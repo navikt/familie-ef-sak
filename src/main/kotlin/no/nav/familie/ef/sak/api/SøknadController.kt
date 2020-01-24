@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.api
 
-import no.nav.familie.ef.sak.api.dto.SøknadDto
+import no.nav.familie.kontrakter.ef.søknad.Søknad
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.ResponseEntity
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController
 class SøknadController {
 
     @PostMapping("sendInn")
-    fun sendInn(@RequestBody søknadDto: SøknadDto): ResponseEntity<HttpStatus> {
+    fun sendInn(@RequestBody søknad: Søknad): ResponseEntity<HttpStatus> {
 
         return ResponseEntity.ok(HttpStatus.CREATED)
     }
