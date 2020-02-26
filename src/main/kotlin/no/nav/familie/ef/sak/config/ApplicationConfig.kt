@@ -2,12 +2,14 @@ package no.nav.familie.ef.sak.config
 
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.springframework.boot.SpringBootConfiguration
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.http.client.ClientHttpRequestInterceptor
 import org.springframework.web.client.RestOperations
 
 @SpringBootConfiguration
+@ConfigurationPropertiesScan
 class ApplicationConfig {
 
     @Bean
