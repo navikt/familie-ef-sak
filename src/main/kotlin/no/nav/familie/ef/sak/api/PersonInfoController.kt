@@ -12,12 +12,12 @@ import no.nav.familie.kontrakter.felles.Ressurs
 
 
 @RestController
-@RequestMapping(path = ["/api/soknad"], produces = [APPLICATION_JSON_VALUE])
-class SøknadController {
+@RequestMapping(path = ["/api/personinfo"], produces = [APPLICATION_JSON_VALUE])
+class PersonInfoController {
 
-    @PostMapping("sendinn")
-    fun sendInn(@RequestBody søknad: Søknad): ResponseEntity<Ressurs<Unit>>{
-        return ResponseEntity.status(HttpStatus.CREATED).body(Ressurs.success(Unit))
+    @PostMapping()
+    fun sendInn(@RequestBody data: String): Ressurs<String>{
+        return Ressurs.success("Dette er data for $data" )
     }
 
 }
