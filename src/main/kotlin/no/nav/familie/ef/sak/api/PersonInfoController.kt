@@ -17,7 +17,7 @@ class PersonInfoController {
 
     @PostMapping()
     fun sendInn(@RequestBody data: String): Ressurs<String>{
-        return Ressurs.success("Dette er data for $data" )
+        return Ressurs.success("Dette er en test for $data" )
     }
 
 }
