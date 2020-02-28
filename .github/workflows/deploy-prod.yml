@@ -54,7 +54,7 @@ jobs:
         with:
           cluster: dev-fss
           team: teamfamilie
-          resource: app-dev.yaml
+          resource: nais-dev.yaml
       - name: Deploy til prod-fss
         uses: navikt/deployment-cli/action@b60ef91
         env:
