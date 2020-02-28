@@ -8,15 +8,16 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import no.nav.familie.kontrakter.felles.Ressurs
+
 
 @RestController
 @RequestMapping(path = ["/api/soknad"], produces = [APPLICATION_JSON_VALUE])
 class SøknadController {
 
-    @PostMapping("sendInn")
-    fun sendInn(@RequestBody søknad: Søknad): ResponseEntity<HttpStatus> {
-
-        return ResponseEntity.ok(HttpStatus.CREATED)
+    @PostMapping("sendinn")
+    fun sendInn(@RequestBody søknad: Søknad): ResponseEntity<Ressurs<Unit>>{
+        return ResponseEntity.status(HttpStatus.CREATED).body(Ressurs.success(Unit))
     }
 
 }
