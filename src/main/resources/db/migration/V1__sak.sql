@@ -1,6 +1,7 @@
-CREATE TABLE Sak
-(
-    id             bigserial PRIMARY KEY,
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+CREATE TABLE sak (
+    id             uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
     soknad         BYTEA        NOT NULL,
     saksnummer     VARCHAR      NOT NULL,
     journalpost_id VARCHAR      NOT NULL,

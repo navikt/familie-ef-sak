@@ -4,14 +4,14 @@ import no.nav.familie.ef.sak.service.SakService
 import no.nav.familie.kontrakter.ef.sak.Sak
 import no.nav.familie.kontrakter.ef.søknad.*
 import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDate
 import java.time.Month
-import javax.websocket.server.PathParam
+import java.util.*
+import no.nav.familie.ef.sak.repository.Sak as Domenesak
 
 @RestController
-@RequestMapping(path = ["/api/soknad"])
+@RequestMapping(path = ["/api/sak"])
 class SakController(private val sakService: SakService) {
 
     @PostMapping("sendInn")
@@ -32,9 +32,7 @@ class SakController(private val sakService: SakService) {
     }
 
     @GetMapping("/{id}")
-    fun dummy(@PathVariable("id") id: Long): no.nav.familie.ef.sak.repository.Sak {
-
-
+    fun dummy(@PathVariable("id") id: UUID): Domenesak {
         return sakService.hentSak(id)
     }
 
