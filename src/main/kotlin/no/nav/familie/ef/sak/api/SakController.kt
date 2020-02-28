@@ -32,7 +32,7 @@ class SakController(private val sakService: SakService) {
     }
 
     @GetMapping("/{id}")
-    fun dummy(@PathVariable("id") id: UUID): Domenesak {
+    fun dummy(@PathVariable("id") id: UUID): Sak {
         return sakService.hentSak(id)
     }
 
