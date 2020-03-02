@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.repository
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.familie.kontrakter.ef.søknad.Søknad
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.data.annotation.Id
@@ -11,7 +10,7 @@ import no.nav.familie.kontrakter.ef.sak.Sak as DtoSak
 
 
 data class Sak(@Id
-               val id: UUID? = null,
+               val id: UUID = UUID.randomUUID(),
                @Column("soknad")
                val søknad: ByteArray,
                val saksnummer: String,

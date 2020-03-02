@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.service
 
+import no.nav.familie.ef.sak.repository.CustomSakRepository
 import no.nav.familie.ef.sak.repository.SakMapper
 import no.nav.familie.ef.sak.repository.SakRepository
 import no.nav.familie.kontrakter.ef.sak.Sak
@@ -10,7 +11,8 @@ import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-class SakService(private val sakRepository: SakRepository) {
+class SakService(private val sakRepository: SakRepository,
+                 private val customSakRepository: CustomSakRepository) {
 
     val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
@@ -18,9 +20,9 @@ class SakService(private val sakRepository: SakRepository) {
 
         val domenesak = SakMapper.toDomain(sak)
 
-        val save = sakRepository.save(domenesak)
+        val save = customSakRepository.persist(domenesak)
         logger.info("lagret ${save.id}")
-        return save.id!!
+        return save.id
     }
 
     fun hentSak(id: UUID): Sak {
