@@ -39,3 +39,7 @@ spec:
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: dev
+    - name: AZURE_CLIENT_ID
+      value: /run/secrets/nais.io/azuread/client_id
+    - name: AZURE_CLIENT_SECRET
+      value: /run/secrets/nais.io/azuread/client_secret
