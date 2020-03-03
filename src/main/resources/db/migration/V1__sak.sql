@@ -1,5 +1,5 @@
 CREATE TABLE sak (
-    id             uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id             uuid PRIMARY KEY,
     soknad         BYTEA        NOT NULL,
     saksnummer     VARCHAR      NOT NULL,
     journalpost_id VARCHAR      NOT NULL,
