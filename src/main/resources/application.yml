@@ -2,6 +2,25 @@ server:
   servlet:
     context-path: /
 
+spring:
+  data:
+    jdbc:
+      repositories:
+        enabled: true
+  main:
+    allow-bean-definition-overriding: true
+    banner-mode: "off"
+  flyway:
+    enabled: true
+  datasource:
+    url: jdbc:postgresql://A01DBVL010.adeo.no:5432/familie-ef-sak
+    hikari:
+      maximum-pool-size: 2
+      connection-test-query: "select 1"
+      max-lifetime: 30000
+      minimum-idle: 1
+
+
 management:
   endpoint.health.show-details: always
   endpoints.web:
