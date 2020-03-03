@@ -3,13 +3,13 @@ server:
 
 spring:
   datasource:
-    username: familie
+    username: postgres
     password: Test
     url: jdbc:postgresql://localhost:5432/familie-ef-sak
 
 no.nav.security.jwt:
   issuer.azuread:
     discoveryurl: https://login.microsoftonline.com/navq.onmicrosoft.com/v2.0/.well-known/openid-configuration
-    accepted_audience: ${EF_SAK_FRONTEND_CLIENT_ID}
+    accepted_audience: ${CLIENT_ID}
     proxyurl:
     cookie_name: azure_token
