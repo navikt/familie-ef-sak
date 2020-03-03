@@ -1,7 +1,11 @@
 server:
   port: 8093
-  servlet:
-    context-path: /
+
+spring:
+  datasource:
+    username: familie
+    password: Test
+    url: jdbc:postgresql://localhost:5432/familie-ef-sak
 
 no.nav.security.jwt:
   issuer.azuread:
