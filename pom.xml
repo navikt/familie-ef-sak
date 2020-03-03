@@ -152,6 +152,11 @@
             <version>${kontrakter.version}</version>
         </dependency>
         <dependency>
+            <groupId>no.nav.familie.felles</groupId>
+            <artifactId>sikkerhet</artifactId>
+            <version>${felles.version}</version>
+        </dependency>
+        <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-registry-prometheus</artifactId>
         </dependency>

@@ -39,3 +39,5 @@ no.nav.security.jwt:
     accepted_audience: ${AZURE_CLIENT_ID}
     proxyurl: http://webproxy-nais.nav.no:8088
     cookie_name: azure_token
+
+ACCEPTED_CLIENTS: ${EF_SAK_FRONTEND_CLIENT_ID}, ${EF_MOTTAK_CLIENT_ID}
