@@ -1,3 +1,5 @@
+application:
+  name: "familie-ef-sak"
 server:
   servlet:
     context-path: /
@@ -11,3 +13,10 @@ management:
       info: "status/isAlive"
   metrics.export.prometheus.enabled: true
   metrics.web.server.auto-time-requests: true
+
+no.nav.security.jwt:
+  issuer.azuread:
+    discoveryurl: https://login.microsoftonline.com/navno.onmicrosoft.com/v2.0/.well-known/openid-configuration
+    accepted_audience: ${EF_SAK_FRONTEND_CLIENT_ID}
+    proxyurl: http://webproxy-nais.nav.no:8088
+    cookie_name: azure_token
