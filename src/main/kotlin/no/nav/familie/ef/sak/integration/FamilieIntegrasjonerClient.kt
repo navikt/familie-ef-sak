@@ -3,9 +3,11 @@ package no.nav.familie.ef.sak.integration
 import no.nav.familie.ef.sak.config.IntegrasjonerConfig
 import no.nav.familie.ef.sak.integration.dto.Tilgang
 import no.nav.familie.http.client.AbstractPingableRestClient
+import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
 import java.net.URI
 
+@Component
 class FamilieIntegrasjonerClient(restOperations: RestOperations,
                                  private val integrasjonerConfig: IntegrasjonerConfig)
     : AbstractPingableRestClient(restOperations, "familie.integrasjoner") {
@@ -16,10 +18,4 @@ class FamilieIntegrasjonerClient(restOperations: RestOperations,
         return postForEntity(integrasjonerConfig.tilgangUri, identer)!!
 
     }
-
-
-
-
-
-
 }
