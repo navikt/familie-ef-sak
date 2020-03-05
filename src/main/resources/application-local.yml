@@ -3,7 +3,7 @@ server:
 
 spring:
   datasource:
-    username: postgres
+    username: familie
     password: Test
     url: jdbc:postgresql://localhost:5432/familie-ef-sak
 
@@ -13,3 +13,6 @@ no.nav.security.jwt:
     accepted_audience: ${AZURE_CLIENT_ID}
     proxyurl:
     cookie_name: azure_token
+
+EF_SAK_FRONTEND_CLIENT_ID: dummy
+EF_MOTTAK_CLIENT_ID: dummy
