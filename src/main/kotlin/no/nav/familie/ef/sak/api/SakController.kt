@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.api
 import no.nav.familie.ef.sak.service.SakService
 import no.nav.familie.kontrakter.ef.sak.Sak
 import no.nav.familie.kontrakter.ef.søknad.*
+import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDate
@@ -12,6 +13,7 @@ import no.nav.familie.ef.sak.repository.Sak as Domenesak
 
 @RestController
 @RequestMapping(path = ["/api/sak"])
+@ProtectedWithClaims(issuer = "azuread")
 class SakController(private val sakService: SakService) {
 
     @PostMapping("sendInn")
