@@ -13,6 +13,6 @@ no.nav.security.jwt:
 
 AZUREAD_DISCOVERY_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/v2.0/.well-known/openid-configuration
 AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
-FAMILIE_INTEGRASJONER_API_URL: http://localhost:8085/api
+FAMILIE_INTEGRASJONER_URL: http://localhost:8085
 EF_SAK_FRONTEND_CLIENT_ID: dummy
 EF_MOTTAK_CLIENT_ID: dummy

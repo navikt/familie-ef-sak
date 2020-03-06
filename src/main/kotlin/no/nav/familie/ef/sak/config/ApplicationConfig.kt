@@ -17,7 +17,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2
 @EnableSwagger2
 @EnableJwtTokenValidation(ignore = ["org.springframework", "springfox.documentation.swagger.web.ApiResourceController"])
 @Import(RestTemplateAzure::class)
-//@EnableOAuth2Client(cacheEnabled = true)
+@EnableOAuth2Client(cacheEnabled = true)
 class ApplicationConfig {
 
     @Bean
