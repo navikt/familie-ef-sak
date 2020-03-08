@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*
 @ProtectedWithClaims(issuer = "azuread")
 class PersonInfoController(private val personService: PersonService) {
 
-    @PostMapping()
+    @PostMapping
     fun personinfo(@RequestHeader(name = "Nav-Personident") ident: String): Person {
         return personService.hentPerson(ident)
     }

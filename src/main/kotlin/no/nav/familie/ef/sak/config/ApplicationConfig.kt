@@ -13,7 +13,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2
 
 @SpringBootConfiguration
 @ConfigurationPropertiesScan
-@ComponentScan("no.nav.familie.ef.sak")
+@ComponentScan("no.nav.familie.ef.sak", "no.nav.familie.sikkerhet")
 @EnableSwagger2
 @EnableJwtTokenValidation(ignore = ["org.springframework", "springfox.documentation.swagger.web.ApiResourceController"])
 @Import(RestTemplateAzure::class)

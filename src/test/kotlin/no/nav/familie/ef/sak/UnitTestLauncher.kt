@@ -5,17 +5,16 @@ import no.nav.security.token.support.test.spring.TokenGeneratorConfiguration
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration
 import org.springframework.boot.builder.SpringApplicationBuilder
-import org.springframework.boot.context.properties.ConfigurationPropertiesScan
 import org.springframework.context.annotation.Import
 
 @SpringBootApplication(exclude = [ErrorMvcAutoConfiguration::class])
-@ConfigurationPropertiesScan
 @Import(TokenGeneratorConfiguration::class)
-class ApplicationLocal
+class UnitTestLauncher {
 
-fun main(args: Array<String>) {
-    SpringApplicationBuilder(ApplicationConfig::class.java)
-            .profiles("local",
-                      "mock-oauth")
-            .run(*args)
+    fun main(args: Array<String>) {
+        val app = SpringApplicationBuilder(ApplicationConfig::class.java)
+                .profiles("local")
+                .build()
+        app.run(*args)
+    }
 }
