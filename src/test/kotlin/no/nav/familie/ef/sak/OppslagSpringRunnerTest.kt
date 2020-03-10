@@ -17,10 +17,10 @@ import org.springframework.test.context.junit4.SpringRunner
 @SpringBootTest(classes = [UnitTestLauncher::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 abstract class OppslagSpringRunnerTest {
 
-    protected var listAppender = initLoggingEventListAppender()
-    protected var loggingEvents = listAppender.list
-    protected var restTemplate = TestRestTemplate()
-    protected var headers = HttpHeaders()
+    protected val listAppender = initLoggingEventListAppender()
+    protected var loggingEvents: MutableList<ILoggingEvent> = listAppender.list
+    protected val restTemplate = TestRestTemplate()
+    protected val headers = HttpHeaders()
 
     @LocalServerPort
     private var port: Int? = 0
@@ -43,7 +43,7 @@ abstract class OppslagSpringRunnerTest {
     }
 
     protected val lokalTestToken: String
-        protected get() {
+        get() {
             val cookie = restTemplate.exchange(localhost("/local/cookie"),
                                                HttpMethod.GET,
                                                HttpEntity.EMPTY,
@@ -52,7 +52,7 @@ abstract class OppslagSpringRunnerTest {
         }
 
     private fun tokenFraRespons(cookie: ResponseEntity<String>): String {
-        return cookie.body.split("value\":\"".toRegex()).toTypedArray()[1].split("\"".toRegex()).toTypedArray()[0]
+        return cookie.body!!.split("value\":\"".toRegex()).toTypedArray()[1].split("\"".toRegex()).toTypedArray()[0]
     }
 
     companion object {

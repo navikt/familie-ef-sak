@@ -16,6 +16,7 @@ class ApplicationLocal
 fun main(args: Array<String>) {
     SpringApplicationBuilder(ApplicationConfig::class.java)
             .profiles("local",
-                      "mock-oauth")
+                      "mock-oauth",
+                      "mock-auth")
             .run(*args)
 }

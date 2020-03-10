@@ -6,7 +6,7 @@ import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 
 @Configuration
-class IntegrasjonerConfig(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val integrasjonUri: URI) {
+class IntegrasjonerConfig(@Value("\${FAMILIE_INTEGRASJONER_URL}") private val integrasjonUri: URI) {
 
     val pingUri: URI = UriComponentsBuilder.fromUri(integrasjonUri).path(PATH_PING).build().toUri()
 

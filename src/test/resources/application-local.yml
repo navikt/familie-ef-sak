@@ -2,6 +2,9 @@ server:
   port: 8093
 
 spring:
+  h2:
+    console:
+      enabled: true
   datasource:
     username: sa
     password:
@@ -20,8 +23,6 @@ AAD_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/toke
 
 AZUREAD_DISCOVERY_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/v2.0/.well-known/openid-configuration
 AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
-FAMILIE_INTEGRASJONER_URL: http://localhost:18321
-EF_SAK_FRONTEND_CLIENT_ID: dummy
+FAMILIE_INTEGRASJONER_URL: http://localhost:8085
+EF_SAK_FRONTEND_CLIENT_ID: DEV_azp
 EF_MOTTAK_CLIENT_ID: dummy
-CREDENTIAL_USERNAME: not-a-real-srvuser
-CREDENTIAL_PASSWORD: not-a-real-pw

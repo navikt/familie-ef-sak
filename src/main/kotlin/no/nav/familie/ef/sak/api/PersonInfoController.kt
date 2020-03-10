@@ -1,12 +1,12 @@
 package no.nav.familie.ef.sak.api
 
 import no.nav.familie.ef.sak.api.dto.Person
-import no.nav.familie.ef.sak.integration.dto.personopplysning.Personinfo
 import no.nav.familie.ef.sak.service.PersonService
-import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.client.HttpClientErrorException
 
 
 @RestController
@@ -14,7 +14,12 @@ import org.springframework.web.bind.annotation.*
 @ProtectedWithClaims(issuer = "azuread")
 class PersonInfoController(private val personService: PersonService) {
 
-    @PostMapping
+    @ExceptionHandler(HttpClientErrorException.NotFound::class)
+    fun handleRestClientResponseException(e: HttpClientErrorException.NotFound): ResponseEntity<String> {
+        return ResponseEntity.status(e.rawStatusCode).body("Feil mot personopplysning. Message=${e.message}")
+    }
+
+    @GetMapping
     fun personinfo(@RequestHeader(name = "Nav-Personident") ident: String): Person {
         return personService.hentPerson(ident)
     }

@@ -27,7 +27,7 @@ class FamilieIntegrasjonerClient(restOperations: RestOperations,
     }
 
     fun hentPersonhistorikk(ident: String): PersonhistorikkInfo {
-        return getForEntity<Ressurs<PersonhistorikkInfo>>(integrasjonerConfig.personopplysningerUri,
+        return getForEntity<Ressurs<PersonhistorikkInfo>>(integrasjonerConfig.personhistorikkUri,
                                                           personIdentHeader(ident)).data!!
     }
 

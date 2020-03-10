@@ -1,8 +1,0 @@
-spring:
-  cloud:
-    vault:
-      enabled: false
-#      token: bobb
-      database:
-        role: postgres
-
