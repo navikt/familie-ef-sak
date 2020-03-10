@@ -21,10 +21,12 @@ abstract class OppslagSpringRunnerTest {
     protected var loggingEvents = listAppender.list
     protected var restTemplate = TestRestTemplate()
     protected var headers = HttpHeaders()
-    @LocalServerPort
-    private val port = 0
 
-    @After fun reset() {
+    @LocalServerPort
+    private var port: Int? = 0
+
+    @After
+    fun reset() {
         loggingEvents.clear()
     }
 

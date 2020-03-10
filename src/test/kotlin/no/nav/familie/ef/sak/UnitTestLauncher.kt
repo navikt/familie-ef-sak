@@ -8,12 +8,13 @@ import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.context.annotation.Import
 
 @SpringBootApplication(exclude = [ErrorMvcAutoConfiguration::class])
-@Import(TokenGeneratorConfiguration::class)
+@Import(ApplicationConfig::class, TokenGeneratorConfiguration::class)
 class UnitTestLauncher {
 
     fun main(args: Array<String>) {
         val app = SpringApplicationBuilder(ApplicationConfig::class.java)
-                .profiles("local")
+                .profiles("local",
+                          "mock-oauth")
                 .build()
         app.run(*args)
     }

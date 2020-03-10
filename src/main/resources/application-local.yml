@@ -3,16 +3,25 @@ server:
 
 spring:
   datasource:
-    username: familie
-    password: Test
-    url: jdbc:postgresql://localhost:5432/familie-ef-sak
+    username: sa
+    password:
+#    url: jdbc:postgresql://localhost:5432/familie-ef-sak
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
 
 no.nav.security.jwt:
   issuer.azuread:
-    proxyurl: ""
+    discoveryurl: http://metadata
+    accepted_audience: aud-localhost
+    cookie_name: localhost-idtoken
+    proxyurl:
+
+AAD_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
 
 AZUREAD_DISCOVERY_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/v2.0/.well-known/openid-configuration
 AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
-FAMILIE_INTEGRASJONER_URL: http://localhost:8085
+FAMILIE_INTEGRASJONER_URL: http://localhost:18321
 EF_SAK_FRONTEND_CLIENT_ID: dummy
 EF_MOTTAK_CLIENT_ID: dummy
+CREDENTIAL_USERNAME: not-a-real-srvuser
+CREDENTIAL_PASSWORD: not-a-real-pw
