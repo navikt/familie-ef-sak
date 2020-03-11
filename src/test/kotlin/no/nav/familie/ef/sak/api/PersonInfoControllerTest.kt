@@ -52,13 +52,13 @@ class PersonInfoControllerTest : OppslagSpringRunnerTest() {
                                                      .withHeader("Content-Type", "application/json")
                                                      .withBody(objectMapper.writeValueAsString(personhistorikkInfo))))
 
-        val response: ResponseEntity<Person> = restTemplate.exchange(localhost(GET_PERSONINFO),
-                                                                     HttpMethod.GET,
-                                                                     HttpEntity(null, headers))
+        val response = restTemplate.exchange<Ressurs<Person>> (localhost(GET_PERSONINFO), HttpMethod.GET, HttpEntity(null, headers))
+
+        Assertions.assertThat(response).isNotNull
 
         Assertions.assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
-        Assertions.assertThat(response.body?.personhistorikkInfo?.personIdent?.id).isEqualTo(person.data?.personIdent?.id)
-        Assertions.assertThat(response.body?.personinfo?.personIdent?.id).isEqualTo(person.data?.personIdent?.id)
+        Assertions.assertThat(response.body?.data?.personhistorikkInfo?.personIdent?.id).isEqualTo(person.data?.personIdent?.id)
+        Assertions.assertThat(response.body?.data?.personinfo?.personIdent?.id).isEqualTo(person.data?.personIdent?.id)
     }
 
     @Test
@@ -96,7 +96,7 @@ class PersonInfoControllerTest : OppslagSpringRunnerTest() {
                                                                      HttpMethod.GET,
                                                                      HttpEntity(null, headers))
 
-       Assertions.assertThat(response.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
+        Assertions.assertThat(response.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
         Assertions.assertThat(response.body).isEqualTo("Feil mot personopplysning. Message=404 Not Found: [no body]")
     }
 
