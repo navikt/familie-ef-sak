@@ -7,7 +7,7 @@ server:
 no.nav.security.jwt:
   issuer.azuread:
     discoveryurl: ${AZUREAD_DISCOVERY_URL}
-    accepted_audience: ${EF_SAK_CLIENT_ID}
+    accepted_audience: ${AZURE_CLIENT_ID}
     proxyurl: http://webproxy-nais.nav.no:8088
     cookie_name: azure_token
   client:
