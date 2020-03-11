@@ -21,7 +21,6 @@ class SakService(private val sakRepository: SakRepository,
 
     fun mottaSak(sak: Sak): UUID {
 
-        familieIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("12345678910"))
         val domenesak = SakMapper.toDomain(sak)
 
         val save = customRepository.persist(domenesak)
