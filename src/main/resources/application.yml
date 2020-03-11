@@ -18,8 +18,8 @@ no.nav.security.jwt:
         grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
         scope: ${FAMILIE_INTEGRASJONER_SCOPE}
         authentication:
-          client-id: ${EF_SAK_CLIENT_ID}
-          client-secret: ${CLIENT_SECRET}
+          client-id: ${AZURE_CLIENT_ID}
+          client-secret: ${AZURE_CLIENT_SECRET}
           client-auth-method: client_secret_basic
 
 spring:
