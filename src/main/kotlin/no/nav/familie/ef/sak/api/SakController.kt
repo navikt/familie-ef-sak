@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*
 import java.time.LocalDate
 import java.time.Month
 import java.util.*
-import no.nav.familie.ef.sak.repository.Sak as Domenesak
 
 @RestController
 @RequestMapping(path = ["/api/sak"])

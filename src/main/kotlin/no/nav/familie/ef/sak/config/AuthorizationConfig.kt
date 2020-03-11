@@ -11,7 +11,7 @@ class AuthorizationConfig(private val oidcUtil: OIDCUtil,
                           @Value("\${ACCEPTED_CLIENTS}")
                           private val acceptedClients: List<String>) {
 
-//    @Bean
+    @Bean
     fun authorizationFilter(): AuthorizationFilter {
         return AuthorizationFilter(oidcUtil, acceptedClients)
     }

@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.service
 
+import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.repository.CustomRepository
 import no.nav.familie.ef.sak.repository.SakMapper
 import no.nav.familie.ef.sak.repository.SakRepository
@@ -13,7 +14,8 @@ import no.nav.familie.ef.sak.repository.Sak as Domenesak
 
 @Service
 class SakService(private val sakRepository: SakRepository,
-                 private val customRepository: CustomRepository<Domenesak>) {
+                 private val customRepository: CustomRepository<Domenesak>,
+                 private val familieIntegrasjonerClient: FamilieIntegrasjonerClient) {
 
     val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
@@ -27,6 +29,7 @@ class SakService(private val sakRepository: SakRepository,
     }
 
     fun hentSak(id: UUID): Sak {
+
         val sak = sakRepository.findByIdOrNull(id) ?: error("Ugyldig Primærnøkkel : $id")
         return SakMapper.toDto(sak)
     }

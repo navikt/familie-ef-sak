@@ -29,7 +29,8 @@ done
 shift $(($OPTIND - 1))
 
 if [ -z $major ] && [ -z $minor ]; then
-    printf "usage: Spesifiser om du vil bumpe major og/eller minor med hhv flaggene -M og -m. Major/minor vil da bumpes med 1 fra siste release-tag.\n"
+    printf "usage: Spesifiser om du vil bumpe major og/eller minor med hhv flaggene -M og -m.\n"
+    printf "Major/minor vil da bumpes med 1 fra siste release-tag.\n"
     exit 1
 fi
 
