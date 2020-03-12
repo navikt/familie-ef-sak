@@ -10,6 +10,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
 import java.net.URI
+import java.time.LocalDate
 
 @Component
 class FamilieIntegrasjonerClient(restOperations: RestOperations,
@@ -27,7 +28,12 @@ class FamilieIntegrasjonerClient(restOperations: RestOperations,
     }
 
     fun hentPersonhistorikk(ident: String): PersonhistorikkInfo {
-        return getForEntity<Ressurs<PersonhistorikkInfo>>(integrasjonerConfig.personhistorikkUri,
+
+        val uri = integrasjonerConfig.personhistorikkUriBuilder
+                .queryParam("fomDato", LocalDate.MIN)
+                .queryParam("tomDato", LocalDate.now()).build().toUri()
+
+        return getForEntity<Ressurs<PersonhistorikkInfo>>(uri,
                                                           personIdentHeader(ident)).data!!
     }
 

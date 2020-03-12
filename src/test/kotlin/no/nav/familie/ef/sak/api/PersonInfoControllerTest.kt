@@ -46,7 +46,7 @@ class PersonInfoControllerTest : OppslagSpringRunnerTest() {
                                                      .withStatus(200)
                                                      .withHeader("Content-Type", "application/json")
                                                      .withBody(objectMapper.writeValueAsString(person))))
-        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo("/api/personopplysning/v1/historikk"))
+        WireMock.stubFor(WireMock.get(WireMock.urlPathEqualTo("/api/personopplysning/v1/historikk"))
                                  .willReturn(WireMock.aResponse()
                                                      .withStatus(200)
                                                      .withHeader("Content-Type", "application/json")
@@ -88,7 +88,7 @@ class PersonInfoControllerTest : OppslagSpringRunnerTest() {
                                                      .withStatus(200)
                                                      .withHeader("Content-Type", "application/json")
                                                      .withBody(objectMapper.writeValueAsString(person))))
-        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo("/api/personopplysning/v1/historikk"))
+        WireMock.stubFor(WireMock.get(WireMock.urlPathEqualTo("/api/personopplysning/v1/historikk"))
                                  .willReturn(WireMock.aResponse()
                                                      .withStatus(404)))
 
