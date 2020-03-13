@@ -9,19 +9,18 @@ spring:
     username: sa
     password:
 #    url: jdbc:postgresql://localhost:5432/familie-ef-sak
-    url: jdbc:h2:mem:testdb
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
     driver-class-name: org.h2.Driver
 
 no.nav.security.jwt:
   issuer.azuread:
-    discoveryurl: http://metadata
     accepted_audience: aud-localhost
     cookie_name: localhost-idtoken
     proxyurl:
 
 AAD_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
 
-AZUREAD_DISCOVERY_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/v2.0/.well-known/openid-configuration
+AZUREAD_DISCOVERY_URL: http://metadata
 AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
 FAMILIE_INTEGRASJONER_URL: http://localhost:8085
 EF_SAK_FRONTEND_CLIENT_ID: DEV_azp
