@@ -52,7 +52,8 @@ class PersonInfoControllerTest : OppslagSpringRunnerTest() {
                                                      .withHeader("Content-Type", "application/json")
                                                      .withBody(objectMapper.writeValueAsString(personhistorikkInfo))))
 
-        val response = restTemplate.exchange<Ressurs<Person>> (localhost(GET_PERSONINFO), HttpMethod.GET, HttpEntity(null, headers))
+        val response =
+                restTemplate.exchange<Ressurs<Person>>(localhost(GET_PERSONINFO), HttpMethod.GET, HttpEntity(null, headers))
 
         Assertions.assertThat(response).isNotNull
 
