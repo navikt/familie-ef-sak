@@ -61,7 +61,7 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
     }
 
     companion object {
-        public val person = Ressurs.success(Personinfo(PersonIdent("12137578901"),
+        private val person = Ressurs.success(Personinfo(PersonIdent("12137578901"),
                                                         "Bob",
                                                         Adresseinfo(AdresseType.BOSTEDSADRESSE,
                                                                     "Bob",
@@ -113,7 +113,7 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                                                                            "Norge",
                                                                            PersonstatusType.BOSA)),
                                                         45))
-        public val personhistorikkInfo =
+        private val personhistorikkInfo =
                 Ressurs.success(PersonhistorikkInfo(PersonIdent("12137578901"),
                                                     listOf(PersonstatusPeriode(Periode(LocalDate.of(1975, 12, 13),
                                                                                        LocalDate.of(2004, 5, 21)),
