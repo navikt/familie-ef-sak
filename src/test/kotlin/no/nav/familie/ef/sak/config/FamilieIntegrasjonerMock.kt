@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.config
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.nav.familie.ef.sak.config.IntegrasjonerConfig
 import no.nav.familie.ef.sak.integration.dto.personopplysning.Periode
 import no.nav.familie.ef.sak.integration.dto.personopplysning.PersonIdent
@@ -31,21 +30,21 @@ import java.time.LocalDate
 class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
 
     val responses = listOf(
-    WireMock.get(WireMock.urlEqualTo(integrasjonerConfig.pingUri.path))
-                                   .willReturn(WireMock.aResponse().withStatus(200)),
-                           WireMock.get(WireMock.urlEqualTo(integrasjonerConfig.personopplysningerUri.path))
-                                   .willReturn(WireMock.aResponse()
-                                                       .withStatus(200)
-                                                       .withHeader("Content-Type", "application/json")
-                                                       .withBody(objectMapper.writeValueAsString(person)))
-                           ,
-                           WireMock.get(WireMock.urlPathMatching(integrasjonerConfig.personhistorikkUri.path))
-                                    .withQueryParam( "tomDato",  WireMock.equalTo(LocalDate.now().toString()))
-                                    .withQueryParam( "fomDato", WireMock.equalTo(LocalDate.now().minusYears(5).toString()))
-                                   .willReturn(WireMock.aResponse()
-                                                       .withStatus(200)
-                                                       .withHeader("Content-Type", "application/json")
-                                                       .withBody(objectMapper.writeValueAsString(personhistorikkInfo)))
+            WireMock.get(WireMock.urlEqualTo(integrasjonerConfig.pingUri.path))
+                    .willReturn(WireMock.aResponse().withStatus(200)),
+            WireMock.get(WireMock.urlEqualTo(integrasjonerConfig.personopplysningerUri.path))
+                    .willReturn(WireMock.aResponse()
+                                        .withStatus(200)
+                                        .withHeader("Content-Type", "application/json")
+                                        .withBody(objectMapper.writeValueAsString(person)))
+            ,
+            WireMock.get(WireMock.urlPathMatching(integrasjonerConfig.personhistorikkUri.path))
+                    .withQueryParam("tomDato", WireMock.equalTo(LocalDate.now().toString()))
+                    .withQueryParam("fomDato", WireMock.equalTo(LocalDate.now().minusYears(5).toString()))
+                    .willReturn(WireMock.aResponse()
+                                        .withStatus(200)
+                                        .withHeader("Content-Type", "application/json")
+                                        .withBody(objectMapper.writeValueAsString(personhistorikkInfo)))
     )
 
 
