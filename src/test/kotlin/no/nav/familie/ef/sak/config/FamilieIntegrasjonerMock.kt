@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.config
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.nav.familie.ef.sak.config.IntegrasjonerConfig
 import no.nav.familie.ef.sak.integration.dto.personopplysning.Periode
 import no.nav.familie.ef.sak.integration.dto.personopplysning.PersonIdent
@@ -29,18 +30,24 @@ import java.time.LocalDate
 @Component
 class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
 
-    val responses = listOf(WireMock.get(WireMock.urlEqualTo(integrasjonerConfig.pingUri.path))
+    val responses = listOf(
+    WireMock.get(WireMock.urlEqualTo(integrasjonerConfig.pingUri.path))
                                    .willReturn(WireMock.aResponse().withStatus(200)),
                            WireMock.get(WireMock.urlEqualTo(integrasjonerConfig.personopplysningerUri.path))
                                    .willReturn(WireMock.aResponse()
                                                        .withStatus(200)
                                                        .withHeader("Content-Type", "application/json")
-                                                       .withBody(objectMapper.writeValueAsString(person))),
+                                                       .withBody(objectMapper.writeValueAsString(person)))
+                           ,
                            WireMock.get(WireMock.urlPathMatching(integrasjonerConfig.personhistorikkUri.path))
+                                    .withQueryParam( "tomDato",  WireMock.equalTo(LocalDate.now().toString()))
+                                    .withQueryParam( "fomDato", WireMock.equalTo(LocalDate.now().minusYears(5).toString()))
                                    .willReturn(WireMock.aResponse()
                                                        .withStatus(200)
                                                        .withHeader("Content-Type", "application/json")
-                                                       .withBody(objectMapper.writeValueAsString(personhistorikkInfo))))
+                                                       .withBody(objectMapper.writeValueAsString(personhistorikkInfo)))
+    )
+
 
     @Bean("mock-integrasjoner")
     @Profile("mock-integrasjoner")
@@ -54,7 +61,7 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
     }
 
     companion object {
-        private val person = Ressurs.success(Personinfo(PersonIdent("12137578901"),
+        public val person = Ressurs.success(Personinfo(PersonIdent("12137578901"),
                                                         "Bob",
                                                         Adresseinfo(AdresseType.BOSTEDSADRESSE,
                                                                     "Bob",
@@ -106,7 +113,7 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                                                                            "Norge",
                                                                            PersonstatusType.BOSA)),
                                                         45))
-        private val personhistorikkInfo =
+        public val personhistorikkInfo =
                 Ressurs.success(PersonhistorikkInfo(PersonIdent("12137578901"),
                                                     listOf(PersonstatusPeriode(Periode(LocalDate.of(1975, 12, 13),
                                                                                        LocalDate.of(2004, 5, 21)),

@@ -30,7 +30,7 @@ class FamilieIntegrasjonerClient(restOperations: RestOperations,
     fun hentPersonhistorikk(ident: String): PersonhistorikkInfo {
 
         val uri = integrasjonerConfig.personhistorikkUriBuilder
-                .queryParam("fomDato", LocalDate.MIN)
+                .queryParam("fomDato", LocalDate.now().minusYears(5))
                 .queryParam("tomDato", LocalDate.now()).build().toUri()
 
         return getForEntity<Ressurs<PersonhistorikkInfo>>(uri,
