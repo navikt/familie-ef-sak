@@ -11,6 +11,6 @@ import kotlin.reflect.KClass
 @Constraint(validatedBy = [Persontilgang::class])
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.RUNTIME)
-annotation class PersontilgangConstraint(val message: String = "Ikke tilgang til sak",
+annotation class PersontilgangConstraint(val message: String = "Ikke tilgang til person",
                                          val groups: Array<KClass<*>> = [],
                                          val payload: Array<KClass<out Payload>> = [])

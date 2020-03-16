@@ -2,15 +2,15 @@ package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.repository.CustomRepository
-import no.nav.familie.ef.sak.repository.SakMapper
 import no.nav.familie.ef.sak.repository.SakRepository
+import no.nav.familie.ef.sak.repository.domain.SakMapper
 import no.nav.familie.kontrakter.ef.sak.Sak
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.util.*
-import no.nav.familie.ef.sak.repository.Sak as Domenesak
+import no.nav.familie.ef.sak.repository.domain.Sak as Domenesak
 
 @Service
 class SakService(private val sakRepository: SakRepository,
@@ -21,9 +21,7 @@ class SakService(private val sakRepository: SakRepository,
 
     fun mottaSak(sak: Sak): UUID {
 
-        familieIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("12345678910"))
         val domenesak = SakMapper.toDomain(sak)
-
         val save = customRepository.persist(domenesak)
         logger.info("lagret ${save.id}")
         return save.id

@@ -1,10 +1,12 @@
 package no.nav.familie.ef.sak.api
 
+import no.nav.familie.ba.sak.validering.SakstilgangConstraint
 import no.nav.familie.ef.sak.service.SakService
 import no.nav.familie.kontrakter.ef.sak.Sak
 import no.nav.familie.kontrakter.ef.søknad.*
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDate
 import java.time.Month
@@ -13,6 +15,7 @@ import java.util.*
 @RestController
 @RequestMapping(path = ["/api/sak"])
 @ProtectedWithClaims(issuer = "azuread")
+@Validated
 class SakController(private val sakService: SakService) {
 
     @PostMapping("sendInn")
@@ -33,7 +36,7 @@ class SakController(private val sakService: SakService) {
     }
 
     @GetMapping("/{id}")
-    fun dummy(@PathVariable("id") id: UUID): Sak {
+    fun dummy(@PathVariable("id") @SakstilgangConstraint id: UUID): Sak {
         return sakService.hentSak(id)
     }
 
