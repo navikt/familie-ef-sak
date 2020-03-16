@@ -36,7 +36,7 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                                                        .withStatus(200)
                                                        .withHeader("Content-Type", "application/json")
                                                        .withBody(objectMapper.writeValueAsString(person))),
-                           WireMock.get(WireMock.urlEqualTo(integrasjonerConfig.personhistorikkUri.path))
+                           WireMock.get(WireMock.urlPathMatching(integrasjonerConfig.personhistorikkUri.path))
                                    .willReturn(WireMock.aResponse()
                                                        .withStatus(200)
                                                        .withHeader("Content-Type", "application/json")
