@@ -30,7 +30,7 @@ internal class PersontilgangTest {
 
         val valid = persontilgang.isValid("654654654", mockk())
 
-        assertThat(valid).isTrue()
+        assertThat(valid).isFalse()
     }
 
 }
