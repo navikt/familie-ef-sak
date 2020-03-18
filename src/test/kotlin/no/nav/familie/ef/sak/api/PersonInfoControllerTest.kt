@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.api
 import com.github.tomakehurst.wiremock.client.WireMock
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.api.dto.Person
+import no.nav.familie.ef.sak.integration.dto.Tilgang
 import no.nav.familie.ef.sak.integration.dto.personopplysning.PersonIdent
 import no.nav.familie.ef.sak.integration.dto.personopplysning.PersonhistorikkInfo
 import no.nav.familie.ef.sak.integration.dto.personopplysning.Personinfo
@@ -37,6 +38,12 @@ class PersonInfoControllerTest : OppslagSpringRunnerTest() {
     fun setUp() {
         headers.setBearerAuth(lokalTestToken)
         headers.add("Nav-Personident", "12345678901")
+        WireMock.stubFor(WireMock.post(WireMock.urlEqualTo("/api/tilgang/personer"))
+                                 .willReturn(WireMock.aResponse()
+                                                     .withStatus(200)
+                                                     .withHeader("Content-Type", "application/json")
+                                                     .withBody(objectMapper.writeValueAsString(listOf(Tilgang(true, null))))))
+
     }
 
     @Test
@@ -96,7 +103,7 @@ class PersonInfoControllerTest : OppslagSpringRunnerTest() {
                                                                      HttpMethod.GET,
                                                                      HttpEntity(null, headers))
 
-       Assertions.assertThat(response.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
+        Assertions.assertThat(response.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
         Assertions.assertThat(response.body).isEqualTo("Feil mot personopplysning. Message=404 Not Found: [no body]")
     }
 

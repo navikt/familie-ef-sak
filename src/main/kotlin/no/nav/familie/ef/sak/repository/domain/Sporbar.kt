@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.repository
+package no.nav.familie.ef.sak.repository.domain
 
 import org.springframework.data.relational.core.mapping.Column
 import java.time.LocalDateTime
