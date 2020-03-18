@@ -44,7 +44,7 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                     .willReturn(WireMock.aResponse()
                                         .withStatus(200)
                                         .withHeader("Content-Type", "application/json")
-                                        .withBody(objectMapper.writeValueAsString(personhistorikkInfo)))
+                                        .withBody(objectMapper.writeValueAsString(personhistorikkInfo))),
             WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.tilgangUri.path))
                     .willReturn(WireMock.aResponse()
                                         .withStatus(200)
