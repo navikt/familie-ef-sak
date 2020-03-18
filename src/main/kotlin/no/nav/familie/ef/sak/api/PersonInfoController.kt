@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.api
 import no.nav.familie.ba.sak.validering.PersontilgangConstraint
 import no.nav.familie.ef.sak.api.dto.Person
 import no.nav.familie.ef.sak.service.PersonService
+import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.ResponseEntity
@@ -23,8 +24,8 @@ class PersonInfoController(private val personService: PersonService) {
     }
 
     @GetMapping
-    fun personinfo(@RequestHeader(name = "Nav-Personident") @PersontilgangConstraint ident: String): Person {
-        return personService.hentPerson(ident)
+    fun personinfo(@RequestHeader(name = "Nav-Personident") ident: String): Ressurs<Person> {
+        return Ressurs.success(personService.hentPerson(ident))
     }
 
 }

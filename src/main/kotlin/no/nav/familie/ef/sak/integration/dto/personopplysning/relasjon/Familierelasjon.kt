@@ -5,8 +5,8 @@ import java.time.LocalDate
 
 class Familierelasjon(val personIdent: PersonIdent,
                       val relasjonsrolle: RelasjonsRolleType,
-                      val fødselsdato: LocalDate,
-                      val harSammeBosted: Boolean) {
+                      val fødselsdato: LocalDate?,
+                      val harSammeBosted: Boolean?) {
 
     override fun toString(): String {
         return (javaClass.simpleName

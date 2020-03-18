@@ -18,6 +18,9 @@ class IntegrasjonerConfig(@Value("\${FAMILIE_INTEGRASJONER_URL}") private val in
     val personhistorikkUri: URI =
             UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_PERSONHISTORIKK).build().toUri()
 
+    val personhistorikkUriBuilder  =
+            UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_PERSONHISTORIKK)
+
     companion object {
         private const val PATH_PING = "/internal/status/isAlive"
         private const val PATH_TILGANGER = "api/tilgang/personer"

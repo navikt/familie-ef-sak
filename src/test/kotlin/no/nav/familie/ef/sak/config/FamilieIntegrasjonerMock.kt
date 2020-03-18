@@ -30,23 +30,26 @@ import java.time.LocalDate
 @Component
 class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
 
-    val responses = listOf(WireMock.get(WireMock.urlEqualTo(integrasjonerConfig.pingUri.path))
-                                   .willReturn(WireMock.aResponse().withStatus(200)),
-                           WireMock.get(WireMock.urlEqualTo(integrasjonerConfig.personopplysningerUri.path))
-                                   .willReturn(WireMock.aResponse()
-                                                       .withStatus(200)
-                                                       .withHeader("Content-Type", "application/json")
-                                                       .withBody(objectMapper.writeValueAsString(person))),
-                           WireMock.get(WireMock.urlEqualTo(integrasjonerConfig.personhistorikkUri.path))
-                                   .willReturn(WireMock.aResponse()
-                                                       .withStatus(200)
-                                                       .withHeader("Content-Type", "application/json")
-                                                       .withBody(objectMapper.writeValueAsString(personhistorikkInfo))),
-                           WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.tilgangUri.path))
-                                   .willReturn(WireMock.aResponse()
-                                                       .withStatus(200)
-                                                       .withHeader("Content-Type", "application/json")
-                                                       .withBody(objectMapper.writeValueAsString(listOf(Tilgang(true, null))))))
+    val responses = listOf(
+            WireMock.get(WireMock.urlEqualTo(integrasjonerConfig.pingUri.path))
+                    .willReturn(WireMock.aResponse().withStatus(200)),
+            WireMock.get(WireMock.urlEqualTo(integrasjonerConfig.personopplysningerUri.path))
+                    .willReturn(WireMock.aResponse()
+                                        .withStatus(200)
+                                        .withHeader("Content-Type", "application/json")
+                                        .withBody(objectMapper.writeValueAsString(person))),
+            WireMock.get(WireMock.urlPathMatching(integrasjonerConfig.personhistorikkUri.path))
+                    .withQueryParam("tomDato", WireMock.equalTo(LocalDate.now().toString()))
+                    .withQueryParam("fomDato", WireMock.equalTo(LocalDate.now().minusYears(5).toString()))
+                    .willReturn(WireMock.aResponse()
+                                        .withStatus(200)
+                                        .withHeader("Content-Type", "application/json")
+                                        .withBody(objectMapper.writeValueAsString(personhistorikkInfo))),
+            WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.tilgangUri.path))
+                    .willReturn(WireMock.aResponse()
+                                        .withStatus(200)
+                                        .withHeader("Content-Type", "application/json")
+                                        .withBody(objectMapper.writeValueAsString(listOf(Tilgang(true, null))))))
 
     @Bean("mock-integrasjoner")
     @Profile("mock-integrasjoner")
