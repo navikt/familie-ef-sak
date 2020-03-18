@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.config
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import no.nav.familie.ef.sak.config.IntegrasjonerConfig
+import no.nav.familie.ef.sak.integration.dto.Tilgang
 import no.nav.familie.ef.sak.integration.dto.personopplysning.Periode
 import no.nav.familie.ef.sak.integration.dto.personopplysning.PersonIdent
 import no.nav.familie.ef.sak.integration.dto.personopplysning.PersonhistorikkInfo
@@ -36,8 +37,7 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                     .willReturn(WireMock.aResponse()
                                         .withStatus(200)
                                         .withHeader("Content-Type", "application/json")
-                                        .withBody(objectMapper.writeValueAsString(person)))
-            ,
+                                        .withBody(objectMapper.writeValueAsString(person))),
             WireMock.get(WireMock.urlPathMatching(integrasjonerConfig.personhistorikkUri.path))
                     .withQueryParam("tomDato", WireMock.equalTo(LocalDate.now().toString()))
                     .withQueryParam("fomDato", WireMock.equalTo(LocalDate.now().minusYears(5).toString()))
@@ -45,8 +45,11 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                                         .withStatus(200)
                                         .withHeader("Content-Type", "application/json")
                                         .withBody(objectMapper.writeValueAsString(personhistorikkInfo)))
-    )
-
+            WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.tilgangUri.path))
+                    .willReturn(WireMock.aResponse()
+                                        .withStatus(200)
+                                        .withHeader("Content-Type", "application/json")
+                                        .withBody(objectMapper.writeValueAsString(listOf(Tilgang(true, null))))))
 
     @Bean("mock-integrasjoner")
     @Profile("mock-integrasjoner")

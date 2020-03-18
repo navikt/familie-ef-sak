@@ -11,7 +11,7 @@ Appen starter da opp med en in memory-database og er da tilgjengelig under `loca
 Databasen kan aksesseres på `localhost:8093/h2-console`. Log på jdbc url `jdbc:h2:mem:testdb` med bruker `sa` og blankt passord.
 
 Dersom man vil gå mot endepunkter som krever autentisering lokalt, kan man få et testtoken ved å gå mot 
-`localhost:8093/local/jwt`. 
+`localhost:8093/local/jwt`.
 
 
 ## Produksjonssetting

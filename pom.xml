@@ -33,18 +33,18 @@
         <springfox.version>2.9.2</springfox.version>
         <mockk.version>1.9.3</mockk.version>
         <fasterxml.version>2.10.3</fasterxml.version>
-        <felles.version>1_20200309094948_c273e36</felles.version>
+        <felles.version>1.20200316131010_4afd914</felles.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
         <kontrakter.version>2.0_20200228161749_7c496bf</kontrakter.version>
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
         <sonar.organization>navit</sonar.organization>
-        <flyway.version>6.3.0</flyway.version>
+        <flyway.version>6.3.1</flyway.version>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <nav.security.version>1.1.4</nav.security.version>
-        <postgres.version>42.2.10</postgres.version>
+        <postgres.version>42.2.11</postgres.version>
         <!--suppress UnresolvedMavenProperty Ligger som secret i github-->
-        <spring.cloud>2.2.1.RELEASE</spring.cloud>
+        <spring.cloud>2.2.2.RELEASE</spring.cloud>
         <sonar.login>${SONAR_LOGIN}</sonar.login>
     </properties>
 
@@ -155,7 +155,7 @@
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
             <artifactId>wiremock-jre8</artifactId>
-            <version>2.26.0</version>
+            <version>2.26.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>

@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.repository
+package no.nav.familie.ef.sak.repository.domain
 
 import no.nav.familie.kontrakter.ef.søknad.Søknad
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -17,13 +17,18 @@ data class Sak(@Id
                @Column("journalpost_id")
                val journalpostId: String,
                @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-               val sporbar: Sporbar = Sporbar())
+               val sporbar: Sporbar = Sporbar(),
+               val søker: Søker,
+               val barn: Set<Barn>)
 
 object SakMapper {
     fun toDomain(sak: DtoSak): Sak {
         return Sak(søknad = objectMapper.writeValueAsBytes(sak.søknad),
                    saksnummer = sak.saksnummer,
-                   journalpostId = sak.journalpostId)
+                   journalpostId = sak.journalpostId,
+                   søker = SøkerMapper.toDomain(sak.søknad),
+                   barn = BarnMapper.toDomain(sak.søknad)
+                )
     }
 
     fun toDto(sak: Sak): DtoSak {
