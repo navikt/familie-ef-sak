@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.client.HttpClientErrorException
+import javax.validation.ConstraintViolationException
 
 
 @RestController
@@ -23,8 +24,13 @@ class PersonInfoController(private val personService: PersonService) {
         return ResponseEntity.status(e.rawStatusCode).body("Feil mot personopplysning. Message=${e.message}")
     }
 
+    @ExceptionHandler(ConstraintViolationException::class)
+    fun handleRestClientResponseException(e: ConstraintViolationException): Ressurs<ConstraintViolationException> {
+        return Ressurs.failure<ConstraintViolationException>(e.message,e)
+    }
+
     @GetMapping
-    fun personinfo(@RequestHeader(name = "Nav-Personident") ident: String): Ressurs<Person> {
+    fun personinfo(@RequestHeader(name = "Nav-Personident") @PersontilgangConstraint  ident: String): Ressurs<Person> {
         return Ressurs.success(personService.hentPerson(ident))
     }
 
