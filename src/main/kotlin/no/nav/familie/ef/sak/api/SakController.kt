@@ -47,7 +47,7 @@ internal object Testsøknad {
 
     val søknad = Søknad(Søknadsfelt("Søker", personalia()),
                         Søknadsfelt("Detaljer om sivilstand", sivilstandsdetaljer()),
-                        Søknadsfelt("Opphold i Norge", medlemskapsdetaljer()),
+                        Søknadsfelt("no.nav.familie.ef.sak.integration.dto.pdl.Opphold i Norge", medlemskapsdetaljer()),
                         Søknadsfelt("Bosituasjonen din", bosituasjon()),
                         Søknadsfelt("Sivilstandsplaner", sivilstandsplaner()),
                         Søknadsfelt("Barn fra folkeregisteret", listOf(folkeregisterbarn())),
@@ -86,7 +86,7 @@ internal object Testsøknad {
                                             "Jeg er i arbeid",
                                             "Jeg er selvstendig næringsdrivende eller frilanser")),
                          Søknadsfelt("Om arbeidsforholdet ditt",
-                                     listOf(Arbeidsgiver(Søknadsfelt("Navn på arbeidsgiveren", "Palpatine"),
+                                     listOf(Arbeidsgiver(Søknadsfelt("no.nav.familie.ef.sak.integration.dto.pdl.Navn på arbeidsgiveren", "Palpatine"),
                                                          Søknadsfelt("Hvor mye jobber du?", 15),
                                                          Søknadsfelt("Er stillingen fast eller midlertidig?",
                                                                      "Fast"),
@@ -94,7 +94,7 @@ internal object Testsøknad {
                                                          Søknadsfelt("Når skal du slutte?",
                                                                      LocalDate.of(2020, 11, 18))))),
                          Søknadsfelt("Om firmaet du driver",
-                                     Selvstendig(Søknadsfelt("Navn på firma", "Bobs burgers"),
+                                     Selvstendig(Søknadsfelt("no.nav.familie.ef.sak.integration.dto.pdl.Navn på firma", "Bobs burgers"),
                                                  Søknadsfelt("Organisasjonsnummer", "987654321"),
                                                  Søknadsfelt("Når etablerte du firmaet?",
                                                              LocalDate.of(2018, 4, 5)),
@@ -182,7 +182,7 @@ internal object Testsøknad {
 
     @Suppress("LongLine")
     private fun folkeregisterbarn(): RegistrertBarn {
-        return RegistrertBarn(Søknadsfelt("Navn", "Lykkeliten"),
+        return RegistrertBarn(Søknadsfelt("no.nav.familie.ef.sak.integration.dto.pdl.Navn", "Lykkeliten"),
                               Søknadsfelt("Fødselsnummer", Fødselsnummer("31081953069")),
                               Søknadsfelt("Har samme adresse som søker", true),
                               Søknadsfelt("Barnets andre forelder",
@@ -257,18 +257,18 @@ internal object Testsøknad {
                                    Søknadsfelt("Dato for samlivsbrudd", LocalDate.of(2014, 10, 3)),
                                    Søknadsfelt("Når flyttet dere fra hverandre?", LocalDate.of(2014, 10, 4)),
                                    Søknadsfelt("Hva er grunnen til at du er alene med barn?",
-                                               "Endring i samværsordning"),
+                                               "no.nav.familie.ef.sak.integration.dto.pdl.Endring i samværsordning"),
                                    Søknadsfelt("Når skjedde endringen / når skal endringen skje?",
                                                LocalDate.of(2013, 4, 17)))
     }
 
     private fun personalia(): Personalia {
         return Personalia(Søknadsfelt("Fødselsnummer", Fødselsnummer("24117938529")),
-                          Søknadsfelt("Navn", "Kari Nordmann"),
-                          Søknadsfelt("Statsborgerskap", "Norsk"),
+                          Søknadsfelt("no.nav.familie.ef.sak.integration.dto.pdl.Navn", "Kari Nordmann"),
+                          Søknadsfelt("no.nav.familie.ef.sak.integration.dto.pdl.Statsborgerskap", "Norsk"),
                           adresseSøknadsfelt(),
-                          Søknadsfelt("Telefonnummer", "12345678"),
-                          Søknadsfelt("Sivilstand", "Ugift"))
+                          Søknadsfelt("no.nav.familie.ef.sak.integration.dto.pdl.Telefonnummer", "12345678"),
+                          Søknadsfelt("no.nav.familie.ef.sak.integration.dto.pdl.Sivilstand", "Ugift"))
     }
 
     private fun adresseSøknadsfelt(): Søknadsfelt<Adresse> {
@@ -282,7 +282,7 @@ internal object Testsøknad {
     private fun dokumentfelt(tittel: String) = Søknadsfelt("Dokument", Dokument(byteArrayOf(12), tittel))
 
     private fun personMinimum(): PersonMinimum {
-        return PersonMinimum(Søknadsfelt("Navn", "Bob Burger"),
+        return PersonMinimum(Søknadsfelt("no.nav.familie.ef.sak.integration.dto.pdl.Navn", "Bob Burger"),
                              null,
                              Søknadsfelt("Fødselsdato", LocalDate.of(1992, 2, 18)))
     }

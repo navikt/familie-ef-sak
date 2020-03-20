@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.api
 
 import no.nav.familie.ba.sak.validering.PersontilgangConstraint
 import no.nav.familie.ef.sak.api.dto.Person
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlHentPersonResponse
 import no.nav.familie.ef.sak.service.PersonService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -24,8 +25,12 @@ class PersonInfoController(private val personService: PersonService) {
     }
 
     @GetMapping
-    fun personinfo(@RequestHeader(name = "Nav-Personident") ident: String): Ressurs<Person> {
+    fun personinfo(@RequestHeader(name = "Nav-Personident") @PersontilgangConstraint ident: String): Ressurs<Person> {
         return Ressurs.success(personService.hentPerson(ident))
     }
 
+    @GetMapping("/pdl")
+    fun personinfoPdl(@RequestHeader(name = "Nav-Personident") @PersontilgangConstraint ident: String): PdlHentPersonResponse {
+        return personService.hentPdlPerson(ident)
+    }
 }

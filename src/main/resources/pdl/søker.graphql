@@ -1,0 +1,19 @@
+query($ident: ID!, $navnHistorikk: Boolean!){
+    person: hentPerson(ident: $ident) {
+        foedsel {
+            foedselsdato
+        }
+        navn(historikk: $navnHistorikk) {
+            fornavn
+            mellomnavn
+            etternavn
+        }
+        kjoenn {
+            kjoenn
+        }
+        familierelasjoner {
+            relatertPersonsIdent,
+            relatertPersonsRolle
+        }
+    }
+}
