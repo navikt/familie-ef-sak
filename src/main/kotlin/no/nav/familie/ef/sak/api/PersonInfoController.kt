@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.client.HttpClientErrorException
+import javax.validation.ConstraintViolationException
 
 
 @RestController
@@ -22,6 +23,11 @@ class PersonInfoController(private val personService: PersonService) {
     @ExceptionHandler(HttpClientErrorException.NotFound::class)
     fun handleRestClientResponseException(e: HttpClientErrorException.NotFound): ResponseEntity<String> {
         return ResponseEntity.status(e.rawStatusCode).body("Feil mot personopplysning. Message=${e.message}")
+    }
+
+    @ExceptionHandler(ConstraintViolationException::class)
+    fun handleRestClientResponseException(e: ConstraintViolationException): Ressurs<ConstraintViolationException> {
+        return Ressurs.failure<ConstraintViolationException>(e.message,e)
     }
 
     @GetMapping
