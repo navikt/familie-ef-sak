@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.integration.dto.personopplysning.PersonhistorikkInf
 import no.nav.familie.ef.sak.integration.dto.personopplysning.Personinfo
 import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.kontrakter.felles.Ressurs
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
@@ -13,7 +14,7 @@ import java.net.URI
 import java.time.LocalDate
 
 @Component
-class FamilieIntegrasjonerClient(restOperations: RestOperations,
+class FamilieIntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
                                  private val integrasjonerConfig: IntegrasjonerConfig)
     : AbstractPingableRestClient(restOperations, "familie.integrasjoner") {
 
