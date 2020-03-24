@@ -51,7 +51,7 @@ management:
   metrics.export.prometheus.enabled: true
   metrics.web.server.auto-time-requests: true
 
-ACCEPTED_CLIENTS: ${EF_SAK_FRONTEND_CLIENT_ID}, ${EF_MOTTAK_CLIENT_ID}
+
 
 AZUREAD_DISCOVERY_URL: https://login.microsoftonline.com/navno.onmicrosoft.com/v2.0/.well-known/openid-configuration
 AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navno.onmicrosoft.com/oauth2/v2.0/token
