@@ -20,7 +20,7 @@ class PdlConfig(val oAuth2AccessTokenService: OAuth2AccessTokenService,
 
     val pdlUri = UriComponentsBuilder.fromUri(pdlUrl).path(PATH_GRAPHQL).build().toUri()
 
-    val søkerQuery = this::class.java.getResource("/pdl/søker.graphql").readText().graphqlCompatible()
+    val søkerQuery get() = this::class.java.getResource("/pdl/hentperson.graphql").readText().graphqlCompatible()
 
 //    val barnQuery = this::class.java.getResource("/pdl/barn.graphql").readText().graphqlCompatible()
 
