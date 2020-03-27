@@ -30,8 +30,8 @@ data class PdlResponse<T>(val data: T?,
 data class PdlError(val message: String)
 
 data class PdlSøker(val person: PdlSøkerData?)
-data class PdlAnnenForelder(val person: PdlBarnData?)
-data class PdlBarn(val person: PdlAnnenForelderData?)
+data class PdlAnnenForelder(val person: PdlAnnenForelderData?)
+data class PdlBarn(val person: PdlBarnData?)
 
 
 data class PdlSøkerData(val adressebeskyttelse: List<Adressebeskyttelse>,
