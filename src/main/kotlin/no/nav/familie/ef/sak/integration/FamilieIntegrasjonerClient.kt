@@ -24,10 +24,12 @@ class FamilieIntegrasjonerClient(@Qualifier("azure") restOperations: RestOperati
         return postForEntity(integrasjonerConfig.tilgangUri, identer)!!
     }
 
+    @Deprecated("bruk Pdl-løsning")
     fun hentPersonopplysninger(ident: String): Personinfo {
         return getForEntity<Ressurs<Personinfo>>(integrasjonerConfig.personopplysningerUri, personIdentHeader(ident)).data!!
     }
 
+    @Deprecated("bruk Pdl-løsning")
     fun hentPersonhistorikk(ident: String): PersonhistorikkInfo {
 
         val uri = integrasjonerConfig.personhistorikkUriBuilder
