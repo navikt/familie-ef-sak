@@ -2,7 +2,10 @@ package no.nav.familie.ef.sak.api
 
 import no.nav.familie.ba.sak.validering.PersontilgangConstraint
 import no.nav.familie.ef.sak.api.dto.Person
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlHentPersonResponse
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlAnnenForelder
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlBarn
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlResponse
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker
 import no.nav.familie.ef.sak.service.PersonService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -35,19 +38,21 @@ class PersonInfoController(private val personService: PersonService) {
         return Ressurs.success(personService.hentPerson(ident))
     }
 
-    @GetMapping("/soker")
-    fun søkerinfo(@RequestHeader(name = "Nav-Personident") @PersontilgangConstraint ident: String): PdlHentPersonResponse {
+
+    @GetMapping("/soker") // TODO Testendepunkt. Fjernes etter hvert
+    fun søkerinfo(@RequestHeader(name = "Nav-Personident") @PersontilgangConstraint ident: String): PdlResponse<PdlSøker> {
         return personService.hentPdlPerson(ident)
     }
 
-    @GetMapping("/barn")
-    fun barninfoPdl(@RequestHeader(name = "Nav-Personident") @PersontilgangConstraint ident: String): PdlHentPersonResponse {
+    @GetMapping("/barn") // TODO Testendepunkt. Fjernes etter hvert
+    fun barninfoPdl(@RequestHeader(name = "Nav-Personident") @PersontilgangConstraint ident: String): PdlResponse<PdlBarn> {
         return personService.hentPdlBarn(ident)
     }
 
-    @GetMapping("/forelder2")
-    fun forelder2infoPdl(@RequestHeader(name = "Nav-Personident") @PersontilgangConstraint ident: String): PdlHentPersonResponse {
-        return personService.hentPdlForelder2(ident)
+    @GetMapping("/forelder2") // TODO Testendepunkt. Fjernes etter hvert
+    fun annenForelderinfoPdl(@RequestHeader(name = "Nav-Personident") @PersontilgangConstraint ident: String)
+            : PdlResponse<PdlAnnenForelder> {
+        return personService.hentPdlAnnenForelder(ident)
     }
 
 }

@@ -3,11 +3,6 @@ package no.nav.familie.ef.sak.integration.dto.pdl
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-
-data class Identliste(
-        val identer: List<IdentInformasjon>
-)
-
 data class IdentInformasjon(
         val ident: String,
         val gruppe: IdentGruppe,
@@ -20,8 +15,8 @@ enum class IdentGruppe {
     NPID
 }
 
-data class PdlHentPersonResponse(val data: PdlPerson?,
-                                 val errors: List<PdlError>?) {
+data class PdlResponse<T>(val data: T?,
+                          val errors: List<PdlError>?) {
 
     fun harFeil(): Boolean {
         return errors != null && errors.isNotEmpty()
@@ -34,26 +29,45 @@ data class PdlHentPersonResponse(val data: PdlPerson?,
 
 data class PdlError(val message: String)
 
+data class PdlSøker(val person: PdlSøkerData?)
+data class PdlAnnenForelder(val person: PdlBarnData?)
+data class PdlBarn(val person: PdlAnnenForelderData?)
 
-data class PdlPerson(val person: PdlPersonData?)
 
+data class PdlSøkerData(val adressebeskyttelse: List<Adressebeskyttelse>,
+                        val bostedsadresse: List<Bostedsadresse>,
+                        val deltBosted: List<DeltBosted>,
+                        val doedsfall: List<Doedsfall>,
+                        val familierelasjoner: List<Familierelasjon>,
+                        val foedsel: List<Foedsel>,
+                        val folkeregisterpersonstatus: List<Folkeregisterpersonstatus>,
+                        val navn: List<Navn>,
+                        val opphold: List<Opphold>,
+                        val oppholdsadresse: List<Oppholdsadresse>,
+                        val sivilstand: List<Sivilstand>,
+                        val statsborgerskap: List<Statsborgerskap>,
+                        val telefonnummer: List<Telefonnummer>,
+                        val tilrettelagtKommunikasjon: List<TilrettelagtKommunikasjon>,
+                        val innflyttingTilNorge: List<InnflyttingTilNorge>,
+                        val utflyttingFraNorge: List<UtflyttingFraNorge>)
 
-data class PdlPersonData(val adressebeskyttelse: List<Adressebeskyttelse>,
-                         val bostedsadresse: List<Bostedsadresse>,
-                         val deltBosted: List<DeltBosted>,
-                         val doedsfall: List<Doedsfall>,
-                         val familierelasjoner: List<Familierelasjon>,
-                         val foedsel: List<Foedsel>,
-                         val folkeregisterpersonstatus: List<Folkeregisterpersonstatus>,
-                         val navn: List<Navn>,
-                         val opphold: List<Opphold>,
-                         val oppholdsadresse: List<Oppholdsadresse>,
-                         val sivilstand: List<Sivilstand>,
-                         val statsborgerskap: List<Statsborgerskap>,
-                         val telefonnummer: List<Telefonnummer>,
-                         val tilrettelagtKommunikasjon: List<TilrettelagtKommunikasjon>,
-                         val innflyttingTilNorge: List<InnflyttingTilNorge>,
-                         val utflyttingFraNorge: List<UtflyttingFraNorge>)
+data class PdlBarnData(val adressebeskyttelse: List<Adressebeskyttelse>,
+                       val bostedsadresse: List<Bostedsadresse>,
+                       val deltBosted: List<DeltBosted>,
+                       val doedsfall: List<Doedsfall>,
+                       val familierelasjoner: List<Familierelasjon>,
+                       val foedsel: List<Foedsel>,
+                       val navn: List<Navn>)
+
+data class PdlAnnenForelderData(val adressebeskyttelse: List<Adressebeskyttelse>,
+                                val bostedsadresse: List<Bostedsadresse>,
+                                val doedsfall: List<Doedsfall>,
+                                val navn: List<Navn>,
+                                val opphold: List<Opphold>,
+                                val oppholdsadresse: List<Oppholdsadresse>,
+                                val statsborgerskap: List<Statsborgerskap>,
+                                val innflyttingTilNorge: List<InnflyttingTilNorge>,
+                                val utflyttingFraNorge: List<UtflyttingFraNorge>)
 
 data class DeltBosted(val startdatoForKontrakt: LocalDateTime,
                       val sluttdatoForKontrakt: LocalDateTime?,

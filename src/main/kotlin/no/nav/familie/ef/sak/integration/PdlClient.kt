@@ -1,9 +1,7 @@
 package no.nav.familie.ef.sak.integration
 
 import no.nav.familie.ef.sak.config.PdlConfig
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlHentPersonResponse
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlPersonRequest
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlPersonRequestVariables
+import no.nav.familie.ef.sak.integration.dto.pdl.*
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.http.sts.StsRestClient
 import org.springframework.beans.factory.annotation.Qualifier
@@ -18,7 +16,7 @@ class PdlClient(val pdlConfig: PdlConfig,
     : AbstractRestClient(restTemplate, "pdl.personinfo") {
 
 
-    fun hentSøker(personIdent: String): PdlHentPersonResponse {
+    fun hentSøker(personIdent: String): PdlResponse<PdlSøker> {
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent, true),
                                                 query = pdlConfig.søkerQuery)
         return postForEntity(pdlConfig.pdlUri,
@@ -26,17 +24,15 @@ class PdlClient(val pdlConfig: PdlConfig,
                              httpHeaders())!!
     }
 
-    fun hentBarn(personIdent: String): PdlHentPersonResponse {
+    fun hentBarn(personIdent: String): PdlResponse<PdlBarn> {
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent, true),
                                                 query = pdlConfig.barnQuery)
         return postForEntity(pdlConfig.pdlUri,
                              pdlPersonRequest,
                              httpHeaders())!!
-
-
     }
 
-    fun hentForelder2(personIdent: String): PdlHentPersonResponse {
+    fun hentForelder2(personIdent: String): PdlResponse<PdlAnnenForelder> {
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent, true),
                                                 query = pdlConfig.annenForelderQuery)
         return postForEntity(pdlConfig.pdlUri,
@@ -51,5 +47,4 @@ class PdlClient(val pdlConfig: PdlConfig,
             add("Tema", "ENF")
         }
     }
-
 }
