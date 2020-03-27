@@ -19,6 +19,14 @@ class PersonService(val integrasjonerClient: FamilieIntegrasjonerClient,
     fun hentPdlPerson(ident: String): PdlHentPersonResponse {
         return pdlClient.hentSøker(ident)
     }
+
+    fun hentPdlBarn(ident: String): PdlHentPersonResponse {
+        return pdlClient.hentBarn(ident)
+    }
+
+    fun hentPdlForelder2(ident: String): PdlHentPersonResponse {
+        return pdlClient.hentForelder2(ident)
+    }
 }
 
 

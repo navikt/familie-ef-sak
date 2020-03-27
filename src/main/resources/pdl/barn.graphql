@@ -1,19 +1,71 @@
-query($ident: ID!, $navnHistorikk: Boolean!){
+query($ident: ID!){
     person: hentPerson(ident: $ident) {
-        foedsel {
-            foedselsdato
+        adressebeskyttelse {
+            gradering
         }
-        navn(historikk: $navnHistorikk) {
+        bostedsadresse {
+            angittFlyttedato
+            coAdressenavn
+            vegadresse {
+                husnummer
+                husbokstav
+                bruksenhetsnummer
+                adressenavn
+                kommunenummer
+                tilleggsnavn
+                postnummer
+                koordinater {
+                    x
+                    y
+                    z
+                    kvalitet
+                }
+            }
+            ukjentBosted {
+                bostedskommune
+            }
+        }
+        deltBosted {
+            startdatoForKontrakt
+            sluttdatoForKontrakt
+            vegadresse {
+                husnummer
+                husbokstav
+                bruksenhetsnummer
+                adressenavn
+                kommunenummer
+                tilleggsnavn
+                postnummer
+                koordinater {
+                    x
+                    y
+                    z
+                    kvalitet
+                }
+            }
+            ukjentBosted {
+                bostedskommune
+            }
+        }
+        doedsfall {
+            doedsdato
+        }
+        familierelasjoner {
+            relatertPersonsIdent
+            relatertPersonsRolle
+            minRolleForPerson
+        }
+        foedsel {
+            foedselsaar
+            foedselsdato
+            foedeland
+            foedested
+            foedekommune
+        }
+        navn {
             fornavn
             mellomnavn
             etternavn
-        }
-        kjoenn {
-            kjoenn
-        }
-        familierelasjoner {
-            relatertPersonsIdent,
-            relatertPersonsRolle
         }
     }
 }

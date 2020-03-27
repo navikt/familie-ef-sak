@@ -26,6 +26,24 @@ class PdlClient(val pdlConfig: PdlConfig,
                              httpHeaders())!!
     }
 
+    fun hentBarn(personIdent: String): PdlHentPersonResponse {
+        val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent, true),
+                                                query = pdlConfig.barnQuery)
+        return postForEntity(pdlConfig.pdlUri,
+                             pdlPersonRequest,
+                             httpHeaders())!!
+
+
+    }
+
+    fun hentForelder2(personIdent: String): PdlHentPersonResponse {
+        val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent, true),
+                                                query = pdlConfig.annenForelderQuery)
+        return postForEntity(pdlConfig.pdlUri,
+                             pdlPersonRequest,
+                             httpHeaders())!!
+    }
+
     private fun httpHeaders(): HttpHeaders {
 
         return HttpHeaders().apply {

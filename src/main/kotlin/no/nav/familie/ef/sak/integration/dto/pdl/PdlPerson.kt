@@ -32,7 +32,7 @@ data class PdlHentPersonResponse(val data: PdlPerson?,
     }
 }
 
-data class PdlError (val message: String)
+data class PdlError(val message: String)
 
 
 data class PdlPerson(val person: PdlPersonData?)
@@ -44,7 +44,6 @@ data class PdlPersonData(val adressebeskyttelse: List<Adressebeskyttelse>,
                          val doedsfall: List<Doedsfall>,
                          val familierelasjoner: List<Familierelasjon>,
                          val foedsel: List<Foedsel>,
-                         val folkeregisteridentifikator: List<Folkeregisteridentifikator>,
                          val folkeregisterpersonstatus: List<Folkeregisterpersonstatus>,
                          val navn: List<Navn>,
                          val opphold: List<Opphold>,
@@ -73,8 +72,7 @@ data class Oppholdsadresse(val oppholdsadressedato: LocalDate?,
                            val vegadresse: Vegadresse?,
                            val oppholdAnnetSted: String?)
 
-data class Vegadresse(val matrikkelId: Int?,
-                      val husnummer: String?,
+data class Vegadresse(val husnummer: String?,
                       val husbokstav: String?,
                       val bruksenhetsnummer: String?,
                       val adressenavn: String?,
@@ -140,10 +138,6 @@ data class TilrettelagtKommunikasjon(val talespraaktolk: Tolk?,
                                      val tegnspraaktolk: Tolk?)
 
 data class Tolk(val spraak: String?)
-
-data class Folkeregisteridentifikator(val identifikasjonsnummer: String,
-                                      val status: String,
-                                      val type: String)
 
 data class Statsborgerskap(val land: String,
                            val gyldigFraOgMed: LocalDate?,

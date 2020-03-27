@@ -1,19 +1,145 @@
-query($ident: ID!, $navnHistorikk: Boolean!){
+query($ident: ID!){
     person: hentPerson(ident: $ident) {
-        foedsel {
-            foedselsdato
+        adressebeskyttelse {
+            gradering
         }
-        navn(historikk: $navnHistorikk) {
+        bostedsadresse(historikk: true) {
+            angittFlyttedato
+            coAdressenavn
+            vegadresse {
+                husnummer
+                husbokstav
+                bruksenhetsnummer
+                adressenavn
+                kommunenummer
+                tilleggsnavn
+                postnummer
+                koordinater {
+                    x
+                    y
+                    z
+                    kvalitet
+                }
+            }
+            ukjentBosted {
+                bostedskommune
+            }
+        }
+        deltBosted(historikk: true) {
+            startdatoForKontrakt
+            sluttdatoForKontrakt
+            vegadresse {
+                husnummer
+                husbokstav
+                bruksenhetsnummer
+                adressenavn
+                kommunenummer
+                tilleggsnavn
+                postnummer
+                koordinater {
+                    x
+                    y
+                    z
+                    kvalitet
+                }
+            }
+            ukjentBosted {
+                bostedskommune
+            }
+        }
+        doedsfall {
+            doedsdato
+        }
+        familierelasjoner {
+            relatertPersonsIdent
+            relatertPersonsRolle
+            minRolleForPerson
+        }
+        foedsel {
+            foedselsaar
+            foedselsdato
+            foedeland
+            foedested
+            foedekommune
+        }
+        folkeregisterpersonstatus(historikk: true) {
+            status
+            forenkletStatus
+        }
+        navn {
             fornavn
             mellomnavn
             etternavn
         }
-        kjoenn {
-            kjoenn
+        opphold(historikk: true) {
+            type
+            oppholdFra
+            oppholdTil
         }
-        familierelasjoner {
-            relatertPersonsIdent,
-            relatertPersonsRolle
+        oppholdsadresse(historikk: true) {
+            oppholdsadressedato
+            coAdressenavn
+            utenlandskAdresse {
+                adressenavn
+                bygningsinformasjon
+                postboks
+                postkode
+                byEllerStedsnavn
+                distriktEllerRegion
+                landkode
+            }
+            vegadresse {
+                husnummer
+                husbokstav
+                bruksenhetsnummer
+                adressenavn
+                kommunenummer
+                tilleggsnavn
+                postnummer
+                koordinater {
+                    x
+                    y
+                    z
+                    kvalitet
+                }
+            }
+            oppholdAnnetSted
+        }
+        sivilstand(historikk: true) {
+            type
+            gyldigFraOgMed
+            myndighet
+            kommune
+            sted
+            utland
+            relatertVedSivilstand
+            bekreftelsesdato
+        }
+        statsborgerskap(historikk: true) {
+            land
+            gyldigFraOgMed
+            gyldigTilOgMed
+        }
+        telefonnummer {
+            landskode
+            nummer
+            prioritet
+        }
+        tilrettelagtKommunikasjon {
+            talespraaktolk {
+                spraak
+            }
+            tegnspraaktolk {
+                spraak
+            }
+        }
+        innflyttingTilNorge {
+            fraflyttingsland
+            fraflyttingsstedIUtlandet
+        }
+        utflyttingFraNorge {
+            tilflyttingsland
+            tilflyttingsstedIUtlandet
         }
     }
 }

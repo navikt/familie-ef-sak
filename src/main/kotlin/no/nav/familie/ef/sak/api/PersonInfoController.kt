@@ -35,8 +35,19 @@ class PersonInfoController(private val personService: PersonService) {
         return Ressurs.success(personService.hentPerson(ident))
     }
 
-    @GetMapping("/pdl")
-    fun personinfoPdl(@RequestHeader(name = "Nav-Personident") @PersontilgangConstraint ident: String): PdlHentPersonResponse {
+    @GetMapping("/soker")
+    fun søkerinfo(@RequestHeader(name = "Nav-Personident") @PersontilgangConstraint ident: String): PdlHentPersonResponse {
         return personService.hentPdlPerson(ident)
     }
+
+    @GetMapping("/barn")
+    fun barninfoPdl(@RequestHeader(name = "Nav-Personident") @PersontilgangConstraint ident: String): PdlHentPersonResponse {
+        return personService.hentPdlBarn(ident)
+    }
+
+    @GetMapping("/forelder2")
+    fun forelder2infoPdl(@RequestHeader(name = "Nav-Personident") @PersontilgangConstraint ident: String): PdlHentPersonResponse {
+        return personService.hentPdlForelder2(ident)
+    }
+
 }
