@@ -25,3 +25,5 @@ AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navq.onmicrosoft.c
 FAMILIE_INTEGRASJONER_URL: http://localhost:8085
 EF_SAK_FRONTEND_CLIENT_ID: DEV_azp
 EF_MOTTAK_CLIENT_ID: dummy
+CREDENTIAL_USERNAME: not-a-real-srvuser
+CREDENTIAL_PASSWORD: not-a-real-pw

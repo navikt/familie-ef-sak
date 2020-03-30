@@ -21,6 +21,16 @@ no.nav.security.jwt:
           client-id: ${AZURE_CLIENT_ID}
           client-secret: ${AZURE_CLIENT_SECRET}
           client-auth-method: client_secret_basic
+# PDL er per nå ikke lagt inn i azureAd, men det skal komme.
+#      pdl:
+#        resource-url: ${PDL_URL}
+#        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
+#        grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+#        scope: ${PDL_SCOPE}
+#        authentication:
+#          client-id: ${AZURE_CLIENT_ID}
+#          client-secret: ${AZURE_CLIENT_SECRET}
+#          client-auth-method: client_secret_basic
 
 spring:
   data:
@@ -56,3 +66,5 @@ management:
 AZUREAD_DISCOVERY_URL: https://login.microsoftonline.com/navno.onmicrosoft.com/v2.0/.well-known/openid-configuration
 AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navno.onmicrosoft.com/oauth2/v2.0/token
 FAMILIE_INTEGRASJONER_URL: http://familie-integrasjoner
+STS_URL: http://security-token-service.default.svc.nais.local/rest/v1/sts/token?grant_type=client_credentials&scope=openid
+PDL_URL: http://pdl-api
