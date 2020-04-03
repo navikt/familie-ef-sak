@@ -1,11 +1,8 @@
-package no.nav.familie.ef.sak.api
+package no.nav.familie.ef.sak.api.gui
 
 import no.nav.familie.ba.sak.validering.PersontilgangConstraint
-import no.nav.familie.ef.sak.api.dto.Person
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlAnnenForelder
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlBarn
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlResponse
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker
+import no.nav.familie.ef.sak.api.gui.dto.Person
+import no.nav.familie.ef.sak.integration.dto.pdl.*
 import no.nav.familie.ef.sak.service.PersonService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
