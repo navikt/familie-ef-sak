@@ -3,9 +3,13 @@ query($ident: ID!){
         adressebeskyttelse {
             gradering
         }
-        bostedsadresse {
+        bostedsadresse(historikk: true) {
             angittFlyttedato
             coAdressenavn
+            folkeregistermetadata {
+                gyldighetstidspunkt
+                opphoerstidspunkt
+            }
             vegadresse {
                 husnummer
                 husbokstav
@@ -27,6 +31,10 @@ query($ident: ID!){
         }
         doedsfall {
             doedsdato
+        }
+        folkeregisterpersonstatus(historikk: true) {
+            status
+            forenkletStatus
         }
         navn {
             fornavn

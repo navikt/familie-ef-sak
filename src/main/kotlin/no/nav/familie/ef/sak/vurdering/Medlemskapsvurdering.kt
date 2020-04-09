@@ -1,13 +1,13 @@
 package no.nav.familie.ef.sak.vurdering
 
 import no.nav.familie.ef.sak.api.gui.dto.GuiSak
-import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlPerson
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.time.Period
 
 @Component
-class Medlemskapsvurdering(val medlemskapsinfo: Medlemskapsinfo,
+class Medlemskapsvurdering(val medlemskapshistorikkHelper: MedlemskapshistorikkHelper,
                            val guiSak: GuiSak) {
 
     private val landkoderNorden = listOf("NO", "SE", "DK", "IS", "FI")
@@ -51,13 +51,14 @@ class Medlemskapsvurdering(val medlemskapsinfo: Medlemskapsinfo,
                                  hvisJa = { Evaluering(Resultat.NEI, "Søker er registrert som ikke medlem.") },
                                  hvisNei = { erBosattINorge.evaluer(this) })
 
-    fun erIkkeMedlem(guiSak: GuiSak): Evaluering {
-        val gyldigUnntakNå = medlemskapsinfo.gyldigePerioder.find { LocalDate.now().isBefore(it.tom) }
-        if (gyldigUnntakNå != null) {
+    private fun erIkkeMedlem(guiSak: GuiSak): Evaluering {
+        val statusNå = medlemskapshistorikkHelper.beregnPerioder(guiSak.søker.person!!,
+                                                                 guiSak.søknad.personalia.verdi.fødselsnummer.verdi.verdi)
+                .find { it.contains(LocalDate.now()) }
+        if (statusNå == null || statusNå.gyldig == false) {
             return Evaluering(Resultat.JA, "Er IKKE MEDLEM")
         }
-        val uavklartUnntakNå = medlemskapsinfo.uavklartePerioder.find { LocalDate.now().isBefore(it.tom) }
-        if (uavklartUnntakNå != null) {
+        if (statusNå.gyldig == null) {
             return Evaluering(Resultat.KANSKJE, "Uavklart medlemskapsunntak nå")
         }
         return Evaluering.nei("Ikke registrert med medlemskapsunntak nå.")
@@ -95,25 +96,22 @@ class Medlemskapsvurdering(val medlemskapsinfo: Medlemskapsinfo,
     private val medlemskapslengde =
             SpørsmålNode<GuiSak>("Har søker vært medlem av folketrygden de siste 3 år?",
                                  "EF-M7",
-                                 { oppholdINorge(this) },
+                                 { medlemskapslengde(this) },
                                  hvisJa = { nordiskStatsborger.evaluer(this) },
                                  hvisNei = { medlemskapslengdeAvbruddMindreEnn10år.evaluer(this) })
 
     private fun medlemskapslengde(guiSak: GuiSak): Evaluering {
-        guiSak.søker
-                .person
-                ?.bostedsadresse
-                ?.filter {
-                    it.angittFlyttedato != null && it.angittFlyttedato.isBefore(LocalDate.now().minusYears(3))
-                }?.maxBy { it.angittFlyttedato!! }
-        ?: return Evaluering.nei("Ikke hatt bostedsadresse i Norge siste 3 år")
-        val gyldigeUnntakSiste3år = medlemskapsinfo.gyldigePerioder.filter { it.tom.isAfter(LocalDate.now().minusYears(3)) }
-        if (gyldigeUnntakSiste3år.isNotEmpty()) {
-            return Evaluering.nei("Her hatt opphold i medlemskap siste 3 år")
+
+        val statusSiste3År = medlemskapshistorikkHelper.beregnPerioder(guiSak.søker.person!!,
+                                                                       guiSak.søknad.personalia.verdi.fødselsnummer.verdi.verdi)
+                .filter { it.tildato.isAfter(LocalDate.now().minusYears(3))}
+
+
+        if (statusSiste3År.find { it.gyldig == false } != null) {
+            return Evaluering.nei("Her hatt medlemskapsunntak siste 3 år")
         }
-        val uavklarteUnntakSiste3år = medlemskapsinfo.uavklartePerioder.filter { it.tom.isAfter(LocalDate.now().minusYears(3)) }
-        if (uavklarteUnntakSiste3år.isNotEmpty()) {
-            return Evaluering.kanskje("Her hatt uavklart opphold i medlemskap siste 3 år")
+        if (statusSiste3År.find { it.gyldig == null } != null) {
+            return Evaluering.kanskje("Her hatt uavklart medlemskapsunntak siste 3 år")
         }
 
         return Evaluering.ja("Gyldig medlemskap siste 3 år.")
@@ -128,19 +126,11 @@ class Medlemskapsvurdering(val medlemskapsinfo: Medlemskapsinfo,
 
     private fun medlemskapslengdeAvbruddMindreEnn10år(guiSak: GuiSak): Evaluering {
 
+        // TODO Gyldig ser ut til å være gyldig medlemskap, ikke gyldig unntak.
 
-
-        val fødselsdato = guiSak.søker.person?.foedsel?.firstOrNull()?.foedselsdato ?: error("Person er ikke født")
-        val datoFor16årsdag = fødselsdato.plusYears(16)
+        val datoFor16årsdag = datoFor16Årsdag(guiSak.søker.person)
         val tidSiden16årsdag = Period.between(datoFor16årsdag, LocalDate.now()) // TODO Skal være søknadsdato ikke d.d.
-
-
-        val gyldigeUnntakSiden16årsdag =
-                medlemskapsinfo.gyldigePerioder
-                        .filter { it.tom.isAfter(datoFor16årsdag) }
-                        .map {
-                            Period.between(if (it.fom.isBefore(datoFor16årsdag)) datoFor16årsdag else it.fom, it.tom)
-                        }
+        val gyldigeUnntakSiden16årsdag = gyldigePerioderSiden16årsdag(datoFor16årsdag)
         if (gyldigeUnntakSiden16årsdag.find { it.years > 9 } != null) {
             return Evaluering.nei("Lenger avbrudd enn 10 år ")
         }
@@ -150,13 +140,8 @@ class Medlemskapsvurdering(val medlemskapsinfo: Medlemskapsinfo,
             return Evaluering.nei("Mindre enn 3 års medlemskap etter fylte 16 år ")
         }
 
+        val uavklarteUnntakSiden16årsdag = uavklartePerioderSiden16årsdag(datoFor16årsdag)
 
-        val uavklarteUnntakSiden16årsdag =
-                medlemskapsinfo.uavklartePerioder
-                        .filter { it.tom.isAfter(datoFor16årsdag) }
-                        .map {
-                            Period.between(if (it.fom.isBefore(datoFor16årsdag)) datoFor16årsdag else it.fom, it.tom)
-                        }
         if (uavklarteUnntakSiden16årsdag.find { it.years > 9 } != null) {
             return Evaluering.kanskje("Uavklart avbrudd lenger enn 10 år ")
         }
@@ -168,6 +153,11 @@ class Medlemskapsvurdering(val medlemskapsinfo: Medlemskapsinfo,
         return Evaluering.ja("Min 3 års medlemskap etter fylte 16år.")
     }
 
+    private fun datoFor16Årsdag(person: PdlPerson?): LocalDate {
+        val fødselsdato = person?.foedsel?.firstOrNull()?.foedselsdato ?: error("Person er ikke født")
+        return fødselsdato.plusYears(16)
+    }
+
     private val medlemskapslengdeAvbruddMerEnn10år =
             SpørsmålNode<GuiSak>("Har søker etter fylte 16 år vært medlem i minst 7 år ved avbrud mer enn 10 år?",
                                  "EF-M10",
@@ -176,35 +166,39 @@ class Medlemskapsvurdering(val medlemskapsinfo: Medlemskapsinfo,
                                  hvisNei = { .evaluer(this) })
 
     private fun medlemskapslengdeAvbruddMerEnn10år(guiSak: GuiSak): Evaluering {
-        val fødselsdato = guiSak.søker.person?.foedsel?.firstOrNull()?.foedselsdato ?: error("Person er ikke født")
-        val datoFor16årsdag = fødselsdato.plusYears(16)
+        val datoFor16årsdag = datoFor16Årsdag(guiSak.søker.person)
         val tidSiden16årsdag = Period.between(datoFor16årsdag, LocalDate.now()) // TODO Skal være søknadsdato ikke d.d.
-
-        val gyldigeUnntakSiden16årsdag =
-                medlemskapsinfo.gyldigePerioder
-                        .filter { it.tom.isAfter(datoFor16årsdag) }
-                        .map {
-                            Period.between(if (it.fom.isBefore(datoFor16årsdag)) datoFor16årsdag else it.fom, it.tom)
-                        }
+        val gyldigeUnntakSiden16årsdag = gyldigePerioderSiden16årsdag(datoFor16årsdag)
 
         val sumGyldigeUnntak = gyldigeUnntakSiden16årsdag.fold(Period.ZERO) { acc, period -> acc.plus(period) }
         if (tidSiden16årsdag.minus(sumGyldigeUnntak).years < 7) {
             return Evaluering.nei("Mindre enn 7 års medlemskap etter fylte 16 år ")
         }
 
-
         val uavklarteUnntakSiden16årsdag =
-                medlemskapsinfo.uavklartePerioder
-                        .filter { it.tom.isAfter(datoFor16årsdag) }
-                        .map {
-                            Period.between(if (it.fom.isBefore(datoFor16årsdag)) datoFor16årsdag else it.fom, it.tom)
-                        }
+                uavklartePerioderSiden16årsdag(datoFor16årsdag)
         val sumUavklarteUnntak = uavklarteUnntakSiden16årsdag.fold(Period.ZERO) { acc, period -> acc.plus(period) }
         if (tidSiden16årsdag.minus(sumUavklarteUnntak).years < 7) {
             return Evaluering.kanskje("Uavklarte avbrudd medfører mindre enn 7 års medlemskap etter fylte 16 år ")
         }
 
         return Evaluering.ja("Min 7 års medlemskap etter fylte 16år.")
+    }
+
+    private fun uavklartePerioderSiden16årsdag(datoFor16årsdag: LocalDate): List<Period> {
+        return medlemskapsinfo.uavklartePerioder
+                .filter { it.tom.isAfter(datoFor16årsdag) }
+                .map {
+                    Period.between(if (it.fom.isBefore(datoFor16årsdag)) datoFor16årsdag else it.fom, it.tom)
+                }
+    }
+
+    private fun gyldigePerioderSiden16årsdag(datoFor16årsdag: LocalDate): List<Period> {
+        return medlemskapsinfo.gyldigePerioder
+                .filter { it.tom.isAfter(datoFor16årsdag) }
+                .map {
+                    Period.between(if (it.fom.isBefore(datoFor16årsdag)) datoFor16årsdag else it.fom, it.tom)
+                }
     }
 
     private val nordiskStatsborger =

@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.integration.dto.personopplysning.PersonhistorikkInf
 import no.nav.familie.ef.sak.integration.dto.personopplysning.Personinfo
 import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Component
@@ -24,8 +25,8 @@ class FamilieIntegrasjonerClient(@Qualifier("azure") restOperations: RestOperati
         return postForEntity(integrasjonerConfig.tilgangUri, identer)!!
     }
 
-    fun hentMedlemskapsinfo(ident: String): Personinfo {
-        return getForEntity<Ressurs<Personinfo>>(integrasjonerConfig.personopplysningerUri, personIdentHeader(ident)).data!!
+    fun hentMedlemskapsinfo(ident: String): Medlemskapsinfo {
+        return getForEntity<Ressurs<Medlemskapsinfo>>(integrasjonerConfig.personopplysningerUri, personIdentHeader(ident)).data!!
     }
 
     @Deprecated("bruk Pdl-løsning")
