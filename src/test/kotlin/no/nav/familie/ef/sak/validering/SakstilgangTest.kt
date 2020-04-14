@@ -5,7 +5,7 @@ import io.mockk.mockk
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.dto.Tilgang
 import no.nav.familie.ef.sak.repository.SakRepository
-import no.nav.familie.ef.sak.repository.domain.DomeneSak
+import no.nav.familie.ef.sak.repository.domain.Sak
 import no.nav.familie.ef.sak.repository.domain.Sporbar
 import no.nav.familie.ef.sak.repository.domain.Søker
 import org.assertj.core.api.Assertions
@@ -25,7 +25,7 @@ internal class SakstilgangTest {
     @BeforeEach
     fun setUp() {
         every { sakRepository.findByIdOrNull(any()) }
-                .returns(DomeneSak(UUID.randomUUID(),
+                .returns(Sak(UUID.randomUUID(),
                                    byteArrayOf(0),
                                    "1",
                                    "1",

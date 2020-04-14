@@ -1,27 +1,22 @@
 package no.nav.familie.ef.sak.vurdering
 
-import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.dto.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlPerson
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
-import org.springframework.stereotype.Component
 import java.time.LocalDate
 
-@Component
-class MedlemskapshistorikkHelper(val familieIntegrasjonerClient: FamilieIntegrasjonerClient) {
+class Medlemskapshistorikk(pdlPerson: PdlPerson, medlemskapsinfo: Medlemskapsinfo) {
 
-    fun beregnPerioder(pdlPerson: PdlPerson, ident: String): List<Periode> {
-        val bosattAdresser = pdlPerson.bostedsadresse
-                .filter { it.angittFlyttedato != null || it.folkeregistermetadata.gyldighetstidspunkt != null }
-                .sortedBy { it.angittFlyttedato ?: it.folkeregistermetadata.gyldighetstidspunkt!!.toLocalDate() }
+    private val bosattAdresser = pdlPerson.bostedsadresse
+            .filter { it.angittFlyttedato != null || it.folkeregistermetadata.gyldighetstidspunkt != null }
+            .sortedBy { it.angittFlyttedato ?: it.folkeregistermetadata.gyldighetstidspunkt!!.toLocalDate() }
 
-        val perioder = mapTilBosattperioder(bosattAdresser)
-        val hentMedlemskapsinfo = familieIntegrasjonerClient.hentMedlemskapsinfo(ident)
-        return overstyrMedUnntak(perioder, hentMedlemskapsinfo)
-    }
+    private val bosattPerioder = mapTilBosattperioder(bosattAdresser)
 
-    private fun overstyrMedUnntak(bosattPerioder: List<Periode>, medlemskapsinfo: Medlemskapsinfo): List<Periode> {
-        val unntaksperioder = mapTilBosattperioder(medlemskapsinfo)
+    val medlemskapsperioder = overstyrMedUnntak(medlemskapsinfo)
+
+    private fun overstyrMedUnntak(medlemskapsinfo: Medlemskapsinfo): List<Periode> {
+        val unntaksperioder = mapTilUnntaksperioder(medlemskapsinfo)
 
         if (unntaksperioder.isEmpty()) {
             return bosattPerioder
@@ -31,9 +26,13 @@ class MedlemskapshistorikkHelper(val familieIntegrasjonerClient: FamilieIntegras
             gjørPlassTilUnntak(bosattPeriode, unntaksperioder)
         }.flatten()
 
-        return bosattperioderMedPlassTilUnntak + unntaksperioder
+        return (bosattperioderMedPlassTilUnntak + unntaksperioder).sortedBy { it.fradato }
     }
 
+    /**
+     * Gå igjennom alle unntaksperioder som berører en bosattperiode og kort inn og stykk opp bosattperiode
+     * slik at det blir plass till unntaksperiodene
+     */
     private fun gjørPlassTilUnntak(bosattPeriode: Periode,
                                    unntaksperioder: List<Periode>): List<Periode> {
         var periodesegmenter = listOf(bosattPeriode)
@@ -43,18 +42,18 @@ class MedlemskapshistorikkHelper(val familieIntegrasjonerClient: FamilieIntegras
                     periodesegment.gyldig == unntaksperiode.gyldig -> {
                         listOf(periodesegment)
                     }
-                    unntaksperiode.encompasses(periodesegment) -> {
+                    periodesegment.omsluttesAv(unntaksperiode) -> {
                         emptyList()
                     }
-                    periodesegment.contains(unntaksperiode) -> {
+                    periodesegment.inneholder(unntaksperiode) -> {
                         listOf(periodesegment.copy(tildato = unntaksperiode.fradato.minusDays(1)),
                                periodesegment.copy(fradato = unntaksperiode.tildato.plusDays(1)))
 
                     }
-                    periodesegment.contains(unntaksperiode.fradato) -> {
+                    periodesegment.inneholder(unntaksperiode.fradato) -> {
                         listOf(periodesegment.copy(tildato = unntaksperiode.fradato.minusDays(1)))
                     }
-                    periodesegment.contains(unntaksperiode.tildato) -> {
+                    periodesegment.inneholder(unntaksperiode.tildato) -> {
                         listOf(periodesegment.copy(fradato = unntaksperiode.tildato.plusDays(1)))
                     }
                     else -> {
@@ -66,11 +65,10 @@ class MedlemskapshistorikkHelper(val familieIntegrasjonerClient: FamilieIntegras
         return periodesegmenter
     }
 
-    private fun mapTilBosattperioder(medlemskapsinfo: Medlemskapsinfo): List<Periode> {
+    private fun mapTilUnntaksperioder(medlemskapsinfo: Medlemskapsinfo): List<Periode> {
         return medlemskapsinfo.gyldigePerioder.map { Periode(it.fom, it.tom, true) } +
                medlemskapsinfo.uavklartePerioder.map { Periode(it.fom, it.tom, null) } +
                medlemskapsinfo.avvistePerioder.map { Periode(it.fom, it.tom, false) }.sortedBy { it.fradato }
-
     }
 
     private fun mapTilBosattperioder(bosattAdresser: List<Bostedsadresse>): List<Periode> {
@@ -101,11 +99,13 @@ class MedlemskapshistorikkHelper(val familieIntegrasjonerClient: FamilieIntegras
                 periode = null
             }
         }
-        if (periode?.tildato != LocalDate.MAX) {
+        if (periode == null) {
             // Avsluttende opphold
-            bosattperioder.add(Periode(periode?.tildato?.plusDays(1) ?: LocalDate.MIN,
+            bosattperioder.add(Periode(forrigePeriode?.tildato?.plusDays(1) ?: LocalDate.MIN,
                                        LocalDate.MAX,
                                        false))
+        } else {
+            bosattperioder.add(periode)
         }
 
         return bosattperioder.toList()
@@ -119,17 +119,15 @@ class MedlemskapshistorikkHelper(val familieIntegrasjonerClient: FamilieIntegras
 
 data class Periode(val fradato: LocalDate, val tildato: LocalDate, val gyldig: Boolean?) {
 
-    fun contains(date: LocalDate): Boolean {
+    fun inneholder(date: LocalDate): Boolean {
         return (!date.isBefore(fradato) && !date.isAfter(tildato))
     }
 
-    fun contains(periode: Periode): Boolean {
+    fun inneholder(periode: Periode): Boolean {
         return (periode.fradato.isAfter(this.fradato) && periode.tildato.isBefore(this.tildato))
     }
 
-    fun encompasses(periode: Periode): Boolean {
+    fun omsluttesAv(periode: Periode): Boolean {
         return (!periode.fradato.isAfter(this.fradato) && !periode.tildato.isBefore(this.tildato))
     }
-
-
 }
