@@ -33,16 +33,16 @@
         <springfox.version>2.9.2</springfox.version>
         <mockk.version>1.9.3</mockk.version>
         <fasterxml.version>2.10.3</fasterxml.version>
-        <felles.version>1.20200325131618_102c329</felles.version>
+        <felles.version>1.20200408151439_00385c3</felles.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>2.0_20200331150736_b142f34</kontrakter.version>
+        <kontrakter.version>2.0_20200408074716_e14d187</kontrakter.version>
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
         <sonar.organization>navit</sonar.organization>
-        <flyway.version>6.3.2</flyway.version>
+        <flyway.version>6.3.3</flyway.version>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <nav.security.version>1.1.4</nav.security.version>
-        <postgres.version>42.2.11</postgres.version>
+        <postgres.version>42.2.12</postgres.version>
         <!--suppress UnresolvedMavenProperty Ligger som secret i github-->
         <spring.cloud>2.2.2.RELEASE</spring.cloud>
         <sonar.login>${SONAR_LOGIN}</sonar.login>

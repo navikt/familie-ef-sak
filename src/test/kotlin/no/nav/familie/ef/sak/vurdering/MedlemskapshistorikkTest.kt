@@ -1,9 +1,11 @@
-package no.nav.familie.ef.sak.vurdering
+package no.nav.familie.ef.sak.no.nav.familie.ef.sak.vurdering
 
 import no.nav.familie.ef.sak.integration.dto.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.integration.dto.pdl.Foedsel
 import no.nav.familie.ef.sak.integration.dto.pdl.Folkeregistermetadata
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlPerson
+import no.nav.familie.ef.sak.vurdering.Medlemskapshistorikk
+import no.nav.familie.ef.sak.vurdering.Periode
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import no.nav.familie.kontrakter.felles.medlemskap.PeriodeInfo
 import no.nav.familie.kontrakter.felles.medlemskap.PeriodeStatus
@@ -39,7 +41,9 @@ internal class MedlemskapshistorikkTest {
         val medlemskapsinfo = Medlemskapsinfo("3213213",
                                               emptyList(),
                                               avvistePerioder(Pair(LocalDate.of(2008, 4, 15),
-                                                                   LocalDate.of(2010, 1, 16))),
+                                                                   LocalDate.of(2010, 1, 16)),
+                                                              Pair(LocalDate.of(2010, 4, 15),
+                                                                   LocalDate.of(2010, 5, 16))),
                                               emptyList())
 
         val historikk = Medlemskapshistorikk(pdlPerson, medlemskapsinfo)
@@ -52,6 +56,12 @@ internal class MedlemskapshistorikkTest {
                                                                        LocalDate.of(2010, 1, 16),
                                                                        false))
         assertThat(historikk.medlemskapsperioder[3]).isEqualTo(Periode(LocalDate.of(2010, 1, 17),
+                                                                       LocalDate.of(2010, 4, 14),
+                                                                       true))
+        assertThat(historikk.medlemskapsperioder[4]).isEqualTo(Periode(LocalDate.of(2010, 4, 15),
+                                                                       LocalDate.of(2010, 5, 16),
+                                                                       false))
+        assertThat(historikk.medlemskapsperioder[5]).isEqualTo(Periode(LocalDate.of(2010, 5, 17),
                                                                        LocalDate.MAX,
                                                                        true))
     }
@@ -129,6 +139,77 @@ internal class MedlemskapshistorikkTest {
                                                                        false))
     }
 
+    @Test
+    fun `getMedlemskapsperioder med gyldig unntak i opphold gir gyldig medlemskap`() {
+
+        val pdlPerson = pdlPerson()
+        val medlemskapsinfo = Medlemskapsinfo("3213213",
+                                              gyldigePerioder(Pair(LocalDate.of(2014, 1, 12),
+                                                                   LocalDate.of(2017, 4, 12))),
+                                              emptyList(),
+                                              emptyList())
+
+        val historikk = Medlemskapshistorikk(pdlPerson, medlemskapsinfo)
+
+        assertThat(historikk.medlemskapsperioder[0]).isEqualTo(Periode(LocalDate.MIN,
+                                                                       LocalDate.of(2014, 1, 11),
+                                                                       false))
+        assertThat(historikk.medlemskapsperioder[1]).isEqualTo(Periode(LocalDate.of(2014, 1, 12),
+                                                                       LocalDate.of(2017, 4, 12),
+                                                                       true))
+        assertThat(historikk.medlemskapsperioder[2]).isEqualTo(Periode(LocalDate.of(2017, 4, 13),
+                                                                       LocalDate.MAX,
+                                                                       false))
+    }
+
+    @Test
+    fun `getMedlemskapsperioder med uavklart unntak i opphold gir ukjent medlemskap`() {
+
+        val pdlPerson = pdlPerson()
+        val medlemskapsinfo = Medlemskapsinfo("3213213",
+                                              emptyList(),
+                                              emptyList(),
+                                              uavklartePerioder(Pair(LocalDate.of(2014, 1, 12),
+                                                                     LocalDate.of(2017, 4, 12))))
+
+        val historikk = Medlemskapshistorikk(pdlPerson, medlemskapsinfo)
+
+        assertThat(historikk.medlemskapsperioder[0]).isEqualTo(Periode(LocalDate.MIN,
+                                                                       LocalDate.of(2014, 1, 11),
+                                                                       false))
+        assertThat(historikk.medlemskapsperioder[1]).isEqualTo(Periode(LocalDate.of(2014, 1, 12),
+                                                                       LocalDate.of(2017, 4, 12),
+                                                                       null))
+        assertThat(historikk.medlemskapsperioder[2]).isEqualTo(Periode(LocalDate.of(2017, 4, 13),
+                                                                       LocalDate.MAX,
+                                                                       false))
+    }
+
+    @Test
+    fun `getMedlemskapsperioder med gyldig unntak som går over forskjellige perioder påvirker bare den ugyldige perioden`() {
+
+        val pdlPerson =
+                pdlPerson(Pair(LocalDate.of(2002, 2, 14), LocalDateTime.of(2007, 10, 12, 0, 0)),
+                          Pair(LocalDate.of(2015, 6, 14), null))
+        val medlemskapsinfo = Medlemskapsinfo("3213213",
+                                              gyldigePerioder(Pair(LocalDate.of(2014, 1, 12),
+                                                                   LocalDate.of(2017, 4, 12))),
+                                              emptyList(),
+                                              emptyList())
+
+        val historikk = Medlemskapshistorikk(pdlPerson, medlemskapsinfo)
+
+        assertThat(historikk.medlemskapsperioder[0]).isEqualTo(Periode(LocalDate.MIN, LocalDate.of(2002, 2, 13), false))
+        assertThat(historikk.medlemskapsperioder[1]).isEqualTo(Periode(LocalDate.of(2002, 2, 14),
+                                                                       LocalDate.of(2007, 10, 12),
+                                                                       true))
+        assertThat(historikk.medlemskapsperioder[2]).isEqualTo(Periode(LocalDate.of(2007, 10, 13),
+                                                                       LocalDate.of(2014, 1, 11),
+                                                                       false))
+        assertThat(historikk.medlemskapsperioder[3]).isEqualTo(Periode(LocalDate.of(2014, 1, 12),
+                                                                       LocalDate.MAX,
+                                                                       true))
+    }
 
     private fun pdlPerson(vararg perioder: Pair<LocalDate, LocalDateTime?>) = object : PdlPerson {
         override val foedsel: List<Foedsel> = listOf(Foedsel(null, null, null, null, null))

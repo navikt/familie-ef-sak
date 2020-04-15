@@ -25,8 +25,32 @@ class Medlemskapshistorikk(pdlPerson: PdlPerson, medlemskapsinfo: Medlemskapsinf
         val bosattperioderMedPlassTilUnntak = bosattPerioder.map { bosattPeriode ->
             gjørPlassTilUnntak(bosattPeriode, unntaksperioder)
         }.flatten()
+        val bosattperioderMedUnntak = (bosattperioderMedPlassTilUnntak + unntaksperioder).sortedBy { it.fradato }
 
-        return (bosattperioderMedPlassTilUnntak + unntaksperioder).sortedBy { it.fradato }
+
+        return fusjonerLikeKonsekutivePerioder(bosattperioderMedUnntak)
+    }
+
+    private fun fusjonerLikeKonsekutivePerioder(bosattperioderMedUnntak: List<Periode>): List<Periode> {
+
+        var periodeTilFusjonering: Periode? = null
+        val fusjonertePerioder = ArrayList<Periode>()
+        for (medlemskapsperiode in bosattperioderMedUnntak) {
+
+            if (periodeTilFusjonering == null) { // Opprett ny periode
+                periodeTilFusjonering = medlemskapsperiode
+            } else if (periodeTilFusjonering.gyldig == medlemskapsperiode.gyldig ){
+                // Like statuser, utvid periode
+                periodeTilFusjonering = periodeTilFusjonering.copy(tildato = medlemskapsperiode.tildato)
+            } else { // ulik status. Ferdig fusjonert periode legges til liste
+                fusjonertePerioder.add(periodeTilFusjonering)
+                periodeTilFusjonering = medlemskapsperiode
+            }
+        }
+        if (periodeTilFusjonering != null) {
+            fusjonertePerioder.add(periodeTilFusjonering)
+        }
+        return fusjonertePerioder.toList()
     }
 
     /**
@@ -39,9 +63,6 @@ class Medlemskapshistorikk(pdlPerson: PdlPerson, medlemskapsinfo: Medlemskapsinf
         for (unntaksperiode in unntaksperioder) {
             periodesegmenter = periodesegmenter.map { periodesegment ->
                 when {
-                    periodesegment.gyldig == unntaksperiode.gyldig -> {
-                        listOf(periodesegment)
-                    }
                     periodesegment.omsluttesAv(unntaksperiode) -> {
                         emptyList()
                     }
