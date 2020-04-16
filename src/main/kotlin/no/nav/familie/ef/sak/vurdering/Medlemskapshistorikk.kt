@@ -7,16 +7,16 @@ import java.time.LocalDate
 
 class Medlemskapshistorikk(pdlPerson: PdlPerson, medlemskapsinfo: Medlemskapsinfo) {
 
-    private val bosattAdresser = pdlPerson.bostedsadresse
-            .filter { it.angittFlyttedato != null || it.folkeregistermetadata.gyldighetstidspunkt != null }
-            .sortedBy { it.angittFlyttedato ?: it.folkeregistermetadata.gyldighetstidspunkt!!.toLocalDate() }
+    val medlemskapsperioder = byggMedlemskapsperioder(pdlPerson, medlemskapsinfo)
 
-    private val bosattPerioder = mapTilBosattperioder(bosattAdresser)
+    private fun byggMedlemskapsperioder(pdlPerson: PdlPerson,
+                                        medlemskapsinfo: Medlemskapsinfo): List<Periode> {
 
-    val medlemskapsperioder = overstyrMedUnntak(medlemskapsinfo)
-
-    private fun overstyrMedUnntak(medlemskapsinfo: Medlemskapsinfo): List<Periode> {
-        val unntaksperioder = mapTilUnntaksperioder(medlemskapsinfo)
+        val bosattPerioder = mapTilBosattperioder(pdlPerson.bostedsadresse)
+        val unntaksperioder =
+                medlemskapsinfo.gyldigePerioder.map { Periode(it.fom, it.tom, true) } +
+                medlemskapsinfo.uavklartePerioder.map { Periode(it.fom, it.tom, null) } +
+                medlemskapsinfo.avvistePerioder.map { Periode(it.fom, it.tom, false) }.sortedBy { it.fradato }
 
         if (unntaksperioder.isEmpty()) {
             return bosattPerioder
@@ -39,7 +39,7 @@ class Medlemskapshistorikk(pdlPerson: PdlPerson, medlemskapsinfo: Medlemskapsinf
 
             if (periodeTilFusjonering == null) { // Opprett ny periode
                 periodeTilFusjonering = medlemskapsperiode
-            } else if (periodeTilFusjonering.gyldig == medlemskapsperiode.gyldig ){
+            } else if (periodeTilFusjonering.gyldig == medlemskapsperiode.gyldig) {
                 // Like statuser, utvid periode
                 periodeTilFusjonering = periodeTilFusjonering.copy(tildato = medlemskapsperiode.tildato)
             } else { // ulik status. Ferdig fusjonert periode legges til liste
@@ -55,7 +55,7 @@ class Medlemskapshistorikk(pdlPerson: PdlPerson, medlemskapsinfo: Medlemskapsinf
 
     /**
      * Gå igjennom alle unntaksperioder som berører en bosattperiode og kort inn og stykk opp bosattperiode
-     * slik at det blir plass till unntaksperiodene
+     * slik at det blir plass til unntaksperiodene
      */
     private fun gjørPlassTilUnntak(bosattPeriode: Periode,
                                    unntaksperioder: List<Periode>): List<Periode> {
@@ -64,17 +64,21 @@ class Medlemskapshistorikk(pdlPerson: PdlPerson, medlemskapsinfo: Medlemskapsinf
             periodesegmenter = periodesegmenter.map { periodesegment ->
                 when {
                     periodesegment.omsluttesAv(unntaksperiode) -> {
+                        // Unntaket dekker hele bosattperioden, så vi forkaster den.
                         emptyList()
                     }
                     periodesegment.inneholder(unntaksperiode) -> {
+                        // Unntaket befinner seg helhetlig inne i en bosattperiode, så vi deler den i to.
                         listOf(periodesegment.copy(tildato = unntaksperiode.fradato.minusDays(1)),
                                periodesegment.copy(fradato = unntaksperiode.tildato.plusDays(1)))
 
                     }
                     periodesegment.inneholder(unntaksperiode.fradato) -> {
+                        // Unntaket dekker slutten av bosattperioden, så vi avkorter med en tidligere tildato.
                         listOf(periodesegment.copy(tildato = unntaksperiode.fradato.minusDays(1)))
                     }
                     periodesegment.inneholder(unntaksperiode.tildato) -> {
+                        // Unntaket dekker slutten av bosattperioden, så vi avkorter med en senere fradato.
                         listOf(periodesegment.copy(fradato = unntaksperiode.tildato.plusDays(1)))
                     }
                     else -> {
@@ -86,13 +90,12 @@ class Medlemskapshistorikk(pdlPerson: PdlPerson, medlemskapsinfo: Medlemskapsinf
         return periodesegmenter
     }
 
-    private fun mapTilUnntaksperioder(medlemskapsinfo: Medlemskapsinfo): List<Periode> {
-        return medlemskapsinfo.gyldigePerioder.map { Periode(it.fom, it.tom, true) } +
-               medlemskapsinfo.uavklartePerioder.map { Periode(it.fom, it.tom, null) } +
-               medlemskapsinfo.avvistePerioder.map { Periode(it.fom, it.tom, false) }.sortedBy { it.fradato }
-    }
+    private fun mapTilBosattperioder(bostedsadresser: List<Bostedsadresse>): List<Periode> {
+        val bosattAdresser = bostedsadresser
+                .filter { it.angittFlyttedato != null || it.folkeregistermetadata.gyldighetstidspunkt != null }
+                .sortedBy { it.angittFlyttedato ?: it.folkeregistermetadata.gyldighetstidspunkt!!.toLocalDate() }
 
-    private fun mapTilBosattperioder(bosattAdresser: List<Bostedsadresse>): List<Periode> {
+
         var periode: Periode? = null
         var forrigePeriode: Periode? = null
         val bosattperioder = ArrayList<Periode>()
