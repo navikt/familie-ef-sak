@@ -31,6 +31,10 @@ class Medlemskapshistorikk(pdlPerson: PdlPerson, medlemskapsinfo: Medlemskapsinf
         return fusjonerLikeKonsekutivePerioder(bosattperioderMedUnntak)
     }
 
+    /**
+     * Slår sammen alle påfølgende perioder med samme status slik at den resulterende listen alltid vil ha
+     * forskjellig status mellom påfølgende perioder.
+     */
     private fun fusjonerLikeKonsekutivePerioder(bosattperioderMedUnntak: List<Periode>): List<Periode> {
 
         var periodeTilFusjonering: Periode? = null
@@ -50,7 +54,7 @@ class Medlemskapshistorikk(pdlPerson: PdlPerson, medlemskapsinfo: Medlemskapsinf
         if (periodeTilFusjonering != null) {
             fusjonertePerioder.add(periodeTilFusjonering)
         }
-        return fusjonertePerioder.toList()
+        return fusjonertePerioder.toList() // konverter til umuterbar liste.
     }
 
     /**
