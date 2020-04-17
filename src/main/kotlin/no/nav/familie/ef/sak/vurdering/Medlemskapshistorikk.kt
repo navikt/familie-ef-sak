@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.integration.dto.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlPerson
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import java.time.LocalDate
+import java.time.Period
 
 class Medlemskapshistorikk(pdlPerson: PdlPerson, medlemskapsinfo: Medlemskapsinfo) {
 
@@ -158,4 +159,6 @@ data class Periode(val fradato: LocalDate, val tildato: LocalDate, val gyldig: B
     fun omsluttesAv(periode: Periode): Boolean {
         return (!periode.fradato.isAfter(this.fradato) && !periode.tildato.isBefore(this.tildato))
     }
+
+    val lengde = Period.between(fradato, tildato)
 }

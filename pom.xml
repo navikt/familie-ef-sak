@@ -141,6 +141,11 @@
             <version>${kontrakter.version}</version>
         </dependency>
         <dependency>
+            <groupId>no.nav</groupId>
+            <artifactId>nare</artifactId>
+            <version>012820b</version>
+        </dependency>
+        <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-registry-prometheus</artifactId>
         </dependency>
