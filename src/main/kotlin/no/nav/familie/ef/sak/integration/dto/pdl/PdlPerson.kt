@@ -33,13 +33,16 @@ data class PdlSøker(val person: PdlSøkerData?)
 data class PdlAnnenForelder(val person: PdlAnnenForelderData?)
 data class PdlBarn(val person: PdlBarnData?)
 
+interface PdlPerson {
+    val foedsel: List<Foedsel>
+    val bostedsadresse: List<Bostedsadresse>
+}
 
 data class PdlSøkerData(val adressebeskyttelse: List<Adressebeskyttelse>,
-                        val bostedsadresse: List<Bostedsadresse>,
-                        val deltBosted: List<DeltBosted>,
+                        override val bostedsadresse: List<Bostedsadresse>,
                         val doedsfall: List<Doedsfall>,
                         val familierelasjoner: List<Familierelasjon>,
-                        val foedsel: List<Foedsel>,
+                        override val foedsel: List<Foedsel>,
                         val folkeregisterpersonstatus: List<Folkeregisterpersonstatus>,
                         val navn: List<Navn>,
                         val opphold: List<Opphold>,
@@ -49,25 +52,26 @@ data class PdlSøkerData(val adressebeskyttelse: List<Adressebeskyttelse>,
                         val telefonnummer: List<Telefonnummer>,
                         val tilrettelagtKommunikasjon: List<TilrettelagtKommunikasjon>,
                         val innflyttingTilNorge: List<InnflyttingTilNorge>,
-                        val utflyttingFraNorge: List<UtflyttingFraNorge>)
+                        val utflyttingFraNorge: List<UtflyttingFraNorge>) : PdlPerson
 
 data class PdlBarnData(val adressebeskyttelse: List<Adressebeskyttelse>,
-                       val bostedsadresse: List<Bostedsadresse>,
+                       override val bostedsadresse: List<Bostedsadresse>,
                        val deltBosted: List<DeltBosted>,
                        val doedsfall: List<Doedsfall>,
                        val familierelasjoner: List<Familierelasjon>,
-                       val foedsel: List<Foedsel>,
-                       val navn: List<Navn>)
+                       override val foedsel: List<Foedsel>,
+                       val navn: List<Navn>) : PdlPerson
 
 data class PdlAnnenForelderData(val adressebeskyttelse: List<Adressebeskyttelse>,
-                                val bostedsadresse: List<Bostedsadresse>,
+                                override val bostedsadresse: List<Bostedsadresse>,
                                 val doedsfall: List<Doedsfall>,
+                                override val foedsel: List<Foedsel>,
                                 val navn: List<Navn>,
                                 val opphold: List<Opphold>,
                                 val oppholdsadresse: List<Oppholdsadresse>,
                                 val statsborgerskap: List<Statsborgerskap>,
                                 val innflyttingTilNorge: List<InnflyttingTilNorge>,
-                                val utflyttingFraNorge: List<UtflyttingFraNorge>)
+                                val utflyttingFraNorge: List<UtflyttingFraNorge>) : PdlPerson
 
 data class DeltBosted(val startdatoForKontrakt: LocalDateTime,
                       val sluttdatoForKontrakt: LocalDateTime?,
@@ -75,8 +79,12 @@ data class DeltBosted(val startdatoForKontrakt: LocalDateTime,
                       val ukjentBosted: UkjentBosted?
 )
 
+data class Folkeregistermetadata(val gyldighetstidspunkt: LocalDateTime?,
+                                 val opphoerstidspunkt: LocalDateTime?)
+
 data class Bostedsadresse(val angittFlyttedato: LocalDate?,
                           val coAdressenavn: String?,
+                          val folkeregistermetadata: Folkeregistermetadata,
                           val vegadresse: Vegadresse?,
                           val ukjentBosted: UkjentBosted?)
 
