@@ -10,7 +10,7 @@ import no.nav.nare.core.specifications.Spesifikasjon as SpørsmålNode
 
 
 class MedlemskapRegelsett(private val medlemskapshistorikkSøker: Medlemskapshistorikk,
-                          private val medlemskapshistorikkAnnenForelder: Medlemskapshistorikk) {
+                          private val medlemskapshistorikkAnnenForelder: Medlemskapshistorikk?) {
 
     private val landkoderNorden = listOf("NO", "SE", "DK", "IS", "FI")
     private val landkoderEøs = listOf("BE",
@@ -337,7 +337,7 @@ class MedlemskapRegelsett(private val medlemskapshistorikkSøker: Medlemskapshis
     }
 
 
-    private val totalvurderingMedlemskap =
+    val totalvurderingMedlemskap =
             (erIkkeMedlem.ikke()
                     og erBosattINorge
                     og (oppholdINorge eller utenlandsoppholdGrunnetNorskArbeidsgiver)
