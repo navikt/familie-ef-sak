@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.vurdering
+package no.nav.familie.ef.sak.no.nav.familie.ef.sak.vurdering.medlemskap
 
 import no.nav.familie.ef.sak.integration.dto.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.integration.dto.pdl.Foedsel
@@ -20,11 +20,9 @@ internal class MedlemskapshistorikkTest {
     fun `getMedlemskapsperioder uten bostedsadresser gir ett evigvarende opphold`() {
         val pdlPerson = pdlPerson()
         val medlemskapsinfoUtenUnntak = Medlemskapsinfo("3213213", emptyList(), emptyList(), emptyList())
-        val forventetEvigvarendeUgyldigMedlemskap =
-                Periode(LocalDate.MIN, LocalDate.MAX, false)
+        val forventetEvigvarendeUgyldigMedlemskap = Periode(LocalDate.MIN, LocalDate.MAX, false)
 
-        val historikk = Medlemskapshistorikk(pdlPerson,
-                                                                                                           medlemskapsinfoUtenUnntak)
+        val historikk = Medlemskapshistorikk(pdlPerson, medlemskapsinfoUtenUnntak)
 
         assertThat(historikk.medlemskapsperioder[0]).isEqualTo(forventetEvigvarendeUgyldigMedlemskap)
     }
@@ -36,17 +34,10 @@ internal class MedlemskapshistorikkTest {
                           Pair(LocalDate.of(2007, 10, 12), null),
                           Pair(LocalDate.of(2015, 6, 14), null))
         val medlemskapsinfoUtenUnntak = Medlemskapsinfo("3213213", emptyList(), emptyList(), emptyList())
-        val forventetUgyldigPeriodeFørFørsteMedlemskap = Periode(
-                LocalDate.MIN,
-                LocalDate.of(2002, 2, 13),
-                false)
-        val forventetGyldigMedlemskapsperiode =
-                Periode(LocalDate.of(2002, 2, 14),
-                                                                                      LocalDate.MAX,
-                                                                                      true)
+        val forventetUgyldigPeriodeFørFørsteMedlemskap = Periode(LocalDate.MIN, LocalDate.of(2002, 2, 13), false)
+        val forventetGyldigMedlemskapsperiode = Periode(LocalDate.of(2002, 2, 14), LocalDate.MAX, true)
 
-        val historikk = Medlemskapshistorikk(pdlPerson,
-                                                                                                           medlemskapsinfoUtenUnntak)
+        val historikk = Medlemskapshistorikk(pdlPerson, medlemskapsinfoUtenUnntak)
 
         assertThat(historikk.medlemskapsperioder[0]).isEqualTo(forventetUgyldigPeriodeFørFørsteMedlemskap)
         assertThat(historikk.medlemskapsperioder[1]).isEqualTo(forventetGyldigMedlemskapsperiode)
@@ -63,33 +54,19 @@ internal class MedlemskapshistorikkTest {
                                                 Pair(LocalDate.of(2010, 4, 15),
                                                      LocalDate.of(2010, 5, 16))),
                                 emptyList())
-        val forventetUgyldigPeriodeFørFørsteMedlemskap = Periode(
-                LocalDate.MIN,
-                LocalDate.of(2002, 2, 13),
-                false)
+        val forventetUgyldigPeriodeFørFørsteMedlemskap = Periode(LocalDate.MIN, LocalDate.of(2002, 2, 13), false)
         val forventetFørsteGyldigeMedlemskapsperiode =
-                Periode(LocalDate.of(2002, 2, 14),
-                                                                                      LocalDate.of(2008, 4, 14),
-                                                                                      true)
+                Periode(LocalDate.of(2002, 2, 14), LocalDate.of(2008, 4, 14), true)
         val forventetUgyldigMedlemskapsperiodeSomFølgeAvAvvisning =
-                Periode(LocalDate.of(2008, 4, 15),
-                                                                                      LocalDate.of(2010, 1, 16),
-                                                                                      false)
+                Periode(LocalDate.of(2008, 4, 15), LocalDate.of(2010, 1, 16), false)
         val forventetGyldigPeriode =
-                Periode(LocalDate.of(2010, 1, 17),
-                                                                                      LocalDate.of(2010, 4, 14),
-                                                                                      true)
+                Periode(LocalDate.of(2010, 1, 17), LocalDate.of(2010, 4, 14), true)
         val forventetUgyldigPeriodeSomFølgeAvEnAvvistPeriodeTil =
-                Periode(LocalDate.of(2010, 4, 15),
-                                                                                      LocalDate.of(2010, 5, 16),
-                                                                                      false)
+                Periode(LocalDate.of(2010, 4, 15), LocalDate.of(2010, 5, 16), false)
         val forventetAvsluttendeGyldigPeriode =
-                Periode(LocalDate.of(2010, 5, 17),
-                                                                                      LocalDate.MAX,
-                                                                                      true)
+                Periode(LocalDate.of(2010, 5, 17), LocalDate.MAX, true)
 
-        val historikk = Medlemskapshistorikk(pdlPerson,
-                                                                                                           medlemskapsinfoMedAvvistPerioder)
+        val historikk = Medlemskapshistorikk(pdlPerson, medlemskapsinfoMedAvvistPerioder)
 
         assertThat(historikk.medlemskapsperioder[0]).isEqualTo(forventetUgyldigPeriodeFørFørsteMedlemskap)
         assertThat(historikk.medlemskapsperioder[1]).isEqualTo(forventetFørsteGyldigeMedlemskapsperiode)
@@ -109,17 +86,10 @@ internal class MedlemskapshistorikkTest {
                                                      LocalDate.of(2010, 1, 16))),
                                 emptyList(),
                                 emptyList())
-        val forventetUgyldigPeriodeFørFørsteMedlemskap = Periode(
-                LocalDate.MIN,
-                LocalDate.of(2002, 2, 13),
-                false)
-        val forventetUendretMedlemskapsperiode =
-                Periode(LocalDate.of(2002, 2, 14),
-                                                                                      LocalDate.MAX,
-                                                                                      true)
+        val forventetUgyldigPeriodeFørFørsteMedlemskap = Periode(LocalDate.MIN, LocalDate.of(2002, 2, 13), false)
+        val forventetUendretMedlemskapsperiode = Periode(LocalDate.of(2002, 2, 14), LocalDate.MAX, true)
 
-        val historikk = Medlemskapshistorikk(pdlPerson,
-                                                                                                           medlemskapsinfoMedGyldigePeriode)
+        val historikk = Medlemskapshistorikk(pdlPerson, medlemskapsinfoMedGyldigePeriode)
 
         assertThat(historikk.medlemskapsperioder[0]).isEqualTo(forventetUgyldigPeriodeFørFørsteMedlemskap)
         assertThat(historikk.medlemskapsperioder[1]).isEqualTo(forventetUendretMedlemskapsperiode)
@@ -133,24 +103,15 @@ internal class MedlemskapshistorikkTest {
                           Pair(LocalDate.of(2015, 6, 14), null))
         val medlemskapsinfoUtenUnntak = Medlemskapsinfo("3213213", emptyList(), emptyList(), emptyList())
         val forventetUgyldigPeriodeFørFørsteMedlemskap =
-                Periode(LocalDate.MIN,
-                                                                                      LocalDate.of(2002, 2, 13),
-                                                                                      false)
+                Periode(LocalDate.MIN, LocalDate.of(2002, 2, 13), false)
         val forventetGyldigPeriodeSomSamsvarerMedPeriodeForBostedsadresse =
-                Periode(LocalDate.of(2002, 2, 14),
-                                                                                      LocalDate.of(2007, 10, 12),
-                                                                                      true)
+                Periode(LocalDate.of(2002, 2, 14), LocalDate.of(2007, 10, 12), true)
         val forventetOppholdIMedlemskapSomTilsvarerOppholdIBostedshistorikk =
-                Periode(LocalDate.of(2007, 10, 13),
-                                                                                      LocalDate.of(2015, 6, 13),
-                                                                                      false)
+                Periode(LocalDate.of(2007, 10, 13), LocalDate.of(2015, 6, 13), false)
         val forventetPågåendeMedlemskapsperiodeSomFølgeAvNåværendeBosted =
-                Periode(LocalDate.of(2015, 6, 14),
-                                                                                      LocalDate.MAX,
-                                                                                      true)
+                Periode(LocalDate.of(2015, 6, 14), LocalDate.MAX, true)
 
-        val historikk = Medlemskapshistorikk(pdlPerson,
-                                                                                                           medlemskapsinfoUtenUnntak)
+        val historikk = Medlemskapshistorikk(pdlPerson, medlemskapsinfoUtenUnntak)
 
         assertThat(historikk.medlemskapsperioder[0]).isEqualTo(forventetUgyldigPeriodeFørFørsteMedlemskap)
         assertThat(historikk.medlemskapsperioder[1]).isEqualTo(forventetGyldigPeriodeSomSamsvarerMedPeriodeForBostedsadresse)
@@ -163,21 +124,13 @@ internal class MedlemskapshistorikkTest {
         val pdlPerson = pdlPerson(Pair(LocalDate.of(2002, 2, 14),
                                        LocalDateTime.of(2007, 10, 12, 0, 0)))
         val medlemskapsinfoUtenUnntak = Medlemskapsinfo("3213213", emptyList(), emptyList(), emptyList())
-        val forventetUgyldigPeriodeFørFørsteMedlemskap = Periode(
-                LocalDate.MIN,
-                LocalDate.of(2002, 2, 13),
-                false)
+        val forventetUgyldigPeriodeFørFørsteMedlemskap = Periode(LocalDate.MIN, LocalDate.of(2002, 2, 13), false)
         val forventetGyldigPeriodeSomSamsvarerMedBostedsadresse =
-                Periode(LocalDate.of(2002, 2, 14),
-                                                                                      LocalDate.of(2007, 10, 12),
-                                                                                      true)
+                Periode(LocalDate.of(2002, 2, 14), LocalDate.of(2007, 10, 12), true)
         val forventetUgyldigEvigPeriodeEtterSisteBostedsadresse =
-                Periode(LocalDate.of(2007, 10, 13),
-                                                                                      LocalDate.MAX,
-                                                                                      false)
+                Periode(LocalDate.of(2007, 10, 13), LocalDate.MAX, false)
 
-        val historikk = Medlemskapshistorikk(pdlPerson,
-                                                                                                           medlemskapsinfoUtenUnntak)
+        val historikk = Medlemskapshistorikk(pdlPerson, medlemskapsinfoUtenUnntak)
 
         assertThat(historikk.medlemskapsperioder[0]).isEqualTo(forventetUgyldigPeriodeFørFørsteMedlemskap)
         assertThat(historikk.medlemskapsperioder[1]).isEqualTo(forventetGyldigPeriodeSomSamsvarerMedBostedsadresse)
@@ -195,20 +148,13 @@ internal class MedlemskapshistorikkTest {
                                 emptyList(),
                                 emptyList())
         val forventetUgyldigPeriodeFørFørsteMedlemskap =
-                Periode(LocalDate.MIN,
-                                                                                      LocalDate.of(2014, 1, 11),
-                                                                                      false)
+                Periode(LocalDate.MIN, LocalDate.of(2014, 1, 11), false)
         val forventetGyldigPeriodeSomSamsvarerMedGyldigUnntak =
-                Periode(LocalDate.of(2014, 1, 12),
-                                                                                      LocalDate.of(2017, 4, 12),
-                                                                                      true)
+                Periode(LocalDate.of(2014, 1, 12), LocalDate.of(2017, 4, 12), true)
         val forventetEvigvarendeUgyldigPeriodeEtterGyldigUnntak =
-                Periode(LocalDate.of(2017, 4, 13),
-                                                                                      LocalDate.MAX,
-                                                                                      false)
+                Periode(LocalDate.of(2017, 4, 13), LocalDate.MAX, false)
 
-        val historikk = Medlemskapshistorikk(pdlPerson,
-                                                                                                           medlemskapsinfoMedGyldigePeriode)
+        val historikk = Medlemskapshistorikk(pdlPerson, medlemskapsinfoMedGyldigePeriode)
 
         assertThat(historikk.medlemskapsperioder[0]).isEqualTo(forventetUgyldigPeriodeFørFørsteMedlemskap)
         assertThat(historikk.medlemskapsperioder[1]).isEqualTo(forventetGyldigPeriodeSomSamsvarerMedGyldigUnntak)
@@ -226,20 +172,13 @@ internal class MedlemskapshistorikkTest {
                                 uavklartePerioder(Pair(LocalDate.of(2014, 1, 12),
                                                        LocalDate.of(2017, 4, 12))))
         val forventetUgyldigPeriodeFørFørsteMedlemskap =
-                Periode(LocalDate.MIN,
-                                                                                      LocalDate.of(2014, 1, 11),
-                                                                                      false)
+                Periode(LocalDate.MIN, LocalDate.of(2014, 1, 11), false)
         val forventetEvigvarendeUgyldigPeriodeEtterUavklartUnntak =
-                Periode(LocalDate.of(2017, 4, 13),
-                                                                                      LocalDate.MAX,
-                                                                                      false)
+                Periode(LocalDate.of(2017, 4, 13), LocalDate.MAX, false)
         val forventetUkjentPeriodeSomSamsvarerMedUavklartUnntak =
-                Periode(LocalDate.of(2014, 1, 12),
-                                                                                      LocalDate.of(2017, 4, 12),
-                                                                                      null)
+                Periode(LocalDate.of(2014, 1, 12), LocalDate.of(2017, 4, 12), null)
 
-        val historikk = Medlemskapshistorikk(pdlPerson,
-                                                                                                           medlemskapsinfoMedUavklartePerioder)
+        val historikk = Medlemskapshistorikk(pdlPerson, medlemskapsinfoMedUavklartePerioder)
 
         assertThat(historikk.medlemskapsperioder[0]).isEqualTo(forventetUgyldigPeriodeFørFørsteMedlemskap)
         assertThat(historikk.medlemskapsperioder[1]).isEqualTo(forventetUkjentPeriodeSomSamsvarerMedUavklartUnntak)
@@ -258,25 +197,15 @@ internal class MedlemskapshistorikkTest {
                                                      LocalDate.of(2017, 4, 12))),
                                 emptyList(),
                                 emptyList())
-        val forventetUgyldigPeriodeFørFørsteMedlemskap = Periode(
-                LocalDate.MIN,
-                LocalDate.of(2002, 2, 13),
-                false)
+        val forventetUgyldigPeriodeFørFørsteMedlemskap = Periode(LocalDate.MIN, LocalDate.of(2002, 2, 13), false)
         val forventetGyldigPeriodeSomSamsvarerMedBostedsadresse =
-                Periode(LocalDate.of(2002, 2, 14),
-                                                                                      LocalDate.of(2007, 10, 12),
-                                                                                      true)
+                Periode(LocalDate.of(2002, 2, 14), LocalDate.of(2007, 10, 12), true)
         val forventetUgyldigPeriodeSomErForkortetAvGyldigUnntak =
-                Periode(LocalDate.of(2007, 10, 13),
-                                                                                      LocalDate.of(2014, 1, 11),
-                                                                                      false)
+                Periode(LocalDate.of(2007, 10, 13), LocalDate.of(2014, 1, 11), false)
         val forventetGyldigPeriodeSomErForlengetGrunnetGyldigUnntak =
-                Periode(LocalDate.of(2014, 1, 12),
-                                                                                      LocalDate.MAX,
-                                                                                      true)
+                Periode(LocalDate.of(2014, 1, 12), LocalDate.MAX, true)
 
-        val historikk = Medlemskapshistorikk(pdlPerson,
-                                                                                                           medlemskapsinfoMedGyldigePeriode)
+        val historikk = Medlemskapshistorikk(pdlPerson, medlemskapsinfoMedGyldigePeriode)
 
         assertThat(historikk.medlemskapsperioder[0]).isEqualTo(forventetUgyldigPeriodeFørFørsteMedlemskap)
         assertThat(historikk.medlemskapsperioder[1]).isEqualTo(forventetGyldigPeriodeSomSamsvarerMedBostedsadresse)
