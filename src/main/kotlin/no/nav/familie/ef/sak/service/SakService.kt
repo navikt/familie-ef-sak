@@ -29,12 +29,7 @@ class SakService(private val sakRepository: SakRepository,
 
     fun hentSak(id: UUID): Sak {
         val sak = sakRepository.findByIdOrNull(id) ?: error("Ugyldig Primærnøkkel : $id")
-
-        val vurdering =
-
         return SakMapper.toDto(sak)
     }
-
-
 
 }
