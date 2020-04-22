@@ -14,10 +14,10 @@ import java.time.Period
 @Component
 class MedlemskapRegelsett {
 
-    private val erIkkeMedlem =
-            Spesifikasjon<Medlemskapsgrunnlag>("Er søker registrert som IKKE MEDLEM?",
+    private val erMedlem =
+            Spesifikasjon<Medlemskapsgrunnlag>("Er søker registrert medlem?",
                                                "FP_VK 2.13",
-                                               implementasjon = { erIkkeMedlem(this) })
+                                               implementasjon = { erMedlem(this) })
 
     private val erBosattINorge =
             Spesifikasjon<Medlemskapsgrunnlag>("Er søker registrert bosatt i norge",
@@ -71,23 +71,23 @@ class MedlemskapRegelsett {
                     .med("EF-M7 EF-M8 EF-M10", "Er vilkår for forutgående medlemskap oppfylt?")
 
     val vurderingMedlemskapSøker =
-            (erIkkeMedlem.ikke()
+            (erMedlem
                     og erBosattINorge
                     og (oppholdINorge eller utenlandsoppholdGrunnetNorskArbeidsgiver)
                     og forutgåendeMedlemskapSøker
                     og oppholdsrett).med("Medlemskap kap. 15",
                                          "Har søker opphold i Norge og forutgående medlemskap?")
 
-    private fun erIkkeMedlem(medlemskapsgrunnlag: Medlemskapsgrunnlag): Evaluering {
+    private fun erMedlem(medlemskapsgrunnlag: Medlemskapsgrunnlag): Evaluering {
         val statusNå =
                 medlemskapsgrunnlag.medlemskapshistorikk.medlemskapsperioder.find { it.inneholder(LocalDate.now()) }
         if (statusNå == null || statusNå.gyldig == false) {
-            return Evaluering(Resultat.JA, "Er IKKE MEDLEM")
+            return Evaluering(Resultat.NEI, "Er IKKE MEDLEM")
         }
         if (statusNå.gyldig == null) {
             return Evaluering(Resultat.KANSKJE, "Uavklart medlemskapsunntak nå")
         }
-        return Evaluering.nei("Ikke registrert med medlemskapsunntak nå.")
+        return Evaluering.ja("Søke er registrert som medlem nå.")
     }
 
     private fun erBosattINorge(medlemskapsgrunnlag: Medlemskapsgrunnlag): Evaluering {

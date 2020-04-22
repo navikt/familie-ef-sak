@@ -1,14 +1,8 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.vurdering.medlemskap
 
-import no.nav.familie.ef.sak.integration.dto.pdl.Bostedsadresse
-import no.nav.familie.ef.sak.integration.dto.pdl.Foedsel
-import no.nav.familie.ef.sak.integration.dto.pdl.Folkeregistermetadata
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlPerson
 import no.nav.familie.ef.sak.vurdering.medlemskap.Medlemskapshistorikk
 import no.nav.familie.ef.sak.vurdering.medlemskap.Periode
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
-import no.nav.familie.kontrakter.felles.medlemskap.PeriodeInfo
-import no.nav.familie.kontrakter.felles.medlemskap.PeriodeStatus
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -213,24 +207,6 @@ internal class MedlemskapshistorikkTest {
         assertThat(historikk.medlemskapsperioder[3]).isEqualTo(forventetGyldigPeriodeSomErForlengetGrunnetGyldigUnntak)
     }
 
-    private fun pdlPerson(vararg perioder: Pair<LocalDate, LocalDateTime?>) = object : PdlPerson {
-        override val foedsel: List<Foedsel> = listOf(Foedsel(null, null, null, null, null))
-        override val bostedsadresse: List<Bostedsadresse> = perioder.map {
-            Bostedsadresse(it.first, null, Folkeregistermetadata(null, it.second), null, null)
-        }
-    }
-
-    private fun avvistePerioder(vararg perioder: Pair<LocalDate, LocalDate>) = perioder.map {
-        PeriodeInfo(PeriodeStatus.AVST, null, it.first, it.second, true, "", null)
-    }
-
-    private fun gyldigePerioder(vararg perioder: Pair<LocalDate, LocalDate>) = perioder.map {
-        PeriodeInfo(PeriodeStatus.GYLD, null, it.first, it.second, true, "", null)
-    }
-
-    private fun uavklartePerioder(vararg perioder: Pair<LocalDate, LocalDate>) = perioder.map {
-        PeriodeInfo(PeriodeStatus.UAVK, null, it.first, it.second, true, "", null)
-    }
-
-
 }
+
+
