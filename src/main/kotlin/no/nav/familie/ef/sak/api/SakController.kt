@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.Month
 import java.util.*
 
@@ -46,6 +47,7 @@ class SakController(private val sakService: SakService) {
 internal object Testsøknad {
 
     val søknad = Søknad(Søknadsfelt("Søker", personalia()),
+                        Søknadsfelt("innsending", Innsendingsdetaljer(Søknadsfelt("Dato mottat", LocalDateTime.now()))),
                         Søknadsfelt("Detaljer om sivilstand", sivilstandsdetaljer()),
                         Søknadsfelt("Opphold i Norge", medlemskapsdetaljer()),
                         Søknadsfelt("Bosituasjonen din", bosituasjon()),
