@@ -24,11 +24,18 @@ object DataGenerator {
     fun flereTilfeldigeAndelerTilkjentYtelse(tilkjentYtelseId: Long, antall: Int): List<AndelTilkjentYtelse> =
         (1 .. antall).map { tilfeldigAndelTilkjentYtelse(tilkjentYtelseId) }.toList()
 
-    val defaultTilkjentYtelse = TilkjentYtelse(
-            personIdentifikator = "12345678910",
-            stønadFom = LocalDate.now(),
-            stønadTom = LocalDate.now(),
-            saksnummer = "SAK123",
-            vedtaksdato = LocalDate.now()
+    fun tilfeldigTilkjentYtelse(
+            personIdentifikator: String = Random().nextInt(Int.MAX_VALUE).toString(),
+            stønadFom: LocalDate = LocalDate.now(),
+            stønadTom: LocalDate = LocalDate.now(),
+            saksnummer: String = "SAK"+Random().nextInt(Int.MAX_VALUE),
+            vedtaksdato: LocalDate = LocalDate.now()
+
+    ) =  TilkjentYtelse(
+            personIdentifikator = personIdentifikator,
+            stønadFom = stønadFom,
+            stønadTom = stønadTom,
+            saksnummer = saksnummer,
+            vedtaksdato = vedtaksdato
     )
 }

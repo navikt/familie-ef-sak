@@ -1,10 +1,8 @@
 package no.nav.familie.ef.sak.økonomi
 
-import no.nav.familie.ef.sak.økonomi.dto.TilkjentYtelse
 import no.nav.familie.ef.sak.common.DbContainerInitializer
 import no.nav.familie.ef.sak.config.ApplicationConfig
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.økonomi.DataGenerator
-import no.nav.familie.kontrakter.felles.objectMapper
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -13,8 +11,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import java.time.LocalDate
-import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
@@ -35,7 +31,7 @@ internal class TilkjentYtelseRepositoryTest {
     @Test
     fun `Opprett og hent tilkjent ytelse`() {
 
-        val tilkjentYtelse = DataGenerator.defaultTilkjentYtelse
+        val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse()
 
         val tilkjentYtelseId = tilkjentYtelseRepository.save(tilkjentYtelse).id
 
@@ -43,13 +39,13 @@ internal class TilkjentYtelseRepositoryTest {
 
         val hentetTilkjentYtelse = tilkjentYtelseRepository.findById(tilkjentYtelseId).get()
 
-        assertEquals("SAK123",hentetTilkjentYtelse.saksnummer)
+        assertEquals(tilkjentYtelse.saksnummer, hentetTilkjentYtelse.saksnummer)
     }
 
     @Test
     fun `Opprett andeler tilkjent ytelse`() {
 
-        val tilkjentYtelse = DataGenerator.defaultTilkjentYtelse
+        val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse()
 
         val tilkjentYtelseId = tilkjentYtelseRepository.save(tilkjentYtelse).id
 
@@ -66,10 +62,8 @@ internal class TilkjentYtelseRepositoryTest {
     @Test
     fun `Opprett og hent andeler tilkjent ytelse`() {
 
-        val tilkjentYtelse = DataGenerator.defaultTilkjentYtelse
-
-        val tilkjentYtelseId1 = tilkjentYtelseRepository.save(tilkjentYtelse).id
-        val tilkjentYtelseId2 = tilkjentYtelseRepository.save(tilkjentYtelse).id
+        val tilkjentYtelseId1 = tilkjentYtelseRepository.save(DataGenerator.tilfeldigTilkjentYtelse()).id
+        val tilkjentYtelseId2 = tilkjentYtelseRepository.save(DataGenerator.tilfeldigTilkjentYtelse()).id
 
         val andelerTilkjentYtelse1 = DataGenerator.flereTilfeldigeAndelerTilkjentYtelse(tilkjentYtelseId1, 2)
         val andelerTilkjentYtelse2 = DataGenerator.flereTilfeldigeAndelerTilkjentYtelse(tilkjentYtelseId2, 4)

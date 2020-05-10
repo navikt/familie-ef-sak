@@ -26,8 +26,10 @@ data class TilkjentYtelse(
 
 enum class TilkjentYtelseStatus() {
     IKKE_KLAR,
+    OPPRETTET,
     SENDT_TIL_IVERKSETTING,
     AKTIV,
     AVSLUTTET
 }
+
 
