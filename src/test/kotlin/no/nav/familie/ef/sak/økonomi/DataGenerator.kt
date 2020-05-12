@@ -1,8 +1,8 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.økonomi
 
-import no.nav.familie.ef.sak.økonomi.dto.AndelTilkjentYtelse
-import no.nav.familie.ef.sak.økonomi.dto.TilkjentYtelse
-import no.nav.familie.ef.sak.økonomi.dto.YtelseType
+import no.nav.familie.ef.sak.økonomi.domain.AndelTilkjentYtelse
+import no.nav.familie.ef.sak.økonomi.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.økonomi.domain.YtelseType
 import java.time.LocalDate
 import java.util.*
 
@@ -31,7 +31,7 @@ object DataGenerator {
             saksnummer: String = "SAK"+Random().nextInt(Int.MAX_VALUE),
             vedtaksdato: LocalDate = LocalDate.now()
 
-    ) =  TilkjentYtelse(
+    ) = TilkjentYtelse(
             personIdentifikator = personIdentifikator,
             stønadFom = stønadFom,
             stønadTom = stønadTom,

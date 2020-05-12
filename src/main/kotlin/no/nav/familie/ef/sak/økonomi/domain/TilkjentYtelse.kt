@@ -1,6 +1,5 @@
-package no.nav.familie.ef.sak.økonomi.dto
+package no.nav.familie.ef.sak.økonomi.domain
 
-import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import java.time.LocalDate
@@ -12,12 +11,12 @@ data class TilkjentYtelse(
         val personIdentifikator: String,
         val saksnummer: String,
         @Column("stonad_fom")
-        var stønadFom: LocalDate? = null,
+        val stønadFom: LocalDate? = null,
         @Column("stonad_tom")
-        var stønadTom: LocalDate? = null,
+        val stønadTom: LocalDate? = null,
         @Column("opphor_fom")
-        var opphørFom: LocalDate? = null,
-        var utbetalingsoppdrag: String? = null,
+        val opphørFom: LocalDate? = null,
+        val utbetalingsoppdrag: String? = null,
         @Column("forrige_tilkjentytelse_id_fkey")
         val forrigeTilkjentYtelseId: Long? = null,
         val vedtaksdato: LocalDate? = null,

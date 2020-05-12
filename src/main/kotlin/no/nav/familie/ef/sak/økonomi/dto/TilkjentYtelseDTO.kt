@@ -1,12 +1,15 @@
 package no.nav.familie.ef.sak.økonomi.dto
 
-import java.lang.IllegalStateException
+import no.nav.familie.ef.sak.økonomi.domain.AndelTilkjentYtelse
+import no.nav.familie.ef.sak.økonomi.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.økonomi.domain.TilkjentYtelseStatus
+import no.nav.familie.ef.sak.økonomi.domain.YtelseType
 import java.time.LocalDate
 
-data class TilkjentYtelseRestDTO(
+data class TilkjentYtelseDTO(
     val søker: String,
     val saksnummer: String,
-    val andelerTilkjentYtelse: List<AndelTilkjentYtelseRestDTO>
+    val andelerTilkjentYtelse: List<AndelTilkjentYtelseDTO>
 ) {
 
     fun valider() {
@@ -24,7 +27,7 @@ data class TilkjentYtelseRestDTO(
     }
 }
 
-data class AndelTilkjentYtelseRestDTO(
+data class AndelTilkjentYtelseDTO(
         val personIdentifikator : String,
         val beløp: Int,
         val stønadFom: LocalDate,
@@ -32,7 +35,7 @@ data class AndelTilkjentYtelseRestDTO(
         val type: YtelseType
 )
 
-fun TilkjentYtelseRestDTO.tilTilkjentYtelse(status: TilkjentYtelseStatus = TilkjentYtelseStatus.OPPRETTET) : TilkjentYtelse {
+fun TilkjentYtelseDTO.tilTilkjentYtelse(status: TilkjentYtelseStatus = TilkjentYtelseStatus.OPPRETTET) : TilkjentYtelse {
 
     val minStønadFom = this.andelerTilkjentYtelse.map { it.stønadFom }.min()
     val maxStønadTom = this.andelerTilkjentYtelse.map { it.stønadTom }.max()
@@ -47,7 +50,7 @@ fun TilkjentYtelseRestDTO.tilTilkjentYtelse(status: TilkjentYtelseStatus = Tilkj
     )
 }
 
-fun TilkjentYtelseRestDTO.tilAndelerTilkjentYtelse(tilkjentYtelseId: Long) : List<AndelTilkjentYtelse> {
+fun TilkjentYtelseDTO.tilAndelerTilkjentYtelse(tilkjentYtelseId: Long) : List<AndelTilkjentYtelse> {
 
     return this.andelerTilkjentYtelse
             .map {
@@ -62,16 +65,16 @@ fun TilkjentYtelseRestDTO.tilAndelerTilkjentYtelse(tilkjentYtelseId: Long) : Lis
             }
 }
 
-fun TilkjentYtelse.tilDto(andelerTilkjentYtelse: List<AndelTilkjentYtelseRestDTO>) : TilkjentYtelseRestDTO {
-    return TilkjentYtelseRestDTO(
+fun TilkjentYtelse.tilDto(andelerTilkjentYtelse: List<AndelTilkjentYtelseDTO>) : TilkjentYtelseDTO {
+    return TilkjentYtelseDTO(
             søker = this.personIdentifikator,
             saksnummer = this.saksnummer,
             andelerTilkjentYtelse = andelerTilkjentYtelse
     )
 }
 
-fun AndelTilkjentYtelse.tilDto() : AndelTilkjentYtelseRestDTO {
-    return AndelTilkjentYtelseRestDTO(
+fun AndelTilkjentYtelse.tilDto() : AndelTilkjentYtelseDTO {
+    return AndelTilkjentYtelseDTO(
             personIdentifikator = this.personIdentifikator,
             beløp = this.beløp,
             stønadFom = this.stønadFom,

@@ -1,21 +1,18 @@
 package no.nav.familie.ef.sak.økonomi
 
-import no.nav.familie.ef.sak.common.BaseService
 import no.nav.familie.ef.sak.økonomi.dto.StatusFraOppdragDTO
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.log.NavHttpHeaders
 import no.nav.familie.log.mdc.MDCConstants
-import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService
-import no.nav.security.token.support.client.spring.ClientConfigurationProperties
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
+import org.springframework.web.client.RestOperations
 import org.springframework.web.client.exchange
 import java.net.URI
 import java.time.LocalDateTime
@@ -27,21 +24,13 @@ const val FAGSYSTEM = "EF"
 class ØkonomiKlient(
         @Value("\${FAMILIE_OPPDRAG_API_URL}")
         private val familieOppdragUri: String,
-        restTemplateBuilderMedProxy: RestTemplateBuilder,
-        clientConfigurationProperties: ClientConfigurationProperties,
-        oAuth2AccessTokenService: OAuth2AccessTokenService
-) : BaseService(
-        OAUTH2_CLIENT_CONFIG_KEY,
-        restTemplateBuilderMedProxy,
-        clientConfigurationProperties,
-        oAuth2AccessTokenService
-) {
+        val azure: RestOperations) {
 
     fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag): ResponseEntity<Ressurs<String>> {
         val headers = HttpHeaders().medContentTypeJsonUTF8()
         headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
 
-        return restOperations.exchange(
+        return azure.exchange(
                 URI.create("$familieOppdragUri/oppdrag"),
                 HttpMethod.POST,
                 HttpEntity(utbetalingsoppdrag, headers))
@@ -51,7 +40,7 @@ class ØkonomiKlient(
         val headers = HttpHeaders().medContentTypeJsonUTF8()
         headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
 
-        return restOperations.exchange(
+        return azure.exchange(
                 URI.create("$familieOppdragUri/status"),
                 HttpMethod.POST,
                 HttpEntity(statusFraOppdragDTO, headers))
@@ -62,10 +51,16 @@ class ØkonomiKlient(
         headers.acceptCharset = listOf(Charsets.UTF_8)
         headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
 
-        return restOperations.exchange(
+        return azure.exchange(
                 URI.create("$familieOppdragUri/grensesnittavstemming/$FAGSYSTEM/?fom=$fraDato&tom=$tilDato"),
                 HttpMethod.POST,
                 HttpEntity<String>(headers))
+    }
+
+    private fun HttpHeaders.medContentTypeJsonUTF8(): HttpHeaders {
+        this.add("Content-Type", "application/json;charset=UTF-8")
+        this.acceptCharset = listOf(Charsets.UTF_8)
+        return this
     }
 
 }

@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.økonomi.dto
+package no.nav.familie.ef.sak.økonomi.domain
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column

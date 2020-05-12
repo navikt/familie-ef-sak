@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.økonomi
 
-import no.nav.familie.ef.sak.økonomi.dto.AndelTilkjentYtelse
+import no.nav.familie.ef.sak.økonomi.domain.AndelTilkjentYtelse
 import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.data.repository.CrudRepository
 

@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
@@ -37,9 +38,9 @@ internal class TilkjentYtelseRepositoryTest {
 
         assertNotNull(tilkjentYtelseId)
 
-        val hentetTilkjentYtelse = tilkjentYtelseRepository.findById(tilkjentYtelseId).get()
+        val hentetTilkjentYtelse = tilkjentYtelseRepository.findByIdOrNull(tilkjentYtelseId)
 
-        assertEquals(tilkjentYtelse.saksnummer, hentetTilkjentYtelse.saksnummer)
+        assertEquals(tilkjentYtelse.saksnummer, hentetTilkjentYtelse!!.saksnummer)
     }
 
     @Test
