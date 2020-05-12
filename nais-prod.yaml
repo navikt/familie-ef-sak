@@ -26,6 +26,8 @@ spec:
         mountPath: /var/run/secrets/nais.io/vault
       - kvPath: /azuread/data/prod/creds/familie-ef-sak
         mountPath: /var/run/secrets/nais.io/azuread
+      - kvPath: /serviceuser/data/prod/srvfamilie-ef-sak
+        mountPath: /var/run/secrets/nais.io/srvfamilie-ef-sak
   replicas:
     min: 2
     max: 4
@@ -41,6 +43,7 @@ spec:
     enabled: true
   ingresses: # Optional. List of ingress URLs that will route HTTP traffic to the application.
     - https://familie-ef-sak.nais.adeo.no
+    - https://familie-ef-sak.prod-fss.nais.io
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: prod
@@ -48,3 +51,7 @@ spec:
       value: /run/secrets/nais.io/azuread/client_id
     - name: AZURE_CLIENT_SECRET
       value: /run/secrets/nais.io/azuread/client_secret
+    - name: CREDENTIAL_USERNAME
+      value: /run/secrets/nais.io/azuread/srvfamilie-ef-sak/username
+    - name: CREDENTIAL_PASSWORD
+      value: /run/secrets/nais.io/azuread/srvfamilie-ef-sak/password
