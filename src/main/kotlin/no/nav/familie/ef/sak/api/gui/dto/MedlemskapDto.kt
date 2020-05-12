@@ -4,7 +4,7 @@ import no.nav.familie.ef.sak.integration.dto.pdl.InnflyttingTilNorge
 import no.nav.familie.ef.sak.integration.dto.pdl.Statsborgerskap
 import no.nav.familie.ef.sak.integration.dto.pdl.UtflyttingFraNorge
 import no.nav.familie.ef.sak.vurdering.medlemskap.Medlemskapshistorikk
-import no.nav.nare.core.evaluations.Evaluering
+import no.nav.familie.ef.sak.nare.evaluations.Evaluering
 
 
 data class MedlemskapDto(val totalvurdering: Evaluering,

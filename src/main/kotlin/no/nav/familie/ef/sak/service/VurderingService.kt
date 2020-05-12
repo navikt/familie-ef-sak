@@ -22,13 +22,13 @@ class VurderingService(private val sakService: SakService,
         val medlemskapsinfo = integrasjonerClient.hentMedlemskapsinfo(fnr)
         val medlemskapshistorikk =
                 Medlemskapshistorikk(pdlSøker.data?.person!!,
-                                                                                                   medlemskapsinfo)
+                                     medlemskapsinfo)
         val medlemskapsgrunnlag = Medlemskapsgrunnlag(pdlSøker.data,
-                                                                                                                    medlemskapshistorikk,
-                                                                                                                    sak.søknad)
+                                                      medlemskapshistorikk,
+                                                      sak.søknad)
         val evaluering = medlemskapRegelsett.vurderingMedlemskapSøker.evaluer(medlemskapsgrunnlag)
 
-      return MedlemskapDto(evaluering,
+        return MedlemskapDto(evaluering,
                              pdlSøker.data.person.statsborgerskap,
                              pdlSøker.data.person.innflyttingTilNorge,
                              pdlSøker.data.person.utflyttingFraNorge,

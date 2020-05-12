@@ -4,9 +4,9 @@ import no.nav.familie.ef.sak.integration.dto.pdl.PdlPerson
 import no.nav.familie.ef.sak.vurdering.antallÅrOpphold
 import no.nav.familie.ef.sak.vurdering.landkoderEøs
 import no.nav.familie.ef.sak.vurdering.landkoderNorden
-import no.nav.nare.core.evaluations.Evaluering
-import no.nav.nare.core.evaluations.Resultat
-import no.nav.nare.core.specifications.Spesifikasjon
+import no.nav.familie.ef.sak.nare.evaluations.Evaluering
+import no.nav.familie.ef.sak.nare.evaluations.Resultat
+import no.nav.familie.ef.sak.nare.specifications.Spesifikasjon
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.time.Period
@@ -30,12 +30,13 @@ class MedlemskapRegelsett {
                                                implementasjon = { oppholdINorge(this) })
 
     private val utenlandsoppholdGrunnetNorskArbeidsgiver =
-            Spesifikasjon<Medlemskapsgrunnlag>(beskrivelse = "Oppholder søker seg i Norge?",
+            Spesifikasjon<Medlemskapsgrunnlag>(beskrivelse = "Skyldes utenlandsoppholdet arbeid for norsk arbeidsgiver?",
                                                identifikator = "EF-M4",
                                                implementasjon = { utenlandsoppholdGrunnetNorskArbeidsgiver(this) })
 
     private val medlemskapslengde =
-            Spesifikasjon<Medlemskapsgrunnlag>(beskrivelse = "Har søker vært medlem av folketrygden de siste $antallÅrOpphold år?",
+            Spesifikasjon<Medlemskapsgrunnlag>(beskrivelse = "Har søker vært medlem av folketrygden de siste " +
+                                                             "$antallÅrOpphold år?",
                                                identifikator = "EF-M7",
                                                implementasjon = { medlemskapslengde(this) })
 
