@@ -62,6 +62,7 @@ fun uavklartePerioder(vararg perioder: Pair<LocalDate, LocalDate>) = perioder.ma
 }
 
 fun søknad(personalia: Søknadsfelt<Personalia> = mockk(),
+           innsendingsdetaljer: Søknadsfelt<Innsendingsdetaljer> = mockk(),
            sivilstandsdetaljer: Søknadsfelt<Sivilstandsdetaljer> = mockk(),
            medlemskapsdetaljer: Søknadsfelt<Medlemskapsdetaljer> = mockk(),
            bosituasjon: Søknadsfelt<Bosituasjon> = mockk(),
@@ -72,6 +73,7 @@ fun søknad(personalia: Søknadsfelt<Personalia> = mockk(),
            situasjon: Søknadsfelt<Situasjon> = mockk(),
            stønadsstart: Søknadsfelt<Stønadsstart> = mockk()) =
         Søknad(personalia,
+               innsendingsdetaljer,
                sivilstandsdetaljer,
                medlemskapsdetaljer,
                bosituasjon,

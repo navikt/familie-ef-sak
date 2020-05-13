@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.Month
 import java.util.*
 
@@ -46,22 +47,16 @@ class SakController(private val sakService: SakService) {
 internal object Testsøknad {
 
     val søknad = Søknad(Søknadsfelt("Søker", personalia()),
-                        Søknadsfelt("Detaljer om sivilstand",
-                                    sivilstandsdetaljer()),
-                        Søknadsfelt("Opphold i Norge",
-                                    medlemskapsdetaljer()),
-                        Søknadsfelt("Bosituasjonen din",
-                                    bosituasjon()),
-                        Søknadsfelt("Sivilstandsplaner",
-                                    sivilstandsplaner()),
+                        Søknadsfelt("innsending", Innsendingsdetaljer(Søknadsfelt("Dato mottat", LocalDateTime.now()))),
+                        Søknadsfelt("Detaljer om sivilstand", sivilstandsdetaljer()),
+                        Søknadsfelt("Opphold i Norge", medlemskapsdetaljer()),
+                        Søknadsfelt("Bosituasjonen din", bosituasjon()),
+                        Søknadsfelt("Sivilstandsplaner", sivilstandsplaner()),
                         Søknadsfelt("Barn fra folkeregisteret", listOf(folkeregisterbarn())),
                         Søknadsfelt("Barn lagt til", listOf(kommendeBarn())),
-                        Søknadsfelt("Arbeid, utdanning og andre aktiviteter",
-                                    aktivitet()),
-                        Søknadsfelt("Mer om situasjonen din",
-                                    situasjon()),
-                        Søknadsfelt("Når søker du stønad fra?",
-                                    stønadsstart()))
+                        Søknadsfelt("Arbeid, utdanning og andre aktiviteter", aktivitet()),
+                        Søknadsfelt("Mer om situasjonen din", situasjon()),
+                        Søknadsfelt("Når søker du stønad fra?", stønadsstart()))
 
     private fun stønadsstart() = Stønadsstart(Søknadsfelt("Fra måned", Month.AUGUST), Søknadsfelt("Fra år", 2018))
 
@@ -167,14 +162,12 @@ internal object Testsøknad {
                         samvær = Søknadsfelt("samvær",
                                              Samvær(Søknadsfelt("Har du og den andre forelderen skriftlig avtale om delt bosted for barnet?",
                                                                 true),
-                                                    dokumentfelt(
-                                                            "Avtale om samvær"),
+                                                    dokumentfelt("Avtale om samvær"),
                                                     Søknadsfelt("Har den andre forelderen samvær med barnet",
                                                                 "Ja, men ikke mer enn vanlig samværsrett"),
                                                     Søknadsfelt("Har dere skriftlig samværsavtale for barnet?",
                                                                 "Ja, men den beskriver ikke når barnet er sammen med hver av foreldrene"),
-                                                    dokumentfelt(
-                                                            "Avtale om samvær"),
+                                                    dokumentfelt("Avtale om samvær"),
                                                     Søknadsfelt("Hvordan praktiserer dere samværet?",
                                                                 "Litt hver for oss"),
                                                     Søknadsfelt("Bor du og den andre forelderen til [barnets navn] i samme hus/blokk, gårdstun, kvartal eller vei?",
@@ -183,8 +176,7 @@ internal object Testsøknad {
                                                                 true),
                                                     Søknadsfelt("Når flyttet dere fra hverandre?",
                                                                 LocalDate.of(2018, 7, 21)),
-                                                    dokumentfelt(
-                                                            "Erklæring om samlivsbrudd"),
+                                                    dokumentfelt("Erklæring om samlivsbrudd"),
                                                     Søknadsfelt("Hvor mye er du sammen med den andre forelderen til barnet?",
                                                                 "Vi møtes også uten at barnet er til stede"),
                                                     Søknadsfelt("Beskriv  hvor mye er du sammen med den andre forelderen til barnet?",
@@ -197,8 +189,7 @@ internal object Testsøknad {
                               Søknadsfelt("Fødselsnummer", Fødselsnummer("31081953069")),
                               Søknadsfelt("Har samme adresse som søker", true),
                               Søknadsfelt("Barnets andre forelder",
-                                          AnnenForelder(person = Søknadsfelt("personalia",
-                                                                             personMinimum()),
+                                          AnnenForelder(person = Søknadsfelt("personalia", personMinimum()),
                                                         adresse = adresseSøknadsfelt())),
                               Søknadsfelt("samvær",
                                           Samvær(Søknadsfelt("Har du og den andre forelderen skriftlig avtale om delt bosted for barnet?",
@@ -227,15 +218,13 @@ internal object Testsøknad {
     private fun sivilstandsplaner(): Sivilstandsplaner {
         return Sivilstandsplaner(Søknadsfelt("Har du konkrete planer om å gifte deg eller bli samboer", true),
                                  Søknadsfelt("Når skal dette skje?", LocalDate.of(2021, 4, 15)),
-                                 Søknadsfelt("Hvem skal du gifte deg eller bli samboer med?",
-                                             personMinimum()))
+                                 Søknadsfelt("Hvem skal du gifte deg eller bli samboer med?", personMinimum()))
     }
 
     private fun bosituasjon(): Bosituasjon {
         return Bosituasjon(Søknadsfelt("Deler du bolig med andre voksne?",
                                        "Ja, jeg har samboer og lever i et ekteskapslignende forhold"),
-                           Søknadsfelt("Om samboeren din",
-                                       personMinimum()),
+                           Søknadsfelt("Om samboeren din", personMinimum()),
                            Søknadsfelt("Når flyttet dere sammen?", LocalDate.of(2018, 8, 12)))
     }
 
