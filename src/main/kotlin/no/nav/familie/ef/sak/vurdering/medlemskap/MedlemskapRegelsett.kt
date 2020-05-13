@@ -92,7 +92,7 @@ class MedlemskapRegelsett {
     }
 
     private fun erBosattINorge(medlemskapsgrunnlag: Medlemskapsgrunnlag): Evaluering {
-        return if ("bosatt" == medlemskapsgrunnlag.søker.person?.folkeregisterpersonstatus?.firstOrNull()?.status) {
+        return if ("bosatt" == medlemskapsgrunnlag.søker.person.folkeregisterpersonstatus.firstOrNull()?.status) {
             Evaluering(Resultat.JA, "Bosatt i Norge.")
         } else {
             Evaluering(Resultat.NEI, "Ikke bosatt i Norge.")
@@ -109,7 +109,8 @@ class MedlemskapRegelsett {
 
     private fun utenlandsoppholdGrunnetNorskArbeidsgiver(medlemskapsgrunnlag: Medlemskapsgrunnlag): Evaluering {
         // Hvis dette blir en del av søknaden kan vi gi bedre svar.
-        return Evaluering(Resultat.KANSKJE, "Saksbehandler må ta stilling til dette.")
+        return Evaluering(Resultat.KANSKJE, "Saksbehandler må ta stilling til om utenlandsopphold grunnes arbeid" +
+                                            "for norsk arbeidsgiver.")
     }
 
 
@@ -223,19 +224,19 @@ class MedlemskapRegelsett {
                          medlemskapsgrunnlag.søknad.stønadsstart.verdi.fraMåned.verdi, 1)
 
     private fun datoFor16Årsdag(person: PdlPerson?): LocalDate {
-        val fødselsdato = person?.foedsel?.firstOrNull()?.foedselsdato ?: error("Person er ikke født")
+        val fødselsdato = person?.fødsel?.firstOrNull()?.fødselsdato ?: error("Person er ikke født")
         return fødselsdato.plusYears(16)
     }
 
     private fun nordiskStatsborger(medlemskapsgrunnlag: Medlemskapsgrunnlag): Evaluering {
-        if (medlemskapsgrunnlag.søker.person?.statsborgerskap?.find { landkoderNorden.contains(it.land.toUpperCase()) } != null) {
+        if (medlemskapsgrunnlag.søker.person.statsborgerskap.find { landkoderNorden.contains(it.land.toUpperCase()) } != null) {
             return Evaluering.ja("Søker er nordisk statsborger")
         }
         return Evaluering.nei("Søker er ikke nordisk statsborger")
     }
 
     private fun eøsBorgerEllerLovligOpphold(medlemskapsgrunnlag: Medlemskapsgrunnlag): Evaluering {
-        if (medlemskapsgrunnlag.søker.person?.statsborgerskap?.find { landkoderEøs.contains(it.land.toUpperCase()) } != null) {
+        if (medlemskapsgrunnlag.søker.person.statsborgerskap.find { landkoderEøs.contains(it.land.toUpperCase()) } != null) {
             return Evaluering.kanskje("Søker er eøs-borger")
         }
 

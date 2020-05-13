@@ -10,7 +10,7 @@ import java.time.LocalDateTime
 
 fun pdlPerson(vararg perioder: Pair<LocalDate, LocalDateTime?>) = object : PdlPerson {
 
-    override val foedsel: List<Foedsel> = listOf(Foedsel(null, null, null, null, null))
+    override val fødsel: List<Fødsel> = listOf(Fødsel(null, null, null, null, null))
 
     override val bostedsadresse: List<Bostedsadresse> = perioder.map {
         Bostedsadresse(it.first, null, Folkeregistermetadata(null, it.second), null, null)
@@ -19,9 +19,9 @@ fun pdlPerson(vararg perioder: Pair<LocalDate, LocalDateTime?>) = object : PdlPe
 
 fun pdlSøker(adressebeskyttelse: List<Adressebeskyttelse> = mockk(),
              bostedsadresse: List<Bostedsadresse> = mockk(),
-             doedsfall: List<Doedsfall> = mockk(),
+             doedsfall: List<Dødsfall> = mockk(),
              familierelasjoner: List<Familierelasjon> = mockk(),
-             foedsel: List<Foedsel> = mockk(),
+             fødsel: List<Fødsel> = mockk(),
              folkeregisterpersonstatus: List<Folkeregisterpersonstatus> = mockk(),
              navn: List<Navn> = mockk(),
              opphold: List<Opphold> = mockk(),
@@ -36,7 +36,7 @@ fun pdlSøker(adressebeskyttelse: List<Adressebeskyttelse> = mockk(),
                               bostedsadresse,
                               doedsfall,
                               familierelasjoner,
-                              foedsel,
+                              fødsel,
                               folkeregisterpersonstatus,
                               navn,
                               opphold,

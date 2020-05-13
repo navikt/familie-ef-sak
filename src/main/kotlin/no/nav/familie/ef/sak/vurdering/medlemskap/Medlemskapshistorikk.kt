@@ -140,7 +140,7 @@ class Medlemskapshistorikk(pdlPerson: PdlPerson, medlemskapsinfo: Medlemskapsinf
         return bosattperioder.toList()
     }
 
-    private fun tildato(it: Bostedsadresse) = it.folkeregistermetadata.opphoerstidspunkt?.toLocalDate() ?: LocalDate.MAX
+    private fun tildato(it: Bostedsadresse) = it.folkeregistermetadata.opphørstidspunkt?.toLocalDate() ?: LocalDate.MAX
 
     private fun fradato(it: Bostedsadresse) = it.angittFlyttedato ?: it.folkeregistermetadata.gyldighetstidspunkt!!.toLocalDate()
 

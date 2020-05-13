@@ -16,7 +16,7 @@ data class Evaluering(val resultat: Resultat,
 
     infix fun eller(other: Evaluering) =
             Evaluering(resultat = resultat eller other.resultat,
-                       begrunnelse = if (resultat == Resultat.JA) begrunnelse else "($begrunnelse ELLER ${other.begrunnelse})",
+                       begrunnelse = if (resultat == Resultat.JA) begrunnelse else "($begrunnelse OG ${other.begrunnelse})",
                        operator = Operator.ELLER,
                        children = this.specOrChildren() + other.specOrChildren()
             )

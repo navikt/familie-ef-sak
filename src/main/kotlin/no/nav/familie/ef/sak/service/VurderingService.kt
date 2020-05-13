@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.service
 import no.nav.familie.ef.sak.api.gui.dto.MedlemskapDto
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.PdlClient
+import no.nav.familie.ef.sak.mapper.MedlemskapMapper
 import no.nav.familie.ef.sak.vurdering.medlemskap.MedlemskapRegelsett
 import no.nav.familie.ef.sak.vurdering.medlemskap.Medlemskapsgrunnlag
 import no.nav.familie.ef.sak.vurdering.medlemskap.Medlemskapshistorikk
@@ -28,11 +29,9 @@ class VurderingService(private val sakService: SakService,
                                                       sak.søknad)
         val evaluering = medlemskapRegelsett.vurderingMedlemskapSøker.evaluer(medlemskapsgrunnlag)
 
-        return MedlemskapDto(evaluering,
-                             pdlSøker.data.person.statsborgerskap,
-                             pdlSøker.data.person.innflyttingTilNorge,
-                             pdlSøker.data.person.utflyttingFraNorge,
-                             medlemskapshistorikk)
+        return MedlemskapMapper.tilDto(evaluering,
+                                       pdlSøker.data,
+                                       medlemskapshistorikk)
     }
 
 

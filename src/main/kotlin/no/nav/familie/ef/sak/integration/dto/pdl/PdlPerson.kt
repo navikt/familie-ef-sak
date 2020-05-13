@@ -1,19 +1,8 @@
 package no.nav.familie.ef.sak.integration.dto.pdl
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import java.time.LocalDate
 import java.time.LocalDateTime
-
-data class IdentInformasjon(
-        val ident: String,
-        val gruppe: IdentGruppe,
-        val historisk: Boolean
-)
-
-enum class IdentGruppe {
-    AKTORID,
-    FOLKEREGISTERIDENT,
-    NPID
-}
 
 data class PdlResponse<T>(val data: T?,
                           val errors: List<PdlError>?) {
@@ -29,20 +18,20 @@ data class PdlResponse<T>(val data: T?,
 
 data class PdlError(val message: String)
 
-data class PdlSøker(val person: PdlSøkerData?)
-data class PdlAnnenForelder(val person: PdlAnnenForelderData?)
-data class PdlBarn(val person: PdlBarnData?)
+data class PdlSøker(val person: PdlSøkerData)
+data class PdlAnnenForelder(val person: PdlAnnenForelderData)
+data class PdlBarn(val person: PdlBarnData)
 
 interface PdlPerson {
-    val foedsel: List<Foedsel>
+    val fødsel: List<Fødsel>
     val bostedsadresse: List<Bostedsadresse>
 }
 
 data class PdlSøkerData(val adressebeskyttelse: List<Adressebeskyttelse>,
                         override val bostedsadresse: List<Bostedsadresse>,
-                        val doedsfall: List<Doedsfall>,
+                        @JsonProperty("doedsfall") val dødsfall: List<Dødsfall>,
                         val familierelasjoner: List<Familierelasjon>,
-                        override val foedsel: List<Foedsel>,
+                        @JsonProperty("foedsel") override val fødsel: List<Fødsel>,
                         val folkeregisterpersonstatus: List<Folkeregisterpersonstatus>,
                         val navn: List<Navn>,
                         val opphold: List<Opphold>,
@@ -57,15 +46,15 @@ data class PdlSøkerData(val adressebeskyttelse: List<Adressebeskyttelse>,
 data class PdlBarnData(val adressebeskyttelse: List<Adressebeskyttelse>,
                        override val bostedsadresse: List<Bostedsadresse>,
                        val deltBosted: List<DeltBosted>,
-                       val doedsfall: List<Doedsfall>,
+                       @JsonProperty("doedsfall") val dødsfall: List<Dødsfall>,
                        val familierelasjoner: List<Familierelasjon>,
-                       override val foedsel: List<Foedsel>,
+                       @JsonProperty("foedsel") override val fødsel: List<Fødsel>,
                        val navn: List<Navn>) : PdlPerson
 
 data class PdlAnnenForelderData(val adressebeskyttelse: List<Adressebeskyttelse>,
                                 override val bostedsadresse: List<Bostedsadresse>,
-                                val doedsfall: List<Doedsfall>,
-                                override val foedsel: List<Foedsel>,
+                                @JsonProperty("doedsfall") val dødsfall: List<Dødsfall>,
+                                @JsonProperty("foedsel") override val fødsel: List<Fødsel>,
                                 val navn: List<Navn>,
                                 val opphold: List<Opphold>,
                                 val oppholdsadresse: List<Oppholdsadresse>,
@@ -80,7 +69,7 @@ data class DeltBosted(val startdatoForKontrakt: LocalDateTime,
 )
 
 data class Folkeregistermetadata(val gyldighetstidspunkt: LocalDateTime?,
-                                 val opphoerstidspunkt: LocalDateTime?)
+                                 @JsonProperty("opphoerstidspunkt") val opphørstidspunkt: LocalDateTime?)
 
 data class Bostedsadresse(val angittFlyttedato: LocalDate?,
                           val coAdressenavn: String?,
@@ -126,13 +115,13 @@ enum class AdressebeskyttelseGradering {
     UGRADERT
 }
 
-data class Foedsel(val foedselsaar: Int?,
-                   val foedselsdato: LocalDate?,
-                   val foedeland: String?,
-                   val foedested: String?,
-                   val foedekommune: String?)
+data class Fødsel(@JsonProperty("foedselsaar") val fødselsår: Int?,
+                  @JsonProperty("foedselsdato") val fødselsdato: LocalDate?,
+                  @JsonProperty("foedeland") val fødeland: String?,
+                  @JsonProperty("foedested") val fødested: String?,
+                  @JsonProperty("foedekommune") val fødekommune: String?)
 
-data class Doedsfall(val doedsdato: LocalDate?)
+data class Dødsfall(@JsonProperty("doedsdato") val dødsdato: LocalDate?)
 
 data class Familierelasjon(val relatertPersonsIdent: String,
                            val relatertPersonsRolle: Familierelasjonsrolle,
@@ -156,10 +145,10 @@ data class Telefonnummer(val landskode: String,
                          val nummer: String,
                          val prioritet: Int)
 
-data class TilrettelagtKommunikasjon(val talespraaktolk: Tolk?,
-                                     val tegnspraaktolk: Tolk?)
+data class TilrettelagtKommunikasjon(@JsonProperty("talespraaktolk") val talespråktolk: Tolk?,
+                                     @JsonProperty("tegnspraaktolk") val tegnspråktolk: Tolk?)
 
-data class Tolk(val spraak: String?)
+data class Tolk(@JsonProperty("spraak") val språk: String?)
 
 data class Statsborgerskap(val land: String,
                            val gyldigFraOgMed: LocalDate?,
