@@ -2,7 +2,9 @@ package no.nav.familie.ef.sak.api.gui
 
 import no.nav.familie.ba.sak.validering.PersontilgangConstraint
 import no.nav.familie.ef.sak.api.gui.dto.Person
-import no.nav.familie.ef.sak.integration.dto.pdl.*
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlAnnenForelder
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlBarn
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker
 import no.nav.familie.ef.sak.service.PersonService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -27,7 +29,7 @@ class PersonInfoController(private val personService: PersonService) {
 
     @ExceptionHandler(ConstraintViolationException::class)
     fun handleRestClientResponseException(e: ConstraintViolationException): Ressurs<ConstraintViolationException> {
-        return Ressurs.failure<ConstraintViolationException>(e.message,e)
+        return Ressurs.failure(e.message, e)
     }
 
     @GetMapping
@@ -37,18 +39,17 @@ class PersonInfoController(private val personService: PersonService) {
 
 
     @GetMapping("/soker") // TODO Testendepunkt. Fjernes etter hvert
-    fun søkerinfo(@RequestHeader(name = "Nav-Personident") @PersontilgangConstraint ident: String): PdlResponse<PdlSøker> {
+    fun søkerinfo(@RequestHeader(name = "Nav-Personident") @PersontilgangConstraint ident: String): PdlSøker {
         return personService.hentPdlPerson(ident)
     }
 
     @GetMapping("/barn") // TODO Testendepunkt. Fjernes etter hvert
-    fun barninfoPdl(@RequestHeader(name = "Nav-Personident") @PersontilgangConstraint ident: String): PdlResponse<PdlBarn> {
+    fun barninfoPdl(@RequestHeader(name = "Nav-Personident") @PersontilgangConstraint ident: String): PdlBarn {
         return personService.hentPdlBarn(ident)
     }
 
     @GetMapping("/forelder2") // TODO Testendepunkt. Fjernes etter hvert
-    fun annenForelderinfoPdl(@RequestHeader(name = "Nav-Personident") @PersontilgangConstraint ident: String)
-            : PdlResponse<PdlAnnenForelder> {
+    fun annenForelderinfoPdl(@RequestHeader(name = "Nav-Personident") @PersontilgangConstraint ident: String): PdlAnnenForelder {
         return personService.hentPdlAnnenForelder(ident)
     }
 

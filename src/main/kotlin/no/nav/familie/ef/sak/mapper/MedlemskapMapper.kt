@@ -14,9 +14,9 @@ object MedlemskapMapper {
 
         return MedlemskapDto(evaluering.resultat.toString(),
                              evaluering.children.map { it.begrunnelse },
-                             pdlSøker.person.statsborgerskap,
-                             pdlSøker.person.innflyttingTilNorge,
-                             pdlSøker.person.utflyttingFraNorge,
+                             pdlSøker.statsborgerskap,
+                             pdlSøker.innflyttingTilNorge,
+                             pdlSøker.utflyttingFraNorge,
                              medlemskapshistorikk)
 
 

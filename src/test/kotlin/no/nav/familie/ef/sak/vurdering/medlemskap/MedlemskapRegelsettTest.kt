@@ -26,12 +26,23 @@ internal class MedlemskapRegelsettTest {
                                 statsborgerskap = listOf(Statsborgerskap("SE", LocalDate.of(2002, 2, 2), null)))
         val søknad = søknad(medlemskapsdetaljer = Søknadsfelt("", Medlemskapsdetaljer(Søknadsfelt("", true), mockk(), mockk())),
                             stønadsstart = Søknadsfelt("", Stønadsstart(Søknadsfelt("", Month.AUGUST), Søknadsfelt("", 2014))))
-        val medlemskapshistorikk = Medlemskapshistorikk(pdlSøker.person, medlemskapsinfoUtenUnntak)
+        val medlemskapshistorikk = Medlemskapshistorikk(pdlSøker, medlemskapsinfoUtenUnntak)
         val medlemskapsgrunnlag = Medlemskapsgrunnlag(pdlSøker, medlemskapshistorikk, søknad)
 
         val evaluering = MedlemskapRegelsett().vurderingMedlemskapSøker.evaluer(medlemskapsgrunnlag)
 
         assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
+        assertThat(evaluering.children.find { it.beskrivelse == "Er søker registrert medlem?" }?.resultat).isEqualTo(Resultat.NEI)
+        assertThat(evaluering.children.find { it.beskrivelse == "Er søker registrert bosatt i norge" }?.resultat)
+                .isEqualTo(Resultat.JA)
+        assertThat(evaluering.children.find {
+            it.beskrivelse == "Oppholder søker seg i Norge? ELLER Skyldes utenlandsoppholdet arbeid for norsk arbeidsgiver?"
+        }?.resultat).isEqualTo(Resultat.JA)
+        assertThat(evaluering.children.find { it.beskrivelse == "Er vilkår for forutgående medlemskap oppfylt?" }?.resultat)
+                .isEqualTo(Resultat.NEI)
+        assertThat(evaluering.children.find {
+            it.beskrivelse == "Har søker lovlig opphold i Norge eller er søker EØS-borger med oppholdsrett"
+        }?.resultat).isEqualTo(Resultat.JA)
     }
 
     @Test
@@ -51,13 +62,23 @@ internal class MedlemskapRegelsettTest {
                                                                                   mockk(),
                                                                                   mockk())),
                             stønadsstart = Søknadsfelt("", Stønadsstart(Søknadsfelt("", Month.AUGUST), Søknadsfelt("", 2014))))
-        val medlemskapshistorikk = Medlemskapshistorikk(pdlSøker.person, medlemskapsinfoUtenUnntak)
+        val medlemskapshistorikk = Medlemskapshistorikk(pdlSøker, medlemskapsinfoUtenUnntak)
         val medlemskapsgrunnlag = Medlemskapsgrunnlag(pdlSøker, medlemskapshistorikk, søknad)
 
         val evaluering = MedlemskapRegelsett().vurderingMedlemskapSøker.evaluer(medlemskapsgrunnlag)
 
         assertThat(evaluering.resultat).isEqualTo(Resultat.JA)
-
+        assertThat(evaluering.children.find { it.beskrivelse == "Er søker registrert medlem?" }?.resultat).isEqualTo(Resultat.JA)
+        assertThat(evaluering.children.find { it.beskrivelse == "Er søker registrert bosatt i norge" }?.resultat)
+                .isEqualTo(Resultat.JA)
+        assertThat(evaluering.children.find {
+            it.beskrivelse == "Oppholder søker seg i Norge? ELLER Skyldes utenlandsoppholdet arbeid for norsk arbeidsgiver?"
+        }?.resultat).isEqualTo(Resultat.JA)
+        assertThat(evaluering.children.find { it.beskrivelse == "Er vilkår for forutgående medlemskap oppfylt?" }?.resultat)
+                .isEqualTo(Resultat.JA)
+        assertThat(evaluering.children.find {
+            it.beskrivelse == "Har søker lovlig opphold i Norge eller er søker EØS-borger med oppholdsrett"
+        }?.resultat).isEqualTo(Resultat.JA)
     }
 
     @Test
@@ -77,13 +98,25 @@ internal class MedlemskapRegelsettTest {
                                                                                   mockk(),
                                                                                   mockk())),
                             stønadsstart = Søknadsfelt("", Stønadsstart(Søknadsfelt("", Month.AUGUST), Søknadsfelt("", 2014))))
-        val medlemskapshistorikk = Medlemskapshistorikk(pdlSøker.person, medlemskapsinfoUtenUnntak)
+        val medlemskapshistorikk = Medlemskapshistorikk(pdlSøker, medlemskapsinfoUtenUnntak)
         val medlemskapsgrunnlag = Medlemskapsgrunnlag(pdlSøker, medlemskapshistorikk, søknad)
 
         val evaluering = MedlemskapRegelsett().vurderingMedlemskapSøker.evaluer(medlemskapsgrunnlag)
 
         assertThat(evaluering.resultat).isEqualTo(Resultat.KANSKJE)
-
+        assertThat(evaluering.children.find { it.beskrivelse == "Er søker registrert medlem?" }?.resultat).isEqualTo(Resultat.JA)
+        assertThat(evaluering.children.find { it.beskrivelse == "Er søker registrert bosatt i norge" }?.resultat)
+                .isEqualTo(Resultat.JA)
+        assertThat(evaluering.children.find { it.beskrivelse == "Oppholder søker seg i Norge?" }?.resultat)
+                .isEqualTo(Resultat.NEI)
+        assertThat(evaluering.children.find {
+            it.beskrivelse == "Skyldes utenlandsoppholdet arbeid for norsk arbeidsgiver?"
+        }?.resultat).isEqualTo(Resultat.KANSKJE)
+        assertThat(evaluering.children.find { it.beskrivelse == "Er vilkår for forutgående medlemskap oppfylt?" }?.resultat)
+                .isEqualTo(Resultat.JA)
+        assertThat(evaluering.children.find {
+            it.beskrivelse == "Har søker lovlig opphold i Norge eller er søker EØS-borger med oppholdsrett"
+        }?.resultat).isEqualTo(Resultat.JA)
     }
 
 }

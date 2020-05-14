@@ -18,49 +18,49 @@ data class PdlResponse<T>(val data: T?,
 
 data class PdlError(val message: String)
 
-data class PdlSøker(val person: PdlSøkerData)
-data class PdlAnnenForelder(val person: PdlAnnenForelderData)
-data class PdlBarn(val person: PdlBarnData)
+data class PdlSøkerData(val person: PdlSøker)
+data class PdlAnnenForelderData(val person: PdlAnnenForelder)
+data class PdlBarnData(val person: PdlBarn)
 
 interface PdlPerson {
     val fødsel: List<Fødsel>
     val bostedsadresse: List<Bostedsadresse>
 }
 
-data class PdlSøkerData(val adressebeskyttelse: List<Adressebeskyttelse>,
-                        override val bostedsadresse: List<Bostedsadresse>,
-                        @JsonProperty("doedsfall") val dødsfall: List<Dødsfall>,
-                        val familierelasjoner: List<Familierelasjon>,
-                        @JsonProperty("foedsel") override val fødsel: List<Fødsel>,
-                        val folkeregisterpersonstatus: List<Folkeregisterpersonstatus>,
-                        val navn: List<Navn>,
-                        val opphold: List<Opphold>,
-                        val oppholdsadresse: List<Oppholdsadresse>,
-                        val sivilstand: List<Sivilstand>,
-                        val statsborgerskap: List<Statsborgerskap>,
-                        val telefonnummer: List<Telefonnummer>,
-                        val tilrettelagtKommunikasjon: List<TilrettelagtKommunikasjon>,
-                        val innflyttingTilNorge: List<InnflyttingTilNorge>,
-                        val utflyttingFraNorge: List<UtflyttingFraNorge>) : PdlPerson
+data class PdlSøker(val adressebeskyttelse: List<Adressebeskyttelse>,
+                    override val bostedsadresse: List<Bostedsadresse>,
+                    @JsonProperty("doedsfall") val dødsfall: List<Dødsfall>,
+                    val familierelasjoner: List<Familierelasjon>,
+                    @JsonProperty("foedsel") override val fødsel: List<Fødsel>,
+                    val folkeregisterpersonstatus: List<Folkeregisterpersonstatus>,
+                    val navn: List<Navn>,
+                    val opphold: List<Opphold>,
+                    val oppholdsadresse: List<Oppholdsadresse>,
+                    val sivilstand: List<Sivilstand>,
+                    val statsborgerskap: List<Statsborgerskap>,
+                    val telefonnummer: List<Telefonnummer>,
+                    val tilrettelagtKommunikasjon: List<TilrettelagtKommunikasjon>,
+                    val innflyttingTilNorge: List<InnflyttingTilNorge>,
+                    val utflyttingFraNorge: List<UtflyttingFraNorge>) : PdlPerson
 
-data class PdlBarnData(val adressebeskyttelse: List<Adressebeskyttelse>,
-                       override val bostedsadresse: List<Bostedsadresse>,
-                       val deltBosted: List<DeltBosted>,
-                       @JsonProperty("doedsfall") val dødsfall: List<Dødsfall>,
-                       val familierelasjoner: List<Familierelasjon>,
-                       @JsonProperty("foedsel") override val fødsel: List<Fødsel>,
-                       val navn: List<Navn>) : PdlPerson
+data class PdlBarn(val adressebeskyttelse: List<Adressebeskyttelse>,
+                   override val bostedsadresse: List<Bostedsadresse>,
+                   val deltBosted: List<DeltBosted>,
+                   @JsonProperty("doedsfall") val dødsfall: List<Dødsfall>,
+                   val familierelasjoner: List<Familierelasjon>,
+                   @JsonProperty("foedsel") override val fødsel: List<Fødsel>,
+                   val navn: List<Navn>) : PdlPerson
 
-data class PdlAnnenForelderData(val adressebeskyttelse: List<Adressebeskyttelse>,
-                                override val bostedsadresse: List<Bostedsadresse>,
-                                @JsonProperty("doedsfall") val dødsfall: List<Dødsfall>,
-                                @JsonProperty("foedsel") override val fødsel: List<Fødsel>,
-                                val navn: List<Navn>,
-                                val opphold: List<Opphold>,
-                                val oppholdsadresse: List<Oppholdsadresse>,
-                                val statsborgerskap: List<Statsborgerskap>,
-                                val innflyttingTilNorge: List<InnflyttingTilNorge>,
-                                val utflyttingFraNorge: List<UtflyttingFraNorge>) : PdlPerson
+data class PdlAnnenForelder(val adressebeskyttelse: List<Adressebeskyttelse>,
+                            override val bostedsadresse: List<Bostedsadresse>,
+                            @JsonProperty("doedsfall") val dødsfall: List<Dødsfall>,
+                            @JsonProperty("foedsel") override val fødsel: List<Fødsel>,
+                            val navn: List<Navn>,
+                            val opphold: List<Opphold>,
+                            val oppholdsadresse: List<Oppholdsadresse>,
+                            val statsborgerskap: List<Statsborgerskap>,
+                            val innflyttingTilNorge: List<InnflyttingTilNorge>,
+                            val utflyttingFraNorge: List<UtflyttingFraNorge>) : PdlPerson
 
 data class DeltBosted(val startdatoForKontrakt: LocalDateTime,
                       val sluttdatoForKontrakt: LocalDateTime?,

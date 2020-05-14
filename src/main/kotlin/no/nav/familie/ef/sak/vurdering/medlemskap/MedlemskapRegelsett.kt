@@ -1,12 +1,11 @@
 package no.nav.familie.ef.sak.vurdering.medlemskap
 
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlPerson
+import no.nav.familie.ef.sak.nare.evaluations.Evaluering
+import no.nav.familie.ef.sak.nare.specifications.Regel
 import no.nav.familie.ef.sak.vurdering.antallÅrOpphold
 import no.nav.familie.ef.sak.vurdering.landkoderEøs
 import no.nav.familie.ef.sak.vurdering.landkoderNorden
-import no.nav.familie.ef.sak.nare.evaluations.Evaluering
-import no.nav.familie.ef.sak.nare.evaluations.Resultat
-import no.nav.familie.ef.sak.nare.specifications.Spesifikasjon
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.time.Period
@@ -15,54 +14,54 @@ import java.time.Period
 class MedlemskapRegelsett {
 
     private val erMedlem =
-            Spesifikasjon<Medlemskapsgrunnlag>("Er søker registrert medlem?",
-                                               "FP_VK 2.13",
-                                               implementasjon = { erMedlem(this) })
+            Regel<Medlemskapsgrunnlag>("Er søker registrert medlem?",
+                                       "FP_VK 2.13",
+                                       implementasjon = { erMedlem(this) })
 
     private val erBosattINorge =
-            Spesifikasjon<Medlemskapsgrunnlag>("Er søker registrert bosatt i norge",
-                                               "EF-M3",
-                                               implementasjon = { erBosattINorge(this) })
+            Regel<Medlemskapsgrunnlag>("Er søker registrert bosatt i norge",
+                                       "EF-M3",
+                                       implementasjon = { erBosattINorge(this) })
 
     private val oppholdINorge =
-            Spesifikasjon<Medlemskapsgrunnlag>(beskrivelse = "Oppholder søker seg i Norge?",
-                                               identifikator = "EF-M4",
-                                               implementasjon = { oppholdINorge(this) })
+            Regel<Medlemskapsgrunnlag>(beskrivelse = "Oppholder søker seg i Norge?",
+                                       identifikator = "EF-M4",
+                                       implementasjon = { oppholdINorge(this) })
 
     private val utenlandsoppholdGrunnetNorskArbeidsgiver =
-            Spesifikasjon<Medlemskapsgrunnlag>(beskrivelse = "Skyldes utenlandsoppholdet arbeid for norsk arbeidsgiver?",
-                                               identifikator = "EF-M4",
-                                               implementasjon = { utenlandsoppholdGrunnetNorskArbeidsgiver(this) })
+            Regel<Medlemskapsgrunnlag>(beskrivelse = "Skyldes utenlandsoppholdet arbeid for norsk arbeidsgiver?",
+                                       identifikator = "EF-M4",
+                                       implementasjon = { utenlandsoppholdGrunnetNorskArbeidsgiver(this) })
 
     private val medlemskapslengde =
-            Spesifikasjon<Medlemskapsgrunnlag>(beskrivelse = "Har søker vært medlem av folketrygden de siste " +
-                                                             "$antallÅrOpphold år?",
-                                               identifikator = "EF-M7",
-                                               implementasjon = { medlemskapslengde(this) })
+            Regel<Medlemskapsgrunnlag>(beskrivelse = "Har søker vært medlem av folketrygden de siste " +
+                                                     "$antallÅrOpphold år?",
+                                       identifikator = "EF-M7",
+                                       implementasjon = { medlemskapslengde(this) })
 
     private val medlemskapslengdeAvbruddMindreEnn10år =
-            Spesifikasjon<Medlemskapsgrunnlag>(beskrivelse = "Har søker etter fylte 16 år vært medlem i minst $antallÅrOpphold " +
-                                                             "år og avbruddet mindre enn 10 år?",
-                                               identifikator = "EF-M9",
-                                               implementasjon = { medlemskapslengdeAvbruddMindreEnn10år(this) })
+            Regel<Medlemskapsgrunnlag>(beskrivelse = "Har søker etter fylte 16 år vært medlem i minst $antallÅrOpphold " +
+                                                     "år og avbruddet mindre enn 10 år?",
+                                       identifikator = "EF-M9",
+                                       implementasjon = { medlemskapslengdeAvbruddMindreEnn10år(this) })
 
     private val medlemskapslengdeAvbruddMerEnn10år =
-            Spesifikasjon<Medlemskapsgrunnlag>(beskrivelse = "Har søker etter fylte 16 år vært medlem i minst 7 år " +
-                                                             "ved avbrudd mer enn 10 år?",
-                                               identifikator = "EF-M10",
-                                               implementasjon = { medlemskapslengdeAvbruddMerEnn10år(this) })
+            Regel<Medlemskapsgrunnlag>(beskrivelse = "Har søker etter fylte 16 år vært medlem i minst 7 år " +
+                                                     "ved avbrudd mer enn 10 år?",
+                                       identifikator = "EF-M10",
+                                       implementasjon = { medlemskapslengdeAvbruddMerEnn10år(this) })
 
     private val nordiskStatsborger =
-            Spesifikasjon<Medlemskapsgrunnlag>(beskrivelse = "Er søker norsk/nordisk statsborger?",
-                                               identifikator = "EF-M8/17",
-                                               implementasjon = { nordiskStatsborger(this) })
+            Regel<Medlemskapsgrunnlag>(beskrivelse = "Er søker norsk/nordisk statsborger?",
+                                       identifikator = "EF-M8/17",
+                                       implementasjon = { nordiskStatsborger(this) })
 
 
     private val eøsBorgerEllerLovligOpphold =
-            Spesifikasjon<Medlemskapsgrunnlag>(beskrivelse = "Har søker lovlig opphold i Norge eller " +
-                                                             "er søker EØS-borger med oppholdsrett?",
-                                               identifikator = "EF-M12/18",
-                                               implementasjon = { eøsBorgerEllerLovligOpphold(this) })
+            Regel<Medlemskapsgrunnlag>(beskrivelse = "Har søker lovlig opphold i Norge eller " +
+                                                     "er søker EØS-borger med oppholdsrett?",
+                                       identifikator = "EF-M12/18",
+                                       implementasjon = { eøsBorgerEllerLovligOpphold(this) })
 
     private val oppholdsrett = (nordiskStatsborger eller eøsBorgerEllerLovligOpphold)
             .med("FP_VK 2.12", "Har søker lovlig opphold i Norge eller er søker EØS-borger med oppholdsrett")
@@ -83,34 +82,34 @@ class MedlemskapRegelsett {
         val statusNå =
                 medlemskapsgrunnlag.medlemskapshistorikk.medlemskapsperioder.find { it.inneholder(LocalDate.now()) }
         if (statusNå == null || statusNå.gyldig == false) {
-            return Evaluering(Resultat.NEI, "Er IKKE MEDLEM")
+            return Evaluering.nei("Er IKKE MEDLEM")
         }
         if (statusNå.gyldig == null) {
-            return Evaluering(Resultat.KANSKJE, "Uavklart medlemskapsunntak nå")
+            return Evaluering.kanskje("Uavklart medlemskapsunntak nå")
         }
         return Evaluering.ja("Søke er registrert som medlem nå.")
     }
 
     private fun erBosattINorge(medlemskapsgrunnlag: Medlemskapsgrunnlag): Evaluering {
-        return if ("bosatt" == medlemskapsgrunnlag.søker.person.folkeregisterpersonstatus.firstOrNull()?.status) {
-            Evaluering(Resultat.JA, "Bosatt i Norge.")
+        return if ("bosatt" == medlemskapsgrunnlag.søker.folkeregisterpersonstatus.firstOrNull()?.status) {
+            Evaluering.ja("Bosatt i Norge.")
         } else {
-            Evaluering(Resultat.NEI, "Ikke bosatt i Norge.")
+            Evaluering.nei("Ikke bosatt i Norge.")
         }
     }
 
     private fun oppholdINorge(medlemskapsgrunnlag: Medlemskapsgrunnlag): Evaluering {
         return if (medlemskapsgrunnlag.søknad.medlemskapsdetaljer.verdi.oppholderDuDegINorge.verdi) {
-            Evaluering(Resultat.JA, "Oppholder seg i Norge.")
+            Evaluering.ja("Oppholder seg i Norge.")
         } else {
-            Evaluering(Resultat.NEI, "Oppholder seg ikke i Norge.")
+            Evaluering.nei("Oppholder seg ikke i Norge.")
         }
     }
 
     private fun utenlandsoppholdGrunnetNorskArbeidsgiver(medlemskapsgrunnlag: Medlemskapsgrunnlag): Evaluering {
         // Hvis dette blir en del av søknaden kan vi gi bedre svar.
-        return Evaluering(Resultat.KANSKJE, "Saksbehandler må ta stilling til om utenlandsopphold grunnes arbeid" +
-                                            "for norsk arbeidsgiver.")
+        return Evaluering.kanskje("Saksbehandler må ta stilling til om utenlandsopphold grunnes arbeid" +
+                                  "for norsk arbeidsgiver.")
     }
 
 
@@ -121,10 +120,10 @@ class MedlemskapRegelsett {
             it.tildato.isAfter(søknadsdato.minusYears(antallÅrOpphold))
         }
 
-        if (statusSisteÅr.find { it.gyldig == false } != null) {
+        if (statusSisteÅr.any { it.gyldig == false }) {
             return Evaluering.nei("Her hatt medlemskapsunntak siste $antallÅrOpphold år")
         }
-        if (statusSisteÅr.find { it.gyldig == null } != null) {
+        if (statusSisteÅr.any { it.gyldig == null }) {
             return Evaluering.kanskje("Her hatt uavklart medlemskapsunntak siste $antallÅrOpphold år")
         }
 
@@ -137,13 +136,13 @@ class MedlemskapRegelsett {
         val gyldigePerioderSiden16årsdag = perioderSiden16årsdag.filter { it.gyldig == true }
         val ugyldigePerioderSiden16årsdag = perioderSiden16årsdag.filter { it.gyldig == false }
 
-        if (ugyldigePerioderSiden16årsdag.find { it.lengde.years >= 10 } != null) {
+        if (ugyldigePerioderSiden16årsdag.any { it.lengde.years >= 10 }) {
             return Evaluering.nei("Lenger avbrudd enn 10 år ")
         }
 
         val uavklartePerioderSiden16årsdag = perioderSiden16årsdag.filter { it.gyldig == null }
         if (fusjonerKonsekutivePerioder(ugyldigePerioderSiden16årsdag, uavklartePerioderSiden16årsdag)
-                        .find { it.lengde.years >= 10 } != null) {
+                        .any { it.lengde.years >= 10 }) {
             return Evaluering.kanskje("Uavklart avbrudd lenger enn 10 år ")
         }
 
@@ -153,7 +152,7 @@ class MedlemskapRegelsett {
         }
 
         if (fusjonerKonsekutivePerioder(gyldigePerioderSiden16årsdag, uavklartePerioderSiden16årsdag)
-                        .find { it.lengde.years >= antallÅrOpphold } != null) {
+                        .any { it.lengde.years >= antallÅrOpphold }) {
             return Evaluering.kanskje("Uavklarte avbrudd medfører mindre enn $antallÅrOpphold års medlemskap etter fylte 16 år ")
         }
 
@@ -173,7 +172,7 @@ class MedlemskapRegelsett {
         }
 
         if (fusjonerKonsekutivePerioder(gyldigePerioderSiden16årsdag, uavklartePerioderSiden16årsdag)
-                        .find { it.lengde.years >= 7 } != null) {
+                        .any { it.lengde.years >= 7 }) {
             return Evaluering.kanskje("Uavklarte avbrudd medfører mindre enn 7 års medlemskap etter fylte 16 år ")
         }
 
@@ -182,7 +181,7 @@ class MedlemskapRegelsett {
 
     private fun perioderMellom16årsdagOgSøknadsdato(medlemskapsgrunnlag: Medlemskapsgrunnlag): List<Periode> {
         val søknadsdato = søknadsdato(medlemskapsgrunnlag)
-        val datoFor16årsdag = datoFor16Årsdag(medlemskapsgrunnlag.søker.person)
+        val datoFor16årsdag = datoFor16Årsdag(medlemskapsgrunnlag.søker)
         return medlemskapsgrunnlag.medlemskapshistorikk.medlemskapsperioder
                 .filter { it.tildato.isAfter(datoFor16årsdag) }
                 .map {
@@ -229,14 +228,14 @@ class MedlemskapRegelsett {
     }
 
     private fun nordiskStatsborger(medlemskapsgrunnlag: Medlemskapsgrunnlag): Evaluering {
-        if (medlemskapsgrunnlag.søker.person.statsborgerskap.find { landkoderNorden.contains(it.land.toUpperCase()) } != null) {
+        if (medlemskapsgrunnlag.søker.statsborgerskap.any { landkoderNorden.contains(it.land.toUpperCase()) }) {
             return Evaluering.ja("Søker er nordisk statsborger")
         }
         return Evaluering.nei("Søker er ikke nordisk statsborger")
     }
 
     private fun eøsBorgerEllerLovligOpphold(medlemskapsgrunnlag: Medlemskapsgrunnlag): Evaluering {
-        if (medlemskapsgrunnlag.søker.person.statsborgerskap.find { landkoderEøs.contains(it.land.toUpperCase()) } != null) {
+        if (medlemskapsgrunnlag.søker.statsborgerskap.any { landkoderEøs.contains(it.land.toUpperCase()) }) {
             return Evaluering.kanskje("Søker er eøs-borger")
         }
 

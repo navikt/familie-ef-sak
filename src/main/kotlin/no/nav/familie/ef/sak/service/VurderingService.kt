@@ -21,16 +21,14 @@ class VurderingService(private val sakService: SakService,
         val fnr = sak.søknad.personalia.verdi.fødselsnummer.verdi.verdi
         val pdlSøker = pdlClient.hentSøker(fnr)
         val medlemskapsinfo = integrasjonerClient.hentMedlemskapsinfo(fnr)
-        val medlemskapshistorikk =
-                Medlemskapshistorikk(pdlSøker.data?.person!!,
-                                     medlemskapsinfo)
-        val medlemskapsgrunnlag = Medlemskapsgrunnlag(pdlSøker.data,
+        val medlemskapshistorikk = Medlemskapshistorikk(pdlSøker, medlemskapsinfo)
+        val medlemskapsgrunnlag = Medlemskapsgrunnlag(pdlSøker,
                                                       medlemskapshistorikk,
                                                       sak.søknad)
         val evaluering = medlemskapRegelsett.vurderingMedlemskapSøker.evaluer(medlemskapsgrunnlag)
 
         return MedlemskapMapper.tilDto(evaluering,
-                                       pdlSøker.data,
+                                       pdlSøker,
                                        medlemskapshistorikk)
     }
 
