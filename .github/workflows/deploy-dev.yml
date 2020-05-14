@@ -1,8 +1,12 @@
 name: Build-Deploy
-on: [pull_request]
+on:
+  push:
+    branches-ignore:
+      - 'master'
 
 env:
   IMAGE: docker.pkg.github.com/${{ github.repository }}/familie-ef-sak:${{ github.sha }}
+  DEPLOY: false # Må settes til true for å gjøre deploy
 
 jobs:
   build:
@@ -37,6 +41,7 @@ jobs:
           docker login docker.pkg.github.com -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
           docker push ${IMAGE}
   deploy:
+    if: ${{ env.DEPLOY }} 
     name: Deploy to NAIS
     needs: build
     runs-on: ubuntu-latest
