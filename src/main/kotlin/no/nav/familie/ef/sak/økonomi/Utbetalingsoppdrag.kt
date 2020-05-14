@@ -49,7 +49,9 @@ fun lagUtbetalingsoppdrag(saksbehandlerId: String,
 
 fun <T> List<T>.kunSisteHvis(kunSiste: Boolean): List<T> {
     return this.foldRight(mutableListOf()) { element, resultat ->
-        if (resultat.size == 0 || !kunSiste) resultat.add(0, element);resultat
+        if (resultat.size == 0 || !kunSiste) resultat.add(0, element)
+
+        resultat
     }
 }
 

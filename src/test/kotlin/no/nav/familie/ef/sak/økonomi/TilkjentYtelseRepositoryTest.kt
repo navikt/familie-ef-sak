@@ -19,7 +19,7 @@ import kotlin.test.assertTrue
 @SpringBootTest(classes = [ApplicationConfig::class])
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres","mock-integrasjoner","mock-oauth", "mock-auth")
+@ActiveProfiles("postgres", "mock-integrasjoner", "mock-oauth", "mock-auth")
 @Tag("integration")
 internal class TilkjentYtelseRepositoryTest {
 
@@ -53,11 +53,12 @@ internal class TilkjentYtelseRepositoryTest {
         val andelTilkjentYtelse1 = DataGenerator.tilfeldigAndelTilkjentYtelse(tilkjentYtelseId)
         val andelTilkjentYtelse2 = DataGenerator.tilfeldigAndelTilkjentYtelse(tilkjentYtelseId)
 
-        val lagredeAndelerTilkjentYtelse = andelTilkjentYtelseRepository.saveAll(listOf(andelTilkjentYtelse1,andelTilkjentYtelse2))
+        val lagredeAndelerTilkjentYtelse =
+                andelTilkjentYtelseRepository.saveAll(listOf(andelTilkjentYtelse1, andelTilkjentYtelse2))
 
-        assertEquals(2,lagredeAndelerTilkjentYtelse.count())
+        assertEquals(2, lagredeAndelerTilkjentYtelse.count())
 
-        lagredeAndelerTilkjentYtelse.forEach { assertTrue(it.id!=0L) }
+        lagredeAndelerTilkjentYtelse.forEach { assertTrue(it.id != 0L) }
     }
 
     @Test
@@ -75,7 +76,7 @@ internal class TilkjentYtelseRepositoryTest {
         val antallAbdeler1 = andelTilkjentYtelseRepository.findByTilkjentYtelseId(tilkjentYtelseId1).size
         val antallAbdeler2 = andelTilkjentYtelseRepository.findByTilkjentYtelseId(tilkjentYtelseId2).size
 
-        assertEquals(2,antallAbdeler1)
+        assertEquals(2, antallAbdeler1)
         assertEquals(4, antallAbdeler2)
-     }
+    }
 }

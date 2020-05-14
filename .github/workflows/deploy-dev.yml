@@ -1,8 +1,5 @@
 name: Build-Deploy
-on:
-  push:
-    branches-ignore:
-      - 'master'
+on: [pull_request]
 
 env:
   IMAGE: docker.pkg.github.com/${{ github.repository }}/familie-ef-sak:${{ github.sha }}
