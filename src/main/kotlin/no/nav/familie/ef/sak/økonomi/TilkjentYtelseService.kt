@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.util.*
 
 @Service
 class TilkjentYtelseService(
@@ -20,26 +21,27 @@ class TilkjentYtelseService(
 ) {
 
     @Transactional
-    fun opprettTilkjentYtelse(tilkjentYtelseDTO: TilkjentYtelseDTO): Long {
+    fun opprettTilkjentYtelse(tilkjentYtelseDTO: TilkjentYtelseDTO): UUID {
         tilkjentYtelseDTO.valider()
 
-        val tilkjentYtelse = tilkjentYtelseDTO.tilTilkjentYtelse(TilkjentYtelseStatus.OPPRETTET)
-        val tilkjentYtelseId = tilkjentYtelseRepository.save(tilkjentYtelse).id
+        val opprettetTilkjentYtelse = tilkjentYtelseRepository.save(
+                tilkjentYtelseDTO.tilTilkjentYtelse(TilkjentYtelseStatus.OPPRETTET)
+        )
 
-        andelTilkjentYtelseRepository.saveAll(tilkjentYtelseDTO.tilAndelerTilkjentYtelse(tilkjentYtelseId))
+        andelTilkjentYtelseRepository.saveAll(tilkjentYtelseDTO.tilAndelerTilkjentYtelse(opprettetTilkjentYtelse.id))
 
-        return tilkjentYtelseId
+        return opprettetTilkjentYtelse.eksternId
     }
 
     @Transactional
-    fun iverksettUtbetalingsoppdrag(tilkjentYtelseId: Long) {
-        val tilkjentYtelse = hentTilkjentYtelse(tilkjentYtelseId)
+    fun iverksettUtbetalingsoppdrag(eksternTilkjentYtelseId: UUID) {
+        val tilkjentYtelse = hentTilkjentYtelse(eksternTilkjentYtelseId)
 
         when (tilkjentYtelse.status) {
             TilkjentYtelseStatus.SENDT_TIL_IVERKSETTING -> return
             TilkjentYtelseStatus.AKTIV -> return
-            TilkjentYtelseStatus.IKKE_KLAR -> error("Tilkjent ytelse $tilkjentYtelseId er ikke klar")
-            TilkjentYtelseStatus.AVSLUTTET -> error("Tilkjent ytelse $tilkjentYtelseId er avsluttet")
+            TilkjentYtelseStatus.IKKE_KLAR -> error("Tilkjent ytelse ${tilkjentYtelse.id} er ikke klar")
+            TilkjentYtelseStatus.AVSLUTTET -> error("Tilkjent ytelse ${tilkjentYtelse.id} er avsluttet")
             TilkjentYtelseStatus.OPPRETTET -> sendUtbetalingsoppdragOgOppdaterStatus(
                     tilkjentYtelse,
                     TilkjentYtelseStatus.SENDT_TIL_IVERKSETTING)
@@ -48,14 +50,14 @@ class TilkjentYtelseService(
     }
 
     @Transactional
-    fun opphørUtbetalingsoppdrag(tilkjentYtelseId: Long, opphørDato: LocalDate = LocalDate.now()) {
-        val tilkjentYtelse = hentTilkjentYtelse(tilkjentYtelseId)
+    fun opphørUtbetalingsoppdrag(eksternTilkjentYtelseId: UUID, opphørDato: LocalDate = LocalDate.now()) {
+        val tilkjentYtelse = hentTilkjentYtelse(eksternTilkjentYtelseId)
 
         when (tilkjentYtelse.status) {
-            TilkjentYtelseStatus.OPPRETTET -> error("Tilkjent ytelse $tilkjentYtelseId er opprettet, men ikke iverksatt")
-            TilkjentYtelseStatus.SENDT_TIL_IVERKSETTING -> error("Tilkjent ytelse $tilkjentYtelseId er i ferd med å iverksettes")
-            TilkjentYtelseStatus.IKKE_KLAR -> error("Tilkjent ytelse $tilkjentYtelseId er ikke klar")
-            TilkjentYtelseStatus.AVSLUTTET -> error("Tilkjent ytelse $tilkjentYtelseId er allerede avsluttet")
+            TilkjentYtelseStatus.OPPRETTET -> error("Tilkjent ytelse ${tilkjentYtelse.id} er opprettet, men ikke iverksatt")
+            TilkjentYtelseStatus.SENDT_TIL_IVERKSETTING -> error("Tilkjent ytelse ${tilkjentYtelse.id} er i ferd med å iverksettes")
+            TilkjentYtelseStatus.IKKE_KLAR -> error("Tilkjent ytelse ${tilkjentYtelse.id} er ikke klar")
+            TilkjentYtelseStatus.AVSLUTTET -> error("Tilkjent ytelse ${tilkjentYtelse.id} er allerede avsluttet")
             TilkjentYtelseStatus.AKTIV -> sendUtbetalingsoppdragOgOppdaterStatus(
                     tilkjentYtelse.copy(opphørFom = opphørDato),
                     TilkjentYtelseStatus.AVSLUTTET)
@@ -79,32 +81,32 @@ class TilkjentYtelseService(
                                                  "Iverksetting mot oppdrag feilet")
     }
 
-    fun hentStatus(tilkjentYtelseId: Long): OppdragProtokollStatus {
+    fun hentStatus(eksternTilkjentYtelseId: UUID): OppdragProtokollStatus {
 
-        val tilkjentYtelse = hentTilkjentYtelse(tilkjentYtelseId)
+        val tilkjentYtelse = hentTilkjentYtelse(eksternTilkjentYtelseId)
 
         val statusFraOppdragDTO = StatusFraOppdragDTO(
                 fagsystem = FAGSYSTEM,
                 personIdent = tilkjentYtelse.personIdentifikator,
-                behandlingsId = tilkjentYtelseId,
-                vedtaksId = tilkjentYtelseId
+                behandlingsId = tilkjentYtelse.id,
+                vedtaksId = tilkjentYtelse.id
         )
 
         return gjørKallOgVentPåResponseEntityMedRessurs({ økonomiKlient.hentStatus(statusFraOppdragDTO) },
                                                         "Henting av status mot oppdrag feilet")
     }
 
-    fun hentTilkjentYtelseDto(tilkjentYtelseId: Long): TilkjentYtelseDTO {
-        val tilkjentYtelse = hentTilkjentYtelse(tilkjentYtelseId)
-        val andelerTilkjentYtelse = hentAndelerTilkjentYtelse(tilkjentYtelseId)
+    fun hentTilkjentYtelseDto(eksternTilkjentYtelseId: UUID): TilkjentYtelseDTO {
+        val tilkjentYtelse = hentTilkjentYtelse(eksternTilkjentYtelseId)
+        val andelerTilkjentYtelse = hentAndelerTilkjentYtelse(tilkjentYtelse.id)
                 .map { it.tilDto() }.toList()
 
         return tilkjentYtelse.tilDto(andelerTilkjentYtelse)
     }
 
-    private fun hentTilkjentYtelse(tilkjentYtelseId: Long) =
-            tilkjentYtelseRepository.findByIdOrNull(tilkjentYtelseId)
-            ?: error("Fant ikke tilkjent ytelse med id $tilkjentYtelseId")
+    private fun hentTilkjentYtelse(eksternTilkjentYtelseId: UUID) =
+            tilkjentYtelseRepository.findByEksternIdOrNull(eksternTilkjentYtelseId)
+            ?: error("Fant ikke tilkjent ytelse med ekstern id $eksternTilkjentYtelseId")
 
     private fun hentAndelerTilkjentYtelse(tilkjentYtelseId: Long) =
             andelTilkjentYtelseRepository.findByTilkjentYtelseId(tilkjentYtelseId)

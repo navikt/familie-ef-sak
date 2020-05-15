@@ -38,16 +38,28 @@ internal class TilkjentYtelseRepositoryTest {
 
         assertNotNull(tilkjentYtelseId)
 
-        val hentetTilkjentYtelse = tilkjentYtelseRepository.findByIdOrNull(tilkjentYtelseId)
+        val hentetTilkjentYtelse = tilkjentYtelseRepository.findByIdOrNull(tilkjentYtelseId)!!
 
-        assertEquals(tilkjentYtelse.saksnummer, hentetTilkjentYtelse!!.saksnummer)
+        assertEquals(tilkjentYtelse.saksnummer, hentetTilkjentYtelse.saksnummer)
+        assertEquals(tilkjentYtelse.eksternId, hentetTilkjentYtelse.eksternId)
+    }
+
+    @Test
+    fun `Opprett og hent tilkjent ytelse med ekstern id`() {
+
+        val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse()
+
+        val eksternId = tilkjentYtelseRepository.save(tilkjentYtelse).eksternId
+
+        val hentetTilkjentYtelse = tilkjentYtelseRepository.findByEksternIdOrNull(eksternId)!!
+
+        assertEquals(tilkjentYtelse.saksnummer, hentetTilkjentYtelse.saksnummer)
     }
 
     @Test
     fun `Opprett andeler tilkjent ytelse`() {
 
         val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse()
-
         val tilkjentYtelseId = tilkjentYtelseRepository.save(tilkjentYtelse).id
 
         val andelTilkjentYtelse1 = DataGenerator.tilfeldigAndelTilkjentYtelse(tilkjentYtelseId)

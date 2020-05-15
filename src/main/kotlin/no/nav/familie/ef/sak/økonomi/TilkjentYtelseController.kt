@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder
+import java.util.*
 
 @RestController
 @RequestMapping(path = ["/api/tilkjentytelse"])
@@ -29,28 +30,28 @@ class TilkjentYtelseController(private val tilkjentYtelseService: TilkjentYtelse
     }
 
     @GetMapping("{tilkjentYtelseId}")
-    fun hentTilkjentYtelse(@PathVariable tilkjentYtelseId: Long): ResponseEntity<TilkjentYtelseDTO> {
+    fun hentTilkjentYtelse(@PathVariable tilkjentYtelseId: UUID): ResponseEntity<TilkjentYtelseDTO> {
         val tilkjentYtelseDto = tilkjentYtelseService.hentTilkjentYtelseDto(tilkjentYtelseId)
 
         return ResponseEntity.ok(tilkjentYtelseDto)
     }
 
     @PutMapping("{tilkjentYtelseId}/utbetaling")
-    fun sørgForUtbetaling(@PathVariable tilkjentYtelseId: Long): HttpStatus {
+    fun sørgForUtbetaling(@PathVariable tilkjentYtelseId: UUID): HttpStatus {
         tilkjentYtelseService.iverksettUtbetalingsoppdrag(tilkjentYtelseId)
 
         return HttpStatus.ACCEPTED
     }
 
     @DeleteMapping("{tilkjentYtelseId}/utbetaling")
-    fun opphørUtbetaling(@PathVariable tilkjentYtelseId: Long): HttpStatus {
+    fun opphørUtbetaling(@PathVariable tilkjentYtelseId: UUID): HttpStatus {
         tilkjentYtelseService.opphørUtbetalingsoppdrag(tilkjentYtelseId)
 
         return HttpStatus.ACCEPTED
     }
 
-    @GetMapping("{tilkjentYtelse}/utbetaling")
-    fun hentStatusUtbetaling(@PathVariable tilkjentYtelseId: Long): ResponseEntity<OppdragProtokollStatus> {
+    @GetMapping("{tilkjentYtelseId}/utbetaling")
+    fun hentStatusUtbetaling(@PathVariable tilkjentYtelseId: UUID): ResponseEntity<OppdragProtokollStatus> {
         val status = tilkjentYtelseService.hentStatus(tilkjentYtelseId)
 
         return ResponseEntity.ok(status)
