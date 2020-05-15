@@ -30,7 +30,7 @@ class PersonInfoController(private val personService: PersonService) {
 
     @ExceptionHandler(ConstraintViolationException::class)
     fun handleRestClientResponseException(e: ConstraintViolationException): Ressurs<ConstraintViolationException> {
-        return Ressurs.failure<ConstraintViolationException>(e.message,e)
+        return Ressurs.failure<ConstraintViolationException>(e.message, null, e)
     }
 
     @GetMapping
