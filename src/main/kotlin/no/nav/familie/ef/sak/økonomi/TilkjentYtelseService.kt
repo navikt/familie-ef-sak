@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.økonomi
 
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.økonomi.Utbetalingsoppdrag.lagUtbetalingsoppdrag
 import no.nav.familie.ef.sak.økonomi.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.domain.TilkjentYtelseStatus
 import no.nav.familie.ef.sak.økonomi.dto.*
@@ -71,7 +72,7 @@ class TilkjentYtelseService(
         val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
         val utbetalingsoppdrag = lagUtbetalingsoppdrag(saksbehandlerId, tilkjentYtelse, andelerTilkjentYtelse)
 
-        // Rulles tilbake hvis iverksettOppdrag under kaster en exception
+        // Rulles tilbake hvis økonomiKlient.iverksettOppdrag under kaster en exception
         tilkjentYtelseRepository.save(tilkjentYtelse.copy(
                 utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdrag),
                 status = nyStatus

@@ -17,7 +17,8 @@ fun TilkjentYtelseDTO.tilTilkjentYtelse(status: TilkjentYtelseStatus = TilkjentY
             saksnummer = saksnummer,
             stønadFom = minStønadFom,
             stønadTom = maxStønadTom,
-            vedtaksdato = LocalDate.now(),
+            vedtaksdato = vedtaksdato,
+            eksternId = eksternId,
             status = status
     )
 }

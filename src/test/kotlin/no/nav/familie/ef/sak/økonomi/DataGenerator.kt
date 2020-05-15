@@ -3,10 +3,15 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.økonomi
 import no.nav.familie.ef.sak.økonomi.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.domain.YtelseType
+import no.nav.familie.ef.sak.økonomi.dto.AndelTilkjentYtelseDTO
+import no.nav.familie.ef.sak.økonomi.dto.TilkjentYtelseDTO
 import java.time.LocalDate
 import java.util.*
 
 object DataGenerator {
+    private fun tilfeldigFødselsnummer() =  Random().nextInt(Int.MAX_VALUE).toString()
+    private fun tilfeldigSaksnummer() = "SAK"+Random().nextInt(Int.MAX_VALUE)
+
     fun tilfeldigAndelTilkjentYtelse(
             tilkjentYtelseId: Long,
             beløp: Int=Random().nextInt(),
@@ -25,10 +30,10 @@ object DataGenerator {
         (1 .. antall).map { tilfeldigAndelTilkjentYtelse(tilkjentYtelseId) }.toList()
 
     fun tilfeldigTilkjentYtelse(
-            personIdentifikator: String = Random().nextInt(Int.MAX_VALUE).toString(),
+            personIdentifikator: String = tilfeldigFødselsnummer(),
             stønadFom: LocalDate = LocalDate.now(),
             stønadTom: LocalDate = LocalDate.now(),
-            saksnummer: String = "SAK"+Random().nextInt(Int.MAX_VALUE),
+            saksnummer: String = tilfeldigSaksnummer(),
             vedtaksdato: LocalDate = LocalDate.now()
 
     ) = TilkjentYtelse(
@@ -38,4 +43,23 @@ object DataGenerator {
             saksnummer = saksnummer,
             vedtaksdato = vedtaksdato
     )
+
+    fun tilfeldigTilkjentYtelseDto() : TilkjentYtelseDTO {
+        val søker = tilfeldigFødselsnummer()
+
+        return TilkjentYtelseDTO(
+            søker = søker,
+            saksnummer = tilfeldigSaksnummer(),
+            andelerTilkjentYtelse = listOf(
+                    AndelTilkjentYtelseDTO(
+                            personIdentifikator = søker,
+                            beløp = Random().nextInt(100_000),
+                            stønadFom = LocalDate.now(),
+                            stønadTom = LocalDate.now(),
+                            type=YtelseType.OVERGANGSSTØNAD
+                    )
+            ))
+
+    }
+
 }

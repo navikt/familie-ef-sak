@@ -27,40 +27,22 @@ class ØkonomiKlient(
         val azure: RestOperations) {
 
     fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag): ResponseEntity<Ressurs<String>> {
-        val headers = HttpHeaders().medContentTypeJsonUTF8()
-        headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
-
         return azure.exchange(
                 URI.create("$familieOppdragUri/oppdrag"),
                 HttpMethod.POST,
-                HttpEntity(utbetalingsoppdrag, headers))
+                HttpEntity(utbetalingsoppdrag))
     }
 
     fun hentStatus(statusFraOppdragDTO: StatusFraOppdragDTO): ResponseEntity<Ressurs<OppdragProtokollStatus>> {
-        val headers = HttpHeaders().medContentTypeJsonUTF8()
-        headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
-
         return azure.exchange(
                 URI.create("$familieOppdragUri/status"),
                 HttpMethod.POST,
-                HttpEntity(statusFraOppdragDTO, headers))
+                HttpEntity(statusFraOppdragDTO))
     }
 
     fun grensesnittavstemOppdrag(fraDato: LocalDateTime, tilDato: LocalDateTime): ResponseEntity<Ressurs<String>> {
-        val headers = HttpHeaders()
-        headers.acceptCharset = listOf(Charsets.UTF_8)
-        headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
-
         return azure.exchange(
                 URI.create("$familieOppdragUri/grensesnittavstemming/$FAGSYSTEM/?fom=$fraDato&tom=$tilDato"),
-                HttpMethod.POST,
-                HttpEntity<String>(headers))
+                HttpMethod.POST)
     }
-
-    private fun HttpHeaders.medContentTypeJsonUTF8(): HttpHeaders {
-        this.add("Content-Type", "application/json;charset=UTF-8")
-        this.acceptCharset = listOf(Charsets.UTF_8)
-        return this
-    }
-
 }
