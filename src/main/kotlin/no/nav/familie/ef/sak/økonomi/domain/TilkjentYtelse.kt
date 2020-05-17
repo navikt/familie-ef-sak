@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.økonomi.domain
 
+import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import java.time.LocalDate
@@ -19,14 +20,15 @@ data class TilkjentYtelse(
         val stønadTom: LocalDate? = null,
         @Column("opphor_fom")
         val opphørFom: LocalDate? = null,
-        val utbetalingsoppdrag: String? = null,
+        val utbetalingsoppdrag: Utbetalingsoppdrag? = null,
         @Column("forrige_tilkjent_ytelse_id_fkey")
         val forrigeTilkjentYtelseId: Long? = null,
         val vedtaksdato: LocalDate? = null,
-        val status: TilkjentYtelseStatus = TilkjentYtelseStatus.IKKE_KLAR
+        val status: TilkjentYtelseStatus = TilkjentYtelseStatus.IKKE_KLAR,
+        val type: TilkjentYtelseType = TilkjentYtelseType.FØRSTEGANGSBEHANDLING
 )
 
-enum class TilkjentYtelseStatus() {
+enum class TilkjentYtelseStatus {
     IKKE_KLAR,
     OPPRETTET,
     SENDT_TIL_IVERKSETTING,
@@ -34,4 +36,9 @@ enum class TilkjentYtelseStatus() {
     AVSLUTTET
 }
 
+enum class TilkjentYtelseType {
+    FØRSTEGANGSBEHANDLING,
+    OPPHØR,
+    ENDRING
+}
 

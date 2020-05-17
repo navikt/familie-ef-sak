@@ -3,14 +3,15 @@ package no.nav.familie.ef.sak.økonomi
 import no.nav.familie.ef.sak.økonomi.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.domain.TilkjentYtelseStatus
+import no.nav.familie.ef.sak.økonomi.domain.TilkjentYtelseType
 import no.nav.familie.ef.sak.økonomi.dto.AndelTilkjentYtelseDTO
 import no.nav.familie.ef.sak.økonomi.dto.TilkjentYtelseDTO
 import java.time.LocalDate
 
 fun TilkjentYtelseDTO.tilTilkjentYtelse(status: TilkjentYtelseStatus = TilkjentYtelseStatus.OPPRETTET) : TilkjentYtelse {
 
-    val minStønadFom = this.andelerTilkjentYtelse.map { it.stønadFom }.min()
-    val maxStønadTom = this.andelerTilkjentYtelse.map { it.stønadTom }.max()
+    val minStønadFom = this.andelerTilkjentYtelse.map { it.stønadFom }.min() ?: LocalDate.MIN
+    val maxStønadTom = this.andelerTilkjentYtelse.map { it.stønadTom }.max() ?: LocalDate.MAX
 
     return TilkjentYtelse(
             personIdentifikator = søker,
@@ -55,3 +56,13 @@ fun AndelTilkjentYtelse.tilDto() : AndelTilkjentYtelseDTO {
             type = this.type
     )
 }
+
+fun TilkjentYtelse.tilOpphør(opphørDato: LocalDate) = TilkjentYtelse(
+        type = TilkjentYtelseType.OPPHØR,
+        personIdentifikator = personIdentifikator,
+        saksnummer = saksnummer,
+        opphørFom = opphørDato,
+        forrigeTilkjentYtelseId = id,
+        vedtaksdato = LocalDate.now()
+)
+

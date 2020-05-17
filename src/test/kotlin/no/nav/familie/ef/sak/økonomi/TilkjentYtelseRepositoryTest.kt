@@ -3,6 +3,8 @@ package no.nav.familie.ef.sak.økonomi
 import no.nav.familie.ef.sak.common.DbContainerInitializer
 import no.nav.familie.ef.sak.config.ApplicationConfig
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.økonomi.DataGenerator
+import no.nav.familie.ef.sak.økonomi.Utbetalingsoppdrag.lagUtbetalingsoppdrag
+import no.nav.familie.ef.sak.økonomi.domain.TilkjentYtelseStatus
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -14,6 +16,7 @@ import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 @SpringBootTest(classes = [ApplicationConfig::class])
@@ -91,4 +94,32 @@ internal class TilkjentYtelseRepositoryTest {
         assertEquals(2, antallAbdeler1)
         assertEquals(4, antallAbdeler2)
     }
+
+    @Test
+    fun `Lagre utbetalingsoppdrag`() {
+
+        val lagretTilkjentYtelse = tilkjentYtelseRepository.save(DataGenerator.tilfeldigTilkjentYtelse())
+        val andelerTilkjentYtelse = DataGenerator.flereTilfeldigeAndelerTilkjentYtelse(lagretTilkjentYtelse.id, 2)
+
+        val utbetalingsoppdrag = lagUtbetalingsoppdrag("saksbehandler", lagretTilkjentYtelse, andelerTilkjentYtelse)
+
+        tilkjentYtelseRepository.save(lagretTilkjentYtelse.copy(utbetalingsoppdrag = utbetalingsoppdrag))
+
+        val oppdatertTilkjentYtelse = tilkjentYtelseRepository.findByIdOrNull(lagretTilkjentYtelse.id)!!
+
+        assertEquals(utbetalingsoppdrag,oppdatertTilkjentYtelse.utbetalingsoppdrag)
+    }
+
+    @Test
+    fun `Finn tilkjent ytelse på personident`() {
+
+        val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse()
+        val lagretTilkjentYtelse = tilkjentYtelseRepository.save(tilkjentYtelse)
+
+        val hentetTilkjentYtelse = tilkjentYtelseRepository.findByPersonIdentifikatorOrNull(tilkjentYtelse.personIdentifikator)
+
+        assertEquals(lagretTilkjentYtelse,hentetTilkjentYtelse)
+        assertNull(tilkjentYtelseRepository.findByPersonIdentifikatorOrNull("Finnes ikke"))
+    }
+
 }

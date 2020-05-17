@@ -20,7 +20,7 @@ object Utbetalingsoppdrag {
     // Beholder bare siste utbetalingsperiode hvis det er opphør.
     fun lagUtbetalingsoppdrag(saksbehandlerId: String,
                               tilkjentYtelse: TilkjentYtelse,
-                              andelerTilkjentYtelse: List<AndelTilkjentYtelse>): Utbetalingsoppdrag {
+                              andelerTilkjentYtelse: Iterable<AndelTilkjentYtelse>): Utbetalingsoppdrag {
 
         val erOpphør = tilkjentYtelse.opphørFom != null
 

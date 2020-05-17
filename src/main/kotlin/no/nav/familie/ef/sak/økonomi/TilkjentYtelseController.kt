@@ -44,10 +44,14 @@ class TilkjentYtelseController(private val tilkjentYtelseService: TilkjentYtelse
     }
 
     @DeleteMapping("{tilkjentYtelseId}/utbetaling")
-    fun opphørUtbetaling(@PathVariable tilkjentYtelseId: UUID): HttpStatus {
-        tilkjentYtelseService.opphørUtbetalingsoppdrag(tilkjentYtelseId)
+    fun opphørUtbetaling(@PathVariable tilkjentYtelseId: UUID): ResponseEntity<Long> {
+        val opphørtTilkjentYtelseId = tilkjentYtelseService.opphørUtbetalingsoppdrag(tilkjentYtelseId)
 
-        return HttpStatus.ACCEPTED
+        val location = ServletUriComponentsBuilder.fromCurrentRequestUri()
+                .path(opphørtTilkjentYtelseId.toString())
+                .build().toUri()
+
+        return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY).location(location).build()
     }
 
     @GetMapping("{tilkjentYtelseId}/utbetaling")
