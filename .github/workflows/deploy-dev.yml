@@ -6,7 +6,7 @@ on:
 
 env:
   IMAGE: docker.pkg.github.com/${{ github.repository }}/familie-ef-sak:${{ github.sha }}
-  DEPLOY: false # Må settes til true for å gjøre deploy
+  DEPLOY: true # Må settes til true for å gjøre deploy
 
 jobs:
   build:
