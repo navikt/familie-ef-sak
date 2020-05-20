@@ -28,7 +28,6 @@ spec:
         mountPath: /var/run/secrets/nais.io/azuread
       - kvPath: /serviceuser/data/dev/srvfamilie-ef-sak
         mountPath: /var/run/secrets/nais.io/srvfamilie-ef-sak
-        #kv/preprod/fss/familie-ef-sak/default/dev - hvor kommer denne fra?
   replicas:
     min: 2
     max: 4
