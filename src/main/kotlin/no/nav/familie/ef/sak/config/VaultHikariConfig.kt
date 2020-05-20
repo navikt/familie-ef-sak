@@ -29,7 +29,7 @@ class VaultHikariConfig(private val container: SecretLeaseContainer,
                 hikariDataSource.password = password
 //                hikariDataSource.hikariConfigMXBean.setUsername(username)
 //                hikariDataSource.hikariConfigMXBean.setPassword(password)
-                hikariDataSource.hikariPoolMXBean.softEvictConnections()
+   //             hikariDataSource.hikariPoolMXBean.softEvictConnections()
             }
         }
         container.addRequestedSecret(secret)
