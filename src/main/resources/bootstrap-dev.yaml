@@ -9,7 +9,7 @@ spring:
         order: -10
         lifecycle:
           enabled: true
-          expiry-threshold: 2m
+         # expiry-threshold: 2m
       database:
         enabled: true
         role: familie-ef-sak-admin
