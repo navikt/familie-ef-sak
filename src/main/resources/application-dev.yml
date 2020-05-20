@@ -4,3 +4,4 @@ spring:
 
 AZUREAD_DISCOVERY_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/v2.0/.well-known/openid-configuration
 AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
+FAMILIE_OPPDRAG_API_URL: http://familie-oppdrag/api
