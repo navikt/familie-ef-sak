@@ -9,7 +9,7 @@ data class AndelTilkjentYtelse(
         val id: Long = 0,
         @Column("tilkjentytelse_id_fkey")
         val tilkjentYtelseId: Long,
-        @Column("personIdent")
+        @Column("personident")
         val personIdentifikator : String,
         @Column("belop")
         val beløp: Int,

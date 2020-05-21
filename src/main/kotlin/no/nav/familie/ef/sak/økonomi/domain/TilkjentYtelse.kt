@@ -11,7 +11,7 @@ data class TilkjentYtelse(
         val id: Long = 0,
         @Column("ekstern_id")
         val eksternId: UUID = UUID.randomUUID(),
-        @Column("personIdent")
+        @Column("personident")
         val personIdentifikator: String,
         val saksnummer: String,
         @Column("stonad_fom")
