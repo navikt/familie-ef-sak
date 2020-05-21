@@ -1,9 +1,10 @@
-package no.nav.familie.ef.sak.vurdering
+package no.nav.familie.ef.sak.vurdering.medlemskap
 
 import no.nav.familie.ef.sak.integration.dto.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlPerson
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import java.time.LocalDate
+import java.time.Period
 
 class Medlemskapshistorikk(pdlPerson: PdlPerson, medlemskapsinfo: Medlemskapsinfo) {
 
@@ -139,7 +140,7 @@ class Medlemskapshistorikk(pdlPerson: PdlPerson, medlemskapsinfo: Medlemskapsinf
         return bosattperioder.toList()
     }
 
-    private fun tildato(it: Bostedsadresse) = it.folkeregistermetadata.opphoerstidspunkt?.toLocalDate() ?: LocalDate.MAX
+    private fun tildato(it: Bostedsadresse) = it.folkeregistermetadata.opphørstidspunkt?.toLocalDate() ?: LocalDate.MAX
 
     private fun fradato(it: Bostedsadresse) = it.angittFlyttedato ?: it.folkeregistermetadata.gyldighetstidspunkt!!.toLocalDate()
 
@@ -158,4 +159,6 @@ data class Periode(val fradato: LocalDate, val tildato: LocalDate, val gyldig: B
     fun omsluttesAv(periode: Periode): Boolean {
         return (!periode.fradato.isAfter(this.fradato) && !periode.tildato.isBefore(this.tildato))
     }
+
+    val lengde = Period.between(fradato, tildato)
 }

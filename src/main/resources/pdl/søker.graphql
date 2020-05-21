@@ -6,28 +6,10 @@ query($ident: ID!){
         bostedsadresse(historikk: true) {
             angittFlyttedato
             coAdressenavn
-            vegadresse {
-                husnummer
-                husbokstav
-                bruksenhetsnummer
-                adressenavn
-                kommunenummer
-                tilleggsnavn
-                postnummer
-                koordinater {
-                    x
-                    y
-                    z
-                    kvalitet
-                }
+            folkeregistermetadata {
+                gyldighetstidspunkt
+                opphoerstidspunkt
             }
-            ukjentBosted {
-                bostedskommune
-            }
-        }
-        deltBosted(historikk: true) {
-            startdatoForKontrakt
-            sluttdatoForKontrakt
             vegadresse {
                 husnummer
                 husbokstav
@@ -115,7 +97,7 @@ query($ident: ID!){
             relatertVedSivilstand
             bekreftelsesdato
         }
-        statsborgerskap(historikk: true) {
+        statsborgerskap {
             land
             gyldigFraOgMed
             gyldigTilOgMed

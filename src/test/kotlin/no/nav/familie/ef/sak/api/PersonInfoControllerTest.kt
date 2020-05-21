@@ -2,8 +2,9 @@ package no.nav.familie.ef.sak.api
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.api.dto.Person
 import no.nav.familie.ef.sak.common.DbContainerInitializer
+import no.nav.familie.ef.sak.api.gui.dto.Person
+import no.nav.familie.ef.sak.api.gui.PersonInfoController
 import no.nav.familie.ef.sak.integration.dto.Tilgang
 import no.nav.familie.ef.sak.integration.dto.personopplysning.PersonIdent
 import no.nav.familie.ef.sak.integration.dto.personopplysning.PersonhistorikkInfo

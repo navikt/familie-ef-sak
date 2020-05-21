@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.api
+package no.nav.familie.ef.sak.api.external
 
 import no.nav.familie.ba.sak.validering.SakstilgangConstraint
 import no.nav.familie.ef.sak.service.SakService

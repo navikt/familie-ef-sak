@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.api.dto
+package no.nav.familie.ef.sak.api.gui.dto
 
 import no.nav.familie.ef.sak.integration.dto.personopplysning.PersonhistorikkInfo
 import no.nav.familie.ef.sak.integration.dto.personopplysning.Personinfo
