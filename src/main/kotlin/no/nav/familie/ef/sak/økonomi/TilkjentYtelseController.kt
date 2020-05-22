@@ -1,0 +1,64 @@
+package no.nav.familie.ef.sak.økonomi
+
+import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.økonomi.dto.TilkjentYtelseDTO
+import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+import org.springframework.validation.annotation.Validated
+import org.springframework.web.bind.annotation.*
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder
+import java.util.*
+
+@RestController
+@RequestMapping(path = ["/api/tilkjentytelse"])
+@ProtectedWithClaims(issuer = "azuread")
+class TilkjentYtelseController(private val tilkjentYtelseService: TilkjentYtelseService) {
+
+    @PostMapping
+    fun opprettTilkjentYtelse(@RequestBody tilkjentYtelseDTO: TilkjentYtelseDTO): ResponseEntity<Long> {
+
+        tilkjentYtelseDTO.valider()
+
+        val tilkjentYtelseId = tilkjentYtelseService.opprettTilkjentYtelse(tilkjentYtelseDTO)
+
+        val location = ServletUriComponentsBuilder.fromCurrentRequestUri()
+                .path(tilkjentYtelseId.toString())
+                .build().toUri()
+
+        return ResponseEntity.created(location).build()
+    }
+
+    @GetMapping("{tilkjentYtelseId}")
+    fun hentTilkjentYtelse(@PathVariable tilkjentYtelseId: UUID): ResponseEntity<TilkjentYtelseDTO> {
+        val tilkjentYtelseDto = tilkjentYtelseService.hentTilkjentYtelseDto(tilkjentYtelseId)
+
+        return ResponseEntity.ok(tilkjentYtelseDto)
+    }
+
+    @PutMapping("{tilkjentYtelseId}/utbetaling")
+    fun sørgForUtbetaling(@PathVariable tilkjentYtelseId: UUID): HttpStatus {
+        tilkjentYtelseService.iverksettUtbetalingsoppdrag(tilkjentYtelseId)
+
+        return HttpStatus.ACCEPTED
+    }
+
+    @DeleteMapping("{tilkjentYtelseId}/utbetaling")
+    fun opphørUtbetaling(@PathVariable tilkjentYtelseId: UUID): ResponseEntity<Long> {
+        val opphørtTilkjentYtelseId = tilkjentYtelseService.opphørUtbetalingsoppdrag(tilkjentYtelseId)
+
+        val location = ServletUriComponentsBuilder.fromCurrentRequestUri()
+                .path(opphørtTilkjentYtelseId.toString())
+                .build().toUri()
+
+        return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY).location(location).build()
+    }
+
+    @GetMapping("{tilkjentYtelseId}/utbetaling")
+    fun hentStatusUtbetaling(@PathVariable tilkjentYtelseId: UUID): ResponseEntity<OppdragProtokollStatus> {
+        val status = tilkjentYtelseService.hentStatus(tilkjentYtelseId)
+
+        return ResponseEntity.ok(status)
+    }
+
+}

@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.api
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
+import no.nav.familie.ef.sak.common.DbContainerInitializer
 import no.nav.familie.ef.sak.api.gui.dto.Person
 import no.nav.familie.ef.sak.api.gui.PersonInfoController
 import no.nav.familie.ef.sak.integration.dto.Tilgang
@@ -24,12 +25,14 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.TestPropertySource
 import java.time.LocalDate
 
-@ActiveProfiles("local", "mock-auth", "mock-oauth")
+@ActiveProfiles("postgres", "mock-auth", "mock-oauth")
 @TestPropertySource(properties = ["FAMILIE_INTEGRASJONER_URL=http://localhost:28085"])
 @AutoConfigureWireMock(port = 28085)
+@ContextConfiguration(initializers = [DbContainerInitializer::class])
 class PersonInfoControllerTest : OppslagSpringRunnerTest() {
 
     @Autowired
