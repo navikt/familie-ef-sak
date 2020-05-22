@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.integration
 
-import no.nav.familie.ef.sak.exception.PdlRequestException
 import no.nav.familie.ef.sak.config.PdlConfig
+import no.nav.familie.ef.sak.exception.PdlRequestException
 import no.nav.familie.ef.sak.integration.dto.pdl.*
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.http.sts.StsRestClient
@@ -16,6 +16,11 @@ class PdlClient(val pdlConfig: PdlConfig,
                 val stsRestClient: StsRestClient)
     : AbstractRestClient(restTemplate, "pdl.personinfo") {
 
+    fun hentSøkerKort(personIdent: String): PdlSøkerKort {
+        val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
+                                                query = pdlConfig.søkerKortQuery)
+        return hentFraPdl<PdlSøkerKortData>(pdlPersonRequest).person
+    }
 
     fun hentSøker(personIdent: String): PdlSøker {
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),

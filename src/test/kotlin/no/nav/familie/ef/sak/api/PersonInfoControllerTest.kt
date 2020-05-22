@@ -16,8 +16,8 @@ import no.nav.familie.ef.sak.integration.dto.personopplysning.tilhørighet.Landk
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.web.client.exchange
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
@@ -39,7 +39,7 @@ class PersonInfoControllerTest : OppslagSpringRunnerTest() {
     @Autowired
     lateinit var personInfoController: PersonInfoController
 
-    @Before
+    @BeforeEach
     fun setUp() {
         headers.setBearerAuth(lokalTestToken)
         WireMock.stubFor(WireMock.post(WireMock.urlEqualTo("/api/tilgang/personer"))

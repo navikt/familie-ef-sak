@@ -20,6 +20,10 @@ class PersonService(val integrasjonerClient: FamilieIntegrasjonerClient,
         return pdlClient.hentSøker(ident)
     }
 
+    fun hentPdlPersonKort(ident: String): PdlSøkerKort {
+        return pdlClient.hentSøkerKort(ident)
+    }
+
     fun hentPdlBarn(ident: String): PdlBarn {
         return pdlClient.hentBarn(ident)
     }
