@@ -1,12 +1,12 @@
 package no.nav.familie.ef.sak.api.gui
 
-import no.nav.familie.ba.sak.validering.PersontilgangConstraint
 import no.nav.familie.ef.sak.api.dto.PersonIdentDto
 import no.nav.familie.ef.sak.api.gui.dto.Person
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlAnnenForelder
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlBarn
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker
 import no.nav.familie.ef.sak.service.PersonService
+import no.nav.familie.ef.sak.validering.PersontilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
@@ -31,12 +31,6 @@ class PersonInfoController(private val personService: PersonService) {
     @ExceptionHandler(ConstraintViolationException::class)
     fun handleRestClientResponseException(e: ConstraintViolationException): Ressurs<ConstraintViolationException> {
         return Ressurs.failure(e.message, null, e)
-    }
-
-    // TODO slett når frontend er oppdatert
-    @GetMapping
-    fun personinfo(@PersontilgangConstraint @RequestHeader(name = "Nav-Personident") ident: String): Ressurs<Person> {
-        return personinfo(PersonIdentDto(ident))
     }
 
     @PostMapping

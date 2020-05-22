@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.api
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
+import no.nav.familie.ef.sak.api.dto.PersonIdentDto
 import no.nav.familie.ef.sak.common.DbContainerInitializer
 import no.nav.familie.ef.sak.api.gui.dto.Person
 import no.nav.familie.ef.sak.api.gui.PersonInfoController
@@ -41,7 +42,6 @@ class PersonInfoControllerTest : OppslagSpringRunnerTest() {
     @Before
     fun setUp() {
         headers.setBearerAuth(lokalTestToken)
-        headers.add("Nav-Personident", "12345678901")
         WireMock.stubFor(WireMock.post(WireMock.urlEqualTo("/api/tilgang/personer"))
                                  .willReturn(WireMock.aResponse()
                                                      .withStatus(200)
@@ -64,7 +64,9 @@ class PersonInfoControllerTest : OppslagSpringRunnerTest() {
                                                      .withBody(objectMapper.writeValueAsString(personhistorikkInfo))))
 
         val response =
-                restTemplate.exchange<Ressurs<Person>>(localhost(GET_PERSONINFO), HttpMethod.GET, HttpEntity(null, headers))
+                restTemplate.exchange<Ressurs<Person>>(localhost(PERSONINFO_PATH),
+                                                       HttpMethod.POST,
+                                                       HttpEntity(PersonIdentDto(PERSONIDENT), headers))
 
         Assertions.assertThat(response).isNotNull
 
@@ -84,9 +86,9 @@ class PersonInfoControllerTest : OppslagSpringRunnerTest() {
                                                      .withHeader("Content-Type", "application/json")
                                                      .withBody(objectMapper.writeValueAsString(personhistorikkInfo))))
 
-        val response: ResponseEntity<String> = restTemplate.exchange(localhost(GET_PERSONINFO),
-                                                                     HttpMethod.GET,
-                                                                     HttpEntity(null, headers))
+        val response: ResponseEntity<String> = restTemplate.exchange(localhost(PERSONINFO_PATH),
+                                                                     HttpMethod.POST,
+                                                                     HttpEntity(PersonIdentDto(PERSONIDENT), headers))
 
         Assertions.assertThat(response.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
         Assertions.assertThat(response.body).isEqualTo("Feil mot personopplysning. Message=404 Not Found: [no body]")
@@ -104,16 +106,17 @@ class PersonInfoControllerTest : OppslagSpringRunnerTest() {
                                  .willReturn(WireMock.aResponse()
                                                      .withStatus(404)))
 
-        val response: ResponseEntity<String> = restTemplate.exchange(localhost(GET_PERSONINFO),
-                                                                     HttpMethod.GET,
-                                                                     HttpEntity(null, headers))
+        val response: ResponseEntity<String> = restTemplate.exchange(localhost(PERSONINFO_PATH),
+                                                                     HttpMethod.POST,
+                                                                     HttpEntity(PersonIdentDto(PERSONIDENT), headers))
 
         Assertions.assertThat(response.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
         Assertions.assertThat(response.body).isEqualTo("Feil mot personopplysning. Message=404 Not Found: [no body]")
     }
 
     companion object {
-        private const val GET_PERSONINFO = "/api/personinfo"
+        private const val PERSONINFO_PATH = "/api/personinfo"
+        private const val PERSONIDENT = "12345678901"
     }
 
     private val person = Ressurs.success(Personinfo(PersonIdent("12345678901"),
