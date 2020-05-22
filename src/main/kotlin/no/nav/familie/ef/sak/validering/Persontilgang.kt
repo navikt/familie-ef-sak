@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.validering
 
-import no.nav.familie.ba.sak.validering.PersontilgangConstraint
 import no.nav.familie.ef.sak.api.dto.PersonIdentDto
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import org.slf4j.LoggerFactory

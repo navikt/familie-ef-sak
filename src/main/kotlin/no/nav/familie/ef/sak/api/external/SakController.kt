@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.api.external
 
-import no.nav.familie.ba.sak.validering.SakstilgangConstraint
 import no.nav.familie.ef.sak.service.SakService
+import no.nav.familie.ef.sak.validering.SakstilgangConstraint
 import no.nav.familie.kontrakter.ef.sak.Sak
 import no.nav.familie.kontrakter.ef.søknad.*
 import no.nav.security.token.support.core.api.ProtectedWithClaims
