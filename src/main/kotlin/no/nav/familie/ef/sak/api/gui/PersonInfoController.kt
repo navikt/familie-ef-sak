@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.api.gui
 
 import no.nav.familie.ba.sak.validering.PersontilgangConstraint
+import no.nav.familie.ef.sak.api.dto.PersonIdentDto
 import no.nav.familie.ef.sak.api.gui.dto.Person
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlAnnenForelder
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlBarn
@@ -32,11 +33,16 @@ class PersonInfoController(private val personService: PersonService) {
         return Ressurs.failure(e.message, null, e)
     }
 
+    // TODO slett når frontend er oppdatert
     @GetMapping
-    fun personinfo(@RequestHeader(name = "Nav-Personident") @PersontilgangConstraint ident: String): Ressurs<Person> {
-        return Ressurs.success(personService.hentPerson(ident))
+    fun personinfo(@PersontilgangConstraint @RequestHeader(name = "Nav-Personident") ident: String): Ressurs<Person> {
+        return personinfo(PersonIdentDto(ident))
     }
 
+    @PostMapping
+    fun personinfo(@PersontilgangConstraint @RequestBody personIdent: PersonIdentDto): Ressurs<Person> {
+        return Ressurs.success(personService.hentPerson(personIdent.personIdent))
+    }
 
     @GetMapping("/soker") // TODO Testendepunkt. Fjernes etter hvert
     fun søkerinfo(@RequestHeader(name = "Nav-Personident") @PersontilgangConstraint ident: String): PdlSøker {

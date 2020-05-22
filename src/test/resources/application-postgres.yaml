@@ -1,22 +1,29 @@
-server:
-  port: 8093
-
-spring:
-  h2:
-    console:
-      enabled: true
-  datasource:
-    username: sa
-    password:
-#    url: jdbc:postgresql://localhost:5432/familie-ef-sak
-    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
-    driver-class-name: org.h2.Driver
-
 no.nav.security.jwt:
   issuer.azuread:
     accepted_audience: aud-localhost
     cookie_name: localhost-idtoken
     proxyurl:
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/familie-ba-sak
+    password: test
+    username: postgres
+  flyway:
+    enabled: true
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql=false
+    hibernate:
+      ddl-auto: none
+
+  cloud:
+    vault:
+      database:
+        role: postgres
+
 
 AAD_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
 
@@ -25,6 +32,7 @@ AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navq.onmicrosoft.c
 FAMILIE_INTEGRASJONER_URL: http://localhost:8085
 EF_SAK_FRONTEND_CLIENT_ID: DEV_azp
 EF_MOTTAK_CLIENT_ID: dummy
+FAMILIE_OPPDRAG_API_URL: http://localhost:8087/api
+
 CREDENTIAL_USERNAME: not-a-real-srvuser
 CREDENTIAL_PASSWORD: not-a-real-pw
-FAMILIE_OPPDRAG_API_URL: http://localhost:8087/api
