@@ -20,12 +20,7 @@ object AnnenForelderMapper {
 
         return AnnenForelder(navn = annenForelder.person?.verdi?.navn?.verdi,
                              fødselsnummer = annenForelder.person?.verdi?.fødselsnummer?.verdi?.verdi,
-                             bosattNorge = annenForelder.bosattNorge?.verdi,
-                             annenForelderAdresse = AnnenForelderAdresseMapper.toDomain(annenForelder.adresse?.verdi)
-
-
-        )
-
+                             bosattNorge = annenForelder.bosattNorge?.verdi)
     }
 
 
