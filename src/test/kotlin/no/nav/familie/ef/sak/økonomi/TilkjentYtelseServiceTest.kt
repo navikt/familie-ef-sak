@@ -64,6 +64,7 @@ class TilkjentYtelseServiceTest {
         every { andelTilkjentYtelseRepository.findByTilkjentYtelseId(tilkjentYtelse.id) } returns andelerTilkjentYtelse
 
         val dto = tilkjentYtelseService.hentTilkjentYtelseDto(eksternId)
+        assertEquals(eksternId, dto.eksternId)
         assertEquals(3, dto.andelerTilkjentYtelse.size)
         assertEquals(andelerTilkjentYtelse[2].beløp, dto.andelerTilkjentYtelse[2].beløp)
 

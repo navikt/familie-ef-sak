@@ -5,14 +5,19 @@ App for saksbehandling av stønadene for enslige forsørgere.
 Appen kjører på JRE 11. Bygging gjøres ved å kjøre `mvn clean install`. 
 
 ## Kjøring og testing lokalt
-For å kjøre opp appen lokalt kan en kjøre `ApplicationLocal`.
-
-Appen starter da opp med en in memory-database og er da tilgjengelig under `localhost:8093`.
-Databasen kan aksesseres på `localhost:8093/h2-console`. Log på jdbc url `jdbc:h2:mem:testdb` med bruker `sa` og blankt passord.
 
 Dersom man vil gå mot endepunkter som krever autentisering lokalt, kan man få et testtoken ved å gå mot 
 `localhost:8093/local/jwt`.
 
+### Kjøring med in-memory-database
+For å kjøre opp appen lokalt, kan en kjøre `ApplicationLocal`.
+
+Appen starter da opp med en in memory-database og er da tilgjengelig under `localhost:8093`.
+Databasen kan aksesseres på `localhost:8093/h2-console`. Log på jdbc url `jdbc:h2:mem:testdb` med bruker `sa` og blankt passord.
+
+### Kjøring med postgres-database
+For å kjøre opp appen lokalt med en postgres-database, kan en kjøre `ApplicationLocalPostgres`.
+App'en vil starte opp en container med siste versjon av postgres. 
 
 ## Produksjonssetting
 Hvis du skal deploye appen til prod, må du pushe en ny tag på master. Dette gjøres ved å kjøre tag-scriptet som ligger i 

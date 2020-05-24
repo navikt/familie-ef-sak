@@ -43,6 +43,7 @@ fun TilkjentYtelse.tilDto(andelerTilkjentYtelse: List<AndelTilkjentYtelseDTO>) :
     return TilkjentYtelseDTO(
             søker = this.personIdentifikator,
             saksnummer = this.saksnummer,
+            eksternId = this.eksternId,
             andelerTilkjentYtelse = andelerTilkjentYtelse
     )
 }

@@ -53,7 +53,6 @@ spring:
   flyway:
     enabled: true
   datasource:
-    url: jdbc:postgresql://A01DBVL010.adeo.no:5432/familie-ef-sak
     hikari:
       maximum-pool-size: 2
       connection-test-query: "select 1"
