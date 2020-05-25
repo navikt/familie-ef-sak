@@ -1,30 +1,21 @@
 package no.nav.familie.ef.sak.økonomi
 
-import no.nav.familie.ef.sak.common.DbContainerInitializer
-import no.nav.familie.ef.sak.config.ApplicationConfig
+import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.økonomi.DataGenerator
 import no.nav.familie.ef.sak.økonomi.Utbetalingsoppdrag.lagUtbetalingsoppdrag
-import no.nav.familie.ef.sak.økonomi.domain.TilkjentYtelseStatus
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
-import org.springframework.test.context.junit.jupiter.SpringExtension
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-@SpringBootTest(classes = [ApplicationConfig::class])
-@ExtendWith(SpringExtension::class)
-@ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres", "mock-integrasjoner", "mock-oauth", "mock-auth")
+@ActiveProfiles("local", "mock-auth", "mock-oauth")
 @Tag("integration")
-internal class TilkjentYtelseRepositoryTest {
+internal class TilkjentYtelseRepositoryTest: OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
