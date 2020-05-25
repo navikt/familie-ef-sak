@@ -1,8 +1,8 @@
 package no.nav.familie.ef.sak.api.gui
 
-import no.nav.familie.ba.sak.validering.SakstilgangConstraint
 import no.nav.familie.ef.sak.api.gui.dto.MedlemskapDto
 import no.nav.familie.ef.sak.service.VurderingService
+import no.nav.familie.ef.sak.validering.SakstilgangConstraint
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated

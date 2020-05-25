@@ -9,8 +9,6 @@ spring:
     url: jdbc:postgresql://localhost:5432/familie-ba-sak
     password: test
     username: postgres
-  flyway:
-    enabled: true
   jpa:
     show-sql: true
     properties:

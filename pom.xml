@@ -33,9 +33,9 @@
         <springfox.version>2.9.2</springfox.version>
         <mockk.version>1.10.0</mockk.version>
         <fasterxml.version>2.11.0</fasterxml.version>
-        <felles.version>1.20200408151439_00385c3</felles.version>
+        <felles.version>1.20200519094152_75dba46</felles.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>2.0_20200522143947_ea010a5</kontrakter.version>
+        <kontrakter.version>2.0_20200525085003_5db78e4</kontrakter.version>
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
         <sonar.organization>navit</sonar.organization>
@@ -191,6 +191,12 @@
             <scope>test</scope>
             <version>1.4.200</version>
         </dependency>
+        <dependency>
+            <groupId>net.rakugakibox.spring.boot</groupId>
+            <artifactId>logback-access-spring-boot-starter</artifactId>
+            <version>2.7.1</version>
+            <scope>test</scope>
+        </dependency>
 
         <dependency>
             <groupId>org.testcontainers</groupId>
@@ -199,15 +205,12 @@
             <scope>test</scope>
         </dependency>
 
-
-
         <!-- Nav-interne avhengigheter -->
         <dependency>
             <groupId>no.nav.fpsak.tidsserie</groupId>
             <artifactId>fpsak-tidsserie</artifactId>
             <version>2.3-20200406045853-e288f17</version>
         </dependency>
-
     </dependencies>
 
     <profiles>

@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.validering
+package no.nav.familie.ef.sak.validering
 
 import no.nav.familie.ef.sak.validering.Sakstilgang
 import javax.validation.Constraint

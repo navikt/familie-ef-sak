@@ -2,15 +2,8 @@ server:
   port: 8093
 
 spring:
-  h2:
-    console:
-      enabled: true
   datasource:
-    username: sa
-    password:
-#    url: jdbc:postgresql://localhost:5432/familie-ef-sak
-    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;CASE_INSENSITIVE_IDENTIFIERS=TRUE
-    driver-class-name: org.h2.Driver
+    url:
 
 no.nav.security.jwt:
   issuer.azuread:
