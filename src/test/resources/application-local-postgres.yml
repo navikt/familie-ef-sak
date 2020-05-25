@@ -1,6 +1,10 @@
 server:
   port: 8093
 
+spring:
+  datasource:
+    url:
+
 no.nav.security.jwt:
   issuer.azuread:
     accepted_audience: aud-localhost
