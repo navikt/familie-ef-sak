@@ -32,7 +32,7 @@ enum class Folkeregisterpersonstatus(private val pdlKode: String) {
 
     companion object {
         private val map = values().associateBy(Folkeregisterpersonstatus::pdlKode)
-        fun frånPDLKode(pdlKode: String) = map.getOrDefault(pdlKode, UKJENT)
+        fun fraPDLKode(pdlKode: String) = map.getOrDefault(pdlKode, UKJENT)
     }
 }
 
