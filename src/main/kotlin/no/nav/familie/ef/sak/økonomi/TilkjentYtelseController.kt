@@ -21,7 +21,7 @@ class TilkjentYtelseController(private val tilkjentYtelseService: TilkjentYtelse
         val tilkjentYtelseId = tilkjentYtelseService.opprettTilkjentYtelse(tilkjentYtelseDTO)
 
         val location = ServletUriComponentsBuilder.fromCurrentRequestUri()
-                .path("/" + tilkjentYtelseId.toString())
+                .pathSegment(tilkjentYtelseId.toString())
                 .build().toUri()
 
         return ResponseEntity.created(location).build()
@@ -46,7 +46,7 @@ class TilkjentYtelseController(private val tilkjentYtelseService: TilkjentYtelse
         val opphørtTilkjentYtelseId = tilkjentYtelseService.opphørUtbetalingsoppdrag(tilkjentYtelseId)
 
         val location = ServletUriComponentsBuilder.fromCurrentRequestUri()
-                .path("/" + opphørtTilkjentYtelseId.toString())
+                .pathSegment(opphørtTilkjentYtelseId.toString())
                 .build().toUri()
 
         return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY).location(location).build()
