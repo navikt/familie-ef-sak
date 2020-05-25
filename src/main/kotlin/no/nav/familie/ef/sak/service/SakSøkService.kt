@@ -41,7 +41,7 @@ class SakSøkService(
                             it.etternavn)
                 },
                 adressebeskyttelse = Adressebeskyttelse.valueOf(søker.adressebeskyttelse.single().gradering.name),
-                folkeregisterpersonstatus = Folkeregisterpersonstatus.frånPDLKode(søker.folkeregisterpersonstatus.single().status)
+                folkeregisterpersonstatus = Folkeregisterpersonstatus.fraPDLKode(søker.folkeregisterpersonstatus.single().status)
         ))
     }
 
