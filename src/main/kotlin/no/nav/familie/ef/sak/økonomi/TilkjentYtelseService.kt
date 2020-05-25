@@ -8,6 +8,8 @@ import no.nav.familie.ef.sak.økonomi.domain.TilkjentYtelseStatus
 import no.nav.familie.ef.sak.økonomi.domain.TilkjentYtelseType
 import no.nav.familie.ef.sak.økonomi.dto.*
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
+import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -110,18 +112,17 @@ class TilkjentYtelseService(
                                                  "Iverksetting mot oppdrag feilet")
     }
 
-    fun hentStatus(eksternTilkjentYtelseId: UUID): OppdragProtokollStatus {
+    fun hentStatus(eksternTilkjentYtelseId: UUID): OppdragStatus {
 
         val tilkjentYtelse = hentTilkjentYtelse(eksternTilkjentYtelseId)
 
-        val statusFraOppdragDTO = StatusFraOppdragDTO(
+        val oppdragId = OppdragId(
                 fagsystem = FAGSYSTEM,
                 personIdent = tilkjentYtelse.personIdentifikator,
-                behandlingsId = tilkjentYtelse.id,
-                vedtaksId = tilkjentYtelse.id
+                behandlingsId = tilkjentYtelse.id.toString()
         )
 
-        return gjørKallOgVentPåResponseEntityMedRessurs({ økonomiKlient.hentStatus(statusFraOppdragDTO) },
+        return gjørKallOgVentPåResponseEntityMedRessurs({ økonomiKlient.hentStatus(oppdragId) },
                                                         "Henting av status mot oppdrag feilet")
     }
 

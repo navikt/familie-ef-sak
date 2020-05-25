@@ -2,13 +2,13 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.økonomi
 
 import io.mockk.*
 import no.nav.familie.ef.sak.økonomi.*
-import no.nav.familie.ef.sak.økonomi.OppdragProtokollStatus.KVITTERT_OK
 import no.nav.familie.ef.sak.økonomi.Utbetalingsoppdrag.finnAvstemmingTidspunkt
 import no.nav.familie.ef.sak.økonomi.Utbetalingsoppdrag.lagUtbetalingsoppdrag
 import no.nav.familie.ef.sak.økonomi.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.domain.TilkjentYtelseStatus
-import no.nav.familie.ef.sak.økonomi.dto.StatusFraOppdragDTO
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
+import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -78,20 +78,19 @@ class TilkjentYtelseServiceTest {
         val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse().copy(id=1)
         val eksternId = tilkjentYtelse.eksternId
 
-        val statusFraOppdragDTO = StatusFraOppdragDTO(
+        val oppdragId = OppdragId(
                  "EF",
                  tilkjentYtelse.personIdentifikator,
-                 tilkjentYtelse.id,
-                 tilkjentYtelse.id
+                 tilkjentYtelse.id.toString()
          )
 
         every { tilkjentYtelseRepository.findByEksternIdOrNull(eksternId) } returns tilkjentYtelse
-        every { økonomiKlient.hentStatus(statusFraOppdragDTO) } returns ResponseEntity.ok(Ressurs.success(KVITTERT_OK))
+        every { økonomiKlient.hentStatus(oppdragId) } returns ResponseEntity.ok(Ressurs.success(OppdragStatus.KVITTERT_OK))
 
         tilkjentYtelseService.hentStatus(eksternId)
 
         verify { tilkjentYtelseRepository.findByEksternIdOrNull(eksternId) }
-        verify { økonomiKlient.hentStatus(statusFraOppdragDTO) }
+        verify { økonomiKlient.hentStatus(oppdragId) }
     }
 
     @Test
