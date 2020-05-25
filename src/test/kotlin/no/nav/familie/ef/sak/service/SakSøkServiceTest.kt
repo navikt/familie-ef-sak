@@ -18,24 +18,24 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
 
-internal class SakSoekServiceTest {
+internal class SakSøkServiceTest {
 
     private lateinit var sakRepository: SakRepository
     private lateinit var pdlClient: PdlClient
 
-    private lateinit var sakSoekService: SakSoekService
+    private lateinit var sakSøkService: SakSøkService
 
     @BeforeEach
     fun setUp() {
         sakRepository = mockk()
         pdlClient = mockk()
-        sakSoekService = SakSoekService(sakRepository, pdlClient)
+        sakSøkService = SakSøkService(sakRepository, pdlClient)
     }
 
     @Test
     fun `Skal returnere ressurs med feil når det ikke finnes en sak`() {
         every { sakRepository.findBySøkerFødselsnummer(any()) } returns emptyList()
-        val sakSøk = sakSoekService.finnSakForPerson("")
+        val sakSøk = sakSøkService.finnSakForPerson("")
         assertThat(sakSøk.status).isEqualTo(Ressurs.Status.FEILET)
         assertThat(sakSøk.frontendFeilmelding).isEqualTo("Finner ikke noen sak på personen")
     }
@@ -55,7 +55,7 @@ internal class SakSoekServiceTest {
         every { pdlClient.hentSøkerKort(any()) } returns
                 PdlSøkerKort(kjønn = listOf(Kjønn(kjønn = KjønnType.MANN)),
                              navn = listOf(Navn("Fornavn", "mellomnavn", "Etternavn")))
-        val sakSøk = sakSoekService.finnSakForPerson(personIdent)
+        val sakSøk = sakSøkService.finnSakForPerson(personIdent)
         assertThat(sakSøk.status).isEqualTo(Ressurs.Status.SUKSESS)
         assertThat(sakSøk.data?.sakId).isEqualTo(id)
         assertThat(sakSøk.data?.personIdent).isEqualTo(personIdent)
