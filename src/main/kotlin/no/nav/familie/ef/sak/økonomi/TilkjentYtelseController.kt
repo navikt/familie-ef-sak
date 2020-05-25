@@ -1,11 +1,9 @@
 package no.nav.familie.ef.sak.økonomi
 
-import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.økonomi.dto.TilkjentYtelseDTO
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 import java.util.*
@@ -23,7 +21,7 @@ class TilkjentYtelseController(private val tilkjentYtelseService: TilkjentYtelse
         val tilkjentYtelseId = tilkjentYtelseService.opprettTilkjentYtelse(tilkjentYtelseDTO)
 
         val location = ServletUriComponentsBuilder.fromCurrentRequestUri()
-                .path(tilkjentYtelseId.toString())
+                .pathSegment(tilkjentYtelseId.toString())
                 .build().toUri()
 
         return ResponseEntity.created(location).build()
@@ -48,7 +46,7 @@ class TilkjentYtelseController(private val tilkjentYtelseService: TilkjentYtelse
         val opphørtTilkjentYtelseId = tilkjentYtelseService.opphørUtbetalingsoppdrag(tilkjentYtelseId)
 
         val location = ServletUriComponentsBuilder.fromCurrentRequestUri()
-                .path(opphørtTilkjentYtelseId.toString())
+                .pathSegment(opphørtTilkjentYtelseId.toString())
                 .build().toUri()
 
         return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY).location(location).build()
