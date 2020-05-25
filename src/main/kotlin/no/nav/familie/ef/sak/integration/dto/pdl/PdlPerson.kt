@@ -40,6 +40,7 @@ data class PdlSøker(val adressebeskyttelse: List<Adressebeskyttelse>,
                     val familierelasjoner: List<Familierelasjon>,
                     @JsonProperty("foedsel") override val fødsel: List<Fødsel>,
                     val folkeregisterpersonstatus: List<Folkeregisterpersonstatus>,
+                    val fullmakt: List<Fullmakt>,
                     @JsonProperty("kjoenn") val kjønn: List<Kjønn>,
                     val navn: List<Navn>,
                     val opphold: List<Opphold>,
@@ -138,6 +139,17 @@ enum class Familierelasjonsrolle {
 
 data class Folkeregisterpersonstatus(val status: String,
                                      val forenkletStatus: String)
+
+data class Fullmakt(val gyldigFraOgMed: LocalDate,
+                    val gyldigTilOgMed: LocalDate,
+                    val motpartsPersonident: String,
+                    val motpartsRolle: MotpartsRolle,
+                    val omraader: List<String>)
+
+enum class MotpartsRolle {
+    FULLMAKTSGIVER,
+    FULLMEKTIG
+}
 
 data class Kjønn(@JsonProperty("kjoenn") val kjønn: KjønnType)
 
