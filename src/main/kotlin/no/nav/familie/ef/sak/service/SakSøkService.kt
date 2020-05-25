@@ -1,8 +1,6 @@
 package no.nav.familie.ef.sak.service
 
-import no.nav.familie.ef.sak.api.dto.Kjønn
-import no.nav.familie.ef.sak.api.dto.NavnDto
-import no.nav.familie.ef.sak.api.dto.SakSøkDto
+import no.nav.familie.ef.sak.api.dto.*
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøkerKort
 import no.nav.familie.ef.sak.repository.SakRepository
@@ -32,16 +30,18 @@ class SakSøkService(
             personIdent: String,
             sakId: UUID,
             søker: PdlSøkerKort
-            ): Ressurs<SakSøkDto> {
+    ): Ressurs<SakSøkDto> {
         return Ressurs.success(SakSøkDto(
                 sakId = sakId,
                 personIdent = personIdent,
-                kjønn = søker.kjønn.first().kjønn.let { Kjønn.valueOf(it.name) },
-                navn = søker.navn.first().let {
+                kjønn = søker.kjønn.single().kjønn.let { Kjønn.valueOf(it.name) },
+                navn = søker.navn.single().let {
                     NavnDto(it.fornavn,
                             it.mellomnavn,
                             it.etternavn)
-                }
+                },
+                adressebeskyttelse = Adressebeskyttelse.valueOf(søker.adressebeskyttelse.single().gradering.name),
+                folkeregisterpersonstatus = Folkeregisterpersonstatus.frånPDLKode(søker.folkeregisterpersonstatus.single().status)
         ))
     }
 

@@ -3,10 +3,7 @@ package no.nav.familie.ef.sak.service
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.integration.PdlClient
-import no.nav.familie.ef.sak.integration.dto.pdl.Kjønn
-import no.nav.familie.ef.sak.integration.dto.pdl.KjønnType
-import no.nav.familie.ef.sak.integration.dto.pdl.Navn
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøkerKort
+import no.nav.familie.ef.sak.integration.dto.pdl.*
 import no.nav.familie.ef.sak.repository.SakRepository
 import no.nav.familie.ef.sak.repository.domain.Barn
 import no.nav.familie.ef.sak.repository.domain.Sak
@@ -54,12 +51,18 @@ internal class SakSøkServiceTest {
         ))
         every { pdlClient.hentSøkerKort(any()) } returns
                 PdlSøkerKort(kjønn = listOf(Kjønn(kjønn = KjønnType.MANN)),
-                             navn = listOf(Navn("Fornavn", "mellomnavn", "Etternavn")))
+                             navn = listOf(Navn("Fornavn", "mellomnavn", "Etternavn")),
+                             adressebeskyttelse = listOf(Adressebeskyttelse(AdressebeskyttelseGradering.FORTROLIG)),
+                             folkeregisterpersonstatus = listOf(Folkeregisterpersonstatus("utflyttet", "ikkeBosatt")))
         val sakSøk = sakSøkService.finnSakForPerson(personIdent)
         assertThat(sakSøk.status).isEqualTo(Ressurs.Status.SUKSESS)
-        assertThat(sakSøk.data?.sakId).isEqualTo(id)
-        assertThat(sakSøk.data?.personIdent).isEqualTo(personIdent)
-        assertThat(sakSøk.data?.kjønn).isEqualTo(no.nav.familie.ef.sak.api.dto.Kjønn.MANN)
-        assertThat(sakSøk.data?.navn!!.visningsnavn).isEqualTo("Fornavn mellomnavn Etternavn")
+        sakSøk.data!!.let {
+            assertThat(it.sakId).isEqualTo(id)
+            assertThat(it.personIdent).isEqualTo(personIdent)
+            assertThat(it.kjønn).isEqualTo(no.nav.familie.ef.sak.api.dto.Kjønn.MANN)
+            assertThat(it.navn!!.visningsnavn).isEqualTo("Fornavn mellomnavn Etternavn")
+            assertThat(it.adressebeskyttelse).isEqualTo(no.nav.familie.ef.sak.api.dto.Adressebeskyttelse.FORTROLIG)
+            assertThat(it.folkeregisterpersonstatus).isEqualTo(no.nav.familie.ef.sak.api.dto.Folkeregisterpersonstatus.UTFLYTTET)
+        }
     }
 }
