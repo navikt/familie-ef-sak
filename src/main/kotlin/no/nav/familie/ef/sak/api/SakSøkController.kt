@@ -12,11 +12,9 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/saksoek")
+@RequestMapping("/api/saksok")
 @ProtectedWithClaims(issuer = "azuread")
-class SakSøkController(
-        private val sakSøkService: SakSøkService
-) {
+class SakSøkController(private val sakSøkService: SakSøkService) {
 
     @PostMapping("ident")
     fun søkMedIdent(@PersontilgangConstraint @RequestBody identParam: PersonIdentDto): Ressurs<SakSøkDto> {

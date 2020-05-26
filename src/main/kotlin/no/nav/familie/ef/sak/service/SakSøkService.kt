@@ -10,10 +10,8 @@ import java.util.*
 
 
 @Component
-class SakSøkService(
-        private val sakRepository: SakRepository,
-        private val pdlClient: PdlClient
-) {
+class SakSøkService(private val sakRepository: SakRepository,
+                    private val pdlClient: PdlClient) {
 
     fun finnSakForPerson(personIdent: String): Ressurs<SakSøkDto> {
         val saker = sakRepository.findBySøkerFødselsnummer(personIdent)
@@ -26,11 +24,9 @@ class SakSøkService(
         }
     }
 
-    private fun lagSakSøkDto(
-            personIdent: String,
-            sakId: UUID,
-            søker: PdlSøkerKort
-    ): Ressurs<SakSøkDto> {
+    private fun lagSakSøkDto(personIdent: String,
+                             sakId: UUID,
+                             søker: PdlSøkerKort): Ressurs<SakSøkDto> {
         return Ressurs.success(SakSøkDto(
                 sakId = sakId,
                 personIdent = personIdent,

@@ -9,11 +9,11 @@ import java.util.*
 @Repository
 interface SakRepository : CrudRepository<Sak, UUID> {
 
-    @Query("SELECT" +
-           " s.*," +
-           " soker.sak søker_sak, soker.fodselsnummer søker_fodselsnummer, soker.navn søker_navn" +
-           " FROM sak s" +
-           " JOIN soker soker ON soker.sak = s.id WHERE soker.fodselsnummer = :fødselsnummer")
+    @Query("""SELECT
+        s.*, soker.sak søker_sak, soker.fodselsnummer søker_fodselsnummer, soker.navn søker_navn
+        FROM sak s
+        JOIN soker soker ON soker.sak = s.id
+        WHERE soker.fodselsnummer = :fødselsnummer""")
     fun findBySøkerFødselsnummer(fødselsnummer: String): List<Sak>
 
 }

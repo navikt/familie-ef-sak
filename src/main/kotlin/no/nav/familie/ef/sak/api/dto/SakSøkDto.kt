@@ -2,17 +2,16 @@ package no.nav.familie.ef.sak.api.dto
 
 import java.util.*
 
-data class SakSøkDto(
-        val sakId: UUID,
-        val personIdent: String,
-        val navn: NavnDto,
-        val kjønn: Kjønn,
-        val adressebeskyttelse: Adressebeskyttelse,
-        val folkeregisterpersonstatus: Folkeregisterpersonstatus?
-)
+data class SakSøkDto(val sakId: UUID,
+                     val personIdent: String,
+                     val navn: NavnDto,
+                     val kjønn: Kjønn,
+                     val adressebeskyttelse: Adressebeskyttelse,
+                     val folkeregisterpersonstatus: Folkeregisterpersonstatus?)
 
 @Suppress("unused")
 enum class Adressebeskyttelse {
+
     STRENGT_FORTROLIG,
     FORTROLIG,
     UGRADERT
@@ -20,12 +19,13 @@ enum class Adressebeskyttelse {
 
 @Suppress("unused")
 enum class Folkeregisterpersonstatus(private val pdlKode: String) {
+
     BOSATT("bosatt"),
     UTFLYTTET("utflyttet"),
     FORSVUNNET("forsvunnet"),
-    DOED("doed"),
-    OPPHOERT("opphoert"),
-    FOEDSELSREGISTRERT("foedselsregistrert"),
+    DØD("doed"),
+    OPPHØRT("opphoert"),
+    FØDSELSREGISTRERT("foedselsregistrert"),
     MIDLERTIDIG("midlertidig"),
     INAKTIV("inaktiv"),
     UKJENT("ukjent");
@@ -44,11 +44,9 @@ enum class Kjønn {
     UKJENT
 }
 
-data class NavnDto(
-        val fornavn: String,
-        val mellomnavn: String?,
-        val etternavn: String
-) {
+data class NavnDto(val fornavn: String,
+                   val mellomnavn: String?,
+                   val etternavn: String) {
 
     @Suppress("unused") val visningsnavn: String = when (mellomnavn) {
         null -> "$fornavn $etternavn"
