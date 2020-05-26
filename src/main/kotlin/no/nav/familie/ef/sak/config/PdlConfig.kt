@@ -12,6 +12,8 @@ class PdlConfig(@Value("\${PDL_URL}") pdlUrl: URI) {
 
     val pdlUri: URI = UriComponentsBuilder.fromUri(pdlUrl).path(PATH_GRAPHQL).build().toUri()
 
+    val søkerKortQuery get() = this::class.java.getResource("/pdl/søker_kort.graphql").readText().graphqlCompatible()
+
     val søkerQuery get() = this::class.java.getResource("/pdl/søker.graphql").readText().graphqlCompatible()
 
     val barnQuery get() = this::class.java.getResource("/pdl/barn.graphql").readText().graphqlCompatible()

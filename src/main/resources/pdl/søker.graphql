@@ -48,6 +48,9 @@ query($ident: ID!){
             status
             forenkletStatus
         }
+        kjoenn {
+            kjoenn
+        }
         navn {
             fornavn
             mellomnavn

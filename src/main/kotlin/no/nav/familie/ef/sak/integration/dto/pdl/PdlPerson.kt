@@ -18,6 +18,7 @@ data class PdlResponse<T>(val data: T?,
 
 data class PdlError(val message: String)
 
+data class PdlSøkerKortData(val person: PdlSøkerKort)
 data class PdlSøkerData(val person: PdlSøker)
 data class PdlAnnenForelderData(val person: PdlAnnenForelder)
 data class PdlBarnData(val person: PdlBarn)
@@ -27,12 +28,18 @@ interface PdlPerson {
     val bostedsadresse: List<Bostedsadresse>
 }
 
+data class PdlSøkerKort(val adressebeskyttelse: List<Adressebeskyttelse>,
+                        val folkeregisterpersonstatus: List<Folkeregisterpersonstatus>,
+                        @JsonProperty("kjoenn") val kjønn: List<Kjønn>,
+                        val navn: List<Navn>)
+
 data class PdlSøker(val adressebeskyttelse: List<Adressebeskyttelse>,
                     override val bostedsadresse: List<Bostedsadresse>,
                     @JsonProperty("doedsfall") val dødsfall: List<Dødsfall>,
                     val familierelasjoner: List<Familierelasjon>,
                     @JsonProperty("foedsel") override val fødsel: List<Fødsel>,
                     val folkeregisterpersonstatus: List<Folkeregisterpersonstatus>,
+                    @JsonProperty("kjoenn") val kjønn: List<Kjønn>,
                     val navn: List<Navn>,
                     val opphold: List<Opphold>,
                     val oppholdsadresse: List<Oppholdsadresse>,
@@ -136,6 +143,14 @@ enum class Familierelasjonsrolle {
 
 data class Folkeregisterpersonstatus(val status: String,
                                      val forenkletStatus: String)
+
+data class Kjønn(@JsonProperty("kjoenn") val kjønn: KjønnType)
+
+enum class KjønnType {
+    KVINNE,
+    MANN,
+    UKJENT
+}
 
 data class Navn(val fornavn: String,
                 val mellomnavn: String?,

@@ -5,10 +5,11 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
+import org.springframework.data.relational.core.mapping.Table
 import java.util.*
 import no.nav.familie.kontrakter.ef.sak.Sak as DtoSak
 
-
+@Table("sak")
 data class Sak(@Id
                val id: UUID = UUID.randomUUID(),
                @Column("soknad")

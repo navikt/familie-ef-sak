@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak
 
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
-import org.junit.After
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
@@ -25,7 +25,7 @@ abstract class OppslagSpringRunnerTest {
     @LocalServerPort
     private var port: Int? = 0
 
-    @After
+    @AfterEach
     fun reset() {
         loggingEvents.clear()
     }
