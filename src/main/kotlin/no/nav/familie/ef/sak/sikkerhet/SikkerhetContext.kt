@@ -10,4 +10,4 @@ object SikkerhetContext {
                         onFailure = { "VL" }
                 )
     }
- }
+}

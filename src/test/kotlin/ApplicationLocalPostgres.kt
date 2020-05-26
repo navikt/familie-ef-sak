@@ -25,7 +25,7 @@ fun main(args: Array<String>) {
     psql.start()
 
     val properties = Properties()
-    properties.put("spring.datasource.url",psql.jdbcUrl)
+    properties.put("spring.datasource.url", psql.jdbcUrl)
     properties.put("spring.datasource.username", psql.username)
     properties.put("spring.datasource.password", psql.password)
 

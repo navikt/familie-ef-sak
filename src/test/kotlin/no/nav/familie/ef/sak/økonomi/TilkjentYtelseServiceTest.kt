@@ -12,7 +12,6 @@ import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.http.ResponseEntity
 import java.time.LocalDate
 import java.time.LocalDateTime
 import kotlin.test.assertEquals
@@ -23,7 +22,8 @@ class TilkjentYtelseServiceTest {
     private val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
     private val økonomiKlient = mockk<ØkonomiKlient>()
 
-    private val tilkjentYtelseService = TilkjentYtelseService(økonomiKlient,tilkjentYtelseRepository,andelTilkjentYtelseRepository)
+    private val tilkjentYtelseService =
+            TilkjentYtelseService(økonomiKlient, tilkjentYtelseRepository, andelTilkjentYtelseRepository)
 
     @BeforeEach
     fun beforeEach() {
@@ -56,8 +56,8 @@ class TilkjentYtelseServiceTest {
 
     @Test
     fun `hent tilkjent-ytelse-dto`() {
-        val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse().copy(id=1)
-        val andelerTilkjentYtelse = DataGenerator.flereTilfeldigeAndelerTilkjentYtelse(tilkjentYtelse.id,3)
+        val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse().copy(id = 1)
+        val andelerTilkjentYtelse = DataGenerator.flereTilfeldigeAndelerTilkjentYtelse(tilkjentYtelse.id, 3)
         val eksternId = tilkjentYtelse.eksternId
 
         every { tilkjentYtelseRepository.findByEksternIdOrNull(eksternId) } returns tilkjentYtelse
@@ -75,14 +75,12 @@ class TilkjentYtelseServiceTest {
     @Test
     fun `hent status fra oppdragstjenesten`() {
 
-        val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse().copy(id=1)
+        val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse().copy(id = 1)
         val eksternId = tilkjentYtelse.eksternId
 
-        val oppdragId = OppdragId(
-                 "EF",
-                 tilkjentYtelse.personIdentifikator,
-                 tilkjentYtelse.id.toString()
-         )
+        val oppdragId = OppdragId("EF",
+                                  tilkjentYtelse.personIdentifikator,
+                                  tilkjentYtelse.id.toString())
 
         every { tilkjentYtelseRepository.findByEksternIdOrNull(eksternId) } returns tilkjentYtelse
         every { økonomiKlient.hentStatus(oppdragId) } returns Ressurs.success(OppdragStatus.KVITTERT_OK)
@@ -96,19 +94,16 @@ class TilkjentYtelseServiceTest {
     @Test
     fun `iverksett utbetalingsoppdrag`() {
 
-        val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse().copy(
-                id=1,
-                status = TilkjentYtelseStatus.OPPRETTET
-        )
+        val tilkjentYtelse =
+                DataGenerator.tilfeldigTilkjentYtelse().copy(id = 1, status = TilkjentYtelseStatus.OPPRETTET)
 
         val eksternId = tilkjentYtelse.eksternId
 
-        val andelerTilkjentYtelse = DataGenerator.flereTilfeldigeAndelerTilkjentYtelse(tilkjentYtelse.id,3)
-        val utbetalingsoppdrag = lagUtbetalingsoppdrag("VL",tilkjentYtelse,andelerTilkjentYtelse)
-        val oppdatertTilkjentYtelse = tilkjentYtelse.copy(
-                status = TilkjentYtelseStatus.SENDT_TIL_IVERKSETTING,
-                utbetalingsoppdrag = utbetalingsoppdrag
-        )
+        val andelerTilkjentYtelse = DataGenerator.flereTilfeldigeAndelerTilkjentYtelse(tilkjentYtelse.id, 3)
+        val utbetalingsoppdrag = lagUtbetalingsoppdrag("VL", tilkjentYtelse, andelerTilkjentYtelse)
+        val oppdatertTilkjentYtelse =
+                tilkjentYtelse.copy(status = TilkjentYtelseStatus.SENDT_TIL_IVERKSETTING,
+                                    utbetalingsoppdrag = utbetalingsoppdrag)
 
         every { tilkjentYtelseRepository.findByEksternIdOrNull(eksternId) } returns tilkjentYtelse
         every { andelTilkjentYtelseRepository.findByTilkjentYtelseId(tilkjentYtelse.id) } returns andelerTilkjentYtelse
@@ -128,25 +123,23 @@ class TilkjentYtelseServiceTest {
         val opphørDato = LocalDate.now()
         val vedtaksdato = LocalDate.now()
 
-        val originalTilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse().copy(
-                id=1,
-                status = TilkjentYtelseStatus.AKTIV
-        )
+        val originalTilkjentYtelse =
+                DataGenerator.tilfeldigTilkjentYtelse().copy(id = 1,
+                                                             status = TilkjentYtelseStatus.AKTIV)
 
-        val avsluttetOriginalTilkjentYtelse = originalTilkjentYtelse.copy(
-                status = TilkjentYtelseStatus.AVSLUTTET
-        )
+        val avsluttetOriginalTilkjentYtelse = originalTilkjentYtelse.copy(status = TilkjentYtelseStatus.AVSLUTTET)
 
         val opphørtTilkjentYtelse = originalTilkjentYtelse.tilOpphør(opphørDato)
 
         val eksternId = originalTilkjentYtelse.eksternId
 
-        val andelerTilkjentYtelse = DataGenerator.flereTilfeldigeAndelerTilkjentYtelse(originalTilkjentYtelse.id,3)
-        val utbetalingsoppdrag = lagUtbetalingsoppdrag("VL",opphørtTilkjentYtelse,andelerTilkjentYtelse)
-        val opphørtTilkjentYtelseSendtUtbetalingsoppdrag = opphørtTilkjentYtelse.copy(
-                status = TilkjentYtelseStatus.SENDT_TIL_IVERKSETTING,
-                utbetalingsoppdrag = utbetalingsoppdrag
-        )
+        val andelerTilkjentYtelse =
+                DataGenerator.flereTilfeldigeAndelerTilkjentYtelse(originalTilkjentYtelse.id, 3)
+        val utbetalingsoppdrag =
+                lagUtbetalingsoppdrag("VL", opphørtTilkjentYtelse, andelerTilkjentYtelse)
+        val opphørtTilkjentYtelseSendtUtbetalingsoppdrag =
+                opphørtTilkjentYtelse.copy(status = TilkjentYtelseStatus.SENDT_TIL_IVERKSETTING,
+                                           utbetalingsoppdrag = utbetalingsoppdrag)
 
         every { tilkjentYtelseRepository.findByEksternIdOrNull(eksternId) } returns originalTilkjentYtelse
         every { tilkjentYtelseRepository.save(avsluttetOriginalTilkjentYtelse) } returns avsluttetOriginalTilkjentYtelse
@@ -154,7 +147,8 @@ class TilkjentYtelseServiceTest {
 
         every { andelTilkjentYtelseRepository.findByTilkjentYtelseId(originalTilkjentYtelse.id) } returns andelerTilkjentYtelse
         every { økonomiKlient.iverksettOppdrag(utbetalingsoppdrag) } returns Ressurs.success("")
-        every { tilkjentYtelseRepository.save(opphørtTilkjentYtelseSendtUtbetalingsoppdrag) } returns opphørtTilkjentYtelseSendtUtbetalingsoppdrag
+        every { tilkjentYtelseRepository.save(opphørtTilkjentYtelseSendtUtbetalingsoppdrag) }
+                .returns(opphørtTilkjentYtelseSendtUtbetalingsoppdrag)
 
         tilkjentYtelseService.opphørUtbetalingsoppdrag(eksternId, opphørDato)
 

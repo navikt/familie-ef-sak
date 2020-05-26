@@ -15,7 +15,7 @@ fun beregnUtbetalingsperioder(andelerTilkjentYtelse: Iterable<AndelTilkjentYtels
 fun beregnUtbetalingsperioderUtenKlassifisering(andelerTilkjentYtelse: Set<AndelTilkjentYtelse>): LocalDateTimeline<Int> {
     return andelerTilkjentYtelse
             .map { personTilTimeline(it) }
-            .reduce (::reducer)
+            .reduce(::reducer)
 }
 
 private fun personTilTimeline(it: AndelTilkjentYtelse) =

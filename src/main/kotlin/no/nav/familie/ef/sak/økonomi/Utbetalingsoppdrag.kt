@@ -40,15 +40,13 @@ object Utbetalingsoppdrag {
                     }.kunSisteHvis(erOpphør)
         }
 
-        return Utbetalingsoppdrag(
-                saksbehandlerId = saksbehandlerId,
-                kodeEndring = if (!erOpphør) NY else UEND,
-                fagSystem = FAGSYSTEM,
-                saksnummer = tilkjentYtelse.saksnummer,
-                aktoer = tilkjentYtelse.personIdentifikator,
-                utbetalingsperiode = utbetalingsperioder,
-                avstemmingTidspunkt = finnAvstemmingTidspunkt()
-        )
+        return Utbetalingsoppdrag(saksbehandlerId = saksbehandlerId,
+                                  kodeEndring = if (!erOpphør) NY else UEND,
+                                  fagSystem = FAGSYSTEM,
+                                  saksnummer = tilkjentYtelse.saksnummer,
+                                  aktoer = tilkjentYtelse.personIdentifikator,
+                                  utbetalingsperiode = utbetalingsperioder,
+                                  avstemmingTidspunkt = finnAvstemmingTidspunkt())
     }
 
     private fun <T> List<T>.kunSisteHvis(kunSiste: Boolean): List<T> {
@@ -59,13 +57,11 @@ object Utbetalingsoppdrag {
         }
     }
 
-    internal fun finnAvstemmingTidspunkt() : LocalDateTime = LocalDateTime.now()
+    internal fun finnAvstemmingTidspunkt(): LocalDateTime = LocalDateTime.now()
 
-    private data class UtbetalingsperiodeMal(
-            val tilkjentYtelse: TilkjentYtelse,
-            val erEndringPåEksisterendePeriode: Boolean = false,
-            val periodeIdStart: Long = tilkjentYtelse.id
-    ) {
+    private data class UtbetalingsperiodeMal(val tilkjentYtelse: TilkjentYtelse,
+                                             val erEndringPåEksisterendePeriode: Boolean = false,
+                                             val periodeIdStart: Long = tilkjentYtelse.id) {
 
         private val MAX_PERIODEID_OFFSET = 1_000
 
@@ -80,20 +76,18 @@ object Utbetalingsoppdrag {
             // Skaper "plass" til offset
             val utvidetPeriodeIdStart = periodeIdStart * MAX_PERIODEID_OFFSET
 
-            return Utbetalingsperiode(
-                    erEndringPåEksisterendePeriode,
-                    tilkjentYtelse.opphørFom?.let { Opphør(it) },
-                    utvidetPeriodeIdStart + periodeIdOffset,
-                    if (periodeIdOffset > 0) utvidetPeriodeIdStart + (periodeIdOffset - 1).toLong() else null,
-                    tilkjentYtelse.vedtaksdato!!,
-                    klassifisering,
-                    segment.fom,
-                    segment.tom,
-                    BigDecimal(segment.value),
-                    MND,
-                    tilkjentYtelse.personIdentifikator,
-                    tilkjentYtelse.id
-            )
+            return Utbetalingsperiode(erEndringPåEksisterendePeriode,
+                                      tilkjentYtelse.opphørFom?.let { Opphør(it) },
+                                      utvidetPeriodeIdStart + periodeIdOffset,
+                                      if (periodeIdOffset > 0) utvidetPeriodeIdStart + (periodeIdOffset - 1).toLong() else null,
+                                      tilkjentYtelse.vedtaksdato!!,
+                                      klassifisering,
+                                      segment.fom,
+                                      segment.tom,
+                                      BigDecimal(segment.value),
+                                      MND,
+                                      tilkjentYtelse.personIdentifikator,
+                                      tilkjentYtelse.id)
         }
     }
 }

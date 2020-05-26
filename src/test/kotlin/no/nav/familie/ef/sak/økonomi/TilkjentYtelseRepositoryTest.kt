@@ -15,7 +15,7 @@ import kotlin.test.assertTrue
 
 @ActiveProfiles("local", "mock-auth", "mock-oauth")
 @Tag("integration")
-internal class TilkjentYtelseRepositoryTest: OppslagSpringRunnerTest() {
+internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
@@ -98,7 +98,7 @@ internal class TilkjentYtelseRepositoryTest: OppslagSpringRunnerTest() {
 
         val oppdatertTilkjentYtelse = tilkjentYtelseRepository.findByIdOrNull(lagretTilkjentYtelse.id)!!
 
-        assertEquals(utbetalingsoppdrag,oppdatertTilkjentYtelse.utbetalingsoppdrag)
+        assertEquals(utbetalingsoppdrag, oppdatertTilkjentYtelse.utbetalingsoppdrag)
     }
 
     @Test
@@ -109,7 +109,7 @@ internal class TilkjentYtelseRepositoryTest: OppslagSpringRunnerTest() {
 
         val hentetTilkjentYtelse = tilkjentYtelseRepository.findByPersonIdentifikatorOrNull(tilkjentYtelse.personIdentifikator)
 
-        assertEquals(lagretTilkjentYtelse,hentetTilkjentYtelse)
+        assertEquals(lagretTilkjentYtelse, hentetTilkjentYtelse)
         assertNull(tilkjentYtelseRepository.findByPersonIdentifikatorOrNull("Finnes ikke"))
     }
 

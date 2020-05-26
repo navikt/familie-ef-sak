@@ -1,9 +1,8 @@
 package no.nav.familie.ef.sak.config
 
-import org.junit.jupiter.api.Test
-
-import java.net.URI
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
+import java.net.URI
 
 internal class IntegrasjonerConfigTest {
 

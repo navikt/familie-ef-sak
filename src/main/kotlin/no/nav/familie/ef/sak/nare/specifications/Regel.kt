@@ -5,11 +5,10 @@ import no.nav.familie.ef.sak.nare.evaluations.Evaluering.Companion.evaluer
 import no.nav.familie.ef.sak.nare.evaluations.Resultat
 
 
-data class Regel<T>(
-        val beskrivelse: String,
-        val identifikator: String = "",
-        val children: List<Regel<T>> = emptyList(),
-        val implementasjon: T.() -> Evaluering) {
+data class Regel<T>(val beskrivelse: String,
+                    val identifikator: String = "",
+                    val children: List<Regel<T>> = emptyList(),
+                    val implementasjon: T.() -> Evaluering) {
 
     fun evaluer(t: T): Evaluering {
         return evaluer(beskrivelse = beskrivelse,
@@ -28,13 +27,13 @@ data class Regel<T>(
         return Regel(beskrivelse = "$beskrivelse ELLER ${other.beskrivelse}",
                      children = this.specOrChildren() + other.specOrChildren(),
                      implementasjon = {
-                                 val evaluer = evaluer(this)
-                                 if (evaluer.resultat == Resultat.JA) {
-                                     evaluer
-                                 } else {
-                                     evaluer(this) eller other.evaluer(this)
-                                 }
-                             }
+                         val evaluer = evaluer(this)
+                         if (evaluer.resultat == Resultat.JA) {
+                             evaluer
+                         } else {
+                             evaluer(this) eller other.evaluer(this)
+                         }
+                     }
         )
     }
 

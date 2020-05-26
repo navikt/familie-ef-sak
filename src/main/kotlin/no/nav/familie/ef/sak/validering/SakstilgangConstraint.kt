@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.validering
 
-import no.nav.familie.ef.sak.validering.Sakstilgang
 import javax.validation.Constraint
 import javax.validation.Payload
 import kotlin.reflect.KClass

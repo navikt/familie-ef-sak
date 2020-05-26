@@ -18,7 +18,7 @@ class IntegrasjonerConfig(@Value("\${FAMILIE_INTEGRASJONER_URL}") private val in
     val personhistorikkUri: URI =
             UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_PERSONHISTORIKK).build().toUri()
 
-    val personhistorikkUriBuilder  =
+    val personhistorikkUriBuilder =
             UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_PERSONHISTORIKK)
 
     companion object {
