@@ -31,7 +31,7 @@ data class Regel<T>(val beskrivelse: String,
                          if (evaluer.resultat == Resultat.JA) {
                              evaluer
                          } else {
-                             evaluer(this) eller other.evaluer(this)
+                             evaluer eller other.evaluer(this)
                          }
                      }
         )
