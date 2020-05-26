@@ -1,8 +1,8 @@
 package no.nav.familie.ef.sak.økonomi
 
+import no.nav.familie.ef.sak.repository.CustomRepository
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.økonomi.Utbetalingsoppdrag.lagUtbetalingsoppdrag
-import no.nav.familie.ef.sak.økonomi.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.domain.TilkjentYtelseStatus
 import no.nav.familie.ef.sak.økonomi.domain.TilkjentYtelseType
@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.økonomi.dto.TilkjentYtelseDTO
 import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -18,28 +19,26 @@ import java.util.*
 @Service
 class TilkjentYtelseService(private val økonomiKlient: ØkonomiKlient,
                             private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-                            private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository) {
+                            private val customRepository: CustomRepository<TilkjentYtelse>) {
 
     @Transactional
     fun opprettTilkjentYtelse(tilkjentYtelseDTO: TilkjentYtelseDTO): UUID {
         tilkjentYtelseDTO.valider()
 
         val eksisterendeTilkjentYtelse = tilkjentYtelseRepository.findByPersonIdentifikatorOrNull(tilkjentYtelseDTO.søker)
-        if (eksisterendeTilkjentYtelse != null)
+        if (eksisterendeTilkjentYtelse != null) {
             error("Søker har allerede en tilkjent ytelse")
+        }
 
-        val opprettetTilkjentYtelse = tilkjentYtelseRepository.save(
-                tilkjentYtelseDTO.tilTilkjentYtelse(TilkjentYtelseStatus.OPPRETTET)
-        )
+        val opprettetTilkjentYtelse =
+                customRepository.persist(tilkjentYtelseDTO.tilTilkjentYtelse(TilkjentYtelseStatus.OPPRETTET))
 
-        andelTilkjentYtelseRepository.saveAll(tilkjentYtelseDTO.tilAndelerTilkjentYtelse(opprettetTilkjentYtelse.id))
-
-        return opprettetTilkjentYtelse.eksternId
+        return opprettetTilkjentYtelse.id
     }
 
     @Transactional
-    fun iverksettUtbetalingsoppdrag(eksternTilkjentYtelseId: UUID) {
-        val tilkjentYtelse = hentTilkjentYtelse(eksternTilkjentYtelseId)
+    fun iverksettUtbetalingsoppdrag(ytelseId: UUID) {
+        val tilkjentYtelse = hentTilkjentYtelse(ytelseId)
 
         when (tilkjentYtelse.type) {
             TilkjentYtelseType.OPPHØR -> error("Tilkjent ytelse ${tilkjentYtelse.id} er opphørt")
@@ -58,8 +57,8 @@ class TilkjentYtelseService(private val økonomiKlient: ØkonomiKlient,
     }
 
     @Transactional
-    fun opphørUtbetalingsoppdrag(eksternTilkjentYtelseId: UUID, opphørDato: LocalDate = LocalDate.now()): UUID {
-        val tilkjentYtelse = hentTilkjentYtelse(eksternTilkjentYtelseId)
+    fun opphørUtbetalingsoppdrag(TilkjentYtelseId: UUID, opphørDato: LocalDate = LocalDate.now()): UUID {
+        val tilkjentYtelse = hentTilkjentYtelse(TilkjentYtelseId)
 
         when (tilkjentYtelse.type) {
             TilkjentYtelseType.OPPHØR -> error("Tilkjent ytelse ${tilkjentYtelse.id} er allerede opphørt")
@@ -81,21 +80,16 @@ class TilkjentYtelseService(private val økonomiKlient: ØkonomiKlient,
 
         val lagretOpphørtTilkjentYtelse = tilkjentYtelseRepository.save(tilkjentYtelse.tilOpphør(opphørDato))
 
-        val andelerTilkjentYtelse = andelTilkjentYtelseRepository.findByTilkjentYtelseId(tilkjentYtelse.id)
-
         sendUtbetalingsoppdragOgOppdaterStatus(lagretOpphørtTilkjentYtelse,
-                                               TilkjentYtelseStatus.SENDT_TIL_IVERKSETTING,
-                                               andelerTilkjentYtelse)
+                                               TilkjentYtelseStatus.SENDT_TIL_IVERKSETTING)
 
-        return lagretOpphørtTilkjentYtelse.eksternId
+        return lagretOpphørtTilkjentYtelse.id
     }
 
     private fun sendUtbetalingsoppdragOgOppdaterStatus(tilkjentYtelse: TilkjentYtelse,
-                                                       nyStatus: TilkjentYtelseStatus,
-                                                       andelerTilkjentYtelse: Iterable<AndelTilkjentYtelse> =
-                                                               hentAndelerTilkjentYtelse(tilkjentYtelse.id)) {
+                                                       nyStatus: TilkjentYtelseStatus) {
         val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
-        val utbetalingsoppdrag = lagUtbetalingsoppdrag(saksbehandlerId, tilkjentYtelse, andelerTilkjentYtelse)
+        val utbetalingsoppdrag = lagUtbetalingsoppdrag(saksbehandlerId, tilkjentYtelse)
 
         // Rulles tilbake hvis økonomiKlient.iverksettOppdrag under kaster en exception
         tilkjentYtelseRepository.save(tilkjentYtelse.copy(utbetalingsoppdrag = utbetalingsoppdrag,
@@ -104,30 +98,25 @@ class TilkjentYtelseService(private val økonomiKlient: ØkonomiKlient,
         økonomiKlient.iverksettOppdrag(utbetalingsoppdrag).getDataOrThrow()
     }
 
-    fun hentStatus(eksternTilkjentYtelseId: UUID): OppdragStatus {
+    fun hentStatus(tilkjentYtelseId: UUID): OppdragStatus {
 
-        val tilkjentYtelse = hentTilkjentYtelse(eksternTilkjentYtelseId)
+        val tilkjentYtelse = hentTilkjentYtelse(tilkjentYtelseId)
 
         val oppdragId = OppdragId(fagsystem = FAGSYSTEM,
-                                  personIdent = tilkjentYtelse.personIdentifikator,
+                                  personIdent = tilkjentYtelse.personident,
                                   behandlingsId = tilkjentYtelse.id.toString())
 
         return økonomiKlient.hentStatus(oppdragId).getDataOrThrow()
     }
 
-    fun hentTilkjentYtelseDto(eksternTilkjentYtelseId: UUID): TilkjentYtelseDTO {
-        val tilkjentYtelse = hentTilkjentYtelse(eksternTilkjentYtelseId)
-        val andelerTilkjentYtelse = hentAndelerTilkjentYtelse(tilkjentYtelse.id)
-                .map { it.tilDto() }.toList()
+    fun hentTilkjentYtelseDto(tilkjentYtelseId: UUID): TilkjentYtelseDTO {
+        val tilkjentYtelse = hentTilkjentYtelse(tilkjentYtelseId)
 
-        return tilkjentYtelse.tilDto(andelerTilkjentYtelse)
+        return tilkjentYtelse.tilDto()
     }
 
-    private fun hentTilkjentYtelse(eksternTilkjentYtelseId: UUID) =
-            tilkjentYtelseRepository.findByEksternIdOrNull(eksternTilkjentYtelseId)
-            ?: error("Fant ikke tilkjent ytelse med ekstern id $eksternTilkjentYtelseId")
+    private fun hentTilkjentYtelse(tilkjentYtelseId: UUID) =
+            tilkjentYtelseRepository.findByIdOrNull(tilkjentYtelseId)
+            ?: error("Fant ikke tilkjent ytelse med id $tilkjentYtelseId")
 
-    private fun hentAndelerTilkjentYtelse(tilkjentYtelseId: Long) =
-            andelTilkjentYtelseRepository.findByTilkjentYtelseId(tilkjentYtelseId)
-                    .ifEmpty { error("Fant ikke andeler tilkjent ytelse for tilkjent ytelse med id $tilkjentYtelseId") }
 }

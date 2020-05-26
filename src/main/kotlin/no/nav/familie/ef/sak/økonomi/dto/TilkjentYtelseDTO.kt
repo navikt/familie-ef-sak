@@ -7,7 +7,7 @@ import java.util.*
 data class TilkjentYtelseDTO(val søker: String,
                              val saksnummer: String,
                              val vedtaksdato: LocalDate = LocalDate.now(),
-                             val eksternId: UUID = UUID.randomUUID(),
+                             val id: UUID = UUID.randomUUID(),
                              val andelerTilkjentYtelse: List<AndelTilkjentYtelseDTO>) {
 
     fun valider() {
@@ -25,8 +25,7 @@ data class TilkjentYtelseDTO(val søker: String,
     }
 }
 
-data class AndelTilkjentYtelseDTO(val personIdentifikator: String,
-                                  val beløp: Int,
+data class AndelTilkjentYtelseDTO(val beløp: Int,
                                   val stønadFom: LocalDate,
                                   val stønadTom: LocalDate,
                                   val type: YtelseType)
