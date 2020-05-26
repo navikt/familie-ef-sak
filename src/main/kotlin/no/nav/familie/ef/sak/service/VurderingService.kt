@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.service
 
+import no.nav.familie.ef.sak.api.gui.dto.AleneomsorgDto
 import no.nav.familie.ef.sak.api.gui.dto.MedlemskapDto
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.PdlClient
@@ -31,6 +32,24 @@ class VurderingService(private val sakService: SakService,
                                        pdlSøker,
                                        medlemskapshistorikk)
     }
+
+    fun vurderAleneomsorg(sakId: UUID): AleneomsorgDto {
+        val sak = sakService.hentSak(sakId)
+        val fnr = sak.søknad.personalia.verdi.fødselsnummer.verdi.verdi
+        val pdlSøker = pdlClient.hentSøker(fnr)
+        val medlemskapsinfo = integrasjonerClient.hentMedlemskapsinfo(fnr)
+        val medlemskapshistorikk = Medlemskapshistorikk(pdlSøker, medlemskapsinfo)
+        val medlemskapsgrunnlag = Medlemskapsgrunnlag(pdlSøker,
+                                                      medlemskapshistorikk,
+                                                      sak.søknad)
+        val evaluering = medlemskapRegelsett.vurderingMedlemskapSøker.evaluer(medlemskapsgrunnlag)
+
+        return MedlemskapMapper.tilDto(evaluering,
+                                       pdlSøker,
+                                       medlemskapshistorikk)
+    }
+
+
 
 
 }
