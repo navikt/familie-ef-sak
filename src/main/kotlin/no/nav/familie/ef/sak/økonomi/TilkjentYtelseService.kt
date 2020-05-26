@@ -6,8 +6,9 @@ import no.nav.familie.ef.sak.økonomi.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.domain.TilkjentYtelseStatus
 import no.nav.familie.ef.sak.økonomi.domain.TilkjentYtelseType
-import no.nav.familie.ef.sak.økonomi.dto.*
+import no.nav.familie.ef.sak.økonomi.dto.TilkjentYtelseDTO
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import org.springframework.http.ResponseEntity
@@ -28,7 +29,7 @@ class TilkjentYtelseService(
         tilkjentYtelseDTO.valider()
 
         val eksisterendeTilkjentYtelse = tilkjentYtelseRepository.findByPersonIdentifikatorOrNull(tilkjentYtelseDTO.søker)
-        if(eksisterendeTilkjentYtelse!=null)
+        if (eksisterendeTilkjentYtelse != null)
             error("Søker har allerede en tilkjent ytelse")
 
         val opprettetTilkjentYtelse = tilkjentYtelseRepository.save(
@@ -44,7 +45,7 @@ class TilkjentYtelseService(
     fun iverksettUtbetalingsoppdrag(eksternTilkjentYtelseId: UUID) {
         val tilkjentYtelse = hentTilkjentYtelse(eksternTilkjentYtelseId)
 
-        when(tilkjentYtelse.type) {
+        when (tilkjentYtelse.type) {
             TilkjentYtelseType.OPPHØR -> error("Tilkjent ytelse ${tilkjentYtelse.id} er opphørt")
             TilkjentYtelseType.ENDRING -> throw NotImplementedError("Har ikke støtte for endring ennå")
             TilkjentYtelseType.FØRSTEGANGSBEHANDLING -> when (tilkjentYtelse.status) {
@@ -61,10 +62,10 @@ class TilkjentYtelseService(
     }
 
     @Transactional
-    fun opphørUtbetalingsoppdrag(eksternTilkjentYtelseId: UUID, opphørDato: LocalDate = LocalDate.now()) : UUID {
+    fun opphørUtbetalingsoppdrag(eksternTilkjentYtelseId: UUID, opphørDato: LocalDate = LocalDate.now()): UUID {
         val tilkjentYtelse = hentTilkjentYtelse(eksternTilkjentYtelseId)
 
-        when(tilkjentYtelse.type) {
+        when (tilkjentYtelse.type) {
             TilkjentYtelseType.OPPHØR -> error("Tilkjent ytelse ${tilkjentYtelse.id} er allerede opphørt")
             TilkjentYtelseType.ENDRING -> throw NotImplementedError("Har ikke støtte for endring ennå")
             TilkjentYtelseType.FØRSTEGANGSBEHANDLING -> when (tilkjentYtelse.status) {
@@ -108,8 +109,7 @@ class TilkjentYtelseService(
                 status = nyStatus
         ))
 
-        gjørKallOgVentPåResponseEntityMedRessurs({ økonomiKlient.iverksettOppdrag(utbetalingsoppdrag) },
-                                                 "Iverksetting mot oppdrag feilet")
+        økonomiKlient.iverksettOppdrag(utbetalingsoppdrag).getDataOrThrow()
     }
 
     fun hentStatus(eksternTilkjentYtelseId: UUID): OppdragStatus {
@@ -122,8 +122,7 @@ class TilkjentYtelseService(
                 behandlingsId = tilkjentYtelse.id.toString()
         )
 
-        return gjørKallOgVentPåResponseEntityMedRessurs({ økonomiKlient.hentStatus(oppdragId) },
-                                                        "Henting av status mot oppdrag feilet")
+        return økonomiKlient.hentStatus(oppdragId).getDataOrThrow()
     }
 
     fun hentTilkjentYtelseDto(eksternTilkjentYtelseId: UUID): TilkjentYtelseDTO {
@@ -141,27 +140,4 @@ class TilkjentYtelseService(
     private fun hentAndelerTilkjentYtelse(tilkjentYtelseId: Long) =
             andelTilkjentYtelseRepository.findByTilkjentYtelseId(tilkjentYtelseId)
                     .ifEmpty { error("Fant ikke andeler tilkjent ytelse for tilkjent ytelse med id $tilkjentYtelseId") }
-
-    private fun <T : Any> gjørKallOgVentPåResponseEntityMedRessurs(
-            kall: () -> ResponseEntity<Ressurs<T>>,
-            failureMessage: String): T {
-        Result.runCatching { kall() }
-                .fold(
-                        onSuccess = {
-                            checkNotNull(it.body) { "Finner ikke ressurs" }
-                            checkNotNull(it.body?.data) { "Ressurs mangler data" }
-
-                            check(it.body?.status == Ressurs.Status.SUKSESS) {
-                                "Ressurs returnerer ${it.body?.status} men har http status kode ${it.statusCode}"
-                            }
-
-                            return it.body?.data!!
-
-                        },
-                        onFailure = {
-                            throw Exception(failureMessage, it)
-                        }
-                )
-    }
-
 }

@@ -85,7 +85,7 @@ class TilkjentYtelseServiceTest {
          )
 
         every { tilkjentYtelseRepository.findByEksternIdOrNull(eksternId) } returns tilkjentYtelse
-        every { økonomiKlient.hentStatus(oppdragId) } returns ResponseEntity.ok(Ressurs.success(OppdragStatus.KVITTERT_OK))
+        every { økonomiKlient.hentStatus(oppdragId) } returns Ressurs.success(OppdragStatus.KVITTERT_OK)
 
         tilkjentYtelseService.hentStatus(eksternId)
 
@@ -112,7 +112,7 @@ class TilkjentYtelseServiceTest {
 
         every { tilkjentYtelseRepository.findByEksternIdOrNull(eksternId) } returns tilkjentYtelse
         every { andelTilkjentYtelseRepository.findByTilkjentYtelseId(tilkjentYtelse.id) } returns andelerTilkjentYtelse
-        every { økonomiKlient.iverksettOppdrag(utbetalingsoppdrag) } returns ResponseEntity.ok(Ressurs.success(""))
+        every { økonomiKlient.iverksettOppdrag(utbetalingsoppdrag) } returns Ressurs.success("")
         every { tilkjentYtelseRepository.save(oppdatertTilkjentYtelse) } returns oppdatertTilkjentYtelse
 
         tilkjentYtelseService.iverksettUtbetalingsoppdrag(eksternId)
@@ -153,7 +153,7 @@ class TilkjentYtelseServiceTest {
         every { tilkjentYtelseRepository.save(any<TilkjentYtelse>()) } returns opphørtTilkjentYtelse
 
         every { andelTilkjentYtelseRepository.findByTilkjentYtelseId(originalTilkjentYtelse.id) } returns andelerTilkjentYtelse
-        every { økonomiKlient.iverksettOppdrag(utbetalingsoppdrag) } returns ResponseEntity.ok(Ressurs.success(""))
+        every { økonomiKlient.iverksettOppdrag(utbetalingsoppdrag) } returns Ressurs.success("")
         every { tilkjentYtelseRepository.save(opphørtTilkjentYtelseSendtUtbetalingsoppdrag) } returns opphørtTilkjentYtelseSendtUtbetalingsoppdrag
 
         tilkjentYtelseService.opphørUtbetalingsoppdrag(eksternId, opphørDato)
