@@ -41,21 +41,21 @@ class PdlClient(val pdlConfig: PdlConfig,
     }
 
     private inline fun <reified T : Any> hentFraPdl(pdlPersonRequest: PdlPersonRequest): T {
-        val pdlRespone: PdlResponse<T> = postForEntity(pdlConfig.pdlUri,
-                                                       pdlPersonRequest,
-                                                       httpHeaders())!!
+        val pdlResponse: PdlResponse<T> = postForEntity(pdlConfig.pdlUri,
+                                                        pdlPersonRequest,
+                                                        httpHeaders())
 
-        if (pdlRespone.harFeil()) {
-            secureLogger.error("Feil ved henting av ${T::class} fra PDL: ${pdlRespone.errorMessages()}")
+        if (pdlResponse.harFeil()) {
+            secureLogger.error("Feil ved henting av ${T::class} fra PDL: ${pdlResponse.errorMessages()}")
             throw PdlRequestException("Feil ved henting av ${T::class} fra PDL. Se secure logg for detaljer.")
         }
 
-        if (pdlRespone.data == null) {
+        if (pdlResponse.data == null) {
             secureLogger.error("Feil ved oppslag på ident ${pdlPersonRequest.variables.ident}. " +
                                "PDL rapporterte ingen feil men returnerte tomt datafelt")
             throw PdlRequestException("Manglende ${T::class} ved feilfri respons fra PDL. Se secure logg for detaljer.")
         }
-        return pdlRespone.data
+        return pdlResponse.data
     }
 
     private fun httpHeaders(): HttpHeaders {

@@ -90,7 +90,7 @@ internal class MedlemskapshistorikkTest {
     }
 
     @Test
-    fun `getMedlemskapsperioder med opphold slår sammen bostedsadresser til bosattperioder med gylidg lik true og false`() {
+    fun `getMedlemskapsperioder med opphold slår sammen bostedsadresser til bosattperioder med gyldig lik true og false`() {
 
         val pdlPerson =
                 pdlPerson(Pair(LocalDate.of(2002, 2, 14), LocalDateTime.of(2007, 10, 12, 0, 0)),

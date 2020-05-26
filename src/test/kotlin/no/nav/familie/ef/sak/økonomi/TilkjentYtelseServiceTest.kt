@@ -121,7 +121,6 @@ class TilkjentYtelseServiceTest {
     @Test
     fun `opphør aktiv tilkjent ytelse`() {
         val opphørDato = LocalDate.now()
-        val vedtaksdato = LocalDate.now()
 
         val originalTilkjentYtelse =
                 DataGenerator.tilfeldigTilkjentYtelse().copy(id = 1,

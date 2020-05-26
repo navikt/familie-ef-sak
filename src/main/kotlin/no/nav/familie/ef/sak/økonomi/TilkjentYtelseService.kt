@@ -70,12 +70,12 @@ class TilkjentYtelseService(private val økonomiKlient: ØkonomiKlient,
                     error("Tilkjent ytelse ${tilkjentYtelse.id} er i ferd med å iverksettes")
                 TilkjentYtelseStatus.IKKE_KLAR -> error("Tilkjent ytelse ${tilkjentYtelse.id} er ikke klar")
                 TilkjentYtelseStatus.AVSLUTTET -> error("Tilkjent ytelse ${tilkjentYtelse.id} er allerede avsluttet")
-                TilkjentYtelseStatus.AKTIV -> return lagOpphørOgSendUtebetalingsoppdrag(tilkjentYtelse, opphørDato)
+                TilkjentYtelseStatus.AKTIV -> return lagOpphørOgSendUtbetalingsoppdrag(tilkjentYtelse, opphørDato)
             }
         }
     }
 
-    private fun lagOpphørOgSendUtebetalingsoppdrag(tilkjentYtelse: TilkjentYtelse, opphørDato: LocalDate): UUID {
+    private fun lagOpphørOgSendUtbetalingsoppdrag(tilkjentYtelse: TilkjentYtelse, opphørDato: LocalDate): UUID {
 
         tilkjentYtelseRepository.save(tilkjentYtelse.copy(status = TilkjentYtelseStatus.AVSLUTTET))
 

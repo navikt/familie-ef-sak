@@ -47,7 +47,7 @@ class SakController(private val sakService: SakService) {
 internal object Testsøknad {
 
     val søknad = Søknad(Søknadsfelt("Søker", personalia()),
-                        Søknadsfelt("innsending", Innsendingsdetaljer(Søknadsfelt("Dato mottat", LocalDateTime.now()))),
+                        Søknadsfelt("innsending", Innsendingsdetaljer(Søknadsfelt("Dato mottatt", LocalDateTime.now()))),
                         Søknadsfelt("Detaljer om sivilstand", sivilstandsdetaljer()),
                         Søknadsfelt("Opphold i Norge", medlemskapsdetaljer()),
                         Søknadsfelt("Bosituasjonen din", bosituasjon()),

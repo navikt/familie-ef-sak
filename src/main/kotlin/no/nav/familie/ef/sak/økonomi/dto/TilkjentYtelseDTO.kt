@@ -11,7 +11,7 @@ data class TilkjentYtelseDTO(val søker: String,
                              val andelerTilkjentYtelse: List<AndelTilkjentYtelseDTO>) {
 
     fun valider() {
-        if (andelerTilkjentYtelse.size == 0) {
+        if (andelerTilkjentYtelse.isEmpty()) {
             throw IllegalStateException("Request trenger minst én andel tilkjent ytelse")
         }
 

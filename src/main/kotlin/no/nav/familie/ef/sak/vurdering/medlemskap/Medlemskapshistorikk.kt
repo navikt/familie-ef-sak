@@ -42,14 +42,18 @@ class Medlemskapshistorikk(pdlPerson: PdlPerson, medlemskapsinfo: Medlemskapsinf
         val fusjonertePerioder = ArrayList<Periode>()
         for (medlemskapsperiode in bosattperioderMedUnntak) {
 
-            if (periodeTilFusjonering == null) { // Opprett ny periode
-                periodeTilFusjonering = medlemskapsperiode
-            } else if (periodeTilFusjonering.gyldig == medlemskapsperiode.gyldig) {
-                // Like statuser, utvid periode
-                periodeTilFusjonering = periodeTilFusjonering.copy(tildato = medlemskapsperiode.tildato)
-            } else { // ulik status. Ferdig fusjonert periode legges til liste
-                fusjonertePerioder.add(periodeTilFusjonering)
-                periodeTilFusjonering = medlemskapsperiode
+            periodeTilFusjonering = when {
+                periodeTilFusjonering == null -> { // Opprett ny periode
+                    medlemskapsperiode
+                }
+                periodeTilFusjonering.gyldig == medlemskapsperiode.gyldig -> {
+                    // Like statuser, utvid periode
+                    periodeTilFusjonering.copy(tildato = medlemskapsperiode.tildato)
+                }
+                else -> { // ulik status. Ferdig fusjonert periode legges til liste
+                    fusjonertePerioder.add(periodeTilFusjonering)
+                    medlemskapsperiode
+                }
             }
         }
         if (periodeTilFusjonering != null) {
@@ -160,5 +164,5 @@ data class Periode(val fradato: LocalDate, val tildato: LocalDate, val gyldig: B
         return (!periode.fradato.isAfter(this.fradato) && !periode.tildato.isBefore(this.tildato))
     }
 
-    val lengde = Period.between(fradato, tildato)
+    val lengde: Period = Period.between(fradato, tildato)
 }

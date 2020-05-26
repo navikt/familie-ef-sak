@@ -22,7 +22,7 @@ class FamilieIntegrasjonerClient(@Qualifier("azure") restOperations: RestOperati
     override val pingUri: URI = integrasjonerConfig.pingUri
 
     fun sjekkTilgangTilPersoner(identer: List<String>): List<Tilgang> {
-        return postForEntity(integrasjonerConfig.tilgangUri, identer)!!
+        return postForEntity(integrasjonerConfig.tilgangUri, identer)
     }
 
     fun hentMedlemskapsinfo(ident: String): Medlemskapsinfo {
