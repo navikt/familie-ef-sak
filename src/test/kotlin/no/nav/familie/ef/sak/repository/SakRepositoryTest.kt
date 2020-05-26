@@ -27,7 +27,7 @@ internal class SakRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `finner 1 sak på fødelsnummer`() {
+    fun `finner 1 sak på fødselsnummer`() {
         opprettSak("1", "11111122222")
 
         val saker = sakRepository.findBySøkerFødselsnummer("11111122222")
@@ -37,7 +37,7 @@ internal class SakRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `finner 2 saker på fødelsnummer`() {
+    fun `finner 2 saker på fødselsnummer`() {
         opprettSak("1", "11111122222")
         opprettSak("2", "11111122222")
         opprettSak("3", "22222211111")
@@ -49,9 +49,9 @@ internal class SakRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `finner ingen saker på fødelsnummer`() {
+    fun `finner ingen saker på fødselsnummer`() {
         val saker = sakRepository.findBySøkerFødselsnummer("11111122222")
-        assertThat(saker.count()).isEqualTo(0)
+        assertThat(saker.size).isEqualTo(0)
     }
 
     private fun opprettSak(saksnummer: String, fødselsnummer: String) {

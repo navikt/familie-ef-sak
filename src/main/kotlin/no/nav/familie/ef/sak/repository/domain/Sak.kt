@@ -28,8 +28,7 @@ object SakMapper {
                    saksnummer = sak.saksnummer,
                    journalpostId = sak.journalpostId,
                    søker = SøkerMapper.toDomain(sak.søknad),
-                   barn = BarnMapper.toDomain(sak.søknad)
-                )
+                   barn = BarnMapper.toDomain(sak.søknad))
     }
 
     fun toDto(sak: Sak): DtoSak {

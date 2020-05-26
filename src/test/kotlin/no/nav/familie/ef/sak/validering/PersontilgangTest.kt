@@ -12,12 +12,12 @@ internal class PersontilgangTest {
 
     private val integrasjonerClient = mockk<FamilieIntegrasjonerClient>()
 
-    private val persontilgang  = Persontilgang(integrasjonerClient)
+    private val persontilgang = Persontilgang(integrasjonerClient)
 
     @Test
     fun `isValid returnerer true hvis integrasjonerClient sjekkTilgangTilPersoner returnerer true`() {
         every { integrasjonerClient.sjekkTilgangTilPersoner(any()) }
-                .returns(listOf(Tilgang (true, null)))
+                .returns(listOf(Tilgang(true, null)))
 
         val valid = persontilgang.isValid(PersonIdentDto("654654654"), mockk())
 
@@ -27,7 +27,7 @@ internal class PersontilgangTest {
     @Test
     fun `isValid returnerer false hvis integrasjonerClient sjekkTilgangTilPersoner returnerer false`() {
         every { integrasjonerClient.sjekkTilgangTilPersoner(any()) }
-                .returns(listOf(Tilgang (false, null)))
+                .returns(listOf(Tilgang(false, null)))
 
         val valid = persontilgang.isValid(PersonIdentDto("654654654"), mockk())
 

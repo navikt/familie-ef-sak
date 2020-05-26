@@ -7,22 +7,18 @@ import no.nav.familie.ef.sak.økonomi.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.domain.TilkjentYtelseStatus
 import no.nav.familie.ef.sak.økonomi.domain.TilkjentYtelseType
 import no.nav.familie.ef.sak.økonomi.dto.TilkjentYtelseDTO
-import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.util.*
 
 @Service
-class TilkjentYtelseService(
-        private val økonomiKlient: ØkonomiKlient,
-        private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-        private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
-) {
+class TilkjentYtelseService(private val økonomiKlient: ØkonomiKlient,
+                            private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+                            private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository) {
 
     @Transactional
     fun opprettTilkjentYtelse(tilkjentYtelseDTO: TilkjentYtelseDTO): UUID {
@@ -70,15 +66,16 @@ class TilkjentYtelseService(
             TilkjentYtelseType.ENDRING -> throw NotImplementedError("Har ikke støtte for endring ennå")
             TilkjentYtelseType.FØRSTEGANGSBEHANDLING -> when (tilkjentYtelse.status) {
                 TilkjentYtelseStatus.OPPRETTET -> error("Tilkjent ytelse ${tilkjentYtelse.id} er opprettet, men ikke iverksatt")
-                TilkjentYtelseStatus.SENDT_TIL_IVERKSETTING -> error("Tilkjent ytelse ${tilkjentYtelse.id} er i ferd med å iverksettes")
+                TilkjentYtelseStatus.SENDT_TIL_IVERKSETTING ->
+                    error("Tilkjent ytelse ${tilkjentYtelse.id} er i ferd med å iverksettes")
                 TilkjentYtelseStatus.IKKE_KLAR -> error("Tilkjent ytelse ${tilkjentYtelse.id} er ikke klar")
                 TilkjentYtelseStatus.AVSLUTTET -> error("Tilkjent ytelse ${tilkjentYtelse.id} er allerede avsluttet")
-                TilkjentYtelseStatus.AKTIV -> return lagOpphørOgSendUtebetalingsoppdrag(tilkjentYtelse, opphørDato)
+                TilkjentYtelseStatus.AKTIV -> return lagOpphørOgSendUtbetalingsoppdrag(tilkjentYtelse, opphørDato)
             }
         }
     }
 
-    private fun lagOpphørOgSendUtebetalingsoppdrag(tilkjentYtelse: TilkjentYtelse, opphørDato: LocalDate): UUID {
+    private fun lagOpphørOgSendUtbetalingsoppdrag(tilkjentYtelse: TilkjentYtelse, opphørDato: LocalDate): UUID {
 
         tilkjentYtelseRepository.save(tilkjentYtelse.copy(status = TilkjentYtelseStatus.AVSLUTTET))
 
@@ -86,28 +83,23 @@ class TilkjentYtelseService(
 
         val andelerTilkjentYtelse = andelTilkjentYtelseRepository.findByTilkjentYtelseId(tilkjentYtelse.id)
 
-        sendUtbetalingsoppdragOgOppdaterStatus(
-                lagretOpphørtTilkjentYtelse,
-                TilkjentYtelseStatus.SENDT_TIL_IVERKSETTING,
-                andelerTilkjentYtelse
-        )
+        sendUtbetalingsoppdragOgOppdaterStatus(lagretOpphørtTilkjentYtelse,
+                                               TilkjentYtelseStatus.SENDT_TIL_IVERKSETTING,
+                                               andelerTilkjentYtelse)
 
         return lagretOpphørtTilkjentYtelse.eksternId
     }
 
-    private fun sendUtbetalingsoppdragOgOppdaterStatus(
-            tilkjentYtelse: TilkjentYtelse,
-            nyStatus: TilkjentYtelseStatus,
-            andelerTilkjentYtelse: Iterable<AndelTilkjentYtelse> = hentAndelerTilkjentYtelse(tilkjentYtelse.id)
-    ) {
+    private fun sendUtbetalingsoppdragOgOppdaterStatus(tilkjentYtelse: TilkjentYtelse,
+                                                       nyStatus: TilkjentYtelseStatus,
+                                                       andelerTilkjentYtelse: Iterable<AndelTilkjentYtelse> =
+                                                               hentAndelerTilkjentYtelse(tilkjentYtelse.id)) {
         val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
         val utbetalingsoppdrag = lagUtbetalingsoppdrag(saksbehandlerId, tilkjentYtelse, andelerTilkjentYtelse)
 
         // Rulles tilbake hvis økonomiKlient.iverksettOppdrag under kaster en exception
-        tilkjentYtelseRepository.save(tilkjentYtelse.copy(
-                utbetalingsoppdrag = utbetalingsoppdrag,
-                status = nyStatus
-        ))
+        tilkjentYtelseRepository.save(tilkjentYtelse.copy(utbetalingsoppdrag = utbetalingsoppdrag,
+                                                          status = nyStatus))
 
         økonomiKlient.iverksettOppdrag(utbetalingsoppdrag).getDataOrThrow()
     }
@@ -116,11 +108,9 @@ class TilkjentYtelseService(
 
         val tilkjentYtelse = hentTilkjentYtelse(eksternTilkjentYtelseId)
 
-        val oppdragId = OppdragId(
-                fagsystem = FAGSYSTEM,
-                personIdent = tilkjentYtelse.personIdentifikator,
-                behandlingsId = tilkjentYtelse.id.toString()
-        )
+        val oppdragId = OppdragId(fagsystem = FAGSYSTEM,
+                                  personIdent = tilkjentYtelse.personIdentifikator,
+                                  behandlingsId = tilkjentYtelse.id.toString())
 
         return økonomiKlient.hentStatus(oppdragId).getDataOrThrow()
     }

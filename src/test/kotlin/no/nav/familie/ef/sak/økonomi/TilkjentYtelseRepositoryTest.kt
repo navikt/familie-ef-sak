@@ -15,7 +15,7 @@ import kotlin.test.assertTrue
 
 @ActiveProfiles("local", "mock-auth", "mock-oauth")
 @Tag("integration")
-internal class TilkjentYtelseRepositoryTest: OppslagSpringRunnerTest() {
+internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
@@ -79,11 +79,11 @@ internal class TilkjentYtelseRepositoryTest: OppslagSpringRunnerTest() {
         andelTilkjentYtelseRepository.saveAll(andelerTilkjentYtelse1)
         andelTilkjentYtelseRepository.saveAll(andelerTilkjentYtelse2)
 
-        val antallAbdeler1 = andelTilkjentYtelseRepository.findByTilkjentYtelseId(tilkjentYtelseId1).size
-        val antallAbdeler2 = andelTilkjentYtelseRepository.findByTilkjentYtelseId(tilkjentYtelseId2).size
+        val antallAndeler1 = andelTilkjentYtelseRepository.findByTilkjentYtelseId(tilkjentYtelseId1).size
+        val antallAndeler2 = andelTilkjentYtelseRepository.findByTilkjentYtelseId(tilkjentYtelseId2).size
 
-        assertEquals(2, antallAbdeler1)
-        assertEquals(4, antallAbdeler2)
+        assertEquals(2, antallAndeler1)
+        assertEquals(4, antallAndeler2)
     }
 
     @Test
@@ -98,7 +98,7 @@ internal class TilkjentYtelseRepositoryTest: OppslagSpringRunnerTest() {
 
         val oppdatertTilkjentYtelse = tilkjentYtelseRepository.findByIdOrNull(lagretTilkjentYtelse.id)!!
 
-        assertEquals(utbetalingsoppdrag,oppdatertTilkjentYtelse.utbetalingsoppdrag)
+        assertEquals(utbetalingsoppdrag, oppdatertTilkjentYtelse.utbetalingsoppdrag)
     }
 
     @Test
@@ -109,7 +109,7 @@ internal class TilkjentYtelseRepositoryTest: OppslagSpringRunnerTest() {
 
         val hentetTilkjentYtelse = tilkjentYtelseRepository.findByPersonIdentifikatorOrNull(tilkjentYtelse.personIdentifikator)
 
-        assertEquals(lagretTilkjentYtelse,hentetTilkjentYtelse)
+        assertEquals(lagretTilkjentYtelse, hentetTilkjentYtelse)
         assertNull(tilkjentYtelseRepository.findByPersonIdentifikatorOrNull("Finnes ikke"))
     }
 

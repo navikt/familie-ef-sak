@@ -3,14 +3,11 @@ package no.nav.familie.ef.sak.repository.domain
 import no.nav.familie.kontrakter.ef.søknad.NyttBarn
 import no.nav.familie.kontrakter.ef.søknad.RegistrertBarn
 import no.nav.familie.kontrakter.ef.søknad.Søknad
-import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
 import java.time.LocalDate
-import java.util.*
 
-data class Barn(
-                val navn: String?,
+data class Barn(val navn: String?,
                 @Column("fodselsnummer")
                 val fødselsnummer: String?,
                 @Column("fodselsdato")

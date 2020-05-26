@@ -26,12 +26,12 @@ internal class SakstilgangTest {
     fun setUp() {
         every { sakRepository.findByIdOrNull(any()) }
                 .returns(Sak(UUID.randomUUID(),
-                                   byteArrayOf(0),
-                                   "1",
-                                   "1",
-                                   Sporbar(),
-                                   Søker("654654654", "Bob"),
-                                   emptySet()))
+                             byteArrayOf(0),
+                             "1",
+                             "1",
+                             Sporbar(),
+                             Søker("654654654", "Bob"),
+                             emptySet()))
     }
 
     @Test

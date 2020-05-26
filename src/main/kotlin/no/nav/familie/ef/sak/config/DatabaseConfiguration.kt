@@ -1,8 +1,5 @@
 package no.nav.familie.ef.sak.config
 
-import com.fasterxml.jackson.databind.ser.FilterProvider
-import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider
 import no.nav.familie.ef.sak.økonomi.domain.TilkjentYtelseStatus
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
@@ -45,12 +42,13 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
     class UtbetalingsoppdragTilStringConverter : Converter<Utbetalingsoppdrag, String> {
 
         override fun convert(utbetalingsoppdrag: Utbetalingsoppdrag): String {
-             return objectMapper.writeValueAsString(utbetalingsoppdrag)
+            return objectMapper.writeValueAsString(utbetalingsoppdrag)
         }
     }
 
     @ReadingConverter
     class StringTilUtbetalingsoppdragConverter : Converter<String, Utbetalingsoppdrag> {
+
         override fun convert(string: String): Utbetalingsoppdrag {
             return objectMapper.readValue(string, Utbetalingsoppdrag::class.java)
         }

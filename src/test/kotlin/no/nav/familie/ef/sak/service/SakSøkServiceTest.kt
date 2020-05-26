@@ -60,7 +60,7 @@ internal class SakSøkServiceTest {
             assertThat(it.sakId).isEqualTo(id)
             assertThat(it.personIdent).isEqualTo(personIdent)
             assertThat(it.kjønn).isEqualTo(no.nav.familie.ef.sak.api.dto.Kjønn.MANN)
-            assertThat(it.navn!!.visningsnavn).isEqualTo("Fornavn mellomnavn Etternavn")
+            assertThat(it.navn.visningsnavn).isEqualTo("Fornavn mellomnavn Etternavn")
             assertThat(it.adressebeskyttelse).isEqualTo(no.nav.familie.ef.sak.api.dto.Adressebeskyttelse.FORTROLIG)
             assertThat(it.folkeregisterpersonstatus).isEqualTo(no.nav.familie.ef.sak.api.dto.Folkeregisterpersonstatus.UTFLYTTET)
         }

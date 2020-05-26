@@ -17,17 +17,17 @@ class ApplicationLocalPostgres
 
 fun main(args: Array<String>) {
 
-    val psql = KPostgreSQLContainer("postgres")
+    val sqlContainer = KPostgreSQLContainer("postgres")
             .withDatabaseName("familie-oppdrag")
             .withUsername("postgres")
             .withPassword("test")
 
-    psql.start()
+    sqlContainer.start()
 
     val properties = Properties()
-    properties.put("spring.datasource.url",psql.jdbcUrl)
-    properties.put("spring.datasource.username", psql.username)
-    properties.put("spring.datasource.password", psql.password)
+    properties["spring.datasource.url"] = sqlContainer.jdbcUrl
+    properties["spring.datasource.username"] = sqlContainer.username
+    properties["spring.datasource.password"] = sqlContainer.password
 
     SpringApplicationBuilder(ApplicationConfig::class.java)
             .profiles("local-postgres",

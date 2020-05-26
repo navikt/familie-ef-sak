@@ -44,8 +44,10 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                     .willReturn(WireMock.aResponse()
                                         .withStatus(200)
                                         .withHeader("Content-Type", "application/json")
-                                        .withBody(objectMapper.writeValueAsString(listOf(Tilgang(false,
-                                                                                                 "Mock sier: Du har ikke tilgang til person ikketilgang"))))),
+                                        .withBody(objectMapper
+                                                          .writeValueAsString(listOf(Tilgang(false,
+                                                                                             "Mock sier: Du har ikke tilgang " +
+                                                                                             "til person ikketilgang"))))),
             WireMock.get(WireMock.urlPathMatching(integrasjonerConfig.personhistorikkUri.path))
                     .atPriority(2)
                     .withQueryParam("tomDato", WireMock.equalTo(LocalDate.now().toString()))
