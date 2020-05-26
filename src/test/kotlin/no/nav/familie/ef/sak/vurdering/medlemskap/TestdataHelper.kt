@@ -32,7 +32,8 @@ fun pdlSøker(adressebeskyttelse: List<Adressebeskyttelse> = mockk(),
              telefonnummer: List<Telefonnummer> = mockk(),
              tilrettelagtKommunikasjon: List<TilrettelagtKommunikasjon> = mockk(),
              innflyttingTilNorge: List<InnflyttingTilNorge> = mockk(),
-             utflyttingFraNorge: List<UtflyttingFraNorge> = mockk()) =
+             utflyttingFraNorge: List<UtflyttingFraNorge> = mockk(),
+             vergemaalEllerFremtidsfullmakt: List<VergemaalEllerFremtidsfullmakt> = mockk()) =
         PdlSøker(adressebeskyttelse,
                  bostedsadresse,
                  dødsfall,
@@ -48,7 +49,8 @@ fun pdlSøker(adressebeskyttelse: List<Adressebeskyttelse> = mockk(),
                  telefonnummer,
                  tilrettelagtKommunikasjon,
                  innflyttingTilNorge,
-                 utflyttingFraNorge)
+                 utflyttingFraNorge,
+                 vergemaalEllerFremtidsfullmakt)
 
 
 fun avvistePerioder(vararg perioder: Pair<LocalDate, LocalDate>) = perioder.map {
