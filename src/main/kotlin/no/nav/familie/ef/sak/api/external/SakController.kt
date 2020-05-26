@@ -1,7 +1,7 @@
-package no.nav.familie.ef.sak.api
+package no.nav.familie.ef.sak.api.external
 
-import no.nav.familie.ba.sak.validering.SakstilgangConstraint
 import no.nav.familie.ef.sak.service.SakService
+import no.nav.familie.ef.sak.validering.SakstilgangConstraint
 import no.nav.familie.kontrakter.ef.sak.Sak
 import no.nav.familie.kontrakter.ef.søknad.*
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -172,6 +172,8 @@ internal object Testsøknad {
                                                                 "Litt hver for oss"),
                                                     Søknadsfelt("Bor du og den andre forelderen til [barnets navn] i samme hus/blokk, gårdstun, kvartal eller vei?",
                                                                 "ja"),
+                                                    Søknadsfelt("Bor du og den andre forelderen til [barnets navn] i samme hus/blokk, gårdstun, kvartal eller vei?",
+                                                                "Dette er en beskrivelse"),
                                                     Søknadsfelt("Har du bodd sammen med den andre forelderen til [barnets fornavn] før?",
                                                                 true),
                                                     Søknadsfelt("Når flyttet dere fra hverandre?",
@@ -188,9 +190,10 @@ internal object Testsøknad {
         return RegistrertBarn(Søknadsfelt("Navn", "Lykkeliten"),
                               Søknadsfelt("Fødselsnummer", Fødselsnummer("31081953069")),
                               Søknadsfelt("Har samme adresse som søker", true),
+                              Søknadsfelt("Har ikke samme adresse som søker beskrivelse", "Dette er en beskrivelse."),
                               Søknadsfelt("Barnets andre forelder",
-                                          AnnenForelder(person = Søknadsfelt("personalia", personMinimum()),
-                                                        adresse = adresseSøknadsfelt())),
+                                          AnnenForelder(kanIkkeOppgiAnnenForelderFar = Søknadsfelt("Kan ikke oppgi", false),
+                                                        person = Søknadsfelt("personalia", personMinimum()))),
                               Søknadsfelt("samvær",
                                           Samvær(Søknadsfelt("Har du og den andre forelderen skriftlig avtale om delt bosted for barnet?",
                                                              true),
@@ -204,6 +207,8 @@ internal object Testsøknad {
                                                              "Litt hver for oss"),
                                                  Søknadsfelt("Bor du og den andre forelderen til [barnets navn] i samme hus/blokk, gårdstun, kvartal eller vei?",
                                                              "ja"),
+                                                 Søknadsfelt("Bor du og den andre forelderen til [barnets navn] i samme hus/blokk, gårdstun, kvartal eller vei?",
+                                                             "Dette er en beskrivelse"),
                                                  Søknadsfelt("Har du bodd sammen med den andre forelderen til [barnets fornavn] før?",
                                                              true),
                                                  Søknadsfelt("Når flyttet dere fra hverandre?",

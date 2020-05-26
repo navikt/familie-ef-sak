@@ -1,9 +1,7 @@
 package no.nav.familie.ef.sak.validering
 
-import no.nav.familie.ba.sak.validering.SakstilgangConstraint
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.repository.SakRepository
-import no.nav.familie.ef.sak.service.SakService
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Component
