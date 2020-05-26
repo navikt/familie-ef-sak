@@ -52,7 +52,8 @@ data class PdlSøkerData(val adressebeskyttelse: List<Adressebeskyttelse>,
                         val telefonnummer: List<Telefonnummer>,
                         val tilrettelagtKommunikasjon: List<TilrettelagtKommunikasjon>,
                         val innflyttingTilNorge: List<InnflyttingTilNorge>,
-                        val utflyttingFraNorge: List<UtflyttingFraNorge>) : PdlPerson
+                        val utflyttingFraNorge: List<UtflyttingFraNorge>,
+                        val vergemaalEllerFremtidsfullmakt: List<VergemaalEllerFremtidsfullmakt>) : PdlPerson
 
 data class PdlBarnData(val adressebeskyttelse: List<Adressebeskyttelse>,
                        override val bostedsadresse: List<Bostedsadresse>,
@@ -90,7 +91,7 @@ data class Bostedsadresse(val angittFlyttedato: LocalDate?,
 
 data class Oppholdsadresse(val oppholdsadressedato: LocalDate?,
                            val coAdressenavn: String?,
-                           val utenlandskAdresse: InternasjonalAdresse?,
+                           val utenlandskAdresse: UtenlandskAdresse?,
                            val vegadresse: Vegadresse?,
                            val oppholdAnnetSted: String?)
 
@@ -105,14 +106,6 @@ data class Vegadresse(val husnummer: String?,
 
 data class UkjentBosted(val bostedskommune: String?)
 
-data class InternasjonalAdresse(val adressenavn: String?,
-                                val bygningsinformasjon: String?,
-                                val postboks: String?,
-                                val postkode: String?,
-                                val byEllerStedsnavn: String?,
-                                val distriktEllerRegion: String?,
-                                val landkode: String)
-
 data class Koordinater(val x: Float?,
                        val y: Float?,
                        val z: Float?,
@@ -122,6 +115,7 @@ data class Adressebeskyttelse(val gradering: AdressebeskyttelseGradering)
 
 enum class AdressebeskyttelseGradering {
     STRENGT_FORTROLIG,
+    STRENGT_FORTROLIG_UTLAND,
     FORTROLIG,
     UGRADERT
 }
@@ -202,3 +196,21 @@ data class InnflyttingTilNorge(val fraflyttingsland: String?,
 
 data class UtflyttingFraNorge(val tilflyttingsland: String?,
                               val tilflyttingsstedIUtlandet: String?)
+
+data class UtenlandskAdresse(val adressenavnNummer: String?,
+                             val bySted: String?,
+                             val bygningEtasjeLeilighet: String?,
+                             val landkode: String,
+                             val postboksNummerNavn: String?,
+                             val postkode: String?,
+                             val regionDistriktOmraade: String?)
+
+data class VergeEllerFullmektig(val motpartsPersonident: String?,
+                                val navn: Navn?,
+                                val omfang: String?,
+                                val omfangetErInnenPersonligOmraade: Boolean)
+
+data class VergemaalEllerFremtidsfullmakt(val embete: String?,
+                                          val folkeregistermetadata: Folkeregistermetadata?,
+                                          val type: String?,
+                                          val vergeEllerFullmektig: VergeEllerFullmektig)
