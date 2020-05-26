@@ -18,6 +18,7 @@ fun main(args: Array<String>) {
     SpringApplicationBuilder(ApplicationConfig::class.java)
             .profiles("local",
                       "mock-integrasjoner",
+                      "mock-pdl",
                       "mock-oauth",
                       "mock-auth")
             .run(*args)

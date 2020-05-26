@@ -32,6 +32,7 @@ fun main(args: Array<String>) {
     SpringApplicationBuilder(ApplicationConfig::class.java)
             .profiles("local-postgres",
                       "mock-integrasjoner",
+                      "mock-pdl",
                       "mock-oauth",
                       "mock-auth")
             .properties(properties)

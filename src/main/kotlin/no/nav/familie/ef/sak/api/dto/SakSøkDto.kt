@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.api.dto
 
+import java.time.LocalDate
 import java.util.*
 
 data class SakSøkDto(val sakId: UUID,
@@ -7,7 +8,8 @@ data class SakSøkDto(val sakId: UUID,
                      val navn: NavnDto,
                      val kjønn: Kjønn,
                      val adressebeskyttelse: Adressebeskyttelse,
-                     val folkeregisterpersonstatus: Folkeregisterpersonstatus?)
+                     val folkeregisterpersonstatus: Folkeregisterpersonstatus?,
+                     val dødsdato: LocalDate?)
 
 @Suppress("unused")
 enum class Adressebeskyttelse {
