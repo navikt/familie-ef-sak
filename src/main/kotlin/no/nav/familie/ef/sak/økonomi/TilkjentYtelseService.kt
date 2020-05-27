@@ -25,7 +25,7 @@ class TilkjentYtelseService(private val økonomiKlient: ØkonomiKlient,
     fun opprettTilkjentYtelse(tilkjentYtelseDTO: TilkjentYtelseDTO): UUID {
         tilkjentYtelseDTO.valider()
 
-        val eksisterendeTilkjentYtelse = tilkjentYtelseRepository.findByPersonIdentifikatorOrNull(tilkjentYtelseDTO.søker)
+        val eksisterendeTilkjentYtelse = tilkjentYtelseRepository.findByPersonident(tilkjentYtelseDTO.søker)
         if (eksisterendeTilkjentYtelse != null) {
             error("Søker har allerede en tilkjent ytelse")
         }

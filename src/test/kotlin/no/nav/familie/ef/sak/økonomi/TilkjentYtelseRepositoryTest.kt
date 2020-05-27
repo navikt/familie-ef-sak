@@ -60,7 +60,7 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
         val lagretTilkjentYtelse = customRepository.persist(tilkjentYtelse)
 
         val hentetTilkjentYtelse =
-                tilkjentYtelseRepository.findByPersonIdentifikatorOrNull(tilkjentYtelse.personident)
+                tilkjentYtelseRepository.findByPersonident(tilkjentYtelse.personident)
 
         assertThat(hentetTilkjentYtelse).isEqualTo(lagretTilkjentYtelse)
     }

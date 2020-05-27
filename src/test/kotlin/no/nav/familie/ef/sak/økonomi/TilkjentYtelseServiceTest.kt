@@ -41,12 +41,12 @@ class TilkjentYtelseServiceTest {
         val tilkjentYtelseDto = DataGenerator.tilfeldigTilkjentYtelseDto()
         val tilkjentYtelse = tilkjentYtelseDto.tilTilkjentYtelse(TilkjentYtelseStatus.OPPRETTET)
         val slot = slot<TilkjentYtelse>()
-        every { tilkjentYtelseRepository.findByPersonIdentifikatorOrNull(tilkjentYtelse.personident) } returns null
+        every { tilkjentYtelseRepository.findByPersonident(tilkjentYtelse.personident) } returns null
         every { customRepository.persist(capture(slot)) } returns tilkjentYtelse
 
         tilkjentYtelseService.opprettTilkjentYtelse(tilkjentYtelseDto)
 
-        verify { tilkjentYtelseRepository.findByPersonIdentifikatorOrNull(tilkjentYtelse.personident) }
+        verify { tilkjentYtelseRepository.findByPersonident(tilkjentYtelse.personident) }
         verify { customRepository.persist(slot.captured)}
         assertThat(slot.captured).isEqualToIgnoringGivenFields(tilkjentYtelse, "id")
 

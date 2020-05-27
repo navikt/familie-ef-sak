@@ -7,7 +7,6 @@ import java.util.*
 
 interface TilkjentYtelseRepository : CrudRepository<TilkjentYtelse, UUID> {
 
-    @Query(value = """SELECT * FROM Tilkjent_Ytelse ty WHERE ty.personIdent = :personIdent""")
-    fun findByPersonIdentifikatorOrNull(personIdent: String): TilkjentYtelse?
+    fun findByPersonident(personident: String): TilkjentYtelse?
 
 }
