@@ -11,7 +11,7 @@ import org.testcontainers.containers.PostgreSQLContainer
 import java.util.*
 
 @SpringBootApplication(exclude = [ErrorMvcAutoConfiguration::class])
-//@ConfigurationPropertiesScan
+@ConfigurationPropertiesScan
 @Import(TokenGeneratorConfiguration::class)
 class ApplicationLocalPostgres
 
