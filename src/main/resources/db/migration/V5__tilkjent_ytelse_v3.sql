@@ -1,3 +1,5 @@
+"Stygg syntax-feil som stopper databaseoppdatering"
+
 DROP TABLE andel_tilkjent_ytelse;
 DROP TABLE tilkjent_ytelse;
 
