@@ -29,6 +29,7 @@ interface PdlPerson {
 }
 
 data class PdlSøkerKort(val adressebeskyttelse: List<Adressebeskyttelse>,
+                        @JsonProperty("doedsfall") val dødsfall: List<Dødsfall>,
                         val folkeregisterpersonstatus: List<Folkeregisterpersonstatus>,
                         @JsonProperty("kjoenn") val kjønn: List<Kjønn>,
                         val navn: List<Navn>)
