@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.service.SakService
 import no.nav.familie.ef.sak.validering.SakstilgangConstraint
 import no.nav.familie.kontrakter.ef.sak.Sak
 import no.nav.familie.kontrakter.ef.søknad.*
+import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
 import org.springframework.validation.annotation.Validated
@@ -37,8 +38,8 @@ class SakController(private val sakService: SakService) {
     }
 
     @GetMapping("/{id}")
-    fun dummy(@PathVariable("id") @SakstilgangConstraint id: UUID): Sak {
-        return sakService.hentSak(id)
+    fun dummy(@PathVariable("id") @SakstilgangConstraint id: UUID): Ressurs<Sak> {
+        return Ressurs.success(sakService.hentSak(id));
     }
 
 
