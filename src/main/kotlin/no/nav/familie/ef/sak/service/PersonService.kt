@@ -1,9 +1,5 @@
 package no.nav.familie.ef.sak.service
 
-import no.nav.familie.ef.sak.api.dto.*
-import no.nav.familie.ef.sak.api.dto.Folkeregisterpersonstatus
-import no.nav.familie.ef.sak.api.dto.MotpartsRolle
-import no.nav.familie.ef.sak.api.dto.Sivilstandstype
 import no.nav.familie.ef.sak.api.gui.dto.Person
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.PdlClient
@@ -37,33 +33,6 @@ class PersonService(val integrasjonerClient: FamilieIntegrasjonerClient,
 
     fun hentPdlAnnenForelder(ident: String): PdlAnnenForelder {
         return pdlClient.hentForelder2(ident)
-    }
-
-    fun hentPdlSøker(ident: String): PersonopplysningerDto {
-        val søker = pdlClient.hentSøker(ident)
-        return PersonopplysningerDto(
-                statsborgerskap = søker.statsborgerskap.map { StatsborgerskapDto(
-                        land = it.land,
-                        gyldigFraOgMed = it.gyldigFraOgMed,
-                        gyldigTilOgMed = it.gyldigTilOgMed
-                ) },
-                personstatus = Folkeregisterpersonstatus.UKJENT, //TODO
-                sivilstand = søker.sivilstand.map { SivilstandDto(
-                        type = Sivilstandstype.FORTROLIG, //TODO
-                        gyldigFraOgMed = it.gyldigFraOgMed,
-                        kommune = it.kommune,
-                        relatertVedSivilstand = it.relatertVedSivilstand
-
-                ) },
-                telefonnummer = søker.telefonnummer.first { it.prioritet == 1 }
-                        .let { TelefonnummerDto(it.landskode, it.nummer) },
-                fullmakt = søker.fullmakt.map { FullmaktDto(
-                        gyldigFraOgMed = it.gyldigFraOgMed,
-                    gyldigTilOgMed = it.gyldigTilOgMed,
-                    motpartsPersonident = it.motpartsPersonident,
-                    motpartsRolle = MotpartsRolle.valueOf(it.motpartsRolle.name)
-                ) }
-        )
     }
 }
 
