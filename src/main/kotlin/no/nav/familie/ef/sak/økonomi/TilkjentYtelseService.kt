@@ -78,7 +78,7 @@ class TilkjentYtelseService(private val økonomiKlient: ØkonomiKlient,
 
         tilkjentYtelseRepository.save(tilkjentYtelse.copy(status = TilkjentYtelseStatus.AVSLUTTET))
 
-        val lagretOpphørtTilkjentYtelse = tilkjentYtelseRepository.save(tilkjentYtelse.tilOpphør(opphørDato))
+        val lagretOpphørtTilkjentYtelse = customRepository.persist(tilkjentYtelse.tilOpphør(opphørDato))
 
         sendUtbetalingsoppdragOgOppdaterStatus(lagretOpphørtTilkjentYtelse,
                                                TilkjentYtelseStatus.SENDT_TIL_IVERKSETTING)
