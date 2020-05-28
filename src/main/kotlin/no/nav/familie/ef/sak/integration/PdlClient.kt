@@ -49,6 +49,7 @@ class PdlClient(val pdlConfig: PdlConfig,
         val pdlResponse: PdlResponse<T>
         try {
             pdlResponse = objectMapper.readValue(resp)
+            log.info(resp)
         } catch (e: Exception) {
             log.error(resp, e);
             throw RuntimeException(e)
