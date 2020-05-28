@@ -1,12 +1,10 @@
 package no.nav.familie.ef.sak.integration
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.config.PdlConfig
 import no.nav.familie.ef.sak.exception.PdlRequestException
 import no.nav.familie.ef.sak.integration.dto.pdl.*
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.http.sts.StsRestClient
-import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Service
@@ -21,39 +19,31 @@ class PdlClient(val pdlConfig: PdlConfig,
     fun hentSøkerKort(personIdent: String): PdlSøkerKort {
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
                                                 query = pdlConfig.søkerKortQuery)
-        return hentFraPdl<PdlSøkerKortData>(pdlPersonRequest).person
+        return hentFraPdl<PdlSøkerKortData, PdlResponse<PdlSøkerKortData>>(pdlPersonRequest).person
     }
 
     fun hentSøker(personIdent: String): PdlSøker {
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
                                                 query = pdlConfig.søkerQuery)
-        return hentFraPdl<PdlSøkerData>(pdlPersonRequest).person
+        return hentFraPdl<PdlSøkerData, PdlResponse<PdlSøkerData>>(pdlPersonRequest).person
     }
 
     fun hentBarn(personIdent: String): PdlBarn {
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
                                                 query = pdlConfig.barnQuery)
-        return hentFraPdl<PdlBarnData>(pdlPersonRequest).person
+        return hentFraPdl<PdlBarnData, PdlResponse<PdlBarnData>>(pdlPersonRequest).person
     }
 
     fun hentForelder2(personIdent: String): PdlAnnenForelder {
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
                                                 query = pdlConfig.annenForelderQuery)
-        return hentFraPdl<PdlAnnenForelderData>(pdlPersonRequest).person
+        return hentFraPdl<PdlAnnenForelderData, PdlResponse<PdlAnnenForelderData>>(pdlPersonRequest).person
     }
 
-    private inline fun <reified T : Any> hentFraPdl(pdlPersonRequest: PdlPersonRequest): T {
-        val resp: String = postForEntity(pdlConfig.pdlUri,
-                                         pdlPersonRequest,
-                                         httpHeaders())
-        val pdlResponse: PdlResponse<T>
-        try {
-            pdlResponse = objectMapper.readValue(resp)
-            log.info(resp)
-        } catch (e: Exception) {
-            log.error(resp, e);
-            throw RuntimeException(e)
-        }
+    private inline fun <reified T, reified R : PdlResponse<T>> hentFraPdl(pdlPersonRequest: PdlPersonRequest): T {
+        val pdlResponse: R = postForEntity(pdlConfig.pdlUri,
+                                           pdlPersonRequest,
+                                           httpHeaders())
 
         if (pdlResponse.harFeil()) {
             secureLogger.error("Feil ved henting av ${T::class} fra PDL: ${pdlResponse.errorMessages()}")
