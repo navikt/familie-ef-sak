@@ -1,5 +1,3 @@
-"Stygg syntax-feil som stopper databaseoppdatering"
-
 DROP TABLE andel_tilkjent_ytelse;
 DROP TABLE tilkjent_ytelse;
 
@@ -21,8 +19,8 @@ CREATE TABLE tilkjent_ytelse (
     vedtaksdato              DATE,
     opprettet_av             VARCHAR          NOT NULL DEFAULT 'VL',
     opprettet_tid            TIMESTAMP(3) NOT NULL     DEFAULT localtimestamp,
-    endret_av                VARCHAR,
-    endret_tid               TIMESTAMP(3)              DEFAULT localtimestamp
+    endret_av                VARCHAR          NOT NULL,
+    endret_tid               TIMESTAMP(3) NOT NULL     DEFAULT localtimestamp
 );
 
 CREATE TABLE andel_tilkjent_ytelse (
