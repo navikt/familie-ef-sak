@@ -3,7 +3,10 @@ server:
 
 spring:
   datasource:
-    url:
+    url: ${SPRING_DATASOURCE_URL_OVERRIDE}
+    username: ${SPRING_DATASOURCE_USERNAME_OVERRIDE}
+    password: ${SPRING_DATASOURCE_PASSWORD_OVERRIDE}
+    driver-class-name: ${SPRING_DATASOURCE_DRIVER_OVERRIDE}
 
 no.nav.security.jwt:
   issuer.azuread:
