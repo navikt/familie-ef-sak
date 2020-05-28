@@ -1,10 +1,12 @@
 package no.nav.familie.ef.sak.integration
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.config.PdlConfig
 import no.nav.familie.ef.sak.exception.PdlRequestException
 import no.nav.familie.ef.sak.integration.dto.pdl.*
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.http.sts.StsRestClient
+import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Service
@@ -41,9 +43,16 @@ class PdlClient(val pdlConfig: PdlConfig,
     }
 
     private inline fun <reified T : Any> hentFraPdl(pdlPersonRequest: PdlPersonRequest): T {
-        val pdlResponse: PdlResponse<T> = postForEntity(pdlConfig.pdlUri,
-                                                        pdlPersonRequest,
-                                                        httpHeaders())
+        val resp: String = postForEntity(pdlConfig.pdlUri,
+                                         pdlPersonRequest,
+                                         httpHeaders())
+        val pdlResponse: PdlResponse<T>
+        try {
+            pdlResponse = objectMapper.readValue(resp)
+        } catch (e: Exception) {
+            log.error(resp, e);
+            throw RuntimeException(e)
+        }
 
         if (pdlResponse.harFeil()) {
             secureLogger.error("Feil ved henting av ${T::class} fra PDL: ${pdlResponse.errorMessages()}")
