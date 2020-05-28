@@ -26,9 +26,9 @@ fun main(args: Array<String>) {
 
     val properties = Properties()
     properties["SPRING_DATASOURCE_URL_OVERRIDE"] = sqlContainer.jdbcUrl
-    properties["spring.datasource.username"] = sqlContainer.username
-    properties["spring.datasource.password"] = sqlContainer.password
-    properties["spring.datasource.driver-class-name"] = "org.postgresql.Driver"
+    properties["SPRING_DATASOURCE_USERNAME_OVERRIDE"] = sqlContainer.username
+    properties["SPRING_DATASOURCE_PASSWORD_OVERRIDE"] = sqlContainer.password
+    properties["SPRING_DATASOURCE_DRIVER_OVERRIDE"] = "org.postgresql.Driver"
 
     SpringApplicationBuilder(ApplicationConfig::class.java)
             .profiles("local-postgres",
