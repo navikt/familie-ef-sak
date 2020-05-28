@@ -18,28 +18,26 @@ class ApplicationLocalPostgres
 fun main(args: Array<String>) {
 
     val sqlContainer = KPostgreSQLContainer("postgres")
-            .withDatabaseName("familie-oppdrag")
+            .withDatabaseName("familie-ef-sak")
             .withUsername("postgres")
             .withPassword("test")
 
     sqlContainer.start()
 
     val properties = Properties()
-    properties["spring.datasource.url"] = sqlContainer.jdbcUrl
+    properties["SPRING_DATASOURCE_URL_OVERRIDE"] = sqlContainer.jdbcUrl
     properties["spring.datasource.username"] = sqlContainer.username
     properties["spring.datasource.password"] = sqlContainer.password
     properties["spring.datasource.driver-class-name"] = "org.postgresql.Driver"
 
-    val app = SpringApplicationBuilder(ApplicationConfig::class.java)
+    SpringApplicationBuilder(ApplicationConfig::class.java)
             .profiles("local-postgres",
                       "mock-integrasjoner",
                       "mock-pdl",
                       "mock-oauth",
                       "mock-auth")
-            .build()
-
-    app.setDefaultProperties(properties)
-    app.run(*args)
+            .properties(properties)
+            .run(*args)
 }
 
 // Hack needed because testcontainers use of generics confuses Kotlin

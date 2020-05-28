@@ -1,9 +1,7 @@
 server:
   port: 8093
 
-spring:
-  datasource:
-    url:
+spring.datasource.url: ${SPRING_DATASOURCE_URL_OVERRIDE}
 
 no.nav.security.jwt:
   issuer.azuread:
