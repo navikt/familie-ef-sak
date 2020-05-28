@@ -22,7 +22,7 @@ internal class PersonopplysningerServiceTest {
         assertThat(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(søker))
                 .isEqualToIgnoringWhitespace("""{
   "telefonnummer" : {
-    "landkode" : "+47",
+    "landskode" : "+47",
     "nummer" : "98999923"
   },
   "folkeregisterpersonstatus" : "BOSATT",
