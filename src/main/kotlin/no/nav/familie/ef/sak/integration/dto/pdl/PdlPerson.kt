@@ -18,10 +18,10 @@ data class PdlResponse<T>(val data: T?,
 
 data class PdlError(val message: String)
 
-data class PdlSøkerKortData(val person: PdlSøkerKort)
-data class PdlSøkerData(val person: PdlSøker)
-data class PdlAnnenForelderData(val person: PdlAnnenForelder)
-data class PdlBarnData(val person: PdlBarn)
+data class PdlSøkerKortData(@JsonProperty("hentPerson") val person: PdlSøkerKort)
+data class PdlSøkerData(@JsonProperty("hentPerson") val person: PdlSøker)
+data class PdlAnnenForelderData(@JsonProperty("hentPerson") val person: PdlAnnenForelder)
+data class PdlBarnData(@JsonProperty("hentPerson") val person: PdlBarn)
 
 interface PdlPerson {
     val fødsel: List<Fødsel>
