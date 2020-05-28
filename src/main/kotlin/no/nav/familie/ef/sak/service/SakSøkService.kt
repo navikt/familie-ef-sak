@@ -37,7 +37,8 @@ class SakSøkService(private val sakRepository: SakRepository,
                             it.etternavn)
                 },
                 adressebeskyttelse = Adressebeskyttelse.valueOf(søker.adressebeskyttelse.single().gradering.name),
-                folkeregisterpersonstatus = Folkeregisterpersonstatus.fraPDLKode(søker.folkeregisterpersonstatus.single().status)
+                folkeregisterpersonstatus = Folkeregisterpersonstatus.fraPDLKode(søker.folkeregisterpersonstatus.single().status),
+                dødsdato = søker.dødsfall.firstOrNull()?.dødsdato
         ))
     }
 

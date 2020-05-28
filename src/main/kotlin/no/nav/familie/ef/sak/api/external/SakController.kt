@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.service.SakService
 import no.nav.familie.ef.sak.validering.SakstilgangConstraint
 import no.nav.familie.kontrakter.ef.sak.Sak
 import no.nav.familie.kontrakter.ef.søknad.*
+import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
 import org.springframework.validation.annotation.Validated
@@ -37,10 +38,9 @@ class SakController(private val sakService: SakService) {
     }
 
     @GetMapping("/{id}")
-    fun dummy(@PathVariable("id") id: UUID): Sak {
-        return sakService.hentSak(id)
+    fun dummy(@PathVariable("id") id: UUID): Ressurs<Sak> {
+        return Ressurs.success(sakService.hentSak(id));
     }
-
 
 }
 
@@ -262,8 +262,6 @@ internal object Testsøknad {
                                    dokumentfelt("Erklæring om samlivsbrudd"),
                                    Søknadsfelt("Dato for samlivsbrudd", LocalDate.of(2014, 10, 3)),
                                    Søknadsfelt("Når flyttet dere fra hverandre?", LocalDate.of(2014, 10, 4)),
-                                   Søknadsfelt("Hva er grunnen til at du er alene med barn?",
-                                               "Endring i samværsordning"),
                                    Søknadsfelt("Når skjedde endringen / når skal endringen skje?",
                                                LocalDate.of(2013, 4, 17)))
     }

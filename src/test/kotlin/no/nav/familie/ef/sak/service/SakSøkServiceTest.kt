@@ -53,7 +53,8 @@ internal class SakSøkServiceTest {
                 PdlSøkerKort(kjønn = listOf(Kjønn(kjønn = KjønnType.MANN)),
                              navn = listOf(Navn("Fornavn", "mellomnavn", "Etternavn")),
                              adressebeskyttelse = listOf(Adressebeskyttelse(AdressebeskyttelseGradering.FORTROLIG)),
-                             folkeregisterpersonstatus = listOf(Folkeregisterpersonstatus("utflyttet", "ikkeBosatt")))
+                             folkeregisterpersonstatus = listOf(Folkeregisterpersonstatus("utflyttet", "ikkeBosatt")),
+                             dødsfall = listOf(Dødsfall(LocalDate.parse("2020-01-02"))))
         val sakSøk = sakSøkService.finnSakForPerson(personIdent)
         assertThat(sakSøk.status).isEqualTo(Ressurs.Status.SUKSESS)
         sakSøk.data!!.let {
@@ -63,6 +64,7 @@ internal class SakSøkServiceTest {
             assertThat(it.navn.visningsnavn).isEqualTo("Fornavn mellomnavn Etternavn")
             assertThat(it.adressebeskyttelse).isEqualTo(no.nav.familie.ef.sak.api.dto.Adressebeskyttelse.FORTROLIG)
             assertThat(it.folkeregisterpersonstatus).isEqualTo(no.nav.familie.ef.sak.api.dto.Folkeregisterpersonstatus.UTFLYTTET)
+            assertThat(it.dødsdato.toString()).isEqualTo("2020-01-02")
         }
     }
 }

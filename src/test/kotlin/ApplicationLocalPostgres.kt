@@ -18,20 +18,22 @@ class ApplicationLocalPostgres
 fun main(args: Array<String>) {
 
     val sqlContainer = KPostgreSQLContainer("postgres")
-            .withDatabaseName("familie-oppdrag")
+            .withDatabaseName("familie-ef-sak")
             .withUsername("postgres")
             .withPassword("test")
 
     sqlContainer.start()
 
     val properties = Properties()
-    properties["spring.datasource.url"] = sqlContainer.jdbcUrl
-    properties["spring.datasource.username"] = sqlContainer.username
-    properties["spring.datasource.password"] = sqlContainer.password
+    properties["SPRING_DATASOURCE_URL_OVERRIDE"] = sqlContainer.jdbcUrl
+    properties["SPRING_DATASOURCE_USERNAME_OVERRIDE"] = sqlContainer.username
+    properties["SPRING_DATASOURCE_PASSWORD_OVERRIDE"] = sqlContainer.password
+    properties["SPRING_DATASOURCE_DRIVER_OVERRIDE"] = "org.postgresql.Driver"
 
     SpringApplicationBuilder(ApplicationConfig::class.java)
             .profiles("local-postgres",
                       "mock-integrasjoner",
+                      "mock-pdl",
                       "mock-oauth",
                       "mock-auth")
             .properties(properties)
