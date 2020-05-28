@@ -20,9 +20,9 @@ internal class PersonopplysningerServiceTest {
     internal fun `mapper pdlsøker til PersonopplysningerDto`() {
         val søker = personopplysningerService.hentPdlSøker("11111122222")
         assertThat(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(søker))
-                .isEqualTo("""{
+                .isEqualToIgnoringWhitespace("""{
   "telefonnummer" : {
-    "landskode" : "+47",
+    "landkode" : "+47",
     "nummer" : "98999923"
   },
   "folkeregisterpersonstatus" : "BOSATT",

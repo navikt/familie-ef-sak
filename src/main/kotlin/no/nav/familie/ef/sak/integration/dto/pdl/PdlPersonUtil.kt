@@ -6,10 +6,7 @@ fun Bostedsadresse.tilFormatertAdresse(): String? {
 }
 
 fun Oppholdsadresse.tilFormatertAdresse(): String? {
-    val adresse = when {
-        vegadresse != null -> vegadresse.tilFormatertAdresse()
-        else -> utenlandskAdresse?.tilFormatertAdresse()
-    }
+    val adresse = vegadresse?.tilFormatertAdresse() ?: utenlandskAdresse?.tilFormatertAdresse()
     return join(coAdresse(coAdressenavn), adresse)
 }
 

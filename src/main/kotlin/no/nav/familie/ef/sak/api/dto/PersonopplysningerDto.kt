@@ -14,7 +14,7 @@ data class PersonopplysningerDto(val telefonnummer: TelefonnummerDto?,
                                  val adresse: List<AdresseDto>,
                                  val fullmakt: List<FullmaktDto>)
 
-data class TelefonnummerDto(val landskode: String,
+data class TelefonnummerDto(val landkode: String,
                             val nummer: String)
 
 data class StatsborgerskapDto(val land: String,
