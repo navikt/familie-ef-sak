@@ -73,6 +73,9 @@ data class PdlAnnenForelder(val adressebeskyttelse: List<Adressebeskyttelse>,
                             val innflyttingTilNorge: List<InnflyttingTilNorge>,
                             val utflyttingFraNorge: List<UtflyttingFraNorge>) : PdlPerson
 
+data class MetadataEndringer(val registrert: LocalDate)
+data class Metadata(val endringer: List<MetadataEndringer>)
+
 data class DeltBosted(val startdatoForKontrakt: LocalDateTime,
                       val sluttdatoForKontrakt: LocalDateTime?,
                       val vegadresse: Vegadresse?,
@@ -188,7 +191,8 @@ enum class KjønnType {
 
 data class Navn(val fornavn: String,
                 val mellomnavn: String?,
-                val etternavn: String)
+                val etternavn: String,
+                val metadata: Metadata)
 
 data class Telefonnummer(val landskode: String,
                          val nummer: String,

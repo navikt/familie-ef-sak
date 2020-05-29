@@ -51,7 +51,10 @@ internal class SakSøkServiceTest {
         ))
         every { pdlClient.hentSøkerKort(any()) } returns
                 PdlSøkerKort(kjønn = listOf(Kjønn(kjønn = KjønnType.MANN)),
-                             navn = listOf(Navn("Fornavn", "mellomnavn", "Etternavn")),
+                             navn = listOf(Navn("Fornavn",
+                                                "mellomnavn",
+                                                "Etternavn",
+                                                Metadata(endringer = listOf(MetadataEndringer(LocalDate.now()))))),
                              adressebeskyttelse = listOf(Adressebeskyttelse(AdressebeskyttelseGradering.FORTROLIG)),
                              folkeregisterpersonstatus = listOf(Folkeregisterpersonstatus("utflyttet", "ikkeBosatt")),
                              dødsfall = listOf(Dødsfall(LocalDate.parse("2020-01-02"))))

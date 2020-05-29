@@ -24,7 +24,10 @@ class PdlClientConfig {
         val pdlCLient: PdlClient = mockk()
 
         val folkeregisterpersonstatus = listOf(Folkeregisterpersonstatus("bosatt", "bosattEtterFolkeregisterloven"))
-        val navn = listOf(Navn("Fornavn", "mellomnavn", "Etternavn"))
+        val navn = listOf(Navn("Fornavn",
+                               "mellomnavn",
+                               "Etternavn",
+                               Metadata(endringer = listOf(MetadataEndringer(LocalDate.now())))))
         val kjønn = listOf(Kjønn(KjønnType.KVINNE))
         val adressebeskyttelse = listOf(Adressebeskyttelse(gradering = AdressebeskyttelseGradering.UGRADERT))
 

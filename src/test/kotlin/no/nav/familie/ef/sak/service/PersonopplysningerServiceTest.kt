@@ -26,6 +26,12 @@ internal class PersonopplysningerServiceTest {
     "nummer" : "98999923"
   },
   "folkeregisterpersonstatus" : "BOSATT",
+  "navn" : {
+    "fornavn" : "Fornavn",
+    "mellomnavn" : "mellomnavn",
+    "etternavn" : "Etternavn",
+    "visningsnavn" : "Fornavn mellomnavn Etternavn"
+  },
   "statsborgerskap" : [ {
     "land" : "NOR",
     "gyldigFraOgMed" : "2020-01-01",
