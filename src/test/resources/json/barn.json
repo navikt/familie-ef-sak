@@ -10,6 +10,10 @@
         {
           "angittFlyttedato": "1966-11-18",
           "coAdressenavn": null,
+          "folkeregistermetadata": {
+            "gyldighetstidspunkt": "2020-05-29T12:09:02",
+            "opphoerstidspunkt": null
+          },
           "vegadresse": {
             "husnummer": "77",
             "husbokstav": null,

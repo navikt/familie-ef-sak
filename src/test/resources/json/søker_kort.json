@@ -3,13 +3,14 @@
     "person": {
       "adressebeskyttelse": [
         {
-          "gradering": "UGRADERT"
+          "gradering": "FORTROLIG"
         }
       ],
       "doedsfall": [],
       "folkeregisterpersonstatus": [
         {
-          "forenkletStatus": "bosattEtterFolkeregisterloven"
+          "forenkletStatus": "bosattEtterFolkeregisterloven",
+          "status": "bosatt"
         }
       ],
       "kjoenn": [

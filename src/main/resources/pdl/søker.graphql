@@ -61,6 +61,24 @@ query($ident: ID!){
             oppholdFra
             oppholdTil
         }
+        vergemaalEllerFremtidsfullmakt {
+            embete
+            folkeregistermetadata {
+                gyldighetstidspunkt
+                opphoerstidspunkt
+            }
+            type
+            vergeEllerFullmektig {
+                motpartsPersonident
+                navn {
+                    fornavn
+                    mellomnavn
+                    etternavn
+                }
+                omfang
+                omfangetErInnenPersonligOmraade
+            }
+        }
         oppholdsadresse(historikk: true) {
             oppholdsadressedato
             coAdressenavn

@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.web.client.RestOperations
 import java.net.URI
+import java.time.LocalDate
 
 class PdlClientTest {
 
@@ -38,34 +39,44 @@ class PdlClientTest {
     }
 
     @Test
-    fun `pdlClienten håndterer response fra pdltjenesten riktig`() {
+    fun `pdlClienten håndterer response for søker-query mot pdltjenesten riktig`() {
         wireMockServer.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
-                                       .willReturn(okJson("""{
-  "data": {
-    "person": {
-      "adressebeskyttelse": [
-        {
-          "gradering": "FORTROLIG"
-        }
-      ],
-      "doedsfall": [],
-      "folkeregisterpersonstatus": [],
-      "kjoenn": [
-        {
-          "kjoenn": "MANN"
-        }
-      ],
-      "navn": [
-        {
-          "fornavn": "FRODIG",
-          "mellomnavn": "SLØVENDE",
-          "etternavn": "GYNGEHEST"
-        }
-      ]
+                                       .willReturn(okJson(readfile("søker.json"))))
+        val response = pdlClient.hentSøker("")
+        assertThat(response.bostedsadresse[0].vegadresse?.adressenavn).isEqualTo("INNGJERDSVEGEN")
     }
-  }
-}""")))
+
+    @Test
+    fun `pdlClienten håndterer response for annenForelder-query mot pdltjenesten riktig`() {
+        wireMockServer.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
+                                       .willReturn(okJson(readfile("søker.json"))))
+        val response = pdlClient.hentForelder2("")
+        assertThat(response.bostedsadresse[0].angittFlyttedato).isEqualTo(LocalDate.of(1966,11,18))
+    }
+
+    @Test
+    fun `pdlClienten håndterer response for barn-query mot pdltjenesten riktig`() {
+        wireMockServer.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
+                                       .willReturn(okJson(readfile("barn.json"))))
+        val response = pdlClient.hentBarn("")
+        assertThat(response.fødsel[0].fødselsdato).isEqualTo(LocalDate.of(1966,11,18))
+    }
+
+    @Test
+    fun `pdlClienten håndterer response for søkerKort-query mot pdltjenesten riktig`() {
+        wireMockServer.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
+                                       .willReturn(okJson(readfile("søker_kort.json"))))
         val response = pdlClient.hentSøkerKort("")
         assertThat(response.adressebeskyttelse[0].gradering).isEqualTo(AdressebeskyttelseGradering.FORTROLIG)
     }
+
+
+
+
+    private fun readfile(filnavn: String): String {
+        return this::class.java.getResource("/json/$filnavn").readText()
+    }
+
+
+
 }
