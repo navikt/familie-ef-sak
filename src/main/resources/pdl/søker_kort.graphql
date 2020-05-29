@@ -1,14 +1,5 @@
 query($ident: ID!){
     person: hentPerson(ident: $ident) {
-        adressebeskyttelse {
-            gradering
-        }
-        doedsfall {
-            doedsdato
-        }
-        folkeregisterpersonstatus {
-            forenkletStatus
-        }
         kjoenn {
             kjoenn
         }
@@ -16,6 +7,11 @@ query($ident: ID!){
             fornavn
             mellomnavn
             etternavn
+            metadata {
+                endringer {
+                    registrert
+                }
+            }
         }
     }
 }

@@ -66,6 +66,11 @@ query($ident: ID!){
             fornavn
             mellomnavn
             etternavn
+            metadata {
+                endringer {
+                    registrert
+                }
+            }
         }
     }
 }
