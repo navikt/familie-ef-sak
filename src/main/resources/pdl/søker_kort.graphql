@@ -8,6 +8,7 @@ query($ident: ID!){
         }
         folkeregisterpersonstatus {
             forenkletStatus
+            status
         }
         kjoenn {
             kjoenn
