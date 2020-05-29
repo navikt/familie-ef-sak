@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.validering
 
 import no.nav.familie.ef.sak.api.dto.PersonIdentDto
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
-import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import javax.validation.ConstraintValidator
