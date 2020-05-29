@@ -20,27 +20,27 @@ class PdlClient(val pdlConfig: PdlConfig,
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
                                                 query = pdlConfig.søkerKortQuery)
         val pdlResponse: PdlResponse<PdlSøkerKortData> = postForEntity(pdlConfig.pdlUri,
-                                                                           pdlPersonRequest,
-                                                                           httpHeaders())
-        return feilsjekkOgReturnerPerson(personIdent, pdlResponse).person
+                                                                       pdlPersonRequest,
+                                                                       httpHeaders())
+        return feilsjekkOgReturnerData(personIdent, pdlResponse).person
     }
 
     fun hentSøker(personIdent: String): PdlSøker {
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
                                                 query = pdlConfig.søkerQuery)
         val pdlResponse: PdlResponse<PdlSøkerData> = postForEntity(pdlConfig.pdlUri,
-                                                                           pdlPersonRequest,
-                                                                           httpHeaders())
-        return feilsjekkOgReturnerPerson(personIdent, pdlResponse).person
+                                                                   pdlPersonRequest,
+                                                                   httpHeaders())
+        return feilsjekkOgReturnerData(personIdent, pdlResponse).person
     }
 
     fun hentBarn(personIdent: String): PdlBarn {
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
                                                 query = pdlConfig.barnQuery)
         val pdlResponse: PdlResponse<PdlBarnData> = postForEntity(pdlConfig.pdlUri,
-                                                                           pdlPersonRequest,
-                                                                           httpHeaders())
-        return feilsjekkOgReturnerPerson(personIdent, pdlResponse).person
+                                                                  pdlPersonRequest,
+                                                                  httpHeaders())
+        return feilsjekkOgReturnerData(personIdent, pdlResponse).person
     }
 
     fun hentForelder2(personIdent: String): PdlAnnenForelder {
@@ -49,12 +49,12 @@ class PdlClient(val pdlConfig: PdlConfig,
         val pdlResponse: PdlResponse<PdlAnnenForelderData> = postForEntity(pdlConfig.pdlUri,
                                                                            pdlPersonRequest,
                                                                            httpHeaders())
-        return feilsjekkOgReturnerPerson(personIdent, pdlResponse).person
+        return feilsjekkOgReturnerData(personIdent, pdlResponse).person
 
     }
 
-    private inline fun <reified T : Any> feilsjekkOgReturnerPerson(ident: String,
-                                                                   pdlResponse: PdlResponse<T>): T {
+    private inline fun <reified T : Any> feilsjekkOgReturnerData(ident: String,
+                                                                 pdlResponse: PdlResponse<T>): T {
 
         if (pdlResponse.harFeil()) {
             secureLogger.error("Feil ved henting av ${T::class} fra PDL: ${pdlResponse.errorMessages()}")
