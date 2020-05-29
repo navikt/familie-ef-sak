@@ -22,7 +22,7 @@ class PersonopplysningerService(private val personService: PersonService) {
                                        gyldigTilOgMed = it.gyldigTilOgMed)
                 },
                 folkeregisterpersonstatus = Folkeregisterpersonstatus.fraPdl(søker.folkeregisterpersonstatus.single()),
-                navn = NavnDto.fromNavn(søker.navn.gjeldende()),
+                navn = NavnDto.fraNavn(søker.navn.gjeldende()),
                 sivilstand = sivilstand.map {
                     SivilstandDto(type = Sivilstandstype.valueOf(it.type.name),
                                   gyldigFraOgMed = it.gyldigFraOgMed,

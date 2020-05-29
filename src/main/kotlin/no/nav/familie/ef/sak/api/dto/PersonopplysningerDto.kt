@@ -102,9 +102,7 @@ data class NavnDto(val fornavn: String,
                    val etternavn: String) {
 
     companion object {
-        fun fromNavn(navn: Navn): NavnDto = NavnDto(navn.fornavn,
-                                                navn.mellomnavn,
-                                                navn.etternavn)
+        fun fraNavn(navn: Navn): NavnDto = NavnDto(navn.fornavn, navn.mellomnavn, navn.etternavn)
     }
 
     @Suppress("unused") val visningsnavn: String = when (mellomnavn) {
