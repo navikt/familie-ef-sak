@@ -18,19 +18,23 @@ internal class PersonopplysningerServiceTest {
 
     @Test
     internal fun `mapper pdlsøker til PersonopplysningerDto`() {
-        val søker = personopplysningerService.hentPdlSøker("11111122222")
+        val søker = personopplysningerService.hentPersonopplysninger("11111122222")
         assertThat(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(søker))
                 .isEqualToIgnoringWhitespace("""{
-  "telefonnummer" : {
-    "landskode" : "+47",
-    "nummer" : "98999923"
-  },
-  "folkeregisterpersonstatus" : "BOSATT",
+  "personIdent" : "11111122222",
   "navn" : {
     "fornavn" : "Fornavn",
     "mellomnavn" : "mellomnavn",
     "etternavn" : "Etternavn",
     "visningsnavn" : "Fornavn mellomnavn Etternavn"
+  },
+  "kjønn" : "KVINNE",
+  "adressebeskyttelse" : "UGRADERT",
+  "folkeregisterpersonstatus" : "BOSATT",
+  "dødsdato" : null,
+  "telefonnummer" : {
+    "landskode" : "+47",
+    "nummer" : "98999923"
   },
   "statsborgerskap" : [ {
     "land" : "NOR",
