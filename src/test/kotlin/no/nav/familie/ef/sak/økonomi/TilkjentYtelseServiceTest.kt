@@ -1,161 +1,145 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.økonomi
 
 import io.mockk.*
+import no.nav.familie.ef.sak.repository.CustomRepository
 import no.nav.familie.ef.sak.økonomi.*
-import no.nav.familie.ef.sak.økonomi.Utbetalingsoppdrag.finnAvstemmingTidspunkt
 import no.nav.familie.ef.sak.økonomi.Utbetalingsoppdrag.lagUtbetalingsoppdrag
 import no.nav.familie.ef.sak.økonomi.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.domain.TilkjentYtelseStatus
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.data.repository.findByIdOrNull
 import java.time.LocalDate
-import java.time.LocalDateTime
-import kotlin.test.assertEquals
+import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag as UtbetalingsoppdragDto
 
 class TilkjentYtelseServiceTest {
 
+    private val customRepository = mockk<CustomRepository<TilkjentYtelse>>()
     private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
-    private val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
     private val økonomiKlient = mockk<ØkonomiKlient>()
 
     private val tilkjentYtelseService =
-            TilkjentYtelseService(økonomiKlient, tilkjentYtelseRepository, andelTilkjentYtelseRepository)
+            TilkjentYtelseService(økonomiKlient, tilkjentYtelseRepository, customRepository)
 
     @BeforeEach
     fun beforeEach() {
         mockkObject(Utbetalingsoppdrag)
-        every { finnAvstemmingTidspunkt() } returns LocalDateTime.MIN
     }
 
     @AfterEach
     fun afterEach() {
-        confirmVerified(tilkjentYtelseRepository, andelTilkjentYtelseRepository, økonomiKlient)
+        confirmVerified(tilkjentYtelseRepository, økonomiKlient, customRepository)
     }
 
     @Test
     fun `opprett tilkjent ytelse`() {
         val tilkjentYtelseDto = DataGenerator.tilfeldigTilkjentYtelseDto()
-
         val tilkjentYtelse = tilkjentYtelseDto.tilTilkjentYtelse(TilkjentYtelseStatus.OPPRETTET)
-        val andelerTilkjentYtelse = tilkjentYtelseDto.tilAndelerTilkjentYtelse(tilkjentYtelse.id)
-
-        every { tilkjentYtelseRepository.findByPersonIdentifikatorOrNull(tilkjentYtelse.personIdentifikator) } returns null
-        every { tilkjentYtelseRepository.save(tilkjentYtelse) } returns tilkjentYtelse
-        every { andelTilkjentYtelseRepository.saveAll(andelerTilkjentYtelse) } returns andelerTilkjentYtelse
+        val slot = slot<TilkjentYtelse>()
+        every { tilkjentYtelseRepository.findByPersonident(tilkjentYtelse.personident) } returns null
+        every { customRepository.persist(capture(slot)) } returns tilkjentYtelse
 
         tilkjentYtelseService.opprettTilkjentYtelse(tilkjentYtelseDto)
 
-        verify { tilkjentYtelseRepository.findByPersonIdentifikatorOrNull(tilkjentYtelse.personIdentifikator) }
-        verify { tilkjentYtelseRepository.save(tilkjentYtelse) }
-        verify { andelTilkjentYtelseRepository.saveAll(andelerTilkjentYtelse) }
+        verify { tilkjentYtelseRepository.findByPersonident(tilkjentYtelse.personident) }
+        verify { customRepository.persist(slot.captured)}
+        assertThat(slot.captured).isEqualToIgnoringGivenFields(tilkjentYtelse, "id")
+
     }
 
     @Test
     fun `hent tilkjent-ytelse-dto`() {
-        val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse().copy(id = 1)
-        val andelerTilkjentYtelse = DataGenerator.flereTilfeldigeAndelerTilkjentYtelse(tilkjentYtelse.id, 3)
-        val eksternId = tilkjentYtelse.eksternId
+        val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(3)
+        val id = tilkjentYtelse.id
+        every { tilkjentYtelseRepository.findByIdOrNull(id) } returns tilkjentYtelse
 
-        every { tilkjentYtelseRepository.findByEksternIdOrNull(eksternId) } returns tilkjentYtelse
-        every { andelTilkjentYtelseRepository.findByTilkjentYtelseId(tilkjentYtelse.id) } returns andelerTilkjentYtelse
+        val dto = tilkjentYtelseService.hentTilkjentYtelseDto(id)
 
-        val dto = tilkjentYtelseService.hentTilkjentYtelseDto(eksternId)
-        assertEquals(eksternId, dto.eksternId)
-        assertEquals(3, dto.andelerTilkjentYtelse.size)
-        assertEquals(andelerTilkjentYtelse[2].beløp, dto.andelerTilkjentYtelse[2].beløp)
-
-        verify { tilkjentYtelseRepository.findByEksternIdOrNull(eksternId) }
-        verify { andelTilkjentYtelseRepository.findByTilkjentYtelseId(tilkjentYtelse.id) }
+        assertThat(dto.id).isEqualTo(id)
+        assertThat(dto.andelerTilkjentYtelse.size).isEqualTo(3)
+        (0..2).forEach {
+            assertThat(dto.andelerTilkjentYtelse[it].beløp).isEqualTo(tilkjentYtelse.andelerTilkjentYtelse[it].beløp)
+        }
+        verify { tilkjentYtelseRepository.findByIdOrNull(id) }
     }
 
     @Test
     fun `hent status fra oppdragstjenesten`() {
-
-        val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse().copy(id = 1)
-        val eksternId = tilkjentYtelse.eksternId
-
+        val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse()
+        val id = tilkjentYtelse.id
         val oppdragId = OppdragId("EF",
-                                  tilkjentYtelse.personIdentifikator,
+                                  tilkjentYtelse.personident,
                                   tilkjentYtelse.id.toString())
-
-        every { tilkjentYtelseRepository.findByEksternIdOrNull(eksternId) } returns tilkjentYtelse
+        every { tilkjentYtelseRepository.findByIdOrNull(id) } returns tilkjentYtelse
         every { økonomiKlient.hentStatus(oppdragId) } returns Ressurs.success(OppdragStatus.KVITTERT_OK)
 
-        tilkjentYtelseService.hentStatus(eksternId)
+        tilkjentYtelseService.hentStatus(id)
 
-        verify { tilkjentYtelseRepository.findByEksternIdOrNull(eksternId) }
+        verify { tilkjentYtelseRepository.findByIdOrNull(id) }
         verify { økonomiKlient.hentStatus(oppdragId) }
     }
 
     @Test
     fun `iverksett utbetalingsoppdrag`() {
-
-        val tilkjentYtelse =
-                DataGenerator.tilfeldigTilkjentYtelse().copy(id = 1, status = TilkjentYtelseStatus.OPPRETTET)
-
-        val eksternId = tilkjentYtelse.eksternId
-
-        val andelerTilkjentYtelse = DataGenerator.flereTilfeldigeAndelerTilkjentYtelse(tilkjentYtelse.id, 3)
-        val utbetalingsoppdrag = lagUtbetalingsoppdrag("VL", tilkjentYtelse, andelerTilkjentYtelse)
+        val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(3)
+                .copy(status = TilkjentYtelseStatus.OPPRETTET)
+        val id = tilkjentYtelse.id
+        val utbetalingsoppdrag = lagUtbetalingsoppdrag("VL", tilkjentYtelse)
+        val ytelseSlot = slot<TilkjentYtelse>()
+        val oppdragSlot = slot<UtbetalingsoppdragDto>()
         val oppdatertTilkjentYtelse =
                 tilkjentYtelse.copy(status = TilkjentYtelseStatus.SENDT_TIL_IVERKSETTING,
                                     utbetalingsoppdrag = utbetalingsoppdrag)
+        every { tilkjentYtelseRepository.findByIdOrNull(id) } returns tilkjentYtelse
+        every { økonomiKlient.iverksettOppdrag(capture(oppdragSlot)) } returns Ressurs.success("")
+        every { tilkjentYtelseRepository.save(capture(ytelseSlot)) } returns oppdatertTilkjentYtelse
 
-        every { tilkjentYtelseRepository.findByEksternIdOrNull(eksternId) } returns tilkjentYtelse
-        every { andelTilkjentYtelseRepository.findByTilkjentYtelseId(tilkjentYtelse.id) } returns andelerTilkjentYtelse
-        every { økonomiKlient.iverksettOppdrag(utbetalingsoppdrag) } returns Ressurs.success("")
-        every { tilkjentYtelseRepository.save(oppdatertTilkjentYtelse) } returns oppdatertTilkjentYtelse
+        tilkjentYtelseService.iverksettUtbetalingsoppdrag(id)
 
-        tilkjentYtelseService.iverksettUtbetalingsoppdrag(eksternId)
-
-        verify { tilkjentYtelseRepository.findByEksternIdOrNull(eksternId) }
-        verify { andelTilkjentYtelseRepository.findByTilkjentYtelseId(tilkjentYtelse.id) }
-        verify { økonomiKlient.iverksettOppdrag(utbetalingsoppdrag) }
-        verify { tilkjentYtelseRepository.save(oppdatertTilkjentYtelse) }
+        verify { tilkjentYtelseRepository.findByIdOrNull(id) }
+        verify { økonomiKlient.iverksettOppdrag(oppdragSlot.captured) }
+        verify { tilkjentYtelseRepository.save(ytelseSlot.captured) }
+        assertThat(ytelseSlot.captured).isEqualToIgnoringGivenFields(oppdatertTilkjentYtelse, "utbetalingsoppdrag")
+        assertThat(ytelseSlot.captured.utbetalingsoppdrag).isEqualToIgnoringGivenFields(utbetalingsoppdrag, "avstemmingTidspunkt")
+        assertThat(oppdragSlot.captured).isEqualToIgnoringGivenFields(utbetalingsoppdrag, "avstemmingTidspunkt")
     }
 
     @Test
     fun `opphør aktiv tilkjent ytelse`() {
         val opphørDato = LocalDate.now()
-
         val originalTilkjentYtelse =
-                DataGenerator.tilfeldigTilkjentYtelse().copy(id = 1,
-                                                             status = TilkjentYtelseStatus.AKTIV)
-
+                DataGenerator.tilfeldigTilkjentYtelse(3).copy(status = TilkjentYtelseStatus.AKTIV)
         val avsluttetOriginalTilkjentYtelse = originalTilkjentYtelse.copy(status = TilkjentYtelseStatus.AVSLUTTET)
-
         val opphørtTilkjentYtelse = originalTilkjentYtelse.tilOpphør(opphørDato)
-
-        val eksternId = originalTilkjentYtelse.eksternId
-
-        val andelerTilkjentYtelse =
-                DataGenerator.flereTilfeldigeAndelerTilkjentYtelse(originalTilkjentYtelse.id, 3)
+        val id = originalTilkjentYtelse.id
         val utbetalingsoppdrag =
-                lagUtbetalingsoppdrag("VL", opphørtTilkjentYtelse, andelerTilkjentYtelse)
+                lagUtbetalingsoppdrag("VL", opphørtTilkjentYtelse)
         val opphørtTilkjentYtelseSendtUtbetalingsoppdrag =
                 opphørtTilkjentYtelse.copy(status = TilkjentYtelseStatus.SENDT_TIL_IVERKSETTING,
                                            utbetalingsoppdrag = utbetalingsoppdrag)
-
-        every { tilkjentYtelseRepository.findByEksternIdOrNull(eksternId) } returns originalTilkjentYtelse
+        val utbetalingSlot = slot<UtbetalingsoppdragDto>()
+        val ytelseSlot = slot<TilkjentYtelse>()
+        every { tilkjentYtelseRepository.findByIdOrNull(id) } returns originalTilkjentYtelse
         every { tilkjentYtelseRepository.save(avsluttetOriginalTilkjentYtelse) } returns avsluttetOriginalTilkjentYtelse
-        every { tilkjentYtelseRepository.save(any<TilkjentYtelse>()) } returns opphørtTilkjentYtelse
-
-        every { andelTilkjentYtelseRepository.findByTilkjentYtelseId(originalTilkjentYtelse.id) } returns andelerTilkjentYtelse
-        every { økonomiKlient.iverksettOppdrag(utbetalingsoppdrag) } returns Ressurs.success("")
-        every { tilkjentYtelseRepository.save(opphørtTilkjentYtelseSendtUtbetalingsoppdrag) }
+        every { customRepository.persist(any<TilkjentYtelse>()) } returns opphørtTilkjentYtelse
+        every { økonomiKlient.iverksettOppdrag(capture(utbetalingSlot)) } returns Ressurs.success("")
+        every { tilkjentYtelseRepository.save(capture(ytelseSlot)) }
                 .returns(opphørtTilkjentYtelseSendtUtbetalingsoppdrag)
 
-        tilkjentYtelseService.opphørUtbetalingsoppdrag(eksternId, opphørDato)
+        tilkjentYtelseService.opphørUtbetalingsoppdrag(id, opphørDato)
 
-        verify { tilkjentYtelseRepository.findByEksternIdOrNull(eksternId) }
+        verify { tilkjentYtelseRepository.findByIdOrNull(id) }
         verify { tilkjentYtelseRepository.save(avsluttetOriginalTilkjentYtelse) }
-        verify { tilkjentYtelseRepository.save(any<TilkjentYtelse>()) }
-        verify { andelTilkjentYtelseRepository.findByTilkjentYtelseId(originalTilkjentYtelse.id) }
-        verify { økonomiKlient.iverksettOppdrag(utbetalingsoppdrag) }
-        verify { tilkjentYtelseRepository.save(opphørtTilkjentYtelseSendtUtbetalingsoppdrag) }
+        verify { customRepository.persist(any<TilkjentYtelse>()) }
+        verify { økonomiKlient.iverksettOppdrag(utbetalingSlot.captured) }
+        verify { tilkjentYtelseRepository.save(ytelseSlot.captured) }
+        assertThat(ytelseSlot.captured).isEqualToIgnoringGivenFields(opphørtTilkjentYtelseSendtUtbetalingsoppdrag, "utbetalingsoppdrag")
+        assertThat(ytelseSlot.captured.utbetalingsoppdrag).isEqualToIgnoringGivenFields(utbetalingsoppdrag, "avstemmingTidspunkt")
+        assertThat(utbetalingSlot.captured).isEqualToIgnoringGivenFields(utbetalingsoppdrag, "avstemmingTidspunkt")
     }
 }

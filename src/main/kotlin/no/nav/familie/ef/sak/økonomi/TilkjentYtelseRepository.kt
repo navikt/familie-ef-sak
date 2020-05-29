@@ -5,12 +5,8 @@ import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.data.repository.CrudRepository
 import java.util.*
 
-interface TilkjentYtelseRepository : CrudRepository<TilkjentYtelse, Long> {
+interface TilkjentYtelseRepository : CrudRepository<TilkjentYtelse, UUID> {
 
-    @Query(value = "SELECT * FROM Tilkjent_Ytelse ty WHERE ty.ekstern_id = :eksternId")
-    fun findByEksternIdOrNull(eksternId: UUID): TilkjentYtelse?
-
-    @Query(value = "SELECT * FROM Tilkjent_Ytelse ty WHERE ty.personIdent = :personIdent")
-    fun findByPersonIdentifikatorOrNull(personIdent: String): TilkjentYtelse?
+    fun findByPersonident(personident: String): TilkjentYtelse?
 
 }

@@ -13,38 +13,36 @@ fun TilkjentYtelseDTO.tilTilkjentYtelse(status: TilkjentYtelseStatus = TilkjentY
     val minStønadFom = this.andelerTilkjentYtelse.map { it.stønadFom }.min() ?: LocalDate.MIN
     val maxStønadTom = this.andelerTilkjentYtelse.map { it.stønadTom }.max() ?: LocalDate.MAX
 
-    return TilkjentYtelse(personIdentifikator = søker,
+    return TilkjentYtelse(personident = søker,
+                          periodeIdStart = 0L,
                           saksnummer = saksnummer,
                           stønadFom = minStønadFom,
                           stønadTom = maxStønadTom,
                           vedtaksdato = vedtaksdato,
-                          eksternId = eksternId,
-                          status = status)
+                          status = status,
+                          andelerTilkjentYtelse = tilAndelerTilkjentYtelse())
 }
 
-fun TilkjentYtelseDTO.tilAndelerTilkjentYtelse(tilkjentYtelseId: Long): List<AndelTilkjentYtelse> {
+fun TilkjentYtelseDTO.tilAndelerTilkjentYtelse(): List<AndelTilkjentYtelse> {
 
     return this.andelerTilkjentYtelse
             .map {
-                AndelTilkjentYtelse(tilkjentYtelseId = tilkjentYtelseId,
-                                    personIdentifikator = it.personIdentifikator,
-                                    beløp = it.beløp,
+                AndelTilkjentYtelse(beløp = it.beløp,
                                     stønadFom = it.stønadFom,
                                     stønadTom = it.stønadTom,
                                     type = it.type)
             }
 }
 
-fun TilkjentYtelse.tilDto(andelerTilkjentYtelse: List<AndelTilkjentYtelseDTO>): TilkjentYtelseDTO {
-    return TilkjentYtelseDTO(søker = this.personIdentifikator,
+fun TilkjentYtelse.tilDto(): TilkjentYtelseDTO {
+    return TilkjentYtelseDTO(id = this.id,
+                             søker = this.personident,
                              saksnummer = this.saksnummer,
-                             eksternId = this.eksternId,
-                             andelerTilkjentYtelse = andelerTilkjentYtelse)
+                             andelerTilkjentYtelse = this.andelerTilkjentYtelse.map { it.tilDto() })
 }
 
 fun AndelTilkjentYtelse.tilDto(): AndelTilkjentYtelseDTO {
-    return AndelTilkjentYtelseDTO(personIdentifikator = this.personIdentifikator,
-                                  beløp = this.beløp,
+    return AndelTilkjentYtelseDTO(beløp = this.beløp,
                                   stønadFom = this.stønadFom,
                                   stønadTom = this.stønadTom,
                                   type = this.type)
@@ -52,8 +50,10 @@ fun AndelTilkjentYtelse.tilDto(): AndelTilkjentYtelseDTO {
 
 fun TilkjentYtelse.tilOpphør(opphørDato: LocalDate) =
         TilkjentYtelse(type = TilkjentYtelseType.OPPHØR,
-                       personIdentifikator = personIdentifikator,
+                       personident = personident,
+                       periodeIdStart = 0L,
                        saksnummer = saksnummer,
                        opphørFom = opphørDato,
-                       forrigeTilkjentYtelseId = id,
-                       vedtaksdato = LocalDate.now())
+                       forrigePeriodeIdStart = periodeIdStart,
+                       vedtaksdato = LocalDate.now(),
+                       andelerTilkjentYtelse = andelerTilkjentYtelse)

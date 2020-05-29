@@ -38,10 +38,9 @@ class SakController(private val sakService: SakService) {
     }
 
     @GetMapping("/{id}")
-    fun dummy(@PathVariable("id") @SakstilgangConstraint id: UUID): Ressurs<Sak> {
+    fun dummy(@PathVariable("id") id: UUID): Ressurs<Sak> {
         return Ressurs.success(sakService.hentSak(id));
     }
-
 
 }
 

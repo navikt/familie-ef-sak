@@ -48,6 +48,13 @@ query($ident: ID!){
             status
             forenkletStatus
         }
+        fullmakt(historikk: true) {
+            gyldigFraOgMed
+            gyldigTilOgMed
+            motpartsPersonident
+            motpartsRolle
+            omraader
+        }
         kjoenn {
             kjoenn
         }
