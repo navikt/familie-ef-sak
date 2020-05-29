@@ -15,8 +15,6 @@ class Persontilgang(private val integrasjonerClient: FamilieIntegrasjonerClient)
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun isValid(personIdent: PersonIdentDto, ctx: ConstraintValidatorContext): Boolean {
-
-        val jwtToken = SpringTokenValidationContextHolder().tokenValidationContext.getJwtToken("azure")
         integrasjonerClient.sjekkTilgangTilPersoner(listOf(personIdent.personIdent))
                 .filterNot { it.harTilgang }
                 .forEach {
