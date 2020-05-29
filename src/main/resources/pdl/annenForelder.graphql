@@ -32,6 +32,13 @@ query($ident: ID!){
         doedsfall {
             doedsdato
         }
+        foedsel {
+            foedselsaar
+            foedselsdato
+            foedeland
+            foedested
+            foedekommune
+        }
         folkeregisterpersonstatus(historikk: true) {
             status
             forenkletStatus

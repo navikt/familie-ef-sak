@@ -44,6 +44,7 @@
           "forenkletStatus": "bosattEtterFolkeregisterloven"
         }
       ],
+      "fullmakt": [],
       "kjoenn": [
         {
           "kjoenn": "MANN"
@@ -58,6 +59,28 @@
       ],
       "opphold": [],
       "vergemaalEllerFremtidsfullmakt": [],
+      "kontaktadresse": [
+        {
+          "coAdressenavn": null,
+          "gyldigFraOgMed": "1966-11-18T00:00",
+          "gyldigTilOgMed": null,
+          "postadresseIFrittFormat": null,
+          "postboksadresse": null,
+          "type": "Innland",
+          "utenlandskAdresse": null,
+          "utenlandskAdresseIFrittFormat": null,
+          "vegadresse": {
+            "husnummer": "77",
+            "husbokstav": null,
+            "bruksenhetsnummer": null,
+            "adressenavn": "INNGJERDSVEGEN",
+            "kommunenummer": null,
+            "tilleggsnavn": null,
+            "postnummer": "0862",
+            "koordinater": null
+          }
+        }
+      ],
       "oppholdsadresse": [
         {
           "oppholdsadressedato": "1966-11-18",

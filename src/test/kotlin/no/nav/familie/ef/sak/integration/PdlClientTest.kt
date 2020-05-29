@@ -26,7 +26,6 @@ class PdlClientTest {
     @BeforeEach
     fun setUp() {
         wireMockServer.start()
-        val wireMockPort: String = wireMockServer.port().toString()
         val stsRestClient = mockk<StsRestClient>()
         every { stsRestClient.systemOIDCToken } returns "token"
         pdlClient = PdlClient(PdlConfig(URI.create(wireMockServer.baseUrl())), restOperations, stsRestClient)
@@ -49,7 +48,7 @@ class PdlClientTest {
     @Test
     fun `pdlClienten håndterer response for annenForelder-query mot pdltjenesten riktig`() {
         wireMockServer.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
-                                       .willReturn(okJson(readfile("søker.json"))))
+                                       .willReturn(okJson(readfile("annenForelder.json"))))
         val response = pdlClient.hentForelder2("")
         assertThat(response.bostedsadresse[0].angittFlyttedato).isEqualTo(LocalDate.of(1966,11,18))
     }

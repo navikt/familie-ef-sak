@@ -28,6 +28,15 @@
         }
       ],
       "doedsfall": [],
+      "foedsel": [
+        {
+          "foedselsaar": null,
+          "foedselsdato": "1966-11-18",
+          "foedeland": null,
+          "foedested": null,
+          "foedekommune": null
+        }
+      ],
       "folkeregisterpersonstatus": [
         {
           "status": "bosatt",
