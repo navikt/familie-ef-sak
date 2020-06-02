@@ -1,0 +1,30 @@
+{
+  "data": {
+    "person": {
+      "adressebeskyttelse": [
+        {
+          "gradering": "FORTROLIG"
+        }
+      ],
+      "doedsfall": [],
+      "folkeregisterpersonstatus": [
+        {
+          "forenkletStatus": "bosattEtterFolkeregisterloven",
+          "status": "bosatt"
+        }
+      ],
+      "kjoenn": [
+        {
+          "kjoenn": "MANN"
+        }
+      ],
+      "navn": [
+        {
+          "fornavn": "BRÅKETE",
+          "mellomnavn": null,
+          "etternavn": "KAMELEON"
+        }
+      ]
+    }
+  }
+}

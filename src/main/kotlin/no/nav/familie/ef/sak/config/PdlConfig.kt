@@ -21,7 +21,7 @@ class PdlConfig(@Value("\${PDL_URL}") pdlUrl: URI) {
     val annenForelderQuery get() = this::class.java.getResource("/pdl/annenForelder.graphql").readText().graphqlCompatible()
 
     companion object {
-        private const val PATH_GRAPHQL = "graphql"
+        const val PATH_GRAPHQL = "graphql"
     }
 
     fun String.graphqlCompatible(): String {

@@ -73,17 +73,83 @@ query($ident: ID!){
             oppholdFra
             oppholdTil
         }
+        vergemaalEllerFremtidsfullmakt {
+            embete
+            folkeregistermetadata {
+                gyldighetstidspunkt
+                opphoerstidspunkt
+            }
+            type
+            vergeEllerFullmektig {
+                motpartsPersonident
+                navn {
+                    fornavn
+                    mellomnavn
+                    etternavn
+                }
+                omfang
+                omfangetErInnenPersonligOmraade
+            }
+        }
+        kontaktadresse{
+            coAdressenavn
+            gyldigFraOgMed
+            gyldigTilOgMed
+            postadresseIFrittFormat {
+                adresselinje1
+                adresselinje2
+                adresselinje3
+                postnummer
+            }
+            postboksadresse {
+                postboks
+                postbokseier
+                postnummer
+            }
+            type
+            utenlandskAdresse {
+                adressenavnNummer
+                bySted
+                bygningEtasjeLeilighet
+                landkode
+                postboksNummerNavn
+                postkode
+                regionDistriktOmraade
+            }
+            utenlandskAdresseIFrittFormat {
+                adresselinje1
+                adresselinje2
+                adresselinje3
+                byEllerStedsnavn
+                landkode
+                postkode
+            }
+            vegadresse {
+                husnummer
+                husbokstav
+                bruksenhetsnummer
+                adressenavn
+                kommunenummer
+                tilleggsnavn
+                postnummer
+                koordinater {
+                    x
+                    y
+                    z
+                    kvalitet
+                }
+            }
+        }
         oppholdsadresse(historikk: true) {
             oppholdsadressedato
             coAdressenavn
             utenlandskAdresse {
-                adressenavn
-                bygningsinformasjon
-                postboks
+                adressenavnNummer
+                bySted
                 postkode
-                byEllerStedsnavn
-                distriktEllerRegion
                 landkode
+                postboksNummerNavn
+                regionDistriktOmraade
             }
             vegadresse {
                 husnummer

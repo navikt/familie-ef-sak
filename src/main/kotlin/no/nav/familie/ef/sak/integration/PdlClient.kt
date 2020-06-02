@@ -19,31 +19,42 @@ class PdlClient(val pdlConfig: PdlConfig,
     fun hentSøkerKort(personIdent: String): PdlSøkerKort {
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
                                                 query = pdlConfig.søkerKortQuery)
-        return hentFraPdl<PdlSøkerKortData>(pdlPersonRequest).person
+        val pdlResponse: PdlResponse<PdlSøkerKortData> = postForEntity(pdlConfig.pdlUri,
+                                                                       pdlPersonRequest,
+                                                                       httpHeaders())
+        return feilsjekkOgReturnerData(personIdent, pdlResponse).person
     }
 
     fun hentSøker(personIdent: String): PdlSøker {
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
                                                 query = pdlConfig.søkerQuery)
-        return hentFraPdl<PdlSøkerData>(pdlPersonRequest).person
+        val pdlResponse: PdlResponse<PdlSøkerData> = postForEntity(pdlConfig.pdlUri,
+                                                                   pdlPersonRequest,
+                                                                   httpHeaders())
+        return feilsjekkOgReturnerData(personIdent, pdlResponse).person
     }
 
     fun hentBarn(personIdent: String): PdlBarn {
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
                                                 query = pdlConfig.barnQuery)
-        return hentFraPdl<PdlBarnData>(pdlPersonRequest).person
+        val pdlResponse: PdlResponse<PdlBarnData> = postForEntity(pdlConfig.pdlUri,
+                                                                  pdlPersonRequest,
+                                                                  httpHeaders())
+        return feilsjekkOgReturnerData(personIdent, pdlResponse).person
     }
 
     fun hentForelder2(personIdent: String): PdlAnnenForelder {
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
                                                 query = pdlConfig.annenForelderQuery)
-        return hentFraPdl<PdlAnnenForelderData>(pdlPersonRequest).person
+        val pdlResponse: PdlResponse<PdlAnnenForelderData> = postForEntity(pdlConfig.pdlUri,
+                                                                           pdlPersonRequest,
+                                                                           httpHeaders())
+        return feilsjekkOgReturnerData(personIdent, pdlResponse).person
+
     }
 
-    private inline fun <reified T : Any> hentFraPdl(pdlPersonRequest: PdlPersonRequest): T {
-        val pdlResponse: PdlResponse<T> = postForEntity(pdlConfig.pdlUri,
-                                                        pdlPersonRequest,
-                                                        httpHeaders())
+    private inline fun <reified T : Any> feilsjekkOgReturnerData(ident: String,
+                                                                 pdlResponse: PdlResponse<T>): T {
 
         if (pdlResponse.harFeil()) {
             secureLogger.error("Feil ved henting av ${T::class} fra PDL: ${pdlResponse.errorMessages()}")
@@ -51,7 +62,7 @@ class PdlClient(val pdlConfig: PdlConfig,
         }
 
         if (pdlResponse.data == null) {
-            secureLogger.error("Feil ved oppslag på ident ${pdlPersonRequest.variables.ident}. " +
+            secureLogger.error("Feil ved oppslag på ident $ident. " +
                                "PDL rapporterte ingen feil men returnerte tomt datafelt")
             throw PdlRequestException("Manglende ${T::class} ved feilfri respons fra PDL. Se secure logg for detaljer.")
         }

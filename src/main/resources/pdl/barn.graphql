@@ -6,6 +6,10 @@ query($ident: ID!){
         bostedsadresse {
             angittFlyttedato
             coAdressenavn
+            folkeregistermetadata {
+                gyldighetstidspunkt
+                opphoerstidspunkt
+            }
             vegadresse {
                 husnummer
                 husbokstav

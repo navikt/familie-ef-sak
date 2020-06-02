@@ -1,5 +1,15 @@
 query($ident: ID!){
     person: hentPerson(ident: $ident) {
+        adressebeskyttelse {
+            gradering
+        }
+        doedsfall {
+            doedsdato
+        }
+        folkeregisterpersonstatus {
+            forenkletStatus
+            status
+        }
         kjoenn {
             kjoenn
         }
