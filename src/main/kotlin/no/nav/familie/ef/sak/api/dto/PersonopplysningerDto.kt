@@ -11,7 +11,7 @@ NAV-enhet
 data class PersonopplysningerDto(val personIdent: String,
                                  val navn: NavnDto,
                                  val kjønn: Kjønn,
-                                 val adressebeskyttelse: Adressebeskyttelse,
+                                 val adressebeskyttelse: Adressebeskyttelse?,
                                  val folkeregisterpersonstatus: Folkeregisterpersonstatus?,
                                  val dødsdato: LocalDate?,
                                  val telefonnummer: TelefonnummerDto?,

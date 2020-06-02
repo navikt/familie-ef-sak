@@ -18,7 +18,8 @@ class PersonopplysningerService(private val personService: PersonService) {
         val sivilstand = søker.sivilstand
         //val andreIdenter = fullmakter.map { it.motpartsPersonident } + sivilstand.map { it.relatertVedSivilstand }.filterNotNull() //TODO hent personinfo
         return PersonopplysningerDto(
-                adressebeskyttelse = Adressebeskyttelse.valueOf(søker.adressebeskyttelse.single().gradering.name),
+                adressebeskyttelse = søker.adressebeskyttelse.firstOrNull()
+                        ?.let { Adressebeskyttelse.valueOf(it.gradering.name) },
                 folkeregisterpersonstatus = Folkeregisterpersonstatus.fraPdl(søker.folkeregisterpersonstatus.single()),
                 dødsdato = søker.dødsfall.firstOrNull()?.dødsdato,
                 navn = NavnDto.fraNavn(søker.navn.gjeldende()),
