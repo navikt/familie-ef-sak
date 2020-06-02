@@ -34,6 +34,16 @@ class PdlClient(val pdlConfig: PdlConfig,
         return feilsjekkOgReturnerData(personIdent, pdlResponse).person
     }
 
+    //Brukes for å hente hele pdl dataobjektet uten serialisering
+    fun hentSøkerAsMap(personIdent: String): Map<String, Any> {
+        val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
+                                                query = pdlConfig.søkerQuery)
+        val pdlResponse: PdlResponse<Map<String, Any>> = postForEntity(pdlConfig.pdlUri,
+                                                                       pdlPersonRequest,
+                                                                       httpHeaders())
+        return feilsjekkOgReturnerData(personIdent, pdlResponse)
+    }
+
     fun hentBarn(personIdent: String): PdlBarn {
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
                                                 query = pdlConfig.barnQuery)

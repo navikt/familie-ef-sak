@@ -21,21 +21,24 @@ class PdlClientConfig {
     @Bean
     @Primary
     fun pdlClient(): PdlClient {
-        val pdlCLient: PdlClient = mockk()
+        val pdlClient: PdlClient = mockk()
 
         val folkeregisterpersonstatus = listOf(Folkeregisterpersonstatus("bosatt", "bosattEtterFolkeregisterloven"))
-        val navn = listOf(Navn("Fornavn", "mellomnavn", "Etternavn"))
+        val navn = listOf(Navn("Fornavn",
+                               "mellomnavn",
+                               "Etternavn",
+                               Metadata(endringer = listOf(MetadataEndringer(LocalDate.now())))))
         val kjønn = listOf(Kjønn(KjønnType.KVINNE))
         val adressebeskyttelse = listOf(Adressebeskyttelse(gradering = AdressebeskyttelseGradering.UGRADERT))
 
-        every { pdlCLient.hentSøkerKort(any()) } returns
+        every { pdlClient.hentSøkerKort(any()) } returns
                 PdlSøkerKort(adressebeskyttelse = adressebeskyttelse,
                              dødsfall = emptyList(),
                              folkeregisterpersonstatus = folkeregisterpersonstatus,
                              kjønn = kjønn,
                              navn = navn)
 
-        every { pdlCLient.hentSøker(any()) } returns
+        every { pdlClient.hentSøker(any()) } returns
                 PdlSøker(
                         adressebeskyttelse = adressebeskyttelse,
                         bostedsadresse = bostedsadresse(),
@@ -57,7 +60,8 @@ class PdlClientConfig {
                         utflyttingFraNorge = listOf(),
                         vergemaalEllerFremtidsfullmakt = listOf()
                 )
-        return pdlCLient
+        every { pdlClient.hentSøkerAsMap(any())} returns mapOf()
+        return pdlClient
     }
 
     private fun kontaktadresse(): List<Kontaktadresse> =

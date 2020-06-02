@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.api.dto
 
+import no.nav.familie.ef.sak.integration.dto.pdl.Navn
 import java.time.LocalDate
 import no.nav.familie.ef.sak.integration.dto.pdl.Folkeregisterpersonstatus as PdlFolkeregisterpersonstatus
 
@@ -9,6 +10,7 @@ NAV-enhet
  */
 data class PersonopplysningerDto(val telefonnummer: TelefonnummerDto?,
                                  val folkeregisterpersonstatus: Folkeregisterpersonstatus,
+                                 val navn: NavnDto,
                                  val statsborgerskap: List<StatsborgerskapDto>,
                                  val sivilstand: List<SivilstandDto>,
                                  val adresse: List<AdresseDto>,
@@ -98,6 +100,10 @@ enum class Kjønn {
 data class NavnDto(val fornavn: String,
                    val mellomnavn: String?,
                    val etternavn: String) {
+
+    companion object {
+        fun fraNavn(navn: Navn): NavnDto = NavnDto(navn.fornavn, navn.mellomnavn, navn.etternavn)
+    }
 
     @Suppress("unused") val visningsnavn: String = when (mellomnavn) {
         null -> "$fornavn $etternavn"

@@ -16,7 +16,8 @@ class PersonService(val integrasjonerClient: FamilieIntegrasjonerClient,
     fun hentPerson(ident: String): Person {
         val personopplysninger = integrasjonerClient.hentPersonopplysninger(ident)
         val personhistorikk = integrasjonerClient.hentPersonhistorikk(ident)
-        return Person(personopplysninger, personhistorikk)
+        val pdlData = pdlClient.hentSøkerAsMap(ident)
+        return Person(personopplysninger, personhistorikk, pdlData)
     }
 
     fun hentPdlPerson(ident: String): PdlSøker {

@@ -1,10 +1,9 @@
 package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.api.dto.*
-import no.nav.familie.ef.sak.integration.dto.pdl.KontaktadresseType
-import no.nav.familie.ef.sak.integration.dto.pdl.MotpartsRolle
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker
-import no.nav.familie.ef.sak.integration.dto.pdl.tilFormatertAdresse
+import no.nav.familie.ef.sak.api.dto.Folkeregisterpersonstatus
+import no.nav.familie.ef.sak.api.dto.Sivilstandstype
+import no.nav.familie.ef.sak.integration.dto.pdl.*
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -23,6 +22,7 @@ class PersonopplysningerService(private val personService: PersonService) {
                                        gyldigTilOgMed = it.gyldigTilOgMed)
                 },
                 folkeregisterpersonstatus = Folkeregisterpersonstatus.fraPdl(søker.folkeregisterpersonstatus.single()),
+                navn = NavnDto.fraNavn(søker.navn.gjeldende()),
                 sivilstand = sivilstand.map {
                     SivilstandDto(type = Sivilstandstype.valueOf(it.type.name),
                                   gyldigFraOgMed = it.gyldigFraOgMed,
