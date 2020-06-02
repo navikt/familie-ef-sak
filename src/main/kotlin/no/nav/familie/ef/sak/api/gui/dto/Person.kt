@@ -4,4 +4,5 @@ import no.nav.familie.ef.sak.integration.dto.personopplysning.PersonhistorikkInf
 import no.nav.familie.ef.sak.integration.dto.personopplysning.Personinfo
 
 class Person(val personinfo: Personinfo,
-             val personhistorikkInfo: PersonhistorikkInfo)
+             val personhistorikkInfo: PersonhistorikkInfo,
+             val pdlData: Map<String, Any>)
