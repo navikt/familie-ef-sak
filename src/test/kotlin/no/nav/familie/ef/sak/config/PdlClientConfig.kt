@@ -18,35 +18,32 @@ class PdlClientConfig {
     private val startdato = LocalDate.of(2020, 1, 1)
     private val sluttdato = LocalDate.of(2021, 1, 1)
 
+    private val søkerKort = mapOf(
+            "11111122222" to PdlSøkerKort(lagKjønn(KjønnType.MANN), lagNavn(fornavn = "Foo")),
+            "11111133333" to PdlSøkerKort(lagKjønn(KjønnType.KVINNE), lagNavn(fornavn = "Bar"))
+    )
+
     @Bean
     @Primary
     fun pdlClient(): PdlClient {
         val pdlClient: PdlClient = mockk()
 
-        val folkeregisterpersonstatus = listOf(Folkeregisterpersonstatus("bosatt", "bosattEtterFolkeregisterloven"))
-        val navn = listOf(Navn("Fornavn",
-                               "mellomnavn",
-                               "Etternavn",
-                               Metadata(endringer = listOf(MetadataEndringer(LocalDate.now())))))
-        val kjønn = listOf(Kjønn(KjønnType.KVINNE))
-        val adressebeskyttelse = listOf(Adressebeskyttelse(gradering = AdressebeskyttelseGradering.UGRADERT))
-
-        every { pdlClient.hentSøkerKort(any()) } returns
-                PdlSøkerKort(kjønn = kjønn,
-                             navn = navn)
+        every { pdlClient.hentSøkerKort(any()) } answers {
+            søkerKort.getOrDefault(firstArg() as String, PdlSøkerKort(lagKjønn(KjønnType.MANN), lagNavn(fornavn = "Ikke mappet")))
+        }
 
         every { pdlClient.hentSøker(any()) } returns
                 PdlSøker(
-                        adressebeskyttelse = adressebeskyttelse,
+                        adressebeskyttelse = listOf(Adressebeskyttelse(gradering = AdressebeskyttelseGradering.UGRADERT)),
                         bostedsadresse = bostedsadresse(),
                         dødsfall = listOf(),
                         familierelasjoner = listOf(),
                         fødsel = listOf(),
-                        folkeregisterpersonstatus = folkeregisterpersonstatus,
+                        folkeregisterpersonstatus = listOf(Folkeregisterpersonstatus("bosatt", "bosattEtterFolkeregisterloven")),
                         fullmakt = fullmakter(),
-                        kjønn = kjønn,
+                        kjønn = lagKjønn(KjønnType.KVINNE),
                         kontaktadresse = kontaktadresse(),
-                        navn = navn,
+                        navn = lagNavn(),
                         opphold = listOf(),
                         oppholdsadresse = listOf(),
                         sivilstand = sivilstand(),
@@ -57,9 +54,19 @@ class PdlClientConfig {
                         utflyttingFraNorge = listOf(),
                         vergemaalEllerFremtidsfullmakt = listOf()
                 )
-        every { pdlClient.hentSøkerAsMap(any())} returns mapOf()
+        every { pdlClient.hentSøkerAsMap(any()) } returns mapOf()
         return pdlClient
     }
+
+    private fun lagKjønn(kjønnType: KjønnType) = listOf(Kjønn(kjønnType))
+
+    private fun lagNavn(fornavn: String = "Fornavn",
+                        mellomnavn: String? = "mellomnavn",
+                        etternavn: String = "Etternavn"): List<Navn> =
+            listOf(Navn(fornavn,
+                        mellomnavn,
+                        etternavn,
+                        Metadata(endringer = listOf(MetadataEndringer(LocalDate.now())))))
 
     private fun kontaktadresse(): List<Kontaktadresse> =
             listOf(Kontaktadresse(coAdressenavn = "co",
@@ -90,7 +97,7 @@ class PdlClientConfig {
     private fun fullmakter(): List<Fullmakt> =
             listOf(Fullmakt(gyldigTilOgMed = startdato,
                             gyldigFraOgMed = sluttdato,
-                            motpartsPersonident = "11111122222",
+                            motpartsPersonident = "11111133333",
                             motpartsRolle = MotpartsRolle.FULLMEKTIG,
                             omraader = listOf()))
 
