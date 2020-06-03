@@ -32,10 +32,7 @@ class SakSøkService(private val sakRepository: SakRepository,
                 sakId = sakId,
                 personIdent = personIdent,
                 kjønn = søker.kjønn.single().kjønn.let { Kjønn.valueOf(it.name) },
-                navn = NavnDto.fraNavn(søker.navn.gjeldende()),
-                adressebeskyttelse = Adressebeskyttelse.valueOf(søker.adressebeskyttelse.single().gradering.name),
-                folkeregisterpersonstatus = Folkeregisterpersonstatus.fraPdl(søker.folkeregisterpersonstatus.single()),
-                dødsdato = søker.dødsfall.firstOrNull()?.dødsdato
+                navn = NavnDto.fraNavn(søker.navn.gjeldende())
         ))
     }
 

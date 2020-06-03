@@ -54,10 +54,7 @@ internal class SakSøkServiceTest {
                              navn = listOf(Navn("Fornavn",
                                                 "mellomnavn",
                                                 "Etternavn",
-                                                Metadata(endringer = listOf(MetadataEndringer(LocalDate.now()))))),
-                             adressebeskyttelse = listOf(Adressebeskyttelse(AdressebeskyttelseGradering.FORTROLIG)),
-                             folkeregisterpersonstatus = listOf(Folkeregisterpersonstatus("utflyttet", "ikkeBosatt")),
-                             dødsfall = listOf(Dødsfall(LocalDate.parse("2020-01-02"))))
+                                                Metadata(endringer = listOf(MetadataEndringer(LocalDate.now()))))))
         val sakSøk = sakSøkService.finnSakForPerson(personIdent)
         assertThat(sakSøk.status).isEqualTo(Ressurs.Status.SUKSESS)
         sakSøk.data!!.let {
@@ -65,9 +62,6 @@ internal class SakSøkServiceTest {
             assertThat(it.personIdent).isEqualTo(personIdent)
             assertThat(it.kjønn).isEqualTo(no.nav.familie.ef.sak.api.dto.Kjønn.MANN)
             assertThat(it.navn.visningsnavn).isEqualTo("Fornavn mellomnavn Etternavn")
-            assertThat(it.adressebeskyttelse).isEqualTo(no.nav.familie.ef.sak.api.dto.Adressebeskyttelse.FORTROLIG)
-            assertThat(it.folkeregisterpersonstatus).isEqualTo(no.nav.familie.ef.sak.api.dto.Folkeregisterpersonstatus.UTFLYTTET)
-            assertThat(it.dødsdato.toString()).isEqualTo("2020-01-02")
         }
     }
 }

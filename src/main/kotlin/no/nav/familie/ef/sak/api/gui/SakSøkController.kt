@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.api
+package no.nav.familie.ef.sak.api.gui
 
 import no.nav.familie.ef.sak.api.dto.PersonIdentDto
 import no.nav.familie.ef.sak.api.dto.SakSøkDto

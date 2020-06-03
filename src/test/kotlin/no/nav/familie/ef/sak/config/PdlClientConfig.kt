@@ -32,10 +32,7 @@ class PdlClientConfig {
         val adressebeskyttelse = listOf(Adressebeskyttelse(gradering = AdressebeskyttelseGradering.UGRADERT))
 
         every { pdlClient.hentSøkerKort(any()) } returns
-                PdlSøkerKort(adressebeskyttelse = adressebeskyttelse,
-                             dødsfall = emptyList(),
-                             folkeregisterpersonstatus = folkeregisterpersonstatus,
-                             kjønn = kjønn,
+                PdlSøkerKort(kjønn = kjønn,
                              navn = navn)
 
         every { pdlClient.hentSøker(any()) } returns

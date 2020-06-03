@@ -8,9 +8,13 @@ import no.nav.familie.ef.sak.integration.dto.pdl.Folkeregisterpersonstatus as Pd
 Målform Målform skal mastres videre i KRR. Konsumenter som vil ha målform, må derfor gå direkte mot KRR for å få ut opplysningene. I en overgangsfase vil opplysningene fortsatt være tilgjengelig fra TPS.
 NAV-enhet
  */
-data class PersonopplysningerDto(val telefonnummer: TelefonnummerDto?,
-                                 val folkeregisterpersonstatus: Folkeregisterpersonstatus,
+data class PersonopplysningerDto(val personIdent: String,
                                  val navn: NavnDto,
+                                 val kjønn: Kjønn,
+                                 val adressebeskyttelse: Adressebeskyttelse?,
+                                 val folkeregisterpersonstatus: Folkeregisterpersonstatus?,
+                                 val dødsdato: LocalDate?,
+                                 val telefonnummer: TelefonnummerDto?,
                                  val statsborgerskap: List<StatsborgerskapDto>,
                                  val sivilstand: List<SivilstandDto>,
                                  val adresse: List<AdresseDto>,

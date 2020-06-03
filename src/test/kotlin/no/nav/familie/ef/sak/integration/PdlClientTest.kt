@@ -6,7 +6,6 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.config.PdlConfig
-import no.nav.familie.ef.sak.integration.dto.pdl.AdressebeskyttelseGradering
 import no.nav.familie.http.sts.StsRestClient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -50,7 +49,7 @@ class PdlClientTest {
         wireMockServer.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
                                        .willReturn(okJson(readfile("annenForelder.json"))))
         val response = pdlClient.hentForelder2("")
-        assertThat(response.bostedsadresse[0].angittFlyttedato).isEqualTo(LocalDate.of(1966,11,18))
+        assertThat(response.bostedsadresse[0].angittFlyttedato).isEqualTo(LocalDate.of(1966, 11, 18))
     }
 
     @Test
@@ -58,7 +57,7 @@ class PdlClientTest {
         wireMockServer.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
                                        .willReturn(okJson(readfile("barn.json"))))
         val response = pdlClient.hentBarn("")
-        assertThat(response.fødsel[0].fødselsdato).isEqualTo(LocalDate.of(1966,11,18))
+        assertThat(response.fødsel[0].fødselsdato).isEqualTo(LocalDate.of(1966, 11, 18))
     }
 
     @Test
@@ -66,16 +65,10 @@ class PdlClientTest {
         wireMockServer.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
                                        .willReturn(okJson(readfile("søker_kort.json"))))
         val response = pdlClient.hentSøkerKort("")
-        assertThat(response.adressebeskyttelse[0].gradering).isEqualTo(AdressebeskyttelseGradering.FORTROLIG)
+        assertThat(response.navn[0].fornavn).isEqualTo("BRÅKETE")
     }
-
-
-
 
     private fun readfile(filnavn: String): String {
         return this::class.java.getResource("/json/$filnavn").readText()
     }
-
-
-
 }
