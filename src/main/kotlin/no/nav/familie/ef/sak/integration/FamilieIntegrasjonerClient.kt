@@ -49,7 +49,7 @@ class FamilieIntegrasjonerClient(@Qualifier("azure") restOperations: RestOperati
 
     fun egenAnsatt(ident: String): Boolean {
         return postForEntity<Ressurs<EgenAnsattResponse>>(integrasjonerConfig.egenAnsattUri,
-                                                          EgenAnsattRequest(ident)).data!!.egenAnsatt
+                                                          EgenAnsattRequest(ident)).data!!.erEgenAnsatt
     }
 
 
