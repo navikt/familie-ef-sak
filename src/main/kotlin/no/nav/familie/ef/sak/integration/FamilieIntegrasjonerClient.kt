@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.integration.dto.Tilgang
 import no.nav.familie.ef.sak.integration.dto.personopplysning.PersonhistorikkInfo
 import no.nav.familie.ef.sak.integration.dto.personopplysning.Personinfo
 import no.nav.familie.http.client.AbstractPingableRestClient
+import no.nav.familie.integrasjoner.kodeverk.domene.KodeverkDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import org.springframework.beans.factory.annotation.Qualifier
@@ -29,6 +30,14 @@ class FamilieIntegrasjonerClient(@Qualifier("azure") restOperations: RestOperati
 
     fun hentMedlemskapsinfo(ident: String): Medlemskapsinfo {
         return getForEntity<Ressurs<Medlemskapsinfo>>(integrasjonerConfig.personopplysningerUri, personIdentHeader(ident)).data!!
+    }
+
+    fun hentKodeverkLandkoder(): KodeverkDto {
+        return getForEntity<Ressurs<KodeverkDto>>(integrasjonerConfig.kodeverkLandkoderUri).data!!
+    }
+
+    fun hentKodeverkPoststed(): KodeverkDto {
+        return getForEntity<Ressurs<KodeverkDto>>(integrasjonerConfig.kodeverkPoststedUri).data!!
     }
 
     @Deprecated("bruk Pdl-løsning")

@@ -3,6 +3,8 @@ package no.nav.familie.ef.sak.service
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
+import no.nav.familie.ef.sak.mapper.PdlAdresseMapper
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.config.KodeverkServiceMock
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.config.PdlClientConfig
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
@@ -13,12 +15,16 @@ internal class PersonopplysningerServiceTest {
 
     private lateinit var personopplysningerService: PersonopplysningerService
     private lateinit var familieIntegrasjonerClient: FamilieIntegrasjonerClient
+    private lateinit var pdlAdresseMapper: PdlAdresseMapper
+
 
     @BeforeEach
     internal fun setUp() {
         familieIntegrasjonerClient = mockk()
+        pdlAdresseMapper = PdlAdresseMapper(KodeverkServiceMock().kodeverkService())
         personopplysningerService = PersonopplysningerService(PersonService(mockk(), PdlClientConfig().pdlClient()),
-                                                              familieIntegrasjonerClient)
+                                                              familieIntegrasjonerClient,
+                                                              pdlAdresseMapper)
     }
 
     @Test
@@ -43,7 +49,7 @@ internal class PersonopplysningerServiceTest {
     "nummer" : "98999923"
   },
   "statsborgerskap" : [ {
-    "land" : "NOR",
+    "land" : "Norge",
     "gyldigFraOgMed" : "2020-01-01",
     "gyldigTilOgMed" : "2021-01-01"
   } ],

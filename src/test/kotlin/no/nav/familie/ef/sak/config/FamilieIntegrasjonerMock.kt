@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.config
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
+import io.mockk.mockk
 import no.nav.familie.ef.sak.config.IntegrasjonerConfig
 import no.nav.familie.ef.sak.integration.dto.EgenAnsattResponse
 import no.nav.familie.ef.sak.integration.dto.Tilgang
@@ -20,6 +21,8 @@ import no.nav.familie.ef.sak.integration.dto.personopplysning.status.Personstatu
 import no.nav.familie.ef.sak.integration.dto.personopplysning.status.PersonstatusType
 import no.nav.familie.ef.sak.integration.dto.personopplysning.tilhørighet.Landkode
 import no.nav.familie.ef.sak.integration.dto.personopplysning.tilhørighet.StatsborgerskapPeriode
+import no.nav.familie.integrasjoner.kodeverk.domene.BetydningDto
+import no.nav.familie.integrasjoner.kodeverk.domene.KodeverkDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.context.annotation.Bean
