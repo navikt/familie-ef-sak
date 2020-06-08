@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.config
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import no.nav.familie.ef.sak.config.IntegrasjonerConfig
+import no.nav.familie.ef.sak.integration.dto.EgenAnsattResponse
 import no.nav.familie.ef.sak.integration.dto.Tilgang
 import no.nav.familie.ef.sak.integration.dto.personopplysning.Periode
 import no.nav.familie.ef.sak.integration.dto.personopplysning.PersonIdent
@@ -33,34 +34,24 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
     val responses = listOf(
             WireMock.get(WireMock.urlEqualTo(integrasjonerConfig.pingUri.path))
                     .willReturn(WireMock.aResponse().withStatus(200)),
+            WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.egenAnsattUri.path))
+                    .willReturn(WireMock.okJson(objectMapper.writeValueAsString(egenAnsatt))),
             WireMock.get(WireMock.urlEqualTo(integrasjonerConfig.personopplysningerUri.path))
-                    .willReturn(WireMock.aResponse()
-                                        .withStatus(200)
-                                        .withHeader("Content-Type", "application/json")
-                                        .withBody(objectMapper.writeValueAsString(person))),
+                    .willReturn(WireMock.okJson(objectMapper.writeValueAsString(person))),
             WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.tilgangUri.path))
                     .withRequestBody(WireMock.matching(".*ikketilgang.*"))
                     .atPriority(1)
-                    .willReturn(WireMock.aResponse()
-                                        .withStatus(200)
-                                        .withHeader("Content-Type", "application/json")
-                                        .withBody(objectMapper
-                                                          .writeValueAsString(listOf(Tilgang(false,
-                                                                                             "Mock sier: Du har ikke tilgang " +
-                                                                                             "til person ikketilgang"))))),
+                    .willReturn(WireMock.okJson(objectMapper
+                                                        .writeValueAsString(listOf(Tilgang(false,
+                                                                                           "Mock sier: Du har ikke tilgang " +
+                                                                                           "til person ikketilgang"))))),
             WireMock.get(WireMock.urlPathMatching(integrasjonerConfig.personhistorikkUri.path))
                     .atPriority(2)
                     .withQueryParam("tomDato", WireMock.equalTo(LocalDate.now().toString()))
                     .withQueryParam("fomDato", WireMock.equalTo(LocalDate.now().minusYears(5).toString()))
-                    .willReturn(WireMock.aResponse()
-                                        .withStatus(200)
-                                        .withHeader("Content-Type", "application/json")
-                                        .withBody(objectMapper.writeValueAsString(personhistorikkInfo))),
+                    .willReturn(WireMock.okJson(objectMapper.writeValueAsString(personhistorikkInfo))),
             WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.tilgangUri.path))
-                    .willReturn(WireMock.aResponse()
-                                        .withStatus(200)
-                                        .withHeader("Content-Type", "application/json")
-                                        .withBody(objectMapper.writeValueAsString(listOf(Tilgang(true, null))))))
+                    .willReturn(WireMock.okJson(objectMapper.writeValueAsString(listOf(Tilgang(true, null))))))
 
     @Bean("mock-integrasjoner")
     @Profile("mock-integrasjoner")
@@ -74,6 +65,7 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
     }
 
     companion object {
+        private val egenAnsatt = Ressurs.success(EgenAnsattResponse(false))
         private val person = Ressurs.success(Personinfo(PersonIdent("12137578901"),
                                                         "Bob",
                                                         Adresseinfo(AdresseType.BOSTEDSADRESSE,

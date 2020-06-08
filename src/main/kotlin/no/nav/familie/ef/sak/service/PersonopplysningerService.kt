@@ -1,26 +1,56 @@
 package no.nav.familie.ef.sak.service
 
+import kotlinx.coroutines.*
 import no.nav.familie.ef.sak.api.dto.*
 import no.nav.familie.ef.sak.api.dto.Adressebeskyttelse
 import no.nav.familie.ef.sak.api.dto.Folkeregisterpersonstatus
 import no.nav.familie.ef.sak.api.dto.Kjønn
 import no.nav.familie.ef.sak.api.dto.Sivilstandstype
+import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.dto.pdl.*
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
 @Service
-class PersonopplysningerService(private val personService: PersonService) {
+class PersonopplysningerService(private val personService: PersonService,
+                                private val familieIntegrasjonerClient: FamilieIntegrasjonerClient) {
+
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun hentPersonopplysninger(ident: String): PersonopplysningerDto {
-        val søker = personService.hentPdlPerson(ident)
-        val fullmakter = søker.fullmakt.filter { it.motpartsRolle == MotpartsRolle.FULLMEKTIG }
-        val sivilstand = søker.sivilstand
-        //val andreIdenter = fullmakter.map { it.motpartsPersonident } + sivilstand.map { it.relatertVedSivilstand }.filterNotNull() //TODO hent personinfo
+        return runBlocking {
+            val egenAnsattDeferred = async { familieIntegrasjonerClient.egenAnsatt(ident) }
+            val søker = withContext(Dispatchers.Default) { personService.hentPdlPerson(ident) }
+
+            val fullmakter = søker.fullmakt.filter { it.motpartsRolle == MotpartsRolle.FULLMEKTIG }
+
+            val identer = fullmakter.map { it.motpartsPersonident } +
+                          søker.sivilstand.mapNotNull { it.relatertVedSivilstand }.filterNot { it.endsWith("00000") }
+            val identNavn = hentNavn(identer)
+
+            lagPersonopplysninger(søker, ident, fullmakter, egenAnsattDeferred.await(), identNavn)
+        }
+    }
+
+    private suspend fun hentNavn(identer: List<String>): Map<String, String> = coroutineScope {
+        if (identer.isEmpty()) return@coroutineScope emptyMap<String, String>()
+        logger.info("Henter navn til {} personer", identer.size)
+        identer.map { Pair(it, async { personService.hentPdlPersonKort(it) }) }
+                .map { Pair(it.first, it.second.await().navn.gjeldende().visningsnavn()) }
+                .toMap()
+    }
+
+    private fun lagPersonopplysninger(søker: PdlSøker,
+                                      ident: String,
+                                      fullmakter: List<Fullmakt>,
+                                      egenAnsatt: Boolean,
+                                      identNavn: Map<String, String>): PersonopplysningerDto {
         return PersonopplysningerDto(
                 adressebeskyttelse = søker.adressebeskyttelse.firstOrNull()
                         ?.let { Adressebeskyttelse.valueOf(it.gradering.name) },
-                folkeregisterpersonstatus = Folkeregisterpersonstatus.fraPdl(søker.folkeregisterpersonstatus.single()),
+                folkeregisterpersonstatus = søker.folkeregisterpersonstatus.firstOrNull()
+                        ?.let { Folkeregisterpersonstatus.fraPdl(it) },
                 dødsdato = søker.dødsfall.firstOrNull()?.dødsdato,
                 navn = NavnDto.fraNavn(søker.navn.gjeldende()),
                 kjønn = søker.kjønn.single().kjønn.let { Kjønn.valueOf(it.name) },
@@ -32,19 +62,20 @@ class PersonopplysningerService(private val personService: PersonService) {
                                        gyldigFraOgMed = it.gyldigFraOgMed,
                                        gyldigTilOgMed = it.gyldigTilOgMed)
                 },
-                sivilstand = sivilstand.map {
+                sivilstand = søker.sivilstand.map {
                     SivilstandDto(type = Sivilstandstype.valueOf(it.type.name),
-                                  gyldigFraOgMed = it.gyldigFraOgMed,
+                                  gyldigFraOgMed = it.gyldigFraOgMed?.toString() ?: it.bekreftelsesdato,
                                   relatertVedSivilstand = it.relatertVedSivilstand,
-                                  navn = null) //TODO
+                                  navn = identNavn[it.relatertVedSivilstand])
                 },
                 adresse = adresse(søker),
                 fullmakt = fullmakter.map {
                     FullmaktDto(gyldigFraOgMed = it.gyldigFraOgMed,
                                 gyldigTilOgMed = it.gyldigTilOgMed,
                                 motpartsPersonident = it.motpartsPersonident,
-                                navn = null) //TODO
-                }
+                                navn = identNavn[it.motpartsPersonident])
+                },
+                egenAnsatt = egenAnsatt
         )
     }
 
