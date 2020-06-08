@@ -49,7 +49,8 @@ class PersonopplysningerService(private val personService: PersonService,
         return PersonopplysningerDto(
                 adressebeskyttelse = søker.adressebeskyttelse.firstOrNull()
                         ?.let { Adressebeskyttelse.valueOf(it.gradering.name) },
-                folkeregisterpersonstatus = Folkeregisterpersonstatus.fraPdl(søker.folkeregisterpersonstatus.single()),
+                folkeregisterpersonstatus = søker.folkeregisterpersonstatus.firstOrNull()
+                        ?.let { Folkeregisterpersonstatus.fraPdl(it) },
                 dødsdato = søker.dødsfall.firstOrNull()?.dødsdato,
                 navn = NavnDto.fraNavn(søker.navn.gjeldende()),
                 kjønn = søker.kjønn.single().kjønn.let { Kjønn.valueOf(it.name) },
