@@ -6,8 +6,6 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.config.PdlConfig
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.integration.TestUtil
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.integration.Testdata
 import no.nav.familie.http.sts.StsRestClient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -78,41 +76,6 @@ class PdlClientTest {
         assertThat(response.navn[0].fornavn).isEqualTo("BRÅKETE")
     }
 
-    @Test
-    fun `pdlSøkerKortData returnerer samme felter som blir spurt om i query`() {
-        val spørringsfelter = TestUtil.parseSpørring("/pdl/søker_kort.graphql")
-
-        val dtoFelter = TestUtil.finnFeltStruktur(Testdata.pdlSøkerKortData)!!
-
-        assertThat(dtoFelter).isEqualTo(spørringsfelter["data"])
-    }
-
-    @Test
-    fun `pdlSøkerData inneholder samme felter som blir spurt om i query`() {
-        val spørringsfelter = TestUtil.parseSpørring("/pdl/søker.graphql")
-
-        val dtoFelter = TestUtil.finnFeltStruktur(Testdata.pdlSøkerData)!!
-
-        assertThat(dtoFelter).isEqualTo(spørringsfelter["data"])
-    }
-
-    @Test
-    fun `pdlBarnData returnerer samme felter som blir spurt om i query`() {
-        val spørringsfelter = TestUtil.parseSpørring("/pdl/barn.graphql")
-
-        val dtoFelter = TestUtil.finnFeltStruktur(Testdata.pdlBarnData)!!
-
-        assertThat(dtoFelter).isEqualTo(spørringsfelter["data"])
-    }
-
-    @Test
-    fun `pdlAnnenForelderData returnerer samme felter som blir spurt om i query`() {
-        val spørringsfelter = TestUtil.parseSpørring("/pdl/annenForelder.graphql")
-
-        val dtoFelter = TestUtil.finnFeltStruktur(Testdata.pdlAnnenForelderData)!!
-
-        assertThat(dtoFelter).isEqualTo(spørringsfelter["data"])
-    }
 
     private fun readFile(filnavn: String): String {
         return this::class.java.getResource("/json/$filnavn").readText()

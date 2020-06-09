@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.integration
+package no.nav.familie.ef.sak.no.nav.familie.ef.sak.integration.dto.pdl
 
 import kotlin.reflect.KParameter
 import kotlin.reflect.KProperty1
@@ -6,7 +6,7 @@ import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.primaryConstructor
 
 
-object TestUtil {
+object PdlTestUtil {
 
     fun parseSpørring(filnavn: String): Map<String, *> {
         val query = this::class.java.getResource(filnavn).readText()
@@ -21,11 +21,13 @@ object TestUtil {
         }
         // Det går ike å hente elementene i en liste med reflection, så vi traverserer den som vanlig.
         if (entitet is List<*>) {
-            return finnFeltStruktur(entitet.first())
+            return finnFeltStruktur(
+                    entitet.first())
         }
 
         val map =
-                konstruktørparametere(entitet)
+                konstruktørparametere(
+                        entitet)
                         .map {
                             val annotation = it.annotations.firstOrNull()
                             val annotationClass = annotation?.annotationClass
@@ -34,9 +36,15 @@ object TestUtil {
                                             ?.firstOrNull { kProperty1 -> kProperty1.name == "value" }
                                             ?.getter
                                             ?.call(annotation) as String?
-                            (annotationValue ?: it.name) to finnSøknadsfelt(entitet, it)
+                            (annotationValue ?: it.name) to finnSøknadsfelt(
+                                    entitet,
+                                    it)
                         }
-                        .associateBy({ it.first!! }, { finnFeltStruktur(getFeltverdi(it.second, entitet)) })
+                        .associateBy({ it.first!! }, { finnFeltStruktur(
+                                getFeltverdi(
+                                        it.second,
+                                        entitet))
+                        })
 
         return if (map.isEmpty()) null else map
     }
@@ -46,13 +54,17 @@ object TestUtil {
         stringLines.forEach {
             when {
                 it.trim().endsWith("{") -> {
-                    map[parseToLabel(it)] = toMap(stringLines)
+                    map[parseToLabel(
+                            it)] =
+                            toMap(
+                                    stringLines)
                 }
                 it.trim().endsWith("}") -> {
                     return map
                 }
                 else -> {
-                    map[parseToLabel(it)] = null
+                    map[parseToLabel(
+                            it)] = null
                 }
             }
         }

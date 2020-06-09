@@ -1,15 +1,10 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.integration
+package no.nav.familie.ef.sak.no.nav.familie.ef.sak.integration.dto.pdl
 
 import no.nav.familie.ef.sak.integration.dto.pdl.*
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-/**
- * TODO
- *
- * @author Bent J. Lorentzen
- */
-object Testdata {
+object PdlTestdata {
 
     private val vegadresse = Vegadresse("",
                                         "",
@@ -48,7 +43,9 @@ object Testdata {
 
     private val opphold = listOf(Opphold(Oppholdstillatelse.MIDLERTIDIG, LocalDate.now(), LocalDate.now()))
 
-    private val oppholdsadresse = listOf(Oppholdsadresse(LocalDate.now(), "", utenlandskAdresse, vegadresse, ""))
+    private val oppholdsadresse = listOf(Oppholdsadresse(LocalDate.now(), "",
+                                                         utenlandskAdresse,
+                                                         vegadresse, ""))
 
     private val statsborgerskap = listOf(Statsborgerskap("", LocalDate.now(), LocalDate.now()))
 
