@@ -1,6 +1,8 @@
 package no.nav.familie.ef.sak.integration
 
 import no.nav.familie.ef.sak.config.IntegrasjonerConfig
+import no.nav.familie.ef.sak.integration.dto.EgenAnsattRequest
+import no.nav.familie.ef.sak.integration.dto.EgenAnsattResponse
 import no.nav.familie.ef.sak.integration.dto.Tilgang
 import no.nav.familie.ef.sak.integration.dto.personopplysning.PersonhistorikkInfo
 import no.nav.familie.ef.sak.integration.dto.personopplysning.Personinfo
@@ -22,7 +24,7 @@ class FamilieIntegrasjonerClient(@Qualifier("azure") restOperations: RestOperati
     override val pingUri: URI = integrasjonerConfig.pingUri
 
     fun sjekkTilgangTilPersoner(identer: List<String>): List<Tilgang> {
-        return postForEntity(integrasjonerConfig.tilgangUri, identer)!!
+        return postForEntity(integrasjonerConfig.tilgangUri, identer)
     }
 
     fun hentMedlemskapsinfo(ident: String): Medlemskapsinfo {
@@ -43,6 +45,11 @@ class FamilieIntegrasjonerClient(@Qualifier("azure") restOperations: RestOperati
 
         return getForEntity<Ressurs<PersonhistorikkInfo>>(uri,
                                                           personIdentHeader(ident)).data!!
+    }
+
+    fun egenAnsatt(ident: String): Boolean {
+        return postForEntity<Ressurs<EgenAnsattResponse>>(integrasjonerConfig.egenAnsattUri,
+                                                          EgenAnsattRequest(ident)).data!!.erEgenAnsatt
     }
 
 

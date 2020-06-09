@@ -1,9 +1,10 @@
 package no.nav.familie.ef.sak.api.external
 
-import no.nav.familie.ba.sak.validering.SakstilgangConstraint
 import no.nav.familie.ef.sak.service.SakService
+import no.nav.familie.ef.sak.validering.SakstilgangConstraint
 import no.nav.familie.kontrakter.ef.sak.Sak
 import no.nav.familie.kontrakter.ef.søknad.*
+import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
 import org.springframework.validation.annotation.Validated
@@ -37,17 +38,16 @@ class SakController(private val sakService: SakService) {
     }
 
     @GetMapping("/{id}")
-    fun dummy(@PathVariable("id") @SakstilgangConstraint id: UUID): Sak {
-        return sakService.hentSak(id)
+    fun dummy(@PathVariable("id") id: UUID): Ressurs<Sak> {
+        return Ressurs.success(sakService.hentSak(id));
     }
-
 
 }
 
 internal object Testsøknad {
 
     val søknad = Søknad(Søknadsfelt("Søker", personalia()),
-                        Søknadsfelt("innsending", Innsendingsdetaljer(Søknadsfelt("Dato mottat", LocalDateTime.now()))),
+                        Søknadsfelt("innsending", Innsendingsdetaljer(Søknadsfelt("Dato mottatt", LocalDateTime.now()))),
                         Søknadsfelt("Detaljer om sivilstand", sivilstandsdetaljer()),
                         Søknadsfelt("Opphold i Norge", medlemskapsdetaljer()),
                         Søknadsfelt("Bosituasjonen din", bosituasjon()),
@@ -172,6 +172,8 @@ internal object Testsøknad {
                                                                 "Litt hver for oss"),
                                                     Søknadsfelt("Bor du og den andre forelderen til [barnets navn] i samme hus/blokk, gårdstun, kvartal eller vei?",
                                                                 "ja"),
+                                                    Søknadsfelt("Bor du og den andre forelderen til [barnets navn] i samme hus/blokk, gårdstun, kvartal eller vei?",
+                                                                "Dette er en beskrivelse"),
                                                     Søknadsfelt("Har du bodd sammen med den andre forelderen til [barnets fornavn] før?",
                                                                 true),
                                                     Søknadsfelt("Når flyttet dere fra hverandre?",
@@ -188,9 +190,10 @@ internal object Testsøknad {
         return RegistrertBarn(Søknadsfelt("Navn", "Lykkeliten"),
                               Søknadsfelt("Fødselsnummer", Fødselsnummer("31081953069")),
                               Søknadsfelt("Har samme adresse som søker", true),
+                              Søknadsfelt("Har ikke samme adresse som søker beskrivelse", "Dette er en beskrivelse."),
                               Søknadsfelt("Barnets andre forelder",
-                                          AnnenForelder(person = Søknadsfelt("personalia", personMinimum()),
-                                                        adresse = adresseSøknadsfelt())),
+                                          AnnenForelder(kanIkkeOppgiAnnenForelderFar = Søknadsfelt("Kan ikke oppgi", false),
+                                                        person = Søknadsfelt("personalia", personMinimum()))),
                               Søknadsfelt("samvær",
                                           Samvær(Søknadsfelt("Har du og den andre forelderen skriftlig avtale om delt bosted for barnet?",
                                                              true),
@@ -204,6 +207,8 @@ internal object Testsøknad {
                                                              "Litt hver for oss"),
                                                  Søknadsfelt("Bor du og den andre forelderen til [barnets navn] i samme hus/blokk, gårdstun, kvartal eller vei?",
                                                              "ja"),
+                                                 Søknadsfelt("Bor du og den andre forelderen til [barnets navn] i samme hus/blokk, gårdstun, kvartal eller vei?",
+                                                             "Dette er en beskrivelse"),
                                                  Søknadsfelt("Har du bodd sammen med den andre forelderen til [barnets fornavn] før?",
                                                              true),
                                                  Søknadsfelt("Når flyttet dere fra hverandre?",
@@ -257,8 +262,6 @@ internal object Testsøknad {
                                    dokumentfelt("Erklæring om samlivsbrudd"),
                                    Søknadsfelt("Dato for samlivsbrudd", LocalDate.of(2014, 10, 3)),
                                    Søknadsfelt("Når flyttet dere fra hverandre?", LocalDate.of(2014, 10, 4)),
-                                   Søknadsfelt("Hva er grunnen til at du er alene med barn?",
-                                               "Endring i samværsordning"),
                                    Søknadsfelt("Når skjedde endringen / når skal endringen skje?",
                                                LocalDate.of(2013, 4, 17)))
     }

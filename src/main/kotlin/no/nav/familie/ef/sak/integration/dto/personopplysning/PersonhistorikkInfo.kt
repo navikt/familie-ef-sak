@@ -7,5 +7,5 @@ import java.util.*
 
 data class PersonhistorikkInfo(val personIdent: PersonIdent,
                                val personstatushistorikk: List<PersonstatusPeriode> = ArrayList(),
-                               val statsborgerskaphistorikk: List<StatsborgerskapPeriode> = ArrayList(),
+                               val statsborgerskapshistorikk: List<StatsborgerskapPeriode> = ArrayList(),
                                val adressehistorikk: List<AdressePeriode> = ArrayList())

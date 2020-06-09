@@ -1,4 +1,5 @@
 spring:
+  autoconfigure.exclude: org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration
   datasource:
     url: jdbc:postgresql://b27dbvl008.preprod.local:5432/familie-ef-sak
 

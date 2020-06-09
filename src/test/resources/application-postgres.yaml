@@ -1,0 +1,36 @@
+no.nav.security.jwt:
+  issuer.azuread:
+    accepted_audience: aud-localhost
+    cookie_name: localhost-idtoken
+    proxyurl:
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/familie-ba-sak
+    password: test
+    username: postgres
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql=false
+    hibernate:
+      ddl-auto: none
+
+  cloud:
+    vault:
+      database:
+        role: postgres
+
+
+AAD_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
+
+AZUREAD_DISCOVERY_URL: http://metadata
+AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
+FAMILIE_INTEGRASJONER_URL: http://localhost:8085
+EF_SAK_FRONTEND_CLIENT_ID: DEV_azp
+EF_MOTTAK_CLIENT_ID: dummy
+FAMILIE_OPPDRAG_API_URL: http://localhost:8087
+
+CREDENTIAL_USERNAME: not-a-real-srvuser
+CREDENTIAL_PASSWORD: not-a-real-pw

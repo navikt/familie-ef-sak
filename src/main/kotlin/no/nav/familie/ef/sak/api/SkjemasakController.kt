@@ -1,17 +1,14 @@
 package no.nav.familie.ef.sak.api
 
-import no.nav.familie.ba.sak.validering.SakstilgangConstraint
 import no.nav.familie.ef.sak.service.SakService
-import no.nav.familie.kontrakter.ef.sak.Sak
 import no.nav.familie.kontrakter.ef.sak.Skjemasak
-import no.nav.familie.kontrakter.ef.søknad.*
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.*
-import java.time.LocalDate
-import java.time.Month
-import java.util.*
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping(path = ["/api/skjemasak"])

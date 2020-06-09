@@ -1,0 +1,17 @@
+query($ident: ID!){
+    person: hentPerson(ident: $ident) {
+        kjoenn {
+            kjoenn
+        }
+        navn {
+            fornavn
+            mellomnavn
+            etternavn
+            metadata {
+                endringer {
+                    registrert
+                }
+            }
+        }
+    }
+}

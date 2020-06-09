@@ -1,0 +1,26 @@
+server:
+  port: 8093
+
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL_OVERRIDE}
+    username: ${SPRING_DATASOURCE_USERNAME_OVERRIDE}
+    password: ${SPRING_DATASOURCE_PASSWORD_OVERRIDE}
+    driver-class-name: ${SPRING_DATASOURCE_DRIVER_OVERRIDE}
+
+no.nav.security.jwt:
+  issuer.azuread:
+    accepted_audience: aud-localhost
+    cookie_name: localhost-idtoken
+    proxyurl:
+
+AAD_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
+
+AZUREAD_DISCOVERY_URL: http://metadata
+AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
+FAMILIE_INTEGRASJONER_URL: http://localhost:8085
+EF_SAK_FRONTEND_CLIENT_ID: DEV_azp
+EF_MOTTAK_CLIENT_ID: dummy
+CREDENTIAL_USERNAME: not-a-real-srvuser
+CREDENTIAL_PASSWORD: not-a-real-pw
+FAMILIE_OPPDRAG_API_URL: http://localhost:8087

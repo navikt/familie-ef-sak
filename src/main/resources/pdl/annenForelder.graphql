@@ -32,14 +32,22 @@ query($ident: ID!){
         doedsfall {
             doedsdato
         }
-        folkeregisterpersonstatus(historikk: true) {
-            status
-            forenkletStatus
+        foedsel {
+            foedselsaar
+            foedselsdato
+            foedeland
+            foedested
+            foedekommune
         }
         navn {
             fornavn
             mellomnavn
             etternavn
+            metadata {
+                endringer {
+                    registrert
+                }
+            }
         }
         opphold(historikk: true) {
             type
@@ -50,13 +58,13 @@ query($ident: ID!){
             oppholdsadressedato
             coAdressenavn
             utenlandskAdresse {
-                adressenavn
-                bygningsinformasjon
-                postboks
+                adressenavnNummer
+                bygningEtasjeLeilighet
+                bySted
                 postkode
-                byEllerStedsnavn
-                distriktEllerRegion
                 landkode
+                postboksNummerNavn
+                regionDistriktOmraade
             }
             vegadresse {
                 husnummer

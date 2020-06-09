@@ -1,7 +1,5 @@
 package no.nav.familie.ef.sak.repository.domain
 
-import org.springframework.data.relational.core.mapping.Table
-
 data class AnnenForelderAdresse(val adresse: String? = null,
                                 val postnummer: String,
                                 val poststedsnavn: String? = null,
