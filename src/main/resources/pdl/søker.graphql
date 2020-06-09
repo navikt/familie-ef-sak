@@ -146,6 +146,7 @@ query($ident: ID!){
             utenlandskAdresse {
                 adressenavnNummer
                 bySted
+                bygningEtasjeLeilighet
                 postkode
                 landkode
                 postboksNummerNavn
