@@ -1,29 +1,55 @@
 package no.nav.familie.ef.sak.mapper
 
+import no.nav.familie.ef.sak.api.dto.AdresseDto
+import no.nav.familie.ef.sak.api.dto.AdresseType
 import no.nav.familie.ef.sak.integration.dto.pdl.*
 import no.nav.familie.ef.sak.service.KodeverkService
+import no.nav.familie.ef.sak.util.datoEllerIdag
 import org.springframework.stereotype.Component
-import org.springframework.stereotype.Service
 import java.time.LocalDate
 
 @Component
-class PdlAdresseMapper(private val kodeverkService: KodeverkService) {
+class AdresseMapper(private val kodeverkService: KodeverkService) {
 
-    fun hentLand(landkode: String, gjeldendeDato: LocalDate): String? = kodeverkService.hentLand(landkode, gjeldendeDato)
+    fun tilAdresse(adresse: Oppholdsadresse): AdresseDto {
+        val visningsadresse = tilFormatertAdresse(adresse, datoEllerIdag(adresse.oppholdsadressedato))
+        return AdresseDto(visningsadresse = visningsadresse,
+                          type = AdresseType.OPPHOLDSADRESSE,
+                          gyldigFraOgMed = adresse.oppholdsadressedato,
+                          gyldigTilOgMed = null)
+    }
 
-    fun tilFormatertAdresse(bostedsadresse: Bostedsadresse, gjeldendeDato: LocalDate): String? {
+    fun tilAdresse(adresse: Kontaktadresse): AdresseDto {
+        val type = when (adresse.type) {
+            KontaktadresseType.INNLAND -> AdresseType.KONTAKTADRESSE
+            KontaktadresseType.UTLAND -> AdresseType.KONTAKTADRESSE_UTLAND
+        }
+        return AdresseDto(visningsadresse = tilFormatertAdresse(adresse, datoEllerIdag(adresse.gyldigFraOgMed)),
+                          type = type,
+                          gyldigFraOgMed = adresse.gyldigFraOgMed,
+                          gyldigTilOgMed = adresse.gyldigTilOgMed)
+    }
+
+    fun tilAdresse(adresse: Bostedsadresse): AdresseDto {
+        return AdresseDto(visningsadresse = tilFormatertAdresse(adresse, datoEllerIdag(adresse.angittFlyttedato)),
+                          type = AdresseType.BOSTEDADRESSE,
+                          gyldigFraOgMed = adresse.angittFlyttedato,
+                          gyldigTilOgMed = adresse.folkeregistermetadata.opphørstidspunkt?.toLocalDate())
+    }
+
+    private fun tilFormatertAdresse(bostedsadresse: Bostedsadresse, gjeldendeDato: LocalDate): String? {
         val adresse = bostedsadresse.vegadresse?.let { tilFormatertAdresse(it, gjeldendeDato) }
                       ?: bostedsadresse.ukjentBosted?.bostedskommune
         return join(coAdresse(bostedsadresse.coAdressenavn), adresse)
     }
 
-    fun tilFormatertAdresse(oppholdsadresse: Oppholdsadresse, gjeldendeDato: LocalDate): String? {
+    private fun tilFormatertAdresse(oppholdsadresse: Oppholdsadresse, gjeldendeDato: LocalDate): String? {
         val adresse = oppholdsadresse.vegadresse?.let { tilFormatertAdresse(it, gjeldendeDato) }
                       ?: oppholdsadresse.utenlandskAdresse?.let { tilFormatertAdresse(it, gjeldendeDato) }
         return join(coAdresse(oppholdsadresse.coAdressenavn), adresse)
     }
 
-    fun tilFormatertAdresse(kontaktadresse: Kontaktadresse, gjeldendeDato: LocalDate): String? {
+    private fun tilFormatertAdresse(kontaktadresse: Kontaktadresse, gjeldendeDato: LocalDate): String? {
         val adresse = when (kontaktadresse.type) {
             KontaktadresseType.INNLAND -> when {
                 kontaktadresse.vegadresse != null -> tilFormatertAdresse(kontaktadresse.vegadresse, gjeldendeDato)

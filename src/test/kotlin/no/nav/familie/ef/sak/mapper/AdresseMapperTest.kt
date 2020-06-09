@@ -7,14 +7,12 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-internal class PdlAdresseMapperTest {
+internal class AdresseMapperTest {
     private val startdato = LocalDate.of(2020, 1, 1)
     private val sluttdato = startdato.plusDays(1)
 
-    private val gjeldendeDato = LocalDate.now()
-
     private val kodeverkService = KodeverkServiceMock().kodeverkService()
-    private val mapper = PdlAdresseMapper(kodeverkService)
+    private val mapper = AdresseMapper(kodeverkService)
 
     @Test
     internal fun `Bostedsadresse formatert adresse`() {
@@ -26,15 +24,14 @@ internal class PdlAdresseMapperTest {
                 vegadresse = vegadresse(),
                 ukjentBosted = UkjentBosted(bostedskommune = "ukjentBostedKommune")
         )
-        assertThat(mapper.tilFormatertAdresse(bostedsadresse, gjeldendeDato))
+        assertThat(mapper.tilAdresse(bostedsadresse).visningsadresse)
                 .isEqualTo("Charlies vei 13 b, 0575 Oslo")
 
-        assertThat(mapper.tilFormatertAdresse(bostedsadresse.copy(coAdressenavn = "co"),
-                                              gjeldendeDato))
+        assertThat(mapper.tilAdresse(bostedsadresse.copy(coAdressenavn = "co")).visningsadresse)
                 .withFailMessage("Skal skrive ut co adressen")
                 .isEqualTo("c/o co, Charlies vei 13 b, 0575 Oslo")
 
-        assertThat(mapper.tilFormatertAdresse(bostedsadresse.copy(vegadresse = null), gjeldendeDato))
+        assertThat(mapper.tilAdresse(bostedsadresse.copy(vegadresse = null)).visningsadresse)
                 .withFailMessage("Skal skrive ut ukjentBosted når vegadresse er null")
                 .isEqualTo("ukjentBostedKommune")
     }
@@ -48,14 +45,14 @@ internal class PdlAdresseMapperTest {
                                               oppholdAnnetSted = null)
 
         val adresseMedVegadresseMedAdressenavn = oppholdsadresse.copy(vegadresse = tomVegadresse().copy(adressenavn = "adresse"))
-        assertThat(mapper.tilFormatertAdresse(adresseMedVegadresseMedAdressenavn, gjeldendeDato))
+        assertThat(mapper.tilAdresse(adresseMedVegadresseMedAdressenavn).visningsadresse)
                 .isEqualTo("adresse")
 
-        assertThat(mapper.tilFormatertAdresse(oppholdsadresse.copy(coAdressenavn = "co"), gjeldendeDato))
+        assertThat(mapper.tilAdresse(oppholdsadresse.copy(coAdressenavn = "co")).visningsadresse)
                 .withFailMessage("Skal skrive ut co adressen")
                 .isEqualTo("c/o co")
 
-        assertThat(mapper.tilFormatertAdresse(oppholdsadresse.copy(utenlandskAdresse = utenlandskAdresse()), gjeldendeDato))
+        assertThat(mapper.tilAdresse(oppholdsadresse.copy(utenlandskAdresse = utenlandskAdresse())).visningsadresse)
                 .withFailMessage("Skal skrive ut utenlandskAdresse når vegadresse er null")
                 .isEqualTo("a 1, 001 bysted, region, Norge")
     }
@@ -64,15 +61,14 @@ internal class PdlAdresseMapperTest {
     internal fun `Kontaktadresse formatert adresse utland`() {
         val kontaktadresse = kontaktadresse(KontaktadresseType.UTLAND)
 
-        assertThat(mapper.tilFormatertAdresse(kontaktadresse.copy(utenlandskAdresse = utenlandskAdresse()), gjeldendeDato))
+        assertThat(mapper.tilAdresse(kontaktadresse.copy(utenlandskAdresse = utenlandskAdresse())).visningsadresse)
                 .isEqualTo("a 1, 001 bysted, region, Norge")
 
-        assertThat(mapper.tilFormatertAdresse(kontaktadresse.copy(coAdressenavn = "co"), gjeldendeDato))
+        assertThat(mapper.tilAdresse(kontaktadresse.copy(coAdressenavn = "co")).visningsadresse)
                 .withFailMessage("Skal skrive ut co adressen")
                 .isEqualTo("c/o co")
 
-        assertThat(mapper.tilFormatertAdresse(kontaktadresse.copy(utenlandskAdresseIFrittFormat = utenlandAdresseFrittFormat()),
-                                              gjeldendeDato))
+        assertThat(mapper.tilAdresse(kontaktadresse.copy(utenlandskAdresseIFrittFormat = utenlandAdresseFrittFormat())).visningsadresse)
                 .withFailMessage("Skal skrive ut utenlandskAdresseIFrittFormat når utenlandskAdresse er null")
                 .isEqualTo("1, 2, 3, 0575 by, Norge")
 
@@ -82,22 +78,22 @@ internal class PdlAdresseMapperTest {
     internal fun `Kontaktadresse formatert adresse innland`() {
         val kontaktadresse = kontaktadresse(KontaktadresseType.INNLAND)
 
-        assertThat(mapper.tilFormatertAdresse(kontaktadresse.copy(vegadresse = vegadresse()), gjeldendeDato))
+        assertThat(mapper.tilAdresse(kontaktadresse.copy(vegadresse = vegadresse())).visningsadresse)
                 .isEqualTo("Charlies vei 13 b, 0575 Oslo")
 
-        assertThat(mapper.tilFormatertAdresse(kontaktadresse.copy(coAdressenavn = "co"), gjeldendeDato))
+        assertThat(mapper.tilAdresse(kontaktadresse.copy(coAdressenavn = "co")).visningsadresse)
                 .withFailMessage("Skal skrive ut co adressen")
                 .isEqualTo("c/o co")
 
         val adresseMedPostboksadresse = kontaktadresse.copy(postboksadresse = Postboksadresse(postboks = "postboks",
                                                                                               postbokseier = "eier",
                                                                                               postnummer = "0575"))
-        assertThat(mapper.tilFormatertAdresse(adresseMedPostboksadresse, gjeldendeDato))
+        assertThat(mapper.tilAdresse(adresseMedPostboksadresse).visningsadresse)
                 .withFailMessage("Skal skrive ut postboksadresse når vegadresse er null")
                 .isEqualTo("eier, postboks, 0575 Oslo")
 
-        assertThat(mapper.tilFormatertAdresse(kontaktadresse.copy(postadresseIFrittFormat = postadresseFrittFormat())
-                                              , gjeldendeDato))
+        assertThat(mapper.tilAdresse(kontaktadresse.copy(postadresseIFrittFormat = postadresseFrittFormat())
+        ).visningsadresse)
                 .withFailMessage("Skal skrive ut postboksadresse når vegadresse er null")
                 .isEqualTo("1, 2, 3, 0575 Oslo")
 

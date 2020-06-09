@@ -3,7 +3,8 @@ package no.nav.familie.ef.sak.service
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
-import no.nav.familie.ef.sak.mapper.PdlAdresseMapper
+import no.nav.familie.ef.sak.mapper.AdresseMapper
+import no.nav.familie.ef.sak.mapper.PersonopplysningerMapper
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.config.KodeverkServiceMock
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.config.PdlClientConfig
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -13,18 +14,21 @@ import org.junit.jupiter.api.Test
 
 internal class PersonopplysningerServiceTest {
 
+    private val kodeverkService = KodeverkServiceMock().kodeverkService()
+
     private lateinit var personopplysningerService: PersonopplysningerService
     private lateinit var familieIntegrasjonerClient: FamilieIntegrasjonerClient
-    private lateinit var pdlAdresseMapper: PdlAdresseMapper
-
+    private lateinit var adresseMapper: AdresseMapper
 
     @BeforeEach
     internal fun setUp() {
         familieIntegrasjonerClient = mockk()
-        pdlAdresseMapper = PdlAdresseMapper(KodeverkServiceMock().kodeverkService())
-        personopplysningerService = PersonopplysningerService(PersonService(mockk(), PdlClientConfig().pdlClient()),
+        adresseMapper = AdresseMapper(kodeverkService)
+        val personopplysningerMapper = PersonopplysningerMapper(adresseMapper, kodeverkService)
+        val personService = PersonService(mockk(), PdlClientConfig().pdlClient())
+        personopplysningerService = PersonopplysningerService(personService,
                                                               familieIntegrasjonerClient,
-                                                              pdlAdresseMapper)
+                                                              personopplysningerMapper)
     }
 
     @Test
