@@ -191,6 +191,11 @@ data class Navn(val fornavn: String,
                 val etternavn: String,
                 val metadata: Metadata)
 
+data class Personnavn(val etternavn: String,
+                      val fornavn: String,
+                      val mellomnavn: String?)
+
+
 data class Telefonnummer(val landskode: String,
                          val nummer: String,
                          val prioritet: Int)
@@ -258,7 +263,7 @@ data class UtenlandskAdresseIFrittFormat(val adresselinje1: String?,
                                          val postkode: String?)
 
 data class VergeEllerFullmektig(val motpartsPersonident: String?,
-                                val navn: Navn?,
+                                val navn: Personnavn?,
                                 val omfang: String?,
                                 val omfangetErInnenPersonligOmraade: Boolean)
 

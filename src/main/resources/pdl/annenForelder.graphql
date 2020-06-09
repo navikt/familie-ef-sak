@@ -39,10 +39,6 @@ query($ident: ID!){
             foedested
             foedekommune
         }
-        folkeregisterpersonstatus(historikk: true) {
-            status
-            forenkletStatus
-        }
         navn {
             fornavn
             mellomnavn
@@ -63,6 +59,7 @@ query($ident: ID!){
             coAdressenavn
             utenlandskAdresse {
                 adressenavnNummer
+                bygningEtasjeLeilighet
                 bySted
                 postkode
                 landkode

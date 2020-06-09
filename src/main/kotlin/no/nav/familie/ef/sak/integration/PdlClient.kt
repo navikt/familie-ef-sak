@@ -18,7 +18,7 @@ class PdlClient(val pdlConfig: PdlConfig,
 
     fun hentSøkerKort(personIdent: String): PdlSøkerKort {
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
-                                                query = pdlConfig.søkerKortQuery)
+                                                query = PdlConfig.søkerKortQuery)
         val pdlResponse: PdlResponse<PdlSøkerKortData> = postForEntity(pdlConfig.pdlUri,
                                                                        pdlPersonRequest,
                                                                        httpHeaders())
@@ -27,7 +27,7 @@ class PdlClient(val pdlConfig: PdlConfig,
 
     fun hentSøker(personIdent: String): PdlSøker {
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
-                                                query = pdlConfig.søkerQuery)
+                                                query = PdlConfig.søkerQuery)
         val pdlResponse: PdlResponse<PdlSøkerData> = postForEntity(pdlConfig.pdlUri,
                                                                    pdlPersonRequest,
                                                                    httpHeaders())
@@ -37,7 +37,7 @@ class PdlClient(val pdlConfig: PdlConfig,
     //Brukes for å hente hele pdl dataobjektet uten serialisering
     fun hentSøkerAsMap(personIdent: String): Map<String, Any> {
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
-                                                query = pdlConfig.søkerQuery)
+                                                query = PdlConfig.søkerQuery)
         val pdlResponse: PdlResponse<Map<String, Any>> = postForEntity(pdlConfig.pdlUri,
                                                                        pdlPersonRequest,
                                                                        httpHeaders())
@@ -46,7 +46,7 @@ class PdlClient(val pdlConfig: PdlConfig,
 
     fun hentBarn(personIdent: String): PdlBarn {
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
-                                                query = pdlConfig.barnQuery)
+                                                query = PdlConfig.barnQuery)
         val pdlResponse: PdlResponse<PdlBarnData> = postForEntity(pdlConfig.pdlUri,
                                                                   pdlPersonRequest,
                                                                   httpHeaders())
@@ -55,7 +55,7 @@ class PdlClient(val pdlConfig: PdlConfig,
 
     fun hentForelder2(personIdent: String): PdlAnnenForelder {
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
-                                                query = pdlConfig.annenForelderQuery)
+                                                query = PdlConfig.annenForelderQuery)
         val pdlResponse: PdlResponse<PdlAnnenForelderData> = postForEntity(pdlConfig.pdlUri,
                                                                            pdlPersonRequest,
                                                                            httpHeaders())
