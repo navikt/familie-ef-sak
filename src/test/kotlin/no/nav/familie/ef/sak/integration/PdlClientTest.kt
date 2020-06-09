@@ -37,38 +37,47 @@ class PdlClientTest {
     }
 
     @Test
-    fun `pdlClienten håndterer response for søker-query mot pdltjenesten riktig`() {
+    fun `pdlClient håndterer response for søker-query mot pdl-tjenesten riktig`() {
         wireMockServer.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
-                                       .willReturn(okJson(readfile("søker.json"))))
+                                       .willReturn(okJson(readFile("søker.json"))))
+
         val response = pdlClient.hentSøker("")
+
         assertThat(response.bostedsadresse[0].vegadresse?.adressenavn).isEqualTo("INNGJERDSVEGEN")
     }
 
     @Test
-    fun `pdlClienten håndterer response for annenForelder-query mot pdltjenesten riktig`() {
+    fun `pdlClient håndterer response for annenForelder-query mot pdl-tjenesten riktig`() {
         wireMockServer.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
-                                       .willReturn(okJson(readfile("annenForelder.json"))))
+                                       .willReturn(okJson(readFile("annenForelder.json"))))
+
         val response = pdlClient.hentForelder2("")
+
         assertThat(response.bostedsadresse[0].angittFlyttedato).isEqualTo(LocalDate.of(1966, 11, 18))
     }
 
     @Test
-    fun `pdlClienten håndterer response for barn-query mot pdltjenesten riktig`() {
+    fun `pdlClient håndterer response for barn-query mot pdl-tjenesten riktig`() {
         wireMockServer.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
-                                       .willReturn(okJson(readfile("barn.json"))))
+                                       .willReturn(okJson(readFile("barn.json"))))
+
         val response = pdlClient.hentBarn("")
+
         assertThat(response.fødsel[0].fødselsdato).isEqualTo(LocalDate.of(1966, 11, 18))
     }
 
     @Test
-    fun `pdlClienten håndterer response for søkerKort-query mot pdltjenesten riktig`() {
+    fun `pdlClient håndterer response for søkerKort-query mot pdl-tjenesten riktig`() {
         wireMockServer.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
-                                       .willReturn(okJson(readfile("søker_kort.json"))))
+                                       .willReturn(okJson(readFile("søker_kort.json"))))
+
         val response = pdlClient.hentSøkerKort("")
+
         assertThat(response.navn[0].fornavn).isEqualTo("BRÅKETE")
     }
 
-    private fun readfile(filnavn: String): String {
+
+    private fun readFile(filnavn: String): String {
         return this::class.java.getResource("/json/$filnavn").readText()
     }
 }
