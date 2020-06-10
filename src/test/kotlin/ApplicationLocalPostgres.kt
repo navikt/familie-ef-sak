@@ -35,7 +35,8 @@ fun main(args: Array<String>) {
                       "mock-integrasjoner",
                       "mock-pdl",
                       "mock-oauth",
-                      "mock-auth")
+                      "mock-auth",
+                      "mock-kodeverk")
             .properties(properties)
             .run(*args)
 }

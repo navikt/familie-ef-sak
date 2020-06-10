@@ -25,7 +25,7 @@ data class PersonopplysningerDto(val personIdent: String,
 data class TelefonnummerDto(val landskode: String,
                             val nummer: String)
 
-data class StatsborgerskapDto(val land: String,
+data class StatsborgerskapDto(val land: String?,
                               val gyldigFraOgMed: LocalDate?,
                               val gyldigTilOgMed: LocalDate?)
 

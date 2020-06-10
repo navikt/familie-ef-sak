@@ -3,6 +3,9 @@ package no.nav.familie.ef.sak.service
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
+import no.nav.familie.ef.sak.mapper.AdresseMapper
+import no.nav.familie.ef.sak.mapper.PersonopplysningerMapper
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.config.KodeverkServiceMock
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.config.PdlClientConfig
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
@@ -11,14 +14,21 @@ import org.junit.jupiter.api.Test
 
 internal class PersonopplysningerServiceTest {
 
+    private val kodeverkService = KodeverkServiceMock().kodeverkService()
+
     private lateinit var personopplysningerService: PersonopplysningerService
     private lateinit var familieIntegrasjonerClient: FamilieIntegrasjonerClient
+    private lateinit var adresseMapper: AdresseMapper
 
     @BeforeEach
     internal fun setUp() {
         familieIntegrasjonerClient = mockk()
-        personopplysningerService = PersonopplysningerService(PersonService(mockk(), PdlClientConfig().pdlClient()),
-                                                              familieIntegrasjonerClient)
+        adresseMapper = AdresseMapper(kodeverkService)
+        val personopplysningerMapper = PersonopplysningerMapper(adresseMapper, kodeverkService)
+        val personService = PersonService(mockk(), PdlClientConfig().pdlClient())
+        personopplysningerService = PersonopplysningerService(personService,
+                                                              familieIntegrasjonerClient,
+                                                              personopplysningerMapper)
     }
 
     @Test
@@ -43,7 +53,7 @@ internal class PersonopplysningerServiceTest {
     "nummer" : "98999923"
   },
   "statsborgerskap" : [ {
-    "land" : "NOR",
+    "land" : "Norge",
     "gyldigFraOgMed" : "2020-01-01",
     "gyldigTilOgMed" : "2021-01-01"
   } ],
