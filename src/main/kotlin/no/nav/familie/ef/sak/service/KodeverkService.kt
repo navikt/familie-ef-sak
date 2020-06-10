@@ -1,22 +1,14 @@
 package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
-import no.nav.familie.integrasjoner.kodeverk.domene.KodeverkDto
-import no.nav.familie.integrasjoner.kodeverk.domene.Språk
+import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
+import no.nav.familie.kontrakter.felles.kodeverk.hentGjelende
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
 @Service
 class KodeverkService(private val familieIntegrasjonerClient: FamilieIntegrasjonerClient) {
-
-    fun LocalDate.mellom(fra: LocalDate, til: LocalDate) =
-            this.isEqual(fra) || this.isEqual(til) || (this.isAfter(fra) && this.isBefore(til))
-
-    fun KodeverkDto.hentGjelende(kode: String, gjeldendeDato: LocalDate) =
-            betydninger[kode]
-                    ?.firstOrNull { gjeldendeDato.mellom(it.gyldigFra, it.gyldigTil) }
-                    ?.beskrivelser?.get(Språk.BOKMÅL.kode)?.term
 
     fun hentLand(landkode: String, gjeldendeDato: LocalDate): String? {
         return hentLandkoder().hentGjelende(landkode, gjeldendeDato)

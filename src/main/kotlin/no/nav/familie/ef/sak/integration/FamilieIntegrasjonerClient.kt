@@ -7,8 +7,8 @@ import no.nav.familie.ef.sak.integration.dto.Tilgang
 import no.nav.familie.ef.sak.integration.dto.personopplysning.PersonhistorikkInfo
 import no.nav.familie.ef.sak.integration.dto.personopplysning.Personinfo
 import no.nav.familie.http.client.AbstractPingableRestClient
-import no.nav.familie.integrasjoner.kodeverk.domene.KodeverkDto
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
