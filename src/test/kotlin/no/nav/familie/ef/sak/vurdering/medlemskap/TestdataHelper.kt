@@ -91,3 +91,5 @@ fun søknad(personalia: Søknadsfelt<Personalia> = mockk(),
                aktivitet,
                situasjon,
                stønadsstart)
+
+fun <T> søknadsfelt(verdi: T): Søknadsfelt<T> = Søknadsfelt("label", verdi)
