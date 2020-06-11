@@ -4,8 +4,6 @@ import java.time.LocalDate
 import java.time.Month
 import java.util.*
 
-//ansatt i eget as, hvor finnes denne?
-
 data class OvergangsstønadDto(val sakId: UUID,
                               val aktivitet: AktivitetDto,
                               val sagtOppEllerRedusertStilling: SagtOppEllerRedusertStillingDto?)
