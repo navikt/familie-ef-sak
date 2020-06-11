@@ -29,11 +29,11 @@ object OvergangsstønadMapper {
     private fun tilVirksomhetDto(virksomhet: Virksomhet?): VirksomhetDto? =
             virksomhet?.let { VirksomhetDto(virksomhetsbeskrivelse = it.virksomhetsbeskrivelse.verdi) }
 
-    private fun tilAksjeselskapDto(aksjeselskaper: List<Aksjeselskap>?): List<AksjeselskapDto>? =
+    private fun tilAksjeselskapDto(aksjeselskaper: List<Aksjeselskap>?): List<AksjeselskapDto> =
             aksjeselskaper?.map {
                 AksjeselskapDto(navn = it.navn.verdi,
                                 arbeidsmengde = it.arbeidsmengde.verdi)
-            }
+            } ?: emptyList()
 
     private fun tilArbeidsforholdDto(arbedsgivere: List<Arbeidsgiver>?): List<ArbeidsforholdDto> =
             arbedsgivere?.map {
