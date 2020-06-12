@@ -15,7 +15,7 @@ object OvergangsstønadMapper {
                             virksomhet = tilVirksomhetDto(aktivitet.virksomhet?.verdi),
                             arbeidssøker = tilArbeidssøkerDto(aktivitet.arbeidssøker?.verdi),
                             underUtdanning = tilUnderUtdanningDto(aktivitet.underUtdanning?.verdi),
-                            annenSituasjon = tilAnnenSituasjon(søknad.situasjon.verdi))
+                            situasjon = tilAnnenSituasjon(søknad.situasjon.verdi))
     }
 
     fun tilSagtOppEllerRedusertStilling(situasjon: Situasjon): SagtOppEllerRedusertStillingDto? {
@@ -23,7 +23,7 @@ object OvergangsstønadMapper {
         return SagtOppEllerRedusertStillingDto(sagtOppEllerRedusertStilling = sagtOppEllerRedusertStilling.verdi,
                                                årsak = situasjon.oppsigelseReduksjonÅrsak?.verdi,
                                                dato = situasjon.oppsigelseReduksjonTidspunkt?.verdi,
-                                               vedlegg = situasjon.oppsigelseReduksjonDokumentasjon?.verdi?.let(this::tilVedleggDto))
+                                               vedlegg = tilVedleggDto(situasjon.oppsigelseReduksjonDokumentasjon))
     }
 
     private fun tilVirksomhetDto(virksomhet: Virksomhet?): VirksomhetDto? =
@@ -63,15 +63,13 @@ object OvergangsstønadMapper {
                 )
             }
 
-    private fun tilAnnenSituasjon(situasjon: Situasjon): List<AnnenSituasjonDto> =
-            listOfNotNull(situasjon.sykdom,
-                          situasjon.barnsSykdom,
-                          situasjon.manglendeBarnepass,
-                          situasjon.barnMedSærligeBehov,
-                          situasjon.arbeidskontrakt,
-                          situasjon.utdanningstilbud).map { AnnenSituasjonDto(it.label, tilVedleggDto(it.verdi)) }
+    private fun tilAnnenSituasjon(situasjon: Situasjon): SituasjonDto =
+            SituasjonDto(sykdom = tilVedleggDto(situasjon.sykdom),
+                         barnsSykdom = tilVedleggDto(situasjon.barnsSykdom),
+                         manglendeBarnepass = tilVedleggDto(situasjon.manglendeBarnepass),
+                         barnMedSærligeBehov = tilVedleggDto(situasjon.barnMedSærligeBehov))
 
-    private fun tilVedleggDto(dokument: Dokument): VedleggDto = VedleggDto(dokument.tittel)
+    private fun tilVedleggDto(dokument: Søknadsfelt<Dokument>?) = dokument?.let { VedleggDto(it.verdi.tittel) } // todo endre senere
 
     private fun tilUnderUtdanningDto(underUtdanning: UnderUtdanning?): UnderUtdanningDto? =
             underUtdanning?.let {

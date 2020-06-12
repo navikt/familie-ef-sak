@@ -15,7 +15,7 @@ data class AktivitetDto(val arbeidssituasjon: List<String>,
                         val arbeidssøker: ArbeidssøkerDto?,
                         val underUtdanning: UnderUtdanningDto?,
                         val aktivitetsplikt: String?,
-                        val annenSituasjon: List<AnnenSituasjonDto>,
+                        val situasjon: SituasjonDto,
                         val virksomhet: VirksomhetDto?)
 
 data class SagtOppEllerRedusertStillingDto(val sagtOppEllerRedusertStilling: String,
@@ -63,6 +63,9 @@ data class PeriodeDto(val fraMåned: Month,
                       val tilMåned: Month,
                       val tilÅr: Int)
 
-data class AnnenSituasjonDto(val tekst: String, val vedlegg: VedleggDto)
+data class SituasjonDto(val sykdom: VedleggDto?,
+                        val barnsSykdom: VedleggDto?,
+                        val manglendeBarnepass: VedleggDto?,
+                        val barnMedSærligeBehov: VedleggDto?)
 
 data class VedleggDto(val tittel: String)
