@@ -36,7 +36,7 @@
         <fasterxml.version>2.11.0</fasterxml.version>
         <felles.version>1.20200525161012_b74511c</felles.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>2.0_20200611130117_dd15d9d</kontrakter.version>
+        <kontrakter.version>2.0_20200612142944_231bc7c</kontrakter.version>
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
         <sonar.organization>navit</sonar.organization>
