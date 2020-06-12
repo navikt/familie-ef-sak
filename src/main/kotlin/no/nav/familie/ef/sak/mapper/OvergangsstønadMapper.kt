@@ -69,7 +69,8 @@ object OvergangsstønadMapper {
                          manglendeBarnepass = tilVedleggDto(situasjon.manglendeBarnepass),
                          barnMedSærligeBehov = tilVedleggDto(situasjon.barnMedSærligeBehov))
 
-    private fun tilVedleggDto(dokument: Søknadsfelt<Dokument>?) = dokument?.let { VedleggDto(it.verdi.tittel) } // todo endre senere
+    private fun tilVedleggDto(dokument: Søknadsfelt<List<Dokument>>?) =
+            dokument?.verdi?.map { VedleggDto(it.tittel) } ?: emptyList()
 
     private fun tilUnderUtdanningDto(underUtdanning: UnderUtdanning?): UnderUtdanningDto? =
             underUtdanning?.let {

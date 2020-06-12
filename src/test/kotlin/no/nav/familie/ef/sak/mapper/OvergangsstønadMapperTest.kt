@@ -27,21 +27,21 @@ internal class OvergangsstønadMapperTest {
     }
 
     private fun situasjon(): Søknadsfelt<Situasjon> =
-            søknadsfelt(Situasjon(arbeidskontrakt = dokument(),
-                                  barnMedSærligeBehov = dokument(),
-                                  barnsSykdom = dokument(),
+            søknadsfelt(Situasjon(arbeidskontrakt = dokumentliste(),
+                                  barnMedSærligeBehov = dokumentliste(),
+                                  barnsSykdom = dokumentliste(),
                                   gjelderDetteDeg = søknadsfelt(emptyList()),
-                                  manglendeBarnepass = dokument(),
-                                  oppsigelseReduksjonDokumentasjon = dokument(),
+                                  manglendeBarnepass = dokumentliste(),
+                                  oppsigelseReduksjonDokumentasjon = dokumentliste(),
                                   oppsigelseReduksjonTidspunkt = søknadsfelt(LocalDate.now()),
                                   oppsigelseReduksjonÅrsak = søknadsfelt("Årsak"),
                                   oppstartNyJobb = null,
                                   oppstartUtdanning = null,
                                   sagtOppEllerRedusertStilling = søknadsfelt("Ja"),
-                                  sykdom = dokument(),
-                                  utdanningstilbud = dokument()))
+                                  sykdom = dokumentliste(),
+                                  utdanningstilbud = dokumentliste()))
 
-    private fun dokument(): Søknadsfelt<Dokument> = søknadsfelt(Dokument(byteArrayOf(), "tittel"))
+    private fun dokumentliste(): Søknadsfelt<List<Dokument>> = søknadsfelt(listOf(Dokument(byteArrayOf(), "tittel")))
 
     private fun aktivitet(): Søknadsfelt<Aktivitet> =
             søknadsfelt(Aktivitet(arbeidsforhold = arbeidsforhold(),
