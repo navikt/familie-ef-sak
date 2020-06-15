@@ -50,8 +50,8 @@ data class UnderUtdanningDto(val skoleUtdanningssted: String,
                              val utdanning: UtdanningDto,
                              val offentligEllerPrivat: String,
                              val heltidEllerDeltid: String,
-                             val hvorMyeSkalDuStudere: Int,
-                             val hvaErMåletMedUtdanningen: String,
+                             val hvorMyeSkalDuStudere: Int?,
+                             val hvaErMåletMedUtdanningen: String?,
                              val utdanningEtterGrunnskolen: Boolean,
                              val tidligereUtdanninger: List<UtdanningDto>)
 

@@ -78,8 +78,8 @@ object OvergangsstønadMapper {
                                   utdanning = tilUtdanningDto(it.utdanning.verdi),
                                   offentligEllerPrivat = it.offentligEllerPrivat.verdi,
                                   heltidEllerDeltid = it.heltidEllerDeltid.verdi,
-                                  hvorMyeSkalDuStudere = it.hvorMyeSkalDuStudere.verdi,
-                                  hvaErMåletMedUtdanningen = it.hvaErMåletMedUtdanningen.verdi,
+                                  hvorMyeSkalDuStudere = it.hvorMyeSkalDuStudere?.verdi,
+                                  hvaErMåletMedUtdanningen = it.hvaErMåletMedUtdanningen?.verdi,
                                   utdanningEtterGrunnskolen = it.utdanningEtterGrunnskolen.verdi,
                                   tidligereUtdanninger = it.tidligereUtdanninger?.verdi?.map(this::tilUtdanningDto)
                                                          ?: emptyList())
