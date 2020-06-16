@@ -75,8 +75,7 @@ fun søknad(personalia: Søknadsfelt<Personalia> = mockk(),
            medlemskapsdetaljer: Søknadsfelt<Medlemskapsdetaljer> = mockk(),
            bosituasjon: Søknadsfelt<Bosituasjon> = mockk(),
            sivilstandsplaner: Søknadsfelt<Sivilstandsplaner>? = mockk(),
-           folkeregisterbarn: Søknadsfelt<List<RegistrertBarn>>? = mockk(),
-           kommendeBarn: Søknadsfelt<List<NyttBarn>>? = mockk(),
+           barn: Søknadsfelt<List<Barn>> = mockk(),
            aktivitet: Søknadsfelt<Aktivitet> = mockk(),
            situasjon: Søknadsfelt<Situasjon> = mockk(),
            stønadsstart: Søknadsfelt<Stønadsstart> = mockk()) =
@@ -86,8 +85,9 @@ fun søknad(personalia: Søknadsfelt<Personalia> = mockk(),
                medlemskapsdetaljer,
                bosituasjon,
                sivilstandsplaner,
-               folkeregisterbarn,
-               kommendeBarn,
+               barn,
                aktivitet,
                situasjon,
                stønadsstart)
+
+fun <T> søknadsfelt(verdi: T): Søknadsfelt<T> = Søknadsfelt("label", verdi)

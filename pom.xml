@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.3.0.RELEASE</version>
+        <version>2.3.1.RELEASE</version>
     </parent>
     <repositories>
         <repository>
@@ -34,16 +34,16 @@
         <springfox.version>2.9.2</springfox.version>
         <mockk.version>1.10.0</mockk.version>
         <fasterxml.version>2.11.0</fasterxml.version>
-        <felles.version>1.20200525161012_b74511c</felles.version>
+        <felles.version>1.20200605142849_484da0c</felles.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>2.0_20200610082350_e72105a</kontrakter.version>
+        <kontrakter.version>2.0_20200615093815_4acfbd5</kontrakter.version>
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
         <sonar.organization>navit</sonar.organization>
-        <flyway.version>6.4.3</flyway.version>
+        <flyway.version>6.4.4</flyway.version>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <nav.security.version>1.1.5</nav.security.version>
-        <postgres.version>42.2.12</postgres.version>
+        <nav.security.version>1.1.6</nav.security.version>
+        <postgres.version>42.2.14</postgres.version>
         <!--suppress UnresolvedMavenProperty Ligger som secret i github-->
         <spring.cloud>2.2.2.RELEASE</spring.cloud>
         <!--suppress UnresolvedMavenProperty -->

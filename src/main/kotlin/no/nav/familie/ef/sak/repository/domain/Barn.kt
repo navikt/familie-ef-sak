@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.repository.domain
 
-import no.nav.familie.kontrakter.ef.søknad.NyttBarn
-import no.nav.familie.kontrakter.ef.søknad.RegistrertBarn
+import no.nav.familie.kontrakter.ef.søknad.Barn as KontraktBarn
 import no.nav.familie.kontrakter.ef.søknad.Søknad
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
@@ -18,25 +17,19 @@ data class Barn(val navn: String?,
 
 object BarnMapper {
     fun toDomain(søknad: Søknad): Set<Barn> {
-        return (søknad.kommendeBarn?.verdi?.map(this::toBarn)?.toSet() ?: emptySet()) +
-               (søknad.folkeregisterbarn?.verdi?.map(this::toBarn)?.toSet() ?: emptySet())
+        return søknad.barn.verdi.map(this::toBarn).toSet()
 
     }
 
-    private fun toBarn(nyttBarn: NyttBarn): Barn {
-        return Barn(navn = nyttBarn.navn?.verdi,
-                    fødselsnummer = nyttBarn.fødselsnummer?.verdi,
-                    fødselsdato = nyttBarn.fødselTermindato.verdi,
-                    harSammeAdresse = nyttBarn.skalBarnetBoHosSøker.verdi,
-                    annenForelder = AnnenForelderMapper.toDomain(nyttBarn.annenForelder?.verdi))
-    }
-
-    private fun toBarn(registrertBarn: RegistrertBarn): Barn {
-        return Barn(navn = registrertBarn.navn.verdi,
-                    fødselsnummer = registrertBarn.fødselsnummer.verdi.verdi,
-                    fødselsdato = registrertBarn.fødselsnummer.verdi.fødselsdato,
-                    harSammeAdresse = registrertBarn.harSammeAdresse.verdi,
-                    annenForelder = AnnenForelderMapper.toDomain(registrertBarn.annenForelder?.verdi))
+    private fun toBarn(barn: KontraktBarn): Barn {
+        val fødselsdato = barn.fødselTermindato?.verdi ?:
+                          barn.fødselsnummer?.verdi?.fødselsdato ?:
+                          error("Både fødselsdato og fødselsnummer mangler på barn")
+        return Barn(navn = barn.navn?.verdi,
+                    fødselsnummer = barn.fødselsnummer?.verdi?.verdi,
+                    fødselsdato = fødselsdato,
+                    harSammeAdresse = barn.harSkalHaSammeAdresse.verdi,
+                    annenForelder = AnnenForelderMapper.toDomain(barn.annenForelder?.verdi))
     }
 }
 
