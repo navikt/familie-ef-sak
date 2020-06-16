@@ -25,7 +25,7 @@ data class Sak(@Id
 
 object SakMapper {
     fun toDomain(sak: SakRequest): Sak {
-        return Sak(søknad = objectMapper.writeValueAsBytes(sak.søknad),
+        return Sak(søknad = objectMapper.writeValueAsBytes(sak.søknad.søknad),
                    saksnummer = sak.saksnummer,
                    journalpostId = sak.journalpostId,
                    søker = SøkerMapper.toDomain(sak.søknad.søknad),

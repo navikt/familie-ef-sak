@@ -28,6 +28,8 @@ internal class SakServiceTest : OppslagSpringRunnerTest() {
                              journalpostId = "journalpostId")
         val sakId = sakService.mottaSak(sak)
 
+        val hentSak = sakService.hentSak(sakId)
+        assertThat(hentSak.søknad.personalia).isNotNull
         val hentetVedlegg = vedleggRepository.findByIdOrNull(UUID.fromString(vedlegg.first().id))!!
         assertThat(sakId).isEqualTo(hentetVedlegg.sakId)
         assertThat(String(hentetVedlegg.data)).isEqualTo("filinnehold")
