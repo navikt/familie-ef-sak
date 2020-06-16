@@ -1,7 +1,8 @@
 package no.nav.familie.ef.sak.api.external
 
+import no.nav.familie.ef.sak.api.dto.SakDto
 import no.nav.familie.ef.sak.service.SakService
-import no.nav.familie.kontrakter.ef.sak.Sak
+import no.nav.familie.kontrakter.ef.sak.SakRequest
 import no.nav.familie.kontrakter.ef.søknad.*
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -20,8 +21,7 @@ import java.util.*
 class SakController(private val sakService: SakService) {
 
     @PostMapping("sendInn")
-    fun sendInn(@RequestBody sak: Sak): HttpStatus {
-
+    fun sendInn(@RequestBody sak: SakRequest): HttpStatus {
         sakService.mottaSak(sak)
 
         return HttpStatus.CREATED
@@ -30,14 +30,14 @@ class SakController(private val sakService: SakService) {
     @PostMapping("dummy")
     fun dummy(): HttpStatus {
 
-        val sak = Sak(Testsøknad.søknad, "123", "321")
+        val sak = SakRequest(SøknadMedVedlegg(Testsøknad.søknad, emptyList()), "123", "321")
         sakService.mottaSak(sak)
 
         return HttpStatus.CREATED
     }
 
     @GetMapping("/{id}")
-    fun dummy(@PathVariable("id") id: UUID): Ressurs<Sak> {
+    fun dummy(@PathVariable("id") id: UUID): Ressurs<SakDto> {
         return Ressurs.success(sakService.hentSak(id));
     }
 
@@ -55,6 +55,9 @@ internal object Testsøknad {
                         Søknadsfelt("Arbeid, utdanning og andre aktiviteter", aktivitet()),
                         Søknadsfelt("Mer om situasjonen din", situasjon()),
                         Søknadsfelt("Når søker du stønad fra?", stønadsstart()))
+
+    val vedleggId = "d5531f89-0079-4715-a337-9fd28f811f2f"
+    val vedlegg = listOf(Vedlegg(vedleggId, "vedlegg.pdf", "tittel", "filinnehold".toByteArray()))
 
     private fun stønadsstart() = Stønadsstart(Søknadsfelt("Fra måned", Month.AUGUST), Søknadsfelt("Fra år", 2018))
 
@@ -248,7 +251,7 @@ internal object Testsøknad {
                                    "Norge"))
     }
 
-    private fun dokumentfelt(tittel: String) = Søknadsfelt("Dokument", listOf(Dokument(byteArrayOf(12), tittel)))
+    private fun dokumentfelt(tittel: String) = Søknadsfelt("Dokument", listOf(Dokument(vedleggId, tittel)))
 
     private fun personMinimum(): PersonMinimum {
         return PersonMinimum(Søknadsfelt("Navn", "Bob Burger"),
