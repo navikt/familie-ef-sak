@@ -79,6 +79,9 @@ object PdlTestUtil {
         if (line.trim().startsWith("person: hentPerson")) {
             return "person"
         }
+        if (line.trim().startsWith("personBolk: hentPersonBolk")) {
+            return "personBolk"
+        }
         return line.trim().substringBefore("{").substringBefore("(").trim()
     }
 

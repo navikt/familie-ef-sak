@@ -63,6 +63,16 @@ class PdlClient(val pdlConfig: PdlConfig,
 
     }
 
+    fun hentPersonKortBolk(personIdent: List<String>): Map<String, PdlPersonKort> {
+        require(personIdent.size <= 100) { "Liste med personidenter må være færre enn 100 st" }
+        val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonBolkRequestVariables(personIdent),
+                                                query = PdlConfig.personBolkKortQuery)
+        val pdlResponse: PdlBolkResponse<PdlPersonKort> = postForEntity(pdlConfig.pdlUri,
+                                                                        pdlPersonRequest,
+                                                                        httpHeaders())
+        return feilsjekkOgReturnerData(pdlResponse)
+    }
+
     private inline fun <reified T : Any> feilsjekkOgReturnerData(ident: String,
                                                                  pdlResponse: PdlResponse<T>): T {
 
@@ -77,6 +87,16 @@ class PdlClient(val pdlConfig: PdlConfig,
             throw PdlRequestException("Manglende ${T::class} ved feilfri respons fra PDL. Se secure logg for detaljer.")
         }
         return pdlResponse.data
+    }
+
+    private inline fun <reified T : Any> feilsjekkOgReturnerData(pdlResponse: PdlBolkResponse<T>): Map<String, T> {
+
+        val feil = pdlResponse.data.personBolk.filter { it.code != "ok" }.map { it.ident to it.code }.toMap()
+        if (feil.isNotEmpty()) {
+            secureLogger.error("Feil ved henting av ${T::class} fra PDL: $feil")
+            throw PdlRequestException("Feil ved henting av ${T::class} fra PDL. Se secure logg for detaljer.")
+        }
+        return pdlResponse.data.personBolk.map { it.ident to it.person!! }.toMap()
     }
 
     private fun httpHeaders(): HttpHeaders {

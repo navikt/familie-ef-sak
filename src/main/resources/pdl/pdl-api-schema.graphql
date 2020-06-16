@@ -15,6 +15,12 @@ type Adressebeskyttelse {
     metadata: Metadata!
 }
 
+type BolkResult {
+    code: String!
+    ident: String!
+    person: Person
+}
+
 type Bostedsadresse {
     angittFlyttedato: Date
     coAdressenavn: String
@@ -349,6 +355,8 @@ type Postboksadresse {
 type Query {
     hentIdenter(grupper: [IdentGruppe!], historikk: Boolean = false, ident: ID!): Identliste
     hentPerson(ident: ID!): Person
+    hentPersonBolk(identer: [ID!]!): [BolkResult!]!
+    sokPerson(criteria: [Criterion], paging: Paging): SearchResult
 }
 
 type RelatertBiPerson {
@@ -356,6 +364,13 @@ type RelatertBiPerson {
     kjoenn: KjoennType
     navn: Personnavn
     statsborgerskap: String
+}
+
+type SearchResult {
+    hits: [searchHit!]!
+    pageNumber: Int
+    totalHits: Int
+    totalPages: Int
 }
 
 type Sikkerhetstiltak {
@@ -474,6 +489,11 @@ type VergemaalEllerFremtidsfullmakt {
     vergeEllerFullmektig: VergeEllerFullmektig!
 }
 
+type searchHit {
+    person: Person
+    score: Float
+}
+
 enum AdressebeskyttelseGradering {
     FORTROLIG
     STRENGT_FORTROLIG
@@ -544,6 +564,33 @@ enum Sivilstandstype {
     SKILT_PARTNER
     UGIFT
     UOPPGITT
+}
+
+input Criterion {
+    fieldName: String!
+    includeHistorical: Boolean
+    searchRule: SearchRule!
+}
+
+input Paging {
+    pageNumber: Int = 1
+    resultsPerPage: Int = 10
+}
+
+input SearchRule {
+    after: String
+    before: String
+    contains: String
+    equals: String
+    from: String
+    fromExcluding: String
+    fuzzy: String
+    greaterThan: String
+    lessThan: String
+    notEquals: String
+    regex: String
+    to: String
+    toExcluding: String
 }
 
 

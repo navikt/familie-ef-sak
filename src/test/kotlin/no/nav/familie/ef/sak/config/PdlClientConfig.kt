@@ -32,6 +32,10 @@ class PdlClientConfig {
             søkerKort.getOrDefault(firstArg() as String, PdlSøkerKort(lagKjønn(KjønnType.MANN), lagNavn(fornavn = "Ikke mappet")))
         }
 
+        every { pdlClient.hentPersonKortBolk(any()) } answers {
+            (firstArg() as List<String>).map { it to PdlPersonKort(lagNavn(fornavn = it)) }.toMap()
+        }
+
         every { pdlClient.hentSøker(any()) } returns
                 PdlSøker(
                         adressebeskyttelse = listOf(Adressebeskyttelse(gradering = AdressebeskyttelseGradering.UGRADERT)),

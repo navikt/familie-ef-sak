@@ -15,13 +15,19 @@ class PdlConfig(@Value("\${PDL_URL}") pdlUrl: URI) {
 
         const val PATH_GRAPHQL = "graphql"
 
-        val søkerKortQuery = PdlConfig::class.java.getResource("/pdl/søker_kort.graphql").readText().graphqlCompatible()
+        val personBolkKortQuery = graphqlQuery("/pdl/person_kort_bolk.graphql")
 
-        val søkerQuery = PdlConfig::class.java.getResource("/pdl/søker.graphql").readText().graphqlCompatible()
+        val søkerKortQuery = graphqlQuery("/pdl/søker_kort.graphql")
 
-        val barnQuery = PdlConfig::class.java.getResource("/pdl/barn.graphql").readText().graphqlCompatible()
+        val søkerQuery = graphqlQuery("/pdl/søker.graphql")
 
-        val annenForelderQuery = PdlConfig::class.java.getResource("/pdl/annenForelder.graphql").readText().graphqlCompatible()
+        val barnQuery = graphqlQuery("/pdl/barn.graphql")
+
+        val annenForelderQuery = graphqlQuery("/pdl/annenForelder.graphql")
+
+        private fun graphqlQuery(path: String) = PdlConfig::class.java.getResource(path)
+                .readText()
+                .graphqlCompatible()
 
         private fun String.graphqlCompatible(): String {
             return StringUtils.normalizeSpace(this.replace("\n", ""))

@@ -1,6 +1,8 @@
 package no.nav.familie.ef.sak.service
 
-import no.nav.familie.ef.sak.api.dto.*
+import no.nav.familie.ef.sak.api.dto.Kjønn
+import no.nav.familie.ef.sak.api.dto.NavnDto
+import no.nav.familie.ef.sak.api.dto.SakSøkDto
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøkerKort
 import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende

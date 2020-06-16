@@ -113,4 +113,6 @@ object PdlTestdata {
                                                                      statsborgerskap,
                                                                      innflyttingTilNorge,
                                                                      utflyttingFraNorge))
+
+    val pdlPersonKortBolk = PersonBolk(listOf(PersonDataBolk("11111122222", "ok", PdlPersonKort(navn))))
 }
