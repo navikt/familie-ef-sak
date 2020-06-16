@@ -32,7 +32,7 @@ internal class OvergangsstønadMapperTest {
                                   barnsSykdom = dokumentliste(),
                                   gjelderDetteDeg = søknadsfelt(emptyList()),
                                   manglendeBarnepass = dokumentliste(),
-                                  oppsigelseReduksjonDokumentasjon = dokumentliste(),
+                                  oppsigelseDokumentasjon = dokumentliste(),
                                   oppsigelseReduksjonTidspunkt = søknadsfelt(LocalDate.now()),
                                   oppsigelseReduksjonÅrsak = søknadsfelt("Årsak"),
                                   oppstartNyJobb = null,
