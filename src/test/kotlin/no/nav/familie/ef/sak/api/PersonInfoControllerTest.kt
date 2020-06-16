@@ -13,7 +13,6 @@ import no.nav.familie.ef.sak.integration.dto.personopplysning.Personinfo
 import no.nav.familie.ef.sak.integration.dto.personopplysning.relasjon.SivilstandType
 import no.nav.familie.ef.sak.integration.dto.personopplysning.status.PersonstatusType
 import no.nav.familie.ef.sak.integration.dto.personopplysning.tilhørighet.Landkode
-import no.nav.familie.ef.sak.service.PersonService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions
@@ -30,15 +29,13 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.TestPropertySource
 import java.time.LocalDate
 
-@ActiveProfiles("local", "mock-auth", "mock-oauth")
+@ActiveProfiles("local", "mock-pdl", "mock-auth", "mock-oauth")
 @TestPropertySource(properties = ["FAMILIE_INTEGRASJONER_URL=http://localhost:28085"])
 @AutoConfigureWireMock(port = 28085)
 class PersonInfoControllerTest : OppslagSpringRunnerTest() {
 
     @Autowired
     lateinit var personInfoController: PersonInfoController
-
-    @Autowired lateinit var personService: PersonService
 
     @BeforeEach
     fun setUp() {
@@ -55,12 +52,6 @@ class PersonInfoControllerTest : OppslagSpringRunnerTest() {
                                                      .withHeader("Content-Type", "application/json")
                                                      .withBody("{}")))
 
-    }
-
-    @Test
-    internal fun name() {
-        val hentPdlPersonKort = personService.hentPdlPersonKort("21057822284")
-        println()
     }
 
     @Test
