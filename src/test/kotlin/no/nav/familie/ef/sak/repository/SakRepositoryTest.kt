@@ -21,11 +21,6 @@ internal class SakRepositoryTest : OppslagSpringRunnerTest() {
     @Autowired lateinit var sakRepository: SakRepository
     @Autowired lateinit var customRepository: CustomRepository<Sak>
 
-    @BeforeEach
-    internal fun setUp() {
-        customRepository.jdbcAggregateOperations.deleteAll(Sak::class.java)
-    }
-
     @Test
     fun `finner 1 sak på fødselsnummer`() {
         opprettSak("1", "11111122222")
