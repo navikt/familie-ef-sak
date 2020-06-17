@@ -2,10 +2,12 @@ package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.api.external.Testsøknad
+import no.nav.familie.ef.sak.repository.SakRepository
 import no.nav.familie.ef.sak.repository.VedleggRepository
 import no.nav.familie.kontrakter.ef.sak.SakRequest
 import no.nav.familie.kontrakter.ef.søknad.SøknadMedVedlegg
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
@@ -19,6 +21,13 @@ internal class SakServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired lateinit var sakService: SakService
     @Autowired lateinit var vedleggRepository: VedleggRepository
+    @Autowired lateinit var sakRepository: SakRepository
+
+    @AfterEach
+    internal fun tearDown() {
+        vedleggRepository.deleteAll()
+        sakRepository.deleteAll()
+    }
 
     @Test
     internal fun `lagrer sak med vedlegg, vedlegg lagres med id som den kommer inn med`() {
