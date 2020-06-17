@@ -23,10 +23,16 @@ data class PdlSøkerData(val person: PdlSøker)
 data class PdlAnnenForelderData(val person: PdlAnnenForelder)
 data class PdlBarnData(val person: PdlBarn)
 
+data class PersonDataBolk<T>(val ident: String, val code: String, val person: T?)
+data class PersonBolk<T>(val personBolk: List<PersonDataBolk<T>>)
+data class PdlBolkResponse<T>(val data: PersonBolk<T>)
+
 interface PdlPerson {
     val fødsel: List<Fødsel>
     val bostedsadresse: List<Bostedsadresse>
 }
+
+data class PdlPersonKort(val navn: List<Navn>)
 
 data class PdlSøkerKort(@JsonProperty("kjoenn") val kjønn: List<Kjønn>,
                         val navn: List<Navn>)
