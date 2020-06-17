@@ -25,4 +25,11 @@ class ApiExceptionHandler {
                 .body(Ressurs.failure("Uventet feil"))
     }
 
+    @ExceptionHandler(Feil::class)
+    fun handleThrowable(feil: Feil): ResponseEntity<Ressurs<Nothing>> {
+        secureLogger.error("En håndtert feil har oppstått(${feil.httpStatus}): ${feil.frontendFeilmelding}", feil)
+        logger.info("En håndtert feil har oppstått(${feil.httpStatus}): ${feil.message} ")
+        return ResponseEntity.status(feil.httpStatus).body(Ressurs.failure(frontendFeilmelding = feil.frontendFeilmelding))
+    }
+
 }

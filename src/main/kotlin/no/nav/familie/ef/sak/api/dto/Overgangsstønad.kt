@@ -68,4 +68,4 @@ data class SituasjonDto(val sykdom: List<VedleggDto>,
                         val manglendeBarnepass: List<VedleggDto>,
                         val barnMedSærligeBehov: List<VedleggDto>)
 
-data class VedleggDto(val tittel: String)
+data class VedleggDto(val id: String, val navn: String)

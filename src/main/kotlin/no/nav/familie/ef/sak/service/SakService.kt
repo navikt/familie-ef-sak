@@ -1,10 +1,12 @@
 package no.nav.familie.ef.sak.service
 
-import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
+import no.nav.familie.ef.sak.api.dto.SakDto
 import no.nav.familie.ef.sak.repository.CustomRepository
 import no.nav.familie.ef.sak.repository.SakRepository
 import no.nav.familie.ef.sak.repository.domain.SakMapper
-import no.nav.familie.kontrakter.ef.sak.Sak
+import no.nav.familie.ef.sak.repository.domain.Vedlegg
+import no.nav.familie.ef.sak.repository.domain.VedleggMapper
+import no.nav.familie.kontrakter.ef.sak.SakRequest
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
@@ -15,19 +17,20 @@ import no.nav.familie.ef.sak.repository.domain.Sak as Domenesak
 @Service
 class SakService(private val sakRepository: SakRepository,
                  private val customRepository: CustomRepository<Domenesak>,
-                 private val familieIntegrasjonerClient: FamilieIntegrasjonerClient) {
+                 private val vedleggRepository: CustomRepository<Vedlegg>) {
 
     val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
-    fun mottaSak(sak: Sak): UUID {
-
+    fun mottaSak(sak: SakRequest): UUID {
         val domenesak = SakMapper.toDomain(sak)
         val save = customRepository.persist(domenesak)
-        logger.info("lagret ${save.id}")
+        val vedlegg = sak.søknad.vedlegg.map { VedleggMapper.toDomain(save.id, it) }
+        vedlegg.forEach { vedleggRepository.persist(it) }
+        logger.info("lagret ${save.id} sammen med ${vedlegg.size} vedlegg")
         return save.id
     }
 
-    fun hentSak(id: UUID): Sak {
+    fun hentSak(id: UUID): SakDto {
         val sak = sakRepository.findByIdOrNull(id) ?: error("Ugyldig Primærnøkkel : $id")
         return SakMapper.toDto(sak)
     }
