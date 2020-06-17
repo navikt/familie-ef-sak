@@ -4,7 +4,6 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.Table
-import java.time.LocalDateTime
 import java.util.*
 
 @Table("vedlegg")
@@ -16,6 +15,12 @@ data class Vedlegg(@Id
                    val sporbar: Sporbar = Sporbar(),
                    val data: ByteArray,
                    val navn: String) {
+
+
+
+    override fun toString(): String {
+        return "Vedlegg(id=$id, sakId=$sakId, sporbar=$sporbar, navn='$navn')"
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
