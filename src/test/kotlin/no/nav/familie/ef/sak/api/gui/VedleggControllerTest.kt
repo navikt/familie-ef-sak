@@ -43,7 +43,6 @@ internal class VedleggControllerTest {
                 .isInstanceOf(Feil::class.java)
                 .extracting { (it as Feil).message }
                 .isEqualTo("Ugyldig Primærnøkkel: 6005812f-0713-4cf2-a223-e9dd0c83e9ed")
-                //.matches { (it as Feil).frontendFeilmelding == "Har ikke tilgang til saken" }
     }
 
     @Test
