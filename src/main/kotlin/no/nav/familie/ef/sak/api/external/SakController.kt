@@ -5,6 +5,7 @@ import no.nav.familie.kontrakter.ef.sak.Sak
 import no.nav.familie.kontrakter.ef.søknad.*
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.HttpStatus
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
@@ -15,7 +16,8 @@ import java.util.*
 
 @RestController
 @RequestMapping(path = ["/api/sak"])
-@ProtectedWithClaims(issuer = "azuread")
+//@ProtectedWithClaims(issuer = "azuread")
+@Unprotected
 @Validated
 class SakController(private val sakService: SakService) {
 
