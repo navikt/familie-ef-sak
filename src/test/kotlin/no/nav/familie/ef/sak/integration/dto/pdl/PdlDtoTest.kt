@@ -34,7 +34,7 @@ class PdlDtoTest {
 
     @Test
     fun `pdlAnnenForelderData inneholder samme felter som blir spurt om i query`() {
-        val spørringsfelter = PdlTestUtil.parseSpørring("/pdl/annenForelder.graphql")
+        val spørringsfelter = PdlTestUtil.parseSpørring("/pdl/andreForeldre.graphql")
 
         val dtoFelter = PdlTestUtil.finnFeltStruktur(PdlTestdata.pdlAnnenForelderData)!!
 

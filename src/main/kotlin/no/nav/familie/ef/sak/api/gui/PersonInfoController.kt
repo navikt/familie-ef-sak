@@ -2,9 +2,7 @@ package no.nav.familie.ef.sak.api.gui
 
 import no.nav.familie.ef.sak.api.dto.PersonIdentDto
 import no.nav.familie.ef.sak.api.gui.dto.Person
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlAnnenForelder
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlBarn
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker
+import no.nav.familie.ef.sak.integration.dto.pdl.*
 import no.nav.familie.ef.sak.service.PersonService
 import no.nav.familie.ef.sak.validering.PersontilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -41,16 +39,6 @@ class PersonInfoController(private val personService: PersonService) {
     @GetMapping("/soker") // TODO Testendepunkt. Fjernes etter hvert
     fun søkerinfo(@RequestHeader(name = "Nav-Personident") @PersontilgangConstraint ident: String): PdlSøker {
         return personService.hentPdlPerson(ident)
-    }
-
-    @GetMapping("/barn") // TODO Testendepunkt. Fjernes etter hvert
-    fun barninfoPdl(@RequestHeader(name = "Nav-Personident") @PersontilgangConstraint ident: String): PdlBarn {
-        return personService.hentPdlBarn(ident)
-    }
-
-    @GetMapping("/forelder2") // TODO Testendepunkt. Fjernes etter hvert
-    fun annenForelderinfoPdl(@RequestHeader(name = "Nav-Personident") @PersontilgangConstraint ident: String): PdlAnnenForelder {
-        return personService.hentPdlAnnenForelder(ident)
     }
 
 }

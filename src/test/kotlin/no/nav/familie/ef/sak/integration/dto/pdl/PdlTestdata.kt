@@ -92,27 +92,29 @@ object PdlTestdata {
                                                                                              "",
                                                                                              true)))))
 
-    val pdlBarnData = PdlBarnData(PdlBarn(adressebeskyttelse,
-                                          bostedsadresse,
-                                          listOf(DeltBosted(LocalDateTime.now(),
-                                                            LocalDateTime.now(),
-                                                            vegadresse,
-                                                            UkjentBosted(""))),
-                                          dødsfall,
-                                          familierelasjon,
-                                          fødsel,
-                                          navn))
+    val pdlBarnData =
+            PersonBolk(listOf(PersonDataBolk("11111122222", "ok", PdlBarn(adressebeskyttelse,
+                                                                          bostedsadresse,
+                                                                          listOf(DeltBosted(LocalDateTime.now(),
+                                                                                            LocalDateTime.now(),
+                                                                                            vegadresse,
+                                                                                            UkjentBosted(""))),
+                                                                          dødsfall,
+                                                                          familierelasjon,
+                                                                          fødsel,
+                                                                          navn))))
 
-    val pdlAnnenForelderData = PdlAnnenForelderData(PdlAnnenForelder(adressebeskyttelse,
-                                                                     bostedsadresse,
-                                                                     dødsfall,
-                                                                     fødsel,
-                                                                     navn,
-                                                                     opphold,
-                                                                     oppholdsadresse,
-                                                                     statsborgerskap,
-                                                                     innflyttingTilNorge,
-                                                                     utflyttingFraNorge))
+    val pdlAnnenForelderData =
+            PersonBolk(listOf(PersonDataBolk("11111122222", "ok", PdlAnnenForelder(adressebeskyttelse,
+                                                                                   bostedsadresse,
+                                                                                   dødsfall,
+                                                                                   fødsel,
+                                                                                   navn,
+                                                                                   opphold,
+                                                                                   oppholdsadresse,
+                                                                                   statsborgerskap,
+                                                                                   innflyttingTilNorge,
+                                                                                   utflyttingFraNorge))))
 
     val pdlPersonKortBolk = PersonBolk(listOf(PersonDataBolk("11111122222", "ok", PdlPersonKort(navn))))
 }

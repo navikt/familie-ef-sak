@@ -47,13 +47,13 @@ class PdlClientTest {
     }
 
     @Test
-    fun `pdlClient håndterer response for annenForelder-query mot pdl-tjenesten riktig`() {
+    fun `pdlClient håndterer response for andreForeldre-query mot pdl-tjenesten riktig`() {
         wireMockServer.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
-                                       .willReturn(okJson(readFile("annenForelder.json"))))
+                                       .willReturn(okJson(readFile("andreForeldre.json"))))
 
-        val response = pdlClient.hentForelder2("")
+        val response = pdlClient.hentAndreForeldre(listOf("11111122222"))
 
-        assertThat(response.bostedsadresse[0].angittFlyttedato).isEqualTo(LocalDate.of(1966, 11, 18))
+        assertThat(response["11111122222"]?.bostedsadresse?.get(0)?.angittFlyttedato).isEqualTo(LocalDate.of(1966, 11, 18))
     }
 
     @Test
@@ -61,9 +61,9 @@ class PdlClientTest {
         wireMockServer.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
                                        .willReturn(okJson(readFile("barn.json"))))
 
-        val response = pdlClient.hentBarn("")
+        val response = pdlClient.hentBarn(listOf("11111122222"))
 
-        assertThat(response.fødsel[0].fødselsdato).isEqualTo(LocalDate.of(1966, 11, 18))
+        assertThat(response["11111122222"]?.fødsel?.get(0)?.fødselsdato).isEqualTo(LocalDate.of(1966, 11, 18))
     }
 
     @Test
@@ -74,6 +74,16 @@ class PdlClientTest {
         val response = pdlClient.hentSøkerKort("")
 
         assertThat(response.navn[0].fornavn).isEqualTo("BRÅKETE")
+    }
+
+    @Test
+    fun `pdlClient håndterer response for personKortBolk-query mot pdl-tjenesten riktig`() {
+        wireMockServer.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
+                                       .willReturn(okJson(readFile("person_kort_bolk.json"))))
+
+        val response = pdlClient.hentPersonKortBolk(listOf("11111122222"))
+
+        assertThat(response["11111122222"]?.navn?.get(0)?.fornavn).isEqualTo("BRÅKETE")
     }
 
 

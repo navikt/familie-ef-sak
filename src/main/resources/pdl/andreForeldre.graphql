@@ -1,0 +1,104 @@
+query($identer: [ID!]!){
+    personBolk: hentPersonBolk(identer: $identer) {
+        code
+        ident
+        person {
+            adressebeskyttelse {
+                gradering
+            }
+            bostedsadresse(historikk: true) {
+                angittFlyttedato
+                coAdressenavn
+                folkeregistermetadata {
+                    gyldighetstidspunkt
+                    opphoerstidspunkt
+                }
+                vegadresse {
+                    husnummer
+                    husbokstav
+                    bruksenhetsnummer
+                    adressenavn
+                    kommunenummer
+                    tilleggsnavn
+                    postnummer
+                    koordinater {
+                        x
+                        y
+                        z
+                        kvalitet
+                    }
+                }
+                ukjentBosted {
+                    bostedskommune
+                }
+            }
+            doedsfall {
+                doedsdato
+            }
+            foedsel {
+                foedselsaar
+                foedselsdato
+                foedeland
+                foedested
+                foedekommune
+            }
+            navn {
+                fornavn
+                mellomnavn
+                etternavn
+                metadata {
+                    endringer {
+                        registrert
+                    }
+                }
+            }
+            opphold(historikk: true) {
+                type
+                oppholdFra
+                oppholdTil
+            }
+            oppholdsadresse(historikk: true) {
+                oppholdsadressedato
+                coAdressenavn
+                utenlandskAdresse {
+                    adressenavnNummer
+                    bygningEtasjeLeilighet
+                    bySted
+                    postkode
+                    landkode
+                    postboksNummerNavn
+                    regionDistriktOmraade
+                }
+                vegadresse {
+                    husnummer
+                    husbokstav
+                    bruksenhetsnummer
+                    adressenavn
+                    kommunenummer
+                    tilleggsnavn
+                    postnummer
+                    koordinater {
+                        x
+                        y
+                        z
+                        kvalitet
+                    }
+                }
+                oppholdAnnetSted
+            }
+            statsborgerskap(historikk: true) {
+                land
+                gyldigFraOgMed
+                gyldigTilOgMed
+            }
+            innflyttingTilNorge {
+                fraflyttingsland
+                fraflyttingsstedIUtlandet
+            }
+            utflyttingFraNorge {
+                tilflyttingsland
+                tilflyttingsstedIUtlandet
+            }
+        }
+    }
+}

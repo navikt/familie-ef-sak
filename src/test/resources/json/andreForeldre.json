@@ -31,9 +31,7 @@
               "ukjentBosted": null
             }
           ],
-          "deltBosted": [],
           "doedsfall": [],
-          "familierelasjoner": [],
           "foedsel": [
             {
               "foedselsaar": null,
@@ -41,6 +39,12 @@
               "foedeland": null,
               "foedested": null,
               "foedekommune": null
+            }
+          ],
+          "folkeregisterpersonstatus": [
+            {
+              "status": "bosatt",
+              "forenkletStatus": "bosattEtterFolkeregisterloven"
             }
           ],
           "navn": [
@@ -56,7 +60,40 @@
                 ]
               }
             }
-          ]
+          ],
+          "opphold": [],
+          "oppholdsadresse": [
+            {
+              "oppholdsadressedato": "1966-11-18",
+              "coAdressenavn": null,
+              "utenlandskAdresse": null,
+              "vegadresse": {
+                "husnummer": "77",
+                "husbokstav": null,
+                "bruksenhetsnummer": null,
+                "adressenavn": "INNGJERDSVEGEN",
+                "kommunenummer": "0301",
+                "tilleggsnavn": null,
+                "postnummer": "0862",
+                "koordinater": null
+              },
+              "oppholdAnnetSted": null
+            }
+          ],
+          "statsborgerskap": [
+            {
+              "land": "NOR",
+              "gyldigFraOgMed": null,
+              "gyldigTilOgMed": null
+            }
+          ],
+          "innflyttingTilNorge": [
+            {
+              "fraflyttingsland": "CYP",
+              "fraflyttingsstedIUtlandet": null
+            }
+          ],
+          "utflyttingFraNorge": []
         }
       }
     ]
