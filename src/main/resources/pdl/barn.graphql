@@ -1,78 +1,82 @@
-query($ident: ID!){
-    person: hentPerson(ident: $ident) {
-        adressebeskyttelse {
-            gradering
-        }
-        bostedsadresse {
-            angittFlyttedato
-            coAdressenavn
-            folkeregistermetadata {
-                gyldighetstidspunkt
-                opphoerstidspunkt
+query($identer: [ID!]!){
+    personBolk: hentPersonBolk(identer: $identer) {
+        code
+        ident
+        person {
+            adressebeskyttelse {
+                gradering
             }
-            vegadresse {
-                husnummer
-                husbokstav
-                bruksenhetsnummer
-                adressenavn
-                kommunenummer
-                tilleggsnavn
-                postnummer
-                koordinater {
-                    x
-                    y
-                    z
-                    kvalitet
+            bostedsadresse {
+                angittFlyttedato
+                coAdressenavn
+                folkeregistermetadata {
+                    gyldighetstidspunkt
+                    opphoerstidspunkt
+                }
+                vegadresse {
+                    husnummer
+                    husbokstav
+                    bruksenhetsnummer
+                    adressenavn
+                    kommunenummer
+                    tilleggsnavn
+                    postnummer
+                    koordinater {
+                        x
+                        y
+                        z
+                        kvalitet
+                    }
+                }
+                ukjentBosted {
+                    bostedskommune
                 }
             }
-            ukjentBosted {
-                bostedskommune
-            }
-        }
-        deltBosted {
-            startdatoForKontrakt
-            sluttdatoForKontrakt
-            vegadresse {
-                husnummer
-                husbokstav
-                bruksenhetsnummer
-                adressenavn
-                kommunenummer
-                tilleggsnavn
-                postnummer
-                koordinater {
-                    x
-                    y
-                    z
-                    kvalitet
+            deltBosted {
+                startdatoForKontrakt
+                sluttdatoForKontrakt
+                vegadresse {
+                    husnummer
+                    husbokstav
+                    bruksenhetsnummer
+                    adressenavn
+                    kommunenummer
+                    tilleggsnavn
+                    postnummer
+                    koordinater {
+                        x
+                        y
+                        z
+                        kvalitet
+                    }
+                }
+                ukjentBosted {
+                    bostedskommune
                 }
             }
-            ukjentBosted {
-                bostedskommune
+            doedsfall {
+                doedsdato
             }
-        }
-        doedsfall {
-            doedsdato
-        }
-        familierelasjoner {
-            relatertPersonsIdent
-            relatertPersonsRolle
-            minRolleForPerson
-        }
-        foedsel {
-            foedselsaar
-            foedselsdato
-            foedeland
-            foedested
-            foedekommune
-        }
-        navn {
-            fornavn
-            mellomnavn
-            etternavn
-            metadata {
-                endringer {
-                    registrert
+            familierelasjoner {
+                relatertPersonsIdent
+                relatertPersonsRolle
+                minRolleForPerson
+            }
+            foedsel {
+                foedselsaar
+                foedselsdato
+                foedeland
+                foedested
+                foedekommune
+            }
+            navn {
+                fornavn
+                mellomnavn
+                etternavn
+                metadata {
+                    endringer {
+                        registrert
+                    }
                 }
             }
         }

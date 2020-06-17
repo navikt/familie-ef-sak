@@ -21,18 +21,6 @@ class PersonService(val integrasjonerClient: FamilieIntegrasjonerClient,
         return pdlClient.hentSøker(ident)
     }
 
-    fun hentPdlPersonKort(ident: String): PdlSøkerKort {
-        return pdlClient.hentSøkerKort(ident)
-    }
-
-    fun hentPdlBarn(ident: String): PdlBarn {
-        return pdlClient.hentBarn(ident)
-    }
-
-    fun hentPdlAnnenForelder(ident: String): PdlAnnenForelder {
-        return pdlClient.hentForelder2(ident)
-    }
-
     fun hentPdlPersonKort(identer: List<String>): Map<String, PdlPersonKort> {
         return identer.distinct().chunked(100).map { pdlClient.hentPersonKortBolk(it) }.reduce { acc, it -> acc + it }
     }

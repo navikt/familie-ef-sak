@@ -23,7 +23,7 @@ class PdlConfig(@Value("\${PDL_URL}") pdlUrl: URI) {
 
         val barnQuery = graphqlQuery("/pdl/barn.graphql")
 
-        val annenForelderQuery = graphqlQuery("/pdl/annenForelder.graphql")
+        val annenForelderQuery = graphqlQuery("/pdl/andreForeldre.graphql")
 
         private fun graphqlQuery(path: String) = PdlConfig::class.java.getResource(path)
                 .readText()

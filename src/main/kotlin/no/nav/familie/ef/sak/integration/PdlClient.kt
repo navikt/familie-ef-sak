@@ -44,22 +44,22 @@ class PdlClient(val pdlConfig: PdlConfig,
         return feilsjekkOgReturnerData(personIdent, pdlResponse)
     }
 
-    fun hentBarn(personIdent: String): PdlBarn {
-        val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
-                                                query = PdlConfig.barnQuery)
-        val pdlResponse: PdlResponse<PdlBarnData> = postForEntity(pdlConfig.pdlUri,
+    fun hentBarn(personIdent: List<String>): Map<String, PdlBarn> {
+        val pdlPersonRequest = PdlPersonBolkRequest(variables = PdlPersonBolkRequestVariables(personIdent),
+                                                    query = PdlConfig.barnQuery)
+        val pdlResponse: PdlBolkResponse<PdlBarn> = postForEntity(pdlConfig.pdlUri,
                                                                   pdlPersonRequest,
                                                                   httpHeaders())
-        return feilsjekkOgReturnerData(personIdent, pdlResponse).person
+        return feilsjekkOgReturnerData(pdlResponse)
     }
 
-    fun hentForelder2(personIdent: String): PdlAnnenForelder {
-        val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
-                                                query = PdlConfig.annenForelderQuery)
-        val pdlResponse: PdlResponse<PdlAnnenForelderData> = postForEntity(pdlConfig.pdlUri,
+    fun hentAndreForeldre(personIdent: List<String>): Map<String, PdlAnnenForelder> {
+        val pdlPersonRequest = PdlPersonBolkRequest(variables = PdlPersonBolkRequestVariables(personIdent),
+                                                    query = PdlConfig.annenForelderQuery)
+        val pdlResponse: PdlBolkResponse<PdlAnnenForelder> = postForEntity(pdlConfig.pdlUri,
                                                                            pdlPersonRequest,
                                                                            httpHeaders())
-        return feilsjekkOgReturnerData(personIdent, pdlResponse).person
+        return feilsjekkOgReturnerData(pdlResponse)
 
     }
 
@@ -96,7 +96,7 @@ class PdlClient(val pdlConfig: PdlConfig,
             secureLogger.error("Feil ved henting av ${T::class} fra PDL: $feil")
             throw PdlRequestException("Feil ved henting av ${T::class} fra PDL. Se secure logg for detaljer.")
         }
-        return pdlResponse.data.personBolk.map { it.ident to it.person!! }.toMap()
+        return pdlResponse.data.personBolk.associateBy({ it.ident }, { it.person!! })
     }
 
     private fun httpHeaders(): HttpHeaders {
