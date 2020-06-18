@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.api.gui.dto.Aleneomsorg
-import no.nav.familie.ef.sak.api.gui.dto.AleneomsorgDto
 import no.nav.familie.ef.sak.api.gui.dto.MedlemskapDto
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.PdlClient
@@ -44,16 +43,22 @@ class VurderingService(private val sakService: SakService,
 
 
         val barn = pdlSøker.familierelasjoner
-                .asSequence()
                 .filter { it.relatertPersonsRolle == Familierelasjonsrolle.BARN }
-                .associateBy({ it.relatertPersonsIdent }, { pdlClient.hentBarn(it.relatertPersonsIdent) })
+                .map { it.relatertPersonsIdent }
+                .let { pdlClient.hentBarn(it) }
                 .filter { it.value.fødsel.firstOrNull()?.fødselsdato != null }
                 .filter { it.value.fødsel.first().fødselsdato!!.plusYears(18).isAfter(LocalDate.now()) }
 
+        val barneforeldreFraSøknad =
+                sak.søknad.barn.verdi.mapNotNull { it.annenForelder?.verdi?.person?.verdi?.fødselsnummer?.verdi?.verdi }
+
         val barneforeldre = barn.map { it.value.familierelasjoner }
                 .flatten()
-                .filter { it.relatertPersonsIdent != fnrSøker && it.relatertPersonsRolle  }
-                .associateBy({ it.relatertPersonsIdent }, { pdlClient.hentForelder2(it.relatertPersonsIdent) })
+                .filter { it.relatertPersonsIdent != fnrSøker && it.relatertPersonsRolle != Familierelasjonsrolle.BARN }
+                .map { it.relatertPersonsIdent }
+                .plus(barneforeldreFraSøknad)
+                .distinct()
+                .let { pdlClient.hentAndreForeldre(it) }
 
         return AleneomsorgMapper.tilDto(pdlSøker,
                                         barn,

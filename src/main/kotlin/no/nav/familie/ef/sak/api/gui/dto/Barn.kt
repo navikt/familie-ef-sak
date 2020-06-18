@@ -10,5 +10,6 @@ data class Barn(val navn: String,
                 val aleneomsorg: Boolean,
                 val søkersRelasjonTilBarnet: String,
                 val skalBoBorHosSøker: Boolean,
-                val deltBosted: DeltBosted)
+                val deltBosted: DeltBosted,
+                val fraRegister: Boolean)
 
