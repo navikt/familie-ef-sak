@@ -32,11 +32,9 @@ class PersonopplysningerService(private val personService: PersonService,
         }
     }
 
-    private suspend fun hentNavn(identer: List<String>): Map<String, String> = coroutineScope {
-        if (identer.isEmpty()) return@coroutineScope emptyMap<String, String>()
+    private fun hentNavn(identer: List<String>): Map<String, String> {
+        if (identer.isEmpty()) return emptyMap()
         logger.info("Henter navn til {} personer", identer.size)
-        identer.map { Pair(it, async { personService.hentPdlPersonKort(it) }) }
-                .map { Pair(it.first, it.second.await().navn.gjeldende().visningsnavn()) }
-                .toMap()
+        return personService.hentPdlPersonKort(identer).map { it.key to it.value.navn.gjeldende().visningsnavn() }.toMap()
     }
 }

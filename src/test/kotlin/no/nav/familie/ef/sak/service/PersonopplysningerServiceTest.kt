@@ -61,7 +61,7 @@ internal class PersonopplysningerServiceTest {
     "type" : "SKILT",
     "gyldigFraOgMed" : "2020-01-01",
     "relatertVedSivilstand" : "11111122222",
-    "navn" : "Foo mellomnavn Etternavn"
+    "navn" : "11111122222 mellomnavn Etternavn"
   } ],
   "adresse" : [ {
     "visningsadresse" : "c/o CONAVN, Charlies vei 13 b, 0575 Oslo",
@@ -78,7 +78,7 @@ internal class PersonopplysningerServiceTest {
     "gyldigFraOgMed" : "2021-01-01",
     "gyldigTilOgMed" : "2020-01-01",
     "motpartsPersonident" : "11111133333",
-    "navn" : "Bar mellomnavn Etternavn"
+    "navn" : "11111133333 mellomnavn Etternavn"
   } ],
   "egenAnsatt" : true
 }""")

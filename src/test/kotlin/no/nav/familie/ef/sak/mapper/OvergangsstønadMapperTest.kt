@@ -32,7 +32,7 @@ internal class OvergangsstønadMapperTest {
                                   barnsSykdom = dokumentliste(),
                                   gjelderDetteDeg = søknadsfelt(emptyList()),
                                   manglendeBarnepass = dokumentliste(),
-                                  oppsigelseReduksjonDokumentasjon = dokumentliste(),
+                                  oppsigelseDokumentasjon = dokumentliste(),
                                   oppsigelseReduksjonTidspunkt = søknadsfelt(LocalDate.now()),
                                   oppsigelseReduksjonÅrsak = søknadsfelt("Årsak"),
                                   oppstartNyJobb = null,
@@ -41,7 +41,7 @@ internal class OvergangsstønadMapperTest {
                                   sykdom = dokumentliste(),
                                   utdanningstilbud = dokumentliste()))
 
-    private fun dokumentliste(): Søknadsfelt<List<Dokument>> = søknadsfelt(listOf(Dokument(byteArrayOf(), "tittel")))
+    private fun dokumentliste(): Søknadsfelt<List<Dokument>> = søknadsfelt(listOf(Dokument("id", "tittel")))
 
     private fun aktivitet(): Søknadsfelt<Aktivitet> =
             søknadsfelt(Aktivitet(arbeidsforhold = arbeidsforhold(),

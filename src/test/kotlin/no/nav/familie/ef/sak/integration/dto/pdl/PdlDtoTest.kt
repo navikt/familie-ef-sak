@@ -34,9 +34,18 @@ class PdlDtoTest {
 
     @Test
     fun `pdlAnnenForelderData inneholder samme felter som blir spurt om i query`() {
-        val spørringsfelter = PdlTestUtil.parseSpørring("/pdl/annenForelder.graphql")
+        val spørringsfelter = PdlTestUtil.parseSpørring("/pdl/andreForeldre.graphql")
 
         val dtoFelter = PdlTestUtil.finnFeltStruktur(PdlTestdata.pdlAnnenForelderData)!!
+
+        Assertions.assertThat(dtoFelter).isEqualTo(spørringsfelter["data"])
+    }
+
+    @Test
+    fun `pdlPersonKortBolk inneholder samme felter som blir spurt om i query`() {
+        val spørringsfelter = PdlTestUtil.parseSpørring("/pdl/person_kort_bolk.graphql")
+
+        val dtoFelter = PdlTestUtil.finnFeltStruktur(PdlTestdata.pdlPersonKortBolk)!!
 
         Assertions.assertThat(dtoFelter).isEqualTo(spørringsfelter["data"])
     }

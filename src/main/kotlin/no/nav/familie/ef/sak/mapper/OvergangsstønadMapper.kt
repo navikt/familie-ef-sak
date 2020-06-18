@@ -23,7 +23,7 @@ object OvergangsstønadMapper {
         return SagtOppEllerRedusertStillingDto(sagtOppEllerRedusertStilling = sagtOppEllerRedusertStilling.verdi,
                                                årsak = situasjon.oppsigelseReduksjonÅrsak?.verdi,
                                                dato = situasjon.oppsigelseReduksjonTidspunkt?.verdi,
-                                               vedlegg = tilVedleggDto(situasjon.oppsigelseReduksjonDokumentasjon))
+                                               vedlegg = tilVedleggDto(situasjon.oppsigelseDokumentasjon))
     }
 
     private fun tilVirksomhetDto(virksomhet: Virksomhet?): VirksomhetDto? =
@@ -70,7 +70,7 @@ object OvergangsstønadMapper {
                          barnMedSærligeBehov = tilVedleggDto(situasjon.barnMedSærligeBehov))
 
     private fun tilVedleggDto(dokument: Søknadsfelt<List<Dokument>>?) =
-            dokument?.verdi?.map { VedleggDto(it.tittel) } ?: emptyList()
+            dokument?.verdi?.map { VedleggDto(it.id, it.navn) } ?: emptyList()
 
     private fun tilUnderUtdanningDto(underUtdanning: UnderUtdanning?): UnderUtdanningDto? =
             underUtdanning?.let {
