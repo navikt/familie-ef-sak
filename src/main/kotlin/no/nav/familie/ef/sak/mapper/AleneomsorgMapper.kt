@@ -32,7 +32,6 @@ object AleneomsorgMapper {
     private fun lagUnionAvSøknadsbarnOgRegisterBarn(søknadsbarn: List<Søknadsbarn>,
                                                     pdlBarnMap: Map<String, PdlBarn>): List<Pair<Søknadsbarn?, PdlBarn?>> {
 
-
         val søknadsbarnMatchetTilPdlBarn =
                 søknadsbarn.map {
                     it to pdlBarnMap[it.fødselsnummer?.verdi?.verdi]?.let { pdlBarn ->
@@ -42,10 +41,10 @@ object AleneomsorgMapper {
 
         val pdlBarnMatchetTilSøknadsbarn =
                 pdlBarnMap.map { entry ->
-                    entry to søknadsbarn.firstOrNull { it.fødselsnummer?.verdi?.verdi == entry.key }
+                    søknadsbarn.firstOrNull { it.fødselsnummer?.verdi?.verdi == entry.key } to entry
                 }
 
-        val registerbarnIkkeISøknad = pdlBarnMatchetTilSøknadsbarn.filter { it.second == null }
+        val registerbarnIkkeISøknad = pdlBarnMatchetTilSøknadsbarn.filter { it.first == null }
         val søknadsbarnIkkeIRegister = søknadsbarnMatchetTilPdlBarn.filter { it.second == null }
 
     }
