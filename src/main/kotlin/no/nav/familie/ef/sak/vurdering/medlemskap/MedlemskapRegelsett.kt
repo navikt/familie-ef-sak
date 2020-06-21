@@ -218,9 +218,13 @@ class MedlemskapRegelsett {
         return fusjonertePerioder.toList()
     }
 
-    private fun søknadsdato(medlemskapsgrunnlag: Medlemskapsgrunnlag) =
-            LocalDate.of(medlemskapsgrunnlag.søknad.stønadsstart.verdi.fraÅr.verdi,
-                         medlemskapsgrunnlag.søknad.stønadsstart.verdi.fraMåned.verdi, 1)
+    private fun søknadsdato(medlemskapsgrunnlag: Medlemskapsgrunnlag): LocalDate {
+        if (medlemskapsgrunnlag.søknad.stønadsstart.verdi.søkerFraBestemtMåned.verdi) {
+            LocalDate.of(medlemskapsgrunnlag.søknad.stønadsstart.verdi.fraÅr!!.verdi,
+                         medlemskapsgrunnlag.søknad.stønadsstart.verdi.fraMåned!!.verdi, 1)
+        }
+        return LocalDate.now()
+    }
 
     private fun datoFor16Årsdag(person: PdlPerson?): LocalDate {
         val fødselsdato = person?.fødsel?.firstOrNull()?.fødselsdato ?: error("Person er ikke født")
