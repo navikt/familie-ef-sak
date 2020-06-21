@@ -23,7 +23,7 @@ object OvergangsstønadMapper {
         return SagtOppEllerRedusertStillingDto(sagtOppEllerRedusertStilling = sagtOppEllerRedusertStilling.verdi,
                                                årsak = situasjon.oppsigelseReduksjonÅrsak?.verdi,
                                                dato = situasjon.oppsigelseReduksjonTidspunkt?.verdi,
-                                               vedlegg = tilDokumentasjonDto(situasjon.oppsigelseDokumentasjon))
+                                               dokumentasjon = tilDokumentasjonDto(situasjon.oppsigelseDokumentasjon))
     }
 
     private fun tilVirksomhetDto(virksomhet: Virksomhet?): VirksomhetDto? =

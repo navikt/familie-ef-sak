@@ -21,7 +21,7 @@ data class AktivitetDto(val arbeidssituasjon: List<String>,
 data class SagtOppEllerRedusertStillingDto(val sagtOppEllerRedusertStilling: String,
                                            val årsak: String?,
                                            val dato: LocalDate?,
-                                           val vedlegg: DokumentasjonDto?)
+                                           val dokumentasjon: DokumentasjonDto?)
 
 data class ArbeidsforholdDto(val arbeidsgivernavn: String,
                              val arbeidsmengde: Int,
