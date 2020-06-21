@@ -21,7 +21,7 @@ data class AktivitetDto(val arbeidssituasjon: List<String>,
 data class SagtOppEllerRedusertStillingDto(val sagtOppEllerRedusertStilling: String,
                                            val årsak: String?,
                                            val dato: LocalDate?,
-                                           val vedlegg: List<VedleggDto>)
+                                           val vedlegg: DokumentasjonDto?)
 
 data class ArbeidsforholdDto(val arbeidsgivernavn: String,
                              val arbeidsmengde: Int,
@@ -63,9 +63,11 @@ data class PeriodeDto(val fraMåned: Month,
                       val tilMåned: Month,
                       val tilÅr: Int)
 
-data class SituasjonDto(val sykdom: List<VedleggDto>,
-                        val barnsSykdom: List<VedleggDto>,
-                        val manglendeBarnepass: List<VedleggDto>,
-                        val barnMedSærligeBehov: List<VedleggDto>)
+data class SituasjonDto(val sykdom: DokumentasjonDto?,
+                        val barnsSykdom: DokumentasjonDto?,
+                        val manglendeBarnepass: DokumentasjonDto?,
+                        val barnMedSærligeBehov: DokumentasjonDto?)
+
+data class DokumentasjonDto(val harSendtInn: Boolean, val vedlegg: List<VedleggDto>)
 
 data class VedleggDto(val id: String, val navn: String)
