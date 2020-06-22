@@ -23,7 +23,7 @@ object OvergangsstønadMapper {
         return SagtOppEllerRedusertStillingDto(sagtOppEllerRedusertStilling = sagtOppEllerRedusertStilling.verdi,
                                                årsak = situasjon.oppsigelseReduksjonÅrsak?.verdi,
                                                dato = situasjon.oppsigelseReduksjonTidspunkt?.verdi,
-                                               vedlegg = tilVedleggDto(situasjon.oppsigelseDokumentasjon))
+                                               dokumentasjon = tilDokumentasjonDto(situasjon.oppsigelseDokumentasjon))
     }
 
     private fun tilVirksomhetDto(virksomhet: Virksomhet?): VirksomhetDto? =
@@ -64,13 +64,16 @@ object OvergangsstønadMapper {
             }
 
     private fun tilAnnenSituasjon(situasjon: Situasjon): SituasjonDto =
-            SituasjonDto(sykdom = tilVedleggDto(situasjon.sykdom),
-                         barnsSykdom = tilVedleggDto(situasjon.barnsSykdom),
-                         manglendeBarnepass = tilVedleggDto(situasjon.manglendeBarnepass),
-                         barnMedSærligeBehov = tilVedleggDto(situasjon.barnMedSærligeBehov))
+            SituasjonDto(sykdom = tilDokumentasjonDto(situasjon.sykdom),
+                         barnsSykdom = tilDokumentasjonDto(situasjon.barnsSykdom),
+                         manglendeBarnepass = tilDokumentasjonDto(situasjon.manglendeBarnepass),
+                         barnMedSærligeBehov = tilDokumentasjonDto(situasjon.barnMedSærligeBehov))
 
-    private fun tilVedleggDto(dokument: Søknadsfelt<List<Dokument>>?) =
-            dokument?.verdi?.map { VedleggDto(it.id, it.navn) } ?: emptyList()
+    private fun tilDokumentasjonDto(dokument: Søknadsfelt<Dokumentasjon>?) =
+            dokument?.verdi?.let {
+                DokumentasjonDto(it.harSendtInnTidligere.verdi,
+                                 it.dokumenter.map { dokument ->VedleggDto(dokument.id, dokument.navn) })
+            }
 
     private fun tilUnderUtdanningDto(underUtdanning: UnderUtdanning?): UnderUtdanningDto? =
             underUtdanning?.let {

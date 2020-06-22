@@ -41,7 +41,9 @@ internal class OvergangsstønadMapperTest {
                                   sykdom = dokumentliste(),
                                   utdanningstilbud = dokumentliste()))
 
-    private fun dokumentliste(): Søknadsfelt<List<Dokument>> = søknadsfelt(listOf(Dokument("id", "tittel")))
+    private fun dokumentliste() =
+            søknadsfelt(Dokumentasjon(Søknadsfelt("Har allerede sendt inn", false),
+                                      listOf(Dokument("id", "tittel"))))
 
     private fun aktivitet(): Søknadsfelt<Aktivitet> =
             søknadsfelt(Aktivitet(arbeidsforhold = arbeidsforhold(),
