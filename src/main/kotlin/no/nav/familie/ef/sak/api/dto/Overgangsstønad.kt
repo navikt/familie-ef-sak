@@ -42,7 +42,7 @@ data class VirksomhetDto(val virksomhetsbeskrivelse: String)
 data class ArbeidssøkerDto(val registrertSomArbeidssøkerNav: Boolean,
                            val villigTilÅTaImotTilbudOmArbeid: Boolean,
                            val kanDuBegynneInnenEnUke: Boolean,
-                           val kanDuSkaffeBarnepassInnenEnUke: Boolean,
+                           val kanDuSkaffeBarnepassInnenEnUke: Boolean?,
                            val hvorØnskerDuArbeid: String,
                            val ønskerDuMinst50ProsentStilling: Boolean)
 
