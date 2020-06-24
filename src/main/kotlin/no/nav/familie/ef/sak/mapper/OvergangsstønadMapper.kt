@@ -57,7 +57,7 @@ object OvergangsstønadMapper {
                 ArbeidssøkerDto(registrertSomArbeidssøkerNav = it.registrertSomArbeidssøkerNav.verdi,
                                 villigTilÅTaImotTilbudOmArbeid = it.villigTilÅTaImotTilbudOmArbeid.verdi,
                                 kanDuBegynneInnenEnUke = it.kanDuBegynneInnenEnUke.verdi,
-                                kanDuSkaffeBarnepassInnenEnUke = it.kanDuSkaffeBarnepassInnenEnUke.verdi,
+                                kanDuSkaffeBarnepassInnenEnUke = it.kanDuSkaffeBarnepassInnenEnUke?.verdi,
                                 hvorØnskerDuArbeid = it.hvorØnskerDuArbeid.verdi,
                                 ønskerDuMinst50ProsentStilling = it.ønskerDuMinst50ProsentStilling.verdi
                 )
