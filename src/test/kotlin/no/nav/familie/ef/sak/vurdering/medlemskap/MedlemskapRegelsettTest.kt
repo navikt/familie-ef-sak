@@ -25,7 +25,9 @@ internal class MedlemskapRegelsettTest {
                                 folkeregisterpersonstatus = listOf(Folkeregisterpersonstatus("bosatt", "bo")),
                                 statsborgerskap = listOf(Statsborgerskap("SE", LocalDate.of(2002, 2, 2), null)))
         val søknad = søknad(medlemskapsdetaljer = Søknadsfelt("", Medlemskapsdetaljer(Søknadsfelt("", true), mockk(), mockk())),
-                            stønadsstart = Søknadsfelt("", Stønadsstart(Søknadsfelt("", Month.AUGUST), Søknadsfelt("", 2014))))
+                            stønadsstart = Søknadsfelt("", Stønadsstart(Søknadsfelt("", Month.AUGUST),
+                                                                        Søknadsfelt("", 2014),
+                                                                        Søknadsfelt("", true))))
         val medlemskapshistorikk = Medlemskapshistorikk(pdlSøker, medlemskapsinfoUtenUnntak)
         val medlemskapsgrunnlag = Medlemskapsgrunnlag(pdlSøker, medlemskapshistorikk, søknad)
 
@@ -61,7 +63,9 @@ internal class MedlemskapRegelsettTest {
                                                               Medlemskapsdetaljer(Søknadsfelt("oppholdINorge", true),
                                                                                   mockk(),
                                                                                   mockk())),
-                            stønadsstart = Søknadsfelt("", Stønadsstart(Søknadsfelt("", Month.AUGUST), Søknadsfelt("", 2014))))
+                            stønadsstart = Søknadsfelt("", Stønadsstart(Søknadsfelt("", Month.AUGUST),
+                                                                        Søknadsfelt("", 2014),
+                                                                        Søknadsfelt("", true))))
         val medlemskapshistorikk = Medlemskapshistorikk(pdlSøker, medlemskapsinfoUtenUnntak)
         val medlemskapsgrunnlag = Medlemskapsgrunnlag(pdlSøker, medlemskapshistorikk, søknad)
 
@@ -97,7 +101,9 @@ internal class MedlemskapRegelsettTest {
                                                               Medlemskapsdetaljer(Søknadsfelt("oppholdINorge", false),
                                                                                   mockk(),
                                                                                   mockk())),
-                            stønadsstart = Søknadsfelt("", Stønadsstart(Søknadsfelt("", Month.AUGUST), Søknadsfelt("", 2014))))
+                            stønadsstart = Søknadsfelt("", Stønadsstart(Søknadsfelt("", Month.AUGUST),
+                                                                        Søknadsfelt("", 2014),
+                                                                        Søknadsfelt("", true))))
         val medlemskapshistorikk = Medlemskapshistorikk(pdlSøker, medlemskapsinfoUtenUnntak)
         val medlemskapsgrunnlag = Medlemskapsgrunnlag(pdlSøker, medlemskapshistorikk, søknad)
 

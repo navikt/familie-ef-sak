@@ -38,7 +38,7 @@ class SakController(private val sakService: SakService) {
 
     @GetMapping("/{id}")
     fun dummy(@PathVariable("id") id: UUID): Ressurs<SakDto> {
-        return Ressurs.success(sakService.hentSak(id));
+        return Ressurs.success(sakService.hentSak(id))
     }
 
 }
@@ -59,7 +59,9 @@ internal object Testsøknad {
     val vedleggId = "d5531f89-0079-4715-a337-9fd28f811f2f"
     val vedlegg = listOf(Vedlegg(vedleggId, "vedlegg.pdf", "tittel", "filinnehold".toByteArray()))
 
-    private fun stønadsstart() = Stønadsstart(Søknadsfelt("Fra måned", Month.AUGUST), Søknadsfelt("Fra år", 2018))
+    private fun stønadsstart() = Stønadsstart(Søknadsfelt("Fra måned", Month.AUGUST),
+                                              Søknadsfelt("Fra år", 2018),
+                                              Søknadsfelt("Søker fra bestemt månde", true))
 
     @Suppress("LongLine")
     private fun situasjon(): Situasjon {
@@ -251,7 +253,8 @@ internal object Testsøknad {
                                    "Norge"))
     }
 
-    private fun dokumentfelt(tittel: String) = Søknadsfelt("Dokument", listOf(Dokument(vedleggId, tittel)))
+    private fun dokumentfelt(tittel: String) =
+            Søknadsfelt(tittel, Dokumentasjon(Søknadsfelt("Har allerede sendt inn", false), listOf(Dokument(vedleggId, tittel))))
 
     private fun personMinimum(): PersonMinimum {
         return PersonMinimum(Søknadsfelt("Navn", "Bob Burger"),

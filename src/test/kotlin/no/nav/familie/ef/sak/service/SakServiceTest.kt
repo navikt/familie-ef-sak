@@ -21,13 +21,6 @@ internal class SakServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired lateinit var sakService: SakService
     @Autowired lateinit var vedleggRepository: VedleggRepository
-    @Autowired lateinit var sakRepository: SakRepository
-
-    @AfterEach
-    internal fun tearDown() {
-        vedleggRepository.deleteAll()
-        sakRepository.deleteAll()
-    }
 
     @Test
     internal fun `lagrer sak med vedlegg, vedlegg lagres med id som den kommer inn med`() {
