@@ -56,7 +56,9 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
             WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.tilgangUri.path))
                     .willReturn(WireMock.okJson(objectMapper.writeValueAsString(listOf(Tilgang(true, null))))),
             WireMock.get(WireMock.urlEqualTo(integrasjonerConfig.kodeverkPoststedUri.path))
-                    .willReturn(WireMock.okJson(objectMapper.writeValueAsString(kodeverkPoststed)))
+                    .willReturn(WireMock.okJson(objectMapper.writeValueAsString(kodeverkPoststed))),
+            WireMock.get(WireMock.urlEqualTo(integrasjonerConfig.kodeverkLandkoderUri.path))
+                    .willReturn(WireMock.okJson(objectMapper.writeValueAsString(kodeverkLand)))
     )
 
     @Bean("mock-integrasjoner")
@@ -75,9 +77,15 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
         val poststed = KodeverkDto(mapOf("0575" to listOf(BetydningDto(LocalDate.MIN,
                                                                        LocalDate.MAX,
                                                                        mapOf("nb" to BeskrivelseDto(
-                                                                               "Oslo",
-                                                                               "Oslo"))))))
+                                                                               "OSLO",
+                                                                               "OSLO"))))))
+        val land = KodeverkDto(mapOf("NOR" to listOf(BetydningDto(LocalDate.MIN,
+                                                                       LocalDate.MAX,
+                                                                       mapOf("nb" to BeskrivelseDto(
+                                                                               "NORGE",
+                                                                               "NORGE"))))))
         private val kodeverkPoststed = Ressurs.success(poststed)
+        private val kodeverkLand = Ressurs.success(land)
         private val person = Ressurs.success(Personinfo(PersonIdent("12137578901"),
                                                         "Bob",
                                                         Adresseinfo(AdresseType.BOSTEDSADRESSE,
