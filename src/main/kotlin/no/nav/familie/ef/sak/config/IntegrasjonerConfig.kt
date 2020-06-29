@@ -34,8 +34,8 @@ class IntegrasjonerConfig(@Value("\${FAMILIE_INTEGRASJONER_URL}") private val in
         private const val PATH_KODEVERK_LANDKODER = "api/kodeverk/landkoder"
         private const val PATH_KODEVERK_POSTSTED = "api/kodeverk/poststed"
         private const val PATH_TILGANGER = "api/tilgang/personer"
-        private const val PATH_PERSONOPPLYSNING = "api/personopplysning/v1/info"
-        private const val PATH_PERSONHISTORIKK = "api/personopplysning/v1/historikk"
+        private const val PATH_PERSONOPPLYSNING = "api/personopplysning/v2/info"
+        private const val PATH_PERSONHISTORIKK = "api/personopplysning/v2/historikk"
         private const val PATH_EGEN_ANSATT = "api/egenansatt"
     }
 }
