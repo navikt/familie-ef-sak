@@ -10,6 +10,7 @@ import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
+import no.nav.familie.kontrakter.felles.personinfo.Ident
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Component
@@ -29,7 +30,7 @@ class FamilieIntegrasjonerClient(@Qualifier("azure") restOperations: RestOperati
     }
 
     fun hentMedlemskapsinfo(ident: String): Medlemskapsinfo {
-        return getForEntity<Ressurs<Medlemskapsinfo>>(integrasjonerConfig.personopplysningerUri, personIdentHeader(ident)).data!!
+        return postForEntity<Ressurs<Medlemskapsinfo>>(integrasjonerConfig.personopplysningerUri, Ident(ident)).data!!
     }
 
     fun hentKodeverkLandkoder(): KodeverkDto {
@@ -42,7 +43,7 @@ class FamilieIntegrasjonerClient(@Qualifier("azure") restOperations: RestOperati
 
     @Deprecated("bruk Pdl-løsning")
     fun hentPersonopplysninger(ident: String): Personinfo {
-        return getForEntity<Ressurs<Personinfo>>(integrasjonerConfig.personopplysningerUri, personIdentHeader(ident)).data!!
+        return postForEntity<Ressurs<Personinfo>>(integrasjonerConfig.personopplysningerUri, Ident(ident)).data!!
     }
 
     @Deprecated("bruk Pdl-løsning")
@@ -52,16 +53,12 @@ class FamilieIntegrasjonerClient(@Qualifier("azure") restOperations: RestOperati
                 .queryParam("fomDato", LocalDate.now().minusYears(5))
                 .queryParam("tomDato", LocalDate.now()).build().toUri()
 
-        return getForEntity<Ressurs<PersonhistorikkInfo>>(uri,
-                                                          personIdentHeader(ident)).data!!
+        return postForEntity<Ressurs<PersonhistorikkInfo>>(uri,
+                                                          Ident(ident)).data!!
     }
 
     fun egenAnsatt(ident: String): Boolean {
         return postForEntity<Ressurs<EgenAnsattResponse>>(integrasjonerConfig.egenAnsattUri,
                                                           EgenAnsattRequest(ident)).data!!.erEgenAnsatt
     }
-
-
-    private fun personIdentHeader(ident: String) = HttpHeaders().apply { add("Nav-Personident", ident) }
-
 }
