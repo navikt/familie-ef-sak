@@ -95,5 +95,6 @@ internal class OvergangsstønadMapperTest {
                                      kanDuSkaffeBarnepassInnenEnUke = søknadsfelt(true),
                                      registrertSomArbeidssøkerNav = søknadsfelt(true),
                                      villigTilÅTaImotTilbudOmArbeid = søknadsfelt(true),
-                                     ønskerDuMinst50ProsentStilling = søknadsfelt(true)))
+                                     ønskerDuMinst50ProsentStilling = søknadsfelt(true),
+                                     ikkeVilligTilÅTaImotTilbudOmArbeidDokumentasjon = dokumentliste()))
 }
