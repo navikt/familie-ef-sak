@@ -44,7 +44,8 @@ data class ArbeidssøkerDto(val registrertSomArbeidssøkerNav: Boolean,
                            val kanDuBegynneInnenEnUke: Boolean,
                            val kanDuSkaffeBarnepassInnenEnUke: Boolean?,
                            val hvorØnskerDuArbeid: String,
-                           val ønskerDuMinst50ProsentStilling: Boolean)
+                           val ønskerDuMinst50ProsentStilling: Boolean,
+                           val ikkeVilligTilÅTaImotTilbudOmArbeidDokumentasjon: DokumentasjonDto?)
 
 data class UnderUtdanningDto(val skoleUtdanningssted: String,
                              val utdanning: UtdanningDto,
