@@ -57,7 +57,9 @@ internal class OvergangsstønadMapperTest {
     private fun aksjeselskap(): Søknadsfelt<List<Aksjeselskap>>? =
             søknadsfelt(listOf(Aksjeselskap(navn = søknadsfelt("navn"), arbeidsmengde = søknadsfelt(30))))
 
-    private fun virksomhet() = søknadsfelt(Virksomhet(virksomhetsbeskrivelse = søknadsfelt("virksomhet")))
+    private fun virksomhet() =
+            søknadsfelt(Virksomhet(virksomhetsbeskrivelse = søknadsfelt("virksomhet"),
+                                   dokumentasjon = dokumentliste()))
 
     private fun underUtdanning(): Søknadsfelt<UnderUtdanning> =
             søknadsfelt(UnderUtdanning(heltidEllerDeltid = søknadsfelt("Heltid"),

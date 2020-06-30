@@ -37,7 +37,7 @@ data class SelvstendigDto(val firmanavn: String,
 data class AksjeselskapDto(val navn: String,
                            val arbeidsmengde: Int)
 
-data class VirksomhetDto(val virksomhetsbeskrivelse: String)
+data class VirksomhetDto(val virksomhetsbeskrivelse: String, val dokumentasjon: DokumentasjonDto?)
 
 data class ArbeidssøkerDto(val registrertSomArbeidssøkerNav: Boolean,
                            val villigTilÅTaImotTilbudOmArbeid: Boolean,
