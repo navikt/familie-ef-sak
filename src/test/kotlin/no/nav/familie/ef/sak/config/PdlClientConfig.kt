@@ -28,8 +28,8 @@ class PdlClientConfig {
     fun pdlClient(): PdlClient {
         val pdlClient: PdlClient = mockk()
 
-        every { pdlClient.hentSøkerKort(any()) } answers {
-            søkerKort.getOrDefault(firstArg() as String, PdlSøkerKort(lagKjønn(KjønnType.MANN), lagNavn(fornavn = "Ikke mappet")))
+        every { pdlClient.hentSøkerKortBolk(any()) } answers {
+            (firstArg() as List<String>).map { it to PdlSøkerKort(lagKjønn(), lagNavn(fornavn = it)) }.toMap()
         }
 
         every { pdlClient.hentPersonKortBolk(any()) } answers {
@@ -62,7 +62,7 @@ class PdlClientConfig {
         return pdlClient
     }
 
-    private fun lagKjønn(kjønnType: KjønnType) = listOf(Kjønn(kjønnType))
+    private fun lagKjønn(kjønnType: KjønnType = KjønnType.KVINNE) = listOf(Kjønn(kjønnType))
 
     private fun lagNavn(fornavn: String = "Fornavn",
                         mellomnavn: String? = "mellomnavn",

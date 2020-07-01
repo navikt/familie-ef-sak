@@ -1,13 +1,13 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
+import no.nav.familie.ef.sak.api.external.Testsøknad.søknad
 import no.nav.familie.ef.sak.repository.CustomRepository
 import no.nav.familie.ef.sak.repository.SakRepository
 import no.nav.familie.ef.sak.repository.domain.Barn
 import no.nav.familie.ef.sak.repository.domain.Sak
 import no.nav.familie.ef.sak.repository.domain.Søker
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ActiveProfiles
@@ -51,7 +51,7 @@ internal class SakRepositoryTest : OppslagSpringRunnerTest() {
 
     private fun opprettSak(saksnummer: String, fødselsnummer: String) {
         customRepository.persist(Sak(
-                søknad = byteArrayOf(12),
+                søknad = søknad,
                 saksnummer = saksnummer,
                 søker = Søker(fødselsnummer, "Navn"),
                 barn = setOf(Barn(fødselsdato = LocalDate.now(), harSammeAdresse = true, fødselsnummer = null, navn = "Navn")),

@@ -2,12 +2,10 @@ package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.api.external.Testsøknad
-import no.nav.familie.ef.sak.repository.SakRepository
 import no.nav.familie.ef.sak.repository.VedleggRepository
 import no.nav.familie.kontrakter.ef.sak.SakRequest
 import no.nav.familie.kontrakter.ef.søknad.SøknadMedVedlegg
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull

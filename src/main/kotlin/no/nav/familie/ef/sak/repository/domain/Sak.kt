@@ -14,7 +14,7 @@ import java.util.*
 data class Sak(@Id
                val id: UUID = UUID.randomUUID(),
                @Column("soknad")
-               val søknad: ByteArray,
+               val søknad: Søknad,
                val saksnummer: String,
                @Column("journalpost_id")
                val journalpostId: String,
@@ -25,16 +25,11 @@ data class Sak(@Id
 
 object SakMapper {
     fun toDomain(sak: SakRequest): Sak {
-        return Sak(søknad = objectMapper.writeValueAsBytes(sak.søknad.søknad),
+        return Sak(søknad = sak.søknad.søknad,
                    saksnummer = sak.saksnummer,
                    journalpostId = sak.journalpostId,
                    søker = SøkerMapper.toDomain(sak.søknad.søknad),
                    barn = BarnMapper.toDomain(sak.søknad.søknad))
     }
 
-    fun toDto(sak: Sak): SakDto {
-        return SakDto(objectMapper.readValue(sak.søknad, Søknad::class.java),
-                      sak.saksnummer,
-                      sak.journalpostId)
-    }
 }
