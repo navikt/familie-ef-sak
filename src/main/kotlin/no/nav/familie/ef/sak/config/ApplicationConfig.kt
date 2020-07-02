@@ -11,12 +11,12 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Import
-import springfox.documentation.swagger2.annotations.EnableSwagger2WebMvc
+import springfox.documentation.swagger2.annotations.EnableSwagger2
 
 @SpringBootConfiguration
 @ConfigurationPropertiesScan
 @ComponentScan("no.nav.familie.ef.sak", "no.nav.familie.sikkerhet")
-@EnableSwagger2WebMvc
+@EnableSwagger2
 @EnableJwtTokenValidation(ignore = ["org.springframework", "springfox.documentation.swagger.web.ApiResourceController"])
 @Import(RestTemplateAzure::class, RestTemplateSts::class, StsRestClient::class)
 @EnableOAuth2Client(cacheEnabled = true)
