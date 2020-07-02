@@ -1,9 +1,7 @@
 package no.nav.familie.ef.sak.repository.domain
 
-import no.nav.familie.ef.sak.api.dto.SakDto
 import no.nav.familie.kontrakter.ef.sak.SakRequest
 import no.nav.familie.kontrakter.ef.søknad.Søknad
-import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded

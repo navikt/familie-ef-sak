@@ -22,6 +22,14 @@ internal class SakRepositoryTest : OppslagSpringRunnerTest() {
     @Autowired lateinit var customRepository: CustomRepository<Sak>
 
     @Test
+    fun `finner 1 sak når vi henter top 10`() {
+        opprettSak("1", "11111122222")
+
+        val saker = sakRepository.findTop10ByOrderBySporbar_OpprettetTidDesc()
+        assertThat(saker).hasSize(1)
+    }
+
+    @Test
     fun `finner 1 sak på fødselsnummer`() {
         opprettSak("1", "11111122222")
 
