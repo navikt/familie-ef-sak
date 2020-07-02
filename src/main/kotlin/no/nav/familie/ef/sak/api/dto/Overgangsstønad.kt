@@ -2,10 +2,8 @@ package no.nav.familie.ef.sak.api.dto
 
 import java.time.LocalDate
 import java.time.Month
-import java.util.*
 
-data class OvergangsstønadDto(val sakId: UUID,
-                              val aktivitet: AktivitetDto,
+data class OvergangsstønadDto(val aktivitet: AktivitetDto,
                               val sagtOppEllerRedusertStilling: SagtOppEllerRedusertStillingDto?)
 
 data class AktivitetDto(val arbeidssituasjon: List<String>,

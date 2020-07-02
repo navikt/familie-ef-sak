@@ -69,11 +69,11 @@ class PdlClientTest {
     @Test
     fun `pdlClient håndterer response for søkerKort-query mot pdl-tjenesten riktig`() {
         wireMockServer.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
-                                       .willReturn(okJson(readFile("søker_kort.json"))))
+                                       .willReturn(okJson(readFile("søker_kort_bolk.json"))))
 
-        val response = pdlClient.hentSøkerKort("")
+        val response = pdlClient.hentSøkerKortBolk(listOf("11111122222"))
 
-        assertThat(response.navn[0].fornavn).isEqualTo("BRÅKETE")
+        assertThat(response["11111122222"]!!.navn[0].fornavn).isEqualTo("BRÅKETE")
     }
 
     @Test

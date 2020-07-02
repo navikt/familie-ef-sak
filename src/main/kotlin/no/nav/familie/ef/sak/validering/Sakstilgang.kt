@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.validering
 import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.repository.SakRepository
+import no.nav.familie.ef.sak.repository.domain.Sak
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
@@ -30,7 +31,10 @@ class Sakstilgang(private val sakRepository: SakRepository,
 
     fun harTilgang(sakId: UUID): Boolean {
         val sak = sakRepository.findByIdOrNull(sakId) ?: error("sak finnes ikke: $sakId ")
+        return harTilgang(sak)
+    }
 
+    fun harTilgang(sak: Sak): Boolean {
         val relatertePersoner =
                 sak.barn.map { listOf(it.fødselsnummer, it.annenForelder?.fødselsnummer) }.flatten().filterNotNull()
 
@@ -44,4 +48,5 @@ class Sakstilgang(private val sakRepository: SakRepository,
                 }
         return true
     }
+
 }

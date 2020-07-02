@@ -1,0 +1,31 @@
+{
+  "data": {
+    "personBolk": [
+      {
+        "ident": "11111122222",
+        "code": "ok",
+        "person": {
+          "kjoenn": [
+            {
+              "kjoenn": "MANN"
+            }
+          ],
+          "navn": [
+            {
+              "fornavn": "BRÅKETE",
+              "mellomnavn": null,
+              "etternavn": "KAMELEON",
+              "metadata": {
+                "endringer": [
+                  {
+                    "registrert": "2020-01-01T09:00:00"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
