@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.api.gui
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.api.Feil
+import no.nav.familie.ef.sak.api.external.Testsøknad.søknad
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.dto.Tilgang
 import no.nav.familie.ef.sak.repository.SakRepository
@@ -66,7 +67,7 @@ internal class VedleggControllerTest {
                 .matches { (it as Feil).frontendFeilmelding == "Har ikke tilgang til saken" }
     }
 
-    private fun sak() = Sak(søknad = byteArrayOf(12),
+    private fun sak() = Sak(søknad = søknad,
                             saksnummer = "saksnummer",
                             søker = Søker("12345612345", "Navn"),
                             barn = setOf(Barn(fødselsdato = LocalDate.now(),

@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.api.external
 
 import no.nav.familie.ef.sak.api.dto.SakDto
 import no.nav.familie.ef.sak.service.SakService
+import no.nav.familie.ef.sak.validering.SakstilgangConstraint
 import no.nav.familie.kontrakter.ef.sak.SakRequest
 import no.nav.familie.kontrakter.ef.søknad.*
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -29,7 +30,6 @@ class SakController(private val sakService: SakService) {
 
     @PostMapping("dummy")
     fun dummy(): HttpStatus {
-
         val sak = SakRequest(SøknadMedVedlegg(Testsøknad.søknad, emptyList()), "123", "321")
         sakService.mottaSak(sak)
 
@@ -37,8 +37,8 @@ class SakController(private val sakService: SakService) {
     }
 
     @GetMapping("/{id}")
-    fun dummy(@PathVariable("id") id: UUID): Ressurs<SakDto> {
-        return Ressurs.success(sakService.hentSak(id))
+    fun dummy(@SakstilgangConstraint @PathVariable("id") id: UUID): Ressurs<SakDto> {
+        return Ressurs.success(sakService.hentSakDto(id))
     }
 
 }
@@ -161,8 +161,7 @@ internal object Testsøknad {
                     Søknadsfelt("Termindato", LocalDate.of(2020, 5, 16)),
                     dokumentfelt("Bekreftelse på ventet fødselsdato"),
                     Søknadsfelt("Barnets andre forelder",
-                                AnnenForelder(kanIkkeOppgiAnnenForelderFar = Søknadsfelt("Kan ikke oppgi", false),
-                                              person = Søknadsfelt("personalia", personMinimum()))),
+                                AnnenForelder(person = Søknadsfelt("personalia", personMinimum()))),
                     Søknadsfelt("samvær",
                                 Samvær(Søknadsfelt("Har du og den andre forelderen skriftlig avtale om delt bosted for barnet?",
                                                    true),

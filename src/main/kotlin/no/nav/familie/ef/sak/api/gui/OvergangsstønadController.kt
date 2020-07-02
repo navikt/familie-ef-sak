@@ -18,7 +18,8 @@ class OvergangsstøandController(private val overgangsstøandService: Overgangss
 
     @GetMapping("/{id}")
     fun dummy(@PathVariable("id") id: UUID): Ressurs<OvergangsstønadDto> {
-        return Ressurs.success(overgangsstøandService.hentOvergangsstønad(id));
+        return Ressurs.failure("ikke tilgang")
+        //return Ressurs.success(overgangsstøandService.lagOvergangsstønad(id))
     }
 
     @PostMapping("vurdering/aktivitetsplikt")

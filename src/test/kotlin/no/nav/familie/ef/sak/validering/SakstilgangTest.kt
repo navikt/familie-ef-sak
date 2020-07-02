@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.validering
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ef.sak.api.external.Testsøknad.søknad
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.dto.Tilgang
 import no.nav.familie.ef.sak.repository.SakRepository
@@ -26,7 +27,7 @@ internal class SakstilgangTest {
     fun setUp() {
         every { sakRepository.findByIdOrNull(any()) }
                 .returns(Sak(UUID.randomUUID(),
-                             byteArrayOf(0),
+                             søknad,
                              "1",
                              "1",
                              Sporbar(),

@@ -17,7 +17,8 @@ import no.nav.familie.ef.sak.repository.domain.Sak as Domenesak
 @Service
 class SakService(private val sakRepository: SakRepository,
                  private val customRepository: CustomRepository<Domenesak>,
-                 private val vedleggRepository: CustomRepository<Vedlegg>) {
+                 private val vedleggRepository: CustomRepository<Vedlegg>,
+                 private val overgangsstøandService: OvergangsstøandService) {
 
     val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
@@ -30,9 +31,17 @@ class SakService(private val sakRepository: SakRepository,
         return save.id
     }
 
-    fun hentSak(id: UUID): SakDto {
-        val sak = sakRepository.findByIdOrNull(id) ?: error("Ugyldig Primærnøkkel : $id")
-        return SakMapper.toDto(sak)
+    fun hentSak(id: UUID): Domenesak {
+        return sakRepository.findByIdOrNull(id) ?: error("Ugyldig Primærnøkkel : $id")
+    }
+
+    fun hentSakDto(id: UUID): SakDto {
+        val sak = hentSak(id)
+        return SakDto(id = sak.id,
+                      søknad = sak.søknad,
+                      saksnummer = sak.saksnummer,
+                      journalpostId = sak.journalpostId,
+                      overgangsstønad = overgangsstøandService.lagOvergangsstønad(sak.søknad))
     }
 
 }
