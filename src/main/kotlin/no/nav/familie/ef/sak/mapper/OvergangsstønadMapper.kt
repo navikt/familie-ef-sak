@@ -27,7 +27,10 @@ object OvergangsstønadMapper {
     }
 
     private fun tilVirksomhetDto(virksomhet: Virksomhet?): VirksomhetDto? =
-            virksomhet?.let { VirksomhetDto(virksomhetsbeskrivelse = it.virksomhetsbeskrivelse.verdi) }
+            virksomhet?.let {
+                VirksomhetDto(virksomhetsbeskrivelse = it.virksomhetsbeskrivelse.verdi,
+                              dokumentasjon = tilDokumentasjonDto(it.dokumentasjon))
+            }
 
     private fun tilAksjeselskapDto(aksjeselskaper: List<Aksjeselskap>?): List<AksjeselskapDto> =
             aksjeselskaper?.map {
@@ -59,7 +62,8 @@ object OvergangsstønadMapper {
                                 kanDuBegynneInnenEnUke = it.kanDuBegynneInnenEnUke.verdi,
                                 kanDuSkaffeBarnepassInnenEnUke = it.kanDuSkaffeBarnepassInnenEnUke?.verdi,
                                 hvorØnskerDuArbeid = it.hvorØnskerDuArbeid.verdi,
-                                ønskerDuMinst50ProsentStilling = it.ønskerDuMinst50ProsentStilling.verdi
+                                ønskerDuMinst50ProsentStilling = it.ønskerDuMinst50ProsentStilling.verdi,
+                                ikkeVilligTilÅTaImotTilbudOmArbeidDokumentasjon = tilDokumentasjonDto(it.ikkeVilligTilÅTaImotTilbudOmArbeidDokumentasjon)
                 )
             }
 
@@ -72,7 +76,7 @@ object OvergangsstønadMapper {
     private fun tilDokumentasjonDto(dokument: Søknadsfelt<Dokumentasjon>?) =
             dokument?.verdi?.let {
                 DokumentasjonDto(it.harSendtInnTidligere.verdi,
-                                 it.dokumenter.map { dokument ->VedleggDto(dokument.id, dokument.navn) })
+                                 it.dokumenter.map { dokument -> VedleggDto(dokument.id, dokument.navn) })
             }
 
     private fun tilUnderUtdanningDto(underUtdanning: UnderUtdanning?): UnderUtdanningDto? =
