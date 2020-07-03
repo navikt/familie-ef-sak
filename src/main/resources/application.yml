@@ -4,7 +4,7 @@ server:
   servlet:
     context-path: /
     multipart:
-      max-file-size: 20MB
+      max-file-size: 200MB
       max-request-size: 200MB
 
 no.nav.security.jwt:
