@@ -26,7 +26,7 @@ internal class SakServiceTest : OppslagSpringRunnerTest() {
         val sak = SakRequest(søknad = SøknadMedVedlegg(Testsøknad.søknad, vedlegg),
                              saksnummer = "saksnummer",
                              journalpostId = "journalpostId")
-        val sakId = sakService.mottaSak(sak)
+        val sakId = sakService.mottaSak(sak, emptyMap())
 
         val hentSak = sakService.hentSak(sakId)
         assertThat(hentSak.søknad.personalia).isNotNull
