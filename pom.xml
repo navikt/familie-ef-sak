@@ -43,7 +43,7 @@
         <flyway.version>6.5.0</flyway.version>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <nav.security.version>1.2.0</nav.security.version>
-        <postgres.version>42.2.14</postgres.version>
+        <postgres.version>42.2.14.jre7</postgres.version>
         <!--suppress UnresolvedMavenProperty Ligger som secret i github-->
         <spring.cloud>2.2.3.RELEASE</spring.cloud>
         <!--suppress UnresolvedMavenProperty -->
