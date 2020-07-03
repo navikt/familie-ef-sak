@@ -5,7 +5,7 @@ server:
     context-path: /
     multipart:
       max-file-size: 20MB
-      max-request-size: 21MB
+      max-request-size: 200MB
 
 no.nav.security.jwt:
   issuer.azuread:
