@@ -84,7 +84,7 @@ internal object Testsøknad {
                         Søknadsfelt("Når søker du stønad fra?", stønadsstart()))
 
     val vedleggId = "d5531f89-0079-4715-a337-9fd28f811f2f"
-    val vedlegg = listOf(Vedlegg(vedleggId, "vedlegg.pdf", "tittel", "filinnehold".toByteArray()))
+    val vedlegg = listOf(Vedlegg(vedleggId, "vedlegg.pdf", "tittel", null))
 
     private fun stønadsstart() = Stønadsstart(Søknadsfelt("Fra måned", Month.AUGUST),
                                               Søknadsfelt("Fra år", 2018),
