@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.validering.SakstilgangConstraint
 import no.nav.familie.kontrakter.ef.sak.SakRequest
 import no.nav.familie.kontrakter.ef.søknad.*
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.util.FnrGenerator
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
 import org.springframework.validation.annotation.Validated
@@ -154,7 +155,7 @@ internal object Testsøknad {
     @Suppress("LongLine")
     private fun folkeregisterbarn(): Barn {
         return Barn(Søknadsfelt("Navn", "Lykkeliten"),
-                    Søknadsfelt("Fødselsnummer", Fødselsnummer("31081953069")),
+                    Søknadsfelt("Fødselsnummer", Fødselsnummer(FnrGenerator.generer(1995))),
                     Søknadsfelt("Har samme adresse som søker", true),
                     Søknadsfelt("Har ikke samme adresse som søker beskrivelse", "Dette er en beskrivelse."),
                     Søknadsfelt("Er barnet født?", false),
@@ -236,7 +237,7 @@ internal object Testsøknad {
     }
 
     private fun personalia(): Personalia {
-        return Personalia(Søknadsfelt("Fødselsnummer", Fødselsnummer("24117938529")),
+        return Personalia(Søknadsfelt("Fødselsnummer", Fødselsnummer(FnrGenerator.generer())),
                           Søknadsfelt("Navn", "Kari Nordmann"),
                           Søknadsfelt("Statsborgerskap", "Norsk"),
                           adresseSøknadsfelt(),
