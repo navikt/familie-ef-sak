@@ -34,7 +34,7 @@
         <springfox.version>2.9.2</springfox.version>
         <mockk.version>1.10.0</mockk.version>
         <fasterxml.version>2.11.1</fasterxml.version>
-        <felles.version>1.20200703104246_d66d421</felles.version>
+        <felles.version>1.20200703124425_7e616f5</felles.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
         <kontrakter.version>2.0_20200701121339_752a034</kontrakter.version>
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
