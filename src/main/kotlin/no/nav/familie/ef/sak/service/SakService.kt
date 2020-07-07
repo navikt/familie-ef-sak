@@ -11,6 +11,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.util.*
 import no.nav.familie.ef.sak.repository.domain.Sak as Domenesak
 
@@ -22,12 +23,16 @@ class SakService(private val sakRepository: SakRepository,
 
     val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
-    fun mottaSak(sak: SakRequest): UUID {
+    @Transactional
+    fun mottaSak(sak: SakRequest, vedleggMap: Map<String, ByteArray>): UUID {
         val domenesak = SakMapper.toDomain(sak)
         val save = customRepository.persist(domenesak)
-        val vedlegg = sak.søknad.vedlegg.map { VedleggMapper.toDomain(save.id, it) }
-        vedlegg.forEach { vedleggRepository.persist(it) }
-        logger.info("lagret ${save.id} sammen med ${vedlegg.size} vedlegg")
+        val vedleggListe = sak.søknad.vedlegg.map {
+            val vedlegg = vedleggMap[it.id] ?: error("Finner ikke vedlegg ${it.id}")
+            VedleggMapper.toDomain(save.id, it, vedlegg)
+        }
+        vedleggListe.forEach { vedleggRepository.persist(it) }
+        logger.info("lagret ${save.id} sammen med ${vedleggListe.size} vedlegg")
         return save.id
     }
 

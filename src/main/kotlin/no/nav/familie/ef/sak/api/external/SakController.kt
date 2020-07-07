@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.api.external
 
+import no.nav.familie.ef.sak.api.dto.FeilDto
 import no.nav.familie.ef.sak.api.dto.SakDto
 import no.nav.familie.ef.sak.service.SakService
 import no.nav.familie.ef.sak.validering.SakstilgangConstraint
@@ -8,9 +9,13 @@ import no.nav.familie.kontrakter.ef.søknad.*
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.util.FnrGenerator
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
@@ -22,17 +27,37 @@ import java.util.*
 @Validated
 class SakController(private val sakService: SakService) {
 
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     @PostMapping("sendInn")
     fun sendInn(@RequestBody sak: SakRequest): HttpStatus {
-        sakService.mottaSak(sak)
+        sakService.mottaSak(sak.copy(søknad = sak.søknad.copy(vedlegg = sak.søknad.vedlegg.map { it.copy(bytes = null) })),
+                            sak.søknad.vedlegg.map { it.id to it.bytes!! }.toMap())
 
         return HttpStatus.CREATED
+    }
+
+    @PostMapping("sendInn", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    fun sendInn(@RequestPart("sak") sak: SakRequest,
+                @RequestPart("vedlegg") vedleggListe: List<MultipartFile>
+    ): ResponseEntity<Any> {
+        val vedleggMetadata = sak.søknad.vedlegg.map { it.id to it }.toMap()
+        val vedlegg = vedleggListe.map { it.originalFilename to it.bytes }.toMap()
+
+        if (vedleggMetadata.keys.size != vedlegg.keys.size || !vedleggMetadata.keys.containsAll(vedlegg.keys)) {
+            logger.error("Søknad savner: [{}], vedleggListe:[{}]",
+                         vedleggMetadata.keys.toMutableSet().removeAll(vedlegg.keys),
+                         vedlegg.keys.toMutableSet().removeAll(vedleggMetadata.keys))
+            return ResponseEntity.badRequest().body(FeilDto("Savner vedlegg, se logg for mer informasjon"))
+        }
+        sakService.mottaSak(sak, vedlegg)
+        return ResponseEntity.status(HttpStatus.CREATED).build()
     }
 
     @PostMapping("dummy")
     fun dummy(): HttpStatus {
         val sak = SakRequest(SøknadMedVedlegg(Testsøknad.søknad, emptyList()), "123", "321")
-        sakService.mottaSak(sak)
+        sakService.mottaSak(sak, emptyMap())
 
         return HttpStatus.CREATED
     }
@@ -58,7 +83,7 @@ internal object Testsøknad {
                         Søknadsfelt("Når søker du stønad fra?", stønadsstart()))
 
     val vedleggId = "d5531f89-0079-4715-a337-9fd28f811f2f"
-    val vedlegg = listOf(Vedlegg(vedleggId, "vedlegg.pdf", "tittel", "filinnehold".toByteArray()))
+    val vedlegg = listOf(Vedlegg(vedleggId, "vedlegg.pdf", "tittel", null))
 
     private fun stønadsstart() = Stønadsstart(Søknadsfelt("Fra måned", Month.AUGUST),
                                               Søknadsfelt("Fra år", 2018),
