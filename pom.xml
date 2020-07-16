@@ -31,7 +31,7 @@
         <jvmTarget>11</jvmTarget>
         <kotlin.version>1.3.72</kotlin.version>
         <kotlin-coroutines.version>1.3.7</kotlin-coroutines.version>
-        <springfox.version>2.9.2</springfox.version>
+        <springfox.version>2.10.5</springfox.version>
         <mockk.version>1.10.0</mockk.version>
         <fasterxml.version>2.11.1</fasterxml.version>
         <felles.version>1.20200703124425_7e616f5</felles.version>
