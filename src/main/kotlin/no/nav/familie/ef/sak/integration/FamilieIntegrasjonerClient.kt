@@ -10,7 +10,7 @@ import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
-import no.nav.familie.kontrakter.felles.personinfo.Ident
+import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Component
