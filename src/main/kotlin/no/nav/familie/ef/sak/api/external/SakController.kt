@@ -29,14 +29,6 @@ class SakController(private val sakService: SakService) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    @PostMapping("sendInn")
-    fun sendInn(@RequestBody sak: SakRequest): HttpStatus {
-        sakService.mottaSak(sak.copy(søknad = sak.søknad.copy(vedlegg = sak.søknad.vedlegg.map { it.copy(bytes = null) })),
-                            sak.søknad.vedlegg.map { it.id to it.bytes!! }.toMap())
-
-        return HttpStatus.CREATED
-    }
-
     @PostMapping("sendInn", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun sendInn(@RequestPart("sak") sak: SakRequest,
                 @RequestPart("vedlegg") vedleggListe: List<MultipartFile>
@@ -83,7 +75,7 @@ internal object Testsøknad {
                         Søknadsfelt("Når søker du stønad fra?", stønadsstart()))
 
     val vedleggId = "d5531f89-0079-4715-a337-9fd28f811f2f"
-    val vedlegg = listOf(Vedlegg(vedleggId, "vedlegg.pdf", "tittel", null))
+    val vedlegg = listOf(Vedlegg(vedleggId, "vedlegg.pdf", "tittel"))
 
     private fun stønadsstart() = Stønadsstart(Søknadsfelt("Fra måned", Month.AUGUST),
                                               Søknadsfelt("Fra år", 2018),
