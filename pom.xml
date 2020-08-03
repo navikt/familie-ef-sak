@@ -45,7 +45,7 @@
         <nav.security.version>1.2.0</nav.security.version>
         <postgres.version>42.2.14</postgres.version>
         <!--suppress UnresolvedMavenProperty Ligger som secret i github-->
-        <spring.cloud>2.2.3.RELEASE</spring.cloud>
+        <spring.cloud>2.2.4.RELEASE</spring.cloud>
         <!--suppress UnresolvedMavenProperty -->
         <sonar.login>${SONAR_LOGIN}</sonar.login>
     </properties>
