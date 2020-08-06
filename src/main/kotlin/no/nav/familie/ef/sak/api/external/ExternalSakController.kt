@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.api.external
 import no.nav.familie.ef.sak.api.ApiFeil
 import no.nav.familie.ef.sak.service.SakService
 import no.nav.familie.kontrakter.ef.sak.SakRequest
+import no.nav.familie.kontrakter.ef.sak.Skjemasak
 import no.nav.familie.kontrakter.ef.søknad.*
 import no.nav.familie.util.FnrGenerator
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -11,10 +12,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestPart
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -27,6 +25,12 @@ import java.time.Month
 class ExternalSakController(private val sakService: SakService) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
+
+    @PostMapping("arbeidssoker")
+    fun sendInn(@RequestBody skjemasak: Skjemasak): HttpStatus {
+        // TODO
+        return HttpStatus.INTERNAL_SERVER_ERROR
+    }
 
     @PostMapping("overgangsstonad", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun sendInnOvergangsstønad(@RequestPart("sak") sak: SakRequest<SøknadOvergangsstønad>,
