@@ -42,7 +42,7 @@
         <sonar.organization>navit</sonar.organization>
         <flyway.version>6.5.4</flyway.version>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <nav.security.version>1.2.0</nav.security.version>
+        <nav.security.version>1.3.0</nav.security.version>
         <postgres.version>42.2.14</postgres.version>
         <!--suppress UnresolvedMavenProperty Ligger som secret i github-->
         <spring.cloud>2.2.4.RELEASE</spring.cloud>
