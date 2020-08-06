@@ -22,7 +22,7 @@ internal class OvergangsstønadMapperTest {
         sjekkAtAlleVerdierErSatt(dto!!)
     }
 
-    private fun søknad(): Søknad {
+    private fun søknad(): SøknadOvergangsstønad {
         return søknad(aktivitet = aktivitet(), situasjon = situasjon())
     }
 

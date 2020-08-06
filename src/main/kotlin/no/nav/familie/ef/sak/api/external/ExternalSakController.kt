@@ -1,12 +1,9 @@
 package no.nav.familie.ef.sak.api.external
 
-import no.nav.familie.ef.sak.api.dto.FeilDto
-import no.nav.familie.ef.sak.api.dto.SakDto
+import no.nav.familie.ef.sak.api.ApiFeil
 import no.nav.familie.ef.sak.service.SakService
-import no.nav.familie.ef.sak.validering.SakstilgangConstraint
 import no.nav.familie.kontrakter.ef.sak.SakRequest
 import no.nav.familie.kontrakter.ef.søknad.*
-import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.util.FnrGenerator
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
@@ -14,65 +11,80 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestPart
+import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
-import java.util.*
 
 @RestController
-@RequestMapping(path = ["/api/sak"])
+@RequestMapping(path = ["/api/external/sak"])
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class SakController(private val sakService: SakService) {
+class ExternalSakController(private val sakService: SakService) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    @PostMapping("sendInn", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-    fun sendInn(@RequestPart("sak") sak: SakRequest,
-                @RequestPart("vedlegg") vedleggListe: List<MultipartFile>
-    ): ResponseEntity<Any> {
-        val vedleggMetadata = sak.søknad.vedlegg.map { it.id to it }.toMap()
-        val vedlegg = vedleggListe.map { it.originalFilename to it.bytes }.toMap()
+    @PostMapping("overgangsstonad", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    fun sendInnOvergangsstønad(@RequestPart("sak") sak: SakRequest<SøknadOvergangsstønad>,
+                               @RequestPart("vedlegg") vedleggListe: List<MultipartFile>): ResponseEntity<Any> {
+        val vedlegg = vedleggData(vedleggListe)
 
-        if (vedleggMetadata.keys.size != vedlegg.keys.size || !vedleggMetadata.keys.containsAll(vedlegg.keys)) {
-            logger.error("Søknad savner: [{}], vedleggListe:[{}]",
-                         vedleggMetadata.keys.toMutableSet().removeAll(vedlegg.keys),
-                         vedlegg.keys.toMutableSet().removeAll(vedleggMetadata.keys))
-            return ResponseEntity.badRequest().body(FeilDto("Savner vedlegg, se logg for mer informasjon"))
-        }
-        sakService.mottaSak(sak, vedlegg)
+        validerVedlegg(sak.søknad.vedlegg, vedlegg)
+        sakService.mottaSakOvergangsstønad(sak, vedlegg)
         return ResponseEntity.status(HttpStatus.CREATED).build()
+    }
+
+    @PostMapping("barnetilsyn", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    fun sendInnBarnetilsyn(@RequestPart("sak") sak: SakRequest<SøknadBarnetilsyn>,
+                           @RequestPart("vedlegg") vedleggListe: List<MultipartFile>): ResponseEntity<Any> {
+        val vedlegg = vedleggData(vedleggListe)
+
+        validerVedlegg(sak.søknad.vedlegg, vedlegg)
+        sakService.mottaSakBarnetilsyn(sak, vedlegg)
+        return ResponseEntity.status(HttpStatus.CREATED).build()
+    }
+
+    private fun vedleggData(vedleggListe: List<MultipartFile>) =
+            vedleggListe.map { it.originalFilename to it.bytes }.toMap()
+
+    private fun validerVedlegg(vedlegg: List<Vedlegg>,
+                               vedleggData: Map<String?, ByteArray>) {
+        val vedleggMetadata = vedlegg.map { it.id to it }.toMap()
+        if (vedleggMetadata.keys.size != vedleggData.keys.size || !vedleggMetadata.keys.containsAll(vedleggData.keys)) {
+            logger.error("Søknad savner: [{}], vedleggListe:[{}]",
+                         vedleggMetadata.keys.toMutableSet().removeAll(vedleggData.keys),
+                         vedleggData.keys.toMutableSet().removeAll(vedleggMetadata.keys))
+            throw ApiFeil("Savner vedlegg, se logg for mer informasjon", HttpStatus.BAD_REQUEST)
+        }
     }
 
     @PostMapping("dummy")
     fun dummy(): HttpStatus {
-        val sak = SakRequest(SøknadMedVedlegg(Testsøknad.søknad, emptyList()), "123", "321")
-        sakService.mottaSak(sak, emptyMap())
+        val sak = SakRequest<SøknadOvergangsstønad>(SøknadMedVedlegg(Testsøknad.søknad, emptyList()), "123", "321")
+        sakService.mottaSakOvergangsstønad(sak, emptyMap())
 
         return HttpStatus.CREATED
-    }
-
-    @GetMapping("/{id}")
-    fun dummy(@SakstilgangConstraint @PathVariable("id") id: UUID): Ressurs<SakDto> {
-        return Ressurs.success(sakService.hentSakDto(id))
     }
 
 }
 
 internal object Testsøknad {
 
-    val søknad = Søknad(Søknadsfelt("Søker", personalia()),
-                        Søknadsfelt("innsending", Innsendingsdetaljer(Søknadsfelt("Dato mottatt", LocalDateTime.now()))),
-                        Søknadsfelt("Detaljer om sivilstand", sivilstandsdetaljer()),
-                        Søknadsfelt("Opphold i Norge", medlemskapsdetaljer()),
-                        Søknadsfelt("Bosituasjonen din", bosituasjon()),
-                        Søknadsfelt("Sivilstandsplaner", sivilstandsplaner()),
-                        Søknadsfelt("Barn fra folkeregisteret", listOf(folkeregisterbarn())),
-                        Søknadsfelt("Arbeid, utdanning og andre aktiviteter", aktivitet()),
-                        Søknadsfelt("Mer om situasjonen din", situasjon()),
-                        Søknadsfelt("Når søker du stønad fra?", stønadsstart()))
+    val søknad = SøknadOvergangsstønad(Søknadsfelt("Søker", personalia()),
+                                       Søknadsfelt("innsending",
+                                                   Innsendingsdetaljer(Søknadsfelt("Dato mottatt", LocalDateTime.now()))),
+                                       Søknadsfelt("Detaljer om sivilstand", sivilstandsdetaljer()),
+                                       Søknadsfelt("Opphold i Norge", medlemskapsdetaljer()),
+                                       Søknadsfelt("Bosituasjonen din", bosituasjon()),
+                                       Søknadsfelt("Sivilstandsplaner", sivilstandsplaner()),
+                                       Søknadsfelt("Barn fra folkeregisteret", listOf(folkeregisterbarn())),
+                                       Søknadsfelt("Arbeid, utdanning og andre aktiviteter", aktivitet()),
+                                       Søknadsfelt("Mer om situasjonen din", situasjon()),
+                                       Søknadsfelt("Når søker du stønad fra?", stønadsstart()))
 
     val vedleggId = "d5531f89-0079-4715-a337-9fd28f811f2f"
     val vedlegg = listOf(Vedlegg(vedleggId, "vedlegg.pdf", "tittel"))

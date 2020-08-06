@@ -5,7 +5,7 @@ import no.nav.familie.kontrakter.ef.søknad.*
 
 object OvergangsstønadMapper {
 
-    fun tilAktivitetDto(søknad: Søknad, aktivitetsplikt: String?): AktivitetDto {
+    fun tilAktivitetDto(søknad: SøknadOvergangsstønad, aktivitetsplikt: String?): AktivitetDto {
         val aktivitet = søknad.aktivitet.verdi
         return AktivitetDto(aktivitetsplikt = aktivitetsplikt,
                             arbeidssituasjon = aktivitet.hvordanErArbeidssituasjonen.verdi,
@@ -35,13 +35,13 @@ object OvergangsstønadMapper {
     private fun tilAksjeselskapDto(aksjeselskaper: List<Aksjeselskap>?): List<AksjeselskapDto> =
             aksjeselskaper?.map {
                 AksjeselskapDto(navn = it.navn.verdi,
-                                arbeidsmengde = it.arbeidsmengde.verdi)
+                                arbeidsmengde = it.arbeidsmengde?.verdi)
             } ?: emptyList()
 
     private fun tilArbeidsforholdDto(arbedsgivere: List<Arbeidsgiver>?): List<ArbeidsforholdDto> =
             arbedsgivere?.map {
                 ArbeidsforholdDto(arbeidsgivernavn = it.arbeidsgivernavn.verdi,
-                                  arbeidsmengde = it.arbeidsmengde.verdi,
+                                  arbeidsmengde = it.arbeidsmengde?.verdi,
                                   fastEllerMidlertidig = it.fastEllerMidlertidig.verdi,
                                   sluttdato = it.sluttdato?.verdi)
             } ?: emptyList()
@@ -51,7 +51,7 @@ object OvergangsstønadMapper {
                 SelvstendigDto(firmanavn = it.firmanavn.verdi,
                                organisasjonsnummer = it.organisasjonsnummer.verdi,
                                etableringsdato = it.etableringsdato.verdi,
-                               arbeidsmengde = it.arbeidsmengde.verdi,
+                               arbeidsmengde = it.arbeidsmengde?.verdi,
                                hvordanSerArbeidsukenUt = it.hvordanSerArbeidsukenUt.verdi)
             }
 

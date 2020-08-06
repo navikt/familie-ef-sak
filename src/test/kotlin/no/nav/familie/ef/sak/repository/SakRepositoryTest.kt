@@ -7,6 +7,8 @@ import no.nav.familie.ef.sak.repository.SakRepository
 import no.nav.familie.ef.sak.repository.domain.Barn
 import no.nav.familie.ef.sak.repository.domain.Sak
 import no.nav.familie.ef.sak.repository.domain.Søker
+import no.nav.familie.ef.sak.repository.domain.SøknadType
+import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -51,7 +53,8 @@ internal class SakRepositoryTest : OppslagSpringRunnerTest() {
 
     private fun opprettSak(saksnummer: String, fødselsnummer: String) {
         customRepository.persist(Sak(
-                søknad = søknad,
+                søknad = objectMapper.writeValueAsBytes(søknad),
+                type = SøknadType.OVERGANGSSTØNAD,
                 saksnummer = saksnummer,
                 søker = Søker(fødselsnummer, "Navn"),
                 barn = setOf(Barn(fødselsdato = LocalDate.now(), harSammeAdresse = true, fødselsnummer = null, navn = "Navn")),

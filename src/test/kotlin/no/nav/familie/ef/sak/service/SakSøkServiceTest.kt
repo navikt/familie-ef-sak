@@ -9,8 +9,10 @@ import no.nav.familie.ef.sak.repository.SakRepository
 import no.nav.familie.ef.sak.repository.domain.Barn
 import no.nav.familie.ef.sak.repository.domain.Sak
 import no.nav.familie.ef.sak.repository.domain.Søker
+import no.nav.familie.ef.sak.repository.domain.SøknadType
 import no.nav.familie.ef.sak.validering.Sakstilgang
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -87,7 +89,8 @@ internal class SakSøkServiceTest {
     private fun sak(id: UUID, personIdent: String, barnIdent: String): Sak {
         return Sak(
                 id = id,
-                søknad = søknad,
+                søknad = objectMapper.writeValueAsBytes(søknad),
+                type = SøknadType.OVERGANGSSTØNAD,
                 saksnummer = "1",
                 søker = Søker(personIdent, "Navn"),
                 barn = setOf(Barn(fødselsdato = LocalDate.now(),
