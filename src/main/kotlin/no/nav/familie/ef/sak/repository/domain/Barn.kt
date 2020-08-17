@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.repository.domain
 
 import no.nav.familie.kontrakter.ef.søknad.Barn as KontraktBarn
-import no.nav.familie.kontrakter.ef.søknad.Søknad
+import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
 import java.time.LocalDate
@@ -16,7 +16,7 @@ data class Barn(val navn: String?,
                 val annenForelder: AnnenForelder? = null)
 
 object BarnMapper {
-    fun toDomain(søknad: Søknad): Set<Barn> {
+    fun toDomain(søknad: SøknadOvergangsstønad): Set<Barn> {
         return søknad.barn.verdi.map(this::toBarn).toSet()
 
     }

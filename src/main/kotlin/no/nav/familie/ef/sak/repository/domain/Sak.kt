@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.repository.domain
 
 import no.nav.familie.ef.sak.api.dto.SakDto
 import no.nav.familie.kontrakter.ef.sak.SakRequest
-import no.nav.familie.kontrakter.ef.søknad.Søknad
+import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
@@ -14,7 +14,7 @@ import java.util.*
 data class Sak(@Id
                val id: UUID = UUID.randomUUID(),
                @Column("soknad")
-               val søknad: Søknad,
+               val søknad: SøknadOvergangsstønad,
                val saksnummer: String,
                @Column("journalpost_id")
                val journalpostId: String,
@@ -24,7 +24,7 @@ data class Sak(@Id
                val barn: Set<Barn>)
 
 object SakMapper {
-    fun toDomain(sak: SakRequest): Sak {
+    fun toDomain(sak: SakRequest<SøknadOvergangsstønad>): Sak {
         return Sak(søknad = sak.søknad.søknad,
                    saksnummer = sak.saksnummer,
                    journalpostId = sak.journalpostId,

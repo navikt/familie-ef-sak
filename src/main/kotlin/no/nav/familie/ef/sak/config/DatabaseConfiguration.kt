@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.config
 
 import no.nav.familie.ef.sak.økonomi.domain.TilkjentYtelseStatus
-import no.nav.familie.kontrakter.ef.søknad.Søknad
+import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import org.springframework.context.annotation.Bean
@@ -64,13 +64,14 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
     }
 
     @WritingConverter
-    class SøknadTilByteArrayConverter : Converter<Søknad, ByteArray> {
-        override fun convert(source: Søknad): ByteArray = objectMapper.writeValueAsBytes(source)
+    class SøknadTilByteArrayConverter : Converter<SøknadOvergangsstønad, ByteArray> {
+        override fun convert(source: SøknadOvergangsstønad): ByteArray = objectMapper.writeValueAsBytes(source)
     }
 
     @ReadingConverter
-    class ByteArrayTilSøknadConverter : Converter<ByteArray, Søknad> {
-        override fun convert(source: ByteArray): Søknad = objectMapper.readValue(source, Søknad::class.java)
+    class ByteArrayTilSøknadConverter : Converter<ByteArray, SøknadOvergangsstønad> {
+        override fun convert(source: ByteArray): SøknadOvergangsstønad =
+                objectMapper.readValue(source, SøknadOvergangsstønad::class.java)
     }
 
 }
