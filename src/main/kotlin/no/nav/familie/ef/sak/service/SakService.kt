@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.repository.domain.SakMapper
 import no.nav.familie.ef.sak.repository.domain.Vedlegg
 import no.nav.familie.ef.sak.repository.domain.VedleggMapper
 import no.nav.familie.kontrakter.ef.sak.SakRequest
+import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
@@ -24,7 +25,7 @@ class SakService(private val sakRepository: SakRepository,
     val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
     @Transactional
-    fun mottaSak(sak: SakRequest, vedleggMap: Map<String, ByteArray>): UUID {
+    fun mottaSak(sak: SakRequest<SøknadOvergangsstønad>, vedleggMap: Map<String, ByteArray>): UUID {
         val domenesak = SakMapper.toDomain(sak)
         val save = customRepository.persist(domenesak)
         val vedleggListe = sak.søknad.vedlegg.map {

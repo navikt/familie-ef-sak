@@ -30,7 +30,7 @@ class SakController(private val sakService: SakService) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     @PostMapping("sendInn", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-    fun sendInn(@RequestPart("sak") sak: SakRequest,
+    fun sendInn(@RequestPart("sak") sak: SakRequest<SøknadOvergangsstønad>,
                 @RequestPart("vedlegg") vedleggListe: List<MultipartFile>
     ): ResponseEntity<Any> {
         val vedleggMetadata = sak.søknad.vedlegg.map { it.id to it }.toMap()
@@ -63,16 +63,17 @@ class SakController(private val sakService: SakService) {
 
 internal object Testsøknad {
 
-    val søknad = Søknad(Søknadsfelt("Søker", personalia()),
-                        Søknadsfelt("innsending", Innsendingsdetaljer(Søknadsfelt("Dato mottatt", LocalDateTime.now()))),
-                        Søknadsfelt("Detaljer om sivilstand", sivilstandsdetaljer()),
-                        Søknadsfelt("Opphold i Norge", medlemskapsdetaljer()),
-                        Søknadsfelt("Bosituasjonen din", bosituasjon()),
-                        Søknadsfelt("Sivilstandsplaner", sivilstandsplaner()),
-                        Søknadsfelt("Barn fra folkeregisteret", listOf(folkeregisterbarn())),
-                        Søknadsfelt("Arbeid, utdanning og andre aktiviteter", aktivitet()),
-                        Søknadsfelt("Mer om situasjonen din", situasjon()),
-                        Søknadsfelt("Når søker du stønad fra?", stønadsstart()))
+    val søknad = SøknadOvergangsstønad(Søknadsfelt("Søker", personalia()),
+                                       Søknadsfelt("innsending",
+                                                   Innsendingsdetaljer(Søknadsfelt("Dato mottatt", LocalDateTime.now()))),
+                                       Søknadsfelt("Detaljer om sivilstand", sivilstandsdetaljer()),
+                                       Søknadsfelt("Opphold i Norge", medlemskapsdetaljer()),
+                                       Søknadsfelt("Bosituasjonen din", bosituasjon()),
+                                       Søknadsfelt("Sivilstandsplaner", sivilstandsplaner()),
+                                       Søknadsfelt("Barn fra folkeregisteret", listOf(folkeregisterbarn())),
+                                       Søknadsfelt("Arbeid, utdanning og andre aktiviteter", aktivitet()),
+                                       Søknadsfelt("Mer om situasjonen din", situasjon()),
+                                       Søknadsfelt("Når søker du stønad fra?", stønadsstart()))
 
     val vedleggId = "d5531f89-0079-4715-a337-9fd28f811f2f"
     val vedlegg = listOf(Vedlegg(vedleggId, "vedlegg.pdf", "tittel"))
@@ -125,6 +126,14 @@ internal object Testsøknad {
                                                  Søknadsfelt("Hvor mye jobber du?", 150),
                                                  Søknadsfelt("Hvordan ser arbeidsuken din ut?",
                                                              "Veldig tung"))),
+                         Søknadsfelt("Om firmaet du driver",
+                                     listOf(Selvstendig(Søknadsfelt("Navn på firma", "Bobs burgers"),
+                                                 Søknadsfelt("Organisasjonsnummer", "987654321"),
+                                                 Søknadsfelt("Når etablerte du firmaet?",
+                                                             LocalDate.of(2018, 4, 5)),
+                                                 Søknadsfelt("Hvor mye jobber du?", 150),
+                                                 Søknadsfelt("Hvordan ser arbeidsuken din ut?",
+                                                             "Veldig tung")))),
                          Søknadsfelt("Om virksomheten du etablerer",
                                      Virksomhet(Søknadsfelt("Beskriv virksomheten",
                                                             "Den kommer til å revolusjonere verden"))),
