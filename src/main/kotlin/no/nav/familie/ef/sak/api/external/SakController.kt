@@ -61,7 +61,7 @@ class SakController(private val sakService: SakService) {
 
 }
 
-internal object Testsøknad {
+object Testsøknad {
 
     val søknad = Søknad(Søknadsfelt("Søker", personalia()),
                         Søknadsfelt("innsending", Innsendingsdetaljer(Søknadsfelt("Dato mottatt", LocalDateTime.now()))),
@@ -74,7 +74,7 @@ internal object Testsøknad {
                         Søknadsfelt("Mer om situasjonen din", situasjon()),
                         Søknadsfelt("Når søker du stønad fra?", stønadsstart()))
 
-    val vedleggId = "d5531f89-0079-4715-a337-9fd28f811f2f"
+    private const val vedleggId = "d5531f89-0079-4715-a337-9fd28f811f2f"
     val vedlegg = listOf(Vedlegg(vedleggId, "vedlegg.pdf", "tittel"))
 
     private fun stønadsstart() = Stønadsstart(Søknadsfelt("Fra måned", Month.AUGUST),
