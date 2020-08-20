@@ -4,17 +4,16 @@ import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.api.external.Testsøknad.søknad
 import no.nav.familie.ef.sak.repository.CustomRepository
 import no.nav.familie.ef.sak.repository.SakRepository
-import no.nav.familie.ef.sak.repository.domain.Barn
-import no.nav.familie.ef.sak.repository.domain.Sak
-import no.nav.familie.ef.sak.repository.domain.Søker
-import no.nav.familie.ef.sak.repository.domain.SøknadType
+import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
+import org.h2.util.MathUtils
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.TestPropertySource
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @ActiveProfiles("local", "mock-auth", "mock-oauth")
 @TestPropertySource(properties = ["FAMILIE_INTEGRASJONER_URL=http://localhost:28085"])
@@ -28,7 +27,24 @@ internal class SakRepositoryTest : OppslagSpringRunnerTest() {
         opprettSak("1", "11111122222")
 
         val saker = sakRepository.findTop10ByOrderBySporbar_OpprettetTidDesc()
+
         assertThat(saker).hasSize(1)
+    }
+
+    @Test
+    fun `finner 10 sorterte saker når vi henter top 10`() {
+        repeat(12) {
+            opprettSak("1", "11111122222")
+        }
+
+        val saker = sakRepository.findTop10ByOrderBySporbar_OpprettetTidDesc()
+
+        assertThat(saker).hasSize(10)
+        var forrigeSaksOpprettetTid = LocalDateTime.MAX
+        saker.forEach {
+            assertThat(it.sporbar.opprettetTid).isBefore(forrigeSaksOpprettetTid)
+            forrigeSaksOpprettetTid = it.sporbar.opprettetTid
+        }
     }
 
     @Test
@@ -66,7 +82,12 @@ internal class SakRepositoryTest : OppslagSpringRunnerTest() {
                 saksnummer = saksnummer,
                 søker = Søker(fødselsnummer, "Navn"),
                 barn = setOf(Barn(fødselsdato = LocalDate.now(), harSammeAdresse = true, fødselsnummer = null, navn = "Navn")),
-                journalpostId = "journalId$saksnummer"
+                journalpostId = "journalId$saksnummer",
+                sporbar = Sporbar(opprettetTid = LocalDateTime.of(MathUtils.randomInt(2020),
+                                                                  MathUtils.randomInt(11) + 1,
+                                                                  MathUtils.randomInt(27) + 1,
+                                                                  MathUtils.randomInt(23),
+                                                                  MathUtils.randomInt(59)))
         ))
     }
 }
