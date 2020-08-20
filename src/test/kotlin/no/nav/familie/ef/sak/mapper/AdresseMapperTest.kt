@@ -8,6 +8,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 internal class AdresseMapperTest {
+
     private val startdato = LocalDate.of(2020, 1, 1)
     private val sluttdato = startdato.plusDays(1)
 

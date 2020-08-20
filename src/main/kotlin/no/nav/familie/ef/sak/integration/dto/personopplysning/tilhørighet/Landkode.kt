@@ -7,6 +7,7 @@ data class Landkode(val kode: String) {
     }
 
     companion object {
+
         val UDEFINERT = Landkode("UDEFINERT")
         val NORGE = Landkode("NOR")
     }

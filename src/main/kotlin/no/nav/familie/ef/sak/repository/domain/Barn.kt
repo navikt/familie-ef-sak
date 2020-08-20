@@ -16,6 +16,7 @@ data class Barn(val navn: String?,
                 val annenForelder: AnnenForelder? = null)
 
 object BarnMapper {
+
     fun toDomain(barn: Søknadsfelt<List<KontraktBarn>>): Set<Barn> {
         return barn.verdi.map(this::toBarn).toSet()
 

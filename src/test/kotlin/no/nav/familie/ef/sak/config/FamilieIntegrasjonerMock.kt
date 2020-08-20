@@ -74,14 +74,14 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
 
     companion object {
         private val egenAnsatt = Ressurs.success(EgenAnsattResponse(false))
-        val poststed = KodeverkDto(mapOf("0575" to listOf(BetydningDto(LocalDate.MIN,
-                                                                       LocalDate.MAX,
-                                                                       mapOf("nb" to BeskrivelseDto(
+        private val poststed = KodeverkDto(mapOf("0575" to listOf(BetydningDto(LocalDate.MIN,
+                                                                               LocalDate.MAX,
+                                                                               mapOf("nb" to BeskrivelseDto(
                                                                                "OSLO",
                                                                                "OSLO"))))))
-        val land = KodeverkDto(mapOf("NOR" to listOf(BetydningDto(LocalDate.MIN,
-                                                                       LocalDate.MAX,
-                                                                       mapOf("nb" to BeskrivelseDto(
+        private val land = KodeverkDto(mapOf("NOR" to listOf(BetydningDto(LocalDate.MIN,
+                                                                          LocalDate.MAX,
+                                                                          mapOf("nb" to BeskrivelseDto(
                                                                                "NORGE",
                                                                                "NORGE"))))))
         private val kodeverkPoststed = Ressurs.success(poststed)

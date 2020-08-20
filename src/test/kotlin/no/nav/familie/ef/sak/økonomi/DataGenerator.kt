@@ -12,13 +12,13 @@ object DataGenerator {
     private fun tilfeldigFødselsnummer() = Random().nextInt(Int.MAX_VALUE).toString()
     private fun tilfeldigSaksnummer() = "SAK" + Random().nextInt(Int.MAX_VALUE)
 
-    fun flereTilfeldigeAndelerTilkjentYtelse(antall: Int): List<AndelTilkjentYtelse> =
+    private fun flereTilfeldigeAndelerTilkjentYtelse(antall: Int): List<AndelTilkjentYtelse> =
             (1..antall).map { tilfeldigAndelTilkjentYtelse() }.toList()
 
-    fun tilfeldigAndelTilkjentYtelse(beløp: Int = Random().nextInt(),
-                                     stønadFom: LocalDate = LocalDate.now(),
-                                     stønadTom: LocalDate = LocalDate.now(),
-                                     type: YtelseType = YtelseType.OVERGANGSSTØNAD) =
+    private fun tilfeldigAndelTilkjentYtelse(beløp: Int = Random().nextInt(),
+                                             stønadFom: LocalDate = LocalDate.now(),
+                                             stønadTom: LocalDate = LocalDate.now(),
+                                             type: YtelseType = YtelseType.OVERGANGSSTØNAD) =
             AndelTilkjentYtelse(beløp = beløp,
                                 stønadFom = stønadFom,
                                 stønadTom = stønadTom,

@@ -17,7 +17,6 @@ data class Vedlegg(@Id
                    val navn: String) {
 
 
-
     override fun toString(): String {
         return "Vedlegg(id=$id, sakId=$sakId, sporbar=$sporbar, navn='$navn')"
     }
@@ -48,6 +47,7 @@ data class Vedlegg(@Id
 }
 
 object VedleggMapper {
+
     fun toDomain(sakId: UUID, vedlegg: no.nav.familie.kontrakter.ef.søknad.Vedlegg, bytes: ByteArray): Vedlegg =
             Vedlegg(id = UUID.fromString(vedlegg.id), sakId = sakId, data = bytes, navn = vedlegg.navn)
 }

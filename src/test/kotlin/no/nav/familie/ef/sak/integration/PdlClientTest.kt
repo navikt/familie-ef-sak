@@ -73,7 +73,7 @@ class PdlClientTest {
 
         val response = pdlClient.hentSøkerKortBolk(listOf("11111122222"))
 
-        assertThat(response["11111122222"]!!.navn[0].fornavn).isEqualTo("BRÅKETE")
+        assertThat(response["11111122222"]?.navn?.get(0)?.fornavn).isEqualTo("BRÅKETE")
     }
 
     @Test
