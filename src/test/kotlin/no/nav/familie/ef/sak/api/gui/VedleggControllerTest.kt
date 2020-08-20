@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.repository.VedleggRepository
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.service.VedleggService
 import no.nav.familie.ef.sak.validering.Sakstilgang
+import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -40,7 +41,7 @@ internal class VedleggControllerTest {
     internal fun `kaster feil når man ikke finner vedlegget`() {
         every { vedleggRepository.findByIdOrNull(any()) } returns null
 
-        assertThat(Assertions.catchThrowable { vedleggController.hentVedlegg (vedleggId)})
+        assertThat(Assertions.catchThrowable { vedleggController.hentVedlegg(vedleggId) })
                 .isInstanceOf(Feil::class.java)
                 .extracting { (it as Feil).message }
                 .isEqualTo("Ugyldig Primærnøkkel: 6005812f-0713-4cf2-a223-e9dd0c83e9ed")
@@ -62,12 +63,13 @@ internal class VedleggControllerTest {
         every { sakRepository.findByIdOrNull(any()) } returns sak()
         every { integrasjonerClient.sjekkTilgangTilPersoner(any()) } returns listOf(Tilgang(false))
 
-        assertThat(Assertions.catchThrowable { vedleggController.hentVedlegg (UUID.randomUUID())})
+        assertThat(Assertions.catchThrowable { vedleggController.hentVedlegg(UUID.randomUUID()) })
                 .isInstanceOf(Feil::class.java)
                 .matches { (it as Feil).frontendFeilmelding == "Har ikke tilgang til saken" }
     }
 
-    private fun sak() = Sak(søknad = søknad,
+    private fun sak() = Sak(søknad = objectMapper.writeValueAsBytes(søknad),
+                            type = SøknadType.OVERGANGSSTØNAD,
                             saksnummer = "saksnummer",
                             søker = Søker("12345612345", "Navn"),
                             barn = setOf(Barn(fødselsdato = LocalDate.now(),

@@ -9,6 +9,8 @@ import no.nav.familie.ef.sak.repository.SakRepository
 import no.nav.familie.ef.sak.repository.domain.Sak
 import no.nav.familie.ef.sak.repository.domain.Sporbar
 import no.nav.familie.ef.sak.repository.domain.Søker
+import no.nav.familie.ef.sak.repository.domain.SøknadType
+import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -27,7 +29,8 @@ internal class SakstilgangTest {
     fun setUp() {
         every { sakRepository.findByIdOrNull(any()) }
                 .returns(Sak(UUID.randomUUID(),
-                             søknad,
+                             SøknadType.OVERGANGSSTØNAD,
+                             objectMapper.writeValueAsBytes(søknad),
                              "1",
                              "1",
                              Sporbar(),

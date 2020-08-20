@@ -4,9 +4,11 @@ import no.nav.familie.ef.sak.api.dto.SakDto
 import no.nav.familie.ef.sak.repository.CustomRepository
 import no.nav.familie.ef.sak.repository.SakRepository
 import no.nav.familie.ef.sak.repository.domain.SakMapper
+import no.nav.familie.ef.sak.repository.domain.SakWrapper
 import no.nav.familie.ef.sak.repository.domain.Vedlegg
 import no.nav.familie.ef.sak.repository.domain.VedleggMapper
 import no.nav.familie.kontrakter.ef.sak.SakRequest
+import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -25,8 +27,18 @@ class SakService(private val sakRepository: SakRepository,
     val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
     @Transactional
-    fun mottaSak(sak: SakRequest<SøknadOvergangsstønad>, vedleggMap: Map<String, ByteArray>): UUID {
-        val domenesak = SakMapper.toDomain(sak)
+    fun mottaSakOvergangsstønad(sak: SakRequest<SøknadOvergangsstønad>, vedleggMap: Map<String, ByteArray>): UUID {
+        return mottaSak(SakMapper.toDomain(sak.saksnummer, sak.journalpostId, sak.søknad.søknad), sak, vedleggMap)
+    }
+
+    @Transactional
+    fun mottaSakBarnetilsyn(sak: SakRequest<SøknadBarnetilsyn>, vedleggMap: Map<String, ByteArray>): UUID {
+        return mottaSak(SakMapper.toDomain(sak.saksnummer, sak.journalpostId, sak.søknad.søknad), sak, vedleggMap)
+    }
+
+    private fun <T> mottaSak(domenesak: no.nav.familie.ef.sak.repository.domain.Sak,
+                             sak: SakRequest<T>,
+                             vedleggMap: Map<String, ByteArray>): UUID {
         val save = customRepository.persist(domenesak)
         val vedleggListe = sak.søknad.vedlegg.map {
             val vedlegg = vedleggMap[it.id] ?: error("Finner ikke vedlegg ${it.id}")
@@ -37,17 +49,29 @@ class SakService(private val sakRepository: SakRepository,
         return save.id
     }
 
-    fun hentSak(id: UUID): Domenesak {
+    fun hentOvergangsstønad(id: UUID): SakWrapper<SøknadOvergangsstønad> {
+        val sak = hentSak(id)
+        return SakMapper.pakkOppOvergangsstønad(sak)
+    }
+
+    fun hentBarnetilsyn(id: UUID): SakWrapper<SøknadBarnetilsyn> {
+        val sak = hentSak(id)
+        return SakMapper.pakkOppBarnetisyn(sak)
+    }
+
+    private fun hentSak(id: UUID): Domenesak {
         return sakRepository.findByIdOrNull(id) ?: error("Ugyldig Primærnøkkel : $id")
     }
 
-    fun hentSakDto(id: UUID): SakDto {
-        val sak = hentSak(id)
+    fun hentOvergangsstønadDto(id: UUID): SakDto {
+        val sakWrapper = hentOvergangsstønad(id)
+        val sak = sakWrapper.sak
+        val søknad = sakWrapper.søknad
         return SakDto(id = sak.id,
-                      søknad = sak.søknad,
+                      søknad = søknad,
                       saksnummer = sak.saksnummer,
                       journalpostId = sak.journalpostId,
-                      overgangsstønad = overgangsstøandService.lagOvergangsstønad(sak.søknad))
+                      overgangsstønad = overgangsstøandService.lagOvergangsstønad(søknad))
     }
 
 }

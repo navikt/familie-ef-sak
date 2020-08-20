@@ -26,9 +26,9 @@ internal class SakServiceTest : OppslagSpringRunnerTest() {
         val sak = SakRequest(søknad = SøknadMedVedlegg(Testsøknad.søknad, vedlegg),
                              saksnummer = "saksnummer",
                              journalpostId = "journalpostId")
-        val sakId = sakService.mottaSak(sak, mapOf(vedlegg.first().id to "filinnehold".toByteArray()))
+        val sakId = sakService.mottaSakOvergangsstønad(sak, mapOf(vedlegg.first().id to "filinnehold".toByteArray()))
 
-        val hentSak = sakService.hentSak(sakId)
+        val hentSak = sakService.hentOvergangsstønad(sakId)
         assertThat(hentSak.søknad.personalia).isNotNull
         val hentetVedlegg = vedleggRepository.findByIdOrNull(UUID.fromString(vedlegg.first().id))!!
         assertThat(sakId).isEqualTo(hentetVedlegg.sakId)
