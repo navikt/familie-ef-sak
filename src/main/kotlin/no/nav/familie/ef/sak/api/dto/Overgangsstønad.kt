@@ -22,18 +22,18 @@ data class SagtOppEllerRedusertStillingDto(val sagtOppEllerRedusertStilling: Str
                                            val dokumentasjon: DokumentasjonDto?)
 
 data class ArbeidsforholdDto(val arbeidsgivernavn: String,
-                             val arbeidsmengde: Int,
+                             val arbeidsmengde: Int?,
                              val fastEllerMidlertidig: String,
                              val sluttdato: LocalDate?)
 
 data class SelvstendigDto(val firmanavn: String,
                           val organisasjonsnummer: String,
                           val etableringsdato: LocalDate,
-                          val arbeidsmengde: Int,
+                          val arbeidsmengde: Int?,
                           val hvordanSerArbeidsukenUt: String)
 
 data class AksjeselskapDto(val navn: String,
-                           val arbeidsmengde: Int)
+                           val arbeidsmengde: Int?)
 
 data class VirksomhetDto(val virksomhetsbeskrivelse: String, val dokumentasjon: DokumentasjonDto?)
 

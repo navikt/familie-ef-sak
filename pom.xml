@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.3.1.RELEASE</version>
+        <version>2.3.3.RELEASE</version>
     </parent>
     <repositories>
         <repository>
@@ -29,23 +29,23 @@
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <jvmTarget>11</jvmTarget>
-        <kotlin.version>1.3.72</kotlin.version>
-        <kotlin-coroutines.version>1.3.7</kotlin-coroutines.version>
-        <springfox.version>2.9.2</springfox.version>
+        <kotlin.version>1.4.0</kotlin.version>
+        <kotlin-coroutines.version>1.3.9</kotlin-coroutines.version>
+        <springfox.version>3.0.0</springfox.version>
         <mockk.version>1.10.0</mockk.version>
-        <fasterxml.version>2.11.1</fasterxml.version>
-        <felles.version>1.20200629134442_aadbfc0</felles.version>
+        <fasterxml.version>2.11.2</fasterxml.version>
+        <felles.version>1.20200724074856_d12948e</felles.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>2.0_20200701121339_752a034</kontrakter.version>
+        <kontrakter.version>2.0_20200817155303_17e0e62</kontrakter.version>
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
         <sonar.organization>navit</sonar.organization>
-        <flyway.version>6.5.0</flyway.version>
+        <flyway.version>6.5.5</flyway.version>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <nav.security.version>1.2.0</nav.security.version>
-        <postgres.version>42.2.14</postgres.version>
+        <nav.security.version>1.3.0</nav.security.version>
+        <postgres.version>42.2.15</postgres.version>
         <!--suppress UnresolvedMavenProperty Ligger som secret i github-->
-        <spring.cloud>2.2.3.RELEASE</spring.cloud>
+        <spring.cloud>2.2.4.RELEASE</spring.cloud>
         <!--suppress UnresolvedMavenProperty -->
         <sonar.login>${SONAR_LOGIN}</sonar.login>
     </properties>
@@ -145,6 +145,11 @@
         </dependency>
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
+            <artifactId>util</artifactId>
+            <version>${felles.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.familie.felles</groupId>
             <artifactId>http-client</artifactId>
             <version>${felles.version}</version>
         </dependency>
@@ -178,7 +183,7 @@
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
             <artifactId>wiremock-jre8</artifactId>
-            <version>2.27.0</version>
+            <version>2.27.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>

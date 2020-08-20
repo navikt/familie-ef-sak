@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.service
 
-import no.nav.familie.kontrakter.felles.kodeverk.hentGjelende
+import no.nav.familie.kontrakter.felles.kodeverk.hentGjeldende
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -8,10 +8,10 @@ import java.time.LocalDate
 class KodeverkService(private val cachedKodeverkService: CachedKodeverkService) {
 
     fun hentLand(landkode: String, gjeldendeDato: LocalDate): String? {
-        return cachedKodeverkService.hentLandkoder().hentGjelende(landkode, gjeldendeDato)
+        return cachedKodeverkService.hentLandkoder().hentGjeldende(landkode, gjeldendeDato)
     }
 
     fun hentPoststed(postnummer: String, gjeldendeDato: LocalDate): String? {
-        return cachedKodeverkService.hentPoststed().hentGjelende(postnummer, gjeldendeDato)
+        return cachedKodeverkService.hentPoststed().hentGjeldende(postnummer, gjeldendeDato)
     }
 }
