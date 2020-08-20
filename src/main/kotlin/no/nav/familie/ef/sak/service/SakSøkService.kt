@@ -20,7 +20,7 @@ class SakSøkService(private val sakRepository: SakRepository,
                     private val sakstilgang: Sakstilgang) {
 
     fun finnSaker(): Ressurs<SakSøkListeDto> {
-        val saker = sakRepository.findAll().filter(sakstilgang::harTilgang)
+        val saker = sakRepository.findTop10ByOrderBySporbar_OpprettetTidDesc().filter(sakstilgang::harTilgang)
         val personInfo = pdlClient.hentSøkerKortBolk(saker.map { it.søker.fødselsnummer })
         val søkListeDto = SakSøkListeDto(saker.map {
             val fnr = it.søker.fødselsnummer

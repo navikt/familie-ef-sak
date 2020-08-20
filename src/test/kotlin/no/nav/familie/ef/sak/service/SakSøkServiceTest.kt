@@ -38,7 +38,8 @@ internal class SakSøkServiceTest {
     @Test
     fun `skal ikke ha tilgang på sak`() {
         mockPdlHentSøkerKortBolk()
-        every { sakRepository.findAll() } returns listOf(sak(UUID.randomUUID(), "11111122222", "22222211111"))
+        every { sakRepository.findTop10ByOrderBySporbar_OpprettetTidDesc() } returns
+                listOf(sak(UUID.randomUUID(), "11111122222", "22222211111"))
 
         assertThat(sakSøkService.finnSaker().data!!.saker)
                 .hasSize(1)
