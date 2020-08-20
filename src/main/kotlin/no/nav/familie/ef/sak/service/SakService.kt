@@ -3,11 +3,13 @@ package no.nav.familie.ef.sak.service
 import no.nav.familie.ef.sak.api.dto.SakDto
 import no.nav.familie.ef.sak.repository.CustomRepository
 import no.nav.familie.ef.sak.repository.SakRepository
-import no.nav.familie.ef.sak.repository.domain.*
+import no.nav.familie.ef.sak.repository.domain.SakMapper
+import no.nav.familie.ef.sak.repository.domain.SakWrapper
+import no.nav.familie.ef.sak.repository.domain.Vedlegg
+import no.nav.familie.ef.sak.repository.domain.VedleggMapper
 import no.nav.familie.kontrakter.ef.sak.SakRequest
 import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
-import no.nav.familie.kontrakter.felles.objectMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull

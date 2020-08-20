@@ -76,7 +76,7 @@ class ExternalSakController(private val sakService: SakService) {
 
 }
 
-internal object Testsøknad {
+object Testsøknad {
 
     val søknad = SøknadOvergangsstønad(Søknadsfelt("Søker", personalia()),
                                        Søknadsfelt("innsending",
@@ -90,7 +90,7 @@ internal object Testsøknad {
                                        Søknadsfelt("Mer om situasjonen din", situasjon()),
                                        Søknadsfelt("Når søker du stønad fra?", stønadsstart()))
 
-    val vedleggId = "d5531f89-0079-4715-a337-9fd28f811f2f"
+    private const val vedleggId = "d5531f89-0079-4715-a337-9fd28f811f2f"
     val vedlegg = listOf(Vedlegg(vedleggId, "vedlegg.pdf", "tittel"))
 
     private fun stønadsstart() = Stønadsstart(Søknadsfelt("Fra måned", Month.AUGUST),
@@ -141,6 +141,14 @@ internal object Testsøknad {
                                                  Søknadsfelt("Hvor mye jobber du?", 150),
                                                  Søknadsfelt("Hvordan ser arbeidsuken din ut?",
                                                              "Veldig tung"))),
+                         Søknadsfelt("Om firmaet du driver",
+                                     listOf(Selvstendig(Søknadsfelt("Navn på firma", "Bobs burgers"),
+                                                 Søknadsfelt("Organisasjonsnummer", "987654321"),
+                                                 Søknadsfelt("Når etablerte du firmaet?",
+                                                             LocalDate.of(2018, 4, 5)),
+                                                 Søknadsfelt("Hvor mye jobber du?", 150),
+                                                 Søknadsfelt("Hvordan ser arbeidsuken din ut?",
+                                                             "Veldig tung")))),
                          Søknadsfelt("Om virksomheten du etablerer",
                                      Virksomhet(Søknadsfelt("Beskriv virksomheten",
                                                             "Den kommer til å revolusjonere verden"))),
