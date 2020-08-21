@@ -31,7 +31,8 @@ class ØkonomiKlient(@Value("\${FAMILIE_OPPDRAG_API_URL}")
     }
 
     fun grensesnittavstemOppdrag(fraDato: LocalDateTime, tilDato: LocalDateTime): ResponseEntity<Ressurs<String>> {
-        return operations.exchange(URI.create("$familieOppdragUri/api/grensesnittavstemming/$FAGSYSTEM/?fom=$fraDato&tom=$tilDato"),
+        return operations.exchange(URI.create("$familieOppdragUri/api/grensesnittavstemming/" +
+                                              "$FAGSYSTEM/?fom=$fraDato&tom=$tilDato"),
                                    HttpMethod.POST)
     }
 }

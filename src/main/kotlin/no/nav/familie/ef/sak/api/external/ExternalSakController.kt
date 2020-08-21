@@ -68,7 +68,7 @@ class ExternalSakController(private val sakService: SakService) {
 
     @PostMapping("dummy")
     fun dummy(): HttpStatus {
-        val sak = SakRequest<SøknadOvergangsstønad>(SøknadMedVedlegg(Testsøknad.søknad, emptyList()), "123", "321")
+        val sak = SakRequest(SøknadMedVedlegg(Testsøknad.søknad, emptyList()), "123", "321")
         sakService.mottaSakOvergangsstønad(sak, emptyMap())
 
         return HttpStatus.CREATED
@@ -143,12 +143,12 @@ object Testsøknad {
                                                              "Veldig tung"))),
                          Søknadsfelt("Om firmaet du driver",
                                      listOf(Selvstendig(Søknadsfelt("Navn på firma", "Bobs burgers"),
-                                                 Søknadsfelt("Organisasjonsnummer", "987654321"),
-                                                 Søknadsfelt("Når etablerte du firmaet?",
-                                                             LocalDate.of(2018, 4, 5)),
-                                                 Søknadsfelt("Hvor mye jobber du?", 150),
-                                                 Søknadsfelt("Hvordan ser arbeidsuken din ut?",
-                                                             "Veldig tung")))),
+                                                        Søknadsfelt("Organisasjonsnummer", "987654321"),
+                                                        Søknadsfelt("Når etablerte du firmaet?",
+                                                                    LocalDate.of(2018, 4, 5)),
+                                                        Søknadsfelt("Hvor mye jobber du?", 150),
+                                                        Søknadsfelt("Hvordan ser arbeidsuken din ut?",
+                                                                    "Veldig tung")))),
                          Søknadsfelt("Om virksomheten du etablerer",
                                      Virksomhet(Søknadsfelt("Beskriv virksomheten",
                                                             "Den kommer til å revolusjonere verden"))),

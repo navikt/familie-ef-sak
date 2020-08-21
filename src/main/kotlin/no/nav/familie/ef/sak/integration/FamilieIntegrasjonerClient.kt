@@ -12,7 +12,6 @@ import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
 import java.net.URI
@@ -54,7 +53,7 @@ class FamilieIntegrasjonerClient(@Qualifier("azure") restOperations: RestOperati
                 .queryParam("tomDato", LocalDate.now()).build().toUri()
 
         return postForEntity<Ressurs<PersonhistorikkInfo>>(uri,
-                                                          Ident(ident)).data!!
+                                                           Ident(ident)).data!!
     }
 
     fun egenAnsatt(ident: String): Boolean {

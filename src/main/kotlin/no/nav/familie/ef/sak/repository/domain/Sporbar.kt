@@ -13,6 +13,7 @@ data class Sporbar(@Column("opprettet_av")
                    val endretTid: LocalDateTime = LocalDateTime.now()) {
 
     companion object {
+
         private const val BRUKERNAVN_NÅR_SIKKERHETSKONTEKST_IKKE_FINNES = "VL"
         private fun finnBrukernavn(): String {
             val brukerident: String? = null // SikkerhetContext.hentSaksbehandler()

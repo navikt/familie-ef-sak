@@ -63,7 +63,8 @@ object OvergangsstønadMapper {
                                 kanDuSkaffeBarnepassInnenEnUke = it.kanDuSkaffeBarnepassInnenEnUke?.verdi,
                                 hvorØnskerDuArbeid = it.hvorØnskerDuArbeid.verdi,
                                 ønskerDuMinst50ProsentStilling = it.ønskerDuMinst50ProsentStilling.verdi,
-                                ikkeVilligTilÅTaImotTilbudOmArbeidDokumentasjon = tilDokumentasjonDto(it.ikkeVilligTilÅTaImotTilbudOmArbeidDokumentasjon)
+                                ikkeVilligTilÅTaImotTilbudOmArbeidDokumentasjon =
+                                tilDokumentasjonDto(it.ikkeVilligTilÅTaImotTilbudOmArbeidDokumentasjon)
                 )
             }
 

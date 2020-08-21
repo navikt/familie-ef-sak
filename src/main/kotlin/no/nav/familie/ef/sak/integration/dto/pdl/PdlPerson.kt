@@ -28,6 +28,7 @@ data class PersonBolk<T>(val personBolk: List<PersonDataBolk<T>>)
 data class PdlBolkResponse<T>(val data: PersonBolk<T>)
 
 interface PdlPerson {
+
     val fødsel: List<Fødsel>
     val bostedsadresse: List<Bostedsadresse>
 }

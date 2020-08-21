@@ -47,7 +47,7 @@ class TilkjentYtelseServiceTest {
         tilkjentYtelseService.opprettTilkjentYtelse(tilkjentYtelseDto)
 
         verify { tilkjentYtelseRepository.findByPersonident(tilkjentYtelse.personident) }
-        verify { customRepository.persist(slot.captured)}
+        verify { customRepository.persist(slot.captured) }
         assertThat(slot.captured).isEqualToIgnoringGivenFields(tilkjentYtelse, "id")
 
     }
@@ -126,7 +126,7 @@ class TilkjentYtelseServiceTest {
         val ytelseSlot = slot<TilkjentYtelse>()
         every { tilkjentYtelseRepository.findByIdOrNull(id) } returns originalTilkjentYtelse
         every { tilkjentYtelseRepository.save(avsluttetOriginalTilkjentYtelse) } returns avsluttetOriginalTilkjentYtelse
-        every { customRepository.persist(any<TilkjentYtelse>()) } returns opphørtTilkjentYtelse
+        every { customRepository.persist(any()) } returns opphørtTilkjentYtelse
         every { økonomiKlient.iverksettOppdrag(capture(utbetalingSlot)) } returns Ressurs.success("")
         every { tilkjentYtelseRepository.save(capture(ytelseSlot)) }
                 .returns(opphørtTilkjentYtelseSendtUtbetalingsoppdrag)
@@ -135,10 +135,11 @@ class TilkjentYtelseServiceTest {
 
         verify { tilkjentYtelseRepository.findByIdOrNull(id) }
         verify { tilkjentYtelseRepository.save(avsluttetOriginalTilkjentYtelse) }
-        verify { customRepository.persist(any<TilkjentYtelse>()) }
+        verify { customRepository.persist(any()) }
         verify { økonomiKlient.iverksettOppdrag(utbetalingSlot.captured) }
         verify { tilkjentYtelseRepository.save(ytelseSlot.captured) }
-        assertThat(ytelseSlot.captured).isEqualToIgnoringGivenFields(opphørtTilkjentYtelseSendtUtbetalingsoppdrag, "utbetalingsoppdrag")
+        assertThat(ytelseSlot.captured)
+                .isEqualToIgnoringGivenFields(opphørtTilkjentYtelseSendtUtbetalingsoppdrag, "utbetalingsoppdrag")
         assertThat(ytelseSlot.captured.utbetalingsoppdrag).isEqualToIgnoringGivenFields(utbetalingsoppdrag, "avstemmingTidspunkt")
         assertThat(utbetalingSlot.captured).isEqualToIgnoringGivenFields(utbetalingsoppdrag, "avstemmingTidspunkt")
     }
