@@ -21,6 +21,9 @@ import no.nav.familie.ef.sak.integration.dto.personopplysning.status.Personstatu
 import no.nav.familie.ef.sak.integration.dto.personopplysning.tilhørighet.Landkode
 import no.nav.familie.ef.sak.integration.dto.personopplysning.tilhørighet.StatsborgerskapPeriode
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.kodeverk.BeskrivelseDto
+import no.nav.familie.kontrakter.felles.kodeverk.BetydningDto
+import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Profile
@@ -51,7 +54,12 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                     .withQueryParam("fomDato", WireMock.equalTo(LocalDate.now().minusYears(5).toString()))
                     .willReturn(WireMock.okJson(objectMapper.writeValueAsString(personhistorikkInfo))),
             WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.tilgangUri.path))
-                    .willReturn(WireMock.okJson(objectMapper.writeValueAsString(listOf(Tilgang(true, null))))))
+                    .willReturn(WireMock.okJson(objectMapper.writeValueAsString(listOf(Tilgang(true, null))))),
+            WireMock.get(WireMock.urlEqualTo(integrasjonerConfig.kodeverkPoststedUri.path))
+                    .willReturn(WireMock.okJson(objectMapper.writeValueAsString(kodeverkPoststed))),
+            WireMock.get(WireMock.urlEqualTo(integrasjonerConfig.kodeverkLandkoderUri.path))
+                    .willReturn(WireMock.okJson(objectMapper.writeValueAsString(kodeverkLand)))
+    )
 
     @Bean("mock-integrasjoner")
     @Profile("mock-integrasjoner")
@@ -66,6 +74,18 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
 
     companion object {
         private val egenAnsatt = Ressurs.success(EgenAnsattResponse(false))
+        private val poststed = KodeverkDto(mapOf("0575" to listOf(BetydningDto(LocalDate.MIN,
+                                                                               LocalDate.MAX,
+                                                                               mapOf("nb" to BeskrivelseDto(
+                                                                               "OSLO",
+                                                                               "OSLO"))))))
+        private val land = KodeverkDto(mapOf("NOR" to listOf(BetydningDto(LocalDate.MIN,
+                                                                          LocalDate.MAX,
+                                                                          mapOf("nb" to BeskrivelseDto(
+                                                                               "NORGE",
+                                                                               "NORGE"))))))
+        private val kodeverkPoststed = Ressurs.success(poststed)
+        private val kodeverkLand = Ressurs.success(land)
         private val person = Ressurs.success(Personinfo(PersonIdent("12137578901"),
                                                         "Bob",
                                                         Adresseinfo(AdresseType.BOSTEDSADRESSE,

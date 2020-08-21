@@ -79,15 +79,15 @@ fun søknad(personalia: Søknadsfelt<Personalia> = mockk(),
            aktivitet: Søknadsfelt<Aktivitet> = mockk(),
            situasjon: Søknadsfelt<Situasjon> = mockk(),
            stønadsstart: Søknadsfelt<Stønadsstart> = mockk()) =
-        Søknad(personalia,
-               innsendingsdetaljer,
-               sivilstandsdetaljer,
-               medlemskapsdetaljer,
-               bosituasjon,
-               sivilstandsplaner,
-               barn,
-               aktivitet,
-               situasjon,
-               stønadsstart)
+        SøknadOvergangsstønad(personalia,
+                              innsendingsdetaljer,
+                              sivilstandsdetaljer,
+                              medlemskapsdetaljer,
+                              bosituasjon,
+                              sivilstandsplaner,
+                              barn,
+                              aktivitet,
+                              situasjon,
+                              stønadsstart)
 
 fun <T> søknadsfelt(verdi: T): Søknadsfelt<T> = Søknadsfelt("label", verdi)

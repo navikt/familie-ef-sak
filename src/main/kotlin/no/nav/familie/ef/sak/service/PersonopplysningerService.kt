@@ -1,6 +1,9 @@
 package no.nav.familie.ef.sak.service
 
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import no.nav.familie.ef.sak.api.dto.PersonopplysningerDto
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.dto.pdl.MotpartsRolle

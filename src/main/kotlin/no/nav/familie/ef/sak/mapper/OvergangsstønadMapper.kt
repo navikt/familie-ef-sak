@@ -5,7 +5,7 @@ import no.nav.familie.kontrakter.ef.søknad.*
 
 object OvergangsstønadMapper {
 
-    fun tilAktivitetDto(søknad: Søknad, aktivitetsplikt: String?): AktivitetDto {
+    fun tilAktivitetDto(søknad: SøknadOvergangsstønad, aktivitetsplikt: String?): AktivitetDto {
         val aktivitet = søknad.aktivitet.verdi
         return AktivitetDto(aktivitetsplikt = aktivitetsplikt,
                             arbeidssituasjon = aktivitet.hvordanErArbeidssituasjonen.verdi,
@@ -27,18 +27,21 @@ object OvergangsstønadMapper {
     }
 
     private fun tilVirksomhetDto(virksomhet: Virksomhet?): VirksomhetDto? =
-            virksomhet?.let { VirksomhetDto(virksomhetsbeskrivelse = it.virksomhetsbeskrivelse.verdi) }
+            virksomhet?.let {
+                VirksomhetDto(virksomhetsbeskrivelse = it.virksomhetsbeskrivelse.verdi,
+                              dokumentasjon = tilDokumentasjonDto(it.dokumentasjon))
+            }
 
     private fun tilAksjeselskapDto(aksjeselskaper: List<Aksjeselskap>?): List<AksjeselskapDto> =
             aksjeselskaper?.map {
                 AksjeselskapDto(navn = it.navn.verdi,
-                                arbeidsmengde = it.arbeidsmengde.verdi)
+                                arbeidsmengde = it.arbeidsmengde?.verdi)
             } ?: emptyList()
 
     private fun tilArbeidsforholdDto(arbedsgivere: List<Arbeidsgiver>?): List<ArbeidsforholdDto> =
             arbedsgivere?.map {
                 ArbeidsforholdDto(arbeidsgivernavn = it.arbeidsgivernavn.verdi,
-                                  arbeidsmengde = it.arbeidsmengde.verdi,
+                                  arbeidsmengde = it.arbeidsmengde?.verdi,
                                   fastEllerMidlertidig = it.fastEllerMidlertidig.verdi,
                                   sluttdato = it.sluttdato?.verdi)
             } ?: emptyList()
@@ -48,7 +51,7 @@ object OvergangsstønadMapper {
                 SelvstendigDto(firmanavn = it.firmanavn.verdi,
                                organisasjonsnummer = it.organisasjonsnummer.verdi,
                                etableringsdato = it.etableringsdato.verdi,
-                               arbeidsmengde = it.arbeidsmengde.verdi,
+                               arbeidsmengde = it.arbeidsmengde?.verdi,
                                hvordanSerArbeidsukenUt = it.hvordanSerArbeidsukenUt.verdi)
             }
 
@@ -59,7 +62,9 @@ object OvergangsstønadMapper {
                                 kanDuBegynneInnenEnUke = it.kanDuBegynneInnenEnUke.verdi,
                                 kanDuSkaffeBarnepassInnenEnUke = it.kanDuSkaffeBarnepassInnenEnUke?.verdi,
                                 hvorØnskerDuArbeid = it.hvorØnskerDuArbeid.verdi,
-                                ønskerDuMinst50ProsentStilling = it.ønskerDuMinst50ProsentStilling.verdi
+                                ønskerDuMinst50ProsentStilling = it.ønskerDuMinst50ProsentStilling.verdi,
+                                ikkeVilligTilÅTaImotTilbudOmArbeidDokumentasjon =
+                                tilDokumentasjonDto(it.ikkeVilligTilÅTaImotTilbudOmArbeidDokumentasjon)
                 )
             }
 
@@ -72,7 +77,7 @@ object OvergangsstønadMapper {
     private fun tilDokumentasjonDto(dokument: Søknadsfelt<Dokumentasjon>?) =
             dokument?.verdi?.let {
                 DokumentasjonDto(it.harSendtInnTidligere.verdi,
-                                 it.dokumenter.map { dokument ->VedleggDto(dokument.id, dokument.navn) })
+                                 it.dokumenter.map { dokument -> VedleggDto(dokument.id, dokument.navn) })
             }
 
     private fun tilUnderUtdanningDto(underUtdanning: UnderUtdanning?): UnderUtdanningDto? =

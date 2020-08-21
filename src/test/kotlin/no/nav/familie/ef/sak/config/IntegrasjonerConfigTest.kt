@@ -21,12 +21,12 @@ internal class IntegrasjonerConfigTest {
     @Test
     fun getPersonopplysninger() {
         assertThat(integrasjonerConfig.personopplysningerUri)
-                .isEqualTo(URI("http://familie-integrasjoner/api/personopplysning/v1/info"))
+                .isEqualTo(URI("http://familie-integrasjoner/api/personopplysning/v2/info"))
     }
 
     @Test
     fun getPersonhistorikk() {
         assertThat(integrasjonerConfig.personhistorikkUri)
-                .isEqualTo(URI("http://familie-integrasjoner/api/personopplysning/v1/historikk"))
+                .isEqualTo(URI("http://familie-integrasjoner/api/personopplysning/v2/historikk"))
     }
 }

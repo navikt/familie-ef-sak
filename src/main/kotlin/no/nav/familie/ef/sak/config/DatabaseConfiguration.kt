@@ -34,8 +34,8 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
         return JdbcCustomConversions(listOf(
                 UtbetalingsoppdragTilStringConverter(),
                 StringTilUtbetalingsoppdragConverter(),
-                TilkjentYtelseStatusTilStringConverter())
-        )
+                TilkjentYtelseStatusTilStringConverter()
+        ))
     }
 
     @WritingConverter
@@ -59,6 +59,5 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
         override fun convert(tilkjentYtelseStatus: TilkjentYtelseStatus) = tilkjentYtelseStatus.name
     }
-
 
 }

@@ -10,8 +10,8 @@ import java.time.LocalDate
 
 fun TilkjentYtelseDTO.tilTilkjentYtelse(status: TilkjentYtelseStatus = TilkjentYtelseStatus.OPPRETTET): TilkjentYtelse {
 
-    val minStønadFom = this.andelerTilkjentYtelse.map { it.stønadFom }.min() ?: LocalDate.MIN
-    val maxStønadTom = this.andelerTilkjentYtelse.map { it.stønadTom }.max() ?: LocalDate.MAX
+    val minStønadFom = this.andelerTilkjentYtelse.map { it.stønadFom }.minOrNull() ?: LocalDate.MIN
+    val maxStønadTom = this.andelerTilkjentYtelse.map { it.stønadTom }.maxOrNull() ?: LocalDate.MAX
 
     return TilkjentYtelse(personident = søker,
                           periodeIdStart = 0L,

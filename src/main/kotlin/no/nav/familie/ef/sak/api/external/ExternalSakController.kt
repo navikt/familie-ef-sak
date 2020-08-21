@@ -1,63 +1,97 @@
 package no.nav.familie.ef.sak.api.external
 
-import no.nav.familie.ef.sak.api.dto.SakDto
+import no.nav.familie.ef.sak.api.ApiFeil
 import no.nav.familie.ef.sak.service.SakService
 import no.nav.familie.kontrakter.ef.sak.SakRequest
+import no.nav.familie.kontrakter.ef.sak.Skjemasak
 import no.nav.familie.kontrakter.ef.søknad.*
-import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.util.FnrGenerator
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
-import java.util.*
 
 @RestController
-@RequestMapping(path = ["/api/sak"])
+@RequestMapping(path = ["/api/external/sak"])
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class SakController(private val sakService: SakService) {
+class ExternalSakController(private val sakService: SakService) {
 
-    @PostMapping("sendInn")
-    fun sendInn(@RequestBody sak: SakRequest): HttpStatus {
-        sakService.mottaSak(sak)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
-        return HttpStatus.CREATED
+    @PostMapping("arbeidssoker")
+    fun sendInn(@RequestBody skjemasak: Skjemasak): HttpStatus {
+        // TODO
+        return HttpStatus.INTERNAL_SERVER_ERROR
+    }
+
+    @PostMapping("overgangsstonad", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    fun sendInnOvergangsstønad(@RequestPart("sak") sak: SakRequest<SøknadOvergangsstønad>,
+                               @RequestPart("vedlegg") vedleggListe: List<MultipartFile>): ResponseEntity<Any> {
+        val vedlegg = vedleggData(vedleggListe)
+
+        validerVedlegg(sak.søknad.vedlegg, vedlegg)
+        sakService.mottaSakOvergangsstønad(sak, vedlegg)
+        return ResponseEntity.status(HttpStatus.CREATED).build()
+    }
+
+    @PostMapping("barnetilsyn", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    fun sendInnBarnetilsyn(@RequestPart("sak") sak: SakRequest<SøknadBarnetilsyn>,
+                           @RequestPart("vedlegg") vedleggListe: List<MultipartFile>): ResponseEntity<Any> {
+        val vedlegg = vedleggData(vedleggListe)
+
+        validerVedlegg(sak.søknad.vedlegg, vedlegg)
+        sakService.mottaSakBarnetilsyn(sak, vedlegg)
+        return ResponseEntity.status(HttpStatus.CREATED).build()
+    }
+
+    private fun vedleggData(vedleggListe: List<MultipartFile>) =
+            vedleggListe.map { it.originalFilename to it.bytes }.toMap()
+
+    private fun validerVedlegg(vedlegg: List<Vedlegg>,
+                               vedleggData: Map<String?, ByteArray>) {
+        val vedleggMetadata = vedlegg.map { it.id to it }.toMap()
+        if (vedleggMetadata.keys.size != vedleggData.keys.size || !vedleggMetadata.keys.containsAll(vedleggData.keys)) {
+            logger.error("Søknad savner: [{}], vedleggListe:[{}]",
+                         vedleggMetadata.keys.toMutableSet().removeAll(vedleggData.keys),
+                         vedleggData.keys.toMutableSet().removeAll(vedleggMetadata.keys))
+            throw ApiFeil("Savner vedlegg, se logg for mer informasjon", HttpStatus.BAD_REQUEST)
+        }
     }
 
     @PostMapping("dummy")
     fun dummy(): HttpStatus {
-
         val sak = SakRequest(SøknadMedVedlegg(Testsøknad.søknad, emptyList()), "123", "321")
-        sakService.mottaSak(sak)
+        sakService.mottaSakOvergangsstønad(sak, emptyMap())
 
         return HttpStatus.CREATED
     }
 
-    @GetMapping("/{id}")
-    fun dummy(@PathVariable("id") id: UUID): Ressurs<SakDto> {
-        return Ressurs.success(sakService.hentSak(id))
-    }
-
 }
 
-internal object Testsøknad {
+object Testsøknad {
 
-    val søknad = Søknad(Søknadsfelt("Søker", personalia()),
-                        Søknadsfelt("innsending", Innsendingsdetaljer(Søknadsfelt("Dato mottatt", LocalDateTime.now()))),
-                        Søknadsfelt("Detaljer om sivilstand", sivilstandsdetaljer()),
-                        Søknadsfelt("Opphold i Norge", medlemskapsdetaljer()),
-                        Søknadsfelt("Bosituasjonen din", bosituasjon()),
-                        Søknadsfelt("Sivilstandsplaner", sivilstandsplaner()),
-                        Søknadsfelt("Barn fra folkeregisteret", listOf(folkeregisterbarn())),
-                        Søknadsfelt("Arbeid, utdanning og andre aktiviteter", aktivitet()),
-                        Søknadsfelt("Mer om situasjonen din", situasjon()),
-                        Søknadsfelt("Når søker du stønad fra?", stønadsstart()))
+    val søknad = SøknadOvergangsstønad(Søknadsfelt("Søker", personalia()),
+                                       Søknadsfelt("innsending",
+                                                   Innsendingsdetaljer(Søknadsfelt("Dato mottatt", LocalDateTime.now()))),
+                                       Søknadsfelt("Detaljer om sivilstand", sivilstandsdetaljer()),
+                                       Søknadsfelt("Opphold i Norge", medlemskapsdetaljer()),
+                                       Søknadsfelt("Bosituasjonen din", bosituasjon()),
+                                       Søknadsfelt("Sivilstandsplaner", sivilstandsplaner()),
+                                       Søknadsfelt("Barn fra folkeregisteret", listOf(folkeregisterbarn())),
+                                       Søknadsfelt("Arbeid, utdanning og andre aktiviteter", aktivitet()),
+                                       Søknadsfelt("Mer om situasjonen din", situasjon()),
+                                       Søknadsfelt("Når søker du stønad fra?", stønadsstart()))
 
-    val vedleggId = "d5531f89-0079-4715-a337-9fd28f811f2f"
-    val vedlegg = listOf(Vedlegg(vedleggId, "vedlegg.pdf", "tittel", "filinnehold".toByteArray()))
+    private const val vedleggId = "d5531f89-0079-4715-a337-9fd28f811f2f"
+    val vedlegg = listOf(Vedlegg(vedleggId, "vedlegg.pdf", "tittel"))
 
     private fun stønadsstart() = Stønadsstart(Søknadsfelt("Fra måned", Month.AUGUST),
                                               Søknadsfelt("Fra år", 2018),
@@ -107,6 +141,14 @@ internal object Testsøknad {
                                                  Søknadsfelt("Hvor mye jobber du?", 150),
                                                  Søknadsfelt("Hvordan ser arbeidsuken din ut?",
                                                              "Veldig tung"))),
+                         Søknadsfelt("Om firmaet du driver",
+                                     listOf(Selvstendig(Søknadsfelt("Navn på firma", "Bobs burgers"),
+                                                        Søknadsfelt("Organisasjonsnummer", "987654321"),
+                                                        Søknadsfelt("Når etablerte du firmaet?",
+                                                                    LocalDate.of(2018, 4, 5)),
+                                                        Søknadsfelt("Hvor mye jobber du?", 150),
+                                                        Søknadsfelt("Hvordan ser arbeidsuken din ut?",
+                                                                    "Veldig tung")))),
                          Søknadsfelt("Om virksomheten du etablerer",
                                      Virksomhet(Søknadsfelt("Beskriv virksomheten",
                                                             "Den kommer til å revolusjonere verden"))),
@@ -154,15 +196,14 @@ internal object Testsøknad {
     @Suppress("LongLine")
     private fun folkeregisterbarn(): Barn {
         return Barn(Søknadsfelt("Navn", "Lykkeliten"),
-                    Søknadsfelt("Fødselsnummer", Fødselsnummer("31081953069")),
+                    Søknadsfelt("Fødselsnummer", Fødselsnummer(FnrGenerator.generer(1995))),
                     Søknadsfelt("Har samme adresse som søker", true),
                     Søknadsfelt("Har ikke samme adresse som søker beskrivelse", "Dette er en beskrivelse."),
                     Søknadsfelt("Er barnet født?", false),
                     Søknadsfelt("Termindato", LocalDate.of(2020, 5, 16)),
                     dokumentfelt("Bekreftelse på ventet fødselsdato"),
                     Søknadsfelt("Barnets andre forelder",
-                                AnnenForelder(kanIkkeOppgiAnnenForelderFar = Søknadsfelt("Kan ikke oppgi", false),
-                                              person = Søknadsfelt("personalia", personMinimum()))),
+                                AnnenForelder(person = Søknadsfelt("personalia", personMinimum()))),
                     Søknadsfelt("samvær",
                                 Samvær(Søknadsfelt("Har du og den andre forelderen skriftlig avtale om delt bosted for barnet?",
                                                    true),
@@ -237,7 +278,7 @@ internal object Testsøknad {
     }
 
     private fun personalia(): Personalia {
-        return Personalia(Søknadsfelt("Fødselsnummer", Fødselsnummer("24117938529")),
+        return Personalia(Søknadsfelt("Fødselsnummer", Fødselsnummer(FnrGenerator.generer())),
                           Søknadsfelt("Navn", "Kari Nordmann"),
                           Søknadsfelt("Statsborgerskap", "Norsk"),
                           adresseSøknadsfelt(),

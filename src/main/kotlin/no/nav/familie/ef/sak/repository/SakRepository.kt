@@ -16,5 +16,7 @@ interface SakRepository : CrudRepository<Sak, UUID> {
         WHERE soker.fodselsnummer = :fødselsnummer""")
     fun findBySøkerFødselsnummer(fødselsnummer: String): List<Sak>
 
+    fun findTop10ByOrderBySporbar_OpprettetTidDesc(): List<Sak>
+
 }
 

@@ -2,12 +2,10 @@ package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.api.external.Testsøknad
-import no.nav.familie.ef.sak.repository.SakRepository
 import no.nav.familie.ef.sak.repository.VedleggRepository
 import no.nav.familie.kontrakter.ef.sak.SakRequest
 import no.nav.familie.kontrakter.ef.søknad.SøknadMedVedlegg
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
@@ -28,9 +26,9 @@ internal class SakServiceTest : OppslagSpringRunnerTest() {
         val sak = SakRequest(søknad = SøknadMedVedlegg(Testsøknad.søknad, vedlegg),
                              saksnummer = "saksnummer",
                              journalpostId = "journalpostId")
-        val sakId = sakService.mottaSak(sak)
+        val sakId = sakService.mottaSakOvergangsstønad(sak, mapOf(vedlegg.first().id to "filinnehold".toByteArray()))
 
-        val hentSak = sakService.hentSak(sakId)
+        val hentSak = sakService.hentOvergangsstønad(sakId)
         assertThat(hentSak.søknad.personalia).isNotNull
         val hentetVedlegg = vedleggRepository.findByIdOrNull(UUID.fromString(vedlegg.first().id))!!
         assertThat(sakId).isEqualTo(hentetVedlegg.sakId)

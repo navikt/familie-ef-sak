@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.api.gui
 
 import no.nav.familie.ef.sak.api.dto.PersonIdentDto
 import no.nav.familie.ef.sak.api.gui.dto.Person
-import no.nav.familie.ef.sak.integration.dto.pdl.*
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker
 import no.nav.familie.ef.sak.service.PersonService
 import no.nav.familie.ef.sak.validering.PersontilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs

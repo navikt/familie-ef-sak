@@ -56,12 +56,12 @@ class PersonInfoControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `skal korrekt behandle returobjekt`() {
-        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo("/api/personopplysning/v1/info"))
+        WireMock.stubFor(WireMock.post(WireMock.urlEqualTo("/api/personopplysning/v2/info"))
                                  .willReturn(WireMock.aResponse()
                                                      .withStatus(200)
                                                      .withHeader("Content-Type", "application/json")
                                                      .withBody(objectMapper.writeValueAsString(person))))
-        WireMock.stubFor(WireMock.get(WireMock.urlPathEqualTo("/api/personopplysning/v1/historikk"))
+        WireMock.stubFor(WireMock.post(WireMock.urlPathEqualTo("/api/personopplysning/v2/historikk"))
                                  .willReturn(WireMock.aResponse()
                                                      .withStatus(200)
                                                      .withHeader("Content-Type", "application/json")
@@ -81,10 +81,10 @@ class PersonInfoControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `skal kaste feil hvis personinfo ikke funnet`() {
-        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo("/api/personopplysning/v1/info"))
+        WireMock.stubFor(WireMock.post(WireMock.urlEqualTo("/api/personopplysning/v2/info"))
                                  .willReturn(WireMock.aResponse()
                                                      .withStatus(404)))
-        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo("/api/personopplysning/v1/historikk"))
+        WireMock.stubFor(WireMock.post(WireMock.urlEqualTo("/api/personopplysning/v2/historikk"))
                                  .willReturn(WireMock.aResponse()
                                                      .withStatus(200)
                                                      .withHeader("Content-Type", "application/json")
@@ -101,12 +101,12 @@ class PersonInfoControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `skal kaste feil hvis personhistorikk ikke funnet`() {
-        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo("/api/personopplysning/v1/info"))
+        WireMock.stubFor(WireMock.post(WireMock.urlEqualTo("/api/personopplysning/v2/info"))
                                  .willReturn(WireMock.aResponse()
                                                      .withStatus(200)
                                                      .withHeader("Content-Type", "application/json")
                                                      .withBody(objectMapper.writeValueAsString(person))))
-        WireMock.stubFor(WireMock.get(WireMock.urlPathEqualTo("/api/personopplysning/v1/historikk"))
+        WireMock.stubFor(WireMock.post(WireMock.urlPathEqualTo("/api/personopplysning/v2/historikk"))
                                  .willReturn(WireMock.aResponse()
                                                      .withStatus(404)))
 

@@ -21,7 +21,7 @@ class VurderingService(private val sakService: SakService,
                        private val medlemskapRegelsett: MedlemskapRegelsett) {
 
     fun vurderMedlemskap(sakId: UUID): MedlemskapDto {
-        val sak = sakService.hentSak(sakId)
+        val sak = sakService.hentOvergangsstønad(sakId)
         val fnr = sak.søknad.personalia.verdi.fødselsnummer.verdi.verdi
         val pdlSøker = pdlClient.hentSøker(fnr)
         val medlemskapsinfo = integrasjonerClient.hentMedlemskapsinfo(fnr)

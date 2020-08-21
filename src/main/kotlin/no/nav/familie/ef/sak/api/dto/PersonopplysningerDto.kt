@@ -6,7 +6,8 @@ import java.time.LocalDate
 import no.nav.familie.ef.sak.integration.dto.pdl.Folkeregisterpersonstatus as PdlFolkeregisterpersonstatus
 
 /*
-Målform Målform skal mastres videre i KRR. Konsumenter som vil ha målform, må derfor gå direkte mot KRR for å få ut opplysningene. I en overgangsfase vil opplysningene fortsatt være tilgjengelig fra TPS.
+Målform Målform skal mastres videre i KRR. Konsumenter som vil ha målform, må derfor gå direkte mot KRR for å få ut opplysningene.
+ I en overgangsfase vil opplysningene fortsatt være tilgjengelig fra TPS.
 NAV-enhet
  */
 data class PersonopplysningerDto(val personIdent: String,
@@ -90,6 +91,7 @@ enum class Folkeregisterpersonstatus(private val pdlStatus: String) {
     UKJENT("ukjent");
 
     companion object {
+
         private val map = values().associateBy(Folkeregisterpersonstatus::pdlStatus)
         fun fraPdl(status: PdlFolkeregisterpersonstatus) = map.getOrDefault(status.status, UKJENT)
     }
@@ -109,6 +111,7 @@ data class NavnDto(val fornavn: String,
                    val visningsnavn: String) {
 
     companion object {
+
         fun fraNavn(navn: Navn): NavnDto = NavnDto(navn.fornavn, navn.mellomnavn, navn.etternavn, navn.visningsnavn())
     }
 }

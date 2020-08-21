@@ -2,10 +2,8 @@ package no.nav.familie.ef.sak.api.dto
 
 import java.time.LocalDate
 import java.time.Month
-import java.util.*
 
-data class OvergangsstønadDto(val sakId: UUID,
-                              val aktivitet: AktivitetDto,
+data class OvergangsstønadDto(val aktivitet: AktivitetDto,
                               val sagtOppEllerRedusertStilling: SagtOppEllerRedusertStillingDto?)
 
 data class AktivitetDto(val arbeidssituasjon: List<String>,
@@ -24,27 +22,28 @@ data class SagtOppEllerRedusertStillingDto(val sagtOppEllerRedusertStilling: Str
                                            val dokumentasjon: DokumentasjonDto?)
 
 data class ArbeidsforholdDto(val arbeidsgivernavn: String,
-                             val arbeidsmengde: Int,
+                             val arbeidsmengde: Int?,
                              val fastEllerMidlertidig: String,
                              val sluttdato: LocalDate?)
 
 data class SelvstendigDto(val firmanavn: String,
                           val organisasjonsnummer: String,
                           val etableringsdato: LocalDate,
-                          val arbeidsmengde: Int,
+                          val arbeidsmengde: Int?,
                           val hvordanSerArbeidsukenUt: String)
 
 data class AksjeselskapDto(val navn: String,
-                           val arbeidsmengde: Int)
+                           val arbeidsmengde: Int?)
 
-data class VirksomhetDto(val virksomhetsbeskrivelse: String)
+data class VirksomhetDto(val virksomhetsbeskrivelse: String, val dokumentasjon: DokumentasjonDto?)
 
 data class ArbeidssøkerDto(val registrertSomArbeidssøkerNav: Boolean,
                            val villigTilÅTaImotTilbudOmArbeid: Boolean,
                            val kanDuBegynneInnenEnUke: Boolean,
                            val kanDuSkaffeBarnepassInnenEnUke: Boolean?,
                            val hvorØnskerDuArbeid: String,
-                           val ønskerDuMinst50ProsentStilling: Boolean)
+                           val ønskerDuMinst50ProsentStilling: Boolean,
+                           val ikkeVilligTilÅTaImotTilbudOmArbeidDokumentasjon: DokumentasjonDto?)
 
 data class UnderUtdanningDto(val skoleUtdanningssted: String,
                              val utdanning: UtdanningDto,
