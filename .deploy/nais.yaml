@@ -1,0 +1,60 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: familie-ef-sak
+  namespace: teamfamilie
+  labels:
+    team: teamfamilie
+
+spec:
+  image: {{ image }}
+  liveness:
+    path: /internal/status/isAlive
+    initialDelay: 30
+    failureThreshold: 10
+  readiness:
+    path: /internal/status/isAlive
+    initialDelay: 30
+    failureThreshold: 10
+  prometheus:
+    enabled: true
+    path: /internal/prometheus
+  replicas:
+    min: 2
+    max: 4
+    cpuThresholdPercentage: 50
+  resources:
+    limits:
+      memory: 1024Mi
+      cpu: "1"
+    requests:
+      memory: 512Mi
+      cpu: 500m
+  secureLogs:
+    enabled: true
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_11
+        databases:
+          - name: familie-ef-sak
+            envVarPrefix: DB
+            diskAutoresize: true
+  accessPolicy:
+    inbound:
+      rules:
+        - application: familie-ef-sak-frontend
+    outbound:
+      external:
+        - { { #each externalHosts as |host|}}
+              - host: {{host } }
+            {{/each}}
+        - host: login.microsoftonline.com
+  env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: {{springProfile}}
+  envFrom:
+    - secret: familie-ef-sak
+    - secret: sts-apikey
+    - secret: pdl-apikey
+    - secret: familie-oppdrag-apikey
+    - secret: familie-integrasjoner-apikey

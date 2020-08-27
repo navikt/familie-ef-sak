@@ -11,7 +11,6 @@ no.nav.security.jwt:
   issuer.azuread:
     discoveryurl: ${AZUREAD_DISCOVERY_URL}
     accepted_audience: ${AZURE_CLIENT_ID}
-    proxyurl: http://webproxy-nais.nav.no:8088
     cookie_name: azure_token
   client:
     registration:
@@ -83,7 +82,9 @@ spring:
   flyway:
     enabled: true
   datasource:
-    url: jdbc:postgresql://A01DBVL010.adeo.no:5432/familie-ef-sak
+    url: jdbc:postgresql://${DB_HOST}:5432/familie-ef-sak
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     hikari:
       maximum-pool-size: 2
       connection-test-query: "select 1"
@@ -100,8 +101,7 @@ management:
   metrics.export.prometheus.enabled: true
   metrics.web.server.auto-time-requests: true
 
-AZUREAD_DISCOVERY_URL: https://login.microsoftonline.com/navno.onmicrosoft.com/v2.0/.well-known/openid-configuration
-AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navno.onmicrosoft.com/oauth2/v2.0/token
+
 FAMILIE_INTEGRASJONER_URL: http://familie-integrasjoner
 STS_PREFIX: ${STS_URL_ENV:http://security-token-service.default.svc.nais.local}
 STS_URL: ${STS_PREFIX}/rest/v1/sts/token?grant_type=client_credentials&scope=openid
@@ -110,7 +110,7 @@ PDL_URL: http://pdl-api
 FAMILIE_OPPDRAG_API_URL: http://familie-oppdrag
 INFOTRYGD_FEED_API_URL: https://familie-ef-infotrygd-feed.nais.adeo.no
 INFOTRYGD_REPLIKA_API_URL: https://infotrygd-enslig-forsoerger.nais.adeo.no
-FAMILIE_BREV_API_URL: https://familie-brev.intern.nav.no
+FAMILIE_BREV_API_URL: https://familie-brev
 
 FRONTEND_OPPGAVE_URL: https://ensligmorellerfar.prod-fss.nais.io/fagsak
 

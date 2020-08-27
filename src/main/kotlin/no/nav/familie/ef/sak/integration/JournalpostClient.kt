@@ -21,7 +21,7 @@ import java.net.URI
 
 
 @Component
-class JournalpostClient(@Qualifier("azure") restOperations: RestOperations,
+class JournalpostClient(@Qualifier("azureMedApiKey") restOperations: RestOperations,
                         integrasjonerConfig: IntegrasjonerConfig)
     : AbstractPingableRestClient(restOperations, "oppgave") {
 

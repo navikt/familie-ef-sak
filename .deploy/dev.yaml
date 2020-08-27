@@ -1,0 +1,5 @@
+ingress: https://familie-ef-sak.dev.intern.nav.no
+externalHosts:
+  - api-gw-q1.oera.no
+  - unleash.dev-adeo.no
+springProfile: dev

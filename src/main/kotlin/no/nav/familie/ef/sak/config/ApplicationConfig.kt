@@ -3,14 +3,17 @@ package no.nav.familie.ef.sak.config
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import no.nav.familie.http.config.RestTemplateAzure
 import no.nav.familie.http.config.RestTemplateSts
+import no.nav.familie.http.interceptor.ApiKeyInjectingClientInterceptor
 import no.nav.familie.http.interceptor.ConsumerIdClientInterceptor
 import no.nav.familie.http.interceptor.MdcValuesPropagatingClientInterceptor
+import no.nav.familie.http.interceptor.StsBearerTokenClientInterceptor
 import no.nav.familie.http.sts.StsRestClient
 import no.nav.familie.log.filter.LogFilter
 import no.nav.familie.log.filter.RequestTimeFilter
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import no.nav.security.token.support.spring.api.EnableJwtTokenValidation
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.SpringBootConfiguration
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan
 import org.springframework.boot.web.client.RestTemplateBuilder
@@ -18,8 +21,10 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Import
+import org.springframework.http.client.ClientHttpRequestInterceptor
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.web.client.RestOperations
+import java.net.URI
 
 @SpringBootConfiguration
 @ConfigurationPropertiesScan
@@ -58,5 +63,29 @@ class ApplicationConfig {
                      consumerIdClientInterceptor: ConsumerIdClientInterceptor): RestOperations {
         return restTemplateBuilder.additionalInterceptors(consumerIdClientInterceptor,
                                                           MdcValuesPropagatingClientInterceptor()).build()
+    }
+
+    @Bean
+    fun apiKeyInjectingClientInterceptor(@Value("\${PDL_API_APIKEY}") pdlApiKey: String,
+                                         @Value("\${PDL_API_URL}") pdlBaseUrl: String): ClientHttpRequestInterceptor {
+        val map = mapOf(Pair(URI.create(pdlBaseUrl), Pair(apiKeyHeader, pdlApiKey)))
+        return ApiKeyInjectingClientInterceptor(map)
+    }
+
+    @Bean("stsMedApiKey")
+    fun restTemplateSts(stsBearerTokenClientInterceptor: StsBearerTokenClientInterceptor,
+                        consumerIdClientInterceptor: ConsumerIdClientInterceptor,
+                        apiKeyInjectingClientInterceptor: ClientHttpRequestInterceptor
+    ): RestOperations {
+        return RestTemplateBuilder().additionalInterceptors(consumerIdClientInterceptor,
+                                                            stsBearerTokenClientInterceptor,
+                                                            apiKeyInjectingClientInterceptor,
+                                                            MdcValuesPropagatingClientInterceptor()
+        ).build()
+    }
+
+    companion object {
+
+        private const val apiKeyHeader = "x-nav-apiKey"
     }
 }

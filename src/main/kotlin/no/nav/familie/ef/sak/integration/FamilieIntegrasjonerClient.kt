@@ -18,7 +18,7 @@ import org.springframework.web.client.RestOperations
 import java.net.URI
 
 @Component
-class FamilieIntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
+class FamilieIntegrasjonerClient(@Qualifier("azureMedApiKey") restOperations: RestOperations,
                                  private val integrasjonerConfig: IntegrasjonerConfig)
     : AbstractPingableRestClient(restOperations, "familie.integrasjoner") {
 
