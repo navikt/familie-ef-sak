@@ -29,8 +29,6 @@ fun main(args: Array<String>) {
             .profiles("postgres",
                       "mock-integrasjoner",
                       "mock-pdl",
-                      "mock-oauth",
-                      "mock-auth",
                       "mock-kodeverk")
             .properties(properties)
             .run(*args)
