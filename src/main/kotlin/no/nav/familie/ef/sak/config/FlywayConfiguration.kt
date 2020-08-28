@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.flyway.FlywayConfigurationCustomiz
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Profile
 
 @ConfigurationProperties("spring.cloud.vault.database")
 @ConditionalOnProperty(name = ["spring.cloud.vault.enabled"])
