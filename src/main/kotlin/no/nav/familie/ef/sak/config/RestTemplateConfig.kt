@@ -82,7 +82,7 @@ class RestTemplateConfig(private val environment: Environment) {
     }
 
     private fun trengerProxy(): Boolean {
-        return !environment.activeProfiles.any {
+        return environment.activeProfiles.none {
             listOf("local", "postgres", "local-postgres").contains(it.trim(' '))
         }
     }
