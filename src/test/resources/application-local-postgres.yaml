@@ -1,0 +1,27 @@
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL_OVERRIDE}
+    username: ${SPRING_DATASOURCE_USERNAME_OVERRIDE}
+    password: ${SPRING_DATASOURCE_PASSWORD_OVERRIDE}
+    driver-class-name: ${SPRING_DATASOURCE_DRIVER_OVERRIDE}
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql=false
+    hibernate:
+      ddl-auto: none
+
+no.nav.security.jwt:
+  issuer.azuread:
+    discoveryurl: https://login.microsoftonline.com/navq.onmicrosoft.com/v2.0/.well-known/openid-configuration
+    accepted_audience: ${AZURE_CLIENT_ID}
+    cookie_name: azure_token
+    proxy_url: #Default satt, skal være null lokalt
+
+AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
+FAMILIE_INTEGRASJONER_URL: http://localhost:8085
+FAMILIE_OPPDRAG_API_URL: http://localhost:8087
+
+CREDENTIAL_USERNAME: not-a-real-srvuser
+CREDENTIAL_PASSWORD: not-a-real-pw

@@ -26,7 +26,7 @@ fun main(args: Array<String>) {
     properties["SPRING_DATASOURCE_DRIVER_OVERRIDE"] = "org.postgresql.Driver"
 
     SpringApplicationBuilder(ApplicationConfig::class.java)
-            .profiles("postgres",
+            .profiles("local-postgres",
                       "mock-integrasjoner",
                       "mock-pdl",
                       "mock-kodeverk")
