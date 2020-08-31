@@ -4,13 +4,6 @@ spring:
     username: ${SPRING_DATASOURCE_USERNAME_OVERRIDE}
     password: ${SPRING_DATASOURCE_PASSWORD_OVERRIDE}
     driver-class-name: ${SPRING_DATASOURCE_DRIVER_OVERRIDE}
-  jpa:
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql=false
-    hibernate:
-      ddl-auto: none
 
 no.nav.security.jwt:
   issuer.azuread:
