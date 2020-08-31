@@ -1,6 +1,9 @@
 # familie-integrasjoner
 App for saksbehandling av stønadene for enslige forsørgere.
 
+## Swagger
+http://localhost:8083/swagger-ui/index.html
+
 ## Bygging lokalt
 Appen kjører på JRE 11. Bygging gjøres ved å kjøre `mvn clean install`. 
 
