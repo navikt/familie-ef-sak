@@ -4,10 +4,15 @@ App for saksbehandling av stønadene for enslige forsørgere.
 ## Bygging lokalt
 Appen kjører på JRE 11. Bygging gjøres ved å kjøre `mvn clean install`. 
 
-## Kjøring og testing lokalt
+### Autentisering lokalt
+Dersom man vil gjøre autentiserte kall mot andre tjenester eller vil kjøre applikasjonen sammen med frontend, må man sette opp følgende miljø-variabler:
+* `AZURE_CLIENT_SECRET`
+* `AZURE_CLIENT_ID`
+* `EF_SAK_FRONTEND_CLIENT_ID`
+* Scope for den aktuelle tjenesten
 
-Dersom man vil gå mot endepunkter som krever autentisering lokalt, kan man få et testtoken ved å gå mot 
-`localhost:8093/local/jwt`.
+Alle disse variablene finnes i applikasjonens mappe for preprod-fss på vault. Merk at client id og client secret har andre navn i applikasjonens mappe. 
+Disse kan alternativt hentes fra azure-mappen i vault, der vil de ha riktig navn. Variablene legges inn under ApplicationLocal -> Edit Configurations -> Environment Variables. 
 
 ### Kjøring med in-memory-database
 For å kjøre opp appen lokalt, kan en kjøre `ApplicationLocal`.
@@ -20,11 +25,4 @@ For å kjøre opp appen lokalt med en postgres-database, kan en kjøre `Applicat
 App'en vil starte opp en container med siste versjon av postgres. 
 
 ## Produksjonssetting
-Hvis du skal deploye appen til prod, må du pushe en ny tag på master. Dette gjøres ved å kjøre tag-scriptet som ligger i 
-`.github`-mappen. Da spesifiserer du om du vil bumpe major eller minor, scriptet vil da bumpe med 1 opp fra nyeste tag. 
-
-Eksempelvis: 
-
-Nyeste tag er `v0.5`.`./tag.sh -M` vil da pushe tagen `v1.0`, og `./tag.sh -m` vil pushe tagen `v0.6`.
-
-Når en ny tag pushes, trigges github action workflowen som heter Deploy-Prod. 
+Applikasjonen vil deployes til produksjon ved ny commit på master-branchen. Det er dermed tilstrekkelig å merge PR for å trigge produksjonsbygget. 
