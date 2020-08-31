@@ -18,6 +18,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2
 @ComponentScan("no.nav.familie.ef.sak", "no.nav.familie.sikkerhet")
 @EnableSwagger2
 @EnableJwtTokenValidation(ignore = ["org.springframework", "springfox.documentation.swagger.web.ApiResourceController"])
+@Import(RestTemplateSts::class, StsRestClient::class)
 @EnableOAuth2Client(cacheEnabled = true)
 class ApplicationConfig {
 
