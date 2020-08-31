@@ -8,4 +8,4 @@ import org.springframework.context.annotation.Profile
 @Profile("integrasjonstest")
 @Import(TokenGeneratorConfiguration::class)
 @Configuration
-class ControllerTestConfig
+class IntegrasjonstestConfig
