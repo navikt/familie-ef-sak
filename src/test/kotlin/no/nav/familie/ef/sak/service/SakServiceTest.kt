@@ -13,7 +13,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.TestPropertySource
 import java.util.*
 
-@ActiveProfiles("local", "mock-auth", "mock-oauth")
+@ActiveProfiles("local", "mock-oauth")
 @TestPropertySource(properties = ["FAMILIE_INTEGRASJONER_URL=http://localhost:28085"])
 internal class SakServiceTest : OppslagSpringRunnerTest() {
 
