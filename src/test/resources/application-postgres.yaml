@@ -1,9 +1,3 @@
-no.nav.security.jwt:
-  issuer.azuread:
-    accepted_audience: aud-localhost
-    cookie_name: localhost-idtoken
-    proxyurl:
-
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/familie-ba-sak
@@ -19,17 +13,19 @@ spring:
 
   cloud:
     vault:
+      enabled: false
       database:
         role: postgres
 
+no.nav.security.jwt:
+  issuer.azuread:
+    discoveryurl: https://login.microsoftonline.com/navq.onmicrosoft.com/v2.0/.well-known/openid-configuration
+    accepted_audience: ${AZURE_CLIENT_ID}
+    cookie_name: azure_token
+    proxy_url: #Default satt, skal være null lokalt
 
-AAD_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
-
-AZUREAD_DISCOVERY_URL: http://metadata
 AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
 FAMILIE_INTEGRASJONER_URL: http://localhost:8085
-EF_SAK_FRONTEND_CLIENT_ID: DEV_azp
-EF_MOTTAK_CLIENT_ID: dummy
 FAMILIE_OPPDRAG_API_URL: http://localhost:8087
 
 CREDENTIAL_USERNAME: not-a-real-srvuser

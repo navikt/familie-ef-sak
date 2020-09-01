@@ -15,7 +15,7 @@ import org.springframework.test.context.TestPropertySource
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-@ActiveProfiles("local", "mock-auth", "mock-oauth")
+@ActiveProfiles("local", "mock-oauth")
 @TestPropertySource(properties = ["FAMILIE_INTEGRASJONER_URL=http://localhost:28085"])
 internal class SakRepositoryTest : OppslagSpringRunnerTest() {
 
