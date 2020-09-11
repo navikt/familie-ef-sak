@@ -161,7 +161,8 @@ data class Fødsel(@JsonProperty("foedselsaar") val fødselsår: Int?,
 data class Dødsfall(@JsonProperty("doedsdato") val dødsdato: LocalDate?)
 
 data class Familierelasjon(val relatertPersonsIdent: String,
-                           val relatertPersonsRolle: Familierelasjonsrolle,                           val minRolleForPerson: Familierelasjonsrolle?)
+                           val relatertPersonsRolle: Familierelasjonsrolle,
+                           val minRolleForPerson: Familierelasjonsrolle?)
 
 enum class Familierelasjonsrolle {
     BARN,

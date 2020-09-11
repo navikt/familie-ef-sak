@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.integration.dto.pdl.Familierelasjonsrolle
 import no.nav.familie.ef.sak.mapper.AleneomsorgMapper
 import no.nav.familie.ef.sak.mapper.MedlemskapMapper
+import no.nav.familie.ef.sak.repository.domain.SakMapper
 import no.nav.familie.ef.sak.vurdering.medlemskap.MedlemskapRegelsett
 import no.nav.familie.ef.sak.vurdering.medlemskap.Medlemskapsgrunnlag
 import no.nav.familie.ef.sak.vurdering.medlemskap.Medlemskapshistorikk
@@ -38,7 +39,7 @@ class VurderingService(private val sakService: SakService,
 
     fun vurderAleneomsorg(sakId: UUID): Aleneomsorg {
         val sak = sakService.hentSak(sakId)
-        val fnrSøker = sak.søknad.personalia.verdi.fødselsnummer.verdi.verdi
+        val fnrSøker = sak.søker.fødselsnummer
         val pdlSøker = pdlClient.hentSøker(fnrSøker)
 
 
@@ -49,8 +50,11 @@ class VurderingService(private val sakService: SakService,
                 .filter { it.value.fødsel.firstOrNull()?.fødselsdato != null }
                 .filter { it.value.fødsel.first().fødselsdato!!.plusYears(18).isAfter(LocalDate.now()) }
 
+        val overgangsstønad = SakMapper.pakkOppOvergangsstønad(sak)
         val barneforeldreFraSøknad =
-                sak.søknad.barn.verdi.mapNotNull { it.annenForelder?.verdi?.person?.verdi?.fødselsnummer?.verdi?.verdi }
+                overgangsstønad.søknad.barn.verdi.mapNotNull {
+                    it.annenForelder?.verdi?.person?.verdi?.fødselsnummer?.verdi?.verdi
+                }
 
         val barneforeldre = barn.map { it.value.familierelasjoner }
                 .flatten()
@@ -63,7 +67,7 @@ class VurderingService(private val sakService: SakService,
         return AleneomsorgMapper.tilDto(pdlSøker,
                                         barn,
                                         barneforeldre,
-                                        sak.søknad)
+                                        overgangsstønad.søknad)
     }
 
 

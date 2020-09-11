@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.api.gui
 
+import no.nav.familie.ef.sak.api.gui.dto.Aleneomsorg
 import no.nav.familie.ef.sak.api.gui.dto.MedlemskapDto
 import no.nav.familie.ef.sak.service.VurderingService
 import no.nav.familie.ef.sak.validering.SakstilgangConstraint
@@ -23,4 +24,10 @@ class VurderingController(val vurderingService: VurderingService) {
     fun getMedlemskapVurdering(@SakstilgangConstraint @PathVariable sakId: UUID): MedlemskapDto {
         return vurderingService.vurderMedlemskap(sakId)
     }
+
+    @GetMapping("{sakId}/aleneomsorg")
+    fun getAleneOmsorg(@SakstilgangConstraint @PathVariable sakId: UUID): Aleneomsorg {
+        return vurderingService.vurderAleneomsorg(sakId)
+    }
+
 }
