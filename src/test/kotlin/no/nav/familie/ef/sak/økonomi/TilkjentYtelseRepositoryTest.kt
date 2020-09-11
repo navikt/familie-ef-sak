@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.test.context.ActiveProfiles
 
-@ActiveProfiles("local", "mock-auth", "mock-oauth")
+@ActiveProfiles("local", "mock-oauth")
 @Tag("integration")
 internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
 

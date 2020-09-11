@@ -1,10 +1,11 @@
 package no.nav.familie.ef.sak.api.dto
 
 import java.time.LocalDate
-import java.time.Month
+import java.time.YearMonth
 
 data class OvergangsstønadDto(val aktivitet: AktivitetDto,
-                              val sagtOppEllerRedusertStilling: SagtOppEllerRedusertStillingDto?)
+                              val sagtOppEllerRedusertStilling: SagtOppEllerRedusertStillingDto?,
+                              val stønadsperiode: StønadsperiodeDto)
 
 data class AktivitetDto(val arbeidssituasjon: List<String>,
                         val arbeidsforhold: List<ArbeidsforholdDto>,
@@ -57,16 +58,10 @@ data class UnderUtdanningDto(val skoleUtdanningssted: String,
 data class UtdanningDto(val linjeKursGrad: String,
                         val nårVarSkalDuVæreElevStudent: PeriodeDto)
 
-data class PeriodeDto(val fraMåned: Month,
-                      val fraÅr: Int,
-                      val tilMåned: Month,
-                      val tilÅr: Int)
-
 data class SituasjonDto(val sykdom: DokumentasjonDto?,
                         val barnsSykdom: DokumentasjonDto?,
                         val manglendeBarnepass: DokumentasjonDto?,
                         val barnMedSærligeBehov: DokumentasjonDto?)
 
-data class DokumentasjonDto(val harSendtInn: Boolean, val vedlegg: List<VedleggDto>)
-
-data class VedleggDto(val id: String, val navn: String)
+data class StønadsperiodeDto(val resterendeAvHovedperiode: String,
+                             val søkerStønadFra: YearMonth?)

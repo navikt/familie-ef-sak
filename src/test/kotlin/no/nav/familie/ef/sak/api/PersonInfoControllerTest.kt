@@ -29,7 +29,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.TestPropertySource
 import java.time.LocalDate
 
-@ActiveProfiles("local", "mock-pdl", "mock-auth", "mock-oauth")
+@ActiveProfiles("local", "mock-pdl", "mock-oauth", "integrasjonstest")
 @TestPropertySource(properties = ["FAMILIE_INTEGRASJONER_URL=http://localhost:28085"])
 @AutoConfigureWireMock(port = 28085)
 class PersonInfoControllerTest : OppslagSpringRunnerTest() {

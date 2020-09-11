@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.mapper
 
 import no.nav.familie.ef.sak.api.dto.*
 import no.nav.familie.kontrakter.ef.søknad.*
+import java.time.YearMonth
 
 object OvergangsstønadMapper {
 
@@ -24,6 +25,17 @@ object OvergangsstønadMapper {
                                                årsak = situasjon.oppsigelseReduksjonÅrsak?.verdi,
                                                dato = situasjon.oppsigelseReduksjonTidspunkt?.verdi,
                                                dokumentasjon = tilDokumentasjonDto(situasjon.oppsigelseDokumentasjon))
+    }
+
+    fun tilStønadsperiode(stønadsstart: Stønadsstart): StønadsperiodeDto {
+        val søkerStønadFra = if (stønadsstart.fraMåned != null && stønadsstart.fraÅr != null)
+            YearMonth.of(stønadsstart.fraÅr!!.verdi, stønadsstart.fraMåned!!.verdi) else null
+        return StønadsperiodeDto(
+                // TODO - resterendeAvHovedperiode:
+                //  her må vi kanskje vite om det er en førstegangssøkere eller historikk fra tidligere søknader
+                resterendeAvHovedperiode = "Ikke implementert - Hovedperiode (36 mnd) minus tidligere brukt periode",
+                søkerStønadFra = søkerStønadFra
+        )
     }
 
     private fun tilVirksomhetDto(virksomhet: Virksomhet?): VirksomhetDto? =
@@ -95,11 +107,9 @@ object OvergangsstønadMapper {
 
     private fun tilUtdanningDto(utdanning: Utdanning): UtdanningDto =
             UtdanningDto(linjeKursGrad = utdanning.linjeKursGrad.verdi,
-                         nårVarSkalDuVæreElevStudent = tilPeriodeDto(utdanning.nårVarSkalDuVæreElevStudent.verdi))
+                         nårVarSkalDuVæreElevStudent = tilPeriodeÅrMånedDto(utdanning.nårVarSkalDuVæreElevStudent.verdi))
 
-    private fun tilPeriodeDto(periode: Periode): PeriodeDto =
-            PeriodeDto(fraMåned = periode.fraMåned,
-                       fraÅr = periode.fraÅr,
-                       tilMåned = periode.tilMåned,
-                       tilÅr = periode.tilÅr)
+    private fun tilPeriodeÅrMånedDto(periode: Periode): PeriodeDto =
+            PeriodeDto(fra = YearMonth.of(periode.fraÅr, periode.fraMåned),
+                       til = YearMonth.of(periode.tilÅr, periode.tilMåned))
 }

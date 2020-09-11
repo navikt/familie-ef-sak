@@ -18,7 +18,7 @@ import java.net.URI
 import java.time.LocalDate
 
 @Component
-class FamilieIntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
+class FamilieIntegrasjonerClient(@Qualifier("jwtBearer") restOperations: RestOperations,
                                  private val integrasjonerConfig: IntegrasjonerConfig)
     : AbstractPingableRestClient(restOperations, "familie.integrasjoner") {
 

@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
 
-@ActiveProfiles("local", "mock-auth", "mock-oauth", "mock-integrasjoner")
+@ActiveProfiles("local", "mock-oauth", "mock-integrasjoner")
 internal class KodeverkServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired lateinit var kodeverkService: KodeverkService

@@ -1,18 +1,13 @@
 package no.nav.familie.ef.sak
 
 import no.nav.familie.ef.sak.config.ApplicationConfig
-import no.nav.security.token.support.test.spring.TokenGeneratorConfiguration
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration
 import org.springframework.boot.builder.SpringApplicationBuilder
-import org.springframework.boot.context.properties.ConfigurationPropertiesScan
-import org.springframework.context.annotation.Import
 import org.testcontainers.containers.PostgreSQLContainer
 import java.util.*
 
 @SpringBootApplication(exclude = [ErrorMvcAutoConfiguration::class])
-@ConfigurationPropertiesScan
-@Import(TokenGeneratorConfiguration::class)
 class ApplicationLocalPostgres
 
 fun main(args: Array<String>) {
@@ -34,8 +29,6 @@ fun main(args: Array<String>) {
             .profiles("local-postgres",
                       "mock-integrasjoner",
                       "mock-pdl",
-                      "mock-oauth",
-                      "mock-auth",
                       "mock-kodeverk")
             .properties(properties)
             .run(*args)
