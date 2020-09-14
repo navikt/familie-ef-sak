@@ -38,7 +38,7 @@ class PersonInfoController(private val personService: PersonService) {
 
     @GetMapping("/soker") // TODO Testendepunkt. Fjernes etter hvert
     fun søkerinfo(@RequestHeader(name = "Nav-Personident") @PersontilgangConstraint ident: String): PdlSøker {
-        return personService.hentPdlPerson(ident)
+        return personService.hentSøker(ident)
     }
 
 }

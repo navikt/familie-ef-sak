@@ -23,7 +23,7 @@ class PersonopplysningerService(private val personService: PersonService,
     fun hentPersonopplysninger(ident: String): PersonopplysningerDto {
         return runBlocking {
             val egenAnsattDeferred = async { familieIntegrasjonerClient.egenAnsatt(ident) }
-            val søker = withContext(Dispatchers.Default) { personService.hentPdlPerson(ident) }
+            val søker = withContext(Dispatchers.Default) { personService.hentSøker(ident) }
 
             val fullmakter = søker.fullmakt.filter { it.motpartsRolle == MotpartsRolle.FULLMEKTIG }
 
@@ -38,6 +38,6 @@ class PersonopplysningerService(private val personService: PersonService,
     private fun hentNavn(identer: List<String>): Map<String, String> {
         if (identer.isEmpty()) return emptyMap()
         logger.info("Henter navn til {} personer", identer.size)
-        return personService.hentPdlPersonKort(identer).map { it.key to it.value.navn.gjeldende().visningsnavn() }.toMap()
+        return personService.hentPersonKort(identer).map { it.key to it.value.navn.gjeldende().visningsnavn() }.toMap()
     }
 }

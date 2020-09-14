@@ -1,9 +1,10 @@
 package no.nav.familie.ef.sak.integration
 
 import no.nav.familie.ef.sak.config.IntegrasjonerConfig
-import no.nav.familie.ef.sak.integration.dto.EgenAnsattRequest
-import no.nav.familie.ef.sak.integration.dto.EgenAnsattResponse
-import no.nav.familie.ef.sak.integration.dto.Tilgang
+import no.nav.familie.ef.sak.integration.dto.familie.Arbeidsfordelingsenhet
+import no.nav.familie.ef.sak.integration.dto.familie.EgenAnsattRequest
+import no.nav.familie.ef.sak.integration.dto.familie.EgenAnsattResponse
+import no.nav.familie.ef.sak.integration.dto.familie.Tilgang
 import no.nav.familie.ef.sak.integration.dto.personopplysning.PersonhistorikkInfo
 import no.nav.familie.ef.sak.integration.dto.personopplysning.Personinfo
 import no.nav.familie.http.client.AbstractPingableRestClient
@@ -11,8 +12,11 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
+import no.nav.familie.log.NavHttpHeaders
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Component
+import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestOperations
 import java.net.URI
 import java.time.LocalDate
@@ -40,6 +44,19 @@ class FamilieIntegrasjonerClient(@Qualifier("jwtBearer") restOperations: RestOpe
         return getForEntity<Ressurs<KodeverkDto>>(integrasjonerConfig.kodeverkPoststedUri).data!!
     }
 
+    fun hentNavEnhet(ident: String): List<Arbeidsfordelingsenhet> {
+        val uri = integrasjonerConfig.arbeidsfordelingUri
+        return try {
+            val response =
+                    getForEntity<Ressurs<List<Arbeidsfordelingsenhet>>>(uri, httpHeaders = HttpHeaders().medPersonident(ident))
+            response.data ?: throw IntegrasjonException("Objektet fra integrasjonstjenesten mot arbeidsfordeling er tomt",
+                                                        null,
+                                                        uri)
+        } catch (e: RestClientException) {
+            throw IntegrasjonException("Kall mot integrasjon feilet ved henting av arbeidsfordelingsenhet", e, uri)
+        }
+    }
+
     @Deprecated("bruk Pdl-løsning")
     fun hentPersonopplysninger(ident: String): Personinfo {
         return postForEntity<Ressurs<Personinfo>>(integrasjonerConfig.personopplysningerUri, Ident(ident)).data!!
@@ -59,5 +76,10 @@ class FamilieIntegrasjonerClient(@Qualifier("jwtBearer") restOperations: RestOpe
     fun egenAnsatt(ident: String): Boolean {
         return postForEntity<Ressurs<EgenAnsattResponse>>(integrasjonerConfig.egenAnsattUri,
                                                           EgenAnsattRequest(ident)).data!!.erEgenAnsatt
+    }
+
+    private fun HttpHeaders.medPersonident(personident: String): HttpHeaders {
+        this.add(NavHttpHeaders.NAV_PERSONIDENT.asString(), personident)
+        return this
     }
 }

@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.integration.dto
+package no.nav.familie.ef.sak.integration.dto.familie
 
 data class EgenAnsattRequest(val ident: String)
 

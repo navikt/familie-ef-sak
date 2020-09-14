@@ -3,8 +3,8 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.config
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import no.nav.familie.ef.sak.config.IntegrasjonerConfig
-import no.nav.familie.ef.sak.integration.dto.EgenAnsattResponse
-import no.nav.familie.ef.sak.integration.dto.Tilgang
+import no.nav.familie.ef.sak.integration.dto.familie.EgenAnsattResponse
+import no.nav.familie.ef.sak.integration.dto.familie.Tilgang
 import no.nav.familie.ef.sak.integration.dto.personopplysning.Periode
 import no.nav.familie.ef.sak.integration.dto.personopplysning.PersonIdent
 import no.nav.familie.ef.sak.integration.dto.personopplysning.PersonhistorikkInfo
