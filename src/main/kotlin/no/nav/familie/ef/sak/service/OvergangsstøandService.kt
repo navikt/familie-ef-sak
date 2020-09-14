@@ -12,6 +12,7 @@ class OvergangsstøandService {
         val aktivitetsplikt = null//TODO - denne kommer som ett resultat av inngangsvilkåret
         val sagtOppEllerRedusertStilling = OvergangsstønadMapper.tilSagtOppEllerRedusertStilling(søknad.situasjon.verdi)
         return OvergangsstønadDto(aktivitet = OvergangsstønadMapper.tilAktivitetDto(søknad, aktivitetsplikt),
-                                  sagtOppEllerRedusertStilling = sagtOppEllerRedusertStilling)
+                                  sagtOppEllerRedusertStilling = sagtOppEllerRedusertStilling,
+                                  stønadsperiode = OvergangsstønadMapper.tilStønadsperiode(søknad.stønadsstart.verdi))
     }
 }
