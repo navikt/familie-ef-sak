@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.integration
 
+import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.config.IntegrasjonerConfig
 import no.nav.familie.ef.sak.integration.dto.familie.Arbeidsfordelingsenhet
 import no.nav.familie.ef.sak.integration.dto.familie.EgenAnsattRequest
@@ -49,11 +50,9 @@ class FamilieIntegrasjonerClient(@Qualifier("jwtBearer") restOperations: RestOpe
         return try {
             val response =
                     getForEntity<Ressurs<List<Arbeidsfordelingsenhet>>>(uri, httpHeaders = HttpHeaders().medPersonident(ident))
-            response.data ?: throw IntegrasjonException("Objektet fra integrasjonstjenesten mot arbeidsfordeling er tomt",
-                                                        null,
-                                                        uri)
+            response.data ?: throw Feil("Objektet fra integrasjonstjenesten mot arbeidsfordeling er tomt uri=$uri")
         } catch (e: RestClientException) {
-            throw IntegrasjonException("Kall mot integrasjon feilet ved henting av arbeidsfordelingsenhet", e, uri)
+            throw Feil("Kall mot integrasjon feilet ved henting av arbeidsfordelingsenhet uri=$uri", e)
         }
     }
 

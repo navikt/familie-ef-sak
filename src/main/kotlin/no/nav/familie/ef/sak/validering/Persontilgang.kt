@@ -9,7 +9,8 @@ import javax.validation.ConstraintValidator
 import javax.validation.ConstraintValidatorContext
 
 @Component
-class Persontilgang(private val integrasjonerClient: FamilieIntegrasjonerClient, private val personService: PersonService)
+class Persontilgang(private val integrasjonerClient: FamilieIntegrasjonerClient,
+                    private val personService: PersonService)
     : ConstraintValidator<PersontilgangConstraint, PersonIdentDto> {
 
     private val logger = LoggerFactory.getLogger(this::class.java)

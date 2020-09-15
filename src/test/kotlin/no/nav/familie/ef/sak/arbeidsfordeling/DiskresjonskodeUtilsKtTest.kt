@@ -13,6 +13,7 @@ internal class DiskresjonskodeUtilsKtTest {
 
     @Test
     internal fun `finnPersonMedStrengesteAdressebeskyttelse - strengt fortrolig er høyest gradert`() {
+        verifiserPersonMedStrengesteAdressebeskyttelse("1", strengtFortrolig)
         verifiserPersonMedStrengesteAdressebeskyttelse("1", strengtFortrolig, fortrolig, savner)
         verifiserPersonMedStrengesteAdressebeskyttelse("1", fortrolig, savner, strengtFortrolig, ugradert)
         verifiserPersonMedStrengesteAdressebeskyttelse("1", fortrolig, savner, savner, strengtFortrolig)
@@ -20,6 +21,7 @@ internal class DiskresjonskodeUtilsKtTest {
 
     @Test
     internal fun `finnPersonMedStrengesteAdressebeskyttelse - strengt fortrolig er nest høyest gradert`() {
+        verifiserPersonMedStrengesteAdressebeskyttelse("2", fortrolig)
         verifiserPersonMedStrengesteAdressebeskyttelse("2", fortrolig, savner)
         verifiserPersonMedStrengesteAdressebeskyttelse("2", fortrolig, savner, ugradert)
         verifiserPersonMedStrengesteAdressebeskyttelse("2", savner, savner, fortrolig)
@@ -27,12 +29,13 @@ internal class DiskresjonskodeUtilsKtTest {
 
     @Test
     internal fun `finnPersonMedStrengesteAdressebeskyttelse - ugradert`() {
-        verifiserPersonMedStrengesteAdressebeskyttelse("3", ugradert, savner)
-        verifiserPersonMedStrengesteAdressebeskyttelse("3", fortrolig, ugradert)
-        verifiserPersonMedStrengesteAdressebeskyttelse("3", savner, ugradert)
+        verifiserPersonMedStrengesteAdressebeskyttelse(null, ugradert, savner)
+        verifiserPersonMedStrengesteAdressebeskyttelse(null, savner, ugradert)
+        verifiserPersonMedStrengesteAdressebeskyttelse(null, savner)
+        verifiserPersonMedStrengesteAdressebeskyttelse(null, ugradert)
     }
 
-    private fun verifiserPersonMedStrengesteAdressebeskyttelse(forventetIdent: String, vararg identer: IdentMedAdressebeskyttelse) {
+    private fun verifiserPersonMedStrengesteAdressebeskyttelse(forventetIdent: String?, vararg identer: IdentMedAdressebeskyttelse) {
         assertThat(finnPersonMedStrengesteAdressebeskyttelse(identer.toList())).isEqualTo(forventetIdent)
     }
 }

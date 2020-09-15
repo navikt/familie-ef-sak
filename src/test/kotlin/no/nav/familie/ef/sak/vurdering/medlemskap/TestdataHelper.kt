@@ -56,6 +56,20 @@ fun pdlSøker(adressebeskyttelse: List<Adressebeskyttelse> = mockk(),
                  utflyttingFraNorge,
                  vergemaalEllerFremtidsfullmakt)
 
+fun pdlBarn(adressebeskyttelse: List<Adressebeskyttelse> = mockk(),
+            bostedsadresse: List<Bostedsadresse> = mockk(),
+            deltBosted: List<DeltBosted> = mockk(),
+            dødsfall: List<Dødsfall> = mockk(),
+            familierelasjoner: List<Familierelasjon> = mockk(),
+            fødsel: List<Fødsel> = mockk(),
+            navn: List<Navn> = mockk()) =
+        PdlBarn(adressebeskyttelse,
+                bostedsadresse,
+                deltBosted,
+                dødsfall,
+                familierelasjoner,
+                fødsel,
+                navn)
 
 fun avvistePerioder(vararg perioder: Pair<LocalDate, LocalDate>) = perioder.map {
     PeriodeInfo(PeriodeStatus.AVST, null, it.first, it.second, true, "", null)

@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.service
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
+import no.nav.familie.ef.sak.integration.dto.familie.Arbeidsfordelingsenhet
 import no.nav.familie.ef.sak.mapper.AdresseMapper
 import no.nav.familie.ef.sak.mapper.PersonopplysningerMapper
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.config.KodeverkServiceMock
@@ -19,12 +20,14 @@ internal class PersonopplysningerServiceTest {
     private lateinit var personopplysningerService: PersonopplysningerService
     private lateinit var familieIntegrasjonerClient: FamilieIntegrasjonerClient
     private lateinit var adresseMapper: AdresseMapper
+    private lateinit var arbeidsfordelingService: ArbeidsfordelingService
 
     @BeforeEach
     internal fun setUp() {
         familieIntegrasjonerClient = mockk()
         adresseMapper = AdresseMapper(kodeverkService)
-        val personopplysningerMapper = PersonopplysningerMapper(adresseMapper, kodeverkService)
+        arbeidsfordelingService = mockk()
+        val personopplysningerMapper = PersonopplysningerMapper(adresseMapper, kodeverkService, arbeidsfordelingService)
         val personService = PersonService(mockk(), PdlClientConfig().pdlClient())
         personopplysningerService = PersonopplysningerService(personService,
                                                               familieIntegrasjonerClient,
@@ -34,6 +37,7 @@ internal class PersonopplysningerServiceTest {
     @Test
     internal fun `mapper pdlsøker til PersonopplysningerDto`() {
         every { familieIntegrasjonerClient.egenAnsatt(any()) } returns true
+        every { arbeidsfordelingService.hentNavEnhet(any()) } returns listOf(Arbeidsfordelingsenhet("1", "Enhet"))
         val søker = personopplysningerService.hentPersonopplysninger("11111122222")
         assertThat(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(søker))
                 .isEqualToIgnoringWhitespace("""{
@@ -80,7 +84,8 @@ internal class PersonopplysningerServiceTest {
     "motpartsPersonident" : "11111133333",
     "navn" : "11111133333 mellomnavn Etternavn"
   } ],
-  "egenAnsatt" : true
+  "egenAnsatt" : true,
+  "navEnhet" : "1 - Enhet"
 }""")
     }
 }

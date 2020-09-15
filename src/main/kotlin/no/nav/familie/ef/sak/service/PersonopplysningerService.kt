@@ -38,6 +38,6 @@ class PersonopplysningerService(private val personService: PersonService,
     private fun hentNavn(identer: List<String>): Map<String, String> {
         if (identer.isEmpty()) return emptyMap()
         logger.info("Henter navn til {} personer", identer.size)
-        return personService.hentPersonKort(identer).map { it.key to it.value.navn.gjeldende().visningsnavn() }.toMap()
+        return personService.hentPdlPersonKort(identer).map { it.key to it.value.navn.gjeldende().visningsnavn() }.toMap()
     }
 }
