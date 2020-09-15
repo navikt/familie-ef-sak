@@ -25,7 +25,7 @@ internal class PersonopplysningerServiceTest {
         familieIntegrasjonerClient = mockk()
         adresseMapper = AdresseMapper(kodeverkService)
         val personopplysningerMapper = PersonopplysningerMapper(adresseMapper, kodeverkService)
-        val personService = PersonService(mockk(), PdlClientConfig().pdlClient())
+        val personService = PersonService(PdlClientConfig().pdlClient())
         personopplysningerService = PersonopplysningerService(personService,
                                                               familieIntegrasjonerClient,
                                                               personopplysningerMapper)
