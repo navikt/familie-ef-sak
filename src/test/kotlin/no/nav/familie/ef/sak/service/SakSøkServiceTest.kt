@@ -55,7 +55,7 @@ internal class SakSøkServiceTest {
         every { sakRepository.findBySøkerFødselsnummer(any()) } returns emptyList()
         val sakSøk = sakSøkService.finnSakForPerson("")
         assertThat(sakSøk.status).isEqualTo(Ressurs.Status.FEILET)
-        assertThat(sakSøk.frontendFeilmelding).isEqualTo("Finner ikke noen sak på personen")
+        assertThat(sakSøk.frontendFeilmelding).contains("Finner ikke noen sak på person")
     }
 
     @Test

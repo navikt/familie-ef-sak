@@ -25,7 +25,15 @@ class PersonopplysningerController(private val personopplysningerService: Person
 
     @PostMapping
     fun personopplysninger(@PersontilgangConstraint @RequestBody personIdent: PersonIdentDto): Ressurs<PersonopplysningerDto> {
-        return Ressurs.success(personopplysningerService.hentPersonopplysninger(personIdent.personIdent))
+        return runCatching { personopplysningerService.hentPersonopplysninger(personIdent.personIdent) }
+                .fold(
+                        onSuccess = { Ressurs.success(it) },
+                        onFailure = {
+                            Ressurs.failure(frontendFeilmelding =
+                                            "Ukjent feil ved uthenting av personopplysninger for person ${personIdent.personIdent}",
+                                            error = it
+                            )
+                        }
+                )
     }
-
 }

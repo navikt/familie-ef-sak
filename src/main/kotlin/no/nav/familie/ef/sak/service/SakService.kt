@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.repository.domain.VedleggMapper
 import no.nav.familie.kontrakter.ef.sak.SakRequest
 import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
+import no.nav.familie.kontrakter.felles.Ressurs
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
@@ -63,15 +64,25 @@ class SakService(private val sakRepository: SakRepository,
         return sakRepository.findByIdOrNull(id) ?: error("Ugyldig Primærnøkkel : $id")
     }
 
-    fun hentOvergangsstønadDto(id: UUID): SakDto {
-        val sakWrapper = hentOvergangsstønad(id)
-        val sak = sakWrapper.sak
-        val søknad = sakWrapper.søknad
-        return SakDto(id = sak.id,
-                      søknad = søknad,
-                      saksnummer = sak.saksnummer,
-                      journalpostId = sak.journalpostId,
-                      overgangsstønad = overgangsstøandService.lagOvergangsstønad(søknad))
+    fun hentOvergangsstønadDto(id: UUID): Ressurs<SakDto> {
+        return runCatching {
+            val sakWrapper = hentOvergangsstønad(id)
+            val sak = sakWrapper.sak
+            val søknad = sakWrapper.søknad
+            SakDto(id = sak.id,
+                   søknad = søknad,
+                   saksnummer = sak.saksnummer,
+                   journalpostId = sak.journalpostId,
+                   overgangsstønad = overgangsstøandService.lagOvergangsstønad(søknad))
+        }.fold(
+                onSuccess = {
+                    Ressurs.success(it)
+                },
+                onFailure = {
+                    Ressurs.failure(frontendFeilmelding = "Klarte ikke hente sak for overgangsstønad med id $id",
+                                    error = it
+                    )
+                })
     }
 
 }

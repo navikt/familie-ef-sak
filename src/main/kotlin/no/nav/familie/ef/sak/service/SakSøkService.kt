@@ -32,15 +32,22 @@ class SakSøkService(private val sakRepository: SakRepository,
     fun finnSakForPerson(personIdent: String): Ressurs<SakSøkDto> {
         val saker = sakRepository.findBySøkerFødselsnummer(personIdent)
         return if (saker.isEmpty()) {
-            Ressurs.failure(frontendFeilmelding = "Finner ikke noen sak på personen")
+            Ressurs.failure(frontendFeilmelding = "Finner ikke noen sak på person $personIdent")
         } else {
             val søker = pdlClient.hentSøkerKortBolk(listOf(personIdent))[personIdent] ?: error("Finner ikke personinfo til søker")
             val sak = saker.first()
             val sakId = sak.id
             if (!sakstilgang.harTilgang(sak)) {
-                Ressurs.failure(frontendFeilmelding = "Har ikke tilgang til sak")
+                Ressurs.failure(frontendFeilmelding = "Har ikke tilgang til sak for person $personIdent")
             } else {
-                Ressurs.success(lagSakSøkDto(personIdent, sakId, søker))
+                runCatching { lagSakSøkDto(personIdent, sakId, søker) }
+                        .fold(
+                                onSuccess = { Ressurs.success(it) },
+                                onFailure = {
+                                    Ressurs.failure(frontendFeilmelding = "Ukjent feil ved uthenting av sak for person $personIdent",
+                                                    error = it)
+                                }
+                        )
             }
         }
     }

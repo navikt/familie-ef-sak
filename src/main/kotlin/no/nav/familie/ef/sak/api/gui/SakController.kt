@@ -20,7 +20,6 @@ class SakController(private val sakService: SakService) {
 
     @GetMapping("/{id}")
     fun hentSak(@SakstilgangConstraint @PathVariable("id") id: UUID): Ressurs<SakDto> {
-        return Ressurs.success(sakService.hentOvergangsstønadDto(id))
+        return sakService.hentOvergangsstønadDto(id)
     }
-
 }
