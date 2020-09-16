@@ -54,7 +54,7 @@ object AleneomsorgMapper {
         val pdlAnnenForelder = barneforeldre[fnr]
 
         val bostedsland = if (pdlAnnenForelder?.bostedsadresse != null) {
-            "NORGE"
+            pdlAnnenForelder.bostedsadresse.firstOrNull()?.utenlandskAdresse?.landkode ?: "NORGE"
         } else {
             pdlAnnenForelder?.oppholdsadresse?.firstOrNull()?.utenlandskAdresse?.landkode
             ?: barn.søknadsbarn.annenForelder?.verdi?.land?.verdi ?: "UKJENT"

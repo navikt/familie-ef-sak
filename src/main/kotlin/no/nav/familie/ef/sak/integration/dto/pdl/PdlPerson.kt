@@ -92,6 +92,7 @@ data class Folkeregistermetadata(val gyldighetstidspunkt: LocalDateTime?,
 data class Bostedsadresse(val angittFlyttedato: LocalDate?,
                           val coAdressenavn: String?,
                           val folkeregistermetadata: Folkeregistermetadata,
+                          val utenlandskAdresse: UtenlandskAdresse?,
                           val vegadresse: Vegadresse?,
                           val ukjentBosted: UkjentBosted?)
 

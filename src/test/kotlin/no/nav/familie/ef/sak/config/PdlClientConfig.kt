@@ -109,6 +109,7 @@ class PdlClientConfig {
             listOf(Bostedsadresse(angittFlyttedato = startdato,
                                   folkeregistermetadata = Folkeregistermetadata(gyldighetstidspunkt = LocalDateTime.now(),
                                                                                 opphørstidspunkt = startdato.atStartOfDay()),
+                                  utenlandskAdresse = null,
                                   coAdressenavn = "CONAVN",
                                   vegadresse = vegadresse(),
                                   ukjentBosted = null))
