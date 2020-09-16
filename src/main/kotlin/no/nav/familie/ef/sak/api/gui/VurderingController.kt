@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.api.gui.dto.Aleneomsorg
 import no.nav.familie.ef.sak.api.gui.dto.MedlemskapDto
 import no.nav.familie.ef.sak.service.VurderingService
 import no.nav.familie.ef.sak.validering.SakstilgangConstraint
+import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
@@ -21,13 +22,13 @@ import java.util.*
 class VurderingController(val vurderingService: VurderingService) {
 
     @GetMapping("{sakId}/medlemskap")
-    fun getMedlemskapVurdering(@SakstilgangConstraint @PathVariable sakId: UUID): MedlemskapDto {
-        return vurderingService.vurderMedlemskap(sakId)
+    fun getMedlemskapVurdering(@SakstilgangConstraint @PathVariable sakId: UUID): Ressurs<MedlemskapDto> {
+        return Ressurs.Companion.success(vurderingService.vurderMedlemskap (sakId))
     }
 
     @GetMapping("{sakId}/aleneomsorg")
-    fun getAleneOmsorg(@SakstilgangConstraint @PathVariable sakId: UUID): Aleneomsorg {
-        return vurderingService.vurderAleneomsorg(sakId)
+    fun getAleneOmsorg(@SakstilgangConstraint @PathVariable sakId: UUID): Ressurs<Aleneomsorg> {
+        return Ressurs.Companion.success(vurderingService.vurderAleneomsorg (sakId))
     }
 
 }

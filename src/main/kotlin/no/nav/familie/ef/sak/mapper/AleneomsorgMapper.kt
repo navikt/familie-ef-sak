@@ -61,6 +61,9 @@ object AleneomsorgMapper {
         }
 
         return Forelder(fødselsnummerAnnenForelder = fnr,
+                        navn = pdlAnnenForelder?.navn?.firstOrNull()?.visningsnavn()
+                               ?: barn.søknadsbarn.annenForelder?.verdi?.person?.verdi?.navn?.verdi,
+                        fødselsdato = barn.søknadsbarn.annenForelder?.verdi?.person?.verdi?.fødselsdato?.verdi,
                         bostedsland = bostedsland,
                         harForeldreneBoddSammen = barn.søknadsbarn.samvær?.verdi?.harDereTidligereBoddSammen?.verdi,
                         fraflyttingsdato = barn.søknadsbarn.samvær?.verdi?.nårFlyttetDereFraHverandre?.verdi,
@@ -69,8 +72,6 @@ object AleneomsorgMapper {
                         kanSøkerAnsesÅHaAleneomsorgen = null,
                         aleneomsorgBegrunnelse = null,
                         adresser = pdlAnnenForelder?.bostedsadresse?.map { Adresse(it) })
-
-
     }
 
 
