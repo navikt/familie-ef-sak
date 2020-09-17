@@ -9,8 +9,8 @@ import kotlin.reflect.full.isSubclassOf
 /**
  * Sjekker at alle verdier er satt på et objekt og att det ikke finnes noen collections som er tomme.
  * Den traverserer alle felter
- * * Når den finner ett felt som har ett packenavn som starter på kotlin. eller java. (UUID, String, Int, LocalDate) etc
- * * så sjekker den at verdiet er satt og stopper traverseringen
+ * * Når den finner et felt som har et pakkenavn som starter på kotlin. eller java. (UUID, String, Int, LocalDate) etc
+ * * så sjekker den at verdien er satt og stopper traverseringen
  */
 fun sjekkAtAlleVerdierErSatt(obj: Any) {
     val kClass = obj::class

@@ -49,7 +49,8 @@ internal class OvergangsstønadMapperTest {
             søknadsfelt(Aktivitet(arbeidsforhold = arbeidsforhold(),
                                   arbeidssøker = arbeidssøker(),
                                   hvordanErArbeidssituasjonen = søknadsfelt(listOf("Fin")),
-                                  selvstendig = selvstendig(),
+                                  selvstendig = søknadsfelt(selvstendig()),
+                                  firmaer = søknadsfelt(listOf(selvstendig())),
                                   underUtdanning = underUtdanning(),
                                   aksjeselskap = aksjeselskap(),
                                   virksomhet = virksomhet()))
@@ -67,22 +68,31 @@ internal class OvergangsstønadMapperTest {
                                        hvorMyeSkalDuStudere = søknadsfelt(50),
                                        offentligEllerPrivat = søknadsfelt("privat"),
                                        skoleUtdanningssted = søknadsfelt("Oslo"),
-                                       tidligereUtdanninger = søknadsfelt(listOf(utdanning())),
-                                       utdanning = søknadsfelt(utdanning()),
-                                       utdanningEtterGrunnskolen = søknadsfelt(true)))
+                                       tidligereUtdanninger = søknadsfelt(listOf(tidligereUtdanning())),
+                                       utdanning = søknadsfelt(tidligereUtdanning()),
+                                       utdanningEtterGrunnskolen = søknadsfelt(true),
+                                       gjeldendeUtdanning = søknadsfelt(utdanning())
+            ))
 
-    private fun utdanning(): Utdanning =
-            Utdanning(linjeKursGrad = søknadsfelt("linje"),
-                      nårVarSkalDuVæreElevStudent = søknadsfelt(periode()))
+    private fun tidligereUtdanning(): TidligereUtdanning =
+            TidligereUtdanning(linjeKursGrad = søknadsfelt("linje"),
+                               nårVarSkalDuVæreElevStudent = søknadsfelt(periode()))
 
-    private fun periode() = Periode(Month.JANUARY, 2020, Month.JANUARY, 2021)
+    private fun utdanning(): GjeldendeUtdanning =
+            GjeldendeUtdanning(linjeKursGrad = søknadsfelt("linje"),
+                               nårVarSkalDuVæreElevStudent = søknadsfelt(datoperiode()))
 
-    private fun selvstendig(): Søknadsfelt<Selvstendig> =
-            søknadsfelt(Selvstendig(arbeidsmengde = søknadsfelt(50),
+    private fun datoperiode() = Datoperiode(LocalDate.of(2020,Month.JANUARY, 1),
+                                            LocalDate.of(2020, Month.JANUARY, 1))
+
+    private fun periode() = MånedÅrPeriode(Month.JANUARY, 2020, Month.JANUARY, 2021)
+
+    private fun selvstendig(): Selvstendig =
+            Selvstendig(arbeidsmengde = søknadsfelt(50),
                                     etableringsdato = søknadsfelt(LocalDate.now()),
                                     firmanavn = søknadsfelt("SelvstendigFirmanavn"),
                                     hvordanSerArbeidsukenUt = søknadsfelt("fin"),
-                                    organisasjonsnummer = søknadsfelt("987654321")))
+                                    organisasjonsnummer = søknadsfelt("987654321"))
 
     private fun arbeidsforhold(): Søknadsfelt<List<Arbeidsgiver>> =
             søknadsfelt(listOf(Arbeidsgiver(arbeidsgivernavn = søknadsfelt("Arbeidsgivernavn"),
