@@ -2,10 +2,7 @@ package no.nav.familie.ef.sak
 
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
-import no.nav.familie.ef.sak.repository.domain.Barn
-import no.nav.familie.ef.sak.repository.domain.Sak
-import no.nav.familie.ef.sak.repository.domain.Søker
-import no.nav.familie.ef.sak.repository.domain.Vedlegg
+import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.økonomi.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.domain.TilkjentYtelse
 import org.junit.jupiter.api.AfterEach
@@ -45,7 +42,10 @@ abstract class OppslagSpringRunnerTest {
     private fun resetDatabase() {
         listOf(Vedlegg::class,
                Sak::class,
-               TilkjentYtelse::class
+               TilkjentYtelse::class,
+               Oppgave::class,
+               Behandling::class,
+               Fagsak::class
         ).forEach { jdbcAggregateOperations.deleteAll(it.java) }
     }
 

@@ -20,8 +20,7 @@ import no.nav.familie.ef.sak.repository.domain.Sak as Domenesak
 
 @Service
 class SakService(private val sakRepository: SakRepository,
-                 private val customRepository: CustomRepository<Domenesak>,
-                 private val vedleggRepository: CustomRepository<Vedlegg>,
+                 private val customRepository: CustomRepository,
                  private val overgangsstønadService: OvergangsstønadService) {
 
     val logger: Logger = LoggerFactory.getLogger(this.javaClass)
@@ -44,7 +43,7 @@ class SakService(private val sakRepository: SakRepository,
             val vedlegg = vedleggMap[it.id] ?: error("Finner ikke vedlegg ${it.id}")
             VedleggMapper.toDomain(save.id, it, vedlegg)
         }
-        vedleggListe.forEach { vedleggRepository.persist(it) }
+        vedleggListe.forEach { customRepository.persist(it) }
         logger.info("lagret ${save.id} sammen med ${vedleggListe.size} vedlegg")
         return save.id
     }
