@@ -11,7 +11,7 @@ object OvergangsstønadMapper {
         return AktivitetDto(aktivitetsplikt = aktivitetsplikt,
                             arbeidssituasjon = aktivitet.hvordanErArbeidssituasjonen.verdi,
                             arbeidsforhold = tilArbeidsforholdDto(aktivitet.arbeidsforhold?.verdi),
-                            selvstendig = tilSelvstendigDto(aktivitet.selvstendig?.verdi),
+                            selvstendig = tilSelvstendigDto(aktivitet.firmaer?.verdi),
                             aksjeselskap = tilAksjeselskapDto(aktivitet.aksjeselskap?.verdi),
                             virksomhet = tilVirksomhetDto(aktivitet.virksomhet?.verdi),
                             arbeidssøker = tilArbeidssøkerDto(aktivitet.arbeidssøker?.verdi),
@@ -58,14 +58,14 @@ object OvergangsstønadMapper {
                                   sluttdato = it.sluttdato?.verdi)
             } ?: emptyList()
 
-    private fun tilSelvstendigDto(selvstendig: Selvstendig?): SelvstendigDto? =
-            selvstendig?.let {
+    private fun tilSelvstendigDto(selvstendig: List<Selvstendig>?): List<SelvstendigDto> =
+            selvstendig?.map {
                 SelvstendigDto(firmanavn = it.firmanavn.verdi,
                                organisasjonsnummer = it.organisasjonsnummer.verdi,
                                etableringsdato = it.etableringsdato.verdi,
                                arbeidsmengde = it.arbeidsmengde?.verdi,
                                hvordanSerArbeidsukenUt = it.hvordanSerArbeidsukenUt.verdi)
-            }
+            } ?: emptyList()
 
     private fun tilArbeidssøkerDto(arbeidssøker: Arbeidssøker?): ArbeidssøkerDto? =
             arbeidssøker?.let {
@@ -95,7 +95,7 @@ object OvergangsstønadMapper {
     private fun tilUnderUtdanningDto(underUtdanning: UnderUtdanning?): UnderUtdanningDto? =
             underUtdanning?.let {
                 UnderUtdanningDto(skoleUtdanningssted = it.skoleUtdanningssted.verdi,
-                                  utdanning = tilUtdanningDto(it.utdanning.verdi),
+                                  utdanning = tilUtdanningDto(it.gjeldendeUtdanning?.verdi),
                                   offentligEllerPrivat = it.offentligEllerPrivat.verdi,
                                   heltidEllerDeltid = it.heltidEllerDeltid.verdi,
                                   hvorMyeSkalDuStudere = it.hvorMyeSkalDuStudere?.verdi,
@@ -105,11 +105,22 @@ object OvergangsstønadMapper {
                                                          ?: emptyList())
             }
 
-    private fun tilUtdanningDto(utdanning: Utdanning): UtdanningDto =
-            UtdanningDto(linjeKursGrad = utdanning.linjeKursGrad.verdi,
-                         nårVarSkalDuVæreElevStudent = tilPeriodeÅrMånedDto(utdanning.nårVarSkalDuVæreElevStudent.verdi))
+    private fun tilUtdanningDto(utdanning: TidligereUtdanning): UtdanningDto {
+        return UtdanningDto(linjeKursGrad = utdanning.linjeKursGrad.verdi,
+                            nårVarSkalDuVæreElevStudent = tilPeriodeÅrMånedDto(utdanning.nårVarSkalDuVæreElevStudent.verdi))
+    }
 
-    private fun tilPeriodeÅrMånedDto(periode: Periode): PeriodeDto =
+    private fun tilUtdanningDto(utdanning: GjeldendeUtdanning?): UtdanningDto? {
+        utdanning ?: return null
+        return UtdanningDto(linjeKursGrad = utdanning.linjeKursGrad.verdi,
+                            nårVarSkalDuVæreElevStudent = tilPeriodeÅrMånedDto(utdanning.nårVarSkalDuVæreElevStudent.verdi))
+    }
+
+    private fun tilPeriodeÅrMånedDto(periode: Datoperiode): PeriodeDto =
+            PeriodeDto(fra = YearMonth.of(periode.fra.year, periode.fra.month),
+                       til = YearMonth.of(periode.til.year, periode.til.month))
+
+    private fun tilPeriodeÅrMånedDto(periode: MånedÅrPeriode): PeriodeDto =
             PeriodeDto(fra = YearMonth.of(periode.fraÅr, periode.fraMåned),
                        til = YearMonth.of(periode.tilÅr, periode.tilMåned))
 }

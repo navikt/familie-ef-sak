@@ -9,7 +9,7 @@ data class OvergangsstønadDto(val aktivitet: AktivitetDto,
 
 data class AktivitetDto(val arbeidssituasjon: List<String>,
                         val arbeidsforhold: List<ArbeidsforholdDto>,
-                        val selvstendig: SelvstendigDto?,
+                        val selvstendig: List<SelvstendigDto>,
                         val aksjeselskap: List<AksjeselskapDto>,
                         val arbeidssøker: ArbeidssøkerDto?,
                         val underUtdanning: UnderUtdanningDto?,
@@ -47,7 +47,7 @@ data class ArbeidssøkerDto(val registrertSomArbeidssøkerNav: Boolean,
                            val ikkeVilligTilÅTaImotTilbudOmArbeidDokumentasjon: DokumentasjonDto?)
 
 data class UnderUtdanningDto(val skoleUtdanningssted: String,
-                             val utdanning: UtdanningDto,
+                             val utdanning: UtdanningDto?,
                              val offentligEllerPrivat: String,
                              val heltidEllerDeltid: String,
                              val hvorMyeSkalDuStudere: Int?,
