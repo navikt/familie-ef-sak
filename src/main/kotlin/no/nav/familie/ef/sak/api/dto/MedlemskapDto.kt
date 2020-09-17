@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.api.gui.dto
+package no.nav.familie.ef.sak.api.dto
 
 import no.nav.familie.ef.sak.integration.dto.pdl.InnflyttingTilNorge
 import no.nav.familie.ef.sak.integration.dto.pdl.Statsborgerskap

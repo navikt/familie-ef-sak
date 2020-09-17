@@ -1,10 +1,10 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.økonomi
 
-import no.nav.familie.ef.sak.økonomi.domain.AndelTilkjentYtelse
-import no.nav.familie.ef.sak.økonomi.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.økonomi.domain.YtelseType
-import no.nav.familie.ef.sak.økonomi.dto.AndelTilkjentYtelseDTO
-import no.nav.familie.ef.sak.økonomi.dto.TilkjentYtelseDTO
+import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
+import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.repository.domain.YtelseType
+import no.nav.familie.ef.sak.api.dto.AndelTilkjentYtelseDTO
+import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
 import java.time.LocalDate
 import java.util.*
 

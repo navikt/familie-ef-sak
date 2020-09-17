@@ -1,6 +1,6 @@
-package no.nav.familie.ef.sak.økonomi
+package no.nav.familie.ef.sak.repository
 
-import no.nav.familie.ef.sak.økonomi.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import org.springframework.data.repository.CrudRepository
 import java.util.*
 

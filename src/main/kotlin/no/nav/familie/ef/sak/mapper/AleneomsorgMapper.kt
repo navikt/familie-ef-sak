@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.mapper
 
-import no.nav.familie.ef.sak.api.gui.dto.*
+import no.nav.familie.ef.sak.api.dto.*
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlAnnenForelder
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlBarn
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker

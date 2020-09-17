@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.api.gui.dto
+package no.nav.familie.ef.sak.api.dto
 
 import no.nav.familie.kontrakter.ef.søknad.Dokument
 import java.time.LocalDateTime
