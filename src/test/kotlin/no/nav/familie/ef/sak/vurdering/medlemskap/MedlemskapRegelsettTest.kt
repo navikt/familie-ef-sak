@@ -57,6 +57,7 @@ internal class MedlemskapRegelsettTest {
                                                                        Folkeregistermetadata(LocalDateTime.of(1999, 4, 5, 0, 0),
                                                                                              null),
                                                                        null,
+                                                                       null,
                                                                        null)),
                                 statsborgerskap = listOf(Statsborgerskap("SE", LocalDate.of(2002, 2, 2), null)))
         val søknad = søknad(medlemskapsdetaljer = Søknadsfelt("",
@@ -94,6 +95,7 @@ internal class MedlemskapRegelsettTest {
                                                                        null,
                                                                        Folkeregistermetadata(LocalDateTime.of(1999, 4, 5, 0, 0),
                                                                                              null),
+                                                                       null,
                                                                        null,
                                                                        null)),
                                 statsborgerskap = listOf(Statsborgerskap("SE", LocalDate.of(2002, 2, 2), null)))

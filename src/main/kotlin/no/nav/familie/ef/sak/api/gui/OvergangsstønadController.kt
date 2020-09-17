@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.api.gui
 
 import no.nav.familie.ef.sak.api.dto.OvergangsstønadDto
-import no.nav.familie.ef.sak.service.OvergangsstøandService
+import no.nav.familie.ef.sak.service.OvergangsstønadService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
@@ -14,12 +14,12 @@ import java.util.*
 @RequestMapping(path = ["/api/overgangsstonad"])
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class OvergangsstøandController(private val overgangsstøandService: OvergangsstøandService) {
+class OvergangsstønadController(private val overgangsstønadService: OvergangsstønadService) {
 
     @GetMapping("/{id}")
     fun dummy(@PathVariable("id") id: UUID): Ressurs<OvergangsstønadDto> {
         return Ressurs.failure("ikke tilgang")
-        //return Ressurs.success(overgangsstøandService.lagOvergangsstønad(id))
+//        return Ressurs.success(overgangsstønadService.lagOvergangsstønad(id))
     }
 
     @PostMapping("vurdering/aktivitetsplikt")

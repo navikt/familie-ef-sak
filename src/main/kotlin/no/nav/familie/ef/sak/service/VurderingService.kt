@@ -1,13 +1,18 @@
 package no.nav.familie.ef.sak.service
 
+import no.nav.familie.ef.sak.api.gui.dto.Aleneomsorg
 import no.nav.familie.ef.sak.api.gui.dto.MedlemskapDto
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.PdlClient
+import no.nav.familie.ef.sak.integration.dto.pdl.Familierelasjonsrolle
+import no.nav.familie.ef.sak.mapper.AleneomsorgMapper
 import no.nav.familie.ef.sak.mapper.MedlemskapMapper
+import no.nav.familie.ef.sak.repository.domain.SakMapper
 import no.nav.familie.ef.sak.vurdering.medlemskap.MedlemskapRegelsett
 import no.nav.familie.ef.sak.vurdering.medlemskap.Medlemskapsgrunnlag
 import no.nav.familie.ef.sak.vurdering.medlemskap.Medlemskapshistorikk
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.util.*
 
 @Service
@@ -30,6 +35,39 @@ class VurderingService(private val sakService: SakService,
         return MedlemskapMapper.tilDto(evaluering,
                                        pdlSøker,
                                        medlemskapshistorikk)
+    }
+
+    fun vurderAleneomsorg(sakId: UUID): Aleneomsorg {
+        val sak = sakService.hentSak(sakId)
+        val fnrSøker = sak.søker.fødselsnummer
+        val pdlSøker = pdlClient.hentSøker(fnrSøker)
+
+
+        val barn = pdlSøker.familierelasjoner
+                .filter { it.relatertPersonsRolle == Familierelasjonsrolle.BARN }
+                .map { it.relatertPersonsIdent }
+                .let { pdlClient.hentBarn(it) }
+                .filter { it.value.fødsel.firstOrNull()?.fødselsdato != null }
+                .filter { it.value.fødsel.first().fødselsdato!!.plusYears(18).isAfter(LocalDate.now()) }
+
+        val overgangsstønad = SakMapper.pakkOppOvergangsstønad(sak)
+        val barneforeldreFraSøknad =
+                overgangsstønad.søknad.barn.verdi.mapNotNull {
+                    it.annenForelder?.verdi?.person?.verdi?.fødselsnummer?.verdi?.verdi
+                }
+
+        val barneforeldre = barn.map { it.value.familierelasjoner }
+                .flatten()
+                .filter { it.relatertPersonsIdent != fnrSøker && it.relatertPersonsRolle != Familierelasjonsrolle.BARN }
+                .map { it.relatertPersonsIdent }
+                .plus(barneforeldreFraSøknad)
+                .distinct()
+                .let { pdlClient.hentAndreForeldre(it) }
+
+        return AleneomsorgMapper.tilDto(pdlSøker,
+                                        barn,
+                                        barneforeldre,
+                                        overgangsstønad.søknad)
     }
 
 
