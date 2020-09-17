@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.api.dto.*
 import no.nav.familie.ef.sak.integration.dto.pdl.Fullmakt
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker
 import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
+import no.nav.familie.ef.sak.service.ArbeidsfordelingService
 import no.nav.familie.ef.sak.service.KodeverkService
 import no.nav.familie.ef.sak.util.datoEllerIdag
 import org.springframework.stereotype.Component
@@ -11,7 +12,8 @@ import java.time.LocalDate
 
 @Component
 class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
-                               private val kodeverkService: KodeverkService) {
+                               private val kodeverkService: KodeverkService,
+                               private val arbeidsfordelingService: ArbeidsfordelingService) {
 
     fun tilPersonopplysninger(søker: PdlSøker,
                               ident: String,
@@ -47,7 +49,9 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                                 motpartsPersonident = it.motpartsPersonident,
                                 navn = identNavn[it.motpartsPersonident])
                 },
-                egenAnsatt = egenAnsatt
+                egenAnsatt = egenAnsatt,
+                navEnhet = arbeidsfordelingService.hentNavEnhet(ident).firstOrNull()
+                                   ?.let { it.enhetId + " - " + it.enhetNavn } ?: "Ej funnet"
         )
     }
 

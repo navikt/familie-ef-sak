@@ -59,6 +59,8 @@ class PdlClientConfig {
                         vergemaalEllerFremtidsfullmakt = listOf()
                 )
         every { pdlClient.hentSøkerAsMap(any()) } returns mapOf()
+
+        every { pdlClient.hentBarn(any()) } returns emptyMap()
         return pdlClient
     }
 

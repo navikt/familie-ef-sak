@@ -21,7 +21,8 @@ data class PersonopplysningerDto(val personIdent: String,
                                  val sivilstand: List<SivilstandDto>,
                                  val adresse: List<AdresseDto>,
                                  val fullmakt: List<FullmaktDto>,
-                                 val egenAnsatt: Boolean)
+                                 val egenAnsatt: Boolean,
+                                 val navEnhet: String)
 
 data class TelefonnummerDto(val landskode: String,
                             val nummer: String)

@@ -29,6 +29,8 @@ class IntegrasjonerConfig(@Value("\${FAMILIE_INTEGRASJONER_URL}") private val in
 
     val egenAnsattUri: URI = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_EGEN_ANSATT).build().toUri()
 
+    val arbeidsfordelingUri: URI = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_ARBEIDSFORDELING).build().toUri()
+
     companion object {
 
         private const val PATH_PING = "/internal/status/isAlive"
@@ -38,5 +40,6 @@ class IntegrasjonerConfig(@Value("\${FAMILIE_INTEGRASJONER_URL}") private val in
         private const val PATH_PERSONOPPLYSNING = "api/personopplysning/v2/info"
         private const val PATH_PERSONHISTORIKK = "api/personopplysning/v2/historikk"
         private const val PATH_EGEN_ANSATT = "api/egenansatt"
+        private const val PATH_ARBEIDSFORDELING = "api/arbeidsfordeling/enhet/ENF"
     }
 }

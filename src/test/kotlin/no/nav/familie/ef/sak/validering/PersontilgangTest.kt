@@ -4,7 +4,8 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.api.dto.PersonIdentDto
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
-import no.nav.familie.ef.sak.integration.dto.Tilgang
+import no.nav.familie.ef.sak.integration.dto.familie.Tilgang
+import no.nav.familie.ef.sak.service.PersonService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -12,7 +13,8 @@ internal class PersontilgangTest {
 
     private val integrasjonerClient = mockk<FamilieIntegrasjonerClient>()
 
-    private val persontilgang = Persontilgang(integrasjonerClient)
+    private val personService = mockk<PersonService>(relaxed = true)
+    private val persontilgang = Persontilgang(integrasjonerClient, personService)
 
     @Test
     fun `isValid returnerer true hvis integrasjonerClient sjekkTilgangTilPersoner returnerer true`() {

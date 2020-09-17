@@ -23,7 +23,7 @@ class PersonopplysningerService(private val personService: PersonService,
     fun hentPersonopplysninger(ident: String): PersonopplysningerDto {
         return runBlocking {
             val egenAnsattDeferred = async { familieIntegrasjonerClient.egenAnsatt(ident) }
-            val søker = withContext(Dispatchers.Default) { personService.hentPdlPerson(ident) }
+            val søker = withContext(Dispatchers.Default) { personService.hentSøker(ident) }
 
             val fullmakter = søker.fullmakt.filter { it.motpartsRolle == MotpartsRolle.FULLMEKTIG }
 
