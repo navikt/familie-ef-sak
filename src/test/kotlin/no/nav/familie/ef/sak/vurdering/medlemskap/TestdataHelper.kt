@@ -13,7 +13,7 @@ fun pdlPerson(vararg perioder: Pair<LocalDate, LocalDateTime?>) = object : PdlPe
     override val fødsel: List<Fødsel> = listOf(Fødsel(null, null, null, null, null))
 
     override val bostedsadresse: List<Bostedsadresse> = perioder.map {
-        Bostedsadresse(it.first, null, Folkeregistermetadata(null, it.second), null, null)
+        Bostedsadresse(it.first, null, Folkeregistermetadata(null, it.second), null,null, null)
     }
 }
 
@@ -56,6 +56,20 @@ fun pdlSøker(adressebeskyttelse: List<Adressebeskyttelse> = mockk(),
                  utflyttingFraNorge,
                  vergemaalEllerFremtidsfullmakt)
 
+fun pdlBarn(adressebeskyttelse: List<Adressebeskyttelse> = mockk(),
+            bostedsadresse: List<Bostedsadresse> = mockk(),
+            deltBosted: List<DeltBosted> = mockk(),
+            dødsfall: List<Dødsfall> = mockk(),
+            familierelasjoner: List<Familierelasjon> = mockk(),
+            fødsel: List<Fødsel> = mockk(),
+            navn: List<Navn> = mockk()) =
+        PdlBarn(adressebeskyttelse,
+                bostedsadresse,
+                deltBosted,
+                dødsfall,
+                familierelasjoner,
+                fødsel,
+                navn)
 
 fun avvistePerioder(vararg perioder: Pair<LocalDate, LocalDate>) = perioder.map {
     PeriodeInfo(PeriodeStatus.AVST, null, it.first, it.second, true, "", null)

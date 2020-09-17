@@ -22,6 +22,7 @@ internal class AdresseMapperTest {
                 coAdressenavn = null,
                 folkeregistermetadata = Folkeregistermetadata(gyldighetstidspunkt = LocalDateTime.now(),
                                                               opphørstidspunkt = startdato.plusDays(1).atStartOfDay()),
+                utenlandskAdresse(),
                 vegadresse = vegadresse(),
                 ukjentBosted = UkjentBosted(bostedskommune = "ukjentBostedKommune")
         )

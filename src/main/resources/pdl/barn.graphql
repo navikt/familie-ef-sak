@@ -13,6 +13,15 @@ query($identer: [ID!]!){
                     gyldighetstidspunkt
                     opphoerstidspunkt
                 }
+                utenlandskAdresse {
+                    adressenavnNummer
+                    bySted
+                    bygningEtasjeLeilighet
+                    landkode
+                    postboksNummerNavn
+                    postkode
+                    regionDistriktOmraade
+                }
                 vegadresse {
                     husnummer
                     husbokstav

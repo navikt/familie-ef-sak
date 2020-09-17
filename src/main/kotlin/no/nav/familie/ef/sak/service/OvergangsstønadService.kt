@@ -6,7 +6,7 @@ import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
 import org.springframework.stereotype.Service
 
 @Service
-class OvergangsstøandService {
+class OvergangsstønadService {
 
     fun lagOvergangsstønad(søknad: SøknadOvergangsstønad): OvergangsstønadDto {
         val aktivitetsplikt = null//TODO - denne kommer som ett resultat av inngangsvilkåret

@@ -3,14 +3,6 @@ spring:
     url: jdbc:postgresql://localhost:5432/familie-ba-sak
     password: test
     username: postgres
-  jpa:
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql=false
-    hibernate:
-      ddl-auto: none
-
   cloud:
     vault:
       enabled: false

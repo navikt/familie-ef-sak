@@ -59,6 +59,8 @@ class PdlClientConfig {
                         vergemaalEllerFremtidsfullmakt = listOf()
                 )
         every { pdlClient.hentSøkerAsMap(any()) } returns mapOf()
+
+        every { pdlClient.hentBarn(any()) } returns emptyMap()
         return pdlClient
     }
 
@@ -109,6 +111,7 @@ class PdlClientConfig {
             listOf(Bostedsadresse(angittFlyttedato = startdato,
                                   folkeregistermetadata = Folkeregistermetadata(gyldighetstidspunkt = LocalDateTime.now(),
                                                                                 opphørstidspunkt = startdato.atStartOfDay()),
+                                  utenlandskAdresse = null,
                                   coAdressenavn = "CONAVN",
                                   vegadresse = vegadresse(),
                                   ukjentBosted = null))

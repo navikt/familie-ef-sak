@@ -32,6 +32,7 @@ object PdlTestdata {
     private val bostedsadresse = listOf(Bostedsadresse(LocalDate.now(),
                                                        "",
                                                        folkeregistermetadata,
+                                                       utenlandskAdresse,
                                                        vegadresse,
                                                        UkjentBosted("")))
 

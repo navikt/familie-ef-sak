@@ -15,19 +15,16 @@ type Adressebeskyttelse {
     metadata: Metadata!
 }
 
-type BolkResult {
-    code: String!
-    ident: String!
-    person: Person
-}
-
 type Bostedsadresse {
     angittFlyttedato: Date
     coAdressenavn: String
-    folkeregistermetadata: Folkeregistermetadata!
+    folkeregistermetadata: Folkeregistermetadata
+    gyldigFraOgMed: DateTime
+    gyldigTilOgMed: DateTime
     matrikkeladresse: Matrikkeladresse
     metadata: Metadata!
     ukjentBosted: UkjentBosted
+    utenlandskAdresse: UtenlandskAdresse
     vegadresse: Vegadresse
 }
 
@@ -40,6 +37,7 @@ type DeltBosted {
     sluttdatoForKontrakt: Date @deprecated(reason : "Flyttet til adresser rett under")
     startdatoForKontrakt: Date!
     ukjentBosted: UkjentBosted
+    utenlandskAdresse: UtenlandskAdresse
     vegadresse: Vegadresse
 }
 
@@ -145,6 +143,26 @@ type Fullmakt {
     omraader: [String!]!
 }
 
+type GeografiskTilknytning {
+    gtBydel: String
+    gtKommune: String
+    gtLand: String
+    gtType: GtType!
+    metadata: Metadata!
+}
+
+type HentIdenterBolkResult {
+    code: String!
+    ident: String!
+    identer: [IdentInformasjon!]
+}
+
+type HentPersonBolkResult {
+    code: String!
+    ident: String!
+    person: Person
+}
+
 type IdentInformasjon {
     gruppe: IdentGruppe!
     historisk: Boolean!
@@ -236,7 +254,7 @@ type Matrikkeladresse {
     bruksenhetsnummer: String
     kommunenummer: String
     koordinater: Koordinater
-    matrikkelId: Int
+    matrikkelId: Long
     postnummer: String
     tilleggsnavn: String
 }
@@ -272,6 +290,7 @@ type Navn {
     folkeregistermetadata: Folkeregistermetadata
     forkortetNavn: String
     fornavn: String!
+    gyldigFraOgMed: Date
     mellomnavn: String
     metadata: Metadata!
     originaltNavn: OriginaltNavn
@@ -288,10 +307,12 @@ type Opphold {
 type Oppholdsadresse {
     coAdressenavn: String
     folkeregistermetadata: Folkeregistermetadata
+    gyldigFraOgMed: DateTime
+    gyldigTilOgMed: DateTime
     matrikkeladresse: Matrikkeladresse
     metadata: Metadata!
     oppholdAnnetSted: String
-    oppholdsadressedato: Date
+    oppholdsadressedato: Date @deprecated(reason : "Mappes til gyldigFraOgMed. Dette feltet er nÃ¥ overflÃ¸dig vil bli fjernet")
     utenlandskAdresse: UtenlandskAdresse
     vegadresse: Vegadresse
 }
@@ -315,6 +336,7 @@ type Person {
     folkeregisterpersonstatus(historikk: Boolean = false): [Folkeregisterpersonstatus!]!
     foreldreansvar(historikk: Boolean = false): [Foreldreansvar!]!
     fullmakt(historikk: Boolean = false): [Fullmakt!]!
+    geografiskTilknytning: GeografiskTilknytning
     identitetsgrunnlag(historikk: Boolean = false): [Identitetsgrunnlag!]!
     innflyttingTilNorge: [InnflyttingTilNorge!]!
     kjoenn(historikk: Boolean = false): [Kjoenn!]!
@@ -354,8 +376,9 @@ type Postboksadresse {
 
 type Query {
     hentIdenter(grupper: [IdentGruppe!], historikk: Boolean = false, ident: ID!): Identliste
+    hentIdenterBolk(grupper: [IdentGruppe!], historikk: Boolean = false, identer: [ID!]!): [HentIdenterBolkResult!]!
     hentPerson(ident: ID!): Person
-    hentPersonBolk(identer: [ID!]!): [BolkResult!]!
+    hentPersonBolk(identer: [ID!]!): [HentPersonBolkResult!]!
     sokPerson(criteria: [Criterion], paging: Paging): SearchResult
 }
 
@@ -465,11 +488,12 @@ type UtflyttingFraNorge {
 type Vegadresse {
     adressenavn: String
     bruksenhetsnummer: String
+    bydelsnummer: String
     husbokstav: String
     husnummer: String
     kommunenummer: String
     koordinater: Koordinater
-    matrikkelId: Int
+    matrikkelId: Long
     postnummer: String
     tilleggsnavn: String
 }
@@ -490,6 +514,7 @@ type VergemaalEllerFremtidsfullmakt {
 }
 
 type searchHit {
+    identer: [IdentInformasjon!]!
     person: Person
     score: Float
 }
@@ -517,6 +542,13 @@ enum Familierelasjonsrolle {
 enum FullmaktsRolle {
     FULLMAKTSGIVER
     FULLMEKTIG
+}
+
+enum GtType {
+    BYDEL
+    KOMMUNE
+    UDEFINERT
+    UTLAND
 }
 
 enum IdentGruppe {
@@ -569,6 +601,7 @@ enum Sivilstandstype {
 input Criterion {
     fieldName: String!
     includeHistorical: Boolean
+    searchHistorical: Boolean
     searchRule: SearchRule!
 }
 
@@ -580,8 +613,13 @@ input Paging {
 input SearchRule {
     after: String
     before: String
+    boost: Float
+    "extra query parameters (can not be used as queries by them self)"
+    caseSensitive: Boolean
     contains: String
+    disablePhonetic: Boolean
     equals: String
+    exists: String
     from: String
     fromExcluding: String
     fuzzy: String
@@ -589,8 +627,10 @@ input SearchRule {
     lessThan: String
     notEquals: String
     regex: String
+    startsWith: String
     to: String
     toExcluding: String
+    wildcard: String
 }
 
 
@@ -599,3 +639,6 @@ scalar Date
 
 "Format: YYYY-MM-DDTHH:mm:SS (ISO-8601), example: 2011-12-03T10:15:30"
 scalar DateTime
+
+"Long type"
+scalar Long

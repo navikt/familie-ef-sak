@@ -40,7 +40,7 @@ class Sakstilgang(private val sakRepository: SakRepository,
 
         val personer = relatertePersoner + sak.søker.fødselsnummer
 
-        integrasjonerClient.sjekkTilgangTilPersoner(personer)
+        integrasjonerClient.sjekkTilgangTilPersoner(personer.distinct())
                 .filterNot { it.harTilgang }
                 .forEach {
                     logger.error("Bruker har ikke tilgang: ${it.begrunnelse}")
