@@ -1,6 +1,7 @@
-package no.nav.familie.ef.sak.økonomi
+package no.nav.familie.ef.sak.api.gui
 
-import no.nav.familie.ef.sak.økonomi.dto.TilkjentYtelseDTO
+import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
+import no.nav.familie.ef.sak.service.TilkjentYtelseService
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus

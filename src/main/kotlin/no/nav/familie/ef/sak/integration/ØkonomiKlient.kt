@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.økonomi
+package no.nav.familie.ef.sak.integration
 
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Ressurs

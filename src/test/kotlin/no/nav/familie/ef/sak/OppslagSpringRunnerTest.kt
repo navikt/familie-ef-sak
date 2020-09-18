@@ -2,12 +2,9 @@ package no.nav.familie.ef.sak
 
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
-import no.nav.familie.ef.sak.repository.domain.Barn
 import no.nav.familie.ef.sak.repository.domain.Sak
-import no.nav.familie.ef.sak.repository.domain.Søker
 import no.nav.familie.ef.sak.repository.domain.Vedlegg
-import no.nav.familie.ef.sak.økonomi.domain.AndelTilkjentYtelse
-import no.nav.familie.ef.sak.økonomi.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired

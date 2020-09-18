@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.api.gui
 
-import no.nav.familie.ef.sak.api.gui.dto.Aleneomsorg
-import no.nav.familie.ef.sak.api.gui.dto.MedlemskapDto
+import no.nav.familie.ef.sak.api.dto.Aleneomsorg
+import no.nav.familie.ef.sak.api.dto.MedlemskapDto
 import no.nav.familie.ef.sak.service.VurderingService
 import no.nav.familie.ef.sak.validering.SakstilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -23,12 +23,12 @@ class VurderingController(val vurderingService: VurderingService) {
 
     @GetMapping("{sakId}/medlemskap")
     fun getMedlemskapVurdering(@SakstilgangConstraint @PathVariable sakId: UUID): Ressurs<MedlemskapDto> {
-        return Ressurs.Companion.success(vurderingService.vurderMedlemskap (sakId))
+        return Ressurs.success(vurderingService.vurderMedlemskap (sakId))
     }
 
     @GetMapping("{sakId}/aleneomsorg")
     fun getAleneOmsorg(@SakstilgangConstraint @PathVariable sakId: UUID): Ressurs<Aleneomsorg> {
-        return Ressurs.Companion.success(vurderingService.vurderAleneomsorg (sakId))
+        return Ressurs.success(vurderingService.vurderAleneomsorg (sakId))
     }
 
 }

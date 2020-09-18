@@ -1,6 +1,6 @@
-package no.nav.familie.ef.sak.økonomi.dto
+package no.nav.familie.ef.sak.api.dto
 
-import no.nav.familie.ef.sak.økonomi.domain.YtelseType
+import no.nav.familie.ef.sak.repository.domain.YtelseType
 import java.time.LocalDate
 import java.util.*
 

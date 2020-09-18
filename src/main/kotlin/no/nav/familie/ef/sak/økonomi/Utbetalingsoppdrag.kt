@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.økonomi
 
-import no.nav.familie.ef.sak.økonomi.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.integration.FAGSYSTEM
+import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.kontrakter.felles.oppdrag.Opphør
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag.KodeEndring.NY

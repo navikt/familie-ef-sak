@@ -1,11 +1,11 @@
-package no.nav.familie.ef.sak.økonomi
+package no.nav.familie.ef.sak.mapper
 
-import no.nav.familie.ef.sak.økonomi.domain.AndelTilkjentYtelse
-import no.nav.familie.ef.sak.økonomi.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.økonomi.domain.TilkjentYtelseStatus
-import no.nav.familie.ef.sak.økonomi.domain.TilkjentYtelseType
-import no.nav.familie.ef.sak.økonomi.dto.AndelTilkjentYtelseDTO
-import no.nav.familie.ef.sak.økonomi.dto.TilkjentYtelseDTO
+import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
+import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus
+import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseType
+import no.nav.familie.ef.sak.api.dto.AndelTilkjentYtelseDTO
+import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
 import java.time.LocalDate
 
 fun TilkjentYtelseDTO.tilTilkjentYtelse(status: TilkjentYtelseStatus = TilkjentYtelseStatus.OPPRETTET): TilkjentYtelse {

@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.api.gui.dto
+package no.nav.familie.ef.sak.api.dto
 
 data class Samvær(val annenForeldersSamvær: String,
                   val foreldreHarSamværsavtale: String,

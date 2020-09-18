@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.økonomi.domain
+package no.nav.familie.ef.sak.repository.domain
 
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import org.springframework.data.annotation.Id

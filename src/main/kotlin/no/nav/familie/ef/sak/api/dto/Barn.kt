@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.api.gui.dto
+package no.nav.familie.ef.sak.api.dto
 
 import java.time.LocalDate
 
