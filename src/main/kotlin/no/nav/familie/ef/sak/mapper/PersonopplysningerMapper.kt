@@ -50,7 +50,7 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                                 navn = identNavn[it.motpartsPersonident])
                 },
                 egenAnsatt = egenAnsatt,
-                navEnhet = arbeidsfordelingService.hentNavEnhet(ident).firstOrNull()
+                navEnhet = arbeidsfordelingService.hentNavEnhet(ident)
                                    ?.let { it.enhetId + " - " + it.enhetNavn } ?: "Ej funnet"
         )
     }

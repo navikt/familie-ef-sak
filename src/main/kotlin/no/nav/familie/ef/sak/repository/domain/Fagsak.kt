@@ -15,7 +15,12 @@ data class Fagsak(@Id
                   @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                   val sporbar: Sporbar = Sporbar(),
                   @MappedCollection(idColumn = "fagsak_id")
-                  var søkerIdenter: Set<FagsakPerson> = setOf())
+                  var søkerIdenter: Set<FagsakPerson> = setOf()){
+
+    fun hentAktivIdent(): String {
+        return søkerIdenter.maxByOrNull { it.sporbar.opprettetTid }?.ident ?: error("Fant ingen ident på fagsak $id")
+    }
+}
 
 enum class Stønadstype {
     OVERGANGSSTØNAD,

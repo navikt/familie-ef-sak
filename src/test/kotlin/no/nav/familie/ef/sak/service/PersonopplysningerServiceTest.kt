@@ -37,7 +37,7 @@ internal class PersonopplysningerServiceTest {
     @Test
     internal fun `mapper pdlsøker til PersonopplysningerDto`() {
         every { familieIntegrasjonerClient.egenAnsatt(any()) } returns true
-        every { arbeidsfordelingService.hentNavEnhet(any()) } returns listOf(Arbeidsfordelingsenhet("1", "Enhet"))
+        every { arbeidsfordelingService.hentNavEnhet(any()) } returns Arbeidsfordelingsenhet("1", "Enhet")
         val søker = personopplysningerService.hentPersonopplysninger("11111122222")
         assertThat(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(søker))
                 .isEqualToIgnoringWhitespace("""{
