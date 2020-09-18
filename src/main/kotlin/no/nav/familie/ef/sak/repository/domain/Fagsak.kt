@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.repository.domain
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
+import org.springframework.data.relational.core.mapping.MappedCollection
 import org.springframework.data.relational.core.mapping.Table
 import java.util.*
 
@@ -12,7 +13,9 @@ data class Fagsak(@Id
                   @Column("stonadstype")
                   val stønadstype: Stønadstype,
                   @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                  val sporbar: Sporbar = Sporbar())
+                  val sporbar: Sporbar = Sporbar(),
+                  @MappedCollection(idColumn = "fagsak_id")
+                  var søkerIdenter: Set<FagsakPerson> = setOf())
 
 enum class Stønadstype {
     OVERGANGSSTØNAD,

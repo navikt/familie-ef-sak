@@ -23,4 +23,9 @@ fun behandling(fagsak: Fagsak, aktiv: Boolean = true, status: BehandlingStatus =
     )
 }
 
-fun fagsak() = Fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD)
+fun fagsak(identer: Set<FagsakPerson> = setOf()) = Fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD, søkerIdenter = identer)
+
+
+fun fagsakpersoner(identer: Set<String>): Set<FagsakPerson> = identer.map {
+    FagsakPerson(ident = it)
+}.toSet()
