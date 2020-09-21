@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.api.external.Testsøknad
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.Testsøknad
 import no.nav.familie.ef.sak.repository.VedleggRepository
 import no.nav.familie.kontrakter.ef.sak.SakRequest
 import no.nav.familie.kontrakter.ef.søknad.SøknadMedVedlegg
