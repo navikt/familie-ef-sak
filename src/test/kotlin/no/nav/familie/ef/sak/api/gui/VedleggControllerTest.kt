@@ -3,9 +3,9 @@ package no.nav.familie.ef.sak.api.gui
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.api.Feil
-import no.nav.familie.ef.sak.api.external.Testsøknad.søknad
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.dto.familie.Tilgang
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.Testsøknad.søknad
 import no.nav.familie.ef.sak.repository.SakRepository
 import no.nav.familie.ef.sak.repository.VedleggRepository
 import no.nav.familie.ef.sak.repository.domain.*
