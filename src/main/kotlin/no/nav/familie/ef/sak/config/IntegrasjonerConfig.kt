@@ -30,6 +30,7 @@ class IntegrasjonerConfig(@Value("\${FAMILIE_INTEGRASJONER_URL}") private val in
     val egenAnsattUri: URI = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_EGEN_ANSATT).build().toUri()
 
     val arbeidsfordelingUri: URI = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_ARBEIDSFORDELING).build().toUri()
+    val oppgaveUri: URI = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_OPPGAVE).build().toUri()
 
     companion object {
 
@@ -41,5 +42,6 @@ class IntegrasjonerConfig(@Value("\${FAMILIE_INTEGRASJONER_URL}") private val in
         private const val PATH_PERSONHISTORIKK = "api/personopplysning/v2/historikk"
         private const val PATH_EGEN_ANSATT = "api/egenansatt"
         private const val PATH_ARBEIDSFORDELING = "api/arbeidsfordeling/enhet/ENF"
+        private const val PATH_OPPGAVE = "api/oppgave"
     }
 }
