@@ -6,8 +6,7 @@ import no.nav.familie.ef.sak.util.RessursUtils
 import no.nav.familie.ef.sak.util.medContentTypeJsonUTF8
 import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
-import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
+import no.nav.familie.kontrakter.felles.oppgave.*
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Component
@@ -28,10 +27,29 @@ class OppgaveClient(@Qualifier("jwtBearer") restOperations: RestOperations,
 
         val respons = postForEntity<Ressurs<OppgaveResponse>>(uri, opprettOppgave, HttpHeaders().medContentTypeJsonUTF8())
         RessursUtils.assertGenerelleSuksessKriterier(respons)
-        return respons.data?.oppgaveId?.toString() ?: throw IntegrasjonException("Response fra opprettOppgave mangler oppgaveId.",
+        return respons.data?.oppgaveId?.toString() ?: throw IntegrasjonException("Respons fra opprettOppgave mangler oppgaveId.",
                                                                                        null,
                                                                                        uri,
                                                                                        opprettOppgave.ident?.ident)
-
     }
+
+    fun finnOppgaveMedId(oppgaveId: Long): Oppgave {
+        val uri = URI.create("$oppgaveUri/$oppgaveId")
+
+        val respons = getForEntity<Ressurs<Oppgave>>(uri)
+        RessursUtils.assertGenerelleSuksessKriterier(respons)
+        return respons.data ?:  throw IntegrasjonException("Respons fra finnOppgaveMedId mangler data.",
+                                                           null,
+                                                           uri,
+                                                           null)
+    }
+
+    fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto {
+        val uri = URI.create("$oppgaveUri/v4")
+
+        val respons = postForEntity<Ressurs<FinnOppgaveResponseDto>>(uri, finnOppgaveRequest, HttpHeaders().medContentTypeJsonUTF8())
+        RessursUtils.assertGenerelleSuksessKriterier(respons)
+        return respons.data ?: throw IntegrasjonException("Respons fra hentOppgaver mangler data.", null, uri, null)
+    }
+
 }

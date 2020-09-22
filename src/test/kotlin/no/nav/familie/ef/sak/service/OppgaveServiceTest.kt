@@ -65,6 +65,23 @@ internal class OppgaveServiceTest {
         assertThat(slot.captured.beskrivelse).contains("https://ensligmorellerfar.prod-fss.nais.io/fagsak/$FAGSAK_ID")
     }
 
+    @Test
+    fun `Skal kunne hente oppgave gitt en ID`() {
+        every { oppgaveClient.finnOppgaveMedId(any<Long>()) } returns lagEksternTestOppgave()
+        val oppgave = oppgaveService.hentOppgave(OPPGAVE_ID_L)
+
+        assertThat(oppgave.id).isEqualTo(OPPGAVE_ID_L)
+    }
+
+    @Test
+    fun `Skal hente oppgaver gitt en filtrering`() {
+        every { oppgaveClient.hentOppgaver(any<FinnOppgaveRequest>()) } returns lagFinnOppgaveResponseDto()
+        val respons = oppgaveService.hentOppgaver(FinnOppgaveRequest(tema = Tema.ENF))
+
+        assertThat(respons.antallTreffTotalt).isEqualTo(1)
+        assertThat(respons.oppgaver.first().id).isEqualTo(OPPGAVE_ID_L)
+    }
+
     private fun lagTestBehandling(): Behandling {
         return Behandling(
                 fagsakId = FAGSAK_ID,
@@ -84,12 +101,25 @@ internal class OppgaveServiceTest {
         return Oppgave(behandlingId = BEHANDLING_ID, type = Oppgavetype.BehandleSak, gsakId = GSAK_ID)
     }
 
+    private fun lagEksternTestOppgave(): no.nav.familie.kontrakter.felles.oppgave.Oppgave {
+        return no.nav.familie.kontrakter.felles.oppgave.Oppgave(
+                id= OPPGAVE_ID_L
+        )
+    }
+
+    private fun lagFinnOppgaveResponseDto(): FinnOppgaveResponseDto {
+        return FinnOppgaveResponseDto(antallTreffTotalt =  1,
+                oppgaver = listOf(lagEksternTestOppgave())
+        )
+    }
+
     companion object {
 
         private val FAGSAK_ID = UUID.fromString("1242f220-cad3-4640-95c1-190ec814c91e")
         private val GSAK_ID = "12345"
         private val BEHANDLING_ID = UUID.fromString("1c4209bd-3217-4130-8316-8658fe300a84")
         private const val OPPGAVE_ID = "42"
+        private const val OPPGAVE_ID_L = 42L
         private const val ENHETSNUMMER = "enhetnr"
         private const val ENHETSNAVN = "enhetsnavn"
         private const val FNR = "11223312345"

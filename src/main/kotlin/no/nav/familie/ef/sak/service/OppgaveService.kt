@@ -53,7 +53,7 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
                     fristFerdigstillelse = fristForFerdigstillelse,
                     beskrivelse = lagOppgaveTekst(fagsak.id.toString(), beskrivelse),
                     enhetsnummer = enhetId ?: enhetsnummer?.enhetId,
-                    behandlingstema = finnBehandlingstema(fagsak.stønadstype).kode,
+                    behandlingstema = finnBehandlingstema(fagsak.stønadstype).value,
                     tilordnetRessurs = tilordnetNavIdent
             )
 
@@ -79,9 +79,9 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
 //        return oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(oppgavetype, behandling)
 //    }
 //
-//    fun hentOppgave(oppgaveId: Long): Oppgave {
-//        return integrasjonClient.finnOppgaveMedId(oppgaveId)
-//    }
+    fun hentOppgave(oppgaveId: Long): Oppgave {
+        return oppgaveClient.finnOppgaveMedId(oppgaveId)
+    }
 //
 //    fun ferdigstillOppgave(behandlingId: Long, oppgavetype: Oppgavetype) {
 //        val oppgave = oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(oppgavetype,
@@ -104,23 +104,16 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
                "https://ensligmorellerfar.prod-fss.nais.io/fagsak/${fagsakId}" // TODO: Denne bør konfigureres slik at url er riktig
     }
 
-    //
-//    fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): OppgaverOgAntall {
-//        return integrasjonClient.hentOppgaver(finnOppgaveRequest)
-//    }
-//
-    enum class Behandlingstema(val kode: String) {
 
-        SKOLEPENGER("ab0177"),
-        BARNETILSYN("ab0028"),
-        OVERGANGSSTØNAD("ab0071")
+    fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto {
+        return oppgaveClient.hentOppgaver(finnOppgaveRequest)
     }
 
     private fun finnBehandlingstema(stønadstype: Stønadstype): Behandlingstema {
         return when (stønadstype) {
-            Stønadstype.OVERGANGSSTØNAD -> Behandlingstema.OVERGANGSSTØNAD
-            Stønadstype.BARNETILSYN -> Behandlingstema.BARNETILSYN
-            Stønadstype.SKOLEPENGER -> Behandlingstema.SKOLEPENGER
+            Stønadstype.OVERGANGSSTØNAD -> Behandlingstema.Overgangsstønad
+            Stønadstype.BARNETILSYN -> Behandlingstema.Barnetilsyn
+            Stønadstype.SKOLEPENGER -> Behandlingstema.Skolepenger
         }
     }
 //
