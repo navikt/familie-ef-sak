@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.økonomi
 
-import no.nav.familie.ef.sak.økonomi.domain.AndelTilkjentYtelse
+import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators

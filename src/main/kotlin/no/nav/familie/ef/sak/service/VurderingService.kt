@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.service
 
-import no.nav.familie.ef.sak.api.gui.dto.Aleneomsorg
-import no.nav.familie.ef.sak.api.gui.dto.MedlemskapDto
+import no.nav.familie.ef.sak.api.dto.Aleneomsorg
+import no.nav.familie.ef.sak.api.dto.MedlemskapDto
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.integration.dto.pdl.Familierelasjonsrolle

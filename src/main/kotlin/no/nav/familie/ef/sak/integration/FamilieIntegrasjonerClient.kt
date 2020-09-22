@@ -6,8 +6,6 @@ import no.nav.familie.ef.sak.integration.dto.familie.Arbeidsfordelingsenhet
 import no.nav.familie.ef.sak.integration.dto.familie.EgenAnsattRequest
 import no.nav.familie.ef.sak.integration.dto.familie.EgenAnsattResponse
 import no.nav.familie.ef.sak.integration.dto.familie.Tilgang
-import no.nav.familie.ef.sak.integration.dto.personopplysning.PersonhistorikkInfo
-import no.nav.familie.ef.sak.integration.dto.personopplysning.Personinfo
 import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
@@ -20,7 +18,6 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestOperations
 import java.net.URI
-import java.time.LocalDate
 
 @Component
 class FamilieIntegrasjonerClient(@Qualifier("jwtBearer") restOperations: RestOperations,
@@ -54,22 +51,6 @@ class FamilieIntegrasjonerClient(@Qualifier("jwtBearer") restOperations: RestOpe
         } catch (e: RestClientException) {
             throw Feil("Kall mot integrasjon feilet ved henting av arbeidsfordelingsenhet uri=$uri", e)
         }
-    }
-
-    @Deprecated("bruk Pdl-løsning")
-    fun hentPersonopplysninger(ident: String): Personinfo {
-        return postForEntity<Ressurs<Personinfo>>(integrasjonerConfig.personopplysningerUri, Ident(ident)).data!!
-    }
-
-    @Deprecated("bruk Pdl-løsning")
-    fun hentPersonhistorikk(ident: String): PersonhistorikkInfo {
-
-        val uri = integrasjonerConfig.personhistorikkUriBuilder
-                .queryParam("fomDato", LocalDate.now().minusYears(5))
-                .queryParam("tomDato", LocalDate.now()).build().toUri()
-
-        return postForEntity<Ressurs<PersonhistorikkInfo>>(uri,
-                                                           Ident(ident)).data!!
     }
 
     fun egenAnsatt(ident: String): Boolean {

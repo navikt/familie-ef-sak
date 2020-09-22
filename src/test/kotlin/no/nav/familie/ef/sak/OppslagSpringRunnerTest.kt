@@ -3,8 +3,6 @@ package no.nav.familie.ef.sak
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
 import no.nav.familie.ef.sak.repository.domain.*
-import no.nav.familie.ef.sak.økonomi.domain.AndelTilkjentYtelse
-import no.nav.familie.ef.sak.økonomi.domain.TilkjentYtelse
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired

@@ -1,12 +1,18 @@
-package no.nav.familie.ef.sak.økonomi
+package no.nav.familie.ef.sak.service
 
+import no.nav.familie.ef.sak.mapper.tilDto
+import no.nav.familie.ef.sak.mapper.tilOpphør
+import no.nav.familie.ef.sak.mapper.tilTilkjentYtelse
 import no.nav.familie.ef.sak.repository.CustomRepository
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.økonomi.Utbetalingsoppdrag.lagUtbetalingsoppdrag
-import no.nav.familie.ef.sak.økonomi.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.økonomi.domain.TilkjentYtelseStatus
-import no.nav.familie.ef.sak.økonomi.domain.TilkjentYtelseType
-import no.nav.familie.ef.sak.økonomi.dto.TilkjentYtelseDTO
+import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus
+import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseType
+import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
+import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
+import no.nav.familie.ef.sak.integration.FAGSYSTEM
+import no.nav.familie.ef.sak.integration.ØkonomiKlient
 import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus

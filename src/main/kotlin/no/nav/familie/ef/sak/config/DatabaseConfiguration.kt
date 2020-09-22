@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.config
 
-import no.nav.familie.ef.sak.økonomi.domain.TilkjentYtelseStatus
+import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import org.springframework.context.annotation.Bean

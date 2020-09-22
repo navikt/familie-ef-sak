@@ -1,11 +1,16 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.økonomi
 
 import io.mockk.*
+import no.nav.familie.ef.sak.integration.ØkonomiKlient
+import no.nav.familie.ef.sak.mapper.tilOpphør
+import no.nav.familie.ef.sak.mapper.tilTilkjentYtelse
 import no.nav.familie.ef.sak.repository.CustomRepository
+import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.økonomi.*
 import no.nav.familie.ef.sak.økonomi.Utbetalingsoppdrag.lagUtbetalingsoppdrag
-import no.nav.familie.ef.sak.økonomi.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.økonomi.domain.TilkjentYtelseStatus
+import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus
+import no.nav.familie.ef.sak.service.TilkjentYtelseService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
