@@ -57,5 +57,4 @@ class FamilieIntegrasjonerClient(@Qualifier("jwtBearer") restOperations: RestOpe
         return postForEntity<Ressurs<EgenAnsattResponse>>(integrasjonerConfig.egenAnsattUri,
                                                           EgenAnsattRequest(ident)).data!!.erEgenAnsatt
     }
-
 }
