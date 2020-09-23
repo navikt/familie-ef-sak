@@ -21,21 +21,13 @@ import java.util.*
 internal class OppgaveServiceTest {
 
 
-    private var oppgaveClient = mockk<OppgaveClient>()
+    private val oppgaveClient = mockk<OppgaveClient>()
+    private val arbeidsfordelingService = mockk<ArbeidsfordelingService>()
+    private val behandlingRepository = mockk<BehandlingRepository>()
+    private val fagsakRepository = mockk<FagsakRepository>()
+    private val oppgaveRepository = mockk<OppgaveRepository>()
 
-    @MockK
-    private var arbeidsfordelingService = mockk<ArbeidsfordelingService>()
-
-    @MockK
-    private var behandlingRepository = mockk<BehandlingRepository>()
-
-    @MockK
-    private var fagsakRepository = mockk<FagsakRepository>()
-
-    @MockK
-    private var oppgaveRepository = mockk<OppgaveRepository>()
-
-    private var oppgaveService =
+    private val oppgaveService =
             OppgaveService(oppgaveClient,
                            behandlingRepository,
                            fagsakRepository,
