@@ -1,8 +1,6 @@
 package no.nav.familie.ef.sak.api.oppgave
 
 import no.nav.familie.ef.sak.service.OppgaveService
-import no.nav.familie.ef.sak.util.RessursUtils
-import no.nav.familie.ef.sak.util.RessursUtils.illegalState
 import no.nav.familie.ef.sak.util.RessursUtils.ok
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
@@ -21,51 +19,21 @@ class OppgaveController(val oppgaveService: OppgaveService) {
     @PostMapping(path = ["/hent-oppgaver"],
                  consumes = [MediaType.APPLICATION_JSON_VALUE],
                  produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun hentOppgaver(@RequestBody restFinnOppgaveRequest: RestFinnOppgaveRequest)
-            : ResponseEntity<Ressurs<FinnOppgaveResponseDto>> {
-        val oppgaver: FinnOppgaveResponseDto = oppgaveService.hentOppgaver(restFinnOppgaveRequest.tilFinnOppgaveRequest())
-        return ResponseEntity.ok().body(Ressurs.success(oppgaver, "Finn oppgaver OK"))
+    fun hentOppgaver(@RequestBody finnOppgaveRequest: FinnOppgaveRequestDto): ResponseEntity<Ressurs<FinnOppgaveResponseDto>> {
+        return ok(oppgaveService.hentOppgaver(finnOppgaveRequest.tilFinnOppgaveRequest()))
     }
 
 
-    @PostMapping(path = ["/{oppgaveId}/fordel"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun fordelOppgave(@PathVariable(name = "oppgaveId") oppgaveId: Long,
+    @PostMapping(path = ["/{gsakId}/fordel"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun fordelOppgave(@PathVariable(name = "gsakId") gsakId: Long,
                       @RequestParam("saksbehandler") saksbehandler: String
     ): ResponseEntity<Ressurs<Long>> {
-        return ok(oppgaveService.fordelOppgave(oppgaveId, saksbehandler))
+        return ok(oppgaveService.fordelOppgave(gsakId, saksbehandler))
     }
-//
-//    @PostMapping(path = ["/{oppgaveId}/tilbakestill"], produces = [MediaType.APPLICATION_JSON_VALUE])
-//    fun tilbakestillFordelingPåOppgave(@PathVariable(name = "oppgaveId") oppgaveId: Long): ResponseEntity<Ressurs<String>> {
-//        Result.runCatching {
-//            oppgaveService.tilbakestillFordelingPåOppgave(oppgaveId)
-//        }.fold(
-//                onSuccess = { return ResponseEntity.ok().body(Ressurs.Companion.success(it)) },
-//                onFailure = { return illegalState("Feil ved tilbakestilling av tildeling på oppgave", it) }
-//        )
-//    }
 
-//    @GetMapping(path = ["/{oppgaveId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
-//    fun hentDataForManuellJournalføring(@PathVariable(name = "oppgaveId") oppgaveId: Long)
-//            : ResponseEntity<Ressurs<DataForManuellJournalføring>> {
-//
-//        return Result.runCatching {
-//            val oppgave = oppgaveService.hentOppgave(oppgaveId)
-//            val personIdent = if (oppgave.aktoerId == null) null else {
-//                integrasjonClient.hentPersonIdent(oppgave.aktoerId) ?: error("Fant ikke personident for aktør id")
-//            }
-//            val fagsak = if (personIdent == null) null else fagsakService.hentRestFagsakForPerson(personIdent).data
-//
-//            Ressurs.success(DataForManuellJournalføring(
-//                    oppgave = oppgave,
-//                    journalpost = if (oppgave.journalpostId == null) null else integrasjonClient.hentJournalpost(oppgave.journalpostId!!).data
-//                                                                               ?: error("Feil ved henting av journalpost, data finnes ikke på ressurs"),
-//                    person = personIdent?.ident?.let { personopplysningerService.hentPersoninfoMedRelasjoner(it).toRestPersonInfo(it) },
-//                    fagsak = fagsak
-//            ))
-//        }.fold(
-//                onSuccess = { return ResponseEntity.ok().body(it) },
-//                onFailure = { illegalState("Ukjent feil ved henting data for manuell journalføring.", it) }
-//        )
-//    }
+    @PostMapping(path = ["/{gsakId}/tilbakestill"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun tilbakestillFordelingPåOppgave(@PathVariable(name = "gsakId") gsakId: Long): ResponseEntity<Ressurs<Long>> {
+        return ok(oppgaveService.tilbakestillFordelingPåOppgave(gsakId))
+    }
+
 }
