@@ -43,7 +43,6 @@ abstract class OppslagSpringRunnerTest {
                TilkjentYtelse::class,
                Oppgave::class,
                Behandling::class,
-               FagsakPerson::class,
                Fagsak::class
         ).forEach { jdbcAggregateOperations.deleteAll(it.java) }
     }
