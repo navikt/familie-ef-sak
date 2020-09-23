@@ -6,6 +6,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Test
 import org.springframework.data.repository.CrudRepository
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Repository
 import java.util.*
 
@@ -19,7 +20,7 @@ internal class RepositoryUtilTest {
     @Test
     internal fun `findOrThrow - kaster exception`() {
         val testRepository = mockk<TestRepository>()
-        every { testRepository.findById(any()) } returns Optional.empty()
+        every { testRepository.findByIdOrNull(any()) } returns null
         assertThat(catchThrowable { testRepository.findByIdOrThrow("123") })
                 .hasMessage("Finner ikke TestDomene med id=123")
                 .isInstanceOf(IllegalStateException::class.java)
@@ -28,7 +29,7 @@ internal class RepositoryUtilTest {
     @Test
     internal fun `findOrThrow`() {
         val testRepository = mockk<TestRepository>()
-        every { testRepository.findById(any()) } returns Optional.of(TestDomene(""))
+        every { testRepository.findByIdOrNull(any()) } returns TestDomene("")
         assertThat(testRepository.findByIdOrThrow("123")).isNotNull
     }
 }
