@@ -21,7 +21,8 @@ internal class ArbeidsfordelingServiceTest {
     @BeforeEach
     internal fun setUp() {
         personService = mockk()
-        familieIntegrasjonerClient = mockk(relaxed = true)
+        familieIntegrasjonerClient = mockk()
+        every { familieIntegrasjonerClient.hentNavEnhet(any()) } returns listOf()
         arbeidsfordelingService = ArbeidsfordelingService(personService, familieIntegrasjonerClient)
     }
 

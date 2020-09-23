@@ -112,7 +112,7 @@ internal class OppgaveServiceTest {
     fun `Fordel oppgave skal tildele oppgave til saksbehandler`() {
         val oppgaveSlot = slot<Long>()
         val saksbehandlerSlot = slot<String>()
-        every { oppgaveClient.fordelOppgave(capture(oppgaveSlot), capture(saksbehandlerSlot)) } returns OPPGAVE_ID
+        every { oppgaveClient.fordelOppgave(capture(oppgaveSlot), capture(saksbehandlerSlot)) } returns GSAK_ID
 
         oppgaveService.fordelOppgave(GSAK_ID, SAKSBEHANDLER_ID)
 
@@ -123,7 +123,7 @@ internal class OppgaveServiceTest {
     @Test
     fun `Tilbakestill oppgave skal nullstille tildeling på oppgave`() {
         val oppgaveSlot = slot<Long>()
-        every { oppgaveClient.fordelOppgave(capture(oppgaveSlot), any()) } returns OPPGAVE_ID
+        every { oppgaveClient.fordelOppgave(capture(oppgaveSlot), any()) } returns GSAK_ID
 
         oppgaveService.tilbakestillFordelingPåOppgave(GSAK_ID)
 
@@ -167,7 +167,6 @@ internal class OppgaveServiceTest {
         private val FAGSAK_ID = UUID.fromString("1242f220-cad3-4640-95c1-190ec814c91e")
         private val GSAK_ID = 12345L
         private val BEHANDLING_ID = UUID.fromString("1c4209bd-3217-4130-8316-8658fe300a84")
-        private const val OPPGAVE_ID = "42"
         private const val ENHETSNUMMER = "enhetnr"
         private const val ENHETSNAVN = "enhetsnavn"
         private const val FNR = "11223312345"

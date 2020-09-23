@@ -21,7 +21,6 @@ class ArbeidsfordelingService(private val personService: PersonService,
                                            }
         val identMedStrengeste = finnPersonMedStrengesteAdressebeskyttelse(identerMedAdressebeskyttelse)
         return familieIntegrasjonerClient.hentNavEnhet(identMedStrengeste ?: ident).firstOrNull()
-
     }
 
 }
