@@ -74,8 +74,4 @@ class OppgaveClient(@Qualifier("jwtBearer") restOperations: RestOperations,
         }
     }
 
-    private fun responseBody(it: Throwable): String? {
-        return if (it is RestClientResponseException) it.responseBodyAsString else ""
-    }
-
 }
