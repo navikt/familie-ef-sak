@@ -13,7 +13,7 @@ data class Oppgave(@Id
                    @Column("behandling_id")
                    val behandlingId: UUID,
                    @Column("gsak_id")
-                   val gsakId: String,
+                   val gsakId: Long,
                    val type: Oppgavetype,
                    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                    val sporbar: Sporbar = Sporbar(),

@@ -1,9 +1,7 @@
 package no.nav.familie.ef.sak.service
 
-import io.mockk.every
+import io.mockk.*
 import io.mockk.impl.annotations.MockK
-import io.mockk.mockk
-import io.mockk.slot
 import no.nav.familie.ef.sak.integration.OppgaveClient
 import no.nav.familie.ef.sak.integration.dto.familie.Arbeidsfordelingsenhet
 import no.nav.familie.ef.sak.repository.BehandlingRepository
@@ -12,6 +10,7 @@ import no.nav.familie.ef.sak.repository.OppgaveRepository
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.repository.domain.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.*
+import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.data.repository.findByIdOrNull
@@ -43,15 +42,15 @@ internal class OppgaveServiceTest {
     fun `Opprett oppgave skal samle data og opprette en ny oppgave basert på fagsak, behandling, fnr og enhet`() {
         every { behandlingRepository.findByIdOrNull(BEHANDLING_ID) } returns lagTestBehandling()
         every { fagsakRepository.findByIdOrNull(FAGSAK_ID) } returns lagTestFagsak()
-        every { behandlingRepository.save(any<Behandling>()) } returns lagTestBehandling()
-        every { oppgaveRepository.save(any<Oppgave>()) } returns lagTestOppgave()
+        every { behandlingRepository.save(any()) } returns lagTestBehandling()
+        every { oppgaveRepository.save(any()) } returns lagTestOppgave()
         every {
-            oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any<UUID>(), any<Oppgavetype>())
+            oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any())
         } returns null
         every { arbeidsfordelingService.hentNavEnhet(any()) } returns Arbeidsfordelingsenhet(enhetId = ENHETSNUMMER,
                                                                                              enhetNavn = ENHETSNAVN)
         val slot = slot<OpprettOppgaveRequest>()
-        every { oppgaveClient.opprettOppgave(capture(slot)) } returns OPPGAVE_ID
+        every { oppgaveClient.opprettOppgave(capture(slot)) } returns GSAK_ID
 
         oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak, FRIST_FERDIGSTILLELSE_BEH_SAK)
 
@@ -67,19 +66,69 @@ internal class OppgaveServiceTest {
 
     @Test
     fun `Skal kunne hente oppgave gitt en ID`() {
-        every { oppgaveClient.finnOppgaveMedId(any<Long>()) } returns lagEksternTestOppgave()
-        val oppgave = oppgaveService.hentOppgave(OPPGAVE_ID_L)
+        every { oppgaveClient.finnOppgaveMedId(any()) } returns lagEksternTestOppgave()
+        val oppgave = oppgaveService.hentOppgave(GSAK_ID)
 
-        assertThat(oppgave.id).isEqualTo(OPPGAVE_ID_L)
+        assertThat(oppgave.id).isEqualTo(GSAK_ID)
     }
 
     @Test
     fun `Skal hente oppgaver gitt en filtrering`() {
-        every { oppgaveClient.hentOppgaver(any<FinnOppgaveRequest>()) } returns lagFinnOppgaveResponseDto()
+        every { oppgaveClient.hentOppgaver(any()) } returns lagFinnOppgaveResponseDto()
         val respons = oppgaveService.hentOppgaver(FinnOppgaveRequest(tema = Tema.ENF))
 
         assertThat(respons.antallTreffTotalt).isEqualTo(1)
-        assertThat(respons.oppgaver.first().id).isEqualTo(OPPGAVE_ID_L)
+        assertThat(respons.oppgaver.first().id).isEqualTo(GSAK_ID)
+    }
+
+    @Test
+    fun `Ferdigstill oppgave`() {
+        every { behandlingRepository.findByIdOrNull(BEHANDLING_ID) } returns mockk {}
+        every {
+            oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any())
+        } returns lagTestOppgave()
+        every { oppgaveRepository.save(any()) } returns lagTestOppgave()
+        val slot = slot<Long>()
+        every { oppgaveClient.ferdigstillOppgave(capture(slot)) } just runs
+
+        oppgaveService.ferdigstillOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak)
+        assertThat(slot.captured).isEqualTo(GSAK_ID)
+    }
+
+    @Test
+    fun `Ferdigstill oppgave feiler fordi den ikke finner oppgave på behandlingen`() {
+        every {
+            oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any())
+        } returns null
+        every { oppgaveRepository.save(any()) } returns lagTestOppgave()
+        every { behandlingRepository.findByIdOrNull(BEHANDLING_ID) } returns mockk {}
+
+        Assertions.assertThatThrownBy { oppgaveService.ferdigstillOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak) }
+                .hasMessage("Finner ikke oppgave for behandling $BEHANDLING_ID")
+                .isInstanceOf(java.lang.IllegalStateException::class.java)
+    }
+
+    @Test
+    fun `Fordel oppgave skal tildele oppgave til saksbehandler`() {
+        val oppgaveSlot = slot<Long>()
+        val saksbehandlerSlot = slot<String>()
+        every { oppgaveClient.fordelOppgave(capture(oppgaveSlot), capture(saksbehandlerSlot)) } returns OPPGAVE_ID
+
+        oppgaveService.fordelOppgave(GSAK_ID, SAKSBEHANDLER_ID)
+
+        assertThat(GSAK_ID).isEqualTo(oppgaveSlot.captured)
+        assertThat(SAKSBEHANDLER_ID).isEqualTo(saksbehandlerSlot.captured)
+    }
+
+    @Test
+    fun `Tilbakestill oppgave skal nullstille tildeling på oppgave`() {
+        val oppgaveSlot = slot<Long>()
+        every { oppgaveClient.fordelOppgave(capture(oppgaveSlot), any()) } returns OPPGAVE_ID
+
+        oppgaveService.tilbakestillFordelingPåOppgave(GSAK_ID)
+
+        assertThat(GSAK_ID).isEqualTo(oppgaveSlot.captured)
+        verify(exactly = 1) { oppgaveClient.fordelOppgave(any(), null) }
     }
 
     private fun lagTestBehandling(): Behandling {
@@ -103,23 +152,22 @@ internal class OppgaveServiceTest {
 
     private fun lagEksternTestOppgave(): no.nav.familie.kontrakter.felles.oppgave.Oppgave {
         return no.nav.familie.kontrakter.felles.oppgave.Oppgave(
-                id= OPPGAVE_ID_L
+                id = GSAK_ID
         )
     }
 
     private fun lagFinnOppgaveResponseDto(): FinnOppgaveResponseDto {
-        return FinnOppgaveResponseDto(antallTreffTotalt =  1,
-                oppgaver = listOf(lagEksternTestOppgave())
+        return FinnOppgaveResponseDto(antallTreffTotalt = 1,
+                                      oppgaver = listOf(lagEksternTestOppgave())
         )
     }
 
     companion object {
 
         private val FAGSAK_ID = UUID.fromString("1242f220-cad3-4640-95c1-190ec814c91e")
-        private val GSAK_ID = "12345"
+        private val GSAK_ID = 12345L
         private val BEHANDLING_ID = UUID.fromString("1c4209bd-3217-4130-8316-8658fe300a84")
         private const val OPPGAVE_ID = "42"
-        private const val OPPGAVE_ID_L = 42L
         private const val ENHETSNUMMER = "enhetnr"
         private const val ENHETSNAVN = "enhetsnavn"
         private const val FNR = "11223312345"

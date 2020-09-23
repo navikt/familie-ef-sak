@@ -28,13 +28,13 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `findByFagsakIdAndAktivIsTrue`() {
         val fagsak = customRepository.persist(fagsak())
-        val behandling = customRepository.persist(behandling(fagsak, aktiv = false))
+        customRepository.persist(behandling(fagsak, aktiv = false))
 
-        assertThat(behandlingRepository.findByFagsakId(UUID.randomUUID())).isEmpty()
-        assertThat(behandlingRepository.findByFagsakId(fagsak.id)).isEmpty()
+        assertThat(behandlingRepository.findByFagsakIdAndAktivIsTrue(UUID.randomUUID())).isNull()
+        assertThat(behandlingRepository.findByFagsakIdAndAktivIsTrue(fagsak.id)).isNull()
 
         val aktivBehandling = customRepository.persist(behandling(fagsak, aktiv = true))
-        assertThat(behandlingRepository.findByFagsakId(fagsak.id)).containsOnly(aktivBehandling)
+        assertThat(behandlingRepository.findByFagsakIdAndAktivIsTrue(fagsak.id)).isEqualTo(aktivBehandling)
     }
 
     @Test

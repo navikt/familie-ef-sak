@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.integration.OppgaveClient
 import no.nav.familie.ef.sak.repository.BehandlingRepository
 import no.nav.familie.ef.sak.repository.FagsakRepository
 import no.nav.familie.ef.sak.repository.OppgaveRepository
+import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.kontrakter.felles.oppgave.*
 import org.slf4j.LoggerFactory
@@ -13,7 +14,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
-import no.nav.familie.ef.sak.repository.domain.Oppgave as EFOppgave
+import no.nav.familie.ef.sak.repository.domain.Oppgave as EfOppgave
 
 
 @Service
@@ -30,7 +31,7 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
                        fristForFerdigstillelse: LocalDate,
                        enhetId: String? = null,
                        tilordnetNavIdent: String? = null,
-                       beskrivelse: String? = null): String {
+                       beskrivelse: String? = null): Long {
         val behandling =
                 behandlingRepository.findByIdOrNull(behandlingId) ?: error("Finner ikke behandling med id=${behandlingId}")
         val fagsak =
@@ -59,7 +60,7 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
 
             val opprettetOppgaveId = oppgaveClient.opprettOppgave(opprettOppgave)
 
-            val oppgave = EFOppgave(gsakId = opprettetOppgaveId,
+            val oppgave = EfOppgave(gsakId = opprettetOppgaveId,
                                     behandlingId = behandling.id,
                                     type = oppgavetype)
             oppgaveRepository.save(oppgave)
@@ -67,33 +68,31 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
         }
     }
 
-    //    fun fordelOppgave(oppgaveId: Long, saksbehandler: String): String {
-//        return integrasjonClient.fordelOppgave(oppgaveId, saksbehandler)
-//    }
-//
-//    fun tilbakestillFordelingPåOppgave(oppgaveId: Long): String {
-//        return integrasjonClient.fordelOppgave(oppgaveId, null)
-//    }
-//
-//    fun hentOppgaveSomIkkeErFerdigstilt(oppgavetype: Oppgavetype, behandling: Behandling): Oppgave? {
-//        return oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(oppgavetype, behandling)
-//    }
-//
-    fun hentOppgave(oppgaveId: Long): Oppgave {
-        return oppgaveClient.finnOppgaveMedId(oppgaveId)
+    fun fordelOppgave(gsakId: Long, saksbehandler: String): String {
+        return oppgaveClient.fordelOppgave(gsakId, saksbehandler)
     }
-//
-//    fun ferdigstillOppgave(behandlingId: Long, oppgavetype: Oppgavetype) {
-//        val oppgave = oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(oppgavetype,
-//                                                                                         behandlingRepository.finnBehandling(
-//                                                                                                 behandlingId))
-//                      ?: error("Finner ikke oppgave for behandling $behandlingId")
-//        integrasjonClient.ferdigstillOppgave(oppgave.gsakId.toLong())
-//
-//        oppgave.erFerdigstilt = true
-//        oppgaveRepository.save(oppgave)
-//    }
-//
+
+    fun tilbakestillFordelingPåOppgave(gsakId: Long): String {
+        return oppgaveClient.fordelOppgave(gsakId, null)
+    }
+
+    fun hentOppgaveSomIkkeErFerdigstilt(oppgavetype: Oppgavetype, behandling: Behandling): EfOppgave? {
+        return oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandling.id, oppgavetype)
+    }
+
+    fun hentOppgave(gsakId: Long): Oppgave {
+        return oppgaveClient.finnOppgaveMedId(gsakId)
+    }
+
+    fun ferdigstillOppgave(behandlingId: UUID, oppgavetype: Oppgavetype) {
+        val oppgave = oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
+                      ?: error("Finner ikke oppgave for behandling $behandlingId")
+        oppgaveClient.ferdigstillOppgave(oppgave.gsakId.toLong())
+
+        oppgave.erFerdigstilt = true
+        oppgaveRepository.save(oppgave)
+    }
+
     fun lagOppgaveTekst(fagsakId: String, beskrivelse: String? = null): String {
         return if (beskrivelse != null) {
             beskrivelse + "\n"
@@ -116,8 +115,5 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
             Stønadstype.SKOLEPENGER -> Behandlingstema.Skolepenger
         }
     }
-//
-//    companion object {
-//        val LOG = LoggerFactory.getLogger(this::class.java)
-//    }
+
 }
