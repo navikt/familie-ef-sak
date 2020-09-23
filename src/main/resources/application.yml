@@ -80,4 +80,4 @@ STS_URL: http://security-token-service.default.svc.nais.local/rest/v1/sts/token?
 PDL_URL: http://pdl-api
 FAMILIE_OPPDRAG_API_URL: http://familie-oppdrag
 
-
+FRONTEND_OPPGAVE_URL: https://ensligmorellerfar.prod-fss.nais.io/fagsak

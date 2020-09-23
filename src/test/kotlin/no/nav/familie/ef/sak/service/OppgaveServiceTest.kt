@@ -14,6 +14,7 @@ import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.data.repository.findByIdOrNull
+import java.net.URI
 import java.time.LocalDate
 import java.util.*
 
@@ -35,8 +36,12 @@ internal class OppgaveServiceTest {
     private var oppgaveRepository = mockk<OppgaveRepository>()
 
     private var oppgaveService =
-            OppgaveService(oppgaveClient, behandlingRepository, fagsakRepository, oppgaveRepository, arbeidsfordelingService)
-
+            OppgaveService(oppgaveClient,
+                           behandlingRepository,
+                           fagsakRepository,
+                           oppgaveRepository,
+                           arbeidsfordelingService,
+                           URI.create("https://ensligmorellerfar.prod-fss.nais.io/fagsak"))
 
     @Test
     fun `Opprett oppgave skal samle data og opprette en ny oppgave basert på fagsak, behandling, fnr og enhet`() {

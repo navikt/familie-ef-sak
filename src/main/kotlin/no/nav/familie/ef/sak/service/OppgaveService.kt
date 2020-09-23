@@ -8,8 +8,10 @@ import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.kontrakter.felles.oppgave.*
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import java.net.URI
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -22,7 +24,8 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
                      private val behandlingRepository: BehandlingRepository,
                      private val fagsakRepository: FagsakRepository,
                      private val oppgaveRepository: OppgaveRepository,
-                     private val arbeidsfordelingService: ArbeidsfordelingService) {
+                     private val arbeidsfordelingService: ArbeidsfordelingService,
+                     @Value("\${FRONTEND_OPPGAVE_URL}") private val frontendOppgaveUrl: URI) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -100,9 +103,8 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
             ""
         } +
                "----- Opprettet av familie-ef-sak ${LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)} --- \n" +
-               "https://ensligmorellerfar.prod-fss.nais.io/fagsak/${fagsakId}" // TODO: Denne bør konfigureres slik at url er riktig
+               "${frontendOppgaveUrl}/${fagsakId}"
     }
-
 
     fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto {
         return oppgaveClient.hentOppgaver(finnOppgaveRequest)
