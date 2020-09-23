@@ -1,17 +1,16 @@
 package no.nav.familie.ef.sak.api.oppgave
 
 import no.nav.familie.ef.sak.service.OppgaveService
+import no.nav.familie.ef.sak.util.RessursUtils
 import no.nav.familie.ef.sak.util.RessursUtils.illegalState
+import no.nav.familie.ef.sak.util.RessursUtils.ok
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/oppgave")
@@ -23,27 +22,18 @@ class OppgaveController(val oppgaveService: OppgaveService) {
                  consumes = [MediaType.APPLICATION_JSON_VALUE],
                  produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentOppgaver(@RequestBody restFinnOppgaveRequest: RestFinnOppgaveRequest)
-            : ResponseEntity<Ressurs<FinnOppgaveResponseDto>> =
-            try {
-                val oppgaver: FinnOppgaveResponseDto = oppgaveService.hentOppgaver(restFinnOppgaveRequest.tilFinnOppgaveRequest())
-                ResponseEntity.ok().body(Ressurs.success(oppgaver, "Finn oppgaver OK"))
-            } catch (e: Throwable) {
-                illegalState("Henting av oppgaver feilet", e)
-            }
+            : ResponseEntity<Ressurs<FinnOppgaveResponseDto>> {
+        val oppgaver: FinnOppgaveResponseDto = oppgaveService.hentOppgaver(restFinnOppgaveRequest.tilFinnOppgaveRequest())
+        return ResponseEntity.ok().body(Ressurs.success(oppgaver, "Finn oppgaver OK"))
+    }
 
 
-//    @PostMapping(path = ["/{oppgaveId}/fordel"], produces = [MediaType.APPLICATION_JSON_VALUE])
-//    fun fordelOppgave(@PathVariable(name = "oppgaveId") oppgaveId: Long,
-//                      @RequestParam("saksbehandler") saksbehandler: String
-//    ): ResponseEntity<Ressurs<String>> {
-//
-//        Result.runCatching {
-//            oppgaveService.fordelOppgave(oppgaveId, saksbehandler)
-//        }.fold(
-//                onSuccess = { return ResponseEntity.ok().body(Ressurs.success(it)) },
-//                onFailure = { return illegalState("Feil ved tildeling av oppgave", it) }
-//        )
-//    }
+    @PostMapping(path = ["/{oppgaveId}/fordel"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun fordelOppgave(@PathVariable(name = "oppgaveId") oppgaveId: Long,
+                      @RequestParam("saksbehandler") saksbehandler: String
+    ): ResponseEntity<Ressurs<Long>> {
+        return ok(oppgaveService.fordelOppgave(oppgaveId, saksbehandler))
+    }
 //
 //    @PostMapping(path = ["/{oppgaveId}/tilbakestill"], produces = [MediaType.APPLICATION_JSON_VALUE])
 //    fun tilbakestillFordelingPåOppgave(@PathVariable(name = "oppgaveId") oppgaveId: Long): ResponseEntity<Ressurs<String>> {
