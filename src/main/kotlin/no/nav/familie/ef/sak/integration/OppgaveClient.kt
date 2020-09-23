@@ -23,7 +23,7 @@ class OppgaveClient(@Qualifier("jwtBearer") restOperations: RestOperations,
     private val oppgaveUri: URI = integrasjonerConfig.oppgaveUri
 
     fun opprettOppgave(opprettOppgave: OpprettOppgaveRequest): Long {
-        val uri = URI.create("$oppgaveUri/v2")
+        val uri = URI.create("$oppgaveUri/opprett")
 
         val respons = postForEntity<Ressurs<OppgaveResponse>>(uri, opprettOppgave, HttpHeaders().medContentTypeJsonUTF8())
         return pakkUtRespons(respons, uri, "opprettOppgave").oppgaveId
