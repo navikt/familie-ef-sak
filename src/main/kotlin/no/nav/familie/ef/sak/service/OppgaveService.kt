@@ -46,7 +46,7 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
             logger.error("Fant eksisterende oppgave med samme oppgavetype som ikke er ferdigstilt ved opprettelse av ny oppgave ${eksisterendeOppgave}. " +
                          "Vi går videre, men kaster feil for å følge med på utviklingen.")
 
-            eksisterendeOppgave.gsakId
+            eksisterendeOppgave.gsakOppgaveId
         } else {
             val enhetsnummer = arbeidsfordelingService.hentNavEnhet(fagsak.hentAktivIdent())
             val opprettOppgave = OpprettOppgaveRequest(
@@ -63,7 +63,7 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
 
             val opprettetOppgaveId = oppgaveClient.opprettOppgave(opprettOppgave)
 
-            val oppgave = EfOppgave(gsakId = opprettetOppgaveId,
+            val oppgave = EfOppgave(gsakOppgaveId = opprettetOppgaveId,
                                     behandlingId = behandling.id,
                                     type = oppgavetype)
             oppgaveRepository.save(oppgave)
@@ -71,26 +71,26 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
         }
     }
 
-    fun fordelOppgave(gsakId: Long, saksbehandler: String): Long {
-        return oppgaveClient.fordelOppgave(gsakId, saksbehandler)
+    fun fordelOppgave(gsakOppgaveId: Long, saksbehandler: String): Long {
+        return oppgaveClient.fordelOppgave(gsakOppgaveId, saksbehandler)
     }
 
-    fun tilbakestillFordelingPåOppgave(gsakId: Long): Long {
-        return oppgaveClient.fordelOppgave(gsakId, null)
+    fun tilbakestillFordelingPåOppgave(gsakOppgaveId: Long): Long {
+        return oppgaveClient.fordelOppgave(gsakOppgaveId, null)
     }
 
     fun hentOppgaveSomIkkeErFerdigstilt(oppgavetype: Oppgavetype, behandling: Behandling): EfOppgave? {
         return oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandling.id, oppgavetype)
     }
 
-    fun hentOppgave(gsakId: Long): Oppgave {
-        return oppgaveClient.finnOppgaveMedId(gsakId)
+    fun hentOppgave(gsakOppgaveId: Long): Oppgave {
+        return oppgaveClient.finnOppgaveMedId(gsakOppgaveId)
     }
 
     fun ferdigstillOppgave(behandlingId: UUID, oppgavetype: Oppgavetype) {
         val oppgave = oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
                       ?: error("Finner ikke oppgave for behandling $behandlingId")
-        oppgaveClient.ferdigstillOppgave(oppgave.gsakId.toLong())
+        oppgaveClient.ferdigstillOppgave(oppgave.gsakOppgaveId.toLong())
 
         oppgave.erFerdigstilt = true
         oppgaveRepository.save(oppgave)

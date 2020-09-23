@@ -6,7 +6,7 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 fun oppgave(behandling: Behandling, erFerdigstilt: Boolean = false): Oppgave {
     return Oppgave(
             behandlingId = behandling.id!!,
-            gsakId = 123,
+            gsakOppgaveId = 123,
             type = Oppgavetype.Journalføring,
             erFerdigstilt = erFerdigstilt
     )

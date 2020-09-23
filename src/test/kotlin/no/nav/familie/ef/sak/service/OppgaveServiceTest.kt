@@ -46,7 +46,7 @@ internal class OppgaveServiceTest {
         every { arbeidsfordelingService.hentNavEnhet(any()) } returns Arbeidsfordelingsenhet(enhetId = ENHETSNUMMER,
                                                                                              enhetNavn = ENHETSNAVN)
         val slot = slot<OpprettOppgaveRequest>()
-        every { oppgaveClient.opprettOppgave(capture(slot)) } returns GSAK_ID
+        every { oppgaveClient.opprettOppgave(capture(slot)) } returns GSAK_OPPGAVE_ID
 
         oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak, FRIST_FERDIGSTILLELSE_BEH_SAK)
 
@@ -63,9 +63,9 @@ internal class OppgaveServiceTest {
     @Test
     fun `Skal kunne hente oppgave gitt en ID`() {
         every { oppgaveClient.finnOppgaveMedId(any()) } returns lagEksternTestOppgave()
-        val oppgave = oppgaveService.hentOppgave(GSAK_ID)
+        val oppgave = oppgaveService.hentOppgave(GSAK_OPPGAVE_ID)
 
-        assertThat(oppgave.id).isEqualTo(GSAK_ID)
+        assertThat(oppgave.id).isEqualTo(GSAK_OPPGAVE_ID)
     }
 
     @Test
@@ -74,7 +74,7 @@ internal class OppgaveServiceTest {
         val respons = oppgaveService.hentOppgaver(FinnOppgaveRequest(tema = Tema.ENF))
 
         assertThat(respons.antallTreffTotalt).isEqualTo(1)
-        assertThat(respons.oppgaver.first().id).isEqualTo(GSAK_ID)
+        assertThat(respons.oppgaver.first().id).isEqualTo(GSAK_OPPGAVE_ID)
     }
 
     @Test
@@ -88,7 +88,7 @@ internal class OppgaveServiceTest {
         every { oppgaveClient.ferdigstillOppgave(capture(slot)) } just runs
 
         oppgaveService.ferdigstillOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak)
-        assertThat(slot.captured).isEqualTo(GSAK_ID)
+        assertThat(slot.captured).isEqualTo(GSAK_OPPGAVE_ID)
     }
 
     @Test
@@ -108,22 +108,22 @@ internal class OppgaveServiceTest {
     fun `Fordel oppgave skal tildele oppgave til saksbehandler`() {
         val oppgaveSlot = slot<Long>()
         val saksbehandlerSlot = slot<String>()
-        every { oppgaveClient.fordelOppgave(capture(oppgaveSlot), capture(saksbehandlerSlot)) } returns GSAK_ID
+        every { oppgaveClient.fordelOppgave(capture(oppgaveSlot), capture(saksbehandlerSlot)) } returns GSAK_OPPGAVE_ID
 
-        oppgaveService.fordelOppgave(GSAK_ID, SAKSBEHANDLER_ID)
+        oppgaveService.fordelOppgave(GSAK_OPPGAVE_ID, SAKSBEHANDLER_ID)
 
-        assertThat(GSAK_ID).isEqualTo(oppgaveSlot.captured)
+        assertThat(GSAK_OPPGAVE_ID).isEqualTo(oppgaveSlot.captured)
         assertThat(SAKSBEHANDLER_ID).isEqualTo(saksbehandlerSlot.captured)
     }
 
     @Test
     fun `Tilbakestill oppgave skal nullstille tildeling på oppgave`() {
         val oppgaveSlot = slot<Long>()
-        every { oppgaveClient.fordelOppgave(capture(oppgaveSlot), any()) } returns GSAK_ID
+        every { oppgaveClient.fordelOppgave(capture(oppgaveSlot), any()) } returns GSAK_OPPGAVE_ID
 
-        oppgaveService.tilbakestillFordelingPåOppgave(GSAK_ID)
+        oppgaveService.tilbakestillFordelingPåOppgave(GSAK_OPPGAVE_ID)
 
-        assertThat(GSAK_ID).isEqualTo(oppgaveSlot.captured)
+        assertThat(GSAK_OPPGAVE_ID).isEqualTo(oppgaveSlot.captured)
         verify(exactly = 1) { oppgaveClient.fordelOppgave(any(), null) }
     }
 
@@ -143,12 +143,12 @@ internal class OppgaveServiceTest {
     }
 
     private fun lagTestOppgave(): Oppgave {
-        return Oppgave(behandlingId = BEHANDLING_ID, type = Oppgavetype.BehandleSak, gsakId = GSAK_ID)
+        return Oppgave(behandlingId = BEHANDLING_ID, type = Oppgavetype.BehandleSak, gsakOppgaveId = GSAK_OPPGAVE_ID)
     }
 
     private fun lagEksternTestOppgave(): no.nav.familie.kontrakter.felles.oppgave.Oppgave {
         return no.nav.familie.kontrakter.felles.oppgave.Oppgave(
-                id = GSAK_ID
+                id = GSAK_OPPGAVE_ID
         )
     }
 
@@ -161,7 +161,7 @@ internal class OppgaveServiceTest {
     companion object {
 
         private val FAGSAK_ID = UUID.fromString("1242f220-cad3-4640-95c1-190ec814c91e")
-        private val GSAK_ID = 12345L
+        private val GSAK_OPPGAVE_ID = 12345L
         private val BEHANDLING_ID = UUID.fromString("1c4209bd-3217-4130-8316-8658fe300a84")
         private const val ENHETSNUMMER = "enhetnr"
         private const val ENHETSNAVN = "enhetsnavn"

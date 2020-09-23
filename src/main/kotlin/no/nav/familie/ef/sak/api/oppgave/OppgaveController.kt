@@ -24,16 +24,16 @@ class OppgaveController(val oppgaveService: OppgaveService) {
     }
 
 
-    @PostMapping(path = ["/{gsakId}/fordel"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun fordelOppgave(@PathVariable(name = "gsakId") gsakId: Long,
+    @PostMapping(path = ["/{gsakOppgaveId}/fordel"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun fordelOppgave(@PathVariable(name = "gsakOppgaveId") gsakOppgaveId: Long,
                       @RequestParam("saksbehandler") saksbehandler: String
     ): ResponseEntity<Ressurs<Long>> {
-        return ok(oppgaveService.fordelOppgave(gsakId, saksbehandler))
+        return ok(oppgaveService.fordelOppgave(gsakOppgaveId, saksbehandler))
     }
 
-    @PostMapping(path = ["/{gsakId}/tilbakestill"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun tilbakestillFordelingPåOppgave(@PathVariable(name = "gsakId") gsakId: Long): ResponseEntity<Ressurs<Long>> {
-        return ok(oppgaveService.tilbakestillFordelingPåOppgave(gsakId))
+    @PostMapping(path = ["/{gsakOppgaveId}/tilbakestill"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun tilbakestillFordelingPåOppgave(@PathVariable(name = "gsakOppgaveId") gsakOppgaveId: Long): ResponseEntity<Ressurs<Long>> {
+        return ok(oppgaveService.tilbakestillFordelingPåOppgave(gsakOppgaveId))
     }
 
 }

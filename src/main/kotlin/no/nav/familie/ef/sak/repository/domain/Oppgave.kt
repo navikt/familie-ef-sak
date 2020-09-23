@@ -12,8 +12,8 @@ data class Oppgave(@Id
                    val id: UUID = UUID.randomUUID(),
                    @Column("behandling_id")
                    val behandlingId: UUID,
-                   @Column("gsak_id")
-                   val gsakId: Long,
+                   @Column("gsak_oppgave_id")
+                   val gsakOppgaveId: Long,
                    val type: Oppgavetype,
                    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                    val sporbar: Sporbar = Sporbar(),

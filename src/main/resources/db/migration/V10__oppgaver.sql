@@ -1,7 +1,7 @@
 CREATE TABLE oppgave (
     id                  UUID            PRIMARY KEY,
     behandling_id       UUID            REFERENCES behandling (id),
-    gsak_id             BIGINT         NOT NULL,
+    gsak_oppgave_id     BIGINT          NOT NULL,
     type                VARCHAR         NOT NULL,
     ferdigstilt         BOOLEAN         NOT NULL,
     opprettet_av        VARCHAR         NOT NULL DEFAULT 'VL',
