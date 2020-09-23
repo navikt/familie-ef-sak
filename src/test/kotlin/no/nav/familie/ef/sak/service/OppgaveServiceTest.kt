@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.service
 
 import io.mockk.*
-import io.mockk.impl.annotations.MockK
 import no.nav.familie.ef.sak.integration.OppgaveClient
 import no.nav.familie.ef.sak.integration.dto.familie.Arbeidsfordelingsenhet
 import no.nav.familie.ef.sak.repository.BehandlingRepository
