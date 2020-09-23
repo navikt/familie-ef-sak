@@ -68,11 +68,11 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
         }
     }
 
-    fun fordelOppgave(gsakId: Long, saksbehandler: String): String {
+    fun fordelOppgave(gsakId: Long, saksbehandler: String): Long {
         return oppgaveClient.fordelOppgave(gsakId, saksbehandler)
     }
 
-    fun tilbakestillFordelingPåOppgave(gsakId: Long): String {
+    fun tilbakestillFordelingPåOppgave(gsakId: Long): Long {
         return oppgaveClient.fordelOppgave(gsakId, null)
     }
 

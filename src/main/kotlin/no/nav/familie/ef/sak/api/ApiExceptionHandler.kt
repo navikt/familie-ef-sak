@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.api
 
+import no.nav.familie.ef.sak.exception.IntegrasjonException
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -35,6 +36,14 @@ class ApiExceptionHandler {
         secureLogger.error("En håndtert feil har oppstått(${feil.httpStatus}): ${feil.frontendFeilmelding}", feil)
         logger.info("En håndtert feil har oppstått(${feil.httpStatus}): ${feil.message} ")
         return ResponseEntity.status(feil.httpStatus).body(Ressurs.failure(frontendFeilmelding = feil.frontendFeilmelding))
+    }
+
+    @ExceptionHandler(IntegrasjonException::class)
+    fun handleThrowable(feil: IntegrasjonException): ResponseEntity<Ressurs<Nothing>> {
+        secureLogger.error("Feil mot integrasjonsclienten har oppstått: uri={} data={}", feil.uri, feil.data, feil)
+        logger.error("Feil mot integrasjonsclienten har oppstått")
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Ressurs.failure(frontendFeilmelding = feil.message))
     }
 
 }
