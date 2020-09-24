@@ -20,8 +20,10 @@ internal class FinnOppgaveRequestDtoTest {
         eksternInput.put("journalpostId", "12345");
         eksternInput.put("tilordnetRessurs", "XY1234");
         eksternInput.put("tildeltRessurs", "true");
-        eksternInput.put("opprettet", LocalDate.of(2020, 1, 1).toString());
-        eksternInput.put("frist", LocalDate.of(2020, 1, 2).toString())
+        eksternInput.put("opprettetFom", LocalDate.of(2020, 1, 1).toString());
+        eksternInput.put("opprettetTom", LocalDate.of(2020, 1, 2).toString());
+        eksternInput.put("fristFom", LocalDate.of(2020, 1, 2).toString())
+        eksternInput.put("fristTom", LocalDate.of(2020, 1, 2).toString())
 
         val finnOppgaveRequestDto =
                 objectMapper.readValue(objectMapper.writeValueAsString(eksternInput), FinnOppgaveRequestDto::class.java)
@@ -35,7 +37,7 @@ internal class FinnOppgaveRequestDtoTest {
         Assertions.assertThat(finnOppgaveRequest.tilordnetRessurs).isEqualTo("XY1234")
         Assertions.assertThat(finnOppgaveRequest.tildeltRessurs).isEqualTo(true)
         Assertions.assertThat(finnOppgaveRequest.opprettetFomTidspunkt).isEqualTo(LocalDateTime.of(2020, 1, 1, 0, 0, 0))
-        Assertions.assertThat(finnOppgaveRequest.opprettetTomTidspunkt).isEqualTo(LocalDateTime.of(2020, 1, 2, 0, 0, 0))
+        Assertions.assertThat(finnOppgaveRequest.opprettetTomTidspunkt).isEqualTo(LocalDateTime.of(2020, 1, 3, 0, 0, 0))
         Assertions.assertThat(finnOppgaveRequest.fristFomDato).isEqualTo(LocalDate.of(2020, 1, 2))
         Assertions.assertThat(finnOppgaveRequest.fristTomDato).isEqualTo(LocalDate.of(2020, 1, 2))
         Assertions.assertThat(finnOppgaveRequest.limit).isEqualTo(150)

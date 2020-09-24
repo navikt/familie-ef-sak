@@ -14,8 +14,10 @@ data class FinnOppgaveRequestDto(
         val journalpostId: String? = null,
         val tilordnetRessurs: String? = null,
         val tildeltRessurs: Boolean? = null,
-        val opprettet: LocalDate? = null,
-        val frist: LocalDate? = null) {
+        val opprettetFom: LocalDate? = null,
+        val opprettetTom: LocalDate? = null,
+        val fristFom: LocalDate? = null,
+        val fristTom: LocalDate? = null) {
 
     fun tilFinnOppgaveRequest(): FinnOppgaveRequest = FinnOppgaveRequest(
             tema = Tema.ENF,
@@ -26,10 +28,10 @@ data class FinnOppgaveRequestDto(
             journalpostId = this.journalpostId,
             tildeltRessurs = this.tildeltRessurs,
             tilordnetRessurs = this.tilordnetRessurs,
-            opprettetFomTidspunkt = this.opprettet?.atStartOfDay(),
-            opprettetTomTidspunkt = this.opprettet?.plusDays(1)?.atStartOfDay(),
-            fristFomDato = this.frist,
-            fristTomDato = this.frist,
+            opprettetFomTidspunkt = this.opprettetFom?.atStartOfDay(),
+            opprettetTomTidspunkt = this.opprettetTom?.plusDays(1)?.atStartOfDay(),
+            fristFomDato = this.fristFom,
+            fristTomDato = this.fristTom,
             aktivFomDato = null,
             aktivTomDato = null,
             limit = 150,
