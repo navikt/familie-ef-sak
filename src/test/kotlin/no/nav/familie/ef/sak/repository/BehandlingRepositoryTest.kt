@@ -43,7 +43,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         val behandling = customRepository.persist(behandling(fagsak, status = BehandlingStatus.OPPRETTET))
 
         assertThat(behandlingRepository.findByFagsakIdAndStatus(UUID.randomUUID(), BehandlingStatus.OPPRETTET)).isEmpty()
-        assertThat(behandlingRepository.findByFagsakIdAndStatus(fagsak.id, BehandlingStatus.AVSLUTTET)).isEmpty()
+        assertThat(behandlingRepository.findByFagsakIdAndStatus(fagsak.id, BehandlingStatus.FERDIGSTILT)).isEmpty()
         assertThat(behandlingRepository.findByFagsakIdAndStatus(fagsak.id, BehandlingStatus.OPPRETTET)).containsOnly(behandling)
     }
 
