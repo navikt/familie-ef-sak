@@ -15,16 +15,14 @@ data class FinnOppgaveRequestDto(
         val tilordnetRessurs: String? = null,
         val tildeltRessurs: Boolean? = null,
         val opprettet: LocalDate? = null,
-        val frist: LocalDate? = null,
-        val limit: Long? = null,
-        val offset: Long? = null) {
+        val frist: LocalDate? = null) {
 
     fun tilFinnOppgaveRequest(): FinnOppgaveRequest = FinnOppgaveRequest(
             tema = Tema.ENF,
             behandlingstema = if (this.behandlingstema != null) Behandlingstema.values()
-                    .find { it.value == this.behandlingstema } else null,
+                    .find { it.name.equals(behandlingstema, true) } else null,
             oppgavetype = if (this.oppgavetype != null) Oppgavetype.values()
-                    .find { it.value == this.oppgavetype } else null,
+                    .find { it.name.equals(this.oppgavetype, true) } else null,
             enhet = this.enhet,
             saksbehandler = this.saksbehandler,
             journalpostId = this.journalpostId,
