@@ -19,7 +19,7 @@ const val FAGSYSTEM = "EF"
 
 @Service
 class ØkonomiKlient(@Value("\${FAMILIE_OPPDRAG_API_URL}")
-                    private val familieOppdragUri: URI, @Qualifier("jwtBearer") restOperations: RestOperations) :
+                    private val familieOppdragUri: URI, @Qualifier("azure") restOperations: RestOperations) :
         AbstractRestClient(restOperations, "familie.oppdrag") {
 
     fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag): Ressurs<String> {

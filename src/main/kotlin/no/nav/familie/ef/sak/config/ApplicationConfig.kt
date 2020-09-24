@@ -16,7 +16,7 @@ import org.springframework.context.annotation.Import
 @ConfigurationPropertiesScan
 @ComponentScan("no.nav.familie.ef.sak", "no.nav.familie.sikkerhet")
 @EnableJwtTokenValidation(ignore = ["org.springframework", "springfox.documentation.swagger"])
-@Import(RestTemplateSts::class, StsRestClient::class)
+@Import(RestTemplateAzure::class, RestTemplateSts::class, StsRestClient::class)
 @EnableOAuth2Client(cacheEnabled = true)
 class ApplicationConfig {
 

@@ -12,7 +12,7 @@ Dersom man vil gjøre autentiserte kall mot andre tjenester eller vil kjøre app
 * `AZURE_CLIENT_SECRET`
 * `AZURE_CLIENT_ID`
 * `EF_SAK_FRONTEND_CLIENT_ID`
-* Scope for den aktuelle tjenesten
+* Scope for den aktuelle tjenesten (`FAMILIE_INTEGRASJONER_SCOPE`, `FAMILIE_OPPDRAG_SCOPE`, ...)
 
 Alle disse variablene finnes i applikasjonens mappe for preprod-fss på vault. Merk at client id og client secret har andre navn i applikasjonens mappe. 
 Disse kan alternativt hentes fra azure-mappen i vault, der vil de ha riktig navn. Variablene legges inn under ApplicationLocal -> Edit Configurations -> Environment Variables. 

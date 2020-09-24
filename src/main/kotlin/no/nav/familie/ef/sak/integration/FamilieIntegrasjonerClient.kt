@@ -20,7 +20,7 @@ import org.springframework.web.client.RestOperations
 import java.net.URI
 
 @Component
-class FamilieIntegrasjonerClient(@Qualifier("jwtBearer") restOperations: RestOperations,
+class FamilieIntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
                                  private val integrasjonerConfig: IntegrasjonerConfig)
     : AbstractPingableRestClient(restOperations, "familie.integrasjoner") {
 
