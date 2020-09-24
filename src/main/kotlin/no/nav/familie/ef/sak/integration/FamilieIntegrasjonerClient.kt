@@ -6,14 +6,13 @@ import no.nav.familie.ef.sak.integration.dto.familie.Arbeidsfordelingsenhet
 import no.nav.familie.ef.sak.integration.dto.familie.EgenAnsattRequest
 import no.nav.familie.ef.sak.integration.dto.familie.EgenAnsattResponse
 import no.nav.familie.ef.sak.integration.dto.familie.Tilgang
-import no.nav.familie.ef.sak.util.medPersonident
 import no.nav.familie.http.client.AbstractPingableRestClient
+import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestOperations
@@ -45,8 +44,7 @@ class FamilieIntegrasjonerClient(@Qualifier("jwtBearer") restOperations: RestOpe
     fun hentNavEnhet(ident: String): List<Arbeidsfordelingsenhet> {
         val uri = integrasjonerConfig.arbeidsfordelingUri
         return try {
-            val response =
-                    getForEntity<Ressurs<List<Arbeidsfordelingsenhet>>>(uri, httpHeaders = HttpHeaders().medPersonident(ident))
+            val response = postForEntity<Ressurs<List<Arbeidsfordelingsenhet>>>(uri, PersonIdent(ident))
             response.data ?: throw Feil("Objektet fra integrasjonstjenesten mot arbeidsfordeling er tomt uri=$uri")
         } catch (e: RestClientException) {
             throw Feil("Kall mot integrasjon feilet ved henting av arbeidsfordelingsenhet uri=$uri", e)
