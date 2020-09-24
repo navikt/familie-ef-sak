@@ -9,7 +9,6 @@ import no.nav.familie.kontrakter.felles.oppgave.*
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Component
-import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.RestOperations
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
@@ -70,7 +69,10 @@ class OppgaveClient(@Qualifier("jwtBearer") restOperations: RestOperations,
         } else if (respons.status == Ressurs.Status.SUKSESS) {
             throw IntegrasjonException("Ressurs har status suksess, men mangler data")
         } else {
-            throw IntegrasjonException("Respons fra $metode mangler data.", null, uri, data)
+            throw IntegrasjonException("Respons fra $metode feilet med status=${respons.status} melding=${respons.melding}",
+                                       null,
+                                       uri,
+                                       data)
         }
     }
 

@@ -25,7 +25,6 @@ data class Behandling(@Id
 
 enum class BehandlingOpprinnelse {
     MANUELL,
-    AUTOMATISK_VED_FØDSELSHENDELSE,
     AUTOMATISK_VED_JOURNALFØRING
 }
 
