@@ -13,8 +13,8 @@ internal class FinnOppgaveRequestDtoTest {
     @Test
     internal fun `skal mappe om finnOppgaveRequestDto til FinnOppgaveRequest`() {
         val eksternInput = HashMap<String, String>()
-        eksternInput.put("behandlingstema", "Overgangsstønad");
-        eksternInput.put("oppgavetype", "Journalføring");
+        eksternInput.put("behandlingstema", "ab0071");
+        eksternInput.put("oppgavetype", "JFR");
         eksternInput.put("enhet", "1234");
         eksternInput.put("saksbehandler", "AB1234");
         eksternInput.put("journalpostId", "12345");

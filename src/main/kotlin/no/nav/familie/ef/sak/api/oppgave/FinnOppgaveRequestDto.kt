@@ -7,8 +7,8 @@ import no.nav.familie.kontrakter.felles.oppgave.Tema
 import java.time.LocalDate
 
 data class FinnOppgaveRequestDto(
-        val behandlingstema: Behandlingstema? = null,
-        val oppgavetype: Oppgavetype? = null,
+        val behandlingstema: String? = null,
+        val oppgavetype: String? = null,
         val enhet: String? = null,
         val saksbehandler: String? = null,
         val journalpostId: String? = null,
@@ -21,8 +21,9 @@ data class FinnOppgaveRequestDto(
 
     fun tilFinnOppgaveRequest(): FinnOppgaveRequest = FinnOppgaveRequest(
             tema = Tema.ENF,
-            behandlingstema = this.behandlingstema,
-            oppgavetype = this.oppgavetype,
+            behandlingstema = if (this.behandlingstema != null) Behandlingstema.values()
+                    .find { it.value == this.behandlingstema } else null,
+            oppgavetype = if (this.oppgavetype != null) Oppgavetype.values().find { it.value == this.oppgavetype } else null,
             enhet = this.enhet,
             saksbehandler = this.saksbehandler,
             journalpostId = this.journalpostId,
