@@ -10,7 +10,6 @@ CREATE TABLE behandling (
     endret_tid          TIMESTAMP    NOT NULL DEFAULT localtimestamp,
 
     type                VARCHAR      NOT NULL,
-    opprinnelse         VARCHAR      NOT NULL,
     status              VARCHAR      NOT NULL,
     steg                VARCHAR      NOT NULL
 );

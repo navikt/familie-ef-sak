@@ -16,7 +16,6 @@ fun behandling(fagsak: Fagsak, aktiv: Boolean = true, status: BehandlingStatus =
     return Behandling(
             fagsakId = fagsak.id!!,
             type = BehandlingType.FØRSTEGANGSBEHANDLING,
-            opprinnelse = BehandlingOpprinnelse.MANUELL,
             status = status,
             steg = BehandlingSteg.KOMMER_SENDERE,
             aktiv = aktiv

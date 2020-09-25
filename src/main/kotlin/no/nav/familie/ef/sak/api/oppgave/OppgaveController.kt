@@ -14,13 +14,12 @@ import org.springframework.web.bind.annotation.*
 @Validated
 class OppgaveController(val oppgaveService: OppgaveService) {
 
-    @PostMapping(path = ["/hent-oppgaver"],
+    @PostMapping(path = ["/soek"],
                  consumes = [MediaType.APPLICATION_JSON_VALUE],
                  produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentOppgaver(@RequestBody finnOppgaveRequest: FinnOppgaveRequestDto): Ressurs<FinnOppgaveResponseDto> {
         return Ressurs.success(oppgaveService.hentOppgaver(finnOppgaveRequest.tilFinnOppgaveRequest()))
     }
-
 
     @PostMapping(path = ["/{gsakOppgaveId}/fordel"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun fordelOppgave(@PathVariable(name = "gsakOppgaveId") gsakOppgaveId: Long,

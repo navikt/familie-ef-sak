@@ -131,7 +131,6 @@ internal class OppgaveServiceTest {
         return Behandling(
                 fagsakId = FAGSAK_ID,
                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                opprinnelse = BehandlingOpprinnelse.MANUELL,
                 status = BehandlingStatus.OPPRETTET,
                 steg = BehandlingSteg.KOMMER_SENDERE)
     }

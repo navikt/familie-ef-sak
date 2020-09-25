@@ -16,17 +16,11 @@ data class Behandling(@Id
                       val aktiv: Boolean = true,
 
                       val type: BehandlingType,
-                      val opprinnelse: BehandlingOpprinnelse,
                       val status: BehandlingStatus,
                       val steg: BehandlingSteg,
 
                       @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                       val sporbar: Sporbar = Sporbar())
-
-enum class BehandlingOpprinnelse {
-    MANUELL,
-    AUTOMATISK_VED_JOURNALFØRING
-}
 
 enum class BehandlingType(val visningsnavn: String) {
     FØRSTEGANGSBEHANDLING("Førstegangsbehandling"),
