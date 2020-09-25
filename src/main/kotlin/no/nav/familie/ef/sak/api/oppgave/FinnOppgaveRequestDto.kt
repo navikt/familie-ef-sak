@@ -1,9 +1,6 @@
 package no.nav.familie.ef.sak.api.oppgave
 
-import no.nav.familie.kontrakter.felles.oppgave.Behandlingstema
-import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import no.nav.familie.kontrakter.felles.oppgave.Tema
+import no.nav.familie.kontrakter.felles.oppgave.*
 import java.time.LocalDate
 
 data class FinnOppgaveRequestDto(
@@ -17,7 +14,8 @@ data class FinnOppgaveRequestDto(
         val opprettetFom: LocalDate? = null,
         val opprettetTom: LocalDate? = null,
         val fristFom: LocalDate? = null,
-        val fristTom: LocalDate? = null) {
+        val fristTom: LocalDate? = null,
+        val enhetsmappe: Long? = null) {
 
     fun tilFinnOppgaveRequest(): FinnOppgaveRequest = FinnOppgaveRequest(
             tema = Tema.ENF,
@@ -35,6 +33,8 @@ data class FinnOppgaveRequestDto(
             fristTomDato = this.fristTom,
             aktivFomDato = null,
             aktivTomDato = null,
+            enhetsmappe = if (this.enhetsmappe != null) Enhetsmappe.values()
+                    .find { it.value == this.enhetsmappe } else null,
             limit = 150,
             offset = 0)
 }

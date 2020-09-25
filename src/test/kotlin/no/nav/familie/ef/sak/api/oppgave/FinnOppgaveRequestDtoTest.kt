@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.api.oppgave
 
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Behandlingstema
+import no.nav.familie.kontrakter.felles.oppgave.Enhetsmappe
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
@@ -13,15 +14,16 @@ internal class FinnOppgaveRequestDtoTest {
     @Test
     internal fun `skal mappe om finnOppgaveRequestDto til FinnOppgaveRequest`() {
         val eksternInput = HashMap<String, String>()
-        eksternInput.put("behandlingstema", "ab0071");
-        eksternInput.put("oppgavetype", "JFR");
-        eksternInput.put("enhet", "1234");
-        eksternInput.put("saksbehandler", "AB1234");
-        eksternInput.put("journalpostId", "12345");
-        eksternInput.put("tilordnetRessurs", "XY1234");
-        eksternInput.put("tildeltRessurs", "true");
-        eksternInput.put("opprettetFom", LocalDate.of(2020, 1, 1).toString());
-        eksternInput.put("opprettetTom", LocalDate.of(2020, 1, 2).toString());
+        eksternInput.put("behandlingstema", "ab0071")
+        eksternInput.put("oppgavetype", "JFR")
+        eksternInput.put("enhet", "1234")
+        eksternInput.put("saksbehandler", "AB1234")
+        eksternInput.put("journalpostId", "12345")
+        eksternInput.put("tilordnetRessurs", "XY1234")
+        eksternInput.put("tildeltRessurs", "true")
+        eksternInput.put("enhetsmappe", "100000035")
+        eksternInput.put("opprettetFom", LocalDate.of(2020, 1, 1).toString())
+        eksternInput.put("opprettetTom", LocalDate.of(2020, 1, 2).toString())
         eksternInput.put("fristFom", LocalDate.of(2020, 1, 2).toString())
         eksternInput.put("fristTom", LocalDate.of(2020, 1, 2).toString())
 
@@ -42,6 +44,7 @@ internal class FinnOppgaveRequestDtoTest {
         Assertions.assertThat(finnOppgaveRequest.fristTomDato).isEqualTo(LocalDate.of(2020, 1, 2))
         Assertions.assertThat(finnOppgaveRequest.limit).isEqualTo(150)
         Assertions.assertThat(finnOppgaveRequest.offset).isEqualTo(0)
+        Assertions.assertThat(finnOppgaveRequest.enhetsmappe).isEqualTo(Enhetsmappe.SøknaderKlarTilBehandling)
 
 
     }
