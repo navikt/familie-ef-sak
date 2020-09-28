@@ -21,7 +21,7 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
     private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
 
     @Autowired
-    private lateinit var customRepository: CustomRepository<TilkjentYtelse>
+    private lateinit var customRepository: CustomRepository
 
     @Test
     fun `Opprett og hent tilkjent ytelse`() {

@@ -25,7 +25,7 @@ import java.util.*
 @Service
 class TilkjentYtelseService(private val økonomiKlient: ØkonomiKlient,
                             private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-                            private val customRepository: CustomRepository<TilkjentYtelse>) {
+                            private val customRepository: CustomRepository) {
 
     @Transactional
     fun opprettTilkjentYtelse(tilkjentYtelseDTO: TilkjentYtelseDTO): UUID {

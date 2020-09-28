@@ -20,7 +20,7 @@ import java.time.LocalDateTime
 internal class SakRepositoryTest : OppslagSpringRunnerTest() {
 
     @Autowired lateinit var sakRepository: SakRepository
-    @Autowired lateinit var customRepository: CustomRepository<Sak>
+    @Autowired lateinit var customRepository: CustomRepository
 
     @Test
     fun `finner 1 sak når vi henter top 10`() {

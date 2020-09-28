@@ -3,6 +3,7 @@ on:
   push:
     branches-ignore:
       - 'master'
+      - 'tmp/*'
 
 env:
   IMAGE: docker.pkg.github.com/${{ github.repository }}/familie-ef-sak:${{ github.sha }}

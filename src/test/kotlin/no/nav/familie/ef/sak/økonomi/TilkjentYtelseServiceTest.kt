@@ -24,7 +24,7 @@ import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag as Utbetaling
 
 class TilkjentYtelseServiceTest {
 
-    private val customRepository = mockk<CustomRepository<TilkjentYtelse>>()
+    private val customRepository = mockk<CustomRepository>()
     private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
     private val økonomiKlient = mockk<ØkonomiKlient>()
 
@@ -131,7 +131,7 @@ class TilkjentYtelseServiceTest {
         val ytelseSlot = slot<TilkjentYtelse>()
         every { tilkjentYtelseRepository.findByIdOrNull(id) } returns originalTilkjentYtelse
         every { tilkjentYtelseRepository.save(avsluttetOriginalTilkjentYtelse) } returns avsluttetOriginalTilkjentYtelse
-        every { customRepository.persist(any()) } returns opphørtTilkjentYtelse
+        every { customRepository.persist(any<TilkjentYtelse>()) } returns opphørtTilkjentYtelse
         every { økonomiKlient.iverksettOppdrag(capture(utbetalingSlot)) } returns Ressurs.success("")
         every { tilkjentYtelseRepository.save(capture(ytelseSlot)) }
                 .returns(opphørtTilkjentYtelseSendtUtbetalingsoppdrag)
