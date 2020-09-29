@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.api.dto.Aleneomsorg
-import no.nav.familie.ef.sak.api.dto.MedlemskapDto
+import no.nav.familie.ef.sak.api.dto.InngangsvilkårDto
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.integration.dto.pdl.Familierelasjonsrolle
@@ -18,15 +18,16 @@ class VurderingService(private val sakService: SakService,
                        private val pdlClient: PdlClient,
                        private val medlemskapMapper: MedlemskapMapper) {
 
-    fun vurderMedlemskap(sakId: UUID): MedlemskapDto {
+    fun hentInngangsvilkår(sakId: UUID): InngangsvilkårDto {
         val sak = sakService.hentOvergangsstønad(sakId)
         val fnr = sak.søknad.personalia.verdi.fødselsnummer.verdi.verdi
         val pdlSøker = pdlClient.hentSøker(fnr)
         val medlemskapsinfo = integrasjonerClient.hentMedlemskapsinfo(fnr)
 
-        return medlemskapMapper.tilDto(medlemskapsdetaljer = sak.søknad.medlemskapsdetaljer.verdi,
-                                       pdlSøker = pdlSøker,
-                                       medlemskapsinfo = medlemskapsinfo)
+        val medlemskap = medlemskapMapper.tilDto(medlemskapsdetaljer = sak.søknad.medlemskapsdetaljer.verdi,
+                                                 pdlSøker = pdlSøker,
+                                                 medlemskapsinfo = medlemskapsinfo)
+        return InngangsvilkårDto(medlemskap = medlemskap)
     }
 
     fun vurderAleneomsorg(sakId: UUID): Aleneomsorg {

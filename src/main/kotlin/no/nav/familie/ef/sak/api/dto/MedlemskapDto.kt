@@ -11,7 +11,6 @@ data class MedlemskapSøknadGrunnlagDto(val bosattNorgeSisteÅrene: Boolean,
                                        val oppholderDuDegINorge: Boolean,
                                        val utenlandsopphold: List<UtenlandsoppholdDto>)
 
-//
 data class MedlemskapRegisterGrunnlagDto(val nåværendeStatsborgerskap: List<String>,
                                          val statsborgerskap: List<StatsborgerskapDto>,
                                          val oppholdstatus: List<OppholdstillatelseDto>, //TODO må sjekkes med Mirja, ref hvilken data som finnes i PDL
