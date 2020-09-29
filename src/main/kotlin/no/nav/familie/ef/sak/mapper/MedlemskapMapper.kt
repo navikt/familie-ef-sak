@@ -1,19 +1,20 @@
 package no.nav.familie.ef.sak.mapper
 
-import no.nav.familie.ef.sak.api.dto.MedlemskapDto
-import no.nav.familie.ef.sak.api.dto.MedlemskapRegisterGrunnlagDto
-import no.nav.familie.ef.sak.api.dto.MedlemskapSøknadGrunnlagDto
-import no.nav.familie.ef.sak.api.dto.UtenlandsoppholdDto
+import no.nav.familie.ef.sak.api.dto.*
+import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker
 import no.nav.familie.ef.sak.vurdering.medlemskap.Medlemskapshistorikk
 import no.nav.familie.kontrakter.ef.søknad.Medlemskapsdetaljer
+import no.nav.familie.kontrakter.felles.PersonIdent
 import org.springframework.stereotype.Component
 
 @Component
-class MedlemskapMapper(private val statsborgerskapMapper: StatsborgerskapMapper) {
+class MedlemskapMapper(private val statsborgerskapMapper: StatsborgerskapMapper,
+                       private val integrasjonerClient: FamilieIntegrasjonerClient) {
 
     fun tilDto(medlemskapsdetaljer: Medlemskapsdetaljer,
                pdlSøker: PdlSøker,
+               personIdent: PersonIdent,
                medlemskapshistorikk: Medlemskapshistorikk): MedlemskapDto {
 
 
@@ -31,7 +32,8 @@ class MedlemskapMapper(private val statsborgerskapMapper: StatsborgerskapMapper)
                         //nåværendeStatsborgerskap - må avklare om det skal representeres som Norsk eller Norge, finner ikke "Norsk" mapping nå
                         nåværendeStatsborgerskap = statsborgerskap.filter { it.gyldigTilOgMed == null }.map { it.land },
                         statsborgerskap = statsborgerskap,
-                        oppholdstatus = null
+                        oppholdstatus = OppholdstillatelseMapper.map(pdlSøker.opphold),
+                        medlemskapsinfo = integrasjonerClient.hentMedlemskapsinfo(personIdent.ident) //TODO map denne om til en dto
                 ))
 
 
