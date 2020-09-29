@@ -13,10 +13,8 @@ data class MedlemskapSøknadGrunnlagDto(val bosattNorgeSisteÅrene: Boolean,
 
 data class MedlemskapRegisterGrunnlagDto(val nåværendeStatsborgerskap: List<String>,
                                          val statsborgerskap: List<StatsborgerskapDto>,
-                                         val oppholdstatus: List<OppholdstillatelseDto>, //TODO må sjekkes med Mirja, ref hvilken data som finnes i PDL
+                                         val oppholdstatus: List<OppholdstillatelseDto>,
                                          val medlemskapsinfo: Medlemskapsinfo) //TODO: Lag en DTO-klasse for denne i stedet for å sende opp integrasjonsklassen
-
-class VurderingDto
 
 data class UtenlandsoppholdDto(val fra: LocalDate,
                                val til: LocalDate,

@@ -2,16 +2,14 @@ package no.nav.familie.ef.sak.api.gui
 
 import no.nav.familie.ef.sak.api.dto.Aleneomsorg
 import no.nav.familie.ef.sak.api.dto.InngangsvilkårDto
+import no.nav.familie.ef.sak.api.dto.VurderingDto
 import no.nav.familie.ef.sak.service.VurderingService
 import no.nav.familie.ef.sak.validering.SakstilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import java.util.*
 
 @RestController
@@ -19,6 +17,12 @@ import java.util.*
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class VurderingController(val vurderingService: VurderingService) {
+
+    @PostMapping("{behandlingId}/inngangsvilkaar/vurdering")
+    fun oppdaterVurderingInngangsvilkår(@RequestBody vurderinger: List<VurderingDto>): Ressurs<String> {
+        //TODO oppdater innslag i vilkår-tabell med vurdering fra SB
+        return Ressurs.success("Oppdatering OK")
+    }
 
     @GetMapping("{sakId}/inngangsvilkaar")
     fun getInngangsvilkår(@SakstilgangConstraint @PathVariable sakId: UUID): Ressurs<InngangsvilkårDto> {
