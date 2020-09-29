@@ -8,9 +8,6 @@ import no.nav.familie.ef.sak.integration.dto.pdl.Familierelasjonsrolle
 import no.nav.familie.ef.sak.mapper.AleneomsorgMapper
 import no.nav.familie.ef.sak.mapper.MedlemskapMapper
 import no.nav.familie.ef.sak.repository.domain.SakMapper
-import no.nav.familie.ef.sak.vurdering.medlemskap.MedlemskapRegelsett
-import no.nav.familie.ef.sak.vurdering.medlemskap.Medlemskapsgrunnlag
-import no.nav.familie.ef.sak.vurdering.medlemskap.Medlemskapshistorikk
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.*
@@ -19,22 +16,17 @@ import java.util.*
 class VurderingService(private val sakService: SakService,
                        private val integrasjonerClient: FamilieIntegrasjonerClient,
                        private val pdlClient: PdlClient,
-                       private val medlemskapRegelsett: MedlemskapRegelsett) {
+                       private val medlemskapMapper: MedlemskapMapper) {
 
     fun vurderMedlemskap(sakId: UUID): MedlemskapDto {
         val sak = sakService.hentOvergangsstønad(sakId)
         val fnr = sak.søknad.personalia.verdi.fødselsnummer.verdi.verdi
         val pdlSøker = pdlClient.hentSøker(fnr)
         val medlemskapsinfo = integrasjonerClient.hentMedlemskapsinfo(fnr)
-        val medlemskapshistorikk = Medlemskapshistorikk(pdlSøker, medlemskapsinfo)
-        val medlemskapsgrunnlag = Medlemskapsgrunnlag(pdlSøker,
-                                                      medlemskapshistorikk,
-                                                      sak.søknad)
-        val evaluering = medlemskapRegelsett.vurderingMedlemskapSøker.evaluer(medlemskapsgrunnlag)
 
-        return MedlemskapMapper.tilDto(evaluering,
-                                       pdlSøker,
-                                       medlemskapshistorikk)
+        return medlemskapMapper.tilDto(medlemskapsdetaljer = sak.søknad.medlemskapsdetaljer.verdi,
+                                       pdlSøker = pdlSøker,
+                                       medlemskapsinfo = medlemskapsinfo)
     }
 
     fun vurderAleneomsorg(sakId: UUID): Aleneomsorg {
