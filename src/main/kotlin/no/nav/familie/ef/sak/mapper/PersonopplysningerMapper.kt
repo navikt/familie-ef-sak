@@ -12,7 +12,7 @@ import java.time.LocalDate
 
 @Component
 class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
-                               private val kodeverkService: KodeverkService,
+                               private val statsborgerskapMapper: StatsborgerskapMapper,
                                private val arbeidsfordelingService: ArbeidsfordelingService) {
 
     fun tilPersonopplysninger(søker: PdlSøker,
@@ -31,11 +31,7 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                 personIdent = ident,
                 telefonnummer = søker.telefonnummer.find { it.prioritet == 1 }
                         ?.let { TelefonnummerDto(it.landskode, it.nummer) },
-                statsborgerskap = søker.statsborgerskap.map {
-                    StatsborgerskapDto(land = kodeverkService.hentLand(it.land, datoEllerIdag(it.gyldigFraOgMed)),
-                                       gyldigFraOgMed = it.gyldigFraOgMed,
-                                       gyldigTilOgMed = it.gyldigTilOgMed)
-                },
+                statsborgerskap = statsborgerskapMapper.map(søker.statsborgerskap),
                 sivilstand = søker.sivilstand.map {
                     SivilstandDto(type = Sivilstandstype.valueOf(it.type.name),
                                   gyldigFraOgMed = it.gyldigFraOgMed?.toString() ?: it.bekreftelsesdato,
