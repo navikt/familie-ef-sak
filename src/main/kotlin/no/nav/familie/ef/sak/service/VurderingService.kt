@@ -17,7 +17,6 @@ class VurderingService(private val sakService: SakService,
                        private val pdlClient: PdlClient,
                        private val medlemskapMapper: MedlemskapMapper) {
 
-    //TODO denne må opprette vurderinger dersom det ikke finnes fra før på behandling. Dersom det finnes vurdering, hent denne.
     fun hentInngangsvilkår(sakId: UUID): InngangsvilkårDto {
         val sak = sakService.hentOvergangsstønad(sakId)
         val fnr = sak.søknad.personalia.verdi.fødselsnummer.verdi.verdi
