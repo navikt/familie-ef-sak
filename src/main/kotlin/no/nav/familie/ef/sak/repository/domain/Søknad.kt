@@ -7,6 +7,7 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
+import org.springframework.data.relational.core.mapping.MappedCollection
 import org.springframework.data.relational.core.mapping.Table
 import java.util.*
 
@@ -24,7 +25,9 @@ data class Søknad(@Id
                   val journalpostId: String,
                   @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                   val sporbar: Sporbar = Sporbar(),
+                  @MappedCollection(idColumn = "gr_soknad_id")
                   val søker: Søker,
+                  @MappedCollection(idColumn = "gr_soknad_id")
                   val barn: Set<Barn>)
 
 data class SakWrapper<T>(val soknad: Søknad, val søknad: T)
