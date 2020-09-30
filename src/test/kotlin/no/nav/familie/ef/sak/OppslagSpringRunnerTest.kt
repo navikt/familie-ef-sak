@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak
 
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
+import com.github.tomakehurst.wiremock.WireMockServer
 import no.nav.familie.ef.sak.repository.domain.*
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.extension.ExtendWith
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.web.server.LocalServerPort
+import org.springframework.context.ApplicationContext
 import org.springframework.data.jdbc.core.JdbcAggregateOperations
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -27,6 +29,7 @@ abstract class OppslagSpringRunnerTest {
     protected val headers = HttpHeaders()
 
     @Autowired private lateinit var jdbcAggregateOperations: JdbcAggregateOperations
+    @Autowired private lateinit var applicationContext: ApplicationContext
 
     @LocalServerPort
     private var port: Int? = 0
@@ -35,6 +38,11 @@ abstract class OppslagSpringRunnerTest {
     fun reset() {
         loggingEvents.clear()
         resetDatabase()
+        stoppWireMockServers()
+    }
+
+    private fun stoppWireMockServers() {
+        applicationContext.getBeansOfType(WireMockServer::class.java).values.forEach(WireMockServer::stop)
     }
 
     private fun resetDatabase() {
@@ -73,6 +81,7 @@ abstract class OppslagSpringRunnerTest {
     }
 
     companion object {
+
         private const val LOCALHOST = "http://localhost:"
         protected fun initLoggingEventListAppender(): ListAppender<ILoggingEvent> {
             val listAppender = ListAppender<ILoggingEvent>()
