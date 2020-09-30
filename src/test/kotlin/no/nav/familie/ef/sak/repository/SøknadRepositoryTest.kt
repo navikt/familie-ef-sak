@@ -3,7 +3,7 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.Testsøknad.søknad
 import no.nav.familie.ef.sak.repository.CustomRepository
-import no.nav.familie.ef.sak.repository.SakRepository
+import no.nav.familie.ef.sak.repository.SøknadRepository
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
@@ -17,16 +17,16 @@ import java.time.LocalDateTime
 
 @ActiveProfiles("local", "mock-oauth")
 @TestPropertySource(properties = ["FAMILIE_INTEGRASJONER_URL=http://localhost:28085"])
-internal class SakRepositoryTest : OppslagSpringRunnerTest() {
+internal class SøknadRepositoryTest : OppslagSpringRunnerTest() {
 
-    @Autowired lateinit var sakRepository: SakRepository
+    @Autowired lateinit var søknadRepository: SøknadRepository
     @Autowired lateinit var customRepository: CustomRepository
 
     @Test
     fun `finner 1 sak når vi henter top 10`() {
         opprettSak("1", "11111122222")
 
-        val saker = sakRepository.findTop10ByOrderBySporbar_OpprettetTidDesc()
+        val saker = søknadRepository.findTop10ByOrderBySporbar_OpprettetTidDesc()
 
         assertThat(saker).hasSize(1)
     }
@@ -37,7 +37,7 @@ internal class SakRepositoryTest : OppslagSpringRunnerTest() {
             opprettSak("1", "11111122222")
         }
 
-        val saker = sakRepository.findTop10ByOrderBySporbar_OpprettetTidDesc()
+        val saker = søknadRepository.findTop10ByOrderBySporbar_OpprettetTidDesc()
 
         assertThat(saker).hasSize(10)
         var forrigeSaksOpprettetTid = LocalDateTime.MAX
@@ -51,7 +51,7 @@ internal class SakRepositoryTest : OppslagSpringRunnerTest() {
     fun `finner 1 sak på fødselsnummer`() {
         opprettSak("1", "11111122222")
 
-        val saker = sakRepository.findBySøkerFødselsnummer("11111122222")
+        val saker = søknadRepository.findBySøkerFødselsnummer("11111122222")
         assertThat(saker).hasSize(1)
         assertThat(saker[0].barn).isNotEmpty
         assertThat(saker[0].søker).isNotNull
@@ -63,23 +63,23 @@ internal class SakRepositoryTest : OppslagSpringRunnerTest() {
         opprettSak("2", "11111122222")
         opprettSak("3", "22222211111")
 
-        val saker = sakRepository.findBySøkerFødselsnummer("11111122222")
+        val saker = søknadRepository.findBySøkerFødselsnummer("11111122222")
         assertThat(saker).hasSize(2)
-        assertThat(saker.filter { it.saksnummer == "1" }).hasSize(1)
-        assertThat(saker.filter { it.saksnummer == "2" }).hasSize(1)
+        assertThat(saker.filter { it.saksnummerInfotrygd == "1" }).hasSize(1)
+        assertThat(saker.filter { it.saksnummerInfotrygd == "2" }).hasSize(1)
     }
 
     @Test
     fun `finner ingen saker på fødselsnummer`() {
-        val saker = sakRepository.findBySøkerFødselsnummer("11111122222")
+        val saker = søknadRepository.findBySøkerFødselsnummer("11111122222")
         assertThat(saker.size).isEqualTo(0)
     }
 
     private fun opprettSak(saksnummer: String, fødselsnummer: String) {
-        customRepository.persist(Sak(
+        customRepository.persist(Søknad(
                 søknad = objectMapper.writeValueAsBytes(søknad),
                 type = SøknadType.OVERGANGSSTØNAD,
-                saksnummer = saksnummer,
+                saksnummerInfotrygd = saksnummer,
                 søker = Søker(fødselsnummer, "Navn"),
                 barn = setOf(Barn(fødselsdato = LocalDate.now(), harSammeAdresse = true, fødselsnummer = null, navn = "Navn")),
                 journalpostId = "journalId$saksnummer",

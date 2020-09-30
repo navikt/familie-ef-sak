@@ -24,9 +24,9 @@ class VurderingController(val vurderingService: VurderingService) {
         return Ressurs.success("Oppdatering OK")
     }
 
-    @GetMapping("{sakId}/inngangsvilkaar")
-    fun getInngangsvilkår(@SakstilgangConstraint @PathVariable sakId: UUID): Ressurs<InngangsvilkårDto> {
-        return Ressurs.success(vurderingService.hentInngangsvilkår(sakId))
+    @GetMapping("{behandlingId}/inngangsvilkaar")
+    fun getInngangsvilkår(@SakstilgangConstraint @PathVariable behandlingId: UUID): Ressurs<InngangsvilkårDto> {
+        return Ressurs.success(vurderingService.hentInngangsvilkår(behandlingId))
     }
 
     @GetMapping("{sakId}/aleneomsorg")

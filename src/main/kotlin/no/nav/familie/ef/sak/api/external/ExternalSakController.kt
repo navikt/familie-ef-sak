@@ -5,7 +5,6 @@ import no.nav.familie.ef.sak.service.SakService
 import no.nav.familie.kontrakter.ef.sak.SakRequest
 import no.nav.familie.kontrakter.ef.sak.Skjemasak
 import no.nav.familie.kontrakter.ef.søknad.*
-import no.nav.familie.util.FnrGenerator
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -14,9 +13,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.Month
 
 @RestController
 @RequestMapping(path = ["/api/external/sak"])

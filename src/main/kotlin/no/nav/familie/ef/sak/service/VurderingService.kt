@@ -2,13 +2,12 @@ package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.api.dto.Aleneomsorg
 import no.nav.familie.ef.sak.api.dto.InngangsvilkårDto
-import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
+import no.nav.familie.ef.sak.api.dto.VurderingDto
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.integration.dto.pdl.Familierelasjonsrolle
 import no.nav.familie.ef.sak.mapper.AleneomsorgMapper
 import no.nav.familie.ef.sak.mapper.MedlemskapMapper
 import no.nav.familie.ef.sak.repository.VilkårVurderingRepository
-import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.SakMapper
 import no.nav.familie.ef.sak.repository.domain.VilkårType
 import no.nav.familie.ef.sak.repository.domain.VilkårVurdering
@@ -22,26 +21,32 @@ class VurderingService(private val sakService: SakService,
                        private val vilkårVurderingRepository: VilkårVurderingRepository,
                        private val medlemskapMapper: MedlemskapMapper) {
 
-    //TODO denne må opprette vurderinger dersom det ikke finnes fra før på behandling. Dersom det finnes vurdering, hent denne.
-    fun hentInngangsvilkår(sakId: UUID): InngangsvilkårDto {
-        val sak = sakService.hentOvergangsstønad(sakId)
-        val fnr = sak.søknad.personalia.verdi.fødselsnummer.verdi.verdi
+    fun hentInngangsvilkår(behandlingId: UUID): InngangsvilkårDto {
+        val søknad = sakService.hentOvergangsstønadPåBehandlingId(behandlingId)
+        val fnr = søknad.søknad.personalia.verdi.fødselsnummer.verdi.verdi
         val pdlSøker = pdlClient.hentSøker(fnr)
 
-        val medlemskap = medlemskapMapper.tilDto(medlemskapsdetaljer = sak.søknad.medlemskapsdetaljer.verdi,
+        val medlemskap = medlemskapMapper.tilDto(medlemskapsdetaljer = søknad.søknad.medlemskapsdetaljer.verdi,
                                                  pdlSøker = pdlSøker)
 
-        //TODO: Dette må kobles til behandling
-        val vurderinger = hentEllerOpprettVurderingerForInngangsvilkår()
-        return InngangsvilkårDto(medlemskap = medlemskap, vurderinger = emptyList())
+        val vurderinger = hentEllerOpprettVurderingerForInngangsvilkår(behandlingId)
+                .map {
+                    VurderingDto(id = it.id,
+                                 behandlingId = it.behandlingId,
+                                 resultat = it.resultat,
+                                 vilkårType = it.type,
+                                 begrunnelse = it.begrunnelse,
+                                 unntak = it.unntak)
+                }
+        return InngangsvilkårDto(medlemskap = medlemskap, vurderinger = vurderinger)
     }
 
-    private fun hentEllerOpprettVurderingerForInngangsvilkår(behandling: Behandling): List<VilkårVurdering> {
-
-        val lagredeVilkårVurderinger = vilkårVurderingRepository.findByBehandlingId(behandling.id)
+    private fun hentEllerOpprettVurderingerForInngangsvilkår(behandlingId: UUID): List<VilkårVurdering> {
+        //TODO sjekke att behandlingen allerede ikke er avsluttet? Eks burde vi ikke opprette nye vurderinger hvis noen går inn å sjekker en avsluttet sak..
+        val lagredeVilkårVurderinger = vilkårVurderingRepository.findByBehandlingId(behandlingId)
         val nyeVilkårVurderinger = VilkårType.hentInngangsvilkår().filter {
             lagredeVilkårVurderinger.find { vurdering -> vurdering.type == it } == null
-        }.map { VilkårVurdering(behandlingId = behandling.id, type = it) }
+        }.map { VilkårVurdering(behandlingId = behandlingId, type = it) }
 
         vilkårVurderingRepository.saveAll(nyeVilkårVurderinger)
 
@@ -49,7 +54,7 @@ class VurderingService(private val sakService: SakService,
     }
 
     fun vurderAleneomsorg(sakId: UUID): Aleneomsorg {
-        val sak = sakService.hentSak(sakId)
+        val sak = sakService.hentSøknad(sakId)
         val fnrSøker = sak.søker.fødselsnummer
         val pdlSøker = pdlClient.hentSøker(fnrSøker)
 

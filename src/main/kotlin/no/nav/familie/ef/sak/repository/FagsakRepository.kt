@@ -6,4 +6,8 @@ import org.springframework.stereotype.Repository
 import java.util.*
 
 @Repository
-interface FagsakRepository : CrudRepository<Fagsak, UUID>
+interface FagsakRepository : CrudRepository<Fagsak, UUID> {
+
+    fun findBySøkerIdent(ident: String): Fagsak?
+
+}

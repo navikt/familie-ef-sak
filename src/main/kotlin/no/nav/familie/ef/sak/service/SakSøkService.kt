@@ -7,7 +7,7 @@ import no.nav.familie.ef.sak.api.dto.SakSøkListeDto
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøkerKort
 import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
-import no.nav.familie.ef.sak.repository.SakRepository
+import no.nav.familie.ef.sak.repository.SøknadRepository
 import no.nav.familie.ef.sak.validering.Sakstilgang
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.springframework.stereotype.Component
@@ -15,12 +15,12 @@ import java.util.*
 
 
 @Component
-class SakSøkService(private val sakRepository: SakRepository,
+class SakSøkService(private val søknadRepository: SøknadRepository,
                     private val pdlClient: PdlClient,
                     private val sakstilgang: Sakstilgang) {
 
     fun finnSaker(): Ressurs<SakSøkListeDto> {
-        val saker = sakRepository.findTop10ByOrderBySporbar_OpprettetTidDesc().filter(sakstilgang::harTilgang)
+        val saker = søknadRepository.findTop10ByOrderBySporbar_OpprettetTidDesc().filter(sakstilgang::harTilgang)
         val personInfo = pdlClient.hentSøkerKortBolk(saker.map { it.søker.fødselsnummer })
         val søkListeDto = SakSøkListeDto(saker.map {
             val fnr = it.søker.fødselsnummer
@@ -30,7 +30,7 @@ class SakSøkService(private val sakRepository: SakRepository,
     }
 
     fun finnSakForPerson(personIdent: String): Ressurs<SakSøkDto> {
-        val saker = sakRepository.findBySøkerFødselsnummer(personIdent)
+        val saker = søknadRepository.findBySøkerFødselsnummer(personIdent)
         return if (saker.isEmpty()) {
             Ressurs.failure(frontendFeilmelding = "Finner ikke noen sak på personen")
         } else {

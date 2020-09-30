@@ -5,8 +5,8 @@ import io.mockk.mockk
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.dto.familie.Tilgang
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.Testsøknad.søknad
-import no.nav.familie.ef.sak.repository.SakRepository
-import no.nav.familie.ef.sak.repository.domain.Sak
+import no.nav.familie.ef.sak.repository.SøknadRepository
+import no.nav.familie.ef.sak.repository.domain.Søknad
 import no.nav.familie.ef.sak.repository.domain.Sporbar
 import no.nav.familie.ef.sak.repository.domain.Søker
 import no.nav.familie.ef.sak.repository.domain.SøknadType
@@ -21,21 +21,21 @@ internal class SakstilgangTest {
 
     private val integrasjonerClient = mockk<FamilieIntegrasjonerClient>()
 
-    private val sakRepository = mockk<SakRepository>()
+    private val sakRepository = mockk<SøknadRepository>()
 
     private val sakstilgang = Sakstilgang(sakRepository, integrasjonerClient)
 
     @BeforeEach
     fun setUp() {
         every { sakRepository.findByIdOrNull(any()) }
-                .returns(Sak(UUID.randomUUID(),
-                             SøknadType.OVERGANGSSTØNAD,
-                             objectMapper.writeValueAsBytes(søknad),
-                             "1",
-                             "1",
-                             Sporbar(),
-                             Søker("654654654", "Bob"),
-                             emptySet()))
+                .returns(Søknad(UUID.randomUUID(),
+                                SøknadType.OVERGANGSSTØNAD,
+                                objectMapper.writeValueAsBytes(søknad),
+                                "1",
+                                "1",
+                                Sporbar(),
+                                Søker("654654654", "Bob"),
+                                emptySet()))
     }
 
     @Test
