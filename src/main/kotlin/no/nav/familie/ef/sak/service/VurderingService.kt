@@ -7,7 +7,11 @@ import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.integration.dto.pdl.Familierelasjonsrolle
 import no.nav.familie.ef.sak.mapper.AleneomsorgMapper
 import no.nav.familie.ef.sak.mapper.MedlemskapMapper
+import no.nav.familie.ef.sak.repository.VilkårVurderingRepository
+import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.SakMapper
+import no.nav.familie.ef.sak.repository.domain.VilkårType
+import no.nav.familie.ef.sak.repository.domain.VilkårVurdering
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.*
@@ -15,6 +19,7 @@ import java.util.*
 @Service
 class VurderingService(private val sakService: SakService,
                        private val pdlClient: PdlClient,
+                       private val vilkårVurderingRepository: VilkårVurderingRepository,
                        private val medlemskapMapper: MedlemskapMapper) {
 
     //TODO denne må opprette vurderinger dersom det ikke finnes fra før på behandling. Dersom det finnes vurdering, hent denne.
@@ -25,7 +30,22 @@ class VurderingService(private val sakService: SakService,
 
         val medlemskap = medlemskapMapper.tilDto(medlemskapsdetaljer = sak.søknad.medlemskapsdetaljer.verdi,
                                                  pdlSøker = pdlSøker)
-        return InngangsvilkårDto(medlemskap = medlemskap)
+
+        //TODO: Dette må kobles til behandling
+        val vurderinger = hentEllerOpprettVurderingerForInngangsvilkår()
+        return InngangsvilkårDto(medlemskap = medlemskap, vurderinger = emptyList())
+    }
+
+    private fun hentEllerOpprettVurderingerForInngangsvilkår(behandling: Behandling): List<VilkårVurdering> {
+
+        val lagredeVilkårVurderinger = vilkårVurderingRepository.findByBehandlingId(behandling.id)
+        val nyeVilkårVurderinger = VilkårType.hentInngangsvilkår().filter {
+            lagredeVilkårVurderinger.find { vurdering -> vurdering.type == it } == null
+        }.map { VilkårVurdering(behandlingId = behandling.id, type = it) }
+
+        vilkårVurderingRepository.saveAll(nyeVilkårVurderinger)
+
+        return lagredeVilkårVurderinger + nyeVilkårVurderinger
     }
 
     fun vurderAleneomsorg(sakId: UUID): Aleneomsorg {
