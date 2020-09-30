@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.api.external
 
 import no.nav.familie.ef.sak.api.ApiFeil
-import no.nav.familie.ef.sak.service.SakService
+import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.kontrakter.ef.sak.SakRequest
 import no.nav.familie.kontrakter.ef.sak.Skjemasak
 import no.nav.familie.kontrakter.ef.søknad.*
@@ -18,7 +18,7 @@ import org.springframework.web.multipart.MultipartFile
 @RequestMapping(path = ["/api/external/sak"])
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class ExternalSakController(private val sakService: SakService) {
+class ExternalSakController(private val behandlingService: BehandlingService) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -34,7 +34,7 @@ class ExternalSakController(private val sakService: SakService) {
         val vedlegg = vedleggData(vedleggListe)
 
         validerVedlegg(sak.søknad.vedlegg, vedlegg)
-        sakService.mottaSakOvergangsstønad(sak, vedlegg)
+        behandlingService.mottaSakOvergangsstønad(sak, vedlegg)
         return ResponseEntity.status(HttpStatus.CREATED).build()
     }
 
@@ -44,7 +44,7 @@ class ExternalSakController(private val sakService: SakService) {
         val vedlegg = vedleggData(vedleggListe)
 
         validerVedlegg(sak.søknad.vedlegg, vedlegg)
-        sakService.mottaSakBarnetilsyn(sak, vedlegg)
+        behandlingService.mottaSakBarnetilsyn(sak, vedlegg)
         return ResponseEntity.status(HttpStatus.CREATED).build()
     }
 

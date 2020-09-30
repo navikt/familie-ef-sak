@@ -1,10 +1,8 @@
 package no.nav.familie.ef.sak.api.gui
 
-import no.nav.familie.ef.sak.api.dto.Aleneomsorg
 import no.nav.familie.ef.sak.api.dto.InngangsvilkårDto
 import no.nav.familie.ef.sak.api.dto.VurderingDto
 import no.nav.familie.ef.sak.service.VurderingService
-import no.nav.familie.ef.sak.validering.SakstilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
@@ -24,14 +22,10 @@ class VurderingController(val vurderingService: VurderingService) {
         return Ressurs.success("Oppdatering OK")
     }
 
+    //TODO BehandlingIdConstraint
     @GetMapping("{behandlingId}/inngangsvilkaar")
-    fun getInngangsvilkår(@SakstilgangConstraint @PathVariable behandlingId: UUID): Ressurs<InngangsvilkårDto> {
+    fun getInngangsvilkår(@PathVariable behandlingId: UUID): Ressurs<InngangsvilkårDto> {
         return Ressurs.success(vurderingService.hentInngangsvilkår(behandlingId))
-    }
-
-    @GetMapping("{sakId}/aleneomsorg")
-    fun getAleneOmsorg(@SakstilgangConstraint @PathVariable sakId: UUID): Ressurs<Aleneomsorg> {
-        return Ressurs.success(vurderingService.vurderAleneomsorg(sakId))
     }
 
 }

@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.integration.dto.pdl.Familierelasjonsrolle
 import no.nav.familie.ef.sak.mapper.AleneomsorgMapper
 import no.nav.familie.ef.sak.mapper.MedlemskapMapper
+import no.nav.familie.ef.sak.repository.CustomRepository
 import no.nav.familie.ef.sak.repository.VilkårVurderingRepository
 import no.nav.familie.ef.sak.repository.domain.SakMapper
 import no.nav.familie.ef.sak.repository.domain.VilkårType
@@ -16,13 +17,14 @@ import java.time.LocalDate
 import java.util.*
 
 @Service
-class VurderingService(private val sakService: SakService,
+class VurderingService(private val behandlingService: BehandlingService,
                        private val pdlClient: PdlClient,
+                       private val customRepository: CustomRepository,
                        private val vilkårVurderingRepository: VilkårVurderingRepository,
                        private val medlemskapMapper: MedlemskapMapper) {
 
     fun hentInngangsvilkår(behandlingId: UUID): InngangsvilkårDto {
-        val søknad = sakService.hentOvergangsstønadPåBehandlingId(behandlingId)
+        val søknad = behandlingService.hentOvergangsstønadPåBehandlingId(behandlingId)
         val fnr = søknad.søknad.personalia.verdi.fødselsnummer.verdi.verdi
         val pdlSøker = pdlClient.hentSøker(fnr)
 
@@ -48,14 +50,14 @@ class VurderingService(private val sakService: SakService,
             lagredeVilkårVurderinger.find { vurdering -> vurdering.type == it } == null
         }.map { VilkårVurdering(behandlingId = behandlingId, type = it) }
 
-        vilkårVurderingRepository.saveAll(nyeVilkårVurderinger)
+        customRepository.persistAll(nyeVilkårVurderinger)
 
         return lagredeVilkårVurderinger + nyeVilkårVurderinger
     }
 
-    fun vurderAleneomsorg(sakId: UUID): Aleneomsorg {
-        val sak = sakService.hentSøknad(sakId)
-        val fnrSøker = sak.søker.fødselsnummer
+    fun vurderAleneomsorg(behandlingId: UUID): Aleneomsorg {
+        val sak = behandlingService.hentOvergangsstønadPåBehandlingId(behandlingId).soknad
+        val fnrSøker = "" //TODO
         val pdlSøker = pdlClient.hentSøker(fnrSøker)
 
 

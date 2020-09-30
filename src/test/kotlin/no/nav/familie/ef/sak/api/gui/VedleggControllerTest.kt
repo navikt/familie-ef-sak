@@ -34,7 +34,8 @@ internal class VedleggControllerTest {
         vedleggRepository = mockk()
         søknadRepository = mockk()
         integrasjonerClient = mockk()
-        vedleggController = VedleggController(VedleggService(vedleggRepository, Sakstilgang(søknadRepository, integrasjonerClient)))
+        vedleggController =
+                VedleggController(VedleggService(vedleggRepository, Sakstilgang(søknadRepository, integrasjonerClient)))
     }
 
     @Test
@@ -50,7 +51,7 @@ internal class VedleggControllerTest {
     @Test
     internal fun `finner vedlegg på id`() {
         every { vedleggRepository.findByIdOrNull(any()) } returns vedlegg()
-        every { søknadRepository.findByIdOrNull(any()) } returns sak()
+        every { søknadRepository.findByIdOrNull(any()) } returns søknad()
         every { integrasjonerClient.sjekkTilgangTilPersoner(any()) } returns listOf(Tilgang(true))
 
         val vedleggResponse = vedleggController.hentVedlegg(UUID.randomUUID())
@@ -60,7 +61,7 @@ internal class VedleggControllerTest {
     @Test
     internal fun `kaster feil når man ikke har tilgang på vedlegget`() {
         every { vedleggRepository.findByIdOrNull(any()) } returns vedlegg()
-        every { søknadRepository.findByIdOrNull(any()) } returns sak()
+        every { søknadRepository.findByIdOrNull(any()) } returns søknad()
         every { integrasjonerClient.sjekkTilgangTilPersoner(any()) } returns listOf(Tilgang(false))
 
         assertThat(Assertions.catchThrowable { vedleggController.hentVedlegg(UUID.randomUUID()) })
@@ -68,15 +69,16 @@ internal class VedleggControllerTest {
                 .matches { (it as Feil).frontendFeilmelding == "Har ikke tilgang til saken" }
     }
 
-    private fun sak() = Søknad(søknad = objectMapper.writeValueAsBytes(søknad),
-                               type = SøknadType.OVERGANGSSTØNAD,
-                               saksnummerInfotrygd = "saksnummer",
-                               søker = Søker("12345612345", "Navn"),
-                               barn = setOf(Barn(fødselsdato = LocalDate.now(),
-                                              harSammeAdresse = true,
-                                              fødselsnummer = null,
-                                              navn = "Navn")),
-                               journalpostId = "journalId")
+    private fun søknad() = Søknad(søknad = objectMapper.writeValueAsBytes(søknad),
+                                  type = SøknadType.OVERGANGSSTØNAD,
+                                  saksnummerInfotrygd = "saksnummer",
+                                  søker = Søker("12345612345", "Navn"),
+                                  barn = setOf(Barn(fødselsdato = LocalDate.now(),
+                                                    harSammeAdresse = true,
+                                                    fødselsnummer = null,
+                                                    navn = "Navn")),
+                                  journalpostId = "journalId",
+                                  behandlingId = UUID.randomUUID())
 
     private fun vedlegg(): Vedlegg {
         return Vedlegg(vedleggId, UUID.randomUUID(), Sporbar(), byteArrayOf(12), "navn")

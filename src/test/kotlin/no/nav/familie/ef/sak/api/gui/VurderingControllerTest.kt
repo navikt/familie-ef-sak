@@ -3,7 +3,7 @@ package no.nav.familie.ef.sak.api.gui
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.api.dto.InngangsvilkårDto
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.Testsøknad
-import no.nav.familie.ef.sak.service.SakService
+import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.kontrakter.ef.sak.SakRequest
 import no.nav.familie.kontrakter.ef.søknad.SøknadMedVedlegg
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -21,7 +21,7 @@ import org.springframework.test.context.ActiveProfiles
 @ActiveProfiles("integrasjonstest", "mock-oauth", "mock-integrasjoner", "mock-pdl")
 internal class VurderingControllerTest : OppslagSpringRunnerTest() {
 
-    @Autowired lateinit var sakService: SakService
+    @Autowired lateinit var behandlingService: BehandlingService
 
     @BeforeEach
     fun setUp() {
@@ -31,7 +31,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `skal hente inngangsvilkår`() {
         val sak = SakRequest(SøknadMedVedlegg(Testsøknad.søknad, emptyList()), "123", "321")
-        val sakId = sakService.mottaSakOvergangsstønad(sak, emptyMap())
+        val sakId = behandlingService.mottaSakOvergangsstønad(sak, emptyMap())
 
         val respons: ResponseEntity<Ressurs<InngangsvilkårDto>> =
                 restTemplate.exchange(localhost("/api/vurdering/$sakId/inngangsvilkaar"),

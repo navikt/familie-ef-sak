@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.service
 
-import no.nav.familie.ef.sak.api.dto.SakDto
 import no.nav.familie.ef.sak.repository.CustomRepository
 import no.nav.familie.ef.sak.repository.FagsakRepository
 import no.nav.familie.ef.sak.repository.SøknadRepository
@@ -10,16 +9,14 @@ import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
 
 @Service
-class SakService(private val søknadRepository: SøknadRepository,
-                 private val fagsakRepository: FagsakRepository,
-                 private val customRepository: CustomRepository,
-                 private val overgangsstønadService: OvergangsstønadService) {
+class BehandlingService(private val søknadRepository: SøknadRepository,
+                        private val fagsakRepository: FagsakRepository,
+                        private val customRepository: CustomRepository) {
 
     val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
@@ -27,21 +24,25 @@ class SakService(private val søknadRepository: SøknadRepository,
     fun mottaSakOvergangsstønad(sak: SakRequest<SøknadOvergangsstønad>, vedleggMap: Map<String, ByteArray>): UUID {
         val ident = sak.søknad.søknad.personalia.verdi.fødselsnummer.verdi.verdi
         val behandling = hentBehandling(ident)
-        return mottaSak(SakMapper.toDomain(sak.saksnummer, sak.journalpostId, sak.søknad.søknad, behandling.id), sak, vedleggMap)
+        mottaSøknad(SakMapper.toDomain(sak.saksnummer, sak.journalpostId, sak.søknad.søknad, behandling.id),
+                    sak,
+                    vedleggMap)
+        return behandling.id
     }
 
     @Transactional
     fun mottaSakBarnetilsyn(sak: SakRequest<SøknadBarnetilsyn>, vedleggMap: Map<String, ByteArray>): UUID {
         val ident = sak.søknad.søknad.personalia.verdi.fødselsnummer.verdi.verdi
         val behandling = hentBehandling(ident)
-        return mottaSak(SakMapper.toDomain(sak.saksnummer, sak.journalpostId, sak.søknad.søknad, behandling.id),
-                        sak,
-                        vedleggMap)
+        mottaSøknad(SakMapper.toDomain(sak.saksnummer, sak.journalpostId, sak.søknad.søknad, behandling.id),
+                    sak,
+                    vedleggMap)
+        return behandling.id
     }
 
-    private fun <T> mottaSak(domenesak: no.nav.familie.ef.sak.repository.domain.Søknad,
-                             sak: SakRequest<T>,
-                             vedleggMap: Map<String, ByteArray>): UUID {
+    private fun <T> mottaSøknad(domenesak: Søknad,
+                                sak: SakRequest<T>,
+                                vedleggMap: Map<String, ByteArray>) {
         val save = customRepository.persist(domenesak)
         val vedleggListe = sak.søknad.vedlegg.map {
             val vedlegg = vedleggMap[it.id] ?: error("Finner ikke vedlegg ${it.id}")
@@ -49,11 +50,11 @@ class SakService(private val søknadRepository: SøknadRepository,
         }
         vedleggListe.forEach { customRepository.persist(it) }
         logger.info("lagret ${save.id} sammen med ${vedleggListe.size} vedlegg")
-        return save.id
     }
 
+    //tmp for å gjøre det mulig å støtte mottaSakOvergangsstønad
     private fun hentBehandling(ident: String): Behandling {
-        val fagsak = fagsakRepository.findBySøkerIdent(ident)
+        val fagsak = fagsakRepository.findBySøkerIdent(ident, Stønadstype.OVERGANGSSTØNAD)
                      ?: customRepository.persist(Fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD))
 
         return customRepository.persist(Behandling(fagsakId = fagsak.id,
@@ -62,38 +63,13 @@ class SakService(private val søknadRepository: SøknadRepository,
                                                    status = BehandlingStatus.OPPRETTET))
     }
 
-    fun hentOvergangsstønad(id: UUID): SakWrapper<SøknadOvergangsstønad> {
-        val søknad = hentSøknad(id)
+    fun hentOvergangsstønadPåBehandlingId(behandlingId: UUID): SakWrapper<SøknadOvergangsstønad> {
+        val søknad = hentSøknadPåBehandlingId(behandlingId)
         return SakMapper.pakkOppOvergangsstønad(søknad)
-    }
-
-    fun hentOvergangsstønadPåBehandlingId(id: UUID): SakWrapper<SøknadOvergangsstønad> {
-        val søknad = hentSøknadPåBehandlingId(id)
-        return SakMapper.pakkOppOvergangsstønad(søknad)
-    }
-
-    fun hentBarnetilsyn(id: UUID): SakWrapper<SøknadBarnetilsyn> {
-        val søknad = hentSøknad(id)
-        return SakMapper.pakkOppBarnetisyn(søknad)
-    }
-
-    fun hentSøknad(id: UUID): Søknad {
-        return søknadRepository.findByIdOrNull(id) ?: error("Ugyldig Primærnøkkel : $id")
     }
 
     private fun hentSøknadPåBehandlingId(id: UUID): Søknad {
         return søknadRepository.findByBehandlingId(id) ?: error("Finner ikke søknad til behandling: $id")
-    }
-
-    fun hentOvergangsstønadDto(id: UUID): SakDto {
-        val sakWrapper = hentOvergangsstønad(id)
-        val sak = sakWrapper.soknad
-        val søknad = sakWrapper.søknad
-        return SakDto(id = sak.id,
-                      søknad = søknad,
-                      saksnummer = sak.saksnummerInfotrygd,
-                      journalpostId = sak.journalpostId,
-                      overgangsstønad = overgangsstønadService.lagOvergangsstønad(søknad))
     }
 
 }

@@ -29,6 +29,7 @@ internal class SakstilgangTest {
     fun setUp() {
         every { sakRepository.findByIdOrNull(any()) }
                 .returns(Søknad(UUID.randomUUID(),
+                                UUID.randomUUID(),
                                 SøknadType.OVERGANGSSTØNAD,
                                 objectMapper.writeValueAsBytes(søknad),
                                 "1",
