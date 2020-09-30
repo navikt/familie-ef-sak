@@ -88,7 +88,7 @@ class PdlClientConfig {
     private fun statsborgerskap(): List<Statsborgerskap> =
             listOf(Statsborgerskap(land = "NOR",
                                    gyldigFraOgMed = startdato,
-                                   gyldigTilOgMed = sluttdato))
+                                   gyldigTilOgMed = null))
 
     private fun sivilstand(): List<Sivilstand> =
             listOf(Sivilstand(type = Sivilstandstype.SKILT,

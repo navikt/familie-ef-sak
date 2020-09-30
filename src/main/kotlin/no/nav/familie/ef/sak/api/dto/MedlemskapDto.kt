@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.api.dto
 
-import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import java.time.LocalDate
 
 data class MedlemskapDto(val søknadGrunnlag: MedlemskapSøknadGrunnlagDto,
@@ -13,8 +12,7 @@ data class MedlemskapSøknadGrunnlagDto(val bosattNorgeSisteÅrene: Boolean,
 
 data class MedlemskapRegisterGrunnlagDto(val nåværendeStatsborgerskap: List<String>,
                                          val statsborgerskap: List<StatsborgerskapDto>,
-                                         val oppholdstatus: List<OppholdstillatelseDto>,
-                                         val medlemskapsinfo: Medlemskapsinfo) //TODO: Lag en DTO-klasse for denne i stedet for å sende opp integrasjonsklassen
+                                         val oppholdstatus: List<OppholdstillatelseDto>)
 
 data class UtenlandsoppholdDto(val fra: LocalDate,
                                val til: LocalDate,

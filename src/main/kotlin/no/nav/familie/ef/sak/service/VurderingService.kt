@@ -14,7 +14,6 @@ import java.util.*
 
 @Service
 class VurderingService(private val sakService: SakService,
-                       private val integrasjonerClient: FamilieIntegrasjonerClient,
                        private val pdlClient: PdlClient,
                        private val medlemskapMapper: MedlemskapMapper) {
 
@@ -23,11 +22,9 @@ class VurderingService(private val sakService: SakService,
         val sak = sakService.hentOvergangsstønad(sakId)
         val fnr = sak.søknad.personalia.verdi.fødselsnummer.verdi.verdi
         val pdlSøker = pdlClient.hentSøker(fnr)
-        val medlemskapsinfo = integrasjonerClient.hentMedlemskapsinfo(fnr)
 
         val medlemskap = medlemskapMapper.tilDto(medlemskapsdetaljer = sak.søknad.medlemskapsdetaljer.verdi,
-                                                 pdlSøker = pdlSøker,
-                                                 medlemskapsinfo = medlemskapsinfo)
+                                                 pdlSøker = pdlSøker)
         return InngangsvilkårDto(medlemskap = medlemskap)
     }
 
