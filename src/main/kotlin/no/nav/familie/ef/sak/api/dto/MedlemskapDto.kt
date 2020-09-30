@@ -3,8 +3,7 @@ package no.nav.familie.ef.sak.api.dto
 import java.time.LocalDate
 
 data class MedlemskapDto(val søknadGrunnlag: MedlemskapSøknadGrunnlagDto,
-                         val registerGrunnlag: MedlemskapRegisterGrunnlagDto,
-                         val vurdering: VurderingDto? = null)
+                         val registerGrunnlag: MedlemskapRegisterGrunnlagDto)
 
 data class MedlemskapSøknadGrunnlagDto(val bosattNorgeSisteÅrene: Boolean,
                                        val oppholderDuDegINorge: Boolean,
@@ -13,8 +12,6 @@ data class MedlemskapSøknadGrunnlagDto(val bosattNorgeSisteÅrene: Boolean,
 data class MedlemskapRegisterGrunnlagDto(val nåværendeStatsborgerskap: List<String>,
                                          val statsborgerskap: List<StatsborgerskapDto>,
                                          val oppholdstatus: List<OppholdstillatelseDto>)
-
-class VurderingDto
 
 data class UtenlandsoppholdDto(val fra: LocalDate,
                                val til: LocalDate,
