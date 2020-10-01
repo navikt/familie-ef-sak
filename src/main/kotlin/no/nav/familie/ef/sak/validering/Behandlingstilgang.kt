@@ -30,7 +30,7 @@ class Behandlingstilgang(private val søknadRepository: SøknadRepository,
     }
 
     fun harTilgang(behandlingId: UUID): Boolean {
-        val søknad = søknadRepository.findByIdOrNull(behandlingId) ?: error("behandling finnes ikke: $behandlingId ")
+        val søknad = søknadRepository.findByBehandlingId(behandlingId) ?: error("behandling finnes ikke: $behandlingId ")
         return harTilgang(søknad)
     }
 
