@@ -17,17 +17,17 @@ import org.junit.jupiter.api.Test
 import org.springframework.data.repository.findByIdOrNull
 import java.util.*
 
-internal class SakstilgangTest {
+internal class BehandlingstilgangTest {
 
     private val integrasjonerClient = mockk<FamilieIntegrasjonerClient>()
 
-    private val sakRepository = mockk<SøknadRepository>()
+    private val søknadRepository = mockk<SøknadRepository>()
 
-    private val sakstilgang = Sakstilgang(sakRepository, integrasjonerClient)
+    private val behandlingstilgang = Behandlingstilgang(søknadRepository, integrasjonerClient)
 
     @BeforeEach
     fun setUp() {
-        every { sakRepository.findByIdOrNull(any()) }
+        every { søknadRepository.findByIdOrNull(any()) }
                 .returns(Søknad(UUID.randomUUID(),
                                 UUID.randomUUID(),
                                 SøknadType.OVERGANGSSTØNAD,
@@ -46,7 +46,7 @@ internal class SakstilgangTest {
                                 Tilgang(true, null),
                                 Tilgang(true, null)))
 
-        val valid = sakstilgang.isValid(UUID.randomUUID(), mockk())
+        val valid = behandlingstilgang.isValid(UUID.randomUUID(), mockk())
 
         Assertions.assertThat(valid).isTrue()
     }
@@ -58,7 +58,7 @@ internal class SakstilgangTest {
                                 Tilgang(false, null),
                                 Tilgang(true, null)))
 
-        val valid = sakstilgang.isValid(UUID.randomUUID(), mockk())
+        val valid = behandlingstilgang.isValid(UUID.randomUUID(), mockk())
 
         Assertions.assertThat(valid).isFalse()
     }

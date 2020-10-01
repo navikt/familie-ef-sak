@@ -24,7 +24,7 @@ class VurderingService(private val behandlingService: BehandlingService,
                        private val medlemskapMapper: MedlemskapMapper) {
 
     fun hentInngangsvilkår(behandlingId: UUID): InngangsvilkårDto {
-        val søknad = behandlingService.hentOvergangsstønadPåBehandlingId(behandlingId)
+        val søknad = behandlingService.hentOvergangsstønad(behandlingId)
         val fnr = søknad.søknad.personalia.verdi.fødselsnummer.verdi.verdi
         val pdlSøker = pdlClient.hentSøker(fnr)
 
@@ -56,7 +56,7 @@ class VurderingService(private val behandlingService: BehandlingService,
     }
 
     fun vurderAleneomsorg(behandlingId: UUID): Aleneomsorg {
-        val sak = behandlingService.hentOvergangsstønadPåBehandlingId(behandlingId).soknad
+        val sak = behandlingService.hentOvergangsstønad(behandlingId).soknad
         val fnrSøker = "" //TODO
         val pdlSøker = pdlClient.hentSøker(fnrSøker)
 

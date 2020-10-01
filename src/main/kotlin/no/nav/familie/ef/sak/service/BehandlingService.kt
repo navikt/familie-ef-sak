@@ -63,13 +63,13 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
                                                    status = BehandlingStatus.OPPRETTET))
     }
 
-    fun hentOvergangsstønadPåBehandlingId(behandlingId: UUID): SakWrapper<SøknadOvergangsstønad> {
-        val søknad = hentSøknadPåBehandlingId(behandlingId)
+    fun hentOvergangsstønad(behandlingId: UUID): SakWrapper<SøknadOvergangsstønad> {
+        val søknad = hentSøknad(behandlingId)
         return SakMapper.pakkOppOvergangsstønad(søknad)
     }
 
-    private fun hentSøknadPåBehandlingId(id: UUID): Søknad {
-        return søknadRepository.findByBehandlingId(id) ?: error("Finner ikke søknad til behandling: $id")
+    private fun hentSøknad(behandlingId: UUID): Søknad {
+        return søknadRepository.findByBehandlingId(behandlingId) ?: error("Finner ikke søknad til behandling: $behandlingId")
     }
 
 }

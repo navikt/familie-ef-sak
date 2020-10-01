@@ -5,3 +5,4 @@ ALTER TABLE gr_soknad ADD COLUMN behandling_id UUID REFERENCES behandling(id);
 
 ALTER TABLE soker RENAME COLUMN sak TO gr_soknad_id;
 ALTER TABLE barn RENAME COLUMN sak to gr_soknad_id;
+ALTER TABLE vedlegg RENAME COLUMN sak_id to gr_soknad_id;

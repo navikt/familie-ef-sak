@@ -10,7 +10,7 @@ import no.nav.familie.ef.sak.repository.SøknadRepository
 import no.nav.familie.ef.sak.repository.VedleggRepository
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.service.VedleggService
-import no.nav.familie.ef.sak.validering.Sakstilgang
+import no.nav.familie.ef.sak.validering.Behandlingstilgang
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
@@ -35,7 +35,7 @@ internal class VedleggControllerTest {
         søknadRepository = mockk()
         integrasjonerClient = mockk()
         vedleggController =
-                VedleggController(VedleggService(vedleggRepository, Sakstilgang(søknadRepository, integrasjonerClient)))
+                VedleggController(VedleggService(vedleggRepository, Behandlingstilgang(søknadRepository, integrasjonerClient)))
     }
 
     @Test
