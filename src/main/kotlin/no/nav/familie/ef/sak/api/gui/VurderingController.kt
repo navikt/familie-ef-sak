@@ -11,6 +11,7 @@ import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
+
 @RestController
 @RequestMapping(path = ["/api/vurdering"], produces = [MediaType.APPLICATION_JSON_VALUE])
 @ProtectedWithClaims(issuer = "azuread")
@@ -23,7 +24,7 @@ class VurderingController(val vurderingService: VurderingService) {
         return Ressurs.success("Oppdatering OK")
     }
 
-    @GetMapping("{behandlingId}/inngangsvilkaar")
+    @GetMapping("{behandlingId}/inngangsvilkar")
     fun getInngangsvilkår(@BehandlingConstraint @PathVariable behandlingId: UUID): Ressurs<InngangsvilkårDto> {
         return Ressurs.success(vurderingService.hentInngangsvilkår(behandlingId))
     }
