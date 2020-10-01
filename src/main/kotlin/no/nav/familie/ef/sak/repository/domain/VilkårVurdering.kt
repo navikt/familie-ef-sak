@@ -7,7 +7,7 @@ import org.springframework.data.relational.core.mapping.Table
 import java.util.*
 
 @Table("vilkar_vurdering")
-data class VilkårVurdering (
+data class VilkårVurdering(
         @Id
         val id: UUID = UUID.randomUUID(),
         @Column("behandling_id")
@@ -18,9 +18,9 @@ data class VilkårVurdering (
         val unntak: String? = null,
         @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
         val sporbar: Sporbar = Sporbar()
-        )
+)
 
-enum class VilkårResultat{
+enum class VilkårResultat {
     JA,
     NEI,
     IKKE_VURDERT
@@ -28,6 +28,7 @@ enum class VilkårResultat{
 
 //TODO Denne bør kanskje flyttes og utvides til å inneholde en NARE-spesifikasjon
 enum class VilkårType(val beskrivelse: String) {
+
     FORUTGÅENDE_MEDLEMSKAP("§15-2 Forutgående medlemskap"),
     LOVLIG_OPPHOLD("§15-3 Lovlig opphold");
 
