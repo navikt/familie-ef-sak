@@ -27,10 +27,6 @@ data class PersonopplysningerDto(val personIdent: String,
 data class TelefonnummerDto(val landskode: String,
                             val nummer: String)
 
-data class StatsborgerskapDto(val land: String?,
-                              val gyldigFraOgMed: LocalDate?,
-                              val gyldigTilOgMed: LocalDate?)
-
 data class SivilstandDto(val type: Sivilstandstype,
                          val gyldigFraOgMed: String?,
                          val relatertVedSivilstand: String?,

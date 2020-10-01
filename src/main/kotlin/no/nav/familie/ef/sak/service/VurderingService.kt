@@ -1,40 +1,30 @@
 package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.api.dto.Aleneomsorg
-import no.nav.familie.ef.sak.api.dto.MedlemskapDto
+import no.nav.familie.ef.sak.api.dto.InngangsvilkårDto
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.integration.dto.pdl.Familierelasjonsrolle
 import no.nav.familie.ef.sak.mapper.AleneomsorgMapper
 import no.nav.familie.ef.sak.mapper.MedlemskapMapper
 import no.nav.familie.ef.sak.repository.domain.SakMapper
-import no.nav.familie.ef.sak.vurdering.medlemskap.MedlemskapRegelsett
-import no.nav.familie.ef.sak.vurdering.medlemskap.Medlemskapsgrunnlag
-import no.nav.familie.ef.sak.vurdering.medlemskap.Medlemskapshistorikk
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.*
 
 @Service
 class VurderingService(private val sakService: SakService,
-                       private val integrasjonerClient: FamilieIntegrasjonerClient,
                        private val pdlClient: PdlClient,
-                       private val medlemskapRegelsett: MedlemskapRegelsett) {
+                       private val medlemskapMapper: MedlemskapMapper) {
 
-    fun vurderMedlemskap(sakId: UUID): MedlemskapDto {
+    fun hentInngangsvilkår(sakId: UUID): InngangsvilkårDto {
         val sak = sakService.hentOvergangsstønad(sakId)
         val fnr = sak.søknad.personalia.verdi.fødselsnummer.verdi.verdi
         val pdlSøker = pdlClient.hentSøker(fnr)
-        val medlemskapsinfo = integrasjonerClient.hentMedlemskapsinfo(fnr)
-        val medlemskapshistorikk = Medlemskapshistorikk(pdlSøker, medlemskapsinfo)
-        val medlemskapsgrunnlag = Medlemskapsgrunnlag(pdlSøker,
-                                                      medlemskapshistorikk,
-                                                      sak.søknad)
-        val evaluering = medlemskapRegelsett.vurderingMedlemskapSøker.evaluer(medlemskapsgrunnlag)
 
-        return MedlemskapMapper.tilDto(evaluering,
-                                       pdlSøker,
-                                       medlemskapshistorikk)
+        val medlemskap = medlemskapMapper.tilDto(medlemskapsdetaljer = sak.søknad.medlemskapsdetaljer.verdi,
+                                                 pdlSøker = pdlSøker)
+        return InngangsvilkårDto(medlemskap = medlemskap)
     }
 
     fun vurderAleneomsorg(sakId: UUID): Aleneomsorg {

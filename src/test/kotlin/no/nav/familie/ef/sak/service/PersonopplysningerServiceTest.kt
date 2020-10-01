@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.dto.familie.Arbeidsfordelingsenhet
 import no.nav.familie.ef.sak.mapper.AdresseMapper
 import no.nav.familie.ef.sak.mapper.PersonopplysningerMapper
+import no.nav.familie.ef.sak.mapper.StatsborgerskapMapper
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.config.KodeverkServiceMock
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.config.PdlClientConfig
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -27,7 +28,8 @@ internal class PersonopplysningerServiceTest {
         familieIntegrasjonerClient = mockk()
         adresseMapper = AdresseMapper(kodeverkService)
         arbeidsfordelingService = mockk()
-        val personopplysningerMapper = PersonopplysningerMapper(adresseMapper, kodeverkService, arbeidsfordelingService)
+        val personopplysningerMapper =
+                PersonopplysningerMapper(adresseMapper, StatsborgerskapMapper(kodeverkService), arbeidsfordelingService)
         val personService = PersonService(PdlClientConfig().pdlClient())
         personopplysningerService = PersonopplysningerService(personService,
                                                               familieIntegrasjonerClient,
@@ -59,7 +61,7 @@ internal class PersonopplysningerServiceTest {
   "statsborgerskap" : [ {
     "land" : "Norge",
     "gyldigFraOgMed" : "2020-01-01",
-    "gyldigTilOgMed" : "2021-01-01"
+    "gyldigTilOgMed" : null
   } ],
   "sivilstand" : [ {
     "type" : "SKILT",

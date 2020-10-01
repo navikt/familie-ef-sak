@@ -1,14 +1,18 @@
 package no.nav.familie.ef.sak.api.dto
 
-import no.nav.familie.ef.sak.integration.dto.pdl.InnflyttingTilNorge
-import no.nav.familie.ef.sak.integration.dto.pdl.Statsborgerskap
-import no.nav.familie.ef.sak.integration.dto.pdl.UtflyttingFraNorge
-import no.nav.familie.ef.sak.vurdering.medlemskap.Medlemskapshistorikk
+import java.time.LocalDate
 
+data class MedlemskapDto(val søknadGrunnlag: MedlemskapSøknadGrunnlagDto,
+                         val registerGrunnlag: MedlemskapRegisterGrunnlagDto)
 
-data class MedlemskapDto(val totalvurdering: String,
-                         val delvurderinger: List<String>,
-                         val statsborgerskap: List<Statsborgerskap>,
-                         val innvandring: List<InnflyttingTilNorge>,
-                         val utvandring: List<UtflyttingFraNorge>,
-                         val medlemskapshistorikk: Medlemskapshistorikk)
+data class MedlemskapSøknadGrunnlagDto(val bosattNorgeSisteÅrene: Boolean,
+                                       val oppholderDuDegINorge: Boolean,
+                                       val utenlandsopphold: List<UtenlandsoppholdDto>)
+
+data class MedlemskapRegisterGrunnlagDto(val nåværendeStatsborgerskap: List<String>,
+                                         val statsborgerskap: List<StatsborgerskapDto>,
+                                         val oppholdstatus: List<OppholdstillatelseDto>)
+
+data class UtenlandsoppholdDto(val fra: LocalDate,
+                               val til: LocalDate,
+                               val årsak: String)

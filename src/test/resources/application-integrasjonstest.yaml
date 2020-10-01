@@ -1,6 +1,25 @@
+server:
+  port: 9093
+
+spring:
+  h2:
+    console:
+      enabled: true
+  datasource:
+    username: sa
+    password:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;CASE_INSENSITIVE_IDENTIFIERS=TRUE
+    driver-class-name: org.h2.Driver
+
 no.nav.security.jwt:
   issuer.azuread:
     discoveryurl: http://metadata
     accepted_audience: aud-localhost
     cookie_name: localhost-idtoken
     proxy_url: #Default satt, skal være null i integrasjonstest
+
+FAMILIE_INTEGRASJONER_URL: http://localhost:8085
+FAMILIE_OPPDRAG_API_URL: http://localhost:8087
+
+CREDENTIAL_USERNAME: not-a-real-srvuser
+CREDENTIAL_PASSWORD: not-a-real-pw
