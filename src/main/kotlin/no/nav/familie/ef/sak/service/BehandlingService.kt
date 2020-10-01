@@ -63,9 +63,9 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
                                                    status = BehandlingStatus.OPPRETTET))
     }
 
-    fun hentOvergangsstønad(behandlingId: UUID): SakWrapper<SøknadOvergangsstønad> {
+    fun hentOvergangsstønad(behandlingId: UUID): SøknadOvergangsstønad {
         val søknad = hentSøknad(behandlingId)
-        return SakMapper.pakkOppOvergangsstønad(søknad)
+        return SakMapper.pakkOppOvergangsstønad(søknad).søknad
     }
 
     private fun hentSøknad(behandlingId: UUID): Søknad {

@@ -25,10 +25,10 @@ class VurderingService(private val behandlingService: BehandlingService,
 
     fun hentInngangsvilkår(behandlingId: UUID): InngangsvilkårDto {
         val søknad = behandlingService.hentOvergangsstønad(behandlingId)
-        val fnr = søknad.søknad.personalia.verdi.fødselsnummer.verdi.verdi
+        val fnr = søknad.personalia.verdi.fødselsnummer.verdi.verdi
         val pdlSøker = pdlClient.hentSøker(fnr)
 
-        val medlemskap = medlemskapMapper.tilDto(medlemskapsdetaljer = søknad.søknad.medlemskapsdetaljer.verdi,
+        val medlemskap = medlemskapMapper.tilDto(medlemskapsdetaljer = søknad.medlemskapsdetaljer.verdi,
                                                  pdlSøker = pdlSøker)
 
         val vurderinger = hentEllerOpprettVurderingerForInngangsvilkår(behandlingId)
@@ -56,7 +56,7 @@ class VurderingService(private val behandlingService: BehandlingService,
     }
 
     fun vurderAleneomsorg(behandlingId: UUID): Aleneomsorg {
-        val sak = behandlingService.hentOvergangsstønad(behandlingId).soknad
+        val søknad = behandlingService.hentOvergangsstønad(behandlingId)
         val fnrSøker = "" //TODO
         val pdlSøker = pdlClient.hentSøker(fnrSøker)
 
@@ -68,9 +68,8 @@ class VurderingService(private val behandlingService: BehandlingService,
                 .filter { it.value.fødsel.firstOrNull()?.fødselsdato != null }
                 .filter { it.value.fødsel.first().fødselsdato!!.plusYears(18).isAfter(LocalDate.now()) }
 
-        val overgangsstønad = SakMapper.pakkOppOvergangsstønad(sak)
         val barneforeldreFraSøknad =
-                overgangsstønad.søknad.barn.verdi.mapNotNull {
+                søknad.barn.verdi.mapNotNull {
                     it.annenForelder?.verdi?.person?.verdi?.fødselsnummer?.verdi?.verdi
                 }
 
@@ -85,7 +84,7 @@ class VurderingService(private val behandlingService: BehandlingService,
         return AleneomsorgMapper.tilDto(pdlSøker,
                                         barn,
                                         barneforeldre,
-                                        overgangsstønad.søknad)
+                                        søknad)
     }
 
 

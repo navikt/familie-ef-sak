@@ -22,7 +22,7 @@ internal class VilkårVurderingRepositoryTest : OppslagSpringRunnerTest() {
         val fagsak = customRepository.persist(fagsak())
         val behandling = customRepository.persist(behandling(fagsak))
 
-        val vilkårVurdering = customRepository.persist(vilkårVurdering(behandling,
+        val vilkårVurdering = customRepository.persist(vilkårVurdering(behandling.id,
                                                                        VilkårResultat.IKKE_VURDERT,
                                                                        VilkårType.FORUTGÅENDE_MEDLEMSKAP))
 
