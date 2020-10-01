@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.service
 
+import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.api.dto.Aleneomsorg
 import no.nav.familie.ef.sak.api.dto.InngangsvilkårDto
 import no.nav.familie.ef.sak.api.dto.VurderingDto
@@ -9,9 +10,9 @@ import no.nav.familie.ef.sak.mapper.AleneomsorgMapper
 import no.nav.familie.ef.sak.mapper.MedlemskapMapper
 import no.nav.familie.ef.sak.repository.CustomRepository
 import no.nav.familie.ef.sak.repository.VilkårVurderingRepository
-import no.nav.familie.ef.sak.repository.domain.SakMapper
 import no.nav.familie.ef.sak.repository.domain.VilkårType
 import no.nav.familie.ef.sak.repository.domain.VilkårVurdering
+import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.*
@@ -22,6 +23,22 @@ class VurderingService(private val behandlingService: BehandlingService,
                        private val customRepository: CustomRepository,
                        private val vilkårVurderingRepository: VilkårVurderingRepository,
                        private val medlemskapMapper: MedlemskapMapper) {
+
+    fun oppdaterVilkår(vurdering: VurderingDto): UUID {
+        val vilkårVurdering = vilkårVurderingRepository.findByIdOrThrow(vurdering.id)
+
+        val behandlingId = vilkårVurdering.behandlingId
+        if (behandlingErLåstForVidereRedigering(behandlingId)) {
+            throw Feil(message = "Bruker prøver å oppdatere en vilkårsvurdering der behandling=$behandlingId er låst for videre redigering",
+                       frontendFeilmelding = "Behandlingen er låst for videre redigering")
+        }
+
+        val nyVilkårsVurdering = vilkårVurdering.copy(resultat = vurdering.resultat,
+                                                      begrunnelse = vurdering.begrunnelse,
+                                                      unntak = vurdering.unntak,
+                                                      sporbar = vilkårVurdering.sporbar.oppdater())
+        return vilkårVurderingRepository.save(nyVilkårsVurdering).id
+    }
 
     fun hentInngangsvilkår(behandlingId: UUID): InngangsvilkårDto {
         val søknad = behandlingService.hentOvergangsstønad(behandlingId)
@@ -44,8 +61,12 @@ class VurderingService(private val behandlingService: BehandlingService,
     }
 
     private fun hentEllerOpprettVurderingerForInngangsvilkår(behandlingId: UUID): List<VilkårVurdering> {
-        //TODO sjekke att behandlingen allerede ikke er avsluttet? Eks burde vi ikke opprette nye vurderinger hvis noen går inn å sjekker en avsluttet sak..
         val lagredeVilkårVurderinger = vilkårVurderingRepository.findByBehandlingId(behandlingId)
+
+        if (behandlingErLåstForVidereRedigering(behandlingId)) {
+            return lagredeVilkårVurderinger
+        }
+
         val nyeVilkårVurderinger = VilkårType.hentInngangsvilkår().filter {
             lagredeVilkårVurderinger.find { vurdering -> vurdering.type == it } == null
         }.map { VilkårVurdering(behandlingId = behandlingId, type = it) }
@@ -54,6 +75,9 @@ class VurderingService(private val behandlingService: BehandlingService,
 
         return lagredeVilkårVurderinger + nyeVilkårVurderinger
     }
+
+    private fun behandlingErLåstForVidereRedigering(behandlingId: UUID) =
+            behandlingService.hentBehandling(behandlingId).status.behandlingErLåstForVidereRedigering()
 
     fun vurderAleneomsorg(behandlingId: UUID): Aleneomsorg {
         val søknad = behandlingService.hentOvergangsstønad(behandlingId)

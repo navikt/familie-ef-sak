@@ -1,8 +1,6 @@
 package no.nav.familie.ef.sak.service
 
-import no.nav.familie.ef.sak.repository.CustomRepository
-import no.nav.familie.ef.sak.repository.FagsakRepository
-import no.nav.familie.ef.sak.repository.SøknadRepository
+import no.nav.familie.ef.sak.repository.*
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.kontrakter.ef.sak.SakRequest
 import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
@@ -16,6 +14,7 @@ import java.util.*
 @Service
 class BehandlingService(private val søknadRepository: SøknadRepository,
                         private val fagsakRepository: FagsakRepository,
+                        private val behandlingRepository: BehandlingRepository,
                         private val customRepository: CustomRepository) {
 
     val logger: Logger = LoggerFactory.getLogger(this.javaClass)
@@ -62,6 +61,8 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
                                                    steg = BehandlingSteg.KOMMER_SENDERE,
                                                    status = BehandlingStatus.OPPRETTET))
     }
+
+    fun hentBehandling(behandlingId: UUID): Behandling = behandlingRepository.findByIdOrThrow(behandlingId)
 
     fun hentOvergangsstønad(behandlingId: UUID): SøknadOvergangsstønad {
         val søknad = hentSøknad(behandlingId)

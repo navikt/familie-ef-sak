@@ -18,10 +18,9 @@ import java.util.*
 @Validated
 class VurderingController(val vurderingService: VurderingService) {
 
-    @PostMapping("{behandlingId}/inngangsvilkaar/vurdering")
-    fun oppdaterVurderingInngangsvilkår(@RequestBody vurderinger: List<VurderingDto>): Ressurs<String> {
-        //TODO oppdater innslag i vilkår-tabell med vurdering fra SB
-        return Ressurs.success("Oppdatering OK")
+    @PostMapping("inngangsvilkar")
+    fun oppdaterVurderingInngangsvilkår(@RequestBody vurdering: VurderingDto): Ressurs<UUID> {
+        return Ressurs.success(vurderingService.oppdaterVilkår(vurdering))
     }
 
     @GetMapping("{behandlingId}/inngangsvilkar")
