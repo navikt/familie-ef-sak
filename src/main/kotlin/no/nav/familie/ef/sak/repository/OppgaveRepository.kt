@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository
 import java.util.*
 
 @Repository
-interface OppgaveRepository : RepositoryInterface<Oppgave, Long> {
+interface OppgaveRepository : RepositoryInterface<Oppgave, Long>, InsertUpdateRepository<Oppgave> {
 
     fun findByBehandlingIdAndType(behandlingId: UUID, oppgavetype: Oppgavetype): Oppgave?
 

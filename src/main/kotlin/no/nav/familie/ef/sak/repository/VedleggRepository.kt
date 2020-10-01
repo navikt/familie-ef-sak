@@ -5,4 +5,4 @@ import org.springframework.stereotype.Repository
 import java.util.*
 
 @Repository
-interface VedleggRepository : RepositoryInterface<Vedlegg, UUID>
+interface VedleggRepository : RepositoryInterface<Vedlegg, UUID>, InsertUpdateRepository<Vedlegg>

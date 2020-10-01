@@ -15,7 +15,7 @@ interface RepositoryInterface<T, ID> : CrudRepository<T, ID> {
     }
 
     @Deprecated("Støttes ikke, bruk insertAll/updateAll")
-    override fun <S : T> saveAll(entities: MutableIterable<S>): MutableIterable<S> {
+    override fun <S : T> saveAll(entities: Iterable<S>): Iterable<S> {
         error("Not implemented - Use InsertUpdateRepository - insertAll/updateAll")
     }
 }

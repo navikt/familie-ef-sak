@@ -5,4 +5,4 @@ import org.springframework.stereotype.Repository
 import java.util.*
 
 @Repository
-interface SakRepository : RepositoryInterface<Sak, UUID>
+interface SakRepository : RepositoryInterface<Sak, UUID>, InsertUpdateRepository<Sak>
