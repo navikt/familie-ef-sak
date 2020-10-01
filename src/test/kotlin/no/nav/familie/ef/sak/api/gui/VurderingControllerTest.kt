@@ -34,7 +34,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
         val sakId = sakService.mottaSakOvergangsstønad(sak, emptyMap())
 
         val respons: ResponseEntity<Ressurs<InngangsvilkårDto>> =
-                restTemplate.exchange(localhost("/api/vurdering/$sakId/inngangsvilkaar"),
+                restTemplate.exchange(localhost("/api/vurdering/$sakId/inngangsvilkar"),
                                       HttpMethod.GET,
                                       HttpEntity<Any>(headers))
 
