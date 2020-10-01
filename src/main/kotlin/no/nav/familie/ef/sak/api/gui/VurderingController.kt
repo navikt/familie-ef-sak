@@ -20,7 +20,7 @@ import java.util.*
 @Validated
 class VurderingController(val vurderingService: VurderingService) {
 
-    @GetMapping("{sakId}/inngangsvilkaar")
+    @GetMapping("{sakId}/inngangsvilkar")
     fun getInngangsvilkår(@SakstilgangConstraint @PathVariable sakId: UUID): Ressurs<InngangsvilkårDto> {
         return Ressurs.success(vurderingService.hentInngangsvilkår(sakId))
     }

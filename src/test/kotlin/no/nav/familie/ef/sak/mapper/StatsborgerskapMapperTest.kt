@@ -15,7 +15,7 @@ internal class StatsborgerskapMapperTest {
 
     @Test
     internal fun `skal mappe NOR ISO3 landkode til Norge`() {
-        every { kodeverkService.hentLand(any(), any()) } returns "Norge"
+        every { kodeverkService.hentLand("NOR", any()) } returns "Norge"
         val mappedStatsborgerskap =
                 statsborgerskapMapper.map(listOf(Statsborgerskap("NOR", LocalDate.MIN, LocalDate.MAX))).first()
         assertThat(mappedStatsborgerskap.land).isEqualTo("Norge")
