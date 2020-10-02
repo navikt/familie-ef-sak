@@ -35,8 +35,7 @@ class VurderingService(private val behandlingService: BehandlingService,
 
         val nyVilkårsVurdering = vilkårVurdering.copy(resultat = vurdering.resultat,
                                                       begrunnelse = vurdering.begrunnelse,
-                                                      unntak = vurdering.unntak,
-                                                      sporbar = vilkårVurdering.sporbar.oppdater())
+                                                      unntak = vurdering.unntak)
         return vilkårVurderingRepository.save(nyVilkårsVurdering).id
     }
 

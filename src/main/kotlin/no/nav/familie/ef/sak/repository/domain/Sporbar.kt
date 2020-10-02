@@ -13,11 +13,6 @@ data class Sporbar(@Column("opprettet_av")
                    @Column("endret_tid")
                    val endretTid: LocalDateTime = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS)) {
 
-    fun oppdater(): Sporbar {
-        return this.copy(endretAv = finnBrukernavn(),
-                         endretTid = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS))
-    }
-
     companion object {
 
         private const val BRUKERNAVN_NÅR_SIKKERHETSKONTEKST_IKKE_FINNES = "VL"

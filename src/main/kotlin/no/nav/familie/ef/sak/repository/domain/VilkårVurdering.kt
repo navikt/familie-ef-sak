@@ -26,7 +26,7 @@ enum class VilkårResultat {
     IKKE_VURDERT
 }
 
-//TODO Denne bør kanskje flyttes og utvides til å inneholde en NARE-spesifikasjon
+//TODO Denne bør kanskje utvides til å inneholde en NARE-spesifikasjon
 enum class VilkårType(val beskrivelse: String) {
 
     FORUTGÅENDE_MEDLEMSKAP("§15-2 Forutgående medlemskap"),
