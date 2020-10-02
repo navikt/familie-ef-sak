@@ -27,7 +27,7 @@ internal class BehandlingstilgangTest {
 
     @BeforeEach
     fun setUp() {
-        every { søknadRepository.findByIdOrNull(any()) }
+        every { søknadRepository.findByBehandlingId(any()) }
                 .returns(Søknad(UUID.randomUUID(),
                                 UUID.randomUUID(),
                                 SøknadType.OVERGANGSSTØNAD,

@@ -51,7 +51,7 @@ internal class VedleggControllerTest {
     @Test
     internal fun `finner vedlegg på id`() {
         every { vedleggRepository.findByIdOrNull(any()) } returns vedlegg()
-        every { søknadRepository.findByIdOrNull(any()) } returns søknad()
+        every { søknadRepository.findByBehandlingId(any()) } returns søknad()
         every { integrasjonerClient.sjekkTilgangTilPersoner(any()) } returns listOf(Tilgang(true))
 
         val vedleggResponse = vedleggController.hentVedlegg(UUID.randomUUID())
@@ -61,7 +61,7 @@ internal class VedleggControllerTest {
     @Test
     internal fun `kaster feil når man ikke har tilgang på vedlegget`() {
         every { vedleggRepository.findByIdOrNull(any()) } returns vedlegg()
-        every { søknadRepository.findByIdOrNull(any()) } returns søknad()
+        every { søknadRepository.findByBehandlingId(any()) } returns søknad()
         every { integrasjonerClient.sjekkTilgangTilPersoner(any()) } returns listOf(Tilgang(false))
 
         assertThat(Assertions.catchThrowable { vedleggController.hentVedlegg(UUID.randomUUID()) })
