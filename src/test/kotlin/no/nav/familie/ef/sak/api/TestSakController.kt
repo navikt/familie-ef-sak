@@ -10,6 +10,7 @@ import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.util.*
 
 @RestController
 @RequestMapping(path = ["/api/external/sak/"])
@@ -18,11 +19,9 @@ import org.springframework.web.bind.annotation.RestController
 class TestSakController(private val behandlingService: BehandlingService) {
 
     @PostMapping("dummy")
-    fun dummy(): HttpStatus {
+    fun dummy(): UUID {
         val sak = SakRequest(SøknadMedVedlegg(Testsøknad.søknad, emptyList()), "123", "321")
-        behandlingService.mottaSakOvergangsstønad(sak, emptyMap())
-
-        return HttpStatus.CREATED
+        return behandlingService.mottaSakOvergangsstønad(sak, emptyMap())
     }
 
 }
