@@ -19,6 +19,7 @@ import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.data.repository.findByIdOrNull
+import java.time.LocalDateTime
 import java.util.*
 
 
@@ -98,7 +99,9 @@ internal class VurderingServiceTest {
             vurderingService.oppdaterVilkår(VurderingDto(id = vurderingId,
                                                          behandlingId = BEHANDLING_ID,
                                                          resultat = VilkårResultat.JA,
-                                                         vilkårType = VilkårType.FORUTGÅENDE_MEDLEMSKAP))
+                                                         vilkårType = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
+                                                         endretAv = "",
+                                                         endretTid = LocalDateTime.now()))
         }).hasMessageContaining("Finner ikke VilkårVurdering med id")
     }
 
@@ -117,7 +120,9 @@ internal class VurderingServiceTest {
                                                      resultat = VilkårResultat.JA,
                                                      begrunnelse = "Ok",
                                                      unntak = "Nei",
-                                                     vilkårType = vilkårVurdering.type))
+                                                     vilkårType = vilkårVurdering.type,
+                                                     endretAv = "",
+                                                     endretTid = LocalDateTime.now()))
         assertThat(lagretVilkårVurdering.captured.resultat).isEqualTo(VilkårResultat.JA)
         assertThat(lagretVilkårVurdering.captured.begrunnelse).isEqualTo("Ok")
         assertThat(lagretVilkårVurdering.captured.unntak).isEqualTo("Nei")
@@ -138,7 +143,10 @@ internal class VurderingServiceTest {
                                                          resultat = VilkårResultat.JA,
                                                          begrunnelse = "Ok",
                                                          unntak = "Nei",
-                                                         vilkårType = vilkårVurdering.type))
+                                                         vilkårType = vilkårVurdering.type,
+                                                         endretAv = "",
+                                                         endretTid = LocalDateTime.now()
+            ))
         }).isInstanceOf(Feil::class.java)
                 .hasMessageContaining("er låst for videre redigering")
         verify { customRepository wasNot Called }

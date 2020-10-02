@@ -23,7 +23,7 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
     fun mottaSakOvergangsstønad(sak: SakRequest<SøknadOvergangsstønad>, vedleggMap: Map<String, ByteArray>): UUID {
         val ident = sak.søknad.søknad.personalia.verdi.fødselsnummer.verdi.verdi
         val behandling = hentBehandling(ident)
-        mottaSøknad(SakMapper.toDomain(sak.saksnummer, sak.journalpostId, sak.søknad.søknad, behandling.id),
+        mottaSøknad(SøknadMapper.toDomain(sak.saksnummer, sak.journalpostId, sak.søknad.søknad, behandling.id),
                     sak,
                     vedleggMap)
         return behandling.id
@@ -33,7 +33,7 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
     fun mottaSakBarnetilsyn(sak: SakRequest<SøknadBarnetilsyn>, vedleggMap: Map<String, ByteArray>): UUID {
         val ident = sak.søknad.søknad.personalia.verdi.fødselsnummer.verdi.verdi
         val behandling = hentBehandling(ident)
-        mottaSøknad(SakMapper.toDomain(sak.saksnummer, sak.journalpostId, sak.søknad.søknad, behandling.id),
+        mottaSøknad(SøknadMapper.toDomain(sak.saksnummer, sak.journalpostId, sak.søknad.søknad, behandling.id),
                     sak,
                     vedleggMap)
         return behandling.id
@@ -66,7 +66,7 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
 
     fun hentOvergangsstønad(behandlingId: UUID): SøknadOvergangsstønad {
         val søknad = hentSøknad(behandlingId)
-        return SakMapper.pakkOppOvergangsstønad(søknad).søknad
+        return SøknadMapper.pakkOppOvergangsstønad(søknad).søknad
     }
 
     private fun hentSøknad(behandlingId: UUID): Søknad {

@@ -30,14 +30,15 @@ data class Søknad(@Id
                   @MappedCollection(idColumn = "gr_soknad_id")
                   val barn: Set<Barn>)
 
-data class SakWrapper<T>(val soknad: Søknad, val søknad: T)
+data class SøknadWrapper<T>(val soknad: Søknad, val søknad: T)
 
 enum class SøknadType {
     OVERGANGSSTØNAD,
-    BARNETILSYN
+    BARNETILSYN,
+    SKOLEPENGER
 }
 
-object SakMapper {
+object SøknadMapper {
 
     fun toDomain(saksnummer: String,
                  journalpostId: String,
@@ -65,18 +66,18 @@ object SakMapper {
                       type = SøknadType.BARNETILSYN)
     }
 
-    fun pakkOppOvergangsstønad(søknad: Søknad): SakWrapper<SøknadOvergangsstønad> {
+    fun pakkOppOvergangsstønad(søknad: Søknad): SøknadWrapper<SøknadOvergangsstønad> {
         return pakkOpp(søknad, SøknadType.OVERGANGSSTØNAD)
     }
 
-    fun pakkOppBarnetisyn(søknad: Søknad): SakWrapper<SøknadBarnetilsyn> {
+    fun pakkOppBarnetisyn(søknad: Søknad): SøknadWrapper<SøknadBarnetilsyn> {
         return pakkOpp(søknad, SøknadType.BARNETILSYN)
     }
 
     private inline fun <reified T> pakkOpp(søknad: Søknad,
-                                           søknadType: SøknadType): SakWrapper<T> {
+                                           søknadType: SøknadType): SøknadWrapper<T> {
         if (søknad.type != søknadType) error("Feil type søknad ${søknad.id} ${søknad.type}")
-        return SakWrapper(søknad, objectMapper.readValue(søknad.søknad))
+        return SøknadWrapper(søknad, objectMapper.readValue(søknad.søknad))
     }
 
 }

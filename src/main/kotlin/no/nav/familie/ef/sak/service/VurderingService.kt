@@ -54,7 +54,9 @@ class VurderingService(private val behandlingService: BehandlingService,
                                  resultat = it.resultat,
                                  vilkårType = it.type,
                                  begrunnelse = it.begrunnelse,
-                                 unntak = it.unntak)
+                                 unntak = it.unntak,
+                                 endretAv = it.sporbar.endretAv,
+                                 endretTid = it.sporbar.endretTid)
                 }
         return InngangsvilkårDto(medlemskap = medlemskap, vurderinger = vurderinger)
     }
