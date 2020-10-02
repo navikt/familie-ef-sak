@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.repository.domain
 
+import no.nav.familie.ef.sak.service.steg.StegType
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
@@ -17,7 +18,7 @@ data class Behandling(@Id
 
                       val type: BehandlingType,
                       val status: BehandlingStatus,
-                      val steg: BehandlingSteg,
+                      val steg: StegType,
 
                       @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                       val sporbar: Sporbar = Sporbar())
@@ -35,8 +36,4 @@ enum class BehandlingStatus {
     FATTER_VEDTAK,
     IVERKSETTER_VEDTAK,
     FERDIGSTILT,
-}
-
-enum class BehandlingSteg {
-    KOMMER_SENDERE
 }
