@@ -6,6 +6,6 @@ import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 
 @Component
-@Profile("!local && !postgres && !local-postgres")
+@Profile("!local")
 class FamilieIntegrasjonHealth(familieIntegrasjonerClient: FamilieIntegrasjonerClient)
     : AbstractHealthIndicator(familieIntegrasjonerClient, "familie.integrasjoner")
