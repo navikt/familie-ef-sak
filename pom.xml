@@ -33,8 +33,8 @@
         <kotlin-coroutines.version>1.3.9-native-mt-2</kotlin-coroutines.version>
         <springfox.version>3.0.0</springfox.version>
         <mockk.version>1.10.2</mockk.version>
-        <fasterxml.version>2.11.2</fasterxml.version>
-        <felles.version>1.20200923051613_0c243cb</felles.version>
+        <fasterxml.version>2.11.3</fasterxml.version>
+        <felles.version>1.20201002051158_dbaf243</felles.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
         <kontrakter.version>2.0_20200929152152_9343038</kontrakter.version>
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
@@ -42,7 +42,7 @@
         <sonar.organization>navit</sonar.organization>
         <flyway.version>6.5.7</flyway.version>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <nav.security.version>1.3.0</nav.security.version>
+        <nav.security.version>1.3.1</nav.security.version>
         <postgres.version>42.2.16</postgres.version>
         <!--suppress UnresolvedMavenProperty Ligger som secret i github-->
         <spring.cloud>2.2.5.RELEASE</spring.cloud>

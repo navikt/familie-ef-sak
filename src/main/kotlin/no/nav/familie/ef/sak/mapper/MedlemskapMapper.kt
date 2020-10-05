@@ -24,7 +24,7 @@ class MedlemskapMapper(private val statsborgerskapMapper: StatsborgerskapMapper)
                                         it.årsakUtenlandsopphold.verdi)
                 } ?: emptyList())
         val registerGrunnlag = MedlemskapRegisterGrunnlagDto(
-                nåværendeStatsborgerskap = statsborgerskap.filter { it.gyldigTilOgMed == null }.map { it.land },
+                nåværendeStatsborgerskap = statsborgerskap.filter { it.gyldigTilOgMedDato == null }.map { it.land },
                 statsborgerskap = statsborgerskap,
                 oppholdstatus = OppholdstillatelseMapper.map(pdlSøker.opphold)
         )

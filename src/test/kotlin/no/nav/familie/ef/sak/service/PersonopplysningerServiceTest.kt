@@ -60,8 +60,8 @@ internal class PersonopplysningerServiceTest {
   },
   "statsborgerskap" : [ {
     "land" : "Norge",
-    "gyldigFraOgMed" : "2020-01-01",
-    "gyldigTilOgMed" : null
+    "gyldigFraOgMedDato" : "2020-01-01",
+    "gyldigTilOgMedDato" : null
   } ],
   "sivilstand" : [ {
     "type" : "SKILT",

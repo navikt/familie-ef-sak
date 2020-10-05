@@ -47,9 +47,10 @@ abstract class OppslagSpringRunnerTest {
 
     private fun resetDatabase() {
         listOf(Vedlegg::class,
-               Sak::class,
+               Søknad::class,
                TilkjentYtelse::class,
                Oppgave::class,
+               VilkårVurdering::class,
                Behandling::class,
                Fagsak::class
         ).forEach { jdbcAggregateOperations.deleteAll(it.java) }

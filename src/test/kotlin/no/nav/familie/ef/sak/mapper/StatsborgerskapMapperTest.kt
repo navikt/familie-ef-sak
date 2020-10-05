@@ -19,8 +19,8 @@ internal class StatsborgerskapMapperTest {
         val mappedStatsborgerskap =
                 statsborgerskapMapper.map(listOf(Statsborgerskap("NOR", LocalDate.MIN, LocalDate.MAX))).first()
         assertThat(mappedStatsborgerskap.land).isEqualTo("Norge")
-        assertThat(mappedStatsborgerskap.gyldigFraOgMed).isEqualTo(LocalDate.MIN)
-        assertThat(mappedStatsborgerskap.gyldigTilOgMed).isEqualTo(LocalDate.MAX)
+        assertThat(mappedStatsborgerskap.gyldigFraOgMedDato).isEqualTo(LocalDate.MIN)
+        assertThat(mappedStatsborgerskap.gyldigTilOgMedDato).isEqualTo(LocalDate.MAX)
     }
 
     @Test

@@ -9,8 +9,8 @@ import java.util.*
 @Table("vedlegg")
 data class Vedlegg(@Id
                    val id: UUID,
-                   @Column("sak_id")
-                   val sakId: UUID,
+                   @Column("grunnlag_soknad_id")
+                   val søknadId: UUID,
                    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                    val sporbar: Sporbar = Sporbar(),
                    val data: ByteArray,
@@ -18,7 +18,7 @@ data class Vedlegg(@Id
 
 
     override fun toString(): String {
-        return "Vedlegg(id=$id, sakId=$sakId, sporbar=$sporbar, navn='$navn')"
+        return "Vedlegg(id=$id, søknadId=$søknadId, sporbar=$sporbar, navn='$navn')"
     }
 
     override fun equals(other: Any?): Boolean {
@@ -28,7 +28,7 @@ data class Vedlegg(@Id
         other as Vedlegg
 
         if (id != other.id) return false
-        if (sakId != other.sakId) return false
+        if (søknadId != other.søknadId) return false
         if (sporbar != other.sporbar) return false
         if (!data.contentEquals(other.data)) return false
         if (navn != other.navn) return false
@@ -38,7 +38,7 @@ data class Vedlegg(@Id
 
     override fun hashCode(): Int {
         var result = id.hashCode()
-        result = 31 * result + sakId.hashCode()
+        result = 31 * result + søknadId.hashCode()
         result = 31 * result + sporbar.hashCode()
         result = 31 * result + data.contentHashCode()
         result = 31 * result + navn.hashCode()
@@ -48,6 +48,6 @@ data class Vedlegg(@Id
 
 object VedleggMapper {
 
-    fun toDomain(sakId: UUID, vedlegg: no.nav.familie.kontrakter.ef.søknad.Vedlegg, bytes: ByteArray): Vedlegg =
-            Vedlegg(id = UUID.fromString(vedlegg.id), sakId = sakId, data = bytes, navn = vedlegg.navn)
+    fun toDomain(søknadId: UUID, vedlegg: no.nav.familie.kontrakter.ef.søknad.Vedlegg, bytes: ByteArray): Vedlegg =
+            Vedlegg(id = UUID.fromString(vedlegg.id), søknadId = søknadId, data = bytes, navn = vedlegg.navn)
 }
