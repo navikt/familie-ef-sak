@@ -37,39 +37,43 @@ enum class StegType(val rekkefølge: Int,
             rekkefølge = 3,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
-    SEND_TIL_BESLUTTER(
+    BEREGNE_YTELSE(
             rekkefølge = 4,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
-    BESLUTTE_VEDTAK(
+    SEND_TIL_BESLUTTER(
             rekkefølge = 5,
+            tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
+            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
+    BESLUTTE_VEDTAK(
+            rekkefølge = 6,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.FATTER_VEDTAK)),
     IVERKSETT_MOT_OPPDRAG(
-            rekkefølge = 6,
+            rekkefølge = 7,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)),
     VENTE_PÅ_STATUS_FRA_ØKONOMI(
-            rekkefølge = 7,
-            tillattFor = listOf(BehandlerRolle.SYSTEM),
-            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)
-    ),
-    JOURNALFØR_VEDTAKSBREV(
             rekkefølge = 8,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)
     ),
-    DISTRIBUER_VEDTAKSBREV(
+    JOURNALFØR_VEDTAKSBREV(
             rekkefølge = 9,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)
     ),
-    FERDIGSTILLE_BEHANDLING(
+    DISTRIBUER_VEDTAKSBREV(
             rekkefølge = 10,
+            tillattFor = listOf(BehandlerRolle.SYSTEM),
+            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)
+    ),
+    FERDIGSTILLE_BEHANDLING(
+            rekkefølge = 11,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)),
     BEHANDLING_FERDIGSTILT(
-            rekkefølge = 11,
+            rekkefølge = 12,
             tillattFor = emptyList(),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.FERDIGSTILT));
 
@@ -97,7 +101,8 @@ enum class StegType(val rekkefølge: Int,
                 when (utførendeStegType) {
                     REGISTRERE_SØKNAD -> VILKÅRSVURDERE_INNGANGSVILKÅR
                     VILKÅRSVURDERE_INNGANGSVILKÅR -> VILKÅRSVURDERE_STØNAD
-                    VILKÅRSVURDERE_STØNAD -> SEND_TIL_BESLUTTER
+                    VILKÅRSVURDERE_STØNAD -> BEREGNE_YTELSE
+                    BEREGNE_YTELSE -> SEND_TIL_BESLUTTER
                     SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
                     BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
                     IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
@@ -110,7 +115,8 @@ enum class StegType(val rekkefølge: Int,
                 when (utførendeStegType) {
                 REGISTRERE_SØKNAD -> VILKÅRSVURDERE_INNGANGSVILKÅR
                 VILKÅRSVURDERE_INNGANGSVILKÅR -> VILKÅRSVURDERE_STØNAD
-                VILKÅRSVURDERE_STØNAD -> SEND_TIL_BESLUTTER
+                VILKÅRSVURDERE_STØNAD -> BEREGNE_YTELSE
+                BEREGNE_YTELSE -> SEND_TIL_BESLUTTER
                 SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
                 BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
