@@ -13,8 +13,8 @@ class StatsborgerskapMapper(private val kodeverkService: KodeverkService) {
         return statsborgerskap.map {
             val land = kodeverkService.hentLand(it.land, datoEllerIdag(it.gyldigFraOgMed)) ?: it.land
             StatsborgerskapDto(land = land,
-                               gyldigFraOgMed = it.gyldigFraOgMed,
-                               gyldigTilOgMed = it.gyldigTilOgMed)
+                               gyldigFraOgMedDato = it.gyldigFraOgMed,
+                               gyldigTilOgMedDato = it.gyldigTilOgMed)
         }
     }
 }
