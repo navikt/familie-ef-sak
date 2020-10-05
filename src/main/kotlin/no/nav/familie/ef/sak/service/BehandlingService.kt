@@ -2,6 +2,8 @@ package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.repository.*
 import no.nav.familie.ef.sak.repository.domain.*
+import no.nav.familie.ef.sak.service.steg.StegType
+import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.ef.sak.SakRequest
 import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
@@ -58,7 +60,7 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
 
         return customRepository.persist(Behandling(fagsakId = fagsak.id,
                                                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                   steg = BehandlingSteg.KOMMER_SENDERE,
+                                                   steg = StegType.REGISTRERE_SØKNAD,
                                                    status = BehandlingStatus.OPPRETTET))
     }
 
@@ -68,6 +70,23 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
         val søknad = hentSøknad(behandlingId)
         return SøknadMapper.pakkOppOvergangsstønad(søknad).søknad
     }
+
+    fun oppdaterStatusPåBehandling(behandlingId: UUID, status: BehandlingStatus): Behandling {
+        val behandling = hentBehandling(behandlingId)
+        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer status på behandling $behandlingId fra ${behandling.status} til $status")
+
+        behandling.status = status
+        return behandlingRepository.save(behandling)
+    }
+
+    fun oppdaterStegPåBehandling(behandlingId: UUID, steg: StegType): Behandling {
+        val behandling = hentBehandling(behandlingId)
+        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer steg på behandling $behandlingId fra ${behandling.steg} til $steg")
+
+        behandling.steg = steg
+        return behandlingRepository.save(behandling)
+    }
+
 
     private fun hentSøknad(behandlingId: UUID): Søknad {
         return søknadRepository.findByBehandlingId(behandlingId) ?: error("Finner ikke søknad til behandling: $behandlingId")

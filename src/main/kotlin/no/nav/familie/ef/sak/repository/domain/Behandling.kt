@@ -16,8 +16,8 @@ data class Behandling(@Id
                       val aktiv: Boolean = true,
 
                       val type: BehandlingType,
-                      val status: BehandlingStatus,
-                      val steg: StegType,
+                      var status: BehandlingStatus,
+                      var steg: StegType,
 
                       @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                       val sporbar: Sporbar = Sporbar())

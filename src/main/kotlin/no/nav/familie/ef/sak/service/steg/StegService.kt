@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.service.steg
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ef.sak.repository.domain.Behandling
+import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.steg.StegType.BEHANDLING_FERDIGSTILT
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import org.slf4j.LoggerFactory
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class StegService(
         private val behandlingSteg: List<BehandlingSteg<*>>,
+        private val behandlingService: BehandlingService,
 ) {
 
     private val stegSuksessMetrics: Map<StegType, Counter> = initStegMetrikker("suksess")
@@ -65,17 +67,14 @@ class StegService(
                 LOG.info("$saksbehandlerNavn er ferdig med stegprosess på behandling ${behandling.id}")
             }
 
-            // TODO: Venter på merge fra Johan og Martine sin branch med behandlingService
-//            if (!nesteSteg.erGyldigIKombinasjonMedStatus(behandlingService.hentBehandling(behandling.id).status)) {
-//                error("Steg '${nesteSteg.displayName()}' kan ikke settes på behandling i kombinasjon med status ${behandling.status}")
-//            }
-//
-//            val returBehandling = behandlingService.oppdaterStegPåBehandling(behandlingId = behandling.id, steg = nesteSteg)
-//
-//            LOG.info("$saksbehandlerNavn har håndtert $stegType på behandling ${behandling.id}")
-//            return returBehandling
+            if (!nesteSteg.erGyldigIKombinasjonMedStatus(behandlingService.hentBehandling(behandling.id).status)) {
+                error("Steg '${nesteSteg.displayName()}' kan ikke settes på behandling i kombinasjon med status ${behandling.status}")
+            }
 
-            return behandling
+            val returBehandling = behandlingService.oppdaterStegPåBehandling(behandlingId = behandling.id, steg = nesteSteg)
+
+            LOG.info("$saksbehandlerNavn har håndtert $stegType på behandling ${behandling.id}")
+            return returBehandling
         } catch (exception: Exception) {
             stegFeiletMetrics[stegType]?.increment()
             LOG.error("Håndtering av stegtype '$stegType' feilet på behandling ${behandling.id}.")

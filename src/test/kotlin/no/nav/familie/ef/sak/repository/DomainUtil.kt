@@ -21,7 +21,6 @@ fun behandling(fagsak: Fagsak, aktiv: Boolean = true, status: BehandlingStatus =
             steg = steg,
             aktiv = aktiv
     )
-}
 
 fun fagsak(identer: Set<FagsakPerson> = setOf(), sporbar: Sporbar = Sporbar()) =
         Fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD,
