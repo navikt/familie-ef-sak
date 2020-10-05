@@ -8,7 +8,6 @@ import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.integration.dto.pdl.Familierelasjonsrolle
 import no.nav.familie.ef.sak.mapper.AleneomsorgMapper
 import no.nav.familie.ef.sak.mapper.MedlemskapMapper
-import no.nav.familie.ef.sak.repository.CustomRepository
 import no.nav.familie.ef.sak.repository.VilkårVurderingRepository
 import no.nav.familie.ef.sak.repository.domain.VilkårType
 import no.nav.familie.ef.sak.repository.domain.VilkårVurdering
@@ -20,7 +19,6 @@ import java.util.*
 @Service
 class VurderingService(private val behandlingService: BehandlingService,
                        private val pdlClient: PdlClient,
-                       private val customRepository: CustomRepository,
                        private val vilkårVurderingRepository: VilkårVurderingRepository,
                        private val medlemskapMapper: MedlemskapMapper) {
 
@@ -36,7 +34,7 @@ class VurderingService(private val behandlingService: BehandlingService,
         val nyVilkårsVurdering = vilkårVurdering.copy(resultat = vurdering.resultat,
                                                       begrunnelse = vurdering.begrunnelse,
                                                       unntak = vurdering.unntak)
-        return vilkårVurderingRepository.save(nyVilkårsVurdering).id
+        return vilkårVurderingRepository.update(nyVilkårsVurdering).id
     }
 
     fun hentInngangsvilkår(behandlingId: UUID): InngangsvilkårDto {
@@ -72,7 +70,7 @@ class VurderingService(private val behandlingService: BehandlingService,
             lagredeVilkårVurderinger.find { vurdering -> vurdering.type == it } == null
         }.map { VilkårVurdering(behandlingId = behandlingId, type = it) }
 
-        customRepository.persistAll(nyeVilkårVurderinger)
+        vilkårVurderingRepository.insertAll(nyeVilkårVurderinger)
 
         return lagredeVilkårVurderinger + nyeVilkårVurderinger
     }

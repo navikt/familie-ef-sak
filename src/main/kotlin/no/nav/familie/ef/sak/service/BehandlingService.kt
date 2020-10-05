@@ -13,9 +13,9 @@ import java.util.*
 
 @Service
 class BehandlingService(private val søknadRepository: SøknadRepository,
+                        private val vedleggRepository: VedleggRepository,
                         private val fagsakRepository: FagsakRepository,
-                        private val behandlingRepository: BehandlingRepository,
-                        private val customRepository: CustomRepository) {
+                        private val behandlingRepository: BehandlingRepository) {
 
     val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
@@ -42,21 +42,21 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
     private fun <T> mottaSøknad(domenesak: Søknad,
                                 sak: SakRequest<T>,
                                 vedleggMap: Map<String, ByteArray>) {
-        val save = customRepository.persist(domenesak)
+        val save = søknadRepository.insert(domenesak)
         val vedleggListe = sak.søknad.vedlegg.map {
             val vedlegg = vedleggMap[it.id] ?: error("Finner ikke vedlegg ${it.id}")
             VedleggMapper.toDomain(save.id, it, vedlegg)
         }
-        vedleggListe.forEach { customRepository.persist(it) }
+        vedleggListe.forEach { vedleggRepository.insert(it) }
         logger.info("lagret ${save.id} sammen med ${vedleggListe.size} vedlegg")
     }
 
     //tmp for å gjøre det mulig å støtte mottaSakOvergangsstønad
     private fun hentBehandling(ident: String): Behandling {
         val fagsak = fagsakRepository.findBySøkerIdent(ident, Stønadstype.OVERGANGSSTØNAD)
-                     ?: customRepository.persist(Fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD))
+                     ?: fagsakRepository.insert(Fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD))
 
-        return customRepository.persist(Behandling(fagsakId = fagsak.id,
+        return behandlingRepository.insert(Behandling(fagsakId = fagsak.id,
                                                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                                    steg = BehandlingSteg.KOMMER_SENDERE,
                                                    status = BehandlingStatus.OPPRETTET))

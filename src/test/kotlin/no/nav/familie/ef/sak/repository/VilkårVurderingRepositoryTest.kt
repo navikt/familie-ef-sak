@@ -1,7 +1,8 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.repository.CustomRepository
+import no.nav.familie.ef.sak.repository.BehandlingRepository
+import no.nav.familie.ef.sak.repository.FagsakRepository
 import no.nav.familie.ef.sak.repository.VilkårVurderingRepository
 import no.nav.familie.ef.sak.repository.domain.VilkårResultat
 import no.nav.familie.ef.sak.repository.domain.VilkårType
@@ -14,15 +15,16 @@ import java.util.*
 @ActiveProfiles("local", "mock-oauth")
 internal class VilkårVurderingRepositoryTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var customRepository: CustomRepository
     @Autowired private lateinit var vilkårVurderingRepository: VilkårVurderingRepository
+    @Autowired private lateinit var fagsakRepository: FagsakRepository
+    @Autowired private lateinit var behandlingRepository: BehandlingRepository
 
     @Test
     internal fun findByBehandlingId() {
-        val fagsak = customRepository.persist(fagsak())
-        val behandling = customRepository.persist(behandling(fagsak))
+        val fagsak = fagsakRepository.insert(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak))
 
-        val vilkårVurdering = customRepository.persist(vilkårVurdering(behandling.id,
+        val vilkårVurdering = vilkårVurderingRepository.insert(vilkårVurdering(behandling.id,
                                                                        VilkårResultat.IKKE_VURDERT,
                                                                        VilkårType.FORUTGÅENDE_MEDLEMSKAP))
 

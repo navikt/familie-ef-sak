@@ -8,7 +8,6 @@ import no.nav.familie.ef.sak.no.nav.familie.ef.sak.config.PdlClientConfig
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.vilkårVurdering
-import no.nav.familie.ef.sak.repository.CustomRepository
 import no.nav.familie.ef.sak.repository.VilkårVurderingRepository
 import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import no.nav.familie.ef.sak.repository.domain.VilkårResultat
@@ -26,12 +25,10 @@ import java.util.*
 internal class VurderingServiceTest {
 
     private val behandlingService = mockk<BehandlingService>()
-    private val customRepository = mockk<CustomRepository>()
     private val vilkårVurderingRepository = mockk<VilkårVurderingRepository>()
     private val vurderingService = VurderingService(behandlingService = behandlingService,
                                                     pdlClient = PdlClientConfig().pdlClient(),
                                                     medlemskapMapper = mockk(relaxed = true),
-                                                    customRepository = customRepository,
                                                     vilkårVurderingRepository = vilkårVurderingRepository)
 
     @BeforeEach
@@ -45,7 +42,7 @@ internal class VurderingServiceTest {
         every { vilkårVurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns emptyList()
 
         val nyeVilkårVurderinger = slot<List<VilkårVurdering>>()
-        every { customRepository.persistAll(capture(nyeVilkårVurderinger)) } answers
+        every { vilkårVurderingRepository.insertAll(capture(nyeVilkårVurderinger)) } answers
                 { it.invocation.args.first() as List<VilkårVurdering> }
         val inngangsvilkår = VilkårType.hentInngangsvilkår()
 
@@ -65,7 +62,7 @@ internal class VurderingServiceTest {
                                                                                                              behandlingId = BEHANDLING_ID))
 
         val nyeVilkårVurderinger = slot<List<VilkårVurdering>>()
-        every { customRepository.persistAll(capture(nyeVilkårVurderinger)) } answers
+        every { vilkårVurderingRepository.insertAll(capture(nyeVilkårVurderinger)) } answers
                 { it.invocation.args.first() as List<VilkårVurdering> }
         val inngangsvilkår = VilkårType.hentInngangsvilkår()
 
@@ -87,7 +84,7 @@ internal class VurderingServiceTest {
         val alleVilkårVurderinger = vurderingService.hentInngangsvilkår(BEHANDLING_ID).vurderinger
 
         assertThat(alleVilkårVurderinger).hasSize(1)
-        verify { customRepository wasNot Called }
+        verify(exactly = 0) { vilkårVurderingRepository.insertAll(any()) }
         assertThat(alleVilkårVurderinger.map { it.id }).isEqualTo(vilkårsvurderinger.map { it.id })
     }
 
@@ -113,7 +110,7 @@ internal class VurderingServiceTest {
                                               VilkårType.FORUTGÅENDE_MEDLEMSKAP)
         every { vilkårVurderingRepository.findByIdOrNull(vilkårVurdering.id) } returns vilkårVurdering
         val lagretVilkårVurdering = slot<VilkårVurdering>()
-        every { vilkårVurderingRepository.save(capture(lagretVilkårVurdering)) } answers { it.invocation.args.first() as VilkårVurdering }
+        every { vilkårVurderingRepository.update(capture(lagretVilkårVurdering)) } answers { it.invocation.args.first() as VilkårVurdering }
 
         vurderingService.oppdaterVilkår(VurderingDto(id = vilkårVurdering.id,
                                                      behandlingId = BEHANDLING_ID,
@@ -149,7 +146,7 @@ internal class VurderingServiceTest {
             ))
         }).isInstanceOf(Feil::class.java)
                 .hasMessageContaining("er låst for videre redigering")
-        verify { customRepository wasNot Called }
+        verify(exactly = 0) { vilkårVurderingRepository.insertAll(any()) }
     }
 
     companion object {

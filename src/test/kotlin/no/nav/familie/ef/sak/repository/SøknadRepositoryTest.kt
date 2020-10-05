@@ -2,7 +2,8 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.Testsøknad.søknad
-import no.nav.familie.ef.sak.repository.CustomRepository
+import no.nav.familie.ef.sak.repository.BehandlingRepository
+import no.nav.familie.ef.sak.repository.FagsakRepository
 import no.nav.familie.ef.sak.repository.SøknadRepository
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -21,12 +22,13 @@ import java.util.*
 internal class SøknadRepositoryTest : OppslagSpringRunnerTest() {
 
     @Autowired lateinit var søknadRepository: SøknadRepository
-    @Autowired lateinit var customRepository: CustomRepository
+    @Autowired private lateinit var fagsakRepository: FagsakRepository
+    @Autowired private lateinit var behandlingRepository: BehandlingRepository
 
     @Test
     fun `finner søknad på behandlingId`() {
-        val fagsak = customRepository.persist(fagsak())
-        val behandling = customRepository.persist(behandling(fagsak))
+        val fagsak = fagsakRepository.insert(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak))
         opprettSøknad("1", "11111122222", behandling.id)
 
         val søknad = søknadRepository.findByBehandlingId(behandling.id)
@@ -34,7 +36,7 @@ internal class SøknadRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     private fun opprettSøknad(saksnummer: String, fødselsnummer: String, behandlingId: UUID) {
-        customRepository.persist(Søknad(
+        søknadRepository.insert(Søknad(
                 søknad = objectMapper.writeValueAsBytes(søknad),
                 behandlingId = behandlingId,
                 type = SøknadType.OVERGANGSSTØNAD,

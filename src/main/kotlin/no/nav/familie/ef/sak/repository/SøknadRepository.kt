@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository
 import java.util.*
 
 @Repository
-interface SakRepository : RepositoryInterface<Søknad, UUID>, InsertUpdateRepository<Søknad> {
+interface SøknadRepository : RepositoryInterface<Søknad, UUID>, InsertUpdateRepository<Søknad> {
 
     fun findByBehandlingId(behandlingId: UUID): Søknad?
 }

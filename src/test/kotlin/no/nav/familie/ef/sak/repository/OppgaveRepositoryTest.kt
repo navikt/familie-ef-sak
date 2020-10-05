@@ -4,7 +4,6 @@ import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.oppgave
-import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -15,14 +14,15 @@ import java.util.*
 @ActiveProfiles("local", "mock-oauth")
 internal class OppgaveRepositoryTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var customRepository: CustomRepository
     @Autowired private lateinit var oppgaveRepository: OppgaveRepository
+    @Autowired private lateinit var fagsakRepository: FagsakRepository
+    @Autowired private lateinit var behandlingRepository: BehandlingRepository
 
     @Test
     internal fun `findByBehandlingIdAndType`() {
-        val fagsak = customRepository.persist(fagsak())
-        val behandling = customRepository.persist(behandling(fagsak))
-        val oppgave = customRepository.persist(oppgave(behandling))
+        val fagsak = fagsakRepository.insert(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak))
+        val oppgave = oppgaveRepository.insert(oppgave(behandling))
 
         assertThat(oppgaveRepository.findByBehandlingIdAndType(UUID.randomUUID(), Oppgavetype.BehandleSak)).isNull()
         assertThat(oppgaveRepository.findByBehandlingIdAndType(behandling.id, Oppgavetype.BehandleSak)).isNull()
@@ -31,9 +31,9 @@ internal class OppgaveRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `findByBehandlingIdAndTypeAndErFerdigstiltIsFalse`() {
-        val fagsak = customRepository.persist(fagsak())
-        val behandling = customRepository.persist(behandling(fagsak))
-        val oppgave = customRepository.persist(oppgave(behandling, erFerdigstilt = true))
+        val fagsak = fagsakRepository.insert(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak))
+        val oppgave = oppgaveRepository.insert(oppgave(behandling, erFerdigstilt = true))
 
         assertThat(oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(UUID.randomUUID(), Oppgavetype.BehandleSak))
                 .isNull()
@@ -42,7 +42,7 @@ internal class OppgaveRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandling.id, oppgave.type))
                 .isNull()
 
-        val oppgaveIkkeFerdigstilt = customRepository.persist(oppgave(behandling))
+        val oppgaveIkkeFerdigstilt = oppgaveRepository.insert(oppgave(behandling))
         assertThat(oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandling.id, oppgave.type))
                 .isEqualTo(oppgaveIkkeFerdigstilt)
     }

@@ -38,8 +38,8 @@ internal class OppgaveServiceTest {
     fun `Opprett oppgave skal samle data og opprette en ny oppgave basert på fagsak, behandling, fnr og enhet`() {
         every { behandlingRepository.findByIdOrNull(BEHANDLING_ID) } returns lagTestBehandling()
         every { fagsakRepository.findByIdOrNull(FAGSAK_ID) } returns lagTestFagsak()
-        every { behandlingRepository.save(any()) } returns lagTestBehandling()
-        every { oppgaveRepository.save(any()) } returns lagTestOppgave()
+        every { behandlingRepository.update(any()) } returns lagTestBehandling()
+        every { oppgaveRepository.update(any()) } returns lagTestOppgave()
         every {
             oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any())
         } returns null
@@ -83,7 +83,7 @@ internal class OppgaveServiceTest {
         every {
             oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any())
         } returns lagTestOppgave()
-        every { oppgaveRepository.save(any()) } returns lagTestOppgave()
+        every { oppgaveRepository.update(any()) } returns lagTestOppgave()
         val slot = slot<Long>()
         every { oppgaveClient.ferdigstillOppgave(capture(slot)) } just runs
 
@@ -96,7 +96,7 @@ internal class OppgaveServiceTest {
         every {
             oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any())
         } returns null
-        every { oppgaveRepository.save(any()) } returns lagTestOppgave()
+        every { oppgaveRepository.update(any()) } returns lagTestOppgave()
         every { behandlingRepository.findByIdOrNull(BEHANDLING_ID) } returns mockk {}
 
         Assertions.assertThatThrownBy { oppgaveService.ferdigstillOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak) }

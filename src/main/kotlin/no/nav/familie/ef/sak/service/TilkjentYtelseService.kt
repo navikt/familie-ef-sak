@@ -3,7 +3,6 @@ package no.nav.familie.ef.sak.service
 import no.nav.familie.ef.sak.mapper.tilDto
 import no.nav.familie.ef.sak.mapper.tilOpphør
 import no.nav.familie.ef.sak.mapper.tilTilkjentYtelse
-import no.nav.familie.ef.sak.repository.CustomRepository
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.økonomi.Utbetalingsoppdrag.lagUtbetalingsoppdrag
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
@@ -24,8 +23,7 @@ import java.util.*
 
 @Service
 class TilkjentYtelseService(private val økonomiKlient: ØkonomiKlient,
-                            private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-                            private val customRepository: CustomRepository) {
+                            private val tilkjentYtelseRepository: TilkjentYtelseRepository) {
 
     @Transactional
     fun opprettTilkjentYtelse(tilkjentYtelseDTO: TilkjentYtelseDTO): UUID {
@@ -37,7 +35,7 @@ class TilkjentYtelseService(private val økonomiKlient: ØkonomiKlient,
         }
 
         val opprettetTilkjentYtelse =
-                customRepository.persist(tilkjentYtelseDTO.tilTilkjentYtelse(TilkjentYtelseStatus.OPPRETTET))
+                tilkjentYtelseRepository.insert(tilkjentYtelseDTO.tilTilkjentYtelse(TilkjentYtelseStatus.OPPRETTET))
 
         return opprettetTilkjentYtelse.id
     }
@@ -82,9 +80,9 @@ class TilkjentYtelseService(private val økonomiKlient: ØkonomiKlient,
 
     private fun lagOpphørOgSendUtbetalingsoppdrag(tilkjentYtelse: TilkjentYtelse, opphørDato: LocalDate): UUID {
 
-        tilkjentYtelseRepository.save(tilkjentYtelse.copy(status = TilkjentYtelseStatus.AVSLUTTET))
+        tilkjentYtelseRepository.update(tilkjentYtelse.copy(status = TilkjentYtelseStatus.AVSLUTTET))
 
-        val lagretOpphørtTilkjentYtelse = customRepository.persist(tilkjentYtelse.tilOpphør(opphørDato))
+        val lagretOpphørtTilkjentYtelse = tilkjentYtelseRepository.insert(tilkjentYtelse.tilOpphør(opphørDato))
 
         sendUtbetalingsoppdragOgOppdaterStatus(lagretOpphørtTilkjentYtelse,
                                                TilkjentYtelseStatus.SENDT_TIL_IVERKSETTING)
@@ -98,7 +96,7 @@ class TilkjentYtelseService(private val økonomiKlient: ØkonomiKlient,
         val utbetalingsoppdrag = lagUtbetalingsoppdrag(saksbehandlerId, tilkjentYtelse)
 
         // Rulles tilbake hvis økonomiKlient.iverksettOppdrag under kaster en exception
-        tilkjentYtelseRepository.save(tilkjentYtelse.copy(utbetalingsoppdrag = utbetalingsoppdrag,
+        tilkjentYtelseRepository.update(tilkjentYtelse.copy(utbetalingsoppdrag = utbetalingsoppdrag,
                                                           status = nyStatus))
 
         økonomiKlient.iverksettOppdrag(utbetalingsoppdrag).getDataOrThrow()
