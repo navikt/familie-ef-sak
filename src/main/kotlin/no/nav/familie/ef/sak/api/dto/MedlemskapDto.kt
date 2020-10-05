@@ -13,6 +13,6 @@ data class MedlemskapRegisterGrunnlagDto(val nåværendeStatsborgerskap: List<St
                                          val statsborgerskap: List<StatsborgerskapDto>,
                                          val oppholdstatus: List<OppholdstillatelseDto>)
 
-data class UtenlandsoppholdDto(val fra: LocalDate,
-                               val til: LocalDate,
+data class UtenlandsoppholdDto(val fraDato: LocalDate,
+                               val tilDato: LocalDate,
                                val årsak: String)

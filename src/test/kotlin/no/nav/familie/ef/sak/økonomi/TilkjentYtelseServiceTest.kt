@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.økonomi
+package no.nav.familie.ef.sak.økonomi
 
 import io.mockk.*
 import no.nav.familie.ef.sak.integration.ØkonomiKlient

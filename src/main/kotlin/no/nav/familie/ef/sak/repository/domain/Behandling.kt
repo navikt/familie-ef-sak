@@ -8,8 +8,7 @@ import java.util.*
 
 @Table("behandling")
 data class Behandling(@Id
-                      val id: UUID   = UUID.randomUUID(),
-                      @Column("fagsak_id")
+                      val id: UUID = UUID.randomUUID(),
                       val fagsakId: UUID,
 
                       val versjon: Int = 0,
@@ -34,7 +33,10 @@ enum class BehandlingStatus {
     UTREDES,
     FATTER_VEDTAK,
     IVERKSETTER_VEDTAK,
-    FERDIGSTILT,
+    FERDIGSTILT;
+
+    fun behandlingErLåstForVidereRedigering(): Boolean =
+            setOf(FATTER_VEDTAK, IVERKSETTER_VEDTAK, FERDIGSTILT).contains(this)
 }
 
 enum class BehandlingSteg {
