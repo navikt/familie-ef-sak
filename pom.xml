@@ -218,13 +218,6 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>1.14.3</version>
-            <scope>test</scope>
-        </dependency>
-
         <!-- Nav-interne avhengigheter -->
         <dependency>
             <groupId>no.nav.fpsak.tidsserie</groupId>

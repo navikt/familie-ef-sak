@@ -4,7 +4,6 @@ import no.nav.familie.ef.sak.config.ApplicationConfig
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration
 import org.springframework.boot.builder.SpringApplicationBuilder
-import org.testcontainers.containers.PostgreSQLContainer
 import java.util.*
 
 @SpringBootApplication(exclude = [ErrorMvcAutoConfiguration::class])
