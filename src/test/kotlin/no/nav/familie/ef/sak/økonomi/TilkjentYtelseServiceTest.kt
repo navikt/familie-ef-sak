@@ -4,9 +4,7 @@ import io.mockk.*
 import no.nav.familie.ef.sak.integration.ØkonomiKlient
 import no.nav.familie.ef.sak.mapper.tilOpphør
 import no.nav.familie.ef.sak.mapper.tilTilkjentYtelse
-import no.nav.familie.ef.sak.repository.CustomRepository
 import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
-import no.nav.familie.ef.sak.økonomi.*
 import no.nav.familie.ef.sak.økonomi.Utbetalingsoppdrag.lagUtbetalingsoppdrag
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus
@@ -24,12 +22,11 @@ import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag as Utbetaling
 
 class TilkjentYtelseServiceTest {
 
-    private val customRepository = mockk<CustomRepository>()
     private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
     private val økonomiKlient = mockk<ØkonomiKlient>()
 
     private val tilkjentYtelseService =
-            TilkjentYtelseService(økonomiKlient, tilkjentYtelseRepository, customRepository)
+            TilkjentYtelseService(økonomiKlient, tilkjentYtelseRepository)
 
     @BeforeEach
     fun beforeEach() {
@@ -38,7 +35,7 @@ class TilkjentYtelseServiceTest {
 
     @AfterEach
     fun afterEach() {
-        confirmVerified(tilkjentYtelseRepository, økonomiKlient, customRepository)
+        confirmVerified(tilkjentYtelseRepository, økonomiKlient)
     }
 
     @Test
@@ -47,12 +44,12 @@ class TilkjentYtelseServiceTest {
         val tilkjentYtelse = tilkjentYtelseDto.tilTilkjentYtelse(TilkjentYtelseStatus.OPPRETTET)
         val slot = slot<TilkjentYtelse>()
         every { tilkjentYtelseRepository.findByPersonident(tilkjentYtelse.personident) } returns null
-        every { customRepository.persist(capture(slot)) } returns tilkjentYtelse
+        every { tilkjentYtelseRepository.insert(capture(slot)) } returns tilkjentYtelse
 
         tilkjentYtelseService.opprettTilkjentYtelse(tilkjentYtelseDto)
 
         verify { tilkjentYtelseRepository.findByPersonident(tilkjentYtelse.personident) }
-        verify { customRepository.persist(slot.captured) }
+        verify { tilkjentYtelseRepository.insert(slot.captured) }
         assertThat(slot.captured).isEqualToIgnoringGivenFields(tilkjentYtelse, "id")
 
     }
@@ -102,13 +99,13 @@ class TilkjentYtelseServiceTest {
                                     utbetalingsoppdrag = utbetalingsoppdrag)
         every { tilkjentYtelseRepository.findByIdOrNull(id) } returns tilkjentYtelse
         every { økonomiKlient.iverksettOppdrag(capture(oppdragSlot)) } returns Ressurs.success("")
-        every { tilkjentYtelseRepository.save(capture(ytelseSlot)) } returns oppdatertTilkjentYtelse
+        every { tilkjentYtelseRepository.update(capture(ytelseSlot)) } returns oppdatertTilkjentYtelse
 
         tilkjentYtelseService.iverksettUtbetalingsoppdrag(id)
 
         verify { tilkjentYtelseRepository.findByIdOrNull(id) }
         verify { økonomiKlient.iverksettOppdrag(oppdragSlot.captured) }
-        verify { tilkjentYtelseRepository.save(ytelseSlot.captured) }
+        verify { tilkjentYtelseRepository.update(ytelseSlot.captured) }
         assertThat(ytelseSlot.captured).isEqualToIgnoringGivenFields(oppdatertTilkjentYtelse, "utbetalingsoppdrag")
         assertThat(ytelseSlot.captured.utbetalingsoppdrag).isEqualToIgnoringGivenFields(utbetalingsoppdrag, "avstemmingTidspunkt")
         assertThat(oppdragSlot.captured).isEqualToIgnoringGivenFields(utbetalingsoppdrag, "avstemmingTidspunkt")
@@ -130,19 +127,19 @@ class TilkjentYtelseServiceTest {
         val utbetalingSlot = slot<UtbetalingsoppdragDto>()
         val ytelseSlot = slot<TilkjentYtelse>()
         every { tilkjentYtelseRepository.findByIdOrNull(id) } returns originalTilkjentYtelse
-        every { tilkjentYtelseRepository.save(avsluttetOriginalTilkjentYtelse) } returns avsluttetOriginalTilkjentYtelse
-        every { customRepository.persist(any<TilkjentYtelse>()) } returns opphørtTilkjentYtelse
+        every { tilkjentYtelseRepository.update(avsluttetOriginalTilkjentYtelse) } returns avsluttetOriginalTilkjentYtelse
+        every { tilkjentYtelseRepository.insert(any<TilkjentYtelse>()) } returns opphørtTilkjentYtelse
         every { økonomiKlient.iverksettOppdrag(capture(utbetalingSlot)) } returns Ressurs.success("")
-        every { tilkjentYtelseRepository.save(capture(ytelseSlot)) }
+        every { tilkjentYtelseRepository.update(capture(ytelseSlot)) }
                 .returns(opphørtTilkjentYtelseSendtUtbetalingsoppdrag)
 
         tilkjentYtelseService.opphørUtbetalingsoppdrag(id, opphørDato)
 
         verify { tilkjentYtelseRepository.findByIdOrNull(id) }
-        verify { tilkjentYtelseRepository.save(avsluttetOriginalTilkjentYtelse) }
-        verify { customRepository.persist(any()) }
+        verify { tilkjentYtelseRepository.update(avsluttetOriginalTilkjentYtelse) }
+        verify { tilkjentYtelseRepository.insert(any()) }
         verify { økonomiKlient.iverksettOppdrag(utbetalingSlot.captured) }
-        verify { tilkjentYtelseRepository.save(ytelseSlot.captured) }
+        verify { tilkjentYtelseRepository.update(ytelseSlot.captured) }
         assertThat(ytelseSlot.captured)
                 .isEqualToIgnoringGivenFields(opphørtTilkjentYtelseSendtUtbetalingsoppdrag, "utbetalingsoppdrag")
         assertThat(ytelseSlot.captured.utbetalingsoppdrag).isEqualToIgnoringGivenFields(utbetalingsoppdrag, "avstemmingTidspunkt")

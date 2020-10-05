@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.økonomi
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.repository.CustomRepository
 import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.økonomi.Utbetalingsoppdrag.lagUtbetalingsoppdrag
 import org.assertj.core.api.Assertions.assertThat
@@ -18,13 +17,10 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
 
-    @Autowired
-    private lateinit var customRepository: CustomRepository
-
     @Test
     fun `Opprett og hent tilkjent ytelse`() {
         val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse()
-        val tilkjentYtelseId = customRepository.persist(tilkjentYtelse).id
+        val tilkjentYtelseId = tilkjentYtelseRepository.insert(tilkjentYtelse).id
 
         val hentetTilkjentYtelse = tilkjentYtelseRepository.findByIdOrNull(tilkjentYtelseId)!!
 
@@ -36,7 +32,7 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
     fun `Opprett og hent andeler tilkjent ytelse`() {
         val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(2)
 
-        val tilkjentYtelseId = customRepository.persist(tilkjentYtelse).id
+        val tilkjentYtelseId = tilkjentYtelseRepository.insert(tilkjentYtelse).id
 
         val hentetTilkjentYtelse = tilkjentYtelseRepository.findByIdOrNull(tilkjentYtelseId)!!
         assertThat(hentetTilkjentYtelse.andelerTilkjentYtelse.size).isEqualTo(2)
@@ -44,10 +40,10 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `Lagre utbetalingsoppdrag`() {
-        val lagretTilkjentYtelse = customRepository.persist(DataGenerator.tilfeldigTilkjentYtelse(2))
+        val lagretTilkjentYtelse = tilkjentYtelseRepository.insert(DataGenerator.tilfeldigTilkjentYtelse(2))
         val utbetalingsoppdrag = lagUtbetalingsoppdrag("saksbehandler", lagretTilkjentYtelse)
 
-        tilkjentYtelseRepository.save(lagretTilkjentYtelse.copy(utbetalingsoppdrag = utbetalingsoppdrag))
+        tilkjentYtelseRepository.update(lagretTilkjentYtelse.copy(utbetalingsoppdrag = utbetalingsoppdrag))
 
         val oppdatertTilkjentYtelse = tilkjentYtelseRepository.findByIdOrNull(lagretTilkjentYtelse.id)!!
         assertThat(oppdatertTilkjentYtelse.utbetalingsoppdrag).isEqualTo(utbetalingsoppdrag)
@@ -56,7 +52,7 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
     @Test
     fun `Finn tilkjent ytelse på personident`() {
         val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse()
-        val lagretTilkjentYtelse = customRepository.persist(tilkjentYtelse)
+        val lagretTilkjentYtelse = tilkjentYtelseRepository.insert(tilkjentYtelse)
 
         val hentetTilkjentYtelse =
                 tilkjentYtelseRepository.findByPersonident(tilkjentYtelse.personident)

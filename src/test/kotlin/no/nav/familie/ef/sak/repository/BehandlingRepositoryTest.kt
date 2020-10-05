@@ -13,13 +13,13 @@ import java.util.*
 @ActiveProfiles("local", "mock-oauth")
 internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var customRepository: CustomRepository
+    @Autowired private lateinit var fagsakRepository: FagsakRepository
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
 
     @Test
     internal fun `findByFagsakId`() {
-        val fagsak = customRepository.persist(fagsak())
-        val behandling = customRepository.persist(behandling(fagsak))
+        val fagsak = fagsakRepository.insert(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak))
 
         assertThat(behandlingRepository.findByFagsakId(UUID.randomUUID())).isEmpty()
         assertThat(behandlingRepository.findByFagsakId(fagsak.id)).containsOnly(behandling)
@@ -27,20 +27,20 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `findByFagsakIdAndAktivIsTrue`() {
-        val fagsak = customRepository.persist(fagsak())
-        customRepository.persist(behandling(fagsak, aktiv = false))
+        val fagsak = fagsakRepository.insert(fagsak())
+        behandlingRepository.insert(behandling(fagsak, aktiv = false))
 
         assertThat(behandlingRepository.findByFagsakIdAndAktivIsTrue(UUID.randomUUID())).isNull()
         assertThat(behandlingRepository.findByFagsakIdAndAktivIsTrue(fagsak.id)).isNull()
 
-        val aktivBehandling = customRepository.persist(behandling(fagsak, aktiv = true))
+        val aktivBehandling = behandlingRepository.insert(behandling(fagsak, aktiv = true))
         assertThat(behandlingRepository.findByFagsakIdAndAktivIsTrue(fagsak.id)).isEqualTo(aktivBehandling)
     }
 
     @Test
     internal fun `findByFagsakAndStatus`() {
-        val fagsak = customRepository.persist(fagsak())
-        val behandling = customRepository.persist(behandling(fagsak, status = BehandlingStatus.OPPRETTET))
+        val fagsak = fagsakRepository.insert(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.OPPRETTET))
 
         assertThat(behandlingRepository.findByFagsakIdAndStatus(UUID.randomUUID(), BehandlingStatus.OPPRETTET)).isEmpty()
         assertThat(behandlingRepository.findByFagsakIdAndStatus(fagsak.id, BehandlingStatus.FERDIGSTILT)).isEmpty()

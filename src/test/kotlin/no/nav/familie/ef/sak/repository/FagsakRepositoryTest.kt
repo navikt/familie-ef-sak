@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.repository.CustomRepository
 import no.nav.familie.ef.sak.repository.FagsakRepository
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import org.assertj.core.api.Assertions.assertThat
@@ -13,12 +12,11 @@ import org.springframework.test.context.ActiveProfiles
 @ActiveProfiles("local", "mock-oauth")
 internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var customRepository: CustomRepository
     @Autowired private lateinit var fagsakRepository: FagsakRepository
 
     @Test
     internal fun `findByFagsakId`() {
-        val fagsakPersistert = customRepository.persist(fagsak(fagsakpersoner(setOf("12345678901", "98765432109"))))
+        val fagsakPersistert = fagsakRepository.insert(fagsak(fagsakpersoner(setOf("12345678901", "98765432109"))))
         val fagsak = fagsakRepository.findByIdOrNull(fagsakPersistert.id) ?: error("Finner ikke fagsak med id")
 
         assertThat(fagsak).isNotNull
@@ -29,7 +27,7 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `findBySøkerIdent`() {
-        customRepository.persist(fagsak(fagsakpersoner(setOf("12345678901", "98765432109"))))
+        fagsakRepository.insert(fagsak(fagsakpersoner(setOf("12345678901", "98765432109"))))
         val fagsakHentetFinnesIkke = fagsakRepository.findBySøkerIdent("0", Stønadstype.OVERGANGSSTØNAD)
 
         assertThat(fagsakHentetFinnesIkke).isNull()

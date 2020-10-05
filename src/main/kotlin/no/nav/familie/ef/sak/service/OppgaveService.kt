@@ -66,7 +66,7 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
             val oppgave = EfOppgave(gsakOppgaveId = opprettetOppgaveId,
                                     behandlingId = behandling.id,
                                     type = oppgavetype)
-            oppgaveRepository.save(oppgave)
+            oppgaveRepository.update(oppgave)
             opprettetOppgaveId
         }
     }
@@ -93,7 +93,7 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
         oppgaveClient.ferdigstillOppgave(oppgave.gsakOppgaveId.toLong())
 
         oppgave.erFerdigstilt = true
-        oppgaveRepository.save(oppgave)
+        oppgaveRepository.update(oppgave)
     }
 
     fun lagOppgaveTekst(fagsakId: String, beskrivelse: String? = null): String {

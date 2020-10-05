@@ -21,10 +21,8 @@ fun behandling(fagsak: Fagsak, aktiv: Boolean = true, status: BehandlingStatus =
                 aktiv = aktiv
         )
 
-fun fagsak(identer: Set<FagsakPerson> = setOf(), sporbar: Sporbar = Sporbar()) =
-        Fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD,
-               søkerIdenter = identer,
-               sporbar = sporbar)
+fun fagsak(identer: Set<FagsakPerson> = setOf(), stønadstype: Stønadstype = Stønadstype.OVERGANGSSTØNAD) =
+        Fagsak(stønadstype = stønadstype, søkerIdenter = identer)
 
 fun vilkårVurdering(behandlingId: UUID, resultat: VilkårResultat, type: VilkårType): VilkårVurdering =
         VilkårVurdering(behandlingId = behandlingId, resultat = resultat, type = type)
