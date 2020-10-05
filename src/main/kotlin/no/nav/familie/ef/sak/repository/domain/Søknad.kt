@@ -14,14 +14,11 @@ import java.util.*
 @Table("gr_soknad")
 data class Søknad(@Id
                   val id: UUID = UUID.randomUUID(),
-                  @Column("behandling_id")
                   val behandlingId: UUID,
                   val type: SøknadType,
                   @Column("soknad")
                   val søknad: ByteArray,
-                  @Column("saksnummer_infotrygd")
                   val saksnummerInfotrygd: String,
-                  @Column("journalpost_id")
                   val journalpostId: String,
                   @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                   val sporbar: Sporbar = Sporbar(),

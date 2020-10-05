@@ -9,7 +9,6 @@ import java.util.*
 @Table("behandling")
 data class Behandling(@Id
                       val id: UUID = UUID.randomUUID(),
-                      @Column("fagsak_id")
                       val fagsakId: UUID,
 
                       val versjon: Int = 0,
