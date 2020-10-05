@@ -9,7 +9,7 @@ import java.util.*
 @Table("vedlegg")
 data class Vedlegg(@Id
                    val id: UUID,
-                   @Column("gr_soknad_id")
+                   @Column("grunnlag_soknad_id")
                    val søknadId: UUID,
                    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                    val sporbar: Sporbar = Sporbar(),

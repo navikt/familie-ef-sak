@@ -11,7 +11,7 @@ import org.springframework.data.relational.core.mapping.MappedCollection
 import org.springframework.data.relational.core.mapping.Table
 import java.util.*
 
-@Table("gr_soknad")
+@Table("grunnlag_soknad")
 data class Søknad(@Id
                   val id: UUID = UUID.randomUUID(),
                   val behandlingId: UUID,
@@ -22,9 +22,9 @@ data class Søknad(@Id
                   val journalpostId: String,
                   @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                   val sporbar: Sporbar = Sporbar(),
-                  @MappedCollection(idColumn = "gr_soknad_id")
+                  @MappedCollection(idColumn = "grunnlag_soknad_id")
                   val søker: Søker,
-                  @MappedCollection(idColumn = "gr_soknad_id")
+                  @MappedCollection(idColumn = "grunnlag_soknad_id")
                   val barn: Set<Barn>)
 
 data class SøknadWrapper<T>(val soknad: Søknad, val søknad: T)
