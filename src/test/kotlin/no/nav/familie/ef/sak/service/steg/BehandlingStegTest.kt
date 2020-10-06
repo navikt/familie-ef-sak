@@ -12,6 +12,7 @@ internal class BehandlingStegTest {
                 StegType.REGISTRERE_SØKNAD,
                 StegType.VILKÅRSVURDERE_INNGANGSVILKÅR,
                 StegType.VILKÅRSVURDERE_STØNAD,
+                StegType.BEREGNE_YTELSE,
                 StegType.SEND_TIL_BESLUTTER,
                 StegType.BESLUTTE_VEDTAK,
                 StegType.IVERKSETT_MOT_OPPDRAG,
