@@ -22,8 +22,8 @@ class StegService(
 
 
     @Transactional
-    fun håndterSøknad(behandling: Behandling, søknad: String): Behandling {
-        val behandlingSteg: RegistrereSøknadSteg = hentBehandlingSteg(StegType.REGISTRERE_SØKNAD) as RegistrereSøknadSteg
+    fun håndterRegistrerOpplysninger(behandling: Behandling, søknad: String): Behandling {
+        val behandlingSteg: RegistrereOpplysningerSteg = hentBehandlingSteg(StegType.REGISTRERE_OPPLYSNINGER) as RegistrereOpplysningerSteg
         return håndterSteg(behandling, behandlingSteg) {
             behandlingSteg.utførStegOgAngiNeste(behandling, søknad)
         }

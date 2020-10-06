@@ -25,7 +25,7 @@ enum class StegType(val rekkefølge: Int,
                     val tillattFor: List<BehandlerRolle>,
                     private val gyldigIKombinasjonMedStatus: List<BehandlingStatus>) {
 
-    REGISTRERE_SØKNAD(
+    REGISTRERE_OPPLYSNINGER(
             rekkefølge = 1,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
@@ -99,7 +99,7 @@ enum class StegType(val rekkefølge: Int,
         return when (behandlingType) {
             BehandlingType.TEKNISK_OPPHØR ->
                 when (utførendeStegType) {
-                    REGISTRERE_SØKNAD -> VILKÅRSVURDERE_INNGANGSVILKÅR
+                    REGISTRERE_OPPLYSNINGER -> VILKÅRSVURDERE_INNGANGSVILKÅR
                     VILKÅRSVURDERE_INNGANGSVILKÅR -> VILKÅRSVURDERE_STØNAD
                     VILKÅRSVURDERE_STØNAD -> BEREGNE_YTELSE
                     BEREGNE_YTELSE -> SEND_TIL_BESLUTTER
@@ -113,7 +113,7 @@ enum class StegType(val rekkefølge: Int,
                 }
             else ->
                 when (utførendeStegType) {
-                REGISTRERE_SØKNAD -> VILKÅRSVURDERE_INNGANGSVILKÅR
+                REGISTRERE_OPPLYSNINGER -> VILKÅRSVURDERE_INNGANGSVILKÅR
                 VILKÅRSVURDERE_INNGANGSVILKÅR -> VILKÅRSVURDERE_STØNAD
                 VILKÅRSVURDERE_STØNAD -> BEREGNE_YTELSE
                 BEREGNE_YTELSE -> SEND_TIL_BESLUTTER

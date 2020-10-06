@@ -21,7 +21,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         val fagsak = customRepository.persist(fagsak())
         val behandling = customRepository.persist(behandling(fagsak))
 
-        stegService.håndterSøknad(behandling, "")
+        stegService.håndterRegistrerOpplysninger(behandling, "")
     }
 
     @Test
@@ -30,7 +30,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         val behandling = customRepository.persist(behandling(fagsak, steg = StegType.BEHANDLING_FERDIGSTILT))
 
         assertThrows<IllegalStateException> {
-            stegService.håndterSøknad(behandling, "")
+            stegService.håndterRegistrerOpplysninger(behandling, "")
         }
     }
 
@@ -40,7 +40,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         val behandling = customRepository.persist(behandling(fagsak, steg = StegType.BESLUTTE_VEDTAK))
 
         assertThrows<IllegalStateException> {
-            stegService.håndterSøknad(behandling, "")
+            stegService.håndterRegistrerOpplysninger(behandling, "")
         }
     }
 }

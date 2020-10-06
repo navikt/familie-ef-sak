@@ -9,7 +9,7 @@ internal class BehandlingStegTest {
     @Test
     fun `Tester rekkefølgen på steg`() {
         val riktigRekkefølge = listOf(
-                StegType.REGISTRERE_SØKNAD,
+                StegType.REGISTRERE_OPPLYSNINGER,
                 StegType.VILKÅRSVURDERE_INNGANGSVILKÅR,
                 StegType.VILKÅRSVURDERE_STØNAD,
                 StegType.BEREGNE_YTELSE,
@@ -22,7 +22,7 @@ internal class BehandlingStegTest {
                 StegType.FERDIGSTILLE_BEHANDLING,
                 StegType.BEHANDLING_FERDIGSTILT)
 
-        var steg = StegType.REGISTRERE_SØKNAD
+        var steg = StegType.REGISTRERE_OPPLYSNINGER
         riktigRekkefølge.forEach {
             assertEquals(steg, it)
             steg = it.hentNesteSteg(utførendeStegType = steg)
@@ -37,7 +37,7 @@ internal class BehandlingStegTest {
 
     @Test
     fun testErKompatibelMed() {
-        assertTrue(StegType.REGISTRERE_SØKNAD.erGyldigIKombinasjonMedStatus(BehandlingStatus.UTREDES))
+        assertTrue(StegType.REGISTRERE_OPPLYSNINGER.erGyldigIKombinasjonMedStatus(BehandlingStatus.UTREDES))
         assertTrue(StegType.VILKÅRSVURDERE_INNGANGSVILKÅR.erGyldigIKombinasjonMedStatus(BehandlingStatus.UTREDES))
         assertTrue(StegType.VILKÅRSVURDERE_STØNAD.erGyldigIKombinasjonMedStatus(BehandlingStatus.UTREDES))
         assertTrue(StegType.SEND_TIL_BESLUTTER.erGyldigIKombinasjonMedStatus(BehandlingStatus.UTREDES))
@@ -54,7 +54,7 @@ internal class BehandlingStegTest {
 
     @Test
     fun testErSaksbehandlersteg()  {
-        assertTrue(StegType.REGISTRERE_SØKNAD.erSaksbehandlerSteg())
+        assertTrue(StegType.REGISTRERE_OPPLYSNINGER.erSaksbehandlerSteg())
         assertTrue(StegType.VILKÅRSVURDERE_INNGANGSVILKÅR.erSaksbehandlerSteg())
         assertFalse(StegType.JOURNALFØR_VEDTAKSBREV.erSaksbehandlerSteg())
     }

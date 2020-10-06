@@ -13,7 +13,7 @@ fun oppgave(behandling: Behandling, erFerdigstilt: Boolean = false): Oppgave =
                 erFerdigstilt = erFerdigstilt
         )
 
-fun behandling(fagsak: Fagsak, aktiv: Boolean = true, status: BehandlingStatus = BehandlingStatus.OPPRETTET, steg: StegType = StegType.REGISTRERE_SØKNAD): Behandling =
+fun behandling(fagsak: Fagsak, aktiv: Boolean = true, status: BehandlingStatus = BehandlingStatus.OPPRETTET, steg: StegType = StegType.REGISTRERE_OPPLYSNINGER): Behandling =
         Behandling(
             fagsakId = fagsak.id!!,
             type = BehandlingType.FØRSTEGANGSBEHANDLING,

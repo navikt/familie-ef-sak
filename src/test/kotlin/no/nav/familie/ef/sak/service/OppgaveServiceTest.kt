@@ -133,7 +133,7 @@ internal class OppgaveServiceTest {
                 fagsakId = FAGSAK_ID,
                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
                 status = BehandlingStatus.OPPRETTET,
-                steg = StegType.REGISTRERE_SØKNAD)
+                steg = StegType.REGISTRERE_OPPLYSNINGER)
     }
 
     private fun lagTestFagsak(): Fagsak {

@@ -60,7 +60,7 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
 
         return customRepository.persist(Behandling(fagsakId = fagsak.id,
                                                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                   steg = StegType.REGISTRERE_SØKNAD,
+                                                   steg = StegType.REGISTRERE_OPPLYSNINGER,
                                                    status = BehandlingStatus.OPPRETTET))
     }
 

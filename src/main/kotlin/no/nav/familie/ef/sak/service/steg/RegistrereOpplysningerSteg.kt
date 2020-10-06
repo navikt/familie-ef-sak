@@ -6,7 +6,7 @@ import no.nav.familie.ef.sak.service.BehandlingService
 import org.springframework.stereotype.Service
 
 @Service
-class RegistrereSøknadSteg(
+class RegistrereOpplysningerSteg(
         private val behandlingService: BehandlingService
 ) : BehandlingSteg<String> {
 
@@ -18,7 +18,7 @@ class RegistrereSøknadSteg(
     }
 
     override fun stegType(): StegType {
-        return StegType.REGISTRERE_SØKNAD
+        return StegType.REGISTRERE_OPPLYSNINGER
     }
 }
 
