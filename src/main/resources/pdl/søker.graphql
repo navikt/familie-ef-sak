@@ -209,10 +209,18 @@ query($ident: ID!){
         innflyttingTilNorge {
             fraflyttingsland
             fraflyttingsstedIUtlandet
+            folkeregistermetadata {
+                gyldighetstidspunkt
+                opphoerstidspunkt
+            }
         }
         utflyttingFraNorge {
             tilflyttingsland
             tilflyttingsstedIUtlandet
+            folkeregistermetadata {
+                gyldighetstidspunkt
+                opphoerstidspunkt
+            }
         }
     }
 }
