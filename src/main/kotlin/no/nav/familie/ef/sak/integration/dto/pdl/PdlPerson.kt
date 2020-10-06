@@ -250,10 +250,12 @@ enum class Sivilstandstype {
 }
 
 data class InnflyttingTilNorge(val fraflyttingsland: String?,
-                               val fraflyttingsstedIUtlandet: String?)
+                               val fraflyttingsstedIUtlandet: String?,
+                               val folkeregistermetadata: Folkeregistermetadata)
 
 data class UtflyttingFraNorge(val tilflyttingsland: String?,
-                              val tilflyttingsstedIUtlandet: String?)
+                              val tilflyttingsstedIUtlandet: String?,
+                              val folkeregistermetadata: Folkeregistermetadata)
 
 data class UtenlandskAdresse(val adressenavnNummer: String?,
                              val bySted: String?,
