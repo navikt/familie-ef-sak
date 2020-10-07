@@ -55,7 +55,7 @@ class PdlClientConfig {
                         telefonnummer = listOf(Telefonnummer(landskode = "+47", nummer = "98999923", prioritet = 1)),
                         tilrettelagtKommunikasjon = listOf(),
                         innflyttingTilNorge = listOf(InnflyttingTilNorge("SWE", "Stockholm", folkeregistermetadata)),
-                        utflyttingFraNorge = listOf(UtflyttingFraNorge("Swe", "Stockholm", folkeregistermetadata)),
+                        utflyttingFraNorge = listOf(UtflyttingFraNorge("SWE", "Stockholm", folkeregistermetadata)),
                         vergemaalEllerFremtidsfullmakt = listOf()
                 )
         every { pdlClient.hentSøkerAsMap(any()) } returns mapOf()
