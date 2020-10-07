@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.repository.FagsakRepository
 import no.nav.familie.ef.sak.repository.OppgaveRepository
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.repository.domain.Oppgave
+import no.nav.familie.ef.sak.service.steg.StegType
 import no.nav.familie.kontrakter.felles.oppgave.*
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
@@ -132,7 +133,7 @@ internal class OppgaveServiceTest {
                 fagsakId = FAGSAK_ID,
                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
                 status = BehandlingStatus.OPPRETTET,
-                steg = BehandlingSteg.KOMMER_SENDERE)
+                steg = StegType.REGISTRERE_OPPLYSNINGER)
     }
 
     private fun lagTestFagsak(): Fagsak {
