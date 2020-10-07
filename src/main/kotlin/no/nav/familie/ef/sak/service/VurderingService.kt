@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.integration.dto.pdl.Familierelasjonsrolle
 import no.nav.familie.ef.sak.mapper.AleneomsorgMapper
 import no.nav.familie.ef.sak.mapper.MedlemskapMapper
 import no.nav.familie.ef.sak.repository.VilkårVurderingRepository
+import no.nav.familie.ef.sak.repository.domain.VilkårResultat
 import no.nav.familie.ef.sak.repository.domain.VilkårType
 import no.nav.familie.ef.sak.repository.domain.VilkårVurdering
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
@@ -73,6 +74,17 @@ class VurderingService(private val behandlingService: BehandlingService,
         vilkårVurderingRepository.insertAll(nyeVilkårVurderinger)
 
         return lagredeVilkårVurderinger + nyeVilkårVurderinger
+    }
+
+    fun hentInngangsvilkårSomManglerVurdering(behandlingId: UUID): List<VilkårType> {
+        val lagredeVilkårVurderinger = vilkårVurderingRepository.findByBehandlingId(behandlingId)
+        val inngangsvilkår = VilkårType.hentInngangsvilkår()
+
+        return inngangsvilkår.filter {
+            lagredeVilkårVurderinger.find {
+                vurdering -> vurdering.type == it && vurdering.resultat == VilkårResultat.IKKE_VURDERT } !== null ||
+            lagredeVilkårVurderinger.none { vurdering -> vurdering.type == it }
+        }
     }
 
     private fun behandlingErLåstForVidereRedigering(behandlingId: UUID) =
