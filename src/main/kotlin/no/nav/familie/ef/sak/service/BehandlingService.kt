@@ -76,7 +76,7 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer status på behandling $behandlingId fra ${behandling.status} til $status")
 
         behandling.status = status
-        return behandlingRepository.save(behandling)
+        return behandlingRepository.update(behandling)
     }
 
     fun oppdaterStegPåBehandling(behandlingId: UUID, steg: StegType): Behandling {
@@ -84,7 +84,7 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer steg på behandling $behandlingId fra ${behandling.steg} til $steg")
 
         behandling.steg = steg
-        return behandlingRepository.save(behandling)
+        return behandlingRepository.update(behandling)
     }
 
 
