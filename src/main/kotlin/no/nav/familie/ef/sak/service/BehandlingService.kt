@@ -22,13 +22,13 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
     val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
     @Transactional
-    fun mottaSakOvergangsstønad(sak: SakRequest<SøknadOvergangsstønad>, vedleggMap: Map<String, ByteArray>): UUID {
+    fun mottaSakOvergangsstønad(sak: SakRequest<SøknadOvergangsstønad>, vedleggMap: Map<String, ByteArray>): Behandling {
         val ident = sak.søknad.søknad.personalia.verdi.fødselsnummer.verdi.verdi
         val behandling = hentBehandling(ident)
         mottaSøknad(SøknadMapper.toDomain(sak.saksnummer, sak.journalpostId, sak.søknad.søknad, behandling.id),
                     sak,
                     vedleggMap)
-        return behandling.id
+        return behandling
     }
 
     @Transactional

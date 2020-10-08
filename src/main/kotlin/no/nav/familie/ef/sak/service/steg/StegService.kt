@@ -30,6 +30,7 @@ class StegService(
         }
     }
 
+    @Transactional
     fun håndterInngangsvilkår(behandling: Behandling): Behandling {
         val behandlingSteg: InngangsvilkårSteg = hentBehandlingSteg(VILKÅRSVURDERE_INNGANGSVILKÅR) as InngangsvilkårSteg
         return håndterSteg(behandling, behandlingSteg) {
