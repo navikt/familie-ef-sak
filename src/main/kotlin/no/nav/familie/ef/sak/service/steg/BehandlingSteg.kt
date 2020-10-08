@@ -6,17 +6,11 @@ import no.nav.familie.ef.sak.repository.domain.BehandlingType
 
 interface BehandlingSteg<T> {
 
-    fun utførStegOgAngiNeste(behandling: Behandling,
-                             data: T): StegType
+    fun utførSteg(behandling: Behandling, data: T)
 
     fun stegType(): StegType
 
-
-    fun hentNesteSteg(behandling: Behandling): StegType {
-        return behandling.steg.hentNesteSteg(utførendeStegType = this.stegType(), behandlingType = behandling.type)
-    }
-
-    fun preValiderSteg(behandling: Behandling, stegService: StegService? = null) {}
+    fun preValiderSteg(behandling: Behandling) {}
     fun postValiderSteg(behandling: Behandling) {}
 
 }
@@ -81,8 +75,8 @@ enum class StegType(val rekkefølge: Int,
         return this.name.replace('_', ' ').toLowerCase().capitalize()
     }
 
-    fun kommerEtter(steg: StegType): Boolean {
-        return this.rekkefølge > steg.rekkefølge
+    fun kommerEtter(steg: StegType, behandlingType: BehandlingType): Boolean {
+        return this == steg.hentNesteSteg(behandlingType)
     }
 
     fun erGyldigIKombinasjonMedStatus(behandlingStatus: BehandlingStatus): Boolean {
@@ -93,12 +87,24 @@ enum class StegType(val rekkefølge: Int,
         return this.tillattFor.any { it == BehandlerRolle.SAKSBEHANDLER || it == BehandlerRolle.BESLUTTER }
     }
 
-    fun hentNesteSteg(utførendeStegType: StegType,
-                      behandlingType: BehandlingType? = null): StegType {
-
+    fun hentNesteSteg(behandlingType: BehandlingType): StegType {
         return when (behandlingType) {
             BehandlingType.TEKNISK_OPPHØR ->
-                when (utførendeStegType) {
+                when (this) {
+                    REGISTRERE_OPPLYSNINGER -> VILKÅRSVURDERE_INNGANGSVILKÅR
+                    VILKÅRSVURDERE_INNGANGSVILKÅR -> VILKÅRSVURDERE_STØNAD
+                    VILKÅRSVURDERE_STØNAD -> BEREGNE_YTELSE
+                    BEREGNE_YTELSE -> SEND_TIL_BESLUTTER
+                    SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
+                    BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
+                    IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
+                    VENTE_PÅ_STATUS_FRA_ØKONOMI -> FERDIGSTILLE_BEHANDLING
+                    FERDIGSTILLE_BEHANDLING -> BEHANDLING_FERDIGSTILT
+                    BEHANDLING_FERDIGSTILT -> BEHANDLING_FERDIGSTILT
+                    else -> throw IllegalStateException("StegType ${displayName()} ugyldig ved teknisk opphør")
+                }
+            else ->
+                when (this) {
                     REGISTRERE_OPPLYSNINGER -> VILKÅRSVURDERE_INNGANGSVILKÅR
                     VILKÅRSVURDERE_INNGANGSVILKÅR -> VILKÅRSVURDERE_STØNAD
                     VILKÅRSVURDERE_STØNAD -> BEREGNE_YTELSE
@@ -107,25 +113,11 @@ enum class StegType(val rekkefølge: Int,
                     BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
                     IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
                     VENTE_PÅ_STATUS_FRA_ØKONOMI -> JOURNALFØR_VEDTAKSBREV
+                    JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
+                    DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
                     FERDIGSTILLE_BEHANDLING -> BEHANDLING_FERDIGSTILT
                     BEHANDLING_FERDIGSTILT -> BEHANDLING_FERDIGSTILT
-                    else -> throw IllegalStateException("StegType ${utførendeStegType.displayName()} ugyldig ved teknisk opphør")
                 }
-            else ->
-                when (utførendeStegType) {
-                REGISTRERE_OPPLYSNINGER -> VILKÅRSVURDERE_INNGANGSVILKÅR
-                VILKÅRSVURDERE_INNGANGSVILKÅR -> VILKÅRSVURDERE_STØNAD
-                VILKÅRSVURDERE_STØNAD -> BEREGNE_YTELSE
-                BEREGNE_YTELSE -> SEND_TIL_BESLUTTER
-                SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
-                BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
-                IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
-                VENTE_PÅ_STATUS_FRA_ØKONOMI -> JOURNALFØR_VEDTAKSBREV
-                JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
-                DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
-                FERDIGSTILLE_BEHANDLING -> BEHANDLING_FERDIGSTILT
-                BEHANDLING_FERDIGSTILT -> BEHANDLING_FERDIGSTILT
-            }
         }
     }
 }

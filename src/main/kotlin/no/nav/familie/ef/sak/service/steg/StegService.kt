@@ -20,20 +20,16 @@ class StegService(
 
     private val stegFeiletMetrics: Map<StegType, Counter> = initStegMetrikker("feil")
 
-
     @Transactional
     fun håndterRegistrerOpplysninger(behandling: Behandling, søknad: String): Behandling {
-        val behandlingSteg: RegistrereOpplysningerSteg = hentBehandlingSteg(StegType.REGISTRERE_OPPLYSNINGER) as RegistrereOpplysningerSteg
-        return håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførStegOgAngiNeste(behandling, søknad)
-        }
+        val behandlingSteg: RegistrereOpplysningerSteg = hentBehandlingSteg(StegType.REGISTRERE_OPPLYSNINGER)
+        return håndterSteg(behandling, behandlingSteg, søknad)
     }
 
-
     // Generelle stegmetoder
-    private fun håndterSteg(behandling: Behandling,
-                            behandlingSteg: BehandlingSteg<*>,
-                            utførendeSteg: () -> StegType): Behandling {
+    private fun <T> håndterSteg(behandling: Behandling,
+                                behandlingSteg: BehandlingSteg<T>,
+                                data: T): Behandling {
         val stegType = behandlingSteg.stegType()
         try {
             val saksbehandlerNavn = SikkerhetContext.hentSaksbehandlerNavn()
@@ -49,7 +45,7 @@ class StegService(
                 error("Behandlingen er avsluttet og stegprosessen kan ikke gjenåpnes")
             }
 
-            if (stegType.erSaksbehandlerSteg() && stegType.kommerEtter(behandling.steg)) {
+            if (stegType.erSaksbehandlerSteg() && stegType.kommerEtter(behandling.steg, behandling.type)) {
                 error("$saksbehandlerNavn prøver å utføre steg '${stegType.displayName()}', men behandlingen er på steg '${behandling.steg.displayName()}'")
             }
 
@@ -57,11 +53,13 @@ class StegService(
                 error("Behandlingen er på steg '${behandling.steg.displayName()}', og er da låst for alle andre type endringer.")
             }
 
-            behandlingSteg.preValiderSteg(behandling, this)
-            val nesteSteg = utførendeSteg()
+            behandlingSteg.preValiderSteg(behandling)
+            behandlingSteg.utførSteg(behandling, data)
             behandlingSteg.postValiderSteg(behandling)
 
             stegSuksessMetrics[stegType]?.increment()
+
+            val nesteSteg = behandlingSteg.stegType().hentNesteSteg(behandling.type)
 
             if (nesteSteg == BEHANDLING_FERDIGSTILT) {
                 LOG.info("$saksbehandlerNavn er ferdig med stegprosess på behandling ${behandling.id}")
@@ -78,14 +76,16 @@ class StegService(
         } catch (exception: Exception) {
             stegFeiletMetrics[stegType]?.increment()
             LOG.error("Håndtering av stegtype '$stegType' feilet på behandling ${behandling.id}.")
-            secureLogger.info("Håndtering av stegtype '$stegType' feilet.",
-                              exception)
+            secureLogger.info("Håndtering av stegtype '$stegType' feilet.", exception)
             throw exception
         }
     }
 
-    fun hentBehandlingSteg(stegType: StegType): BehandlingSteg<*>? {
-        return behandlingSteg.firstOrNull { it.stegType() == stegType }
+    fun <T : BehandlingSteg<*>> hentBehandlingSteg(stegType: StegType): T {
+        val firstOrNull = behandlingSteg.singleOrNull { it.stegType() == stegType }
+                          ?: error("Finner ikke behandling steg for type $stegType")
+        @Suppress("UNCHECKED_CAST")
+        return firstOrNull as T
     }
 
     private fun initStegMetrikker(type: String): Map<StegType, Counter> {
@@ -94,7 +94,7 @@ class StegService(
                                              "steg",
                                              it.stegType().name,
                                              "beskrivelse",
-                                             it.stegType().rekkefølge.toString() + " " + it.stegType().displayName())
+                                             "${it.stegType().rekkefølge} ${it.stegType().displayName()}")
         }.toMap()
     }
 
