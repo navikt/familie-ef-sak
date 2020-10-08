@@ -62,6 +62,10 @@ internal class PersonopplysningerServiceTest {
     "land" : "Norge",
     "gyldigFraOgMedDato" : "2020-01-01",
     "gyldigTilOgMedDato" : null
+  }, {
+    "land" : "Sverige",
+    "gyldigFraOgMedDato" : "2017-01-01",
+    "gyldigTilOgMedDato" : "2020-01-01"
   } ],
   "sivilstand" : [ {
     "type" : "SKILT",

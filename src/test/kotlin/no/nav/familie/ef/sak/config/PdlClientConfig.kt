@@ -48,14 +48,14 @@ class PdlClientConfig {
                         kjønn = lagKjønn(KjønnType.KVINNE),
                         kontaktadresse = kontaktadresse(),
                         navn = lagNavn(),
-                        opphold = listOf(),
+                        opphold = listOf(Opphold(Oppholdstillatelse.PERMANENT, startdato, null)),
                         oppholdsadresse = listOf(),
                         sivilstand = sivilstand(),
                         statsborgerskap = statsborgerskap(),
                         telefonnummer = listOf(Telefonnummer(landskode = "+47", nummer = "98999923", prioritet = 1)),
                         tilrettelagtKommunikasjon = listOf(),
-                        innflyttingTilNorge = listOf(),
-                        utflyttingFraNorge = listOf(),
+                        innflyttingTilNorge = listOf(InnflyttingTilNorge("SWE", "Stockholm", folkeregistermetadata)),
+                        utflyttingFraNorge = listOf(UtflyttingFraNorge("SWE", "Stockholm", folkeregistermetadata)),
                         vergemaalEllerFremtidsfullmakt = listOf()
                 )
         every { pdlClient.hentSøkerAsMap(any()) } returns mapOf()
@@ -63,6 +63,8 @@ class PdlClientConfig {
         every { pdlClient.hentBarn(any()) } returns emptyMap()
         return pdlClient
     }
+
+    private val folkeregistermetadata = Folkeregistermetadata(LocalDateTime.now(), LocalDateTime.now())
 
     private fun lagKjønn(kjønnType: KjønnType = KjønnType.KVINNE) = listOf(Kjønn(kjønnType))
 
@@ -88,7 +90,10 @@ class PdlClientConfig {
     private fun statsborgerskap(): List<Statsborgerskap> =
             listOf(Statsborgerskap(land = "NOR",
                                    gyldigFraOgMed = startdato,
-                                   gyldigTilOgMed = null))
+                                   gyldigTilOgMed = null),
+                   Statsborgerskap(land = "SWE",
+                                   gyldigFraOgMed = startdato.minusYears(3),
+                                   gyldigTilOgMed = startdato))
 
     private fun sivilstand(): List<Sivilstand> =
             listOf(Sivilstand(type = Sivilstandstype.SKILT,

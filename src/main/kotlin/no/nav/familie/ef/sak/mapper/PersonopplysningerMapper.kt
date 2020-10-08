@@ -5,8 +5,6 @@ import no.nav.familie.ef.sak.integration.dto.pdl.Fullmakt
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker
 import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
 import no.nav.familie.ef.sak.service.ArbeidsfordelingService
-import no.nav.familie.ef.sak.service.KodeverkService
-import no.nav.familie.ef.sak.util.datoEllerIdag
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 

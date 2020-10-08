@@ -11,7 +11,11 @@ data class MedlemskapSøknadGrunnlagDto(val bosattNorgeSisteÅrene: Boolean,
 
 data class MedlemskapRegisterGrunnlagDto(val nåværendeStatsborgerskap: List<String>,
                                          val statsborgerskap: List<StatsborgerskapDto>,
-                                         val oppholdstatus: List<OppholdstillatelseDto>)
+                                         val oppholdstatus: List<OppholdstillatelseDto>,
+                                         val bostedsadresse: List<AdresseDto>,
+                                         val innflytting: List<InnflyttingDto>,
+                                         val utflytting: List<UtflyttingDto>,
+                                         val folkeregisterpersonstatus: Folkeregisterpersonstatus?)
 
 data class UtenlandsoppholdDto(val fraDato: LocalDate,
                                val tilDato: LocalDate,
