@@ -6,10 +6,10 @@ import no.nav.familie.ef.sak.integration.dto.pdl.InnflyttingTilNorge
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker
 import no.nav.familie.ef.sak.integration.dto.pdl.UtflyttingFraNorge
 import no.nav.familie.ef.sak.service.KodeverkService
+import no.nav.familie.ef.sak.util.min
 import no.nav.familie.kontrakter.ef.søknad.Medlemskapsdetaljer
 import org.springframework.stereotype.Component
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 @Component
 class MedlemskapMapper(private val statsborgerskapMapper: StatsborgerskapMapper,
@@ -59,14 +59,5 @@ class MedlemskapMapper(private val statsborgerskapMapper: StatsborgerskapMapper,
 
     private fun finnMinDatoRegistrert(folkeregistermetadata: Folkeregistermetadata) =
             min(folkeregistermetadata.gyldighetstidspunkt, folkeregistermetadata.opphørstidspunkt)
-
-    private fun min(dato1: LocalDateTime?, dato2: LocalDateTime?): LocalDateTime? =
-            if (dato1 == null) {
-                dato2
-            } else if (dato2 == null || dato1.isBefore(dato2)) {
-                dato1
-            } else {
-                dato2
-            }
 
 }
