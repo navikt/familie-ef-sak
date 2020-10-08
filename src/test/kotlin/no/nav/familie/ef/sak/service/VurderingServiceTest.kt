@@ -167,6 +167,22 @@ internal class VurderingServiceTest {
         assertThat(vilkårTyperUtenVurdering.first()).isEqualTo(VilkårType.FORUTGÅENDE_MEDLEMSKAP)
     }
 
+    @Test
+    fun `skal hente vilkårtyper for inngangsvilkår som ikke finnes`() {
+        val behandling = behandling(fagsak(), true, BehandlingStatus.UTREDES)
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+        val vurdertVilkår = vilkårVurdering(BEHANDLING_ID,
+                                                resultat = VilkårResultat.NEI,
+                                                VilkårType.FORUTGÅENDE_MEDLEMSKAP)
+
+        every { vilkårVurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns listOf(vurdertVilkår)
+
+        val vilkårTyperUtenVurdering = vurderingService.hentInngangsvilkårSomManglerVurdering(BEHANDLING_ID)
+
+        assertThat(vilkårTyperUtenVurdering.size).isEqualTo(1)
+        assertThat(vilkårTyperUtenVurdering.first()).isEqualTo(VilkårType.LOVLIG_OPPHOLD)
+    }
+
     companion object {
 
         private val BEHANDLING_ID = UUID.randomUUID()

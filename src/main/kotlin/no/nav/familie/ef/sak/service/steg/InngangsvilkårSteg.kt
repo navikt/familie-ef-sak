@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service
 class InngangsvilkårSteg(private val vurderingService: VurderingService): BehandlingSteg<String> {
 
     override fun utførStegOgAngiNeste(behandling: Behandling, data: String): StegType {
-        //TODO skal vi gjøre noe her?
         return hentNesteSteg(behandling)
     }
 
@@ -27,6 +26,6 @@ class InngangsvilkårSteg(private val vurderingService: VurderingService): Behan
         if (vilkårSomManglerVurdering.isNotEmpty())
             throw Feil(frontendFeilmelding = lagFrontendMelding("Følgende inngangsvilkår mangler vurdering: ",
                                                                 vilkårSomManglerVurdering.map { it.beskrivelse }),
-                       message = "Validering av vilkårsvurdering feilet for behandling ${behandling.id}")
+                       message = "Validering av inngangsvilkår feilet for behandling ${behandling.id}")
     }
 }
