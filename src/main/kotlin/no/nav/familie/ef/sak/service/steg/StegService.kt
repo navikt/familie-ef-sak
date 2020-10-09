@@ -53,9 +53,9 @@ class StegService(
                 error("Behandlingen er på steg '${behandling.steg.displayName()}', og er da låst for alle andre type endringer.")
             }
 
-            behandlingSteg.preValiderSteg(behandling)
+            behandlingSteg.preUtførSteg(behandling)
             behandlingSteg.utførSteg(behandling, data)
-            behandlingSteg.postValiderSteg(behandling)
+            behandlingSteg.postUtførSteg(behandling)
 
             stegSuksessMetrics[stegType]?.increment()
 

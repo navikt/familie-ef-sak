@@ -6,12 +6,13 @@ import no.nav.familie.ef.sak.repository.domain.BehandlingType
 
 interface BehandlingSteg<T> {
 
+    fun preUtførSteg(behandling: Behandling) {}
+
     fun utførSteg(behandling: Behandling, data: T)
 
-    fun stegType(): StegType
+    fun postUtførSteg(behandling: Behandling) {}
 
-    fun preValiderSteg(behandling: Behandling) {}
-    fun postValiderSteg(behandling: Behandling) {}
+    fun stegType(): StegType
 
 }
 
