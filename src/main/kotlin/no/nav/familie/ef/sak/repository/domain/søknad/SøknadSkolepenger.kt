@@ -1,13 +1,13 @@
 package no.nav.familie.ef.sak.repository.domain.søknad
 
-data class SøknadSkolepenger(val personalia: Søknadsfelt<Personalia>,
-                             val barn: Søknadsfelt<List<Barn>>,
-                             val innsendingsdetaljer: Søknadsfelt<Innsendingsdetaljer>,
-                             val sivilstandsdetaljer: Søknadsfelt<Sivilstandsdetaljer>,
-                             val medlemskapsdetaljer: Søknadsfelt<Medlemskapsdetaljer>,
-                             val bosituasjon: Søknadsfelt<Bosituasjon>,
-                             val sivilstandsplaner: Søknadsfelt<Sivilstandsplaner>? = null,
-                             val utdanning: Søknadsfelt<UnderUtdanning>,
+data class SøknadSkolepenger(val personalia: Personalia,
+                             val barn: List<Barn>,
+                             val innsendingsdetaljer: Innsendingsdetaljer,
+                             val sivilstandsdetaljer: Sivilstandsdetaljer,
+                             val medlemskapsdetaljer: Medlemskapsdetaljer,
+                             val bosituasjon: Bosituasjon,
+                             val sivilstandsplaner: Sivilstandsplaner? = null,
+                             val utdanning: UnderUtdanning,
                              val dokumentasjon: SkolepengerDokumentasjon)
 
-data class SkolepengerDokumentasjon(val utdanningsutgifter: Søknadsfelt<Dokumentasjon>? = null)
+data class SkolepengerDokumentasjon(val utdanningsutgifter: Dokumentasjon? = null)

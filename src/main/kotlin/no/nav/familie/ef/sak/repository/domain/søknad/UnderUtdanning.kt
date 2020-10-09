@@ -1,17 +1,17 @@
 package no.nav.familie.ef.sak.repository.domain.søknad
 
-data class UnderUtdanning(val skoleUtdanningssted: Søknadsfelt<String>,
-                          @Deprecated("Bruk gjeldende utdanning") val utdanning: Søknadsfelt<TidligereUtdanning>?,
-                          val gjeldendeUtdanning: Søknadsfelt<GjeldendeUtdanning>?,
-                          val offentligEllerPrivat: Søknadsfelt<String>,
-                          val heltidEllerDeltid: Søknadsfelt<String>,
-                          val hvorMyeSkalDuStudere: Søknadsfelt<Int>?,
-                          val hvaErMåletMedUtdanningen: Søknadsfelt<String>?,
-                          val utdanningEtterGrunnskolen: Søknadsfelt<Boolean>,
-                          val tidligereUtdanninger: Søknadsfelt<List<TidligereUtdanning>>? = null,
-                          val semesteravgift: Søknadsfelt<Double>? = null,
-                          val studieavgift: Søknadsfelt<Double>? = null,
-                          val eksamensgebyr: Søknadsfelt<Double>? = null)
+data class UnderUtdanning(val skoleUtdanningssted: String,
+                          @Deprecated("Bruk gjeldende utdanning") val utdanning: TidligereUtdanning?,
+                          val gjeldendeUtdanning: GjeldendeUtdanning?,
+                          val offentligEllerPrivat: String,
+                          val heltidEllerDeltid: String,
+                          val hvorMyeSkalDuStudere: Int?,
+                          val hvaErMåletMedUtdanningen: String?,
+                          val utdanningEtterGrunnskolen: Boolean,
+                          val tidligereUtdanninger: List<TidligereUtdanning>? = null,
+                          val semesteravgift: Double? = null,
+                          val studieavgift: Double? = null,
+                          val eksamensgebyr: Double? = null)
 
 /**
  *  semesteravgift, studieavgift, eksamensgebyr gjelder kun Skolepenger

@@ -2,18 +2,18 @@ package no.nav.familie.ef.sak.repository.domain.søknad
 
 import java.time.LocalDate
 
-data class Situasjon(val gjelderDetteDeg: Søknadsfelt<List<String>>,
-                     val sykdom: Søknadsfelt<Dokumentasjon>? = null,
-                     val barnsSykdom: Søknadsfelt<Dokumentasjon>? = null,
-                     val manglendeBarnepass: Søknadsfelt<Dokumentasjon>? = null,
-                     val barnMedSærligeBehov: Søknadsfelt<Dokumentasjon>? = null,
-                     val arbeidskontrakt: Søknadsfelt<Dokumentasjon>? = null,
-                     val lærlingkontrakt: Søknadsfelt<Dokumentasjon>? = null,
-                     val oppstartNyJobb: Søknadsfelt<LocalDate>? = null,
-                     val utdanningstilbud: Søknadsfelt<Dokumentasjon>? = null,
-                     val oppstartUtdanning: Søknadsfelt<LocalDate>? = null,
-                     val sagtOppEllerRedusertStilling: Søknadsfelt<String>? = null,
-                     val oppsigelseReduksjonÅrsak: Søknadsfelt<String>? = null,
-                     val oppsigelseReduksjonTidspunkt: Søknadsfelt<LocalDate>? = null,
-                     val reduksjonAvArbeidsforholdDokumentasjon: Søknadsfelt<Dokumentasjon>? = null,
-                     val oppsigelseDokumentasjon: Søknadsfelt<Dokumentasjon>? = null)
+data class Situasjon(val gjelderDetteDeg: List<String>,
+                     val sykdom: Dokumentasjon? = null,
+                     val barnsSykdom: Dokumentasjon? = null,
+                     val manglendeBarnepass: Dokumentasjon? = null,
+                     val barnMedSærligeBehov: Dokumentasjon? = null,
+                     val arbeidskontrakt: Dokumentasjon? = null,
+                     val lærlingkontrakt: Dokumentasjon? = null,
+                     val oppstartNyJobb: LocalDate? = null,
+                     val utdanningstilbud: Dokumentasjon? = null,
+                     val oppstartUtdanning: LocalDate? = null,
+                     val sagtOppEllerRedusertStilling: String? = null,
+                     val oppsigelseReduksjonÅrsak: String? = null,
+                     val oppsigelseReduksjonTidspunkt: LocalDate? = null,
+                     val reduksjonAvArbeidsforholdDokumentasjon: Dokumentasjon? = null,
+                     val oppsigelseDokumentasjon: Dokumentasjon? = null)

@@ -1,18 +1,18 @@
 package no.nav.familie.ef.sak.repository.domain.søknad
 
-data class SøknadBarnetilsyn(val personalia: Søknadsfelt<Personalia>,
-                             val innsendingsdetaljer: Søknadsfelt<Innsendingsdetaljer>,
-                             val sivilstandsdetaljer: Søknadsfelt<Sivilstandsdetaljer>,
-                             val medlemskapsdetaljer: Søknadsfelt<Medlemskapsdetaljer>,
-                             val bosituasjon: Søknadsfelt<Bosituasjon>,
-                             val sivilstandsplaner: Søknadsfelt<Sivilstandsplaner>? = null,
-                             val barn: Søknadsfelt<List<Barn>>,
-                             val aktivitet: Søknadsfelt<Aktivitet>,
-                             val stønadsstart: Søknadsfelt<Stønadsstart>,
+data class SøknadBarnetilsyn(val personalia: Personalia,
+                             val innsendingsdetaljer: Innsendingsdetaljer,
+                             val sivilstandsdetaljer: Sivilstandsdetaljer,
+                             val medlemskapsdetaljer: Medlemskapsdetaljer,
+                             val bosituasjon: Bosituasjon,
+                             val sivilstandsplaner: Sivilstandsplaner? = null,
+                             val barn: List<Barn>,
+                             val aktivitet: Aktivitet,
+                             val stønadsstart: Stønadsstart,
                              val dokumentasjon: BarnetilsynDokumentasjon)
 
-data class BarnetilsynDokumentasjon(val barnepassordningFaktura: Søknadsfelt<Dokumentasjon>? = null,
-                                    val avtaleBarnepasser: Søknadsfelt<Dokumentasjon>? = null,
-                                    val arbeidstid: Søknadsfelt<Dokumentasjon>? = null,
-                                    val roterendeArbeidstid: Søknadsfelt<Dokumentasjon>? = null,
-                                    val spesielleBehov: Søknadsfelt<Dokumentasjon>? = null)
+data class BarnetilsynDokumentasjon(val barnepassordningFaktura: Dokumentasjon? = null,
+                                    val avtaleBarnepasser: Dokumentasjon? = null,
+                                    val arbeidstid: Dokumentasjon? = null,
+                                    val roterendeArbeidstid: Dokumentasjon? = null,
+                                    val spesielleBehov: Dokumentasjon? = null)
