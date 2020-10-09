@@ -18,7 +18,7 @@ import java.util.*
 @RequestMapping(path = ["/api/vurdering"], produces = [MediaType.APPLICATION_JSON_VALUE])
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class VurderingController(val vurderingService: VurderingService,
+class VurderingController(private val vurderingService: VurderingService,
                           private val stegService: StegService,
                           private val behandlingService: BehandlingService) {
 
