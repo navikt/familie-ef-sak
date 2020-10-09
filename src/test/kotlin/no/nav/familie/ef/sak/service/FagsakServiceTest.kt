@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.repository.BehandlingRepository
 import no.nav.familie.ef.sak.repository.FagsakRepository
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.service.steg.StegType
+import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
@@ -61,6 +62,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         behandlingRepository.insert(behandlingAktiv)
 
         val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, Stønadstype.BARNETILSYN)
+        println(objectMapper.writeValueAsString(fagsak))
         assertThat(fagsak.behandlinger.size).isEqualTo(2)
         assertThat(fagsak.stønadstype).isEqualTo(fagsakRequest.stønadstype)
         assertThat(fagsak.personIdent).isEqualTo(personIdent)

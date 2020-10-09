@@ -99,7 +99,8 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
                     id= it.id,
                     type = it.type,
                     status = it.status,
-                    aktiv = it.aktiv
+                    aktiv = it.aktiv,
+                    sistEndret = it.sporbar.endret.endretTid.toLocalDate()
             )
         }
     }
