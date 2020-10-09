@@ -1,4 +1,4 @@
-package no.nav.familie.kontrakter.ef.søknad
+package no.nav.familie.ef.sak.repository.domain.søknad
 
 data class Barnepass(val årsakBarnepass: Søknadsfelt<String>? = null,
                      val barnepassordninger: Søknadsfelt<List<BarnepassOrdning>>)

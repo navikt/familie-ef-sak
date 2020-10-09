@@ -1,4 +1,4 @@
-package no.nav.familie.kontrakter.ef.søknad
+package no.nav.familie.ef.sak.repository.domain.søknad
 
 data class Arbeidssøker(val registrertSomArbeidssøkerNav: Søknadsfelt<Boolean>,
                         val villigTilÅTaImotTilbudOmArbeid: Søknadsfelt<Boolean>,

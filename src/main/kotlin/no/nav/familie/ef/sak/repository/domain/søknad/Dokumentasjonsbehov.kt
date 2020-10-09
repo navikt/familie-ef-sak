@@ -1,4 +1,4 @@
-package no.nav.familie.kontrakter.ef.søknad
+package no.nav.familie.ef.sak.repository.domain.søknad
 
 data class Dokumentasjonsbehov(val label: String,
                                val id: String,

@@ -1,4 +1,4 @@
-package no.nav.familie.kontrakter.ef.søknad
+package no.nav.familie.ef.sak.repository.domain.søknad
 
 data class UnderUtdanning(val skoleUtdanningssted: Søknadsfelt<String>,
                           @Deprecated("Bruk gjeldende utdanning") val utdanning: Søknadsfelt<TidligereUtdanning>?,

@@ -1,4 +1,4 @@
-package no.nav.familie.kontrakter.ef.søknad
+package no.nav.familie.ef.sak.repository.domain.søknad
 
 data class SøknadOvergangsstønad(val personalia: Søknadsfelt<Personalia>,
                                  val innsendingsdetaljer: Søknadsfelt<Innsendingsdetaljer>,

@@ -1,4 +1,4 @@
-package no.nav.familie.kontrakter.ef.søknad
+package no.nav.familie.ef.sak.repository.domain.søknad
 
 data class TidligereUtdanning(val linjeKursGrad: Søknadsfelt<String>,
                               val nårVarSkalDuVæreElevStudent: Søknadsfelt<MånedÅrPeriode>)

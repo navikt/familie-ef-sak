@@ -1,4 +1,4 @@
-package no.nav.familie.kontrakter.ef.søknad
+package no.nav.familie.ef.sak.repository.domain.søknad
 
 data class Aktivitet(val hvordanErArbeidssituasjonen: Søknadsfelt<List<String>>,
                      val arbeidsforhold: Søknadsfelt<List<Arbeidsgiver>>? = null,

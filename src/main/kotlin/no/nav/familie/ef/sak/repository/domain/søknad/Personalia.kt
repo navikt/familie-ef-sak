@@ -1,4 +1,4 @@
-package no.nav.familie.kontrakter.ef.søknad
+package no.nav.familie.ef.sak.repository.domain.søknad
 
 data class Personalia(val fødselsnummer: Søknadsfelt<Fødselsnummer>,
                       val navn: Søknadsfelt<String>,

@@ -1,4 +1,4 @@
-package no.nav.familie.kontrakter.ef.søknad
+package no.nav.familie.ef.sak.repository.domain.søknad
 
 data class SøknadSkolepenger(val personalia: Søknadsfelt<Personalia>,
                              val barn: Søknadsfelt<List<Barn>>,

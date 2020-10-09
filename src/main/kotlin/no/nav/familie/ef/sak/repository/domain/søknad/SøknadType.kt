@@ -1,4 +1,4 @@
-package no.nav.familie.kontrakter.ef.søknad
+package no.nav.familie.ef.sak.repository.domain.søknad
 
 enum class SøknadType(val dokumentType: String, val dokumentTypeVedlegg: String? = null) {
     OVERGANGSSTØNAD("OVERGANGSSTØNAD_SØKNAD", "OVERGANGSSTØNAD_SØKNAD_VEDLEGG"),
