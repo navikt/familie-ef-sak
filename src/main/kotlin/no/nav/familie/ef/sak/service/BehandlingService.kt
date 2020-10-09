@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.service
 
+import no.nav.familie.ef.sak.api.fagsak.BehandlingDto
 import no.nav.familie.ef.sak.repository.*
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.service.steg.StegType
@@ -90,6 +91,17 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
 
     private fun hentSøknad(behandlingId: UUID): Søknad {
         return søknadRepository.findByBehandlingId(behandlingId) ?: error("Finner ikke søknad til behandling: $behandlingId")
+    }
+
+    fun hentBehandlinger(fagsakId: UUID): List<BehandlingDto> {
+        return behandlingRepository.findByFagsakId(fagsakId).map {
+            BehandlingDto(
+                    id= it.id,
+                    type = it.type,
+                    status = it.status,
+                    aktiv = it.aktiv
+            )
+        }
     }
 
 }
