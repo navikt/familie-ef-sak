@@ -81,9 +81,8 @@ class VurderingService(private val behandlingService: BehandlingService,
         val inngangsvilkår = VilkårType.hentInngangsvilkår()
 
         return inngangsvilkår.filter {
-            lagredeVilkårVurderinger.find {
-                vurdering -> vurdering.type == it && vurdering.resultat == VilkårResultat.IKKE_VURDERT } !== null ||
-            lagredeVilkårVurderinger.none { vurdering -> vurdering.type == it }
+            lagredeVilkårVurderinger.any { vurdering -> vurdering.type == it && vurdering.resultat == VilkårResultat.IKKE_VURDERT }
+            || lagredeVilkårVurderinger.none { vurdering -> vurdering.type == it }
         }
     }
 
