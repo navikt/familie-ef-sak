@@ -7,10 +7,8 @@ import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.context.ActiveProfiles
 import java.util.*
 
-@ActiveProfiles("local", "mock-oauth")
 internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
 
     @Autowired private lateinit var fagsakRepository: FagsakRepository

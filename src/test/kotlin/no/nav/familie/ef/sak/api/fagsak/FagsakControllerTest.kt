@@ -11,9 +11,7 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.test.context.ActiveProfiles
 
-@ActiveProfiles("integrasjonstest", "mock-oauth", "mock-integrasjoner", "mock-pdl")
 internal class FagsakControllerTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
