@@ -149,6 +149,40 @@ internal class VurderingServiceTest {
         verify(exactly = 0) { vilkårVurderingRepository.insertAll(any()) }
     }
 
+    @Test
+    fun `skal hente vilkårtyper for inngangsvilkår som mangler vurdering`() {
+        val behandling = behandling(fagsak(), true, BehandlingStatus.UTREDES)
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+        val ikkeVurdertVilkår = vilkårVurdering(BEHANDLING_ID,
+                                              resultat = VilkårResultat.IKKE_VURDERT,
+                                              VilkårType.FORUTGÅENDE_MEDLEMSKAP)
+        val vurdertVilkår = vilkårVurdering(BEHANDLING_ID,
+                                            resultat = VilkårResultat.JA,
+                                            VilkårType.LOVLIG_OPPHOLD)
+        every { vilkårVurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns listOf(ikkeVurdertVilkår, vurdertVilkår)
+
+        val vilkårTyperUtenVurdering = vurderingService.hentInngangsvilkårSomManglerVurdering(BEHANDLING_ID)
+
+        assertThat(vilkårTyperUtenVurdering.size).isEqualTo(1)
+        assertThat(vilkårTyperUtenVurdering.first()).isEqualTo(VilkårType.FORUTGÅENDE_MEDLEMSKAP)
+    }
+
+    @Test
+    fun `skal hente vilkårtyper for inngangsvilkår som ikke finnes`() {
+        val behandling = behandling(fagsak(), true, BehandlingStatus.UTREDES)
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+        val vurdertVilkår = vilkårVurdering(BEHANDLING_ID,
+                                                resultat = VilkårResultat.NEI,
+                                                VilkårType.FORUTGÅENDE_MEDLEMSKAP)
+
+        every { vilkårVurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns listOf(vurdertVilkår)
+
+        val vilkårTyperUtenVurdering = vurderingService.hentInngangsvilkårSomManglerVurdering(BEHANDLING_ID)
+
+        assertThat(vilkårTyperUtenVurdering.size).isEqualTo(1)
+        assertThat(vilkårTyperUtenVurdering.first()).isEqualTo(VilkårType.LOVLIG_OPPHOLD)
+    }
+
     companion object {
 
         private val BEHANDLING_ID = UUID.randomUUID()
