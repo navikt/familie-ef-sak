@@ -65,6 +65,13 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
                                                    status = BehandlingStatus.OPPRETTET))
     }
 
+    fun opprettBehandling(behandlingType: BehandlingType, fagsakId: UUID): Behandling{
+        return behandlingRepository.insert(Behandling(fagsakId = fagsakId,
+                type = behandlingType,
+                steg = StegType.REGISTRERE_OPPLYSNINGER,
+                status = BehandlingStatus.OPPRETTET))
+    }
+
     fun hentBehandling(behandlingId: UUID): Behandling = behandlingRepository.findByIdOrThrow(behandlingId)
 
     fun hentOvergangsstønad(behandlingId: UUID): SøknadOvergangsstønad {

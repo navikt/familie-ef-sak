@@ -88,7 +88,7 @@ internal class OppgaveServiceTest {
         val slot = slot<Long>()
         every { oppgaveClient.ferdigstillOppgave(capture(slot)) } just runs
 
-        oppgaveService.ferdigstillOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak)
+        oppgaveService.ferdigstillBehandleOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak)
         assertThat(slot.captured).isEqualTo(GSAK_OPPGAVE_ID)
     }
 
@@ -100,7 +100,7 @@ internal class OppgaveServiceTest {
         every { oppgaveRepository.update(any()) } returns lagTestOppgave()
         every { behandlingRepository.findByIdOrNull(BEHANDLING_ID) } returns mockk {}
 
-        Assertions.assertThatThrownBy { oppgaveService.ferdigstillOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak) }
+        Assertions.assertThatThrownBy { oppgaveService.ferdigstillBehandleOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak) }
                 .hasMessage("Finner ikke oppgave for behandling $BEHANDLING_ID")
                 .isInstanceOf(java.lang.IllegalStateException::class.java)
     }

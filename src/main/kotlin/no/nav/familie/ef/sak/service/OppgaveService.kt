@@ -87,13 +87,17 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
         return oppgaveClient.finnOppgaveMedId(gsakOppgaveId)
     }
 
-    fun ferdigstillOppgave(behandlingId: UUID, oppgavetype: Oppgavetype) {
+    fun ferdigstillBehandleOppgave(behandlingId: UUID, oppgavetype: Oppgavetype) {
         val oppgave = oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
                       ?: error("Finner ikke oppgave for behandling $behandlingId")
-        oppgaveClient.ferdigstillOppgave(oppgave.gsakOppgaveId.toLong())
+        ferdigstillOppgave(oppgave.gsakOppgaveId)
 
         oppgave.erFerdigstilt = true
         oppgaveRepository.update(oppgave)
+    }
+
+    fun ferdigstillOppgave(gsakOppgaveId: Long){
+        oppgaveClient.ferdigstillOppgave(gsakOppgaveId)
     }
 
     fun lagOppgaveTekst(fagsakId: String, beskrivelse: String? = null): String {
