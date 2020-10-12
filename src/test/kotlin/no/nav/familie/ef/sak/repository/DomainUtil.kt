@@ -31,8 +31,8 @@ fun fagsak(identer: Set<FagsakPerson> = setOf(), stønadstype: Stønadstype = St
 fun vilkårVurdering(behandlingId: UUID,
                     resultat: VilkårResultat,
                     type: VilkårType,
-                    delvilkår: List<Delvilkår> = emptyList()): VilkårVurdering =
-        VilkårVurdering(behandlingId = behandlingId, resultat = resultat, type = type, delvilkår = delvilkår)
+                    delvilkårVurdering: List<DelvilkårVurdering> = emptyList()): VilkårVurdering =
+        VilkårVurdering(behandlingId = behandlingId, resultat = resultat, type = type, delvilkårVurdering = DelvilkårVurderingWrapper(delvilkårVurdering))
 
 fun fagsakpersoner(identer: Set<String>): Set<FagsakPerson> = identer.map {
     FagsakPerson(ident = it)

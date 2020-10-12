@@ -19,11 +19,14 @@ data class VilkårVurdering(
         @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
         val sporbar: Sporbar = Sporbar(),
         @Column("delvilkar")
-        val delvilkår: List<Delvilkår>
+        val delvilkårVurdering: DelvilkårVurderingWrapper
 )
 
-data class Delvilkår(val type: DelvilkårType,
-                     val resultat: VilkårResultat = VilkårResultat.IKKE_VURDERT)
+// Ingen støtte for å ha en liste direkt i entiteten, wrapper+converter virker
+data class DelvilkårVurderingWrapper(val delvilkårVurderinger: List<DelvilkårVurdering>)
+
+data class DelvilkårVurdering(val type: DelvilkårType,
+                              val resultat: VilkårResultat = VilkårResultat.IKKE_VURDERT)
 
 enum class DelvilkårType {
     DOKUMENTERT_FLYKTNINGSTATUS,
