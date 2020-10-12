@@ -6,11 +6,18 @@ import no.nav.familie.ef.sak.repository.domain.BehandlingType
 
 interface BehandlingSteg<T> {
 
-    fun preUtførSteg(behandling: Behandling) {}
+    fun validerSteg(behandling: Behandling) {}
+
+    /**
+     * Hvis man trenger å overridea vanlige flytet og returnere en annen stegtype kan man overridea denne metoden,
+     * hvis ikke kalles utførSteg uten å returnere en stegType
+     */
+    fun utførOgReturnerNesteSteg(behandling: Behandling, data: T): StegType {
+        utførSteg(behandling, data)
+        return stegType().hentNesteSteg(behandling.type)
+    }
 
     fun utførSteg(behandling: Behandling, data: T)
-
-    fun postUtførSteg(behandling: Behandling) {}
 
     fun stegType(): StegType
 

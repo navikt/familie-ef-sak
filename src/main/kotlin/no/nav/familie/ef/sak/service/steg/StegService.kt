@@ -53,13 +53,10 @@ class StegService(
                 error("Behandlingen er på steg '${behandling.steg.displayName()}', og er da låst for alle andre type endringer.")
             }
 
-            behandlingSteg.preUtførSteg(behandling)
-            behandlingSteg.utførSteg(behandling, data)
-            behandlingSteg.postUtførSteg(behandling)
+            behandlingSteg.validerSteg(behandling)
+            val nesteSteg = behandlingSteg.utførOgReturnerNesteSteg(behandling, data)
 
             stegSuksessMetrics[stegType]?.increment()
-
-            val nesteSteg = behandlingSteg.stegType().hentNesteSteg(behandling.type)
 
             if (nesteSteg == BEHANDLING_FERDIGSTILT) {
                 LOG.info("$saksbehandlerNavn er ferdig med stegprosess på behandling ${behandling.id}")
