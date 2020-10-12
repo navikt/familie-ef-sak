@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.api.dto.Aleneomsorg
+import no.nav.familie.ef.sak.api.dto.DelvurderingDto
 import no.nav.familie.ef.sak.api.dto.InngangsvilkårDto
 import no.nav.familie.ef.sak.api.dto.VurderingDto
 import no.nav.familie.ef.sak.integration.PdlClient
@@ -9,6 +10,7 @@ import no.nav.familie.ef.sak.integration.dto.pdl.Familierelasjonsrolle
 import no.nav.familie.ef.sak.mapper.AleneomsorgMapper
 import no.nav.familie.ef.sak.mapper.MedlemskapMapper
 import no.nav.familie.ef.sak.repository.VilkårVurderingRepository
+import no.nav.familie.ef.sak.repository.domain.Delvilkår
 import no.nav.familie.ef.sak.repository.domain.VilkårResultat
 import no.nav.familie.ef.sak.repository.domain.VilkårType
 import no.nav.familie.ef.sak.repository.domain.VilkårVurdering
@@ -32,10 +34,27 @@ class VurderingService(private val behandlingService: BehandlingService,
                        frontendFeilmelding = "Behandlingen er låst for videre redigering")
         }
 
+        validerDelvilkår(vurdering, vilkårVurdering)
+
         val nyVilkårsVurdering = vilkårVurdering.copy(resultat = vurdering.resultat,
                                                       begrunnelse = vurdering.begrunnelse,
-                                                      unntak = vurdering.unntak)
+                                                      unntak = vurdering.unntak,
+                                                      delvilkår = vurdering.delvurderinger.map { delvurdering ->
+                                                          Delvilkår(delvurdering.type,
+                                                                    delvurdering.resultat)
+                                                      }
+        )
         return vilkårVurderingRepository.update(nyVilkårsVurdering).id
+    }
+
+    private fun validerDelvilkår(vurdering: VurderingDto,
+                                 vilkårVurdering: VilkårVurdering) {
+        val innkommendeDelvurderinger = vurdering.delvurderinger.map { it.type }.toSet()
+        val lagredeDelvurderinger = vilkårVurdering.delvilkår.map { it.type }.toSet()
+        if (innkommendeDelvurderinger.size != lagredeDelvurderinger.size
+            && !innkommendeDelvurderinger.containsAll(lagredeDelvurderinger)) {
+            error("Delvilkårstyper motsvarer ikke de som finnes lagrede på vilkåret")
+        }
     }
 
     fun hentInngangsvilkår(behandlingId: UUID): InngangsvilkårDto {
@@ -55,7 +74,11 @@ class VurderingService(private val behandlingService: BehandlingService,
                                  begrunnelse = it.begrunnelse,
                                  unntak = it.unntak,
                                  endretAv = it.sporbar.endret.endretAv,
-                                 endretTid = it.sporbar.endret.endretTid)
+                                 endretTid = it.sporbar.endret.endretTid,
+                                 delvurderinger = it.delvilkår.map { delvurdering ->
+                                     DelvurderingDto(delvurdering.type,
+                                                     delvurdering.resultat)
+                                 })
                 }
         return InngangsvilkårDto(medlemskap = medlemskap, vurderinger = vurderinger)
     }
@@ -67,9 +90,15 @@ class VurderingService(private val behandlingService: BehandlingService,
             return lagredeVilkårVurderinger
         }
 
-        val nyeVilkårVurderinger = VilkårType.hentInngangsvilkår().filter {
-            lagredeVilkårVurderinger.find { vurdering -> vurdering.type == it } == null
-        }.map { VilkårVurdering(behandlingId = behandlingId, type = it) }
+        val nyeVilkårVurderinger = VilkårType.hentInngangsvilkår()
+                .filter {
+                    lagredeVilkårVurderinger.find { vurdering -> vurdering.type == it } == null
+                }
+                .map {
+                    VilkårVurdering(behandlingId = behandlingId,
+                                    type = it,
+                                    delvilkår = it.delvilkår.map { delvilkårType -> Delvilkår(delvilkårType) })
+                }
 
         vilkårVurderingRepository.insertAll(nyeVilkårVurderinger)
 

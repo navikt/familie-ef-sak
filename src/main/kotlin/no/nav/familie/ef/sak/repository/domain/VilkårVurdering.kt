@@ -17,8 +17,17 @@ data class VilkårVurdering(
         val begrunnelse: String? = null,
         val unntak: String? = null,
         @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-        val sporbar: Sporbar = Sporbar()
+        val sporbar: Sporbar = Sporbar(),
+        @Column("delvilkar")
+        val delvilkår: List<Delvilkår>
 )
+
+data class Delvilkår(val type: DelvilkårType,
+                     val resultat: VilkårResultat = VilkårResultat.IKKE_VURDERT)
+
+enum class DelvilkårType {
+    DOKUMENTERT_FLYKTNINGSTATUS,
+}
 
 enum class VilkårResultat {
     JA,
@@ -27,9 +36,12 @@ enum class VilkårResultat {
 }
 
 //TODO Denne bør kanskje utvides til å inneholde en NARE-spesifikasjon
-enum class VilkårType(val beskrivelse: String) {
+enum class VilkårType(val beskrivelse: String,
+                      val delvilkår: List<DelvilkårType> = emptyList()) {
 
-    FORUTGÅENDE_MEDLEMSKAP("§15-2 Forutgående medlemskap"),
+    OPPHOLDSTILLATELSE("Vises kun for ikke-nordiske statsborgere - Foreligger det oppholdstillatelse eller annen bekreftelse på gyldig opphold?"),
+    FORUTGÅENDE_MEDLEMSKAP("§15-2 Forutgående medlemskap",
+                           listOf(DelvilkårType.DOKUMENTERT_FLYKTNINGSTATUS)),
     LOVLIG_OPPHOLD("§15-3 Lovlig opphold");
 
     companion object {
