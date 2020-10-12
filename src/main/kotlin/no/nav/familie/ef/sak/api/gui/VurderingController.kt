@@ -2,7 +2,9 @@ package no.nav.familie.ef.sak.api.gui
 
 import no.nav.familie.ef.sak.api.dto.InngangsvilkårDto
 import no.nav.familie.ef.sak.api.dto.VurderingDto
+import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.VurderingService
+import no.nav.familie.ef.sak.service.steg.StegService
 import no.nav.familie.ef.sak.validering.BehandlingConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -16,7 +18,9 @@ import java.util.*
 @RequestMapping(path = ["/api/vurdering"], produces = [MediaType.APPLICATION_JSON_VALUE])
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class VurderingController(val vurderingService: VurderingService) {
+class VurderingController(private val vurderingService: VurderingService,
+                          private val stegService: StegService,
+                          private val behandlingService: BehandlingService) {
 
     @PostMapping("inngangsvilkar")
     fun oppdaterVurderingInngangsvilkår(@RequestBody vurdering: VurderingDto): Ressurs<UUID> {
@@ -28,4 +32,9 @@ class VurderingController(val vurderingService: VurderingService) {
         return Ressurs.success(vurderingService.hentInngangsvilkår(behandlingId))
     }
 
+    @PostMapping("/{behandlingId}/inngangsvilkar/fullfor")
+    fun validerInngangsvilkår(@BehandlingConstraint @PathVariable behandlingId: UUID): Ressurs<UUID> {
+        val behandling = behandlingService.hentBehandling(behandlingId)
+        return Ressurs.success(stegService.håndterInngangsvilkår(behandling).id)
+    }
 }

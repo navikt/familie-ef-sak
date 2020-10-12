@@ -61,7 +61,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
 
     private fun opprettInngangsvilkår(): ResponseEntity<Ressurs<InngangsvilkårDto>> {
         val sak = SakRequest(SøknadMedVedlegg(Testsøknad.søknad, emptyList()), "123", "321")
-        val behandlingId = behandlingService.mottaSakOvergangsstønad(sak, emptyMap())
+        val behandlingId = behandlingService.mottaSakOvergangsstønad(sak, emptyMap()).id
 
         return restTemplate.exchange(localhost("/api/vurdering/$behandlingId/inngangsvilkar"),
                                      HttpMethod.GET,

@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.service
 
+import no.nav.familie.ef.sak.api.fagsak.BehandlingDto
 import no.nav.familie.ef.sak.repository.*
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.service.steg.StegType
@@ -22,13 +23,13 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
     val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
     @Transactional
-    fun mottaSakOvergangsstønad(sak: SakRequest<SøknadOvergangsstønad>, vedleggMap: Map<String, ByteArray>): UUID {
+    fun mottaSakOvergangsstønad(sak: SakRequest<SøknadOvergangsstønad>, vedleggMap: Map<String, ByteArray>): Behandling {
         val ident = sak.søknad.søknad.personalia.verdi.fødselsnummer.verdi.verdi
         val behandling = hentBehandling(ident)
         mottaSøknad(SøknadMapper.toDomain(sak.saksnummer, sak.journalpostId, sak.søknad.søknad, behandling.id),
                     sak,
                     vedleggMap)
-        return behandling.id
+        return behandling
     }
 
     @Transactional
@@ -90,6 +91,18 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
 
     private fun hentSøknad(behandlingId: UUID): Søknad {
         return søknadRepository.findByBehandlingId(behandlingId) ?: error("Finner ikke søknad til behandling: $behandlingId")
+    }
+
+    fun hentBehandlinger(fagsakId: UUID): List<BehandlingDto> {
+        return behandlingRepository.findByFagsakId(fagsakId).map {
+            BehandlingDto(
+                    id= it.id,
+                    type = it.type,
+                    status = it.status,
+                    aktiv = it.aktiv,
+                    sistEndret = it.sporbar.endret.endretTid.toLocalDate()
+            )
+        }
     }
 
 }
