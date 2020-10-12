@@ -33,7 +33,7 @@ abstract class OppslagSpringRunnerTest {
 
     @Autowired private lateinit var jdbcAggregateOperations: JdbcAggregateOperations
     @Autowired private lateinit var applicationContext: ApplicationContext
-    @Autowired private lateinit var cachemanager: CacheManager
+    @Autowired private lateinit var cacheManager: CacheManager
 
     @LocalServerPort
     private var port: Int? = 0
@@ -42,8 +42,19 @@ abstract class OppslagSpringRunnerTest {
     fun reset() {
         loggingEvents.clear()
         resetDatabase()
-        cachemanager.cacheNames.forEach({cachemanager?.getCache(it)?.clear()})
+        clearCaches()
+        resetWiremockServers()
+    }
+
+    private fun resetWiremockServers() {
         applicationContext.getBeansOfType(WireMockServer::class.java).values.forEach(WireMockServer::resetRequests)
+    }
+
+    private fun clearCaches() {
+        cacheManager.cacheNames
+                .map { cacheManager.getCache(it) }
+                .filterNotNull()
+                .forEach { it.clear() }
     }
 
     private fun resetDatabase() {
