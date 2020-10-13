@@ -8,10 +8,8 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.context.ActiveProfiles
 import java.util.*
 
-@ActiveProfiles("local", "mock-oauth")
 internal class OppgaveRepositoryTest : OppslagSpringRunnerTest() {
 
     @Autowired private lateinit var oppgaveRepository: OppgaveRepository
