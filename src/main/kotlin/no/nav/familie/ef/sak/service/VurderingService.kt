@@ -22,8 +22,8 @@ class VurderingService(private val behandlingService: BehandlingService,
                        private val vilkårVurderingRepository: VilkårVurderingRepository,
                        private val medlemskapMapper: MedlemskapMapper) {
 
-    fun oppdaterVilkår(vilkårVurdering: VilkårVurderingDto): UUID {
-        val vilkårVurdering = vilkårVurderingRepository.findByIdOrThrow(vilkårVurdering.id)
+    fun oppdaterVilkår(vilkårVurderingDto: VilkårVurderingDto): UUID {
+        val vilkårVurdering = vilkårVurderingRepository.findByIdOrThrow(vilkårVurderingDto.id)
 
         val behandlingId = vilkårVurdering.behandlingId
         if (behandlingErLåstForVidereRedigering(behandlingId)) {
@@ -31,12 +31,12 @@ class VurderingService(private val behandlingService: BehandlingService,
                        frontendFeilmelding = "Behandlingen er låst for videre redigering")
         }
 
-        validerDelvilkår(vilkårVurdering, vilkårVurdering)
+        validerDelvilkår(vilkårVurderingDto, vilkårVurdering)
 
-        val nyVilkårsVurdering = vilkårVurdering.copy(resultat = vilkårVurdering.resultat,
-                                                      begrunnelse = vilkårVurdering.begrunnelse,
-                                                      unntak = vilkårVurdering.unntak,
-                                                      delvilkårVurdering = DelvilkårVurderingWrapper(vilkårVurdering.delvurderinger.map { delvurdering ->
+        val nyVilkårsVurdering = vilkårVurdering.copy(resultat = vilkårVurderingDto.resultat,
+                                                      begrunnelse = vilkårVurderingDto.begrunnelse,
+                                                      unntak = vilkårVurderingDto.unntak,
+                                                      delvilkårVurdering = DelvilkårVurderingWrapper(vilkårVurderingDto.delvilkårVurderinger.map { delvurdering ->
                                                           DelvilkårVurdering(delvurdering.type,
                                                                              delvurdering.resultat)
                                                       })

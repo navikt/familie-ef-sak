@@ -29,7 +29,9 @@ data class DelvilkårVurdering(val type: DelvilkårType,
                               val resultat: VilkårResultat = VilkårResultat.IKKE_VURDERT)
 
 enum class DelvilkårType {
+    TRE_ÅRS_MEDLEMSKAP,
     DOKUMENTERT_FLYKTNINGSTATUS,
+    BOR_OG_OPPHOLDER_SEG_I_NORGE,
 }
 
 enum class VilkårResultat {
@@ -44,8 +46,8 @@ enum class VilkårType(val beskrivelse: String,
 
     OPPHOLDSTILLATELSE("Vises kun for ikke-nordiske statsborgere - Foreligger det oppholdstillatelse eller annen bekreftelse på gyldig opphold?"),
     FORUTGÅENDE_MEDLEMSKAP("§15-2 Forutgående medlemskap",
-                           listOf(DelvilkårType.DOKUMENTERT_FLYKTNINGSTATUS)),
-    LOVLIG_OPPHOLD("§15-3 Lovlig opphold");
+                           listOf(DelvilkårType.TRE_ÅRS_MEDLEMSKAP, DelvilkårType.DOKUMENTERT_FLYKTNINGSTATUS)),
+    LOVLIG_OPPHOLD("§15-3 Lovlig opphold", listOf(DelvilkårType.BOR_OG_OPPHOLDER_SEG_I_NORGE));
 
     companion object {
 

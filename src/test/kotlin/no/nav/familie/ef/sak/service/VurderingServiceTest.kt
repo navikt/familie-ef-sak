@@ -5,6 +5,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ef.sak.api.Feil
+import no.nav.familie.ef.sak.api.dto.DelvilkårVurderingDto
 import no.nav.familie.ef.sak.api.dto.VilkårVurderingDto
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.Testsøknad
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.config.PdlClientConfig
@@ -125,8 +126,10 @@ internal class VurderingServiceTest {
     internal fun `skal oppdatere vilkårsvurdering med resultat, begrunnelse og unntak`() {
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling(fagsak(), true, BehandlingStatus.OPPRETTET)
         val vilkårVurdering = vilkårVurdering(BEHANDLING_ID,
-                                              resultat = VilkårResultat.IKKE_VURDERT,
-                                              VilkårType.FORUTGÅENDE_MEDLEMSKAP)
+                                              VilkårResultat.IKKE_VURDERT,
+                                              VilkårType.FORUTGÅENDE_MEDLEMSKAP,
+                                              listOf(DelvilkårVurdering(DelvilkårType.TRE_ÅRS_MEDLEMSKAP,
+                                                                        VilkårResultat.IKKE_VURDERT)))
         every { vilkårVurderingRepository.findByIdOrNull(vilkårVurdering.id) } returns vilkårVurdering
         val lagretVilkårVurdering = slot<VilkårVurdering>()
         every { vilkårVurderingRepository.update(capture(lagretVilkårVurdering)) } answers { it.invocation.args.first() as VilkårVurdering }
@@ -137,11 +140,14 @@ internal class VurderingServiceTest {
                                                            begrunnelse = "Ok",
                                                            unntak = "Nei",
                                                            vilkårType = vilkårVurdering.type,
+                                                           delvilkårVurderinger = listOf(DelvilkårVurderingDto(vilkårVurdering.delvilkårVurdering.delvilkårVurderinger.first().type,
+                                                                                                               VilkårResultat.JA)),
                                                            endretAv = "",
                                                            endretTid = LocalDateTime.now()))
         assertThat(lagretVilkårVurdering.captured.resultat).isEqualTo(VilkårResultat.JA)
         assertThat(lagretVilkårVurdering.captured.begrunnelse).isEqualTo("Ok")
         assertThat(lagretVilkårVurdering.captured.unntak).isEqualTo("Nei")
+        assertThat(lagretVilkårVurdering.captured.delvilkårVurdering.delvilkårVurderinger.first().resultat).isEqualTo(VilkårResultat.JA)
         assertThat(lagretVilkårVurdering.captured.type).isEqualTo(vilkårVurdering.type)
     }
 
