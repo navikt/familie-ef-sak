@@ -44,7 +44,7 @@ class Behandlingstilgang(private val søknadRepository: SøknadRepository,
         integrasjonerClient.sjekkTilgangTilPersoner(personer.distinct())
                 .filterNot { it.harTilgang }
                 .forEach {
-                    logger.error("Bruker har ikke tilgang: ${it.begrunnelse}")
+                    logger.error("Bruker har ikke tilgang")
                     return false
                 }
         return true

@@ -9,10 +9,8 @@ import no.nav.familie.ef.sak.repository.domain.VilkårType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.context.ActiveProfiles
 import java.util.*
 
-@ActiveProfiles("local", "mock-oauth")
 internal class VilkårVurderingRepositoryTest : OppslagSpringRunnerTest() {
 
     @Autowired private lateinit var vilkårVurderingRepository: VilkårVurderingRepository

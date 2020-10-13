@@ -7,10 +7,8 @@ import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.config.IntegrasjonerConfig
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
 
-@ActiveProfiles("local", "mock-oauth", "mock-integrasjoner")
 internal class KodeverkServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired lateinit var kodeverkService: KodeverkService
