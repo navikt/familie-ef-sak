@@ -24,10 +24,10 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
 
     fun fullførJournalpost(journalføringRequest: JournalføringRequest, journalpostId: String): Long {
         val behandling = journalføringRequest.behandling.behandlingsId?.let { behandlingService.hentBehandling(it) }
-                         ?: behandlingService.opprettBehandling(behandlingType = journalføringRequest.behandling.behandlingType!!,
-                                                                fagsakId = journalføringRequest.fagsakId)
+                ?: behandlingService.opprettBehandling(behandlingType = journalføringRequest.behandling.behandlingType!!,
+                        fagsakId = journalføringRequest.fagsakId)
 
-        oppdaterDokumenttitler(journalpostId, journalføringRequest.dokumentTitler, journalføringRequest.fagsakId)
+        oppdaterJournalpost(journalpostId, journalføringRequest.dokumentTitler, journalføringRequest.fagsakId)
 
         oppgaveService.ferdigstillOppgave(journalføringRequest.oppgaveId.toLong())
 
@@ -41,7 +41,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         )
     }
 
-    private fun oppdaterDokumenttitler(journalpostId: String, dokumenttitler: Map<String, String>, fagsakId: UUID) {
+    private fun oppdaterJournalpost(journalpostId: String, dokumenttitler: Map<String, String>?, fagsakId: UUID) {
         val journalpost = hentJournalpost(journalpostId)
         val oppdatertJournalpost = OppdaterJournalpostRequest(
                 bruker = journalpost.bruker?.let {
@@ -59,13 +59,15 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
                         fagsaksystem = "EF",
                         sakstype = "FAGSAK"
                 ),
-                dokumenter = journalpost.dokumenter?.map { dokumentInfo ->
-                    DokumentInfo(
-                            dokumentInfoId = dokumentInfo.dokumentInfoId,
-                            tittel = dokumenttitler[dokumentInfo.dokumentInfoId]
-                                     ?: dokumentInfo.tittel,
-                            brevkode = dokumentInfo.brevkode
-                    )
+                dokumenter = dokumenttitler?.let {
+                    journalpost.dokumenter?.map { dokumentInfo ->
+                        DokumentInfo(
+                                dokumentInfoId = dokumentInfo.dokumentInfoId,
+                                tittel = dokumenttitler[dokumentInfo.dokumentInfoId]
+                                        ?: dokumentInfo.tittel,
+                                brevkode = dokumentInfo.brevkode
+                        )
+                    }
                 }
         )
         journalpostClient.oppdaterJournalpost(oppdatertJournalpost, journalpostId)
