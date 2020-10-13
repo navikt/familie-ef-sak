@@ -20,7 +20,7 @@ class FagsakPersontilgang(private val integrasjonerClient: FamilieIntegrasjonerC
         integrasjonerClient.sjekkTilgangTilPersoner(identifikatorer)
                 .filterNot { it.harTilgang }
                 .forEach {
-                    logger.error("Bruker har ikke tilgang: ${it.begrunnelse}")
+                    logger.error("Bruker har ikke tilgang")
                     return false
                 }
 
