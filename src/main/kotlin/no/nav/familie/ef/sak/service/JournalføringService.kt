@@ -10,7 +10,9 @@ import java.time.LocalDate
 import java.util.*
 
 @Service
-class JournalføringService(private val journalpostClient: JournalpostClient, private val behandlingService: BehandlingService, private val oppgaveService: OppgaveService) {
+class JournalføringService(private val journalpostClient: JournalpostClient,
+                           private val behandlingService: BehandlingService,
+                           private val oppgaveService: OppgaveService) {
 
     fun hentJournalpost(journalpostId: String): Journalpost {
         return journalpostClient.hentJournalpost(journalpostId)
@@ -22,19 +24,26 @@ class JournalføringService(private val journalpostClient: JournalpostClient, pr
 
     fun fullførJournalpost(journalføringRequest: JournalføringRequest, journalpostId: String): Long {
         val behandling = journalføringRequest.behandling.behandlingsId?.let { behandlingService.hentBehandling(it) }
-                ?: behandlingService.opprettBehandling(behandlingType = journalføringRequest.behandling.behandlingType!!, fagsakId = journalføringRequest.fagsakId)
+                         ?: behandlingService.opprettBehandling(behandlingType = journalføringRequest.behandling.behandlingType!!,
+                                                                fagsakId = journalføringRequest.fagsakId)
 
         oppdaterDokumenttitler(journalpostId, journalføringRequest.dokumentTitler, journalføringRequest.fagsakId)
 
         oppgaveService.ferdigstillOppgave(journalføringRequest.oppgaveId.toLong())
 
-        return oppgaveService.opprettOppgave(behandlingId = behandling.id, oppgavetype = Oppgavetype.BehandleSak, fristForFerdigstillelse = LocalDate.now().plusDays(2))
+        // TODO: Hent søknad fra mottak?
+
+        // TODO: Spør Mirja - ny oppgave: EnhetId og Tilordnet til?
+        return oppgaveService.opprettOppgave(
+                behandlingId = behandling.id,
+                oppgavetype = Oppgavetype.BehandleSak,
+                fristForFerdigstillelse = LocalDate.now().plusDays(2)
+        )
     }
 
-    private fun oppdaterDokumenttitler(journalpostId: String, dokumenttitler: Map<String, String>, fagsakId: UUID){
+    private fun oppdaterDokumenttitler(journalpostId: String, dokumenttitler: Map<String, String>, fagsakId: UUID) {
         val journalpost = hentJournalpost(journalpostId)
         val oppdatertJournalpost = OppdaterJournalpostRequest(
-                avsenderMottaker = null,
                 bruker = journalpost.bruker?.let {
                     DokarkivBruker(
                             idType = IdType.valueOf(it.type.toString()),
@@ -54,7 +63,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient, pr
                     DokumentInfo(
                             dokumentInfoId = dokumentInfo.dokumentInfoId,
                             tittel = dokumenttitler[dokumentInfo.dokumentInfoId]
-                                    ?: dokumentInfo.tittel,
+                                     ?: dokumentInfo.tittel,
                             brevkode = dokumentInfo.brevkode
                     )
                 }

@@ -27,8 +27,6 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
                      private val arbeidsfordelingService: ArbeidsfordelingService,
                      @Value("\${FRONTEND_OPPGAVE_URL}") private val frontendOppgaveUrl: URI) {
 
-    private val logger = LoggerFactory.getLogger(this::class.java)
-
     fun opprettOppgave(behandlingId: UUID,
                        oppgavetype: Oppgavetype,
                        fristForFerdigstillelse: LocalDate,
@@ -40,13 +38,10 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
         val fagsak =
                 fagsakRepository.findByIdOrNull(behandling.fagsakId) ?: error("Finner ikke fagsak med id=${behandling.fagsakId}")
 
-        val eksisterendeOppgave = oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
+        val oppgaveFinnesFraFør = oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
 
-        return if (eksisterendeOppgave != null && oppgavetype == eksisterendeOppgave.type) {
-            logger.error("Fant eksisterende oppgave med samme oppgavetype som ikke er ferdigstilt ved opprettelse av ny oppgave ${eksisterendeOppgave}. " +
-                         "Vi går videre, men kaster feil for å følge med på utviklingen.")
-
-            eksisterendeOppgave.gsakOppgaveId
+        return if (oppgaveFinnesFraFør !== null) {
+            oppgaveFinnesFraFør.gsakOppgaveId
         } else {
             val enhetsnummer = arbeidsfordelingService.hentNavEnhet(fagsak.hentAktivIdent())
             val opprettOppgave = OpprettOppgaveRequest(
