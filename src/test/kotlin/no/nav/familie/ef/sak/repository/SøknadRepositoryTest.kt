@@ -11,14 +11,10 @@ import org.assertj.core.api.Assertions.assertThat
 import org.h2.util.MathUtils
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.TestPropertySource
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-@ActiveProfiles("local", "mock-oauth")
-@TestPropertySource(properties = ["FAMILIE_INTEGRASJONER_URL=http://localhost:28085"])
 internal class SøknadRepositoryTest : OppslagSpringRunnerTest() {
 
     @Autowired lateinit var søknadRepository: SøknadRepository
