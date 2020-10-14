@@ -2,16 +2,15 @@ package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.api.dto.Aleneomsorg
+import no.nav.familie.ef.sak.api.dto.DelvilkårVurderingDto
 import no.nav.familie.ef.sak.api.dto.InngangsvilkårDto
-import no.nav.familie.ef.sak.api.dto.VurderingDto
+import no.nav.familie.ef.sak.api.dto.VilkårVurderingDto
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.integration.dto.pdl.Familierelasjonsrolle
 import no.nav.familie.ef.sak.mapper.AleneomsorgMapper
 import no.nav.familie.ef.sak.mapper.MedlemskapMapper
 import no.nav.familie.ef.sak.repository.VilkårVurderingRepository
-import no.nav.familie.ef.sak.repository.domain.VilkårResultat
-import no.nav.familie.ef.sak.repository.domain.VilkårType
-import no.nav.familie.ef.sak.repository.domain.VilkårVurdering
+import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -23,8 +22,8 @@ class VurderingService(private val behandlingService: BehandlingService,
                        private val vilkårVurderingRepository: VilkårVurderingRepository,
                        private val medlemskapMapper: MedlemskapMapper) {
 
-    fun oppdaterVilkår(vurdering: VurderingDto): UUID {
-        val vilkårVurdering = vilkårVurderingRepository.findByIdOrThrow(vurdering.id)
+    fun oppdaterVilkår(vilkårVurderingDto: VilkårVurderingDto): UUID {
+        val vilkårVurdering = vilkårVurderingRepository.findByIdOrThrow(vilkårVurderingDto.id)
 
         val behandlingId = vilkårVurdering.behandlingId
         if (behandlingErLåstForVidereRedigering(behandlingId)) {
@@ -32,10 +31,28 @@ class VurderingService(private val behandlingService: BehandlingService,
                        frontendFeilmelding = "Behandlingen er låst for videre redigering")
         }
 
-        val nyVilkårsVurdering = vilkårVurdering.copy(resultat = vurdering.resultat,
-                                                      begrunnelse = vurdering.begrunnelse,
-                                                      unntak = vurdering.unntak)
+        validerDelvilkår(vilkårVurderingDto, vilkårVurdering)
+
+        val nyVilkårsVurdering = vilkårVurdering.copy(resultat = vilkårVurderingDto.resultat,
+                                                      begrunnelse = vilkårVurderingDto.begrunnelse,
+                                                      unntak = vilkårVurderingDto.unntak,
+                                                      delvilkårVurdering = DelvilkårVurderingWrapper(vilkårVurderingDto.delvilkårVurderinger.map { delvurdering ->
+                                                          DelvilkårVurdering(delvurdering.type,
+                                                                             delvurdering.resultat)
+                                                      })
+        )
         return vilkårVurderingRepository.update(nyVilkårsVurdering).id
+    }
+
+    private fun validerDelvilkår(vurdering: VilkårVurderingDto,
+                                 vilkårVurdering: VilkårVurdering) {
+        val innkommendeDelvurderinger = vurdering.delvilkårVurderinger.map { it.type }.toSet()
+        val lagredeDelvurderinger = vilkårVurdering.delvilkårVurdering.delvilkårVurderinger.map { it.type }.toSet()
+
+        if (innkommendeDelvurderinger.size != lagredeDelvurderinger.size
+            || !innkommendeDelvurderinger.containsAll(lagredeDelvurderinger)) {
+            error("Delvilkårstyper motsvarer ikke de som finnes lagrede på vilkåret")
+        }
     }
 
     fun hentInngangsvilkår(behandlingId: UUID): InngangsvilkårDto {
@@ -48,14 +65,18 @@ class VurderingService(private val behandlingService: BehandlingService,
 
         val vurderinger = hentEllerOpprettVurderingerForInngangsvilkår(behandlingId)
                 .map {
-                    VurderingDto(id = it.id,
-                                 behandlingId = it.behandlingId,
-                                 resultat = it.resultat,
-                                 vilkårType = it.type,
-                                 begrunnelse = it.begrunnelse,
-                                 unntak = it.unntak,
-                                 endretAv = it.sporbar.endret.endretAv,
-                                 endretTid = it.sporbar.endret.endretTid)
+                    VilkårVurderingDto(id = it.id,
+                                       behandlingId = it.behandlingId,
+                                       resultat = it.resultat,
+                                       vilkårType = it.type,
+                                       begrunnelse = it.begrunnelse,
+                                       unntak = it.unntak,
+                                       endretAv = it.sporbar.endret.endretAv,
+                                       endretTid = it.sporbar.endret.endretTid,
+                                       delvilkårVurderinger = it.delvilkårVurdering.delvilkårVurderinger.map { delvurdering ->
+                                     DelvilkårVurderingDto(delvurdering.type,
+                                                           delvurdering.resultat)
+                                 })
                 }
         return InngangsvilkårDto(medlemskap = medlemskap, vurderinger = vurderinger)
     }
@@ -67,9 +88,15 @@ class VurderingService(private val behandlingService: BehandlingService,
             return lagredeVilkårVurderinger
         }
 
-        val nyeVilkårVurderinger = VilkårType.hentInngangsvilkår().filter {
-            lagredeVilkårVurderinger.find { vurdering -> vurdering.type == it } == null
-        }.map { VilkårVurdering(behandlingId = behandlingId, type = it) }
+        val nyeVilkårVurderinger = VilkårType.hentInngangsvilkår()
+                .filter {
+                    lagredeVilkårVurderinger.find { vurdering -> vurdering.type == it } == null
+                }
+                .map {
+                    VilkårVurdering(behandlingId = behandlingId,
+                                    type = it,
+                                    delvilkårVurdering = DelvilkårVurderingWrapper(it.delvilkår.map { delvilkårType -> DelvilkårVurdering(delvilkårType) }))
+                }
 
         vilkårVurderingRepository.insertAll(nyeVilkårVurderinger)
 

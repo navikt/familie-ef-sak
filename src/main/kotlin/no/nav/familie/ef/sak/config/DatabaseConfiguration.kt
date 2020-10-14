@@ -1,5 +1,7 @@
 package no.nav.familie.ef.sak.config
 
+import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.familie.ef.sak.repository.domain.DelvilkårVurderingWrapper
 import no.nav.familie.ef.sak.repository.domain.Endret
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -46,7 +48,9 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
         return JdbcCustomConversions(listOf(
                 UtbetalingsoppdragTilStringConverter(),
                 StringTilUtbetalingsoppdragConverter(),
-                TilkjentYtelseStatusTilStringConverter()
+                TilkjentYtelseStatusTilStringConverter(),
+                StringTilDelvilkårConverter(),
+                DelvilkårTilStringConverter()
         ))
     }
 
@@ -70,6 +74,20 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
     class TilkjentYtelseStatusTilStringConverter : Converter<TilkjentYtelseStatus, String> {
 
         override fun convert(tilkjentYtelseStatus: TilkjentYtelseStatus) = tilkjentYtelseStatus.name
+    }
+
+    @ReadingConverter
+    class StringTilDelvilkårConverter : Converter<ByteArray, DelvilkårVurderingWrapper> {
+
+        override fun convert(byteArray: ByteArray): DelvilkårVurderingWrapper {
+            return DelvilkårVurderingWrapper(objectMapper.readValue(byteArray))
+        }
+    }
+
+    @WritingConverter
+    class DelvilkårTilStringConverter : Converter<DelvilkårVurderingWrapper, ByteArray> {
+
+        override fun convert(delvilkårVurdering: DelvilkårVurderingWrapper) = objectMapper.writeValueAsBytes(delvilkårVurdering.delvilkårVurderinger)
     }
 
 }

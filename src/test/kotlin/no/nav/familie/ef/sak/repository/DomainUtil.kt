@@ -13,20 +13,26 @@ fun oppgave(behandling: Behandling, erFerdigstilt: Boolean = false): Oppgave =
                 erFerdigstilt = erFerdigstilt
         )
 
-fun behandling(fagsak: Fagsak, aktiv: Boolean = true, status: BehandlingStatus = BehandlingStatus.OPPRETTET, steg: StegType = StegType.REGISTRERE_OPPLYSNINGER): Behandling =
+fun behandling(fagsak: Fagsak,
+               aktiv: Boolean = true,
+               status: BehandlingStatus = BehandlingStatus.OPPRETTET,
+               steg: StegType = StegType.REGISTRERE_OPPLYSNINGER): Behandling =
         Behandling(
-            fagsakId = fagsak.id!!,
-            type = BehandlingType.FØRSTEGANGSBEHANDLING,
-            status = status,
-            steg = steg,
-            aktiv = aktiv
-    )
+                fagsakId = fagsak.id!!,
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                status = status,
+                steg = steg,
+                aktiv = aktiv
+        )
 
 fun fagsak(identer: Set<FagsakPerson> = setOf(), stønadstype: Stønadstype = Stønadstype.OVERGANGSSTØNAD) =
         Fagsak(stønadstype = stønadstype, søkerIdenter = identer)
 
-fun vilkårVurdering(behandlingId: UUID, resultat: VilkårResultat, type: VilkårType): VilkårVurdering =
-        VilkårVurdering(behandlingId = behandlingId, resultat = resultat, type = type)
+fun vilkårVurdering(behandlingId: UUID,
+                    resultat: VilkårResultat,
+                    type: VilkårType,
+                    delvilkårVurdering: List<DelvilkårVurdering> = emptyList()): VilkårVurdering =
+        VilkårVurdering(behandlingId = behandlingId, resultat = resultat, type = type, delvilkårVurdering = DelvilkårVurderingWrapper(delvilkårVurdering))
 
 fun fagsakpersoner(identer: Set<String>): Set<FagsakPerson> = identer.map {
     FagsakPerson(ident = it)

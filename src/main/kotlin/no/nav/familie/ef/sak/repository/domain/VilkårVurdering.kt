@@ -17,8 +17,22 @@ data class VilkårVurdering(
         val begrunnelse: String? = null,
         val unntak: String? = null,
         @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-        val sporbar: Sporbar = Sporbar()
+        val sporbar: Sporbar = Sporbar(),
+        @Column("delvilkar")
+        val delvilkårVurdering: DelvilkårVurderingWrapper
 )
+
+// Ingen støtte for å ha en liste direkt i entiteten, wrapper+converter virker
+data class DelvilkårVurderingWrapper(val delvilkårVurderinger: List<DelvilkårVurdering>)
+
+data class DelvilkårVurdering(val type: DelvilkårType,
+                              val resultat: VilkårResultat = VilkårResultat.IKKE_VURDERT)
+
+enum class DelvilkårType {
+    TRE_ÅRS_MEDLEMSKAP,
+    DOKUMENTERT_FLYKTNINGSTATUS,
+    BOR_OG_OPPHOLDER_SEG_I_NORGE,
+}
 
 enum class VilkårResultat {
     JA,
@@ -27,10 +41,13 @@ enum class VilkårResultat {
 }
 
 //TODO Denne bør kanskje utvides til å inneholde en NARE-spesifikasjon
-enum class VilkårType(val beskrivelse: String) {
+enum class VilkårType(val beskrivelse: String,
+                      val delvilkår: List<DelvilkårType> = emptyList()) {
 
-    FORUTGÅENDE_MEDLEMSKAP("§15-2 Forutgående medlemskap"),
-    LOVLIG_OPPHOLD("§15-3 Lovlig opphold");
+    OPPHOLDSTILLATELSE("Vises kun for ikke-nordiske statsborgere - Foreligger det oppholdstillatelse eller annen bekreftelse på gyldig opphold?"),
+    FORUTGÅENDE_MEDLEMSKAP("§15-2 Forutgående medlemskap",
+                           listOf(DelvilkårType.TRE_ÅRS_MEDLEMSKAP, DelvilkårType.DOKUMENTERT_FLYKTNINGSTATUS)),
+    LOVLIG_OPPHOLD("§15-3 Lovlig opphold", listOf(DelvilkårType.BOR_OG_OPPHOLDER_SEG_I_NORGE));
 
     companion object {
 
