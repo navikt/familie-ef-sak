@@ -61,7 +61,7 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
             val oppgave = EfOppgave(gsakOppgaveId = opprettetOppgaveId,
                                     behandlingId = behandling.id,
                                     type = oppgavetype)
-            oppgaveRepository.update(oppgave)
+            oppgaveRepository.insert(oppgave)
             opprettetOppgaveId
         }
     }
