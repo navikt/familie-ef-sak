@@ -15,16 +15,19 @@ class JournalføringController(val journalføringService: JournalføringService)
 
     @GetMapping("/{journalpostId}")
     fun hentJournalPost(@PathVariable journalpostId: String): Ressurs<Journalpost> {
+        // TODO: Tilgangskontroll til person
         return Ressurs.success(journalføringService.hentJournalpost(journalpostId))
     }
 
     @GetMapping("/{journalpostId}/dokument/{dokumentInfoId}")
     fun hentDokument(@PathVariable journalpostId: String, @PathVariable dokumentInfoId: String): Ressurs<ByteArray> {
+        // TODO: Tilgangskontroll til person
         return Ressurs.success(journalføringService.hentDokument(journalpostId, dokumentInfoId));
     }
 
     @PostMapping("/{journalpostId}")
     fun fullførJournalpost(@PathVariable journalpostId: String, @RequestBody journalføringRequest: JournalføringRequest): Ressurs<Long>{
+        // TODO: Tilgangskontroll til person
         return Ressurs.success(journalføringService.fullførJournalpost(journalføringRequest, journalpostId))
     }
 

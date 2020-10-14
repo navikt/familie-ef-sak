@@ -34,6 +34,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         // TODO: Hent søknad fra mottak?
 
         // TODO: Spør Mirja - ny oppgave: EnhetId og Tilordnet til?
+        // TODO: AktørId mangler
         return oppgaveService.opprettOppgave(
                 behandlingId = behandling.id,
                 oppgavetype = Oppgavetype.BehandleSak,
