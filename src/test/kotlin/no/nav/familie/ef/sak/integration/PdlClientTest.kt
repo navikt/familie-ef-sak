@@ -86,6 +86,14 @@ class PdlClientTest {
         assertThat(response["11111122222"]?.navn?.get(0)?.fornavn).isEqualTo("BRÅKETE")
     }
 
+    @Test
+    fun `pdlClient håndterer response for uthenting av identer`() {
+        wireMockServer.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
+                .willReturn(okJson(readFile("hent_identer.json"))))
+        val response = pdlClient.hentAktørId("12345")
+        assertThat(response.hentIdenter.identer.first().ident).isEqualTo("12345678901")
+    }
+
 
     private fun readFile(filnavn: String): String {
         return this::class.java.getResource("/json/$filnavn").readText()
