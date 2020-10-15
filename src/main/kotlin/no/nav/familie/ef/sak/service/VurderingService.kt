@@ -68,7 +68,7 @@ class VurderingService(private val behandlingService: BehandlingService,
                     VilkårsvurderingDto(id = it.id,
                                         behandlingId = it.behandlingId,
                                         resultat = it.resultat,
-                                        vilkårstype = it.type,
+                                        vilkårType = it.type,
                                         begrunnelse = it.begrunnelse,
                                         unntak = it.unntak,
                                         endretAv = it.sporbar.endret.endretAv,
@@ -88,7 +88,7 @@ class VurderingService(private val behandlingService: BehandlingService,
             return lagredeVilkårsvurderinger
         }
 
-        val nyeVilkårsvurderinger = Vilkårstype.hentInngangsvilkår()
+        val nyeVilkårsvurderinger = VilkårType.hentInngangsvilkår()
                 .filter {
                     lagredeVilkårsvurderinger.find { vurdering -> vurdering.type == it } == null
                 }
@@ -105,9 +105,9 @@ class VurderingService(private val behandlingService: BehandlingService,
         return lagredeVilkårsvurderinger + nyeVilkårsvurderinger
     }
 
-    fun hentInngangsvilkårSomManglerVurdering(behandlingId: UUID): List<Vilkårstype> {
+    fun hentInngangsvilkårSomManglerVurdering(behandlingId: UUID): List<VilkårType> {
         val lagredeVilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(behandlingId)
-        val inngangsvilkår = Vilkårstype.hentInngangsvilkår()
+        val inngangsvilkår = VilkårType.hentInngangsvilkår()
 
         return inngangsvilkår.filter {
             lagredeVilkårsvurderinger.any { vurdering -> vurdering.type == it && vurdering.resultat == Vilkårsresultat.IKKE_VURDERT }

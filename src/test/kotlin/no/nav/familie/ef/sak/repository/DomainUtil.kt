@@ -30,7 +30,7 @@ fun fagsak(identer: Set<FagsakPerson> = setOf(), stønadstype: Stønadstype = St
 
 fun vilkårsvurdering(behandlingId: UUID,
                      resultat: Vilkårsresultat,
-                     type: Vilkårstype,
+                     type: VilkårType,
                      delvilkårsvurdering: List<Delvilkårsvurdering> = emptyList()): Vilkårsvurdering =
         Vilkårsvurdering(behandlingId = behandlingId,
                          resultat = resultat,

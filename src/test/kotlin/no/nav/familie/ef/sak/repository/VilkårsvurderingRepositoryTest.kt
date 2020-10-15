@@ -5,7 +5,7 @@ import no.nav.familie.ef.sak.repository.BehandlingRepository
 import no.nav.familie.ef.sak.repository.FagsakRepository
 import no.nav.familie.ef.sak.repository.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
-import no.nav.familie.ef.sak.repository.domain.Vilkårstype
+import no.nav.familie.ef.sak.repository.domain.VilkårType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -24,7 +24,7 @@ internal class VilkårsvurderingRepositoryTest : OppslagSpringRunnerTest() {
 
         val vilkårsvurdering = vilkårsvurderingRepository.insert(vilkårsvurdering(behandling.id,
                                                                                   Vilkårsresultat.IKKE_VURDERT,
-                                                                                  Vilkårstype.FORUTGÅENDE_MEDLEMSKAP))
+                                                                                  VilkårType.FORUTGÅENDE_MEDLEMSKAP))
 
         assertThat(vilkårsvurderingRepository.findByBehandlingId(UUID.randomUUID())).isEmpty()
         assertThat(vilkårsvurderingRepository.findByBehandlingId(behandling.id)).containsOnly(vilkårsvurdering)
