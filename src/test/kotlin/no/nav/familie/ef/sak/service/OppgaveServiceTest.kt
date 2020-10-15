@@ -4,6 +4,9 @@ import io.mockk.*
 import no.nav.familie.ef.sak.integration.OppgaveClient
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.integration.dto.familie.Arbeidsfordelingsenhet
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlAktørId
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlHentIdenter
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlIdent
 import no.nav.familie.ef.sak.repository.BehandlingRepository
 import no.nav.familie.ef.sak.repository.FagsakRepository
 import no.nav.familie.ef.sak.repository.OppgaveRepository
@@ -54,7 +57,7 @@ internal class OppgaveServiceTest {
                 enhetNavn = ENHETSNAVN)
         val slot = slot<OpprettOppgaveRequest>()
         every { oppgaveClient.opprettOppgave(capture(slot)) } returns GSAK_OPPGAVE_ID
-        every { pdlClient.hentAktørId(any()) } returns mapOf(Pair("ident", aktørIdentFraPdl))
+        every { pdlClient.hentAktørId(any()) } returns PdlHentIdenter(PdlAktørId(listOf(PdlIdent(aktørIdentFraPdl))))
 
         oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak, FRIST_FERDIGSTILLELSE_BEH_SAK)
 
