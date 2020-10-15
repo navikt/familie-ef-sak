@@ -33,6 +33,12 @@ interface PdlPerson {
     val bostedsadresse: List<Bostedsadresse>
 }
 
+data class PdlIdent (val ident: String)
+
+data class PdlAktørId(val identer: List<PdlIdent>)
+
+data class PdlHentIdenter(val hentIdenter: PdlAktørId)
+
 data class PdlPersonKort(val navn: List<Navn>)
 
 data class PdlSøkerKort(@JsonProperty("kjoenn") val kjønn: List<Kjønn>,

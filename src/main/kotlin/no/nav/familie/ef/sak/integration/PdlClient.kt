@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.exception.PdlRequestException
 import no.nav.familie.ef.sak.integration.dto.pdl.*
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.http.sts.StsRestClient
+import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Service
@@ -76,13 +77,13 @@ class PdlClient(val pdlConfig: PdlConfig,
         return feilsjekkOgReturnerData(pdlResponse)
     }
 
-    fun hentAktørId(personIdent: String): Map<String, String> {
+    fun hentAktørId(personIdent: String): PdlHentIdenter {
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
                 query = PdlConfig.aktørIdQuery)
-        val pdlResponse: PdlBolkResponse<String> = postForEntity(pdlConfig.pdlUri,
+        val pdlResponse: PdlResponse<PdlHentIdenter> = postForEntity(pdlConfig.pdlUri,
                 pdlPersonRequest,
                 httpHeaders())
-        return feilsjekkOgReturnerData(pdlResponse)
+        return feilsjekkOgReturnerData(personIdent, pdlResponse)
     }
 
     private inline fun <reified T : Any> feilsjekkOgReturnerData(ident: String,
