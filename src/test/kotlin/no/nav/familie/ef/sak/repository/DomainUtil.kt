@@ -28,11 +28,14 @@ fun behandling(fagsak: Fagsak,
 fun fagsak(identer: Set<FagsakPerson> = setOf(), stønadstype: Stønadstype = Stønadstype.OVERGANGSSTØNAD) =
         Fagsak(stønadstype = stønadstype, søkerIdenter = identer)
 
-fun vilkårVurdering(behandlingId: UUID,
-                    resultat: VilkårResultat,
-                    type: VilkårType,
-                    delvilkårVurdering: List<DelvilkårVurdering> = emptyList()): VilkårVurdering =
-        VilkårVurdering(behandlingId = behandlingId, resultat = resultat, type = type, delvilkårVurdering = DelvilkårVurderingWrapper(delvilkårVurdering))
+fun vilkårsvurdering(behandlingId: UUID,
+                     resultat: Vilkårsresultat,
+                     type: VilkårType,
+                     delvilkårsvurdering: List<Delvilkårsvurdering> = emptyList()): Vilkårsvurdering =
+        Vilkårsvurdering(behandlingId = behandlingId,
+                         resultat = resultat,
+                         type = type,
+                         delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurdering))
 
 fun fagsakpersoner(identer: Set<String>): Set<FagsakPerson> = identer.map {
     FagsakPerson(ident = it)

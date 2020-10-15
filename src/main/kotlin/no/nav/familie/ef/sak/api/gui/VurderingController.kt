@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.api.gui
 
 import no.nav.familie.ef.sak.api.dto.InngangsvilkårDto
-import no.nav.familie.ef.sak.api.dto.VilkårVurderingDto
+import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.VurderingService
 import no.nav.familie.ef.sak.service.steg.StegService
@@ -23,8 +23,8 @@ class VurderingController(private val vurderingService: VurderingService,
                           private val behandlingService: BehandlingService) {
 
     @PostMapping("inngangsvilkar")
-    fun oppdaterVurderingInngangsvilkår(@RequestBody vilkårVurdering: VilkårVurderingDto): Ressurs<UUID> {
-        return Ressurs.success(vurderingService.oppdaterVilkår(vilkårVurdering))
+    fun oppdaterVurderingInngangsvilkår(@RequestBody vilkårsvurdering: VilkårsvurderingDto): Ressurs<UUID> {
+        return Ressurs.success(vurderingService.oppdaterVilkår(vilkårsvurdering))
     }
 
     @GetMapping("{behandlingId}/inngangsvilkar")

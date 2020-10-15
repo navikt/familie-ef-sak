@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.config
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.familie.ef.sak.repository.domain.DelvilkårVurderingWrapper
+import no.nav.familie.ef.sak.repository.domain.DelvilkårsvurderingWrapper
 import no.nav.familie.ef.sak.repository.domain.Endret
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -77,17 +77,17 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
     }
 
     @ReadingConverter
-    class StringTilDelvilkårConverter : Converter<ByteArray, DelvilkårVurderingWrapper> {
+    class StringTilDelvilkårConverter : Converter<ByteArray, DelvilkårsvurderingWrapper> {
 
-        override fun convert(byteArray: ByteArray): DelvilkårVurderingWrapper {
-            return DelvilkårVurderingWrapper(objectMapper.readValue(byteArray))
+        override fun convert(byteArray: ByteArray): DelvilkårsvurderingWrapper {
+            return DelvilkårsvurderingWrapper(objectMapper.readValue(byteArray))
         }
     }
 
     @WritingConverter
-    class DelvilkårTilStringConverter : Converter<DelvilkårVurderingWrapper, ByteArray> {
+    class DelvilkårTilStringConverter : Converter<DelvilkårsvurderingWrapper, ByteArray> {
 
-        override fun convert(delvilkårVurdering: DelvilkårVurderingWrapper) = objectMapper.writeValueAsBytes(delvilkårVurdering.delvilkårVurderinger)
+        override fun convert(delvilkårsvurdering: DelvilkårsvurderingWrapper) = objectMapper.writeValueAsBytes(delvilkårsvurdering.delvilkårsvurderinger)
     }
 
 }

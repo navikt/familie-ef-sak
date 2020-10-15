@@ -5,14 +5,14 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ef.sak.api.Feil
-import no.nav.familie.ef.sak.api.dto.DelvilkårVurderingDto
-import no.nav.familie.ef.sak.api.dto.VilkårVurderingDto
+import no.nav.familie.ef.sak.api.dto.DelvilkårsvurderingDto
+import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.Testsøknad
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.config.PdlClientConfig
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.vilkårVurdering
-import no.nav.familie.ef.sak.repository.VilkårVurderingRepository
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.vilkårsvurdering
+import no.nav.familie.ef.sak.repository.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.repository.domain.*
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
@@ -26,11 +26,11 @@ import java.util.*
 internal class VurderingServiceTest {
 
     private val behandlingService = mockk<BehandlingService>()
-    private val vilkårVurderingRepository = mockk<VilkårVurderingRepository>()
+    private val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
     private val vurderingService = VurderingService(behandlingService = behandlingService,
                                                     pdlClient = PdlClientConfig().pdlClient(),
                                                     medlemskapMapper = mockk(relaxed = true),
-                                                    vilkårVurderingRepository = vilkårVurderingRepository)
+                                                    vilkårsvurderingRepository = vilkårsvurderingRepository)
 
     @BeforeEach
     fun setUp() {
@@ -38,153 +38,154 @@ internal class VurderingServiceTest {
     }
 
     @Test
-    fun `skal opprette nye VilkårVurdering for alle inngangsvilkår dersom ingen vurderinger finnes`() {
+    fun `skal opprette nye Vilkårsvurdering for alle inngangsvilkår dersom ingen vurderinger finnes`() {
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling(fagsak(), true, BehandlingStatus.OPPRETTET)
-        every { vilkårVurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns emptyList()
+        every { vilkårsvurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns emptyList()
 
-        val nyeVilkårVurderinger = slot<List<VilkårVurdering>>()
-        every { vilkårVurderingRepository.insertAll(capture(nyeVilkårVurderinger)) } answers
-                { it.invocation.args.first() as List<VilkårVurdering> }
+        val nyeVilkårsvurderinger = slot<List<Vilkårsvurdering>>()
+        every { vilkårsvurderingRepository.insertAll(capture(nyeVilkårsvurderinger)) } answers
+                { it.invocation.args.first() as List<Vilkårsvurdering> }
         val inngangsvilkår = VilkårType.hentInngangsvilkår()
 
         vurderingService.hentInngangsvilkår(BEHANDLING_ID)
 
-        assertThat(nyeVilkårVurderinger.captured).hasSize(inngangsvilkår.size)
-        assertThat(nyeVilkårVurderinger.captured.map { it.type }).containsExactlyElementsOf(inngangsvilkår)
-        assertThat(nyeVilkårVurderinger.captured.map { it.resultat }.toSet()).containsOnly(VilkårResultat.IKKE_VURDERT)
-        assertThat(nyeVilkårVurderinger.captured.map { it.behandlingId }.toSet()).containsOnly(BEHANDLING_ID)
+        assertThat(nyeVilkårsvurderinger.captured).hasSize(inngangsvilkår.size)
+        assertThat(nyeVilkårsvurderinger.captured.map { it.type }).containsExactlyElementsOf(inngangsvilkår)
+        assertThat(nyeVilkårsvurderinger.captured.map { it.resultat }.toSet()).containsOnly(Vilkårsresultat.IKKE_VURDERT)
+        assertThat(nyeVilkårsvurderinger.captured.map { it.behandlingId }.toSet()).containsOnly(BEHANDLING_ID)
     }
 
     @Test
-    fun `skal ikke opprette nye VilkårVurderinger for inngangsvilkår som allerede har en vurdering`() {
+    fun `skal ikke opprette nye Vilkårsvurderinger for inngangsvilkår som allerede har en vurdering`() {
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling(fagsak(), true, BehandlingStatus.OPPRETTET)
-        every { vilkårVurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns listOf(vilkårVurdering(resultat = VilkårResultat.JA,
-                                                                                                             type = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
-                                                                                                             behandlingId = BEHANDLING_ID))
+        every { vilkårsvurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns listOf(vilkårsvurdering(resultat = Vilkårsresultat.JA,
+                                                                                                               type = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
+                                                                                                               behandlingId = BEHANDLING_ID))
 
-        val nyeVilkårVurderinger = slot<List<VilkårVurdering>>()
-        every { vilkårVurderingRepository.insertAll(capture(nyeVilkårVurderinger)) } answers
-                { it.invocation.args.first() as List<VilkårVurdering> }
+        val nyeVilkårsvurderinger = slot<List<Vilkårsvurdering>>()
+        every { vilkårsvurderingRepository.insertAll(capture(nyeVilkårsvurderinger)) } answers
+                { it.invocation.args.first() as List<Vilkårsvurdering> }
         val inngangsvilkår = VilkårType.hentInngangsvilkår()
 
-        val alleVilkårVurderinger = vurderingService.hentInngangsvilkår(BEHANDLING_ID).vurderinger
+        val alleVilkårsvurderinger = vurderingService.hentInngangsvilkår(BEHANDLING_ID).vurderinger
 
-        assertThat(nyeVilkårVurderinger.captured).hasSize(inngangsvilkår.size - 1)
-        assertThat(alleVilkårVurderinger).hasSize(inngangsvilkår.size)
-        assertThat(nyeVilkårVurderinger.captured.map { it.type }).doesNotContain(VilkårType.FORUTGÅENDE_MEDLEMSKAP)
+        assertThat(nyeVilkårsvurderinger.captured).hasSize(inngangsvilkår.size - 1)
+        assertThat(alleVilkårsvurderinger).hasSize(inngangsvilkår.size)
+        assertThat(nyeVilkårsvurderinger.captured.map { it.type }).doesNotContain(VilkårType.FORUTGÅENDE_MEDLEMSKAP)
     }
 
     @Test
     internal fun `skal ikke opprette vilkårsvurderinger hvis behandling er låst for videre vurdering`() {
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling(fagsak(), true, BehandlingStatus.FERDIGSTILT)
-        val vilkårsvurderinger = listOf(vilkårVurdering(resultat = VilkårResultat.JA,
-                                                        type = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
-                                                        behandlingId = BEHANDLING_ID))
-        every { vilkårVurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns vilkårsvurderinger
+        val vilkårsvurderinger = listOf(vilkårsvurdering(resultat = Vilkårsresultat.JA,
+                                                         type = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
+                                                         behandlingId = BEHANDLING_ID))
+        every { vilkårsvurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns vilkårsvurderinger
 
-        val alleVilkårVurderinger = vurderingService.hentInngangsvilkår(BEHANDLING_ID).vurderinger
+        val alleVilkårsvurderinger = vurderingService.hentInngangsvilkår(BEHANDLING_ID).vurderinger
 
-        assertThat(alleVilkårVurderinger).hasSize(1)
-        verify(exactly = 0) { vilkårVurderingRepository.insertAll(any()) }
-        assertThat(alleVilkårVurderinger.map { it.id }).isEqualTo(vilkårsvurderinger.map { it.id })
+        assertThat(alleVilkårsvurderinger).hasSize(1)
+        verify(exactly = 0) { vilkårsvurderingRepository.insertAll(any()) }
+        assertThat(alleVilkårsvurderinger.map { it.id }).isEqualTo(vilkårsvurderinger.map { it.id })
     }
 
     @Test
     internal fun `kan ikke oppdatere vilkårsvurdering koblet til en behandling som ikke finnes`() {
         val vurderingId = UUID.randomUUID()
-        every { vilkårVurderingRepository.findByIdOrNull(vurderingId) } returns null
+        every { vilkårsvurderingRepository.findByIdOrNull(vurderingId) } returns null
         assertThat(catchThrowable {
-            vurderingService.oppdaterVilkår(VilkårVurderingDto(id = vurderingId,
-                                                               behandlingId = BEHANDLING_ID,
-                                                               resultat = VilkårResultat.JA,
-                                                               vilkårType = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
-                                                               endretAv = "",
-                                                               endretTid = LocalDateTime.now()))
-        }).hasMessageContaining("Finner ikke VilkårVurdering med id")
+            vurderingService.oppdaterVilkår(VilkårsvurderingDto(id = vurderingId,
+                                                                behandlingId = BEHANDLING_ID,
+                                                                resultat = Vilkårsresultat.JA,
+                                                                vilkårType = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
+                                                                endretAv = "",
+                                                                endretTid = LocalDateTime.now()))
+        }).hasMessageContaining("Finner ikke Vilkårsvurdering med id")
     }
 
     @Test
     internal fun `kan ikke oppdatere vilkårsvurderingen hvis innsendte delvurderinger ikke motsvarerer de som finnes på vilkåret`() {
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling(fagsak(), true, BehandlingStatus.OPPRETTET)
-        val vilkårVurdering = vilkårVurdering(BEHANDLING_ID,
-                                              resultat = VilkårResultat.IKKE_VURDERT,
-                                              type = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
-                                              delvilkårVurdering = listOf(DelvilkårVurdering(DelvilkårType.DOKUMENTERT_FLYKTNINGSTATUS)))
-        every { vilkårVurderingRepository.findByIdOrNull(vilkårVurdering.id) } returns vilkårVurdering
+        val vilkårsvurdering = vilkårsvurdering(BEHANDLING_ID,
+                                                resultat = Vilkårsresultat.IKKE_VURDERT,
+                                                type = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
+                                                delvilkårsvurdering = listOf(Delvilkårsvurdering(DelvilkårType.DOKUMENTERT_FLYKTNINGSTATUS)))
+        every { vilkårsvurderingRepository.findByIdOrNull(vilkårsvurdering.id) } returns vilkårsvurdering
 
         assertThat(catchThrowable {
-            vurderingService.oppdaterVilkår(VilkårVurderingDto(id = vilkårVurdering.id,
-                                                               behandlingId = BEHANDLING_ID,
-                                                               resultat = VilkårResultat.JA,
-                                                               vilkårType = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
-                                                               endretAv = "",
-                                                               endretTid = LocalDateTime.now()))
+            vurderingService.oppdaterVilkår(VilkårsvurderingDto(id = vilkårsvurdering.id,
+                                                                behandlingId = BEHANDLING_ID,
+                                                                resultat = Vilkårsresultat.JA,
+                                                                vilkårType = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
+                                                                endretAv = "",
+                                                                endretTid = LocalDateTime.now()))
         }).hasMessageContaining("Delvilkårstyper motsvarer ikke de som finnes lagrede på vilkåret")
     }
 
     @Test
     internal fun `skal oppdatere vilkårsvurdering med resultat, begrunnelse og unntak`() {
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling(fagsak(), true, BehandlingStatus.OPPRETTET)
-        val vilkårVurdering = vilkårVurdering(BEHANDLING_ID,
-                                              VilkårResultat.IKKE_VURDERT,
-                                              VilkårType.FORUTGÅENDE_MEDLEMSKAP,
-                                              listOf(DelvilkårVurdering(DelvilkårType.TRE_ÅRS_MEDLEMSKAP,
-                                                                        VilkårResultat.IKKE_VURDERT)))
-        every { vilkårVurderingRepository.findByIdOrNull(vilkårVurdering.id) } returns vilkårVurdering
-        val lagretVilkårVurdering = slot<VilkårVurdering>()
-        every { vilkårVurderingRepository.update(capture(lagretVilkårVurdering)) } answers { it.invocation.args.first() as VilkårVurdering }
+        val vilkårsvurdering = vilkårsvurdering(BEHANDLING_ID,
+                                                Vilkårsresultat.IKKE_VURDERT,
+                                                VilkårType.FORUTGÅENDE_MEDLEMSKAP,
+                                                listOf(Delvilkårsvurdering(DelvilkårType.TRE_ÅRS_MEDLEMSKAP,
+                                                                           Vilkårsresultat.IKKE_VURDERT)))
+        every { vilkårsvurderingRepository.findByIdOrNull(vilkårsvurdering.id) } returns vilkårsvurdering
+        val lagretVilkårsvurdering = slot<Vilkårsvurdering>()
+        every { vilkårsvurderingRepository.update(capture(lagretVilkårsvurdering)) } answers { it.invocation.args.first() as Vilkårsvurdering }
 
-        vurderingService.oppdaterVilkår(VilkårVurderingDto(id = vilkårVurdering.id,
-                                                           behandlingId = BEHANDLING_ID,
-                                                           resultat = VilkårResultat.JA,
-                                                           begrunnelse = "Ok",
-                                                           unntak = "Nei",
-                                                           vilkårType = vilkårVurdering.type,
-                                                           delvilkårVurderinger = listOf(DelvilkårVurderingDto(vilkårVurdering.delvilkårVurdering.delvilkårVurderinger.first().type,
-                                                                                                               VilkårResultat.JA)),
-                                                           endretAv = "",
-                                                           endretTid = LocalDateTime.now()))
-        assertThat(lagretVilkårVurdering.captured.resultat).isEqualTo(VilkårResultat.JA)
-        assertThat(lagretVilkårVurdering.captured.begrunnelse).isEqualTo("Ok")
-        assertThat(lagretVilkårVurdering.captured.unntak).isEqualTo("Nei")
-        assertThat(lagretVilkårVurdering.captured.delvilkårVurdering.delvilkårVurderinger.first().resultat).isEqualTo(VilkårResultat.JA)
-        assertThat(lagretVilkårVurdering.captured.type).isEqualTo(vilkårVurdering.type)
+        vurderingService.oppdaterVilkår(VilkårsvurderingDto(id = vilkårsvurdering.id,
+                                                            behandlingId = BEHANDLING_ID,
+                                                            resultat = Vilkårsresultat.JA,
+                                                            begrunnelse = "Ok",
+                                                            unntak = "Nei",
+                                                            vilkårType = vilkårsvurdering.type,
+                                                            delvilkårsvurderinger = listOf(DelvilkårsvurderingDto(vilkårsvurdering.delvilkårsvurdering.delvilkårsvurderinger.first().type,
+                                                                                                                  Vilkårsresultat.JA)),
+                                                            endretAv = "",
+                                                            endretTid = LocalDateTime.now()))
+        assertThat(lagretVilkårsvurdering.captured.resultat).isEqualTo(Vilkårsresultat.JA)
+        assertThat(lagretVilkårsvurdering.captured.begrunnelse).isEqualTo("Ok")
+        assertThat(lagretVilkårsvurdering.captured.unntak).isEqualTo("Nei")
+        assertThat(lagretVilkårsvurdering.captured.delvilkårsvurdering.delvilkårsvurderinger.first().resultat).isEqualTo(
+                Vilkårsresultat.JA)
+        assertThat(lagretVilkårsvurdering.captured.type).isEqualTo(vilkårsvurdering.type)
     }
 
     @Test
     internal fun `skal ikke oppdatere vilkårsvurdering hvis behandlingen er låst for videre behandling`() {
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling(fagsak(), true, BehandlingStatus.FERDIGSTILT)
-        val vilkårVurdering = vilkårVurdering(BEHANDLING_ID,
-                                              resultat = VilkårResultat.IKKE_VURDERT,
-                                              VilkårType.FORUTGÅENDE_MEDLEMSKAP)
-        every { vilkårVurderingRepository.findByIdOrNull(vilkårVurdering.id) } returns vilkårVurdering
+        val vilkårsvurdering = vilkårsvurdering(BEHANDLING_ID,
+                                                resultat = Vilkårsresultat.IKKE_VURDERT,
+                                                VilkårType.FORUTGÅENDE_MEDLEMSKAP)
+        every { vilkårsvurderingRepository.findByIdOrNull(vilkårsvurdering.id) } returns vilkårsvurdering
 
         assertThat(catchThrowable {
-            vurderingService.oppdaterVilkår(VilkårVurderingDto(id = vilkårVurdering.id,
-                                                               behandlingId = BEHANDLING_ID,
-                                                               resultat = VilkårResultat.JA,
-                                                               begrunnelse = "Ok",
-                                                               unntak = "Nei",
-                                                               vilkårType = vilkårVurdering.type,
-                                                               endretAv = "",
-                                                               endretTid = LocalDateTime.now()
+            vurderingService.oppdaterVilkår(VilkårsvurderingDto(id = vilkårsvurdering.id,
+                                                                behandlingId = BEHANDLING_ID,
+                                                                resultat = Vilkårsresultat.JA,
+                                                                begrunnelse = "Ok",
+                                                                unntak = "Nei",
+                                                                vilkårType = vilkårsvurdering.type,
+                                                                endretAv = "",
+                                                                endretTid = LocalDateTime.now()
             ))
         }).isInstanceOf(Feil::class.java)
                 .hasMessageContaining("er låst for videre redigering")
-        verify(exactly = 0) { vilkårVurderingRepository.insertAll(any()) }
+        verify(exactly = 0) { vilkårsvurderingRepository.insertAll(any()) }
     }
 
     @Test
     fun `skal hente vilkårtyper for inngangsvilkår som mangler vurdering`() {
         val behandling = behandling(fagsak(), true, BehandlingStatus.UTREDES)
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
-        val ikkeVurdertVilkår = vilkårVurdering(BEHANDLING_ID,
-                                                resultat = VilkårResultat.IKKE_VURDERT,
-                                                VilkårType.FORUTGÅENDE_MEDLEMSKAP)
-        val vurdertVilkår = vilkårVurdering(BEHANDLING_ID,
-                                            resultat = VilkårResultat.JA,
-                                            VilkårType.LOVLIG_OPPHOLD)
-        every { vilkårVurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns listOf(ikkeVurdertVilkår, vurdertVilkår)
+        val ikkeVurdertVilkår = vilkårsvurdering(BEHANDLING_ID,
+                                                 resultat = Vilkårsresultat.IKKE_VURDERT,
+                                                 VilkårType.FORUTGÅENDE_MEDLEMSKAP)
+        val vurdertVilkår = vilkårsvurdering(BEHANDLING_ID,
+                                             resultat = Vilkårsresultat.JA,
+                                             VilkårType.LOVLIG_OPPHOLD)
+        every { vilkårsvurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns listOf(ikkeVurdertVilkår, vurdertVilkår)
 
         val vilkårTyperUtenVurdering = vurderingService.hentInngangsvilkårSomManglerVurdering(BEHANDLING_ID)
 
@@ -196,11 +197,11 @@ internal class VurderingServiceTest {
     fun `skal hente vilkårtyper for inngangsvilkår som ikke finnes`() {
         val behandling = behandling(fagsak(), true, BehandlingStatus.UTREDES)
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
-        val vurdertVilkår = vilkårVurdering(BEHANDLING_ID,
-                                            resultat = VilkårResultat.NEI,
-                                            VilkårType.FORUTGÅENDE_MEDLEMSKAP)
+        val vurdertVilkår = vilkårsvurdering(BEHANDLING_ID,
+                                             resultat = Vilkårsresultat.NEI,
+                                             VilkårType.FORUTGÅENDE_MEDLEMSKAP)
 
-        every { vilkårVurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns listOf(vurdertVilkår)
+        every { vilkårsvurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns listOf(vurdertVilkår)
 
         val vilkårTyperUtenVurdering = vurderingService.hentInngangsvilkårSomManglerVurdering(BEHANDLING_ID)
 

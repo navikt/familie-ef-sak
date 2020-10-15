@@ -6,27 +6,27 @@ import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.Table
 import java.util.*
 
-@Table("vilkar_vurdering")
-data class VilkårVurdering(
+@Table("vilkarsvurdering")
+data class Vilkårsvurdering(
         @Id
         val id: UUID = UUID.randomUUID(),
         @Column("behandling_id")
         val behandlingId: UUID,
-        val resultat: VilkårResultat = VilkårResultat.IKKE_VURDERT,
+        val resultat: Vilkårsresultat = Vilkårsresultat.IKKE_VURDERT,
         val type: VilkårType,
         val begrunnelse: String? = null,
         val unntak: String? = null,
         @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
         val sporbar: Sporbar = Sporbar(),
         @Column("delvilkar")
-        val delvilkårVurdering: DelvilkårVurderingWrapper
+        val delvilkårsvurdering: DelvilkårsvurderingWrapper
 )
 
 // Ingen støtte for å ha en liste direkt i entiteten, wrapper+converter virker
-data class DelvilkårVurderingWrapper(val delvilkårVurderinger: List<DelvilkårVurdering>)
+data class DelvilkårsvurderingWrapper(val delvilkårsvurderinger: List<Delvilkårsvurdering>)
 
-data class DelvilkårVurdering(val type: DelvilkårType,
-                              val resultat: VilkårResultat = VilkårResultat.IKKE_VURDERT)
+data class Delvilkårsvurdering(val type: DelvilkårType,
+                               val resultat: Vilkårsresultat = Vilkårsresultat.IKKE_VURDERT)
 
 enum class DelvilkårType {
     TRE_ÅRS_MEDLEMSKAP,
@@ -34,7 +34,7 @@ enum class DelvilkårType {
     BOR_OG_OPPHOLDER_SEG_I_NORGE,
 }
 
-enum class VilkårResultat {
+enum class Vilkårsresultat {
     JA,
     NEI,
     IKKE_VURDERT

@@ -1,0 +1,1 @@
+ALTER TABLE vilkar_vurdering RENAME TO vilkarsvurdering;
