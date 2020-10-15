@@ -14,7 +14,7 @@ import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.*
 
@@ -36,22 +36,26 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
 
     fun fullførJournalpost(journalføringRequest: JournalføringRequest, journalpostId: String): Long {
         val behandling = journalføringRequest.behandling.behandlingsId?.let { behandlingService.hentBehandling(it) }
-                         ?: behandlingService.opprettBehandling(behandlingType = journalføringRequest.behandling.behandlingType!!,
-                                                                fagsakId = journalføringRequest.fagsakId)
+                ?: behandlingService.opprettBehandling(behandlingType = journalføringRequest.behandling.behandlingType!!,
+                        fagsakId = journalføringRequest.fagsakId)
 
-        oppdaterJournalpost(journalpostId, journalføringRequest.dokumentTitler, journalføringRequest.fagsakId)
+        val journalpost = hentJournalpost(journalpostId)
+
+        oppdaterJournalpost(journalpost, journalføringRequest.dokumentTitler, journalføringRequest.fagsakId)
+
 
         oppgaveService.ferdigstillOppgave(journalføringRequest.oppgaveId.toLong())
 
         settSøknadPåBehandling(journalpostId)
 
         // TODO: Spør Mirja - ny oppgave: EnhetId og Tilordnet til?
-        // TODO: AktørId mangler
+
         return oppgaveService.opprettOppgave(
                 behandlingId = behandling.id,
                 oppgavetype = Oppgavetype.BehandleSak,
                 fristForFerdigstillelse = LocalDate.now().plusDays(2)
         )
+
     }
 
     private fun settSøknadPåBehandling(journalpostId: String) {
@@ -87,10 +91,9 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
 
     private fun harOriginalDokument(dokument: no.nav.familie.kontrakter.felles.journalpost.DokumentInfo): Boolean =
             dokument.dokumentvarianter?.contains(Dokumentvariant(variantformat = DokumentVariantformat.ORIGINAL.toString()))
-            ?: false
+                    ?: false
 
-    private fun oppdaterJournalpost(journalpostId: String, dokumenttitler: Map<String, String>?, fagsakId: UUID) {
-        val journalpost = hentJournalpost(journalpostId)
+    private fun oppdaterJournalpost(journalpost: Journalpost, dokumenttitler: Map<String, String>?, fagsakId: UUID) {
         val oppdatertJournalpost = OppdaterJournalpostRequest(
                 bruker = journalpost.bruker?.let {
                     DokarkivBruker(
@@ -112,12 +115,12 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
                         DokumentInfo(
                                 dokumentInfoId = dokumentInfo.dokumentInfoId,
                                 tittel = dokumenttitler[dokumentInfo.dokumentInfoId]
-                                         ?: dokumentInfo.tittel,
+                                        ?: dokumentInfo.tittel,
                                 brevkode = dokumentInfo.brevkode
                         )
                     }
                 }
         )
-        journalpostClient.oppdaterJournalpost(oppdatertJournalpost, journalpostId)
+        journalpostClient.oppdaterJournalpost(oppdatertJournalpost, journalpost.journalpostId)
     }
 }

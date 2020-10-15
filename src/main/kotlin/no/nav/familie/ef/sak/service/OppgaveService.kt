@@ -1,13 +1,13 @@
 package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.integration.OppgaveClient
+import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.repository.BehandlingRepository
 import no.nav.familie.ef.sak.repository.FagsakRepository
 import no.nav.familie.ef.sak.repository.OppgaveRepository
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.kontrakter.felles.oppgave.*
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -25,6 +25,7 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
                      private val fagsakRepository: FagsakRepository,
                      private val oppgaveRepository: OppgaveRepository,
                      private val arbeidsfordelingService: ArbeidsfordelingService,
+                     private val pdlClient: PdlClient,
                      @Value("\${FRONTEND_OPPGAVE_URL}") private val frontendOppgaveUrl: URI) {
 
     fun opprettOppgave(behandlingId: UUID,
@@ -43,9 +44,11 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
         return if (oppgaveFinnesFraFør !== null) {
             oppgaveFinnesFraFør.gsakOppgaveId
         } else {
+
+            val aktørId = pdlClient.hentAktørId(fagsak.hentAktivIdent())["ident"];
             val enhetsnummer = arbeidsfordelingService.hentNavEnhet(fagsak.hentAktivIdent())
             val opprettOppgave = OpprettOppgaveRequest(
-                    ident = OppgaveIdentV2(ident = fagsak.hentAktivIdent(), gruppe = IdentGruppe.FOLKEREGISTERIDENT),
+                    ident = OppgaveIdentV2(ident = aktørId, gruppe = IdentGruppe.AKTOERID),
                     saksId = fagsak.id.toString(),
                     tema = Tema.ENF,
                     oppgavetype = oppgavetype,

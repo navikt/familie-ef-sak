@@ -76,6 +76,15 @@ class PdlClient(val pdlConfig: PdlConfig,
         return feilsjekkOgReturnerData(pdlResponse)
     }
 
+    fun hentAktørId(personIdent: String): Map<String, String> {
+        val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
+                query = PdlConfig.aktørIdQuery)
+        val pdlResponse: PdlBolkResponse<String> = postForEntity(pdlConfig.pdlUri,
+                pdlPersonRequest,
+                httpHeaders())
+        return feilsjekkOgReturnerData(pdlResponse)
+    }
+
     private inline fun <reified T : Any> feilsjekkOgReturnerData(ident: String,
                                                                  pdlResponse: PdlResponse<T>): T {
 

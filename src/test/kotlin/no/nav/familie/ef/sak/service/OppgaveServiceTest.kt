@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.service
 
 import io.mockk.*
 import no.nav.familie.ef.sak.integration.OppgaveClient
+import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.integration.dto.familie.Arbeidsfordelingsenhet
 import no.nav.familie.ef.sak.repository.BehandlingRepository
 import no.nav.familie.ef.sak.repository.FagsakRepository
@@ -26,17 +27,22 @@ internal class OppgaveServiceTest {
     private val behandlingRepository = mockk<BehandlingRepository>()
     private val fagsakRepository = mockk<FagsakRepository>()
     private val oppgaveRepository = mockk<OppgaveRepository>()
+    private val pdlClient = mockk<PdlClient>()
 
     private val oppgaveService =
-            OppgaveService(oppgaveClient,
-                           behandlingRepository,
-                           fagsakRepository,
-                           oppgaveRepository,
-                           arbeidsfordelingService,
-                           URI.create("https://ensligmorellerfar.prod-fss.nais.io/fagsak"))
+            OppgaveService(
+                    oppgaveClient,
+                    behandlingRepository,
+                    fagsakRepository,
+                    oppgaveRepository,
+                    arbeidsfordelingService,
+                    pdlClient,
+                    URI.create("https://ensligmorellerfar.prod-fss.nais.io/fagsak"),
+            )
 
     @Test
     fun `Opprett oppgave skal samle data og opprette en ny oppgave basert på fagsak, behandling, fnr og enhet`() {
+        val aktørIdentFraPdl = "AKTØERIDENT"
         every { behandlingRepository.findByIdOrNull(BEHANDLING_ID) } returns lagTestBehandling()
         every { fagsakRepository.findByIdOrNull(FAGSAK_ID) } returns lagTestFagsak()
         every { behandlingRepository.update(any()) } returns lagTestBehandling()
@@ -45,15 +51,16 @@ internal class OppgaveServiceTest {
             oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any())
         } returns null
         every { arbeidsfordelingService.hentNavEnhet(any()) } returns Arbeidsfordelingsenhet(enhetId = ENHETSNUMMER,
-                                                                                             enhetNavn = ENHETSNAVN)
+                enhetNavn = ENHETSNAVN)
         val slot = slot<OpprettOppgaveRequest>()
         every { oppgaveClient.opprettOppgave(capture(slot)) } returns GSAK_OPPGAVE_ID
+        every { pdlClient.hentAktørId(any()) } returns mapOf(Pair("ident", aktørIdentFraPdl))
 
         oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak, FRIST_FERDIGSTILLELSE_BEH_SAK)
 
         assertThat(slot.captured.enhetsnummer).isEqualTo(ENHETSNUMMER)
         assertThat(slot.captured.saksId).isEqualTo(FAGSAK_ID.toString())
-        assertThat(slot.captured.ident).isEqualTo(OppgaveIdentV2(ident = FNR, gruppe = IdentGruppe.FOLKEREGISTERIDENT))
+        assertThat(slot.captured.ident).isEqualTo(OppgaveIdentV2(ident = aktørIdentFraPdl, gruppe = IdentGruppe.AKTOERID))
         assertThat(slot.captured.behandlingstema).isEqualTo(Behandlingstema.Overgangsstønad.value)
         assertThat(slot.captured.fristFerdigstillelse).isEqualTo(LocalDate.now().plusDays(1))
         assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())
@@ -154,7 +161,7 @@ internal class OppgaveServiceTest {
 
     private fun lagFinnOppgaveResponseDto(): FinnOppgaveResponseDto {
         return FinnOppgaveResponseDto(antallTreffTotalt = 1,
-                                      oppgaver = listOf(lagEksternTestOppgave())
+                oppgaver = listOf(lagEksternTestOppgave())
         )
     }
 
