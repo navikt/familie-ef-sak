@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.service.steg.StegType
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
+import org.springframework.data.relational.core.mapping.MappedCollection
 import org.springframework.data.relational.core.mapping.Table
 import java.util.*
 
@@ -18,6 +19,8 @@ data class Behandling(@Id
                       val type: BehandlingType,
                       var status: BehandlingStatus,
                       var steg: StegType,
+                      @MappedCollection(idColumn = "behandling_id")
+                      var journalposter: Set<BehandlingJournalpost> = setOf(),
 
                       @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                       val sporbar: Sporbar = Sporbar())

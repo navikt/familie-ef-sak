@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.api.journalføring.JournalføringRequest
 import no.nav.familie.ef.sak.domene.DokumentBrevkode
 import no.nav.familie.ef.sak.domene.DokumentVariantformat
 import no.nav.familie.ef.sak.integration.JournalpostClient
+import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
 import no.nav.familie.kontrakter.ef.søknad.SøknadSkolepenger
@@ -48,6 +49,8 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
 
         settSøknadPåBehandling(journalpostId)
 
+        knyttJournalpostTilBehandling(journalpostId, behandling)
+
         // TODO: Spør Mirja - ny oppgave: EnhetId og Tilordnet til?
 
         return oppgaveService.opprettOppgave(
@@ -56,6 +59,10 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
                 fristForFerdigstillelse = LocalDate.now().plusDays(2)
         )
 
+    }
+
+    private fun knyttJournalpostTilBehandling(journalpostId: String, behandling: Behandling) {
+        behandlingService.oppdaterJournalpostIdPåBehandling(journalpostId, behandling)
     }
 
     private fun settSøknadPåBehandling(journalpostId: String) {

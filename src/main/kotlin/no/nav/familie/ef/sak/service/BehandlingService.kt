@@ -112,4 +112,9 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
         }
     }
 
+    fun oppdaterJournalpostIdPåBehandling(journalpostId: String, behandling: Behandling){
+        behandling.journalposter = behandling.journalposter + BehandlingJournalpost(journalpostId = journalpostId, sporbar = Sporbar() )
+        behandlingRepository.update(behandling)
+    }
+
 }

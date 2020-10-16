@@ -68,6 +68,7 @@ internal class JournalføringServiceTest {
 
         every { oppgaveService.ferdigstillOppgave(any()) } just runs
         every { oppgaveService.opprettOppgave(any(), any(), any()) } returns nyOppgaveId
+        every { behandlingService.oppdaterJournalpostIdPåBehandling(any(), any()) } just runs
     }
 
     @Test
