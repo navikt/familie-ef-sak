@@ -3,7 +3,7 @@ package no.nav.familie.ef.sak.api.gui
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.api.dto.InngangsvilkårDto
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.Testsøknad
-import no.nav.familie.ef.sak.repository.domain.VilkårResultat
+import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.kontrakter.ef.sak.SakRequest
 import no.nav.familie.kontrakter.ef.søknad.SøknadMedVedlegg
@@ -45,7 +45,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
                 restTemplate.exchange(localhost("/api/vurdering/inngangsvilkar"),
                                       HttpMethod.POST,
                                       HttpEntity(opprettetVurdering.copy(
-                                              resultat = VilkårResultat.JA,
+                                              resultat = Vilkårsresultat.JA,
                                               begrunnelse = "Godkjent"
                                       ), headers))
 
