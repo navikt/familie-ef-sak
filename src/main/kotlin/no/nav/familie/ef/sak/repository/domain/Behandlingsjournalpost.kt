@@ -5,7 +5,7 @@ import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.Table
 
-@Table("behandling_journalpost")
+@Table("behandlingsjournalpost")
 data class Behandlingsjournalpost(@Column("journalpost_id") val journalpostId: String,
                                   @Column("journalpost_type") val journalpostType: Journalposttype,
                                   @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)

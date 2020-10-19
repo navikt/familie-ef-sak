@@ -1,4 +1,4 @@
-CREATE TABLE behandling_journalpost (
+CREATE TABLE behandlingsjournalpost (
     behandling_id       UUID         REFERENCES behandling (id),
     journalpost_id      VARCHAR      NOT NULL,
     journalpost_type     VARCHAR      NOT NULL,
