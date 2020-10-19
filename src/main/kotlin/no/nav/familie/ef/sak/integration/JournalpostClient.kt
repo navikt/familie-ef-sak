@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.integration
 
-import no.nav.familie.ef.sak.api.journalføring.JournalføringRequest
 import no.nav.familie.ef.sak.config.IntegrasjonerConfig
 import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -20,17 +19,22 @@ class JournalpostClient(@Qualifier("azure") restOperations: RestOperations,
 
     override val pingUri: URI = integrasjonerConfig.pingUri
     private val journalpostURI: URI = integrasjonerConfig.journalPostUri
-    private  val dokarkivUri: URI = integrasjonerConfig.dokarkivUri
+    private val dokarkivUri: URI = integrasjonerConfig.dokarkivUri
 
     fun hentJournalpost(journalpostId: String): Journalpost {
-        return getForEntity<Ressurs<Journalpost>>(URI.create("${journalpostURI}?journalpostId=${journalpostId}")).data!!
+        return getForEntity<Ressurs<Journalpost>>(URI.create("${journalpostURI}?journalpostId=${journalpostId}")).data
+               ?: error("Kunne ikke hente journalpost med id ${journalpostId}")
     }
 
     fun hentDokument(journalpostId: String, dokumentInfoId: String): ByteArray {
-        return getForEntity<Ressurs<ByteArray>>(URI.create("${journalpostURI}/hentdokument/${journalpostId}/${dokumentInfoId}")).data!!
+        return getForEntity<Ressurs<ByteArray>>(URI.create("${journalpostURI}/hentdokument/${journalpostId}/${dokumentInfoId}")).data
+               ?: error("Kunne ikke hente dokument for journalpost=${journalpostId} og dokumentInfoId=${dokumentInfoId}")
     }
 
-    fun oppdaterJournalpost(oppdaterJournalpostRequest: OppdaterJournalpostRequest, journalpostId: String): OppdaterJournalpostResponse{
-        return putForEntity<Ressurs<OppdaterJournalpostResponse>>(URI.create("${dokarkivUri}/v2/${journalpostId}"), oppdaterJournalpostRequest).data!!
+    fun oppdaterJournalpost(oppdaterJournalpostRequest: OppdaterJournalpostRequest,
+                            journalpostId: String): OppdaterJournalpostResponse {
+        return putForEntity<Ressurs<OppdaterJournalpostResponse>>(URI.create("${dokarkivUri}/v2/${journalpostId}"),
+                                                                  oppdaterJournalpostRequest).data
+               ?: error("Kunne ikke oppdatere journalpost med id ${journalpostId}")
     }
 }

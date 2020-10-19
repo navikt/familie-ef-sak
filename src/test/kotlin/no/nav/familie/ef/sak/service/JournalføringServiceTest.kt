@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.service
 
 import io.mockk.*
-import no.nav.familie.ef.sak.api.journalføring.JournalFøringBehandlingRequest
+import no.nav.familie.ef.sak.api.journalføring.JournalføringBehandling
 import no.nav.familie.ef.sak.api.journalføring.JournalføringRequest
 import no.nav.familie.ef.sak.domene.DokumentBrevkode
 import no.nav.familie.ef.sak.domene.DokumentVariantformat
@@ -89,7 +89,7 @@ internal class JournalføringServiceTest {
                         dokumentTitler,
                         fagsakId,
                         oppgaveId,
-                        JournalFøringBehandlingRequest(behandlingsId = behandlingsId))
+                        JournalføringBehandling(behandlingsId = behandlingsId))
         )
 
         assertThat(behandleSakOppgaveId).isEqualTo(nyOppgaveId)
@@ -121,7 +121,7 @@ internal class JournalføringServiceTest {
                         dokumentTitler,
                         fagsakId,
                         oppgaveId,
-                        JournalFøringBehandlingRequest(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING))
+                        JournalføringBehandling(behandlingsType = BehandlingType.FØRSTEGANGSBEHANDLING))
         )
 
         assertThat(behandleSakOppgaveId).isEqualTo(nyOppgaveId)

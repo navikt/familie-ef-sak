@@ -6,6 +6,6 @@ import java.util.*
 data class JournalføringRequest(val dokumentTitler: Map<String, String>? = null,
                                 val fagsakId: UUID,
                                 val oppgaveId: String,
-                                val behandling: JournalFøringBehandlingRequest)
+                                val behandling: JournalføringBehandling)
 
-data class JournalFøringBehandlingRequest(val behandlingsId: UUID? = null, val behandlingType: BehandlingType? = null)
+data class JournalføringBehandling(val behandlingsId: UUID? = null, val behandlingsType: BehandlingType? = null)

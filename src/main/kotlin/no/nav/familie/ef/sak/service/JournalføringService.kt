@@ -37,8 +37,8 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
 
     fun fullførJournalpost(journalføringRequest: JournalføringRequest, journalpostId: String): Long {
         val behandling = journalføringRequest.behandling.behandlingsId?.let { behandlingService.hentBehandling(it) }
-                ?: behandlingService.opprettBehandling(behandlingType = journalføringRequest.behandling.behandlingType!!,
-                        fagsakId = journalføringRequest.fagsakId)
+                ?: behandlingService.opprettBehandling(behandlingType = journalføringRequest.behandling.behandlingsType!!,
+                                                       fagsakId = journalføringRequest.fagsakId)
 
         val journalpost = hentJournalpost(journalpostId)
 
@@ -49,9 +49,9 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
 
         settSøknadPåBehandling(journalpostId)
 
-        knyttJournalpostTilBehandling(journalpostId, behandling)
+        knyttJournalpostTilBehandling(journalpost, behandling)
 
-        // TODO: Spør Mirja - ny oppgave: EnhetId og Tilordnet til?
+        // TODO: Spør Mirja - ny oppgave: skal EnhetId settes?
 
         return oppgaveService.opprettOppgave(
                 behandlingId = behandling.id,
@@ -61,8 +61,8 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
 
     }
 
-    private fun knyttJournalpostTilBehandling(journalpostId: String, behandling: Behandling) {
-        behandlingService.oppdaterJournalpostIdPåBehandling(journalpostId, behandling)
+    private fun knyttJournalpostTilBehandling(journalpost: Journalpost, behandling: Behandling) {
+        behandlingService.oppdaterJournalpostIdPåBehandling(journalpost, behandling)
     }
 
     private fun settSøknadPåBehandling(journalpostId: String) {

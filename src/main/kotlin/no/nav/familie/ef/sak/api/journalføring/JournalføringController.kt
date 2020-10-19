@@ -25,7 +25,7 @@ class JournalføringController(val journalføringService: JournalføringService)
         return Ressurs.success(journalføringService.hentDokument(journalpostId, dokumentInfoId));
     }
 
-    @PostMapping("/{journalpostId}")
+    @PostMapping("/{journalpostId}/fullfor")
     fun fullførJournalpost(@PathVariable journalpostId: String, @RequestBody journalføringRequest: JournalføringRequest): Ressurs<Long>{
         // TODO: Tilgangskontroll til person
         return Ressurs.success(journalføringService.fullførJournalpost(journalføringRequest, journalpostId))

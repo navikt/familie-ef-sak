@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.ef.sak.SakRequest
 import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
+import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -112,8 +113,11 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
         }
     }
 
-    fun oppdaterJournalpostIdPåBehandling(journalpostId: String, behandling: Behandling){
-        behandling.journalposter = behandling.journalposter + BehandlingJournalpost(journalpostId = journalpostId, sporbar = Sporbar() )
+    fun oppdaterJournalpostIdPåBehandling(journalpost: Journalpost, behandling: Behandling){
+        behandling.journalposter = behandling.journalposter + Behandlingsjournalpost(
+                journalpostId = journalpost.journalpostId,
+                sporbar = Sporbar(),
+                journalpostType = journalpost.journalposttype )
         behandlingRepository.update(behandling)
     }
 
