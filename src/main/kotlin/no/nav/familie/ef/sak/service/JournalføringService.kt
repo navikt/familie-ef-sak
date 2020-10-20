@@ -16,6 +16,7 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.util.*
 
@@ -35,6 +36,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         return journalpostClient.hentDokument(journalpostId, dokumentInfoId)
     }
 
+    @Transactional
     fun fullførJournalpost(journalføringRequest: JournalføringRequest, journalpostId: String): Long {
         val behandling = journalføringRequest.behandling.behandlingsId?.let { behandlingService.hentBehandling(it) }
                 ?: behandlingService.opprettBehandling(behandlingType = journalføringRequest.behandling.behandlingsType!!,
