@@ -2,13 +2,13 @@ package no.nav.familie.ef.sak.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException
 import no.nav.familie.ef.sak.api.journalføring.JournalføringRequest
-import no.nav.familie.ef.sak.domene.DokumentBrevkode
 import no.nav.familie.ef.sak.domene.DokumentVariantformat
 import no.nav.familie.ef.sak.integration.JournalpostClient
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
 import no.nav.familie.kontrakter.ef.søknad.SøknadSkolepenger
+import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.felles.dokarkiv.*
 import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariant
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
