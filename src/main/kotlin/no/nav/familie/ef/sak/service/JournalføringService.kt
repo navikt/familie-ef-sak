@@ -69,7 +69,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
     }
 
     private fun hentBehandling(journalføringRequest: JournalføringRequest) = hentEksisterendeBehandling(journalføringRequest.behandling.behandlingsId)
-            ?: opprettBehandlingMedBehandlingstype(journalføringRequest.behandling.behandlingsType, journalføringRequest.fagsakId)
+            ?: opprettBehandlingMedBehandlingstype(journalføringRequest.behandling.behandlingstype, journalføringRequest.fagsakId)
 
 
     private fun opprettBehandlingMedBehandlingstype(behandlingsType: BehandlingType?, fagsakId: UUID) =

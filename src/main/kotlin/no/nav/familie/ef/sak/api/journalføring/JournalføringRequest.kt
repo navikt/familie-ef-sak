@@ -8,4 +8,4 @@ data class JournalføringRequest(val dokumentTitler: Map<String, String>? = null
                                 val oppgaveId: String,
                                 val behandling: JournalføringBehandling)
 
-data class JournalføringBehandling(val behandlingsId: UUID? = null, val behandlingsType: BehandlingType? = null)
+data class JournalføringBehandling(val behandlingsId: UUID? = null, val behandlingstype: BehandlingType? = null)

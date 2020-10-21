@@ -121,7 +121,7 @@ internal class JournalføringServiceTest {
                         dokumentTitler,
                         fagsakId,
                         oppgaveId,
-                        JournalføringBehandling(behandlingsType = BehandlingType.FØRSTEGANGSBEHANDLING))
+                        JournalføringBehandling(behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING))
         )
 
         assertThat(behandleSakOppgaveId).isEqualTo(nyOppgaveId)
