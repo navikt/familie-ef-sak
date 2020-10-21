@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.api.journalføring.JournalføringRequest
 import no.nav.familie.ef.sak.domene.DokumentVariantformat
 import no.nav.familie.ef.sak.integration.JournalpostClient
 import no.nav.familie.ef.sak.repository.domain.Behandling
+import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
 import no.nav.familie.kontrakter.ef.søknad.SøknadSkolepenger
@@ -38,29 +39,45 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
 
     @Transactional
     fun fullførJournalpost(journalføringRequest: JournalføringRequest, journalpostId: String): Long {
-        val behandling = journalføringRequest.behandling.behandlingsId?.let { behandlingService.hentBehandling(it) }
-                ?: behandlingService.opprettBehandling(behandlingType = journalføringRequest.behandling.behandlingsType!!,
-                                                       fagsakId = journalføringRequest.fagsakId)
+        val behandling = hentBehandling(journalføringRequest)
 
         val journalpost = hentJournalpost(journalpostId)
 
         oppdaterJournalpost(journalpost, journalføringRequest.dokumentTitler, journalføringRequest.fagsakId)
 
-
-        oppgaveService.ferdigstillOppgave(journalføringRequest.oppgaveId.toLong())
+        ferdigstillJournalføringsoppgave(journalføringRequest)
 
         settSøknadPåBehandling(journalpostId)
 
         knyttJournalpostTilBehandling(journalpost, behandling)
 
-        // TODO: Spør Mirja - ny oppgave: skal EnhetId settes?
+        return opprettSaksbehandlingsoppgave(behandling)
 
+    }
+
+    private fun opprettSaksbehandlingsoppgave(behandling: Behandling): Long {
+        // TODO: Spør Mirja - ny oppgave: skal EnhetId settes?
         return oppgaveService.opprettOppgave(
                 behandlingId = behandling.id,
                 oppgavetype = Oppgavetype.BehandleSak,
                 fristForFerdigstillelse = LocalDate.now().plusDays(2)
         )
+    }
 
+    private fun ferdigstillJournalføringsoppgave(journalføringRequest: JournalføringRequest) {
+        oppgaveService.ferdigstillOppgave(journalføringRequest.oppgaveId.toLong())
+    }
+
+    private fun hentBehandling(journalføringRequest: JournalføringRequest) = hentEksisterendeBehandling(journalføringRequest.behandling.behandlingsId)
+            ?: opprettBehandlingMedBehandlingstype(journalføringRequest.behandling.behandlingsType, journalføringRequest.fagsakId)
+
+
+    private fun opprettBehandlingMedBehandlingstype(behandlingsType: BehandlingType?, fagsakId: UUID) =
+            behandlingService.opprettBehandling(behandlingType = behandlingsType!!,
+                    fagsakId = fagsakId)
+
+    private fun hentEksisterendeBehandling(behandlingsId: UUID?): Behandling? {
+        return behandlingsId?.let { behandlingService.hentBehandling(it) }
     }
 
     private fun knyttJournalpostTilBehandling(journalpost: Journalpost, behandling: Behandling) {
