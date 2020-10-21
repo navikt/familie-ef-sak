@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.ef.sak.SakRequest
 import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
+import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -65,6 +66,13 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
                                                    status = BehandlingStatus.OPPRETTET))
     }
 
+    fun opprettBehandling(behandlingType: BehandlingType, fagsakId: UUID): Behandling{
+        return behandlingRepository.insert(Behandling(fagsakId = fagsakId,
+                type = behandlingType,
+                steg = StegType.REGISTRERE_OPPLYSNINGER,
+                status = BehandlingStatus.OPPRETTET))
+    }
+
     fun hentBehandling(behandlingId: UUID): Behandling = behandlingRepository.findByIdOrThrow(behandlingId)
 
     fun hentOvergangsstønad(behandlingId: UUID): SøknadOvergangsstønad {
@@ -103,6 +111,14 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
                     sistEndret = it.sporbar.endret.endretTid.toLocalDate()
             )
         }
+    }
+
+    fun oppdaterJournalpostIdPåBehandling(journalpost: Journalpost, behandling: Behandling){
+        behandling.journalposter = behandling.journalposter + Behandlingsjournalpost(
+                journalpostId = journalpost.journalpostId,
+                sporbar = Sporbar(),
+                journalpostType = journalpost.journalposttype )
+        behandlingRepository.update(behandling)
     }
 
 }

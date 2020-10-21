@@ -1,13 +1,13 @@
 package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.integration.OppgaveClient
+import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.repository.BehandlingRepository
 import no.nav.familie.ef.sak.repository.FagsakRepository
 import no.nav.familie.ef.sak.repository.OppgaveRepository
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.kontrakter.felles.oppgave.*
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -25,9 +25,8 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
                      private val fagsakRepository: FagsakRepository,
                      private val oppgaveRepository: OppgaveRepository,
                      private val arbeidsfordelingService: ArbeidsfordelingService,
+                     private val pdlClient: PdlClient,
                      @Value("\${FRONTEND_OPPGAVE_URL}") private val frontendOppgaveUrl: URI) {
-
-    private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun opprettOppgave(behandlingId: UUID,
                        oppgavetype: Oppgavetype,
@@ -40,17 +39,16 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
         val fagsak =
                 fagsakRepository.findByIdOrNull(behandling.fagsakId) ?: error("Finner ikke fagsak med id=${behandling.fagsakId}")
 
-        val eksisterendeOppgave = oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
+        val oppgaveFinnesFraFør = oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
 
-        return if (eksisterendeOppgave != null && oppgavetype == eksisterendeOppgave.type) {
-            logger.error("Fant eksisterende oppgave med samme oppgavetype som ikke er ferdigstilt ved opprettelse av ny oppgave ${eksisterendeOppgave}. " +
-                         "Vi går videre, men kaster feil for å følge med på utviklingen.")
-
-            eksisterendeOppgave.gsakOppgaveId
+        return if (oppgaveFinnesFraFør !== null) {
+            oppgaveFinnesFraFør.gsakOppgaveId
         } else {
+
+            val aktørId = pdlClient.hentAktørId(fagsak.hentAktivIdent()).hentIdenter.identer.first().ident;
             val enhetsnummer = arbeidsfordelingService.hentNavEnhet(fagsak.hentAktivIdent())
             val opprettOppgave = OpprettOppgaveRequest(
-                    ident = OppgaveIdentV2(ident = fagsak.hentAktivIdent(), gruppe = IdentGruppe.FOLKEREGISTERIDENT),
+                    ident = OppgaveIdentV2(ident = aktørId, gruppe = IdentGruppe.AKTOERID),
                     saksId = fagsak.id.toString(),
                     tema = Tema.ENF,
                     oppgavetype = oppgavetype,
@@ -66,7 +64,7 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
             val oppgave = EfOppgave(gsakOppgaveId = opprettetOppgaveId,
                                     behandlingId = behandling.id,
                                     type = oppgavetype)
-            oppgaveRepository.update(oppgave)
+            oppgaveRepository.insert(oppgave)
             opprettetOppgaveId
         }
     }
@@ -87,13 +85,17 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
         return oppgaveClient.finnOppgaveMedId(gsakOppgaveId)
     }
 
-    fun ferdigstillOppgave(behandlingId: UUID, oppgavetype: Oppgavetype) {
+    fun ferdigstillBehandleOppgave(behandlingId: UUID, oppgavetype: Oppgavetype) {
         val oppgave = oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
                       ?: error("Finner ikke oppgave for behandling $behandlingId")
-        oppgaveClient.ferdigstillOppgave(oppgave.gsakOppgaveId.toLong())
+        ferdigstillOppgave(oppgave.gsakOppgaveId)
 
         oppgave.erFerdigstilt = true
         oppgaveRepository.update(oppgave)
+    }
+
+    fun ferdigstillOppgave(gsakOppgaveId: Long){
+        oppgaveClient.ferdigstillOppgave(gsakOppgaveId)
     }
 
     fun lagOppgaveTekst(fagsakId: String, beskrivelse: String? = null): String {

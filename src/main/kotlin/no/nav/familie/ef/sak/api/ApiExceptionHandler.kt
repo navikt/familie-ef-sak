@@ -23,7 +23,7 @@ class ApiExceptionHandler {
 
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Ressurs.failure("Uventet feil"))
+                .body(Ressurs.failure(errorMessage = "Uventet feil", frontendFeilmelding = "En uventet feil oppstod."))
     }
 
     @ExceptionHandler(ApiFeil::class)
