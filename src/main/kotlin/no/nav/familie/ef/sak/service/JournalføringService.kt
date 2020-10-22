@@ -38,21 +38,23 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
     }
 
     @Transactional
-    fun fullførJournalpost(journalføringRequest: JournalføringRequest, journalpostId: String): Long {
+    fun fullførJournalpost(journalføringRequest: JournalføringRequest, journalpostId: String, journalførendeEnhet: String): Long {
         val behandling = hentBehandling(journalføringRequest)
-
         val journalpost = hentJournalpost(journalpostId)
 
         oppdaterJournalpost(journalpost, journalføringRequest.dokumentTitler, journalføringRequest.fagsakId)
-
+        ferdigstillJournalføring(journalpostId, journalførendeEnhet)
         ferdigstillJournalføringsoppgave(journalføringRequest)
 
         settSøknadPåBehandling(journalpostId)
-
         knyttJournalpostTilBehandling(journalpost, behandling)
 
         return opprettSaksbehandlingsoppgave(behandling)
 
+    }
+
+    private fun ferdigstillJournalføring(journalpostId: String, journalførendeEnhet: String) {
+        journalpostClient.ferdigstillJournalpost(journalpostId, journalførendeEnhet)
     }
 
     private fun opprettSaksbehandlingsoppgave(behandling: Behandling): Long {
@@ -149,4 +151,5 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         )
         journalpostClient.oppdaterJournalpost(oppdatertJournalpost, journalpost.journalpostId)
     }
+
 }
