@@ -12,7 +12,6 @@ import no.nav.familie.ef.sak.økonomi.UtbetalingsoppdragGenerator
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -23,7 +22,7 @@ import java.util.*
 @RestController
 @RequestMapping(path = ["/api/tilkjentytelse"])
 @ProtectedWithClaims(issuer = "azuread")
-class TilkjentYtelseController(private val tilkjentYtelseService: TilkjentYtelseService) {
+class TilkjentYtelseController(private val tilkjentYtelseService: TilkjentYtelseService, private val økonomiKlient: ØkonomiKlient) {
 
     @PostMapping
     fun opprettTilkjentYtelse(@RequestBody tilkjentYtelseDTO: TilkjentYtelseDTO): ResponseEntity<Long> {
@@ -70,4 +69,26 @@ class TilkjentYtelseController(private val tilkjentYtelseService: TilkjentYtelse
 
         return ResponseEntity.ok(status)
     }
+
+    @PostMapping("/test-mot-oppdrag")
+    fun testMotOppdrag(@RequestBody tilkjentYtelseTestDTO: TilkjentYtelseTestDTO): Ressurs<TilkjentYtelse> {
+        val nyTilkjentYtelse = tilkjentYtelseTestDTO.nyTilkjentYtelse
+        val forrigeTilkjentYtelse = tilkjentYtelseTestDTO.forrigeTilkjentYtelse
+
+        val tilkjentYtelseMedUtbetalingsoppdrag = UtbetalingsoppdragGenerator.lagTilkjentYtelseMedUtbetalingsoppdrag(
+                nyTilkjentYtelse = nyTilkjentYtelse,
+                forrigeTilkjentYtelse = forrigeTilkjentYtelse)
+
+        økonomiKlient.iverksettOppdrag(tilkjentYtelseMedUtbetalingsoppdrag.utbetalingsoppdrag!!)
+        return Ressurs.success(tilkjentYtelseMedUtbetalingsoppdrag)
+    }
+
+    @GetMapping("/dummy")
+    fun dummyTilkjentYtelse(): Ressurs<TilkjentYtelse> {
+        val søker = "12345678911"
+        val andelTilkjentYtelseDto = AndelTilkjentYtelseDTO(personIdent = søker, beløp = 1000, stønadFom = LocalDate.now(), stønadTom = LocalDate.now(), type = YtelseType.OVERGANGSSTØNAD)
+        val tilkjentYtelseDto = TilkjentYtelseDTO(søker = søker, saksnummer = "12345", behandlingId = "54321", andelerTilkjentYtelse = listOf(andelTilkjentYtelseDto, andelTilkjentYtelseDto))
+        return Ressurs.success(tilkjentYtelseDto.tilTilkjentYtelse(saksbehandler = "VL"))
+    }
+
 }

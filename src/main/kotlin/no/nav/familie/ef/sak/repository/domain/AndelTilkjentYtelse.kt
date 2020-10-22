@@ -62,4 +62,3 @@ data class AndelTilkjentYtelse(@Column("belop")
 enum class YtelseType {
     OVERGANGSSTØNAD
 }
-

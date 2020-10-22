@@ -8,7 +8,7 @@ import java.util.*
 
 data class TilkjentYtelse(@Id
                           val id: UUID = UUID.randomUUID(),
-                          val behandlingId: Long, /// TODO  Gjøres om til UUID og "ekte" foreign key
+                          val behandlingId: String, /// TODO  Gjøres om til UUID og "ekte" foreign key
                           val personident: String,
                           val saksnummer: String,
                           val saksbehandler: String, /// TODO Legg til Sporbar() og fjern dette feltet

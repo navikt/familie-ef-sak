@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.api.gui
+package no.nav.familie.ef.sak.dummy
 
 import no.nav.familie.ef.sak.api.dto.AndelTilkjentYtelseDTO
 import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
@@ -11,20 +11,17 @@ import no.nav.familie.ef.sak.service.TilkjentYtelseService
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.økonomi.UtbetalingsoppdragGenerator
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import no.nav.security.token.support.core.api.Unprotected
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 import java.time.LocalDate
 import java.util.*
 
 @RestController
 @RequestMapping(path = ["/api/test/"])
 @ProtectedWithClaims(issuer = "azuread")
-class TestTilkjentYtelseController(private val tilkjentYtelseService: TilkjentYtelseService, private val økonomiKlient: ØkonomiKlient) {
+class TestTilkjentYtelseController(private val økonomiKlient: ØkonomiKlient,
+                                   private val tilkjentYtelseService: TilkjentYtelseService,
+                                   private val testTilkjentYtelseService: TestTilkjentYtelseService) {
 
     @PostMapping("/send-til-oppdrag")
     fun testMotOppdrag(@RequestBody tilkjentYtelseTestDTO: TilkjentYtelseTestDTO): Ressurs<TilkjentYtelse> {
@@ -35,16 +32,29 @@ class TestTilkjentYtelseController(private val tilkjentYtelseService: TilkjentYt
                 nyTilkjentYtelse = nyTilkjentYtelse,
                 forrigeTilkjentYtelse = forrigeTilkjentYtelse)
 
-        økonomiKlient.iverksettOppdrag(tilkjentYtelseMedUtbetalingsoppdrag.utbetalingsoppdrag!!)
+        økonomiKlient.iverksettOppdrag(tilkjentYtelseMedUtbetalingsoppdrag.utbetalingsoppdrag!!) //TODO FIXA DET HÆR
         return Ressurs.success(tilkjentYtelseMedUtbetalingsoppdrag)
+    }
+
+    @PostMapping("/dummy-med-behandling")
+    fun testMotOppdragMedFagsakOgBehandling(@RequestBody dummyIverksettingDTO: DummyIverksettingDTO): Ressurs<UUID> {
+
+        return Ressurs.success(testTilkjentYtelseService.iverksettBehandling(dummyIverksettingDTO))
     }
 
     @GetMapping("/dummy")
     fun dummyTilkjentYtelse(@RequestParam(defaultValue = "12345678911") fnr: String): Ressurs<TilkjentYtelse> {
         val søker = fnr
         val saksbehandler = SikkerhetContext.hentSaksbehandler()
-        val andelTilkjentYtelseDto = AndelTilkjentYtelseDTO(personIdent = søker, beløp = 1000, stønadFom = LocalDate.now(), stønadTom = LocalDate.now(), type = YtelseType.OVERGANGSSTØNAD)
-        val tilkjentYtelseDto = TilkjentYtelseDTO(søker = søker, saksnummer = "12345", behandlingId = 54321, andelerTilkjentYtelse = listOf(andelTilkjentYtelseDto, andelTilkjentYtelseDto))
+        val andelTilkjentYtelseDto = AndelTilkjentYtelseDTO(personIdent = søker,
+                                                            beløp = 1000,
+                                                            stønadFom = LocalDate.now(),
+                                                            stønadTom = LocalDate.now(),
+                                                            type = YtelseType.OVERGANGSSTØNAD)
+        val tilkjentYtelseDto = TilkjentYtelseDTO(søker = søker,
+                                                  saksnummer = "12345",
+                                                  behandlingId = 54321.toString(),
+                                                  andelerTilkjentYtelse = listOf(andelTilkjentYtelseDto, andelTilkjentYtelseDto))
         return Ressurs.success(tilkjentYtelseDto.tilTilkjentYtelse(saksbehandler = saksbehandler))
     }
 
