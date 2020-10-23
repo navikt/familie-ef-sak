@@ -17,6 +17,7 @@ class JournalpostClient(@Qualifier("azure") restOperations: RestOperations,
                         private val integrasjonerConfig: IntegrasjonerConfig)
     : AbstractPingableRestClient(restOperations, "oppgave") {
 
+
     override val pingUri: URI = integrasjonerConfig.pingUri
     private val journalpostURI: URI = integrasjonerConfig.journalPostUri
     private val dokarkivUri: URI = integrasjonerConfig.dokarkivUri
@@ -36,5 +37,18 @@ class JournalpostClient(@Qualifier("azure") restOperations: RestOperations,
         return putForEntity<Ressurs<OppdaterJournalpostResponse>>(URI.create("${dokarkivUri}/v2/${journalpostId}"),
                                                                   oppdaterJournalpostRequest).data
                ?: error("Kunne ikke oppdatere journalpost med id ${journalpostId}")
+    }
+
+    fun ferdigstillJournalpost(journalpostId: String, journalførendeEnhet: String) {
+        val ressurs = putForEntity<Ressurs<OppdaterJournalpostResponse>>(
+                URI.create("${dokarkivUri}/v2/${journalpostId}/ferdigstill?journalfoerendeEnhet=${journalførendeEnhet}"),
+                ""
+        )
+
+        if (ressurs.status != Ressurs.Status.SUKSESS) {
+            secureLogger.error(" Feil ved oppdatering av journalpost=${journalpostId} - mottok: ${ressurs}")
+            error("Feil ved oppdatering av journalpost= ${journalpostId}")
+        }
+
     }
 }

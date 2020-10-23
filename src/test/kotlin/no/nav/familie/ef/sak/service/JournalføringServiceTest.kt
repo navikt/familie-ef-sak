@@ -69,6 +69,7 @@ internal class JournalføringServiceTest {
         every { oppgaveService.ferdigstillOppgave(any()) } just runs
         every { oppgaveService.opprettOppgave(any(), any(), any()) } returns nyOppgaveId
         every { behandlingService.oppdaterJournalpostIdPåBehandling(any(), any()) } just runs
+        every { journalpostClient.ferdigstillJournalpost(any(), any()) } just runs
     }
 
     @Test
@@ -76,7 +77,10 @@ internal class JournalføringServiceTest {
         val slotDokumentInfoIder: MutableList<String> = mutableListOf<String>()
         val slotJournalpost = slot<OppdaterJournalpostRequest>()
 
-        every { journalpostClient.oppdaterJournalpost(capture(slotJournalpost), journalpostId) } returns OppdaterJournalpostResponse(
+        every {
+            journalpostClient.oppdaterJournalpost(capture(slotJournalpost),
+                                                  journalpostId)
+        } returns OppdaterJournalpostResponse(
                 journalpostId = journalpostId)
 
         every {
@@ -89,15 +93,15 @@ internal class JournalføringServiceTest {
                         dokumentTitler,
                         fagsakId,
                         oppgaveId,
-                        JournalføringBehandling(behandlingsId = behandlingsId))
-        )
+                        JournalføringBehandling(behandlingsId = behandlingsId)), journalførendeEnhet = "1234")
 
         assertThat(behandleSakOppgaveId).isEqualTo(nyOppgaveId)
         assertThat(slotJournalpost.captured.sak?.fagsakId).isEqualTo(fagsakId.toString())
         assertThat(slotJournalpost.captured.sak?.sakstype).isEqualTo("FAGSAK")
         assertThat(slotJournalpost.captured.sak?.fagsaksystem).isEqualTo("EF")
         dokumentTitler.forEach { (dokumentId, nyTittel) ->
-            val oppdatertDokument = slotJournalpost.captured.dokumenter?.find { dokument -> dokument.dokumentInfoId === dokumentId }
+            val oppdatertDokument =
+                    slotJournalpost.captured.dokumenter?.find { dokument -> dokument.dokumentInfoId === dokumentId }
             assertThat(oppdatertDokument?.tittel).isEqualTo(nyTittel)
         }
         assertThat(slotDokumentInfoIder[0]).isEqualTo(dokumentInfoIdMedJsonVerdi)
@@ -121,8 +125,8 @@ internal class JournalføringServiceTest {
                         dokumentTitler,
                         fagsakId,
                         oppgaveId,
-                        JournalføringBehandling(behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING))
-        )
+                        JournalføringBehandling(behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING)),
+                journalførendeEnhet = "1234")
 
         assertThat(behandleSakOppgaveId).isEqualTo(nyOppgaveId)
         assertThat(slot.captured.sak?.fagsakId).isEqualTo(fagsakId.toString())
