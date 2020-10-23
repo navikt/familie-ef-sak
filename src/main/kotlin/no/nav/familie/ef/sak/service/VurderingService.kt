@@ -27,8 +27,8 @@ class VurderingService(private val behandlingService: BehandlingService,
 
         val behandlingId = vilkårVurdering.behandlingId
         if (behandlingErLåstForVidereRedigering(behandlingId)) {
-            throw Feil(message = "Bruker prøver å oppdatere en vilkårsvurdering der behandling=$behandlingId er låst for videre redigering",
-                       frontendFeilmelding = "Behandlingen er låst for videre redigering")
+            throw Feil("Bruker prøver å oppdatere en vilkårsvurdering der behandling=$behandlingId er låst for videre redigering",
+                       "Behandlingen er låst for videre redigering")
         }
 
         val nyVilkårsVurdering = vilkårVurdering.copy(resultat = vurdering.resultat,
@@ -39,10 +39,10 @@ class VurderingService(private val behandlingService: BehandlingService,
 
     fun hentInngangsvilkår(behandlingId: UUID): InngangsvilkårDto {
         val søknad = behandlingService.hentOvergangsstønad(behandlingId)
-        val fnr = søknad.personalia.verdi.fødselsnummer.verdi.verdi
+        val fnr = søknad.fødselsnummer
         val pdlSøker = pdlClient.hentSøker(fnr)
 
-        val medlemskap = medlemskapMapper.tilDto(medlemskapsdetaljer = søknad.medlemskapsdetaljer.verdi,
+        val medlemskap = medlemskapMapper.tilDto(medlemskapsdetaljer = søknad.medlemskap,
                                                  pdlSøker = pdlSøker)
 
         val vurderinger = hentEllerOpprettVurderingerForInngangsvilkår(behandlingId)
@@ -92,8 +92,8 @@ class VurderingService(private val behandlingService: BehandlingService,
                 .filter { it.value.fødsel.first().fødselsdato!!.plusYears(18).isAfter(LocalDate.now()) }
 
         val barneforeldreFraSøknad =
-                søknad.barn.verdi.mapNotNull {
-                    it.annenForelder?.verdi?.person?.verdi?.fødselsnummer?.verdi?.verdi
+                søknad.barn.mapNotNull {
+                    it.annenForelder?.person?.fødselsnummer
                 }
 
         val barneforeldre = barn.map { it.value.familierelasjoner }

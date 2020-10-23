@@ -5,19 +5,16 @@ import io.mockk.mockk
 import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.dto.familie.Tilgang
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.Testsøknad.søknad
 import no.nav.familie.ef.sak.repository.SøknadRepository
 import no.nav.familie.ef.sak.repository.VedleggRepository
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.service.VedleggService
 import no.nav.familie.ef.sak.validering.Behandlingstilgang
-import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.data.repository.findByIdOrNull
-import java.time.LocalDate
 import java.util.*
 
 internal class VedleggControllerTest {
@@ -69,16 +66,13 @@ internal class VedleggControllerTest {
                 .matches { (it as Feil).frontendFeilmelding == "Har ikke tilgang til saken" }
     }
 
-    private fun søknad() = Søknad(søknad = objectMapper.writeValueAsBytes(søknad),
+    private fun søknad() = Søknad(soknadsskjemaId = UUID.randomUUID(),
                                   type = SøknadType.OVERGANGSSTØNAD,
                                   saksnummerInfotrygd = "saksnummer",
                                   søker = Søker("12345612345", "Navn"),
-                                  barn = setOf(Barn(fødselsdato = LocalDate.now(),
-                                                    harSammeAdresse = true,
-                                                    fødselsnummer = null,
-                                                    navn = "Navn")),
                                   journalpostId = "journalId",
-                                  behandlingId = UUID.randomUUID())
+                                  behandlingId = UUID.randomUUID(),
+                                  relaterteFnr = setOf("321321321"))
 
     private fun vedlegg(): Vedlegg {
         return Vedlegg(vedleggId, UUID.randomUUID(), Sporbar(), byteArrayOf(12), "navn")

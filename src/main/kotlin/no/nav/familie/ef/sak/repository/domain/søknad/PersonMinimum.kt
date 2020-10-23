@@ -1,8 +1,16 @@
 package no.nav.familie.ef.sak.repository.domain.søknad
 
+import org.springframework.data.relational.core.mapping.Column
 import java.time.LocalDate
 
+interface IPersonMinimum {
+
+    val fødselsnummer: String?
+}
+
 data class PersonMinimum(val navn: String,
-                         val fødselsnummer: Fødselsnummer? = null,
+                         @Column("fodselsnummer")
+                         override val fødselsnummer: String? = null,
+                         @Column("fodselsdato")
                          val fødselsdato: LocalDate? = null,
-                         val land: String? = null)
+                         val land: String? = null) : IPersonMinimum

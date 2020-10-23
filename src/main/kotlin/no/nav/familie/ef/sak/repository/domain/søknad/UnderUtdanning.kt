@@ -1,18 +1,26 @@
 package no.nav.familie.ef.sak.repository.domain.søknad
 
+import org.springframework.data.relational.core.mapping.Column
+import org.springframework.data.relational.core.mapping.MappedCollection
+import java.time.LocalDate
+import java.time.YearMonth
+
 data class UnderUtdanning(val skoleUtdanningssted: String,
-                          @Deprecated("Bruk gjeldende utdanning") val utdanning: TidligereUtdanning?,
-                          val gjeldendeUtdanning: GjeldendeUtdanning?,
+                          val linjeKursGrad: String,
+                          val fra: LocalDate,
+                          val til: LocalDate,
                           val offentligEllerPrivat: String,
                           val heltidEllerDeltid: String,
                           val hvorMyeSkalDuStudere: Int?,
+                          @Column("hva_Er_Malet_Med_Utdanningen")
                           val hvaErMåletMedUtdanningen: String?,
                           val utdanningEtterGrunnskolen: Boolean,
-                          val tidligereUtdanninger: List<TidligereUtdanning>? = null,
-                          val semesteravgift: Double? = null,
-                          val studieavgift: Double? = null,
-                          val eksamensgebyr: Double? = null)
+                          @MappedCollection(idColumn = "soknadsskjema_id")
+                          val tidligereUtdanninger: Set<TidligereUtdanning>? = emptySet(),
+                          val semesteravgift: Int? = null,
+                          val studieavgift: Int? = null,
+                          val eksamensgebyr: Int? = null)
 
-/**
- *  semesteravgift, studieavgift, eksamensgebyr gjelder kun Skolepenger
- */
+data class TidligereUtdanning(val linjeKursGrad: String,
+                              val fra: YearMonth,
+                              val til: YearMonth)

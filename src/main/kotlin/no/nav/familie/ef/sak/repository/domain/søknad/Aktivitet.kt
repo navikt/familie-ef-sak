@@ -1,16 +1,39 @@
 package no.nav.familie.ef.sak.repository.domain.søknad
 
-data class Aktivitet(val hvordanErArbeidssituasjonen: List<String>,
-                     val arbeidsforhold: List<Arbeidsgiver>? = null,
-                     @Deprecated("Bruk firmaer istedenfor") val selvstendig: Selvstendig? = null,
-                     val firmaer: List<Selvstendig>? = null,
+import org.springframework.data.relational.core.mapping.Embedded
+import org.springframework.data.relational.core.mapping.MappedCollection
+import java.time.LocalDate
+
+data class Aktivitet(val hvordanErArbeidssituasjonen: String,
+                     @MappedCollection(idColumn = "soknadsskjema_id")
+                     val arbeidsforhold: Set<Arbeidsgiver>? = emptySet(),
+                     @MappedCollection(idColumn = "soknadsskjema_id")
+                     val firmaer: Set<Selvstendig>? = emptySet(),
+                     @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "virksomhet_")
                      val virksomhet: Virksomhet? = null,
+                     @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "arbeidssoker_")
                      val arbeidssøker: Arbeidssøker? = null,
+                     @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "under_utdanning_")
                      val underUtdanning: UnderUtdanning? = null,
-                     val aksjeselskap: List<Aksjeselskap>? = null,
+                     @MappedCollection(idColumn = "soknadsskjema_id")
+                     val aksjeselskap: Set<Aksjeselskap>? = emptySet(),
                      val erIArbeid: String? = null,
                      val erIArbeidDokumentasjon: Dokumentasjon? = null)
 
-/**
- * erIArbeid, erIArbeidDokumentasjon: gjelder Barnetilsyn
- */
+data class Arbeidsgiver(val arbeidsgivernavn: String,
+                        val arbeidsmengde: Int? = null,
+                        val fastEllerMidlertidig: String,
+                        val harSluttdato: Boolean?,
+                        val sluttdato: LocalDate? = null)
+
+data class Selvstendig(val firmanavn: String,
+                       val organisasjonsnummer: String,
+                       val etableringsdato: LocalDate,
+                       val arbeidsmengde: Int? = null,
+                       val hvordanSerArbeidsukenUt: String)
+
+data class Virksomhet(val virksomhetsbeskrivelse: String,
+                      val dokumentasjon: Dokumentasjon? = null)
+
+data class Aksjeselskap(val navn: String,
+                        val arbeidsmengde: Int? = null)

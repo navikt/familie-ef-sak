@@ -1,9 +1,12 @@
 package no.nav.familie.ef.sak.repository.domain.søknad
 
+import org.springframework.data.relational.core.mapping.Column
+import org.springframework.data.relational.core.mapping.Embedded
+import java.time.LocalDateTime
 
-data class SkjemaForArbeidssøker(val personaliaArbeidssøker: PersonaliaArbeidssøker,
+
+data class SkjemaForArbeidssøker(@Column("fodselsnummer")
+                                 val fødselsnummer: String,
+                                 @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL)
                                  val arbeidssøker: Arbeidssøker,
-                                 val innsendingsdetaljer: Innsendingsdetaljer)
-
-data class PersonaliaArbeidssøker(val fødselsnummer: Fødselsnummer,
-                                  val navn: String)
+                                 val datoMottatt: LocalDateTime)

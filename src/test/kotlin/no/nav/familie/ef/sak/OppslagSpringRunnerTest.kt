@@ -4,6 +4,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
 import com.github.tomakehurst.wiremock.WireMockServer
 import no.nav.familie.ef.sak.repository.domain.*
+import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsstønad
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -48,6 +49,7 @@ abstract class OppslagSpringRunnerTest {
     private fun resetDatabase() {
         listOf(Vedlegg::class,
                Søknad::class,
+               SøknadsskjemaOvergangsstønad::class,
                TilkjentYtelse::class,
                Oppgave::class,
                VilkårVurdering::class,

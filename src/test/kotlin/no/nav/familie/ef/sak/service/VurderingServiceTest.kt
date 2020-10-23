@@ -1,9 +1,12 @@
 package no.nav.familie.ef.sak.service
 
-import io.mockk.*
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
 import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.api.dto.VurderingDto
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.Testsøknad
+import no.nav.familie.ef.sak.mapper.SøknadsskjemaMapper
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.config.PdlClientConfig
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
@@ -13,6 +16,7 @@ import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import no.nav.familie.ef.sak.repository.domain.VilkårResultat
 import no.nav.familie.ef.sak.repository.domain.VilkårType
 import no.nav.familie.ef.sak.repository.domain.VilkårVurdering
+import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.BeforeEach
@@ -33,7 +37,8 @@ internal class VurderingServiceTest {
 
     @BeforeEach
     fun setUp() {
-        every { behandlingService.hentOvergangsstønad(any()) } returns Testsøknad.søknad
+        every { behandlingService.hentOvergangsstønad(any()) }
+                .returns(SøknadsskjemaMapper.tilDomene(Testsøknad.søknadOvergangsstønad))
     }
 
     @Test
@@ -57,9 +62,10 @@ internal class VurderingServiceTest {
     @Test
     fun `skal ikke opprette nye VilkårVurderinger for inngangsvilkår som allerede har en vurdering`() {
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling(fagsak(), true, BehandlingStatus.OPPRETTET)
-        every { vilkårVurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns listOf(vilkårVurdering(resultat = VilkårResultat.JA,
-                                                                                                             type = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
-                                                                                                             behandlingId = BEHANDLING_ID))
+        every { vilkårVurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns
+                listOf(vilkårVurdering(resultat = VilkårResultat.JA,
+                                       type = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
+                                       behandlingId = BEHANDLING_ID))
 
         val nyeVilkårVurderinger = slot<List<VilkårVurdering>>()
         every { vilkårVurderingRepository.insertAll(capture(nyeVilkårVurderinger)) } answers
@@ -110,7 +116,8 @@ internal class VurderingServiceTest {
                                               VilkårType.FORUTGÅENDE_MEDLEMSKAP)
         every { vilkårVurderingRepository.findByIdOrNull(vilkårVurdering.id) } returns vilkårVurdering
         val lagretVilkårVurdering = slot<VilkårVurdering>()
-        every { vilkårVurderingRepository.update(capture(lagretVilkårVurdering)) } answers { it.invocation.args.first() as VilkårVurdering }
+        every { vilkårVurderingRepository.update(capture(lagretVilkårVurdering)) } answers
+                { it.invocation.args.first() as VilkårVurdering }
 
         vurderingService.oppdaterVilkår(VurderingDto(id = vilkårVurdering.id,
                                                      behandlingId = BEHANDLING_ID,
