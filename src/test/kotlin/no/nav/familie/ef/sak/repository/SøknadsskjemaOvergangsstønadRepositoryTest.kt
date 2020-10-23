@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ActiveProfiles
 
-@ActiveProfiles("local", "mock-oauth")
 internal class SøknadsskjemaOvergangsstønadRepositoryTest : OppslagSpringRunnerTest() {
 
     @Autowired

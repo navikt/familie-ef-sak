@@ -1,0 +1,1 @@
+ALTER TABLE vilkar_vurdering ADD COLUMN delvilkar JSON;

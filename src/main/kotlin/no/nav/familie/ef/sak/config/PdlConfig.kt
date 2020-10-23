@@ -25,6 +25,8 @@ class PdlConfig(@Value("\${PDL_URL}") pdlUrl: URI) {
 
         val annenForelderQuery = graphqlQuery("/pdl/andreForeldre.graphql")
 
+        val hentIdentQuery = graphqlQuery("/pdl/hent_ident.graphql")
+
         private fun graphqlQuery(path: String) = PdlConfig::class.java.getResource(path)
                 .readText()
                 .graphqlCompatible()

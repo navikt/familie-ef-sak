@@ -1,5 +1,7 @@
 package no.nav.familie.ef.sak.config
 
+import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.familie.ef.sak.repository.domain.DelvilkårsvurderingWrapper
 import no.nav.familie.ef.sak.repository.domain.Endret
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus
 import no.nav.familie.ef.sak.repository.domain.søknad.Dokumentasjon
@@ -54,7 +56,10 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
                                             StringTilDokumentConverter(),
                                             YearMonthTilLocalDateConverter(),
                                             LocalDateTilYearMonthConverter(),
-                                            TilkjentYtelseStatusTilStringConverter()))
+                                            TilkjentYtelseStatusTilStringConverter(),
+                                            StringTilDelvilkårConverter(),
+                                            DelvilkårTilStringConverter()
+        ))
     }
 
     @WritingConverter
@@ -116,4 +121,19 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
         override fun convert(tilkjentYtelseStatus: TilkjentYtelseStatus) = tilkjentYtelseStatus.name
     }
+
+    @ReadingConverter
+    class StringTilDelvilkårConverter : Converter<ByteArray, DelvilkårsvurderingWrapper> {
+
+        override fun convert(byteArray: ByteArray): DelvilkårsvurderingWrapper {
+            return DelvilkårsvurderingWrapper(objectMapper.readValue(byteArray))
+        }
+    }
+
+    @WritingConverter
+    class DelvilkårTilStringConverter : Converter<DelvilkårsvurderingWrapper, ByteArray> {
+
+        override fun convert(delvilkårsvurdering: DelvilkårsvurderingWrapper) = objectMapper.writeValueAsBytes(delvilkårsvurdering.delvilkårsvurderinger)
+    }
+
 }

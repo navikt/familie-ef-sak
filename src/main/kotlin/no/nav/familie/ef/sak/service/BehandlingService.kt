@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.mapper.SøknadsskjemaMapper
+import no.nav.familie.ef.sak.api.fagsak.BehandlingDto
 import no.nav.familie.ef.sak.repository.*
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.repository.domain.søknad.ISøknadsskjema
@@ -10,6 +11,7 @@ import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaSkolepenger
 import no.nav.familie.ef.sak.service.steg.StegType
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.ef.sak.SakRequest
+import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -31,23 +33,23 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
     val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
     @Transactional
-    fun mottaSakOvergangsstønad(sak: SakRequest<SøknadOvergangsstønadKontrakt>, vedleggMap: Map<String, ByteArray>): UUID {
+    fun mottaSakOvergangsstønad(sak: SakRequest<SøknadOvergangsstønadKontrakt>, vedleggMap: Map<String, ByteArray>): Behandling {
         val søknadsskjema = SøknadsskjemaMapper.tilDomene(sak.søknad.søknad)
         return mottaSak(sak, vedleggMap, søknadsskjema)
     }
 
     @Transactional
-    fun mottaSakBarnetilsyn(sak: SakRequest<SøknadBarnetilsynKontrakt>, vedleggMap: Map<String, ByteArray>): UUID {
+    fun mottaSakBarnetilsyn(sak: SakRequest<SøknadBarnetilsynKontrakt>, vedleggMap: Map<String, ByteArray>): Behandling {
         val søknadsskjema = SøknadsskjemaMapper.tilDomene(sak.søknad.søknad)
         return mottaSak(sak, vedleggMap, søknadsskjema)
     }
 
-    fun mottaSak(sak: SakRequest<*>, vedleggMap: Map<String, ByteArray>, søknadsskjema: ISøknadsskjema): UUID {
+    fun mottaSak(sak: SakRequest<*>, vedleggMap: Map<String, ByteArray>, søknadsskjema: ISøknadsskjema): Behandling {
         søknadsskjemaRepository.insert(søknadsskjema)
         val ident = søknadsskjema.fødselsnummer
         val behandling = hentBehandling(ident)
         mottaSøknad(SøknadMapper.toDomain(sak.saksnummer, sak.journalpostId, søknadsskjema, behandling.id), sak, vedleggMap)
-        return behandling.id
+        return behandling
     }
 
     private fun <T> mottaSøknad(domenesak: Søknad,
@@ -73,6 +75,13 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
                                                       status = BehandlingStatus.OPPRETTET))
     }
 
+    fun opprettBehandling(behandlingType: BehandlingType, fagsakId: UUID): Behandling {
+        return behandlingRepository.insert(Behandling(fagsakId = fagsakId,
+                                                      type = behandlingType,
+                                                      steg = StegType.REGISTRERE_OPPLYSNINGER,
+                                                      status = BehandlingStatus.OPPRETTET))
+    }
+
     fun hentBehandling(behandlingId: UUID): Behandling = behandlingRepository.findByIdOrThrow(behandlingId)
 
     fun hentOvergangsstønad(behandlingId: UUID): SøknadsskjemaOvergangsstønad {
@@ -84,6 +93,7 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
         val søknad = hentSøknad(behandlingId)
         return søknadSkolepengerRepository.findByIdOrThrow(søknad.soknadsskjemaId)
     }
+
     fun hentBarnetilsyn(behandlingId: UUID): SøknadsskjemaBarnetilsyn {
         val søknad = hentSøknad(behandlingId)
         return søknadBarnetilsynRepository.findByIdOrThrow(søknad.soknadsskjemaId)
@@ -110,6 +120,24 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
 
     private fun hentSøknad(behandlingId: UUID): Søknad {
         return søknadRepository.findByBehandlingId(behandlingId) ?: error("Finner ikke søknad til behandling: $behandlingId")
+    }
+
+    fun hentBehandlinger(fagsakId: UUID): List<BehandlingDto> {
+        return behandlingRepository.findByFagsakId(fagsakId).map {
+            BehandlingDto(id = it.id,
+                          type = it.type,
+                          status = it.status,
+                          aktiv = it.aktiv,
+                          sistEndret = it.sporbar.endret.endretTid.toLocalDate())
+        }
+    }
+
+    fun oppdaterJournalpostIdPåBehandling(journalpost: Journalpost, behandling: Behandling) {
+        behandling.journalposter = behandling.journalposter + Behandlingsjournalpost(
+                journalpostId = journalpost.journalpostId,
+                sporbar = Sporbar(),
+                journalpostType = journalpost.journalposttype)
+        behandlingRepository.update(behandling)
     }
 
 }

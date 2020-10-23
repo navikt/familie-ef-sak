@@ -11,17 +11,20 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.web.server.LocalServerPort
+import org.springframework.cache.CacheManager
 import org.springframework.context.ApplicationContext
 import org.springframework.data.jdbc.core.JdbcAggregateOperations
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 
 
 @ExtendWith(SpringExtension::class)
 @SpringBootTest(classes = [ApplicationLocal::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("integrasjonstest", "mock-oauth", "mock-pdl", "mock-integrasjoner")
 abstract class OppslagSpringRunnerTest {
 
     protected val listAppender = initLoggingEventListAppender()
@@ -31,6 +34,7 @@ abstract class OppslagSpringRunnerTest {
 
     @Autowired private lateinit var jdbcAggregateOperations: JdbcAggregateOperations
     @Autowired private lateinit var applicationContext: ApplicationContext
+    @Autowired private lateinit var cacheManager: CacheManager
 
     @LocalServerPort
     private var port: Int? = 0
@@ -39,11 +43,19 @@ abstract class OppslagSpringRunnerTest {
     fun reset() {
         loggingEvents.clear()
         resetDatabase()
-        stoppWireMockServers()
+        clearCaches()
+        resetWiremockServers()
     }
 
-    private fun stoppWireMockServers() {
-        applicationContext.getBeansOfType(WireMockServer::class.java).values.forEach(WireMockServer::stop)
+    private fun resetWiremockServers() {
+        applicationContext.getBeansOfType(WireMockServer::class.java).values.forEach(WireMockServer::resetRequests)
+    }
+
+    private fun clearCaches() {
+        cacheManager.cacheNames
+                .map { cacheManager.getCache(it) }
+                .filterNotNull()
+                .forEach { it.clear() }
     }
 
     private fun resetDatabase() {
@@ -52,7 +64,7 @@ abstract class OppslagSpringRunnerTest {
                SøknadsskjemaOvergangsstønad::class,
                TilkjentYtelse::class,
                Oppgave::class,
-               VilkårVurdering::class,
+               Vilkårsvurdering::class,
                Behandling::class,
                Fagsak::class
         ).forEach { jdbcAggregateOperations.deleteAll(it.java) }

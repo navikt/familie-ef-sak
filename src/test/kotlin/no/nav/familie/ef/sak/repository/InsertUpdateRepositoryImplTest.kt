@@ -8,9 +8,7 @@ import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.relational.core.conversion.DbActionExecutionException
-import org.springframework.test.context.ActiveProfiles
 
-@ActiveProfiles("local", "mock-oauth")
 internal class InsertUpdateRepositoryImplTest : OppslagSpringRunnerTest() {
 
     @Autowired private lateinit var fagsakRepository: FagsakRepository

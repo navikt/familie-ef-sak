@@ -20,7 +20,7 @@ class MedlemskapMapper(private val statsborgerskapMapper: StatsborgerskapMapper,
                pdlSøker: PdlSøker): MedlemskapDto {
 
         val statsborgerskap = statsborgerskapMapper.map(pdlSøker.statsborgerskap)
-        val søknadGrunnlag = MedlemskapSøknadGrunnlagDto(
+        val søknadsgrunnlag = MedlemskapSøknadsgrunnlagDto(
                 bosattNorgeSisteÅrene = medlemskapsdetaljer.bosattNorgeSisteÅrene,
                 oppholderDuDegINorge = medlemskapsdetaljer.oppholderDuDegINorge,
                 utenlandsopphold = medlemskapsdetaljer.utenlandsopphold.map {
@@ -28,7 +28,7 @@ class MedlemskapMapper(private val statsborgerskapMapper: StatsborgerskapMapper,
                                         it.tildato,
                                         it.årsakUtenlandsopphold)
                 } )
-        val registerGrunnlag = MedlemskapRegisterGrunnlagDto(
+        val registergrunnlag = MedlemskapRegistergrunnlagDto(
                 nåværendeStatsborgerskap = statsborgerskap.filter { it.gyldigTilOgMedDato == null }.map { it.land },
                 statsborgerskap = statsborgerskap,
                 oppholdstatus = OppholdstillatelseMapper.map(pdlSøker.opphold),
@@ -39,8 +39,8 @@ class MedlemskapMapper(private val statsborgerskapMapper: StatsborgerskapMapper,
                         ?.let { Folkeregisterpersonstatus.fraPdl(it) }
         )
         return MedlemskapDto(
-                søknadGrunnlag = søknadGrunnlag,
-                registerGrunnlag = registerGrunnlag)
+                søknadsgrunnlag = søknadsgrunnlag,
+                registergrunnlag = registergrunnlag)
     }
 
     private fun mapInnflytting(innflyttingTilNorge: List<InnflyttingTilNorge>): List<InnflyttingDto> =
