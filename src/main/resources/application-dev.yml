@@ -5,3 +5,8 @@ spring:
 
 AZUREAD_DISCOVERY_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/v2.0/.well-known/openid-configuration
 AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
+
+rolle:
+  veileder: "19dcbfde-4cdb-4c64-a1ea-ac9802b03339"
+  beslutter: "01166863-22f1-4e16-9785-d7a05a22df74"
+  saksbehandler: "ee5e0b5e-454c-4612-b931-1fe363df7c2c"

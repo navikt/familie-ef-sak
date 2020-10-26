@@ -22,59 +22,59 @@ interface BehandlingSteg<T> {
 }
 
 enum class StegType(val rekkefølge: Int,
-                    val tillattFor: List<BehandlerRolle>,
+                    val tillattFor: BehandlerRolle,
                     private val gyldigIKombinasjonMedStatus: List<BehandlingStatus>) {
 
     REGISTRERE_OPPLYSNINGER(
             rekkefølge = 1,
-            tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
+            tillattFor = BehandlerRolle.SAKSBEHANDLER,
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
     VILKÅRSVURDERE_INNGANGSVILKÅR(
             rekkefølge = 2,
-            tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
+            tillattFor = BehandlerRolle.SAKSBEHANDLER,
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
     VILKÅRSVURDERE_STØNAD(
             rekkefølge = 3,
-            tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
+            tillattFor = BehandlerRolle.SAKSBEHANDLER,
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
     BEREGNE_YTELSE(
             rekkefølge = 4,
-            tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
+            tillattFor = BehandlerRolle.SAKSBEHANDLER,
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
     SEND_TIL_BESLUTTER(
             rekkefølge = 5,
-            tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
+            tillattFor = BehandlerRolle.SAKSBEHANDLER,
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
     BESLUTTE_VEDTAK(
             rekkefølge = 6,
-            tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
+            tillattFor = BehandlerRolle.BESLUTTER,
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.FATTER_VEDTAK)),
     IVERKSETT_MOT_OPPDRAG(
             rekkefølge = 7,
-            tillattFor = listOf(BehandlerRolle.SYSTEM),
+            tillattFor = BehandlerRolle.SYSTEM,
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)),
     VENTE_PÅ_STATUS_FRA_ØKONOMI(
             rekkefølge = 8,
-            tillattFor = listOf(BehandlerRolle.SYSTEM),
+            tillattFor = BehandlerRolle.SYSTEM,
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)
     ),
     JOURNALFØR_VEDTAKSBREV(
             rekkefølge = 9,
-            tillattFor = listOf(BehandlerRolle.SYSTEM),
+            tillattFor = BehandlerRolle.SYSTEM,
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)
     ),
     DISTRIBUER_VEDTAKSBREV(
             rekkefølge = 10,
-            tillattFor = listOf(BehandlerRolle.SYSTEM),
+            tillattFor = BehandlerRolle.SYSTEM,
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)
     ),
     FERDIGSTILLE_BEHANDLING(
             rekkefølge = 11,
-            tillattFor = listOf(BehandlerRolle.SYSTEM),
+            tillattFor = BehandlerRolle.SYSTEM,
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)),
     BEHANDLING_FERDIGSTILT(
             rekkefølge = 12,
-            tillattFor = emptyList(),
+            tillattFor = BehandlerRolle.SYSTEM,
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.FERDIGSTILT));
 
     fun displayName(): String {
@@ -87,10 +87,6 @@ enum class StegType(val rekkefølge: Int,
 
     fun erGyldigIKombinasjonMedStatus(behandlingStatus: BehandlingStatus): Boolean {
         return this.gyldigIKombinasjonMedStatus.contains(behandlingStatus)
-    }
-
-    fun erSaksbehandlerSteg(): Boolean {
-        return this.tillattFor.any { it == BehandlerRolle.SAKSBEHANDLER || it == BehandlerRolle.BESLUTTER }
     }
 
     fun hentNesteSteg(utførendeStegType: StegType,
