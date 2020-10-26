@@ -7,6 +7,7 @@ import no.nav.familie.kontrakter.ef.søknad.Sivilstandsdetaljer
 import no.nav.familie.kontrakter.ef.søknad.Stønadsstart
 import org.apache.commons.lang3.StringUtils
 import java.time.YearMonth
+import kotlin.math.roundToInt
 import no.nav.familie.kontrakter.ef.søknad.Aksjeselskap as KontraktAksjeselskap
 import no.nav.familie.kontrakter.ef.søknad.Aktivitet as KontraktAktivitet
 import no.nav.familie.kontrakter.ef.søknad.AnnenForelder as KontraktAnnenForelder
@@ -168,7 +169,7 @@ object SøknadsskjemaMapper {
         Barnepassordning(hvaSlagsBarnepassordning = it.hvaSlagsBarnepassOrdning.verdi,
                          navn = it.navn.verdi,
                          datoperiode = tilDomene(it.datoperiode?.verdi),
-                         beløp = it.belop.verdi.toInt())
+                         beløp = it.belop.verdi.roundToInt())
     }.toSet()
 
     private fun tilDomene(datoperiode: KontraktDatoperiode?): Datoperiode? {
@@ -242,9 +243,9 @@ object SøknadsskjemaMapper {
                                hvaErMåletMedUtdanningen = it.hvaErMåletMedUtdanningen?.verdi,
                                utdanningEtterGrunnskolen = it.utdanningEtterGrunnskolen.verdi,
                                tidligereUtdanninger = tilTidligereUtdanninger(it.tidligereUtdanninger?.verdi),
-                               semesteravgift = it.semesteravgift?.verdi?.toInt(),
-                               studieavgift = it.studieavgift?.verdi?.toInt(),
-                               eksamensgebyr = it.eksamensgebyr?.verdi?.toInt())
+                               semesteravgift = it.semesteravgift?.verdi?.roundToInt(),
+                               studieavgift = it.studieavgift?.verdi?.roundToInt(),
+                               eksamensgebyr = it.eksamensgebyr?.verdi?.roundToInt())
             }
 
     private fun tilTidligereUtdanninger(list: List<KontraktTidligereUtdanning>?): Set<TidligereUtdanning>? =
