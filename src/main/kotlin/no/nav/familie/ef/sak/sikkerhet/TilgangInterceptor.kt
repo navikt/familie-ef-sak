@@ -4,7 +4,6 @@ import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.config.RolleConfig
 import no.nav.familie.ef.sak.service.steg.BehandlerRolle
 import org.slf4j.LoggerFactory
-import org.springframework.context.annotation.Import
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter
@@ -12,7 +11,6 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 @Component
-@Import(RolleConfig::class)
 class TilgangInterceptor(private val rolleConfig: RolleConfig) : HandlerInterceptorAdapter() {
 
     override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {

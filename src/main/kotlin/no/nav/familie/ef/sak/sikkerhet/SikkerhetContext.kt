@@ -40,9 +40,9 @@ object SikkerhetContext {
         val rollerFraToken = hentGruppeFraToken()
         val rollerForBruker = when {
             hentSaksbehandler() == SYSTEM_FORKORTELSE -> listOf(BehandlerRolle.SYSTEM, BehandlerRolle.BESLUTTER, BehandlerRolle.SAKSBEHANDLER, BehandlerRolle.VEILEDER)
-            rollerFraToken.contains(rolleConfig.BESLUTTER_ROLLE) -> listOf(BehandlerRolle.BESLUTTER, BehandlerRolle.SAKSBEHANDLER, BehandlerRolle.VEILEDER)
-            rollerFraToken.contains(rolleConfig.SAKSBEHANDLER_ROLLE) -> listOf(BehandlerRolle.SAKSBEHANDLER, BehandlerRolle.VEILEDER)
-            rollerFraToken.contains(rolleConfig.VEILEDER_ROLLE) -> listOf(BehandlerRolle.VEILEDER)
+            rollerFraToken.contains(rolleConfig.beslutterRolle) -> listOf(BehandlerRolle.BESLUTTER, BehandlerRolle.SAKSBEHANDLER, BehandlerRolle.VEILEDER)
+            rollerFraToken.contains(rolleConfig.saksbehandlerRolle) -> listOf(BehandlerRolle.SAKSBEHANDLER, BehandlerRolle.VEILEDER)
+            rollerFraToken.contains(rolleConfig.veilederRolle) -> listOf(BehandlerRolle.VEILEDER)
             else -> listOf(BehandlerRolle.UKJENT)
         }
 
