@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.api.gui
 import no.nav.familie.ef.sak.api.dto.InngangsvilkårDto
 import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.service.BehandlingService
+import no.nav.familie.ef.sak.service.TilgangService
 import no.nav.familie.ef.sak.service.VurderingService
 import no.nav.familie.ef.sak.service.steg.StegService
 import no.nav.familie.ef.sak.validering.BehandlingConstraint
@@ -20,20 +21,24 @@ import java.util.*
 @Validated
 class VurderingController(private val vurderingService: VurderingService,
                           private val stegService: StegService,
-                          private val behandlingService: BehandlingService) {
+                          private val behandlingService: BehandlingService,
+                          private val tilgangService: TilgangService) {
 
     @PostMapping("inngangsvilkar")
     fun oppdaterVurderingInngangsvilkår(@RequestBody vilkårsvurdering: VilkårsvurderingDto): Ressurs<UUID> {
+        tilgangService.validerTilgangTilBehandling(vilkårsvurdering.behandlingId)
         return Ressurs.success(vurderingService.oppdaterVilkår(vilkårsvurdering))
     }
 
     @GetMapping("{behandlingId}/inngangsvilkar")
     fun getInngangsvilkår(@BehandlingConstraint @PathVariable behandlingId: UUID): Ressurs<InngangsvilkårDto> {
+        tilgangService.validerTilgangTilBehandling(behandlingId)
         return Ressurs.success(vurderingService.hentInngangsvilkår(behandlingId))
     }
 
     @PostMapping("/{behandlingId}/inngangsvilkar/fullfor")
     fun validerInngangsvilkår(@BehandlingConstraint @PathVariable behandlingId: UUID): Ressurs<UUID> {
+        tilgangService.validerTilgangTilBehandling(behandlingId)
         val behandling = behandlingService.hentBehandling(behandlingId)
         return Ressurs.success(stegService.håndterInngangsvilkår(behandling).id)
     }

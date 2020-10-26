@@ -38,6 +38,13 @@ class ApiExceptionHandler {
         return ResponseEntity.status(feil.httpStatus).body(Ressurs.failure(frontendFeilmelding = feil.frontendFeilmelding))
     }
 
+    @ExceptionHandler(ManglerTilgang::class)
+    fun handleThrowable(manglerTilgang: ManglerTilgang): ResponseEntity<Ressurs<Nothing>> {
+        secureLogger.error("En håndtert tilgangsfeil har oppstått - ${manglerTilgang.melding}", manglerTilgang)
+        logger.info("En håndtert tilgangsfeil har oppstått")
+        return ResponseEntity.status(HttpStatus.OK).body(Ressurs.ikkeTilgang(melding = manglerTilgang.melding))
+    }
+
     @ExceptionHandler(IntegrasjonException::class)
     fun handleThrowable(feil: IntegrasjonException): ResponseEntity<Ressurs<Nothing>> {
         secureLogger.error("Feil mot integrasjonsclienten har oppstått: uri={} data={}", feil.uri, feil.data, feil)

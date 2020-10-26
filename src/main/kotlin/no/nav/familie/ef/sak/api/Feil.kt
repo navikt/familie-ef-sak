@@ -12,3 +12,5 @@ class Feil(message: String,
     constructor(message: String, throwable: Throwable?, httpStatus: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR) :
             this(message, null, httpStatus, throwable)
 }
+
+class ManglerTilgang(val melding: String) : RuntimeException(melding)

@@ -1,12 +1,15 @@
 package no.nav.familie.ef.sak.api.journalføring
 
+import io.mockk.Runs
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlAktørId
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlHentIdenter
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlIdent
 import no.nav.familie.ef.sak.service.JournalføringService
+import no.nav.familie.ef.sak.service.TilgangService
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.felles.journalpost.*
 import org.assertj.core.api.Assertions
@@ -18,7 +21,8 @@ internal class JournalføringControllerTest {
 
     val journalføringService = mockk<JournalføringService>()
     val pdlClient = mockk<PdlClient>()
-    val journalføringController = JournalføringController(journalføringService, pdlClient)
+    val tilgangService: TilgangService = mockk()
+    val journalføringController = JournalføringController(journalføringService, pdlClient, tilgangService)
 
     @Test
     internal fun `skal hente journalpost med personident utledet fra pdl`() {
@@ -32,6 +36,11 @@ internal class JournalføringControllerTest {
             journalføringService.hentJournalpost(any())
         } returns journalpostMedAktørId
 
+        // TODO: Vil vi teste tilgangskontrollen her?
+        every {
+            tilgangService.validerTilgangTilPersonMedBarn(any())
+        } just Runs
+
         val journalpostResponse = journalføringController.hentJournalPost("1234")
         Assertions.assertThat(journalpostResponse.data?.personIdent).isEqualTo(personIdentFraPdl)
         Assertions.assertThat(journalpostResponse.data?.journalpost?.journalpostId).isEqualTo("1234")
@@ -43,6 +52,11 @@ internal class JournalføringControllerTest {
         every {
             journalføringService.hentJournalpost(any())
         } returns journalpostMedFødselsnummer
+
+        // TODO: Vil vi teste tilgangskontrollen her?
+        every {
+            tilgangService.validerTilgangTilPersonMedBarn(any())
+        } just Runs
 
         val journalpostResponse = journalføringController.hentJournalPost("1234")
         Assertions.assertThat(journalpostResponse.data?.personIdent).isEqualTo(personIdentFraPdl)
