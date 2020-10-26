@@ -10,7 +10,7 @@ ALTER TABLE grunnlag_soknad
 
 
 CREATE TABLE Soknadsskjema (
-    id                                                           UUID,
+    id                                                           UUID PRIMARY KEY,
     type                                                         VARCHAR,
     fodselsnummer                                                VARCHAR,
     navn                                                         VARCHAR,
