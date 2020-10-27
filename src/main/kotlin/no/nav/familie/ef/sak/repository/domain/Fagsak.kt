@@ -10,7 +10,7 @@ import java.util.*
 @Table("fagsak")
 data class Fagsak(@Id
                   val id: UUID = UUID.randomUUID(),
-                  val eksternId: Long,
+                  val eksternId: Long = 0,
                   @Column("stonadstype")
                   val stønadstype: Stønadstype,
                   @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)

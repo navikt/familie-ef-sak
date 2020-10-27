@@ -11,7 +11,7 @@ import java.util.*
 data class Behandling(@Id
                       val id: UUID = UUID.randomUUID(),
                       val fagsakId: UUID,
-                      val eksternId: Long,
+                      val eksternId: Long = 0,
 
                       val versjon: Int = 0,
                       val aktiv: Boolean = true,
