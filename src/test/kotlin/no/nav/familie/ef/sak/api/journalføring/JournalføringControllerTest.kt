@@ -4,6 +4,7 @@ import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import no.nav.familie.ef.sak.api.ManglerTilgang
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlAktørId
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlHentIdenter
@@ -15,6 +16,7 @@ import no.nav.familie.kontrakter.felles.journalpost.*
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import kotlin.test.assertFailsWith
 
 internal class JournalføringControllerTest {
 
@@ -36,7 +38,6 @@ internal class JournalføringControllerTest {
             journalføringService.hentJournalpost(any())
         } returns journalpostMedAktørId
 
-        // TODO: Vil vi teste tilgangskontrollen her?
         every {
             tilgangService.validerTilgangTilPersonMedBarn(any())
         } just Runs
@@ -53,7 +54,6 @@ internal class JournalføringControllerTest {
             journalføringService.hentJournalpost(any())
         } returns journalpostMedFødselsnummer
 
-        // TODO: Vil vi teste tilgangskontrollen her?
         every {
             tilgangService.validerTilgangTilPersonMedBarn(any())
         } just Runs
@@ -61,6 +61,22 @@ internal class JournalføringControllerTest {
         val journalpostResponse = journalføringController.hentJournalPost("1234")
         Assertions.assertThat(journalpostResponse.data?.personIdent).isEqualTo(personIdentFraPdl)
         Assertions.assertThat(journalpostResponse.data?.journalpost?.journalpostId).isEqualTo("1234")
+    }
+
+    @Test
+    internal fun `skal feile med ManglerTilgang hvis behandler ikke har tilgang person`() {
+
+        every {
+            journalføringService.hentJournalpost(any())
+        } returns journalpostMedFødselsnummer
+
+        every {
+            tilgangService.validerTilgangTilPersonMedBarn(any())
+        } throws ManglerTilgang("Ingen tilgang")
+
+        assertFailsWith<ManglerTilgang> {
+            journalføringController.hentJournalPost("1234")
+        }
     }
 
     @Test
