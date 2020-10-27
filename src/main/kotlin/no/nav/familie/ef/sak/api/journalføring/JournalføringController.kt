@@ -35,7 +35,8 @@ class JournalføringController(val journalføringService: JournalføringService,
     fun fullførJournalpost(@PathVariable journalpostId: String,
                            @RequestBody journalføringRequest: JournalføringRequest,
                            @RequestParam(name = "journalfoerendeEnhet") journalførendeEnhet: String): Ressurs<Long> {
-        // TODO: Tilgangskontroll til person
+        val (_, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
+        tilgangService.validerTilgangTilPersonMedBarn(personIdent)
         return Ressurs.success(journalføringService.fullførJournalpost(journalføringRequest, journalpostId, journalførendeEnhet))
     }
 
