@@ -3,9 +3,7 @@ package no.nav.familie.ef.sak.validering
 import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.repository.SøknadRepository
-import no.nav.familie.ef.sak.repository.domain.Søknad
 import org.slf4j.LoggerFactory
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import java.util.*
@@ -31,17 +29,14 @@ class Behandlingstilgang(private val søknadRepository: SøknadRepository,
 
     fun harTilgang(behandlingId: UUID): Boolean {
         val søknad = søknadRepository.findByBehandlingId(behandlingId) ?: error("behandling finnes ikke: $behandlingId ")
-        return harTilgang(søknad)
+        val personer = søknad.relaterteFnr + søknad.søker.fødselsnummer
+        return harTilgang(personer)
     }
 
     // TODO gjøre om slik att vi sjekker om man har tilgang på alle barn til søkeren og ikke kun de som er med i søknaden
-    fun harTilgang(søknad: Søknad): Boolean {
-        val relatertePersoner =
-                søknad.barn.map { listOf(it.fødselsnummer, it.annenForelder?.fødselsnummer) }.flatten().filterNotNull()
+    fun harTilgang(personer: Set<String>): Boolean {
 
-        val personer = relatertePersoner + søknad.søker.fødselsnummer
-
-        integrasjonerClient.sjekkTilgangTilPersoner(personer.distinct())
+        integrasjonerClient.sjekkTilgangTilPersoner(personer.toList())
                 .filterNot { it.harTilgang }
                 .forEach {
                     logger.error("Bruker har ikke tilgang")

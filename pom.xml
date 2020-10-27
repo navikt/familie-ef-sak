@@ -183,6 +183,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>no.nav.familie.kontrakter</groupId>
+            <artifactId>enslig-forsorger-test</artifactId>
+            <version>${kontrakter.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>io.mockk</groupId>
             <artifactId>mockk</artifactId>
             <version>${mockk.version}</version>
