@@ -74,13 +74,6 @@ internal class TilgangServiceTest {
         tilgangService.validerTilgangTilBehandling(behandling.id)
     }
 
-    @Test
-    internal fun `skal feile når saksbehandler ikke har nødvendig rolle`() {
-
-        tilgangService.validerTilgangTilRolle(BehandlerRolle.SAKSBEHANDLER)
-
-    }
-
 }
 
 
