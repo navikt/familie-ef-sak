@@ -9,5 +9,5 @@ data class Bosituasjon(val delerDuBolig: String,
                        val samboer: PersonMinimum? = null,
                        val sammenflyttingsdato: LocalDate? = null,
                        val datoFlyttetFraHverandre: LocalDate? = null,
-                       @Column("tidligere_Samboer_Fortsatt_Registrert_Pa_Adresse")
+                       @Column("tidligere_samboer_fortsatt_registrert_pa_adresse")
                        val tidligereSamboerFortsattRegistrertPåAdresse: Dokumentasjon? = null)

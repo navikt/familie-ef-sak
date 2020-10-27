@@ -12,7 +12,7 @@ data class UnderUtdanning(val skoleUtdanningssted: String,
                           val offentligEllerPrivat: String,
                           val heltidEllerDeltid: String,
                           val hvorMyeSkalDuStudere: Int?,
-                          @Column("hva_Er_Malet_Med_Utdanningen")
+                          @Column("hva_er_malet_med_utdanningen")
                           val hvaErMåletMedUtdanningen: String?,
                           val utdanningEtterGrunnskolen: Boolean,
                           @MappedCollection(idColumn = "soknadsskjema_id")
