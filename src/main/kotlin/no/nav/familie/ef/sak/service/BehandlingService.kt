@@ -33,6 +33,13 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
     val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
     @Transactional
+    fun mottaSøknadForOvergangsstønad(søknad: SøknadOvergangsstønadKontrakt, behandlingId: UUID, fagsakId: UUID, journalpostId: String) {
+        val søknadsskjema = SøknadsskjemaMapper.tilDomene(søknad)
+        søknadsskjemaRepository.insert(søknadsskjema)
+        søknadRepository.insert(SøknadMapper.toDomain(fagsakId.toString(), journalpostId, søknadsskjema, behandlingId))
+    }
+
+    @Transactional
     fun mottaSakOvergangsstønad(sak: SakRequest<SøknadOvergangsstønadKontrakt>, vedleggMap: Map<String, ByteArray>): Behandling {
         val søknadsskjema = SøknadsskjemaMapper.tilDomene(sak.søknad.søknad)
         return mottaSak(sak, vedleggMap, søknadsskjema)
@@ -67,19 +74,19 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
     //tmp for å gjøre det mulig å støtte mottaSakOvergangsstønad
     private fun hentBehandling(ident: String): Behandling {
         val fagsak = fagsakRepository.findBySøkerIdent(ident, Stønadstype.OVERGANGSSTØNAD)
-                     ?: fagsakRepository.insert(Fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD))
+                ?: fagsakRepository.insert(Fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD))
 
         return behandlingRepository.insert(Behandling(fagsakId = fagsak.id,
-                                                      type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                      steg = StegType.REGISTRERE_OPPLYSNINGER,
-                                                      status = BehandlingStatus.OPPRETTET))
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                steg = StegType.REGISTRERE_OPPLYSNINGER,
+                status = BehandlingStatus.OPPRETTET))
     }
 
     fun opprettBehandling(behandlingType: BehandlingType, fagsakId: UUID): Behandling {
         return behandlingRepository.insert(Behandling(fagsakId = fagsakId,
-                                                      type = behandlingType,
-                                                      steg = StegType.REGISTRERE_OPPLYSNINGER,
-                                                      status = BehandlingStatus.OPPRETTET))
+                type = behandlingType,
+                steg = StegType.REGISTRERE_OPPLYSNINGER,
+                status = BehandlingStatus.OPPRETTET))
     }
 
     fun hentBehandling(behandlingId: UUID): Behandling = behandlingRepository.findByIdOrThrow(behandlingId)
@@ -102,7 +109,7 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
     fun oppdaterStatusPåBehandling(behandlingId: UUID, status: BehandlingStatus): Behandling {
         val behandling = hentBehandling(behandlingId)
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer status på behandling $behandlingId " +
-                    "fra ${behandling.status} til $status")
+                "fra ${behandling.status} til $status")
 
         behandling.status = status
         return behandlingRepository.update(behandling)
@@ -111,7 +118,7 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
     fun oppdaterStegPåBehandling(behandlingId: UUID, steg: StegType): Behandling {
         val behandling = hentBehandling(behandlingId)
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer steg på behandling $behandlingId " +
-                    "fra ${behandling.steg} til $steg")
+                "fra ${behandling.steg} til $steg")
 
         behandling.steg = steg
         return behandlingRepository.update(behandling)
@@ -119,16 +126,17 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
 
 
     private fun hentSøknad(behandlingId: UUID): Søknad {
-        return søknadRepository.findByBehandlingId(behandlingId) ?: error("Finner ikke søknad til behandling: $behandlingId")
+        return søknadRepository.findByBehandlingId(behandlingId)
+                ?: error("Finner ikke søknad til behandling: $behandlingId")
     }
 
     fun hentBehandlinger(fagsakId: UUID): List<BehandlingDto> {
         return behandlingRepository.findByFagsakId(fagsakId).map {
             BehandlingDto(id = it.id,
-                          type = it.type,
-                          status = it.status,
-                          aktiv = it.aktiv,
-                          sistEndret = it.sporbar.endret.endretTid.toLocalDate())
+                    type = it.type,
+                    status = it.status,
+                    aktiv = it.aktiv,
+                    sistEndret = it.sporbar.endret.endretTid.toLocalDate())
         }
     }
 

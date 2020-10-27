@@ -6,7 +6,6 @@ import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.TilgangService
 import no.nav.familie.ef.sak.service.VurderingService
 import no.nav.familie.ef.sak.service.steg.StegService
-import no.nav.familie.ef.sak.validering.BehandlingConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
@@ -31,13 +30,13 @@ class VurderingController(private val vurderingService: VurderingService,
     }
 
     @GetMapping("{behandlingId}/inngangsvilkar")
-    fun getInngangsvilkår(@BehandlingConstraint @PathVariable behandlingId: UUID): Ressurs<InngangsvilkårDto> {
+    fun getInngangsvilkår(@PathVariable behandlingId: UUID): Ressurs<InngangsvilkårDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         return Ressurs.success(vurderingService.hentInngangsvilkår(behandlingId))
     }
 
     @PostMapping("/{behandlingId}/inngangsvilkar/fullfor")
-    fun validerInngangsvilkår(@BehandlingConstraint @PathVariable behandlingId: UUID): Ressurs<UUID> {
+    fun validerInngangsvilkår(@PathVariable behandlingId: UUID): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         val behandling = behandlingService.hentBehandling(behandlingId)
         return Ressurs.success(stegService.håndterInngangsvilkår(behandling).id)
