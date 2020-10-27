@@ -18,7 +18,7 @@ data class Sivilstand(val erUformeltGift: Boolean? = null,
                       val samlivsbruddsdokumentasjon: Dokumentasjon? = null,
                       val samlivsbruddsdato: LocalDate? = null,
                       val fraflytningsdato: LocalDate? = null,
-                      @Column("endring_Samversordning_Dato")
+                      @Column("endring_samversordning_dato")
                       val endringSamværsordningDato: LocalDate? = null,
                       @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "tidligere_samboer_")
                       val tidligereSamboer: PersonMinimum? = null)

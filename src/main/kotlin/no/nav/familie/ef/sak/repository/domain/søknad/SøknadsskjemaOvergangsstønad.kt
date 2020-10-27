@@ -11,7 +11,7 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
-@Table("Soknadsskjema")
+@Table("soknadsskjema")
 data class SøknadsskjemaOvergangsstønad(@Id
                                         override val id: UUID = UUID.randomUUID(),
                                         override val type: SøknadType,

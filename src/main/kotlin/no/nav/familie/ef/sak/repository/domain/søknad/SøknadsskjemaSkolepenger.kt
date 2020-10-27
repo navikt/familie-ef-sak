@@ -9,7 +9,7 @@ import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDateTime
 import java.util.*
 
-@Table("Soknadsskjema")
+@Table("soknadsskjema")
 data class SøknadsskjemaSkolepenger(@Id
                                     override val id: UUID = UUID.randomUUID(),
                                     override val type: SøknadType,
