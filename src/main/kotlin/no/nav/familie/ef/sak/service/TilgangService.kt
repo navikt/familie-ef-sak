@@ -1,9 +1,10 @@
 package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.api.ManglerTilgang
+import no.nav.familie.ef.sak.config.RolleConfig
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
+import no.nav.familie.ef.sak.service.steg.BehandlerRolle
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -11,9 +12,8 @@ import java.util.*
 class TilgangService(private val integrasjonerClient: FamilieIntegrasjonerClient,
                      private val personService: PersonService,
                      private val behandlingService: BehandlingService,
-                     private val fagsakService: FagsakService) {
-
-    private val secureLogger = LoggerFactory.getLogger("secureLogger")
+                     private val fagsakService: FagsakService,
+                     private val rolleConfig: RolleConfig) {
 
     fun validerTilgangTilPersonMedBarn(personIdent: String) {
         val person = personService.hentPersonMedRelasjoner(personIdent)
@@ -30,5 +30,11 @@ class TilgangService(private val integrasjonerClient: FamilieIntegrasjonerClient
         val personIdent = fagsakService.hentFagsak(fagsakId).hentAktivIdent()
 
         validerTilgangTilPersonMedBarn(personIdent)
+    }
+
+    fun validerTilgangTilRolle(minimumsrolle: BehandlerRolle) {
+        if (!SikkerhetContext.harTilgangTilGittRolle(rolleConfig, minimumsrolle)) {
+            throw ManglerTilgang("Saksbehandler ${SikkerhetContext.hentSaksbehandler()} har ikke tilgang til å utføre denne operasjonen som krever minimumsrolle ${minimumsrolle}")
+        }
     }
 }

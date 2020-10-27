@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.service
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.api.ManglerTilgang
+import no.nav.familie.ef.sak.config.RolleConfig
 import no.nav.familie.ef.sak.domene.SøkerMedBarn
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.dto.familie.Tilgang
@@ -11,6 +12,7 @@ import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.repository.domain.Behandling
+import no.nav.familie.ef.sak.service.steg.BehandlerRolle
 import org.junit.jupiter.api.Test
 import kotlin.test.assertFailsWith
 
@@ -21,7 +23,7 @@ internal class TilgangServiceTest {
     val familieIntegrasjonerClient: FamilieIntegrasjonerClient = mockk()
     val behandlingService: BehandlingService = mockk()
     val fagsakService: FagsakService = mockk()
-    val tilgangService = TilgangService(familieIntegrasjonerClient, personService, behandlingService, fagsakService)
+    val tilgangService = TilgangService(familieIntegrasjonerClient, personService, behandlingService, fagsakService, RolleConfig("","",""))
     val mocketPersonIdent = "12345"
 
     val fagsak = fagsak(fagsakpersoner(setOf(mocketPersonIdent)))
@@ -71,6 +73,14 @@ internal class TilgangServiceTest {
 
         tilgangService.validerTilgangTilBehandling(behandling.id)
     }
+
+    @Test
+    internal fun `skal feile når saksbehandler ikke har nødvendig rolle`() {
+
+        tilgangService.validerTilgangTilRolle(BehandlerRolle.SAKSBEHANDLER)
+
+    }
+
 }
 
 

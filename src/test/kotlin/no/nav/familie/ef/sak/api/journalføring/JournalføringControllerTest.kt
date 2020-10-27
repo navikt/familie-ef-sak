@@ -16,6 +16,7 @@ import no.nav.familie.kontrakter.felles.journalpost.*
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.util.*
 import kotlin.test.assertFailsWith
 
 internal class JournalføringControllerTest {
@@ -98,33 +99,55 @@ internal class JournalføringControllerTest {
         assertThrows<IllegalStateException> { journalføringController.hentJournalPost("1234") }
     }
 
+    @Test
+    internal fun `skal feile hvis bruker er veileder`() {
+        every {
+            journalføringService.hentJournalpost(any())
+        } returns journalpostMedFødselsnummer
+
+        every {
+            tilgangService.validerTilgangTilPersonMedBarn(any())
+        } just Runs
+
+        every {
+            tilgangService.validerTilgangTilRolle(any())
+        } throws ManglerTilgang("Bruker mangler tilgang")
+
+        assertThrows<ManglerTilgang> {
+            journalføringController.fullførJournalpost(
+                    journalpostMedFødselsnummer.journalpostId,
+                    JournalføringRequest(null, UUID.randomUUID(), "dummy-oppgave", JournalføringBehandling(UUID.randomUUID())),
+                    "tralala")
+        }
+    }
+
     val aktørId = "11111111111"
     val personIdentFraPdl = "12345678901"
 
     val journalpostMedAktørId = Journalpost(journalpostId = "1234",
-                                  journalposttype = Journalposttype.I,
-                                  journalstatus = Journalstatus.MOTTATT,
-                                  tema = "ENF",
-                                  behandlingstema = "ab0071",
-                                  tittel = "abrakadabra",
-                                  bruker = Bruker(type = BrukerIdType.AKTOERID, id = aktørId),
-                                  journalforendeEnhet = "4817",
-                                  kanal = "SKAN_IM",
-                                  dokumenter = listOf(
-                                          DokumentInfo(
-                                                  dokumentInfoId = "12345",
-                                                  tittel = "Tittel",
-                                                  brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
-                                                  dokumentvarianter = listOf(Dokumentvariant(variantformat = "ARKIV"))
-                                          )
-                                  )
+            journalposttype = Journalposttype.I,
+            journalstatus = Journalstatus.MOTTATT,
+            tema = "ENF",
+            behandlingstema = "ab0071",
+            tittel = "abrakadabra",
+            bruker = Bruker(type = BrukerIdType.AKTOERID, id = aktørId),
+            journalforendeEnhet = "4817",
+            kanal = "SKAN_IM",
+            dokumenter = listOf(
+                    DokumentInfo(
+                            dokumentInfoId = "12345",
+                            tittel = "Tittel",
+                            brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
+                            dokumentvarianter = listOf(Dokumentvariant(variantformat = "ARKIV"))
+                    )
+            )
     )
 
     val journalpostMedFødselsnummer = journalpostMedAktørId.copy(
-        bruker = Bruker(type = BrukerIdType.FNR, id = personIdentFraPdl)
+            bruker = Bruker(type = BrukerIdType.FNR, id = personIdentFraPdl)
     )
     val journalpostUtenBruker = journalpostMedAktørId.copy(
-        bruker = null
+            bruker = null
     )
     val journalpostMedOrgnr = journalpostMedAktørId.copy(
             bruker = Bruker(type = BrukerIdType.ORGNR, id = "12345")
