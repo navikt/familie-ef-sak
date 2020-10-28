@@ -223,6 +223,18 @@
             <version>2.7.1</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>1.14.3</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.doyaaaaaken</groupId>
+            <artifactId>kotlin-csv-jvm</artifactId>
+            <version>0.7.3</version>
+            <scope>test</scope>
+        </dependency>
 
         <!-- Nav-interne avhengigheter -->
         <dependency>
