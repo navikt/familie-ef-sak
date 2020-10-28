@@ -2,6 +2,8 @@ package no.nav.familie.ef.sak.repository
 
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
+import no.nav.familie.ef.sak.repository.domain.EksternBehandlingId
+import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.stereotype.Repository
 import java.util.*
 
@@ -13,5 +15,8 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
     fun findByFagsakIdAndAktivIsTrue(fagsakId: UUID): Behandling?
 
     fun findByFagsakIdAndStatus(fagsakId: UUID, status: BehandlingStatus): List<Behandling>
+
+    @Query("SELECT b.* FROM BEHANDLING b LEFT JOIN behandling_ekstern eb ON eb.behandling = b.id WHERE eb.id = :eksternId")
+    fun findByEksternId(eksternId: Long): Behandling?
 
 }
