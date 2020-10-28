@@ -13,11 +13,10 @@ class TilgangService(private val integrasjonerClient: FamilieIntegrasjonerClient
                      private val behandlingService: BehandlingService,
                      private val fagsakService: FagsakService) {
 
-
     fun validerTilgangTilPersonMedBarn(personIdent: String) {
-        val person = personService.hentPersonMedRelasjoner(personIdent)
+        val barnOgForeldre = personService.hentIdenterForBarnOgForeldre(forelderIdent = personIdent)
 
-        integrasjonerClient.sjekkTilgangTilPersoner(person.identifikatorer()).forEach {
+        integrasjonerClient.sjekkTilgangTilPersoner(barnOgForeldre).forEach {
             if (!it.harTilgang) {
                 throw ManglerTilgang("Saksbehandler ${SikkerhetContext.hentSaksbehandler()} har ikke tilgang til ${personIdent} eller dets barn")
             }
