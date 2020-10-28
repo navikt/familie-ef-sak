@@ -11,8 +11,8 @@ import java.util.*
 data class Behandling(@Id
                       val id: UUID = UUID.randomUUID(),
                       val fagsakId: UUID,
-                      @MappedCollection(idColumn = "behandling")
-                      val eksternId: EksternBehandlingId = EksternBehandlingId(id = 0),
+                      @MappedCollection(idColumn="behandling")
+                      val eksternIdHack: Set<EksternBehandlingId> = setOf(EksternBehandlingId(0)),
                       val versjon: Int = 0,
                       val aktiv: Boolean = true,
 
@@ -23,7 +23,9 @@ data class Behandling(@Id
                       var journalposter: Set<Behandlingsjournalpost> = setOf(),
 
                       @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                      val sporbar: Sporbar = Sporbar())
+                      val sporbar: Sporbar = Sporbar()) {
+    fun eksternId() : EksternBehandlingId = eksternIdHack.first()
+}
 
 enum class BehandlingType(val visningsnavn: String) {
     FØRSTEGANGSBEHANDLING("Førstegangsbehandling"),

@@ -16,7 +16,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
 
     fun findByFagsakIdAndStatus(fagsakId: UUID, status: BehandlingStatus): List<Behandling>
 
-    @Query("SELECT b.* FROM BEHANDLING b LEFT JOIN behandling_ekstern eb ON eb.behandling = b.id WHERE eb.id = :eksternId")
-    fun findByEksternId(eksternId: Long): Behandling?
+    @Query("SELECT b.* FROM BEHANDLING b join behandling_ekstern be on be.behandling = b.id where be.ekstern_id = :eksternId")
+    fun finnMedEksternId(eksternId: Long): Behandling?
 
 }
