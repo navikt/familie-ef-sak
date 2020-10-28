@@ -52,11 +52,4 @@ internal class BehandlingStegTest {
         assertFalse(StegType.BEHANDLING_FERDIGSTILT.erGyldigIKombinasjonMedStatus(BehandlingStatus.OPPRETTET))
     }
 
-    @Test
-    fun testErSaksbehandlersteg()  {
-        assertTrue(StegType.REGISTRERE_OPPLYSNINGER.erSaksbehandlerSteg())
-        assertTrue(StegType.VILKÅRSVURDERE_INNGANGSVILKÅR.erSaksbehandlerSteg())
-        assertFalse(StegType.JOURNALFØR_VEDTAKSBREV.erSaksbehandlerSteg())
-    }
-
 }

@@ -4,17 +4,14 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.dto.familie.Tilgang
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.Testsøknad.søknad
 import no.nav.familie.ef.sak.repository.SøknadRepository
-import no.nav.familie.ef.sak.repository.domain.Søknad
 import no.nav.familie.ef.sak.repository.domain.Sporbar
 import no.nav.familie.ef.sak.repository.domain.Søker
+import no.nav.familie.ef.sak.repository.domain.Søknad
 import no.nav.familie.ef.sak.repository.domain.SøknadType
-import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.data.repository.findByIdOrNull
 import java.util.*
 
 internal class BehandlingstilgangTest {
@@ -31,12 +28,12 @@ internal class BehandlingstilgangTest {
                 .returns(Søknad(UUID.randomUUID(),
                                 UUID.randomUUID(),
                                 SøknadType.OVERGANGSSTØNAD,
-                                objectMapper.writeValueAsBytes(søknad),
+                                UUID.randomUUID(),
                                 "1",
                                 "1",
                                 Sporbar(),
                                 Søker("654654654", "Bob"),
-                                emptySet()))
+                                setOf("321321321")))
     }
 
     @Test

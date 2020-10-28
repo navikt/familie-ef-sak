@@ -29,3 +29,9 @@ App'en vil starte opp en container med siste versjon av postgres.
 
 ## Produksjonssetting
 Applikasjonen vil deployes til produksjon ved ny commit på master-branchen. Det er dermed tilstrekkelig å merge PR for å trigge produksjonsbygget. 
+
+## Roller
+Testbrukeren som opprettes i IDA må ha minst en av følgende roller:
+- 0000-GA-Enslig-Forsorger-Beslutter
+- 0000-GA-Enslig-Forsorger-Saksbehandler
+  
