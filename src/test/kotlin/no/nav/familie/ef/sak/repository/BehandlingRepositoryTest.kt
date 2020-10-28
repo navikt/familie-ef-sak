@@ -49,15 +49,14 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     internal fun findByEksternId() {
         val fagsak = fagsakRepository.insert(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
-        val eksternId = behandling.eksternId()
+        val eksternId = behandling.eksternId
 
         val alleBehandlinger = behandlingRepository.findAll()
 
-        val findByEksternId = behandlingRepository.finnMedEksternId(eksternId.eksternId)
-        println("-------------------------------------")
-        println("------------${findByEksternId?.eksternId()}--------")
-        println("-------------------------------------")
+        val findByBehandlingId = behandlingRepository.findById(behandling.id)
+        val findByEksternId = behandlingRepository.finnMedEksternId(eksternId.id)
         assertThat(findByEksternId).isEqualTo(behandling)
+        assertThat(findByEksternId).isEqualTo(findByBehandlingId.get())
     }
 
 }
