@@ -36,14 +36,12 @@ class TilkjentYtelseServiceTest {
 
     @Test
     fun `opprett tilkjent ytelse`() {
-        mockkObject(SikkerhetContext)
 
         val tilkjentYtelseDto = DataGenerator.tilfeldigTilkjentYtelseDto()
-        val tilkjentYtelse = tilkjentYtelseDto.tilTilkjentYtelse("saksbehandler", TilkjentYtelseStatus.OPPRETTET)
+        val tilkjentYtelse = tilkjentYtelseDto.tilTilkjentYtelse("VL", TilkjentYtelseStatus.OPPRETTET)
         val slot = slot<TilkjentYtelse>()
         every { tilkjentYtelseRepository.findByPersonident(tilkjentYtelse.personident) } returns null
         every { tilkjentYtelseRepository.insert(capture(slot)) } returns tilkjentYtelse
-        every { SikkerhetContext.hentSaksbehandler() } returns "saksbehandler"
 
         tilkjentYtelseService.opprettTilkjentYtelse(tilkjentYtelseDto)
 
