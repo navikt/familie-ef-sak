@@ -20,7 +20,7 @@ CREATE TRIGGER behandling_ekstern_id_inc
     after insert
     on behandling
     for each row
-    execute procedure sett_ekstern_id();
+    execute procedure behandling_sett_ekstern_id();
 
 CREATE OR REPLACE FUNCTION fagsak_sett_ekstern_id() returns trigger as
     $body$

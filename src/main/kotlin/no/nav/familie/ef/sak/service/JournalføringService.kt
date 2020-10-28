@@ -24,6 +24,7 @@ import java.util.*
 @Service
 class JournalføringService(private val journalpostClient: JournalpostClient,
                            private val behandlingService: BehandlingService,
+                           private val fagsakService: FagsakService,
                            private val oppgaveService: OppgaveService) {
 
     private val logger = LoggerFactory.getLogger(JournalføringService::class.java)
@@ -42,7 +43,12 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         val behandling = hentBehandling(journalføringRequest)
         val journalpost = hentJournalpost(journalpostId)
 
-        oppdaterJournalpost(journalpost, journalføringRequest.dokumentTitler, journalføringRequest.fagsakId)
+
+        //sende eksternIdFagsak til joark
+
+        val eksternFagsakId = fagsakService.hentEksternId(journalføringRequest.fagsakId)
+
+        oppdaterJournalpost(journalpost, journalføringRequest.dokumentTitler, eksternFagsakId)
         ferdigstillJournalføring(journalpostId, journalførendeEnhet)
         ferdigstillJournalføringsoppgave(journalføringRequest)
 
@@ -121,7 +127,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
             dokument.dokumentvarianter?.contains(Dokumentvariant(variantformat = DokumentVariantformat.ORIGINAL.toString()))
                     ?: false
 
-    private fun oppdaterJournalpost(journalpost: Journalpost, dokumenttitler: Map<String, String>?, fagsakId: UUID) {
+    private fun oppdaterJournalpost(journalpost: Journalpost, dokumenttitler: Map<String, String>?, eksternFagsakId: Long) {
         val oppdatertJournalpost = OppdaterJournalpostRequest(
                 bruker = journalpost.bruker?.let {
                     DokarkivBruker(
@@ -134,7 +140,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
                 tittel = journalpost.tittel,
                 journalfoerendeEnhet = journalpost.journalforendeEnhet,
                 sak = Sak(
-                        fagsakId = fagsakId.toString(),
+                        fagsakId = eksternFagsakId.toString(),
                         fagsaksystem = "EF",
                         sakstype = "FAGSAK"
                 ),
