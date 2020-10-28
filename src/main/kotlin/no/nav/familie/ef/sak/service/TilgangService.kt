@@ -13,7 +13,6 @@ class TilgangService(private val integrasjonerClient: FamilieIntegrasjonerClient
                      private val behandlingService: BehandlingService,
                      private val fagsakService: FagsakService) {
 
-    private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     fun validerTilgangTilPersonMedBarn(personIdent: String) {
         val person = personService.hentPersonMedRelasjoner(personIdent)
@@ -31,4 +30,5 @@ class TilgangService(private val integrasjonerClient: FamilieIntegrasjonerClient
 
         validerTilgangTilPersonMedBarn(personIdent)
     }
+
 }
