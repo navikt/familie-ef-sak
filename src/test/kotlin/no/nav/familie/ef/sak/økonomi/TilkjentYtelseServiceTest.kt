@@ -5,10 +5,11 @@ import no.nav.familie.ef.sak.integration.ØkonomiKlient
 import no.nav.familie.ef.sak.mapper.tilOpphør
 import no.nav.familie.ef.sak.mapper.tilTilkjentYtelse
 import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
-import no.nav.familie.ef.sak.økonomi.Utbetalingsoppdrag.lagUtbetalingsoppdrag
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus
 import no.nav.familie.ef.sak.service.TilkjentYtelseService
+import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.økonomi.UtbetalingsoppdragGenerator.lagTilkjentYtelseMedUtbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
@@ -28,11 +29,6 @@ class TilkjentYtelseServiceTest {
     private val tilkjentYtelseService =
             TilkjentYtelseService(økonomiKlient, tilkjentYtelseRepository)
 
-    @BeforeEach
-    fun beforeEach() {
-        mockkObject(Utbetalingsoppdrag)
-    }
-
     @AfterEach
     fun afterEach() {
         confirmVerified(tilkjentYtelseRepository, økonomiKlient)
@@ -40,11 +36,14 @@ class TilkjentYtelseServiceTest {
 
     @Test
     fun `opprett tilkjent ytelse`() {
+        mockkObject(SikkerhetContext)
+
         val tilkjentYtelseDto = DataGenerator.tilfeldigTilkjentYtelseDto()
-        val tilkjentYtelse = tilkjentYtelseDto.tilTilkjentYtelse(TilkjentYtelseStatus.OPPRETTET)
+        val tilkjentYtelse = tilkjentYtelseDto.tilTilkjentYtelse("saksbehandler", TilkjentYtelseStatus.OPPRETTET)
         val slot = slot<TilkjentYtelse>()
         every { tilkjentYtelseRepository.findByPersonident(tilkjentYtelse.personident) } returns null
         every { tilkjentYtelseRepository.insert(capture(slot)) } returns tilkjentYtelse
+        every { SikkerhetContext.hentSaksbehandler() } returns "saksbehandler"
 
         tilkjentYtelseService.opprettTilkjentYtelse(tilkjentYtelseDto)
 
@@ -74,7 +73,7 @@ class TilkjentYtelseServiceTest {
     fun `hent status fra oppdragstjenesten`() {
         val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse()
         val id = tilkjentYtelse.id
-        val oppdragId = OppdragId("EF",
+        val oppdragId = OppdragId("EFOG",
                                   tilkjentYtelse.personident,
                                   tilkjentYtelse.id.toString())
         every { tilkjentYtelseRepository.findByIdOrNull(id) } returns tilkjentYtelse
@@ -91,7 +90,7 @@ class TilkjentYtelseServiceTest {
         val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(3)
                 .copy(status = TilkjentYtelseStatus.OPPRETTET)
         val id = tilkjentYtelse.id
-        val utbetalingsoppdrag = lagUtbetalingsoppdrag("VL", tilkjentYtelse)
+        val utbetalingsoppdrag = lagTilkjentYtelseMedUtbetalingsoppdrag(tilkjentYtelse).utbetalingsoppdrag!!
         val ytelseSlot = slot<TilkjentYtelse>()
         val oppdragSlot = slot<UtbetalingsoppdragDto>()
         val oppdatertTilkjentYtelse =
@@ -117,10 +116,11 @@ class TilkjentYtelseServiceTest {
         val originalTilkjentYtelse =
                 DataGenerator.tilfeldigTilkjentYtelse(3).copy(status = TilkjentYtelseStatus.AKTIV)
         val avsluttetOriginalTilkjentYtelse = originalTilkjentYtelse.copy(status = TilkjentYtelseStatus.AVSLUTTET)
-        val opphørtTilkjentYtelse = originalTilkjentYtelse.tilOpphør(opphørDato)
+        val opphørtTilkjentYtelse = originalTilkjentYtelse.tilOpphør("saksbehandler", opphørDato)
         val id = originalTilkjentYtelse.id
         val utbetalingsoppdrag =
-                lagUtbetalingsoppdrag("VL", opphørtTilkjentYtelse)
+                lagTilkjentYtelseMedUtbetalingsoppdrag(opphørtTilkjentYtelse)
+                        .utbetalingsoppdrag!!
         val opphørtTilkjentYtelseSendtUtbetalingsoppdrag =
                 opphørtTilkjentYtelse.copy(status = TilkjentYtelseStatus.SENDT_TIL_IVERKSETTING,
                                            utbetalingsoppdrag = utbetalingsoppdrag)
