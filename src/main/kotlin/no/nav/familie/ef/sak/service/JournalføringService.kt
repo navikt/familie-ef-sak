@@ -33,8 +33,8 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         return journalpostClient.hentJournalpost(journalpostId)
     }
 
-    fun hentDokument(journalpostId: String, dokumentInfoId: String): ByteArray {
-        return journalpostClient.hentDokument(journalpostId, dokumentInfoId)
+    fun hentDokument(journalpostId: String, dokumentInfoId: String, dokumentVariantformat: DokumentVariantformat = DokumentVariantformat.ARKIV ): ByteArray {
+        return journalpostClient.hentDokument(journalpostId, dokumentInfoId, dokumentVariantformat)
     }
 
     @Transactional
@@ -46,7 +46,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         ferdigstillJournalføring(journalpostId, journalførendeEnhet)
         ferdigstillJournalføringsoppgave(journalføringRequest)
 
-        settSøknadPåBehandling(journalpostId)
+        settSøknadPåBehandling(journalpostId, behandling.fagsakId, behandling.id)
         knyttJournalpostTilBehandling(journalpost, behandling)
 
         return opprettSaksbehandlingsoppgave(behandling)
@@ -86,34 +86,34 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         behandlingService.oppdaterJournalpostIdPåBehandling(journalpost, behandling)
     }
 
-    private fun settSøknadPåBehandling(journalpostId: String) {
+    private fun settSøknadPåBehandling(journalpostId: String, fagsakId: UUID, behandlingsId: UUID) {
         hentJournalpost(journalpostId).dokumenter
                 ?.filter { dokument -> DokumentBrevkode.erGyldigBrevkode(dokument.brevkode) && harOriginalDokument(dokument) }
-                ?.map { Pair(DokumentBrevkode.fraBrevkode(it.brevkode), hentDokument(journalpostId, it.dokumentInfoId)) }
+                ?.map { Pair(DokumentBrevkode.fraBrevkode(it.brevkode), hentDokument(journalpostId, it.dokumentInfoId, DokumentVariantformat.ORIGINAL)) }
                 ?.forEach {
-                    konverterTilSøknadsobjekt(it)
+                    konverterTilSøknadsobjekt(it, fagsakId, behandlingsId, journalpostId)
                 }
     }
 
-    private fun konverterTilSøknadsobjekt(it: Pair<DokumentBrevkode, ByteArray>) {
+    private fun konverterTilSøknadsobjekt(it: Pair<DokumentBrevkode, ByteArray>, fagsakId: UUID, behandlingsId: UUID, journalpostId: String) {
         try {
             when (it.first) {
                 DokumentBrevkode.OVERGANGSSTØNAD -> {
-                    objectMapper.readValue(it.second, SøknadOvergangsstønad::class.java)
-                    // TODO: Bent må sette inn i databasen når domenemodellen er klar
+                    val søknad = objectMapper.readValue(it.second, SøknadOvergangsstønad::class.java)
+                    behandlingService.mottaSøknadForOvergangsstønad(søknad, behandlingsId, fagsakId, journalpostId)
                 }
                 DokumentBrevkode.BARNETILSYN -> {
-                    objectMapper.readValue(it.second, SøknadBarnetilsyn::class.java)
-                    // TODO: Bent må sette inn i databasen når domenemodellen er klar
+                    val søknad = objectMapper.readValue(it.second, SøknadBarnetilsyn::class.java)
+                    behandlingService.mottaSøknadForBarnetilsyn(søknad, behandlingsId, fagsakId, journalpostId)
                 }
                 DokumentBrevkode.SKOLEPENGER -> {
-                    objectMapper.readValue(it.second, SøknadSkolepenger::class.java)
-                    // TODO: Bent må sette inn i databasen når domenemodellen er klar
+                    val søknad = objectMapper.readValue(it.second, SøknadSkolepenger::class.java)
+                    behandlingService.mottaSøknadForSkolepenger(søknad, behandlingsId, fagsakId, journalpostId)
                 }
             }
         } catch (e: JsonProcessingException) {
-            secureLogger.warn("Kan ikke konvertere journalpostDokument til søknadsobjekt", e)
-            logger.warn("Kan ikke konvertere journalpostDokument til søknadsobjekt ${e.javaClass.simpleName}")
+            secureLogger.error("Kan ikke konvertere journalpostDokument til søknadsobjekt", e)
+            logger.error("Kan ikke konvertere journalpostDokument til søknadsobjekt ${e.javaClass.simpleName}")
         }
     }
 

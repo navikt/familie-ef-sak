@@ -13,7 +13,7 @@ data class Søknad(@Id
                   val behandlingId: UUID,
                   val type: SøknadType,
                   val soknadsskjemaId: UUID,
-                  val saksnummerInfotrygd: String,
+                  val saksnummerInfotrygd: String?,
                   val journalpostId: String,
                   @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                   val sporbar: Sporbar = Sporbar(),

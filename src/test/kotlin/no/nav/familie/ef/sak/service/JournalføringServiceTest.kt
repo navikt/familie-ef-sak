@@ -10,9 +10,11 @@ import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.service.steg.StegType
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
+import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostResponse
 import no.nav.familie.kontrakter.felles.journalpost.*
+import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -84,8 +86,12 @@ internal class JournalføringServiceTest {
                 journalpostId = journalpostId)
 
         every {
-            journalpostClient.hentDokument(any(), capture(slotDokumentInfoIder))
-        } returns "{}".toByteArray()
+            journalpostClient.hentDokument(any(), capture(slotDokumentInfoIder), DokumentVariantformat.ORIGINAL)
+        } returns objectMapper.writeValueAsString(Testsøknad.søknadOvergangsstønad).toByteArray()
+
+        every {
+            behandlingService.mottaSøknadForOvergangsstønad(any(), any(), any(), any())
+        } just Runs
 
         val behandleSakOppgaveId = journalføringService.fullførJournalpost(
                 journalpostId = journalpostId,
@@ -106,6 +112,7 @@ internal class JournalføringServiceTest {
         }
         assertThat(slotDokumentInfoIder[0]).isEqualTo(dokumentInfoIdMedJsonVerdi)
         assertThat(slotDokumentInfoIder.size).isEqualTo(1)
+        verify(exactly = 1){behandlingService.mottaSøknadForOvergangsstønad(any(), any(), any(), any())}
     }
 
     @Test
@@ -116,7 +123,7 @@ internal class JournalføringServiceTest {
                 journalpostId = journalpostId)
 
         every {
-            journalpostClient.hentDokument(any(), any())
+            journalpostClient.hentDokument(any(), any(), any())
         } returns "IKKE JSON".toByteArray()
 
         val behandleSakOppgaveId = journalføringService.fullførJournalpost(
