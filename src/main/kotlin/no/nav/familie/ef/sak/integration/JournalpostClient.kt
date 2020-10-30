@@ -6,6 +6,7 @@ import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostResponse
+import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
@@ -25,8 +26,7 @@ class JournalpostClient(@Qualifier("azure") restOperations: RestOperations,
     private val dokarkivUri: URI = integrasjonerConfig.dokarkivUri
 
     fun hentJournalpost(journalpostId: String): Journalpost {
-        return getForEntity<Ressurs<Journalpost>>(URI.create("${journalpostURI}?journalpostId=${journalpostId}")).data
-                ?: error("Kunne ikke hente journalpost med id ${journalpostId}")
+        return getForEntity<Ressurs<Journalpost>>(URI.create("${journalpostURI}?journalpostId=${journalpostId}")).getDataOrThrow()
     }
 
     fun hentDokument(journalpostId: String, dokumentInfoId: String, dokumentVariantformat: DokumentVariantformat): ByteArray {
@@ -35,8 +35,7 @@ class JournalpostClient(@Qualifier("azure") restOperations: RestOperations,
                 .queryParam("variantFormat", dokumentVariantformat)
                 .build()
                 .toUri())
-                .data
-                ?: error("Kunne ikke hente dokument for journalpost=${journalpostId} og dokumentInfoId=${dokumentInfoId}")
+                .getDataOrThrow()
     }
 
     fun oppdaterJournalpost(oppdaterJournalpostRequest: OppdaterJournalpostRequest,
