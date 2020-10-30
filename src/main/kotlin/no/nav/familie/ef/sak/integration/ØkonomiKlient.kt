@@ -15,7 +15,7 @@ import org.springframework.web.client.exchange
 import java.net.URI
 import java.time.LocalDateTime
 
-const val FAGSYSTEM = "EF"
+const val FAGSYSTEM = "EFOG"
 
 @Service
 class ØkonomiKlient(@Value("\${FAMILIE_OPPDRAG_API_URL}")

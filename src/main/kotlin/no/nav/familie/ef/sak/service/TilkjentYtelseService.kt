@@ -4,7 +4,6 @@ import no.nav.familie.ef.sak.mapper.tilDto
 import no.nav.familie.ef.sak.mapper.tilOpphør
 import no.nav.familie.ef.sak.mapper.tilTilkjentYtelse
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.ef.sak.økonomi.Utbetalingsoppdrag.lagUtbetalingsoppdrag
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseType
@@ -12,6 +11,7 @@ import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
 import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.integration.FAGSYSTEM
 import no.nav.familie.ef.sak.integration.ØkonomiKlient
+import no.nav.familie.ef.sak.økonomi.UtbetalingsoppdragGenerator.lagTilkjentYtelseMedUtbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
@@ -28,6 +28,7 @@ class TilkjentYtelseService(private val økonomiKlient: ØkonomiKlient,
     @Transactional
     fun opprettTilkjentYtelse(tilkjentYtelseDTO: TilkjentYtelseDTO): UUID {
         tilkjentYtelseDTO.valider()
+        val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
 
         val eksisterendeTilkjentYtelse = tilkjentYtelseRepository.findByPersonident(tilkjentYtelseDTO.søker)
         if (eksisterendeTilkjentYtelse != null) {
@@ -35,7 +36,7 @@ class TilkjentYtelseService(private val økonomiKlient: ØkonomiKlient,
         }
 
         val opprettetTilkjentYtelse =
-                tilkjentYtelseRepository.insert(tilkjentYtelseDTO.tilTilkjentYtelse(TilkjentYtelseStatus.OPPRETTET))
+                tilkjentYtelseRepository.insert(tilkjentYtelseDTO.tilTilkjentYtelse(saksbehandlerId,TilkjentYtelseStatus.OPPRETTET))
 
         return opprettetTilkjentYtelse.id
     }
@@ -43,6 +44,7 @@ class TilkjentYtelseService(private val økonomiKlient: ØkonomiKlient,
     @Transactional
     fun iverksettUtbetalingsoppdrag(ytelseId: UUID) {
         val tilkjentYtelse = hentTilkjentYtelse(ytelseId)
+        val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
 
         when (tilkjentYtelse.type) {
             TilkjentYtelseType.OPPHØR -> error("Tilkjent ytelse ${tilkjentYtelse.id} er opphørt")
@@ -82,7 +84,8 @@ class TilkjentYtelseService(private val økonomiKlient: ØkonomiKlient,
 
         tilkjentYtelseRepository.update(tilkjentYtelse.copy(status = TilkjentYtelseStatus.AVSLUTTET))
 
-        val lagretOpphørtTilkjentYtelse = tilkjentYtelseRepository.insert(tilkjentYtelse.tilOpphør(opphørDato))
+        val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
+        val lagretOpphørtTilkjentYtelse = tilkjentYtelseRepository.insert(tilkjentYtelse.tilOpphør(saksbehandlerId, opphørDato))
 
         sendUtbetalingsoppdragOgOppdaterStatus(lagretOpphørtTilkjentYtelse,
                                                TilkjentYtelseStatus.SENDT_TIL_IVERKSETTING)
@@ -92,8 +95,8 @@ class TilkjentYtelseService(private val økonomiKlient: ØkonomiKlient,
 
     private fun sendUtbetalingsoppdragOgOppdaterStatus(tilkjentYtelse: TilkjentYtelse,
                                                        nyStatus: TilkjentYtelseStatus) {
-        val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
-        val utbetalingsoppdrag = lagUtbetalingsoppdrag(saksbehandlerId, tilkjentYtelse)
+        val utbetalingsoppdrag = lagTilkjentYtelseMedUtbetalingsoppdrag(tilkjentYtelse)
+                .utbetalingsoppdrag ?: error("Utbetalingsoppdrag har ikke blitt opprettet")
 
         // Rulles tilbake hvis økonomiKlient.iverksettOppdrag under kaster en exception
         tilkjentYtelseRepository.update(tilkjentYtelse.copy(utbetalingsoppdrag = utbetalingsoppdrag,
