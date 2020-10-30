@@ -116,7 +116,7 @@ internal class JournalføringControllerTest {
         assertThrows<ManglerTilgang> {
             journalføringController.fullførJournalpost(
                     journalpostMedFødselsnummer.journalpostId,
-                    JournalføringRequest(null, UUID.randomUUID(), "dummy-oppgave", JournalføringBehandling(UUID.randomUUID())),
+                    JournalføringRequest(null, 12345L, "dummy-oppgave", JournalføringBehandling(54321L)),
                     "tralala")
         }
     }

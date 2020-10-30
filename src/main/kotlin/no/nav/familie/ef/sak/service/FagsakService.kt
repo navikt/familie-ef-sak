@@ -27,6 +27,8 @@ class FagsakService(private val fagsakRepository: FagsakRepository, private val 
 
     fun hentFagsak(fagsakId: UUID): Fagsak = fagsakRepository.findByIdOrThrow(fagsakId)
 
+    fun hentFagsak(eksternFagsakId: Long): Fagsak = fagsakRepository.finnMedEksternId(eksternFagsakId)
+
     fun hentEksternId(fagsakId: UUID): Long = fagsakRepository.findByIdOrThrow(fagsakId).eksternId.id
 
 }

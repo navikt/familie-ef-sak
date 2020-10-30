@@ -40,15 +40,10 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
 
     @Transactional
     fun fullførJournalpost(journalføringRequest: JournalføringRequest, journalpostId: String, journalførendeEnhet: String): Long {
-        val behandling = hentBehandling(journalføringRequest)
+        val behandling: Behandling = hentBehandling(journalføringRequest)
         val journalpost = hentJournalpost(journalpostId)
 
-
-        //sende eksternIdFagsak til joark
-
-        val eksternFagsakId = fagsakService.hentEksternId(journalføringRequest.fagsakId)
-
-        oppdaterJournalpost(journalpost, journalføringRequest.dokumentTitler, eksternFagsakId)
+        oppdaterJournalpost(journalpost, journalføringRequest.dokumentTitler, journalføringRequest.fagsakId)
         ferdigstillJournalføring(journalpostId, journalførendeEnhet)
         ferdigstillJournalføringsoppgave(journalføringRequest)
 
@@ -76,15 +71,17 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         oppgaveService.ferdigstillOppgave(journalføringRequest.oppgaveId.toLong())
     }
 
-    private fun hentBehandling(journalføringRequest: JournalføringRequest) = hentEksisterendeBehandling(journalføringRequest.behandling.behandlingsId)
+    private fun hentBehandling(journalføringRequest: JournalføringRequest): Behandling = hentEksisterendeBehandling(journalføringRequest.behandling.behandlingsId)
             ?: opprettBehandlingMedBehandlingstype(journalføringRequest.behandling.behandlingstype, journalføringRequest.fagsakId)
 
 
-    private fun opprettBehandlingMedBehandlingstype(behandlingsType: BehandlingType?, fagsakId: UUID) =
-            behandlingService.opprettBehandling(behandlingType = behandlingsType!!,
-                    fagsakId = fagsakId)
+    private fun opprettBehandlingMedBehandlingstype(behandlingsType: BehandlingType?, fagsakId: Long): Behandling {
+        val fagsak = fagsakService.hentFagsak(fagsakId)
+        return behandlingService.opprettBehandling(behandlingType = behandlingsType!!,
+                                            fagsakId = fagsak.id)
+    }
 
-    private fun hentEksisterendeBehandling(behandlingsId: UUID?): Behandling? {
+    private fun hentEksisterendeBehandling(behandlingsId: Long?): Behandling? {
         return behandlingsId?.let { behandlingService.hentBehandling(it) }
     }
 

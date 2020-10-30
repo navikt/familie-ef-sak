@@ -64,7 +64,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
         val behandling = behandlingService.opprettBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, fagsak.id)
         behandlingService.mottaSøknadForOvergangsstønad(søknad.søknad, behandling.id, fagsak.id, "1234")
 
-        return restTemplate.exchange(localhost("/api/vurdering/${behandling.id}/inngangsvilkar"),
+        return restTemplate.exchange(localhost("/api/vurdering/${behandling.eksternId.id}/inngangsvilkar"),
                                      HttpMethod.GET,
                                      HttpEntity<Any>(headers))
     }

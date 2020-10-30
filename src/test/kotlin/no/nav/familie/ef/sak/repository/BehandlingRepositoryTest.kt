@@ -24,7 +24,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `findByFagsakIdAndAktivIsTrue`() {
+    internal fun findByFagsakIdAndAktivIsTrue() {
         val fagsak = fagsakRepository.insert(fagsak())
         behandlingRepository.insert(behandling(fagsak, aktiv = false))
 
@@ -36,7 +36,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `findByFagsakAndStatus`() {
+    internal fun findByFagsakAndStatus() {
         val fagsak = fagsakRepository.insert(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.OPPRETTET))
 
@@ -49,12 +49,9 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     internal fun findByEksternId() {
         val fagsak = fagsakRepository.insert(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
-        val eksternId = behandling.eksternId
-
-        val alleBehandlinger = behandlingRepository.findAll()
 
         val findByBehandlingId = behandlingRepository.findById(behandling.id)
-        val findByEksternId = behandlingRepository.finnMedEksternId(eksternId.id)
+        val findByEksternId = behandlingRepository.finnMedEksternId(behandling.eksternId.id)
         assertThat(findByEksternId).isEqualTo(behandling)
         assertThat(findByEksternId).isEqualTo(findByBehandlingId.get())
     }

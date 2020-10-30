@@ -55,26 +55,26 @@ internal class TilgangServiceTest {
 
     @Test
     internal fun `skal kaste ManglerTilgang dersom saksbehandler ikke har tilgang til behandling`() {
-        every { behandlingService.hentBehandling(behandling.id) } returns behandling
+        every { behandlingService.hentBehandling(behandling.eksternId.id) } returns behandling
         every { fagsakService.hentFagsak(fagsak.id) } returns fagsak
         every { personService.hentIdenterForBarnOgForeldre(any()) } returns listOf(mocketPersonIdent, olaIdent, kariIdent)
 
         val tilganger = listOf(Tilgang(true), Tilgang(true), Tilgang(false))
         every { familieIntegrasjonerClient.sjekkTilgangTilPersoner(any()) } returns tilganger
 
-        assertFailsWith<ManglerTilgang> { tilgangService.validerTilgangTilBehandling(behandling.id) }
+        assertFailsWith<ManglerTilgang> { tilgangService.validerTilgangTilBehandling(behandling.eksternId.id) }
     }
 
     @Test
     internal fun `skal ikke feile når saksbehandler har tilgang til behandling`() {
-        every { behandlingService.hentBehandling(behandling.id) } returns behandling
+        every { behandlingService.hentBehandling(behandling.eksternId.id) } returns behandling
         every { fagsakService.hentFagsak(fagsak.id) } returns fagsak
         every { personService.hentIdenterForBarnOgForeldre(any()) } returns listOf(mocketPersonIdent, olaIdent, kariIdent)
 
         val tilganger = listOf(Tilgang(true), Tilgang(true), Tilgang(true))
         every { familieIntegrasjonerClient.sjekkTilgangTilPersoner(any()) } returns tilganger
 
-        tilgangService.validerTilgangTilBehandling(behandling.id)
+        tilgangService.validerTilgangTilBehandling(behandling.eksternId.id)
     }
 
 }

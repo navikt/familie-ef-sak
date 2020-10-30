@@ -66,7 +66,7 @@ class VurderingService(private val behandlingService: BehandlingService,
         val vurderinger = hentEllerOpprettVurderingerForInngangsvilkår(behandlingId)
                 .map {
                     VilkårsvurderingDto(id = it.id,
-                                        behandlingId = it.behandlingId,
+                                        behandlingId = behandlingService.hentBehandling(it.behandlingId).eksternId.id,
                                         resultat = it.resultat,
                                         vilkårType = it.type,
                                         begrunnelse = it.begrunnelse,

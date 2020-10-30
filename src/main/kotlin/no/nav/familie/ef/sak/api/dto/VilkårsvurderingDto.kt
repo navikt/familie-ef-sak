@@ -7,7 +7,7 @@ import java.time.LocalDateTime
 import java.util.*
 
 data class VilkårsvurderingDto(val id: UUID,
-                               val behandlingId: UUID,
+                               val behandlingId: Long,
                                val resultat: Vilkårsresultat,
                                val vilkårType: VilkårType,
                                val begrunnelse: String? = null,

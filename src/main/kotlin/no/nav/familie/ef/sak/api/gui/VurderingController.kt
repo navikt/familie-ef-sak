@@ -30,15 +30,16 @@ class VurderingController(private val vurderingService: VurderingService,
     }
 
     @GetMapping("{behandlingId}/inngangsvilkar")
-    fun getInngangsvilkår(@PathVariable behandlingId: UUID): Ressurs<InngangsvilkårDto> {
+    fun getInngangsvilkår(@PathVariable behandlingId: Long): Ressurs<InngangsvilkårDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
-        return Ressurs.success(vurderingService.hentInngangsvilkår(behandlingId))
+        val behandling = behandlingService.hentBehandling(behandlingId)
+        return Ressurs.success(vurderingService.hentInngangsvilkår(behandling.id))
     }
 
     @PostMapping("/{behandlingId}/inngangsvilkar/fullfor")
-    fun validerInngangsvilkår(@PathVariable behandlingId: UUID): Ressurs<UUID> {
+    fun validerInngangsvilkår(@PathVariable behandlingId: Long): Ressurs<Long> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         val behandling = behandlingService.hentBehandling(behandlingId)
-        return Ressurs.success(stegService.håndterInngangsvilkår(behandling).id)
+        return Ressurs.success(stegService.håndterInngangsvilkår(behandling).eksternId.id)
     }
 }
