@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/api/oppgave")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class OppgaveController(val oppgaveService: OppgaveService) {
+class OppgaveController(private val oppgaveService: OppgaveService) {
 
     @PostMapping(path = ["/soek"],
                  consumes = [MediaType.APPLICATION_JSON_VALUE],

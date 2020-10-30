@@ -9,7 +9,7 @@ import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker
 import org.springframework.stereotype.Service
 
 @Service
-class PersonService(val pdlClient: PdlClient) {
+class PersonService(private val pdlClient: PdlClient) {
 
     fun hentSøker(ident: String): PdlSøker {
         return pdlClient.hentSøker(ident)
@@ -33,10 +33,9 @@ class PersonService(val pdlClient: PdlClient) {
                 .flatMap { it.familierelasjoner }
                 .filter { it.relatertPersonsRolle != Familierelasjonsrolle.BARN }
                 .map { it.relatertPersonsIdent }
-                .distinct()
 
         val barnIdenter = søkerMedBarn.barn.keys
 
-        return forelderIdenter + barnIdenter
+        return (forelderIdenter + barnIdenter + forelderIdent).distinct()
     }
 }
