@@ -37,6 +37,7 @@ class JournalføringController(private val journalføringService: Journalføring
                            @RequestParam(name = "journalfoerendeEnhet") journalførendeEnhet: String): Ressurs<Long> {
         val (_, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
         tilgangService.validerTilgangTilPersonMedBarn(personIdent)
+        tilgangService.validerHarSaksbehandlerrolle()
         return Ressurs.success(journalføringService.fullførJournalpost(journalføringRequest, journalpostId, journalførendeEnhet))
     }
 
