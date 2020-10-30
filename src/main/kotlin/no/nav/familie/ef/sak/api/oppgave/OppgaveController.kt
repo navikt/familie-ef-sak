@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.api.oppgave
 
 import no.nav.familie.ef.sak.service.OppgaveService
 import no.nav.familie.ef.sak.service.TilgangService
-import no.nav.familie.ef.sak.service.steg.BehandlerRolle
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -26,13 +25,13 @@ class OppgaveController(val oppgaveService: OppgaveService, val tilgangService: 
     @PostMapping(path = ["/{gsakOppgaveId}/fordel"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun fordelOppgave(@PathVariable(name = "gsakOppgaveId") gsakOppgaveId: Long,
                       @RequestParam("saksbehandler") saksbehandler: String): Ressurs<Long> {
-        tilgangService.validerTilgangTilRolle(BehandlerRolle.SAKSBEHANDLER)
+        tilgangService.validerHarSaksbehandlerrolle()
         return Ressurs.success(oppgaveService.fordelOppgave(gsakOppgaveId, saksbehandler))
     }
 
     @PostMapping(path = ["/{gsakOppgaveId}/tilbakestill"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun tilbakestillFordelingPåOppgave(@PathVariable(name = "gsakOppgaveId") gsakOppgaveId: Long): Ressurs<Long> {
-        tilgangService.validerTilgangTilRolle(BehandlerRolle.SAKSBEHANDLER)
+        tilgangService.validerHarSaksbehandlerrolle()
         return Ressurs.success(oppgaveService.tilbakestillFordelingPåOppgave(gsakOppgaveId))
     }
 

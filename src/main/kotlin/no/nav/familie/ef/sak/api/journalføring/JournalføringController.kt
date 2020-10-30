@@ -3,7 +3,6 @@ package no.nav.familie.ef.sak.api.journalføring;
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.service.JournalføringService
 import no.nav.familie.ef.sak.service.TilgangService
-import no.nav.familie.ef.sak.service.steg.BehandlerRolle
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.journalpost.BrukerIdType
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
@@ -38,7 +37,7 @@ class JournalføringController(val journalføringService: JournalføringService,
                            @RequestParam(name = "journalfoerendeEnhet") journalførendeEnhet: String): Ressurs<Long> {
         val (_, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
         tilgangService.validerTilgangTilPersonMedBarn(personIdent)
-        tilgangService.validerTilgangTilRolle(BehandlerRolle.SAKSBEHANDLER)
+        tilgangService.validerHarSaksbehandlerrolle()
         return Ressurs.success(journalføringService.fullførJournalpost(journalføringRequest, journalpostId, journalførendeEnhet))
     }
 
