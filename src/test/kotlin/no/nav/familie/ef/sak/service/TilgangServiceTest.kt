@@ -28,11 +28,14 @@ internal class TilgangServiceTest {
 
     val fagsak = fagsak(fagsakpersoner(setOf(mocketPersonIdent)))
     val behandling: Behandling = behandling(fagsak)
-    val barn: Map<String, PdlBarn> = mapOf(Pair("45679", mockk()), Pair("98765", mockk()))
+    val olaIdent = "4567"
+    val kariIdent = "98765"
+    val barn: Map<String, PdlBarn> = mapOf(Pair(olaIdent, mockk()), Pair(kariIdent, mockk()))
+
 
     @Test
     internal fun `skal kaste ManglerTilgang dersom saksbehandler ikke har tilgang til person eller dets barn`() {
-        every { personService.hentPersonMedRelasjoner(any()) } returns SøkerMedBarn(mocketPersonIdent, mockk(), barn)
+        every { personService.hentIdenterForBarnOgForeldre(any()) } returns listOf(mocketPersonIdent, olaIdent, kariIdent)
 
         val tilganger = listOf(Tilgang(true), Tilgang(true), Tilgang(false))
         every { familieIntegrasjonerClient.sjekkTilgangTilPersoner(any()) } returns tilganger
@@ -42,7 +45,7 @@ internal class TilgangServiceTest {
 
     @Test
     internal fun `skal ikke feile når saksbehandler har tilgang til person og dets barn`() {
-        every { personService.hentPersonMedRelasjoner(any()) } returns SøkerMedBarn(mocketPersonIdent, mockk(), barn)
+        every { personService.hentIdenterForBarnOgForeldre(any()) } returns listOf(mocketPersonIdent, olaIdent, kariIdent)
 
         val tilganger = listOf(Tilgang(true), Tilgang(true), Tilgang(true))
         every { familieIntegrasjonerClient.sjekkTilgangTilPersoner(any()) } returns tilganger
@@ -54,7 +57,7 @@ internal class TilgangServiceTest {
     internal fun `skal kaste ManglerTilgang dersom saksbehandler ikke har tilgang til behandling`() {
         every { behandlingService.hentBehandling(behandling.id) } returns behandling
         every { fagsakService.hentFagsak(fagsak.id) } returns fagsak
-        every { personService.hentPersonMedRelasjoner(mocketPersonIdent) } returns SøkerMedBarn(mocketPersonIdent, mockk(), barn)
+        every { personService.hentIdenterForBarnOgForeldre(any()) } returns listOf(mocketPersonIdent, olaIdent, kariIdent)
 
         val tilganger = listOf(Tilgang(true), Tilgang(true), Tilgang(false))
         every { familieIntegrasjonerClient.sjekkTilgangTilPersoner(any()) } returns tilganger
@@ -66,7 +69,7 @@ internal class TilgangServiceTest {
     internal fun `skal ikke feile når saksbehandler har tilgang til behandling`() {
         every { behandlingService.hentBehandling(behandling.id) } returns behandling
         every { fagsakService.hentFagsak(fagsak.id) } returns fagsak
-        every { personService.hentPersonMedRelasjoner(mocketPersonIdent) } returns SøkerMedBarn(mocketPersonIdent, mockk(), barn)
+        every { personService.hentIdenterForBarnOgForeldre(any()) } returns listOf(mocketPersonIdent, olaIdent, kariIdent)
 
         val tilganger = listOf(Tilgang(true), Tilgang(true), Tilgang(true))
         every { familieIntegrasjonerClient.sjekkTilgangTilPersoner(any()) } returns tilganger

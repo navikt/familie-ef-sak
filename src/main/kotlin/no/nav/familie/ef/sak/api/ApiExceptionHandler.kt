@@ -42,7 +42,7 @@ class ApiExceptionHandler {
     fun handleThrowable(manglerTilgang: ManglerTilgang): ResponseEntity<Ressurs<Nothing>> {
         secureLogger.error("En håndtert tilgangsfeil har oppstått - ${manglerTilgang.melding}", manglerTilgang)
         logger.info("En håndtert tilgangsfeil har oppstått")
-        return ResponseEntity.status(HttpStatus.OK).body(Ressurs.ikkeTilgang(melding = manglerTilgang.melding))
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Ressurs.ikkeTilgang(melding = manglerTilgang.melding))
     }
 
     @ExceptionHandler(IntegrasjonException::class)
