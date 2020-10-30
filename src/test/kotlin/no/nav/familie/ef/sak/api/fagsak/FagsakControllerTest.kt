@@ -23,7 +23,7 @@ internal class FagsakControllerTest : OppslagSpringRunnerTest() {
     internal fun `Skal returnere 200 OK med status IKKE_TILGANG dersom man ikke har tilgang til brukeren`() {
         val respons: ResponseEntity<Ressurs<FagsakDto>> = hentFagsak()
 
-        Assertions.assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
+        Assertions.assertThat(respons.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
         Assertions.assertThat(respons.body?.status).isEqualTo(Ressurs.Status.IKKE_TILGANG)
         Assertions.assertThat(respons.body?.data).isNull()
     }

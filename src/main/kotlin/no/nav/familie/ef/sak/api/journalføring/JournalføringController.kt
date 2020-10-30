@@ -3,7 +3,6 @@ package no.nav.familie.ef.sak.api.journalføring;
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.service.JournalføringService
 import no.nav.familie.ef.sak.service.TilgangService
-import no.nav.familie.ef.sak.service.steg.BehandlerRolle
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.journalpost.BrukerIdType
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
@@ -16,7 +15,7 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/api/journalpost")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class JournalføringController(val journalføringService: JournalføringService, val pdlClient: PdlClient, private val tilgangService: TilgangService) {
+class JournalføringController(private val journalføringService: JournalføringService, private val pdlClient: PdlClient, private val tilgangService: TilgangService) {
 
     @GetMapping("/{journalpostId}")
     fun hentJournalPost(@PathVariable journalpostId: String): Ressurs<JournalføringResponse> {
@@ -38,7 +37,7 @@ class JournalføringController(val journalføringService: JournalføringService,
                            @RequestParam(name = "journalfoerendeEnhet") journalførendeEnhet: String): Ressurs<Long> {
         val (_, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
         tilgangService.validerTilgangTilPersonMedBarn(personIdent)
-        tilgangService.validerTilgangTilRolle(BehandlerRolle.SAKSBEHANDLER)
+        tilgangService.validerHarSaksbehandlerrolle()
         return Ressurs.success(journalføringService.fullførJournalpost(journalføringRequest, journalpostId, journalførendeEnhet))
     }
 

@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.config
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import no.nav.familie.ef.sak.config.IntegrasjonerConfig
+import no.nav.familie.ef.sak.integration.dto.familie.Arbeidsfordelingsenhet
 import no.nav.familie.ef.sak.integration.dto.familie.EgenAnsattResponse
 import no.nav.familie.ef.sak.integration.dto.familie.Tilgang
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -36,7 +37,9 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
             WireMock.get(WireMock.urlEqualTo(integrasjonerConfig.kodeverkPoststedUri.path))
                     .willReturn(WireMock.okJson(objectMapper.writeValueAsString(kodeverkPoststed))),
             WireMock.get(WireMock.urlEqualTo(integrasjonerConfig.kodeverkLandkoderUri.path))
-                    .willReturn(WireMock.okJson(objectMapper.writeValueAsString(kodeverkLand)))
+                    .willReturn(WireMock.okJson(objectMapper.writeValueAsString(kodeverkLand))),
+            WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.arbeidsfordelingUri.path))
+                    .willReturn(WireMock.okJson(objectMapper.writeValueAsString(arbeidsfordeling)))
     )
 
     @Bean("mock-integrasjoner")
@@ -65,5 +68,7 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                                                                                   "NORGE"))))))
         private val kodeverkPoststed = Ressurs.success(poststed)
         private val kodeverkLand = Ressurs.success(land)
+
+        private val arbeidsfordeling = Ressurs.success(listOf(Arbeidsfordelingsenhet("1234", "nerd-enhet")))
     }
 }

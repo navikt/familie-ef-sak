@@ -110,7 +110,7 @@ internal class JournalføringControllerTest {
         } just Runs
 
         every {
-            tilgangService.validerTilgangTilRolle(any())
+            tilgangService.validerHarSaksbehandlerrolle()
         } throws ManglerTilgang("Bruker mangler tilgang")
 
         assertThrows<ManglerTilgang> {
