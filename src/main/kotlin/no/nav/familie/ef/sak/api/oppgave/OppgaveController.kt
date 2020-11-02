@@ -35,4 +35,14 @@ class OppgaveController(private val oppgaveService: OppgaveService, private val 
         return Ressurs.success(oppgaveService.tilbakestillFordelingPåOppgave(gsakOppgaveId))
     }
 
+    @GetMapping(path = ["/{gsakOppgaveId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun hentOppgave(@PathVariable(name = "gsakOppgaveId") gsakOppgaveId: Long): Ressurs<OppgaveDto> {
+        tilgangService.validerHarSaksbehandlerrolle()
+        val efOppgave = oppgaveService.hentEfOppgave(gsakOppgaveId)
+        return efOppgave?.let { Ressurs.success(OppgaveDto(it.behandlingId, it.gsakOppgaveId)) }
+               ?: Ressurs.funksjonellFeil("Denne oppgaven kan ikke behandles i denne løsningen",
+                                          "Denne oppgaven kan ikke behandles i denne løsningen")
+    }
+
+
 }
