@@ -64,6 +64,7 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
     fun hentBehandling(behandlingId: UUID): Behandling = behandlingRepository.findByIdOrThrow(behandlingId)
 
     fun hentBehandling(eksternBehandlingId: Long): Behandling = behandlingRepository.finnMedEksternId(eksternBehandlingId)
+                                                                ?: throw error("Behandling med id $eksternBehandlingId finnes ikke")
 
     fun hentOvergangsstønad(behandlingId: UUID): SøknadsskjemaOvergangsstønad {
         val søknad = hentSøknad(behandlingId)

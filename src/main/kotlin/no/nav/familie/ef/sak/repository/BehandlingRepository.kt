@@ -19,6 +19,6 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
            "        FROM behandling b " +
            "        JOIN behandling_ekstern be on be.behandling=b.id " +
            "        WHERE be.id = :eksternId")
-    fun finnMedEksternId(eksternId: Long): Behandling
+    fun finnMedEksternId(eksternId: Long): Behandling?
 
 }
