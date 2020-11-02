@@ -4,7 +4,7 @@ import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import java.util.*
 
 data class FagsakDto (
-        val id: UUID,
+        val id: Long,
         val personIdent: String,
         val stønadstype: Stønadstype,
         val behandlinger: List<BehandlingDto>

@@ -22,7 +22,8 @@ class TestSakController(private val behandlingService: BehandlingService, privat
     fun dummy(): Long {
         //TODO Dette steget må trigges et annet sted når vi har satt flyten for opprettelse av behandling.
         // Trigger den her midlertidig for å kunne utføre inngangsvilkår-steget
-        val fagsak = fagsakService.hentEllerOpprettFagsak(Testsøknad.søknadOvergangsstønad.personalia.verdi.fødselsnummer.verdi.verdi, Stønadstype.OVERGANGSSTØNAD)
+        val fagsakDto = fagsakService.hentEllerOpprettFagsak(Testsøknad.søknadOvergangsstønad.personalia.verdi.fødselsnummer.verdi.verdi, Stønadstype.OVERGANGSSTØNAD)
+        val fagsak = fagsakService.hentFagsak(fagsakDto.id)
         val behandling = behandlingService.opprettBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, fagsak.id)
         behandlingService.mottaSøknadForOvergangsstønad(Testsøknad.søknadOvergangsstønad, behandling.id, fagsak.id, "123")
         stegService.håndterRegistrerOpplysninger(behandling, "")

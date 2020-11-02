@@ -7,7 +7,6 @@ import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.FagsakService
-import no.nav.familie.kontrakter.ef.sak.SakRequest
 import no.nav.familie.kontrakter.ef.søknad.SøknadMedVedlegg
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -60,7 +59,8 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
 
     private fun opprettInngangsvilkår(): ResponseEntity<Ressurs<InngangsvilkårDto>> {
         val søknad = SøknadMedVedlegg(Testsøknad.søknadOvergangsstønad, emptyList())
-        val fagsak = fagsakService.hentEllerOpprettFagsak(søknad.søknad.personalia.verdi.fødselsnummer.verdi.verdi, Stønadstype.OVERGANGSSTØNAD)
+        val fagsakDto = fagsakService.hentEllerOpprettFagsak(søknad.søknad.personalia.verdi.fødselsnummer.verdi.verdi, Stønadstype.OVERGANGSSTØNAD)
+        val fagsak = fagsakService.hentFagsak(fagsakDto.id)
         val behandling = behandlingService.opprettBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, fagsak.id)
         behandlingService.mottaSøknadForOvergangsstønad(søknad.søknad, behandling.id, fagsak.id, "1234")
 

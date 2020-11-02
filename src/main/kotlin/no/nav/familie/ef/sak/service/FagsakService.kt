@@ -19,7 +19,7 @@ class FagsakService(private val fagsakRepository: FagsakRepository, private val 
 
         val behandlinger = behandlingService.hentBehandlinger(fagsak.id)
 
-        return FagsakDto(id = fagsak.id,
+        return FagsakDto(id = fagsak.eksternId.id,
                          personIdent = fagsak.hentAktivIdent(),
                          stønadstype = fagsak.stønadstype,
                          behandlinger = behandlinger)

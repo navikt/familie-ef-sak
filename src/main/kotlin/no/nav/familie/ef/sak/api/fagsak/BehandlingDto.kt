@@ -6,7 +6,7 @@ import java.time.LocalDate
 import java.util.*
 
 data class BehandlingDto (
-        val id: UUID,
+        val id: Long,
         val type: BehandlingType,
         val aktiv: Boolean,
         val status: BehandlingStatus,
