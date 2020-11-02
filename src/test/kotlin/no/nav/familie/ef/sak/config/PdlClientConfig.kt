@@ -61,6 +61,8 @@ class PdlClientConfig {
         every { pdlClient.hentSøkerAsMap(any()) } returns mapOf()
 
         every { pdlClient.hentBarn(any()) } returns emptyMap()
+
+        every { pdlClient.hentAktørId(any()) } returns PdlHentIdenter(PdlAktørId(listOf(PdlIdent("12345678901232"))))
         return pdlClient
     }
 
