@@ -11,6 +11,7 @@ import java.util.*
 data class Behandling(@Id
                       val id: UUID = UUID.randomUUID(),
                       val fagsakId: UUID,
+                      @MappedCollection(idColumn = "behandling_id")
                       val eksternId: EksternBehandlingId = EksternBehandlingId(),
                       val versjon: Int = 0,
                       val aktiv: Boolean = true,

@@ -14,7 +14,7 @@ interface FagsakRepository : RepositoryInterface<Fagsak, UUID>, InsertUpdateRepo
 
     @Query("SELECT f.*, fe.id AS eksternId_id " +
            "        FROM fagsak f " +
-           "        JOIN fagsak_ekstern fe on fe.fagsak=f.id " +
+           "        JOIN fagsak_ekstern fe on fe.fagsak_id = f.id " +
            "        WHERE fe.id = :eksternId")
     fun finnMedEksternId(eksternId: Long): Fagsak?
 }

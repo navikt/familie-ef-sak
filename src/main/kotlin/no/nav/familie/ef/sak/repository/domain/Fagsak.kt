@@ -10,6 +10,7 @@ import java.util.*
 @Table("fagsak")
 data class Fagsak(@Id
                   val id: UUID = UUID.randomUUID(),
+                  @MappedCollection(idColumn = "fagsak_id")
                   val eksternId: EksternFagsakId = EksternFagsakId(),
                   @Column("stonadstype")
                   val stønadstype: Stønadstype,
