@@ -47,4 +47,10 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(findByEksternId).isEqualTo(findByFagsakId.get())
     }
 
+    @Test
+    internal fun `finnMedEksternId skal gi null når det ikke finnes fagsak for gitt id`() {
+        val findByEksternId = fagsakRepository.finnMedEksternId(100000L)
+        assertThat(findByEksternId).isEqualTo(null)
+    }
+
 }

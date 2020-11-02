@@ -57,4 +57,10 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(findByEksternId).isEqualTo(findByBehandlingId.get())
     }
 
+    @Test
+    internal fun `finnMedEksternId skal gi null når det ikke finnes behandling for gitt id`() {
+        val findByEksternId = behandlingRepository.finnMedEksternId(1000000L)
+        assertThat(findByEksternId).isEqualTo(null)
+    }
+
 }
