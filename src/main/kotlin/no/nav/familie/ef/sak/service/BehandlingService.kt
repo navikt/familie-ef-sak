@@ -107,7 +107,7 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
 
     fun hentBehandlinger(fagsakId: UUID): List<BehandlingDto> {
         return behandlingRepository.findByFagsakId(fagsakId).map {
-            BehandlingDto(id = it.eksternId.id,
+            BehandlingDto(id = it.id,
                           type = it.type,
                           status = it.status,
                           aktiv = it.aktiv,
