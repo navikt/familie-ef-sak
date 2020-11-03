@@ -49,7 +49,7 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
             val enhetsnummer = arbeidsfordelingService.hentNavEnhet(fagsak.hentAktivIdent())
             val opprettOppgave = OpprettOppgaveRequest(
                     ident = OppgaveIdentV2(ident = aktørId, gruppe = IdentGruppe.AKTOERID),
-                    saksId = fagsak.id.toString(),
+                    saksId = fagsak.eksternId.id.toString(),
                     tema = Tema.ENF,
                     oppgavetype = oppgavetype,
                     fristFerdigstillelse = fristForFerdigstillelse,
@@ -83,6 +83,10 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
 
     fun hentOppgave(gsakOppgaveId: Long): Oppgave {
         return oppgaveClient.finnOppgaveMedId(gsakOppgaveId)
+    }
+
+    fun hentEfOppgave(gsakOppgaveId: Long): EfOppgave? {
+        return oppgaveRepository.findByGsakOppgaveId(gsakOppgaveId)
     }
 
     fun ferdigstillBehandleOppgave(behandlingId: UUID, oppgavetype: Oppgavetype) {

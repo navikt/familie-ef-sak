@@ -24,6 +24,7 @@ import java.util.*
 @Service
 class JournalføringService(private val journalpostClient: JournalpostClient,
                            private val behandlingService: BehandlingService,
+                           private val fagsakService: FagsakService,
                            private val oppgaveService: OppgaveService) {
 
     private val logger = LoggerFactory.getLogger(JournalføringService::class.java)
@@ -33,20 +34,21 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         return journalpostClient.hentJournalpost(journalpostId)
     }
 
-    fun hentDokument(journalpostId: String, dokumentInfoId: String): ByteArray {
-        return journalpostClient.hentDokument(journalpostId, dokumentInfoId)
+    fun hentDokument(journalpostId: String, dokumentInfoId: String, dokumentVariantformat: DokumentVariantformat = DokumentVariantformat.ARKIV ): ByteArray {
+        return journalpostClient.hentDokument(journalpostId, dokumentInfoId, dokumentVariantformat)
     }
 
     @Transactional
     fun fullførJournalpost(journalføringRequest: JournalføringRequest, journalpostId: String, journalførendeEnhet: String): Long {
-        val behandling = hentBehandling(journalføringRequest)
+        val behandling: Behandling = hentBehandling(journalføringRequest)
         val journalpost = hentJournalpost(journalpostId)
 
-        oppdaterJournalpost(journalpost, journalføringRequest.dokumentTitler, journalføringRequest.fagsakId)
+        val eksternFagsakId = fagsakService.hentEksternId(journalføringRequest.fagsakId)
+        oppdaterJournalpost(journalpost, journalføringRequest.dokumentTitler, eksternFagsakId)
         ferdigstillJournalføring(journalpostId, journalførendeEnhet)
         ferdigstillJournalføringsoppgave(journalføringRequest)
 
-        settSøknadPåBehandling(journalpostId)
+        settSøknadPåBehandling(journalpostId, behandling.fagsakId, behandling.id)
         knyttJournalpostTilBehandling(journalpost, behandling)
 
         return opprettSaksbehandlingsoppgave(behandling)
@@ -70,50 +72,51 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         oppgaveService.ferdigstillOppgave(journalføringRequest.oppgaveId.toLong())
     }
 
-    private fun hentBehandling(journalføringRequest: JournalføringRequest) = hentEksisterendeBehandling(journalføringRequest.behandling.behandlingsId)
+    private fun hentBehandling(journalføringRequest: JournalføringRequest): Behandling = hentEksisterendeBehandling(journalføringRequest.behandling.behandlingsId)
             ?: opprettBehandlingMedBehandlingstype(journalføringRequest.behandling.behandlingstype, journalføringRequest.fagsakId)
 
 
-    private fun opprettBehandlingMedBehandlingstype(behandlingsType: BehandlingType?, fagsakId: UUID) =
-            behandlingService.opprettBehandling(behandlingType = behandlingsType!!,
-                    fagsakId = fagsakId)
+    private fun opprettBehandlingMedBehandlingstype(behandlingsType: BehandlingType?, fagsakId: UUID): Behandling {
+        return behandlingService.opprettBehandling(behandlingType = behandlingsType!!,
+                                            fagsakId = fagsakId)
+    }
 
-    private fun hentEksisterendeBehandling(behandlingsId: UUID?): Behandling? {
-        return behandlingsId?.let { behandlingService.hentBehandling(it) }
+    private fun hentEksisterendeBehandling(behandlingId: UUID?): Behandling? {
+        return behandlingId?.let { behandlingService.hentBehandling(it) }
     }
 
     private fun knyttJournalpostTilBehandling(journalpost: Journalpost, behandling: Behandling) {
         behandlingService.oppdaterJournalpostIdPåBehandling(journalpost, behandling)
     }
 
-    private fun settSøknadPåBehandling(journalpostId: String) {
+    private fun settSøknadPåBehandling(journalpostId: String, fagsakId: UUID, behandlingsId: UUID) {
         hentJournalpost(journalpostId).dokumenter
                 ?.filter { dokument -> DokumentBrevkode.erGyldigBrevkode(dokument.brevkode) && harOriginalDokument(dokument) }
-                ?.map { Pair(DokumentBrevkode.fraBrevkode(it.brevkode), hentDokument(journalpostId, it.dokumentInfoId)) }
+                ?.map { Pair(DokumentBrevkode.fraBrevkode(it.brevkode), hentDokument(journalpostId, it.dokumentInfoId, DokumentVariantformat.ORIGINAL)) }
                 ?.forEach {
-                    konverterTilSøknadsobjekt(it)
+                    konverterTilSøknadsobjekt(it, fagsakId, behandlingsId, journalpostId)
                 }
     }
 
-    private fun konverterTilSøknadsobjekt(it: Pair<DokumentBrevkode, ByteArray>) {
+    private fun konverterTilSøknadsobjekt(it: Pair<DokumentBrevkode, ByteArray>, fagsakId: UUID, behandlingsId: UUID, journalpostId: String) {
         try {
             when (it.first) {
                 DokumentBrevkode.OVERGANGSSTØNAD -> {
-                    objectMapper.readValue(it.second, SøknadOvergangsstønad::class.java)
-                    // TODO: Bent må sette inn i databasen når domenemodellen er klar
+                    val søknad = objectMapper.readValue(it.second, SøknadOvergangsstønad::class.java)
+                    behandlingService.mottaSøknadForOvergangsstønad(søknad, behandlingsId, fagsakId, journalpostId)
                 }
                 DokumentBrevkode.BARNETILSYN -> {
-                    objectMapper.readValue(it.second, SøknadBarnetilsyn::class.java)
-                    // TODO: Bent må sette inn i databasen når domenemodellen er klar
+                    val søknad = objectMapper.readValue(it.second, SøknadBarnetilsyn::class.java)
+                    behandlingService.mottaSøknadForBarnetilsyn(søknad, behandlingsId, fagsakId, journalpostId)
                 }
                 DokumentBrevkode.SKOLEPENGER -> {
-                    objectMapper.readValue(it.second, SøknadSkolepenger::class.java)
-                    // TODO: Bent må sette inn i databasen når domenemodellen er klar
+                    val søknad = objectMapper.readValue(it.second, SøknadSkolepenger::class.java)
+                    behandlingService.mottaSøknadForSkolepenger(søknad, behandlingsId, fagsakId, journalpostId)
                 }
             }
         } catch (e: JsonProcessingException) {
-            secureLogger.warn("Kan ikke konvertere journalpostDokument til søknadsobjekt", e)
-            logger.warn("Kan ikke konvertere journalpostDokument til søknadsobjekt ${e.javaClass.simpleName}")
+            secureLogger.error("Kan ikke konvertere journalpostDokument til søknadsobjekt", e)
+            logger.error("Kan ikke konvertere journalpostDokument til søknadsobjekt ${e.javaClass.simpleName}")
         }
     }
 
@@ -121,7 +124,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
             dokument.dokumentvarianter?.contains(Dokumentvariant(variantformat = DokumentVariantformat.ORIGINAL.toString()))
                     ?: false
 
-    private fun oppdaterJournalpost(journalpost: Journalpost, dokumenttitler: Map<String, String>?, fagsakId: UUID) {
+    private fun oppdaterJournalpost(journalpost: Journalpost, dokumenttitler: Map<String, String>?, eksternFagsakId: Long) {
         val oppdatertJournalpost = OppdaterJournalpostRequest(
                 bruker = journalpost.bruker?.let {
                     DokarkivBruker(
@@ -134,7 +137,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
                 tittel = journalpost.tittel,
                 journalfoerendeEnhet = journalpost.journalforendeEnhet,
                 sak = Sak(
-                        fagsakId = fagsakId.toString(),
+                        fagsakId = eksternFagsakId.toString(),
                         fagsaksystem = "EF",
                         sakstype = "FAGSAK"
                 ),

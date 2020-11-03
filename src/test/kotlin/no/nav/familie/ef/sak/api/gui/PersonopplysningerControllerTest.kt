@@ -1,7 +1,8 @@
-package no.nav.familie.ef.sak.api.fagsak
+package no.nav.familie.ef.sak.api.gui
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.repository.domain.Stønadstype
+import no.nav.familie.ef.sak.api.dto.PersonIdentDto
+import no.nav.familie.ef.sak.api.dto.PersonopplysningerDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -12,7 +13,7 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 
-internal class FagsakControllerTest : OppslagSpringRunnerTest() {
+internal class PersonopplysningerControllerTest: OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun setUp() {
@@ -21,18 +22,19 @@ internal class FagsakControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `Skal returnere 200 OK med status IKKE_TILGANG dersom man ikke har tilgang til brukeren`() {
-        val respons: ResponseEntity<Ressurs<FagsakDto>> = hentFagsak()
+        val respons: ResponseEntity<Ressurs<PersonopplysningerDto>> = hentPersonopplysninger()
 
         Assertions.assertThat(respons.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
         Assertions.assertThat(respons.body?.status).isEqualTo(Ressurs.Status.IKKE_TILGANG)
         Assertions.assertThat(respons.body?.data).isNull()
     }
 
-    private fun hentFagsak(): ResponseEntity<Ressurs<FagsakDto>> {
-        val fagsakRequest = FagsakRequest("ikketilgang", Stønadstype.OVERGANGSSTØNAD)
+    private fun hentPersonopplysninger(): ResponseEntity<Ressurs<PersonopplysningerDto>> {
+        val personopplysningerRequest = PersonIdentDto("ikketilgang")
 
-        return restTemplate.exchange(localhost("/api/fagsak"),
-                                     HttpMethod.POST,
-                                     HttpEntity(fagsakRequest, headers))
+        return restTemplate.exchange(localhost("/api/personopplysninger"),
+                HttpMethod.POST,
+                HttpEntity(personopplysningerRequest, headers))
     }
+
 }

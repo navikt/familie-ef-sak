@@ -2,9 +2,11 @@ package no.nav.familie.ef.sak.api.gui
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.api.dto.InngangsvilkårDto
+import no.nav.familie.ef.sak.repository.domain.BehandlingType
+import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
 import no.nav.familie.ef.sak.service.BehandlingService
-import no.nav.familie.kontrakter.ef.sak.SakRequest
+import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.kontrakter.ef.søknad.SøknadMedVedlegg
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -22,6 +24,7 @@ import java.util.*
 internal class VurderingControllerTest : OppslagSpringRunnerTest() {
 
     @Autowired lateinit var behandlingService: BehandlingService
+    @Autowired lateinit var fagsakService: FagsakService
 
     @BeforeEach
     fun setUp() {
@@ -55,10 +58,12 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
     }
 
     private fun opprettInngangsvilkår(): ResponseEntity<Ressurs<InngangsvilkårDto>> {
-        val sak = SakRequest(SøknadMedVedlegg(Testsøknad.søknadOvergangsstønad, emptyList()), "123", "321")
-        val behandlingId = behandlingService.mottaSakOvergangsstønad(sak, emptyMap()).id
+        val søknad = SøknadMedVedlegg(Testsøknad.søknadOvergangsstønad, emptyList())
+        val fagsak = fagsakService.hentEllerOpprettFagsak(søknad.søknad.personalia.verdi.fødselsnummer.verdi.verdi, Stønadstype.OVERGANGSSTØNAD)
+        val behandling = behandlingService.opprettBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, fagsak.id)
+        behandlingService.mottaSøknadForOvergangsstønad(søknad.søknad, behandling.id, fagsak.id, "1234")
 
-        return restTemplate.exchange(localhost("/api/vurdering/$behandlingId/inngangsvilkar"),
+        return restTemplate.exchange(localhost("/api/vurdering/${behandling.id}/inngangsvilkar"),
                                      HttpMethod.GET,
                                      HttpEntity<Any>(headers))
     }

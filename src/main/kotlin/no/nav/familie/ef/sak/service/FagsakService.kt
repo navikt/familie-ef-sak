@@ -5,7 +5,9 @@ import no.nav.familie.ef.sak.repository.FagsakRepository
 import no.nav.familie.ef.sak.repository.domain.Fagsak
 import no.nav.familie.ef.sak.repository.domain.FagsakPerson
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
+import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 class FagsakService(private val fagsakRepository: FagsakRepository, private val behandlingService: BehandlingService) {
@@ -22,4 +24,9 @@ class FagsakService(private val fagsakRepository: FagsakRepository, private val 
                          stønadstype = fagsak.stønadstype,
                          behandlinger = behandlinger)
     }
+
+    fun hentFagsak(fagsakId: UUID): Fagsak = fagsakRepository.findByIdOrThrow(fagsakId)
+
+    fun hentEksternId(fagsakId: UUID): Long = fagsakRepository.findByIdOrThrow(fagsakId).eksternId.id
+
 }

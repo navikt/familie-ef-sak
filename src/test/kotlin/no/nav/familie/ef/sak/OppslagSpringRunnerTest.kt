@@ -59,8 +59,7 @@ abstract class OppslagSpringRunnerTest {
     }
 
     private fun resetDatabase() {
-        listOf(Vedlegg::class,
-               Søknad::class,
+        listOf(Søknad::class,
                SøknadsskjemaOvergangsstønad::class,
                TilkjentYtelse::class,
                Oppgave::class,
