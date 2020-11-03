@@ -1,0 +1,17 @@
+version: '3.7'
+services:
+
+  # SQL database
+  postgres:
+    image: "postgres:11.5"
+    volumes:
+      - "familie-ef-sak-data:/var/lib/postgresql/data"
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "test"
+      POSTGRES_DB: "familie-ef-sak"
+
+volumes:
+  familie-ef-sak-data:

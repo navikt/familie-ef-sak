@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.config
 
-import io.mockk.every
-import io.mockk.mockk
+import io.mockk.*
 import no.nav.familie.ef.sak.integration.OppgaveClient
 import no.nav.familie.kontrakter.felles.oppgave.*
 import org.springframework.context.annotation.Bean
@@ -29,6 +28,8 @@ class OppgaveClientMock() {
 
         every { oppgaveClient.fordelOppgave(any(), any()) } returns 12345678L
 
+        every { oppgaveClient.ferdigstillOppgave(any()) } just Runs
+        
         return oppgaveClient
     }
 

@@ -15,7 +15,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
 
     @Test
-    internal fun `findByFagsakId`() {
+    internal fun findByFagsakId() {
         val fagsak = fagsakRepository.insert(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
 
@@ -24,7 +24,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `findByFagsakIdAndAktivIsTrue`() {
+    internal fun findByFagsakIdAndAktivIsTrue() {
         val fagsak = fagsakRepository.insert(fagsak())
         behandlingRepository.insert(behandling(fagsak, aktiv = false))
 
@@ -36,13 +36,31 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `findByFagsakAndStatus`() {
+    internal fun findByFagsakAndStatus() {
         val fagsak = fagsakRepository.insert(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.OPPRETTET))
 
         assertThat(behandlingRepository.findByFagsakIdAndStatus(UUID.randomUUID(), BehandlingStatus.OPPRETTET)).isEmpty()
         assertThat(behandlingRepository.findByFagsakIdAndStatus(fagsak.id, BehandlingStatus.FERDIGSTILT)).isEmpty()
         assertThat(behandlingRepository.findByFagsakIdAndStatus(fagsak.id, BehandlingStatus.OPPRETTET)).containsOnly(behandling)
+    }
+
+    @Test
+    internal fun finnMedEksternId() {
+        val fagsak = fagsakRepository.insert(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak))
+        val findByBehandlingId = behandlingRepository.findById(behandling.id)
+        val findByEksternId = behandlingRepository.finnMedEksternId(behandling.eksternId.id)
+                              ?: throw error("Behandling med id ${behandling.eksternId.id} finnes ikke")
+
+        assertThat(findByEksternId).isEqualTo(behandling)
+        assertThat(findByEksternId).isEqualTo(findByBehandlingId.get())
+    }
+
+    @Test
+    internal fun `finnMedEksternId skal gi null når det ikke finnes behandling for gitt id`() {
+        val findByEksternId = behandlingRepository.finnMedEksternId(1000000L)
+        assertThat(findByEksternId).isEqualTo(null)
     }
 
 }

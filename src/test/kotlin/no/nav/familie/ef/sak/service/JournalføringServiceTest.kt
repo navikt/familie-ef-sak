@@ -5,9 +5,7 @@ import no.nav.familie.ef.sak.api.journalføring.JournalføringBehandling
 import no.nav.familie.ef.sak.api.journalføring.JournalføringRequest
 import no.nav.familie.ef.sak.domene.DokumentVariantformat
 import no.nav.familie.ef.sak.integration.JournalpostClient
-import no.nav.familie.ef.sak.repository.domain.Behandling
-import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
-import no.nav.familie.ef.sak.repository.domain.BehandlingType
+import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.service.steg.StegType
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
@@ -25,13 +23,15 @@ internal class JournalføringServiceTest {
     private val journalpostClient: JournalpostClient = mockk()
     private val behandlingService: BehandlingService = mockk()
     private val oppgaveService: OppgaveService = mockk()
+    private val fagsakService: FagsakService = mockk()
 
-    private val journalføringService = JournalføringService(journalpostClient, behandlingService, oppgaveService)
+    private val journalføringService = JournalføringService(journalpostClient, behandlingService, fagsakService, oppgaveService)
 
     val fagsakId = UUID.randomUUID()
+    val fagsakEksternId = 12345L
     val journalpostId = "98765"
     val nyOppgaveId = 999999L
-    val behandlingsId = UUID.randomUUID()
+    val behandlingId = UUID.randomUUID()
     val oppgaveId = "1234567"
     val dokumentTitler = hashMapOf("12345" to "Asbjørns skilsmissepapirer", "23456" to "Eiriks samværsdokument")
     val dokumentInfoIdMedJsonVerdi = "12345"
@@ -56,13 +56,15 @@ internal class JournalføringServiceTest {
                 tittel = "Søknad om overgangsstønad"
         )
 
-        every { behandlingService.hentBehandling(behandlingsId) } returns Behandling(id = behandlingsId,
-                                                                                     fagsakId = fagsakId,
-                                                                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                                                     status = BehandlingStatus.UTREDES,
-                                                                                     steg = StegType.REGISTRERE_OPPLYSNINGER)
+        every { fagsakService.hentEksternId(any())} returns fagsakEksternId
 
-        every { behandlingService.opprettBehandling(any(), any()) } returns Behandling(id = behandlingsId,
+        every { behandlingService.hentBehandling(behandlingId) } returns Behandling(id = behandlingId,
+                                                                                           fagsakId = fagsakId,
+                                                                                           type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                                                                                           status = BehandlingStatus.UTREDES,
+                                                                                           steg = StegType.REGISTRERE_OPPLYSNINGER)
+
+        every { behandlingService.opprettBehandling(any(), any()) } returns Behandling(id = behandlingId,
                                                                                        fagsakId = fagsakId,
                                                                                        type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                                                                        status = BehandlingStatus.UTREDES,
@@ -99,10 +101,10 @@ internal class JournalføringServiceTest {
                         dokumentTitler,
                         fagsakId,
                         oppgaveId,
-                        JournalføringBehandling(behandlingsId = behandlingsId)), journalførendeEnhet = "1234")
+                        JournalføringBehandling(behandlingsId = behandlingId)), journalførendeEnhet = "1234")
 
         assertThat(behandleSakOppgaveId).isEqualTo(nyOppgaveId)
-        assertThat(slotJournalpost.captured.sak?.fagsakId).isEqualTo(fagsakId.toString())
+        assertThat(slotJournalpost.captured.sak?.fagsakId).isEqualTo(fagsakEksternId.toString())
         assertThat(slotJournalpost.captured.sak?.sakstype).isEqualTo("FAGSAK")
         assertThat(slotJournalpost.captured.sak?.fagsaksystem).isEqualTo("EF")
         dokumentTitler.forEach { (dokumentId, nyTittel) ->
@@ -112,11 +114,15 @@ internal class JournalføringServiceTest {
         }
         assertThat(slotDokumentInfoIder[0]).isEqualTo(dokumentInfoIdMedJsonVerdi)
         assertThat(slotDokumentInfoIder.size).isEqualTo(1)
-        verify(exactly = 1){behandlingService.mottaSøknadForOvergangsstønad(any(), any(), any(), any())}
+        verify(exactly = 1) { behandlingService.mottaSøknadForOvergangsstønad(any(), any(), any(), any()) }
     }
 
     @Test
     internal fun `skal fullføre manuell journalføring på ny behandling`() {
+        every { fagsakService.hentFagsak(fagsakId) } returns Fagsak(id = fagsakId,
+                                                                     eksternId = EksternFagsakId(id = fagsakEksternId),
+                                                                     stønadstype = Stønadstype.OVERGANGSSTØNAD)
+
         val slot = slot<OppdaterJournalpostRequest>()
 
         every { journalpostClient.oppdaterJournalpost(capture(slot), journalpostId) } returns OppdaterJournalpostResponse(
@@ -136,7 +142,7 @@ internal class JournalføringServiceTest {
                 journalførendeEnhet = "1234")
 
         assertThat(behandleSakOppgaveId).isEqualTo(nyOppgaveId)
-        assertThat(slot.captured.sak?.fagsakId).isEqualTo(fagsakId.toString())
+        assertThat(slot.captured.sak?.fagsakId).isEqualTo(fagsakEksternId.toString())
         assertThat(slot.captured.sak?.sakstype).isEqualTo("FAGSAK")
         assertThat(slot.captured.sak?.fagsaksystem).isEqualTo("EF")
         dokumentTitler.forEach { (dokumentId, nyTittel) ->

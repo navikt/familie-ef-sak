@@ -7,6 +7,8 @@ import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus
 import no.nav.familie.ef.sak.repository.domain.søknad.Dokumentasjon
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
+import no.nav.familie.prosessering.PropertiesWrapperTilStringConverter
+import no.nav.familie.prosessering.StringTilPropertiesWrapperConverter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.convert.converter.Converter
@@ -16,6 +18,7 @@ import org.springframework.data.domain.AuditorAware
 import org.springframework.data.jdbc.core.convert.JdbcCustomConversions
 import org.springframework.data.jdbc.repository.config.AbstractJdbcConfiguration
 import org.springframework.data.jdbc.repository.config.EnableJdbcAuditing
+import org.springframework.data.jdbc.repository.config.EnableJdbcRepositories
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.datasource.DataSourceTransactionManager
@@ -29,6 +32,7 @@ import javax.sql.DataSource
 
 @Configuration
 @EnableJdbcAuditing
+@EnableJdbcRepositories("no.nav.familie")
 class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @Bean
@@ -57,9 +61,10 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
                                             YearMonthTilLocalDateConverter(),
                                             LocalDateTilYearMonthConverter(),
                                             TilkjentYtelseStatusTilStringConverter(),
+                                            PropertiesWrapperTilStringConverter(),
+                                            StringTilPropertiesWrapperConverter(),
                                             StringTilDelvilkårConverter(),
-                                            DelvilkårTilStringConverter()
-        ))
+                                            DelvilkårTilStringConverter()))
     }
 
     @WritingConverter
