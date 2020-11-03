@@ -28,7 +28,7 @@ class JournalføringController(private val journalføringService: Journalføring
     fun hentDokument(@PathVariable journalpostId: String, @PathVariable dokumentInfoId: String): Ressurs<ByteArray> {
         val (_, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
         tilgangService.validerTilgangTilPersonMedBarn(personIdent)
-        return Ressurs.success(journalføringService.hentDokument(journalpostId, dokumentInfoId));
+        return Ressurs.success(journalføringService.hentDokument(journalpostId, dokumentInfoId))
     }
 
     @PostMapping("/{journalpostId}/fullfor")

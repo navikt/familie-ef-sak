@@ -62,7 +62,7 @@ internal class OppgaveServiceTest {
         oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak, FRIST_FERDIGSTILLELSE_BEH_SAK)
 
         assertThat(slot.captured.enhetsnummer).isEqualTo(ENHETSNUMMER)
-        assertThat(slot.captured.saksId).isEqualTo(FAGSAK_ID.toString())
+        assertThat(slot.captured.saksId).isEqualTo(FAGSAK_EKSTERN_ID.toString())
         assertThat(slot.captured.ident).isEqualTo(OppgaveIdentV2(ident = aktørIdentFraPdl, gruppe = IdentGruppe.AKTOERID))
         assertThat(slot.captured.behandlingstema).isEqualTo(Behandlingstema.Overgangsstønad.value)
         assertThat(slot.captured.fristFerdigstillelse).isEqualTo(LocalDate.now().plusDays(1))
@@ -147,9 +147,10 @@ internal class OppgaveServiceTest {
     }
 
     private fun lagTestFagsak(): Fagsak {
-        return Fagsak(id = FAGSAK_ID, stønadstype = Stønadstype.OVERGANGSSTØNAD).also {
-            it.søkerIdenter = setOf(FagsakPerson(ident = FNR))
-        }
+        return Fagsak(id = FAGSAK_ID, stønadstype = Stønadstype.OVERGANGSSTØNAD, eksternId = EksternFagsakId(FAGSAK_EKSTERN_ID))
+                .also {
+                    it.søkerIdenter = setOf(FagsakPerson(ident = FNR))
+                }
     }
 
     private fun lagTestOppgave(): Oppgave {
@@ -171,6 +172,7 @@ internal class OppgaveServiceTest {
     companion object {
 
         private val FAGSAK_ID = UUID.fromString("1242f220-cad3-4640-95c1-190ec814c91e")
+        private val FAGSAK_EKSTERN_ID = 98765L
         private val GSAK_OPPGAVE_ID = 12345L
         private val BEHANDLING_ID = UUID.fromString("1c4209bd-3217-4130-8316-8658fe300a84")
         private const val ENHETSNUMMER = "enhetnr"
