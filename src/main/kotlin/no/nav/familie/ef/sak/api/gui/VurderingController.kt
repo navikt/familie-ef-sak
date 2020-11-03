@@ -37,9 +37,9 @@ class VurderingController(private val vurderingService: VurderingService,
     }
 
     @PostMapping("/{behandlingId}/inngangsvilkar/fullfor")
-    fun validerInngangsvilkår(@PathVariable behandlingId: UUID): Ressurs<Long> {
+    fun validerInngangsvilkår(@PathVariable behandlingId: UUID): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         val behandling = behandlingService.hentBehandling(behandlingId)
-        return Ressurs.success(stegService.håndterInngangsvilkår(behandling).eksternId.id)
+        return Ressurs.success(stegService.håndterInngangsvilkår(behandling).id)
     }
 }

@@ -29,7 +29,7 @@ App'en vil starte opp en container med siste versjon av postgres.
 
 For å kjøre opp postgres containern så kjører man `docker-compose up`
 For å ta ned containern så kjører man `docker-compose down`
-For å slette datan i db:en så kan man `docker-compose down -v`
+For å slette volymen `docker-compose down -v`
 
 
 ## Produksjonssetting

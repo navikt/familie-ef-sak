@@ -53,7 +53,7 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
                     tema = Tema.ENF,
                     oppgavetype = oppgavetype,
                     fristFerdigstillelse = fristForFerdigstillelse,
-                    beskrivelse = lagOppgaveTekst(fagsak.eksternId.id.toString(), beskrivelse),
+                    beskrivelse = lagOppgaveTekst(fagsak.id.toString(), beskrivelse),
                     enhetsnummer = enhetId ?: enhetsnummer?.enhetId,
                     behandlingstema = finnBehandlingstema(fagsak.stønadstype).value,
                     tilordnetRessurs = tilordnetNavIdent
@@ -98,14 +98,14 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
         oppgaveClient.ferdigstillOppgave(gsakOppgaveId)
     }
 
-    fun lagOppgaveTekst(eksternFagsakId: String, beskrivelse: String? = null): String {
+    fun lagOppgaveTekst(fagsakId: String, beskrivelse: String? = null): String {
         return if (beskrivelse != null) {
             beskrivelse + "\n"
         } else {
             ""
         } +
                "----- Opprettet av familie-ef-sak ${LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)} --- \n" +
-               "${frontendOppgaveUrl}/${eksternFagsakId}"
+               "${frontendOppgaveUrl}/${fagsakId}"
     }
 
     fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto {
