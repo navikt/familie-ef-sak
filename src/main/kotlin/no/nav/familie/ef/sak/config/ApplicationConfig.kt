@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Import
 import org.springframework.data.jdbc.repository.config.EnableJdbcRepositories
+import org.springframework.scheduling.annotation.EnableScheduling
 
 @SpringBootConfiguration
 @ConfigurationPropertiesScan
@@ -23,6 +24,7 @@ import org.springframework.data.jdbc.repository.config.EnableJdbcRepositories
 @EnableJwtTokenValidation(ignore = ["org.springframework", "springfox.documentation.swagger"])
 @Import(RestTemplateAzure::class, RestTemplateSts::class, StsRestClient::class)
 @EnableOAuth2Client(cacheEnabled = true)
+@EnableScheduling
 class ApplicationConfig {
 
     private val logger = LoggerFactory.getLogger(ApplicationConfig::class.java)

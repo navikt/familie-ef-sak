@@ -23,8 +23,8 @@ internal class GrensesnittavstemmingTaskTest {
 
     @Test
     fun `doTask skal kalle avstemmingService med fradato fra payload og dato for triggerTid som parametere`() {
-        val fradatoSlot = slot<LocalDate>()
-        val tildatoSlot = slot<LocalDate>()
+        val fradatoSlot = slot<LocalDateTime>()
+        val tildatoSlot = slot<LocalDateTime>()
         justRun {
             avstemmingService.grensesnittavstemOppdrag(capture(fradatoSlot), capture(tildatoSlot))
         }
@@ -33,8 +33,8 @@ internal class GrensesnittavstemmingTaskTest {
                                               payload = LocalDate.of(2018, 4, 18).toString(),
                                               triggerTid = LocalDateTime.of(2018, 4, 19, 8, 0)))
 
-        assertThat(fradatoSlot.captured).isEqualTo(LocalDate.of(2018, 4, 18))
-        assertThat(tildatoSlot.captured).isEqualTo(LocalDate.of(2018, 4, 19))
+        assertThat(fradatoSlot.captured).isEqualTo(LocalDate.of(2018, 4, 18).atStartOfDay())
+        assertThat(tildatoSlot.captured).isEqualTo(LocalDate.of(2018, 4, 19).atStartOfDay())
     }
 
     @Test

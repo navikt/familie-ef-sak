@@ -10,6 +10,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Service
 @TaskStepBeskrivelse(taskStepType = GrensesnittavstemmingTask.TYPE, beskrivelse = "Utfører grensesnittavstemming mot økonomi.")
@@ -19,10 +20,12 @@ class GrensesnittavstemmingTask(private val avstemmingService: AvstemmingService
     val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
     override fun doTask(task: Task) {
-        val fradato = LocalDate.parse(task.payload)
-        logger.info("Gjør avstemming mot oppdrag fra og med $fradato til og med ${task.triggerTid.toLocalDate()}")
+        val fraTidspunkt = LocalDate.parse(task.payload).atStartOfDay()
+        val tilTidspunkt = task.triggerTid.toLocalDate().atStartOfDay()
 
-        avstemmingService.grensesnittavstemOppdrag(fradato, task.triggerTid.toLocalDate())
+        logger.info("Gjør avstemming mot oppdrag fra $fraTidspunkt til ${task.triggerTid.toLocalDate()}")
+
+        avstemmingService.grensesnittavstemOppdrag(fraTidspunkt, tilTidspunkt)
 
     }
 
