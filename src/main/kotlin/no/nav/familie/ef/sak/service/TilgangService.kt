@@ -25,7 +25,7 @@ class TilgangService(private val integrasjonerClient: FamilieIntegrasjonerClient
         }
     }
 
-    fun validerTilgangTilBehandling(behandlingId: Long) {
+    fun validerTilgangTilBehandling(behandlingId: UUID) {
         val fagsakId = behandlingService.hentBehandling(behandlingId).fagsakId
         val personIdent = fagsakService.hentFagsak(fagsakId).hentAktivIdent()
 

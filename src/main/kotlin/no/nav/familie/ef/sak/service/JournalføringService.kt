@@ -43,7 +43,8 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         val behandling: Behandling = hentBehandling(journalføringRequest)
         val journalpost = hentJournalpost(journalpostId)
 
-        oppdaterJournalpost(journalpost, journalføringRequest.dokumentTitler, journalføringRequest.fagsakId)
+        val eksternFagsakId = fagsakService.hentEksternId(journalføringRequest.fagsakId)
+        oppdaterJournalpost(journalpost, journalføringRequest.dokumentTitler, eksternFagsakId)
         ferdigstillJournalføring(journalpostId, journalførendeEnhet)
         ferdigstillJournalføringsoppgave(journalføringRequest)
 
@@ -75,14 +76,14 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
             ?: opprettBehandlingMedBehandlingstype(journalføringRequest.behandling.behandlingstype, journalføringRequest.fagsakId)
 
 
-    private fun opprettBehandlingMedBehandlingstype(behandlingsType: BehandlingType?, fagsakId: Long): Behandling {
+    private fun opprettBehandlingMedBehandlingstype(behandlingsType: BehandlingType?, fagsakId: UUID): Behandling {
         val fagsak = fagsakService.hentFagsak(fagsakId)
         return behandlingService.opprettBehandling(behandlingType = behandlingsType!!,
                                             fagsakId = fagsak.id)
     }
 
-    private fun hentEksisterendeBehandling(behandlingsId: Long?): Behandling? {
-        return behandlingsId?.let { behandlingService.hentBehandling(it) }
+    private fun hentEksisterendeBehandling(behandlingId: UUID?): Behandling? {
+        return behandlingId?.let { behandlingService.hentBehandling(it) }
     }
 
     private fun knyttJournalpostTilBehandling(journalpost: Journalpost, behandling: Behandling) {

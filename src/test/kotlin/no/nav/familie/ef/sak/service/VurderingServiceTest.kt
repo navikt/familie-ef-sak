@@ -98,7 +98,7 @@ internal class VurderingServiceTest {
         every { vilkårsvurderingRepository.findByIdOrNull(vurderingId) } returns null
         assertThat(catchThrowable {
             vurderingService.oppdaterVilkår(VilkårsvurderingDto(id = vurderingId,
-                                                                behandlingId = BEHANDLING_EKSTERN_ID,
+                                                                behandlingId = BEHANDLING_ID,
                                                                 resultat = Vilkårsresultat.JA,
                                                                 vilkårType = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
                                                                 endretAv = "",
@@ -117,7 +117,7 @@ internal class VurderingServiceTest {
 
         assertThat(catchThrowable {
             vurderingService.oppdaterVilkår(VilkårsvurderingDto(id = vilkårsvurdering.id,
-                                                                behandlingId = BEHANDLING_EKSTERN_ID,
+                                                                behandlingId = BEHANDLING_ID,
                                                                 resultat = Vilkårsresultat.JA,
                                                                 vilkårType = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
                                                                 endretAv = "",
@@ -139,7 +139,7 @@ internal class VurderingServiceTest {
                 { it.invocation.args.first() as Vilkårsvurdering }
 
         vurderingService.oppdaterVilkår(VilkårsvurderingDto(id = vilkårsvurdering.id,
-                                                            behandlingId = BEHANDLING_EKSTERN_ID,
+                                                            behandlingId = BEHANDLING_ID,
                                                             resultat = Vilkårsresultat.JA,
                                                             begrunnelse = "Ok",
                                                             unntak = "Nei",
@@ -166,7 +166,7 @@ internal class VurderingServiceTest {
 
         assertThat(catchThrowable {
             vurderingService.oppdaterVilkår(VilkårsvurderingDto(id = vilkårsvurdering.id,
-                                                                behandlingId = BEHANDLING_EKSTERN_ID,
+                                                                behandlingId = BEHANDLING_ID,
                                                                 resultat = Vilkårsresultat.JA,
                                                                 begrunnelse = "Ok",
                                                                 unntak = "Nei",
