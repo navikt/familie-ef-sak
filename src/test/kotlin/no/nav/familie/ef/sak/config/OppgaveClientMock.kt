@@ -7,6 +7,7 @@ import no.nav.familie.kontrakter.felles.oppgave.*
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
+import java.lang.IllegalStateException
 import java.time.LocalDate
 
 
@@ -50,7 +51,7 @@ class OppgaveClientMock() {
                        behandlesAvApplikasjon = "FS22",
                        beskrivelse = beskivelse,
                        tema = Tema.ENF,
-                       behandlingstema = "ab0180",
+                       behandlingstema = "ab0071",
                        oppgavetype = oppgavetype.value,
                        opprettetTidspunkt = LocalDate.of(
                                2020,
