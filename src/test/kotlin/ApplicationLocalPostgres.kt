@@ -13,7 +13,7 @@ fun main(args: Array<String>) {
     val properties = Properties()
     properties["DATASOURCE_URL"] = "jdbc:postgresql://localhost:5432/familie-ef-sak"
     properties["DATASOURCE_USERNAME"] = "postgres"
-    properties["DATASOURCE_PASSWORD"] = "postgres"
+    properties["DATASOURCE_PASSWORD"] = "test"
     properties["DATASOURCE_DRIVER"] = "org.postgresql.Driver"
 
     SpringApplicationBuilder(ApplicationLocalPostgres::class.java)
