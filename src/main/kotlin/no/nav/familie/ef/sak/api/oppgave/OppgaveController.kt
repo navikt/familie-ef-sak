@@ -40,8 +40,8 @@ class OppgaveController(private val oppgaveService: OppgaveService, private val 
         tilgangService.validerHarSaksbehandlerrolle()
         val efOppgave = oppgaveService.hentEfOppgave(gsakOppgaveId)
         return efOppgave?.let { Ressurs.success(OppgaveDto(it.behandlingId, it.gsakOppgaveId)) }
-               ?: Ressurs.funksjonellFeil("Denne oppgaven kan ikke behandles i denne løsningen",
-                                          "Denne oppgaven kan ikke behandles i denne løsningen")
+               ?: Ressurs.funksjonellFeil("Denne oppgaven må behandles i Gosys og Infotrygd",
+                                          "Denne oppgaven må behandles i Gosys og Infotrygd")
     }
 
 
