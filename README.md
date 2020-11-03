@@ -27,6 +27,11 @@ Databasen kan aksesseres på `localhost:8093/h2-console`. Log på jdbc url `jdbc
 For å kjøre opp appen lokalt med en postgres-database, kan en kjøre `ApplicationLocalPostgres`.
 App'en vil starte opp en container med siste versjon av postgres. 
 
+For å kjøre opp postgres containern så kjører man `docker-compose up`
+For å ta ned containern så kjører man `docker-compose down`
+For å slette datan i db:en så kan man `docker-compose down -v`
+
+
 ## Produksjonssetting
 Applikasjonen vil deployes til produksjon ved ny commit på master-branchen. Det er dermed tilstrekkelig å merge PR for å trigge produksjonsbygget. 
 
