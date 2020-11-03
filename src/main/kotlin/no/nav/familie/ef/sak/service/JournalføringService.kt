@@ -77,9 +77,8 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
 
 
     private fun opprettBehandlingMedBehandlingstype(behandlingsType: BehandlingType?, fagsakId: UUID): Behandling {
-        val fagsak = fagsakService.hentFagsak(fagsakId)
         return behandlingService.opprettBehandling(behandlingType = behandlingsType!!,
-                                            fagsakId = fagsak.id)
+                                            fagsakId = fagsakId)
     }
 
     private fun hentEksisterendeBehandling(behandlingId: UUID?): Behandling? {

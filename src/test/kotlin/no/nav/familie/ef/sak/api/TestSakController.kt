@@ -11,6 +11,7 @@ import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.util.*
 
 @RestController
 @RequestMapping(path = ["/api/external/sak/"])
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController
 class TestSakController(private val behandlingService: BehandlingService, private val stegService: StegService, private val fagsakService: FagsakService) {
 
     @PostMapping("dummy")
-    fun dummy(): Long {
+    fun dummy(): UUID {
         //TODO Dette steget må trigges et annet sted når vi har satt flyten for opprettelse av behandling.
         // Trigger den her midlertidig for å kunne utføre inngangsvilkår-steget
         val fagsakDto = fagsakService.hentEllerOpprettFagsak(Testsøknad.søknadOvergangsstønad.personalia.verdi.fødselsnummer.verdi.verdi, Stønadstype.OVERGANGSSTØNAD)
@@ -27,6 +28,6 @@ class TestSakController(private val behandlingService: BehandlingService, privat
         val behandling = behandlingService.opprettBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, fagsak.id)
         behandlingService.mottaSøknadForOvergangsstønad(Testsøknad.søknadOvergangsstønad, behandling.id, fagsak.id, "123")
         stegService.håndterRegistrerOpplysninger(behandling, "")
-        return behandling.eksternId.id
+        return behandling.id
     }
 }
