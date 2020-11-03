@@ -5,6 +5,9 @@ import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.YtelseType
 import no.nav.familie.ef.sak.api.dto.AndelTilkjentYtelseDTO
 import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.repository.domain.Behandling
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
@@ -33,18 +36,16 @@ object DataGenerator {
                            stønadTom = LocalDate.now(),
                            saksnummer = tilfeldigSaksnummer(),
                            vedtaksdato = LocalDate.now(),
-                           behandlingId = Math.random().toLong(),
-                           saksbehandler = tilfeldigFødselsnummer(),
+                           behandlingEksternId = Math.random().toLong(),
                            andelerTilkjentYtelse = andelerTilkjentYtelse)
 
-    fun tilfeldigTilkjentYtelse(antallAndelerTilkjentYteelse: Int = 1) =
+    fun tilfeldigTilkjentYtelse(behandling: Behandling = behandling(fagsak()), antallAndelerTilkjentYteelse: Int = 1) =
             TilkjentYtelse(personident = tilfeldigFødselsnummer(),
                            stønadFom = LocalDate.now(),
                            stønadTom = LocalDate.now(),
                            saksnummer = tilfeldigSaksnummer(),
-                           saksbehandler = tilfeldigFødselsnummer(),
                            vedtaksdato = LocalDate.now(),
-                           behandlingId = Math.random().toLong(),
+                           behandlingEksternId = behandling.eksternId.id,
                            andelerTilkjentYtelse = flereTilfeldigeAndelerTilkjentYtelse(antallAndelerTilkjentYteelse))
 
     fun tilfeldigTilkjentYtelseDto(): TilkjentYtelseDTO {

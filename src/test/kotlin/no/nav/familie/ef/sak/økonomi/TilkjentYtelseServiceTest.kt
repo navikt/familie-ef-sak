@@ -47,13 +47,13 @@ class TilkjentYtelseServiceTest {
 
         verify { tilkjentYtelseRepository.findByPersonident(tilkjentYtelse.personident) }
         verify { tilkjentYtelseRepository.insert(slot.captured) }
-        assertThat(slot.captured).isEqualToIgnoringGivenFields(tilkjentYtelse, "id")
+        assertThat(slot.captured).isEqualToIgnoringGivenFields(tilkjentYtelse, "id","sporbar")
 
     }
 
     @Test
     fun `hent tilkjent-ytelse-dto`() {
-        val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(3)
+        val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(antallAndelerTilkjentYteelse =  3)
         val id = tilkjentYtelse.id
         every { tilkjentYtelseRepository.findByIdOrNull(id) } returns tilkjentYtelse
 
@@ -85,7 +85,7 @@ class TilkjentYtelseServiceTest {
 
     @Test
     fun `iverksett utbetalingsoppdrag`() {
-        val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(3)
+        val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(antallAndelerTilkjentYteelse =  3)
                 .copy(status = TilkjentYtelseStatus.OPPRETTET)
         val id = tilkjentYtelse.id
         val utbetalingsoppdrag = lagTilkjentYtelseMedUtbetalingsoppdrag(tilkjentYtelse).utbetalingsoppdrag!!
@@ -112,7 +112,7 @@ class TilkjentYtelseServiceTest {
     fun `opphør aktiv tilkjent ytelse`() {
         val opphørDato = LocalDate.now()
         val originalTilkjentYtelse =
-                DataGenerator.tilfeldigTilkjentYtelse(3).copy(status = TilkjentYtelseStatus.AKTIV)
+                DataGenerator.tilfeldigTilkjentYtelse(antallAndelerTilkjentYteelse =  3).copy(status = TilkjentYtelseStatus.AKTIV)
         val avsluttetOriginalTilkjentYtelse = originalTilkjentYtelse.copy(status = TilkjentYtelseStatus.AVSLUTTET)
         val opphørtTilkjentYtelse = originalTilkjentYtelse.tilOpphør("saksbehandler", opphørDato)
         val id = originalTilkjentYtelse.id

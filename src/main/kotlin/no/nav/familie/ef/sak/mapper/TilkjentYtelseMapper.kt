@@ -13,10 +13,9 @@ fun TilkjentYtelseDTO.tilTilkjentYtelse(saksbehandler: String, status: TilkjentY
     val minStønadFom = this.andelerTilkjentYtelse.map { it.stønadFom }.minOrNull() ?: LocalDate.MIN
     val maxStønadTom = this.andelerTilkjentYtelse.map { it.stønadTom }.maxOrNull() ?: LocalDate.MAX
 
-    return TilkjentYtelse(behandlingId = behandlingId,
+    return TilkjentYtelse(behandlingEksternId = behandlingId,
                           personident = søker,
                           saksnummer = saksnummer,
-                          saksbehandler = saksbehandler,
                           stønadFom = minStønadFom,
                           stønadTom = maxStønadTom,
                           vedtaksdato = vedtaksdato,
@@ -38,7 +37,7 @@ fun TilkjentYtelseDTO.tilAndelerTilkjentYtelse(): List<AndelTilkjentYtelse> {
 
 fun TilkjentYtelse.tilDto(): TilkjentYtelseDTO {
     return TilkjentYtelseDTO(id = this.id,
-                             behandlingId = this.behandlingId,
+                             behandlingId = this.behandlingEksternId,
                              søker = this.personident,
                              saksnummer = this.saksnummer,
                              andelerTilkjentYtelse = this.andelerTilkjentYtelse.map { it.tilDto() })
@@ -57,8 +56,7 @@ fun TilkjentYtelse.tilOpphør(saksbehandler: String, opphørDato: LocalDate) =
         TilkjentYtelse(type = TilkjentYtelseType.OPPHØR,
                        personident = personident,
                        saksnummer = saksnummer,
-                       saksbehandler = saksbehandler,
                        opphørFom = opphørDato,
-                       behandlingId = behandlingId,
+                       behandlingEksternId = behandlingEksternId,
                        vedtaksdato = LocalDate.now(),
                        andelerTilkjentYtelse = andelerTilkjentYtelse)

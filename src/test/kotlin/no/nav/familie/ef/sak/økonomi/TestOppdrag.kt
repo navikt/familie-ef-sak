@@ -101,10 +101,9 @@ class TestOppdragGroup{
 
     val input: TilkjentYtelse by lazy {
         TilkjentYtelse (
-                behandlingId = 101,
+                behandlingEksternId = 101,
                 personident = personIdent!!,
                 saksnummer = "saksnr",
-                saksbehandler = "saksbehandler",
                 andelerTilkjentYtelse = andelerTilkjentYtelseInn,
                 vedtaksdato = LocalDate.now() // Ikke påkrevd, men exception ellers
         )
@@ -116,20 +115,20 @@ class TestOppdragGroup{
                 fagSystem = "EFOG",
                 saksnummer = "saksnr",
                 aktoer = personIdent!!,
-                saksbehandlerId = "saksbehandler",
+                saksbehandlerId = "VL",
                 avstemmingTidspunkt = LocalDateTime.now().truncatedTo(ChronoUnit.HOURS),
                 utbetalingsperiode = utbetalingsperioder.map { it.copy(behandlingId = 101) }
         )
 
         TilkjentYtelse (
                 id=input.id,
-                behandlingId = 101,
+                behandlingEksternId = 101,
                 personident = personIdent!!,
                 saksnummer = "saksnr",
-                saksbehandler = "saksbehandler",
                 andelerTilkjentYtelse = andelerTilkjentYtelseUt,
                 utbetalingsoppdrag = utbetalingsoppdrag,
                 vedtaksdato = input.vedtaksdato,
+                sporbar = input.sporbar,
                 stønadFom = andelerTilkjentYtelseUt.filter { it.stønadFom!= NULL_DATO }.minOfOrNull { it.stønadFom },
                 stønadTom = andelerTilkjentYtelseInn.filter { it.stønadTom!=NULL_DATO }.maxOfOrNull {  it.stønadTom }
         )

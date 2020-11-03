@@ -3,15 +3,16 @@ package no.nav.familie.ef.sak.repository.domain
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
+import org.springframework.data.relational.core.mapping.Embedded
 import java.time.LocalDate
 import java.util.*
 
 data class TilkjentYtelse(@Id
                           val id: UUID = UUID.randomUUID(),
-                          val behandlingId: Long, /// TODO  Gjøres om til UUID og "ekte" foreign key
+                          @Column("behandling_ekstern_id")
+                          val behandlingEksternId: Long,
                           val personident: String,
                           val saksnummer: String,
-                          val saksbehandler: String, /// TODO Legg til Sporbar() og fjern dette feltet
                           @Column("stonad_fom")
                           val stønadFom: LocalDate? = null,
                           @Column("stonad_tom")
@@ -22,7 +23,9 @@ data class TilkjentYtelse(@Id
                           val vedtaksdato: LocalDate? = null,
                           val status: TilkjentYtelseStatus = TilkjentYtelseStatus.IKKE_KLAR,
                           val type: TilkjentYtelseType = TilkjentYtelseType.FØRSTEGANGSBEHANDLING,
-                          val andelerTilkjentYtelse: List<AndelTilkjentYtelse>) {
+                          val andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+                          @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+                          val sporbar: Sporbar = Sporbar()) {
 
 }
 
