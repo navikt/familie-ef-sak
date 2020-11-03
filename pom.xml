@@ -34,7 +34,8 @@
         <springfox.version>3.0.0</springfox.version>
         <mockk.version>1.10.2</mockk.version>
         <fasterxml.version>2.11.3</fasterxml.version>
-        <felles.version>1.20201016090024_65c41e0</felles.version>
+        <felles.version>1.20201028102301_a931caa</felles.version>
+        <prosessering.version>1.20201103133134_ff6ad45</prosessering.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
         <kontrakter.version>2.0_20201020104434_9274b9d</kontrakter.version>
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
@@ -148,6 +149,11 @@
             <groupId>no.nav.familie.felles</groupId>
             <artifactId>http-client</artifactId>
             <version>${felles.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.familie</groupId>
+            <artifactId>prosessering-jdbc</artifactId>
+            <version>${prosessering.version}</version>
         </dependency>
         <dependency>
             <groupId>no.nav.familie.kontrakter</groupId>
