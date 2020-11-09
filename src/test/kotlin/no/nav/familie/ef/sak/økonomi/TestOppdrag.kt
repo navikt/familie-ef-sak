@@ -1,8 +1,11 @@
 package no.nav.familie.ef.sak.økonomi
 
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseMedMetaData
 import no.nav.familie.kontrakter.felles.oppdrag.Opphør
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
@@ -82,6 +85,7 @@ class TestOppdragGroup{
     private val utbetalingsperioder: MutableList<Utbetalingsperiode> = mutableListOf()
     private var oppdragKode110: Utbetalingsoppdrag.KodeEndring = Utbetalingsoppdrag.KodeEndring.NY
     private var personIdent: String?=null
+    private val eksternBehandlingId = 0L
 
     fun add(to: TestOppdrag) {
         when(to.type) {
@@ -101,7 +105,7 @@ class TestOppdragGroup{
 
     val input: TilkjentYtelse by lazy {
         TilkjentYtelse (
-                behandlingId = 101,
+                behandlingId = behandling(fagsak = fagsak()).id,
                 personident = personIdent!!,
                 saksnummer = "saksnr",
                 saksbehandler = "saksbehandler",
@@ -118,12 +122,12 @@ class TestOppdragGroup{
                 aktoer = personIdent!!,
                 saksbehandlerId = "saksbehandler",
                 avstemmingTidspunkt = LocalDateTime.now().truncatedTo(ChronoUnit.HOURS),
-                utbetalingsperiode = utbetalingsperioder.map { it.copy(behandlingId = 101) }
+                utbetalingsperiode = utbetalingsperioder.map { it.copy(behandlingId = eksternBehandlingId) }
         )
 
         TilkjentYtelse (
-                id=input.id,
-                behandlingId = 101,
+                id = input.id,
+                behandlingId = input.behandlingId,
                 personident = personIdent!!,
                 saksnummer = "saksnr",
                 saksbehandler = "saksbehandler",
@@ -230,8 +234,8 @@ object TestOppdragRunner {
         }
     }
 
-    fun lagTilkjentYtelseMedUtbetalingsoppdrag(nyTilkjentYtelse:TilkjentYtelse,forrigeTilkjentYtelse:TilkjentYtelse? = null) =
+    fun lagTilkjentYtelseMedUtbetalingsoppdrag(nyTilkjentYtelse:TilkjentYtelse, forrigeTilkjentYtelse:TilkjentYtelse? = null) =
             UtbetalingsoppdragGenerator
-                    .lagTilkjentYtelseMedUtbetalingsoppdrag(nyTilkjentYtelse,forrigeTilkjentYtelse)
+                    .lagTilkjentYtelseMedUtbetalingsoppdrag(TilkjentYtelseMedMetaData( tilkjentYtelse = nyTilkjentYtelse, eksternBehandlingId = 0L), forrigeTilkjentYtelse)
 
 }

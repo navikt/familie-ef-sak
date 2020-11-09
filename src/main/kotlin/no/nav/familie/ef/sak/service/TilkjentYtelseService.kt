@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
 import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.integration.FAGSYSTEM
 import no.nav.familie.ef.sak.integration.ØkonomiKlient
+import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseMedMetaData
 import no.nav.familie.ef.sak.økonomi.UtbetalingsoppdragGenerator.lagTilkjentYtelseMedUtbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
@@ -23,7 +24,10 @@ import java.util.*
 
 @Service
 class TilkjentYtelseService(private val økonomiKlient: ØkonomiKlient,
-                            private val tilkjentYtelseRepository: TilkjentYtelseRepository) {
+                            private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+                            private val fagsakService: FagsakService,
+                            private val behandlingService: BehandlingService
+) {
 
     @Transactional
     fun opprettTilkjentYtelse(tilkjentYtelseDTO: TilkjentYtelseDTO): UUID {
@@ -44,7 +48,12 @@ class TilkjentYtelseService(private val økonomiKlient: ØkonomiKlient,
     @Transactional
     fun iverksettUtbetalingsoppdrag(ytelseId: UUID) {
         val tilkjentYtelse = hentTilkjentYtelse(ytelseId)
-        val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
+
+        val behandling = behandlingService.hentBehandling(tilkjentYtelse.behandlingId)
+        val fagsakEksternId =  fagsakService.hentEksternId(fagsakId = behandling.fagsakId)
+        val tilkjentYtelseMedEksternId = TilkjentYtelseMedMetaData(tilkjentYtelse = tilkjentYtelse, eksternBehandlingId = behandling.eksternId.id, eksternFagsakId = fagsakEksternId)
+
+        val saksbehandlerId = SikkerhetContext.hentSaksbehandler() // TODO SKALL DENNE BRUKES?
 
         when (tilkjentYtelse.type) {
             TilkjentYtelseType.OPPHØR -> error("Tilkjent ytelse ${tilkjentYtelse.id} er opphørt")
@@ -55,7 +64,7 @@ class TilkjentYtelseService(private val økonomiKlient: ØkonomiKlient,
                 TilkjentYtelseStatus.IKKE_KLAR -> error("Tilkjent ytelse ${tilkjentYtelse.id} er ikke klar")
                 TilkjentYtelseStatus.AVSLUTTET -> error("Tilkjent ytelse ${tilkjentYtelse.id} er avsluttet")
                 TilkjentYtelseStatus.OPPRETTET -> sendUtbetalingsoppdragOgOppdaterStatus(
-                        tilkjentYtelse,
+                        tilkjentYtelseMedEksternId,
                         TilkjentYtelseStatus.SENDT_TIL_IVERKSETTING)
             }
         }
@@ -80,26 +89,30 @@ class TilkjentYtelseService(private val økonomiKlient: ØkonomiKlient,
         }
     }
 
+    //TODO SPØRR JOBI OM DENNE SKALL BRUKES MED TANKE PÅ DEPRICATED METODEN 'tilOpphør'
     private fun lagOpphørOgSendUtbetalingsoppdrag(tilkjentYtelse: TilkjentYtelse, opphørDato: LocalDate): UUID {
 
-        tilkjentYtelseRepository.update(tilkjentYtelse.copy(status = TilkjentYtelseStatus.AVSLUTTET))
+        val tilkjentYtelse = tilkjentYtelseRepository.update(tilkjentYtelse.copy(status = TilkjentYtelseStatus.AVSLUTTET))
 
         val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
         val lagretOpphørtTilkjentYtelse = tilkjentYtelseRepository.insert(tilkjentYtelse.tilOpphør(saksbehandlerId, opphørDato))
+        val behandling = behandlingService.hentBehandling(lagretOpphørtTilkjentYtelse.behandlingId)
+        //TODO FIKS HER MARTINE
+        val tilkjentYtelseMedEksternId = TilkjentYtelseMedMetaData(tilkjentYtelse = tilkjentYtelse, eksternBehandlingId = eksternBehandlingId)
 
-        sendUtbetalingsoppdragOgOppdaterStatus(lagretOpphørtTilkjentYtelse,
+        sendUtbetalingsoppdragOgOppdaterStatus(tilkjentYtelseMedEksternId,
                                                TilkjentYtelseStatus.SENDT_TIL_IVERKSETTING)
 
         return lagretOpphørtTilkjentYtelse.id
     }
 
-    private fun sendUtbetalingsoppdragOgOppdaterStatus(tilkjentYtelse: TilkjentYtelse,
+    private fun sendUtbetalingsoppdragOgOppdaterStatus(tilkjentYtelseMedMetaData: TilkjentYtelseMedMetaData,
                                                        nyStatus: TilkjentYtelseStatus) {
-        val utbetalingsoppdrag = lagTilkjentYtelseMedUtbetalingsoppdrag(tilkjentYtelse)
+        val utbetalingsoppdrag = lagTilkjentYtelseMedUtbetalingsoppdrag(tilkjentYtelseMedMetaData)
                 .utbetalingsoppdrag ?: error("Utbetalingsoppdrag har ikke blitt opprettet")
 
         // Rulles tilbake hvis økonomiKlient.iverksettOppdrag under kaster en exception
-        tilkjentYtelseRepository.update(tilkjentYtelse.copy(utbetalingsoppdrag = utbetalingsoppdrag,
+        tilkjentYtelseRepository.update(tilkjentYtelseMedMetaData.tilkjentYtelse.copy(utbetalingsoppdrag = utbetalingsoppdrag,
                                                           status = nyStatus))
 
         økonomiKlient.iverksettOppdrag(utbetalingsoppdrag).getDataOrThrow()

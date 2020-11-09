@@ -5,8 +5,9 @@ import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
 import no.nav.familie.ef.sak.api.dto.TilkjentYtelseTestDTO
 import no.nav.familie.ef.sak.integration.ØkonomiKlient
 import no.nav.familie.ef.sak.mapper.tilTilkjentYtelse
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.repository.domain.YtelseType
+import no.nav.familie.ef.sak.repository.domain.*
+import no.nav.familie.ef.sak.service.BehandlingService
+import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.TilkjentYtelseService
 import no.nav.familie.ef.sak.økonomi.UtbetalingsoppdragGenerator
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -22,7 +23,7 @@ import java.util.*
 @RestController
 @RequestMapping(path = ["/api/tilkjentytelse"])
 @ProtectedWithClaims(issuer = "azuread")
-class TilkjentYtelseController(private val tilkjentYtelseService: TilkjentYtelseService, private val økonomiKlient: ØkonomiKlient) {
+class TilkjentYtelseController(private val tilkjentYtelseService: TilkjentYtelseService, private val økonomiKlient: ØkonomiKlient, private val behandlingService: BehandlingService, val fagsakService: FagsakService) {
 
     @PostMapping
     fun opprettTilkjentYtelse(@RequestBody tilkjentYtelseDTO: TilkjentYtelseDTO): ResponseEntity<Long> {
@@ -75,8 +76,12 @@ class TilkjentYtelseController(private val tilkjentYtelseService: TilkjentYtelse
         val nyTilkjentYtelse = tilkjentYtelseTestDTO.nyTilkjentYtelse
         val forrigeTilkjentYtelse = tilkjentYtelseTestDTO.forrigeTilkjentYtelse
 
+        val fagsak = fagsakService.hentEllerOpprettFagsak(tilkjentYtelseTestDTO.nyTilkjentYtelse.personident, stønadstype = Stønadstype.OVERGANGSSTØNAD);
+
+        val behandling = behandlingService.opprettBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING, fagsakId = fagsak.id)
+        val nyTilkjentYtelseMedEksternId = TilkjentYtelseMedMetaData(tilkjentYtelse = nyTilkjentYtelse, eksternBehandlingId = behandling.eksternId.id)
         val tilkjentYtelseMedUtbetalingsoppdrag = UtbetalingsoppdragGenerator.lagTilkjentYtelseMedUtbetalingsoppdrag(
-                nyTilkjentYtelse = nyTilkjentYtelse,
+                nyTilkjentYtelseMedMetaData = nyTilkjentYtelseMedEksternId,
                 forrigeTilkjentYtelse = forrigeTilkjentYtelse)
 
         økonomiKlient.iverksettOppdrag(tilkjentYtelseMedUtbetalingsoppdrag.utbetalingsoppdrag!!)
@@ -87,7 +92,7 @@ class TilkjentYtelseController(private val tilkjentYtelseService: TilkjentYtelse
     fun dummyTilkjentYtelse(): Ressurs<TilkjentYtelse> {
         val søker = "12345678911"
         val andelTilkjentYtelseDto = AndelTilkjentYtelseDTO(personIdent = søker, beløp = 1000, stønadFom = LocalDate.now(), stønadTom = LocalDate.now(), type = YtelseType.OVERGANGSSTØNAD)
-        val tilkjentYtelseDto = TilkjentYtelseDTO(søker = søker, saksnummer = "12345", behandlingId = "54321", andelerTilkjentYtelse = listOf(andelTilkjentYtelseDto, andelTilkjentYtelseDto))
+        val tilkjentYtelseDto = TilkjentYtelseDTO(søker = søker, saksnummer = "12345", behandlingId = UUID.randomUUID(), andelerTilkjentYtelse = listOf(andelTilkjentYtelseDto, andelTilkjentYtelseDto))
         return Ressurs.success(tilkjentYtelseDto.tilTilkjentYtelse(saksbehandler = "VL"))
     }
 

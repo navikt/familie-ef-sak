@@ -1,5 +1,7 @@
 package no.nav.familie.ef.sak.api.dto
 
+import no.nav.familie.ef.sak.repository.domain.Behandling
+import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.YtelseType
 import java.time.LocalDate
@@ -9,7 +11,7 @@ data class TilkjentYtelseDTO(val søker: String,
                              val saksnummer: String,
                              val vedtaksdato: LocalDate = LocalDate.now(),
                              val id: UUID = UUID.randomUUID(),
-                             val behandlingId: String,
+                             val behandlingId: UUID,
                              val andelerTilkjentYtelse: List<AndelTilkjentYtelseDTO>) {
 
     fun valider() {

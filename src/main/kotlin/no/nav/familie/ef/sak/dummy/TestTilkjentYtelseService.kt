@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.repository.domain.YtelseType
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.TilkjentYtelseService
+import no.nav.familie.ef.sak.økonomi.tilYtelseType
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
@@ -31,11 +32,11 @@ class TestTilkjentYtelseService(private val behandlingService: BehandlingService
         val andelTilkjentYtelseDTO = AndelTilkjentYtelseDTO(beløp = dummyIverksettingDTO.beløp,
                                                             stønadFom = dummyIverksettingDTO.stønadFom,
                                                             stønadTom = dummyIverksettingDTO.stønadTom,
-                                                            type = YtelseType.fraStønadstype(dummyIverksettingDTO.stønadstype),
+                                                            type = dummyIverksettingDTO.stønadstype.tilYtelseType(),
                                                             personIdent = dummyIverksettingDTO.personIdent)
         val tilkjentYtelseDTO = TilkjentYtelseDTO(søker = fagsakDto.personIdent,
                                                   saksnummer = fagsakDto.id.toString(),
-                                                  behandlingId = behandling.id.toString(),
+                                                  behandlingId = behandling.id,
                                                   andelerTilkjentYtelse = listOf(andelTilkjentYtelseDTO))
 
         val tilkjentYtelseId = tilkjentYtelseService.opprettTilkjentYtelse(tilkjentYtelseDTO = tilkjentYtelseDTO)
