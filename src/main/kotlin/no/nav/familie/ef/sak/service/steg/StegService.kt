@@ -2,9 +2,11 @@ package no.nav.familie.ef.sak.service.steg
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ef.sak.config.RolleConfig
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.steg.StegType.BEHANDLING_FERDIGSTILT
+import no.nav.familie.ef.sak.service.steg.StegType.VILKÅRSVURDERE_INNGANGSVILKÅR
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -14,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional
 class StegService(
         private val behandlingSteg: List<BehandlingSteg<*>>,
         private val behandlingService: BehandlingService,
+        private val rolleConfig: RolleConfig,
 ) {
 
     private val stegSuksessMetrics: Map<StegType, Counter> = initStegMetrikker("suksess")
@@ -29,6 +32,14 @@ class StegService(
         }
     }
 
+    @Transactional
+    fun håndterInngangsvilkår(behandling: Behandling): Behandling {
+        val behandlingSteg: InngangsvilkårSteg = hentBehandlingSteg(VILKÅRSVURDERE_INNGANGSVILKÅR) as InngangsvilkårSteg
+        return håndterSteg(behandling, behandlingSteg) {
+            behandlingSteg.utførStegOgAngiNeste(behandling, "")
+        }
+    }
+
 
     // Generelle stegmetoder
     private fun håndterSteg(behandling: Behandling,
@@ -37,11 +48,10 @@ class StegService(
         val stegType = behandlingSteg.stegType()
         try {
             val saksbehandlerNavn = SikkerhetContext.hentSaksbehandlerNavn()
-            val behandlerRolle =
-                    SikkerhetContext.hentBehandlerRolleForSteg(behandling.steg.tillattFor.minByOrNull { it.nivå })
+            val harTilgangTilSteg = SikkerhetContext.harTilgangTilGittRolle(rolleConfig, behandling.steg.tillattFor)
 
             LOG.info("$saksbehandlerNavn håndterer $stegType på behandling ${behandling.id}")
-            if (!behandling.steg.tillattFor.contains(behandlerRolle)) {
+            if (!harTilgangTilSteg) {
                 error("$saksbehandlerNavn kan ikke utføre steg '${stegType.displayName()} pga manglende rolle.")
             }
 
@@ -49,7 +59,7 @@ class StegService(
                 error("Behandlingen er avsluttet og stegprosessen kan ikke gjenåpnes")
             }
 
-            if (stegType.erSaksbehandlerSteg() && stegType.kommerEtter(behandling.steg)) {
+            if (stegType.kommerEtter(behandling.steg)) {
                 error("$saksbehandlerNavn prøver å utføre steg '${stegType.displayName()}', men behandlingen er på steg '${behandling.steg.displayName()}'")
             }
 

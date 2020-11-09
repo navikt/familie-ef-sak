@@ -2,16 +2,13 @@ package no.nav.familie.ef.sak.økonomi
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
-import no.nav.familie.ef.sak.økonomi.Utbetalingsoppdrag.lagUtbetalingsoppdrag
+import no.nav.familie.ef.sak.økonomi.UtbetalingsoppdragGenerator.lagTilkjentYtelseMedUtbetalingsoppdrag
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
-import org.springframework.test.context.ActiveProfiles
 
-@ActiveProfiles("local", "mock-oauth")
-@Tag("integration")
+
 internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
 
     @Autowired
@@ -41,7 +38,7 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
     @Test
     fun `Lagre utbetalingsoppdrag`() {
         val lagretTilkjentYtelse = tilkjentYtelseRepository.insert(DataGenerator.tilfeldigTilkjentYtelse(2))
-        val utbetalingsoppdrag = lagUtbetalingsoppdrag("saksbehandler", lagretTilkjentYtelse)
+        val utbetalingsoppdrag = lagTilkjentYtelseMedUtbetalingsoppdrag(lagretTilkjentYtelse).utbetalingsoppdrag!!
 
         tilkjentYtelseRepository.update(lagretTilkjentYtelse.copy(utbetalingsoppdrag = utbetalingsoppdrag))
 

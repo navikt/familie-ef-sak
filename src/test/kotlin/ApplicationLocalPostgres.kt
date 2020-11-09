@@ -16,7 +16,7 @@ fun main(args: Array<String>) {
     properties["DATASOURCE_PASSWORD"] = "test"
     properties["DATASOURCE_DRIVER"] = "org.postgresql.Driver"
 
-    SpringApplicationBuilder(ApplicationConfig::class.java)
+    SpringApplicationBuilder(ApplicationLocalPostgres::class.java)
             .profiles("local",
                       "mock-integrasjoner",
                       "mock-pdl",

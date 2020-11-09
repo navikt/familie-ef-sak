@@ -2,7 +2,11 @@ package no.nav.familie.ef.sak.service
 
 import io.mockk.*
 import no.nav.familie.ef.sak.integration.OppgaveClient
+import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.integration.dto.familie.Arbeidsfordelingsenhet
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlAktørId
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlHentIdenter
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlIdent
 import no.nav.familie.ef.sak.repository.BehandlingRepository
 import no.nav.familie.ef.sak.repository.FagsakRepository
 import no.nav.familie.ef.sak.repository.OppgaveRepository
@@ -26,34 +30,40 @@ internal class OppgaveServiceTest {
     private val behandlingRepository = mockk<BehandlingRepository>()
     private val fagsakRepository = mockk<FagsakRepository>()
     private val oppgaveRepository = mockk<OppgaveRepository>()
+    private val pdlClient = mockk<PdlClient>()
 
     private val oppgaveService =
-            OppgaveService(oppgaveClient,
-                           behandlingRepository,
-                           fagsakRepository,
-                           oppgaveRepository,
-                           arbeidsfordelingService,
-                           URI.create("https://ensligmorellerfar.prod-fss.nais.io/fagsak"))
+            OppgaveService(
+                    oppgaveClient,
+                    behandlingRepository,
+                    fagsakRepository,
+                    oppgaveRepository,
+                    arbeidsfordelingService,
+                    pdlClient,
+                    URI.create("https://ensligmorellerfar.prod-fss.nais.io/fagsak"),
+            )
 
     @Test
     fun `Opprett oppgave skal samle data og opprette en ny oppgave basert på fagsak, behandling, fnr og enhet`() {
+        val aktørIdentFraPdl = "AKTØERIDENT"
         every { behandlingRepository.findByIdOrNull(BEHANDLING_ID) } returns lagTestBehandling()
         every { fagsakRepository.findByIdOrNull(FAGSAK_ID) } returns lagTestFagsak()
         every { behandlingRepository.update(any()) } returns lagTestBehandling()
-        every { oppgaveRepository.update(any()) } returns lagTestOppgave()
+        every { oppgaveRepository.insert(any()) } returns lagTestOppgave()
         every {
             oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any())
         } returns null
         every { arbeidsfordelingService.hentNavEnhet(any()) } returns Arbeidsfordelingsenhet(enhetId = ENHETSNUMMER,
-                                                                                             enhetNavn = ENHETSNAVN)
+                enhetNavn = ENHETSNAVN)
         val slot = slot<OpprettOppgaveRequest>()
         every { oppgaveClient.opprettOppgave(capture(slot)) } returns GSAK_OPPGAVE_ID
+        every { pdlClient.hentAktørId(any()) } returns PdlHentIdenter(PdlAktørId(listOf(PdlIdent(aktørIdentFraPdl))))
 
         oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak, FRIST_FERDIGSTILLELSE_BEH_SAK)
 
         assertThat(slot.captured.enhetsnummer).isEqualTo(ENHETSNUMMER)
-        assertThat(slot.captured.saksId).isEqualTo(FAGSAK_ID.toString())
-        assertThat(slot.captured.ident).isEqualTo(OppgaveIdentV2(ident = FNR, gruppe = IdentGruppe.FOLKEREGISTERIDENT))
+        assertThat(slot.captured.saksId).isEqualTo(FAGSAK_EKSTERN_ID.toString())
+        assertThat(slot.captured.ident).isEqualTo(OppgaveIdentV2(ident = aktørIdentFraPdl, gruppe = IdentGruppe.AKTOERID))
         assertThat(slot.captured.behandlingstema).isEqualTo(Behandlingstema.Overgangsstønad.value)
         assertThat(slot.captured.fristFerdigstillelse).isEqualTo(LocalDate.now().plusDays(1))
         assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())
@@ -88,7 +98,7 @@ internal class OppgaveServiceTest {
         val slot = slot<Long>()
         every { oppgaveClient.ferdigstillOppgave(capture(slot)) } just runs
 
-        oppgaveService.ferdigstillOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak)
+        oppgaveService.ferdigstillBehandleOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak)
         assertThat(slot.captured).isEqualTo(GSAK_OPPGAVE_ID)
     }
 
@@ -97,10 +107,10 @@ internal class OppgaveServiceTest {
         every {
             oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any())
         } returns null
-        every { oppgaveRepository.update(any()) } returns lagTestOppgave()
+        every { oppgaveRepository.insert(any()) } returns lagTestOppgave()
         every { behandlingRepository.findByIdOrNull(BEHANDLING_ID) } returns mockk {}
 
-        Assertions.assertThatThrownBy { oppgaveService.ferdigstillOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak) }
+        Assertions.assertThatThrownBy { oppgaveService.ferdigstillBehandleOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak) }
                 .hasMessage("Finner ikke oppgave for behandling $BEHANDLING_ID")
                 .isInstanceOf(java.lang.IllegalStateException::class.java)
     }
@@ -137,9 +147,10 @@ internal class OppgaveServiceTest {
     }
 
     private fun lagTestFagsak(): Fagsak {
-        return Fagsak(id = FAGSAK_ID, stønadstype = Stønadstype.OVERGANGSSTØNAD).also {
-            it.søkerIdenter = setOf(FagsakPerson(ident = FNR))
-        }
+        return Fagsak(id = FAGSAK_ID, stønadstype = Stønadstype.OVERGANGSSTØNAD, eksternId = EksternFagsakId(FAGSAK_EKSTERN_ID))
+                .also {
+                    it.søkerIdenter = setOf(FagsakPerson(ident = FNR))
+                }
     }
 
     private fun lagTestOppgave(): Oppgave {
@@ -154,13 +165,14 @@ internal class OppgaveServiceTest {
 
     private fun lagFinnOppgaveResponseDto(): FinnOppgaveResponseDto {
         return FinnOppgaveResponseDto(antallTreffTotalt = 1,
-                                      oppgaver = listOf(lagEksternTestOppgave())
+                oppgaver = listOf(lagEksternTestOppgave())
         )
     }
 
     companion object {
 
         private val FAGSAK_ID = UUID.fromString("1242f220-cad3-4640-95c1-190ec814c91e")
+        private val FAGSAK_EKSTERN_ID = 98765L
         private val GSAK_OPPGAVE_ID = 12345L
         private val BEHANDLING_ID = UUID.fromString("1c4209bd-3217-4130-8316-8658fe300a84")
         private const val ENHETSNUMMER = "enhetnr"
