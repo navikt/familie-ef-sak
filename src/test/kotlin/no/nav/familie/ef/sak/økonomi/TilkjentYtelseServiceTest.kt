@@ -27,34 +27,12 @@ class TilkjentYtelseServiceTest {
 
     private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
     private val økonomiKlient = mockk<ØkonomiKlient>()
-    private val behandlingService = mockk<BehandlingService>()
-    private val fagsakService = mockk<FagsakService>()
 
-    private val tilkjentYtelseService = TilkjentYtelseService(økonomiKlient,
-                                  tilkjentYtelseRepository,
-                                  behandlingService = behandlingService,
-                                  fagsakService = fagsakService)
+    private val tilkjentYtelseService = TilkjentYtelseService(økonomiKlient, tilkjentYtelseRepository)
 
     @AfterEach
     fun afterEach() {
         confirmVerified(tilkjentYtelseRepository, økonomiKlient)
-    }
-
-    @Test
-    fun `opprett tilkjent ytelse`() {
-
-        val tilkjentYtelseDto = DataGenerator.tilfeldigTilkjentYtelseDto()
-        val tilkjentYtelse = tilkjentYtelseDto.tilTilkjentYtelse("VL", TilkjentYtelseStatus.OPPRETTET)
-        val slot = slot<TilkjentYtelse>()
-        every { tilkjentYtelseRepository.findByPersonident(tilkjentYtelse.personident) } returns null
-        every { tilkjentYtelseRepository.insert(capture(slot)) } returns tilkjentYtelse
-
-        tilkjentYtelseService.opprettTilkjentYtelse(tilkjentYtelseDto)
-
-        verify { tilkjentYtelseRepository.findByPersonident(tilkjentYtelse.personident) }
-        verify { tilkjentYtelseRepository.insert(slot.captured) }
-        assertThat(slot.captured).isEqualToIgnoringGivenFields(tilkjentYtelse, "id")
-
     }
 
     @Test
@@ -87,79 +65,5 @@ class TilkjentYtelseServiceTest {
 
         verify { tilkjentYtelseRepository.findByIdOrNull(id) }
         verify { økonomiKlient.hentStatus(oppdragId) }
-    }
-
-    @Test
-    fun `iverksett utbetalingsoppdrag`() {
-        val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(3, UUID.randomUUID())
-                .copy(status = TilkjentYtelseStatus.OPPRETTET)
-        val id = tilkjentYtelse.id
-        val utbetalingsoppdrag = lagTilkjentYtelseMedUtbetalingsoppdrag(TilkjentYtelseMedMetaData(tilkjentYtelse = tilkjentYtelse,
-                                                                                                  eksternBehandlingId = behandling.eksternId.id,
-                                                                                                  eksternFagsakId = fagsak.eksternId.id)).utbetalingsoppdrag!!
-        val ytelseSlot = slot<TilkjentYtelse>()
-        val oppdragSlot = slot<UtbetalingsoppdragDto>()
-        val oppdatertTilkjentYtelse =
-                tilkjentYtelse.copy(status = TilkjentYtelseStatus.SENDT_TIL_IVERKSETTING,
-                                    utbetalingsoppdrag = utbetalingsoppdrag)
-        every { tilkjentYtelseRepository.findByIdOrNull(id) } returns tilkjentYtelse
-        every { økonomiKlient.iverksettOppdrag(capture(oppdragSlot)) } returns Ressurs.success("")
-        every { tilkjentYtelseRepository.update(capture(ytelseSlot)) } returns oppdatertTilkjentYtelse
-        every { behandlingService.hentBehandling(any()) } returns behandling
-        every { fagsakService.hentEksternId(any()) } returns fagsak.eksternId.id
-        tilkjentYtelseService.iverksettUtbetalingsoppdrag(id)
-
-        verify { tilkjentYtelseRepository.findByIdOrNull(id) }
-        verify { økonomiKlient.iverksettOppdrag(oppdragSlot.captured) }
-        verify { tilkjentYtelseRepository.update(ytelseSlot.captured) }
-        assertThat(ytelseSlot.captured).isEqualToIgnoringGivenFields(oppdatertTilkjentYtelse, "utbetalingsoppdrag")
-        assertThat(ytelseSlot.captured.utbetalingsoppdrag).isEqualToIgnoringGivenFields(utbetalingsoppdrag, "avstemmingTidspunkt")
-        assertThat(oppdragSlot.captured).isEqualToIgnoringGivenFields(utbetalingsoppdrag, "avstemmingTidspunkt")
-    }
-
-    @Test
-    fun `opphør aktiv tilkjent ytelse`() {
-        val opphørDato = LocalDate.now()
-        val originalTilkjentYtelse =
-                DataGenerator.tilfeldigTilkjentYtelse(3, UUID.randomUUID()).copy(status = TilkjentYtelseStatus.AKTIV)
-        val avsluttetOriginalTilkjentYtelse = originalTilkjentYtelse.copy(status = TilkjentYtelseStatus.AVSLUTTET)
-        val opphørtTilkjentYtelse = originalTilkjentYtelse.tilOpphør("saksbehandler", opphørDato)
-        val id = originalTilkjentYtelse.id
-        val utbetalingsoppdrag =
-                lagTilkjentYtelseMedUtbetalingsoppdrag(TilkjentYtelseMedMetaData(tilkjentYtelse = opphørtTilkjentYtelse,
-                                                                                 eksternBehandlingId = behandling.eksternId.id,
-                                                                                 eksternFagsakId = fagsak.eksternId.id))
-                        .utbetalingsoppdrag!!
-        val opphørtTilkjentYtelseSendtUtbetalingsoppdrag =
-                opphørtTilkjentYtelse.copy(status = TilkjentYtelseStatus.SENDT_TIL_IVERKSETTING,
-                                           utbetalingsoppdrag = utbetalingsoppdrag)
-        val utbetalingSlot = slot<UtbetalingsoppdragDto>()
-        val ytelseSlot = slot<TilkjentYtelse>()
-        every { tilkjentYtelseRepository.findByIdOrNull(id) } returns originalTilkjentYtelse
-        every { behandlingService.hentBehandling(any()) } returns behandling
-        every { fagsakService.hentEksternId(any()) } returns fagsak.eksternId.id
-
-        every { tilkjentYtelseRepository.update(avsluttetOriginalTilkjentYtelse) } returns avsluttetOriginalTilkjentYtelse
-        every { tilkjentYtelseRepository.insert(any<TilkjentYtelse>()) } returns opphørtTilkjentYtelse
-        every { økonomiKlient.iverksettOppdrag(capture(utbetalingSlot)) } returns Ressurs.success("")
-        every { tilkjentYtelseRepository.update(capture(ytelseSlot)) }
-                .returns(opphørtTilkjentYtelseSendtUtbetalingsoppdrag)
-
-        tilkjentYtelseService.opphørUtbetalingsoppdrag(id, opphørDato)
-
-        verify { tilkjentYtelseRepository.findByIdOrNull(id) }
-        verify { tilkjentYtelseRepository.update(avsluttetOriginalTilkjentYtelse) }
-        verify { tilkjentYtelseRepository.insert(any()) }
-        verify { økonomiKlient.iverksettOppdrag(utbetalingSlot.captured) }
-        verify { tilkjentYtelseRepository.update(ytelseSlot.captured) }
-        assertThat(ytelseSlot.captured)
-                .isEqualToIgnoringGivenFields(opphørtTilkjentYtelseSendtUtbetalingsoppdrag, "utbetalingsoppdrag")
-        assertThat(ytelseSlot.captured.utbetalingsoppdrag).isEqualToIgnoringGivenFields(utbetalingsoppdrag, "avstemmingTidspunkt")
-        assertThat(utbetalingSlot.captured).isEqualToIgnoringGivenFields(utbetalingsoppdrag, "avstemmingTidspunkt")
-    }
-
-    companion object {
-        private val fagsak: Fagsak = fagsak()
-        private val behandling: Behandling = behandling(fagsak = fagsak)
     }
 }

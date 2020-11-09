@@ -1,47 +1,41 @@
 package no.nav.familie.ef.sak.dummy
 
-import no.nav.familie.ef.sak.api.dto.AndelTilkjentYtelseDTO
-import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
-import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
-import no.nav.familie.ef.sak.repository.domain.BehandlingType
-import no.nav.familie.ef.sak.repository.domain.YtelseType
+import no.nav.familie.ef.sak.api.dto.TilkjentYtelseTestDTO
+import no.nav.familie.ef.sak.integration.ØkonomiKlient
+import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
+import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.FagsakService
-import no.nav.familie.ef.sak.service.TilkjentYtelseService
-import no.nav.familie.ef.sak.økonomi.tilYtelseType
+import no.nav.familie.ef.sak.økonomi.UtbetalingsoppdragGenerator
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.*
 
 @Service
 class TestTilkjentYtelseService(private val behandlingService: BehandlingService,
                                 private val fagsakService: FagsakService,
-                                private val tilkjentYtelseService: TilkjentYtelseService) {
-
+                                private val økonomiKlient: ØkonomiKlient,
+                                private val tilkjentYtelseRepository: TilkjentYtelseRepository) {
 
     @Transactional
-    fun iverksettBehandling(dummyIverksettingDTO: DummyIverksettingDTO): UUID {
-
-        val fagsakDto = fagsakService.hentEllerOpprettFagsak(personIdent = dummyIverksettingDTO.personIdent,
-                                                             stønadstype = dummyIverksettingDTO.stønadstype)
+    fun lagreTilkjentYtelseOgIverksettUtbetaling(tilkjentYtelseTestDTO: TilkjentYtelseTestDTO): TilkjentYtelse {
+        val fagsak = fagsakService.hentEllerOpprettFagsak(tilkjentYtelseTestDTO.nyTilkjentYtelse.personident, Stønadstype.OVERGANGSSTØNAD)
         val behandling = behandlingService.opprettBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                             fagsakId = fagsakDto.id)
+                                                             fagsakId = fagsak.id)
+        val eksternFagsakId = fagsakService.hentEksternId(behandling.fagsakId)
 
-        behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id, status = BehandlingStatus.IVERKSETTER_VEDTAK)
+        val nyTilkjentYtelse = tilkjentYtelseTestDTO.nyTilkjentYtelse.copy(behandlingId = behandling.id)
+        val forrigeTilkjentYtelse = tilkjentYtelseTestDTO.forrigeTilkjentYtelse
 
-        val andelTilkjentYtelseDTO = AndelTilkjentYtelseDTO(beløp = dummyIverksettingDTO.beløp,
-                                                            stønadFom = dummyIverksettingDTO.stønadFom,
-                                                            stønadTom = dummyIverksettingDTO.stønadTom,
-                                                            type = dummyIverksettingDTO.stønadstype.tilYtelseType(),
-                                                            personIdent = dummyIverksettingDTO.personIdent)
-        val tilkjentYtelseDTO = TilkjentYtelseDTO(søker = fagsakDto.personIdent,
-                                                  behandlingId = behandling.id,
-                                                  andelerTilkjentYtelse = listOf(andelTilkjentYtelseDTO))
+        val nyTilkjentYtelseMedEksternId = TilkjentYtelseMedMetaData(nyTilkjentYtelse,
+                                                                     eksternBehandlingId = behandling.eksternId.id,
+                                                                     eksternFagsakId = eksternFagsakId)
+        val tilkjentYtelseMedUtbetalingsoppdrag = UtbetalingsoppdragGenerator.lagTilkjentYtelseMedUtbetalingsoppdrag(
+                nyTilkjentYtelseMedMetaData = nyTilkjentYtelseMedEksternId,
+                forrigeTilkjentYtelse = forrigeTilkjentYtelse)
 
-        val tilkjentYtelseId = tilkjentYtelseService.opprettTilkjentYtelse(tilkjentYtelseDTO = tilkjentYtelseDTO)
+        tilkjentYtelseRepository.insert(tilkjentYtelseMedUtbetalingsoppdrag)
+        økonomiKlient.iverksettOppdrag(tilkjentYtelseMedUtbetalingsoppdrag.utbetalingsoppdrag!!)
 
-        tilkjentYtelseService.iverksettUtbetalingsoppdrag(ytelseId = tilkjentYtelseId)
-
-        return tilkjentYtelseId
+        return tilkjentYtelseMedUtbetalingsoppdrag
     }
 }
