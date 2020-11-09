@@ -4,6 +4,9 @@ import io.mockk.*
 import no.nav.familie.ef.sak.integration.ØkonomiKlient
 import no.nav.familie.ef.sak.mapper.tilOpphør
 import no.nav.familie.ef.sak.mapper.tilTilkjentYtelse
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.repository.BehandlingRepository
 import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus
@@ -19,15 +22,17 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.data.repository.findByIdOrNull
 import java.time.LocalDate
+import java.util.*
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag as UtbetalingsoppdragDto
 
 class TilkjentYtelseServiceTest {
 
     private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
     private val økonomiKlient = mockk<ØkonomiKlient>()
+    private val behandlingRepository = mockk<BehandlingRepository>()
 
     private val tilkjentYtelseService =
-            TilkjentYtelseService(økonomiKlient, tilkjentYtelseRepository)
+            TilkjentYtelseService(økonomiKlient, tilkjentYtelseRepository, behandlingRepository)
 
     @AfterEach
     fun afterEach() {
@@ -37,11 +42,13 @@ class TilkjentYtelseServiceTest {
     @Test
     fun `opprett tilkjent ytelse`() {
 
+        val behandling = behandling(fagsak())
         val tilkjentYtelseDto = DataGenerator.tilfeldigTilkjentYtelseDto()
-        val tilkjentYtelse = tilkjentYtelseDto.tilTilkjentYtelse("VL", TilkjentYtelseStatus.OPPRETTET)
+        val tilkjentYtelse = tilkjentYtelseDto.tilTilkjentYtelse(behandling.eksternId.id, TilkjentYtelseStatus.OPPRETTET)
         val slot = slot<TilkjentYtelse>()
         every { tilkjentYtelseRepository.findByPersonident(tilkjentYtelse.personident) } returns null
         every { tilkjentYtelseRepository.insert(capture(slot)) } returns tilkjentYtelse
+        every { behandlingRepository.findById(tilkjentYtelseDto.behandlingId) } returns Optional.of(behandling)
 
         tilkjentYtelseService.opprettTilkjentYtelse(tilkjentYtelseDto)
 

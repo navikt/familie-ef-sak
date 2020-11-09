@@ -13,6 +13,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
+import java.util.*
 
 enum class TestOppdragType {
     Input,
@@ -101,6 +102,7 @@ class TestOppdragGroup{
 
     val input: TilkjentYtelse by lazy {
         TilkjentYtelse (
+                behandlingId = UUID.randomUUID(),
                 behandlingEksternId = 101,
                 personident = personIdent!!,
                 saksnummer = "saksnr",
@@ -117,12 +119,13 @@ class TestOppdragGroup{
                 aktoer = personIdent!!,
                 saksbehandlerId = "VL",
                 avstemmingTidspunkt = LocalDateTime.now().truncatedTo(ChronoUnit.HOURS),
-                utbetalingsperiode = utbetalingsperioder.map { it.copy(behandlingId = 101) }
+                utbetalingsperiode = utbetalingsperioder.map { it.copy(behandlingId = input.behandlingEksternId!!) }
         )
 
         TilkjentYtelse (
                 id=input.id,
-                behandlingEksternId = 101,
+                behandlingId = input.behandlingId,
+                behandlingEksternId = input.behandlingEksternId,
                 personident = personIdent!!,
                 saksnummer = "saksnr",
                 andelerTilkjentYtelse = andelerTilkjentYtelseUt,

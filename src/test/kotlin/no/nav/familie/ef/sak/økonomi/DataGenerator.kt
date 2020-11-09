@@ -30,21 +30,13 @@ object DataGenerator {
                                 personIdent = personIdent,
                                 type = type)
 
-    fun tilfeldigTilkjentYtelse(andelerTilkjentYtelse: List<AndelTilkjentYtelse>) =
-            TilkjentYtelse(personident = tilfeldigFødselsnummer(),
-                           stønadFom = LocalDate.now(),
-                           stønadTom = LocalDate.now(),
-                           saksnummer = tilfeldigSaksnummer(),
-                           vedtaksdato = LocalDate.now(),
-                           behandlingEksternId = Math.random().toLong(),
-                           andelerTilkjentYtelse = andelerTilkjentYtelse)
-
     fun tilfeldigTilkjentYtelse(behandling: Behandling = behandling(fagsak()), antallAndelerTilkjentYteelse: Int = 1) =
             TilkjentYtelse(personident = tilfeldigFødselsnummer(),
                            stønadFom = LocalDate.now(),
                            stønadTom = LocalDate.now(),
                            saksnummer = tilfeldigSaksnummer(),
                            vedtaksdato = LocalDate.now(),
+                           behandlingId = behandling.id,
                            behandlingEksternId = behandling.eksternId.id,
                            andelerTilkjentYtelse = flereTilfeldigeAndelerTilkjentYtelse(antallAndelerTilkjentYteelse))
 
@@ -53,7 +45,7 @@ object DataGenerator {
 
         return TilkjentYtelseDTO(søker = søker,
                                  saksnummer = tilfeldigSaksnummer(),
-                                 behandlingId = Random().nextLong(),
+                                 behandlingId = UUID.randomUUID(),
                                  andelerTilkjentYtelse =
                                  listOf(AndelTilkjentYtelseDTO(beløp = Random().nextInt(100_000),
                                                                stønadFom = LocalDate.now(),

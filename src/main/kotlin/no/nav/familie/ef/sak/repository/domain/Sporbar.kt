@@ -25,5 +25,5 @@ data class Endret(@Column("endret_av")
 
 object SporbarUtils {
 
-    fun now() = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS)
+    fun     now() = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS)
 }

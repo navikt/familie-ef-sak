@@ -40,12 +40,11 @@ class TestTilkjentYtelseController(private val tilkjentYtelseService: TilkjentYt
     }
 
     @GetMapping("/dummy")
-    fun dummyTilkjentYtelse(@RequestParam(defaultValue = "12345678911") fnr: String): Ressurs<TilkjentYtelse> {
+    fun dummyTilkjentYtelse(@RequestParam(defaultValue = "12345678911") fnr: String, @RequestParam(defaultValue = "103242") behandlingEksternId: Long): Ressurs<TilkjentYtelse> {
         val søker = fnr
-        val saksbehandler = SikkerhetContext.hentSaksbehandler()
         val andelTilkjentYtelseDto = AndelTilkjentYtelseDTO(personIdent = søker, beløp = 1000, stønadFom = LocalDate.now(), stønadTom = LocalDate.now(), type = YtelseType.OVERGANGSSTØNAD)
-        val tilkjentYtelseDto = TilkjentYtelseDTO(søker = søker, saksnummer = "12345", behandlingId = 54321, andelerTilkjentYtelse = listOf(andelTilkjentYtelseDto, andelTilkjentYtelseDto))
-        return Ressurs.success(tilkjentYtelseDto.tilTilkjentYtelse(saksbehandler = saksbehandler))
+        val tilkjentYtelseDto = TilkjentYtelseDTO(søker = søker, saksnummer = "12345", behandlingId = UUID.randomUUID(), andelerTilkjentYtelse = listOf(andelTilkjentYtelseDto, andelTilkjentYtelseDto))
+        return Ressurs.success(tilkjentYtelseDto.tilTilkjentYtelse(behandlingEksternId))
     }
 
 }

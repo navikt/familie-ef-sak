@@ -41,7 +41,7 @@ data class UtbetalingsperiodeMal(
                     sats = BigDecimal(andel.beløp),
                     satsType = Utbetalingsperiode.SatsType.MND,
                     utbetalesTil = tilkjentYtelse.personident,
-                    behandlingId = tilkjentYtelse.behandlingEksternId
+                    behandlingId = tilkjentYtelse.behandlingEksternId!!
             )
 
 

@@ -8,12 +8,13 @@ import no.nav.familie.ef.sak.api.dto.AndelTilkjentYtelseDTO
 import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
 import java.time.LocalDate
 
-fun TilkjentYtelseDTO.tilTilkjentYtelse(saksbehandler: String, status: TilkjentYtelseStatus = TilkjentYtelseStatus.OPPRETTET): TilkjentYtelse {
+fun TilkjentYtelseDTO.tilTilkjentYtelse(behandlingEksternId:Long, status: TilkjentYtelseStatus = TilkjentYtelseStatus.OPPRETTET): TilkjentYtelse {
 
     val minStønadFom = this.andelerTilkjentYtelse.map { it.stønadFom }.minOrNull() ?: LocalDate.MIN
     val maxStønadTom = this.andelerTilkjentYtelse.map { it.stønadTom }.maxOrNull() ?: LocalDate.MAX
 
-    return TilkjentYtelse(behandlingEksternId = behandlingId,
+    return TilkjentYtelse(behandlingId = behandlingId,
+                          behandlingEksternId = behandlingEksternId,
                           personident = søker,
                           saksnummer = saksnummer,
                           stønadFom = minStønadFom,
@@ -37,7 +38,7 @@ fun TilkjentYtelseDTO.tilAndelerTilkjentYtelse(): List<AndelTilkjentYtelse> {
 
 fun TilkjentYtelse.tilDto(): TilkjentYtelseDTO {
     return TilkjentYtelseDTO(id = this.id,
-                             behandlingId = this.behandlingEksternId,
+                             behandlingId = this.behandlingId,
                              søker = this.personident,
                              saksnummer = this.saksnummer,
                              andelerTilkjentYtelse = this.andelerTilkjentYtelse.map { it.tilDto() })
@@ -57,6 +58,7 @@ fun TilkjentYtelse.tilOpphør(saksbehandler: String, opphørDato: LocalDate) =
                        personident = personident,
                        saksnummer = saksnummer,
                        opphørFom = opphørDato,
+                       behandlingId = behandlingId,
                        behandlingEksternId = behandlingEksternId,
                        vedtaksdato = LocalDate.now(),
                        andelerTilkjentYtelse = andelerTilkjentYtelse)

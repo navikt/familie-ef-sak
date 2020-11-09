@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
 import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.integration.FAGSYSTEM
 import no.nav.familie.ef.sak.integration.ØkonomiKlient
+import no.nav.familie.ef.sak.repository.BehandlingRepository
 import no.nav.familie.ef.sak.økonomi.UtbetalingsoppdragGenerator.lagTilkjentYtelseMedUtbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
@@ -18,25 +19,29 @@ import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.lang.IllegalStateException
 import java.time.LocalDate
 import java.util.*
 
 @Service
 class TilkjentYtelseService(private val økonomiKlient: ØkonomiKlient,
-                            private val tilkjentYtelseRepository: TilkjentYtelseRepository) {
+                            private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+                            private val behandlingRepository: BehandlingRepository) {
 
     @Transactional
     fun opprettTilkjentYtelse(tilkjentYtelseDTO: TilkjentYtelseDTO): UUID {
         tilkjentYtelseDTO.valider()
-        val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
 
         val eksisterendeTilkjentYtelse = tilkjentYtelseRepository.findByPersonident(tilkjentYtelseDTO.søker)
         if (eksisterendeTilkjentYtelse != null) {
             error("Søker har allerede en tilkjent ytelse")
         }
 
+        val behandling = behandlingRepository.findById(tilkjentYtelseDTO.behandlingId)
+                .orElseThrow{ IllegalStateException("Kunne ikke finne behandling med id ${tilkjentYtelseDTO.behandlingId}") }
+
         val opprettetTilkjentYtelse =
-                tilkjentYtelseRepository.insert(tilkjentYtelseDTO.tilTilkjentYtelse(saksbehandlerId,TilkjentYtelseStatus.OPPRETTET))
+                tilkjentYtelseRepository.insert(tilkjentYtelseDTO.tilTilkjentYtelse(behandling.eksternId.id,TilkjentYtelseStatus.OPPRETTET))
 
         return opprettetTilkjentYtelse.id
     }

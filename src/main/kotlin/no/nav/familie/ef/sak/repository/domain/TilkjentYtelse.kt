@@ -9,6 +9,7 @@ import java.util.*
 
 data class TilkjentYtelse(@Id
                           val id: UUID = UUID.randomUUID(),
+                          val behandlingId: UUID,
                           @Column("behandling_ekstern_id")
                           val behandlingEksternId: Long,
                           val personident: String,
