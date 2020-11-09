@@ -1,21 +1,18 @@
 package no.nav.familie.ef.sak.økonomi
 
 import io.mockk.*
-import no.nav.familie.ef.sak.integration.ØkonomiKlient
+import no.nav.familie.ef.sak.integration.OppdragClient
 import no.nav.familie.ef.sak.mapper.tilOpphør
 import no.nav.familie.ef.sak.mapper.tilTilkjentYtelse
 import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus
 import no.nav.familie.ef.sak.service.TilkjentYtelseService
-import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.økonomi.UtbetalingsoppdragGenerator.lagTilkjentYtelseMedUtbetalingsoppdrag
-import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.data.repository.findByIdOrNull
 import java.time.LocalDate
@@ -24,7 +21,7 @@ import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag as Utbetaling
 class TilkjentYtelseServiceTest {
 
     private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
-    private val økonomiKlient = mockk<ØkonomiKlient>()
+    private val økonomiKlient = mockk<OppdragClient>()
 
     private val tilkjentYtelseService =
             TilkjentYtelseService(økonomiKlient, tilkjentYtelseRepository)
@@ -75,7 +72,7 @@ class TilkjentYtelseServiceTest {
                                   tilkjentYtelse.personident,
                                   tilkjentYtelse.id.toString())
         every { tilkjentYtelseRepository.findByIdOrNull(id) } returns tilkjentYtelse
-        every { økonomiKlient.hentStatus(oppdragId) } returns Ressurs.success(OppdragStatus.KVITTERT_OK)
+        every { økonomiKlient.hentStatus(oppdragId) } returns OppdragStatus.KVITTERT_OK
 
         tilkjentYtelseService.hentStatus(id)
 
@@ -95,7 +92,7 @@ class TilkjentYtelseServiceTest {
                 tilkjentYtelse.copy(status = TilkjentYtelseStatus.SENDT_TIL_IVERKSETTING,
                                     utbetalingsoppdrag = utbetalingsoppdrag)
         every { tilkjentYtelseRepository.findByIdOrNull(id) } returns tilkjentYtelse
-        every { økonomiKlient.iverksettOppdrag(capture(oppdragSlot)) } returns Ressurs.success("")
+        every { økonomiKlient.iverksettOppdrag(capture(oppdragSlot)) } returns ""
         every { tilkjentYtelseRepository.update(capture(ytelseSlot)) } returns oppdatertTilkjentYtelse
 
         tilkjentYtelseService.iverksettUtbetalingsoppdrag(id)
@@ -126,8 +123,8 @@ class TilkjentYtelseServiceTest {
         val ytelseSlot = slot<TilkjentYtelse>()
         every { tilkjentYtelseRepository.findByIdOrNull(id) } returns originalTilkjentYtelse
         every { tilkjentYtelseRepository.update(avsluttetOriginalTilkjentYtelse) } returns avsluttetOriginalTilkjentYtelse
-        every { tilkjentYtelseRepository.insert(any<TilkjentYtelse>()) } returns opphørtTilkjentYtelse
-        every { økonomiKlient.iverksettOppdrag(capture(utbetalingSlot)) } returns Ressurs.success("")
+        every { tilkjentYtelseRepository.insert(any()) } returns opphørtTilkjentYtelse
+        every { økonomiKlient.iverksettOppdrag(capture(utbetalingSlot)) } returns ""
         every { tilkjentYtelseRepository.update(capture(ytelseSlot)) }
                 .returns(opphørtTilkjentYtelseSendtUtbetalingsoppdrag)
 

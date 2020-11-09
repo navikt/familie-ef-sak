@@ -1,23 +1,13 @@
 package no.nav.familie.ef.sak.api.gui
 
-import no.nav.familie.ef.sak.api.dto.AndelTilkjentYtelseDTO
 import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
-import no.nav.familie.ef.sak.api.dto.TilkjentYtelseTestDTO
-import no.nav.familie.ef.sak.integration.ØkonomiKlient
-import no.nav.familie.ef.sak.mapper.tilTilkjentYtelse
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.repository.domain.YtelseType
 import no.nav.familie.ef.sak.service.TilkjentYtelseService
-import no.nav.familie.ef.sak.økonomi.UtbetalingsoppdragGenerator
-import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder
-import java.time.LocalDate
 import java.util.*
 
 @RestController
