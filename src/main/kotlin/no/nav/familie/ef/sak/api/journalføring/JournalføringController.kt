@@ -33,14 +33,12 @@ class JournalføringController(private val journalføringService: Journalføring
 
     @PostMapping("/{journalpostId}/fullfor")
     fun fullførJournalpost(@PathVariable journalpostId: String,
-                           @RequestBody journalføringRequest: JournalføringRequest,
-                           @RequestParam(name = "journalfoerendeEnhet") journalførendeEnhet: String,
-                           @RequestParam(name = "navIdent", defaultValue = "", required = false) navIdent: String
+                           @RequestBody journalføringRequest: JournalføringRequest
     ): Ressurs<Long> {
         val (_, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
         tilgangService.validerTilgangTilPersonMedBarn(personIdent)
         tilgangService.validerHarSaksbehandlerrolle()
-        return Ressurs.success(journalføringService.fullførJournalpost(journalføringRequest, journalpostId, journalførendeEnhet, navIdent))
+        return Ressurs.success(journalføringService.fullførJournalpost(journalføringRequest, journalpostId))
     }
 
     fun finnJournalpostOgPersonIdent(journalpostId: String): Pair<Journalpost, String> {

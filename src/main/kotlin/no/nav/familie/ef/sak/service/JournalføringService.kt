@@ -41,22 +41,19 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
     }
 
     @Transactional
-    fun fullførJournalpost(journalføringRequest: JournalføringRequest,
-                           journalpostId: String,
-                           journalførendeEnhet: String,
-                           navIdent: String): Long {
+    fun fullførJournalpost(journalføringRequest: JournalføringRequest, journalpostId: String): Long {
         val behandling: Behandling = hentBehandling(journalføringRequest)
         val journalpost = hentJournalpost(journalpostId)
 
         val eksternFagsakId = fagsakService.hentEksternId(journalføringRequest.fagsakId)
         oppdaterJournalpost(journalpost, journalføringRequest.dokumentTitler, eksternFagsakId)
-        ferdigstillJournalføring(journalpostId, journalførendeEnhet)
+        ferdigstillJournalføring(journalpostId, journalføringRequest.journalførendeEnhet)
         ferdigstillJournalføringsoppgave(journalføringRequest)
 
         settSøknadPåBehandling(journalpostId, behandling.fagsakId, behandling.id)
         knyttJournalpostTilBehandling(journalpost, behandling)
 
-        return opprettSaksbehandlingsoppgave(behandling, navIdent)
+        return opprettSaksbehandlingsoppgave(behandling, journalføringRequest.navIdent)
 
     }
 
@@ -77,11 +74,11 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         oppgaveService.ferdigstillOppgave(journalføringRequest.oppgaveId.toLong())
     }
 
-    private fun hentBehandling(journalføringRequest: JournalføringRequest): Behandling = hentEksisterendeBehandling(
-            journalføringRequest.behandling.behandlingsId)
-                                                                                         ?: opprettBehandlingMedBehandlingstype(
-                                                                                                 journalføringRequest.behandling.behandlingstype,
-                                                                                                 journalføringRequest.fagsakId)
+    private fun hentBehandling(journalføringRequest: JournalføringRequest): Behandling =
+            hentEksisterendeBehandling(journalføringRequest.behandling.behandlingsId)
+            ?: opprettBehandlingMedBehandlingstype(
+                    journalføringRequest.behandling.behandlingstype,
+                    journalføringRequest.fagsakId)
 
 
     private fun opprettBehandlingMedBehandlingstype(behandlingsType: BehandlingType?, fagsakId: UUID): Behandling {
