@@ -85,6 +85,10 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
         return oppgaveClient.finnOppgaveMedId(gsakOppgaveId)
     }
 
+    fun hentEfOppgave(gsakOppgaveId: Long): EfOppgave? {
+        return oppgaveRepository.findByGsakOppgaveId(gsakOppgaveId)
+    }
+
     fun ferdigstillBehandleOppgave(behandlingId: UUID, oppgavetype: Oppgavetype) {
         val oppgave = oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
                       ?: error("Finner ikke oppgave for behandling $behandlingId")
