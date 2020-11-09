@@ -56,13 +56,13 @@ internal class JournalføringServiceTest {
                 tittel = "Søknad om overgangsstønad"
         )
 
-        every { fagsakService.hentEksternId(any())} returns fagsakEksternId
+        every { fagsakService.hentEksternId(any()) } returns fagsakEksternId
 
         every { behandlingService.hentBehandling(behandlingId) } returns Behandling(id = behandlingId,
-                                                                                           fagsakId = fagsakId,
-                                                                                           type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                                                           status = BehandlingStatus.UTREDES,
-                                                                                           steg = StegType.REGISTRERE_OPPLYSNINGER)
+                                                                                    fagsakId = fagsakId,
+                                                                                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                                                                                    status = BehandlingStatus.UTREDES,
+                                                                                    steg = StegType.REGISTRERE_OPPLYSNINGER)
 
         every { behandlingService.opprettBehandling(any(), any()) } returns Behandling(id = behandlingId,
                                                                                        fagsakId = fagsakId,
@@ -71,7 +71,7 @@ internal class JournalføringServiceTest {
                                                                                        steg = StegType.REGISTRERE_OPPLYSNINGER)
 
         every { oppgaveService.ferdigstillOppgave(any()) } just runs
-        every { oppgaveService.opprettOppgave(any(), any(), any()) } returns nyOppgaveId
+        every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any()) } returns nyOppgaveId
         every { behandlingService.oppdaterJournalpostIdPåBehandling(any(), any()) } just runs
         every { journalpostClient.ferdigstillJournalpost(any(), any()) } just runs
     }
@@ -101,7 +101,11 @@ internal class JournalføringServiceTest {
                         dokumentTitler,
                         fagsakId,
                         oppgaveId,
-                        JournalføringBehandling(behandlingsId = behandlingId)), journalførendeEnhet = "1234")
+                        JournalføringBehandling(behandlingsId = behandlingId),
+                        "Z1234567",
+                        "1234"
+                ),
+        )
 
         assertThat(behandleSakOppgaveId).isEqualTo(nyOppgaveId)
         assertThat(slotJournalpost.captured.sak?.fagsakId).isEqualTo(fagsakEksternId.toString())
@@ -120,8 +124,8 @@ internal class JournalføringServiceTest {
     @Test
     internal fun `skal fullføre manuell journalføring på ny behandling`() {
         every { fagsakService.hentFagsak(fagsakId) } returns Fagsak(id = fagsakId,
-                                                                     eksternId = EksternFagsakId(id = fagsakEksternId),
-                                                                     stønadstype = Stønadstype.OVERGANGSSTØNAD)
+                                                                    eksternId = EksternFagsakId(id = fagsakEksternId),
+                                                                    stønadstype = Stønadstype.OVERGANGSSTØNAD)
 
         val slot = slot<OppdaterJournalpostRequest>()
 
@@ -138,8 +142,11 @@ internal class JournalføringServiceTest {
                         dokumentTitler,
                         fagsakId,
                         oppgaveId,
-                        JournalføringBehandling(behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING)),
-                journalførendeEnhet = "1234")
+                        JournalføringBehandling(behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING),
+                        "Z1234567",
+                        "1234"
+                ),
+        )
 
         assertThat(behandleSakOppgaveId).isEqualTo(nyOppgaveId)
         assertThat(slot.captured.sak?.fagsakId).isEqualTo(fagsakEksternId.toString())
