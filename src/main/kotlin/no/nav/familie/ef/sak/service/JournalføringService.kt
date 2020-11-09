@@ -6,10 +6,10 @@ import no.nav.familie.ef.sak.domene.DokumentVariantformat
 import no.nav.familie.ef.sak.integration.JournalpostClient
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
+import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
 import no.nav.familie.kontrakter.ef.søknad.SøknadSkolepenger
-import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.felles.dokarkiv.*
 import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariant
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
@@ -34,12 +34,17 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         return journalpostClient.hentJournalpost(journalpostId)
     }
 
-    fun hentDokument(journalpostId: String, dokumentInfoId: String, dokumentVariantformat: DokumentVariantformat = DokumentVariantformat.ARKIV ): ByteArray {
+    fun hentDokument(journalpostId: String,
+                     dokumentInfoId: String,
+                     dokumentVariantformat: DokumentVariantformat = DokumentVariantformat.ARKIV): ByteArray {
         return journalpostClient.hentDokument(journalpostId, dokumentInfoId, dokumentVariantformat)
     }
 
     @Transactional
-    fun fullførJournalpost(journalføringRequest: JournalføringRequest, journalpostId: String, journalførendeEnhet: String): Long {
+    fun fullførJournalpost(journalføringRequest: JournalføringRequest,
+                           journalpostId: String,
+                           journalførendeEnhet: String,
+                           navIdent: String): Long {
         val behandling: Behandling = hentBehandling(journalføringRequest)
         val journalpost = hentJournalpost(journalpostId)
 
@@ -51,7 +56,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         settSøknadPåBehandling(journalpostId, behandling.fagsakId, behandling.id)
         knyttJournalpostTilBehandling(journalpost, behandling)
 
-        return opprettSaksbehandlingsoppgave(behandling)
+        return opprettSaksbehandlingsoppgave(behandling, navIdent)
 
     }
 
@@ -59,12 +64,12 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         journalpostClient.ferdigstillJournalpost(journalpostId, journalførendeEnhet)
     }
 
-    private fun opprettSaksbehandlingsoppgave(behandling: Behandling): Long {
-        // TODO: Spør Mirja - ny oppgave: skal EnhetId settes?
+    private fun opprettSaksbehandlingsoppgave(behandling: Behandling, navIdent: String): Long {
         return oppgaveService.opprettOppgave(
                 behandlingId = behandling.id,
                 oppgavetype = Oppgavetype.BehandleSak,
-                fristForFerdigstillelse = LocalDate.now().plusDays(2)
+                fristForFerdigstillelse = LocalDate.now().plusDays(2),
+                tilordnetNavIdent = navIdent
         )
     }
 
@@ -72,13 +77,16 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         oppgaveService.ferdigstillOppgave(journalføringRequest.oppgaveId.toLong())
     }
 
-    private fun hentBehandling(journalføringRequest: JournalføringRequest): Behandling = hentEksisterendeBehandling(journalføringRequest.behandling.behandlingsId)
-            ?: opprettBehandlingMedBehandlingstype(journalføringRequest.behandling.behandlingstype, journalføringRequest.fagsakId)
+    private fun hentBehandling(journalføringRequest: JournalføringRequest): Behandling = hentEksisterendeBehandling(
+            journalføringRequest.behandling.behandlingsId)
+                                                                                         ?: opprettBehandlingMedBehandlingstype(
+                                                                                                 journalføringRequest.behandling.behandlingstype,
+                                                                                                 journalføringRequest.fagsakId)
 
 
     private fun opprettBehandlingMedBehandlingstype(behandlingsType: BehandlingType?, fagsakId: UUID): Behandling {
         return behandlingService.opprettBehandling(behandlingType = behandlingsType!!,
-                                            fagsakId = fagsakId)
+                                                   fagsakId = fagsakId)
     }
 
     private fun hentEksisterendeBehandling(behandlingId: UUID?): Behandling? {
@@ -92,13 +100,19 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
     private fun settSøknadPåBehandling(journalpostId: String, fagsakId: UUID, behandlingsId: UUID) {
         hentJournalpost(journalpostId).dokumenter
                 ?.filter { dokument -> DokumentBrevkode.erGyldigBrevkode(dokument.brevkode) && harOriginalDokument(dokument) }
-                ?.map { Pair(DokumentBrevkode.fraBrevkode(it.brevkode), hentDokument(journalpostId, it.dokumentInfoId, DokumentVariantformat.ORIGINAL)) }
+                ?.map {
+                    Pair(DokumentBrevkode.fraBrevkode(it.brevkode),
+                         hentDokument(journalpostId, it.dokumentInfoId, DokumentVariantformat.ORIGINAL))
+                }
                 ?.forEach {
                     konverterTilSøknadsobjekt(it, fagsakId, behandlingsId, journalpostId)
                 }
     }
 
-    private fun konverterTilSøknadsobjekt(it: Pair<DokumentBrevkode, ByteArray>, fagsakId: UUID, behandlingsId: UUID, journalpostId: String) {
+    private fun konverterTilSøknadsobjekt(it: Pair<DokumentBrevkode, ByteArray>,
+                                          fagsakId: UUID,
+                                          behandlingsId: UUID,
+                                          journalpostId: String) {
         try {
             when (it.first) {
                 DokumentBrevkode.OVERGANGSSTØNAD -> {
@@ -122,7 +136,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
 
     private fun harOriginalDokument(dokument: no.nav.familie.kontrakter.felles.journalpost.DokumentInfo): Boolean =
             dokument.dokumentvarianter?.contains(Dokumentvariant(variantformat = DokumentVariantformat.ORIGINAL.toString()))
-                    ?: false
+            ?: false
 
     private fun oppdaterJournalpost(journalpost: Journalpost, dokumenttitler: Map<String, String>?, eksternFagsakId: Long) {
         val oppdatertJournalpost = OppdaterJournalpostRequest(
@@ -146,7 +160,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
                         DokumentInfo(
                                 dokumentInfoId = dokumentInfo.dokumentInfoId,
                                 tittel = dokumenttitler[dokumentInfo.dokumentInfoId]
-                                        ?: dokumentInfo.tittel,
+                                         ?: dokumentInfo.tittel,
                                 brevkode = dokumentInfo.brevkode
                         )
                     }

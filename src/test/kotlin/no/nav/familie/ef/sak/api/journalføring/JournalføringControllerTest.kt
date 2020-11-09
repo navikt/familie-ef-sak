@@ -117,7 +117,8 @@ internal class JournalføringControllerTest {
             journalføringController.fullførJournalpost(
                     journalpostMedFødselsnummer.journalpostId,
                     JournalføringRequest(null, UUID.randomUUID(), "dummy-oppgave", JournalføringBehandling(UUID.randomUUID())),
-                    "tralala")
+                    "tralala",
+            "Z1234567")
         }
     }
 

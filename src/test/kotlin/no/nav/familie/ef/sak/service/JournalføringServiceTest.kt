@@ -71,7 +71,7 @@ internal class JournalføringServiceTest {
                                                                                        steg = StegType.REGISTRERE_OPPLYSNINGER)
 
         every { oppgaveService.ferdigstillOppgave(any()) } just runs
-        every { oppgaveService.opprettOppgave(any(), any(), any()) } returns nyOppgaveId
+        every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any()) } returns nyOppgaveId
         every { behandlingService.oppdaterJournalpostIdPåBehandling(any(), any()) } just runs
         every { journalpostClient.ferdigstillJournalpost(any(), any()) } just runs
     }
@@ -101,7 +101,10 @@ internal class JournalføringServiceTest {
                         dokumentTitler,
                         fagsakId,
                         oppgaveId,
-                        JournalføringBehandling(behandlingsId = behandlingId)), journalførendeEnhet = "1234")
+                        JournalføringBehandling(behandlingsId = behandlingId)),
+                journalførendeEnhet = "1234",
+                navIdent = "Z1234567"
+        )
 
         assertThat(behandleSakOppgaveId).isEqualTo(nyOppgaveId)
         assertThat(slotJournalpost.captured.sak?.fagsakId).isEqualTo(fagsakEksternId.toString())
@@ -139,7 +142,9 @@ internal class JournalføringServiceTest {
                         fagsakId,
                         oppgaveId,
                         JournalføringBehandling(behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING)),
-                journalførendeEnhet = "1234")
+                journalførendeEnhet = "1234",
+                navIdent = "Z1234567"
+        )
 
         assertThat(behandleSakOppgaveId).isEqualTo(nyOppgaveId)
         assertThat(slot.captured.sak?.fagsakId).isEqualTo(fagsakEksternId.toString())
