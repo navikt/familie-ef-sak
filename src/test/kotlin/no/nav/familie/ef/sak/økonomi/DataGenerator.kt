@@ -33,7 +33,6 @@ object DataGenerator {
             TilkjentYtelse(personident = tilfeldigFødselsnummer(),
                            stønadFom = LocalDate.now(),
                            stønadTom = LocalDate.now(),
-                           saksnummer = tilfeldigSaksnummer(),
                            vedtaksdato = LocalDate.now(),
                            behandlingId = behandlingId,
                            saksbehandler = tilfeldigFødselsnummer(),
@@ -43,7 +42,6 @@ object DataGenerator {
             TilkjentYtelse(personident = tilfeldigFødselsnummer(),
                            stønadFom = LocalDate.now(),
                            stønadTom = LocalDate.now(),
-                           saksnummer = tilfeldigSaksnummer(),
                            saksbehandler = tilfeldigFødselsnummer(),
                            vedtaksdato = LocalDate.now(),
                            behandlingId = behandlingId,
@@ -53,7 +51,6 @@ object DataGenerator {
         val søker = tilfeldigFødselsnummer()
 
         return TilkjentYtelseDTO(søker = søker,
-                                 saksnummer = tilfeldigSaksnummer(),
                                  behandlingId = UUID.randomUUID(),
                                  andelerTilkjentYtelse =
                                  listOf(AndelTilkjentYtelseDTO(beløp = Random().nextInt(100_000),

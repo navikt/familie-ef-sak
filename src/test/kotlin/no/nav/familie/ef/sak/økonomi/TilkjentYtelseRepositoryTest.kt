@@ -36,7 +36,7 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
 
         val hentetTilkjentYtelse = tilkjentYtelseRepository.findByIdOrNull(tilkjentYtelseId)!!
 
-        assertThat(hentetTilkjentYtelse.saksnummer).isEqualTo(tilkjentYtelse.saksnummer)
+        assertThat(hentetTilkjentYtelse.behandlingId).isEqualTo(tilkjentYtelse.behandlingId)
         assertThat(hentetTilkjentYtelse.andelerTilkjentYtelse).isNotEmpty
     }
 
@@ -57,7 +57,7 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
         val fagsak = fagsakRepository.insert(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak = fagsak))
         val lagretTilkjentYtelse = tilkjentYtelseRepository.insert(DataGenerator.tilfeldigTilkjentYtelse(2, behandlingId = behandling.id))
-        val utbetalingsoppdrag = lagTilkjentYtelseMedUtbetalingsoppdrag(TilkjentYtelseMedMetaData(lagretTilkjentYtelse, behandling.eksternId.id)).utbetalingsoppdrag!!
+        val utbetalingsoppdrag = lagTilkjentYtelseMedUtbetalingsoppdrag(TilkjentYtelseMedMetaData(lagretTilkjentYtelse, behandling.eksternId.id, fagsak.eksternId.id)).utbetalingsoppdrag!!
 
         tilkjentYtelseRepository.update(lagretTilkjentYtelse.copy(utbetalingsoppdrag = utbetalingsoppdrag))
 

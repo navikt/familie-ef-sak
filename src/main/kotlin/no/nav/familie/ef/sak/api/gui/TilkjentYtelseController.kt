@@ -23,7 +23,10 @@ import java.util.*
 @RestController
 @RequestMapping(path = ["/api/tilkjentytelse"])
 @ProtectedWithClaims(issuer = "azuread")
-class TilkjentYtelseController(private val tilkjentYtelseService: TilkjentYtelseService, private val økonomiKlient: ØkonomiKlient, private val behandlingService: BehandlingService, val fagsakService: FagsakService) {
+class TilkjentYtelseController(private val tilkjentYtelseService: TilkjentYtelseService,
+                               private val økonomiKlient: ØkonomiKlient,
+                               private val behandlingService: BehandlingService,
+                               val fagsakService: FagsakService) {
 
     @PostMapping
     fun opprettTilkjentYtelse(@RequestBody tilkjentYtelseDTO: TilkjentYtelseDTO): ResponseEntity<Long> {
@@ -76,10 +79,16 @@ class TilkjentYtelseController(private val tilkjentYtelseService: TilkjentYtelse
         val nyTilkjentYtelse = tilkjentYtelseTestDTO.nyTilkjentYtelse
         val forrigeTilkjentYtelse = tilkjentYtelseTestDTO.forrigeTilkjentYtelse
 
-        val fagsak = fagsakService.hentEllerOpprettFagsak(tilkjentYtelseTestDTO.nyTilkjentYtelse.personident, stønadstype = Stønadstype.OVERGANGSSTØNAD);
+        val fagsakDto = fagsakService.hentEllerOpprettFagsak(tilkjentYtelseTestDTO.nyTilkjentYtelse.personident,
+                                                             stønadstype = Stønadstype.OVERGANGSSTØNAD)
+        val eksternFagsakId = fagsakService.hentEksternId(fagsakDto.id)
 
-        val behandling = behandlingService.opprettBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING, fagsakId = fagsak.id)
-        val nyTilkjentYtelseMedEksternId = TilkjentYtelseMedMetaData(tilkjentYtelse = nyTilkjentYtelse, eksternBehandlingId = behandling.eksternId.id)
+        val behandling =
+                behandlingService.opprettBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                                                    fagsakId = fagsakDto.id)
+        val nyTilkjentYtelseMedEksternId = TilkjentYtelseMedMetaData(tilkjentYtelse = nyTilkjentYtelse,
+                                                                     eksternBehandlingId = behandling.eksternId.id,
+                                                                     eksternFagsakId = eksternFagsakId)
         val tilkjentYtelseMedUtbetalingsoppdrag = UtbetalingsoppdragGenerator.lagTilkjentYtelseMedUtbetalingsoppdrag(
                 nyTilkjentYtelseMedMetaData = nyTilkjentYtelseMedEksternId,
                 forrigeTilkjentYtelse = forrigeTilkjentYtelse)
@@ -91,8 +100,14 @@ class TilkjentYtelseController(private val tilkjentYtelseService: TilkjentYtelse
     @GetMapping("/dummy")
     fun dummyTilkjentYtelse(): Ressurs<TilkjentYtelse> {
         val søker = "12345678911"
-        val andelTilkjentYtelseDto = AndelTilkjentYtelseDTO(personIdent = søker, beløp = 1000, stønadFom = LocalDate.now(), stønadTom = LocalDate.now(), type = YtelseType.OVERGANGSSTØNAD)
-        val tilkjentYtelseDto = TilkjentYtelseDTO(søker = søker, saksnummer = "12345", behandlingId = UUID.randomUUID(), andelerTilkjentYtelse = listOf(andelTilkjentYtelseDto, andelTilkjentYtelseDto))
+        val andelTilkjentYtelseDto = AndelTilkjentYtelseDTO(personIdent = søker,
+                                                            beløp = 1000,
+                                                            stønadFom = LocalDate.now(),
+                                                            stønadTom = LocalDate.now(),
+                                                            type = YtelseType.OVERGANGSSTØNAD)
+        val tilkjentYtelseDto = TilkjentYtelseDTO(søker = søker,
+                                                  behandlingId = UUID.randomUUID(),
+                                                  andelerTilkjentYtelse = listOf(andelTilkjentYtelseDto, andelTilkjentYtelseDto))
         return Ressurs.success(tilkjentYtelseDto.tilTilkjentYtelse(saksbehandler = "VL"))
     }
 

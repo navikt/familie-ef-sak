@@ -35,7 +35,6 @@ class TestTilkjentYtelseService(private val behandlingService: BehandlingService
                                                             type = dummyIverksettingDTO.stønadstype.tilYtelseType(),
                                                             personIdent = dummyIverksettingDTO.personIdent)
         val tilkjentYtelseDTO = TilkjentYtelseDTO(søker = fagsakDto.personIdent,
-                                                  saksnummer = fagsakDto.id.toString(),
                                                   behandlingId = behandling.id,
                                                   andelerTilkjentYtelse = listOf(andelTilkjentYtelseDTO))
 

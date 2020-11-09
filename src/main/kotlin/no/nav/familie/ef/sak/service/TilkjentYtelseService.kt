@@ -97,8 +97,10 @@ class TilkjentYtelseService(private val økonomiKlient: ØkonomiKlient,
         val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
         val lagretOpphørtTilkjentYtelse = tilkjentYtelseRepository.insert(tilkjentYtelse.tilOpphør(saksbehandlerId, opphørDato))
         val behandling = behandlingService.hentBehandling(lagretOpphørtTilkjentYtelse.behandlingId)
-        //TODO FIKS HER MARTINE
-        val tilkjentYtelseMedEksternId = TilkjentYtelseMedMetaData(tilkjentYtelse = tilkjentYtelse, eksternBehandlingId = eksternBehandlingId)
+        val eksternFagsakId = fagsakService.hentEksternId(behandling.fagsakId)
+        val tilkjentYtelseMedEksternId = TilkjentYtelseMedMetaData(tilkjentYtelse = tilkjentYtelse,
+                                                                   eksternBehandlingId = behandling.eksternId.id,
+                                                                   eksternFagsakId = eksternFagsakId)
 
         sendUtbetalingsoppdragOgOppdaterStatus(tilkjentYtelseMedEksternId,
                                                TilkjentYtelseStatus.SENDT_TIL_IVERKSETTING)

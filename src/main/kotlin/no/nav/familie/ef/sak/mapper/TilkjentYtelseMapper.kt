@@ -13,7 +13,6 @@ fun TilkjentYtelseDTO.tilTilkjentYtelse(saksbehandler: String, status: TilkjentY
 
     return TilkjentYtelse(behandlingId = behandlingId,
                           personident = søker,
-                          saksnummer = saksnummer,
                           saksbehandler = saksbehandler,
                           stønadFom = minStønadFom,
                           stønadTom = maxStønadTom,
@@ -38,7 +37,6 @@ fun TilkjentYtelse.tilDto(): TilkjentYtelseDTO {
     return TilkjentYtelseDTO(id = this.id,
                              behandlingId = this.behandlingId,
                              søker = this.personident,
-                             saksnummer = this.saksnummer,
                              andelerTilkjentYtelse = this.andelerTilkjentYtelse.map { it.tilDto() })
 }
 
@@ -54,7 +52,6 @@ fun AndelTilkjentYtelse.tilDto(): AndelTilkjentYtelseDTO {
 fun TilkjentYtelse.tilOpphør(saksbehandler: String, opphørDato: LocalDate) =
         TilkjentYtelse(type = TilkjentYtelseType.OPPHØR,
                        personident = personident,
-                       saksnummer = saksnummer,
                        saksbehandler = saksbehandler,
                        opphørFom = opphørDato,
                        behandlingId = behandlingId,

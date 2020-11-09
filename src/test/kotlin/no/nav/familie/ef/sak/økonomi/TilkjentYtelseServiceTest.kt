@@ -4,11 +4,12 @@ import io.mockk.*
 import no.nav.familie.ef.sak.integration.ØkonomiKlient
 import no.nav.familie.ef.sak.mapper.tilOpphør
 import no.nav.familie.ef.sak.mapper.tilTilkjentYtelse
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseMedMetaData
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus
+import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.service.BehandlingService
+import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.TilkjentYtelseService
 import no.nav.familie.ef.sak.økonomi.UtbetalingsoppdragGenerator.lagTilkjentYtelseMedUtbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -27,9 +28,12 @@ class TilkjentYtelseServiceTest {
     private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
     private val økonomiKlient = mockk<ØkonomiKlient>()
     private val behandlingService = mockk<BehandlingService>()
+    private val fagsakService = mockk<FagsakService>()
 
-    private val tilkjentYtelseService =
-            TilkjentYtelseService(økonomiKlient, tilkjentYtelseRepository, behandlingService = behandlingService)
+    private val tilkjentYtelseService = TilkjentYtelseService(økonomiKlient,
+                                  tilkjentYtelseRepository,
+                                  behandlingService = behandlingService,
+                                  fagsakService = fagsakService)
 
     @AfterEach
     fun afterEach() {
@@ -90,7 +94,9 @@ class TilkjentYtelseServiceTest {
         val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(3, UUID.randomUUID())
                 .copy(status = TilkjentYtelseStatus.OPPRETTET)
         val id = tilkjentYtelse.id
-        val utbetalingsoppdrag = lagTilkjentYtelseMedUtbetalingsoppdrag(TilkjentYtelseMedMetaData(tilkjentYtelse = tilkjentYtelse, eksternBehandlingId = 0L)).utbetalingsoppdrag!!
+        val utbetalingsoppdrag = lagTilkjentYtelseMedUtbetalingsoppdrag(TilkjentYtelseMedMetaData(tilkjentYtelse = tilkjentYtelse,
+                                                                                                  eksternBehandlingId = behandling.eksternId.id,
+                                                                                                  eksternFagsakId = fagsak.eksternId.id)).utbetalingsoppdrag!!
         val ytelseSlot = slot<TilkjentYtelse>()
         val oppdragSlot = slot<UtbetalingsoppdragDto>()
         val oppdatertTilkjentYtelse =
@@ -99,7 +105,8 @@ class TilkjentYtelseServiceTest {
         every { tilkjentYtelseRepository.findByIdOrNull(id) } returns tilkjentYtelse
         every { økonomiKlient.iverksettOppdrag(capture(oppdragSlot)) } returns Ressurs.success("")
         every { tilkjentYtelseRepository.update(capture(ytelseSlot)) } returns oppdatertTilkjentYtelse
-        every { behandlingService.hentEksternIdBehandling(any())} returns 0L
+        every { behandlingService.hentBehandling(any()) } returns behandling
+        every { fagsakService.hentEksternId(any()) } returns fagsak.eksternId.id
         tilkjentYtelseService.iverksettUtbetalingsoppdrag(id)
 
         verify { tilkjentYtelseRepository.findByIdOrNull(id) }
@@ -119,7 +126,9 @@ class TilkjentYtelseServiceTest {
         val opphørtTilkjentYtelse = originalTilkjentYtelse.tilOpphør("saksbehandler", opphørDato)
         val id = originalTilkjentYtelse.id
         val utbetalingsoppdrag =
-                lagTilkjentYtelseMedUtbetalingsoppdrag(TilkjentYtelseMedMetaData(tilkjentYtelse = opphørtTilkjentYtelse, eksternBehandlingId = 0L))
+                lagTilkjentYtelseMedUtbetalingsoppdrag(TilkjentYtelseMedMetaData(tilkjentYtelse = opphørtTilkjentYtelse,
+                                                                                 eksternBehandlingId = behandling.eksternId.id,
+                                                                                 eksternFagsakId = fagsak.eksternId.id))
                         .utbetalingsoppdrag!!
         val opphørtTilkjentYtelseSendtUtbetalingsoppdrag =
                 opphørtTilkjentYtelse.copy(status = TilkjentYtelseStatus.SENDT_TIL_IVERKSETTING,
@@ -127,7 +136,8 @@ class TilkjentYtelseServiceTest {
         val utbetalingSlot = slot<UtbetalingsoppdragDto>()
         val ytelseSlot = slot<TilkjentYtelse>()
         every { tilkjentYtelseRepository.findByIdOrNull(id) } returns originalTilkjentYtelse
-        every { behandlingService.hentEksternIdBehandling(any()) } returns 0L
+        every { behandlingService.hentBehandling(any()) } returns behandling
+        every { fagsakService.hentEksternId(any()) } returns fagsak.eksternId.id
 
         every { tilkjentYtelseRepository.update(avsluttetOriginalTilkjentYtelse) } returns avsluttetOriginalTilkjentYtelse
         every { tilkjentYtelseRepository.insert(any<TilkjentYtelse>()) } returns opphørtTilkjentYtelse
@@ -146,5 +156,10 @@ class TilkjentYtelseServiceTest {
                 .isEqualToIgnoringGivenFields(opphørtTilkjentYtelseSendtUtbetalingsoppdrag, "utbetalingsoppdrag")
         assertThat(ytelseSlot.captured.utbetalingsoppdrag).isEqualToIgnoringGivenFields(utbetalingsoppdrag, "avstemmingTidspunkt")
         assertThat(utbetalingSlot.captured).isEqualToIgnoringGivenFields(utbetalingsoppdrag, "avstemmingTidspunkt")
+    }
+
+    companion object {
+        private val fagsak: Fagsak = fagsak()
+        private val behandling: Behandling = behandling(fagsak = fagsak)
     }
 }

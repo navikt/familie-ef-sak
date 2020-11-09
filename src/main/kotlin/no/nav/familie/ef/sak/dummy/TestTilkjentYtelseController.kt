@@ -31,12 +31,16 @@ class TestTilkjentYtelseController(private val økonomiKlient: ØkonomiKlient,
 
     @PostMapping("/send-til-oppdrag")
     fun testMotOppdrag(@RequestBody tilkjentYtelseTestDTO: TilkjentYtelseTestDTO): Ressurs<TilkjentYtelse> {
-        val behandling = behandlingService.opprettBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING, fagsakId = UUID.randomUUID())
+        val behandling = behandlingService.opprettBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                                                             fagsakId = UUID.randomUUID())
+        val eksternFagsakId = fagsakService.hentEksternId(behandling.fagsakId)
 
         val nyTilkjentYtelse = tilkjentYtelseTestDTO.nyTilkjentYtelse
         val forrigeTilkjentYtelse = tilkjentYtelseTestDTO.forrigeTilkjentYtelse
 
-        val nyTilkjentYtelseMedEksternId = TilkjentYtelseMedMetaData(nyTilkjentYtelse, eksternBehandlingId = behandling.eksternId.id);
+        val nyTilkjentYtelseMedEksternId = TilkjentYtelseMedMetaData(nyTilkjentYtelse,
+                                                                     eksternBehandlingId = behandling.eksternId.id,
+                                                                     eksternFagsakId = eksternFagsakId)
         val tilkjentYtelseMedUtbetalingsoppdrag = UtbetalingsoppdragGenerator.lagTilkjentYtelseMedUtbetalingsoppdrag(
                 nyTilkjentYtelseMedMetaData = nyTilkjentYtelseMedEksternId,
                 forrigeTilkjentYtelse = forrigeTilkjentYtelse)
@@ -51,7 +55,6 @@ class TestTilkjentYtelseController(private val økonomiKlient: ØkonomiKlient,
         val behandling = behandlingService.opprettBehandling(behandlingType = dummyIverksettingDTO.behandlingType, fagsakId = fagsak.id)
         val tilkjentYtelseId = tilkjentYtelseService.opprettTilkjentYtelse(tilkjentYtelseDTO = TilkjentYtelseDTO(
                 søker = dummyIverksettingDTO.personIdent,
-                saksnummer = "er dette en fagsak ??",
                 behandlingId = behandling.id,
                 andelerTilkjentYtelse = listOf(
                         AndelTilkjentYtelseDTO(
@@ -77,7 +80,6 @@ class TestTilkjentYtelseController(private val økonomiKlient: ØkonomiKlient,
                 stønadTom = LocalDate.now(),
                 type = YtelseType.OVERGANGSSTØNAD)
         val tilkjentYtelseDto = TilkjentYtelseDTO(søker = søker,
-                saksnummer = "12345",
                 behandlingId = UUID.randomUUID(),
                 andelerTilkjentYtelse = listOf(andelTilkjentYtelseDto, andelTilkjentYtelseDto))
         return Ressurs.success(tilkjentYtelseDto.tilTilkjentYtelse(saksbehandler = saksbehandler))

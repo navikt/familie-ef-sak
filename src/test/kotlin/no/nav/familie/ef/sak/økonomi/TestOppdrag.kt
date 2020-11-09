@@ -17,6 +17,9 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 
+private val behandlingEksternId = 0L
+private val fagsakEksternId = 1L
+
 enum class TestOppdragType {
     Input,
     Output,
@@ -85,7 +88,6 @@ class TestOppdragGroup{
     private val utbetalingsperioder: MutableList<Utbetalingsperiode> = mutableListOf()
     private var oppdragKode110: Utbetalingsoppdrag.KodeEndring = Utbetalingsoppdrag.KodeEndring.NY
     private var personIdent: String?=null
-    private val eksternBehandlingId = 0L
 
     fun add(to: TestOppdrag) {
         when(to.type) {
@@ -107,7 +109,6 @@ class TestOppdragGroup{
         TilkjentYtelse (
                 behandlingId = behandling(fagsak = fagsak()).id,
                 personident = personIdent!!,
-                saksnummer = "saksnr",
                 saksbehandler = "saksbehandler",
                 andelerTilkjentYtelse = andelerTilkjentYtelseInn,
                 vedtaksdato = LocalDate.now() // Ikke påkrevd, men exception ellers
@@ -118,18 +119,17 @@ class TestOppdragGroup{
         val utbetalingsoppdrag = Utbetalingsoppdrag(
                 kodeEndring = oppdragKode110,
                 fagSystem = "EFOG",
-                saksnummer = "saksnr",
+                saksnummer = fagsakEksternId.toString(),
                 aktoer = personIdent!!,
                 saksbehandlerId = "saksbehandler",
                 avstemmingTidspunkt = LocalDateTime.now().truncatedTo(ChronoUnit.HOURS),
-                utbetalingsperiode = utbetalingsperioder.map { it.copy(behandlingId = eksternBehandlingId) }
+                utbetalingsperiode = utbetalingsperioder.map { it.copy(behandlingId = behandlingEksternId) }
         )
 
         TilkjentYtelse (
                 id = input.id,
                 behandlingId = input.behandlingId,
                 personident = personIdent!!,
-                saksnummer = "saksnr",
                 saksbehandler = "saksbehandler",
                 andelerTilkjentYtelse = andelerTilkjentYtelseUt,
                 utbetalingsoppdrag = utbetalingsoppdrag,
@@ -234,8 +234,11 @@ object TestOppdragRunner {
         }
     }
 
-    fun lagTilkjentYtelseMedUtbetalingsoppdrag(nyTilkjentYtelse:TilkjentYtelse, forrigeTilkjentYtelse:TilkjentYtelse? = null) =
+    fun lagTilkjentYtelseMedUtbetalingsoppdrag(nyTilkjentYtelse: TilkjentYtelse, forrigeTilkjentYtelse: TilkjentYtelse? = null) =
             UtbetalingsoppdragGenerator
-                    .lagTilkjentYtelseMedUtbetalingsoppdrag(TilkjentYtelseMedMetaData( tilkjentYtelse = nyTilkjentYtelse, eksternBehandlingId = 0L), forrigeTilkjentYtelse)
+                    .lagTilkjentYtelseMedUtbetalingsoppdrag(TilkjentYtelseMedMetaData(tilkjentYtelse = nyTilkjentYtelse,
+                                                                                      eksternBehandlingId = behandlingEksternId,
+                                                                                      eksternFagsakId = fagsakEksternId),
+                                                            forrigeTilkjentYtelse)
 
 }
