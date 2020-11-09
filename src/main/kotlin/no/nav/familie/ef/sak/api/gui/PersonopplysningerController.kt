@@ -13,7 +13,7 @@ import javax.validation.ConstraintViolationException
 
 
 @RestController
-@RequestMapping(path = ["/api/personopplysninger"], produces = [APPLICATION_JSON_VALUE])
+@RequestMapping(path = ["/api/personopplysninger/"], produces = [APPLICATION_JSON_VALUE])
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class PersonopplysningerController(private val personopplysningerService: PersonopplysningerService) {

@@ -22,7 +22,20 @@ data class PersonopplysningerDto(val personIdent: String,
                                  val adresse: List<AdresseDto>,
                                  val fullmakt: List<FullmaktDto>,
                                  val egenAnsatt: Boolean,
-                                 val navEnhet: String)
+                                 val navEnhet: String,
+                                 val barn: List<BarnDto>)
+
+data class BarnDto(
+        val personIdent: String,
+        val navn: String,
+        val annenForelder: AnnenForelderDTO,
+        val adresse: List<AdresseDto>
+)
+
+data class AnnenForelderDTO(
+        val personIdent: String?,
+        val navn: String?,
+)
 
 data class TelefonnummerDto(val landskode: String,
                             val nummer: String)
