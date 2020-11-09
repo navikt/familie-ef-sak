@@ -5,10 +5,11 @@ import no.nav.familie.http.config.RestTemplateBuilderBean
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.oppdrag.*
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.context.annotation.Import
 import org.springframework.stereotype.Service
+import org.springframework.web.client.RestOperations
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 
@@ -18,10 +19,8 @@ const val FAGSYSTEM = "EFOG"
 @Import(RestTemplateBuilderBean::class)
 class OppdragClient(@Value("\${FAMILIE_OPPDRAG_API_URL}")
                     private val familieOppdragUri: URI,
-//                    @Qualifier("azure")
-//                    restOperations: RestOperations
-restTemplateBuilder: RestTemplateBuilder
-) : AbstractRestClient(restTemplateBuilder.build(), "familie.oppdrag") {
+                    @Qualifier("azure")
+                    restOperations: RestOperations) : AbstractRestClient(restOperations, "familie.oppdrag") {
 
     private val postOppdragUri: URI = UriComponentsBuilder.fromUri(familieOppdragUri).pathSegment("api/oppdrag").build().toUri()
 
