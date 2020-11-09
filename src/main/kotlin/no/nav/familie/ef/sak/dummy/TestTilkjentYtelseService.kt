@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.dummy
 
 import no.nav.familie.ef.sak.api.dto.TilkjentYtelseTestDTO
-import no.nav.familie.ef.sak.integration.ØkonomiKlient
+import no.nav.familie.ef.sak.integration.OppdragClient
 import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.service.BehandlingService
@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class TestTilkjentYtelseService(private val behandlingService: BehandlingService,
                                 private val fagsakService: FagsakService,
-                                private val økonomiKlient: ØkonomiKlient,
+                                private val oppdragClient: OppdragClient,
                                 private val tilkjentYtelseRepository: TilkjentYtelseRepository) {
 
     @Transactional
@@ -34,7 +34,7 @@ class TestTilkjentYtelseService(private val behandlingService: BehandlingService
                 forrigeTilkjentYtelse = forrigeTilkjentYtelse)
 
         tilkjentYtelseRepository.insert(tilkjentYtelseMedUtbetalingsoppdrag)
-        økonomiKlient.iverksettOppdrag(tilkjentYtelseMedUtbetalingsoppdrag.utbetalingsoppdrag!!)
+        oppdragClient.iverksettOppdrag(tilkjentYtelseMedUtbetalingsoppdrag.utbetalingsoppdrag!!)
 
         return tilkjentYtelseMedUtbetalingsoppdrag
     }

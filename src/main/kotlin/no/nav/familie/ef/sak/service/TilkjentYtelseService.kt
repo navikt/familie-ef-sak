@@ -24,7 +24,7 @@ class TilkjentYtelseService(private val oppdragClient: OppdragClient,
                                   personIdent = tilkjentYtelse.personident,
                                   behandlingsId = tilkjentYtelse.id.toString())
 
-        return oppdragClient.hentStatus(oppdragId).getDataOrThrow()
+        return oppdragClient.hentStatus(oppdragId)
     }
 
     fun hentTilkjentYtelseDto(tilkjentYtelseId: UUID): TilkjentYtelseDTO {
