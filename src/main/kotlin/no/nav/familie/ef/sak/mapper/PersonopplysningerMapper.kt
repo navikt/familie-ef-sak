@@ -57,7 +57,9 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                             personMedRelasjoner.søkerIdent,
                             personMedRelasjoner.søker.bostedsadresse,
                             identNavn)
-                }
+                },
+                innflyttingTilNorge = søker.innflyttingTilNorge,
+                utflyttingFraNorge = søker.utflyttingFraNorge,
         )
     }
 

@@ -1,23 +1,31 @@
 package no.nav.familie.ef.sak.api.gui
 
 import no.nav.familie.ef.sak.api.dto.*
-import no.nav.familie.ef.sak.integration.dto.pdl.Metadata
-import no.nav.familie.ef.sak.integration.dto.pdl.Navn
+import no.nav.familie.ef.sak.api.dto.Adressebeskyttelse
+import no.nav.familie.ef.sak.api.dto.Folkeregisterpersonstatus
+import no.nav.familie.ef.sak.api.dto.Kjønn
+import no.nav.familie.ef.sak.api.dto.Sivilstandstype
+import no.nav.familie.ef.sak.integration.dto.pdl.*
 import no.nav.familie.ef.sak.service.PersonopplysningerService
 import no.nav.familie.ef.sak.service.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 
 @RestController
 @RequestMapping(path = ["/api/personopplysninger/"], produces = [APPLICATION_JSON_VALUE])
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class PersonopplysningerController(private val personopplysningerService: PersonopplysningerService, private val tilgangService: TilgangService) {
+class PersonopplysningerController(private val personopplysningerService: PersonopplysningerService,
+                                   private val tilgangService: TilgangService) {
 
     @PostMapping
     fun personopplysninger(@RequestBody personIdent: PersonIdentDto): Ressurs<PersonopplysningerDto> {
@@ -26,7 +34,7 @@ class PersonopplysningerController(private val personopplysningerService: Person
     }
 
     @PostMapping("dummy")
-    fun personopplysninger(): Ressurs<PersonopplysningerDto>{
+    fun personopplysninger(): Ressurs<PersonopplysningerDto> {
         return Ressurs.Companion.success(
                 PersonopplysningerDto(personIdent = "12345678910",
                                       navn = NavnDto.fraNavn(Navn("Olav", "mellomnavn", "Olavsen", Metadata(
@@ -36,10 +44,21 @@ class PersonopplysningerController(private val personopplysningerService: Person
                                       folkeregisterpersonstatus = Folkeregisterpersonstatus.BOSATT,
                                       dødsdato = null,
                                       telefonnummer = null,
-                                      statsborgerskap = listOf(StatsborgerskapDto(land ="Danmark", gyldigFraOgMedDato = LocalDate.MAX, gyldigTilOgMedDato = null)),
-                                      sivilstand = listOf(SivilstandDto(Sivilstandstype.SEPARERT, "20.20.2015", relatertVedSivilstand = "99999", navn = "Annen Forelder")),
-                                      adresse = listOf(AdresseDto("Moldegata 15", AdresseType.BOSTEDADRESSE, gyldigFraOgMed = LocalDate.EPOCH, gyldigTilOgMed = null),
-                                                       AdresseDto("Holtevegen 355", AdresseType.BOSTEDADRESSE, gyldigFraOgMed = LocalDate.EPOCH, gyldigTilOgMed = null)),
+                                      statsborgerskap = listOf(StatsborgerskapDto(land = "Danmark",
+                                                                                  gyldigFraOgMedDato = LocalDate.MAX,
+                                                                                  gyldigTilOgMedDato = null)),
+                                      sivilstand = listOf(SivilstandDto(Sivilstandstype.SEPARERT,
+                                                                        "20.20.2015",
+                                                                        relatertVedSivilstand = "99999",
+                                                                        navn = "Annen Forelder")),
+                                      adresse = listOf(AdresseDto("Moldegata 15",
+                                                                  AdresseType.BOSTEDADRESSE,
+                                                                  gyldigFraOgMed = LocalDate.EPOCH,
+                                                                  gyldigTilOgMed = null),
+                                                       AdresseDto("Holtevegen 355",
+                                                                  AdresseType.BOSTEDADRESSE,
+                                                                  gyldigFraOgMed = LocalDate.EPOCH,
+                                                                  gyldigTilOgMed = null)),
                                       fullmakt = listOf(),
                                       egenAnsatt = false,
                                       navEnhet = "abcd-enhet",
@@ -50,7 +69,11 @@ class PersonopplysningerController(private val personopplysningerService: Person
                                                                               AdresseType.BOSTEDADRESSE,
                                                                               gyldigFraOgMed = LocalDate.EPOCH,
                                                                               gyldigTilOgMed = null)),
-                                      true)),
+                                                            true)),
+                                      innflyttingTilNorge = listOf(InnflyttingTilNorge("Sverige", null, Folkeregistermetadata(
+                                              LocalDateTime.now(), null))),
+                                      utflyttingFraNorge = listOf(UtflyttingFraNorge("Narnia", null, Folkeregistermetadata(
+                                              LocalDateTime.now(), null)))
                 ))
     }
 

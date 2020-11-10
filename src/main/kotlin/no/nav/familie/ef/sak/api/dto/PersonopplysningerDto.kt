@@ -1,6 +1,8 @@
 package no.nav.familie.ef.sak.api.dto
 
+import no.nav.familie.ef.sak.integration.dto.pdl.InnflyttingTilNorge
 import no.nav.familie.ef.sak.integration.dto.pdl.Navn
+import no.nav.familie.ef.sak.integration.dto.pdl.UtflyttingFraNorge
 import no.nav.familie.ef.sak.integration.dto.pdl.visningsnavn
 import java.time.LocalDate
 import no.nav.familie.ef.sak.integration.dto.pdl.Folkeregisterpersonstatus as PdlFolkeregisterpersonstatus
@@ -23,7 +25,9 @@ data class PersonopplysningerDto(val personIdent: String,
                                  val fullmakt: List<FullmaktDto>,
                                  val egenAnsatt: Boolean,
                                  val navEnhet: String,
-                                 val barn: List<BarnDto>)
+                                 val barn: List<BarnDto>,
+                                 val innflyttingTilNorge: List<InnflyttingTilNorge>,
+                                 val utflyttingFraNorge: List<UtflyttingFraNorge>)
 
 data class BarnDto(
         val personIdent: String,
