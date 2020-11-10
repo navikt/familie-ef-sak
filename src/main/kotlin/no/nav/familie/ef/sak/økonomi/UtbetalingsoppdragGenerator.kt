@@ -31,7 +31,6 @@ object UtbetalingsoppdragGenerator {
      */
     fun lagTilkjentYtelseMedUtbetalingsoppdrag(nyTilkjentYtelseMedMetaData: TilkjentYtelseMedMetaData,
                                                forrigeTilkjentYtelse: TilkjentYtelse? = null): TilkjentYtelse {
-        //TODO lægga til ekstern behandlingid på  forrigeTilkjentYtelse??
 
         val nyTilkjentYtelse = nyTilkjentYtelseMedMetaData.tilkjentYtelse
         val oppdaterteKjeder = lagKjederUtenNullVerdier(nyTilkjentYtelse)

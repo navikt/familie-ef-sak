@@ -9,7 +9,7 @@ import java.util.*
 
 data class TilkjentYtelse(@Id
                           val id: UUID = UUID.randomUUID(),
-                          val behandlingId: UUID, /// TODO  Gjøres om til UUID og "ekte" foreign key
+                          val behandlingId: UUID,
                           val personident: String,
                           val saksbehandler: String, /// TODO Legg til Sporbar() og fjern dette feltet
                           @Column("stonad_fom")
