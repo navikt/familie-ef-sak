@@ -27,7 +27,6 @@ class TestTilkjentYtelseController(private val testTilkjentYtelseService: TestTi
     fun dummyTilkjentYtelse(@RequestBody dummyIverksettingDTO: DummyIverksettingDTO?): Ressurs<TilkjentYtelse> {
         val dummyDTO = dummyIverksettingDTO ?: DummyIverksettingDTO()
         val søker = dummyDTO.personIdent
-        val saksbehandler = SikkerhetContext.hentSaksbehandler()
         val andelTilkjentYtelseDto = AndelTilkjentYtelseDTO(personIdent = søker,
                                                             beløp = dummyDTO.beløp,
                                                             stønadFom = dummyDTO.stønadFom,
@@ -36,7 +35,7 @@ class TestTilkjentYtelseController(private val testTilkjentYtelseService: TestTi
         val tilkjentYtelseDto = TilkjentYtelseDTO(søker = søker,
                 behandlingId = UUID.randomUUID(),
                 andelerTilkjentYtelse = listOf(andelTilkjentYtelseDto, andelTilkjentYtelseDto))
-        return Ressurs.success(tilkjentYtelseDto.tilTilkjentYtelse(saksbehandler = saksbehandler))
+        return Ressurs.success(tilkjentYtelseDto.tilTilkjentYtelse(saksbehandler = SikkerhetContext.hentSaksbehandler()))
     }
 
 }

@@ -19,10 +19,8 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
 
-
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
-
 
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
