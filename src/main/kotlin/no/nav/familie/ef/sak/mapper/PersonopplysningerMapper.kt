@@ -105,8 +105,4 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
         return bostedsadresse ?: bostedsadresser.firstOrNull()
     }
 
-    fun byGyldighetstidspunktNullFirst(): Comparator<Bostedsadresse>? {
-        return Comparator.comparing({ e -> e.folkeregistermetadata.gyldighetstidspunkt },
-                                    Comparator.nullsFirst(Comparator.naturalOrder()))
-    }
 }
