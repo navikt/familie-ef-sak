@@ -3,7 +3,6 @@ package no.nav.familie.ef.sak.repository.domain
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
-import org.springframework.data.relational.core.mapping.MappedCollection
 import java.time.LocalDate
 import java.util.*
 
