@@ -18,14 +18,13 @@ import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.*
 
-@Component
 object UtbetalingsoppdragGenerator {
 
     /**
      * Lager utbetalingsoppdrag med kjedede perioder av andeler.
-     * Ved opphør sendes @param[nyTilkjentYtelse] uten andeler.
+     * Ved opphør sendes @param[nyTilkjentYtelseMedMetaData] uten andeler.
      *
-     * @param[nyTilkjentYtelse] Den nye tilkjente ytelsen, med fullstending sett av andeler
+     * @param[nyTilkjentYtelseMedMetaData] Den nye tilkjente ytelsen, med fullstending sett av andeler
      * @param[forrigeTilkjentYtelse] Forrige tilkjent ytelse, med fullstendig sett av andeler med id
      * @return Ny tilkjent ytelse med andeler med id'er, samt utbetalingsoppdrag
      */
