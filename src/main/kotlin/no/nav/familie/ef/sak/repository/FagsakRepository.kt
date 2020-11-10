@@ -9,7 +9,11 @@ import java.util.*
 @Repository
 interface FagsakRepository : RepositoryInterface<Fagsak, UUID>, InsertUpdateRepository<Fagsak> {
 
-    @Query("SELECT f.* FROM fagsak f LEFT JOIN fagsak_person fp ON fp.fagsak_id = f.id WHERE ident = :ident AND stonadstype = :stønadstype")
+    @Query("""SELECT f.* FROM fagsak f 
+                     LEFT JOIN fagsak_person fp 
+                     ON fp.fagsak_id = f.id 
+                     WHERE ident = :ident 
+                     AND stonadstype = :stønadstype""")
     fun findBySøkerIdent(ident: String, stønadstype: Stønadstype): Fagsak?
 
     @Query("SELECT f.*, fe.id AS eksternId_id " +

@@ -20,41 +20,43 @@ class MedlemskapMapper(private val statsborgerskapMapper: StatsborgerskapMapper,
                pdlSøker: PdlSøker): MedlemskapDto {
 
         val statsborgerskap = statsborgerskapMapper.map(pdlSøker.statsborgerskap)
-        val søknadsgrunnlag = MedlemskapSøknadsgrunnlagDto(
-                bosattNorgeSisteÅrene = medlemskapsdetaljer.bosattNorgeSisteÅrene,
-                oppholderDuDegINorge = medlemskapsdetaljer.oppholderDuDegINorge,
-                utenlandsopphold = medlemskapsdetaljer.utenlandsopphold.map {
-                    UtenlandsoppholdDto(it.fradato,
-                                        it.tildato,
-                                        it.årsakUtenlandsopphold)
-                } )
-        val registergrunnlag = MedlemskapRegistergrunnlagDto(
-                nåværendeStatsborgerskap = statsborgerskap.filter { it.gyldigTilOgMedDato == null }.map { it.land },
-                statsborgerskap = statsborgerskap,
-                oppholdstatus = OppholdstillatelseMapper.map(pdlSøker.opphold),
-                bostedsadresse = pdlSøker.bostedsadresse.map(adresseMapper::tilAdresse),
-                innflytting = mapInnflytting(pdlSøker.innflyttingTilNorge),
-                utflytting = mapUtflytting(pdlSøker.utflyttingFraNorge),
-                folkeregisterpersonstatus = pdlSøker.folkeregisterpersonstatus.firstOrNull()
-                        ?.let { Folkeregisterpersonstatus.fraPdl(it) }
-        )
-        return MedlemskapDto(
-                søknadsgrunnlag = søknadsgrunnlag,
-                registergrunnlag = registergrunnlag)
+        val søknadsgrunnlag =
+                MedlemskapSøknadsgrunnlagDto(bosattNorgeSisteÅrene = medlemskapsdetaljer.bosattNorgeSisteÅrene,
+                                             oppholderDuDegINorge = medlemskapsdetaljer.oppholderDuDegINorge,
+                                             utenlandsopphold = medlemskapsdetaljer.utenlandsopphold.map {
+                                                 UtenlandsoppholdDto(it.fradato,
+                                                                     it.tildato,
+                                                                     it.årsakUtenlandsopphold)
+                                             })
+        val registergrunnlag =
+                MedlemskapRegistergrunnlagDto(nåværendeStatsborgerskap =
+                                              statsborgerskap.filter { it.gyldigTilOgMedDato == null }
+                                                      .map { it.land },
+                                              statsborgerskap = statsborgerskap,
+                                              oppholdstatus = OppholdstillatelseMapper.map(pdlSøker.opphold),
+                                              bostedsadresse = pdlSøker.bostedsadresse.map(adresseMapper::tilAdresse),
+                                              innflytting = mapInnflytting(pdlSøker.innflyttingTilNorge),
+                                              utflytting = mapUtflytting(pdlSøker.utflyttingFraNorge),
+                                              folkeregisterpersonstatus = pdlSøker.folkeregisterpersonstatus.firstOrNull()
+                                                      ?.let(Folkeregisterpersonstatus::fraPdl))
+        return MedlemskapDto(søknadsgrunnlag = søknadsgrunnlag,
+                             registergrunnlag = registergrunnlag)
     }
 
     private fun mapInnflytting(innflyttingTilNorge: List<InnflyttingTilNorge>): List<InnflyttingDto> =
             innflyttingTilNorge.map { innflytting ->
                 InnflyttingDto(fraflyttingsland = innflytting.fraflyttingsland?.let {
                     kodeverkService.hentLand(it, LocalDate.now()) ?: it
-                }, dato = finnMinDatoRegistrert(innflytting.folkeregistermetadata)?.toLocalDate())
+                },
+                               dato = finnMinDatoRegistrert(innflytting.folkeregistermetadata)?.toLocalDate())
             }
 
     private fun mapUtflytting(utflyttingFraNorge: List<UtflyttingFraNorge>): List<UtflyttingDto> =
             utflyttingFraNorge.map { utflytting ->
                 UtflyttingDto(tilflyttingsland = utflytting.tilflyttingsland?.let {
                     kodeverkService.hentLand(it, LocalDate.now()) ?: it
-                }, dato = finnMinDatoRegistrert(utflytting.folkeregistermetadata)?.toLocalDate())
+                },
+                              dato = finnMinDatoRegistrert(utflytting.folkeregistermetadata)?.toLocalDate())
             }
 
     private fun finnMinDatoRegistrert(folkeregistermetadata: Folkeregistermetadata) =

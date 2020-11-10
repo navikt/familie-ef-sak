@@ -7,20 +7,18 @@ import org.springframework.data.relational.core.mapping.Table
 import java.util.*
 
 @Table("vilkarsvurdering")
-data class Vilkårsvurdering(
-        @Id
-        val id: UUID = UUID.randomUUID(),
-        @Column("behandling_id")
-        val behandlingId: UUID,
-        val resultat: Vilkårsresultat = Vilkårsresultat.IKKE_VURDERT,
-        val type: VilkårType,
-        val begrunnelse: String? = null,
-        val unntak: String? = null,
-        @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-        val sporbar: Sporbar = Sporbar(),
-        @Column("delvilkar")
-        val delvilkårsvurdering: DelvilkårsvurderingWrapper
-)
+data class Vilkårsvurdering(@Id
+                            val id: UUID = UUID.randomUUID(),
+                            @Column("behandling_id")
+                            val behandlingId: UUID,
+                            val resultat: Vilkårsresultat = Vilkårsresultat.IKKE_VURDERT,
+                            val type: VilkårType,
+                            val begrunnelse: String? = null,
+                            val unntak: String? = null,
+                            @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+                            val sporbar: Sporbar = Sporbar(),
+                            @Column("delvilkar")
+                            val delvilkårsvurdering: DelvilkårsvurderingWrapper)
 
 // Ingen støtte for å ha en liste direkt i entiteten, wrapper+converter virker
 data class DelvilkårsvurderingWrapper(val delvilkårsvurderinger: List<Delvilkårsvurdering>)
@@ -44,7 +42,8 @@ enum class Vilkårsresultat {
 enum class VilkårType(val beskrivelse: String,
                       val delvilkår: List<DelvilkårType> = emptyList()) {
 
-    OPPHOLDSTILLATELSE("Vises kun for ikke-nordiske statsborgere - Foreligger det oppholdstillatelse eller annen bekreftelse på gyldig opphold?"),
+    OPPHOLDSTILLATELSE("Vises kun for ikke-nordiske statsborgere - " +
+                       "Foreligger det oppholdstillatelse eller annen bekreftelse på gyldig opphold?"),
     FORUTGÅENDE_MEDLEMSKAP("§15-2 Forutgående medlemskap",
                            listOf(DelvilkårType.TRE_ÅRS_MEDLEMSKAP, DelvilkårType.DOKUMENTERT_FLYKTNINGSTATUS)),
     LOVLIG_OPPHOLD("§15-3 Lovlig opphold", listOf(DelvilkårType.BOR_OG_OPPHOLDER_SEG_I_NORGE));

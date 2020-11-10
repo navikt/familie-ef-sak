@@ -1,8 +1,8 @@
 package no.nav.familie.ef.sak.api.dto
 
 import no.nav.familie.ef.sak.repository.domain.DelvilkårType
-import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
 import no.nav.familie.ef.sak.repository.domain.VilkårType
+import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
 import java.time.LocalDateTime
 import java.util.*
 

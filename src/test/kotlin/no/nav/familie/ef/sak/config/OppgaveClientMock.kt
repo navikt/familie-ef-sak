@@ -1,12 +1,14 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.config
 
-import io.mockk.*
+import io.mockk.Runs
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
 import no.nav.familie.ef.sak.integration.OppgaveClient
 import no.nav.familie.kontrakter.felles.oppgave.*
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
-import java.lang.IllegalStateException
 import java.time.LocalDate
 
 
@@ -29,7 +31,7 @@ class OppgaveClientMock() {
         every { oppgaveClient.fordelOppgave(any(), any()) } returns 12345678L
 
         every { oppgaveClient.ferdigstillOppgave(any()) } just Runs
-        
+
         return oppgaveClient
     }
 
@@ -41,7 +43,9 @@ class OppgaveClientMock() {
     private fun lagOppgave(oppgaveId: Long,
                            oppgavetype: Oppgavetype,
                            tildeltRessurs: String? = null,
-                           beskivelse: String? = "Beskrivelse av oppgaven. Denne teksten kan jo være lang, kort eller ikke inneholde noenting. "): Oppgave {
+                           beskivelse: String? = "Beskrivelse av oppgaven. " +
+                                                 "Denne teksten kan jo være lang, kort eller ikke inneholde noenting. ")
+            : Oppgave {
         return Oppgave(id = oppgaveId,
                        aktoerId = "1234",
                        identer = listOf(OppgaveIdentV2("11111111111", IdentGruppe.FOLKEREGISTERIDENT)),
@@ -54,14 +58,8 @@ class OppgaveClientMock() {
                        tema = Tema.ENF,
                        behandlingstema = "ab0071",
                        oppgavetype = oppgavetype.value,
-                       opprettetTidspunkt = LocalDate.of(
-                               2020,
-                               1,
-                               1).toString(),
-                       fristFerdigstillelse = LocalDate.of(
-                               2020,
-                               2,
-                               1).toString(),
+                       opprettetTidspunkt = LocalDate.of(2020, 1, 1).toString(),
+                       fristFerdigstillelse = LocalDate.of(2020, 2, 1).toString(),
                        prioritet = OppgavePrioritet.NORM,
                        status = StatusEnum.OPPRETTET
         )

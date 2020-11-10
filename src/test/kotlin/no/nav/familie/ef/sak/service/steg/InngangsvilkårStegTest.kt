@@ -22,7 +22,7 @@ internal class InngangsvilkårStegTest {
         every { vurderingService.hentInngangsvilkårSomManglerVurdering(behandling.id) } returns
                 listOf(VilkårType.FORUTGÅENDE_MEDLEMSKAP)
 
-        val exception = assertThrows<Feil> {  inngangsvilkårSteg.postValiderSteg(behandling) }
+        val exception = assertThrows<Feil> { inngangsvilkårSteg.postValiderSteg(behandling) }
         assertEquals("Følgende inngangsvilkår mangler vurdering: \n${VilkårType.FORUTGÅENDE_MEDLEMSKAP.beskrivelse}",
                      exception.frontendFeilmelding)
     }

@@ -47,17 +47,17 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
 
             val aktørId = pdlClient.hentAktørId(fagsak.hentAktivIdent()).hentIdenter.identer.first().ident;
             val enhetsnummer = arbeidsfordelingService.hentNavEnhet(fagsak.hentAktivIdent())
-            val opprettOppgave = OpprettOppgaveRequest(
-                    ident = OppgaveIdentV2(ident = aktørId, gruppe = IdentGruppe.AKTOERID),
-                    saksId = fagsak.eksternId.id.toString(),
-                    tema = Tema.ENF,
-                    oppgavetype = oppgavetype,
-                    fristFerdigstillelse = fristForFerdigstillelse,
-                    beskrivelse = lagOppgaveTekst(fagsak.id.toString(), beskrivelse),
-                    enhetsnummer = enhetId ?: enhetsnummer?.enhetId,
-                    behandlingstema = finnBehandlingstema(fagsak.stønadstype).value,
-                    tilordnetRessurs = tilordnetNavIdent
-            )
+            val opprettOppgave =
+                    OpprettOppgaveRequest(ident = OppgaveIdentV2(ident = aktørId, gruppe = IdentGruppe.AKTOERID),
+                                          saksId = fagsak.eksternId.id.toString(),
+                                          tema = Tema.ENF,
+                                          oppgavetype = oppgavetype,
+                                          fristFerdigstillelse = fristForFerdigstillelse,
+                                          beskrivelse = lagOppgaveTekst(fagsak.id.toString(), beskrivelse),
+                                          enhetsnummer = enhetId ?: enhetsnummer?.enhetId,
+                                          behandlingstema = finnBehandlingstema(fagsak.stønadstype).value,
+                                          tilordnetRessurs = tilordnetNavIdent
+                    )
 
             val opprettetOppgaveId = oppgaveClient.opprettOppgave(opprettOppgave)
 
@@ -98,7 +98,7 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
         oppgaveRepository.update(oppgave)
     }
 
-    fun ferdigstillOppgave(gsakOppgaveId: Long){
+    fun ferdigstillOppgave(gsakOppgaveId: Long) {
         oppgaveClient.ferdigstillOppgave(gsakOppgaveId)
     }
 

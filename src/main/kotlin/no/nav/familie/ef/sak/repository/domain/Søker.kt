@@ -6,7 +6,8 @@ import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 
 @Table("soker")
-data class Søker(@Column("fodselsnummer") val fødselsnummer: String,
+data class Søker(@Column("fodselsnummer")
+                 val fødselsnummer: String,
                  val navn: String)
 
 object SøkerMapper {

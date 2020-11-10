@@ -1,17 +1,16 @@
 package no.nav.familie.ef.sak.økonomi
 
+import no.nav.familie.ef.sak.api.dto.AndelTilkjentYtelseDTO
+import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
 import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.YtelseType
-import no.nav.familie.ef.sak.api.dto.AndelTilkjentYtelseDTO
-import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
 
 object DataGenerator {
+
     fun tilfeldigFødselsnummer() = Random().nextInt(Int.MAX_VALUE).toString()
     private fun tilfeldigSaksnummer() = "SAK" + Random().nextInt(Int.MAX_VALUE)
 
@@ -67,14 +66,12 @@ object DataGenerator {
                                beløp: Int = Random().nextInt(),
                                periodeIdOffset: Long? = null): AndelTilkjentYtelse {
 
-        return AndelTilkjentYtelse(
-                personIdent = personIdent,
-                beløp = beløp,
-                stønadFom = dato(fom),
-                stønadTom = dato(tom),
-                type = ytelseType,
-                periodeId = periodeIdOffset
-        )
+        return AndelTilkjentYtelse(personIdent = personIdent,
+                                   beløp = beløp,
+                                   stønadFom = dato(fom),
+                                   stønadTom = dato(tom),
+                                   type = ytelseType,
+                                   periodeId = periodeIdOffset)
     }
 
     fun dato(s: String) = LocalDate.parse(s)

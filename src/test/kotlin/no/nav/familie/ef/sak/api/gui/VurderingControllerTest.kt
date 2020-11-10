@@ -47,10 +47,9 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
         val respons: ResponseEntity<Ressurs<UUID>> =
                 restTemplate.exchange(localhost("/api/vurdering/inngangsvilkar"),
                                       HttpMethod.POST,
-                                      HttpEntity(opprettetVurdering.copy(
-                                              resultat = Vilkårsresultat.JA,
-                                              begrunnelse = "Godkjent"
-                                      ), headers))
+                                      HttpEntity(opprettetVurdering.copy(resultat = Vilkårsresultat.JA,
+                                                                         begrunnelse = "Godkjent"),
+                                                 headers))
 
         assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(respons.body.status).isEqualTo(Ressurs.Status.SUKSESS)
@@ -59,7 +58,8 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
 
     private fun opprettInngangsvilkår(): ResponseEntity<Ressurs<InngangsvilkårDto>> {
         val søknad = SøknadMedVedlegg(Testsøknad.søknadOvergangsstønad, emptyList())
-        val fagsak = fagsakService.hentEllerOpprettFagsak(søknad.søknad.personalia.verdi.fødselsnummer.verdi.verdi, Stønadstype.OVERGANGSSTØNAD)
+        val fagsak = fagsakService.hentEllerOpprettFagsak(søknad.søknad.personalia.verdi.fødselsnummer.verdi.verdi,
+                                                          Stønadstype.OVERGANGSSTØNAD)
         val behandling = behandlingService.opprettBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, fagsak.id)
         behandlingService.mottaSøknadForOvergangsstønad(søknad.søknad, behandling.id, fagsak.id, "1234")
 

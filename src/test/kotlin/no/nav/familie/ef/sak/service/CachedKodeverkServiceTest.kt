@@ -19,6 +19,7 @@ internal class CachedKodeverkServiceTest {
     @Test
     internal fun `alle publike metoder må være cacheable testklasse`() {
         open class CachedKlasse {
+
             @Cacheable
             open fun med() = true
 
@@ -26,6 +27,7 @@ internal class CachedKodeverkServiceTest {
         }
 
         open class CachedKlasseMedPrivat {
+
             @Cacheable
             open fun med() = true
 

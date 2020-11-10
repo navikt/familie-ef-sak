@@ -13,11 +13,9 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class StegService(
-        private val behandlingSteg: List<BehandlingSteg<*>>,
-        private val behandlingService: BehandlingService,
-        private val rolleConfig: RolleConfig,
-) {
+class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
+                  private val behandlingService: BehandlingService,
+                  private val rolleConfig: RolleConfig) {
 
     private val stegSuksessMetrics: Map<StegType, Counter> = initStegMetrikker("suksess")
 
@@ -26,7 +24,8 @@ class StegService(
 
     @Transactional
     fun håndterRegistrerOpplysninger(behandling: Behandling, søknad: String): Behandling {
-        val behandlingSteg: RegistrereOpplysningerSteg = hentBehandlingSteg(StegType.REGISTRERE_OPPLYSNINGER) as RegistrereOpplysningerSteg
+        val behandlingSteg: RegistrereOpplysningerSteg =
+                hentBehandlingSteg(StegType.REGISTRERE_OPPLYSNINGER) as RegistrereOpplysningerSteg
         return håndterSteg(behandling, behandlingSteg) {
             behandlingSteg.utførStegOgAngiNeste(behandling, søknad)
         }
@@ -60,7 +59,8 @@ class StegService(
             }
 
             if (stegType.kommerEtter(behandling.steg)) {
-                error("$saksbehandlerNavn prøver å utføre steg '${stegType.displayName()}', men behandlingen er på steg '${behandling.steg.displayName()}'")
+                error("$saksbehandlerNavn prøver å utføre steg '${stegType.displayName()}', " +
+                      "men behandlingen er på steg '${behandling.steg.displayName()}'")
             }
 
             if (behandling.steg == StegType.BESLUTTE_VEDTAK && stegType != StegType.BESLUTTE_VEDTAK) {
@@ -78,7 +78,8 @@ class StegService(
             }
 
             if (!nesteSteg.erGyldigIKombinasjonMedStatus(behandlingService.hentBehandling(behandling.id).status)) {
-                error("Steg '${nesteSteg.displayName()}' kan ikke settes på behandling i kombinasjon med status ${behandling.status}")
+                error("Steg '${nesteSteg.displayName()}' kan ikke settes " +
+                      "på behandling i kombinasjon med status ${behandling.status}")
             }
 
             val returBehandling = behandlingService.oppdaterStegPåBehandling(behandlingId = behandling.id, steg = nesteSteg)

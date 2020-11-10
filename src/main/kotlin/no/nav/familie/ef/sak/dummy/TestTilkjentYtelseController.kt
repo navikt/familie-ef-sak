@@ -4,13 +4,16 @@ import no.nav.familie.ef.sak.api.dto.AndelTilkjentYtelseDTO
 import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
 import no.nav.familie.ef.sak.api.dto.TilkjentYtelseTestDTO
 import no.nav.familie.ef.sak.mapper.tilTilkjentYtelse
-import no.nav.familie.ef.sak.repository.domain.*
+import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.økonomi.tilYtelseType
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.context.annotation.Profile
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 import java.util.*
 
 @RestController
@@ -35,8 +38,8 @@ class TestTilkjentYtelseController(private val testTilkjentYtelseService: TestTi
                                                             stønadTom = dummyDTO.stønadTom,
                                                             type = dummyDTO.stønadstype.tilYtelseType())
         val tilkjentYtelseDto = TilkjentYtelseDTO(søker = søker,
-                behandlingId = UUID.randomUUID(),
-                andelerTilkjentYtelse = listOf(andelTilkjentYtelseDto, andelTilkjentYtelseDto))
+                                                  behandlingId = UUID.randomUUID(),
+                                                  andelerTilkjentYtelse = listOf(andelTilkjentYtelseDto, andelTilkjentYtelseDto))
         return Ressurs.success(tilkjentYtelseDto.tilTilkjentYtelse(saksbehandler = SikkerhetContext.hentSaksbehandler()))
     }
 

@@ -40,21 +40,16 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
                                    søkerIdenter = setOf(FagsakPerson(ident = personIdent)))
         val fagsakDB = fagsakRepository.insert(fagsakRequest)
 
-        val behandlingInaktiv = Behandling(
-                fagsakId = fagsakDB.id,
-                type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                status = BehandlingStatus.FERDIGSTILT,
-                aktiv = false,
-                steg = StegType.BEHANDLING_FERDIGSTILT
-        )
-        val behandlingAktiv
-                = Behandling(
-                fagsakId = fagsakDB.id,
-                type = BehandlingType.REVURDERING,
-                status = BehandlingStatus.UTREDES,
-                aktiv = true,
-                steg = StegType.REGISTRERE_OPPLYSNINGER
-        )
+        val behandlingInaktiv = Behandling(fagsakId = fagsakDB.id,
+                                           type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                                           status = BehandlingStatus.FERDIGSTILT,
+                                           aktiv = false,
+                                           steg = StegType.BEHANDLING_FERDIGSTILT)
+        val behandlingAktiv = Behandling(fagsakId = fagsakDB.id,
+                                         type = BehandlingType.REVURDERING,
+                                         status = BehandlingStatus.UTREDES,
+                                         aktiv = true,
+                                         steg = StegType.REGISTRERE_OPPLYSNINGER)
 
         behandlingRepository.insert(behandlingInaktiv)
         behandlingRepository.insert(behandlingAktiv)

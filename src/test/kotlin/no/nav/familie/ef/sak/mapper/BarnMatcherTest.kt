@@ -16,9 +16,9 @@ internal class BarnMatcherTest {
         val fnrBarn3 = FnrGenerator.generer()
         val fnrBarn4 = FnrGenerator.generer(2018, 5, 4)
         val søknadsbarn = setOf(søknadsbarn(fnr = fnrBarn1),
-                                            søknadsbarn(fnr = fnrBarn2),
-                                            søknadsbarn(fnr = fnrBarn3),
-                                            søknadsbarn(LocalDate.of(2018, 5, 4)))
+                                søknadsbarn(fnr = fnrBarn2),
+                                søknadsbarn(fnr = fnrBarn3),
+                                søknadsbarn(LocalDate.of(2018, 5, 4)))
         val pdlBarnMap: Map<String, PdlBarn> = mapOf(pdlBarn(fnrBarn1),
                                                      pdlBarn(fnrBarn2),
                                                      pdlBarn(fnrBarn3),
@@ -41,9 +41,9 @@ internal class BarnMatcherTest {
         val fnrBarn3 = FnrGenerator.generer()
         val fnrBarn4 = FnrGenerator.generer(2018, 5, 4)
         val søknadsbarn = setOf(søknadsbarn(fnr = fnrBarn1),
-                                            søknadsbarn(fnr = fnrBarn2),
-                                            søknadsbarn(fnr = fnrBarn3),
-                                            søknadsbarn(LocalDate.of(2018, 9, 4)))
+                                søknadsbarn(fnr = fnrBarn2),
+                                søknadsbarn(fnr = fnrBarn3),
+                                søknadsbarn(LocalDate.of(2018, 9, 4)))
         val pdlBarnMap: Map<String, PdlBarn> = mapOf(pdlBarn(fnrBarn1),
                                                      pdlBarn(fnrBarn2),
                                                      pdlBarn(fnrBarn3),
@@ -66,9 +66,9 @@ internal class BarnMatcherTest {
         val fnrBarn3 = FnrGenerator.generer()
         val fnrBarn4 = FnrGenerator.generer(2018, 5, 31)
         val søknadsbarn = setOf(søknadsbarn(fnr = fnrBarn1),
-                                            søknadsbarn(fnr = fnrBarn2),
-                                            søknadsbarn(fnr = fnrBarn3),
-                                            søknadsbarn(LocalDate.of(2018, 5, 4)))
+                                søknadsbarn(fnr = fnrBarn2),
+                                søknadsbarn(fnr = fnrBarn3),
+                                søknadsbarn(LocalDate.of(2018, 5, 4)))
         val pdlBarnMap: Map<String, PdlBarn> = mapOf(pdlBarn(fnrBarn1),
                                                      pdlBarn(fnrBarn2),
                                                      pdlBarn(fnrBarn3),
@@ -117,8 +117,8 @@ internal class BarnMatcherTest {
         val fnrBarn3 = FnrGenerator.generer(2018, 5, 15)
         val fnrBarn4 = FnrGenerator.generer(2018, 5, 31)
         val søknadsbarn = setOf(søknadsbarn(fnr = fnrBarn1),
-                                            søknadsbarn(fnr = fnrBarn2),
-                                            søknadsbarn(LocalDate.of(2018, 5, 4)))
+                                søknadsbarn(fnr = fnrBarn2),
+                                søknadsbarn(LocalDate.of(2018, 5, 4)))
         val pdlBarnMap: Map<String, PdlBarn> = mapOf(pdlBarn(fnrBarn1),
                                                      pdlBarn(fnrBarn2),
                                                      pdlBarn(fnrBarn3),

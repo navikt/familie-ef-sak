@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak
 
-import no.nav.familie.ef.sak.config.ApplicationConfig
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration
 import org.springframework.boot.builder.SpringApplicationBuilder

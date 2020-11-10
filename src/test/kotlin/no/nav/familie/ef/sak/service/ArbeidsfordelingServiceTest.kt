@@ -50,9 +50,7 @@ internal class ArbeidsfordelingServiceTest {
                              graderingBarn: AdressebeskyttelseGradering): SøkerMedBarn =
             SøkerMedBarn(IDENT_FORELDER,
                          pdlSøker(graderingForelder),
-                         mapOf(IDENT_BARN to pdlBarn(
-                                 adressebeskyttelse = adressebeskyttelse(graderingBarn)))
-            )
+                         mapOf(IDENT_BARN to pdlBarn(adressebeskyttelse = adressebeskyttelse(graderingBarn))))
 
     private fun pdlSøker(adressebeskyttelseGradering: AdressebeskyttelseGradering) =
             pdlSøker(adressebeskyttelse = adressebeskyttelse(adressebeskyttelseGradering))

@@ -114,43 +114,39 @@ internal class JournalføringControllerTest {
         } throws ManglerTilgang("Bruker mangler tilgang")
 
         assertThrows<ManglerTilgang> {
-            journalføringController.fullførJournalpost(
-                    journalpostMedFødselsnummer.journalpostId,
-                    JournalføringRequest(null, UUID.randomUUID(), "dummy-oppgave", JournalføringBehandling(UUID.randomUUID()), "Z1234567", "9991")
-            )
+            journalføringController.fullførJournalpost(journalpostMedFødselsnummer.journalpostId,
+                                                       JournalføringRequest(null,
+                                                                            UUID.randomUUID(),
+                                                                            "dummy-oppgave",
+                                                                            JournalføringBehandling(UUID.randomUUID()),
+                                                                            "Z1234567",
+                                                                            "9991"))
         }
     }
 
     val aktørId = "11111111111"
     val personIdentFraPdl = "12345678901"
 
-    val journalpostMedAktørId = Journalpost(journalpostId = "1234",
-            journalposttype = Journalposttype.I,
-            journalstatus = Journalstatus.MOTTATT,
-            tema = "ENF",
-            behandlingstema = "ab0071",
-            tittel = "abrakadabra",
-            bruker = Bruker(type = BrukerIdType.AKTOERID, id = aktørId),
-            journalforendeEnhet = "4817",
-            kanal = "SKAN_IM",
-            dokumenter = listOf(
-                    DokumentInfo(
-                            dokumentInfoId = "12345",
-                            tittel = "Tittel",
-                            brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
-                            dokumentvarianter = listOf(Dokumentvariant(variantformat = "ARKIV"))
-                    )
+    val journalpostMedAktørId =
+            Journalpost(journalpostId = "1234",
+                        journalposttype = Journalposttype.I,
+                        journalstatus = Journalstatus.MOTTATT,
+                        tema = "ENF",
+                        behandlingstema = "ab0071",
+                        tittel = "abrakadabra",
+                        bruker = Bruker(type = BrukerIdType.AKTOERID, id = aktørId),
+                        journalforendeEnhet = "4817",
+                        kanal = "SKAN_IM",
+                        dokumenter =
+                        listOf(DokumentInfo(dokumentInfoId = "12345",
+                                            tittel = "Tittel",
+                                            brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
+                                            dokumentvarianter = listOf(Dokumentvariant(variantformat = "ARKIV"))))
             )
-    )
 
-    val journalpostMedFødselsnummer = journalpostMedAktørId.copy(
-            bruker = Bruker(type = BrukerIdType.FNR, id = personIdentFraPdl)
-    )
-    val journalpostUtenBruker = journalpostMedAktørId.copy(
-            bruker = null
-    )
-    val journalpostMedOrgnr = journalpostMedAktørId.copy(
-            bruker = Bruker(type = BrukerIdType.ORGNR, id = "12345")
-    )
+    val journalpostMedFødselsnummer =
+            journalpostMedAktørId.copy(bruker = Bruker(type = BrukerIdType.FNR, id = personIdentFraPdl))
+    val journalpostUtenBruker = journalpostMedAktørId.copy(bruker = null)
+    val journalpostMedOrgnr = journalpostMedAktørId.copy(bruker = Bruker(type = BrukerIdType.ORGNR, id = "12345"))
 
 }

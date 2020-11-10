@@ -17,15 +17,16 @@ internal class AdresseMapperTest {
 
     @Test
     internal fun `Bostedsadresse formatert adresse`() {
-        val bostedsadresse = Bostedsadresse(
-                angittFlyttedato = startdato,
-                coAdressenavn = null,
-                folkeregistermetadata = Folkeregistermetadata(gyldighetstidspunkt = LocalDateTime.now(),
-                                                              opphørstidspunkt = startdato.plusDays(1).atStartOfDay()),
-                utenlandskAdresse(),
-                vegadresse = vegadresse(),
-                ukjentBosted = UkjentBosted(bostedskommune = "ukjentBostedKommune")
-        )
+        val bostedsadresse =
+                Bostedsadresse(angittFlyttedato = startdato,
+                               coAdressenavn = null,
+                               folkeregistermetadata = Folkeregistermetadata(gyldighetstidspunkt = LocalDateTime.now(),
+                                                                             opphørstidspunkt = startdato.plusDays(1)
+                                                                                     .atStartOfDay()),
+                               utenlandskAdresse(),
+                               vegadresse = vegadresse(),
+                               ukjentBosted = UkjentBosted(bostedskommune = "ukjentBostedKommune")
+                )
         assertThat(mapper.tilAdresse(bostedsadresse).visningsadresse)
                 .isEqualTo("Charlies vei 13 b, 0575 Oslo")
 
@@ -70,7 +71,8 @@ internal class AdresseMapperTest {
                 .withFailMessage("Skal skrive ut co adressen")
                 .isEqualTo("c/o co")
 
-        assertThat(mapper.tilAdresse(kontaktadresse.copy(utenlandskAdresseIFrittFormat = utenlandAdresseFrittFormat())).visningsadresse)
+        assertThat(mapper.tilAdresse(kontaktadresse.copy(utenlandskAdresseIFrittFormat =
+                                                         utenlandAdresseFrittFormat())).visningsadresse)
                 .withFailMessage("Skal skrive ut utenlandskAdresseIFrittFormat når utenlandskAdresse er null")
                 .isEqualTo("1, 2, 3, 0575 by, Norge")
 
