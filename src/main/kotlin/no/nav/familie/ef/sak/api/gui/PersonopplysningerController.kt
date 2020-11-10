@@ -49,7 +49,8 @@ class PersonopplysningerController(private val personopplysningerService: Person
                                                             listOf(AdresseDto("Moldegata 15",
                                                                               AdresseType.BOSTEDADRESSE,
                                                                               gyldigFraOgMed = LocalDate.EPOCH,
-                                                                              gyldigTilOgMed = null)) )),
+                                                                              gyldigTilOgMed = null)),
+                                      true)),
                 ))
     }
 

@@ -50,7 +50,14 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                 egenAnsatt = egenAnsatt,
                 navEnhet = arbeidsfordelingService.hentNavEnhet(ident)
                                    ?.let { it.enhetId + " - " + it.enhetNavn } ?: "Ikke funnet",
-                barn = personMedRelasjoner.barn.map { mapBarn(it.key, it.value, personMedRelasjoner.søkerIdent, identNavn) }
+                barn = personMedRelasjoner.barn.map {
+                    mapBarn(
+                            it.key,
+                            it.value,
+                            personMedRelasjoner.søkerIdent,
+                            personMedRelasjoner.søker.bostedsadresse,
+                            identNavn)
+                }
         )
     }
 
@@ -64,16 +71,42 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                                            .thenBy(AdresseDto::type))
     }
 
-    fun mapBarn(personIdent: String, pdlBarn: PdlBarn, søkerIdent: String, identNavn: Map<String, String>): BarnDto {
+    fun mapBarn(personIdent: String,
+                pdlBarn: PdlBarn,
+                søkerIdent: String,
+                bostedsadresserForelder: List<Bostedsadresse>,
+                identNavnMap: Map<String, String>): BarnDto {
 
         val annenForelderIdent = pdlBarn.familierelasjoner.find {
-                    it.relatertPersonsIdent != søkerIdent && it.relatertPersonsRolle != Familierelasjonsrolle.BARN
-                }?.relatertPersonsIdent
+            it.relatertPersonsIdent != søkerIdent && it.relatertPersonsRolle != Familierelasjonsrolle.BARN
+        }?.relatertPersonsIdent
         return BarnDto(
                 personIdent = personIdent,
                 navn = pdlBarn.navn.gjeldende().visningsnavn(),
-                annenForelder = annenForelderIdent?.let { AnnenForelderDTO(it, identNavn[it]!!) } ?: null, //TODO: Vet vi at identnavn finnes?
-                adresse = pdlBarn.bostedsadresse.map(adresseMapper::tilAdresse)
+                annenForelder = annenForelderIdent?.let { AnnenForelderDTO(it, identNavnMap[it] ?: "Finner ikke navn") },
+                adresse = pdlBarn.bostedsadresse.map(adresseMapper::tilAdresse),
+                borHosSøker = borPåSammeAdresse(pdlBarn.bostedsadresse, bostedsadresserForelder)
         )
+    }
+
+    fun borPåSammeAdresse(bostedsadresserForelder: List<Bostedsadresse>, bostedsadresserBarn: List<Bostedsadresse>): Boolean {
+
+        val gjeldendeBostedsadresseBarn = finnGjeldendeBostedsadresse(bostedsadresserBarn)
+        val gjeldendeBostedsadresseForelder = finnGjeldendeBostedsadresse(bostedsadresserForelder)
+        return gjeldendeBostedsadresseBarn?.let {
+            return it.vegadresse == gjeldendeBostedsadresseForelder?.vegadresse
+        } ?: false;
+    }
+
+    private fun finnGjeldendeBostedsadresse(bostedsadresser: List<Bostedsadresse>): Bostedsadresse? {
+        val bostedsadresse = bostedsadresser
+                .filter { it.folkeregistermetadata.gyldighetstidspunkt != null && it.folkeregistermetadata.opphørstidspunkt == null }
+                .maxByOrNull { it.folkeregistermetadata.gyldighetstidspunkt!! }
+        return bostedsadresse ?: bostedsadresser.firstOrNull()
+    }
+
+    fun byGyldighetstidspunktNullFirst(): Comparator<Bostedsadresse>? {
+        return Comparator.comparing({ e -> e.folkeregistermetadata.gyldighetstidspunkt },
+                                    Comparator.nullsFirst(Comparator.naturalOrder()))
     }
 }
