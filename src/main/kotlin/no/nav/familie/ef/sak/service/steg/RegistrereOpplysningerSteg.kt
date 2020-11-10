@@ -6,9 +6,7 @@ import no.nav.familie.ef.sak.service.BehandlingService
 import org.springframework.stereotype.Service
 
 @Service
-class RegistrereOpplysningerSteg(
-        private val behandlingService: BehandlingService
-) : BehandlingSteg<String> {
+class RegistrereOpplysningerSteg(private val behandlingService: BehandlingService) : BehandlingSteg<String> {
 
     override fun utførStegOgAngiNeste(behandling: Behandling,
                                       data: String): StegType {

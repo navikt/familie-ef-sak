@@ -7,19 +7,10 @@ fun finnPersonMedStrengesteAdressebeskyttelse(personer: List<IdentMedAdressebesk
                          fun(person: IdentMedAdressebeskyttelse?,
                              neste: IdentMedAdressebeskyttelse): IdentMedAdressebeskyttelse? {
                              return when {
-                                 person?.adressebeskyttelsegradering == AdressebeskyttelseGradering.STRENGT_FORTROLIG -> {
-                                     person
-                                 }
-                                 neste.adressebeskyttelsegradering == AdressebeskyttelseGradering.STRENGT_FORTROLIG -> {
-                                     neste
-                                 }
-                                 person?.adressebeskyttelsegradering == AdressebeskyttelseGradering.FORTROLIG -> {
-                                     person
-                                 }
-                                 neste.adressebeskyttelsegradering == AdressebeskyttelseGradering.FORTROLIG
-                                 -> {
-                                     neste
-                                 }
+                                 person?.adressebeskyttelsegradering == AdressebeskyttelseGradering.STRENGT_FORTROLIG -> person
+                                 neste.adressebeskyttelsegradering == AdressebeskyttelseGradering.STRENGT_FORTROLIG -> neste
+                                 person?.adressebeskyttelsegradering == AdressebeskyttelseGradering.FORTROLIG -> person
+                                 neste.adressebeskyttelsegradering == AdressebeskyttelseGradering.FORTROLIG -> neste
                                  else -> null
                              }
                          })?.ident

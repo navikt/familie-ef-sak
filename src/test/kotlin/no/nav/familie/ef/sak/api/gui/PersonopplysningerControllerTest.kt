@@ -13,7 +13,7 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 
-internal class PersonopplysningerControllerTest: OppslagSpringRunnerTest() {
+internal class PersonopplysningerControllerTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun setUp() {
@@ -33,8 +33,8 @@ internal class PersonopplysningerControllerTest: OppslagSpringRunnerTest() {
         val personopplysningerRequest = PersonIdentDto("ikketilgang")
 
         return restTemplate.exchange(localhost("/api/personopplysninger"),
-                HttpMethod.POST,
-                HttpEntity(personopplysningerRequest, headers))
+                                     HttpMethod.POST,
+                                     HttpEntity(personopplysningerRequest, headers))
     }
 
 }

@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.service
 
-import no.nav.familie.ef.sak.mapper.SøknadsskjemaMapper
 import no.nav.familie.ef.sak.api.fagsak.BehandlingDto
+import no.nav.familie.ef.sak.mapper.SøknadsskjemaMapper
 import no.nav.familie.ef.sak.repository.*
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaBarnetilsyn
@@ -9,7 +9,6 @@ import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsst
 import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaSkolepenger
 import no.nav.familie.ef.sak.service.steg.StegType
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.kontrakter.ef.søknad.SøknadSkolepenger as SøknadSkolepengerKontrakt
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -18,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.*
 import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn as SøknadBarnetilsynKontrakt
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad as SøknadOvergangsstønadKontrakt
+import no.nav.familie.kontrakter.ef.søknad.SøknadSkolepenger as SøknadSkolepengerKontrakt
 
 @Service
 class BehandlingService(private val søknadRepository: SøknadRepository,
@@ -113,10 +113,10 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
     }
 
     fun oppdaterJournalpostIdPåBehandling(journalpost: Journalpost, behandling: Behandling) {
-        behandling.journalposter = behandling.journalposter + Behandlingsjournalpost(
-                journalpostId = journalpost.journalpostId,
-                sporbar = Sporbar(),
-                journalpostType = journalpost.journalposttype)
+        behandling.journalposter = behandling.journalposter +
+                                   Behandlingsjournalpost(journalpostId = journalpost.journalpostId,
+                                                          sporbar = Sporbar(),
+                                                          journalpostType = journalpost.journalposttype)
         behandlingRepository.update(behandling)
     }
 

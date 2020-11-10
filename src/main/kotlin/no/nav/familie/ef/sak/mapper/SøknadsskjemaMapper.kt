@@ -16,6 +16,7 @@ import no.nav.familie.kontrakter.ef.søknad.Arbeidssøker as KontraktArbeidssøk
 import no.nav.familie.kontrakter.ef.søknad.Barn as KontraktBarn
 import no.nav.familie.kontrakter.ef.søknad.Barnepass as KontraktBarnepass
 import no.nav.familie.kontrakter.ef.søknad.BarnepassOrdning as KontraktBarnepassOrdning
+import no.nav.familie.kontrakter.ef.søknad.BarnetilsynDokumentasjon as KontraktBarnetilsynDokumentasjon
 import no.nav.familie.kontrakter.ef.søknad.Bosituasjon as KontraktBosituasjon
 import no.nav.familie.kontrakter.ef.søknad.Datoperiode as KontraktDatoperiode
 import no.nav.familie.kontrakter.ef.søknad.Dokumentasjon as KontraktDokumentasjon
@@ -31,7 +32,6 @@ import no.nav.familie.kontrakter.ef.søknad.TidligereUtdanning as KontraktTidlig
 import no.nav.familie.kontrakter.ef.søknad.UnderUtdanning as KontraktUnderUtdanning
 import no.nav.familie.kontrakter.ef.søknad.Utenlandsopphold as KontraktUtenlandsopphold
 import no.nav.familie.kontrakter.ef.søknad.Virksomhet as KontraktVirksomhet
-import no.nav.familie.kontrakter.ef.søknad.BarnetilsynDokumentasjon as KontraktBarnetilsynDokumentasjon
 
 object SøknadsskjemaMapper {
 
@@ -105,10 +105,10 @@ object SøknadsskjemaMapper {
 
     private fun tilDomene(dokumentasjon: KontraktBarnetilsynDokumentasjon): BarnetilsynDokumentasjon =
             BarnetilsynDokumentasjon(barnepassordningFaktura = tilDomene(dokumentasjon.barnepassordningFaktura?.verdi),
-                                         avtaleBarnepasser = tilDomene(dokumentasjon.avtaleBarnepasser?.verdi),
-                                         arbeidstid = tilDomene(dokumentasjon.arbeidstid?.verdi),
-                                         roterendeArbeidstid = tilDomene(dokumentasjon.roterendeArbeidstid?.verdi),
-                                         spesielleBehov = tilDomene(dokumentasjon.spesielleBehov?.verdi))
+                                     avtaleBarnepasser = tilDomene(dokumentasjon.avtaleBarnepasser?.verdi),
+                                     arbeidstid = tilDomene(dokumentasjon.arbeidstid?.verdi),
+                                     roterendeArbeidstid = tilDomene(dokumentasjon.roterendeArbeidstid?.verdi),
+                                     spesielleBehov = tilDomene(dokumentasjon.spesielleBehov?.verdi))
 
     private fun tilDomene(personMinimum: KontraktPersonMinimum?): PersonMinimum? =
             personMinimum?.let {

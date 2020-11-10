@@ -43,7 +43,7 @@ object SøknadMapper {
                       relaterteFnr = søknad.barn.map { listOf(it.fødselsnummer, it.annenForelder?.person?.fødselsnummer) }
                               .flatten()
                               .filterNotNull()
-                              .toSet()  )
+                              .toSet())
     }
 
 

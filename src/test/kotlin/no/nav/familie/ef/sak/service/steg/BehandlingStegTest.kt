@@ -8,19 +8,19 @@ internal class BehandlingStegTest {
 
     @Test
     fun `Tester rekkefølgen på steg`() {
-        val riktigRekkefølge = listOf(
-                StegType.REGISTRERE_OPPLYSNINGER,
-                StegType.VILKÅRSVURDERE_INNGANGSVILKÅR,
-                StegType.VILKÅRSVURDERE_STØNAD,
-                StegType.BEREGNE_YTELSE,
-                StegType.SEND_TIL_BESLUTTER,
-                StegType.BESLUTTE_VEDTAK,
-                StegType.IVERKSETT_MOT_OPPDRAG,
-                StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
-                StegType.JOURNALFØR_VEDTAKSBREV,
-                StegType.DISTRIBUER_VEDTAKSBREV,
-                StegType.FERDIGSTILLE_BEHANDLING,
-                StegType.BEHANDLING_FERDIGSTILT)
+        val riktigRekkefølge =
+                listOf(StegType.REGISTRERE_OPPLYSNINGER,
+                       StegType.VILKÅRSVURDERE_INNGANGSVILKÅR,
+                       StegType.VILKÅRSVURDERE_STØNAD,
+                       StegType.BEREGNE_YTELSE,
+                       StegType.SEND_TIL_BESLUTTER,
+                       StegType.BESLUTTE_VEDTAK,
+                       StegType.IVERKSETT_MOT_OPPDRAG,
+                       StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
+                       StegType.JOURNALFØR_VEDTAKSBREV,
+                       StegType.DISTRIBUER_VEDTAKSBREV,
+                       StegType.FERDIGSTILLE_BEHANDLING,
+                       StegType.BEHANDLING_FERDIGSTILT)
 
         var steg = StegType.REGISTRERE_OPPLYSNINGER
         riktigRekkefølge.forEach {

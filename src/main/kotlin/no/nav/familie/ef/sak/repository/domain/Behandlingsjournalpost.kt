@@ -9,6 +9,6 @@ import org.springframework.data.relational.core.mapping.Table
 data class Behandlingsjournalpost(@Column("journalpost_id") val journalpostId: String,
                                   @Column("journalpost_type") val journalpostType: Journalposttype,
                                   @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                                 val sporbar: Sporbar = Sporbar())
+                                  val sporbar: Sporbar = Sporbar())
 
 

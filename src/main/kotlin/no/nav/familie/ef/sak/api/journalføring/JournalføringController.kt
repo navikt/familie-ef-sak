@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/api/journalpost")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class JournalføringController(private val journalføringService: JournalføringService, private val pdlClient: PdlClient, private val tilgangService: TilgangService) {
+class JournalføringController(private val journalføringService: JournalføringService,
+                              private val pdlClient: PdlClient,
+                              private val tilgangService: TilgangService) {
 
     @GetMapping("/{journalpostId}")
     fun hentJournalPost(@PathVariable journalpostId: String): Ressurs<JournalføringResponse> {

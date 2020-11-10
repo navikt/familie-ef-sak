@@ -8,7 +8,7 @@ import no.nav.familie.ef.sak.util.RessursUtils.lagFrontendMelding
 import org.springframework.stereotype.Service
 
 @Service
-class InngangsvilkårSteg(private val vurderingService: VurderingService): BehandlingSteg<String> {
+class InngangsvilkårSteg(private val vurderingService: VurderingService) : BehandlingSteg<String> {
 
     override fun utførStegOgAngiNeste(behandling: Behandling, data: String): StegType {
         return hentNesteSteg(behandling)

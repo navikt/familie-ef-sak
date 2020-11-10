@@ -10,13 +10,12 @@ import no.nav.familie.ef.sak.økonomi.ØkonomiUtils.andelTilOpphørMedDato
 import no.nav.familie.ef.sak.økonomi.ØkonomiUtils.andelerTilOpprettelse
 import no.nav.familie.ef.sak.økonomi.ØkonomiUtils.beståendeAndelerPerKjede
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
-import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag.KodeEndring.*
+import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag.KodeEndring.ENDR
+import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag.KodeEndring.NY
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
-import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
-import java.util.*
 
 object UtbetalingsoppdragGenerator {
 
@@ -46,28 +45,32 @@ object UtbetalingsoppdragGenerator {
 
         val andelerTilOpprettelseMedPeriodeIder = lagAndelerMedPeriodeIder(andelerTilOpprettelse, sistePeriodeIder)
 
-        val utbetalingsperioderSomOpprettes = lagUtbetalingsperioderForOpprettelse(
-                andeler = andelerTilOpprettelseMedPeriodeIder,
-                behandlingId = nyTilkjentYtelseMedMetaData.eksternBehandlingId,
-                tilkjentYtelse = nyTilkjentYtelse)
+        val utbetalingsperioderSomOpprettes =
+                lagUtbetalingsperioderForOpprettelse(andeler = andelerTilOpprettelseMedPeriodeIder,
+                                                     behandlingId = nyTilkjentYtelseMedMetaData.eksternBehandlingId,
+                                                     tilkjentYtelse = nyTilkjentYtelse)
 
-        val utbetalingsperioderSomOpphøres = lagUtbetalingsperioderForOpphør(
-                andeler = andelerTilOpphør,
-                tilkjentYtelse = nyTilkjentYtelse,
-                behandlingId = nyTilkjentYtelseMedMetaData.eksternBehandlingId
-        )
+        val utbetalingsperioderSomOpphøres =
+                lagUtbetalingsperioderForOpphør(andeler = andelerTilOpphør,
+                                                tilkjentYtelse = nyTilkjentYtelse,
+                                                behandlingId = nyTilkjentYtelseMedMetaData.eksternBehandlingId
+                )
 
-        val utbetalingsoppdrag = Utbetalingsoppdrag(
-                saksbehandlerId = nyTilkjentYtelse.saksbehandler,
-                kodeEndring = aksjonskodePåOppdragsnivå,
-                fagSystem = FAGSYSTEM,
-                saksnummer = nyTilkjentYtelseMedMetaData.eksternFagsakId.toString(),
-                aktoer = nyTilkjentYtelse.personident,
-                //TODO Trunkert avstemmingstidspunkt for å kunne skape forutsigbarhet mtp tester. Tester vil kunne feile hver nye time
-                //TODO Løsning kan være å putte avstemmingstidspunkt også i TilkjentYtelse.
-                avstemmingTidspunkt = LocalDateTime.now().truncatedTo(ChronoUnit.HOURS),
-                utbetalingsperiode = listOf(utbetalingsperioderSomOpprettes, utbetalingsperioderSomOpphøres).flatten().sortedBy { it.periodeId }
-        )
+        val utbetalingsoppdrag =
+                Utbetalingsoppdrag(saksbehandlerId = nyTilkjentYtelse.saksbehandler,
+                                   kodeEndring = aksjonskodePåOppdragsnivå,
+                                   fagSystem = FAGSYSTEM,
+                                   saksnummer = nyTilkjentYtelseMedMetaData.eksternFagsakId.toString(),
+                                   aktoer = nyTilkjentYtelse.personident,
+                        //TODO Trunkert avstemmingstidspunkt for å kunne skape forutsigbarhet mtp tester.
+                        // Tester vil kunne feile hver nye time
+                        //TODO Løsning kan være å putte avstemmingstidspunkt også i TilkjentYtelse.
+                                   avstemmingTidspunkt = LocalDateTime.now().truncatedTo(ChronoUnit.HOURS),
+                                   utbetalingsperiode = listOf(utbetalingsperioderSomOpprettes,
+                                                               utbetalingsperioderSomOpphøres)
+                                           .flatten()
+                                           .sortedBy { it.periodeId }
+                )
 
         val gjeldendeAndeler = mergeMultiMap(beståendeAndelerIHverKjede, andelerTilOpprettelseMedPeriodeIder);
 
@@ -77,13 +80,11 @@ object UtbetalingsoppdragGenerator {
                 .filterKeys { !gjeldendeAndeler.hasList(it) }
                 .mapValues { (kjedeId, periodeId) -> listOf(kjedeId.tilNullAndelTilkjentYtelse(periodeId)) }
 
-        return nyTilkjentYtelse.copy(
-                utbetalingsoppdrag = utbetalingsoppdrag,
-                stønadFom = gjeldendeAndeler.values.flatMap { it }.minOfOrNull { it.stønadFom },
-                stønadTom = gjeldendeAndeler.values.flatMap { it }.maxOfOrNull { it.stønadTom },
-                andelerTilkjentYtelse = mergeMultiMap(gjeldendeAndeler, nullAndeler).values.flatten(),
-                //TODO legge til startperiode, sluttperiode, opphørsdato. Se i BA-sak - legges på i konsistensavstemming?
-        )
+        return nyTilkjentYtelse.copy(utbetalingsoppdrag = utbetalingsoppdrag,
+                                     stønadFom = gjeldendeAndeler.values.flatMap { it }.minOfOrNull { it.stønadFom },
+                                     stønadTom = gjeldendeAndeler.values.flatMap { it }.maxOfOrNull { it.stønadTom },
+                                     andelerTilkjentYtelse = mergeMultiMap(gjeldendeAndeler, nullAndeler).values.flatten())
+        //TODO legge til startperiode, sluttperiode, opphørsdato. Se i BA-sak - legges på i konsistensavstemming?
     }
 
     fun lagUtbetalingsperioderForOpphør(andeler: Map<KjedeId, Pair<AndelTilkjentYtelse, LocalDate>>,
@@ -91,10 +92,9 @@ object UtbetalingsoppdragGenerator {
                                         tilkjentYtelse: TilkjentYtelse): List<Utbetalingsperiode> {
         val utbetalingsperiodeMal = UtbetalingsperiodeMal(tilkjentYtelse, true)
         return andeler.values.map { (sisteAndelIKjede, opphørKjedeFom) ->
-            utbetalingsperiodeMal.lagPeriodeFraAndel(
-                    andel = sisteAndelIKjede,
-                    behandlingId = behandlingId,
-                    opphørKjedeFom = opphørKjedeFom)
+            utbetalingsperiodeMal.lagPeriodeFraAndel(andel = sisteAndelIKjede,
+                                                     behandlingId = behandlingId,
+                                                     opphørKjedeFom = opphørKjedeFom)
         }
     }
 
@@ -111,7 +111,8 @@ object UtbetalingsoppdragGenerator {
     }
 
     private fun lagAndelerMedPeriodeIder(andeler: Map<KjedeId, List<AndelTilkjentYtelse>>,
-                                         sisteOffsetIKjedeOversikt: Map<KjedeId, PeriodeId?>): Map<KjedeId, List<AndelTilkjentYtelse>> {
+                                         sisteOffsetIKjedeOversikt: Map<KjedeId, PeriodeId?>)
+            : Map<KjedeId, List<AndelTilkjentYtelse>> {
         return andeler.filter { (_, andeler) -> andeler.isNotEmpty() }
                 .mapValues { (kjedeId, kjede: List<AndelTilkjentYtelse>) ->
                     val forrigePeriodeIdIKjede: Long? = sisteOffsetIKjedeOversikt[kjedeId]?.gjeldende
@@ -119,10 +120,9 @@ object UtbetalingsoppdragGenerator {
 
                     kjede.sortedBy { it.stønadFom }.mapIndexed { index, andel ->
 
-                        andel.copy(
-                                periodeId = nestePeriodeIdIKjede + index,
-                                forrigePeriodeId = if (index == 0) forrigePeriodeIdIKjede else nestePeriodeIdIKjede + index - 1
-                        )
+                        andel.copy(periodeId = nestePeriodeIdIKjede + index,
+                                   forrigePeriodeId = if (index == 0) forrigePeriodeIdIKjede
+                                   else nestePeriodeIdIKjede + index - 1)
                     }
                 }
     }

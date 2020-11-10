@@ -5,7 +5,10 @@ import no.nav.familie.ef.sak.service.TilkjentYtelseService
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 import java.util.*
 
 @RestController

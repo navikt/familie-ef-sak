@@ -62,12 +62,10 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
     }
 
     private fun opprettSaksbehandlingsoppgave(behandling: Behandling, navIdent: String): Long {
-        return oppgaveService.opprettOppgave(
-                behandlingId = behandling.id,
-                oppgavetype = Oppgavetype.BehandleSak,
-                fristForFerdigstillelse = LocalDate.now().plusDays(2),
-                tilordnetNavIdent = navIdent
-        )
+        return oppgaveService.opprettOppgave(behandlingId = behandling.id,
+                                             oppgavetype = Oppgavetype.BehandleSak,
+                                             fristForFerdigstillelse = LocalDate.now().plusDays(2),
+                                             tilordnetNavIdent = navIdent)
     }
 
     private fun ferdigstillJournalføringsoppgave(journalføringRequest: JournalføringRequest) {
@@ -76,9 +74,8 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
 
     private fun hentBehandling(journalføringRequest: JournalføringRequest): Behandling =
             hentEksisterendeBehandling(journalføringRequest.behandling.behandlingsId)
-            ?: opprettBehandlingMedBehandlingstype(
-                    journalføringRequest.behandling.behandlingstype,
-                    journalføringRequest.fagsakId)
+            ?: opprettBehandlingMedBehandlingstype(journalføringRequest.behandling.behandlingstype,
+                                                   journalføringRequest.fagsakId)
 
 
     private fun opprettBehandlingMedBehandlingstype(behandlingsType: BehandlingType?, fagsakId: UUID): Behandling {
@@ -136,33 +133,25 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
             ?: false
 
     private fun oppdaterJournalpost(journalpost: Journalpost, dokumenttitler: Map<String, String>?, eksternFagsakId: Long) {
-        val oppdatertJournalpost = OppdaterJournalpostRequest(
-                bruker = journalpost.bruker?.let {
-                    DokarkivBruker(
-                            idType = IdType.valueOf(it.type.toString()),
-                            id = it.id
-                    )
+        val oppdatertJournalpost =
+                OppdaterJournalpostRequest(bruker = journalpost.bruker?.let {
+                    DokarkivBruker(idType = IdType.valueOf(it.type.toString()), id = it.id)
                 },
-                tema = journalpost.tema,
-                behandlingstema = journalpost.behandlingstema,
-                tittel = journalpost.tittel,
-                journalfoerendeEnhet = journalpost.journalforendeEnhet,
-                sak = Sak(
-                        fagsakId = eksternFagsakId.toString(),
-                        fagsaksystem = "EF",
-                        sakstype = "FAGSAK"
-                ),
-                dokumenter = dokumenttitler?.let {
-                    journalpost.dokumenter?.map { dokumentInfo ->
-                        DokumentInfo(
-                                dokumentInfoId = dokumentInfo.dokumentInfoId,
-                                tittel = dokumenttitler[dokumentInfo.dokumentInfoId]
-                                         ?: dokumentInfo.tittel,
-                                brevkode = dokumentInfo.brevkode
-                        )
-                    }
-                }
-        )
+                                           tema = journalpost.tema,
+                                           behandlingstema = journalpost.behandlingstema,
+                                           tittel = journalpost.tittel,
+                                           journalfoerendeEnhet = journalpost.journalforendeEnhet,
+                                           sak = Sak(fagsakId = eksternFagsakId.toString(),
+                                                     fagsaksystem = "EF",
+                                                     sakstype = "FAGSAK"),
+                                           dokumenter = dokumenttitler?.let {
+                                               journalpost.dokumenter?.map { dokumentInfo ->
+                                                   DokumentInfo(dokumentInfoId = dokumentInfo.dokumentInfoId,
+                                                                tittel = dokumenttitler[dokumentInfo.dokumentInfoId]
+                                                                         ?: dokumentInfo.tittel,
+                                                                brevkode = dokumentInfo.brevkode)
+                                               }
+                                           })
         journalpostClient.oppdaterJournalpost(oppdatertJournalpost, journalpost.journalpostId)
     }
 

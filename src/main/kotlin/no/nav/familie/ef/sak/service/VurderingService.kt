@@ -33,14 +33,17 @@ class VurderingService(private val behandlingService: BehandlingService,
 
         validerDelvilkår(vilkårsvurderingDto, vilkårsvurdering)
 
-        val nyVilkårsvurdering = vilkårsvurdering.copy(resultat = vilkårsvurderingDto.resultat,
-                                                       begrunnelse = vilkårsvurderingDto.begrunnelse,
-                                                       unntak = vilkårsvurderingDto.unntak,
-                                                       delvilkårsvurdering = DelvilkårsvurderingWrapper(vilkårsvurderingDto.delvilkårsvurderinger.map { delvurdering ->
-                                                           Delvilkårsvurdering(delvurdering.type,
-                                                                               delvurdering.resultat)
-                                                       })
-        )
+        val nyVilkårsvurdering =
+                vilkårsvurdering.copy(resultat = vilkårsvurderingDto.resultat,
+                                      begrunnelse = vilkårsvurderingDto.begrunnelse,
+                                      unntak = vilkårsvurderingDto.unntak,
+                                      delvilkårsvurdering =
+                                      DelvilkårsvurderingWrapper(vilkårsvurderingDto.delvilkårsvurderinger
+                                                                         .map { delvurdering ->
+                                                                             Delvilkårsvurdering(delvurdering.type,
+                                                                                                 delvurdering.resultat)
+                                                                         })
+                )
         return vilkårsvurderingRepository.update(nyVilkårsvurdering).id
     }
 
@@ -110,7 +113,8 @@ class VurderingService(private val behandlingService: BehandlingService,
         val inngangsvilkår = VilkårType.hentInngangsvilkår()
 
         return inngangsvilkår.filter {
-            lagredeVilkårsvurderinger.any { vurdering -> vurdering.type == it && vurdering.resultat == Vilkårsresultat.IKKE_VURDERT }
+            lagredeVilkårsvurderinger.any { vurdering -> vurdering.type == it
+                                                         && vurdering.resultat == Vilkårsresultat.IKKE_VURDERT }
             || lagredeVilkårsvurderinger.none { vurdering -> vurdering.type == it }
         }
     }

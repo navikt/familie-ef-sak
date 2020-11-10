@@ -12,8 +12,9 @@ class ArbeidsfordelingService(private val personService: PersonService,
 
     fun hentNavEnhet(ident: String): Arbeidsfordelingsenhet? {
         val personMedRelasjoner = personService.hentPersonMedRelasjoner(ident)
-        val søkerIdentMedAdressebeskyttelse = IdentMedAdressebeskyttelse(personMedRelasjoner.søkerIdent,
-                                                                         personMedRelasjoner.søker.adressebeskyttelse.firstOrNull()?.gradering)
+        val søkerIdentMedAdressebeskyttelse =
+                IdentMedAdressebeskyttelse(personMedRelasjoner.søkerIdent,
+                                           personMedRelasjoner.søker.adressebeskyttelse.firstOrNull()?.gradering)
         val identerMedAdressebeskyttelse = listOf(søkerIdentMedAdressebeskyttelse) +
                                            personMedRelasjoner.barn.map {
                                                IdentMedAdressebeskyttelse(it.key,
