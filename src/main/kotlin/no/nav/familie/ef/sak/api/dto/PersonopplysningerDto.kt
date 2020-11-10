@@ -28,13 +28,13 @@ data class PersonopplysningerDto(val personIdent: String,
 data class BarnDto(
         val personIdent: String,
         val navn: String,
-        val annenForelder: AnnenForelderDTO,
+        val annenForelder: AnnenForelderDTO?,
         val adresse: List<AdresseDto>
 )
 
 data class AnnenForelderDTO(
-        val personIdent: String?,
-        val navn: String?,
+        val personIdent: String,
+        val navn: String,
 )
 
 data class TelefonnummerDto(val landskode: String,
