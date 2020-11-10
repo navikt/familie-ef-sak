@@ -9,12 +9,14 @@ import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.økonomi.tilYtelseType
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.springframework.context.annotation.Profile
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
 @RestController
 @RequestMapping(path = ["/api/test/"])
 @ProtectedWithClaims(issuer = "azuread")
+@Profile("!prod")
 class TestTilkjentYtelseController(private val testTilkjentYtelseService: TestTilkjentYtelseService) {
 
     @PostMapping("/send-til-oppdrag")
