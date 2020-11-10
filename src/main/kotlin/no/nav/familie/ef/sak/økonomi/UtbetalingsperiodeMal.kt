@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.økonomi
 
 import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
+import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.kontrakter.felles.oppdrag.Opphør
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
@@ -27,6 +28,7 @@ data class UtbetalingsperiodeMal(
      * @return Periode til utbetalingsoppdrag
      */
     fun lagPeriodeFraAndel(andel: AndelTilkjentYtelse,
+                           behandlingId: Long,
                            opphørKjedeFom: LocalDate? = null): Utbetalingsperiode =
             Utbetalingsperiode(
                     erEndringPåEksisterendePeriode = erEndringPåEksisterendePeriode,
@@ -41,7 +43,7 @@ data class UtbetalingsperiodeMal(
                     sats = BigDecimal(andel.beløp),
                     satsType = Utbetalingsperiode.SatsType.MND,
                     utbetalesTil = tilkjentYtelse.personident,
-                    behandlingId = tilkjentYtelse.behandlingId
+                    behandlingId = behandlingId
             )
 
 

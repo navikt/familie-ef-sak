@@ -1,8 +1,11 @@
 package no.nav.familie.ef.sak.økonomi
 
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseMedMetaData
 import no.nav.familie.kontrakter.felles.oppdrag.Opphør
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
@@ -13,6 +16,9 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
+
+private val behandlingEksternId = 0L
+private val fagsakEksternId = 1L
 
 enum class TestOppdragType {
     Input,
@@ -101,9 +107,8 @@ class TestOppdragGroup{
 
     val input: TilkjentYtelse by lazy {
         TilkjentYtelse (
-                behandlingId = 101,
+                behandlingId = behandling(fagsak = fagsak()).id,
                 personident = personIdent!!,
-                saksnummer = "saksnr",
                 saksbehandler = "saksbehandler",
                 andelerTilkjentYtelse = andelerTilkjentYtelseInn,
                 vedtaksdato = LocalDate.now() // Ikke påkrevd, men exception ellers
@@ -114,18 +119,17 @@ class TestOppdragGroup{
         val utbetalingsoppdrag = Utbetalingsoppdrag(
                 kodeEndring = oppdragKode110,
                 fagSystem = "EFOG",
-                saksnummer = "saksnr",
+                saksnummer = fagsakEksternId.toString(),
                 aktoer = personIdent!!,
                 saksbehandlerId = "saksbehandler",
                 avstemmingTidspunkt = LocalDateTime.now().truncatedTo(ChronoUnit.HOURS),
-                utbetalingsperiode = utbetalingsperioder.map { it.copy(behandlingId = 101) }
+                utbetalingsperiode = utbetalingsperioder.map { it.copy(behandlingId = behandlingEksternId) }
         )
 
         TilkjentYtelse (
-                id=input.id,
-                behandlingId = 101,
+                id = input.id,
+                behandlingId = input.behandlingId,
                 personident = personIdent!!,
-                saksnummer = "saksnr",
                 saksbehandler = "saksbehandler",
                 andelerTilkjentYtelse = andelerTilkjentYtelseUt,
                 utbetalingsoppdrag = utbetalingsoppdrag,
@@ -230,8 +234,11 @@ object TestOppdragRunner {
         }
     }
 
-    fun lagTilkjentYtelseMedUtbetalingsoppdrag(nyTilkjentYtelse:TilkjentYtelse,forrigeTilkjentYtelse:TilkjentYtelse? = null) =
+    fun lagTilkjentYtelseMedUtbetalingsoppdrag(nyTilkjentYtelse: TilkjentYtelse, forrigeTilkjentYtelse: TilkjentYtelse? = null) =
             UtbetalingsoppdragGenerator
-                    .lagTilkjentYtelseMedUtbetalingsoppdrag(nyTilkjentYtelse,forrigeTilkjentYtelse)
+                    .lagTilkjentYtelseMedUtbetalingsoppdrag(TilkjentYtelseMedMetaData(tilkjentYtelse = nyTilkjentYtelse,
+                                                                                      eksternBehandlingId = behandlingEksternId,
+                                                                                      eksternFagsakId = fagsakEksternId),
+                                                            forrigeTilkjentYtelse)
 
 }

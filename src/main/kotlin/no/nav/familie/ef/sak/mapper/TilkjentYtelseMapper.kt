@@ -1,11 +1,11 @@
 package no.nav.familie.ef.sak.mapper
 
+import no.nav.familie.ef.sak.api.dto.AndelTilkjentYtelseDTO
+import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
 import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseType
-import no.nav.familie.ef.sak.api.dto.AndelTilkjentYtelseDTO
-import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
 import java.time.LocalDate
 
 fun TilkjentYtelseDTO.tilTilkjentYtelse(saksbehandler: String, status: TilkjentYtelseStatus = TilkjentYtelseStatus.OPPRETTET): TilkjentYtelse {
@@ -15,7 +15,6 @@ fun TilkjentYtelseDTO.tilTilkjentYtelse(saksbehandler: String, status: TilkjentY
 
     return TilkjentYtelse(behandlingId = behandlingId,
                           personident = søker,
-                          saksnummer = saksnummer,
                           saksbehandler = saksbehandler,
                           stønadFom = minStønadFom,
                           stønadTom = maxStønadTom,
@@ -40,7 +39,6 @@ fun TilkjentYtelse.tilDto(): TilkjentYtelseDTO {
     return TilkjentYtelseDTO(id = this.id,
                              behandlingId = this.behandlingId,
                              søker = this.personident,
-                             saksnummer = this.saksnummer,
                              andelerTilkjentYtelse = this.andelerTilkjentYtelse.map { it.tilDto() })
 }
 
@@ -56,7 +54,6 @@ fun AndelTilkjentYtelse.tilDto(): AndelTilkjentYtelseDTO {
 fun TilkjentYtelse.tilOpphør(saksbehandler: String, opphørDato: LocalDate) =
         TilkjentYtelse(type = TilkjentYtelseType.OPPHØR,
                        personident = personident,
-                       saksnummer = saksnummer,
                        saksbehandler = saksbehandler,
                        opphørFom = opphørDato,
                        behandlingId = behandlingId,
