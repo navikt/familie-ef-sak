@@ -50,7 +50,7 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                 egenAnsatt = egenAnsatt,
                 navEnhet = arbeidsfordelingService.hentNavEnhet(ident)
                                    ?.let { it.enhetId + " - " + it.enhetNavn } ?: "Ikke funnet",
-                barn = personMedRelasjoner.barn.map { mapBarn(it.key, it.value, personMedRelasjoner, identNavn) }
+                barn = personMedRelasjoner.barn.map { mapBarn(it.key, it.value, personMedRelasjoner.søkerIdent, identNavn) }
         )
     }
 
@@ -69,13 +69,10 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
         val annenForelderIdent = pdlBarn.familierelasjoner.find {
                     it.relatertPersonsIdent != søkerIdent && it.relatertPersonsRolle != Familierelasjonsrolle.BARN
                 }?.relatertPersonsIdent
-        BarnDto(
+        return BarnDto(
                 personIdent = personIdent,
                 navn = pdlBarn.navn.gjeldende().visningsnavn(),
-                annenForelder = AnnenForelderDTO(
-                        personIdent = annenForelderIdent,
-                        navn = identNavn[annenForelderIdent]
-                ),
+                annenForelder = annenForelderIdent?.let { AnnenForelderDTO(it, identNavn[it]!!) } ?: null, //TODO: Vet vi at identnavn finnes?
                 adresse = pdlBarn.bostedsadresse.map(adresseMapper::tilAdresse)
         )
     }
