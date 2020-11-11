@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.task
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.service.AvstemmingService
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -21,12 +22,12 @@ class GrensesnittavstemmingTask(private val avstemmingService: AvstemmingService
     val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
     override fun doTask(task: Task) {
-        val payload = objectMapper.readValue(task.payload, GrensesnittavstemmingPayload::class.java)
+        val payload = objectMapper.readValue<GrensesnittavstemmingPayload>(task.payload)
 
         val fraTidspunkt = payload.fraDato.atStartOfDay()
         val tilTidspunkt = task.triggerTid.toLocalDate().atStartOfDay()
 
-        logger.info("Gjør ${payload.stønadstype} avstemming mot oppdrag fra $fraTidspunkt til $tilTidspunkt")
+        logger.info("Gjør ${task.id} ${payload.stønadstype} avstemming mot oppdrag fra $fraTidspunkt til $tilTidspunkt")
 
         when (payload.stønadstype) {
             Stønadstype.OVERGANGSSTØNAD -> avstemmingService.grensesnittavstemOvergangsstønad(fraTidspunkt, tilTidspunkt)
