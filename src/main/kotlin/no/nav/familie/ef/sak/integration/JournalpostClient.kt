@@ -53,7 +53,7 @@ class JournalpostClient(@Qualifier("azure") restOperations: RestOperations,
 
         if (ressurs.status != Ressurs.Status.SUKSESS) {
             secureLogger.error(" Feil ved oppdatering av journalpost=${journalpostId} - mottok: $ressurs")
-            error("Feil ved oppdatering av journalpost= $journalpostId")
+            error("Feil ved oppdatering av journalpost=$journalpostId")
         }
 
     }
