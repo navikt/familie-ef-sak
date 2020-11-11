@@ -61,10 +61,9 @@ internal class GrensesnittavstemmingTaskTest {
     }
 
     companion object {
-        val payload = objectMapper.writeValueAsString(GrensesnittavstemmingPayload(fraDato = LocalDate.of(
-                2018,
-                4,
-                18), stønadstype = Stønadstype.OVERGANGSSTØNAD))
+
+        val payload = objectMapper.writeValueAsString(GrensesnittavstemmingPayload(fraDato = LocalDate.of(2018, 4, 18),
+                                                                                   stønadstype = Stønadstype.OVERGANGSSTØNAD))
     }
 
 

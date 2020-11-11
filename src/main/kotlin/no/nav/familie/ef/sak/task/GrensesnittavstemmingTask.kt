@@ -29,9 +29,7 @@ class GrensesnittavstemmingTask(private val avstemmingService: AvstemmingService
         logger.info("Gjør ${payload.stønadstype} avstemming mot oppdrag fra $fraTidspunkt til $tilTidspunkt")
 
         when (payload.stønadstype) {
-            Stønadstype.OVERGANGSSTØNAD -> {
-                avstemmingService.grensesnittavstemOvergangsstønad(fraTidspunkt, tilTidspunkt)
-            }
+            Stønadstype.OVERGANGSSTØNAD -> avstemmingService.grensesnittavstemOvergangsstønad(fraTidspunkt, tilTidspunkt)
             else -> throw Error("Grensesnittavstemming for ${payload.stønadstype} er ikke implementert")
         }
     }
