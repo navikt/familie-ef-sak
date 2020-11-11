@@ -25,7 +25,7 @@ import org.springframework.scheduling.annotation.EnableScheduling
 @EnableScheduling
 class ApplicationConfig {
 
-    private val logger = LoggerFactory.getLogger(ApplicationConfig::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Bean
     fun kotlinModule(): KotlinModule = KotlinModule()

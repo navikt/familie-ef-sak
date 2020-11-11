@@ -13,7 +13,7 @@ import java.time.LocalDate
 
 
 @Configuration
-class OppgaveClientMock() {
+class OppgaveClientMock {
 
     @Bean
     @Primary

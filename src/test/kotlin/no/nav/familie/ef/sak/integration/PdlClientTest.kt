@@ -21,7 +21,7 @@ class PdlClientTest {
 
     companion object {
 
-        val restOperations: RestOperations = RestTemplateBuilder().build()
+        private val restOperations: RestOperations = RestTemplateBuilder().build()
         lateinit var pdlClient: PdlClient
         lateinit var wiremockServerItem: WireMockServer
 

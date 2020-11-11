@@ -11,17 +11,17 @@ import java.util.*
 
 object DataGenerator {
 
-    fun tilfeldigFødselsnummer() = Random().nextInt(Int.MAX_VALUE).toString()
+    private fun tilfeldigFødselsnummer() = Random().nextInt(Int.MAX_VALUE).toString()
     private fun tilfeldigSaksnummer() = "SAK" + Random().nextInt(Int.MAX_VALUE)
 
     private fun flereTilfeldigeAndelerTilkjentYtelse(antall: Int): List<AndelTilkjentYtelse> =
             (1..antall).map { tilfeldigAndelTilkjentYtelse() }.toList()
 
-    fun tilfeldigAndelTilkjentYtelse(beløp: Int = Random().nextInt(),
-                                     stønadFom: LocalDate = LocalDate.now(),
-                                     stønadTom: LocalDate = LocalDate.now(),
-                                     personIdent: String = tilfeldigFødselsnummer(),
-                                     type: YtelseType = YtelseType.OVERGANGSSTØNAD) =
+    private fun tilfeldigAndelTilkjentYtelse(beløp: Int = Random().nextInt(),
+                                             stønadFom: LocalDate = LocalDate.now(),
+                                             stønadTom: LocalDate = LocalDate.now(),
+                                             personIdent: String = tilfeldigFødselsnummer(),
+                                             type: YtelseType = YtelseType.OVERGANGSSTØNAD) =
             AndelTilkjentYtelse(beløp = beløp,
                                 stønadFom = stønadFom,
                                 stønadTom = stønadTom,
@@ -37,14 +37,14 @@ object DataGenerator {
                            saksbehandler = tilfeldigFødselsnummer(),
                            andelerTilkjentYtelse = andelerTilkjentYtelse)
 
-    fun tilfeldigTilkjentYtelse(antallAndelerTilkjentYteelse: Int = 1, behandlingId: UUID) =
+    fun tilfeldigTilkjentYtelse(antallAndelerTilkjentYtelse: Int = 1, behandlingId: UUID) =
             TilkjentYtelse(personident = tilfeldigFødselsnummer(),
                            stønadFom = LocalDate.now(),
                            stønadTom = LocalDate.now(),
                            saksbehandler = tilfeldigFødselsnummer(),
                            vedtaksdato = LocalDate.now(),
                            behandlingId = behandlingId,
-                           andelerTilkjentYtelse = flereTilfeldigeAndelerTilkjentYtelse(antallAndelerTilkjentYteelse))
+                           andelerTilkjentYtelse = flereTilfeldigeAndelerTilkjentYtelse(antallAndelerTilkjentYtelse))
 
     fun tilfeldigTilkjentYtelseDto(): TilkjentYtelseDTO {
         val søker = tilfeldigFødselsnummer()
@@ -74,7 +74,7 @@ object DataGenerator {
                                    periodeId = periodeIdOffset)
     }
 
-    fun dato(s: String) = LocalDate.parse(s)
-    fun årMnd(s: String) = YearMonth.parse(s)
+    private fun dato(s: String): LocalDate = LocalDate.parse(s)
+    fun årMnd(s: String): YearMonth = YearMonth.parse(s)
 
 }

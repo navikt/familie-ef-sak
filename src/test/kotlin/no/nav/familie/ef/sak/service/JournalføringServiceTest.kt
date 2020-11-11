@@ -27,14 +27,14 @@ internal class JournalføringServiceTest {
 
     private val journalføringService = JournalføringService(journalpostClient, behandlingService, fagsakService, oppgaveService)
 
-    val fagsakId = UUID.randomUUID()
-    val fagsakEksternId = 12345L
-    val journalpostId = "98765"
-    val nyOppgaveId = 999999L
-    val behandlingId = UUID.randomUUID()
-    val oppgaveId = "1234567"
-    val dokumentTitler = hashMapOf("12345" to "Asbjørns skilsmissepapirer", "23456" to "Eiriks samværsdokument")
-    val dokumentInfoIdMedJsonVerdi = "12345"
+    private val fagsakId: UUID = UUID.randomUUID()
+    private val fagsakEksternId = 12345L
+    private val journalpostId = "98765"
+    private val nyOppgaveId = 999999L
+    val behandlingId: UUID = UUID.randomUUID()
+    private val oppgaveId = "1234567"
+    private val dokumentTitler = hashMapOf("12345" to "Asbjørns skilsmissepapirer", "23456" to "Eiriks samværsdokument")
+    private val dokumentInfoIdMedJsonVerdi = "12345"
 
     @BeforeEach
     fun setupMocks() {
@@ -88,7 +88,7 @@ internal class JournalføringServiceTest {
 
     @Test
     internal fun `skal fullføre manuell journalføring på eksisterende behandling`() {
-        val slotDokumentInfoIder: MutableList<String> = mutableListOf<String>()
+        val slotDokumentInfoIder: MutableList<String> = mutableListOf()
         val slotJournalpost = slot<OppdaterJournalpostRequest>()
 
         every {

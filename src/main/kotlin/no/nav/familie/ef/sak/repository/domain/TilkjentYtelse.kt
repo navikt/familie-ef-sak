@@ -21,9 +21,7 @@ data class TilkjentYtelse(@Id
                           val vedtaksdato: LocalDate? = null,
                           val status: TilkjentYtelseStatus = TilkjentYtelseStatus.IKKE_KLAR,
                           val type: TilkjentYtelseType = TilkjentYtelseType.FØRSTEGANGSBEHANDLING,
-                          val andelerTilkjentYtelse: List<AndelTilkjentYtelse>) {
-
-}
+                          val andelerTilkjentYtelse: List<AndelTilkjentYtelse>)
 
 enum class TilkjentYtelseStatus {
     IKKE_KLAR,

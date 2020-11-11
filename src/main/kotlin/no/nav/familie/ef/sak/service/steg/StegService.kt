@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.steg.StegType.BEHANDLING_FERDIGSTILT
 import no.nav.familie.ef.sak.service.steg.StegType.VILKÅRSVURDERE_INNGANGSVILKÅR
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -16,6 +17,10 @@ import org.springframework.transaction.annotation.Transactional
 class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
                   private val behandlingService: BehandlingService,
                   private val rolleConfig: RolleConfig) {
+
+    val logger: Logger = LoggerFactory.getLogger(this::class.java)
+    private val secureLogger = LoggerFactory.getLogger("secureLogger")
+
 
     private val stegSuksessMetrics: Map<StegType, Counter> = initStegMetrikker("suksess")
 
@@ -49,7 +54,7 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
             val saksbehandlerNavn = SikkerhetContext.hentSaksbehandlerNavn()
             val harTilgangTilSteg = SikkerhetContext.harTilgangTilGittRolle(rolleConfig, behandling.steg.tillattFor)
 
-            LOG.info("$saksbehandlerNavn håndterer $stegType på behandling ${behandling.id}")
+            logger.info("$saksbehandlerNavn håndterer $stegType på behandling ${behandling.id}")
             if (!harTilgangTilSteg) {
                 error("$saksbehandlerNavn kan ikke utføre steg '${stegType.displayName()} pga manglende rolle.")
             }
@@ -74,7 +79,7 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
             stegSuksessMetrics[stegType]?.increment()
 
             if (nesteSteg == BEHANDLING_FERDIGSTILT) {
-                LOG.info("$saksbehandlerNavn er ferdig med stegprosess på behandling ${behandling.id}")
+                logger.info("$saksbehandlerNavn er ferdig med stegprosess på behandling ${behandling.id}")
             }
 
             if (!nesteSteg.erGyldigIKombinasjonMedStatus(behandlingService.hentBehandling(behandling.id).status)) {
@@ -84,11 +89,11 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
 
             val returBehandling = behandlingService.oppdaterStegPåBehandling(behandlingId = behandling.id, steg = nesteSteg)
 
-            LOG.info("$saksbehandlerNavn har håndtert $stegType på behandling ${behandling.id}")
+            logger.info("$saksbehandlerNavn har håndtert $stegType på behandling ${behandling.id}")
             return returBehandling
         } catch (exception: Exception) {
             stegFeiletMetrics[stegType]?.increment()
-            LOG.error("Håndtering av stegtype '$stegType' feilet på behandling ${behandling.id}.")
+            logger.error("Håndtering av stegtype '$stegType' feilet på behandling ${behandling.id}.")
             secureLogger.info("Håndtering av stegtype '$stegType' feilet.",
                               exception)
             throw exception
@@ -107,11 +112,5 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
                                              "beskrivelse",
                                              it.stegType().rekkefølge.toString() + " " + it.stegType().displayName())
         }.toMap()
-    }
-
-    companion object {
-
-        val LOG = LoggerFactory.getLogger(this::class.java)
-        private val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }

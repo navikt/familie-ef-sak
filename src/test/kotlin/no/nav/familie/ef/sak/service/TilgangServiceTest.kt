@@ -17,18 +17,18 @@ import kotlin.test.assertFailsWith
 internal class TilgangServiceTest {
 
 
-    val personService: PersonService = mockk()
-    val familieIntegrasjonerClient: FamilieIntegrasjonerClient = mockk()
-    val behandlingService: BehandlingService = mockk()
-    val fagsakService: FagsakService = mockk()
-    val tilgangService =
+    private val personService: PersonService = mockk()
+    private val familieIntegrasjonerClient: FamilieIntegrasjonerClient = mockk()
+    private val behandlingService: BehandlingService = mockk()
+    private val fagsakService: FagsakService = mockk()
+    private val tilgangService =
             TilgangService(familieIntegrasjonerClient, personService, behandlingService, fagsakService, RolleConfig("", "", ""))
-    val mocketPersonIdent = "12345"
+    private val mocketPersonIdent = "12345"
 
     val fagsak = fagsak(fagsakpersoner(setOf(mocketPersonIdent)))
     val behandling: Behandling = behandling(fagsak)
-    val olaIdent = "4567"
-    val kariIdent = "98765"
+    private val olaIdent = "4567"
+    private val kariIdent = "98765"
     val barn: Map<String, PdlBarn> = mapOf(Pair(olaIdent, mockk()), Pair(kariIdent, mockk()))
 
 

@@ -4,10 +4,8 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
-import org.springframework.data.relational.core.mapping.Table
 import java.util.*
 
-@Table("oppgave")
 data class Oppgave(@Id
                    val id: UUID = UUID.randomUUID(),
                    val behandlingId: UUID,

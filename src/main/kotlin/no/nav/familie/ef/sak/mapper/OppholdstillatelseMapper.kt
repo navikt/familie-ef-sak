@@ -14,7 +14,7 @@ object OppholdstillatelseMapper {
                                       oppholdstillatelse = mapOppholdstillatelse(it.type))
             }
 
-    fun mapOppholdstillatelse(oppholdstillatelse: Oppholdstillatelse): OppholdType {
+    private fun mapOppholdstillatelse(oppholdstillatelse: Oppholdstillatelse): OppholdType {
         return when (oppholdstillatelse) {
             Oppholdstillatelse.PERMANENT -> OppholdType.PERMANENT
             Oppholdstillatelse.MIDLERTIDIG -> OppholdType.MIDLERTIDIG

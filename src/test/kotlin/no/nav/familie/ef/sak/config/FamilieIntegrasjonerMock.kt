@@ -30,13 +30,13 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                    WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.egenAnsattUri.path))
                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(egenAnsatt))),
                    WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.tilgangUri.path))
-                           .withRequestBody(WireMock.matching(".*ikketilgang.*"))
+                           .withRequestBody(WireMock.matching(".*ikkeTilgang.*"))
                            .atPriority(1)
                            .willReturn(WireMock.okJson(objectMapper
                                                                .writeValueAsString(listOf(Tilgang(false,
                                                                                                   "Mock sier: Du har " +
                                                                                                   "ikke tilgang " +
-                                                                                                  "til person ikketilgang"))))),
+                                                                                                  "til person ikkeTilgang"))))),
                    WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.tilgangUri.path))
                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(listOf(Tilgang(true, null))))),
                    WireMock.get(WireMock.urlEqualTo(integrasjonerConfig.kodeverkPoststedUri.path))

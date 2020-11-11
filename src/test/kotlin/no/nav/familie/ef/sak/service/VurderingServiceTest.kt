@@ -220,6 +220,6 @@ internal class VurderingServiceTest {
     companion object {
 
         private val BEHANDLING_ID = UUID.randomUUID()
-        private val BEHANDLING_EKSTERN_ID = 12345L
+        private const val BEHANDLING_EKSTERN_ID = 12345L
     }
 }

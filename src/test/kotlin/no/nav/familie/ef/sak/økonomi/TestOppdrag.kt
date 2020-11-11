@@ -17,8 +17,8 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 
-private val behandlingEksternId = 0L
-private val fagsakEksternId = 1L
+private const val behandlingEksternId = 0L
+private const val fagsakEksternId = 1L
 
 enum class TestOppdragType {
     Input,
@@ -52,7 +52,7 @@ data class TestOppdrag(val type: TestOppdragType,
             AndelTilkjentYtelse.nullAndel(KjedeId(ytelse, fnr),
                                           PeriodeId(linjeId!!, forrigeLinjeId))
         else
-            null;
+            null
     }
 
     fun tilUtbetalingsperiode(): Utbetalingsperiode? {
@@ -71,7 +71,7 @@ data class TestOppdrag(val type: TestOppdragType,
                                utbetalesTil = fnr,
                                behandlingId = 1)
         else
-            null;
+            null
     }
 }
 
@@ -86,7 +86,7 @@ class TestOppdragGroup {
     fun add(to: TestOppdrag) {
         when (to.type) {
             TestOppdragType.Input -> {
-                personIdent = to.fnr;
+                personIdent = to.fnr
                 to.tilAndelTilkjentYtelse()?.also { andelerTilkjentYtelseInn.add(it) }
             }
             TestOppdragType.Oppdrag -> {
@@ -133,46 +133,46 @@ class TestOppdragGroup {
 
 object TestOppdragParser {
 
-    const val KEY_TYPE = "Type"
-    const val KEY_FNR = "Fnr"
-    const val KEY_YTELSE = "Ytelse"
-    const val KEY_LINJE_ID = "LID"
-    const val KEY_FORRIGE_LINJE_ID = "Pre-LID"
-    const val KEY_STATUS_OPPDRAG = "Status oppdrag"
-    const val KEY_ER_ENDRING = "Er endring"
+    private const val KEY_TYPE = "Type"
+    private const val KEY_FNR = "Fnr"
+    private const val KEY_YTELSE = "Ytelse"
+    private const val KEY_LINJE_ID = "LID"
+    private const val KEY_FORRIGE_LINJE_ID = "Pre-LID"
+    private const val KEY_STATUS_OPPDRAG = "Status oppdrag"
+    private const val KEY_ER_ENDRING = "Er endring"
 
-    val RESERVERED_KEYS =
+    private val RESERVERED_KEYS =
             listOf(KEY_TYPE, KEY_FNR, KEY_YTELSE, KEY_LINJE_ID, KEY_FORRIGE_LINJE_ID, KEY_STATUS_OPPDRAG, KEY_ER_ENDRING)
 
-    fun parse(url: URL): List<TestOppdrag> {
+    private fun parse(url: URL): List<TestOppdrag> {
         val fileContent = url.openStream()!!
         val rows: List<Map<String, String>> = csvReader().readAllWithHeader(fileContent)
 
         return rows.map { row ->
             val datoKeysMedBeløp = row.keys
                     .filter { key -> !RESERVERED_KEYS.contains(key) }
-                    .filter { datoKey -> (row.get(datoKey))?.trim('x')?.toIntOrNull() != null }
+                    .filter { datoKey -> (row[datoKey])?.trim('x')?.toIntOrNull() != null }
                     .sorted()
 
             val opphørYearMonth = row.keys
                     .filter { key -> !RESERVERED_KEYS.contains(key) }
                     .sorted()
-                    .firstOrNull { datoKey -> (row.get(datoKey))?.contains('x') ?: false }
+                    .firstOrNull { datoKey -> (row[datoKey])?.contains('x') ?: false }
                     ?.let { YearMonth.parse(it) }
 
             val firstYearMonth = datoKeysMedBeløp.firstOrNull()?.let { YearMonth.parse(it) }
             val lastYearMonth = datoKeysMedBeløp.lastOrNull()?.let { YearMonth.parse(it) }
-            val beløp = datoKeysMedBeløp.firstOrNull()?.let { row.get(it)?.trim('x') }?.toIntOrNull()
+            val beløp = datoKeysMedBeløp.firstOrNull()?.let { row[it]?.trim('x') }?.toIntOrNull()
 
-            TestOppdrag(type = row.get(KEY_TYPE)?.let { TestOppdragType.valueOf(it) }!!,
-                        fnr = row.get(KEY_FNR)!!,
-                        ytelse = row.get(KEY_YTELSE)!!,
-                        linjeId = row.get(KEY_LINJE_ID)?.let { emptyAsNull(it) }?.let { Integer.parseInt(it).toLong() },
-                        forrigeLinjeId = row.get(KEY_FORRIGE_LINJE_ID)
+            TestOppdrag(type = row[KEY_TYPE]?.let { TestOppdragType.valueOf(it) }!!,
+                        fnr = row.getValue(KEY_FNR),
+                        ytelse = row.getValue(KEY_YTELSE),
+                        linjeId = row[KEY_LINJE_ID]?.let { emptyAsNull(it) }?.let { Integer.parseInt(it).toLong() },
+                        forrigeLinjeId = row[KEY_FORRIGE_LINJE_ID]
                                 ?.let { emptyAsNull(it) }
                                 ?.let { Integer.parseInt(it).toLong() },
-                        status110 = row.get(KEY_STATUS_OPPDRAG)?.let { emptyAsNull(it) },
-                        erEndring = row.get(KEY_ER_ENDRING)?.let { it.toBoolean() },
+                        status110 = row[KEY_STATUS_OPPDRAG]?.let { emptyAsNull(it) },
+                        erEndring = row[KEY_ER_ENDRING]?.let { it.toBoolean() },
                         beløp = beløp,
                         opphørsdato = opphørYearMonth?.atDay(1),
                         startPeriode = firstYearMonth?.atDay(1),
@@ -185,18 +185,18 @@ object TestOppdragParser {
 
         val result: MutableList<TestOppdragGroup> = mutableListOf()
 
-        var newGroup = true;
+        var newGroup = true
 
         parse(url).forEach { to ->
             when (to.type) {
                 TestOppdragType.Input -> {
                     if (newGroup) {
                         result.add(TestOppdragGroup())
-                        newGroup = false;
+                        newGroup = false
                     }
                 }
                 else -> {
-                    newGroup = true;
+                    newGroup = true
                 }
             }
             result.last().add(to)
@@ -205,8 +205,8 @@ object TestOppdragParser {
         return result
     }
 
-    private inline fun emptyAsNull(s: String): String? =
-            if (s.length == 0) null else s
+    private fun emptyAsNull(s: String): String? =
+            if (s.isEmpty()) null else s
 
 
 }
@@ -220,12 +220,13 @@ object TestOppdragRunner {
 
         grupper.forEachIndexed { indeks, gruppe ->
             val faktisk = lagTilkjentYtelseMedUtbetalingsoppdrag(gruppe.input, forrigeTilkjentYtelse)
-            Assertions.assertEquals(gruppe.output, faktisk, "Feiler for gruppe med indeks " + indeks)
+            Assertions.assertEquals(gruppe.output, faktisk, "Feiler for gruppe med indeks $indeks")
             forrigeTilkjentYtelse = faktisk
         }
     }
 
-    fun lagTilkjentYtelseMedUtbetalingsoppdrag(nyTilkjentYtelse: TilkjentYtelse, forrigeTilkjentYtelse: TilkjentYtelse? = null) =
+    private fun lagTilkjentYtelseMedUtbetalingsoppdrag(nyTilkjentYtelse: TilkjentYtelse,
+                                                       forrigeTilkjentYtelse: TilkjentYtelse? = null) =
             UtbetalingsoppdragGenerator
                     .lagTilkjentYtelseMedUtbetalingsoppdrag(TilkjentYtelseMedMetaData(tilkjentYtelse = nyTilkjentYtelse,
                                                                                       eksternBehandlingId = behandlingEksternId,

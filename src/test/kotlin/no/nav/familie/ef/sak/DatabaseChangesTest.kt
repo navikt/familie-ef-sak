@@ -14,7 +14,7 @@ class DatabaseChangesTest {
     }
 
     /**
-     * Hvis du har en databasoppdatering vill denne testen feile, slik at ikke branchen blir deployet av misstak
+     * Hvis du har en databaseoppdatering vil denne testen feile, slik at ikke branch blir deployet ved en feil
      */
     @Test
     internal fun `valider migreringsscript`() {

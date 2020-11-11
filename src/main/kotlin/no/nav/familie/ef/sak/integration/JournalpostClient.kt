@@ -17,7 +17,7 @@ import java.net.URI
 
 @Component
 class JournalpostClient(@Qualifier("azure") restOperations: RestOperations,
-                        private val integrasjonerConfig: IntegrasjonerConfig)
+                        integrasjonerConfig: IntegrasjonerConfig)
     : AbstractPingableRestClient(restOperations, "oppgave") {
 
 
@@ -43,7 +43,7 @@ class JournalpostClient(@Qualifier("azure") restOperations: RestOperations,
                             journalpostId: String): OppdaterJournalpostResponse {
         return putForEntity<Ressurs<OppdaterJournalpostResponse>>(URI.create("${dokarkivUri}/v2/${journalpostId}"),
                                                                   oppdaterJournalpostRequest).data
-               ?: error("Kunne ikke oppdatere journalpost med id ${journalpostId}")
+               ?: error("Kunne ikke oppdatere journalpost med id $journalpostId")
     }
 
     fun ferdigstillJournalpost(journalpostId: String, journalførendeEnhet: String) {
@@ -52,8 +52,8 @@ class JournalpostClient(@Qualifier("azure") restOperations: RestOperations,
                 "")
 
         if (ressurs.status != Ressurs.Status.SUKSESS) {
-            secureLogger.error(" Feil ved oppdatering av journalpost=${journalpostId} - mottok: ${ressurs}")
-            error("Feil ved oppdatering av journalpost= ${journalpostId}")
+            secureLogger.error(" Feil ved oppdatering av journalpost=${journalpostId} - mottok: $ressurs")
+            error("Feil ved oppdatering av journalpost= $journalpostId")
         }
 
     }
