@@ -5,6 +5,7 @@ import no.nav.familie.http.config.RestTemplateAzure
 import no.nav.familie.http.config.RestTemplateSts
 import no.nav.familie.http.sts.StsRestClient
 import no.nav.familie.log.filter.LogFilter
+import no.nav.familie.log.filter.RequestTimeFilter
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import no.nav.security.token.support.spring.api.EnableJwtTokenValidation
 import org.slf4j.LoggerFactory
@@ -36,6 +37,15 @@ class ApplicationConfig {
         val filterRegistration = FilterRegistrationBean<LogFilter>()
         filterRegistration.filter = LogFilter()
         filterRegistration.order = 1
+        return filterRegistration
+    }
+
+    @Bean
+    fun requestTimeFilter(): FilterRegistrationBean<RequestTimeFilter> {
+        logger.info("Registering RequestTimeFilter filter")
+        val filterRegistration = FilterRegistrationBean<RequestTimeFilter>()
+        filterRegistration.filter = RequestTimeFilter()
+        filterRegistration.order = 2
         return filterRegistration
     }
 }
