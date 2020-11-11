@@ -32,6 +32,8 @@ class MapperTestUtilTest {
                 .hasMessage(forventetFeilmelding("Bar", "navn"))
     }
 
-    private fun forventetFeilmeldingTomListe(klassenavn: String, feltnavn: String) = "$klassenavn har en tom liste i felt $feltnavn"
+    private fun forventetFeilmeldingTomListe(klassenavn: String,
+                                             feltnavn: String) = "$klassenavn har en tom liste i felt $feltnavn"
+
     private fun forventetFeilmelding(klassenavn: String, feltnavn: String) = "$klassenavn har ingen verdi i felt $feltnavn"
 }

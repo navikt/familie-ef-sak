@@ -1,24 +1,23 @@
 package no.nav.familie.ef.sak.mapper
 
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlBarn
-import no.nav.familie.kontrakter.ef.søknad.Barn
+import no.nav.familie.ef.sak.repository.domain.søknad.Barn
 import no.nav.familie.kontrakter.ef.søknad.Fødselsnummer
 import kotlin.math.abs
 
 object BarnMatcher {
 
-    fun kobleSøknadsbarnOgRegisterBarn(søknadsbarn: List<Barn>,
-                                       pdlBarnMap: Map<String, PdlBarn>): List<MatchetBarn> {
+    fun kobleSøknadsbarnOgRegisterBarn(søknadsbarn: Set<Barn>, pdlBarnMap: Map<String, PdlBarn>): List<MatchetBarn> {
 
         val søknadsbarnMedFnrMatchetTilPdlBarn =
                 søknadsbarn.map {
-                    val firstOrNull = pdlBarnMap.entries.firstOrNull { entry -> it.fødselsnummer?.verdi?.verdi == entry.key }
+                    val firstOrNull = pdlBarnMap.entries.firstOrNull { entry -> it.fødselsnummer == entry.key }
                     MatchetBarn(firstOrNull?.key, firstOrNull?.value, it)
                 }
 
         val pdlBarnIkkeISøknad =
                 pdlBarnMap.filter { entry ->
-                    søknadsbarn.firstOrNull { it.fødselsnummer?.verdi?.verdi == entry.key } == null
+                    søknadsbarn.firstOrNull { it.fødselsnummer == entry.key } == null
                 }.toMutableMap()
 
 
@@ -38,7 +37,7 @@ object BarnMatcher {
     private fun forsøkMatchPåFødselsdato(barn: MatchetBarn,
                                          pdlBarnIkkeISøknad: Map<String, PdlBarn>): MatchetBarn {
 
-        val fødselTermindato = barn.søknadsbarn.fødselTermindato?.verdi ?: return barn
+        val fødselTermindato = barn.søknadsbarn.fødselTermindato ?: return barn
         val uke20 = fødselTermindato.minusWeeks(20)
         val uke44 = fødselTermindato.plusWeeks(4)
 

@@ -13,5 +13,5 @@ import org.springframework.web.client.RestTemplate
 class NaisNoProxyCustomizer : INaisProxyCustomizer {
 
     override fun customize(restTemplate: RestTemplate?) {
-    }	
+    }
 }

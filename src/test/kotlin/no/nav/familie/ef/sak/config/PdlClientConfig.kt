@@ -18,10 +18,9 @@ class PdlClientConfig {
     private val startdato = LocalDate.of(2020, 1, 1)
     private val sluttdato = LocalDate.of(2021, 1, 1)
 
-    private val søkerKort = mapOf(
-            "11111122222" to PdlSøkerKort(lagKjønn(KjønnType.MANN), lagNavn(fornavn = "Foo")),
-            "11111133333" to PdlSøkerKort(lagKjønn(KjønnType.KVINNE), lagNavn(fornavn = "Bar"))
-    )
+    private val søkerKort =
+            mapOf("11111122222" to PdlSøkerKort(lagKjønn(KjønnType.MANN), lagNavn(fornavn = "Foo")),
+                  "11111133333" to PdlSøkerKort(lagKjønn(KjønnType.KVINNE), lagNavn(fornavn = "Bar")))
 
     @Bean
     @Primary
@@ -37,30 +36,31 @@ class PdlClientConfig {
         }
 
         every { pdlClient.hentSøker(any()) } returns
-                PdlSøker(
-                        adressebeskyttelse = listOf(Adressebeskyttelse(gradering = AdressebeskyttelseGradering.UGRADERT)),
-                        bostedsadresse = bostedsadresse(),
-                        dødsfall = listOf(),
-                        familierelasjoner = listOf(),
-                        fødsel = listOf(),
-                        folkeregisterpersonstatus = listOf(Folkeregisterpersonstatus("bosatt", "bosattEtterFolkeregisterloven")),
-                        fullmakt = fullmakter(),
-                        kjønn = lagKjønn(KjønnType.KVINNE),
-                        kontaktadresse = kontaktadresse(),
-                        navn = lagNavn(),
-                        opphold = listOf(Opphold(Oppholdstillatelse.PERMANENT, startdato, null)),
-                        oppholdsadresse = listOf(),
-                        sivilstand = sivilstand(),
-                        statsborgerskap = statsborgerskap(),
-                        telefonnummer = listOf(Telefonnummer(landskode = "+47", nummer = "98999923", prioritet = 1)),
-                        tilrettelagtKommunikasjon = listOf(),
-                        innflyttingTilNorge = listOf(InnflyttingTilNorge("SWE", "Stockholm", folkeregistermetadata)),
-                        utflyttingFraNorge = listOf(UtflyttingFraNorge("SWE", "Stockholm", folkeregistermetadata)),
-                        vergemaalEllerFremtidsfullmakt = listOf()
+                PdlSøker(adressebeskyttelse = listOf(Adressebeskyttelse(gradering = AdressebeskyttelseGradering.UGRADERT)),
+                         bostedsadresse = bostedsadresse(),
+                         dødsfall = listOf(),
+                         familierelasjoner = listOf(),
+                         fødsel = listOf(),
+                         folkeregisterpersonstatus = listOf(Folkeregisterpersonstatus("bosatt", "bosattEtterFolkeregisterloven")),
+                         fullmakt = fullmakter(),
+                         kjønn = lagKjønn(KjønnType.KVINNE),
+                         kontaktadresse = kontaktadresse(),
+                         navn = lagNavn(),
+                         opphold = listOf(Opphold(Oppholdstillatelse.PERMANENT, startdato, null)),
+                         oppholdsadresse = listOf(),
+                         sivilstand = sivilstand(),
+                         statsborgerskap = statsborgerskap(),
+                         telefonnummer = listOf(Telefonnummer(landskode = "+47", nummer = "98999923", prioritet = 1)),
+                         tilrettelagtKommunikasjon = listOf(),
+                         innflyttingTilNorge = listOf(InnflyttingTilNorge("SWE", "Stockholm", folkeregistermetadata)),
+                         utflyttingFraNorge = listOf(UtflyttingFraNorge("SWE", "Stockholm", folkeregistermetadata)),
+                         vergemaalEllerFremtidsfullmakt = listOf()
                 )
         every { pdlClient.hentSøkerAsMap(any()) } returns mapOf()
 
         every { pdlClient.hentBarn(any()) } returns emptyMap()
+
+        every { pdlClient.hentAktørId(any()) } returns PdlHentIdenter(PdlAktørId(listOf(PdlIdent("12345678901232"))))
         return pdlClient
     }
 

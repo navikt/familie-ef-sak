@@ -35,7 +35,8 @@ internal class DiskresjonskodeUtilsKtTest {
         verifiserPersonMedStrengesteAdressebeskyttelse(null, ugradert)
     }
 
-    private fun verifiserPersonMedStrengesteAdressebeskyttelse(forventetIdent: String?, vararg identer: IdentMedAdressebeskyttelse) {
+    private fun verifiserPersonMedStrengesteAdressebeskyttelse(forventetIdent: String?,
+                                                               vararg identer: IdentMedAdressebeskyttelse) {
         assertThat(finnPersonMedStrengesteAdressebeskyttelse(identer.toList())).isEqualTo(forventetIdent)
     }
 }

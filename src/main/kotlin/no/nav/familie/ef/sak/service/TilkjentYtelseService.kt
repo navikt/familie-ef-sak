@@ -1,106 +1,20 @@
 package no.nav.familie.ef.sak.service
 
-import no.nav.familie.ef.sak.mapper.tilDto
-import no.nav.familie.ef.sak.mapper.tilOpphør
-import no.nav.familie.ef.sak.mapper.tilTilkjentYtelse
-import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.ef.sak.økonomi.Utbetalingsoppdrag.lagUtbetalingsoppdrag
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseType
 import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
-import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.integration.FAGSYSTEM
-import no.nav.familie.ef.sak.integration.ØkonomiKlient
-import no.nav.familie.kontrakter.felles.getDataOrThrow
+import no.nav.familie.ef.sak.integration.OppdragClient
+import no.nav.familie.ef.sak.mapper.tilDto
+import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDate
 import java.util.*
 
 @Service
-class TilkjentYtelseService(private val økonomiKlient: ØkonomiKlient,
-                            private val tilkjentYtelseRepository: TilkjentYtelseRepository) {
-
-    @Transactional
-    fun opprettTilkjentYtelse(tilkjentYtelseDTO: TilkjentYtelseDTO): UUID {
-        tilkjentYtelseDTO.valider()
-
-        val eksisterendeTilkjentYtelse = tilkjentYtelseRepository.findByPersonident(tilkjentYtelseDTO.søker)
-        if (eksisterendeTilkjentYtelse != null) {
-            error("Søker har allerede en tilkjent ytelse")
-        }
-
-        val opprettetTilkjentYtelse =
-                tilkjentYtelseRepository.insert(tilkjentYtelseDTO.tilTilkjentYtelse(TilkjentYtelseStatus.OPPRETTET))
-
-        return opprettetTilkjentYtelse.id
-    }
-
-    @Transactional
-    fun iverksettUtbetalingsoppdrag(ytelseId: UUID) {
-        val tilkjentYtelse = hentTilkjentYtelse(ytelseId)
-
-        when (tilkjentYtelse.type) {
-            TilkjentYtelseType.OPPHØR -> error("Tilkjent ytelse ${tilkjentYtelse.id} er opphørt")
-            TilkjentYtelseType.ENDRING -> throw NotImplementedError("Har ikke støtte for endring ennå")
-            TilkjentYtelseType.FØRSTEGANGSBEHANDLING -> when (tilkjentYtelse.status) {
-                TilkjentYtelseStatus.SENDT_TIL_IVERKSETTING -> return
-                TilkjentYtelseStatus.AKTIV -> return
-                TilkjentYtelseStatus.IKKE_KLAR -> error("Tilkjent ytelse ${tilkjentYtelse.id} er ikke klar")
-                TilkjentYtelseStatus.AVSLUTTET -> error("Tilkjent ytelse ${tilkjentYtelse.id} er avsluttet")
-                TilkjentYtelseStatus.OPPRETTET -> sendUtbetalingsoppdragOgOppdaterStatus(
-                        tilkjentYtelse,
-                        TilkjentYtelseStatus.SENDT_TIL_IVERKSETTING)
-            }
-        }
-
-    }
-
-    @Transactional
-    fun opphørUtbetalingsoppdrag(TilkjentYtelseId: UUID, opphørDato: LocalDate = LocalDate.now()): UUID {
-        val tilkjentYtelse = hentTilkjentYtelse(TilkjentYtelseId)
-
-        when (tilkjentYtelse.type) {
-            TilkjentYtelseType.OPPHØR -> error("Tilkjent ytelse ${tilkjentYtelse.id} er allerede opphørt")
-            TilkjentYtelseType.ENDRING -> throw NotImplementedError("Har ikke støtte for endring ennå")
-            TilkjentYtelseType.FØRSTEGANGSBEHANDLING -> when (tilkjentYtelse.status) {
-                TilkjentYtelseStatus.OPPRETTET -> error("Tilkjent ytelse ${tilkjentYtelse.id} er opprettet, men ikke iverksatt")
-                TilkjentYtelseStatus.SENDT_TIL_IVERKSETTING ->
-                    error("Tilkjent ytelse ${tilkjentYtelse.id} er i ferd med å iverksettes")
-                TilkjentYtelseStatus.IKKE_KLAR -> error("Tilkjent ytelse ${tilkjentYtelse.id} er ikke klar")
-                TilkjentYtelseStatus.AVSLUTTET -> error("Tilkjent ytelse ${tilkjentYtelse.id} er allerede avsluttet")
-                TilkjentYtelseStatus.AKTIV -> return lagOpphørOgSendUtbetalingsoppdrag(tilkjentYtelse, opphørDato)
-            }
-        }
-    }
-
-    private fun lagOpphørOgSendUtbetalingsoppdrag(tilkjentYtelse: TilkjentYtelse, opphørDato: LocalDate): UUID {
-
-        tilkjentYtelseRepository.update(tilkjentYtelse.copy(status = TilkjentYtelseStatus.AVSLUTTET))
-
-        val lagretOpphørtTilkjentYtelse = tilkjentYtelseRepository.insert(tilkjentYtelse.tilOpphør(opphørDato))
-
-        sendUtbetalingsoppdragOgOppdaterStatus(lagretOpphørtTilkjentYtelse,
-                                               TilkjentYtelseStatus.SENDT_TIL_IVERKSETTING)
-
-        return lagretOpphørtTilkjentYtelse.id
-    }
-
-    private fun sendUtbetalingsoppdragOgOppdaterStatus(tilkjentYtelse: TilkjentYtelse,
-                                                       nyStatus: TilkjentYtelseStatus) {
-        val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
-        val utbetalingsoppdrag = lagUtbetalingsoppdrag(saksbehandlerId, tilkjentYtelse)
-
-        // Rulles tilbake hvis økonomiKlient.iverksettOppdrag under kaster en exception
-        tilkjentYtelseRepository.update(tilkjentYtelse.copy(utbetalingsoppdrag = utbetalingsoppdrag,
-                                                          status = nyStatus))
-
-        økonomiKlient.iverksettOppdrag(utbetalingsoppdrag).getDataOrThrow()
-    }
+class TilkjentYtelseService(private val oppdragClient: OppdragClient,
+                            private val tilkjentYtelseRepository: TilkjentYtelseRepository
+) {
 
     fun hentStatus(tilkjentYtelseId: UUID): OppdragStatus {
 
@@ -110,7 +24,7 @@ class TilkjentYtelseService(private val økonomiKlient: ØkonomiKlient,
                                   personIdent = tilkjentYtelse.personident,
                                   behandlingsId = tilkjentYtelse.id.toString())
 
-        return økonomiKlient.hentStatus(oppdragId).getDataOrThrow()
+        return oppdragClient.hentStatus(oppdragId)
     }
 
     fun hentTilkjentYtelseDto(tilkjentYtelseId: UUID): TilkjentYtelseDTO {

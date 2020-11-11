@@ -18,34 +18,33 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                               fullmakter: List<Fullmakt>,
                               egenAnsatt: Boolean,
                               identNavn: Map<String, String>): PersonopplysningerDto {
-        return PersonopplysningerDto(
-                adressebeskyttelse = søker.adressebeskyttelse.firstOrNull()
-                        ?.let { Adressebeskyttelse.valueOf(it.gradering.name) },
-                folkeregisterpersonstatus = søker.folkeregisterpersonstatus.firstOrNull()
-                        ?.let { Folkeregisterpersonstatus.fraPdl(it) },
-                dødsdato = søker.dødsfall.firstOrNull()?.dødsdato,
-                navn = NavnDto.fraNavn(søker.navn.gjeldende()),
-                kjønn = søker.kjønn.single().kjønn.let { Kjønn.valueOf(it.name) },
-                personIdent = ident,
-                telefonnummer = søker.telefonnummer.find { it.prioritet == 1 }
-                        ?.let { TelefonnummerDto(it.landskode, it.nummer) },
-                statsborgerskap = statsborgerskapMapper.map(søker.statsborgerskap),
-                sivilstand = søker.sivilstand.map {
-                    SivilstandDto(type = Sivilstandstype.valueOf(it.type.name),
-                                  gyldigFraOgMed = it.gyldigFraOgMed?.toString() ?: it.bekreftelsesdato,
-                                  relatertVedSivilstand = it.relatertVedSivilstand,
-                                  navn = identNavn[it.relatertVedSivilstand])
-                },
-                adresse = tilAdresser(søker),
-                fullmakt = fullmakter.map {
-                    FullmaktDto(gyldigFraOgMed = it.gyldigFraOgMed,
-                                gyldigTilOgMed = it.gyldigTilOgMed,
-                                motpartsPersonident = it.motpartsPersonident,
-                                navn = identNavn[it.motpartsPersonident])
-                },
-                egenAnsatt = egenAnsatt,
-                navEnhet = arbeidsfordelingService.hentNavEnhet(ident)
-                                   ?.let { it.enhetId + " - " + it.enhetNavn } ?: "Ikke funnet"
+        return PersonopplysningerDto(adressebeskyttelse = søker.adressebeskyttelse.firstOrNull()
+                ?.let { Adressebeskyttelse.valueOf(it.gradering.name) },
+                                     folkeregisterpersonstatus = søker.folkeregisterpersonstatus.firstOrNull()
+                                             ?.let { Folkeregisterpersonstatus.fraPdl(it) },
+                                     dødsdato = søker.dødsfall.firstOrNull()?.dødsdato,
+                                     navn = NavnDto.fraNavn(søker.navn.gjeldende()),
+                                     kjønn = søker.kjønn.single().kjønn.let { Kjønn.valueOf(it.name) },
+                                     personIdent = ident,
+                                     telefonnummer = søker.telefonnummer.find { it.prioritet == 1 }
+                                             ?.let { TelefonnummerDto(it.landskode, it.nummer) },
+                                     statsborgerskap = statsborgerskapMapper.map(søker.statsborgerskap),
+                                     sivilstand = søker.sivilstand.map {
+                                         SivilstandDto(type = Sivilstandstype.valueOf(it.type.name),
+                                                       gyldigFraOgMed = it.gyldigFraOgMed?.toString() ?: it.bekreftelsesdato,
+                                                       relatertVedSivilstand = it.relatertVedSivilstand,
+                                                       navn = identNavn[it.relatertVedSivilstand])
+                                     },
+                                     adresse = tilAdresser(søker),
+                                     fullmakt = fullmakter.map {
+                                         FullmaktDto(gyldigFraOgMed = it.gyldigFraOgMed,
+                                                     gyldigTilOgMed = it.gyldigTilOgMed,
+                                                     motpartsPersonident = it.motpartsPersonident,
+                                                     navn = identNavn[it.motpartsPersonident])
+                                     },
+                                     egenAnsatt = egenAnsatt,
+                                     navEnhet = arbeidsfordelingService.hentNavEnhet(ident)
+                                                        ?.let { it.enhetId + " - " + it.enhetNavn } ?: "Ikke funnet"
         )
     }
 

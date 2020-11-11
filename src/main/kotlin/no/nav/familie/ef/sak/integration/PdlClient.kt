@@ -76,6 +76,24 @@ class PdlClient(val pdlConfig: PdlConfig,
         return feilsjekkOgReturnerData(pdlResponse)
     }
 
+    fun hentAktørId(personIdent: String): PdlHentIdenter {
+        val pdlPersonRequest = PdlIdentRequest(variables = PdlIdentRequestVariables(personIdent, "AKTORID"),
+                                               query = PdlConfig.hentIdentQuery)
+        val pdlResponse: PdlResponse<PdlHentIdenter> = postForEntity(pdlConfig.pdlUri,
+                                                                     pdlPersonRequest,
+                                                                     httpHeaders())
+        return feilsjekkOgReturnerData(personIdent, pdlResponse)
+    }
+
+    fun hentPersonident(aktørId: String): PdlHentIdenter {
+        val pdlPersonRequest = PdlIdentRequest(variables = PdlIdentRequestVariables(aktørId, "FOLKEREGISTERIDENT"),
+                                               query = PdlConfig.hentIdentQuery)
+        val pdlResponse: PdlResponse<PdlHentIdenter> = postForEntity(pdlConfig.pdlUri,
+                                                                     pdlPersonRequest,
+                                                                     httpHeaders())
+        return feilsjekkOgReturnerData(aktørId, pdlResponse)
+    }
+
     private inline fun <reified T : Any> feilsjekkOgReturnerData(ident: String,
                                                                  pdlResponse: PdlResponse<T>): T {
 

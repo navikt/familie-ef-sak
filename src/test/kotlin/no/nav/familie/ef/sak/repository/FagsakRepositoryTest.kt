@@ -7,15 +7,13 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
-import org.springframework.test.context.ActiveProfiles
 
-@ActiveProfiles("local", "mock-oauth")
 internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
 
     @Autowired private lateinit var fagsakRepository: FagsakRepository
 
     @Test
-    internal fun `findByFagsakId`() {
+    internal fun findByFagsakId() {
         val fagsakPersistert = fagsakRepository.insert(fagsak(fagsakpersoner(setOf("12345678901", "98765432109"))))
         val fagsak = fagsakRepository.findByIdOrNull(fagsakPersistert.id) ?: error("Finner ikke fagsak med id")
 
@@ -26,7 +24,7 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `findBySøkerIdent`() {
+    internal fun findBySøkerIdent() {
         fagsakRepository.insert(fagsak(fagsakpersoner(setOf("12345678901", "98765432109"))))
         val fagsakHentetFinnesIkke = fagsakRepository.findBySøkerIdent("0", Stønadstype.OVERGANGSSTØNAD)
 
@@ -36,6 +34,23 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
 
         assertThat(fagsak.søkerIdenter.map { it.ident }).contains("12345678901")
         assertThat(fagsak.søkerIdenter.map { it.ident }).contains("98765432109")
+    }
+
+    @Test
+    internal fun finnMedEksternId() {
+        val fagsak = fagsakRepository.insert(fagsak())
+        val findByFagsakId = fagsakRepository.findById(fagsak.id)
+        val findByEksternId = fagsakRepository.finnMedEksternId(fagsak.eksternId.id)
+                              ?: throw error("Fagsak med ekstern id ${fagsak.eksternId} finnes ikke")
+
+        assertThat(findByEksternId).isEqualTo(fagsak)
+        assertThat(findByEksternId).isEqualTo(findByFagsakId.get())
+    }
+
+    @Test
+    internal fun `finnMedEksternId skal gi null når det ikke finnes fagsak for gitt id`() {
+        val findByEksternId = fagsakRepository.finnMedEksternId(100000L)
+        assertThat(findByEksternId).isEqualTo(null)
     }
 
 }

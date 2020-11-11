@@ -8,10 +8,9 @@ import java.util.*
 
 data class TilkjentYtelse(@Id
                           val id: UUID = UUID.randomUUID(),
-                          @Column("periode_id_start")
-                          val periodeIdStart: Long,
+                          val behandlingId: UUID,
                           val personident: String,
-                          val saksnummer: String,
+                          val saksbehandler: String, /// TODO Legg til Sporbar() og fjern dette feltet
                           @Column("stonad_fom")
                           val stønadFom: LocalDate? = null,
                           @Column("stonad_tom")
@@ -19,12 +18,12 @@ data class TilkjentYtelse(@Id
                           @Column("opphor_fom")
                           val opphørFom: LocalDate? = null,
                           val utbetalingsoppdrag: Utbetalingsoppdrag? = null,
-                          @Column("forrige_periode_id_start")
-                          val forrigePeriodeIdStart: Long? = null,
                           val vedtaksdato: LocalDate? = null,
                           val status: TilkjentYtelseStatus = TilkjentYtelseStatus.IKKE_KLAR,
                           val type: TilkjentYtelseType = TilkjentYtelseType.FØRSTEGANGSBEHANDLING,
-                          val andelerTilkjentYtelse: List<AndelTilkjentYtelse>)
+                          val andelerTilkjentYtelse: List<AndelTilkjentYtelse>) {
+
+}
 
 enum class TilkjentYtelseStatus {
     IKKE_KLAR,

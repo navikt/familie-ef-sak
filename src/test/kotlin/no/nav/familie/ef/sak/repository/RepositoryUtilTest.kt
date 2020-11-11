@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Repository
-import java.util.*
 
 internal class RepositoryUtilTest {
 

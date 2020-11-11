@@ -81,3 +81,8 @@ PDL_URL: http://pdl-api
 FAMILIE_OPPDRAG_API_URL: http://familie-oppdrag
 
 FRONTEND_OPPGAVE_URL: https://ensligmorellerfar.prod-fss.nais.io/fagsak
+
+rolle:
+  veileder: "31778fd8-3b71-4867-8db6-a81235fbe001"
+  saksbehandler: "6406aba2-b930-41d3-a85b-dd13731bc974"
+  beslutter: "5fcc0e1d-a4c2-49f0-93dc-27c9fea41e54"
