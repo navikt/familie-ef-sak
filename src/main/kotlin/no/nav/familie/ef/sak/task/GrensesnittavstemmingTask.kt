@@ -24,21 +24,20 @@ class GrensesnittavstemmingTask(private val avstemmingService: AvstemmingService
     override fun doTask(task: Task) {
         val payload = objectMapper.readValue<GrensesnittavstemmingPayload>(task.payload)
 
+        val stønadstype = payload.stønadstype
         val fraTidspunkt = payload.fraDato.atStartOfDay()
         val tilTidspunkt = task.triggerTid.toLocalDate().atStartOfDay()
 
-        logger.info("Gjør ${task.id} ${payload.stønadstype} avstemming mot oppdrag fra $fraTidspunkt til $tilTidspunkt")
+        logger.info("Gjør ${task.id} $stønadstype avstemming mot oppdrag fra $fraTidspunkt til $tilTidspunkt")
+        avstemmingService.grensesnittavstemOppdrag(fraTidspunkt, tilTidspunkt, stønadstype)
 
-        when (payload.stønadstype) {
-            Stønadstype.OVERGANGSSTØNAD -> avstemmingService.grensesnittavstemOvergangsstønad(fraTidspunkt, tilTidspunkt)
-            else -> throw Error("Grensesnittavstemming for ${payload.stønadstype} er ikke implementert")
-        }
     }
 
     override fun onCompletion(task: Task) {
+        val payload = objectMapper.readValue<GrensesnittavstemmingPayload>(task.payload)
         val nesteVirkedag: LocalDate = VirkedagerProvider.nesteVirkedag(task.triggerTid.toLocalDate())
 
-        opprettNyTask(task.triggerTid.toLocalDate(), nesteVirkedag)
+        opprettNyTask(task.triggerTid.toLocalDate(), nesteVirkedag, payload.stønadstype)
     }
 
     fun utløsGrensesnittavstemming(fraDato: LocalDate, stønadstype: Stønadstype, triggerTid: LocalDate?): Task {
@@ -49,7 +48,7 @@ class GrensesnittavstemmingTask(private val avstemmingService: AvstemmingService
 
     private fun opprettNyTask(fraDato: LocalDate,
                               nesteVirkedag: LocalDate,
-                              stønadstype: Stønadstype = Stønadstype.OVERGANGSSTØNAD): Task {
+                              stønadstype: Stønadstype): Task {
         val grensesnittavstemmingPayload = GrensesnittavstemmingPayload(fraDato = fraDato, stønadstype = stønadstype)
 
         val nesteAvstemmingTask = Task(type = TYPE,
