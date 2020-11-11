@@ -13,7 +13,7 @@ import org.springframework.web.client.RestOperations
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 
-const val FAGSYSTEM = "EFOG"
+const val FAGSYSTEM_OVERGANGSSTØNAD = "EFOG"
 
 @Service
 @Import(RestTemplateBuilderBean::class)

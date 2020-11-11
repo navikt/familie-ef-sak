@@ -4,7 +4,9 @@ import io.mockk.every
 import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.slot
+import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.service.AvstemmingService
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
@@ -26,11 +28,11 @@ internal class GrensesnittavstemmingTaskTest {
         val fradatoSlot = slot<LocalDateTime>()
         val tildatoSlot = slot<LocalDateTime>()
         justRun {
-            avstemmingService.grensesnittavstemOppdrag(capture(fradatoSlot), capture(tildatoSlot))
+            avstemmingService.grensesnittavstemOvergangsstønad(capture(fradatoSlot), capture(tildatoSlot))
         }
 
         grensesnittavstemmingTask.doTask(Task(type = "",
-                                              payload = LocalDate.of(2018, 4, 18).toString(),
+                                              payload = payload,
                                               triggerTid = LocalDateTime.of(2018, 4, 19, 8, 0)))
 
         assertThat(fradatoSlot.captured).isEqualTo(LocalDate.of(2018, 4, 18).atStartOfDay())
@@ -51,11 +53,18 @@ internal class GrensesnittavstemmingTaskTest {
                                                     triggerTid = LocalDateTime.of(2018, 4, 18, 8, 0)))
 
         assertThat(slot.captured).isEqualToComparingOnlyGivenFields(Task(type = GrensesnittavstemmingTask.TYPE,
-                                                                         payload = LocalDate.of(2018, 4, 18).toString(),
+                                                                         payload = payload,
                                                                          triggerTid = LocalDateTime.of(2018, 4, 19, 8, 0)),
                                                                     "type",
                                                                     "payload",
                                                                     "triggerTid")
+    }
+
+    companion object {
+        val payload = objectMapper.writeValueAsString(GrensesnittavstemmingPayload(fraDato = LocalDate.of(
+                2018,
+                4,
+                18), stønadstype = Stønadstype.OVERGANGSSTØNAD))
     }
 
 

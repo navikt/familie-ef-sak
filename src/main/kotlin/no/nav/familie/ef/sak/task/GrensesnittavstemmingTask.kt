@@ -1,6 +1,8 @@
 package no.nav.familie.ef.sak.task
 
+import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.service.AvstemmingService
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -19,23 +21,43 @@ class GrensesnittavstemmingTask(private val avstemmingService: AvstemmingService
     val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
     override fun doTask(task: Task) {
-        val fraTidspunkt = LocalDate.parse(task.payload).atStartOfDay()
+        val payload = objectMapper.readValue(task.payload, GrensesnittavstemmingPayload::class.java)
+
+        val fraTidspunkt = payload.fraDato.atStartOfDay()
         val tilTidspunkt = task.triggerTid.toLocalDate().atStartOfDay()
 
-        logger.info("Gjør avstemming mot oppdrag fra $fraTidspunkt til ${task.triggerTid.toLocalDate()}")
+        logger.info("Gjør ${payload.stønadstype} avstemming mot oppdrag fra $fraTidspunkt til $tilTidspunkt")
 
-        avstemmingService.grensesnittavstemOppdrag(fraTidspunkt, tilTidspunkt)
-
+        when (payload.stønadstype) {
+            Stønadstype.OVERGANGSSTØNAD -> {
+                avstemmingService.grensesnittavstemOvergangsstønad(fraTidspunkt, tilTidspunkt)
+            }
+            else -> throw Error("Grensesnittavstemming for ${payload.stønadstype} er ikke implementert")
+        }
     }
 
     override fun onCompletion(task: Task) {
         val nesteVirkedag: LocalDate = VirkedagerProvider.nesteVirkedag(task.triggerTid.toLocalDate())
 
+        opprettNyTask(task.triggerTid.toLocalDate(), nesteVirkedag)
+    }
+
+    fun utløsGrensesnittavstemming(fraDato: LocalDate, stønadstype: Stønadstype, triggerTid: LocalDate?): Task {
+        val nesteVirkedag: LocalDate = triggerTid ?: VirkedagerProvider.nesteVirkedag(fraDato)
+
+        return opprettNyTask(fraDato, nesteVirkedag, stønadstype)
+    }
+
+    private fun opprettNyTask(fraDato: LocalDate,
+                              nesteVirkedag: LocalDate,
+                              stønadstype: Stønadstype = Stønadstype.OVERGANGSSTØNAD): Task {
+        val grensesnittavstemmingPayload = GrensesnittavstemmingPayload(fraDato = fraDato, stønadstype = stønadstype)
+
         val nesteAvstemmingTask = Task(type = TYPE,
-                                       payload = task.triggerTid.toLocalDate().toString(),
+                                       payload = objectMapper.writeValueAsString(grensesnittavstemmingPayload),
                                        triggerTid = nesteVirkedag.atTime(8, 0))
 
-        taskRepository.save(nesteAvstemmingTask)
+        return taskRepository.save(nesteAvstemmingTask)
     }
 
     companion object {
