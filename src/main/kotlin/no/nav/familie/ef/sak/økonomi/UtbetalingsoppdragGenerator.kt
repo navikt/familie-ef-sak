@@ -72,7 +72,7 @@ object UtbetalingsoppdragGenerator {
                                            .sortedBy { it.periodeId }
                 )
 
-        val gjeldendeAndeler = mergeMultiMap(beståendeAndelerIHverKjede, andelerTilOpprettelseMedPeriodeIder);
+        val gjeldendeAndeler = mergeMultiMap(beståendeAndelerIHverKjede, andelerTilOpprettelseMedPeriodeIder)
 
         // Hvis det ikke er noen andeler igjen, må vi opprette en "null-andel" som tar vare på periodeId'en for ytelsestypen
         // På toppen av metoden filtrerer vi bort disse når vi bygger kjedene, men bruker dem til å finne siste periodeId
@@ -81,15 +81,15 @@ object UtbetalingsoppdragGenerator {
                 .mapValues { (kjedeId, periodeId) -> listOf(kjedeId.tilNullAndelTilkjentYtelse(periodeId)) }
 
         return nyTilkjentYtelse.copy(utbetalingsoppdrag = utbetalingsoppdrag,
-                                     stønadFom = gjeldendeAndeler.values.flatMap { it }.minOfOrNull { it.stønadFom },
-                                     stønadTom = gjeldendeAndeler.values.flatMap { it }.maxOfOrNull { it.stønadTom },
+                                     stønadFom = gjeldendeAndeler.values.flatten().minOfOrNull { it.stønadFom },
+                                     stønadTom = gjeldendeAndeler.values.flatten().maxOfOrNull { it.stønadTom },
                                      andelerTilkjentYtelse = mergeMultiMap(gjeldendeAndeler, nullAndeler).values.flatten())
         //TODO legge til startperiode, sluttperiode, opphørsdato. Se i BA-sak - legges på i konsistensavstemming?
     }
 
-    fun lagUtbetalingsperioderForOpphør(andeler: Map<KjedeId, Pair<AndelTilkjentYtelse, LocalDate>>,
-                                        behandlingId: Long,
-                                        tilkjentYtelse: TilkjentYtelse): List<Utbetalingsperiode> {
+    private fun lagUtbetalingsperioderForOpphør(andeler: Map<KjedeId, Pair<AndelTilkjentYtelse, LocalDate>>,
+                                                behandlingId: Long,
+                                                tilkjentYtelse: TilkjentYtelse): List<Utbetalingsperiode> {
         val utbetalingsperiodeMal = UtbetalingsperiodeMal(tilkjentYtelse, true)
         return andeler.values.map { (sisteAndelIKjede, opphørKjedeFom) ->
             utbetalingsperiodeMal.lagPeriodeFraAndel(andel = sisteAndelIKjede,
@@ -98,9 +98,9 @@ object UtbetalingsoppdragGenerator {
         }
     }
 
-    fun lagUtbetalingsperioderForOpprettelse(andeler: Map<KjedeId, List<AndelTilkjentYtelse>>,
-                                             behandlingId: Long,
-                                             tilkjentYtelse: TilkjentYtelse): List<Utbetalingsperiode> {
+    private fun lagUtbetalingsperioderForOpprettelse(andeler: Map<KjedeId, List<AndelTilkjentYtelse>>,
+                                                     behandlingId: Long,
+                                                     tilkjentYtelse: TilkjentYtelse): List<Utbetalingsperiode> {
 
         val utbetalingsperiodeMal = UtbetalingsperiodeMal(tilkjentYtelse)
         return andeler
@@ -128,13 +128,11 @@ object UtbetalingsoppdragGenerator {
     }
 
     private fun sistePeriodeIder(tilkjentYtelse: TilkjentYtelse?): Map<KjedeId, PeriodeId?> {
-        return tilkjentYtelse?.let {
-            it.andelerTilkjentYtelse
-                    .groupBy({ it.tilKjedeId() })
+        return tilkjentYtelse?.let { ytelse ->
+            ytelse.andelerTilkjentYtelse
+                    .groupBy { it.tilKjedeId() }
                     .mapValues { (_, kjede) ->
-                        kjede.filter { it.periodeId != null }
-                                .sortedBy { it.periodeId }
-                                .lastOrNull()?.tilPeriodeId()
+                        kjede.filter { it.periodeId != null }.maxByOrNull { it.periodeId!! }?.tilPeriodeId()
                     }
         } ?: emptyMap()
     }

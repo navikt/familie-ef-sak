@@ -4,10 +4,8 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.MappedCollection
-import org.springframework.data.relational.core.mapping.Table
 import java.util.*
 
-@Table("fagsak")
 data class Fagsak(@Id
                   val id: UUID = UUID.randomUUID(),
                   @MappedCollection(idColumn = "fagsak_id")

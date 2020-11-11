@@ -9,7 +9,6 @@ import java.util.*
 @Table("vilkarsvurdering")
 data class Vilkårsvurdering(@Id
                             val id: UUID = UUID.randomUUID(),
-                            @Column("behandling_id")
                             val behandlingId: UUID,
                             val resultat: Vilkårsresultat = Vilkårsresultat.IKKE_VURDERT,
                             val type: VilkårType,

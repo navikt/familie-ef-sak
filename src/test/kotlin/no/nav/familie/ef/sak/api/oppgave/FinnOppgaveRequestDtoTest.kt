@@ -14,18 +14,18 @@ internal class FinnOppgaveRequestDtoTest {
     @Test
     internal fun `skal mappe om finnOppgaveRequestDto til FinnOppgaveRequest`() {
         val eksternInput = HashMap<String, String>()
-        eksternInput.put("behandlingstema", "ab0071")
-        eksternInput.put("oppgavetype", "JFR")
-        eksternInput.put("enhet", "1234")
-        eksternInput.put("saksbehandler", "AB1234")
-        eksternInput.put("journalpostId", "12345")
-        eksternInput.put("tilordnetRessurs", "XY1234")
-        eksternInput.put("tildeltRessurs", "true")
-        eksternInput.put("enhetsmappe", "100000035")
-        eksternInput.put("opprettetFom", LocalDate.of(2020, 1, 1).toString())
-        eksternInput.put("opprettetTom", LocalDate.of(2020, 1, 2).toString())
-        eksternInput.put("fristFom", LocalDate.of(2020, 1, 2).toString())
-        eksternInput.put("fristTom", LocalDate.of(2020, 1, 2).toString())
+        eksternInput["behandlingstema"] = "ab0071"
+        eksternInput["oppgavetype"] = "JFR"
+        eksternInput["enhet"] = "1234"
+        eksternInput["saksbehandler"] = "AB1234"
+        eksternInput["journalpostId"] = "12345"
+        eksternInput["tilordnetRessurs"] = "XY1234"
+        eksternInput["tildeltRessurs"] = "true"
+        eksternInput["enhetsmappe"] = "100000035"
+        eksternInput["opprettetFom"] = LocalDate.of(2020, 1, 1).toString()
+        eksternInput["opprettetTom"] = LocalDate.of(2020, 1, 2).toString()
+        eksternInput["fristFom"] = LocalDate.of(2020, 1, 2).toString()
+        eksternInput["fristTom"] = LocalDate.of(2020, 1, 2).toString()
 
         val finnOppgaveRequestDto =
                 objectMapper.readValue(objectMapper.writeValueAsString(eksternInput), FinnOppgaveRequestDto::class.java)

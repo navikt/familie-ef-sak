@@ -6,6 +6,6 @@ internal class UtbetalingsoppdragGeneratorTest {
 
     @Test
     fun csvTest() {
-        TestOppdragRunner.run(javaClass.getResource("/oppdrag/Sekvens1.csv"));
+        TestOppdragRunner.run(javaClass.getResource("/oppdrag/Sekvens1.csv"))
     }
 }

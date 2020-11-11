@@ -17,7 +17,7 @@ internal class OppgaveRepositoryTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
 
     @Test
-    internal fun `findByBehandlingIdAndType`() {
+    internal fun findByBehandlingIdAndType() {
         val fagsak = fagsakRepository.insert(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
         val oppgave = oppgaveRepository.insert(oppgave(behandling))
@@ -28,7 +28,7 @@ internal class OppgaveRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `findByBehandlingIdAndTypeAndErFerdigstiltIsFalse`() {
+    internal fun findByBehandlingIdAndTypeAndErFerdigstiltIsFalse() {
         val fagsak = fagsakRepository.insert(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
         val oppgave = oppgaveRepository.insert(oppgave(behandling, erFerdigstilt = true))

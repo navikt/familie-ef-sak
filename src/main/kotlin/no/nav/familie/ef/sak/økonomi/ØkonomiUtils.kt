@@ -15,7 +15,7 @@ fun AndelTilkjentYtelse.tilKjedeId(): KjedeId = KjedeId(this.type.tilKlassifiser
 fun AndelTilkjentYtelse.tilPeriodeId(): PeriodeId = PeriodeId(this.periodeId, this.forrigePeriodeId)
 
 @Deprecated("Bør erstattes med å gjøre 'stønadFom' og  'stønadTom'  nullable")
-val NULL_DATO = LocalDate.MIN;
+val NULL_DATO: LocalDate = LocalDate.MIN
 
 fun KjedeId.tilNullAndelTilkjentYtelse(periodeId: PeriodeId?): AndelTilkjentYtelse =
         AndelTilkjentYtelse(beløp = 0,
@@ -52,7 +52,7 @@ object ØkonomiUtils {
                                        oppdatertKjede: List<AndelTilkjentYtelse>?): List<AndelTilkjentYtelse> {
         val forrigeAndeler = forrigeKjede?.toSet() ?: emptySet()
         val oppdaterteAndeler = oppdatertKjede?.toSet() ?: emptySet()
-        val førsteEndring = forrigeAndeler.disjunkteAndeler(oppdaterteAndeler).sortedBy { it.stønadFom }.firstOrNull()?.stønadFom
+        val førsteEndring = forrigeAndeler.disjunkteAndeler(oppdaterteAndeler).minByOrNull { it.stønadFom }?.stønadFom
 
         val består = if (førsteEndring != null) forrigeAndeler.snittAndeler(oppdaterteAndeler)
                 .filter { it.stønadFom.isBefore(førsteEndring) } else forrigeAndeler
@@ -98,11 +98,9 @@ object ØkonomiUtils {
 
         return forrigeKjeder.mapValues { (kjedeId, kjede) ->
             val forrigeAndeler = kjede.toSet()
-            val oppdaterteAndeler = oppdaterteKjeder.get(kjedeId)?.toSet() ?: emptySet()
+            val oppdaterteAndeler = oppdaterteKjeder[kjedeId]?.toSet() ?: emptySet()
             val førsteEndring = forrigeAndeler
-                    .disjunkteAndeler(oppdaterteAndeler)
-                    .sortedBy { it.stønadFom }
-                    .firstOrNull()?.stønadFom
+                    .disjunkteAndeler(oppdaterteAndeler).minByOrNull { it.stønadFom }?.stønadFom
 
             Pair(kjede.lastOrNull(), førsteEndring)
         }

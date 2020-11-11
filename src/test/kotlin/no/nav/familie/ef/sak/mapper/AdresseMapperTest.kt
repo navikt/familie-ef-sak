@@ -72,7 +72,7 @@ internal class AdresseMapperTest {
                 .isEqualTo("c/o co")
 
         assertThat(mapper.tilAdresse(kontaktadresse.copy(utenlandskAdresseIFrittFormat =
-                                                         utenlandAdresseFrittFormat())).visningsadresse)
+                                                         utenlandskAdresseFrittFormat())).visningsadresse)
                 .withFailMessage("Skal skrive ut utenlandskAdresseIFrittFormat når utenlandskAdresse er null")
                 .isEqualTo("1, 2, 3, 0575 by, Norge")
 
@@ -103,7 +103,7 @@ internal class AdresseMapperTest {
 
     }
 
-    private fun utenlandAdresseFrittFormat(): UtenlandskAdresseIFrittFormat {
+    private fun utenlandskAdresseFrittFormat(): UtenlandskAdresseIFrittFormat {
         return UtenlandskAdresseIFrittFormat("1",
                                              "2",
                                              "3",

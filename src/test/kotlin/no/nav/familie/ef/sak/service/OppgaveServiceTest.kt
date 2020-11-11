@@ -167,8 +167,8 @@ internal class OppgaveServiceTest {
     companion object {
 
         private val FAGSAK_ID = UUID.fromString("1242f220-cad3-4640-95c1-190ec814c91e")
-        private val FAGSAK_EKSTERN_ID = 98765L
-        private val GSAK_OPPGAVE_ID = 12345L
+        private const val FAGSAK_EKSTERN_ID = 98765L
+        private const val GSAK_OPPGAVE_ID = 12345L
         private val BEHANDLING_ID = UUID.fromString("1c4209bd-3217-4130-8316-8658fe300a84")
         private const val ENHETSNUMMER = "enhetnr"
         private const val ENHETSNAVN = "enhetsnavn"
