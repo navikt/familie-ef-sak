@@ -13,6 +13,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Service
 @TaskStepBeskrivelse(taskStepType = GrensesnittavstemmingTask.TYPE, beskrivelse = "Utfører grensesnittavstemming mot økonomi.")
@@ -37,23 +38,23 @@ class GrensesnittavstemmingTask(private val avstemmingService: AvstemmingService
         val payload = objectMapper.readValue<GrensesnittavstemmingPayload>(task.payload)
         val nesteVirkedag: LocalDate = VirkedagerProvider.nesteVirkedag(task.triggerTid.toLocalDate())
 
-        opprettNyTask(task.triggerTid.toLocalDate(), nesteVirkedag, payload.stønadstype)
+        opprettNyTask(task.triggerTid.toLocalDate(), nesteVirkedag.atTime(8, 0), payload.stønadstype)
     }
 
-    fun utløsGrensesnittavstemming(fraDato: LocalDate, stønadstype: Stønadstype, triggerTid: LocalDate?): Task {
-        val nesteVirkedag: LocalDate = triggerTid ?: VirkedagerProvider.nesteVirkedag(fraDato)
+    fun utløsGrensesnittavstemming(fraDato: LocalDate, stønadstype: Stønadstype, triggerTid: LocalDateTime?): Task {
+        val nesteVirkedag: LocalDateTime = triggerTid ?: VirkedagerProvider.nesteVirkedag(fraDato).atTime(8, 0)
 
         return opprettNyTask(fraDato, nesteVirkedag, stønadstype)
     }
 
     private fun opprettNyTask(fraDato: LocalDate,
-                              nesteVirkedag: LocalDate,
+                              nesteVirkedag: LocalDateTime,
                               stønadstype: Stønadstype): Task {
         val grensesnittavstemmingPayload = GrensesnittavstemmingPayload(fraDato = fraDato, stønadstype = stønadstype)
 
         val nesteAvstemmingTask = Task(type = TYPE,
                                        payload = objectMapper.writeValueAsString(grensesnittavstemmingPayload),
-                                       triggerTid = nesteVirkedag.atTime(8, 0))
+                                       triggerTid = nesteVirkedag)
 
         return taskRepository.save(nesteAvstemmingTask)
     }
