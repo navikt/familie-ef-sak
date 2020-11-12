@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.økonomi
 
-import no.nav.familie.ef.sak.integration.FAGSYSTEM
+import no.nav.familie.ef.sak.integration.FAGSYSTEM_OVERGANGSSTØNAD
 import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseMedMetaData
@@ -59,7 +59,7 @@ object UtbetalingsoppdragGenerator {
         val utbetalingsoppdrag =
                 Utbetalingsoppdrag(saksbehandlerId = nyTilkjentYtelse.saksbehandler,
                                    kodeEndring = aksjonskodePåOppdragsnivå,
-                                   fagSystem = FAGSYSTEM,
+                                   fagSystem = FAGSYSTEM_OVERGANGSSTØNAD,
                                    saksnummer = nyTilkjentYtelseMedMetaData.eksternFagsakId.toString(),
                                    aktoer = nyTilkjentYtelse.personident,
                         //TODO Trunkert avstemmingstidspunkt for å kunne skape forutsigbarhet mtp tester.
