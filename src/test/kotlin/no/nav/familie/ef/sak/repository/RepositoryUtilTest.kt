@@ -26,7 +26,7 @@ internal class RepositoryUtilTest {
     }
 
     @Test
-    internal fun `findOrThrow`() {
+    internal fun findOrThrow() {
         val testRepository = mockk<TestRepository>()
         every { testRepository.findByIdOrNull(any()) } returns TestDomene("")
         assertThat(testRepository.findByIdOrThrow("123")).isNotNull

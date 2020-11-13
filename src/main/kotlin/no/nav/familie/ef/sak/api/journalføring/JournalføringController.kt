@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.api.journalføring;
+package no.nav.familie.ef.sak.api.journalføring
 
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.service.JournalføringService
@@ -49,9 +49,9 @@ class JournalføringController(private val journalføringService: Journalføring
             when (it.type) {
                 BrukerIdType.FNR -> it.id
                 BrukerIdType.AKTOERID -> pdlClient.hentPersonident(it.id).hentIdenter.identer.first().ident
-                BrukerIdType.ORGNR -> error("Kan ikke hente journalpost= ${journalpostId} for orgnr")
+                BrukerIdType.ORGNR -> error("Kan ikke hente journalpost=$journalpostId for orgnr")
             }
-        } ?: error("Kan ikke hente journalpost= ${journalpostId} uten bruker")
+        } ?: error("Kan ikke hente journalpost=$journalpostId uten bruker")
         return Pair(journalpost, personIdent)
     }
 }

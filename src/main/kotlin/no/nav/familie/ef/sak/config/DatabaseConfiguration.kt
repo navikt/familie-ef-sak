@@ -138,7 +138,7 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
     @WritingConverter
     class DelvilkårTilStringConverter : Converter<DelvilkårsvurderingWrapper, ByteArray> {
 
-        override fun convert(delvilkårsvurdering: DelvilkårsvurderingWrapper) =
+        override fun convert(delvilkårsvurdering: DelvilkårsvurderingWrapper): ByteArray =
                 objectMapper.writeValueAsBytes(delvilkårsvurdering.delvilkårsvurderinger)
     }
 

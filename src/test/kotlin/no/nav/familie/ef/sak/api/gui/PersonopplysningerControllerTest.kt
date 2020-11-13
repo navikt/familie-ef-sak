@@ -30,7 +30,7 @@ internal class PersonopplysningerControllerTest : OppslagSpringRunnerTest() {
     }
 
     private fun hentPersonopplysninger(): ResponseEntity<Ressurs<PersonopplysningerDto>> {
-        val personopplysningerRequest = PersonIdentDto("ikketilgang")
+        val personopplysningerRequest = PersonIdentDto("ikkeTilgang")
 
         return restTemplate.exchange(localhost("/api/personopplysninger"),
                                      HttpMethod.POST,

@@ -6,8 +6,8 @@ import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 
 object SikkerhetContext {
 
-    const val SYSTEM_NAVN = "System"
-    const val SYSTEM_FORKORTELSE = "VL"
+    private const val SYSTEM_NAVN = "System"
+    private const val SYSTEM_FORKORTELSE = "VL"
 
     fun hentSaksbehandler(): String {
         return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }

@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.service;
+package no.nav.familie.ef.sak.service
 
 import com.fasterxml.jackson.core.JsonProcessingException
 import no.nav.familie.ef.sak.api.journalføring.JournalføringRequest
@@ -27,7 +27,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
                            private val fagsakService: FagsakService,
                            private val oppgaveService: OppgaveService) {
 
-    private val logger = LoggerFactory.getLogger(JournalføringService::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     fun hentJournalpost(journalpostId: String): Journalpost {

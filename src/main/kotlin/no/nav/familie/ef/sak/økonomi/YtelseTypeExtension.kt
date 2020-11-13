@@ -7,9 +7,8 @@ fun YtelseType.tilKlassifisering() = when (this) {
     YtelseType.OVERGANGSSTØNAD -> "EFOG"
 }
 
-fun String.tilYtelseType() = YtelseType.values()
-                                     .filter { it.tilKlassifisering() == this }
-                                     .firstOrNull() ?: error("Finner ikke YtelseType med klassifisering '$this'")
+fun String.tilYtelseType() = YtelseType.values().firstOrNull { it.tilKlassifisering() == this }
+                             ?: error("Finner ikke YtelseType med klassifisering '$this'")
 
 
 fun Stønadstype.tilYtelseType() = when (this) {

@@ -17,11 +17,11 @@ import java.util.*
 
 internal class OppgaveControllerTest {
 
-    val tilgangService: TilgangService = mockk()
-    val oppgaveService: OppgaveService = mockk()
+    private val tilgangService: TilgangService = mockk()
+    private val oppgaveService: OppgaveService = mockk()
 
 
-    val oppgaveController: OppgaveController = OppgaveController(oppgaveService, tilgangService)
+    private val oppgaveController: OppgaveController = OppgaveController(oppgaveService, tilgangService)
 
     @Test
     internal fun `skal feile hvis bruker er veileder`() {
@@ -49,7 +49,7 @@ internal class OppgaveControllerTest {
         } just Runs
 
 
-        val oppgave: Oppgave = Oppgave(UUID.randomUUID(), UUID.randomUUID(), 123, Oppgavetype.BehandleSak)
+        val oppgave = Oppgave(UUID.randomUUID(), UUID.randomUUID(), 123, Oppgavetype.BehandleSak)
 
         every {
             oppgaveService.hentEfOppgave(any())

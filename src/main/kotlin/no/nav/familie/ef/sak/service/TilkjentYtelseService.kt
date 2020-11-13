@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
-import no.nav.familie.ef.sak.integration.FAGSYSTEM
+import no.nav.familie.ef.sak.integration.FAGSYSTEM_OVERGANGSSTØNAD
 import no.nav.familie.ef.sak.integration.OppdragClient
 import no.nav.familie.ef.sak.mapper.tilDto
 import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
@@ -20,7 +20,7 @@ class TilkjentYtelseService(private val oppdragClient: OppdragClient,
 
         val tilkjentYtelse = hentTilkjentYtelse(tilkjentYtelseId)
 
-        val oppdragId = OppdragId(fagsystem = FAGSYSTEM,
+        val oppdragId = OppdragId(fagsystem = FAGSYSTEM_OVERGANGSSTØNAD,
                                   personIdent = tilkjentYtelse.personident,
                                   behandlingsId = tilkjentYtelse.id.toString())
 
