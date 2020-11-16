@@ -13,7 +13,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.data.repository.findByIdOrNull
-import java.util.*
 
 class TilkjentYtelseServiceTest {
 
@@ -29,7 +28,7 @@ class TilkjentYtelseServiceTest {
 
     @Test
     fun `hent tilkjent-ytelse-dto`() {
-        val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(3, UUID.randomUUID())
+        val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(antallAndelerTilkjentYtelse = 3)
         val id = tilkjentYtelse.id
         every { tilkjentYtelseRepository.findByIdOrNull(id) } returns tilkjentYtelse
 
@@ -45,7 +44,7 @@ class TilkjentYtelseServiceTest {
 
     @Test
     fun `hent status fra oppdragstjenesten`() {
-        val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(behandlingId = UUID.randomUUID())
+        val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse()
         val id = tilkjentYtelse.id
         val oppdragId = OppdragId("EFOG",
                                   tilkjentYtelse.personident,

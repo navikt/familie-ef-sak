@@ -116,7 +116,7 @@ class TestOppdragGroup {
                                    fagSystem = "EFOG",
                                    saksnummer = fagsakEksternId.toString(),
                                    aktoer = personIdent!!,
-                                   saksbehandlerId = "VL",
+                                   saksbehandlerId = sporbar.endret.endretAv,
                                    avstemmingTidspunkt = LocalDateTime.now().truncatedTo(ChronoUnit.HOURS),
                                    utbetalingsperiode = utbetalingsperioder.map { it.copy(behandlingId = behandlingEksternId) })
 
