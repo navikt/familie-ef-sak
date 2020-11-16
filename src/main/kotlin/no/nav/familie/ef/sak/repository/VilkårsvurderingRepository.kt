@@ -5,7 +5,7 @@ import org.springframework.stereotype.Repository
 import java.util.*
 
 @Repository
-interface VilkårsvurderingRepository: RepositoryInterface<Vilkårsvurdering, UUID>, InsertUpdateRepository<Vilkårsvurdering> {
+interface VilkårsvurderingRepository : RepositoryInterface<Vilkårsvurdering, UUID>, InsertUpdateRepository<Vilkårsvurdering> {
 
     fun findByBehandlingId(behandlingId: UUID): List<Vilkårsvurdering>
 }

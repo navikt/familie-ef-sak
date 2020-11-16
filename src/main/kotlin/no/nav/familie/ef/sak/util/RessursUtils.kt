@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 
 object RessursUtils {
+
     private val LOG = LoggerFactory.getLogger(this::class.java)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
@@ -38,10 +39,9 @@ object RessursUtils {
                            "${feil.frontendFeilmelding}, ${feil.stackTrace}", feil.throwable)
         LOG.info("En håndtert feil har oppstått(${feil.httpStatus}): ${feil.message} ")
 
-        return ResponseEntity.status(feil.httpStatus).body(Ressurs.failure(
-                frontendFeilmelding = feil.frontendFeilmelding,
-                errorMessage = feil.message.toString()
-        ))
+        return ResponseEntity.status(feil.httpStatus)
+                .body(Ressurs.failure(frontendFeilmelding = feil.frontendFeilmelding,
+                                      errorMessage = feil.message.toString()))
     }
 
     inline fun <reified T> assertGenerelleSuksessKriterier(it: Ressurs<T>?) {

@@ -52,9 +52,7 @@ abstract class OppslagSpringRunnerTest {
     }
 
     private fun clearCaches() {
-        cacheManager.cacheNames
-                .map { cacheManager.getCache(it) }
-                .filterNotNull()
+        cacheManager.cacheNames.mapNotNull { cacheManager.getCache(it) }
                 .forEach { it.clear() }
     }
 

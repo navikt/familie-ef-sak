@@ -8,7 +8,10 @@ import io.mockk.mockk
 import no.nav.familie.ef.sak.config.PdlConfig
 import no.nav.familie.http.sts.StsRestClient
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.web.client.RestOperations
 import java.net.URI
@@ -18,7 +21,7 @@ class PdlClientTest {
 
     companion object {
 
-        val restOperations: RestOperations = RestTemplateBuilder().build()
+        private val restOperations: RestOperations = RestTemplateBuilder().build()
         lateinit var pdlClient: PdlClient
         lateinit var wiremockServerItem: WireMockServer
 

@@ -37,6 +37,7 @@ data class Barn(@Id
                 val barnepass: Barnepass? = null) : IBarn
 
 interface IAnnenForelder {
+
     val person: PersonMinimum?
 }
 

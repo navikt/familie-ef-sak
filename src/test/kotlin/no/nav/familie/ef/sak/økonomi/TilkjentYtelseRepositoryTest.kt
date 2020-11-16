@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.BehandlingRepository
 import no.nav.familie.ef.sak.repository.FagsakRepository
 import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
+import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseMedMetaData
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.økonomi.UtbetalingsoppdragGenerator.lagTilkjentYtelseMedUtbetalingsoppdrag
 import org.assertj.core.api.Assertions.assertThat
@@ -16,9 +17,14 @@ import org.springframework.data.repository.findByIdOrNull
 
 internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var fagsakRepository: FagsakRepository
-    @Autowired private lateinit var behandlingRepository: BehandlingRepository
-    @Autowired private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
+    @Autowired
+    private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
+
+    @Autowired
+    private lateinit var behandlingRepository: BehandlingRepository
+
+    @Autowired
+    private lateinit var fagsakRepository: FagsakRepository
 
     @Test
     fun `Opprett og hent tilkjent ytelse`() {
@@ -27,12 +33,14 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
 
         val hentetTilkjentYtelse = tilkjentYtelseRepository.findByIdOrNull(tilkjentYtelseId)!!
 
-        assertThat(hentetTilkjentYtelse.saksnummer).isEqualTo(tilkjentYtelse.saksnummer)
+        assertThat(hentetTilkjentYtelse.behandlingId).isEqualTo(tilkjentYtelse.behandlingId)
         assertThat(hentetTilkjentYtelse.andelerTilkjentYtelse).isNotEmpty
     }
 
     @Test
     fun `Opprett og hent andeler tilkjent ytelse`() {
+        val fagsak = fagsakRepository.insert(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak = fagsak))
         val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(opprettBehandling(), 2)
 
         val tilkjentYtelseId = tilkjentYtelseRepository.insert(tilkjentYtelse).id
@@ -43,8 +51,14 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `Lagre utbetalingsoppdrag`() {
-        val lagretTilkjentYtelse = tilkjentYtelseRepository.insert(DataGenerator.tilfeldigTilkjentYtelse(opprettBehandling(), 2))
-        val utbetalingsoppdrag = lagTilkjentYtelseMedUtbetalingsoppdrag(lagretTilkjentYtelse).utbetalingsoppdrag!!
+        val fagsak = fagsakRepository.insert(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak = fagsak))
+        val lagretTilkjentYtelse =
+                tilkjentYtelseRepository.insert(DataGenerator.tilfeldigTilkjentYtelse(opprettBehandling(), 2, behandlingId = behandling.id))
+        val utbetalingsoppdrag =
+                lagTilkjentYtelseMedUtbetalingsoppdrag(TilkjentYtelseMedMetaData(lagretTilkjentYtelse,
+                                                                                 behandling.eksternId.id,
+                                                                                 fagsak.eksternId.id)).utbetalingsoppdrag!!
 
         tilkjentYtelseRepository.update(lagretTilkjentYtelse.copy(utbetalingsoppdrag = utbetalingsoppdrag))
 

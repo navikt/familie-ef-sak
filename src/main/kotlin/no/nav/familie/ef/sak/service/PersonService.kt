@@ -3,7 +3,6 @@ package no.nav.familie.ef.sak.service
 import no.nav.familie.ef.sak.domene.SøkerMedBarn
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.integration.dto.pdl.Familierelasjonsrolle
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlAnnenForelder
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlPersonKort
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker
 import org.springframework.stereotype.Service
@@ -26,7 +25,7 @@ class PersonService(private val pdlClient: PdlClient) {
         return identer.distinct().chunked(100).map { pdlClient.hentPersonKortBolk(it) }.reduce { acc, it -> acc + it }
     }
 
-    fun hentIdenterForBarnOgForeldre(forelderIdent: String): List<String>{
+    fun hentIdenterForBarnOgForeldre(forelderIdent: String): List<String> {
         val søkerMedBarn = hentPersonMedRelasjoner(forelderIdent)
 
         val forelderIdenter = søkerMedBarn.barn.values

@@ -4,7 +4,6 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.api.ManglerTilgang
 import no.nav.familie.ef.sak.config.RolleConfig
-import no.nav.familie.ef.sak.domene.SøkerMedBarn
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.dto.familie.Tilgang
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlBarn
@@ -12,24 +11,24 @@ import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.repository.domain.Behandling
-import no.nav.familie.ef.sak.service.steg.BehandlerRolle
 import org.junit.jupiter.api.Test
 import kotlin.test.assertFailsWith
 
 internal class TilgangServiceTest {
 
 
-    val personService: PersonService = mockk()
-    val familieIntegrasjonerClient: FamilieIntegrasjonerClient = mockk()
-    val behandlingService: BehandlingService = mockk()
-    val fagsakService: FagsakService = mockk()
-    val tilgangService = TilgangService(familieIntegrasjonerClient, personService, behandlingService, fagsakService, RolleConfig("","",""))
-    val mocketPersonIdent = "12345"
+    private val personService: PersonService = mockk()
+    private val familieIntegrasjonerClient: FamilieIntegrasjonerClient = mockk()
+    private val behandlingService: BehandlingService = mockk()
+    private val fagsakService: FagsakService = mockk()
+    private val tilgangService =
+            TilgangService(familieIntegrasjonerClient, personService, behandlingService, fagsakService, RolleConfig("", "", ""))
+    private val mocketPersonIdent = "12345"
 
     val fagsak = fagsak(fagsakpersoner(setOf(mocketPersonIdent)))
     val behandling: Behandling = behandling(fagsak)
-    val olaIdent = "4567"
-    val kariIdent = "98765"
+    private val olaIdent = "4567"
+    private val kariIdent = "98765"
     val barn: Map<String, PdlBarn> = mapOf(Pair(olaIdent, mockk()), Pair(kariIdent, mockk()))
 
 

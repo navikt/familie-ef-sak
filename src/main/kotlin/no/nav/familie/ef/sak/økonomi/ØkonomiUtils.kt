@@ -5,31 +5,26 @@ import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse.Companion.dis
 import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse.Companion.snittAndeler
 import java.time.LocalDate
 
-data class KjedeId(
-        val klassifiering: String,
-        val personIdent: String
-)
+data class KjedeId(val klassifiering: String,
+                   val personIdent: String)
 
-data class PeriodeId(
-        val gjeldende: Long?,
-        val forrige: Long? = null
-)
+data class PeriodeId(val gjeldende: Long?,
+                     val forrige: Long? = null)
 
 fun AndelTilkjentYtelse.tilKjedeId(): KjedeId = KjedeId(this.type.tilKlassifisering(), this.personIdent)
-fun AndelTilkjentYtelse.tilPeriodeId(): PeriodeId = PeriodeId(this.periodeId,this.forrigePeriodeId)
+fun AndelTilkjentYtelse.tilPeriodeId(): PeriodeId = PeriodeId(this.periodeId, this.forrigePeriodeId)
 
 @Deprecated("Bør erstattes med å gjøre 'stønadFom' og  'stønadTom'  nullable")
-val NULL_DATO = LocalDate.MIN;
+val NULL_DATO: LocalDate = LocalDate.MIN
 
-fun KjedeId.tilNullAndelTilkjentYtelse(periodeId: PeriodeId?) : AndelTilkjentYtelse = AndelTilkjentYtelse(
-        beløp = 0,
-        stønadFom = NULL_DATO,
-        stønadTom = NULL_DATO,
-        type = this.klassifiering.tilYtelseType(),
-        personIdent = this.personIdent,
-        periodeId = periodeId?.gjeldende,
-        forrigePeriodeId = periodeId?.forrige
-)
+fun KjedeId.tilNullAndelTilkjentYtelse(periodeId: PeriodeId?): AndelTilkjentYtelse =
+        AndelTilkjentYtelse(beløp = 0,
+                            stønadFom = NULL_DATO,
+                            stønadTom = NULL_DATO,
+                            type = this.klassifiering.tilYtelseType(),
+                            personIdent = this.personIdent,
+                            periodeId = periodeId?.gjeldende,
+                            forrigePeriodeId = periodeId?.forrige)
 
 object ØkonomiUtils {
 
@@ -44,12 +39,12 @@ object ØkonomiUtils {
      * @return map med personident og siste bestående andel. Bestående andel=null dersom alle opphøres eller ny person.
      */
     fun beståendeAndelerPerKjede(forrigeKjeder: Map<KjedeId, List<AndelTilkjentYtelse>>,
-                                 oppdaterteKjeder: Map<KjedeId, List<AndelTilkjentYtelse>>): Map<KjedeId, List<AndelTilkjentYtelse>> {
+                                 oppdaterteKjeder: Map<KjedeId, List<AndelTilkjentYtelse>>)
+            : Map<KjedeId, List<AndelTilkjentYtelse>> {
         val alleKjedeIder = forrigeKjeder.keys.union(oppdaterteKjeder.keys)
         return alleKjedeIder.associateWith { kjedeId ->
-            beståendeAndelerIKjede(
-                    forrigeKjede = forrigeKjeder[kjedeId],
-                    oppdatertKjede = oppdaterteKjeder[kjedeId])
+            beståendeAndelerIKjede(forrigeKjede = forrigeKjeder[kjedeId],
+                                   oppdatertKjede = oppdaterteKjeder[kjedeId])
         }
     }
 
@@ -57,7 +52,7 @@ object ØkonomiUtils {
                                        oppdatertKjede: List<AndelTilkjentYtelse>?): List<AndelTilkjentYtelse> {
         val forrigeAndeler = forrigeKjede?.toSet() ?: emptySet()
         val oppdaterteAndeler = oppdatertKjede?.toSet() ?: emptySet()
-        val førsteEndring = forrigeAndeler.disjunkteAndeler(oppdaterteAndeler).sortedBy { it.stønadFom }.firstOrNull()?.stønadFom
+        val førsteEndring = forrigeAndeler.disjunkteAndeler(oppdaterteAndeler).minByOrNull { it.stønadFom }?.stønadFom
 
         val består = if (førsteEndring != null) forrigeAndeler.snittAndeler(oppdaterteAndeler)
                 .filter { it.stønadFom.isBefore(førsteEndring) } else forrigeAndeler
@@ -72,18 +67,20 @@ object ØkonomiUtils {
      * @return andeler som må bygges fordelt på kjeder
      */
     fun andelerTilOpprettelse(oppdaterteKjeder: Map<KjedeId, List<AndelTilkjentYtelse>>,
-                              beståendeAndelerIHverKjede: Map<KjedeId, List<AndelTilkjentYtelse>>): Map<KjedeId, List<AndelTilkjentYtelse>> {
+                              beståendeAndelerIHverKjede: Map<KjedeId, List<AndelTilkjentYtelse>>)
+            : Map<KjedeId, List<AndelTilkjentYtelse>> {
 
         val sisteBeståendeAndelIHverKjede =
-                beståendeAndelerIHverKjede.map {
-                    (kjedeId,kjede)-> Pair(kjedeId, kjede.sortedBy { it.periodeId }.lastOrNull())
+                beståendeAndelerIHverKjede.map { (kjedeId, kjede) ->
+                    Pair(kjedeId, kjede.sortedBy { it.periodeId }.lastOrNull())
                 }.toMap()
 
         return oppdaterteKjeder.map { (kjedeId, oppdaterteAndeler) ->
             if (sisteBeståendeAndelIHverKjede[kjedeId] != null)
                 Pair(kjedeId, oppdaterteAndeler
                         .filter { it.stønadFom.isAfter(sisteBeståendeAndelIHverKjede[kjedeId]!!.stønadTom) })
-            else Pair(kjedeId, oppdaterteAndeler) }
+            else Pair(kjedeId, oppdaterteAndeler)
+        }
                 .toMap()
                 .filter { (_, kjede) -> kjede.isNotEmpty() }
     }
@@ -96,21 +93,20 @@ object ØkonomiUtils {
      * @return map av siste andel og opphørsdato fra kjeder med opphør
      */
     fun andelTilOpphørMedDato(forrigeKjeder: Map<KjedeId, List<AndelTilkjentYtelse>>,
-                              oppdaterteKjeder: Map<KjedeId, List<AndelTilkjentYtelse>>): Map<KjedeId, Pair<AndelTilkjentYtelse, LocalDate>> {
+                              oppdaterteKjeder: Map<KjedeId, List<AndelTilkjentYtelse>>)
+            : Map<KjedeId, Pair<AndelTilkjentYtelse, LocalDate>> {
 
         return forrigeKjeder.mapValues { (kjedeId, kjede) ->
             val forrigeAndeler = kjede.toSet()
-            val oppdaterteAndeler = oppdaterteKjeder.get(kjedeId)?.toSet() ?: emptySet()
+            val oppdaterteAndeler = oppdaterteKjeder[kjedeId]?.toSet() ?: emptySet()
             val førsteEndring = forrigeAndeler
-                    .disjunkteAndeler(oppdaterteAndeler)
-                    .sortedBy { it.stønadFom }
-                    .firstOrNull()?.stønadFom
+                    .disjunkteAndeler(oppdaterteAndeler).minByOrNull { it.stønadFom }?.stønadFom
 
-            Pair(kjede.lastOrNull(),førsteEndring)
+            Pair(kjede.lastOrNull(), førsteEndring)
         }
-                .filter { (_,pair)-> pair.first!=null && pair.second!=null }
-                .mapValues { (_,pair)-> Pair(pair.first!!,pair.second!!) }
+                .filter { (_, pair) -> pair.first != null && pair.second != null }
+                .mapValues { (_, pair) -> Pair(pair.first!!, pair.second!!) }
 
-   }
+    }
 }
 

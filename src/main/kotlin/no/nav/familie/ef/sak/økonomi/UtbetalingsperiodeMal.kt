@@ -14,10 +14,8 @@ import java.time.LocalDate
  * @param[erEndringPåEksisterendePeriode] ved true vil oppdrag sette asksjonskode ENDR på linje og ikke referere bakover
  * @return mal med tilpasset lagPeriodeFraAndel
  */
-data class UtbetalingsperiodeMal(
-        val tilkjentYtelse: TilkjentYtelse,
-        val erEndringPåEksisterendePeriode: Boolean = false
-) {
+data class UtbetalingsperiodeMal(val tilkjentYtelse: TilkjentYtelse,
+                                 val erEndringPåEksisterendePeriode: Boolean = false) {
 
     /**
      * Lager utbetalingsperioder som legges på utbetalingsoppdrag. En utbetalingsperiode tilsvarer linjer hos økonomi
@@ -27,22 +25,22 @@ data class UtbetalingsperiodeMal(
      * @return Periode til utbetalingsoppdrag
      */
     fun lagPeriodeFraAndel(andel: AndelTilkjentYtelse,
+                           behandlingId: Long,
                            opphørKjedeFom: LocalDate? = null): Utbetalingsperiode =
-            Utbetalingsperiode(
-                    erEndringPåEksisterendePeriode = erEndringPåEksisterendePeriode,
-                    opphør = if (erEndringPåEksisterendePeriode) utledOpphørPåLinje(opphørForVedtak = tilkjentYtelse.opphørFom,
-                                                                                    opphørForLinje = opphørKjedeFom!!) else null,
-                    forrigePeriodeId = andel.forrigePeriodeId,
-                    periodeId = andel.periodeId!!,
-                    datoForVedtak = tilkjentYtelse.vedtaksdato!!,
-                    klassifisering = andel.type.tilKlassifisering(),
-                    vedtakdatoFom = andel.stønadFom,
-                    vedtakdatoTom = andel.stønadTom,
-                    sats = BigDecimal(andel.beløp),
-                    satsType = Utbetalingsperiode.SatsType.MND,
-                    utbetalesTil = tilkjentYtelse.personident,
-                    behandlingId = tilkjentYtelse.behandlingEksternId!!
-            )
+            Utbetalingsperiode(erEndringPåEksisterendePeriode = erEndringPåEksisterendePeriode,
+                               opphør = if (erEndringPåEksisterendePeriode)
+                                   utledOpphørPåLinje(opphørForVedtak = tilkjentYtelse.opphørFom,
+                                                      opphørForLinje = opphørKjedeFom!!) else null,
+                               forrigePeriodeId = andel.forrigePeriodeId,
+                               periodeId = andel.periodeId!!,
+                               datoForVedtak = tilkjentYtelse.vedtaksdato!!,
+                               klassifisering = andel.type.tilKlassifisering(),
+                               vedtakdatoFom = andel.stønadFom,
+                               vedtakdatoTom = andel.stønadTom,
+                               sats = BigDecimal(andel.beløp),
+                               satsType = Utbetalingsperiode.SatsType.MND,
+                               utbetalesTil = tilkjentYtelse.personident,
+                               behandlingId = behandlingId)
 
 
     private fun utledOpphørPåLinje(opphørForVedtak: LocalDate?, opphørForLinje: LocalDate): Opphør? {

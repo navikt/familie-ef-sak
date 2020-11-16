@@ -12,7 +12,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.h2.util.MathUtils
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -33,18 +32,18 @@ internal class SøknadRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     private fun opprettSøknad(saksnummer: String, fødselsnummer: String, behandlingId: UUID) {
-        søknadRepository.insert(Søknad(
-                soknadsskjemaId = UUID.randomUUID(),
-                behandlingId = behandlingId,
-                type = SøknadType.OVERGANGSSTØNAD,
-                saksnummerInfotrygd = saksnummer,
-                søker = Søker(fødselsnummer, "Navn"),
-                journalpostId = "journalId$saksnummer",
-                sporbar = Sporbar(opprettetTid = LocalDateTime.of(MathUtils.randomInt(2020),
-                                                                  MathUtils.randomInt(11) + 1,
-                                                                  MathUtils.randomInt(27) + 1,
-                                                                  MathUtils.randomInt(23),
-                                                                  MathUtils.randomInt(59))),
-        relaterteFnr = setOf("654654654")))
+        søknadRepository
+                .insert(Søknad(soknadsskjemaId = UUID.randomUUID(),
+                               behandlingId = behandlingId,
+                               type = SøknadType.OVERGANGSSTØNAD,
+                               saksnummerInfotrygd = saksnummer,
+                               søker = Søker(fødselsnummer, "Navn"),
+                               journalpostId = "journalId$saksnummer",
+                               sporbar = Sporbar(opprettetTid = LocalDateTime.of(MathUtils.randomInt(2020),
+                                                                                 MathUtils.randomInt(11) + 1,
+                                                                                 MathUtils.randomInt(27) + 1,
+                                                                                 MathUtils.randomInt(23),
+                                                                                 MathUtils.randomInt(59))),
+                               relaterteFnr = setOf("654654654")))
     }
 }

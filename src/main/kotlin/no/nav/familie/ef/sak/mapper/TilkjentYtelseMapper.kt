@@ -1,22 +1,21 @@
 package no.nav.familie.ef.sak.mapper
 
+import no.nav.familie.ef.sak.api.dto.AndelTilkjentYtelseDTO
+import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
 import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseType
-import no.nav.familie.ef.sak.api.dto.AndelTilkjentYtelseDTO
-import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
 import java.time.LocalDate
 
-fun TilkjentYtelseDTO.tilTilkjentYtelse(behandlingEksternId:Long, status: TilkjentYtelseStatus = TilkjentYtelseStatus.OPPRETTET): TilkjentYtelse {
+fun TilkjentYtelseDTO.tilTilkjentYtelse(behandlingEksternId:Long,
+                                        status: TilkjentYtelseStatus = TilkjentYtelseStatus.OPPRETTET): TilkjentYtelse {
 
     val minStønadFom = this.andelerTilkjentYtelse.map { it.stønadFom }.minOrNull() ?: LocalDate.MIN
     val maxStønadTom = this.andelerTilkjentYtelse.map { it.stønadTom }.maxOrNull() ?: LocalDate.MAX
 
     return TilkjentYtelse(behandlingId = behandlingId,
-                          behandlingEksternId = behandlingEksternId,
                           personident = søker,
-                          saksnummer = saksnummer,
                           stønadFom = minStønadFom,
                           stønadTom = maxStønadTom,
                           vedtaksdato = vedtaksdato,
@@ -40,7 +39,6 @@ fun TilkjentYtelse.tilDto(): TilkjentYtelseDTO {
     return TilkjentYtelseDTO(id = this.id,
                              behandlingId = this.behandlingId,
                              søker = this.personident,
-                             saksnummer = this.saksnummer,
                              andelerTilkjentYtelse = this.andelerTilkjentYtelse.map { it.tilDto() })
 }
 
@@ -56,9 +54,7 @@ fun AndelTilkjentYtelse.tilDto(): AndelTilkjentYtelseDTO {
 fun TilkjentYtelse.tilOpphør(saksbehandler: String, opphørDato: LocalDate) =
         TilkjentYtelse(type = TilkjentYtelseType.OPPHØR,
                        personident = personident,
-                       saksnummer = saksnummer,
                        opphørFom = opphørDato,
                        behandlingId = behandlingId,
-                       behandlingEksternId = behandlingEksternId,
                        vedtaksdato = LocalDate.now(),
                        andelerTilkjentYtelse = andelerTilkjentYtelse)
