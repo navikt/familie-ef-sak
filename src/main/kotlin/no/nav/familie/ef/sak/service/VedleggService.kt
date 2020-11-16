@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.service
 
-import no.nav.familie.ef.sak.api.dto.DokumentiinfoDto
+import no.nav.familie.ef.sak.api.dto.DokumentinfoDto
 import no.nav.familie.ef.sak.domene.DokumentVariantformat
 import no.nav.familie.kontrakter.felles.journalpost.DokumentInfo
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
@@ -12,7 +12,7 @@ class VedleggService(private val behandlingService: BehandlingService,
                      private val journalføringService: JournalføringService) {
 
 
-    fun finnVedleggForBehandling(behandlingId: UUID): List<DokumentiinfoDto> {
+    fun finnVedleggForBehandling(behandlingId: UUID): List<DokumentinfoDto> {
         val behandling = behandlingService.hentBehandling(behandlingId)
         return behandling.journalposter
                 .map { journalføringService.hentJournalpost(it.journalpostId) }
@@ -22,8 +22,8 @@ class VedleggService(private val behandlingService: BehandlingService,
     }
 
     private fun tilDokumentInfoDto(dokumentInfo: DokumentInfo,
-                                   journalpost: Journalpost): DokumentiinfoDto {
-        return DokumentiinfoDto(
+                                   journalpost: Journalpost): DokumentinfoDto {
+        return DokumentinfoDto(
                 dokumentinfoId = dokumentInfo.dokumentInfoId,
                 filnavn = dokumentInfo.dokumentvarianter?.find { it.variantformat == DokumentVariantformat.ARKIV.toString() }?.filnavn,
                 tittel = dokumentInfo.tittel ?: "Tittel mangler",
