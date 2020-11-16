@@ -32,19 +32,18 @@ fun TilkjentYtelseDTO.tilAndelerTilkjentYtelse(): List<AndelTilkjentYtelse> {
             }
 }
 
-fun TilkjentYtelse.tilDto(type: Stønadstype): TilkjentYtelseDTO {
+fun TilkjentYtelse.tilDto(): TilkjentYtelseDTO {
     return TilkjentYtelseDTO(id = this.id,
                              behandlingId = this.behandlingId,
                              søker = this.personident,
-                             andelerTilkjentYtelse = this.andelerTilkjentYtelse.map { it.tilDto(type) })
+                             andelerTilkjentYtelse = this.andelerTilkjentYtelse.map { it.tilDto() })
 }
 
-fun AndelTilkjentYtelse.tilDto(type: Stønadstype): AndelTilkjentYtelseDTO {
+fun AndelTilkjentYtelse.tilDto(): AndelTilkjentYtelseDTO {
     return AndelTilkjentYtelseDTO(beløp = this.beløp,
                                   stønadFom = this.stønadFom,
                                   stønadTom = this.stønadTom,
-                                  personIdent = this.personIdent,
-                                  type = type)
+                                  personIdent = this.personIdent)
 }
 
 @Deprecated("Skal ikke brukes")

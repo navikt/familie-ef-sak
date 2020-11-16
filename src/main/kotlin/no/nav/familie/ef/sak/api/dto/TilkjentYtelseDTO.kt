@@ -29,8 +29,7 @@ data class TilkjentYtelseDTO(val søker: String,
 data class AndelTilkjentYtelseDTO(val beløp: Int,
                                   val stønadFom: LocalDate,
                                   val stønadTom: LocalDate,
-                                  val personIdent: String,
-                                  val type: Stønadstype)
+                                  val personIdent: String)
 
-data class TilkjentYtelseTestDTO(val nyTilkjentYtelse: TilkjentYtelse, val forrigeTilkjentYtelse: TilkjentYtelse?)
+data class TilkjentYtelseTestDTO(val nyTilkjentYtelse: TilkjentYtelse, val stønadstype: Stønadstype, val forrigeTilkjentYtelse: TilkjentYtelse?)
 

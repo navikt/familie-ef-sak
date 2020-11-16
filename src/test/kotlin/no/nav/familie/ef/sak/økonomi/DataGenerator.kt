@@ -1,9 +1,6 @@
 package no.nav.familie.ef.sak.økonomi
 
-import no.nav.familie.ef.sak.api.dto.AndelTilkjentYtelseDTO
-import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
 import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
-import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import java.time.LocalDate
 import java.time.YearMonth
@@ -12,7 +9,6 @@ import java.util.*
 object DataGenerator {
 
     private fun tilfeldigFødselsnummer() = Random().nextInt(Int.MAX_VALUE).toString()
-    private fun tilfeldigSaksnummer() = "SAK" + Random().nextInt(Int.MAX_VALUE)
 
     private fun flereTilfeldigeAndelerTilkjentYtelse(antall: Int): List<AndelTilkjentYtelse> =
             (1..antall).map { tilfeldigAndelTilkjentYtelse() }.toList()
@@ -26,15 +22,6 @@ object DataGenerator {
                                 stønadTom = stønadTom,
                                 personIdent = personIdent)
 
-    fun tilfeldigTilkjentYtelse(andelerTilkjentYtelse: List<AndelTilkjentYtelse>, behandlingId: UUID) =
-            TilkjentYtelse(personident = tilfeldigFødselsnummer(),
-                           stønadFom = LocalDate.now(),
-                           stønadTom = LocalDate.now(),
-                           vedtaksdato = LocalDate.now(),
-                           behandlingId = behandlingId,
-                           saksbehandler = tilfeldigFødselsnummer(),
-                           andelerTilkjentYtelse = andelerTilkjentYtelse)
-
     fun tilfeldigTilkjentYtelse(antallAndelerTilkjentYtelse: Int = 1, behandlingId: UUID) =
             TilkjentYtelse(personident = tilfeldigFødselsnummer(),
                            stønadFom = LocalDate.now(),
@@ -43,19 +30,6 @@ object DataGenerator {
                            vedtaksdato = LocalDate.now(),
                            behandlingId = behandlingId,
                            andelerTilkjentYtelse = flereTilfeldigeAndelerTilkjentYtelse(antallAndelerTilkjentYtelse))
-
-    fun tilfeldigTilkjentYtelseDto(): TilkjentYtelseDTO {
-        val søker = tilfeldigFødselsnummer()
-
-        return TilkjentYtelseDTO(søker = søker,
-                                 behandlingId = UUID.randomUUID(),
-                                 andelerTilkjentYtelse =
-                                 listOf(AndelTilkjentYtelseDTO(beløp = Random().nextInt(100_000),
-                                                               stønadFom = LocalDate.now(),
-                                                               stønadTom = LocalDate.now(),
-                                                               personIdent = tilfeldigFødselsnummer(),
-                                                               type = Stønadstype.OVERGANGSSTØNAD)))
-    }
 
     fun lagAndelTilkjentYtelse(fom: String,
                                tom: String,

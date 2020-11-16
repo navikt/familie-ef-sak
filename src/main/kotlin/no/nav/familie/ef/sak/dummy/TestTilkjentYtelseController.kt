@@ -34,8 +34,7 @@ class TestTilkjentYtelseController(private val testTilkjentYtelseService: TestTi
         val andelTilkjentYtelseDto = AndelTilkjentYtelseDTO(personIdent = søker,
                                                             beløp = dummyDTO.beløp,
                                                             stønadFom = dummyDTO.stønadFom,
-                                                            stønadTom = dummyDTO.stønadTom,
-                                                            type = dummyDTO.stønadstype)
+                                                            stønadTom = dummyDTO.stønadTom)
         val tilkjentYtelseDto = TilkjentYtelseDTO(søker = søker,
                                                   behandlingId = UUID.randomUUID(),
                                                   andelerTilkjentYtelse = listOf(andelTilkjentYtelseDto, andelTilkjentYtelseDto))

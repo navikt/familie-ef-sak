@@ -33,10 +33,7 @@ class TilkjentYtelseService(private val oppdragClient: OppdragClient,
 
     fun hentTilkjentYtelseDto(tilkjentYtelseId: UUID): TilkjentYtelseDTO {
         val tilkjentYtelse = hentTilkjentYtelse(tilkjentYtelseId)
-        val fagsak = behandlingService.hentBehandling(tilkjentYtelse.behandlingId).let {
-            fagsakService.hentFagsak(it.fagsakId)
-        }
-        return tilkjentYtelse.tilDto(fagsak.stønadstype)
+        return tilkjentYtelse.tilDto()
     }
 
     private fun hentTilkjentYtelse(tilkjentYtelseId: UUID) =
