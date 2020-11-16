@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.økonomi
 
-import no.nav.familie.ef.sak.integration.FAGSYSTEM_OVERGANGSSTØNAD
 import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
+import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseMedMetaData
 import no.nav.familie.ef.sak.util.hasList
@@ -29,11 +29,11 @@ object UtbetalingsoppdragGenerator {
      */
     fun lagTilkjentYtelseMedUtbetalingsoppdrag(nyTilkjentYtelseMedMetaData: TilkjentYtelseMedMetaData,
                                                forrigeTilkjentYtelse: TilkjentYtelse? = null): TilkjentYtelse {
-
+        val stønadstype = nyTilkjentYtelseMedMetaData.stønadstype
         val nyTilkjentYtelse = nyTilkjentYtelseMedMetaData.tilkjentYtelse
-        val oppdaterteKjeder = lagKjederUtenNullVerdier(nyTilkjentYtelse)
-        val forrigeKjeder = lagKjederUtenNullVerdier(forrigeTilkjentYtelse)
-        val sistePeriodeIder = sistePeriodeIder(forrigeTilkjentYtelse)
+        val oppdaterteKjeder = lagKjederUtenNullVerdier(stønadstype, nyTilkjentYtelse)
+        val forrigeKjeder = lagKjederUtenNullVerdier(stønadstype, forrigeTilkjentYtelse)
+        val sistePeriodeIder = sistePeriodeIder(stønadstype, forrigeTilkjentYtelse)
 
         val aksjonskodePåOppdragsnivå =
                 if (forrigeTilkjentYtelse == null) NY
@@ -48,18 +48,19 @@ object UtbetalingsoppdragGenerator {
         val utbetalingsperioderSomOpprettes =
                 lagUtbetalingsperioderForOpprettelse(andeler = andelerTilOpprettelseMedPeriodeIder,
                                                      behandlingId = nyTilkjentYtelseMedMetaData.eksternBehandlingId,
-                                                     tilkjentYtelse = nyTilkjentYtelse)
+                                                     tilkjentYtelse = nyTilkjentYtelse,
+                                                     type = nyTilkjentYtelseMedMetaData.stønadstype)
 
         val utbetalingsperioderSomOpphøres =
                 lagUtbetalingsperioderForOpphør(andeler = andelerTilOpphør,
                                                 tilkjentYtelse = nyTilkjentYtelse,
-                                                behandlingId = nyTilkjentYtelseMedMetaData.eksternBehandlingId
-                )
+                                                behandlingId = nyTilkjentYtelseMedMetaData.eksternBehandlingId,
+                                                type = nyTilkjentYtelseMedMetaData.stønadstype)
 
         val utbetalingsoppdrag =
                 Utbetalingsoppdrag(saksbehandlerId = nyTilkjentYtelse.saksbehandler,
                                    kodeEndring = aksjonskodePåOppdragsnivå,
-                                   fagSystem = FAGSYSTEM_OVERGANGSSTØNAD,
+                                   fagSystem = nyTilkjentYtelseMedMetaData.stønadstype.tilKlassifisering(),
                                    saksnummer = nyTilkjentYtelseMedMetaData.eksternFagsakId.toString(),
                                    aktoer = nyTilkjentYtelse.personident,
                         //TODO Trunkert avstemmingstidspunkt for å kunne skape forutsigbarhet mtp tester.
@@ -89,24 +90,27 @@ object UtbetalingsoppdragGenerator {
 
     private fun lagUtbetalingsperioderForOpphør(andeler: Map<KjedeId, Pair<AndelTilkjentYtelse, LocalDate>>,
                                                 behandlingId: Long,
+                                                type: Stønadstype,
                                                 tilkjentYtelse: TilkjentYtelse): List<Utbetalingsperiode> {
         val utbetalingsperiodeMal = UtbetalingsperiodeMal(tilkjentYtelse, true)
         return andeler.values.map { (sisteAndelIKjede, opphørKjedeFom) ->
             utbetalingsperiodeMal.lagPeriodeFraAndel(andel = sisteAndelIKjede,
                                                      behandlingId = behandlingId,
+                                                     type = type,
                                                      opphørKjedeFom = opphørKjedeFom)
         }
     }
 
     private fun lagUtbetalingsperioderForOpprettelse(andeler: Map<KjedeId, List<AndelTilkjentYtelse>>,
                                                      behandlingId: Long,
+                                                     type: Stønadstype,
                                                      tilkjentYtelse: TilkjentYtelse): List<Utbetalingsperiode> {
 
         val utbetalingsperiodeMal = UtbetalingsperiodeMal(tilkjentYtelse)
         return andeler
                 .flatMap { (_, andeler) -> andeler }
                 .map {
-                    utbetalingsperiodeMal.lagPeriodeFraAndel(it, behandlingId)
+                    utbetalingsperiodeMal.lagPeriodeFraAndel(it, type, behandlingId)
                 }
     }
 
@@ -127,18 +131,18 @@ object UtbetalingsoppdragGenerator {
                 }
     }
 
-    private fun sistePeriodeIder(tilkjentYtelse: TilkjentYtelse?): Map<KjedeId, PeriodeId?> {
+    private fun sistePeriodeIder(type: Stønadstype, tilkjentYtelse: TilkjentYtelse?): Map<KjedeId, PeriodeId?> {
         return tilkjentYtelse?.let { ytelse ->
             ytelse.andelerTilkjentYtelse
-                    .groupBy { it.tilKjedeId() }
+                    .groupBy { it.tilKjedeId(type = type) }
                     .mapValues { (_, kjede) ->
                         kjede.filter { it.periodeId != null }.maxByOrNull { it.periodeId!! }?.tilPeriodeId()
                     }
         } ?: emptyMap()
     }
 
-    private fun lagKjederUtenNullVerdier(tilkjentYtelse: TilkjentYtelse?): Map<KjedeId, List<AndelTilkjentYtelse>> =
+    private fun lagKjederUtenNullVerdier(type: Stønadstype, tilkjentYtelse: TilkjentYtelse?): Map<KjedeId, List<AndelTilkjentYtelse>> =
             tilkjentYtelse?.andelerTilkjentYtelse
                     ?.filter { !it.erNull() }
-                    ?.groupBy { it.tilKjedeId() } ?: emptyMap()
+                    ?.groupBy { it.tilKjedeId(type = type) } ?: emptyMap()
 }

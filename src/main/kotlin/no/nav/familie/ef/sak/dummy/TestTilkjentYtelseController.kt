@@ -6,7 +6,6 @@ import no.nav.familie.ef.sak.api.dto.TilkjentYtelseTestDTO
 import no.nav.familie.ef.sak.mapper.tilTilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.ef.sak.økonomi.tilYtelseType
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.context.annotation.Profile
@@ -36,7 +35,7 @@ class TestTilkjentYtelseController(private val testTilkjentYtelseService: TestTi
                                                             beløp = dummyDTO.beløp,
                                                             stønadFom = dummyDTO.stønadFom,
                                                             stønadTom = dummyDTO.stønadTom,
-                                                            type = dummyDTO.stønadstype.tilYtelseType())
+                                                            type = dummyDTO.stønadstype)
         val tilkjentYtelseDto = TilkjentYtelseDTO(søker = søker,
                                                   behandlingId = UUID.randomUUID(),
                                                   andelerTilkjentYtelse = listOf(andelTilkjentYtelseDto, andelTilkjentYtelseDto))

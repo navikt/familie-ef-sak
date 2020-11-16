@@ -32,6 +32,7 @@ class TestTilkjentYtelseService(private val behandlingService: BehandlingService
 
         val nyTilkjentYtelseMedEksternId = TilkjentYtelseMedMetaData(nyTilkjentYtelse,
                                                                      eksternBehandlingId = behandling.eksternId.id,
+                                                                     stønadstype = fagsak.stønadstype,
                                                                      eksternFagsakId = eksternFagsakId)
         val tilkjentYtelseMedUtbetalingsoppdrag =
                 UtbetalingsoppdragGenerator

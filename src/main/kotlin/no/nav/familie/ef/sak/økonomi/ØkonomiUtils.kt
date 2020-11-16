@@ -3,15 +3,15 @@ package no.nav.familie.ef.sak.økonomi
 import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse.Companion.disjunkteAndeler
 import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse.Companion.snittAndeler
+import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import java.time.LocalDate
 
-data class KjedeId(val klassifiering: String,
-                   val personIdent: String)
+data class KjedeId(val klassifiering: String, val personIdent: String)
 
 data class PeriodeId(val gjeldende: Long?,
                      val forrige: Long? = null)
 
-fun AndelTilkjentYtelse.tilKjedeId(): KjedeId = KjedeId(this.type.tilKlassifisering(), this.personIdent)
+fun AndelTilkjentYtelse.tilKjedeId(type: Stønadstype): KjedeId = KjedeId(type.tilKlassifisering(), this.personIdent)
 fun AndelTilkjentYtelse.tilPeriodeId(): PeriodeId = PeriodeId(this.periodeId, this.forrigePeriodeId)
 
 @Deprecated("Bør erstattes med å gjøre 'stønadFom' og  'stønadTom'  nullable")
@@ -21,7 +21,6 @@ fun KjedeId.tilNullAndelTilkjentYtelse(periodeId: PeriodeId?): AndelTilkjentYtel
         AndelTilkjentYtelse(beløp = 0,
                             stønadFom = NULL_DATO,
                             stønadTom = NULL_DATO,
-                            type = this.klassifiering.tilYtelseType(),
                             personIdent = this.personIdent,
                             periodeId = periodeId?.gjeldende,
                             forrigePeriodeId = periodeId?.forrige)

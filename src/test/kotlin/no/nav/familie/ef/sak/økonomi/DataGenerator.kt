@@ -3,8 +3,8 @@ package no.nav.familie.ef.sak.økonomi
 import no.nav.familie.ef.sak.api.dto.AndelTilkjentYtelseDTO
 import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
 import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
+import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.repository.domain.YtelseType
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
@@ -20,13 +20,11 @@ object DataGenerator {
     private fun tilfeldigAndelTilkjentYtelse(beløp: Int = Random().nextInt(),
                                              stønadFom: LocalDate = LocalDate.now(),
                                              stønadTom: LocalDate = LocalDate.now(),
-                                             personIdent: String = tilfeldigFødselsnummer(),
-                                             type: YtelseType = YtelseType.OVERGANGSSTØNAD) =
+                                             personIdent: String = tilfeldigFødselsnummer()) =
             AndelTilkjentYtelse(beløp = beløp,
                                 stønadFom = stønadFom,
                                 stønadTom = stønadTom,
-                                personIdent = personIdent,
-                                type = type)
+                                personIdent = personIdent)
 
     fun tilfeldigTilkjentYtelse(andelerTilkjentYtelse: List<AndelTilkjentYtelse>, behandlingId: UUID) =
             TilkjentYtelse(personident = tilfeldigFødselsnummer(),
@@ -56,13 +54,12 @@ object DataGenerator {
                                                                stønadFom = LocalDate.now(),
                                                                stønadTom = LocalDate.now(),
                                                                personIdent = tilfeldigFødselsnummer(),
-                                                               type = YtelseType.OVERGANGSSTØNAD)))
+                                                               type = Stønadstype.OVERGANGSSTØNAD)))
     }
 
     fun lagAndelTilkjentYtelse(fom: String,
                                tom: String,
                                personIdent: String,
-                               ytelseType: YtelseType = YtelseType.OVERGANGSSTØNAD,
                                beløp: Int = Random().nextInt(),
                                periodeIdOffset: Long? = null): AndelTilkjentYtelse {
 
@@ -70,7 +67,6 @@ object DataGenerator {
                                    beløp = beløp,
                                    stønadFom = dato(fom),
                                    stønadTom = dato(tom),
-                                   type = ytelseType,
                                    periodeId = periodeIdOffset)
     }
 

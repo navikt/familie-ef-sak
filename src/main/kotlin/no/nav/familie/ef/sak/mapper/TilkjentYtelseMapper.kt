@@ -2,10 +2,7 @@ package no.nav.familie.ef.sak.mapper
 
 import no.nav.familie.ef.sak.api.dto.AndelTilkjentYtelseDTO
 import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
-import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseType
+import no.nav.familie.ef.sak.repository.domain.*
 import java.time.LocalDate
 
 fun TilkjentYtelseDTO.tilTilkjentYtelse(saksbehandler: String,
@@ -31,24 +28,23 @@ fun TilkjentYtelseDTO.tilAndelerTilkjentYtelse(): List<AndelTilkjentYtelse> {
                 AndelTilkjentYtelse(beløp = it.beløp,
                                     stønadFom = it.stønadFom,
                                     stønadTom = it.stønadTom,
-                                    personIdent = it.personIdent,
-                                    type = it.type)
+                                    personIdent = it.personIdent)
             }
 }
 
-fun TilkjentYtelse.tilDto(): TilkjentYtelseDTO {
+fun TilkjentYtelse.tilDto(type: Stønadstype): TilkjentYtelseDTO {
     return TilkjentYtelseDTO(id = this.id,
                              behandlingId = this.behandlingId,
                              søker = this.personident,
-                             andelerTilkjentYtelse = this.andelerTilkjentYtelse.map { it.tilDto() })
+                             andelerTilkjentYtelse = this.andelerTilkjentYtelse.map { it.tilDto(type) })
 }
 
-fun AndelTilkjentYtelse.tilDto(): AndelTilkjentYtelseDTO {
+fun AndelTilkjentYtelse.tilDto(type: Stønadstype): AndelTilkjentYtelseDTO {
     return AndelTilkjentYtelseDTO(beløp = this.beløp,
                                   stønadFom = this.stønadFom,
                                   stønadTom = this.stønadTom,
                                   personIdent = this.personIdent,
-                                  type = this.type)
+                                  type = type)
 }
 
 @Deprecated("Skal ikke brukes")

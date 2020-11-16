@@ -1,0 +1,1 @@
+ALTER TABLE andel_tilkjent_ytelse DROP COLUMN type;
