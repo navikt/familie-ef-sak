@@ -103,7 +103,6 @@ class TestOppdragGroup {
     val input: TilkjentYtelse by lazy {
         TilkjentYtelse(behandlingId = behandling(fagsak = fagsak()).id,
                        personident = personIdent!!,
-                       saksbehandler = "saksbehandler",
                        andelerTilkjentYtelse = andelerTilkjentYtelseInn,
                 // Ikke påkrevd, men exception ellers
                        vedtaksdato = LocalDate.now())
@@ -122,7 +121,6 @@ class TestOppdragGroup {
         TilkjentYtelse(id = input.id,
                        behandlingId = input.behandlingId,
                        personident = personIdent!!,
-                       saksbehandler = "saksbehandler",
                        andelerTilkjentYtelse = andelerTilkjentYtelseUt,
                        utbetalingsoppdrag = utbetalingsoppdrag,
                        vedtaksdato = input.vedtaksdato,

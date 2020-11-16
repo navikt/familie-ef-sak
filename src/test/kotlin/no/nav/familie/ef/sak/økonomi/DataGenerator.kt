@@ -30,20 +30,18 @@ object DataGenerator {
                                 personIdent = personIdent,
                                 type = type)
 
-    fun tilfeldigTilkjentYtelse(behandling: Behandling = behandling(fagsak()), antallAndelerTilkjentYteelse: Int = 1) =
+    fun tilfeldigTilkjentYtelse(behandling: Behandling = behandling(fagsak()), antallAndelerTilkjentYtelse: Int = 1) =
             TilkjentYtelse(personident = tilfeldigFødselsnummer(),
                            stønadFom = LocalDate.now(),
                            stønadTom = LocalDate.now(),
                            vedtaksdato = LocalDate.now(),
-                           behandlingId = behandlingId,
-                           saksbehandler = tilfeldigFødselsnummer(),
-                           andelerTilkjentYtelse = flereTilfeldigeAndelerTilkjentYtelse(antallAndelerTilkjentYteelse))
+                           behandlingId = behandling.id,
+                           andelerTilkjentYtelse = flereTilfeldigeAndelerTilkjentYtelse(antallAndelerTilkjentYtelse))
 
     fun tilfeldigTilkjentYtelse(antallAndelerTilkjentYtelse: Int = 1, behandlingId: UUID) =
             TilkjentYtelse(personident = tilfeldigFødselsnummer(),
                            stønadFom = LocalDate.now(),
                            stønadTom = LocalDate.now(),
-                           saksbehandler = tilfeldigFødselsnummer(),
                            vedtaksdato = LocalDate.now(),
                            behandlingId = behandlingId,
                            andelerTilkjentYtelse = flereTilfeldigeAndelerTilkjentYtelse(antallAndelerTilkjentYtelse))

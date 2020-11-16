@@ -19,9 +19,8 @@ class TilkjentYtelseServiceTest {
 
     private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
     private val økonomiKlient = mockk<OppdragClient>()
-    private val behandlingRepository = mockk<BehandlingRepository>()
 
-    private val tilkjentYtelseService = TilkjentYtelseService(økonomiKlient, tilkjentYtelseRepository, behandlingRepository)
+    private val tilkjentYtelseService = TilkjentYtelseService(økonomiKlient, tilkjentYtelseRepository)
 
     @AfterEach
     fun afterEach() {

@@ -54,7 +54,7 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
         val fagsak = fagsakRepository.insert(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak = fagsak))
         val lagretTilkjentYtelse =
-                tilkjentYtelseRepository.insert(DataGenerator.tilfeldigTilkjentYtelse(opprettBehandling(), 2, behandlingId = behandling.id))
+                tilkjentYtelseRepository.insert(DataGenerator.tilfeldigTilkjentYtelse(opprettBehandling(), 2))
         val utbetalingsoppdrag =
                 lagTilkjentYtelseMedUtbetalingsoppdrag(TilkjentYtelseMedMetaData(lagretTilkjentYtelse,
                                                                                  behandling.eksternId.id,
