@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.integration.JournalpostClient
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.service.steg.StegType
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
+import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostResponse
@@ -84,6 +85,11 @@ internal class JournalføringServiceTest {
         every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any()) } returns nyOppgaveId
         every { behandlingService.oppdaterJournalpostIdPåBehandling(any(), any()) } just runs
         every { journalpostClient.ferdigstillJournalpost(any(), any()) } just runs
+
+        every {
+            behandlingService.mottaSøknadForOvergangsstønad(any(), any(), any(), any())
+        } just Runs
+
     }
 
     @Test
@@ -97,12 +103,8 @@ internal class JournalføringServiceTest {
         } returns OppdaterJournalpostResponse(journalpostId = journalpostId)
 
         every {
-            journalpostClient.hentDokument(any(), capture(slotDokumentInfoIder), DokumentVariantformat.ORIGINAL)
-        } returns objectMapper.writeValueAsString(Testsøknad.søknadOvergangsstønad).toByteArray()
-
-        every {
-            behandlingService.mottaSøknadForOvergangsstønad(any(), any(), any(), any())
-        } just Runs
+            journalpostClient.hentOvergangsstønadSøknad(any(), capture(slotDokumentInfoIder))
+        } returns Testsøknad.søknadOvergangsstønad
 
         val behandleSakOppgaveId =
                 journalføringService.fullførJournalpost(journalpostId = journalpostId,
@@ -140,8 +142,8 @@ internal class JournalføringServiceTest {
                 .returns(OppdaterJournalpostResponse(journalpostId = journalpostId))
 
         every {
-            journalpostClient.hentDokument(any(), any(), any())
-        } returns "IKKE JSON".toByteArray()
+            journalpostClient.hentOvergangsstønadSøknad(any(), any())
+        } returns  Testsøknad.søknadOvergangsstønad
 
         val behandleSakOppgaveId =
                 journalføringService.fullførJournalpost(

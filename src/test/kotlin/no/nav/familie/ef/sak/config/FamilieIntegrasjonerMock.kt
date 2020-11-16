@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.integration.dto.familie.Arbeidsfordelingsenhet
 import no.nav.familie.ef.sak.integration.dto.familie.EgenAnsattResponse
 import no.nav.familie.ef.sak.integration.dto.familie.Tilgang
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
+import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostResponse
 import no.nav.familie.kontrakter.felles.journalpost.*
@@ -19,6 +20,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 
 @Component
@@ -49,6 +51,14 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                    WireMock.get(WireMock.urlPathEqualTo(integrasjonerConfig.journalPostUri.path))
                            .withQueryParam("journalpostId", equalTo("1234"))
                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(journalpost))),
+                   WireMock.get(WireMock.urlPathMatching("${integrasjonerConfig.journalPostUri.path}/hentdokument/([0-9]*)/([0-9]*)"))
+                           .withQueryParam("variantFormat", equalTo("ORIGINAL"))
+                           .willReturn(WireMock.okJson(objectMapper.writeValueAsString(Ressurs.success(Testsøknad.søknadOvergangsstønad)))),
+                   WireMock.get(WireMock.urlPathMatching("${integrasjonerConfig.journalPostUri.path}/hentdokument/([0-9]*)/([0-9]*)"))
+                           .withQueryParam("variantFormat", equalTo("ARKIV"))
+                           .willReturn(WireMock.okJson(objectMapper.writeValueAsString(Ressurs.success(
+                                   "255044462D312E0D747261696C65723C3C2F526F6F743C3C2F50616765733C3C2F4B6964735B3C3C2F4D65646961426F785B302030203320335D3E3E5D3E3E3E3E3E3E".toByteArray()
+                           )))),
                    WireMock.put(WireMock.urlMatching("${integrasjonerConfig.dokarkivUri.path}.*"))
                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(oppdatertJournalpostResponse)))
 
@@ -95,12 +105,38 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                                             bruker = Bruker(type = BrukerIdType.FNR, id = "23097825289"),
                                             journalforendeEnhet = "4817",
                                             kanal = "SKAN_IM",
+                                            relevanteDatoer = listOf(RelevantDato(LocalDateTime.now(), "DATO_REGISTRERT")),
                                             dokumenter =
                                             listOf(DokumentInfo(dokumentInfoId = "12345",
                                                                 tittel = "Søknad om overgangsstønad - dokument 1",
                                                                 brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
                                                                 dokumentvarianter =
                                                                 listOf(Dokumentvariant(variantformat = "ARKIV"),
-                                                                       Dokumentvariant(variantformat = "ORIGINAL"))))))
+                                                                       Dokumentvariant(variantformat = "ORIGINAL"))),
+                                                   DokumentInfo(dokumentInfoId = "12345",
+                                                                tittel = "Søknad om barnetilsyn - dokument 1",
+                                                                brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
+                                                                dokumentvarianter =
+                                                                listOf(Dokumentvariant(variantformat = "ARKIV"))),
+                                                   DokumentInfo(dokumentInfoId = "12345",
+                                                                tittel = "Samboeravtale",
+                                                                brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
+                                                                dokumentvarianter =
+                                                                listOf(Dokumentvariant(variantformat = "ARKIV"))),
+                                                   DokumentInfo(dokumentInfoId = "12345",
+                                                                tittel = "EtFrykteligLangtDokumentNavnSomTroligIkkeBrekkerOgØdeleggerGUI",
+                                                                brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
+                                                                dokumentvarianter =
+                                                                listOf(Dokumentvariant(variantformat = "ARKIV"))),
+                                                   DokumentInfo(dokumentInfoId = "12345",
+                                                                tittel = "Søknad om overgangsstønad - dokument 2",
+                                                                brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
+                                                                dokumentvarianter =
+                                                                listOf(Dokumentvariant(variantformat = "ARKIV"))),
+                                                   DokumentInfo(dokumentInfoId = "12345",
+                                                                tittel = "Søknad om overgangsstønad - dokument 3",
+                                                                brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
+                                                                dokumentvarianter =
+                                                                listOf(Dokumentvariant(variantformat = "ARKIV"))))))
     }
 }

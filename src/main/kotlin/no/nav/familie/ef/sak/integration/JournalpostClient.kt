@@ -3,6 +3,9 @@ package no.nav.familie.ef.sak.integration
 import no.nav.familie.ef.sak.config.IntegrasjonerConfig
 import no.nav.familie.ef.sak.domene.DokumentVariantformat
 import no.nav.familie.http.client.AbstractPingableRestClient
+import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
+import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
+import no.nav.familie.kontrakter.ef.søknad.SøknadSkolepenger
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostResponse
@@ -37,6 +40,27 @@ class JournalpostClient(@Qualifier("azure") restOperations: RestOperations,
                                                         .build()
                                                         .toUri())
                 .getDataOrThrow()
+    }
+
+    fun hentOvergangsstønadSøknad(journalpostId: String, dokumentInfoId: String): SøknadOvergangsstønad {
+        return getForEntity<Ressurs<SøknadOvergangsstønad>>(jsonDokumentUri(journalpostId, dokumentInfoId)).getDataOrThrow()
+    }
+
+    fun hentBarnetilsynSøknad(journalpostId: String, dokumentInfoId: String): SøknadBarnetilsyn {
+        return getForEntity<Ressurs<SøknadBarnetilsyn>>(jsonDokumentUri(journalpostId, dokumentInfoId)).getDataOrThrow()
+    }
+
+    fun hentSkolepengerSøknad(journalpostId: String, dokumentInfoId: String): SøknadSkolepenger {
+        return getForEntity<Ressurs<SøknadSkolepenger>>(jsonDokumentUri(journalpostId, dokumentInfoId)).getDataOrThrow()
+    }
+
+    private fun jsonDokumentUri(journalpostId: String, dokumentInfoId: String): URI {
+        return UriComponentsBuilder
+                .fromUriString("${journalpostURI}/hentdokument/" +
+                               "${journalpostId}/${dokumentInfoId}")
+                .queryParam("variantFormat", DokumentVariantformat.ORIGINAL)
+                .build()
+                .toUri()
     }
 
     fun oppdaterJournalpost(oppdaterJournalpostRequest: OppdaterJournalpostRequest,
