@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.Month
 
 
 @RestController
@@ -43,37 +44,48 @@ class PersonopplysningerController(private val personopplysningerService: Person
                                       adressebeskyttelse = Adressebeskyttelse.UGRADERT,
                                       folkeregisterpersonstatus = Folkeregisterpersonstatus.BOSATT,
                                       dødsdato = null,
-                                      telefonnummer = null,
+                                      telefonnummer = TelefonnummerDto("47", "22228888"),
                                       statsborgerskap = listOf(StatsborgerskapDto(land = "Danmark",
-                                                                                  gyldigFraOgMedDato = LocalDate.MAX,
+                                                                                  gyldigFraOgMedDato = LocalDate.EPOCH,
+                                                                                  gyldigTilOgMedDato = LocalDate.of(1998, 3, 20)),
+                                                               StatsborgerskapDto(land = "Norge",
+                                                                                  gyldigFraOgMedDato = LocalDate.of(1998, 3, 20),
                                                                                   gyldigTilOgMedDato = null)),
                                       sivilstand = listOf(SivilstandDto(Sivilstandstype.SEPARERT,
                                                                         "20.20.2015",
-                                                                        relatertVedSivilstand = "99999",
+                                                                        relatertVedSivilstand = "66666999999",
                                                                         navn = "Annen Forelder")),
                                       adresse = listOf(AdresseDto("Moldegata 15",
                                                                   AdresseType.BOSTEDADRESSE,
                                                                   gyldigFraOgMed = LocalDate.EPOCH,
                                                                   gyldigTilOgMed = null),
                                                        AdresseDto("Holtevegen 355",
-                                                                  AdresseType.BOSTEDADRESSE,
+                                                                  AdresseType.KONTAKTADRESSE,
                                                                   gyldigFraOgMed = LocalDate.EPOCH,
                                                                   gyldigTilOgMed = null)),
                                       fullmakt = listOf(),
                                       egenAnsatt = false,
-                                      navEnhet = "abcd-enhet",
-                                      barn = listOf(BarnDto("654321",
+                                      navEnhet = "0806 Skien",
+                                      barn = listOf(BarnDto("05101822222",
                                                             "Mari Olavsdottir",
-                                                            AnnenForelderDTO("99999", "Annen Forelder Navn"),
+                                                            AnnenForelderDTO("66666999999", "Annen Forelder Navn"),
                                                             listOf(AdresseDto("Moldegata 15",
                                                                               AdresseType.BOSTEDADRESSE,
                                                                               gyldigFraOgMed = LocalDate.EPOCH,
                                                                               gyldigTilOgMed = null)),
-                                                            true)),
+                                                            true),
+                                                    BarnDto("01030122222",
+                                                            "Nils Olavsson",
+                                                            AnnenForelderDTO("66666999999", "Annen Forelder Navn"),
+                                                            listOf(AdresseDto("Moldegata 15",
+                                                                              AdresseType.BOSTEDADRESSE,
+                                                                              gyldigFraOgMed = LocalDate.EPOCH,
+                                                                              gyldigTilOgMed = null)),
+                                                            false)),
                                       innflyttingTilNorge = listOf(InnflyttingTilNorge("Sverige", null, Folkeregistermetadata(
-                                              LocalDateTime.now(), null))),
+                                              LocalDateTime.of(1993, Month.AUGUST, 10, 10,10), null))),
                                       utflyttingFraNorge = listOf(UtflyttingFraNorge("Narnia", null, Folkeregistermetadata(
-                                              LocalDateTime.now(), null)))
+                                              LocalDateTime.of(1998, Month.AUGUST, 10, 10,10), null)))
                 ))
     }
 
