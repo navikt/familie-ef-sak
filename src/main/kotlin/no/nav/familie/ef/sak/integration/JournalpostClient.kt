@@ -56,8 +56,8 @@ class JournalpostClient(@Qualifier("azure") restOperations: RestOperations,
 
     private fun jsonDokumentUri(journalpostId: String, dokumentInfoId: String): URI {
         return UriComponentsBuilder
-                .fromUriString("${journalpostURI}/hentdokument/" +
-                               "${journalpostId}/${dokumentInfoId}")
+                .fromUri(journalpostURI)
+                .pathSegment("hentdokument", journalpostId, dokumentInfoId)
                 .queryParam("variantFormat", DokumentVariantformat.ORIGINAL)
                 .build()
                 .toUri()

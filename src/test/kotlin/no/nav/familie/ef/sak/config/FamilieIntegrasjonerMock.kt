@@ -56,9 +56,7 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(Ressurs.success(Testsøknad.søknadOvergangsstønad)))),
                    WireMock.get(WireMock.urlPathMatching("${integrasjonerConfig.journalPostUri.path}/hentdokument/([0-9]*)/([0-9]*)"))
                            .withQueryParam("variantFormat", equalTo("ARKIV"))
-                           .willReturn(WireMock.okJson(objectMapper.writeValueAsString(Ressurs.success(
-                                   "255044462D312E0D747261696C65723C3C2F526F6F743C3C2F50616765733C3C2F4B6964735B3C3C2F4D65646961426F785B302030203320335D3E3E5D3E3E3E3E3E3E".toByteArray()
-                           )))),
+                           .willReturn(WireMock.okJson(objectMapper.writeValueAsString(Ressurs.success(pdfByteArray)))),
                    WireMock.put(WireMock.urlMatching("${integrasjonerConfig.dokarkivUri.path}.*"))
                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(oppdatertJournalpostResponse)))
 
@@ -95,6 +93,8 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
 
         private val oppdatertJournalpostResponse =
                 Ressurs.success(OppdaterJournalpostResponse(journalpostId = "1234"))
+        val pdfByteArray =
+                "255044462D312E0D747261696C65723C3C2F526F6F743C3C2F50616765733C3C2F4B6964735B3C3C2F4D65646961426F785B302030203320335D3E3E5D3E3E3E3E3E3E".toByteArray()
         private val journalpost =
                 Ressurs.success(Journalpost(journalpostId = "1234",
                                             journalposttype = Journalposttype.I,

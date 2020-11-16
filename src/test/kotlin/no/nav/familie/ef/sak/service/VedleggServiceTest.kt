@@ -102,18 +102,16 @@ internal class VedleggServiceTest {
                                           dokumentvarianter = listOf(Dokumentvariant(filnavn = "FilnavnDok4",
                                                                                      variantformat = "ARKIV")))
 
-    val journalpostSøknad = Journalpost(
-            journalpostId = "1",
-            journalposttype = Journalposttype.I,
-            journalstatus = Journalstatus.MOTTATT,
-            dokumenter = listOf(søknadsdokument, syktBarnDokument, ukjentDokument)
+    val journalpostSøknad = Journalpost(journalpostId = "1",
+                                        journalposttype = Journalposttype.I,
+                                        journalstatus = Journalstatus.MOTTATT,
+                                        dokumenter = listOf(søknadsdokument, syktBarnDokument, ukjentDokument)
     )
 
-    val journalpostEttersendelse = Journalpost(
-            journalpostId = "2",
-            journalposttype = Journalposttype.I,
-            journalstatus = Journalstatus.MOTTATT,
-            dokumenter = listOf(samboerdokument, skilsmissedokument)
+    val journalpostEttersendelse = Journalpost(journalpostId = "2",
+                                               journalposttype = Journalposttype.I,
+                                               journalstatus = Journalstatus.MOTTATT,
+                                               dokumenter = listOf(samboerdokument, skilsmissedokument)
     )
 
 
