@@ -11,8 +11,7 @@ data class SivilstandSøknadsgrunnlagDto(val samlivsbruddsdato: LocalDate?,
                                         val erUformeltGift: Boolean?,
                                         val erUformeltSeparertEllerSkilt: Boolean?,
                                         val datoSøktSeparasjon: LocalDate?,
-                                        val søktOmSkilsmisseSeparasjon: Boolean?,
-                                        val årsakEnslig: String?)
+                                        val søktOmSkilsmisseSeparasjon: Boolean?)
 
 data class SivilstandRegistergrunnlagDto(val type: Sivilstandstype,
                                          val gyldigFraOgMed: LocalDate?)

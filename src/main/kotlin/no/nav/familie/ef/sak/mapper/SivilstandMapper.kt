@@ -22,7 +22,7 @@ object SivilstandMapper {
                                              erUformeltSeparertEllerSkilt = sivilstandsdetaljer.erUformeltSeparertEllerSkilt,
                                              datoSøktSeparasjon = sivilstandsdetaljer.datoSøktSeparasjon,
                                              søktOmSkilsmisseSeparasjon = sivilstandsdetaljer.søktOmSkilsmisseSeparasjon,
-                                             årsakEnslig = sivilstandsdetaljer.årsakEnslig)
+                )
 
         return SivilstandInngangsvilkårDto(
                 søknadsgrunnlag, registergrunnlag
