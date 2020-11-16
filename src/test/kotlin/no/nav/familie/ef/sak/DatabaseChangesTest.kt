@@ -8,12 +8,13 @@ import kotlin.streams.toList
 class DatabaseChangesTest {
 
     companion object {
+
         //Oppdater kun når du er redo for å merge db-endringer
-        const val MERGED_VERSION = 20
+        const val MERGED_VERSION = 21
     }
 
     /**
-     * Hvis du har en databasoppdatering vill denne testen feile, slik at ikke branchen blir deployet av misstak
+     * Hvis du har en databaseoppdatering vil denne testen feile, slik at ikke branch blir deployet ved en feil
      */
     @Test
     internal fun `valider migreringsscript`() {

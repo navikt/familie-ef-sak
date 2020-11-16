@@ -10,7 +10,6 @@ import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.context.ActiveProfiles
 
 internal class SøknadsskjemaOvergangsstønadRepositoryTest : OppslagSpringRunnerTest() {
 

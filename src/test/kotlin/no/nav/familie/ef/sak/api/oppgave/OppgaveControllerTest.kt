@@ -8,22 +8,20 @@ import no.nav.familie.ef.sak.api.ManglerTilgang
 import no.nav.familie.ef.sak.repository.domain.Oppgave
 import no.nav.familie.ef.sak.service.OppgaveService
 import no.nav.familie.ef.sak.service.TilgangService
-import no.nav.familie.ef.sak.util.RessursUtils
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.util.*
-import kotlin.test.assertEquals
 
 internal class OppgaveControllerTest {
 
-    val tilgangService: TilgangService = mockk()
-    val oppgaveService: OppgaveService = mockk()
+    private val tilgangService: TilgangService = mockk()
+    private val oppgaveService: OppgaveService = mockk()
 
 
-    val oppgaveController: OppgaveController = OppgaveController(oppgaveService, tilgangService)
+    private val oppgaveController: OppgaveController = OppgaveController(oppgaveService, tilgangService)
 
     @Test
     internal fun `skal feile hvis bruker er veileder`() {
@@ -51,7 +49,7 @@ internal class OppgaveControllerTest {
         } just Runs
 
 
-        val oppgave: Oppgave = Oppgave(UUID.randomUUID(), UUID.randomUUID(), 123, Oppgavetype.BehandleSak)
+        val oppgave = Oppgave(UUID.randomUUID(), UUID.randomUUID(), 123, Oppgavetype.BehandleSak)
 
         every {
             oppgaveService.hentEfOppgave(any())

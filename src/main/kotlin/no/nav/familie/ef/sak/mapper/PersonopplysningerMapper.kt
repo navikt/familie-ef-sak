@@ -60,7 +60,7 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                 },
                 innflyttingTilNorge = søker.innflyttingTilNorge,
                 utflyttingFraNorge = søker.utflyttingFraNorge,
-        )
+                )
     }
 
     fun tilAdresser(søker: PdlSøker): List<AdresseDto> {
@@ -97,7 +97,7 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
         val gjeldendeBostedsadresseForelder = finnGjeldendeBostedsadresse(bostedsadresserForelder)
         return gjeldendeBostedsadresseBarn?.let {
             return it.vegadresse == gjeldendeBostedsadresseForelder?.vegadresse
-        } ?: false;
+        } ?: false
     }
 
     private fun finnGjeldendeBostedsadresse(bostedsadresser: List<Bostedsadresse>): Bostedsadresse? {

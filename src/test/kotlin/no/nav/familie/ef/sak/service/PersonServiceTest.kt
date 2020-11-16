@@ -20,23 +20,23 @@ internal class PersonServiceTest {
     fun `skal finne indentifikatorer for barn og dets foreldre gitt en forelders ident`() {
 
         val pdlBarnOla = PdlBarn(emptyList(),
-                              emptyList(),
-                              emptyList(),
-                              emptyList(),
-                              listOf(Familierelasjon("1234", Familierelasjonsrolle.MOR, Familierelasjonsrolle.BARN),
-                                     Familierelasjon("5678", Familierelasjonsrolle.FAR, Familierelasjonsrolle.BARN)),
-                              emptyList(),
-                              emptyList())
+                                 emptyList(),
+                                 emptyList(),
+                                 emptyList(),
+                                 listOf(Familierelasjon("1234", Familierelasjonsrolle.MOR, Familierelasjonsrolle.BARN),
+                                        Familierelasjon("5678", Familierelasjonsrolle.FAR, Familierelasjonsrolle.BARN)),
+                                 emptyList(),
+                                 emptyList())
 
         val pdlBarnKari = PdlBarn(emptyList(),
-                              emptyList(),
-                              emptyList(),
-                              emptyList(),
-                              listOf(Familierelasjon("1234", Familierelasjonsrolle.MOR, Familierelasjonsrolle.BARN),
-                                     Familierelasjon("9999", Familierelasjonsrolle.MEDMOR, Familierelasjonsrolle.BARN),
-                                     Familierelasjon("7777", Familierelasjonsrolle.BARN, Familierelasjonsrolle.MOR)),
-                              emptyList(),
-                              emptyList())
+                                  emptyList(),
+                                  emptyList(),
+                                  emptyList(),
+                                  listOf(Familierelasjon("1234", Familierelasjonsrolle.MOR, Familierelasjonsrolle.BARN),
+                                         Familierelasjon("9999", Familierelasjonsrolle.MEDMOR, Familierelasjonsrolle.BARN),
+                                         Familierelasjon("7777", Familierelasjonsrolle.BARN, Familierelasjonsrolle.MOR)),
+                                  emptyList(),
+                                  emptyList())
 
         every {
             pdlClient.hentSøker(any())

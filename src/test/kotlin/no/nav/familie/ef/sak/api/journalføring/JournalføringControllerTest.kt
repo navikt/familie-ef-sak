@@ -22,10 +22,10 @@ import kotlin.test.assertFailsWith
 internal class JournalføringControllerTest {
 
 
-    val journalføringService = mockk<JournalføringService>()
-    val pdlClient = mockk<PdlClient>()
-    val tilgangService: TilgangService = mockk()
-    val journalføringController = JournalføringController(journalføringService, pdlClient, tilgangService)
+    private val journalføringService = mockk<JournalføringService>()
+    private val pdlClient = mockk<PdlClient>()
+    private val tilgangService: TilgangService = mockk()
+    private val journalføringController = JournalføringController(journalføringService, pdlClient, tilgangService)
 
     @Test
     internal fun `skal hente journalpost med personident utledet fra pdl`() {
@@ -114,43 +114,39 @@ internal class JournalføringControllerTest {
         } throws ManglerTilgang("Bruker mangler tilgang")
 
         assertThrows<ManglerTilgang> {
-            journalføringController.fullførJournalpost(
-                    journalpostMedFødselsnummer.journalpostId,
-                    JournalføringRequest(null, UUID.randomUUID(), "dummy-oppgave", JournalføringBehandling(UUID.randomUUID())),
-                    "tralala")
+            journalføringController.fullførJournalpost(journalpostMedFødselsnummer.journalpostId,
+                                                       JournalføringRequest(null,
+                                                                            UUID.randomUUID(),
+                                                                            "dummy-oppgave",
+                                                                            JournalføringBehandling(UUID.randomUUID()),
+                                                                            "Z1234567",
+                                                                            "9991"))
         }
     }
 
-    val aktørId = "11111111111"
-    val personIdentFraPdl = "12345678901"
+    private val aktørId = "11111111111"
+    private val personIdentFraPdl = "12345678901"
 
-    val journalpostMedAktørId = Journalpost(journalpostId = "1234",
-            journalposttype = Journalposttype.I,
-            journalstatus = Journalstatus.MOTTATT,
-            tema = "ENF",
-            behandlingstema = "ab0071",
-            tittel = "abrakadabra",
-            bruker = Bruker(type = BrukerIdType.AKTOERID, id = aktørId),
-            journalforendeEnhet = "4817",
-            kanal = "SKAN_IM",
-            dokumenter = listOf(
-                    DokumentInfo(
-                            dokumentInfoId = "12345",
-                            tittel = "Tittel",
-                            brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
-                            dokumentvarianter = listOf(Dokumentvariant(variantformat = "ARKIV"))
-                    )
+    private val journalpostMedAktørId =
+            Journalpost(journalpostId = "1234",
+                        journalposttype = Journalposttype.I,
+                        journalstatus = Journalstatus.MOTTATT,
+                        tema = "ENF",
+                        behandlingstema = "ab0071",
+                        tittel = "abrakadabra",
+                        bruker = Bruker(type = BrukerIdType.AKTOERID, id = aktørId),
+                        journalforendeEnhet = "4817",
+                        kanal = "SKAN_IM",
+                        dokumenter =
+                        listOf(DokumentInfo(dokumentInfoId = "12345",
+                                            tittel = "Tittel",
+                                            brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
+                                            dokumentvarianter = listOf(Dokumentvariant(variantformat = "ARKIV"))))
             )
-    )
 
-    val journalpostMedFødselsnummer = journalpostMedAktørId.copy(
-            bruker = Bruker(type = BrukerIdType.FNR, id = personIdentFraPdl)
-    )
-    val journalpostUtenBruker = journalpostMedAktørId.copy(
-            bruker = null
-    )
-    val journalpostMedOrgnr = journalpostMedAktørId.copy(
-            bruker = Bruker(type = BrukerIdType.ORGNR, id = "12345")
-    )
+    private val journalpostMedFødselsnummer =
+            journalpostMedAktørId.copy(bruker = Bruker(type = BrukerIdType.FNR, id = personIdentFraPdl))
+    private val journalpostUtenBruker = journalpostMedAktørId.copy(bruker = null)
+    private val journalpostMedOrgnr = journalpostMedAktørId.copy(bruker = Bruker(type = BrukerIdType.ORGNR, id = "12345"))
 
 }

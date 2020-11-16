@@ -27,7 +27,7 @@ internal class ArbeidsfordelingServiceTest {
     }
 
     @Test
-    internal fun `skal hente arbeidsfordeling til foreldern hvis graderingen er lavere på barnet`() {
+    internal fun `skal hente arbeidsfordeling til forelderen hvis graderingen er lavere på barnet`() {
         every { personService.hentPersonMedRelasjoner(IDENT_FORELDER) } returns
                 søkerMedBarn(graderingForelder = AdressebeskyttelseGradering.STRENGT_FORTROLIG,
                              graderingBarn = AdressebeskyttelseGradering.FORTROLIG)
@@ -37,7 +37,7 @@ internal class ArbeidsfordelingServiceTest {
     }
 
     @Test
-    internal fun `skal hente arbeidsfordeling til barnet hvis graderingen er lavere på foreldern`() {
+    internal fun `skal hente arbeidsfordeling til barnet hvis graderingen er lavere på forelderen`() {
         every { personService.hentPersonMedRelasjoner(IDENT_FORELDER) } returns
                 søkerMedBarn(graderingForelder = AdressebeskyttelseGradering.FORTROLIG,
                              graderingBarn = AdressebeskyttelseGradering.STRENGT_FORTROLIG)
@@ -50,9 +50,7 @@ internal class ArbeidsfordelingServiceTest {
                              graderingBarn: AdressebeskyttelseGradering): SøkerMedBarn =
             SøkerMedBarn(IDENT_FORELDER,
                          pdlSøker(graderingForelder),
-                         mapOf(IDENT_BARN to pdlBarn(
-                                 adressebeskyttelse = adressebeskyttelse(graderingBarn)))
-            )
+                         mapOf(IDENT_BARN to pdlBarn(adressebeskyttelse = adressebeskyttelse(graderingBarn))))
 
     private fun pdlSøker(adressebeskyttelseGradering: AdressebeskyttelseGradering) =
             pdlSøker(adressebeskyttelse = adressebeskyttelse(adressebeskyttelseGradering))

@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Repository
-import java.util.*
 
 internal class RepositoryUtilTest {
 
@@ -27,7 +26,7 @@ internal class RepositoryUtilTest {
     }
 
     @Test
-    internal fun `findOrThrow`() {
+    internal fun findOrThrow() {
         val testRepository = mockk<TestRepository>()
         every { testRepository.findByIdOrNull(any()) } returns TestDomene("")
         assertThat(testRepository.findByIdOrThrow("123")).isNotNull

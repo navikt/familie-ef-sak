@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.api.journalføring;
+package no.nav.familie.ef.sak.api.journalføring
 
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.service.JournalføringService
@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/api/journalpost")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class JournalføringController(private val journalføringService: JournalføringService, private val pdlClient: PdlClient, private val tilgangService: TilgangService) {
+class JournalføringController(private val journalføringService: JournalføringService,
+                              private val pdlClient: PdlClient,
+                              private val tilgangService: TilgangService) {
 
     @GetMapping("/{journalpostId}")
     fun hentJournalPost(@PathVariable journalpostId: String): Ressurs<JournalføringResponse> {
@@ -33,12 +35,12 @@ class JournalføringController(private val journalføringService: Journalføring
 
     @PostMapping("/{journalpostId}/fullfor")
     fun fullførJournalpost(@PathVariable journalpostId: String,
-                           @RequestBody journalføringRequest: JournalføringRequest,
-                           @RequestParam(name = "journalfoerendeEnhet") journalførendeEnhet: String): Ressurs<Long> {
+                           @RequestBody journalføringRequest: JournalføringRequest
+    ): Ressurs<Long> {
         val (_, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
         tilgangService.validerTilgangTilPersonMedBarn(personIdent)
         tilgangService.validerHarSaksbehandlerrolle()
-        return Ressurs.success(journalføringService.fullførJournalpost(journalføringRequest, journalpostId, journalførendeEnhet))
+        return Ressurs.success(journalføringService.fullførJournalpost(journalføringRequest, journalpostId))
     }
 
     fun finnJournalpostOgPersonIdent(journalpostId: String): Pair<Journalpost, String> {
@@ -47,9 +49,9 @@ class JournalføringController(private val journalføringService: Journalføring
             when (it.type) {
                 BrukerIdType.FNR -> it.id
                 BrukerIdType.AKTOERID -> pdlClient.hentPersonident(it.id).hentIdenter.identer.first().ident
-                BrukerIdType.ORGNR -> error("Kan ikke hente journalpost= ${journalpostId} for orgnr")
+                BrukerIdType.ORGNR -> error("Kan ikke hente journalpost=$journalpostId for orgnr")
             }
-        } ?: error("Kan ikke hente journalpost= ${journalpostId} uten bruker")
+        } ?: error("Kan ikke hente journalpost=$journalpostId uten bruker")
         return Pair(journalpost, personIdent)
     }
 }

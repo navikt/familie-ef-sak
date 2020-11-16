@@ -29,7 +29,7 @@ internal class FagsakControllerTest : OppslagSpringRunnerTest() {
     }
 
     private fun hentFagsak(): ResponseEntity<Ressurs<FagsakDto>> {
-        val fagsakRequest = FagsakRequest("ikketilgang", Stønadstype.OVERGANGSSTØNAD)
+        val fagsakRequest = FagsakRequest("ikkeTilgang", Stønadstype.OVERGANGSSTØNAD)
 
         return restTemplate.exchange(localhost("/api/fagsak"),
                                      HttpMethod.POST,

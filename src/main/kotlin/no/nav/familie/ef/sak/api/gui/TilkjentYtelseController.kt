@@ -1,23 +1,14 @@
 package no.nav.familie.ef.sak.api.gui
 
-import no.nav.familie.ef.sak.api.dto.AndelTilkjentYtelseDTO
 import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
-import no.nav.familie.ef.sak.api.dto.TilkjentYtelseTestDTO
-import no.nav.familie.ef.sak.integration.ØkonomiKlient
-import no.nav.familie.ef.sak.mapper.tilTilkjentYtelse
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.repository.domain.YtelseType
 import no.nav.familie.ef.sak.service.TilkjentYtelseService
-import no.nav.familie.ef.sak.økonomi.UtbetalingsoppdragGenerator
-import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import no.nav.security.token.support.core.api.Unprotected
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.*
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder
-import java.time.LocalDate
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 import java.util.*
 
 @RestController
@@ -25,43 +16,11 @@ import java.util.*
 @ProtectedWithClaims(issuer = "azuread")
 class TilkjentYtelseController(private val tilkjentYtelseService: TilkjentYtelseService) {
 
-    @PostMapping
-    fun opprettTilkjentYtelse(@RequestBody tilkjentYtelseDTO: TilkjentYtelseDTO): ResponseEntity<Long> {
-
-        tilkjentYtelseDTO.valider()
-
-        val tilkjentYtelseId = tilkjentYtelseService.opprettTilkjentYtelse(tilkjentYtelseDTO)
-
-        val location = ServletUriComponentsBuilder.fromCurrentRequestUri()
-                .pathSegment(tilkjentYtelseId.toString())
-                .build().toUri()
-
-        return ResponseEntity.created(location).build()
-    }
-
     @GetMapping("{tilkjentYtelseId}")
     fun hentTilkjentYtelse(@PathVariable tilkjentYtelseId: UUID): ResponseEntity<TilkjentYtelseDTO> {
         val tilkjentYtelseDto = tilkjentYtelseService.hentTilkjentYtelseDto(tilkjentYtelseId)
 
         return ResponseEntity.ok(tilkjentYtelseDto)
-    }
-
-    @PutMapping("{tilkjentYtelseId}/utbetaling")
-    fun sørgForUtbetaling(@PathVariable tilkjentYtelseId: UUID): HttpStatus {
-        tilkjentYtelseService.iverksettUtbetalingsoppdrag(tilkjentYtelseId)
-
-        return HttpStatus.ACCEPTED
-    }
-
-    @DeleteMapping("{tilkjentYtelseId}/utbetaling")
-    fun opphørUtbetaling(@PathVariable tilkjentYtelseId: UUID): ResponseEntity<Long> {
-        val opphørtTilkjentYtelseId = tilkjentYtelseService.opphørUtbetalingsoppdrag(tilkjentYtelseId)
-
-        val location = ServletUriComponentsBuilder.fromCurrentRequestUri()
-                .pathSegment(opphørtTilkjentYtelseId.toString())
-                .build().toUri()
-
-        return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY).location(location).build()
     }
 
     @GetMapping("{tilkjentYtelseId}/utbetaling")

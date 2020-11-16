@@ -4,10 +4,8 @@ import no.nav.familie.ef.sak.service.steg.StegType
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.MappedCollection
-import org.springframework.data.relational.core.mapping.Table
 import java.util.*
 
-@Table("behandling")
 data class Behandling(@Id
                       val id: UUID = UUID.randomUUID(),
                       val fagsakId: UUID,
@@ -23,8 +21,7 @@ data class Behandling(@Id
                       var journalposter: Set<Behandlingsjournalpost> = setOf(),
 
                       @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                      val sporbar: Sporbar = Sporbar()) {
-}
+                      val sporbar: Sporbar = Sporbar())
 
 enum class BehandlingType(val visningsnavn: String) {
     FØRSTEGANGSBEHANDLING("Førstegangsbehandling"),

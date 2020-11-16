@@ -12,11 +12,8 @@ data class AndelTilkjentYtelse(@Column("belop")
                                val stønadFom: LocalDate, /// TODO  Gjør nullable
                                @Column("stonad_tom")
                                val stønadTom: LocalDate, /// TODO  Gjør nullable
-                               @Column("person_ident")
                                val personIdent: String,
-                               @Column("periode_id")
                                val periodeId: Long? = null,
-                               @Column("forrige_periode_id")
                                val forrigePeriodeId: Long? = null,
                                val type: YtelseType) {
 
@@ -62,4 +59,3 @@ data class AndelTilkjentYtelse(@Column("belop")
 enum class YtelseType {
     OVERGANGSSTØNAD
 }
-

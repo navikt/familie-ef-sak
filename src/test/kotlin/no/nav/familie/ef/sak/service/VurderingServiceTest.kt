@@ -62,8 +62,8 @@ internal class VurderingServiceTest {
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling(fagsak(), true, BehandlingStatus.OPPRETTET)
         every { vilkårsvurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns
                 listOf(vilkårsvurdering(resultat = Vilkårsresultat.JA,
-                                       type = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
-                                       behandlingId = BEHANDLING_ID))
+                                        type = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
+                                        behandlingId = BEHANDLING_ID))
 
         val nyeVilkårsvurderinger = slot<List<Vilkårsvurdering>>()
         every { vilkårsvurderingRepository.insertAll(capture(nyeVilkårsvurderinger)) } answers
@@ -107,12 +107,13 @@ internal class VurderingServiceTest {
     }
 
     @Test
-    internal fun `kan ikke oppdatere vilkårsvurderingen hvis innsendte delvurderinger ikke motsvarerer de som finnes på vilkåret`() {
+    fun `kan ikke oppdatere vilkårsvurderingen hvis innsendte delvurderinger ikke motsvarerer de som finnes på vilkåret`() {
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling(fagsak(), true, BehandlingStatus.OPPRETTET)
         val vilkårsvurdering = vilkårsvurdering(BEHANDLING_ID,
                                                 resultat = Vilkårsresultat.IKKE_VURDERT,
                                                 type = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
-                                                delvilkårsvurdering = listOf(Delvilkårsvurdering(DelvilkårType.DOKUMENTERT_FLYKTNINGSTATUS)))
+                                                delvilkårsvurdering =
+                                                listOf(Delvilkårsvurdering(DelvilkårType.DOKUMENTERT_FLYKTNINGSTATUS)))
         every { vilkårsvurderingRepository.findByIdOrNull(vilkårsvurdering.id) } returns vilkårsvurdering
 
         assertThat(catchThrowable {
@@ -144,15 +145,18 @@ internal class VurderingServiceTest {
                                                             begrunnelse = "Ok",
                                                             unntak = "Nei",
                                                             vilkårType = vilkårsvurdering.type,
-                                                            delvilkårsvurderinger = listOf(DelvilkårsvurderingDto(vilkårsvurdering.delvilkårsvurdering.delvilkårsvurderinger.first().type,
-                                                                                                                  Vilkårsresultat.JA)),
+                                                            delvilkårsvurderinger =
+                                                            listOf(DelvilkårsvurderingDto(vilkårsvurdering.delvilkårsvurdering
+                                                                                                  .delvilkårsvurderinger
+                                                                                                  .first().type,
+                                                                                          Vilkårsresultat.JA)),
                                                             endretAv = "",
                                                             endretTid = LocalDateTime.now()))
         assertThat(lagretVilkårsvurdering.captured.resultat).isEqualTo(Vilkårsresultat.JA)
         assertThat(lagretVilkårsvurdering.captured.begrunnelse).isEqualTo("Ok")
         assertThat(lagretVilkårsvurdering.captured.unntak).isEqualTo("Nei")
-        assertThat(lagretVilkårsvurdering.captured.delvilkårsvurdering.delvilkårsvurderinger.first().resultat).isEqualTo(
-                Vilkårsresultat.JA)
+        assertThat(lagretVilkårsvurdering.captured.delvilkårsvurdering.delvilkårsvurderinger.first().resultat)
+                .isEqualTo(Vilkårsresultat.JA)
         assertThat(lagretVilkårsvurdering.captured.type).isEqualTo(vilkårsvurdering.type)
     }
 
@@ -216,6 +220,6 @@ internal class VurderingServiceTest {
     companion object {
 
         private val BEHANDLING_ID = UUID.randomUUID()
-        private val BEHANDLING_EKSTERN_ID = 12345L
+        private const val BEHANDLING_EKSTERN_ID = 12345L
     }
 }

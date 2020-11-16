@@ -20,7 +20,8 @@ class TilgangService(private val integrasjonerClient: FamilieIntegrasjonerClient
 
         integrasjonerClient.sjekkTilgangTilPersoner(barnOgForeldre).forEach {
             if (!it.harTilgang) {
-                throw ManglerTilgang("Saksbehandler ${SikkerhetContext.hentSaksbehandler()} har ikke tilgang til ${personIdent} eller dets barn")
+                throw ManglerTilgang("Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
+                                     "har ikke tilgang til $personIdent eller dets barn")
             }
         }
     }
@@ -38,7 +39,8 @@ class TilgangService(private val integrasjonerClient: FamilieIntegrasjonerClient
 
     fun validerTilgangTilRolle(minimumsrolle: BehandlerRolle) {
         if (!SikkerhetContext.harTilgangTilGittRolle(rolleConfig, minimumsrolle)) {
-            throw ManglerTilgang("Saksbehandler ${SikkerhetContext.hentSaksbehandler()} har ikke tilgang til å utføre denne operasjonen som krever minimumsrolle ${minimumsrolle}")
+            throw ManglerTilgang("Saksbehandler ${SikkerhetContext.hentSaksbehandler()} har ikke tilgang " +
+                                 "til å utføre denne operasjonen som krever minimumsrolle $minimumsrolle")
         }
     }
 }

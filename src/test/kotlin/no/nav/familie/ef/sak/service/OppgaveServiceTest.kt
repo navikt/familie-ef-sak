@@ -33,15 +33,13 @@ internal class OppgaveServiceTest {
     private val pdlClient = mockk<PdlClient>()
 
     private val oppgaveService =
-            OppgaveService(
-                    oppgaveClient,
-                    behandlingRepository,
-                    fagsakRepository,
-                    oppgaveRepository,
-                    arbeidsfordelingService,
-                    pdlClient,
-                    URI.create("https://ensligmorellerfar.prod-fss.nais.io/fagsak"),
-            )
+            OppgaveService(oppgaveClient,
+                           behandlingRepository,
+                           fagsakRepository,
+                           oppgaveRepository,
+                           arbeidsfordelingService,
+                           pdlClient,
+                           URI.create("https://ensligmorellerfar.prod-fss.nais.io/fagsak"))
 
     @Test
     fun `Opprett oppgave skal samle data og opprette en ny oppgave basert på fagsak, behandling, fnr og enhet`() {
@@ -54,7 +52,7 @@ internal class OppgaveServiceTest {
             oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any())
         } returns null
         every { arbeidsfordelingService.hentNavEnhet(any()) } returns Arbeidsfordelingsenhet(enhetId = ENHETSNUMMER,
-                enhetNavn = ENHETSNAVN)
+                                                                                             enhetNavn = ENHETSNAVN)
         val slot = slot<OpprettOppgaveRequest>()
         every { oppgaveClient.opprettOppgave(capture(slot)) } returns GSAK_OPPGAVE_ID
         every { pdlClient.hentAktørId(any()) } returns PdlHentIdenter(PdlAktørId(listOf(PdlIdent(aktørIdentFraPdl))))
@@ -139,11 +137,10 @@ internal class OppgaveServiceTest {
     }
 
     private fun lagTestBehandling(): Behandling {
-        return Behandling(
-                fagsakId = FAGSAK_ID,
-                type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                status = BehandlingStatus.OPPRETTET,
-                steg = StegType.REGISTRERE_OPPLYSNINGER)
+        return Behandling(fagsakId = FAGSAK_ID,
+                          type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                          status = BehandlingStatus.OPPRETTET,
+                          steg = StegType.REGISTRERE_OPPLYSNINGER)
     }
 
     private fun lagTestFagsak(): Fagsak {
@@ -158,22 +155,20 @@ internal class OppgaveServiceTest {
     }
 
     private fun lagEksternTestOppgave(): no.nav.familie.kontrakter.felles.oppgave.Oppgave {
-        return no.nav.familie.kontrakter.felles.oppgave.Oppgave(
-                id = GSAK_OPPGAVE_ID
-        )
+        return no.nav.familie.kontrakter.felles.oppgave.Oppgave(id = GSAK_OPPGAVE_ID)
     }
 
     private fun lagFinnOppgaveResponseDto(): FinnOppgaveResponseDto {
         return FinnOppgaveResponseDto(antallTreffTotalt = 1,
-                oppgaver = listOf(lagEksternTestOppgave())
+                                      oppgaver = listOf(lagEksternTestOppgave())
         )
     }
 
     companion object {
 
         private val FAGSAK_ID = UUID.fromString("1242f220-cad3-4640-95c1-190ec814c91e")
-        private val FAGSAK_EKSTERN_ID = 98765L
-        private val GSAK_OPPGAVE_ID = 12345L
+        private const val FAGSAK_EKSTERN_ID = 98765L
+        private const val GSAK_OPPGAVE_ID = 12345L
         private val BEHANDLING_ID = UUID.fromString("1c4209bd-3217-4130-8316-8658fe300a84")
         private const val ENHETSNUMMER = "enhetnr"
         private const val ENHETSNAVN = "enhetsnavn"

@@ -82,17 +82,17 @@ internal class OvergangsstønadMapperTest {
             GjeldendeUtdanning(linjeKursGrad = søknadsfelt("linje"),
                                nårVarSkalDuVæreElevStudent = søknadsfelt(datoperiode()))
 
-    private fun datoperiode() = Datoperiode(LocalDate.of(2020,Month.JANUARY, 1),
+    private fun datoperiode() = Datoperiode(LocalDate.of(2020, Month.JANUARY, 1),
                                             LocalDate.of(2020, Month.JANUARY, 1))
 
     private fun periode() = MånedÅrPeriode(Month.JANUARY, 2020, Month.JANUARY, 2021)
 
     private fun selvstendig(): Selvstendig =
             Selvstendig(arbeidsmengde = søknadsfelt(50),
-                                    etableringsdato = søknadsfelt(LocalDate.now()),
-                                    firmanavn = søknadsfelt("SelvstendigFirmanavn"),
-                                    hvordanSerArbeidsukenUt = søknadsfelt("fin"),
-                                    organisasjonsnummer = søknadsfelt("987654321"))
+                        etableringsdato = søknadsfelt(LocalDate.now()),
+                        firmanavn = søknadsfelt("SelvstendigFirmanavn"),
+                        hvordanSerArbeidsukenUt = søknadsfelt("fin"),
+                        organisasjonsnummer = søknadsfelt("987654321"))
 
     private fun arbeidsforhold(): Søknadsfelt<List<Arbeidsgiver>> =
             søknadsfelt(listOf(Arbeidsgiver(arbeidsgivernavn = søknadsfelt("Arbeidsgivernavn"),

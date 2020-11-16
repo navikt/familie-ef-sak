@@ -8,17 +8,9 @@ import no.nav.familie.ef.sak.util.RessursUtils.lagFrontendMelding
 import org.springframework.stereotype.Service
 
 @Service
-class InngangsvilkårSteg(private val vurderingService: VurderingService): BehandlingSteg<String> {
+class InngangsvilkårSteg(private val vurderingService: VurderingService) : BehandlingSteg<Void?> {
 
-    override fun utførStegOgAngiNeste(behandling: Behandling, data: String): StegType {
-        return hentNesteSteg(behandling)
-    }
-
-    override fun stegType(): StegType {
-        return StegType.VILKÅRSVURDERE_INNGANGSVILKÅR
-    }
-
-    override fun postValiderSteg(behandling: Behandling) {
+    override fun validerSteg(behandling: Behandling) {
         if (behandling.type == BehandlingType.TEKNISK_OPPHØR) return
 
         val vilkårSomManglerVurdering = vurderingService.hentInngangsvilkårSomManglerVurdering(behandling.id)
@@ -28,4 +20,13 @@ class InngangsvilkårSteg(private val vurderingService: VurderingService): Behan
                                                                 vilkårSomManglerVurdering.map { it.beskrivelse }),
                        message = "Validering av inngangsvilkår feilet for behandling ${behandling.id}")
     }
+
+    override fun stegType(): StegType {
+        return StegType.VILKÅRSVURDERE_INNGANGSVILKÅR
+    }
+
+    override fun utførSteg(behandling: Behandling, data: Void?) {
+        // gjør ikke noe
+    }
+
 }

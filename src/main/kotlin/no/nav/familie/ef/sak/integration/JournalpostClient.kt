@@ -17,7 +17,7 @@ import java.net.URI
 
 @Component
 class JournalpostClient(@Qualifier("azure") restOperations: RestOperations,
-                        private val integrasjonerConfig: IntegrasjonerConfig)
+                        integrasjonerConfig: IntegrasjonerConfig)
     : AbstractPingableRestClient(restOperations, "oppgave") {
 
 
@@ -31,29 +31,29 @@ class JournalpostClient(@Qualifier("azure") restOperations: RestOperations,
 
     fun hentDokument(journalpostId: String, dokumentInfoId: String, dokumentVariantformat: DokumentVariantformat): ByteArray {
         return getForEntity<Ressurs<ByteArray>>(UriComponentsBuilder
-                .fromUriString("${journalpostURI}/hentdokument/${journalpostId}/${dokumentInfoId}")
-                .queryParam("variantFormat", dokumentVariantformat)
-                .build()
-                .toUri())
+                                                        .fromUriString("${journalpostURI}/hentdokument/" +
+                                                                       "${journalpostId}/${dokumentInfoId}")
+                                                        .queryParam("variantFormat", dokumentVariantformat)
+                                                        .build()
+                                                        .toUri())
                 .getDataOrThrow()
     }
 
     fun oppdaterJournalpost(oppdaterJournalpostRequest: OppdaterJournalpostRequest,
                             journalpostId: String): OppdaterJournalpostResponse {
         return putForEntity<Ressurs<OppdaterJournalpostResponse>>(URI.create("${dokarkivUri}/v2/${journalpostId}"),
-                oppdaterJournalpostRequest).data
-                ?: error("Kunne ikke oppdatere journalpost med id ${journalpostId}")
+                                                                  oppdaterJournalpostRequest).data
+               ?: error("Kunne ikke oppdatere journalpost med id $journalpostId")
     }
 
     fun ferdigstillJournalpost(journalpostId: String, journalførendeEnhet: String) {
         val ressurs = putForEntity<Ressurs<OppdaterJournalpostResponse>>(
                 URI.create("${dokarkivUri}/v2/${journalpostId}/ferdigstill?journalfoerendeEnhet=${journalførendeEnhet}"),
-                ""
-        )
+                "")
 
         if (ressurs.status != Ressurs.Status.SUKSESS) {
-            secureLogger.error(" Feil ved oppdatering av journalpost=${journalpostId} - mottok: ${ressurs}")
-            error("Feil ved oppdatering av journalpost= ${journalpostId}")
+            secureLogger.error(" Feil ved oppdatering av journalpost=${journalpostId} - mottok: $ressurs")
+            error("Feil ved oppdatering av journalpost=$journalpostId")
         }
 
     }
