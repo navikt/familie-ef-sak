@@ -4,6 +4,7 @@ import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
+import no.nav.familie.ef.sak.repository.domain.Sporbar
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseMedMetaData
 import no.nav.familie.kontrakter.felles.oppdrag.Opphør
@@ -16,7 +17,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
-import java.util.*
 
 private const val behandlingEksternId = 0L
 private const val fagsakEksternId = 1L
@@ -81,6 +81,7 @@ class TestOppdragGroup {
     private val andelerTilkjentYtelseInn: MutableList<AndelTilkjentYtelse> = mutableListOf()
     private val andelerTilkjentYtelseUt: MutableList<AndelTilkjentYtelse> = mutableListOf()
     private val utbetalingsperioder: MutableList<Utbetalingsperiode> = mutableListOf()
+    private val sporbar = Sporbar()
     private var oppdragKode110: Utbetalingsoppdrag.KodeEndring = Utbetalingsoppdrag.KodeEndring.NY
     private var personIdent: String? = null
 
@@ -105,7 +106,8 @@ class TestOppdragGroup {
                        personident = personIdent!!,
                        andelerTilkjentYtelse = andelerTilkjentYtelseInn,
                 // Ikke påkrevd, men exception ellers
-                       vedtaksdato = LocalDate.now())
+                       vedtaksdato = LocalDate.now(),
+                       sporbar = sporbar)
     }
 
     val output: TilkjentYtelse by lazy {
@@ -114,7 +116,7 @@ class TestOppdragGroup {
                                    fagSystem = "EFOG",
                                    saksnummer = fagsakEksternId.toString(),
                                    aktoer = personIdent!!,
-                                   saksbehandlerId = "saksbehandler",
+                                   saksbehandlerId = "VL",
                                    avstemmingTidspunkt = LocalDateTime.now().truncatedTo(ChronoUnit.HOURS),
                                    utbetalingsperiode = utbetalingsperioder.map { it.copy(behandlingId = behandlingEksternId) })
 
@@ -125,7 +127,8 @@ class TestOppdragGroup {
                        utbetalingsoppdrag = utbetalingsoppdrag,
                        vedtaksdato = input.vedtaksdato,
                        stønadFom = andelerTilkjentYtelseUt.filter { it.stønadFom != NULL_DATO }.minOfOrNull { it.stønadFom },
-                       stønadTom = andelerTilkjentYtelseInn.filter { it.stønadTom != NULL_DATO }.maxOfOrNull { it.stønadTom })
+                       stønadTom = andelerTilkjentYtelseInn.filter { it.stønadTom != NULL_DATO }.maxOfOrNull { it.stønadTom },
+                       sporbar = sporbar)
 
     }
 }
