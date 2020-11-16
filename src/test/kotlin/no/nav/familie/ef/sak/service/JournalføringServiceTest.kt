@@ -8,12 +8,10 @@ import no.nav.familie.ef.sak.integration.JournalpostClient
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.service.steg.StegType
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
-import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostResponse
 import no.nav.familie.kontrakter.felles.journalpost.*
-import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -87,7 +85,7 @@ internal class JournalføringServiceTest {
         every { journalpostClient.ferdigstillJournalpost(any(), any()) } just runs
 
         every {
-            behandlingService.mottaSøknadForOvergangsstønad(any(), any(), any(), any())
+            behandlingService.lagreSøknadForOvergangsstønad(any(), any(), any(), any())
         } just Runs
 
     }
@@ -127,7 +125,7 @@ internal class JournalføringServiceTest {
         }
         assertThat(slotDokumentInfoIder[0]).isEqualTo(dokumentInfoIdMedJsonVerdi)
         assertThat(slotDokumentInfoIder.size).isEqualTo(1)
-        verify(exactly = 1) { behandlingService.mottaSøknadForOvergangsstønad(any(), any(), any(), any()) }
+        verify(exactly = 1) { behandlingService.lagreSøknadForOvergangsstønad(any(), any(), any(), any()) }
     }
 
     @Test

@@ -97,15 +97,15 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
                         when (DokumentBrevkode.fraBrevkode(it.brevkode)) {
                             DokumentBrevkode.OVERGANGSSTØNAD -> {
                                 val søknad = journalpostClient.hentOvergangsstønadSøknad(journalpostId, it.dokumentInfoId)
-                                behandlingService.mottaSøknadForOvergangsstønad(søknad, behandlingsId, fagsakId, journalpostId)
+                                behandlingService.lagreSøknadForOvergangsstønad(søknad, behandlingsId, fagsakId, journalpostId)
                             }
                             DokumentBrevkode.BARNETILSYN -> {
                                 val søknad = journalpostClient.hentBarnetilsynSøknad(journalpostId, it.dokumentInfoId)
-                                behandlingService.mottaSøknadForBarnetilsyn(søknad, behandlingsId, fagsakId, journalpostId)
+                                behandlingService.lagreSøknadForBarnetilsyn(søknad, behandlingsId, fagsakId, journalpostId)
                             }
                             DokumentBrevkode.SKOLEPENGER -> {
                                 val søknad = journalpostClient.hentSkolepengerSøknad(journalpostId, it.dokumentInfoId)
-                                behandlingService.mottaSøknadForSkolepenger(søknad, behandlingsId, fagsakId, journalpostId)
+                                behandlingService.lagreSøknadForSkolepenger(søknad, behandlingsId, fagsakId, journalpostId)
                             }
                         }
                     } catch (e: JsonProcessingException) {

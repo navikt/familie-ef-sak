@@ -43,31 +43,31 @@ internal class VedleggServiceTest {
     internal fun `skal hente dokumenter fra alle journalposter for en behandling`() {
         val alleVedlegg = vedleggService.finnVedleggForBehandling(UUID.randomUUID())
 
-        val søknad = alleVedlegg.find { it.dokumentInfoId == søknadsdokument.dokumentInfoId }
+        val søknad = alleVedlegg.find { it.dokumentinfoId == søknadsdokument.dokumentInfoId }
         Assertions.assertThat(søknad).isNotNull
         Assertions.assertThat(søknad!!.filnavn).isEqualTo("FilnavnDok1")
         Assertions.assertThat(søknad.tittel).isEqualTo(søknadsdokument.tittel)
         Assertions.assertThat(søknad.journalpostId).isEqualTo(journalpostSøknad.journalpostId)
 
-        val syktBarn = alleVedlegg.find { it.dokumentInfoId == syktBarnDokument.dokumentInfoId }
+        val syktBarn = alleVedlegg.find { it.dokumentinfoId == syktBarnDokument.dokumentInfoId }
         Assertions.assertThat(syktBarn).isNotNull
         Assertions.assertThat(syktBarn!!.filnavn).isEqualTo("FilnavnDok2")
         Assertions.assertThat(syktBarn.tittel).isEqualTo(syktBarnDokument.tittel)
         Assertions.assertThat(syktBarn.journalpostId).isEqualTo(journalpostSøknad.journalpostId)
 
-        val ukjentKontrakt = alleVedlegg.find { it.dokumentInfoId == ukjentDokument.dokumentInfoId }
+        val ukjentKontrakt = alleVedlegg.find { it.dokumentinfoId == ukjentDokument.dokumentInfoId }
         Assertions.assertThat(ukjentKontrakt).isNotNull
         Assertions.assertThat(ukjentKontrakt!!.filnavn).isNull()
         Assertions.assertThat(ukjentKontrakt.tittel).isEqualTo(ukjentKontrakt.tittel)
         Assertions.assertThat(ukjentKontrakt.journalpostId).isEqualTo(journalpostSøknad.journalpostId)
 
-        val samboerkontrakt = alleVedlegg.find { it.dokumentInfoId == samboerdokument.dokumentInfoId }
+        val samboerkontrakt = alleVedlegg.find { it.dokumentinfoId == samboerdokument.dokumentInfoId }
         Assertions.assertThat(samboerkontrakt).isNotNull
         Assertions.assertThat(samboerkontrakt!!.filnavn).isEqualTo("FilnavnDok3")
         Assertions.assertThat(samboerkontrakt.tittel).isEqualTo(samboerdokument.tittel)
         Assertions.assertThat(samboerkontrakt.journalpostId).isEqualTo(journalpostEttersendelse.journalpostId)
 
-        val skilsmissepapirer = alleVedlegg.find { it.dokumentInfoId == skilsmissedokument.dokumentInfoId }
+        val skilsmissepapirer = alleVedlegg.find { it.dokumentinfoId == skilsmissedokument.dokumentInfoId }
         Assertions.assertThat(skilsmissepapirer).isNotNull
         Assertions.assertThat(skilsmissepapirer!!.filnavn).isEqualTo("FilnavnDok4")
         Assertions.assertThat(skilsmissepapirer.tittel).isEqualTo(skilsmissedokument.tittel)

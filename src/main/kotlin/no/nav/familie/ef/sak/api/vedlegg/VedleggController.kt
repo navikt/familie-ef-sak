@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.api.vedlegg
 
-import no.nav.familie.ef.sak.api.dto.DokumentInfoDto
+import no.nav.familie.ef.sak.api.dto.DokumentiinfoDto
 import no.nav.familie.ef.sak.service.TilgangService
 import no.nav.familie.ef.sak.service.VedleggService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -20,7 +20,7 @@ class VedleggController(private val vedleggService: VedleggService,
                         private val tilgangService: TilgangService) {
 
     @GetMapping("/{behandlingId}")
-    fun finnVedleggForBehandling(@PathVariable behandlingId: UUID): Ressurs<List<DokumentInfoDto>> {
+    fun finnVedleggForBehandling(@PathVariable behandlingId: UUID): Ressurs<List<DokumentiinfoDto>> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         return Ressurs.success(vedleggService.finnVedleggForBehandling(behandlingId))
     }
