@@ -9,4 +9,4 @@ data class DokumentinfoDto(
         val tittel: String,
         val journalpostId: String,
         val dato: LocalDate?,
-        val journalpostType: Journalposttype)
+        val journalposttype: Journalposttype)
