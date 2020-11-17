@@ -34,7 +34,7 @@ class TestSakController(private val behandlingService: BehandlingService,
                                                      Stønadstype.OVERGANGSSTØNAD)
         val fagsak = fagsakService.hentFagsak(fagsakDto.id)
         val behandling = behandlingService.opprettBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, fagsak.id)
-        behandlingService.mottaSøknadForOvergangsstønad(Testsøknad.søknadOvergangsstønad, behandling.id, fagsak.id, "123")
+        behandlingService.lagreSøknadForOvergangsstønad(Testsøknad.søknadOvergangsstønad, behandling.id, fagsak.id, "123")
         stegService.håndterRegistrerOpplysninger(behandling, "")
         val eksisterendeOppgave =
                 oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandling.id, Oppgavetype.BehandleSak)

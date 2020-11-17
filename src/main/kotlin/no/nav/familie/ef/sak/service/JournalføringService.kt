@@ -7,13 +7,9 @@ import no.nav.familie.ef.sak.integration.JournalpostClient
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
-import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
-import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
-import no.nav.familie.kontrakter.ef.søknad.SøknadSkolepenger
 import no.nav.familie.kontrakter.felles.dokarkiv.*
 import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariant
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
-import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -93,39 +89,30 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
 
     private fun settSøknadPåBehandling(journalpostId: String, fagsakId: UUID, behandlingsId: UUID) {
         hentJournalpost(journalpostId).dokumenter
-                ?.filter { dokument -> DokumentBrevkode.erGyldigBrevkode(dokument.brevkode) && harOriginalDokument(dokument) }
-                ?.map {
-                    Pair(DokumentBrevkode.fraBrevkode(it.brevkode),
-                         hentDokument(journalpostId, it.dokumentInfoId, DokumentVariantformat.ORIGINAL))
+                ?.filter { dokument ->
+                    DokumentBrevkode.erGyldigBrevkode(dokument.brevkode.toString()) && harOriginalDokument(dokument)
                 }
                 ?.forEach {
-                    konverterTilSøknadsobjekt(it, fagsakId, behandlingsId, journalpostId)
+                    try {
+                        when (DokumentBrevkode.fraBrevkode(it.brevkode)) {
+                            DokumentBrevkode.OVERGANGSSTØNAD -> {
+                                val søknad = journalpostClient.hentOvergangsstønadSøknad(journalpostId, it.dokumentInfoId)
+                                behandlingService.lagreSøknadForOvergangsstønad(søknad, behandlingsId, fagsakId, journalpostId)
+                            }
+                            DokumentBrevkode.BARNETILSYN -> {
+                                val søknad = journalpostClient.hentBarnetilsynSøknad(journalpostId, it.dokumentInfoId)
+                                behandlingService.lagreSøknadForBarnetilsyn(søknad, behandlingsId, fagsakId, journalpostId)
+                            }
+                            DokumentBrevkode.SKOLEPENGER -> {
+                                val søknad = journalpostClient.hentSkolepengerSøknad(journalpostId, it.dokumentInfoId)
+                                behandlingService.lagreSøknadForSkolepenger(søknad, behandlingsId, fagsakId, journalpostId)
+                            }
+                        }
+                    } catch (e: JsonProcessingException) {
+                        secureLogger.error("Kan ikke konvertere journalpostDokument til søknadsobjekt", e)
+                        logger.error("Kan ikke konvertere journalpostDokument til søknadsobjekt ${e.javaClass.simpleName}")
+                    }
                 }
-    }
-
-    private fun konverterTilSøknadsobjekt(it: Pair<DokumentBrevkode, ByteArray>,
-                                          fagsakId: UUID,
-                                          behandlingsId: UUID,
-                                          journalpostId: String) {
-        try {
-            when (it.first) {
-                DokumentBrevkode.OVERGANGSSTØNAD -> {
-                    val søknad = objectMapper.readValue(it.second, SøknadOvergangsstønad::class.java)
-                    behandlingService.mottaSøknadForOvergangsstønad(søknad, behandlingsId, fagsakId, journalpostId)
-                }
-                DokumentBrevkode.BARNETILSYN -> {
-                    val søknad = objectMapper.readValue(it.second, SøknadBarnetilsyn::class.java)
-                    behandlingService.mottaSøknadForBarnetilsyn(søknad, behandlingsId, fagsakId, journalpostId)
-                }
-                DokumentBrevkode.SKOLEPENGER -> {
-                    val søknad = objectMapper.readValue(it.second, SøknadSkolepenger::class.java)
-                    behandlingService.mottaSøknadForSkolepenger(søknad, behandlingsId, fagsakId, journalpostId)
-                }
-            }
-        } catch (e: JsonProcessingException) {
-            secureLogger.error("Kan ikke konvertere journalpostDokument til søknadsobjekt", e)
-            logger.error("Kan ikke konvertere journalpostDokument til søknadsobjekt ${e.javaClass.simpleName}")
-        }
     }
 
     private fun harOriginalDokument(dokument: no.nav.familie.kontrakter.felles.journalpost.DokumentInfo): Boolean =

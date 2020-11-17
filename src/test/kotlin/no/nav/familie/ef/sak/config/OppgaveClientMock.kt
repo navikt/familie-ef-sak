@@ -26,7 +26,7 @@ class OppgaveClientMock {
 
         every { oppgaveClient.finnOppgaveMedId(any()) } returns oppgave1
 
-        every { oppgaveClient.opprettOppgave(any()) } returns 12345678L
+        every { oppgaveClient.opprettOppgave(any()) } returns 2L
 
         every { oppgaveClient.fordelOppgave(any(), any()) } returns 12345678L
 
