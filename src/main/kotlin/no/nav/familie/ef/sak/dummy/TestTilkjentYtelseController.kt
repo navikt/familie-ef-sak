@@ -38,7 +38,7 @@ class TestTilkjentYtelseController(private val testTilkjentYtelseService: TestTi
         val tilkjentYtelseDto = TilkjentYtelseDTO(søker = søker,
                                                   behandlingId = UUID.randomUUID(),
                                                   andelerTilkjentYtelse = listOf(andelTilkjentYtelseDto, andelTilkjentYtelseDto))
-        return Ressurs.success(tilkjentYtelseDto.tilTilkjentYtelse(saksbehandler = SikkerhetContext.hentSaksbehandler()))
+        return Ressurs.success(tilkjentYtelseDto.tilTilkjentYtelse())
     }
 
 }
