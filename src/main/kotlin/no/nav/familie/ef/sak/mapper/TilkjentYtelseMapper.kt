@@ -8,15 +8,13 @@ import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseType
 import java.time.LocalDate
 
-fun TilkjentYtelseDTO.tilTilkjentYtelse(saksbehandler: String,
-                                        status: TilkjentYtelseStatus = TilkjentYtelseStatus.OPPRETTET): TilkjentYtelse {
+fun TilkjentYtelseDTO.tilTilkjentYtelse(status: TilkjentYtelseStatus = TilkjentYtelseStatus.OPPRETTET): TilkjentYtelse {
 
     val minStønadFom = this.andelerTilkjentYtelse.map { it.stønadFom }.minOrNull() ?: LocalDate.MIN
     val maxStønadTom = this.andelerTilkjentYtelse.map { it.stønadTom }.maxOrNull() ?: LocalDate.MAX
 
     return TilkjentYtelse(behandlingId = behandlingId,
                           personident = søker,
-                          saksbehandler = saksbehandler,
                           stønadFom = minStønadFom,
                           stønadTom = maxStønadTom,
                           vedtaksdato = vedtaksdato,
@@ -55,7 +53,6 @@ fun AndelTilkjentYtelse.tilDto(): AndelTilkjentYtelseDTO {
 fun TilkjentYtelse.tilOpphør(saksbehandler: String, opphørDato: LocalDate) =
         TilkjentYtelse(type = TilkjentYtelseType.OPPHØR,
                        personident = personident,
-                       saksbehandler = saksbehandler,
                        opphørFom = opphørDato,
                        behandlingId = behandlingId,
                        vedtaksdato = LocalDate.now(),
