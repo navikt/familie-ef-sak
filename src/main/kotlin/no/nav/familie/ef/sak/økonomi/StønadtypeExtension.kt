@@ -9,4 +9,4 @@ fun Stønadstype.tilKlassifisering() = when (this) {
 }
 
 fun String.tilStønadsType() = Stønadstype.values().firstOrNull { it.tilKlassifisering() == this }
-                             ?: error("Finner ikke YtelseType med klassifisering '$this'")
+                             ?: error("Finner ikke Stønadstype med klassifisering '$this'")

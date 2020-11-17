@@ -6,7 +6,7 @@ import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse.Companion.sni
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import java.time.LocalDate
 
-data class KjedeId(val klassifiering: String, val personIdent: String)
+data class KjedeId(val klassifisering: String, val personIdent: String)
 
 data class PeriodeId(val gjeldende: Long?,
                      val forrige: Long? = null)
