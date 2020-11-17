@@ -58,6 +58,7 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
         val utbetalingsoppdrag =
                 lagTilkjentYtelseMedUtbetalingsoppdrag(TilkjentYtelseMedMetaData(lagretTilkjentYtelse,
                                                                                  behandling.eksternId.id,
+                                                                                 fagsak.stønadstype,
                                                                                  fagsak.eksternId.id)).utbetalingsoppdrag!!
 
         tilkjentYtelseRepository.update(lagretTilkjentYtelse.copy(utbetalingsoppdrag = utbetalingsoppdrag))

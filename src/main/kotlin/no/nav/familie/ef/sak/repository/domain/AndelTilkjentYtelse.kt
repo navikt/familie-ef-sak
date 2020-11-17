@@ -15,14 +15,14 @@ data class AndelTilkjentYtelse(@Column("belop")
                                val personIdent: String,
                                val periodeId: Long? = null,
                                val forrigePeriodeId: Long? = null,
-                               val type: YtelseType) {
+                               ) {
 
     private fun erTilsvarendeForUtbetaling(other: AndelTilkjentYtelse): Boolean {
         return (this.personIdent == other.personIdent
                 && this.stønadFom == other.stønadFom
                 && this.stønadTom == other.stønadTom
                 && this.beløp == other.beløp
-                && this.type == other.type)
+           )
     }
 
     fun erNull() = this.beløp == 0
@@ -54,8 +54,4 @@ data class AndelTilkjentYtelse(@Column("belop")
         }
     }
 
-}
-
-enum class YtelseType {
-    OVERGANGSSTØNAD
 }

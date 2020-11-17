@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.api.dto
 
+import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.repository.domain.YtelseType
 import java.time.LocalDate
 import java.util.*
 
@@ -29,8 +29,7 @@ data class TilkjentYtelseDTO(val søker: String,
 data class AndelTilkjentYtelseDTO(val beløp: Int,
                                   val stønadFom: LocalDate,
                                   val stønadTom: LocalDate,
-                                  val personIdent: String,
-                                  val type: YtelseType)
+                                  val personIdent: String)
 
-data class TilkjentYtelseTestDTO(val nyTilkjentYtelse: TilkjentYtelse, val forrigeTilkjentYtelse: TilkjentYtelse?)
+data class TilkjentYtelseTestDTO(val nyTilkjentYtelse: TilkjentYtelse, val stønadstype: Stønadstype, val forrigeTilkjentYtelse: TilkjentYtelse?)
 

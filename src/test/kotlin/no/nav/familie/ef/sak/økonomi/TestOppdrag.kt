@@ -4,6 +4,7 @@ import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
+import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.domain.Sporbar
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseMedMetaData
@@ -47,8 +48,7 @@ data class TestOppdrag(val type: TestOppdragType,
                                 stønadTom = sluttPeriode,
                                 personIdent = fnr,
                                 periodeId = linjeId,
-                                forrigePeriodeId = forrigeLinjeId,
-                                type = ytelse.tilYtelseType())
+                                forrigePeriodeId = forrigeLinjeId)
         else if (TestOppdragType.Output == type && beløp == null && startPeriode == null && sluttPeriode == null)
             AndelTilkjentYtelse.nullAndel(KjedeId(ytelse, fnr),
                                           PeriodeId(linjeId!!, forrigeLinjeId))
@@ -231,6 +231,7 @@ object TestOppdragRunner {
                                                        forrigeTilkjentYtelse: TilkjentYtelse? = null) =
             UtbetalingsoppdragGenerator
                     .lagTilkjentYtelseMedUtbetalingsoppdrag(TilkjentYtelseMedMetaData(tilkjentYtelse = nyTilkjentYtelse,
+                                                                                      stønadstype =  Stønadstype.OVERGANGSSTØNAD,
                                                                                       eksternBehandlingId = behandlingEksternId,
                                                                                       eksternFagsakId = fagsakEksternId),
                                                             forrigeTilkjentYtelse)

@@ -2,10 +2,7 @@ package no.nav.familie.ef.sak.mapper
 
 import no.nav.familie.ef.sak.api.dto.AndelTilkjentYtelseDTO
 import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
-import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseType
+import no.nav.familie.ef.sak.repository.domain.*
 import java.time.LocalDate
 
 fun TilkjentYtelseDTO.tilTilkjentYtelse(status: TilkjentYtelseStatus = TilkjentYtelseStatus.OPPRETTET): TilkjentYtelse {
@@ -29,8 +26,7 @@ fun TilkjentYtelseDTO.tilAndelerTilkjentYtelse(): List<AndelTilkjentYtelse> {
                 AndelTilkjentYtelse(beløp = it.beløp,
                                     stønadFom = it.stønadFom,
                                     stønadTom = it.stønadTom,
-                                    personIdent = it.personIdent,
-                                    type = it.type)
+                                    personIdent = it.personIdent)
             }
 }
 
@@ -45,8 +41,7 @@ fun AndelTilkjentYtelse.tilDto(): AndelTilkjentYtelseDTO {
     return AndelTilkjentYtelseDTO(beløp = this.beløp,
                                   stønadFom = this.stønadFom,
                                   stønadTom = this.stønadTom,
-                                  personIdent = this.personIdent,
-                                  type = this.type)
+                                  personIdent = this.personIdent)
 }
 
 @Deprecated("Skal ikke brukes")
