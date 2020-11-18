@@ -22,7 +22,7 @@ class TestTilkjentYtelseService(private val behandlingService: BehandlingService
     @Transactional
     fun lagreTilkjentYtelseOgIverksettUtbetaling(tilkjentYtelseTestDTO: TilkjentYtelseTestDTO): TilkjentYtelse {
         val fagsak = fagsakService.hentEllerOpprettFagsak(tilkjentYtelseTestDTO.nyTilkjentYtelse.personident,
-                                                          Stønadstype.OVERGANGSSTØNAD)
+                                                          tilkjentYtelseTestDTO.stønadstype)
         val behandling = behandlingService.opprettBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                                                              fagsakId = fagsak.id)
         val eksternFagsakId = fagsakService.hentEksternId(behandling.fagsakId)
@@ -32,6 +32,7 @@ class TestTilkjentYtelseService(private val behandlingService: BehandlingService
 
         val nyTilkjentYtelseMedEksternId = TilkjentYtelseMedMetaData(nyTilkjentYtelse,
                                                                      eksternBehandlingId = behandling.eksternId.id,
+                                                                     stønadstype = fagsak.stønadstype,
                                                                      eksternFagsakId = eksternFagsakId)
         val tilkjentYtelseMedUtbetalingsoppdrag =
                 UtbetalingsoppdragGenerator

@@ -30,7 +30,7 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
     val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
     @Transactional
-    fun mottaSøknadForOvergangsstønad(søknad: SøknadOvergangsstønadKontrakt,
+    fun lagreSøknadForOvergangsstønad(søknad: SøknadOvergangsstønadKontrakt,
                                       behandlingId: UUID,
                                       fagsakId: UUID,
                                       journalpostId: String) {
@@ -40,14 +40,14 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
     }
 
     @Transactional
-    fun mottaSøknadForBarnetilsyn(søknad: SøknadBarnetilsynKontrakt, behandlingId: UUID, fagsakId: UUID, journalpostId: String) {
+    fun lagreSøknadForBarnetilsyn(søknad: SøknadBarnetilsynKontrakt, behandlingId: UUID, fagsakId: UUID, journalpostId: String) {
         val søknadsskjema = SøknadsskjemaMapper.tilDomene(søknad)
         søknadsskjemaRepository.insert(søknadsskjema)
         søknadRepository.insert(SøknadMapper.toDomain(fagsakId.toString(), journalpostId, søknadsskjema, behandlingId))
     }
 
     @Transactional
-    fun mottaSøknadForSkolepenger(søknad: SøknadSkolepengerKontrakt, behandlingId: UUID, fagsakId: UUID, journalpostId: String) {
+    fun lagreSøknadForSkolepenger(søknad: SøknadSkolepengerKontrakt, behandlingId: UUID, fagsakId: UUID, journalpostId: String) {
         val søknadsskjema = SøknadsskjemaMapper.tilDomene(søknad)
         søknadsskjemaRepository.insert(søknadsskjema)
         søknadRepository.insert(SøknadMapper.toDomain(fagsakId.toString(), journalpostId, søknadsskjema, behandlingId))

@@ -12,7 +12,6 @@ import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostResponse
 import no.nav.familie.kontrakter.felles.journalpost.*
-import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -84,6 +83,11 @@ internal class JournalføringServiceTest {
         every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any()) } returns nyOppgaveId
         every { behandlingService.oppdaterJournalpostIdPåBehandling(any(), any()) } just runs
         every { journalpostClient.ferdigstillJournalpost(any(), any()) } just runs
+
+        every {
+            behandlingService.lagreSøknadForOvergangsstønad(any(), any(), any(), any())
+        } just Runs
+
     }
 
     @Test
@@ -97,12 +101,8 @@ internal class JournalføringServiceTest {
         } returns OppdaterJournalpostResponse(journalpostId = journalpostId)
 
         every {
-            journalpostClient.hentDokument(any(), capture(slotDokumentInfoIder), DokumentVariantformat.ORIGINAL)
-        } returns objectMapper.writeValueAsString(Testsøknad.søknadOvergangsstønad).toByteArray()
-
-        every {
-            behandlingService.mottaSøknadForOvergangsstønad(any(), any(), any(), any())
-        } just Runs
+            journalpostClient.hentOvergangsstønadSøknad(any(), capture(slotDokumentInfoIder))
+        } returns Testsøknad.søknadOvergangsstønad
 
         val behandleSakOppgaveId =
                 journalføringService.fullførJournalpost(journalpostId = journalpostId,
@@ -125,7 +125,7 @@ internal class JournalføringServiceTest {
         }
         assertThat(slotDokumentInfoIder[0]).isEqualTo(dokumentInfoIdMedJsonVerdi)
         assertThat(slotDokumentInfoIder.size).isEqualTo(1)
-        verify(exactly = 1) { behandlingService.mottaSøknadForOvergangsstønad(any(), any(), any(), any()) }
+        verify(exactly = 1) { behandlingService.lagreSøknadForOvergangsstønad(any(), any(), any(), any()) }
     }
 
     @Test
@@ -140,8 +140,8 @@ internal class JournalføringServiceTest {
                 .returns(OppdaterJournalpostResponse(journalpostId = journalpostId))
 
         every {
-            journalpostClient.hentDokument(any(), any(), any())
-        } returns "IKKE JSON".toByteArray()
+            journalpostClient.hentOvergangsstønadSøknad(any(), any())
+        } returns  Testsøknad.søknadOvergangsstønad
 
         val behandleSakOppgaveId =
                 journalføringService.fullførJournalpost(

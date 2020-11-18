@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.repository.BehandlingRepository
 import no.nav.familie.ef.sak.repository.FagsakRepository
 import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseMedMetaData
+import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.økonomi.UtbetalingsoppdragGenerator.lagTilkjentYtelseMedUtbetalingsoppdrag
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -27,9 +28,7 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `Opprett og hent tilkjent ytelse`() {
-        val fagsak = fagsakRepository.insert(fagsak())
-        val behandling = behandlingRepository.insert(behandling(fagsak = fagsak))
-        val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(behandlingId = behandling.id)
+        val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(opprettBehandling())
         val tilkjentYtelseId = tilkjentYtelseRepository.insert(tilkjentYtelse).id
 
         val hentetTilkjentYtelse = tilkjentYtelseRepository.findByIdOrNull(tilkjentYtelseId)!!
@@ -42,7 +41,7 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
     fun `Opprett og hent andeler tilkjent ytelse`() {
         val fagsak = fagsakRepository.insert(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak = fagsak))
-        val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(2, behandlingId = behandling.id)
+        val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(opprettBehandling(), 2)
 
         val tilkjentYtelseId = tilkjentYtelseRepository.insert(tilkjentYtelse).id
 
@@ -55,10 +54,11 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
         val fagsak = fagsakRepository.insert(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak = fagsak))
         val lagretTilkjentYtelse =
-                tilkjentYtelseRepository.insert(DataGenerator.tilfeldigTilkjentYtelse(2, behandlingId = behandling.id))
+                tilkjentYtelseRepository.insert(DataGenerator.tilfeldigTilkjentYtelse(opprettBehandling(), 2))
         val utbetalingsoppdrag =
                 lagTilkjentYtelseMedUtbetalingsoppdrag(TilkjentYtelseMedMetaData(lagretTilkjentYtelse,
                                                                                  behandling.eksternId.id,
+                                                                                 fagsak.stønadstype,
                                                                                  fagsak.eksternId.id)).utbetalingsoppdrag!!
 
         tilkjentYtelseRepository.update(lagretTilkjentYtelse.copy(utbetalingsoppdrag = utbetalingsoppdrag))
@@ -69,14 +69,19 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `Finn tilkjent ytelse på personident`() {
-        val fagsak = fagsakRepository.insert(fagsak())
-        val behandling = behandlingRepository.insert(behandling(fagsak = fagsak))
-        val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(behandlingId = behandling.id)
+        val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(opprettBehandling())
         val lagretTilkjentYtelse = tilkjentYtelseRepository.insert(tilkjentYtelse)
 
         val hentetTilkjentYtelse =
                 tilkjentYtelseRepository.findByPersonident(tilkjentYtelse.personident)
 
         assertThat(hentetTilkjentYtelse).isEqualTo(lagretTilkjentYtelse)
+    }
+
+    private fun opprettBehandling() : Behandling {
+        val fagsak = fagsakRepository.insert(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak))
+
+        return behandling;
     }
 }

@@ -4,6 +4,8 @@ import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
+import no.nav.familie.ef.sak.repository.domain.Stønadstype
+import no.nav.familie.ef.sak.repository.domain.Sporbar
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseMedMetaData
 import no.nav.familie.kontrakter.felles.oppdrag.Opphør
@@ -46,8 +48,7 @@ data class TestOppdrag(val type: TestOppdragType,
                                 stønadTom = sluttPeriode,
                                 personIdent = fnr,
                                 periodeId = linjeId,
-                                forrigePeriodeId = forrigeLinjeId,
-                                type = ytelse.tilYtelseType())
+                                forrigePeriodeId = forrigeLinjeId)
         else if (TestOppdragType.Output == type && beløp == null && startPeriode == null && sluttPeriode == null)
             AndelTilkjentYtelse.nullAndel(KjedeId(ytelse, fnr),
                                           PeriodeId(linjeId!!, forrigeLinjeId))
@@ -80,6 +81,7 @@ class TestOppdragGroup {
     private val andelerTilkjentYtelseInn: MutableList<AndelTilkjentYtelse> = mutableListOf()
     private val andelerTilkjentYtelseUt: MutableList<AndelTilkjentYtelse> = mutableListOf()
     private val utbetalingsperioder: MutableList<Utbetalingsperiode> = mutableListOf()
+    private val sporbar = Sporbar()
     private var oppdragKode110: Utbetalingsoppdrag.KodeEndring = Utbetalingsoppdrag.KodeEndring.NY
     private var personIdent: String? = null
 
@@ -102,10 +104,10 @@ class TestOppdragGroup {
     val input: TilkjentYtelse by lazy {
         TilkjentYtelse(behandlingId = behandling(fagsak = fagsak()).id,
                        personident = personIdent!!,
-                       saksbehandler = "saksbehandler",
                        andelerTilkjentYtelse = andelerTilkjentYtelseInn,
                 // Ikke påkrevd, men exception ellers
-                       vedtaksdato = LocalDate.now())
+                       vedtaksdato = LocalDate.now(),
+                       sporbar = sporbar)
     }
 
     val output: TilkjentYtelse by lazy {
@@ -114,19 +116,19 @@ class TestOppdragGroup {
                                    fagSystem = "EFOG",
                                    saksnummer = fagsakEksternId.toString(),
                                    aktoer = personIdent!!,
-                                   saksbehandlerId = "saksbehandler",
+                                   saksbehandlerId = sporbar.endret.endretAv,
                                    avstemmingTidspunkt = LocalDateTime.now().truncatedTo(ChronoUnit.HOURS),
                                    utbetalingsperiode = utbetalingsperioder.map { it.copy(behandlingId = behandlingEksternId) })
 
         TilkjentYtelse(id = input.id,
                        behandlingId = input.behandlingId,
                        personident = personIdent!!,
-                       saksbehandler = "saksbehandler",
                        andelerTilkjentYtelse = andelerTilkjentYtelseUt,
                        utbetalingsoppdrag = utbetalingsoppdrag,
                        vedtaksdato = input.vedtaksdato,
                        stønadFom = andelerTilkjentYtelseUt.filter { it.stønadFom != NULL_DATO }.minOfOrNull { it.stønadFom },
-                       stønadTom = andelerTilkjentYtelseInn.filter { it.stønadTom != NULL_DATO }.maxOfOrNull { it.stønadTom })
+                       stønadTom = andelerTilkjentYtelseInn.filter { it.stønadTom != NULL_DATO }.maxOfOrNull { it.stønadTom },
+                       sporbar = sporbar)
 
     }
 }
@@ -229,6 +231,7 @@ object TestOppdragRunner {
                                                        forrigeTilkjentYtelse: TilkjentYtelse? = null) =
             UtbetalingsoppdragGenerator
                     .lagTilkjentYtelseMedUtbetalingsoppdrag(TilkjentYtelseMedMetaData(tilkjentYtelse = nyTilkjentYtelse,
+                                                                                      stønadstype =  Stønadstype.OVERGANGSSTØNAD,
                                                                                       eksternBehandlingId = behandlingEksternId,
                                                                                       eksternFagsakId = fagsakEksternId),
                                                             forrigeTilkjentYtelse)
