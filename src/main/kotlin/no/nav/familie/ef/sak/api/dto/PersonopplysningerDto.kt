@@ -34,7 +34,8 @@ data class BarnDto(
         val navn: String,
         val annenForelder: AnnenForelderDTO?,
         val adresse: List<AdresseDto>,
-        val borHosSøker: Boolean
+        val borHosSøker: Boolean,
+        val fødselsdato: LocalDate?
 )
 
 data class AnnenForelderDTO(

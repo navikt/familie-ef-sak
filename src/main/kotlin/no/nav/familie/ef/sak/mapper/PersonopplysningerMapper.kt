@@ -87,7 +87,8 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                 navn = pdlBarn.navn.gjeldende().visningsnavn(),
                 annenForelder = annenForelderIdent?.let { AnnenForelderDTO(it, identNavnMap[it] ?: "Finner ikke navn") },
                 adresse = pdlBarn.bostedsadresse.map(adresseMapper::tilAdresse),
-                borHosSøker = borPåSammeAdresse(pdlBarn.bostedsadresse, bostedsadresserForelder)
+                borHosSøker = borPåSammeAdresse(pdlBarn.bostedsadresse, bostedsadresserForelder),
+                fødselsdato = pdlBarn.fødsel.firstOrNull()?.fødselsdato
         )
     }
 

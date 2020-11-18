@@ -6,6 +6,9 @@ import no.nav.familie.ef.sak.api.dto.Folkeregisterpersonstatus
 import no.nav.familie.ef.sak.api.dto.Kjønn
 import no.nav.familie.ef.sak.api.dto.Sivilstandstype
 import no.nav.familie.ef.sak.integration.dto.pdl.*
+import no.nav.familie.ef.sak.repository.domain.EksternBehandlingId
+import no.nav.familie.ef.sak.service.BehandlingService
+import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.PersonopplysningerService
 import no.nav.familie.ef.sak.service.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -19,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
+import java.util.*
 
 
 @RestController
@@ -26,12 +30,22 @@ import java.time.Month
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class PersonopplysningerController(private val personopplysningerService: PersonopplysningerService,
-                                   private val tilgangService: TilgangService) {
+                                   private val tilgangService: TilgangService,
+                                   private val behandlingService: BehandlingService,
+                                   private val fagsakService: FagsakService) {
 
     @PostMapping
     fun personopplysninger(@RequestBody personIdent: PersonIdentDto): Ressurs<PersonopplysningerDto> {
         tilgangService.validerTilgangTilPersonMedBarn(personIdent.personIdent)
         return Ressurs.success(personopplysningerService.hentPersonopplysninger(personIdent.personIdent))
+    }
+
+    @PostMapping
+    fun personopplysninger(@RequestBody behandlingId: UUID): Ressurs<PersonopplysningerDto> {
+        tilgangService.validerTilgangTilBehandling(behandlingId)
+        val behandling = behandlingService.hentBehandling(behandlingId)
+        val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
+        return Ressurs.success(personopplysningerService.hentPersonopplysninger(fagsak.hentAktivIdent()))
     }
 
     @PostMapping("dummy")
@@ -44,7 +58,7 @@ class PersonopplysningerController(private val personopplysningerService: Person
                                       adressebeskyttelse = Adressebeskyttelse.UGRADERT,
                                       folkeregisterpersonstatus = Folkeregisterpersonstatus.BOSATT,
                                       dødsdato = null,
-                                      telefonnummer = TelefonnummerDto("47", "22228888"),
+                                      telefonnummer = TelefonnummerDto("47", "  22228888"),
                                       statsborgerskap = listOf(StatsborgerskapDto(land = "Danmark",
                                                                                   gyldigFraOgMedDato = LocalDate.EPOCH,
                                                                                   gyldigTilOgMedDato = LocalDate.of(1998, 3, 20)),
@@ -73,7 +87,8 @@ class PersonopplysningerController(private val personopplysningerService: Person
                                                                               AdresseType.BOSTEDADRESSE,
                                                                               gyldigFraOgMed = LocalDate.EPOCH,
                                                                               gyldigTilOgMed = null)),
-                                                            true),
+                                                            true,
+                                                            fødselsdato = LocalDate.of(2018, 12, 2)),
                                                     BarnDto("01030122222",
                                                             "Nils Olavsson",
                                                             AnnenForelderDTO("66666999999", "Annen Forelder Navn"),
@@ -81,11 +96,12 @@ class PersonopplysningerController(private val personopplysningerService: Person
                                                                               AdresseType.BOSTEDADRESSE,
                                                                               gyldigFraOgMed = LocalDate.EPOCH,
                                                                               gyldigTilOgMed = null)),
-                                                            false)),
+                                                            false,
+                                                            fødselsdato = LocalDate.of(2000, 12, 2))),
                                       innflyttingTilNorge = listOf(InnflyttingTilNorge("Sverige", null, Folkeregistermetadata(
-                                              LocalDateTime.of(1993, Month.AUGUST, 10, 10,10), null))),
+                                              LocalDateTime.of(1993, Month.AUGUST, 10, 10, 10), null))),
                                       utflyttingFraNorge = listOf(UtflyttingFraNorge("Narnia", null, Folkeregistermetadata(
-                                              LocalDateTime.of(1998, Month.AUGUST, 10, 10,10), null)))
+                                              LocalDateTime.of(1998, Month.AUGUST, 10, 10, 10), null)))
                 ))
     }
 

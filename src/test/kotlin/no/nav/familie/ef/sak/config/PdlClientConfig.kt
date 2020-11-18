@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.Month
 
 @Configuration
 @Profile("mock-pdl")
@@ -64,7 +65,9 @@ class PdlClientConfig {
         return pdlClient
     }
 
-    private val folkeregistermetadata = Folkeregistermetadata(LocalDateTime.now(), LocalDateTime.now())
+    private val folkeregistermetadata = Folkeregistermetadata(LocalDateTime.of(2010, Month.AUGUST, 30, 10, 10),
+                                                              LocalDateTime.of(2018, Month.JANUARY, 15, 12, 55))
+
 
     private fun lagKjønn(kjønnType: KjønnType = KjønnType.KVINNE) = listOf(Kjønn(kjønnType))
 

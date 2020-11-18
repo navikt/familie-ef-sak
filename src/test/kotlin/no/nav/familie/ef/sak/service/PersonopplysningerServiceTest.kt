@@ -91,7 +91,24 @@ internal class PersonopplysningerServiceTest {
     "navn" : "11111133333 mellomnavn Etternavn"
   } ],
   "egenAnsatt" : true,
-  "navEnhet" : "1 - Enhet"
+  "navEnhet" : "1 - Enhet",
+  "barn" : [ ],
+  "innflyttingTilNorge" : [ {
+    "fraflyttingsland" : "SWE",
+    "fraflyttingsstedIUtlandet" : "Stockholm",
+    "folkeregistermetadata" : {
+      "gyldighetstidspunkt" : "2010-08-30T10:10:00",
+      "opphoerstidspunkt" : "2018-01-15T12:55:00"
+    }
+  } ],
+  "utflyttingFraNorge" : [ {
+    "tilflyttingsland" : "SWE",
+    "tilflyttingsstedIUtlandet" : "Stockholm",
+    "folkeregistermetadata" : {
+      "gyldighetstidspunkt" : "2010-08-30T10:10:00",
+      "opphoerstidspunkt" : "2018-01-15T12:55:00"
+    }
+  } ]
 }""")
     }
 }
