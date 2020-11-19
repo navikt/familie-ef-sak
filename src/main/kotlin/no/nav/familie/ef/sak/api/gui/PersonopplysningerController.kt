@@ -39,7 +39,7 @@ class PersonopplysningerController(private val personopplysningerService: Person
         tilgangService.validerTilgangTilPersonMedBarn(personIdent.personIdent)
         return Ressurs.success(personopplysningerService.hentPersonopplysninger(personIdent.personIdent))
     }
-
+/*
     @PostMapping
     fun personopplysninger(@RequestBody behandlingId: UUID): Ressurs<PersonopplysningerDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
@@ -103,6 +103,6 @@ class PersonopplysningerController(private val personopplysningerService: Person
                                       utflyttingFraNorge = listOf(UtflyttingFraNorge("Narnia", null, Folkeregistermetadata(
                                               LocalDateTime.of(1998, Month.AUGUST, 10, 10, 10), null)))
                 ))
-    }
+    }*/
 
 }
