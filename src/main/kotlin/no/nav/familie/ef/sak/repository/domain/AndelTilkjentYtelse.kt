@@ -3,11 +3,13 @@ package no.nav.familie.ef.sak.repository.domain
 import no.nav.familie.ef.sak.økonomi.KjedeId
 import no.nav.familie.ef.sak.økonomi.PeriodeId
 import no.nav.familie.ef.sak.økonomi.tilNullAndelTilkjentYtelse
+import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import java.time.LocalDate
 import java.util.*
 
-data class AndelTilkjentYtelse(val id: UUID? = null,
+data class AndelTilkjentYtelse(@Id
+                               val id: UUID = UUID.randomUUID(),
                                @Column("belop")
                                val beløp: Int,
                                @Column("stonad_fom")

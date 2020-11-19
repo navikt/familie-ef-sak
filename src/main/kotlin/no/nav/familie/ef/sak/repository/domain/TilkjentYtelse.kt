@@ -4,6 +4,7 @@ import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
+import org.springframework.data.relational.core.mapping.MappedCollection
 import java.time.LocalDate
 import java.util.*
 
@@ -21,6 +22,7 @@ data class TilkjentYtelse(@Id
                           val vedtaksdato: LocalDate? = null,
                           val status: TilkjentYtelseStatus = TilkjentYtelseStatus.IKKE_KLAR,
                           val type: TilkjentYtelseType = TilkjentYtelseType.FØRSTEGANGSBEHANDLING,
+                          @MappedCollection(idColumn = "tilkjent_ytelse", keyColumn = "id")
                           val andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
                           @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                           val sporbar: Sporbar = Sporbar()) {

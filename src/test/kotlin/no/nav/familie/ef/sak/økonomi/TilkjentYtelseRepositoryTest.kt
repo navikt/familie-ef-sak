@@ -3,9 +3,7 @@ package no.nav.familie.ef.sak.økonomi
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
-import no.nav.familie.ef.sak.repository.BehandlingRepository
-import no.nav.familie.ef.sak.repository.FagsakRepository
-import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
+import no.nav.familie.ef.sak.repository.*
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseMedMetaData
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.økonomi.UtbetalingsoppdragGenerator.lagTilkjentYtelseMedUtbetalingsoppdrag
@@ -19,6 +17,9 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
+
+    @Autowired
+    private lateinit var andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
 
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
@@ -35,6 +36,21 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
 
         assertThat(hentetTilkjentYtelse.behandlingId).isEqualTo(tilkjentYtelse.behandlingId)
         assertThat(hentetTilkjentYtelse.andelerTilkjentYtelse).isNotEmpty
+    }
+
+    @Test
+    internal fun `Skal sette id på andelTilkjentYtelse når man lagrer tilkjentYtelse`() {
+        val fagsak = fagsak()
+        val behandling = behandling(fagsak)
+        fagsakRepository.insert(fagsak)
+        behandlingRepository.insert(behandling)
+        val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(behandling, antallAndelerTilkjentYtelse = 1)
+        val andelTilkjentYtelseId = tilkjentYtelse.andelerTilkjentYtelse.single().id
+        tilkjentYtelseRepository.insert(tilkjentYtelse)
+
+        assertThat(tilkjentYtelseRepository.findByIdOrThrow(tilkjentYtelse.id).andelerTilkjentYtelse.single().id)
+                .isEqualTo(andelTilkjentYtelseId)
+        assertThat(andelTilkjentYtelseRepository.findByIdOrNull(andelTilkjentYtelseId)).isNotNull
     }
 
     @Test
