@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.integration.dto.pdl.Familierelasjonsrolle
 import no.nav.familie.ef.sak.mapper.AleneomsorgMapper
 import no.nav.familie.ef.sak.mapper.MedlemskapMapper
+import no.nav.familie.ef.sak.mapper.SivilstandMapper
 import no.nav.familie.ef.sak.repository.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
@@ -66,6 +67,9 @@ class VurderingService(private val behandlingService: BehandlingService,
         val medlemskap = medlemskapMapper.tilDto(medlemskapsdetaljer = søknad.medlemskap,
                                                  pdlSøker = pdlSøker)
 
+        val sivilstand = SivilstandMapper.tilDto(sivilstandsdetaljer = søknad.sivilstand,
+                                                 pdlSøker = pdlSøker)
+
         val vurderinger = hentEllerOpprettVurderingerForInngangsvilkår(behandlingId)
                 .map {
                     VilkårsvurderingDto(id = it.id,
@@ -81,7 +85,7 @@ class VurderingService(private val behandlingService: BehandlingService,
                                                                    delvurdering.resultat)
                                         })
                 }
-        return InngangsvilkårDto(medlemskap = medlemskap, vurderinger = vurderinger)
+        return InngangsvilkårDto(medlemskap = medlemskap, sivilstand = sivilstand, vurderinger = vurderinger)
     }
 
     private fun hentEllerOpprettVurderingerForInngangsvilkår(behandlingId: UUID): List<Vilkårsvurdering> {
@@ -113,8 +117,10 @@ class VurderingService(private val behandlingService: BehandlingService,
         val inngangsvilkår = VilkårType.hentInngangsvilkår()
 
         return inngangsvilkår.filter {
-            lagredeVilkårsvurderinger.any { vurdering -> vurdering.type == it
-                                                         && vurdering.resultat == Vilkårsresultat.IKKE_VURDERT }
+            lagredeVilkårsvurderinger.any { vurdering ->
+                vurdering.type == it
+                && vurdering.resultat == Vilkårsresultat.IKKE_VURDERT
+            }
             || lagredeVilkårsvurderinger.none { vurdering -> vurdering.type == it }
         }
     }
