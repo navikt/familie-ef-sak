@@ -5,8 +5,10 @@ import no.nav.familie.ef.sak.økonomi.PeriodeId
 import no.nav.familie.ef.sak.økonomi.tilNullAndelTilkjentYtelse
 import org.springframework.data.relational.core.mapping.Column
 import java.time.LocalDate
+import java.util.*
 
-data class AndelTilkjentYtelse(@Column("belop")
+data class AndelTilkjentYtelse(val id: UUID? = null,
+                               @Column("belop")
                                val beløp: Int,
                                @Column("stonad_fom")
                                val stønadFom: LocalDate, /// TODO  Gjør nullable
