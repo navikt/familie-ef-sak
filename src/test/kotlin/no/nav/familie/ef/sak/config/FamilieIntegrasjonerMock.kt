@@ -56,7 +56,7 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(Ressurs.success(Testsøknad.søknadOvergangsstønad)))),
                    WireMock.get(WireMock.urlPathMatching("${integrasjonerConfig.journalPostUri.path}/hentdokument/([0-9]*)/([0-9]*)"))
                            .withQueryParam("variantFormat", equalTo("ARKIV"))
-                           .willReturn(WireMock.okJson(objectMapper.writeValueAsString(Ressurs.success(pdfByteArray)))),
+                           .willReturn(WireMock.okJson(objectMapper.writeValueAsString(Ressurs.success(pdfAsBase64String)))),
                    WireMock.put(WireMock.urlMatching("${integrasjonerConfig.dokarkivUri.path}.*"))
                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(oppdatertJournalpostResponse)))
 
@@ -93,8 +93,9 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
 
         private val oppdatertJournalpostResponse =
                 Ressurs.success(OppdaterJournalpostResponse(journalpostId = "1234"))
-        val pdfByteArray =
-                "255044462D312E0D747261696C65723C3C2F526F6F743C3C2F50616765733C3C2F4B6964735B3C3C2F4D65646961426F785B302030203320335D3E3E5D3E3E3E3E3E3E".toByteArray()
+        val pdfAsBase64String =
+                "JVBERi0xLjIgCjkgMCBvYmoKPDwKPj4Kc3RyZWFtCkJULyA5IFRmKFRlc3QpJyBFVAplbmRzdHJlYW0KZW5kb2JqCjQgMCBvYmoKPDwKL1R5cGUgL1BhZ2UKL1BhcmVudCA1IDAgUgovQ29udGVudHMgOSAwIFIKPj4KZW5kb2JqCjUgMCBvYmoKPDwKL0tpZHMgWzQgMCBSIF0KL0NvdW50IDEKL1R5cGUgL1BhZ2VzCi9NZWRpYUJveCBbIDAgMCA5OSA5IF0KPj4KZW5kb2JqCjMgMCBvYmoKPDwKL1BhZ2VzIDUgMCBSCi9UeXBlIC9DYXRhbG9nCj4+CmVuZG9iagp0cmFpbGVyCjw8Ci9Sb290IDMgMCBSCj4+CiUlRU9G"
+
         private val journalpost =
                 Ressurs.success(Journalpost(journalpostId = "1234",
                                             journalposttype = Journalposttype.I,
