@@ -17,7 +17,7 @@ data class FinnOppgaveRequestDto(val behandlingstema: String? = null,
                                  val enhetsmappe: Long? = null,
                                  val ident: String?) {
 
-    fun tilFinnOppgaveRequest(aktørid: String?): FinnOppgaveRequest =
+    fun tilFinnOppgaveRequest(aktørid: String? = null): FinnOppgaveRequest =
             FinnOppgaveRequest(tema = Tema.ENF,
                                behandlingstema = if (this.behandlingstema != null) Behandlingstema.values()
                                        .find { it.value == this.behandlingstema } else null,

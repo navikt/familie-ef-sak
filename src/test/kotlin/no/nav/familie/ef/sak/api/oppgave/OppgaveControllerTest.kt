@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import no.nav.familie.ef.sak.api.ManglerTilgang
+import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.repository.domain.Oppgave
 import no.nav.familie.ef.sak.service.OppgaveService
 import no.nav.familie.ef.sak.service.TilgangService
@@ -19,9 +20,10 @@ internal class OppgaveControllerTest {
 
     private val tilgangService: TilgangService = mockk()
     private val oppgaveService: OppgaveService = mockk()
+    private val pdlClient: PdlClient = mockk()
 
 
-    private val oppgaveController: OppgaveController = OppgaveController(oppgaveService, tilgangService)
+    private val oppgaveController: OppgaveController = OppgaveController(oppgaveService, tilgangService, pdlClient)
 
     @Test
     internal fun `skal feile hvis bruker er veileder`() {
