@@ -30,21 +30,32 @@ internal class OppgaveControllerTest {
     @Test
     internal fun `skal sende med aktoerId i request `() {
         val finnOppgaveRequestSlot = slot<FinnOppgaveRequest>()
-
-        every {
-            tilgangService.validerTilgangTilPersonMedBarn(any())
-        } just Runs
-
-        every {
-            tilgangService.validerHarSaksbehandlerrolle()
-        } just Runs
-
+        tilgangOgRolleJustRuns()
         every { pdlClient.hentAktørId("4321") } returns PdlHentIdenter(PdlAktørId(listOf(PdlIdent("1234"))))
-
         every { oppgaveService.hentOppgaver(capture(finnOppgaveRequestSlot)) } returns FinnOppgaveResponseDto(0, listOf())
         oppgaveController.hentOppgaver(FinnOppgaveRequestDto(ident = "4321"))
-
         assertThat(finnOppgaveRequestSlot.captured.aktørId).isEqualTo("1234")
+    }
+
+
+    @Test
+    internal fun `skal ikke feile hvis ident er tom`() {
+        val finnOppgaveRequestSlot = slot<FinnOppgaveRequest>()
+        tilgangOgRolleJustRuns()
+        every { oppgaveService.hentOppgaver(capture(finnOppgaveRequestSlot)) } returns FinnOppgaveResponseDto(0, listOf())
+        oppgaveController.hentOppgaver(FinnOppgaveRequestDto(ident = " "))
+        verify (exactly = 0){pdlClient.hentAktørId(any())}
+        assertThat(finnOppgaveRequestSlot.captured.aktørId).isEqualTo(null)
+    }
+
+    @Test
+    internal fun `skal ikke feile hvis ident er null`() {
+        val finnOppgaveRequestSlot = slot<FinnOppgaveRequest>()
+        tilgangOgRolleJustRuns()
+        every { oppgaveService.hentOppgaver(capture(finnOppgaveRequestSlot)) } returns FinnOppgaveResponseDto(0, listOf())
+        oppgaveController.hentOppgaver(FinnOppgaveRequestDto(ident = null))
+        verify (exactly = 0){pdlClient.hentAktørId(any())}
+        assertThat(finnOppgaveRequestSlot.captured.aktørId).isEqualTo(null)
     }
 
     @Test
@@ -64,13 +75,7 @@ internal class OppgaveControllerTest {
 
     @Test
     internal fun `skal hente oppgave`() {
-        every {
-            tilgangService.validerTilgangTilPersonMedBarn(any())
-        } just Runs
-
-        every {
-            tilgangService.validerHarSaksbehandlerrolle()
-        } just Runs
+        tilgangOgRolleJustRuns()
 
 
         val oppgave = Oppgave(UUID.randomUUID(), UUID.randomUUID(), 123, Oppgavetype.BehandleSak)
@@ -88,13 +93,7 @@ internal class OppgaveControllerTest {
 
     @Test
     internal fun `skal returnere funksjonell feil når oppgave ikke finnes hos oss`() {
-        every {
-            tilgangService.validerTilgangTilPersonMedBarn(any())
-        } just Runs
-
-        every {
-            tilgangService.validerHarSaksbehandlerrolle()
-        } just Runs
+        tilgangOgRolleJustRuns()
 
 
         every {
@@ -104,5 +103,15 @@ internal class OppgaveControllerTest {
         val returnertOppgaveRessurs = oppgaveController.hentOppgave(123)
 
         assertThat(returnertOppgaveRessurs.status).isEqualTo(Ressurs.Status.FUNKSJONELL_FEIL)
+    }
+
+    private fun tilgangOgRolleJustRuns() {
+        every {
+            tilgangService.validerTilgangTilPersonMedBarn(any())
+        } just Runs
+
+        every {
+            tilgangService.validerHarSaksbehandlerrolle()
+        } just Runs
     }
 }
