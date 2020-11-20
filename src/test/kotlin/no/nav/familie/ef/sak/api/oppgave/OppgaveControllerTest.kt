@@ -44,7 +44,7 @@ internal class OppgaveControllerTest {
         every { oppgaveService.hentOppgaver(capture(finnOppgaveRequestSlot)) } returns FinnOppgaveResponseDto(0, listOf())
         oppgaveController.hentOppgaver(FinnOppgaveRequestDto(ident = "4321"))
 
-        assertThat(finnOppgaveRequestSlot.captured.aktoerId).isEqualTo("1234")
+        assertThat(finnOppgaveRequestSlot.captured.aktørId).isEqualTo("1234")
     }
 
     @Test
