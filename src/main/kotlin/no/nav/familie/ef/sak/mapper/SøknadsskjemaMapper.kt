@@ -302,7 +302,8 @@ object SøknadsskjemaMapper {
                       oppsigelseDokumentasjon = tilDomene(situasjon.oppsigelseDokumentasjon?.verdi))
 
     private fun tilDomene(stønadsstart: Stønadsstart): YearMonth? =
-            stønadsstart.let { YearMonth.of(it.fraÅr!!.verdi, it.fraMåned?.verdi) }
+            stønadsstart.fraMåned?.verdi?.let { måned -> stønadsstart.fraÅr?.verdi?.let { år -> YearMonth.of(år, måned) } }
+
 
     private fun tilDomene(dokumentasjon: KontraktDokumentasjon?): Dokumentasjon? =
             dokumentasjon?.let { dok ->
