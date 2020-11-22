@@ -15,10 +15,7 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
@@ -40,8 +37,8 @@ class PersonopplysningerController(private val personopplysningerService: Person
         return Ressurs.success(personopplysningerService.hentPersonopplysninger(personIdent.personIdent))
     }
 
-    @PostMapping("/behandling")
-    fun personopplysninger(@RequestBody behandlingId: UUID): Ressurs<PersonopplysningerDto> {
+    @GetMapping("/behandling/{behandlingId}")
+    fun personopplysninger(@PathVariable behandlingId: UUID): Ressurs<PersonopplysningerDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         val behandling = behandlingService.hentBehandling(behandlingId)
         val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
