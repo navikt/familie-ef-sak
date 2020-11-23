@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.integration.dto.pdl.*
 import no.nav.familie.ef.sak.service.ArbeidsfordelingService
 import org.springframework.stereotype.Component
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Component
 class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
@@ -60,7 +61,7 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                 },
                 innflyttingTilNorge = søker.innflyttingTilNorge,
                 utflyttingFraNorge = søker.utflyttingFraNorge,
-                )
+        )
     }
 
     fun tilAdresser(søker: PdlSøker): List<AdresseDto> {
@@ -87,14 +88,20 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                 navn = pdlBarn.navn.gjeldende().visningsnavn(),
                 annenForelder = annenForelderIdent?.let { AnnenForelderDTO(it, identNavnMap[it] ?: "Finner ikke navn") },
                 adresse = pdlBarn.bostedsadresse.map(adresseMapper::tilAdresse),
-                borHosSøker = borPåSammeAdresse(pdlBarn.bostedsadresse, bostedsadresserForelder),
+                borHosSøker = borPåSammeAdresse(pdlBarn, bostedsadresserForelder),
                 fødselsdato = pdlBarn.fødsel.firstOrNull()?.fødselsdato
         )
     }
 
-    fun borPåSammeAdresse(bostedsadresserForelder: List<Bostedsadresse>, bostedsadresserBarn: List<Bostedsadresse>): Boolean {
 
-        val gjeldendeBostedsadresseBarn = finnGjeldendeBostedsadresse(bostedsadresserBarn)
+
+    fun borPåSammeAdresse(barn: PdlBarn, bostedsadresserForelder: List<Bostedsadresse>): Boolean {
+
+        if (harDeltBosted(barn)) {
+            return false
+        }
+
+        val gjeldendeBostedsadresseBarn = finnGjeldendeBostedsadresse(barn.bostedsadresse)
         val gjeldendeBostedsadresseForelder = finnGjeldendeBostedsadresse(bostedsadresserForelder)
         return gjeldendeBostedsadresseBarn?.let {
             return it.vegadresse == gjeldendeBostedsadresseForelder?.vegadresse
@@ -106,6 +113,13 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                 .filter { it.folkeregistermetadata.gyldighetstidspunkt != null && it.folkeregistermetadata.opphørstidspunkt == null }
                 .maxByOrNull { it.folkeregistermetadata.gyldighetstidspunkt!! }
         return bostedsadresse ?: bostedsadresser.firstOrNull()
+    }
+
+    private fun harDeltBosted(barn: PdlBarn): Boolean {
+        return barn.deltBosted.any {
+            it.startdatoForKontrakt.isBefore(LocalDateTime.now())
+            && (it.sluttdatoForKontrakt == null || it.sluttdatoForKontrakt.isAfter(LocalDateTime.now()))
+        }
     }
 
 }
