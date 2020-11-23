@@ -52,23 +52,6 @@ internal class JournalpostClientTest {
     }
 
     @Test
-    fun `skal hente ut overgangsstønad-json for en journalpost`() {
-        val søknadOvergangsstønad = Testsøknad.søknadOvergangsstønad
-        wiremockServerItem.stubFor(
-                WireMock.get(WireMock.urlPathMatching("${integrasjonerConfig.journalPostUri.path}/hentdokument/([0-9]*)/([0-9]*)"))
-                        .withQueryParam("variantFormat", WireMock.equalTo("ORIGINAL"))
-                        .willReturn(WireMock.okJson(objectMapper.writeValueAsString(Ressurs.success(søknadOvergangsstønad)))))
-        val response = journalpostClient.hentOvergangsstønadSøknad("123", "123")
-
-
-        assertThat(response).isNotNull
-        assertThat(response.personalia).isEqualTo(søknadOvergangsstønad.personalia)
-        assertThat(response.bosituasjon).isEqualTo(søknadOvergangsstønad.bosituasjon)
-        assertThat(response.innsendingsdetaljer).isEqualTo(søknadOvergangsstønad.innsendingsdetaljer)
-        assertThat(response.medlemskapsdetaljer).isEqualTo(søknadOvergangsstønad.medlemskapsdetaljer)
-    }
-
-    @Test
     fun `skal hente ut vedlegg for en journalpost`() {
         val vedlegg =
                 "255044462D312E0D747261696C65723C3C2F526F6F743C3C2F50616765733C3C2F4B6964735B3C3C2F4D65646961426F785B302030203320335D3E3E5D3E3E3E3E3E3E".toByteArray()
@@ -78,9 +61,54 @@ internal class JournalpostClientTest {
                         .willReturn(WireMock.okJson(objectMapper.writeValueAsString(Ressurs.success(vedlegg)))))
         val response = journalpostClient.hentDokument("123", "123", DokumentVariantformat.ARKIV)
 
-
         assertThat(response).isNotNull
         assertThat(response).isEqualTo(vedlegg)
+    }
+
+
+    @Test
+    fun `skal hente ut og parse søknad om overgangsstønad`() {
+        val vedlegg =
+                objectMapper.writeValueAsString(Ressurs.success(objectMapper.writeValueAsBytes(Testsøknad.søknadOvergangsstønad)))
+        wiremockServerItem.stubFor(
+                WireMock.get(WireMock.urlPathMatching("${integrasjonerConfig.journalPostUri.path}/hentdokument/([0-9]*)/([0-9]*)"))
+                        .withQueryParam("variantFormat", WireMock.equalTo("ORIGINAL"))
+                        .willReturn(WireMock.okJson(vedlegg)))
+        val response = journalpostClient.hentOvergangsstønadSøknad("123", "123")
+
+
+        assertThat(response).isNotNull
+        assertThat(response.personalia.verdi.fødselsnummer).isEqualTo(Testsøknad.søknadOvergangsstønad.personalia.verdi.fødselsnummer)
+    }
+
+
+    @Test
+    fun `skal hente ut og parse søknad om barnetilsyn`() {
+        val vedlegg =
+                objectMapper.writeValueAsString(Ressurs.success(objectMapper.writeValueAsBytes(Testsøknad.søknadBarnetilsyn)))
+        wiremockServerItem.stubFor(
+                WireMock.get(WireMock.urlPathMatching("${integrasjonerConfig.journalPostUri.path}/hentdokument/([0-9]*)/([0-9]*)"))
+                        .withQueryParam("variantFormat", WireMock.equalTo("ORIGINAL"))
+                        .willReturn(WireMock.okJson(vedlegg)))
+        val response = journalpostClient.hentBarnetilsynSøknad("123", "123")
+
+        assertThat(response).isNotNull
+        assertThat(response.personalia.verdi.fødselsnummer).isEqualTo(Testsøknad.søknadBarnetilsyn.personalia.verdi.fødselsnummer)
+    }
+
+    @Test
+    fun `skal hente ut og parse søknad om skolepenger`() {
+        val vedlegg =
+                objectMapper.writeValueAsString(Ressurs.success(objectMapper.writeValueAsBytes(Testsøknad.søknadSkolepenger)))
+        wiremockServerItem.stubFor(
+                WireMock.get(WireMock.urlPathMatching("${integrasjonerConfig.journalPostUri.path}/hentdokument/([0-9]*)/([0-9]*)"))
+                        .withQueryParam("variantFormat", WireMock.equalTo("ORIGINAL"))
+                        .willReturn(WireMock.okJson(vedlegg)))
+        val response = journalpostClient.hentSkolepengerSøknad("123", "123")
+
+
+        assertThat(response).isNotNull
+        assertThat(response.personalia.verdi.fødselsnummer).isEqualTo(Testsøknad.søknadSkolepenger.personalia.verdi.fødselsnummer)
     }
 
     @Test

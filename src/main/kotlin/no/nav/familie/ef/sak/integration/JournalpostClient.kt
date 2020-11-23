@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.integration
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.config.IntegrasjonerConfig
 import no.nav.familie.ef.sak.domene.DokumentVariantformat
 import no.nav.familie.http.client.AbstractPingableRestClient
@@ -11,6 +12,7 @@ import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostResponse
 import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
+import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
@@ -43,15 +45,18 @@ class JournalpostClient(@Qualifier("azure") restOperations: RestOperations,
     }
 
     fun hentOvergangsstønadSøknad(journalpostId: String, dokumentInfoId: String): SøknadOvergangsstønad {
-        return getForEntity<Ressurs<SøknadOvergangsstønad>>(jsonDokumentUri(journalpostId, dokumentInfoId)).getDataOrThrow()
+        val data = getForEntity<Ressurs<ByteArray>>(jsonDokumentUri(journalpostId, dokumentInfoId)).getDataOrThrow()
+        return objectMapper.readValue<SøknadOvergangsstønad>(data)
     }
 
     fun hentBarnetilsynSøknad(journalpostId: String, dokumentInfoId: String): SøknadBarnetilsyn {
-        return getForEntity<Ressurs<SøknadBarnetilsyn>>(jsonDokumentUri(journalpostId, dokumentInfoId)).getDataOrThrow()
+        val data = getForEntity<Ressurs<ByteArray>>(jsonDokumentUri(journalpostId, dokumentInfoId)).getDataOrThrow()
+        return objectMapper.readValue<SøknadBarnetilsyn>(data)
     }
 
     fun hentSkolepengerSøknad(journalpostId: String, dokumentInfoId: String): SøknadSkolepenger {
-        return getForEntity<Ressurs<SøknadSkolepenger>>(jsonDokumentUri(journalpostId, dokumentInfoId)).getDataOrThrow()
+        val data = getForEntity<Ressurs<ByteArray>>(jsonDokumentUri(journalpostId, dokumentInfoId)).getDataOrThrow()
+        return objectMapper.readValue<SøknadSkolepenger>(data)
     }
 
     private fun jsonDokumentUri(journalpostId: String, dokumentInfoId: String): URI {
