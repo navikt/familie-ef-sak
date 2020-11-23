@@ -39,11 +39,10 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
                                                                                                    .visningsnavn(),
                                                                                            søkerMedBarn.søkerIdent),
                                                               barneliste = barnNavnOgFnr)
-        val journalpostId = "TESTJPID"
         behandlingService.lagreSøknadForOvergangsstønad(søknad,
                                                         behandling.id,
                                                         fagsak.id,
-                                                        journalpostId)
+                                                        "TESTJPID")
         return Ressurs.success(behandling.id)
     }
 }
