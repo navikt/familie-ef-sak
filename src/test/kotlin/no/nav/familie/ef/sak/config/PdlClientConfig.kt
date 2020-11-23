@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.integration.dto.pdl.*
+import no.nav.familie.util.FnrGenerator
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
@@ -17,12 +18,14 @@ class PdlClientConfig {
 
     private val startdato = LocalDate.of(2020, 1, 1)
     private val sluttdato = LocalDate.of(2021, 1, 1)
+    private val barnFnr = FnrGenerator.generer(2020, 1, 1)
+    private val søkerFnr = "01010172272"
 
     @Bean
     @Primary
     fun pdlClient(): PdlClient {
         val pdlClient: PdlClient = mockk()
-
+        println("Søkerfnr: $søkerFnr")
         every { pdlClient.hentSøkerKortBolk(any()) } answers {
             (firstArg() as List<String>).map { it to PdlSøkerKort(lagKjønn(), lagNavn(fornavn = it)) }.toMap()
         }
@@ -35,7 +38,7 @@ class PdlClientConfig {
                 PdlSøker(adressebeskyttelse = listOf(Adressebeskyttelse(gradering = AdressebeskyttelseGradering.UGRADERT)),
                          bostedsadresse = bostedsadresse(),
                          dødsfall = listOf(),
-                         familierelasjoner = lagFamilierelasjoner(),
+                         familierelasjoner = familierelasjoner(),
                          fødsel = listOf(),
                          folkeregisterpersonstatus = listOf(Folkeregisterpersonstatus("bosatt", "bosattEtterFolkeregisterloven")),
                          fullmakt = fullmakter(),
@@ -54,7 +57,7 @@ class PdlClientConfig {
                 )
         every { pdlClient.hentSøkerAsMap(any()) } returns mapOf()
 
-        every { pdlClient.hentBarn(any()) } returns emptyMap()
+        every { pdlClient.hentBarn(any()) } returns barn()
 
         every { pdlClient.hentAktørId(any()) } returns PdlHentIdenter(PdlAktørId(listOf(PdlIdent("12345678901232"))))
         return pdlClient
@@ -72,9 +75,25 @@ class PdlClientConfig {
                         etternavn,
                         Metadata(endringer = listOf(MetadataEndringer(LocalDate.now())))))
 
-    private fun lagFamilierelasjoner(): List<Familierelasjon> = listOf(Familierelasjon(relatertPersonsIdent = "01101800033",
-                                                                                       relatertPersonsRolle = Familierelasjonsrolle.BARN,
-                                                                                       minRolleForPerson = Familierelasjonsrolle.MOR))
+    private fun barn(): Map<String, PdlBarn> =
+            mapOf(barnFnr to PdlBarn(adressebeskyttelse = listOf(),
+                                     bostedsadresse = bostedsadresse(),
+                                     deltBosted = listOf(),
+                                     dødsfall = listOf(),
+                                     familierelasjoner = familierelasjonerBarn(),
+                                     fødsel = listOf(),
+                                     navn = lagNavn("Barn", null, "Barnesen")))
+
+    private fun familierelasjoner(): List<Familierelasjon> =
+            listOf(Familierelasjon(relatertPersonsIdent = barnFnr,
+                                   relatertPersonsRolle = Familierelasjonsrolle.BARN,
+                                   minRolleForPerson = Familierelasjonsrolle.MOR))
+
+    private fun familierelasjonerBarn(): List<Familierelasjon> =
+            listOf(Familierelasjon(relatertPersonsIdent = søkerFnr,
+                                   relatertPersonsRolle = Familierelasjonsrolle.MOR,
+                                   minRolleForPerson = Familierelasjonsrolle.BARN))
+
 
     private fun kontaktadresse(): List<Kontaktadresse> =
             listOf(Kontaktadresse(coAdressenavn = "co",
