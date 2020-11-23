@@ -18,10 +18,6 @@ class PdlClientConfig {
     private val startdato = LocalDate.of(2020, 1, 1)
     private val sluttdato = LocalDate.of(2021, 1, 1)
 
-    private val søkerKort =
-            mapOf("11111122222" to PdlSøkerKort(lagKjønn(KjønnType.MANN), lagNavn(fornavn = "Foo")),
-                  "11111133333" to PdlSøkerKort(lagKjønn(KjønnType.KVINNE), lagNavn(fornavn = "Bar")))
-
     @Bean
     @Primary
     fun pdlClient(): PdlClient {
@@ -39,7 +35,7 @@ class PdlClientConfig {
                 PdlSøker(adressebeskyttelse = listOf(Adressebeskyttelse(gradering = AdressebeskyttelseGradering.UGRADERT)),
                          bostedsadresse = bostedsadresse(),
                          dødsfall = listOf(),
-                         familierelasjoner = listOf(),
+                         familierelasjoner = lagFamilierelasjoner(),
                          fødsel = listOf(),
                          folkeregisterpersonstatus = listOf(Folkeregisterpersonstatus("bosatt", "bosattEtterFolkeregisterloven")),
                          fullmakt = fullmakter(),
@@ -75,6 +71,10 @@ class PdlClientConfig {
                         mellomnavn,
                         etternavn,
                         Metadata(endringer = listOf(MetadataEndringer(LocalDate.now())))))
+
+    private fun lagFamilierelasjoner(): List<Familierelasjon> = listOf(Familierelasjon(relatertPersonsIdent = "01101800033",
+                                                                                       relatertPersonsRolle = Familierelasjonsrolle.BARN,
+                                                                                       minRolleForPerson = Familierelasjonsrolle.MOR))
 
     private fun kontaktadresse(): List<Kontaktadresse> =
             listOf(Kontaktadresse(coAdressenavn = "co",
