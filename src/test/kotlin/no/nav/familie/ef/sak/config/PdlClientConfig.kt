@@ -25,7 +25,7 @@ class PdlClientConfig {
     @Primary
     fun pdlClient(): PdlClient {
         val pdlClient: PdlClient = mockk()
-        println("Søkerfnr: $søkerFnr")
+
         every { pdlClient.hentSøkerKortBolk(any()) } answers {
             (firstArg() as List<String>).map { it to PdlSøkerKort(lagKjønn(), lagNavn(fornavn = it)) }.toMap()
         }
