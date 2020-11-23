@@ -29,19 +29,15 @@ data class PersonopplysningerDto(val personIdent: String,
                                  val innflyttingTilNorge: List<InnflyttingTilNorge>,
                                  val utflyttingFraNorge: List<UtflyttingFraNorge>)
 
-data class BarnDto(
-        val personIdent: String,
+data class BarnDto(val personIdent: String,
         val navn: String,
         val annenForelder: AnnenForelderDTO?,
         val adresse: List<AdresseDto>,
         val borHosSøker: Boolean,
-        val fødselsdato: LocalDate?
-)
+        val fødselsdato: LocalDate?)
 
-data class AnnenForelderDTO(
-        val personIdent: String,
-        val navn: String,
-)
+data class AnnenForelderDTO(val personIdent: String,
+        val navn: String)
 
 data class TelefonnummerDto(val landskode: String,
                             val nummer: String)
