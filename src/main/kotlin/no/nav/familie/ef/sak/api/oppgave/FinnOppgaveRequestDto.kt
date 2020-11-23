@@ -14,9 +14,10 @@ data class FinnOppgaveRequestDto(val behandlingstema: String? = null,
                                  val opprettetTom: LocalDate? = null,
                                  val fristFom: LocalDate? = null,
                                  val fristTom: LocalDate? = null,
-                                 val enhetsmappe: Long? = null) {
+                                 val enhetsmappe: Long? = null,
+                                 val ident: String?) {
 
-    fun tilFinnOppgaveRequest(): FinnOppgaveRequest =
+    fun tilFinnOppgaveRequest(aktørid: String? = null): FinnOppgaveRequest =
             FinnOppgaveRequest(tema = Tema.ENF,
                                behandlingstema = if (this.behandlingstema != null) Behandlingstema.values()
                                        .find { it.value == this.behandlingstema } else null,
@@ -24,6 +25,7 @@ data class FinnOppgaveRequestDto(val behandlingstema: String? = null,
                                        .find { it.value == this.oppgavetype } else null,
                                enhet = this.enhet,
                                saksbehandler = this.saksbehandler,
+                               aktørId = aktørid,
                                journalpostId = this.journalpostId,
                                tildeltRessurs = this.tildeltRessurs,
                                tilordnetRessurs = this.tilordnetRessurs,
