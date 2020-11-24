@@ -1,5 +1,5 @@
-CREATE TABLE konsistenavstemming (
-    id            BIGSERIAL     PRIMARY KEY,
+CREATE TABLE konsistensavstemming (
+    id            UUID          PRIMARY KEY,
     dato          DATE          NOT NULL,
     stonadstype   VARCHAR       NOT NULL,
     unique(dato, stonadstype)

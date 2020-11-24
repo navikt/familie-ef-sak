@@ -11,7 +11,7 @@ interface KonsistensavstemmingRepository : RepositoryInterface<Konsistensavstemm
                                            InsertUpdateRepository<Konsistensavstemming> {
 
     // language=PostgreSQL
-    @Query("""SELECT * FROM konsistenavstemming 
+    @Query("""SELECT * FROM konsistensavstemming 
                     WHERE stonadstype = :stønadstype AND dato = current_date""")
     fun finnKonsistensavstemmingMedDatoIdag(stønadstype: Stønadstype): Konsistensavstemming?
 }

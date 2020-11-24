@@ -32,12 +32,9 @@ class GrensesnittavstemmingTask(private val oppdragClient: OppdragClient,
         val tilTidspunkt = task.triggerTid.toLocalDate().atStartOfDay()
 
         logger.info("Gjør ${task.id} $stønadstype avstemming mot oppdrag fra $fraTidspunkt til $tilTidspunkt")
-        oppdragClient.grensesnittavstemming(
-                GrensesnittavstemmingRequest(
-                        stønadstype.tilKlassifisering(),
-                        fraTidspunkt,
-                        tilTidspunkt
-                ))
+        oppdragClient.grensesnittavstemming(GrensesnittavstemmingRequest(fagsystem = stønadstype.tilKlassifisering(),
+                        fra = fraTidspunkt,
+                        til = tilTidspunkt))
     }
 
     override fun onCompletion(task: Task) {

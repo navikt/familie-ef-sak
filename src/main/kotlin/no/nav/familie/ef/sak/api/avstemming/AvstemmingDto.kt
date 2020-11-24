@@ -6,7 +6,7 @@ import java.time.LocalDateTime
 
 data class AvstemmingDto(val avstemmingType: AvstemmingType,
                          val stønadstype: Stønadstype,
-                         val fraDato: LocalDate,
+                         val fraDato: LocalDate?,
                          val triggerTid: LocalDateTime)
 
 enum class AvstemmingType {

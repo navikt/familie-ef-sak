@@ -17,9 +17,11 @@ class AvstemmingService(val grensesnittavstemmingTask: GrensesnittavstemmingTask
 
     fun utløsAvstemming(avstemmingDto: AvstemmingDto): Task? = with(avstemmingDto) {
         when (avstemmingType) {
-            AvstemmingType.GRENSESNITTAVSTEMMING -> utløsGrensesnittavstemming(fraDato = fraDato,
-                                                                                stønadstype = stønadstype,
-                                                                                triggerTid = triggerTid)
+            AvstemmingType.GRENSESNITTAVSTEMMING -> fraDato?.let {
+                utløsGrensesnittavstemming(fraDato = it,
+                                           stønadstype = stønadstype,
+                                           triggerTid = triggerTid)
+            }
             AvstemmingType.KONSISTENSAVSTEMMING -> utløsKonsistensAvstemming(stønadstype, triggerTid)
         }
     }

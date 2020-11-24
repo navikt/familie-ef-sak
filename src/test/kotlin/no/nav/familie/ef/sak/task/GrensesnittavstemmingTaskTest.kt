@@ -32,7 +32,7 @@ internal class GrensesnittavstemmingTaskTest {
         val grensesnittavstemmingRequest = slot<GrensesnittavstemmingRequest>()
         every {
             oppdragClient.grensesnittavstemming(capture(grensesnittavstemmingRequest))
-        } returns anyString()
+        } returns "Dont care string"
 
         grensesnittavstemmingTask.doTask(Task(type = "",
                                               payload = payload,

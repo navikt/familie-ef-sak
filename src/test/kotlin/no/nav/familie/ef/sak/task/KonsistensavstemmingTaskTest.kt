@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.*
 
 
 internal class KonsistensavstemmingTaskTest {
@@ -37,11 +38,11 @@ internal class KonsistensavstemmingTaskTest {
         val konsistensavstemmingRequest = slot<KonsistensavstemmingRequest>()
         every {
             oppdragClient.konsistensavstemming(capture(konsistensavstemmingRequest))
-        } returns ArgumentMatchers.anyString()
+        } returns "Dont care string"
 
         every {
             konsistensavstemmingRepository.finnKonsistensavstemmingMedDatoIdag(Stønadstype.OVERGANGSSTØNAD)
-        } returns Konsistensavstemming(id = 0, dato = LocalDate.now(), Stønadstype.OVERGANGSSTØNAD)
+        } returns Konsistensavstemming(id = UUID.randomUUID(), dato = LocalDate.now(), Stønadstype.OVERGANGSSTØNAD)
 
         konsistensavstemmingTask.doTask(Task(type = "",
                                              payload = payload,
