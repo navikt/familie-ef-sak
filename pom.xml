@@ -34,7 +34,7 @@
         <springfox.version>3.0.0</springfox.version>
         <mockk.version>1.10.2</mockk.version>
         <fasterxml.version>2.11.3</fasterxml.version>
-        <felles.version>1.20201109115536_9083832</felles.version>
+        <felles.version>1.20201123131335_671787f</felles.version>
         <prosessering.version>1.20201116145947_63cf900</prosessering.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
         <kontrakter.version>2.0_20201120120200_aabf9c6</kontrakter.version>
