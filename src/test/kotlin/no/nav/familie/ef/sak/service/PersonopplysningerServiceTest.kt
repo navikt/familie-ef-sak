@@ -108,13 +108,15 @@ internal class PersonopplysningerServiceTest {
     "borHosSøker" : true,
     "fødselsdato" : null
   } ],
-  "innflyttingTilNorge" : [ {
+   "innflyttingTilNorge" : [ {
     "fraflyttingsland" : "SWE",
-    "dato" : null
+    "dato" : null,
+    "fraflyttingssted" : "Stockholm"
   } ],
   "utflyttingFraNorge" : [ {
     "tilflyttingsland" : "SWE",
-    "dato" : null
+    "dato" : null,
+    "tilflyttingsted" : "Stockholm"
   } ]
 }""")
     }

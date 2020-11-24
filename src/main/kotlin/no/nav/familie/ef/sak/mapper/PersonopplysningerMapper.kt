@@ -60,9 +60,15 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                             identNavn)
                 },
                 innflyttingTilNorge = søker.innflyttingTilNorge.map {
-                    InnflyttingDto(it.fraflyttingsland, null)
+                    InnflyttingDto(fraflyttingsland = it.fraflyttingsland,
+                                   dato = null,
+                                   fraflyttingssted = it.fraflyttingsstedIUtlandet)
                 },
-                utflyttingFraNorge = søker.utflyttingFraNorge.map { UtflyttingDto(it.tilflyttingsland, null) },
+                utflyttingFraNorge = søker.utflyttingFraNorge.map {
+                    UtflyttingDto(tilflyttingsland = it.tilflyttingsland,
+                                  dato = null,
+                                  tilflyttingsted = it.tilflyttingsstedIUtlandet)
+                },
         )
     }
 
