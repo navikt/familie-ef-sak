@@ -1,10 +1,7 @@
 package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.api.Feil
-import no.nav.familie.ef.sak.api.dto.Aleneomsorg
-import no.nav.familie.ef.sak.api.dto.DelvilkårsvurderingDto
-import no.nav.familie.ef.sak.api.dto.InngangsvilkårDto
-import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
+import no.nav.familie.ef.sak.api.dto.*
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.integration.dto.pdl.Familierelasjonsrolle
 import no.nav.familie.ef.sak.mapper.AleneomsorgMapper
@@ -66,11 +63,16 @@ class VurderingService(private val behandlingService: BehandlingService,
 
         val medlemskap = medlemskapMapper.tilDto(medlemskapsdetaljer = søknad.medlemskap,
                                                  pdlSøker = pdlSøker)
-
         val sivilstand = SivilstandMapper.tilDto(sivilstandsdetaljer = søknad.sivilstand,
                                                  pdlSøker = pdlSøker)
+        val vurderinger = hentVurderinger(behandlingId)
 
-        val vurderinger = hentEllerOpprettVurderingerForInngangsvilkår(behandlingId)
+        return InngangsvilkårDto(vurderinger = vurderinger,
+                                 grunnlag = InngangsvilkårGrunnlagDto(medlemskap, sivilstand))
+    }
+
+    private fun hentVurderinger(behandlingId: UUID): List<VilkårsvurderingDto> {
+        return hentEllerOpprettVurderingerForInngangsvilkår(behandlingId)
                 .map {
                     VilkårsvurderingDto(id = it.id,
                                         behandlingId = it.behandlingId,
@@ -85,7 +87,6 @@ class VurderingService(private val behandlingService: BehandlingService,
                                                                    delvurdering.resultat)
                                         })
                 }
-        return InngangsvilkårDto(medlemskap = medlemskap, sivilstand = sivilstand, vurderinger = vurderinger)
     }
 
     private fun hentEllerOpprettVurderingerForInngangsvilkår(behandlingId: UUID): List<Vilkårsvurdering> {
