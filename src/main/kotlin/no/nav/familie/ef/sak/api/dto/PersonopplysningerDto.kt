@@ -26,8 +26,8 @@ data class PersonopplysningerDto(val personIdent: String,
                                  val egenAnsatt: Boolean,
                                  val navEnhet: String,
                                  val barn: List<BarnDto>,
-                                 val innflyttingTilNorge: List<InnflyttingTilNorge>,
-                                 val utflyttingFraNorge: List<UtflyttingFraNorge>)
+                                 val innflyttingTilNorge: List<InnflyttingDto>,
+                                 val utflyttingFraNorge: List<UtflyttingDto>)
 
 data class BarnDto(val personIdent: String,
         val navn: String,

@@ -59,8 +59,10 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                             personMedRelasjoner.søker.bostedsadresse,
                             identNavn)
                 },
-                innflyttingTilNorge = søker.innflyttingTilNorge,
-                utflyttingFraNorge = søker.utflyttingFraNorge,
+                innflyttingTilNorge = søker.innflyttingTilNorge.map {
+                    InnflyttingDto(it.fraflyttingsland, null)
+                },
+                utflyttingFraNorge = søker.utflyttingFraNorge.map { UtflyttingDto(it.tilflyttingsland, null) },
         )
     }
 
@@ -92,7 +94,6 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                 fødselsdato = pdlBarn.fødsel.firstOrNull()?.fødselsdato
         )
     }
-
 
 
     fun borPåSammeAdresse(barn: PdlBarn, bostedsadresserForelder: List<Bostedsadresse>): Boolean {

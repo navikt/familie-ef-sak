@@ -95,19 +95,11 @@ internal class PersonopplysningerServiceTest {
   "barn" : [ ],
   "innflyttingTilNorge" : [ {
     "fraflyttingsland" : "SWE",
-    "fraflyttingsstedIUtlandet" : "Stockholm",
-    "folkeregistermetadata" : {
-      "gyldighetstidspunkt" : "2010-08-30T10:10:00",
-      "opphoerstidspunkt" : "2018-01-15T12:55:00"
-    }
+    "dato" : null
   } ],
   "utflyttingFraNorge" : [ {
     "tilflyttingsland" : "SWE",
-    "tilflyttingsstedIUtlandet" : "Stockholm",
-    "folkeregistermetadata" : {
-      "gyldighetstidspunkt" : "2010-08-30T10:10:00",
-      "opphoerstidspunkt" : "2018-01-15T12:55:00"
-    }
+    "dato" : null
   } ]
 }""")
     }
