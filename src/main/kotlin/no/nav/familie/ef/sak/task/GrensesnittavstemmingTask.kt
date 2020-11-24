@@ -1,9 +1,11 @@
 package no.nav.familie.ef.sak.task
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.familie.ef.sak.integration.OppdragClient
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
-import no.nav.familie.ef.sak.service.AvstemmingService
+import no.nav.familie.ef.sak.økonomi.tilKlassifisering
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.oppdrag.GrensesnittavstemmingRequest
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -17,7 +19,7 @@ import java.time.LocalDateTime
 
 @Service
 @TaskStepBeskrivelse(taskStepType = GrensesnittavstemmingTask.TYPE, beskrivelse = "Utfører grensesnittavstemming mot økonomi.")
-class GrensesnittavstemmingTask(private val avstemmingService: AvstemmingService,
+class GrensesnittavstemmingTask(private val oppdragClient: OppdragClient,
                                 private val taskRepository: TaskRepository) : AsyncTaskStep {
 
     val logger: Logger = LoggerFactory.getLogger(this.javaClass)
@@ -30,8 +32,12 @@ class GrensesnittavstemmingTask(private val avstemmingService: AvstemmingService
         val tilTidspunkt = task.triggerTid.toLocalDate().atStartOfDay()
 
         logger.info("Gjør ${task.id} $stønadstype avstemming mot oppdrag fra $fraTidspunkt til $tilTidspunkt")
-        avstemmingService.grensesnittavstemOppdrag(fraTidspunkt, tilTidspunkt, stønadstype)
-
+        oppdragClient.grensesnittavstemming(
+                GrensesnittavstemmingRequest(
+                        stønadstype.tilKlassifisering(),
+                        fraTidspunkt,
+                        tilTidspunkt
+                ))
     }
 
     override fun onCompletion(task: Task) {
@@ -41,15 +47,11 @@ class GrensesnittavstemmingTask(private val avstemmingService: AvstemmingService
         opprettNyTask(task.triggerTid.toLocalDate(), nesteVirkedag.atTime(8, 0), payload.stønadstype)
     }
 
-    fun utløsGrensesnittavstemming(fraDato: LocalDate, stønadstype: Stønadstype, triggerTid: LocalDateTime?): Task {
-        val nesteVirkedag: LocalDateTime = triggerTid ?: VirkedagerProvider.nesteVirkedag(fraDato).atTime(8, 0)
+    fun opprettNyTask(
+            fraDato: LocalDate,
+            nesteVirkedag: LocalDateTime,
+            stønadstype: Stønadstype): Task {
 
-        return opprettNyTask(fraDato, nesteVirkedag, stønadstype)
-    }
-
-    private fun opprettNyTask(fraDato: LocalDate,
-                              nesteVirkedag: LocalDateTime,
-                              stønadstype: Stønadstype): Task {
         val grensesnittavstemmingPayload = GrensesnittavstemmingPayload(fraDato = fraDato, stønadstype = stønadstype)
 
         val nesteAvstemmingTask = Task(type = TYPE,

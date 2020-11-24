@@ -4,13 +4,17 @@ import io.mockk.every
 import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.slot
+import no.nav.familie.ef.sak.integration.OppdragClient
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.service.AvstemmingService
+import no.nav.familie.ef.sak.økonomi.tilKlassifisering
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.oppdrag.GrensesnittavstemmingRequest
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.mockito.ArgumentMatchers.anyString
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -18,27 +22,25 @@ internal class GrensesnittavstemmingTaskTest {
 
     private val taskRepository: TaskRepository = mockk()
 
-    private val avstemmingService: AvstemmingService = mockk()
+    private val oppdragClient: OppdragClient = mockk()
 
     private val grensesnittavstemmingTask: GrensesnittavstemmingTask =
-            GrensesnittavstemmingTask(avstemmingService, taskRepository)
+            GrensesnittavstemmingTask(oppdragClient, taskRepository)
 
     @Test
-    fun `doTask skal kalle avstemmingService med fradato fra payload og dato for triggerTid som parametere`() {
-        val fradatoSlot = slot<LocalDateTime>()
-        val tildatoSlot = slot<LocalDateTime>()
-        val stønadstype = slot<Stønadstype>()
-        justRun {
-            avstemmingService.grensesnittavstemOppdrag(capture(fradatoSlot), capture(tildatoSlot), capture(stønadstype))
-        }
+    fun `doTask skal kalle oppdragClient med fradato fra payload og dato for triggerTid som parametere`() {
+        val grensesnittavstemmingRequest = slot<GrensesnittavstemmingRequest>()
+        every {
+            oppdragClient.grensesnittavstemming(capture(grensesnittavstemmingRequest))
+        } returns anyString()
 
         grensesnittavstemmingTask.doTask(Task(type = "",
                                               payload = payload,
                                               triggerTid = LocalDateTime.of(2018, 4, 19, 8, 0)))
 
-        assertThat(fradatoSlot.captured).isEqualTo(LocalDate.of(2018, 4, 18).atStartOfDay())
-        assertThat(tildatoSlot.captured).isEqualTo(LocalDate.of(2018, 4, 19).atStartOfDay())
-        assertThat(stønadstype.captured).isEqualTo(Stønadstype.OVERGANGSSTØNAD)
+        assertThat(grensesnittavstemmingRequest.captured.fra).isEqualTo(LocalDate.of(2018, 4, 18).atStartOfDay())
+        assertThat(grensesnittavstemmingRequest.captured.til).isEqualTo(LocalDate.of(2018, 4, 19).atStartOfDay())
+        assertThat(grensesnittavstemmingRequest.captured.fagsystem).isEqualTo(Stønadstype.OVERGANGSSTØNAD.tilKlassifisering())
     }
 
     @Test
