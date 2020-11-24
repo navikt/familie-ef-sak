@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.mapper.MedlemskapMapper
 import no.nav.familie.ef.sak.mapper.SivilstandMapper
 import no.nav.familie.ef.sak.repository.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.repository.domain.*
+import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsstønad
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -65,14 +66,15 @@ class VurderingService(private val behandlingService: BehandlingService,
                                                  pdlSøker = pdlSøker)
         val sivilstand = SivilstandMapper.tilDto(sivilstandsdetaljer = søknad.sivilstand,
                                                  pdlSøker = pdlSøker)
-        val vurderinger = hentVurderinger(behandlingId)
+        val vurderinger = hentVurderinger(behandlingId, søknad)
 
         return InngangsvilkårDto(vurderinger = vurderinger,
                                  grunnlag = InngangsvilkårGrunnlagDto(medlemskap, sivilstand))
     }
 
-    private fun hentVurderinger(behandlingId: UUID): List<VilkårsvurderingDto> {
-        return hentEllerOpprettVurderingerForInngangsvilkår(behandlingId)
+    private fun hentVurderinger(behandlingId: UUID,
+                                søknad: SøknadsskjemaOvergangsstønad): List<VilkårsvurderingDto> {
+        return hentEllerOpprettVurderingerForInngangsvilkår(behandlingId, søknad)
                 .map {
                     VilkårsvurderingDto(id = it.id,
                                         behandlingId = it.behandlingId,
@@ -89,7 +91,8 @@ class VurderingService(private val behandlingService: BehandlingService,
                 }
     }
 
-    private fun hentEllerOpprettVurderingerForInngangsvilkår(behandlingId: UUID): List<Vilkårsvurdering> {
+    private fun hentEllerOpprettVurderingerForInngangsvilkår(behandlingId: UUID,
+                                                             søknad: SøknadsskjemaOvergangsstønad): List<Vilkårsvurdering> {
         val lagredeVilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(behandlingId)
 
         if (behandlingErLåstForVidereRedigering(behandlingId)) {
@@ -101,17 +104,29 @@ class VurderingService(private val behandlingService: BehandlingService,
                     lagredeVilkårsvurderinger.find { vurdering -> vurdering.type == it } == null
                 }
                 .map {
+                    val delvilkårsvurderinger = it.delvilkår
+                            .filter { delvilkårType -> erDelvilkårAktueltForSøknaden(delvilkårType, søknad) }
+                            .map { delvilkårType -> Delvilkårsvurdering(delvilkårType) }
                     Vilkårsvurdering(behandlingId = behandlingId,
                                      type = it,
-                                     delvilkårsvurdering = DelvilkårsvurderingWrapper(it.delvilkår.map { delvilkårType ->
-                                         Delvilkårsvurdering(delvilkårType)
-                                     }))
+                                     delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurderinger))
                 }
 
         vilkårsvurderingRepository.insertAll(nyeVilkårsvurderinger)
 
         return lagredeVilkårsvurderinger + nyeVilkårsvurderinger
     }
+
+    /**
+     * Filtrerer bort delvikår som ikke skall vurderes iht data i søknaden
+     */
+    private fun erDelvilkårAktueltForSøknaden(it: DelvilkårType,
+                                              søknad: SøknadsskjemaOvergangsstønad): Boolean =
+            when (it) {
+                DelvilkårType.DOKUMENTERT_EKTESKAP -> søknad.sivilstand.erUformeltGift == true
+                DelvilkårType.DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE -> søknad.sivilstand.erUformeltSeparertEllerSkilt == true
+                else -> true
+            }
 
     fun hentInngangsvilkårSomManglerVurdering(behandlingId: UUID): List<VilkårType> {
         val lagredeVilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(behandlingId)

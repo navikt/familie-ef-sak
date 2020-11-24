@@ -58,6 +58,29 @@ internal class VurderingServiceTest {
     }
 
     @Test
+    internal fun `skal filtrere bort delvilkår pga grunnlag i søknaden`() {
+        val nyeVilkårsvurderinger = slot<List<Vilkårsvurdering>>()
+        every { vilkårsvurderingRepository.insertAll(capture(nyeVilkårsvurderinger)) } answers
+                { it.invocation.args.first() as List<Vilkårsvurdering> }
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling(fagsak(), true, BehandlingStatus.OPPRETTET)
+        every { vilkårsvurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns emptyList()
+        val søknad = SøknadsskjemaMapper.tilDomene(Testsøknad.søknadOvergangsstønad)
+
+        every { behandlingService.hentOvergangsstønad(any()) }.returns(søknad)
+        vurderingService.hentInngangsvilkår(BEHANDLING_ID)
+        assertThat(nyeVilkårsvurderinger.captured.flatMap { it.delvilkårsvurdering.delvilkårsvurderinger.map { it.type } })
+                .containsExactlyInAnyOrderElementsOf(DelvilkårType.values().toList())
+
+        // DOKUMENTERT_EKTESKAP skal ikke med når erUformeltGift = false
+        every { behandlingService.hentOvergangsstønad(any()) }
+                .returns(søknad.copy(sivilstand = søknad.sivilstand.copy(erUformeltGift = false)))
+        vurderingService.hentInngangsvilkår(BEHANDLING_ID)
+        assertThat(nyeVilkårsvurderinger.captured.flatMap { it.delvilkårsvurdering.delvilkårsvurderinger.map { it.type } })
+                .containsExactlyInAnyOrderElementsOf(DelvilkårType.values()
+                                                             .filterNot { it == DelvilkårType.DOKUMENTERT_EKTESKAP })
+    }
+
+    @Test
     fun `skal ikke opprette nye Vilkårsvurderinger for inngangsvilkår som allerede har en vurdering`() {
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling(fagsak(), true, BehandlingStatus.OPPRETTET)
         every { vilkårsvurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns
