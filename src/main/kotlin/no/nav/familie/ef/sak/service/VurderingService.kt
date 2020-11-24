@@ -104,12 +104,12 @@ class VurderingService(private val behandlingService: BehandlingService,
                     lagredeVilkårsvurderinger.find { vurdering -> vurdering.type == it } == null
                 }
                 .map {
-                    val delvilkår = it.delvilkår
-                            .filter { delvilkårType -> filtrerDelvikår(delvilkårType, søknad) }
+                    val delvilkårsvurderinger = it.delvilkår
+                            .filter { delvilkårType -> erDelvilkårAktueltForSøknaden(delvilkårType, søknad) }
                             .map { delvilkårType -> Delvilkårsvurdering(delvilkårType) }
                     Vilkårsvurdering(behandlingId = behandlingId,
                                      type = it,
-                                     delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkår))
+                                     delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurderinger))
                 }
 
         vilkårsvurderingRepository.insertAll(nyeVilkårsvurderinger)
@@ -120,8 +120,8 @@ class VurderingService(private val behandlingService: BehandlingService,
     /**
      * Filtrerer bort delvikår som ikke skall vurderes iht data i søknaden
      */
-    private fun filtrerDelvikår(it: DelvilkårType,
-                                søknad: SøknadsskjemaOvergangsstønad): Boolean =
+    private fun erDelvilkårAktueltForSøknaden(it: DelvilkårType,
+                                              søknad: SøknadsskjemaOvergangsstønad): Boolean =
             when (it) {
                 DelvilkårType.DOKUMENTERT_EKTESKAP -> søknad.sivilstand.erUformeltGift == true
                 DelvilkårType.DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE -> søknad.sivilstand.erUformeltSeparertEllerSkilt == true
