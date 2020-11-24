@@ -1,14 +1,17 @@
 package no.nav.familie.ef.sak.api.oppgave
 
-import io.mockk.Runs
-import io.mockk.every
-import io.mockk.just
-import io.mockk.mockk
+import io.mockk.*
 import no.nav.familie.ef.sak.api.ManglerTilgang
+import no.nav.familie.ef.sak.integration.PdlClient
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlAktørId
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlHentIdenter
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlIdent
 import no.nav.familie.ef.sak.repository.domain.Oppgave
 import no.nav.familie.ef.sak.service.OppgaveService
 import no.nav.familie.ef.sak.service.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
+import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -19,9 +22,41 @@ internal class OppgaveControllerTest {
 
     private val tilgangService: TilgangService = mockk()
     private val oppgaveService: OppgaveService = mockk()
+    private val pdlClient: PdlClient = mockk()
 
 
-    private val oppgaveController: OppgaveController = OppgaveController(oppgaveService, tilgangService)
+    private val oppgaveController: OppgaveController = OppgaveController(oppgaveService, tilgangService, pdlClient)
+
+    @Test
+    internal fun `skal sende med aktoerId i request `() {
+        val finnOppgaveRequestSlot = slot<FinnOppgaveRequest>()
+        tilgangOgRolleJustRuns()
+        every { pdlClient.hentAktørId("4321") } returns PdlHentIdenter(PdlAktørId(listOf(PdlIdent("1234"))))
+        every { oppgaveService.hentOppgaver(capture(finnOppgaveRequestSlot)) } returns FinnOppgaveResponseDto(0, listOf())
+        oppgaveController.hentOppgaver(FinnOppgaveRequestDto(ident = "4321"))
+        assertThat(finnOppgaveRequestSlot.captured.aktørId).isEqualTo("1234")
+    }
+
+
+    @Test
+    internal fun `skal ikke feile hvis ident er tom`() {
+        val finnOppgaveRequestSlot = slot<FinnOppgaveRequest>()
+        tilgangOgRolleJustRuns()
+        every { oppgaveService.hentOppgaver(capture(finnOppgaveRequestSlot)) } returns FinnOppgaveResponseDto(0, listOf())
+        oppgaveController.hentOppgaver(FinnOppgaveRequestDto(ident = " "))
+        verify (exactly = 0){pdlClient.hentAktørId(any())}
+        assertThat(finnOppgaveRequestSlot.captured.aktørId).isEqualTo(null)
+    }
+
+    @Test
+    internal fun `skal ikke feile hvis ident er null`() {
+        val finnOppgaveRequestSlot = slot<FinnOppgaveRequest>()
+        tilgangOgRolleJustRuns()
+        every { oppgaveService.hentOppgaver(capture(finnOppgaveRequestSlot)) } returns FinnOppgaveResponseDto(0, listOf())
+        oppgaveController.hentOppgaver(FinnOppgaveRequestDto(ident = null))
+        verify (exactly = 0){pdlClient.hentAktørId(any())}
+        assertThat(finnOppgaveRequestSlot.captured.aktørId).isEqualTo(null)
+    }
 
     @Test
     internal fun `skal feile hvis bruker er veileder`() {
@@ -40,13 +75,7 @@ internal class OppgaveControllerTest {
 
     @Test
     internal fun `skal hente oppgave`() {
-        every {
-            tilgangService.validerTilgangTilPersonMedBarn(any())
-        } just Runs
-
-        every {
-            tilgangService.validerHarSaksbehandlerrolle()
-        } just Runs
+        tilgangOgRolleJustRuns()
 
 
         val oppgave = Oppgave(UUID.randomUUID(), UUID.randomUUID(), 123, Oppgavetype.BehandleSak)
@@ -64,13 +93,7 @@ internal class OppgaveControllerTest {
 
     @Test
     internal fun `skal returnere funksjonell feil når oppgave ikke finnes hos oss`() {
-        every {
-            tilgangService.validerTilgangTilPersonMedBarn(any())
-        } just Runs
-
-        every {
-            tilgangService.validerHarSaksbehandlerrolle()
-        } just Runs
+        tilgangOgRolleJustRuns()
 
 
         every {
@@ -80,5 +103,15 @@ internal class OppgaveControllerTest {
         val returnertOppgaveRessurs = oppgaveController.hentOppgave(123)
 
         assertThat(returnertOppgaveRessurs.status).isEqualTo(Ressurs.Status.FUNKSJONELL_FEIL)
+    }
+
+    private fun tilgangOgRolleJustRuns() {
+        every {
+            tilgangService.validerTilgangTilPersonMedBarn(any())
+        } just Runs
+
+        every {
+            tilgangService.validerHarSaksbehandlerrolle()
+        } just Runs
     }
 }
