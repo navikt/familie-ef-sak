@@ -92,7 +92,22 @@ internal class PersonopplysningerServiceTest {
   } ],
   "egenAnsatt" : true,
   "navEnhet" : "1 - Enhet",
-  "barn" : [ ],
+  "barn" : [ {
+    "personIdent" : "02022088888",
+    "navn" : "Barn Barnesen",
+    "annenForelder" : {
+      "personIdent" : "01010172272",
+      "navn" : "01010172272 mellomnavn Etternavn"
+    },
+    "adresse" : [ {
+      "visningsadresse" : "c/o CONAVN, Charlies vei 13 b, 0575 Oslo",
+      "type" : "BOSTEDADRESSE",
+      "gyldigFraOgMed" : "2020-01-01",
+      "gyldigTilOgMed" : "2020-01-01"
+    } ],
+    "borHosSøker" : true,
+    "fødselsdato" : null
+  } ],
   "innflyttingTilNorge" : [ {
     "fraflyttingsland" : "SWE",
     "dato" : null

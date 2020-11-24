@@ -4,7 +4,6 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.integration.dto.pdl.*
-import no.nav.familie.util.FnrGenerator
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
@@ -19,7 +18,7 @@ class PdlClientConfig {
 
     private val startdato = LocalDate.of(2020, 1, 1)
     private val sluttdato = LocalDate.of(2021, 1, 1)
-    private val barnFnr = FnrGenerator.generer(2020, 1, 1)
+    private val barnFnr = "02022088888"
     private val søkerFnr = "01010172272"
 
     @Bean
