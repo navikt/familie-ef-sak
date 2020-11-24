@@ -116,7 +116,7 @@ internal class PersonopplysningerServiceTest {
   "utflyttingFraNorge" : [ {
     "tilflyttingsland" : "SWE",
     "dato" : null,
-    "tilflyttingsted" : "Stockholm"
+    "tilflyttingssted" : "Stockholm"
   } ]
 }""")
     }

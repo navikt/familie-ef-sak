@@ -67,7 +67,7 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                 utflyttingFraNorge = søker.utflyttingFraNorge.map {
                     UtflyttingDto(tilflyttingsland = it.tilflyttingsland,
                                   dato = null,
-                                  tilflyttingsted = it.tilflyttingsstedIUtlandet)
+                                  tilflyttingssted = it.tilflyttingsstedIUtlandet)
                 },
         )
     }
