@@ -18,7 +18,7 @@ class PdlClientConfig {
 
     private val startdato = LocalDate.of(2020, 1, 1)
     private val sluttdato = LocalDate.of(2021, 1, 1)
-    private val barnFnr = "02022088888"
+    private val barnFnr = "01012067050"
     private val søkerFnr = "01010172272"
 
     @Bean

@@ -93,7 +93,7 @@ internal class PersonopplysningerServiceTest {
   "egenAnsatt" : true,
   "navEnhet" : "1 - Enhet",
   "barn" : [ {
-    "personIdent" : "02022088888",
+    "personIdent" : "01012067050",
     "navn" : "Barn Barnesen",
     "annenForelder" : {
       "personIdent" : "01010172272",

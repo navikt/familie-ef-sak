@@ -105,7 +105,7 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
         val gjeldendeBostedsadresseBarn = finnGjeldendeBostedsadresse(barn.bostedsadresse)
         val gjeldendeBostedsadresseForelder = finnGjeldendeBostedsadresse(bostedsadresserForelder)
         return gjeldendeBostedsadresseBarn?.let {
-            return it.vegadresse == gjeldendeBostedsadresseForelder?.vegadresse
+            it.vegadresse == gjeldendeBostedsadresseForelder?.vegadresse
         } ?: false
     }
 

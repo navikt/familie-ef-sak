@@ -45,8 +45,7 @@ class PersonopplysningerService(private val personService: PersonService,
     private fun andreForelderIdenter(personMedRelasjoner: SøkerMedBarn): List<String> =
             personMedRelasjoner.barn.values
                     .flatMap { it.familierelasjoner }
-                    .filter { it.relatertPersonsIdent != personMedRelasjoner.søkerIdent }
-                    .filter { it.relatertPersonsRolle != Familierelasjonsrolle.BARN }
+                    .filter { it.relatertPersonsIdent != personMedRelasjoner.søkerIdent && it.relatertPersonsRolle != Familierelasjonsrolle.BARN }
                     .map { it.relatertPersonsIdent }
                     .distinct()
 
