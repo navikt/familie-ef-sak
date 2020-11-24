@@ -29,6 +29,9 @@ enum class DelvilkårType {
     TRE_ÅRS_MEDLEMSKAP,
     DOKUMENTERT_FLYKTNINGSTATUS,
     BOR_OG_OPPHOLDER_SEG_I_NORGE,
+    DOKUMENTERT_EKTESKAP,
+    DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE,
+    KRAV_SIVILSTAND,
 }
 
 enum class Vilkårsresultat {
@@ -45,10 +48,16 @@ enum class VilkårType(val beskrivelse: String,
                        "Foreligger det oppholdstillatelse eller annen bekreftelse på gyldig opphold?"),
     FORUTGÅENDE_MEDLEMSKAP("§15-2 Forutgående medlemskap",
                            listOf(DelvilkårType.TRE_ÅRS_MEDLEMSKAP, DelvilkårType.DOKUMENTERT_FLYKTNINGSTATUS)),
-    LOVLIG_OPPHOLD("§15-3 Lovlig opphold", listOf(DelvilkårType.BOR_OG_OPPHOLDER_SEG_I_NORGE));
+    LOVLIG_OPPHOLD("§15-3 Lovlig opphold", listOf(DelvilkårType.BOR_OG_OPPHOLDER_SEG_I_NORGE)),
+
+    SIVILSTAND("§15-4 Sivilstand", listOf(DelvilkårType.DOKUMENTERT_EKTESKAP,
+                                          DelvilkårType.DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE,
+                                          DelvilkårType.KRAV_SIVILSTAND));
 
     companion object {
 
-        fun hentInngangsvilkår(): List<VilkårType> = listOf(FORUTGÅENDE_MEDLEMSKAP, LOVLIG_OPPHOLD)
+        fun hentInngangsvilkår(): List<VilkårType> = listOf(FORUTGÅENDE_MEDLEMSKAP,
+                                                            LOVLIG_OPPHOLD,
+                                                            SIVILSTAND)
     }
 }
