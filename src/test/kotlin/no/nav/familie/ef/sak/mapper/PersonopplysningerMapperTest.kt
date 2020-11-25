@@ -16,7 +16,7 @@ internal class PersonopplysningerMapperTest {
     fun adresseTromsø() = Vegadresse("1", "ABC", "123", "Tromsøygata", "01", null, "9099", null, null)
     fun adresseTromsøMatrikkel() = Vegadresse("1", "ABC", "123", "Tromsøygata", "01", null, "9099", null, matrikkelId = 123L)
     fun adresseBergen() = Vegadresse("1", "ABC", "123", "Bergensgata", "01", null, "5020", null, null)
-    fun matrikkelAdresse(matrikkelId: Long? = 123L) = Matrikkeladresse(matrikkelId)
+    fun matrikkeladresse(matrikkelId: Long? = 123L) = Matrikkeladresse(matrikkelId)
 
 
     @Test
@@ -52,20 +52,20 @@ internal class PersonopplysningerMapperTest {
     }
 
     @Test
-    internal fun `forelder og barn med samme matrikkelAdresse`() {
+    internal fun `forelder og barn med samme matrikkeladresse`() {
 
-        val barnAdresser = listOf(lagAdresse(adresseBergen(), now().minusDays(1), null, matrikkelAdresse()))
-        val forelderAdresser = listOf(lagAdresse(null, now().minusDays(1), null, matrikkelAdresse()))
+        val barnAdresser = listOf(lagAdresse(adresseBergen(), now().minusDays(1), null, matrikkeladresse()))
+        val forelderAdresser = listOf(lagAdresse(null, now().minusDays(1), null, matrikkeladresse()))
 
         val pdlBarn = PdlBarn(emptyList(), barnAdresser, emptyList(), emptyList(), emptyList(), emptyList(), emptyList())
         Assertions.assertThat(personopplysningerMapper.borPåSammeAdresse(pdlBarn, forelderAdresser)).isTrue
     }
 
     @Test
-    internal fun `forelder og barn med ulik matrikkelAdresse`() {
+    internal fun `forelder og barn med ulik matrikkeladresse`() {
 
-        val barnAdresser = listOf(lagAdresse(adresseBergen(), now().minusDays(1), null, matrikkelAdresse()))
-        val forelderAdresser = listOf(lagAdresse(null, now().minusDays(1), null, matrikkelAdresse(999L)))
+        val barnAdresser = listOf(lagAdresse(adresseBergen(), now().minusDays(1), null, matrikkeladresse()))
+        val forelderAdresser = listOf(lagAdresse(null, now().minusDays(1), null, matrikkeladresse(999L)))
 
         val pdlBarn = PdlBarn(emptyList(), barnAdresser, emptyList(), emptyList(), emptyList(), emptyList(), emptyList())
         Assertions.assertThat(personopplysningerMapper.borPåSammeAdresse(pdlBarn, forelderAdresser)).isFalse
@@ -149,7 +149,7 @@ internal class PersonopplysningerMapperTest {
                         opphørstidspunkt = opphørstidspunkt),
                 utenlandskAdresse = null,
                 ukjentBosted = null,
-                matrikkelAdresse = matrikkeladresse
+                matrikkeladresse = matrikkeladresse
         )
     }
 }

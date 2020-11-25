@@ -141,7 +141,7 @@ class PdlClientConfig {
                                   coAdressenavn = "CONAVN",
                                   vegadresse = vegadresse(),
                                   ukjentBosted = null,
-                                  matrikkelAdresse = null
+                                  matrikkeladresse = null
             ))
 
     private fun vegadresse(): Vegadresse =

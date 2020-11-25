@@ -96,6 +96,7 @@ query($identer: [ID!]!){
                         z
                         kvalitet
                     }
+                    matrikkelId
                 }
                 oppholdAnnetSted
             }

@@ -101,10 +101,10 @@ data class Bostedsadresse(val angittFlyttedato: LocalDate?,
                           val utenlandskAdresse: UtenlandskAdresse?,
                           val vegadresse: Vegadresse?,
                           val ukjentBosted: UkjentBosted?,
-                          val matrikkelAdresse: Matrikkeladresse?) {
+                          val matrikkeladresse: Matrikkeladresse?) {
 
     fun matrikkelId(): Long? {
-        return matrikkelAdresse?.matrikkelId ?: vegadresse?.matrikkelId
+        return matrikkeladresse?.matrikkelId ?: vegadresse?.matrikkelId
     }
 }
 
