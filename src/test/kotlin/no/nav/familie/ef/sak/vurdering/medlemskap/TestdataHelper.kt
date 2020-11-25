@@ -13,7 +13,7 @@ fun pdlPerson(vararg perioder: Pair<LocalDate, LocalDateTime?>) = object : PdlPe
     override val fødsel: List<Fødsel> = listOf(Fødsel(null, null, null, null, null))
 
     override val bostedsadresse: List<Bostedsadresse> = perioder.map {
-        Bostedsadresse(it.first, null, Folkeregistermetadata(null, it.second), null, null, null)
+        Bostedsadresse(it.first, null, Folkeregistermetadata(null, it.second), null, null, null, null)
     }
 }
 

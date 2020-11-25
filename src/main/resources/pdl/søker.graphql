@@ -33,6 +33,10 @@ query($ident: ID!){
                     z
                     kvalitet
                 }
+                matrikkelId
+            }
+            matrikkeladresse {
+                matrikkelId
             }
             ukjentBosted {
                 bostedskommune

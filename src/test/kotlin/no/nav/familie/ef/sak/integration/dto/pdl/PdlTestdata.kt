@@ -16,7 +16,8 @@ object PdlTestdata {
                                         Koordinater(1.0f,
                                                     1.0f,
                                                     1.0f,
-                                                    1))
+                                                    1),
+                                        null)
 
     private val utenlandskAdresse = UtenlandskAdresse("", "", "", "", "", "", "")
 
@@ -34,7 +35,8 @@ object PdlTestdata {
                                                        folkeregistermetadata,
                                                        utenlandskAdresse,
                                                        vegadresse,
-                                                       UkjentBosted("")))
+                                                       UkjentBosted(""),
+                                                       null))
 
     private val dødsfall = listOf(Dødsfall(LocalDate.now()))
 

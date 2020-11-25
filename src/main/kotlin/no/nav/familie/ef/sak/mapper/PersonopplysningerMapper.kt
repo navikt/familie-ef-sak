@@ -112,8 +112,11 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
 
         val gjeldendeBostedsadresseBarn = finnGjeldendeBostedsadresse(barn.bostedsadresse)
         val gjeldendeBostedsadresseForelder = finnGjeldendeBostedsadresse(bostedsadresserForelder)
-        return gjeldendeBostedsadresseBarn?.let {
-            it.vegadresse == gjeldendeBostedsadresseForelder?.vegadresse
+
+        return gjeldendeBostedsadresseBarn?.let { adresseBarn ->
+            return adresseBarn.matrikkelId()?.let { matrikkelId ->
+                return matrikkelId == gjeldendeBostedsadresseForelder?.matrikkelId()
+            } ?: adresseBarn.vegadresse != null && adresseBarn.vegadresse == gjeldendeBostedsadresseForelder?.vegadresse
         } ?: false
     }
 

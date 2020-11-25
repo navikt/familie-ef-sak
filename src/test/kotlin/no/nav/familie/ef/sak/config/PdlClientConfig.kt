@@ -140,7 +140,9 @@ class PdlClientConfig {
                                   utenlandskAdresse = null,
                                   coAdressenavn = "CONAVN",
                                   vegadresse = vegadresse(),
-                                  ukjentBosted = null))
+                                  ukjentBosted = null,
+                                  matrikkelAdresse = null
+            ))
 
     private fun vegadresse(): Vegadresse =
             Vegadresse(husnummer = "13",
@@ -150,5 +152,6 @@ class PdlClientConfig {
                        postnummer = "0575",
                        bruksenhetsnummer = "",
                        tilleggsnavn = null,
-                       koordinater = null)
+                       koordinater = null,
+                       matrikkelId = 0)
 }
