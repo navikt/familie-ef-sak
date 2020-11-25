@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.api.dto.Sivilstandstype
 import no.nav.familie.ef.sak.domene.SøkerMedBarn
 import no.nav.familie.ef.sak.integration.dto.pdl.*
 import no.nav.familie.ef.sak.service.ArbeidsfordelingService
+import no.nav.familie.ef.sak.service.KodeverkService
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -15,7 +16,8 @@ import java.time.LocalDateTime
 @Component
 class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                                private val statsborgerskapMapper: StatsborgerskapMapper,
-                               private val arbeidsfordelingService: ArbeidsfordelingService) {
+                               private val arbeidsfordelingService: ArbeidsfordelingService,
+                               private val kodeverkService: KodeverkService) {
 
     fun tilPersonopplysninger(personMedRelasjoner: SøkerMedBarn,
                               ident: String,
@@ -60,12 +62,12 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                             identNavn)
                 },
                 innflyttingTilNorge = søker.innflyttingTilNorge.map {
-                    InnflyttingDto(fraflyttingsland = it.fraflyttingsland,
+                    InnflyttingDto(fraflyttingsland = it.fraflyttingsland?.let { kodeverkService.hentLand(it, LocalDate.now()) },
                                    dato = null,
                                    fraflyttingssted = it.fraflyttingsstedIUtlandet)
                 },
                 utflyttingFraNorge = søker.utflyttingFraNorge.map {
-                    UtflyttingDto(tilflyttingsland = it.tilflyttingsland,
+                    UtflyttingDto(tilflyttingsland = it.tilflyttingsland?.let { kodeverkService.hentLand(it, LocalDate.now()) },
                                   dato = null,
                                   tilflyttingssted = it.tilflyttingsstedIUtlandet)
                 },

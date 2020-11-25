@@ -10,7 +10,7 @@ import java.time.LocalDateTime.*
 
 internal class PersonopplysningerMapperTest {
 
-    val personopplysningerMapper = PersonopplysningerMapper(mockk(), mockk(), mockk())
+    val personopplysningerMapper = PersonopplysningerMapper(mockk(), mockk(), mockk(), mockk())
 
     fun adresseOslo() = Vegadresse("1", "ABC", "123", "Oslogata", "01", null, "0101", null)
     fun adresseTrondheim() = Vegadresse("1", "ABC", "123", "Trøndergata", "01", null, "7080", null)

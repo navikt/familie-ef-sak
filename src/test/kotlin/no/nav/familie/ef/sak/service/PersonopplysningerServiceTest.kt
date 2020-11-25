@@ -28,8 +28,9 @@ internal class PersonopplysningerServiceTest {
         familieIntegrasjonerClient = mockk()
         adresseMapper = AdresseMapper(kodeverkService)
         arbeidsfordelingService = mockk()
+
         val personopplysningerMapper =
-                PersonopplysningerMapper(adresseMapper, StatsborgerskapMapper(kodeverkService), arbeidsfordelingService)
+                PersonopplysningerMapper(adresseMapper, StatsborgerskapMapper(kodeverkService), arbeidsfordelingService, kodeverkService)
         val personService = PersonService(PdlClientConfig().pdlClient())
         personopplysningerService = PersonopplysningerService(personService,
                                                               familieIntegrasjonerClient,
@@ -109,12 +110,12 @@ internal class PersonopplysningerServiceTest {
     "fødselsdato" : null
   } ],
    "innflyttingTilNorge" : [ {
-    "fraflyttingsland" : "SWE",
+    "fraflyttingsland" : "Sverige",
     "dato" : null,
     "fraflyttingssted" : "Stockholm"
   } ],
   "utflyttingFraNorge" : [ {
-    "tilflyttingsland" : "SWE",
+    "tilflyttingsland" : "Sverige",
     "dato" : null,
     "tilflyttingssted" : "Stockholm"
   } ]
