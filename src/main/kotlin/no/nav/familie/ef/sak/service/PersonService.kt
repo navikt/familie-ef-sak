@@ -17,7 +17,7 @@ class PersonService(private val pdlClient: PdlClient) {
 
     fun hentPersonMedRelasjoner(ident: String): SøkerMedBarn {
         val søker = hentSøker(ident)
-        val barnIdentifikatorer = søker.familierelasjoner.filter { it.minRolleForPerson == Familierelasjonsrolle.BARN }
+        val barnIdentifikatorer = søker.familierelasjoner.filter { it.relatertPersonsRolle == Familierelasjonsrolle.BARN }
                 .map { it.relatertPersonsIdent }
         return SøkerMedBarn(ident, søker, pdlClient.hentBarn(barnIdentifikatorer))
     }
