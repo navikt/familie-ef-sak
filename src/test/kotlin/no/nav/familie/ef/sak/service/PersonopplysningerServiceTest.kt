@@ -28,8 +28,9 @@ internal class PersonopplysningerServiceTest {
         familieIntegrasjonerClient = mockk()
         adresseMapper = AdresseMapper(kodeverkService)
         arbeidsfordelingService = mockk()
+
         val personopplysningerMapper =
-                PersonopplysningerMapper(adresseMapper, StatsborgerskapMapper(kodeverkService), arbeidsfordelingService)
+                PersonopplysningerMapper(adresseMapper, StatsborgerskapMapper(kodeverkService), arbeidsfordelingService, kodeverkService)
         val personService = PersonService(PdlClientConfig().pdlClient())
         personopplysningerService = PersonopplysningerService(personService,
                                                               familieIntegrasjonerClient,
@@ -91,7 +92,33 @@ internal class PersonopplysningerServiceTest {
     "navn" : "11111133333 mellomnavn Etternavn"
   } ],
   "egenAnsatt" : true,
-  "navEnhet" : "1 - Enhet"
+  "navEnhet" : "1 - Enhet",
+  "barn" : [ {
+    "personIdent" : "01012067050",
+    "navn" : "Barn Barnesen",
+    "annenForelder" : {
+      "personIdent" : "01010172272",
+      "navn" : "01010172272 mellomnavn Etternavn"
+    },
+    "adresse" : [ {
+      "visningsadresse" : "c/o CONAVN, Charlies vei 13 b, 0575 Oslo",
+      "type" : "BOSTEDADRESSE",
+      "gyldigFraOgMed" : "2020-01-01",
+      "gyldigTilOgMed" : "2020-01-01"
+    } ],
+    "borHosSøker" : true,
+    "fødselsdato" : null
+  } ],
+   "innflyttingTilNorge" : [ {
+    "fraflyttingsland" : "Sverige",
+    "dato" : null,
+    "fraflyttingssted" : "Stockholm"
+  } ],
+  "utflyttingFraNorge" : [ {
+    "tilflyttingsland" : "Sverige",
+    "dato" : null,
+    "tilflyttingssted" : "Stockholm"
+  } ]
 }""")
     }
 }

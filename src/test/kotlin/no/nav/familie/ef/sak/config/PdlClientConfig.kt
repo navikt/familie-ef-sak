@@ -4,13 +4,13 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.integration.dto.pdl.*
-import no.nav.familie.util.FnrGenerator
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.Month
 
 @Configuration
 @Profile("mock-pdl")
@@ -18,7 +18,7 @@ class PdlClientConfig {
 
     private val startdato = LocalDate.of(2020, 1, 1)
     private val sluttdato = LocalDate.of(2021, 1, 1)
-    private val barnFnr = FnrGenerator.generer(2020, 1, 1)
+    private val barnFnr = "01012067050"
     private val søkerFnr = "01010172272"
 
     @Bean
@@ -63,7 +63,9 @@ class PdlClientConfig {
         return pdlClient
     }
 
-    private val folkeregistermetadata = Folkeregistermetadata(LocalDateTime.now(), LocalDateTime.now())
+    private val folkeregistermetadata = Folkeregistermetadata(LocalDateTime.of(2010, Month.AUGUST, 30, 10, 10),
+                                                              LocalDateTime.of(2018, Month.JANUARY, 15, 12, 55))
+
 
     private fun lagKjønn(kjønnType: KjønnType = KjønnType.KVINNE) = listOf(Kjønn(kjønnType))
 
