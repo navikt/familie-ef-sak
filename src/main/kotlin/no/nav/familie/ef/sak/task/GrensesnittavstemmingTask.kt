@@ -30,8 +30,9 @@ class GrensesnittavstemmingTask(private val avstemmingService: AvstemmingService
 
     override fun onCompletion(task: Task) {
         val payload = objectMapper.readValue<GrensesnittavstemmingPayload>(task.payload)
+        val nesteFradato = task.triggerTid.toLocalDate()
         avstemmingService.opprettGrensesnittavstemmingTask(GrensesnittavstemmingDto(stønadstype = payload.stønadstype,
-                                                                                    fraDato = task.triggerTid.toLocalDate()))
+                                                                                    fraDato = nesteFradato))
     }
 
     companion object {
