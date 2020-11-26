@@ -100,7 +100,13 @@ data class Bostedsadresse(val angittFlyttedato: LocalDate?,
                           val folkeregistermetadata: Folkeregistermetadata,
                           val utenlandskAdresse: UtenlandskAdresse?,
                           val vegadresse: Vegadresse?,
-                          val ukjentBosted: UkjentBosted?)
+                          val ukjentBosted: UkjentBosted?,
+                          val matrikkeladresse: Matrikkeladresse?) {
+
+    fun matrikkelId(): Long? {
+        return matrikkeladresse?.matrikkelId ?: vegadresse?.matrikkelId
+    }
+}
 
 data class Oppholdsadresse(val oppholdsadressedato: LocalDate?,
                            val coAdressenavn: String?,
@@ -141,7 +147,8 @@ data class Vegadresse(val husnummer: String?,
                       val kommunenummer: String?,
                       val tilleggsnavn: String?,
                       val postnummer: String?,
-                      val koordinater: Koordinater?)
+                      val koordinater: Koordinater?,
+                      val matrikkelId: Long?)
 
 data class UkjentBosted(val bostedskommune: String?)
 
@@ -270,6 +277,8 @@ data class UtenlandskAdresse(val adressenavnNummer: String?,
                              val postboksNummerNavn: String?,
                              val postkode: String?,
                              val regionDistriktOmraade: String?)
+
+data class Matrikkeladresse(val matrikkelId: Long?)
 
 data class UtenlandskAdresseIFrittFormat(val adresselinje1: String?,
                                          val adresselinje2: String?,

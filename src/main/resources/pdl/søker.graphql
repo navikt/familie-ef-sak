@@ -33,6 +33,10 @@ query($ident: ID!){
                     z
                     kvalitet
                 }
+                matrikkelId
+            }
+            matrikkeladresse {
+                matrikkelId
             }
             ukjentBosted {
                 bostedskommune
@@ -147,6 +151,7 @@ query($ident: ID!){
                     z
                     kvalitet
                 }
+                matrikkelId
             }
         }
         oppholdsadresse(historikk: true) {
@@ -175,6 +180,7 @@ query($ident: ID!){
                     z
                     kvalitet
                 }
+                matrikkelId
             }
             oppholdAnnetSted
         }

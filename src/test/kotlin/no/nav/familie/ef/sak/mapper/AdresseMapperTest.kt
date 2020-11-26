@@ -25,7 +25,8 @@ internal class AdresseMapperTest {
                                                                                      .atStartOfDay()),
                                utenlandskAdresse(),
                                vegadresse = vegadresse(),
-                               ukjentBosted = UkjentBosted(bostedskommune = "ukjentBostedKommune")
+                               ukjentBosted = UkjentBosted(bostedskommune = "ukjentBostedKommune"),
+                               null
                 )
         assertThat(mapper.tilAdresse(bostedsadresse).visningsadresse)
                 .isEqualTo("Charlies vei 13 b, 0575 Oslo")
@@ -138,7 +139,8 @@ internal class AdresseMapperTest {
                        postnummer = "0575",
                        bruksenhetsnummer = "",
                        tilleggsnavn = "tilleggsnavn",
-                       koordinater = null)
+                       koordinater = null,
+                       matrikkelId = null)
 
     private fun utenlandskAdresse(): UtenlandskAdresse =
             UtenlandskAdresse(adressenavnNummer = "a 1",
@@ -157,5 +159,6 @@ internal class AdresseMapperTest {
                        postnummer = null,
                        bruksenhetsnummer = null,
                        tilleggsnavn = null,
-                       koordinater = null)
+                       koordinater = null,
+                       matrikkelId = null)
 }

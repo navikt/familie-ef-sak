@@ -36,6 +36,10 @@ query($identer: [ID!]!){
                         z
                         kvalitet
                     }
+                    matrikkelId
+                }
+                matrikkeladresse {
+                    matrikkelId
                 }
                 ukjentBosted {
                     bostedskommune
@@ -58,6 +62,7 @@ query($identer: [ID!]!){
                         z
                         kvalitet
                     }
+                    matrikkelId
                 }
                 ukjentBosted {
                     bostedskommune
