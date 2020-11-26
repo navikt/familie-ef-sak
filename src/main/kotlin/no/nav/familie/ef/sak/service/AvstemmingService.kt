@@ -1,38 +1,44 @@
 package no.nav.familie.ef.sak.service
 
-import no.nav.familie.ef.sak.api.avstemming.AvstemmingDto
-import no.nav.familie.ef.sak.api.avstemming.AvstemmingType
+import no.nav.familie.ef.sak.api.avstemming.GrensesnittavstemmingDto
+import no.nav.familie.ef.sak.api.avstemming.KonsistensavstemmingDto
+import no.nav.familie.ef.sak.api.avstemming.tilTask
+import no.nav.familie.ef.sak.integration.OppdragClient
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
-import no.nav.familie.ef.sak.task.KonsistensavstemmingTask
-import no.nav.familie.ef.sak.task.GrensesnittavstemmingTask
-import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.util.VirkedagerProvider
+import no.nav.familie.ef.sak.økonomi.tilKlassifisering
+import no.nav.familie.kontrakter.felles.oppdrag.GrensesnittavstemmingRequest
+import no.nav.familie.kontrakter.felles.oppdrag.KonsistensavstemmingRequest
+import no.nav.familie.kontrakter.felles.oppdrag.OppdragIdForFagsystem
+import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Service
-class AvstemmingService(val grensesnittavstemmingTask: GrensesnittavstemmingTask,
-                        val konsistensavstemmingTask: KonsistensavstemmingTask) {
+class AvstemmingService(private val oppdragClient: OppdragClient, private val taskRepository: TaskRepository) {
 
-    fun utløsAvstemming(avstemmingDto: AvstemmingDto): Task? = with(avstemmingDto) {
-        when (avstemmingType) {
-            AvstemmingType.GRENSESNITTAVSTEMMING -> fraDato?.let {
-                utløsGrensesnittavstemming(fraDato = it,
-                                           stønadstype = stønadstype,
-                                           triggerTid = triggerTid)
-            }
-            AvstemmingType.KONSISTENSAVSTEMMING -> utløsKonsistensAvstemming(stønadstype, triggerTid)
-        }
+    fun opprettGrensesnittavstemmingTask(grensesnittavstemmingDto: GrensesnittavstemmingDto) =
+            grensesnittavstemmingDto
+                    .let { it.tilTask() }
+                    .let { taskRepository.save(it) }
+
+    fun opprettKonsistenavstemmingTasker(vararg avstemmingDto: KonsistensavstemmingDto) =
+            avstemmingDto
+                    .map { it.tilTask() }
+                    .let { taskRepository.saveAll(it) }
+                    .let { it.toList() }
+
+    fun grensesnittavstemOppdrag(fraTidspunkt: LocalDateTime, tilTidspunkt: LocalDateTime, stønadstype: Stønadstype) {
+        val grensesnittavstemmingRequest = GrensesnittavstemmingRequest(fagsystem = stønadstype.tilKlassifisering(),
+                                                                        fra = fraTidspunkt,
+                                                                        til = tilTidspunkt)
+        oppdragClient.grensesnittavstemming(grensesnittavstemmingRequest)
     }
 
-    fun utløsGrensesnittavstemming(fraDato: LocalDate, stønadstype: Stønadstype, triggerTid: LocalDateTime?): Task {
-        val nesteVirkedag: LocalDateTime = triggerTid ?: VirkedagerProvider.nesteVirkedag(fraDato).atTime(8, 0)
-        return grensesnittavstemmingTask.opprettNyTask(fraDato, nesteVirkedag, stønadstype)
-    }
-
-    fun utløsKonsistensAvstemming(stønadstype: Stønadstype, triggerTid: LocalDateTime = LocalDateTime.now()): Task {
-        return konsistensavstemmingTask.opprettNyTask(triggerTid, stønadstype)
+    fun konsistensavstemOppdrag(stønadstype: Stønadstype, oppdragIdListe: List<OppdragIdForFagsystem>) {
+        val konsistensavstemmingRequest = KonsistensavstemmingRequest(fagsystem = stønadstype.tilKlassifisering(),
+                                                                      oppdragIdListe = oppdragIdListe,
+                                                                      avstemmingstidspunkt = LocalDateTime.now())
+        oppdragClient.konsistensavstemming(konsistensavstemmingRequest)
     }
 
 }
