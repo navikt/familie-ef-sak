@@ -39,8 +39,8 @@ internal class AvstemmingServiceTest {
             taskIterable.captured
         }
 
-        avstemmingService.opprettKonsistenavstemmingTasker(KonsistensavstemmingDto(datoForAvstemming,
-                                                                                   stønadstype = Stønadstype.OVERGANGSSTØNAD))
+        avstemmingService.opprettKonsistenavstemmingTasker(listOf(KonsistensavstemmingDto(datoForAvstemming,
+                                                                                   stønadstype = Stønadstype.OVERGANGSSTØNAD)))
 
         val payload = KonsistensavstemmingPayload(stønadstype = Stønadstype.OVERGANGSSTØNAD,
                                                   triggerTid = datoForAvstemming.atTime(8, 0))

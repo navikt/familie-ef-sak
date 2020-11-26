@@ -17,7 +17,7 @@ class AvstemmingController(private val avstemmingService: AvstemmingService) {
     }
 
     @PostMapping("/konsistensavstemming")
-    fun opprettKonsistensAvstemming(@RequestBody avstemmingDto: Array<KonsistensavstemmingDto>): Ressurs<List<Task>> {
-        return Ressurs.success(avstemmingService.opprettKonsistenavstemmingTasker(*avstemmingDto))
+    fun opprettKonsistensAvstemming(@RequestBody avstemmingDto: List<KonsistensavstemmingDto>): Ressurs<List<Task>> {
+        return Ressurs.success(avstemmingService.opprettKonsistenavstemmingTasker(avstemmingDto))
     }
 }

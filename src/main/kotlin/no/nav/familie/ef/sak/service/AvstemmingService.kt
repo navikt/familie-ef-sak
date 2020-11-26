@@ -21,7 +21,7 @@ class AvstemmingService(private val oppdragClient: OppdragClient, private val ta
                     .let { it.tilTask() }
                     .let { taskRepository.save(it) }
 
-    fun opprettKonsistenavstemmingTasker(vararg avstemmingDto: KonsistensavstemmingDto) =
+    fun opprettKonsistenavstemmingTasker(avstemmingDto: List<KonsistensavstemmingDto>) =
             avstemmingDto
                     .map { it.tilTask() }
                     .let { taskRepository.saveAll(it) }
