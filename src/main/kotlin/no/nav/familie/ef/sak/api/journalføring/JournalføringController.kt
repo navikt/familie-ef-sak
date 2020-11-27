@@ -48,7 +48,7 @@ class JournalføringController(private val journalføringService: Journalføring
         val personIdent = journalpost.bruker?.let {
             when (it.type) {
                 BrukerIdType.FNR -> it.id
-                BrukerIdType.AKTOERID -> pdlClient.hentPersonident(it.id).hentIdenter.identer.first().ident
+                BrukerIdType.AKTOERID -> pdlClient.hentPersonident(it.id).identer.first().ident
                 BrukerIdType.ORGNR -> error("Kan ikke hente journalpost=$journalpostId for orgnr")
             }
         } ?: error("Kan ikke hente journalpost=$journalpostId uten bruker")

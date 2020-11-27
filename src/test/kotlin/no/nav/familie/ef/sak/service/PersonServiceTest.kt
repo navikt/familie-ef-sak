@@ -40,14 +40,14 @@ internal class PersonServiceTest {
 
         every {
             pdlClient.hentSøker(any())
-        } returns PdlTestdata.pdlSøkerData.person
+        } returns PdlTestdata.pdlSøkerData.person!!
 
         every {
             pdlClient.hentBarn(any())
         } returns mapOf("1111" to pdlBarnOla, "2222" to pdlBarnKari)
 
 
-        val søkerMedBarn = SøkerMedBarn("1234", PdlTestdata.pdlSøkerData.person, mapOf("1111" to pdlBarnOla))
+        val søkerMedBarn = SøkerMedBarn("1234", PdlTestdata.pdlSøkerData.person!!, mapOf("1111" to pdlBarnOla))
         assertThat(personService.hentIdenterForBarnOgForeldre("1234")).containsAll(listOf("1111", "1234", "5678"))
     }
 }

@@ -6,7 +6,9 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.config.PdlConfig
+import no.nav.familie.ef.sak.exception.PdlRequestException
 import no.nav.familie.http.sts.StsRestClient
+import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -103,7 +105,25 @@ class PdlClientTest {
         wiremockServerItem.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
                                            .willReturn(okJson(readFile("hent_identer.json"))))
         val response = pdlClient.hentAktørId("12345")
-        assertThat(response.hentIdenter.identer.first().ident).isEqualTo("12345678901")
+        assertThat(response.identer.first().ident).isEqualTo("12345678901")
+    }
+
+    @Test
+    fun `pdlClient håndterer response for søker-query mot pdl-tjenesten der person i data er null`() {
+        wiremockServerItem.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
+                                           .willReturn(okJson("{\"data\": {}}")))
+        assertThat(Assertions.catchThrowable { pdlClient.hentSøker("") })
+                .hasMessageStartingWith("Manglende ")
+                .isInstanceOf(PdlRequestException::class.java)
+    }
+
+    @Test
+    fun `pdlClient håndterer response for søker-query mot pdl-tjenesten der data er null og har errors`() {
+        wiremockServerItem.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
+                                           .willReturn(okJson(readFile("pdlErrorResponse.json"))))
+        assertThat(Assertions.catchThrowable { pdlClient.hentSøker("") })
+                .hasMessageStartingWith("Feil ved henting av")
+                .isInstanceOf(PdlRequestException::class.java)
     }
 
 

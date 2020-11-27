@@ -33,7 +33,7 @@ class PdlClient(val pdlConfig: PdlConfig,
         val pdlResponse: PdlResponse<PdlSøkerData> = postForEntity(pdlConfig.pdlUri,
                                                                    pdlPersonRequest,
                                                                    httpHeaders())
-        return feilsjekkOgReturnerData(personIdent, pdlResponse).person
+        return feilsjekkOgReturnerData(personIdent, pdlResponse) { it.person }
     }
 
     //Brukes for å hente hele pdl dataobjektet uten serialisering
@@ -43,7 +43,7 @@ class PdlClient(val pdlConfig: PdlConfig,
         val pdlResponse: PdlResponse<Map<String, Any>> = postForEntity(pdlConfig.pdlUri,
                                                                        pdlPersonRequest,
                                                                        httpHeaders())
-        return feilsjekkOgReturnerData(personIdent, pdlResponse)
+        return feilsjekkOgReturnerData(personIdent, pdlResponse) { it }
     }
 
     fun hentBarn(personIdenter: List<String>): Map<String, PdlBarn> {
@@ -76,38 +76,40 @@ class PdlClient(val pdlConfig: PdlConfig,
         return feilsjekkOgReturnerData(pdlResponse)
     }
 
-    fun hentAktørId(personIdent: String): PdlHentIdenter {
+    fun hentAktørId(personIdent: String): PdlAktørId {
         val pdlPersonRequest = PdlIdentRequest(variables = PdlIdentRequestVariables(personIdent, "AKTORID"),
                                                query = PdlConfig.hentIdentQuery)
         val pdlResponse: PdlResponse<PdlHentIdenter> = postForEntity(pdlConfig.pdlUri,
                                                                      pdlPersonRequest,
                                                                      httpHeaders())
-        return feilsjekkOgReturnerData(personIdent, pdlResponse)
+        return feilsjekkOgReturnerData(personIdent, pdlResponse) { it.hentIdenter }
     }
 
-    fun hentPersonident(aktørId: String): PdlHentIdenter {
+    fun hentPersonident(aktørId: String): PdlAktørId {
         val pdlPersonRequest = PdlIdentRequest(variables = PdlIdentRequestVariables(aktørId, "FOLKEREGISTERIDENT"),
                                                query = PdlConfig.hentIdentQuery)
         val pdlResponse: PdlResponse<PdlHentIdenter> = postForEntity(pdlConfig.pdlUri,
                                                                      pdlPersonRequest,
                                                                      httpHeaders())
-        return feilsjekkOgReturnerData(aktørId, pdlResponse)
+        return feilsjekkOgReturnerData(aktørId, pdlResponse) { it.hentIdenter }
     }
 
-    private inline fun <reified T : Any> feilsjekkOgReturnerData(ident: String,
-                                                                 pdlResponse: PdlResponse<T>): T {
+    private inline fun <reified DATA : Any, reified T : Any> feilsjekkOgReturnerData(ident: String,
+                                                                                     pdlResponse: PdlResponse<DATA>,
+                                                                                     dataMapper: (DATA) -> T?): T {
 
         if (pdlResponse.harFeil()) {
             secureLogger.error("Feil ved henting av ${T::class} fra PDL: ${pdlResponse.errorMessages()}")
             throw PdlRequestException("Feil ved henting av ${T::class} fra PDL. Se secure logg for detaljer.")
         }
 
-        if (pdlResponse.data == null) {
+        val data = dataMapper.invoke(pdlResponse.data)
+        if (data == null) {
             secureLogger.error("Feil ved oppslag på ident $ident. " +
                                "PDL rapporterte ingen feil men returnerte tomt datafelt")
             throw PdlRequestException("Manglende ${T::class} ved feilfri respons fra PDL. Se secure logg for detaljer.")
         }
-        return pdlResponse.data
+        return data
     }
 
     private inline fun <reified T : Any> feilsjekkOgReturnerData(pdlResponse: PdlBolkResponse<T>): Map<String, T> {
