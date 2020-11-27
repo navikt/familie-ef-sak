@@ -9,7 +9,7 @@ spring:
     username: sa
     password:
     url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;CASE_INSENSITIVE_IDENTIFIERS=TRUE
-    driver-class-name: org.h2.Driver
+    driver-class-name: org.postgresql.Driver
 
 no.nav.security.jwt:
   issuer.azuread:
