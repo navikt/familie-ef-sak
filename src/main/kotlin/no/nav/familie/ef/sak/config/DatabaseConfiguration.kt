@@ -132,7 +132,7 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
     class PGobjectTilDelvilkårConverter : Converter<PGobject, DelvilkårsvurderingWrapper> {
 
         override fun convert(pGobject: PGobject): DelvilkårsvurderingWrapper {
-            return DelvilkårsvurderingWrapper(objectMapper.readValue(pGobject.value!!))
+            return DelvilkårsvurderingWrapper(pGobject.value?.let { objectMapper.readValue(it) } ?: emptyList())
         }
     }
 
