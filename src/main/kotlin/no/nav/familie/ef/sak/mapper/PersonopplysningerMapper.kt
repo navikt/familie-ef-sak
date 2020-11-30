@@ -71,7 +71,7 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                                   dato = null,
                                   tilflyttingssted = it.tilflyttingsstedIUtlandet)
                 },
-                oppholdsTillatelse = OppholdstillatelseMapper.map(søker.opphold)
+                oppholdstillatelse = OppholdstillatelseMapper.map(søker.opphold)
         )
     }
 

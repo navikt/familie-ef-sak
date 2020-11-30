@@ -119,7 +119,7 @@ internal class PersonopplysningerServiceTest {
     "dato" : null,
     "tilflyttingssted" : "Stockholm"
   } ],
-  "oppholdsTillatelse" : [ {
+  "oppholdstillatelse" : [ {
     "oppholdstillatelse" : "PERMANENT",
     "fraDato" : "2020-01-01",
     "tilDato" : null
