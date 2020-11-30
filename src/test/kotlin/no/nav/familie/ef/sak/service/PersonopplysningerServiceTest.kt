@@ -118,6 +118,11 @@ internal class PersonopplysningerServiceTest {
     "tilflyttingsland" : "Sverige",
     "dato" : null,
     "tilflyttingssted" : "Stockholm"
+  } ],
+  "oppholdsTillatelse" : [ {
+    "oppholdstillatelse" : "PERMANENT",
+    "fraDato" : "2020-01-01",
+    "tilDato" : null
   } ]
 }""")
     }
