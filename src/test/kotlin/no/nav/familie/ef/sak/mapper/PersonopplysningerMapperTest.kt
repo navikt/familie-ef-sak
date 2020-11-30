@@ -4,18 +4,19 @@ import io.mockk.mockk
 import no.nav.familie.ef.sak.integration.dto.pdl.*
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.LocalDateTime.*
+import java.time.LocalDateTime.now
 
 internal class PersonopplysningerMapperTest {
 
     val personopplysningerMapper = PersonopplysningerMapper(mockk(), mockk(), mockk(), mockk())
 
-    fun adresseOslo() = Vegadresse("1", "ABC", "123", "Oslogata", "01", null, "0101", null)
-    fun adresseTrondheim() = Vegadresse("1", "ABC", "123", "Trøndergata", "01", null, "7080", null)
-    fun adresseTromsø() = Vegadresse("1", "ABC", "123", "Tromsøygata", "01", null, "9099", null)
-    fun adresseBergen() = Vegadresse("1", "ABC", "123", "Bergensgata", "01", null, "5020", null)
+    fun adresseOslo() = Vegadresse("1", "ABC", "123", "Oslogata", "01", null, "0101", null, null)
+    fun adresseTrondheim() = Vegadresse("1", "ABC", "123", "Trøndergata", "01", null, "7080", null, null)
+    fun adresseTromsø() = Vegadresse("1", "ABC", "123", "Tromsøygata", "01", null, "9099", null, null)
+    fun adresseTromsøMatrikkel() = Vegadresse("1", "ABC", "123", "Tromsøygata", "01", null, "9099", null, matrikkelId = 123L)
+    fun adresseBergen() = Vegadresse("1", "ABC", "123", "Bergensgata", "01", null, "5020", null, null)
+    fun matrikkeladresse(matrikkelId: Long? = 123L) = Matrikkeladresse(matrikkelId)
 
 
     @Test
@@ -34,6 +35,40 @@ internal class PersonopplysningerMapperTest {
 
         val pdlBarn = PdlBarn(emptyList(), barnAdresser, emptyList(), emptyList(), emptyList(), emptyList(), emptyList())
         Assertions.assertThat(personopplysningerMapper.borPåSammeAdresse(pdlBarn, forelderAdresser)).isTrue
+    }
+
+    @Test
+    internal fun `forelder og barn med samme vegadresse med matrikkelId`() {
+
+        val barnAdresser = listOf(
+                lagAdresse(adresseTromsøMatrikkel(), now().minusDays(1)),
+        )
+        val forelderAdresser = listOf(
+                lagAdresse(adresseTromsøMatrikkel(), now().minusDays(1))
+        )
+
+        val pdlBarn = PdlBarn(emptyList(), barnAdresser, emptyList(), emptyList(), emptyList(), emptyList(), emptyList())
+        Assertions.assertThat(personopplysningerMapper.borPåSammeAdresse(pdlBarn, forelderAdresser)).isTrue
+    }
+
+    @Test
+    internal fun `forelder og barn med samme matrikkeladresse`() {
+
+        val barnAdresser = listOf(lagAdresse(adresseBergen(), now().minusDays(1), null, matrikkeladresse()))
+        val forelderAdresser = listOf(lagAdresse(null, now().minusDays(1), null, matrikkeladresse()))
+
+        val pdlBarn = PdlBarn(emptyList(), barnAdresser, emptyList(), emptyList(), emptyList(), emptyList(), emptyList())
+        Assertions.assertThat(personopplysningerMapper.borPåSammeAdresse(pdlBarn, forelderAdresser)).isTrue
+    }
+
+    @Test
+    internal fun `forelder og barn med ulik matrikkeladresse`() {
+
+        val barnAdresser = listOf(lagAdresse(adresseBergen(), now().minusDays(1), null, matrikkeladresse()))
+        val forelderAdresser = listOf(lagAdresse(null, now().minusDays(1), null, matrikkeladresse(999L)))
+
+        val pdlBarn = PdlBarn(emptyList(), barnAdresser, emptyList(), emptyList(), emptyList(), emptyList(), emptyList())
+        Assertions.assertThat(personopplysningerMapper.borPåSammeAdresse(pdlBarn, forelderAdresser)).isFalse
     }
 
     @Test
@@ -103,7 +138,8 @@ internal class PersonopplysningerMapperTest {
 
     fun lagAdresse(vegadresse: Vegadresse?,
                    gyldighetstidspunkt: LocalDateTime?,
-                   opphørstidspunkt: LocalDateTime? = null): Bostedsadresse {
+                   opphørstidspunkt: LocalDateTime? = null,
+                   matrikkeladresse: Matrikkeladresse? = null): Bostedsadresse {
         return Bostedsadresse(
                 vegadresse = vegadresse,
                 angittFlyttedato = null,
@@ -112,7 +148,8 @@ internal class PersonopplysningerMapperTest {
                         gyldighetstidspunkt = gyldighetstidspunkt,
                         opphørstidspunkt = opphørstidspunkt),
                 utenlandskAdresse = null,
-                ukjentBosted = null
+                ukjentBosted = null,
+                matrikkeladresse = matrikkeladresse
         )
     }
 }
