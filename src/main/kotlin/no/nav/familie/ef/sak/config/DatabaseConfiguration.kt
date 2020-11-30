@@ -9,6 +9,7 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.prosessering.PropertiesWrapperTilStringConverter
 import no.nav.familie.prosessering.StringTilPropertiesWrapperConverter
+import org.postgresql.util.PGobject
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.convert.converter.Converter
@@ -63,8 +64,8 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
                                             TilkjentYtelseStatusTilStringConverter(),
                                             PropertiesWrapperTilStringConverter(),
                                             StringTilPropertiesWrapperConverter(),
-                                            StringTilDelvilkårConverter(),
-                                            DelvilkårTilStringConverter()))
+                                            PGobjectTilDelvilkårConverter(),
+                                            DelvilkårTilPGobjectConverter()))
     }
 
     @WritingConverter
@@ -128,18 +129,21 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
     }
 
     @ReadingConverter
-    class StringTilDelvilkårConverter : Converter<ByteArray, DelvilkårsvurderingWrapper> {
+    class PGobjectTilDelvilkårConverter : Converter<PGobject, DelvilkårsvurderingWrapper> {
 
-        override fun convert(byteArray: ByteArray): DelvilkårsvurderingWrapper {
-            return DelvilkårsvurderingWrapper(objectMapper.readValue(byteArray))
+        override fun convert(pGobject: PGobject): DelvilkårsvurderingWrapper {
+            return DelvilkårsvurderingWrapper(objectMapper.readValue(pGobject.value!!))
         }
     }
 
     @WritingConverter
-    class DelvilkårTilStringConverter : Converter<DelvilkårsvurderingWrapper, ByteArray> {
+    class DelvilkårTilPGobjectConverter : Converter<DelvilkårsvurderingWrapper, PGobject> {
 
-        override fun convert(delvilkårsvurdering: DelvilkårsvurderingWrapper): ByteArray =
-                objectMapper.writeValueAsBytes(delvilkårsvurdering.delvilkårsvurderinger)
+        override fun convert(delvilkårsvurdering: DelvilkårsvurderingWrapper): PGobject =
+                PGobject().apply {
+                    type = "json"
+                    value = objectMapper.writeValueAsString(delvilkårsvurdering.delvilkårsvurderinger)
+                }
     }
 
 }
