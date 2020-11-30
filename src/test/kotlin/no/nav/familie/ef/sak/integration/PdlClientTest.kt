@@ -126,6 +126,23 @@ class PdlClientTest {
                 .isInstanceOf(PdlRequestException::class.java)
     }
 
+    @Test
+    fun `pdlClient håndterer response for bolk-query mot pdl-tjenesten der person er null og har errors`() {
+        wiremockServerItem.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
+                                           .willReturn(okJson(readFile("pdlBolkErrorResponse.json"))))
+        assertThat(Assertions.catchThrowable { pdlClient.hentBarn(listOf("")) })
+                .hasMessageStartingWith("Feil ved henting av")
+                .isInstanceOf(PdlRequestException::class.java)
+    }
+
+    @Test
+    fun `pdlClient håndterer response for bolk-query mot pdl-tjenesten der data er null og har errors`() {
+        wiremockServerItem.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
+                                           .willReturn(okJson(readFile("pdlBolkErrorResponse_nullData.json"))))
+        assertThat(Assertions.catchThrowable { pdlClient.hentBarn(listOf("")) })
+                .hasMessageStartingWith("Data er null fra PDL")
+                .isInstanceOf(PdlRequestException::class.java)
+    }
 
     private fun readFile(filnavn: String): String {
         return this::class.java.getResource("/json/$filnavn").readText()
