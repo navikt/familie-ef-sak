@@ -6,10 +6,10 @@ spring:
     console:
       enabled: true
   datasource:
-    username: ${DATASOURCE_USERNAME:sa}
-    password: ${DATASOURCE_PASSWORD:}
-    url: ${DATASOURCE_URL:jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;CASE_INSENSITIVE_IDENTIFIERS=TRUE}
-    driver-class-name: ${DATASOURCE_DRIVER:org.h2.Driver}
+    username: ${DATASOURCE_USERNAME}
+    password: ${DATASOURCE_PASSWORD}
+    url: ${DATASOURCE_URL}
+    driver-class-name: org.postgresql.Driver
 
 no.nav.security.jwt:
   issuer.azuread:

@@ -9,11 +9,11 @@ import no.nav.familie.ef.sak.repository.domain.Søker
 import no.nav.familie.ef.sak.repository.domain.Søknad
 import no.nav.familie.ef.sak.repository.domain.SøknadType
 import org.assertj.core.api.Assertions.assertThat
-import org.h2.util.MathUtils
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDateTime
 import java.util.*
+import kotlin.random.Random.Default.nextInt
 
 internal class SøknadRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -39,11 +39,11 @@ internal class SøknadRepositoryTest : OppslagSpringRunnerTest() {
                                saksnummerInfotrygd = saksnummer,
                                søker = Søker(fødselsnummer, "Navn"),
                                journalpostId = "journalId$saksnummer",
-                               sporbar = Sporbar(opprettetTid = LocalDateTime.of(MathUtils.randomInt(2020),
-                                                                                 MathUtils.randomInt(11) + 1,
-                                                                                 MathUtils.randomInt(27) + 1,
-                                                                                 MathUtils.randomInt(23),
-                                                                                 MathUtils.randomInt(59))),
+                               sporbar = Sporbar(opprettetTid = LocalDateTime.of(nextInt(0, 2020),
+                                                                                 nextInt(11) + 1,
+                                                                                 nextInt(27) + 1,
+                                                                                 nextInt(23),
+                                                                                 nextInt(59))),
                                relaterteFnr = setOf("654654654")))
     }
 }

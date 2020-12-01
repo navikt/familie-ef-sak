@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
 import com.github.tomakehurst.wiremock.WireMockServer
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.database.DbContainerInitializer
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsstønad
 import org.junit.jupiter.api.AfterEach
@@ -19,10 +20,12 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 
 
 @ExtendWith(SpringExtension::class)
+@ContextConfiguration(initializers = [DbContainerInitializer::class])
 @SpringBootTest(classes = [ApplicationLocal::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("integrasjonstest", "mock-oauth", "mock-pdl", "mock-integrasjoner")
 abstract class OppslagSpringRunnerTest {
