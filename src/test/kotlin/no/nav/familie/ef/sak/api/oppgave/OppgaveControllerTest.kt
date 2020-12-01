@@ -4,7 +4,6 @@ import io.mockk.*
 import no.nav.familie.ef.sak.api.ManglerTilgang
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlAktørId
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlHentIdenter
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlIdent
 import no.nav.familie.ef.sak.repository.domain.Oppgave
 import no.nav.familie.ef.sak.service.OppgaveService
@@ -31,7 +30,7 @@ internal class OppgaveControllerTest {
     internal fun `skal sende med aktoerId i request `() {
         val finnOppgaveRequestSlot = slot<FinnOppgaveRequest>()
         tilgangOgRolleJustRuns()
-        every { pdlClient.hentAktørId("4321") } returns PdlHentIdenter(PdlAktørId(listOf(PdlIdent("1234"))))
+        every { pdlClient.hentAktørId("4321") } returns PdlAktørId(listOf(PdlIdent("1234")))
         every { oppgaveService.hentOppgaver(capture(finnOppgaveRequestSlot)) } returns FinnOppgaveResponseDto(0, listOf())
         oppgaveController.hentOppgaver(FinnOppgaveRequestDto(ident = "4321"))
         assertThat(finnOppgaveRequestSlot.captured.aktørId).isEqualTo("1234")
@@ -44,7 +43,7 @@ internal class OppgaveControllerTest {
         tilgangOgRolleJustRuns()
         every { oppgaveService.hentOppgaver(capture(finnOppgaveRequestSlot)) } returns FinnOppgaveResponseDto(0, listOf())
         oppgaveController.hentOppgaver(FinnOppgaveRequestDto(ident = " "))
-        verify (exactly = 0){pdlClient.hentAktørId(any())}
+        verify(exactly = 0) { pdlClient.hentAktørId(any()) }
         assertThat(finnOppgaveRequestSlot.captured.aktørId).isEqualTo(null)
     }
 
@@ -54,7 +53,7 @@ internal class OppgaveControllerTest {
         tilgangOgRolleJustRuns()
         every { oppgaveService.hentOppgaver(capture(finnOppgaveRequestSlot)) } returns FinnOppgaveResponseDto(0, listOf())
         oppgaveController.hentOppgaver(FinnOppgaveRequestDto(ident = null))
-        verify (exactly = 0){pdlClient.hentAktørId(any())}
+        verify(exactly = 0) { pdlClient.hentAktørId(any()) }
         assertThat(finnOppgaveRequestSlot.captured.aktørId).isEqualTo(null)
     }
 

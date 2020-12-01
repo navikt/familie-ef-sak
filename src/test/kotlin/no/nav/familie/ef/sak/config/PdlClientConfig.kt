@@ -59,7 +59,7 @@ class PdlClientConfig {
 
         every { pdlClient.hentBarn(any()) } returns barn()
 
-        every { pdlClient.hentAktørId(any()) } returns PdlHentIdenter(PdlAktørId(listOf(PdlIdent("12345678901232"))))
+        every { pdlClient.hentAktørId(any()) } returns PdlAktørId(listOf(PdlIdent("12345678901232")))
         return pdlClient
     }
 

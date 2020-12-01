@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-data class PdlResponse<T>(val data: T?,
+data class PdlResponse<T>(val data: T,
                           val errors: List<PdlError>?) {
 
     fun harFeil(): Boolean {
@@ -16,16 +16,19 @@ data class PdlResponse<T>(val data: T?,
     }
 }
 
+data class PdlBolkResponse<T>(val data: PersonBolk<T>?, val errors: List<PdlError>?) {
+
+    fun errorMessages(): String {
+        return errors?.joinToString { it -> it.message } ?: ""
+    }
+}
+
 data class PdlError(val message: String)
 
-data class PdlSøkerKortData(val person: PdlSøkerKort)
-data class PdlSøkerData(val person: PdlSøker)
-data class PdlAnnenForelderData(val person: PdlAnnenForelder)
-data class PdlBarnData(val person: PdlBarn)
+data class PdlSøkerData(val person: PdlSøker?)
 
 data class PersonDataBolk<T>(val ident: String, val code: String, val person: T?)
 data class PersonBolk<T>(val personBolk: List<PersonDataBolk<T>>)
-data class PdlBolkResponse<T>(val data: PersonBolk<T>)
 
 interface PdlPerson {
 
@@ -37,7 +40,7 @@ data class PdlIdent(val ident: String)
 
 data class PdlAktørId(val identer: List<PdlIdent>)
 
-data class PdlHentIdenter(val hentIdenter: PdlAktørId)
+data class PdlHentIdenter(val hentIdenter: PdlAktørId?)
 
 data class PdlPersonKort(val navn: List<Navn>)
 
