@@ -84,38 +84,46 @@ internal class PlukkBehandlingTilKonsistensavstemmingTest : OppslagSpringRunnerT
     }
 
     /*
-        Case 3:
-        Behandling A: Utbetaling fom. 01.10.2020 - 31.09.2021
-        Revurdering B: Endring på utbetaling fom 01.01.2021
-        Behandling B skal konsistensavstemmes og behandling A skal konsistensavstemmes. (Behandling A har fortsatt utbetalingsperioder som gjelder, behandling B har fremtidig utbetaling)
+    Case 4:
+    Behandling A: Utbetaling fom. [2020-01-01 - 2020-12-31, 2021-01-01 - 2021-12-31]
+    Revurdering B: Opphør på utbetaling fom 2020-11-01
         */
     @Test
-    fun `Case 3`() {
-        val revurdering = behandlingRepository.insert(behandling(fagsak = fagsak))
+    fun `Opphør i november i førsta perioden`() {
+        val opphørsAndel = Andel(100, LocalDate.of(2020, 10, 1), LocalDate.of(2020, 10, 31))
 
-        val oppdragIdForFagsystem = tilkjentYtelseRepository.finnAktiveBehandlinger(datoForAvstemming = LocalDate.now(),
-                                                                                    stønadstype = Stønadstype.OVERGANGSSTØNAD)
-        assertThat(oppdragIdForFagsystem.size).isEqualTo(2)
-        assertThat(oppdragIdForFagsystem[0].behandlingsId).isEqualTo(førstegangsbehandling.eksternId.id)
-        assertThat(oppdragIdForFagsystem[1].behandlingsId).isEqualTo(revurdering.eksternId.id)
+        val behandlingB = opprettTilkjentYtelse(fagsak, opphørsAndel)
+
+
+        assertKonsistensavstemming(datoForAvstemming = LocalDate.of(2020, 2, 1),
+                                   feilmelding = "Skal returnere den nyaste behandlingen når man konsistensavstemmer før periodene",
+                                   behandlingB.eksternId.id)
+
+        assertKonsistensavstemming(datoForAvstemming = LocalDate.of(2020, 11, 1),
+                                   feilmelding = "Skal ikke returnere noe når man konsistensavstemmer etter periodene")
     }
 
 
     /*
     Case 4:
-    Behandling A: Utbetaling fom. 01.10.2020 - 31.09.2021
-    Revurdering B: Opphør på utbetaling fom 01.11.2020
-    Behandling B skal ikke konsistensavstemmes, behandling A skal ikke konsistensavstemmes. (Behandling B har ingen egne utbetalingsperioder, og behandling A sine utbetalingsperioder er ikke lenger gjeldende)
+    Behandling A: Utbetaling fom. [2020-01-01 - 2020-12-31, 2021-01-01 - 2021-12-31]
+    Revurdering B: Ny utbetaling fom. 2022-03-01 - 2023-03-31
+    Opphør C: Opphør på utbetaling fra A fom 01.11.2020 => [2020-01-01 - 2020-10-31, 2022-03-01 - 2023-03-31]
+    Behandling B skal konsistensavstemmes, behandling A og C skal ikke konsistensavstemmes.
     */
     @Test
     fun `Case 4`() {
-        val revurdering = behandlingRepository.insert(behandling(fagsak = fagsak))
+        val nyAndel = Andel(50, LocalDate.of(2022, 3, 1), LocalDate.of(2023, 3, 31))
 
-        val oppdragIdForFagsystem = tilkjentYtelseRepository.finnAktiveBehandlinger(datoForAvstemming = LocalDate.now(),
-                                                                                    stønadstype = Stønadstype.OVERGANGSSTØNAD)
-        assertThat(oppdragIdForFagsystem.size).isEqualTo(2)
-        assertThat(oppdragIdForFagsystem[0].behandlingsId).isEqualTo(førstegangsbehandling.eksternId.id)
-        assertThat(oppdragIdForFagsystem[1].behandlingsId).isEqualTo(revurdering.eksternId.id)
+        val revurdering = opprettTilkjentYtelse(fagsak, periode1, periode2, nyAndel)
+
+        val opphør = opprettTilkjentYtelse(fagsak, periode1.copy(stønadTom = LocalDate.of(2020, 10, 31)), nyAndel)
+
+        assertKonsistensavstemming(datoForAvstemming = LocalDate.of(2020, 11, 1),
+                                   feilmelding = "Skal returnere når man konsistensavstemmer etter periodene",
+                                   opphør.eksternId.id)
+
+
     }
 
     data class Andel(val beløp: Int, val stønadFom: LocalDate, val stønadTom: LocalDate)
