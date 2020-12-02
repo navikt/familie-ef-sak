@@ -15,6 +15,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
+import java.util.*
 
 private const val behandlingEksternId = 0L
 private const val fagsakEksternId = 1L
@@ -45,10 +46,10 @@ data class TestOppdrag(val type: TestOppdragType,
                                 stønadTom = sluttPeriode,
                                 personIdent = fnr,
                                 periodeId = linjeId,
+                                ursprungsbehandlingId = UUID.randomUUID(),
                                 forrigePeriodeId = forrigeLinjeId)
         else if (TestOppdragType.Output == type && beløp == null && startPeriode == null && sluttPeriode == null)
-            AndelTilkjentYtelse.nullAndel(KjedeId(ytelse, fnr),
-                                          PeriodeId(linjeId!!, forrigeLinjeId))
+            KjedeId(ytelse, fnr).tilNullAndelTilkjentYtelse(UUID.randomUUID(), PeriodeId (linjeId!!, forrigeLinjeId))
         else
             null
     }

@@ -26,6 +26,7 @@ fun TilkjentYtelseDTO.tilAndelerTilkjentYtelse(): List<AndelTilkjentYtelse> {
                 AndelTilkjentYtelse(beløp = it.beløp,
                                     stønadFom = it.stønadFom,
                                     stønadTom = it.stønadTom,
+                                    ursprungsbehandlingId = it.ursprungsbehandlingId ?: this.behandlingId,
                                     personIdent = it.personIdent)
             }
 }
@@ -41,6 +42,7 @@ fun AndelTilkjentYtelse.tilDto(): AndelTilkjentYtelseDTO {
     return AndelTilkjentYtelseDTO(beløp = this.beløp,
                                   stønadFom = this.stønadFom,
                                   stønadTom = this.stønadTom,
+                                  ursprungsbehandlingId = this.ursprungsbehandlingId,
                                   personIdent = this.personIdent)
 }
 

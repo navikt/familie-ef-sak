@@ -79,7 +79,7 @@ object UtbetalingsoppdragGenerator {
         // På toppen av metoden filtrerer vi bort disse når vi bygger kjedene, men bruker dem til å finne siste periodeId
         val nullAndeler = sistePeriodeIder
                 .filterKeys { !gjeldendeAndeler.hasList(it) }
-                .mapValues { (kjedeId, periodeId) -> listOf(kjedeId.tilNullAndelTilkjentYtelse(periodeId)) }
+                .mapValues { (kjedeId, periodeId) -> listOf(kjedeId.tilNullAndelTilkjentYtelse(nyTilkjentYtelse.behandlingId, periodeId)) }
 
         return nyTilkjentYtelse.copy(utbetalingsoppdrag = utbetalingsoppdrag,
                                      stønadFom = gjeldendeAndeler.values.flatten().minOfOrNull { it.stønadFom },

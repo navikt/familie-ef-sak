@@ -1,0 +1,1 @@
+ALTER TABLE andel_tilkjent_ytelse ADD COLUMN IF NOT EXISTS ursprungsbehandling_id UUID REFERENCES behandling(id);

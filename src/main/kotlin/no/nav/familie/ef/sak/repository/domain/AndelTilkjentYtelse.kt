@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.økonomi.PeriodeId
 import no.nav.familie.ef.sak.økonomi.tilNullAndelTilkjentYtelse
 import org.springframework.data.relational.core.mapping.Column
 import java.time.LocalDate
+import java.util.*
 
 data class AndelTilkjentYtelse(@Column("belop")
                                val beløp: Int,
@@ -15,6 +16,7 @@ data class AndelTilkjentYtelse(@Column("belop")
                                val personIdent: String,
                                val periodeId: Long? = null,
                                val forrigePeriodeId: Long? = null,
+                               val ursprungsbehandlingId: UUID,
                                ) {
 
     private fun erTilsvarendeForUtbetaling(other: AndelTilkjentYtelse): Boolean {
@@ -43,9 +45,6 @@ data class AndelTilkjentYtelse(@Column("belop")
             val andelerKunIAnnen = other.subtractAndeler(this)
             return andelerKunIDenne.union(andelerKunIAnnen)
         }
-
-        fun nullAndel(kjedeId: KjedeId, periodeId: PeriodeId) =
-                kjedeId.tilNullAndelTilkjentYtelse(periodeId)
 
         private fun Set<AndelTilkjentYtelse>.subtractAndeler(other: Set<AndelTilkjentYtelse>): Set<AndelTilkjentYtelse> {
             return this.filter { a ->

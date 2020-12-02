@@ -40,6 +40,10 @@ internal class PlukkBehandlingTilKonsistensavstemmingTest : OppslagSpringRunnerT
     private val periode1 = Andel(100, LocalDate.of(2020, 1, 1), LocalDate.of(2020, 12, 31))
     private val periode2 = Andel(100, LocalDate.of(2021, 1, 1), LocalDate.of(2021, 12, 31))
 
+
+
+    /*TODO MYCKET VIKTIG NOE MED OPPDATERA BEHANDLINGS_ID PÅ ALLA EFTERFØLJANDE ANDELAR?*/
+
     @BeforeEach
     internal fun setUp() {
         fagsak = fagsakRepository.insert(fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD))
@@ -83,6 +87,18 @@ internal class PlukkBehandlingTilKonsistensavstemmingTest : OppslagSpringRunnerT
                                    feilmelding = "Skal ikke returnere noe når man kosnsistensavstemmer etter periodene")
     }
 
+    @Test
+    fun `hejhej` () {
+        val nyAndel = Andel(50, LocalDate.of(2022, 3, 1), LocalDate.of(2023, 3, 31))
+
+        opprettTilkjentYtelse(fagsak, periode1, periode2, nyAndel)
+
+        opprettTilkjentYtelse(fagsak, periode1, periode2.copy(stønadTom = periode2.stønadTom.minusDays(30)), nyAndel)
+
+        val tralal = tilkjentYtelseRepository.finnNyesteTilkjentYtelse(fagsakId = fagsak.id)
+        assertThat
+    }
+
     /*
     Case 4:
     Behandling A: Utbetaling fom. [2020-01-01 - 2020-12-31, 2021-01-01 - 2021-12-31]
@@ -92,7 +108,7 @@ internal class PlukkBehandlingTilKonsistensavstemmingTest : OppslagSpringRunnerT
     fun `Opphør i november i førsta perioden`() {
         val opphørsAndel = Andel(100, LocalDate.of(2020, 10, 1), LocalDate.of(2020, 10, 31))
 
-        val behandlingB = opprettTilkjentYtelse(fagsak, opphørsAndel)
+        val behandlingB = opprettTilkjentYtelse(fagsak, opphørsAndel, periode2)
 
 
         assertKonsistensavstemming(datoForAvstemming = LocalDate.of(2020, 2, 1),
@@ -157,7 +173,8 @@ internal class PlukkBehandlingTilKonsistensavstemmingTest : OppslagSpringRunnerT
             AndelTilkjentYtelseDTO(beløp = it.beløp,
                                    stønadFom = it.stønadFom,
                                    stønadTom = it.stønadTom,
-                                   personIdent = "1")
+                                   personIdent = "1",
+                                   ursprungsbehandlingId = null)
         }
         tilkjentYtelseService.opprettTilkjentYtelse(TilkjentYtelseDTO("1",
                                                                       LocalDate.now(),

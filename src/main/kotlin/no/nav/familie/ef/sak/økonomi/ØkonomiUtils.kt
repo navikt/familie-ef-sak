@@ -3,8 +3,10 @@ package no.nav.familie.ef.sak.økonomi
 import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse.Companion.disjunkteAndeler
 import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse.Companion.snittAndeler
+import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import java.time.LocalDate
+import java.util.*
 
 data class KjedeId(val klassifisering: String, val personIdent: String)
 
@@ -17,12 +19,13 @@ fun AndelTilkjentYtelse.tilPeriodeId(): PeriodeId = PeriodeId(this.periodeId, th
 @Deprecated("Bør erstattes med å gjøre 'stønadFom' og  'stønadTom'  nullable")
 val NULL_DATO: LocalDate = LocalDate.MIN
 
-fun KjedeId.tilNullAndelTilkjentYtelse(periodeId: PeriodeId?): AndelTilkjentYtelse =
+fun KjedeId.tilNullAndelTilkjentYtelse(behandlingId: UUID, periodeId: PeriodeId?): AndelTilkjentYtelse =
         AndelTilkjentYtelse(beløp = 0,
                             stønadFom = NULL_DATO,
                             stønadTom = NULL_DATO,
                             personIdent = this.personIdent,
                             periodeId = periodeId?.gjeldende,
+                            ursprungsbehandlingId = behandlingId,
                             forrigePeriodeId = periodeId?.forrige)
 
 object ØkonomiUtils {

@@ -20,6 +20,7 @@ object DataGenerator {
             AndelTilkjentYtelse(beløp = beløp,
                                 stønadFom = stønadFom,
                                 stønadTom = stønadTom,
+                                ursprungsbehandlingId = UUID.randomUUID(),
                                 personIdent = personIdent)
 
     fun tilfeldigTilkjentYtelse(behandling: Behandling = behandling(fagsak()), antallAndelerTilkjentYtelse: Int = 1) =
@@ -29,24 +30,4 @@ object DataGenerator {
                            vedtaksdato = LocalDate.now(),
                            behandlingId = behandling.id,
                            andelerTilkjentYtelse = flereTilfeldigeAndelerTilkjentYtelse(antallAndelerTilkjentYtelse))
-
-    fun tilkjentYtelseMedMetaData(stønadFom: LocalDate,
-                                          stønadTom: LocalDate,
-                                          type: TilkjentYtelseType,
-                                          vararg andel: AndelTilkjentYtelse): TilkjentYtelseMedMetaData {
-        val tilkjentYtelse = TilkjentYtelseMedMetaData(TilkjentYtelse(
-                UUID.randomUUID(),
-                UUID.randomUUID(),
-                "1",
-                stønadFom = stønadFom,
-                stønadTom = stønadTom,
-                opphørFom = null,
-                utbetalingsoppdrag = null,
-                vedtaksdato = LocalDate.now(),
-                status = TilkjentYtelseStatus.AKTIV,
-                type = type,
-                andelerTilkjentYtelse = listOf(*andel)
-        ), 1, Stønadstype.OVERGANGSSTØNAD, 1)
-        return tilkjentYtelse
-    }
 }
