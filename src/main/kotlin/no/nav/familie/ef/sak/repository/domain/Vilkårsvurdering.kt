@@ -31,6 +31,7 @@ enum class DelvilkårType {
     BOR_OG_OPPHOLDER_SEG_I_NORGE,
     DOKUMENTERT_EKTESKAP,
     DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE,
+    SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
     KRAV_SIVILSTAND,
 }
 
@@ -52,7 +53,9 @@ enum class VilkårType(val beskrivelse: String,
 
     SIVILSTAND("§15-4 Sivilstand", listOf(DelvilkårType.DOKUMENTERT_EKTESKAP,
                                           DelvilkårType.DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE,
-                                          DelvilkårType.KRAV_SIVILSTAND));
+                                          DelvilkårType.SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
+                                          DelvilkårType.KRAV_SIVILSTAND,));
+
 
     companion object {
 
