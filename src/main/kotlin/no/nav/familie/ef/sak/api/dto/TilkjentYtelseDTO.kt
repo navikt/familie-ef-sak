@@ -7,6 +7,8 @@ import java.util.*
 
 data class TilkjentYtelseDTO(val søker: String,
                              val vedtaksdato: LocalDate = LocalDate.now(),
+        // Skal man opprette andeler som frontend godkjenner eller skal frontend sende inn andeler.
+        // Hvis frontend sender inn andeler kanskje id kan være optional og att backend oppretter id
                              val id: UUID = UUID.randomUUID(),
                              val behandlingId: UUID,
                              val andelerTilkjentYtelse: List<AndelTilkjentYtelseDTO>) {
@@ -31,5 +33,7 @@ data class AndelTilkjentYtelseDTO(val beløp: Int,
                                   val stønadTom: LocalDate,
                                   val personIdent: String)
 
-data class TilkjentYtelseTestDTO(val nyTilkjentYtelse: TilkjentYtelse, val stønadstype: Stønadstype, val forrigeTilkjentYtelse: TilkjentYtelse?)
+data class TilkjentYtelseTestDTO(val nyTilkjentYtelse: TilkjentYtelse,
+                                 val stønadstype: Stønadstype,
+                                 val forrigeTilkjentYtelse: TilkjentYtelse?)
 

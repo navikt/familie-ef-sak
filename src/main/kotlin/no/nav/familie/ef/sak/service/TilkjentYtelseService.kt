@@ -50,28 +50,24 @@ class TilkjentYtelseService(private val oppdragClient: OppdragClient,
         val behandling = behandlingService.hentBehandling(nyTilkjentYtelse.behandlingId)
         val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
 
-
         val nyTilkjentYtelseMedEksternId = TilkjentYtelseMedMetaData(nyTilkjentYtelse,
                                                                      eksternBehandlingId = behandling.eksternId.id,
                                                                      stønadstype = fagsak.stønadstype,
                                                                      eksternFagsakId = fagsak.eksternId.id)
 
-        val forrigeTilkjentYtelse = tilkjentYtelseRepository.finnNyesteTilkjentYtelse()
+        val forrigeTilkjentYtelse = tilkjentYtelseRepository.finnNyesteTilkjentYtelse(fagsakId = fagsak.id)
 
         val tilkjentYtelseMedUtbetalingsoppdrag =
                 UtbetalingsoppdragGenerator
                         .lagTilkjentYtelseMedUtbetalingsoppdrag(nyTilkjentYtelseMedMetaData = nyTilkjentYtelseMedEksternId,
                                                                 forrigeTilkjentYtelse = forrigeTilkjentYtelse)
 
-
         tilkjentYtelseRepository.insert(tilkjentYtelseMedUtbetalingsoppdrag)
-
 
         if (forrigeTilkjentYtelse != null && tilkjentYtelseMedUtbetalingsoppdrag.utbetalingsoppdrag != null) {
             oppdaterForrigeTilkjentYtelseMedOpphørsdato(tilkjentYtelseMedUtbetalingsoppdrag.utbetalingsoppdrag,
                                                         forrigeTilkjentYtelse)
         }
-
     }
 
     private fun oppdaterForrigeTilkjentYtelseMedOpphørsdato(utbetalingsoppdrag: Utbetalingsoppdrag,

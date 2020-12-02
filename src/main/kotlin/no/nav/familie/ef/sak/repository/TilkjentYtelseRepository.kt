@@ -17,14 +17,13 @@ interface TilkjentYtelseRepository : RepositoryInterface<TilkjentYtelse, UUID>, 
         WHERE b.fagsak_id = :fagsakId AND b.status = 'FERDIGSTILT'
         ORDER BY b.opprettet_tid DESC
         LIMIT 1""")
-    fun finnNyesteTilkjentYtelse(): TilkjentYtelse?
+    fun finnNyesteTilkjentYtelse(fagsakId: UUID): TilkjentYtelse?
 
     @Query("""
     SELECT DISTINCT be.id AS behandlings_id, ty.personIdent as person_ident FROM BEHANDLING b 
         JOIN behandling_ekstern be ON be.behandling_id = b.id
         JOIN tilkjent_ytelse ty on b.id = ty.behandling_id
-        JOIN andel_tilkjent_ytelse aty ON aty.tilkjent_ytelse = ty.id
         JOIN fagsak f on b.fagsak_id = f.id
-    WHERE (ty.opphor_fom IS NULL OR ty.opphor_fom > :datoForAvstemming) AND f.stonadstype = :stønadstype AND aty.fom >= :datoForAvstemming""")
+    WHERE (ty.opphor_fom IS NULL OR ty.opphor_fom > :datoForAvstemming) AND f.stonadstype = :stønadstype AND ty.stonad_tom >= :datoForAvstemming""")
     fun finnAktiveBehandlinger(datoForAvstemming: LocalDate, stønadstype: Stønadstype): List<OppdragIdForFagsystem>
 }
