@@ -93,6 +93,14 @@ class VurderingService(private val behandlingService: BehandlingService,
                 }
     }
 
+    private fun utledDelvilkårResultat(delvilkårType: DelvilkårType, søknad: SøknadsskjemaOvergangsstønad, registerGrunnlag: InngangsvilkårGrunnlagDto): Vilkårsresultat {
+        return if (erDelvilkårAktueltForSøknaden(delvilkårType, søknad, registerGrunnlag)) {
+            Vilkårsresultat.IKKE_VURDERT
+        } else {
+            Vilkårsresultat.IKKE_AKTUELL
+        }
+    }
+
     private fun hentEllerOpprettVurderingerForInngangsvilkår(behandlingId: UUID,
                                                              søknad: SøknadsskjemaOvergangsstønad,
                                                              registerGrunnlag: InngangsvilkårGrunnlagDto)
@@ -109,8 +117,8 @@ class VurderingService(private val behandlingService: BehandlingService,
                 }
                 .map {
                     val delvilkårsvurderinger = it.delvilkår
-                            .filter { delvilkårType -> erDelvilkårAktueltForSøknaden(delvilkårType, søknad, registerGrunnlag) }
-                            .map { delvilkårType -> Delvilkårsvurdering(delvilkårType) }
+                            .map { delvilkårType ->
+                                Delvilkårsvurdering(delvilkårType, utledDelvilkårResultat(delvilkårType, søknad, registerGrunnlag))}
                     Vilkårsvurdering(behandlingId = behandlingId,
                                      type = it,
                                      delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurderinger))
