@@ -66,15 +66,17 @@ class VurderingService(private val behandlingService: BehandlingService,
                                                  pdlSøker = pdlSøker)
         val sivilstand = SivilstandMapper.tilDto(sivilstandsdetaljer = søknad.sivilstand,
                                                  pdlSøker = pdlSøker)
-        val vurderinger = hentVurderinger(behandlingId, søknad)
+        val registergrunnlag = InngangsvilkårGrunnlagDto(medlemskap, sivilstand)
+        val vurderinger = hentVurderinger(behandlingId, søknad, registergrunnlag)
 
         return InngangsvilkårDto(vurderinger = vurderinger,
-                                 grunnlag = InngangsvilkårGrunnlagDto(medlemskap, sivilstand))
+                                 grunnlag = registergrunnlag)
     }
 
     private fun hentVurderinger(behandlingId: UUID,
-                                søknad: SøknadsskjemaOvergangsstønad): List<VilkårsvurderingDto> {
-        return hentEllerOpprettVurderingerForInngangsvilkår(behandlingId, søknad)
+                                søknad: SøknadsskjemaOvergangsstønad,
+                                registerGrunnlag: InngangsvilkårGrunnlagDto): List<VilkårsvurderingDto> {
+        return hentEllerOpprettVurderingerForInngangsvilkår(behandlingId, søknad, registerGrunnlag )
                 .map {
                     VilkårsvurderingDto(id = it.id,
                                         behandlingId = it.behandlingId,
@@ -92,7 +94,9 @@ class VurderingService(private val behandlingService: BehandlingService,
     }
 
     private fun hentEllerOpprettVurderingerForInngangsvilkår(behandlingId: UUID,
-                                                             søknad: SøknadsskjemaOvergangsstønad): List<Vilkårsvurdering> {
+                                                             søknad: SøknadsskjemaOvergangsstønad,
+                                                             registerGrunnlag: InngangsvilkårGrunnlagDto)
+    : List<Vilkårsvurdering> {
         val lagredeVilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(behandlingId)
 
         if (behandlingErLåstForVidereRedigering(behandlingId)) {
@@ -105,7 +109,7 @@ class VurderingService(private val behandlingService: BehandlingService,
                 }
                 .map {
                     val delvilkårsvurderinger = it.delvilkår
-                            .filter { delvilkårType -> erDelvilkårAktueltForSøknaden(delvilkårType, søknad) }
+                            .filter { delvilkårType -> erDelvilkårAktueltForSøknaden(delvilkårType, søknad, registerGrunnlag) }
                             .map { delvilkårType -> Delvilkårsvurdering(delvilkårType) }
                     Vilkårsvurdering(behandlingId = behandlingId,
                                      type = it,
@@ -121,12 +125,21 @@ class VurderingService(private val behandlingService: BehandlingService,
      * Filtrerer bort delvikår som ikke skall vurderes iht data i søknaden
      */
     private fun erDelvilkårAktueltForSøknaden(it: DelvilkårType,
-                                              søknad: SøknadsskjemaOvergangsstønad): Boolean =
-            when (it) {
-                DelvilkårType.DOKUMENTERT_EKTESKAP -> søknad.sivilstand.erUformeltGift == true
-                DelvilkårType.DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE -> søknad.sivilstand.erUformeltSeparertEllerSkilt == true
-                else -> true
-            }
+                                              søknad: SøknadsskjemaOvergangsstønad,
+                                              register: InngangsvilkårGrunnlagDto): Boolean {
+
+        val sivilstandType = register.sivilstand.registergrunnlag.type
+
+        return when (it) {
+            DelvilkårType.DOKUMENTERT_EKTESKAP -> (sivilstandType == Sivilstandstype.UGIFT  || sivilstandType == Sivilstandstype.UOPPGITT) && søknad.sivilstand.erUformeltGift == true
+            DelvilkårType.DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE ->  (sivilstandType == Sivilstandstype.UGIFT || sivilstandType == Sivilstandstype.UOPPGITT) && søknad.sivilstand.erUformeltSeparertEllerSkilt == true
+            DelvilkårType.SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON ->  (sivilstandType == Sivilstandstype.GIFT  ||  sivilstandType == Sivilstandstype.REGISTRERT_PARTNER ) && søknad.sivilstand.søktOmSkilsmisseSeparasjon == true
+            DelvilkårType.SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING -> (sivilstandType == Sivilstandstype.SEPARERT || sivilstandType == Sivilstandstype.SEPARERT_PARTNER)
+            DelvilkårType.KRAV_SIVILSTAND -> true
+
+            else -> true
+        }
+    }
 
     fun hentInngangsvilkårSomManglerVurdering(behandlingId: UUID): List<VilkårType> {
         val lagredeVilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(behandlingId)
