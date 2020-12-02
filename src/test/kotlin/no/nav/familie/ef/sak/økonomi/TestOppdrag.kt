@@ -3,11 +3,8 @@ package no.nav.familie.ef.sak.økonomi
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
-import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
-import no.nav.familie.ef.sak.repository.domain.Stønadstype
-import no.nav.familie.ef.sak.repository.domain.Sporbar
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseMedMetaData
+import no.nav.familie.ef.sak.repository.domain.*
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Opphør
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
@@ -220,9 +217,13 @@ object TestOppdragRunner {
 
         var forrigeTilkjentYtelse: TilkjentYtelse? = null
 
+        val om = objectMapper.writerWithDefaultPrettyPrinter()
         grupper.forEachIndexed { indeks, gruppe ->
-            val faktisk = lagTilkjentYtelseMedUtbetalingsoppdrag(gruppe.input, forrigeTilkjentYtelse)
-            Assertions.assertEquals(gruppe.output, faktisk, "Feiler for gruppe med indeks $indeks")
+            val input = gruppe.input
+            val faktisk = lagTilkjentYtelseMedUtbetalingsoppdrag(input, forrigeTilkjentYtelse)
+            Assertions.assertEquals(om.writeValueAsString(gruppe.output),
+                                    om.writeValueAsString(faktisk),
+                                    "Feiler for gruppe med indeks $indeks")
             forrigeTilkjentYtelse = faktisk
         }
     }
@@ -231,7 +232,7 @@ object TestOppdragRunner {
                                                        forrigeTilkjentYtelse: TilkjentYtelse? = null) =
             UtbetalingsoppdragGenerator
                     .lagTilkjentYtelseMedUtbetalingsoppdrag(TilkjentYtelseMedMetaData(tilkjentYtelse = nyTilkjentYtelse,
-                                                                                      stønadstype =  Stønadstype.OVERGANGSSTØNAD,
+                                                                                      stønadstype = Stønadstype.OVERGANGSSTØNAD,
                                                                                       eksternBehandlingId = behandlingEksternId,
                                                                                       eksternFagsakId = fagsakEksternId),
                                                             forrigeTilkjentYtelse)
