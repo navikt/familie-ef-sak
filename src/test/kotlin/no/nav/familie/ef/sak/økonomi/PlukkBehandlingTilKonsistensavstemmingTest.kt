@@ -107,23 +107,45 @@ internal class PlukkBehandlingTilKonsistensavstemmingTest : OppslagSpringRunnerT
     /*
     Case 4:
     Behandling A: Utbetaling fom. [2020-01-01 - 2020-12-31, 2021-01-01 - 2021-12-31]
-    Revurdering B: Ny utbetaling fom. 2022-03-01 - 2023-03-31
-    Opphør C: Opphør på utbetaling fra A fom 01.11.2020 => [2020-01-01 - 2020-10-31, 2022-03-01 - 2023-03-31]
-    Behandling B skal konsistensavstemmes, behandling A og C skal ikke konsistensavstemmes.
+    Revurdering B: Ny utbetaling fom. 2021-03-01 - 2023-03-31
+    Opphør C: Opphør på utbetaling fra A fom 2020-11-01 => [2020-01-01 - 2020-10-31, 2022-03-01 - 2023-03-31]
     */
     @Test
-    fun `Case 4`() {
+    fun `En tredje behandling endrer på første perioden i den første behandlingen`() {
         val nyAndel = Andel(50, LocalDate.of(2022, 3, 1), LocalDate.of(2023, 3, 31))
 
-        val revurdering = opprettTilkjentYtelse(fagsak, periode1, periode2, nyAndel)
+        opprettTilkjentYtelse(fagsak, periode1, periode2, nyAndel)
+
+        val tilkjenteYtelserSomFårOpphørsdato = tilkjentYtelseRepository.findAll()
 
         val opphør = opprettTilkjentYtelse(fagsak, periode1.copy(stønadTom = LocalDate.of(2020, 10, 31)), nyAndel)
+
+        tilkjenteYtelserSomFårOpphørsdato.forEach {
+            assertThat(it.opphørFom)
+                    .withFailMessage("Tidligere tilkjentYtelser skal oppdateres med opphørsdato")
+                    .isEqualTo(periode1.stønadFom)
+        }
 
         assertKonsistensavstemming(datoForAvstemming = LocalDate.of(2020, 11, 1),
                                    feilmelding = "Skal returnere når man konsistensavstemmer etter periodene",
                                    opphør.eksternId.id)
+    }
 
+    /*
+    Case 5:
+    Behandling A: Utbetaling fom. [2020-01-01 - 2020-12-31, 2021-01-01 - 2021-12-31]
+    Revurdering B: Opphør på andre periode fra A fom 2021-11-01 => [2020-01-01 - 2020-12-31, 2021-01-01 - 2021-11-01] opphør 2021-01-01
+    Revurdering C: Endrer den andre perioden på nytt, [2020-01-01 - 2020-12-31, 2021-01-01 - 2021-03-31]
+    */
+    @Test
+    fun `En tredje behandling endrer på andre perioden i den første behandlingen`() {
+        val behandlingB = opprettTilkjentYtelse(fagsak, periode1, periode2.copy(stønadTom = LocalDate.of(2021, 11, 30)))
 
+        val behandlingC = opprettTilkjentYtelse(fagsak, periode1, periode2.copy(stønadTom = LocalDate.of(2021, 3, 31)))
+
+        assertKonsistensavstemming(datoForAvstemming = LocalDate.of(2020, 11, 1),
+                                   feilmelding = "Skal returnere når man konsistensavstemmer etter periodene",
+                                   førstegangsbehandling.eksternId.id, behandlingC.eksternId.id)
     }
 
     data class Andel(val beløp: Int, val stønadFom: LocalDate, val stønadTom: LocalDate)
