@@ -2,9 +2,7 @@ package no.nav.familie.ef.sak.økonomi
 
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
-import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
-import no.nav.familie.ef.sak.repository.domain.Behandling
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.repository.domain.*
 import java.time.LocalDate
 import java.util.*
 
@@ -31,4 +29,24 @@ object DataGenerator {
                            vedtaksdato = LocalDate.now(),
                            behandlingId = behandling.id,
                            andelerTilkjentYtelse = flereTilfeldigeAndelerTilkjentYtelse(antallAndelerTilkjentYtelse))
+
+    fun tilkjentYtelseMedMetaData(stønadFom: LocalDate,
+                                          stønadTom: LocalDate,
+                                          type: TilkjentYtelseType,
+                                          vararg andel: AndelTilkjentYtelse): TilkjentYtelseMedMetaData {
+        val tilkjentYtelse = TilkjentYtelseMedMetaData(TilkjentYtelse(
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                "1",
+                stønadFom = stønadFom,
+                stønadTom = stønadTom,
+                opphørFom = null,
+                utbetalingsoppdrag = null,
+                vedtaksdato = LocalDate.now(),
+                status = TilkjentYtelseStatus.AKTIV,
+                type = type,
+                andelerTilkjentYtelse = listOf(*andel)
+        ), 1, Stønadstype.OVERGANGSSTØNAD, 1)
+        return tilkjentYtelse
+    }
 }

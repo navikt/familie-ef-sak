@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.api.avstemming.GrensesnittavstemmingDto
 import no.nav.familie.ef.sak.api.avstemming.KonsistensavstemmingDto
 import no.nav.familie.ef.sak.api.avstemming.tilTask
 import no.nav.familie.ef.sak.integration.OppdragClient
+import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.økonomi.tilKlassifisering
 import no.nav.familie.kontrakter.felles.oppdrag.GrensesnittavstemmingRequest
@@ -11,10 +12,11 @@ import no.nav.familie.kontrakter.felles.oppdrag.KonsistensavstemmingRequest
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragIdForFagsystem
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Service
-class AvstemmingService(private val oppdragClient: OppdragClient, private val taskRepository: TaskRepository) {
+class AvstemmingService(private val oppdragClient: OppdragClient, private val taskRepository: TaskRepository, private val tilkjentYtelseRepository: TilkjentYtelseRepository) {
 
     fun opprettGrensesnittavstemmingTask(grensesnittavstemmingDto: GrensesnittavstemmingDto) =
             grensesnittavstemmingDto
@@ -34,7 +36,8 @@ class AvstemmingService(private val oppdragClient: OppdragClient, private val ta
         oppdragClient.grensesnittavstemming(grensesnittavstemmingRequest)
     }
 
-    fun konsistensavstemOppdrag(stønadstype: Stønadstype, oppdragIdListe: List<OppdragIdForFagsystem>) {
+    fun konsistensavstemOppdrag(stønadstype: Stønadstype) {
+        val oppdragIdListe = tilkjentYtelseRepository.finnAktiveBehandlinger(datoForAvstemming = LocalDate.now(), stønadstype = stønadstype)
         val konsistensavstemmingRequest = KonsistensavstemmingRequest(fagsystem = stønadstype.tilKlassifisering(),
                                                                       oppdragIdListe = oppdragIdListe,
                                                                       avstemmingstidspunkt = LocalDateTime.now())

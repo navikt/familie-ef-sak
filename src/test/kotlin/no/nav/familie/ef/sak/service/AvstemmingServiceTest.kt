@@ -6,6 +6,7 @@ import io.mockk.slot
 import no.nav.familie.ef.sak.api.avstemming.GrensesnittavstemmingDto
 import no.nav.familie.ef.sak.api.avstemming.KonsistensavstemmingDto
 import no.nav.familie.ef.sak.integration.OppdragClient
+import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.service.AvstemmingService
 import no.nav.familie.ef.sak.task.GrensesnittavstemmingPayload
@@ -23,9 +24,10 @@ internal class AvstemmingServiceTest {
 
     private val oppdragClient: OppdragClient = mockk()
     private val taskRepository: TaskRepository = mockk()
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository = mockk()
 
     private val avstemmingService: AvstemmingService =
-            AvstemmingService(oppdragClient, taskRepository)
+            AvstemmingService(oppdragClient, taskRepository, tilkjentYtelseRepository)
 
 
     @Test
@@ -37,6 +39,12 @@ internal class AvstemmingServiceTest {
             taskRepository.saveAll(capture(taskIterable))
         } answers {
             taskIterable.captured
+        }
+
+        every {
+            tilkjentYtelseRepository.finnAktiveBehandlinger(any(), any())
+        } answers {
+            emptyList()
         }
 
         avstemmingService.opprettKonsistenavstemmingTasker(listOf(KonsistensavstemmingDto(datoForAvstemming,

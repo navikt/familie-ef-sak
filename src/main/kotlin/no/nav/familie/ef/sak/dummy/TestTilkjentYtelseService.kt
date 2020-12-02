@@ -39,6 +39,7 @@ class TestTilkjentYtelseService(private val behandlingService: BehandlingService
                         .lagTilkjentYtelseMedUtbetalingsoppdrag(nyTilkjentYtelseMedMetaData = nyTilkjentYtelseMedEksternId,
                                                                 forrigeTilkjentYtelse = forrigeTilkjentYtelse)
 
+
         tilkjentYtelseRepository.insert(tilkjentYtelseMedUtbetalingsoppdrag)
         oppdragClient.iverksettOppdrag(tilkjentYtelseMedUtbetalingsoppdrag.utbetalingsoppdrag!!)
 

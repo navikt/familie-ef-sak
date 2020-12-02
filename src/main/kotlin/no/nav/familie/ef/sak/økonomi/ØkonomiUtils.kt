@@ -40,7 +40,7 @@ object ØkonomiUtils {
     fun beståendeAndelerPerKjede(forrigeKjeder: Map<KjedeId, List<AndelTilkjentYtelse>>,
                                  oppdaterteKjeder: Map<KjedeId, List<AndelTilkjentYtelse>>)
             : Map<KjedeId, List<AndelTilkjentYtelse>> {
-        val alleKjedeIder = forrigeKjeder.keys.union(oppdaterteKjeder.keys)
+        val alleKjedeIder = forrigeKjeder.keys.union(oppdaterteKjeder.keys) // TRENGER VI DETTE?
         return alleKjedeIder.associateWith { kjedeId ->
             beståendeAndelerIKjede(forrigeKjede = forrigeKjeder[kjedeId],
                                    oppdatertKjede = oppdaterteKjeder[kjedeId])
