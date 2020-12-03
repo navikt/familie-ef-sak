@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.repository.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsstønad
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.kontrakter.ef.søknad.EnsligArbeidssøkerSøknad
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.*
@@ -76,7 +77,7 @@ class VurderingService(private val behandlingService: BehandlingService,
     private fun hentVurderinger(behandlingId: UUID,
                                 søknad: SøknadsskjemaOvergangsstønad,
                                 registerGrunnlag: InngangsvilkårGrunnlagDto): List<VilkårsvurderingDto> {
-        return hentEllerOpprettVurderingerForInngangsvilkår(behandlingId, søknad, registerGrunnlag )
+        return hentEllerOpprettVurderingerForInngangsvilkår(behandlingId, søknad, registerGrunnlag)
                 .map {
                     VilkårsvurderingDto(id = it.id,
                                         behandlingId = it.behandlingId,
@@ -93,7 +94,9 @@ class VurderingService(private val behandlingService: BehandlingService,
                 }
     }
 
-    private fun utledDelvilkårResultat(delvilkårType: DelvilkårType, søknad: SøknadsskjemaOvergangsstønad, registerGrunnlag: InngangsvilkårGrunnlagDto): Vilkårsresultat {
+    private fun utledDelvilkårResultat(delvilkårType: DelvilkårType,
+                                       søknad: SøknadsskjemaOvergangsstønad,
+                                       registerGrunnlag: InngangsvilkårGrunnlagDto): Vilkårsresultat {
         return if (erDelvilkårAktueltForSøknaden(delvilkårType, søknad, registerGrunnlag)) {
             Vilkårsresultat.IKKE_VURDERT
         } else {
@@ -104,7 +107,7 @@ class VurderingService(private val behandlingService: BehandlingService,
     private fun hentEllerOpprettVurderingerForInngangsvilkår(behandlingId: UUID,
                                                              søknad: SøknadsskjemaOvergangsstønad,
                                                              registerGrunnlag: InngangsvilkårGrunnlagDto)
-    : List<Vilkårsvurdering> {
+            : List<Vilkårsvurdering> {
         val lagredeVilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(behandlingId)
 
         if (behandlingErLåstForVidereRedigering(behandlingId)) {
@@ -118,7 +121,9 @@ class VurderingService(private val behandlingService: BehandlingService,
                 .map {
                     val delvilkårsvurderinger = it.delvilkår
                             .map { delvilkårType ->
-                                Delvilkårsvurdering(delvilkårType, utledDelvilkårResultat(delvilkårType, søknad, registerGrunnlag))}
+                                Delvilkårsvurdering(delvilkårType,
+                                                    utledDelvilkårResultat(delvilkårType, søknad, registerGrunnlag))
+                            }
                     Vilkårsvurdering(behandlingId = behandlingId,
                                      type = it,
                                      delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurderinger))
@@ -139,15 +144,37 @@ class VurderingService(private val behandlingService: BehandlingService,
         val sivilstandType = register.sivilstand.registergrunnlag.type
 
         return when (it) {
-            DelvilkårType.DOKUMENTERT_EKTESKAP -> (sivilstandType == Sivilstandstype.UGIFT  || sivilstandType == Sivilstandstype.UOPPGITT) && søknad.sivilstand.erUformeltGift == true
-            DelvilkårType.DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE ->  (sivilstandType == Sivilstandstype.UGIFT || sivilstandType == Sivilstandstype.UOPPGITT) && søknad.sivilstand.erUformeltSeparertEllerSkilt == true
-            DelvilkårType.SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON ->  (sivilstandType == Sivilstandstype.GIFT  ||  sivilstandType == Sivilstandstype.REGISTRERT_PARTNER ) && søknad.sivilstand.søktOmSkilsmisseSeparasjon == true
-            DelvilkårType.SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING -> (sivilstandType == Sivilstandstype.SEPARERT || sivilstandType == Sivilstandstype.SEPARERT_PARTNER)
-            DelvilkårType.KRAV_SIVILSTAND -> true
+            DelvilkårType.DOKUMENTERT_EKTESKAP -> måDokumentereEkteskap(sivilstandType, søknad)
+            DelvilkårType.DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE -> måDokumentereSeparasjonEllerSkilsmisse(sivilstandType,
+                                                                                                            søknad)
+            DelvilkårType.SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON -> måDokumentereSamlivsbrudd(sivilstandType, søknad)
+            DelvilkårType.SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING -> samslivsbruddDatoerSamsvarer(sivilstandType)
+            DelvilkårType.KRAV_SIVILSTAND -> kravTilSivilstand(sivilstandType, søknad)
 
             else -> true
         }
     }
+
+    private fun samslivsbruddDatoerSamsvarer(sivilstandType: Sivilstandstype) =
+            (sivilstandType == Sivilstandstype.SEPARERT || sivilstandType == Sivilstandstype.SEPARERT_PARTNER)
+
+    private fun måDokumentereSamlivsbrudd(sivilstandType: Sivilstandstype,
+                                          søknad: SøknadsskjemaOvergangsstønad) =
+            (sivilstandType == Sivilstandstype.GIFT || sivilstandType == Sivilstandstype.REGISTRERT_PARTNER) && søknad.sivilstand.søktOmSkilsmisseSeparasjon == true
+
+    private fun måDokumentereSeparasjonEllerSkilsmisse(sivilstandType: Sivilstandstype,
+                                                       søknad: SøknadsskjemaOvergangsstønad) =
+            (sivilstandType == Sivilstandstype.UGIFT || sivilstandType == Sivilstandstype.UOPPGITT) && søknad.sivilstand.erUformeltSeparertEllerSkilt == true
+
+    private fun måDokumentereEkteskap(sivilstandType: Sivilstandstype,
+                                      søknad: SøknadsskjemaOvergangsstønad) =
+            (sivilstandType == Sivilstandstype.UGIFT || sivilstandType == Sivilstandstype.UOPPGITT) && søknad.sivilstand.erUformeltGift == true
+
+    private fun kravTilSivilstand(sivilstandType: Sivilstandstype,
+                                  søknad: SøknadsskjemaOvergangsstønad) = !(samslivsbruddDatoerSamsvarer(sivilstandType)
+                                                                            || måDokumentereSamlivsbrudd(sivilstandType, søknad)
+                                                                            || måDokumentereSeparasjonEllerSkilsmisse(sivilstandType, søknad)
+                                                                            || måDokumentereEkteskap(sivilstandType, søknad))
 
     fun hentInngangsvilkårSomManglerVurdering(behandlingId: UUID): List<VilkårType> {
         val lagredeVilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(behandlingId)
