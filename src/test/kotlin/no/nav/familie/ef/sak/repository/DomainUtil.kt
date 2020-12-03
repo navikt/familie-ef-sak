@@ -14,8 +14,10 @@ fun oppgave(behandling: Behandling, erFerdigstilt: Boolean = false): Oppgave =
 fun behandling(fagsak: Fagsak,
                aktiv: Boolean = true,
                status: BehandlingStatus = BehandlingStatus.OPPRETTET,
-               steg: StegType = StegType.REGISTRERE_OPPLYSNINGER): Behandling =
+               steg: StegType = StegType.REGISTRERE_OPPLYSNINGER,
+               oppdragId: UUID = UUID.randomUUID()): Behandling =
         Behandling(fagsakId = fagsak.id,
+                   id = oppdragId,
                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
                    status = status,
                    steg = steg,
