@@ -146,6 +146,7 @@ object TestOppdragParser {
     private fun parse(url: URL): List<TestOppdrag> {
         val fileContent = url.openStream()!!
         val rows: List<Map<String, String>> = csvReader().readAllWithHeader(fileContent)
+                .filterNot { it.getValue(KEY_TYPE).startsWith("!") }
 
         return rows.map { row ->
             val datoKeysMedBeløp = row.keys
