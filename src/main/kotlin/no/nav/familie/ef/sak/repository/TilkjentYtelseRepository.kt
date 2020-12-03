@@ -22,7 +22,7 @@ interface TilkjentYtelseRepository : RepositoryInterface<TilkjentYtelse, UUID>, 
     @Query("""
     WITH sisteBehandlinger AS (
     SELECT behandling_id FROM (
-                      SELECT b.id as behandling_id, row_number() over (PARTITION BY b.fagsak_id ORDER BY ty.vedtaksdato) rn
+                      SELECT b.id as behandling_id, row_number() over (PARTITION BY b.fagsak_id ORDER BY ty.opprettet_tid DESC) rn
                       FROM behandling b
                                JOIN fagsak f on b.fagsak_id = f.id
                                JOIN tilkjent_ytelse ty on b.id = ty.behandling_id -- att man har en tilkjent_ytelse

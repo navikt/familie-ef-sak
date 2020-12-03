@@ -16,6 +16,7 @@ import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
+import java.util.*
 
 object UtbetalingsoppdragGenerator {
 
@@ -43,7 +44,8 @@ object UtbetalingsoppdragGenerator {
         val andelerTilOpphør = andelTilOpphørMedDato(forrigeKjeder, oppdaterteKjeder)
         val andelerTilOpprettelse = andelerTilOpprettelse(oppdaterteKjeder, beståendeAndelerIHverKjede)
 
-        val andelerTilOpprettelseMedPeriodeIder = lagAndelerMedPeriodeIder(andelerTilOpprettelse, sistePeriodeIder)
+        val andelerTilOpprettelseMedPeriodeIder =
+                lagAndelerMedPeriodeIder(andelerTilOpprettelse, sistePeriodeIder, nyTilkjentYtelse.behandlingId)
 
         val utbetalingsperioderSomOpprettes =
                 lagUtbetalingsperioderForOpprettelse(andeler = andelerTilOpprettelseMedPeriodeIder,
@@ -79,7 +81,9 @@ object UtbetalingsoppdragGenerator {
         // På toppen av metoden filtrerer vi bort disse når vi bygger kjedene, men bruker dem til å finne siste periodeId
         val nullAndeler = sistePeriodeIder
                 .filterKeys { !gjeldendeAndeler.hasList(it) }
-                .mapValues { (kjedeId, periodeId) -> listOf(kjedeId.tilNullAndelTilkjentYtelse(nyTilkjentYtelse.behandlingId, periodeId)) }
+                .mapValues { (kjedeId, periodeId) ->
+                    listOf(kjedeId.tilNullAndelTilkjentYtelse(nyTilkjentYtelse.behandlingId, periodeId))
+                }
 
         return nyTilkjentYtelse.copy(utbetalingsoppdrag = utbetalingsoppdrag,
                                      stønadFom = gjeldendeAndeler.values.flatten().minOfOrNull { it.stønadFom },
@@ -115,7 +119,8 @@ object UtbetalingsoppdragGenerator {
     }
 
     private fun lagAndelerMedPeriodeIder(andeler: Map<KjedeId, List<AndelTilkjentYtelse>>,
-                                         sisteOffsetIKjedeOversikt: Map<KjedeId, PeriodeId?>)
+                                         sisteOffsetIKjedeOversikt: Map<KjedeId, PeriodeId?>,
+                                         behandlingId: UUID)
             : Map<KjedeId, List<AndelTilkjentYtelse>> {
         return andeler.filter { (_, andeler) -> andeler.isNotEmpty() }
                 .mapValues { (kjedeId, kjede: List<AndelTilkjentYtelse>) ->
@@ -125,6 +130,7 @@ object UtbetalingsoppdragGenerator {
                     kjede.sortedBy { it.stønadFom }.mapIndexed { index, andel ->
 
                         andel.copy(periodeId = nestePeriodeIdIKjede + index,
+                                   ursprungsbehandlingId = behandlingId,
                                    forrigePeriodeId = if (index == 0) forrigePeriodeIdIKjede
                                    else nestePeriodeIdIKjede + index - 1)
                     }
@@ -141,7 +147,8 @@ object UtbetalingsoppdragGenerator {
         } ?: emptyMap()
     }
 
-    private fun lagKjederUtenNullVerdier(type: Stønadstype, tilkjentYtelse: TilkjentYtelse?): Map<KjedeId, List<AndelTilkjentYtelse>> =
+    private fun lagKjederUtenNullVerdier(type: Stønadstype,
+                                         tilkjentYtelse: TilkjentYtelse?): Map<KjedeId, List<AndelTilkjentYtelse>> =
             tilkjentYtelse?.andelerTilkjentYtelse
                     ?.filter { !it.erNull() }
                     ?.groupBy { it.tilKjedeId(type = type) } ?: emptyMap()

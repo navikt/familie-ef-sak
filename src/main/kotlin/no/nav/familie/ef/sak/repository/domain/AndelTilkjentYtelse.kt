@@ -1,12 +1,14 @@
 package no.nav.familie.ef.sak.repository.domain
 
-import no.nav.familie.ef.sak.økonomi.KjedeId
-import no.nav.familie.ef.sak.økonomi.PeriodeId
-import no.nav.familie.ef.sak.økonomi.tilNullAndelTilkjentYtelse
 import org.springframework.data.relational.core.mapping.Column
 import java.time.LocalDate
 import java.util.*
 
+/**
+ * ursprungsbehandlingId er kun nullable her og ikke i databasen fordi når man mapper DTO til andel,
+ *  som sendes inn til UtbetalingsoppdragGenerator så har vi ikke det verdiet. Men det settes i generatorn.
+ *  På slik måte som att periodeId og forrigePeriodeId også settes der
+ */
 data class AndelTilkjentYtelse(@Column("belop")
                                val beløp: Int,
                                @Column("stonad_fom")
@@ -16,15 +18,15 @@ data class AndelTilkjentYtelse(@Column("belop")
                                val personIdent: String,
                                val periodeId: Long? = null,
                                val forrigePeriodeId: Long? = null,
-                               val ursprungsbehandlingId: UUID,
-                               ) {
+                               val ursprungsbehandlingId: UUID? = null
+) {
 
     private fun erTilsvarendeForUtbetaling(other: AndelTilkjentYtelse): Boolean {
         return (this.personIdent == other.personIdent
                 && this.stønadFom == other.stønadFom
                 && this.stønadTom == other.stønadTom
                 && this.beløp == other.beløp
-           )
+               )
     }
 
     fun erNull() = this.beløp == 0

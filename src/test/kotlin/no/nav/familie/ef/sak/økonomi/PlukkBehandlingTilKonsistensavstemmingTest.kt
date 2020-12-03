@@ -13,14 +13,18 @@ import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import no.nav.familie.ef.sak.repository.domain.Fagsak
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.service.TilkjentYtelseService
+import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.util.*
 
 internal class PlukkBehandlingTilKonsistensavstemmingTest : OppslagSpringRunnerTest() {
+
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Autowired
     private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
@@ -41,16 +45,18 @@ internal class PlukkBehandlingTilKonsistensavstemmingTest : OppslagSpringRunnerT
     private lateinit var periode2: Andel
 
 
-    /*TODO MYCKET VIKTIG NOE MED OPPDATERA BEHANDLINGS_ID PÅ ALLA EFTERFØLJANDE ANDELAR?*/
+    /* TODO MYCKET VIKTIG NOE MED OPPDATERA BEHANDLINGS_ID PÅ ALLA EFTERFØLJANDE ANDELAR?*/
 
     @BeforeEach
     internal fun setUp() {
         fagsak = fagsakRepository.insert(fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD))
         førstegangsbehandling = behandlingRepository.insert(behandling(fagsak = fagsak))
+        logger.info("Første behandlingen: {}", førstegangsbehandling.id)
         periode1 =
                 Andel(100, LocalDate.of(2020, 1, 1), LocalDate.of(2020, 12, 31), ursprungsbehandlingId = førstegangsbehandling.id)
         periode2 =
                 Andel(200, LocalDate.of(2021, 1, 1), LocalDate.of(2021, 12, 31), ursprungsbehandlingId = førstegangsbehandling.id)
+        opprettTilkjentYtelse(førstegangsbehandling, periode1, periode2)
     }
 
     @Test
@@ -68,12 +74,15 @@ internal class PlukkBehandlingTilKonsistensavstemmingTest : OppslagSpringRunnerT
     @Test
     fun `Revurdering med nytt beløp fra mai`() {
         val revurderingBehandling = behandlingRepository.insert(behandling(fagsak = fagsak))
-        val revurderingPeriode2 = Andel(100, LocalDate.of(2021, 1, 1), LocalDate.of(2021, 4, 30), ursprungsbehandlingId = revurderingBehandling.id)
-        val revurderingPeriode3 = Andel(200, LocalDate.of(2021, 5, 1), LocalDate.of(2021, 12, 31), ursprungsbehandlingId = revurderingBehandling.id)
+        logger.info("Oppretter revurdering: {}", revurderingBehandling.id)
+        val revurderingPeriode2 =
+                Andel(100, LocalDate.of(2021, 1, 1), LocalDate.of(2021, 4, 30), ursprungsbehandlingId = revurderingBehandling.id)
+        val revurderingPeriode3 =
+                Andel(200, LocalDate.of(2021, 5, 1), LocalDate.of(2021, 12, 31), ursprungsbehandlingId = revurderingBehandling.id)
         opprettTilkjentYtelse(revurderingBehandling,
-                                                          periode1,
-                                                          revurderingPeriode2,
-                                                          revurderingPeriode3)
+                              periode1,
+                              revurderingPeriode2,
+                              revurderingPeriode3)
 
         assertKonsistensavstemming(datoForAvstemming = LocalDate.of(2019, 1, 1),
                                    feilmelding = "Skal returnere begge behandlingene når man konsistensavstemmer før periodene",
@@ -103,12 +112,11 @@ internal class PlukkBehandlingTilKonsistensavstemmingTest : OppslagSpringRunnerT
 
         opprettTilkjentYtelse(opphør, opphørsAndel, periode2)
 
-
         assertKonsistensavstemming(datoForAvstemming = LocalDate.of(2020, 2, 1),
                                    feilmelding = "Skal returnere den nyaste behandlingen når man konsistensavstemmer før periodene",
-                                   førstegangsbehandling.eksternId.id)
+                                   opphør.eksternId.id)
 
-        assertKonsistensavstemming(datoForAvstemming = LocalDate.of(2020, 11, 1),
+        assertKonsistensavstemming(datoForAvstemming = LocalDate.of(2022, 1, 1),
                                    feilmelding = "Skal ikke returnere noe når man konsistensavstemmer etter periodene")
     }
 
@@ -116,7 +124,7 @@ internal class PlukkBehandlingTilKonsistensavstemmingTest : OppslagSpringRunnerT
     /*
     Case 4:
     Behandling A: Utbetaling fom. [2020-01-01 - 2020-12-31, 2021-01-01 - 2021-12-31]
-    Revurdering B: Ny utbetaling fom. 2021-03-01 - 2023-03-31
+    Revurdering B: Ny utbetaling etter periodene fom. 2021-03-01 - 2023-03-31
     Opphør C: Opphør på utbetaling fra A fom 2020-11-01 => [2020-01-01 - 2020-10-31, 2022-03-01 - 2023-03-31]
     */
     @Test
@@ -127,15 +135,9 @@ internal class PlukkBehandlingTilKonsistensavstemmingTest : OppslagSpringRunnerT
         opprettTilkjentYtelse(revurdering, periode1, periode2, nyAndel)
 
         val tilkjenteYtelserSomFårOpphørsdato = tilkjentYtelseRepository.findAll()
-        val opphørsBehandling =  behandlingRepository.insert(behandling(fagsak = fagsak))
+        val opphørsBehandling = behandlingRepository.insert(behandling(fagsak = fagsak))
 
         opprettTilkjentYtelse(opphørsBehandling, periode1.copy(stønadTom = LocalDate.of(2020, 10, 31)), nyAndel)
-
-        tilkjenteYtelserSomFårOpphørsdato.forEach {
-            assertThat(it.opphørFom)
-                    .withFailMessage("Tidligere tilkjentYtelser skal oppdateres med opphørsdato")
-                    .isEqualTo(periode1.stønadFom)
-        }
 
         assertKonsistensavstemming(datoForAvstemming = LocalDate.of(2020, 11, 1),
                                    feilmelding = "Skal returnere når man konsistensavstemmer etter periodene",
@@ -182,12 +184,21 @@ internal class PlukkBehandlingTilKonsistensavstemmingTest : OppslagSpringRunnerT
     }
 
     private fun assertKonsistensavstemming(datoForAvstemming: LocalDate, feilmelding: String, vararg externBehandlingId: Long) {
+        val stønadstype = Stønadstype.OVERGANGSSTØNAD
         val oppdragIdForFagsystem = tilkjentYtelseRepository.finnAktiveBehandlinger(datoForAvstemming = datoForAvstemming,
-                                                                                    stønadstype = Stønadstype.OVERGANGSSTØNAD)
+                                                                                    stønadstype = stønadstype)
         val faktiskBehandlingIdn = oppdragIdForFagsystem.map { it.behandlingsId }
-        assertThat(faktiskBehandlingIdn)
-                .withFailMessage("$feilmelding - forventet:${externBehandlingId.toList()}, faktisk:$faktiskBehandlingIdn")
-                .containsExactlyInAnyOrder(*externBehandlingId.toTypedArray())
+        try {
+            assertThat(faktiskBehandlingIdn)
+                    .withFailMessage("$feilmelding - forventet:${externBehandlingId.toList()}, faktisk:$faktiskBehandlingIdn")
+                    .containsExactlyInAnyOrder(*externBehandlingId.toTypedArray())
+        } catch (e: Throwable) {
+            tilkjentYtelseRepository.findAll()
+                    .sortedByDescending { it.sporbar.opprettetTid }
+                    .forEach {
+                        logger.info(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(it))
+                    }
+            throw e
+        }
     }
-
 }
