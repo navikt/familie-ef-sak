@@ -63,21 +63,6 @@ class TilkjentYtelseService(private val oppdragClient: OppdragClient,
                                                                 forrigeTilkjentYtelse = forrigeTilkjentYtelse)
 
         tilkjentYtelseRepository.insert(tilkjentYtelseMedUtbetalingsoppdrag)
-
-        if (forrigeTilkjentYtelse != null && tilkjentYtelseMedUtbetalingsoppdrag.utbetalingsoppdrag != null) {
-            oppdaterForrigeTilkjentYtelseMedOpphørsdato(tilkjentYtelseMedUtbetalingsoppdrag.utbetalingsoppdrag,
-                                                        forrigeTilkjentYtelse)
-        }
-    }
-
-    private fun oppdaterForrigeTilkjentYtelseMedOpphørsdato(utbetalingsoppdrag: Utbetalingsoppdrag,
-                                                            forrigeTilkjentYtelse: TilkjentYtelse) {
-        utbetalingsoppdrag.utbetalingsperiode
-                .mapNotNull { it.opphør?.opphørDatoFom }
-                .firstOrNull()
-                .let {
-                    tilkjentYtelseRepository.update(forrigeTilkjentYtelse.copy(opphørFom = it))
-                }
     }
 
     private fun hentTilkjentYtelse(tilkjentYtelseId: UUID) =

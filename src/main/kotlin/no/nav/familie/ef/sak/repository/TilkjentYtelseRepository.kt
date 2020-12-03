@@ -20,10 +20,21 @@ interface TilkjentYtelseRepository : RepositoryInterface<TilkjentYtelse, UUID>, 
     fun finnNyesteTilkjentYtelse(fagsakId: UUID): TilkjentYtelse?
 
     @Query("""
-    SELECT DISTINCT be.id AS behandlings_id, ty.personIdent as person_ident FROM BEHANDLING b 
-        JOIN behandling_ekstern be ON be.behandling_id = b.id
-        JOIN tilkjent_ytelse ty on b.id = ty.behandling_id
-        JOIN fagsak f on b.fagsak_id = f.id
-    WHERE (ty.opphor_fom IS NULL OR ty.opphor_fom > :datoForAvstemming) AND f.stonadstype = :stønadstype AND ty.stonad_tom >= :datoForAvstemming""")
+    WITH sisteBehandlinger AS (
+    SELECT behandling_id FROM (
+                      SELECT b.id as behandling_id, row_number() over (PARTITION BY b.fagsak_id ORDER BY ty.vedtaksdato) rn
+                      FROM behandling b
+                               JOIN fagsak f on b.fagsak_id = f.id
+                               JOIN tilkjent_ytelse ty on b.id = ty.behandling_id -- att man har en tilkjent_ytelse
+                      WHERE b.status = 'FERDIGSTILT'
+                        AND f.stonadstype = :stønadstype
+                  ) q WHERE rn=1
+    ) SELECT DISTINCT be.id as behandlings_id, t.personIdent as person_ident
+    FROM andel_tilkjent_ytelse aty
+    JOIN tilkjent_ytelse t on t.id = aty.tilkjent_ytelse
+    JOIN behandling_ekstern be ON be.behandling_id = aty.ursprungsbehandling_id
+    WHERE t.behandling_id IN (SELECT behandling_id FROM sisteBehandlinger)
+    AND aty.stonad_tom >= :datoForAvstemming    
+    """)
     fun finnAktiveBehandlinger(datoForAvstemming: LocalDate, stønadstype: Stønadstype): List<OppdragIdForFagsystem>
 }
