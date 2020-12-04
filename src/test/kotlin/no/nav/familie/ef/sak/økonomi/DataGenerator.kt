@@ -10,17 +10,18 @@ object DataGenerator {
 
     private fun tilfeldigFødselsnummer() = Random().nextInt(Int.MAX_VALUE).toString()
 
-    private fun flereTilfeldigeAndelerTilkjentYtelse(antall: Int): List<AndelTilkjentYtelse> =
-            (1..antall).map { tilfeldigAndelTilkjentYtelse() }.toList()
+    private fun flereTilfeldigeAndelerTilkjentYtelse(antall: Int, behandlingId: UUID): List<AndelTilkjentYtelse> =
+            (1..antall).map { tilfeldigAndelTilkjentYtelse(behandlingId = behandlingId) }.toList()
 
     private fun tilfeldigAndelTilkjentYtelse(beløp: Int = Random().nextInt(),
                                              stønadFom: LocalDate = LocalDate.now(),
                                              stønadTom: LocalDate = LocalDate.now(),
+                                             behandlingId: UUID,
                                              personIdent: String = tilfeldigFødselsnummer()) =
             AndelTilkjentYtelse(beløp = beløp,
                                 stønadFom = stønadFom,
                                 stønadTom = stønadTom,
-                                ursprungsbehandlingId = UUID.randomUUID(),
+                                ursprungsbehandlingId = behandlingId,
                                 personIdent = personIdent)
 
     fun tilfeldigTilkjentYtelse(behandling: Behandling = behandling(fagsak()), antallAndelerTilkjentYtelse: Int = 1) =
@@ -29,5 +30,5 @@ object DataGenerator {
                            stønadTom = LocalDate.now(),
                            vedtaksdato = LocalDate.now(),
                            behandlingId = behandling.id,
-                           andelerTilkjentYtelse = flereTilfeldigeAndelerTilkjentYtelse(antallAndelerTilkjentYtelse))
+                           andelerTilkjentYtelse = flereTilfeldigeAndelerTilkjentYtelse(antallAndelerTilkjentYtelse, behandling.id))
 }
