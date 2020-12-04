@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.mapper.tilDto
 import no.nav.familie.ef.sak.mapper.tilTilkjentYtelse
 import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
+import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseMedMetaData
 import no.nav.familie.ef.sak.økonomi.UtbetalingsoppdragGenerator
 import no.nav.familie.ef.sak.økonomi.tilKlassifisering
@@ -45,7 +46,7 @@ class TilkjentYtelseService(private val oppdragClient: OppdragClient,
 
 
     @Transactional
-    fun opprettTilkjentYtelse(tilkjentYtelseDTO: TilkjentYtelseDTO) {
+    fun opprettTilkjentYtelse(tilkjentYtelseDTO: TilkjentYtelseDTO): TilkjentYtelse {
         val nyTilkjentYtelse = tilkjentYtelseDTO.tilTilkjentYtelse()
 
         val behandling = behandlingService.hentBehandling(nyTilkjentYtelse.behandlingId)
@@ -58,18 +59,20 @@ class TilkjentYtelseService(private val oppdragClient: OppdragClient,
 
         val forrigeTilkjentYtelse = tilkjentYtelseRepository.finnNyesteTilkjentYtelse(fagsakId = fagsak.id)
 
-        val tilkjentYtelseMedUtbetalingsoppdrag =
-                UtbetalingsoppdragGenerator
-                        .lagTilkjentYtelseMedUtbetalingsoppdrag(nyTilkjentYtelseMedMetaData = nyTilkjentYtelseMedEksternId,
-                                                                forrigeTilkjentYtelse = forrigeTilkjentYtelse)
-
-        tilkjentYtelseRepository.insert(tilkjentYtelseMedUtbetalingsoppdrag)
+       return UtbetalingsoppdragGenerator
+                .lagTilkjentYtelseMedUtbetalingsoppdrag(nyTilkjentYtelseMedMetaData = nyTilkjentYtelseMedEksternId,
+                                                        forrigeTilkjentYtelse = forrigeTilkjentYtelse)
+                .let { tilkjentYtelseRepository.insert(it) }
+                .also { oppdragClient.iverksettOppdrag(it.utbetalingsoppdrag!!) }
     }
 
     fun finnLøpendeUtbetalninger(stønadstype: Stønadstype, datoForAvstemming: LocalDate): List<OppdragIdForFagsystem> {
-       return tilkjentYtelseRepository.finnNyesteBehandlingForVarjeFagsak(stønadstype= stønadstype)
-               .chunked(1000)
-               .flatMap { tilkjentYtelseRepository.finnUrsprungsbehandlingerFraAndelTilkjentYtelse(datoForAvstemming = datoForAvstemming, sisteBehandlinger = it)  }
+        return tilkjentYtelseRepository.finnNyesteBehandlingForVarjeFagsak(stønadstype = stønadstype)
+                .chunked(1000)
+                .flatMap {
+                    tilkjentYtelseRepository.finnUrsprungsbehandlingerFraAndelTilkjentYtelse(datoForAvstemming = datoForAvstemming,
+                                                                                             sisteBehandlinger = it)
+                }
     }
 
     private fun hentTilkjentYtelse(tilkjentYtelseId: UUID) =
