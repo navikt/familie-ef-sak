@@ -22,7 +22,6 @@ interface TilkjentYtelseRepository : RepositoryInterface<TilkjentYtelse, UUID>, 
 
     // language=PostgreSQL
     @Query("""
-    WITH sisteBehandlinger AS (
         SELECT behandling_id FROM (
             SELECT b.id as behandling_id, row_number() over (PARTITION BY b.fagsak_id ORDER BY ty.opprettet_tid DESC) rn
                 FROM behandling b
@@ -30,13 +29,17 @@ interface TilkjentYtelseRepository : RepositoryInterface<TilkjentYtelse, UUID>, 
                     JOIN tilkjent_ytelse ty on b.id = ty.behandling_id -- att man har en tilkjent_ytelse
                 WHERE b.status = 'FERDIGSTILT' AND f.stonadstype = :stønadstype
         ) q WHERE rn=1
-    ) 
+        """)
+    fun finnNyesteBehandlingForVarjeFagsak(stønadstype: Stønadstype): List<UUID>
+
+    // language=PostgreSQL
+    @Query("""
     SELECT DISTINCT be.id as behandlings_id, t.personIdent as person_ident
         FROM andel_tilkjent_ytelse aty
             JOIN tilkjent_ytelse t on t.id = aty.tilkjent_ytelse
             JOIN behandling_ekstern be ON be.behandling_id = aty.ursprungsbehandling_id
-        WHERE t.behandling_id IN (SELECT behandling_id FROM sisteBehandlinger)
+        WHERE t.behandling_id IN (:sisteBehandlinger)
             AND aty.stonad_tom >= :datoForAvstemming    
     """)
-    fun finnAktiveBehandlinger(datoForAvstemming: LocalDate, stønadstype: Stønadstype): List<OppdragIdForFagsystem>
+    fun finnUrsprungsbehandlingerFraAndelTilkjentYtelse(datoForAvstemming: LocalDate, sisteBehandlinger: List<UUID>): List<OppdragIdForFagsystem>
 }

@@ -16,7 +16,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Service
-class AvstemmingService(private val oppdragClient: OppdragClient, private val taskRepository: TaskRepository, private val tilkjentYtelseRepository: TilkjentYtelseRepository) {
+class AvstemmingService(private val oppdragClient: OppdragClient, private val taskRepository: TaskRepository, private val tilkjentYtelseService: TilkjentYtelseService) {
 
     fun opprettGrensesnittavstemmingTask(grensesnittavstemmingDto: GrensesnittavstemmingDto) =
             grensesnittavstemmingDto
@@ -37,7 +37,7 @@ class AvstemmingService(private val oppdragClient: OppdragClient, private val ta
     }
 
     fun konsistensavstemOppdrag(stønadstype: Stønadstype) {
-        val oppdragIdListe = tilkjentYtelseRepository.finnAktiveBehandlinger(datoForAvstemming = LocalDate.now(), stønadstype = stønadstype)
+        val oppdragIdListe = tilkjentYtelseService.finnLøpendeUtbetalninger(datoForAvstemming = LocalDate.now(), stønadstype = stønadstype)
         val konsistensavstemmingRequest = KonsistensavstemmingRequest(fagsystem = stønadstype.tilKlassifisering(),
                                                                       oppdragIdListe = oppdragIdListe,
                                                                       avstemmingstidspunkt = LocalDateTime.now())

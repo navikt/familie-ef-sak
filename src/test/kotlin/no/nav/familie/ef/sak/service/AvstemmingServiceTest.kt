@@ -6,9 +6,9 @@ import io.mockk.slot
 import no.nav.familie.ef.sak.api.avstemming.GrensesnittavstemmingDto
 import no.nav.familie.ef.sak.api.avstemming.KonsistensavstemmingDto
 import no.nav.familie.ef.sak.integration.OppdragClient
-import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.service.AvstemmingService
+import no.nav.familie.ef.sak.service.TilkjentYtelseService
 import no.nav.familie.ef.sak.task.GrensesnittavstemmingPayload
 import no.nav.familie.ef.sak.task.GrensesnittavstemmingTask
 import no.nav.familie.ef.sak.task.KonsistensavstemmingPayload
@@ -24,10 +24,10 @@ internal class AvstemmingServiceTest {
 
     private val oppdragClient: OppdragClient = mockk()
     private val taskRepository: TaskRepository = mockk()
-    private val tilkjentYtelseRepository: TilkjentYtelseRepository = mockk()
+    private val tilkjentYtelseService: TilkjentYtelseService = mockk()
 
     private val avstemmingService: AvstemmingService =
-            AvstemmingService(oppdragClient, taskRepository, tilkjentYtelseRepository)
+            AvstemmingService(oppdragClient, taskRepository, tilkjentYtelseService)
 
 
     @Test
@@ -42,7 +42,7 @@ internal class AvstemmingServiceTest {
         }
 
         every {
-            tilkjentYtelseRepository.finnAktiveBehandlinger(any(), any())
+            tilkjentYtelseService.finnLøpendeUtbetalninger(any(), any())
         } answers {
             emptyList()
         }

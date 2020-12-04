@@ -53,9 +53,9 @@ internal class PlukkBehandlingTilKonsistensavstemmingTest : OppslagSpringRunnerT
         førstegangsbehandling = behandlingRepository.insert(behandling(fagsak = fagsak))
         logger.info("Første behandlingen: {}", førstegangsbehandling.id)
         periode1 =
-                Andel(100, LocalDate.of(2020, 1, 1), LocalDate.of(2020, 12, 31), ursprungsbehandlingId = førstegangsbehandling.id)
+                Andel(100, LocalDate.of(2020, 1, 1), LocalDate.of(2020, 12, 31))
         periode2 =
-                Andel(200, LocalDate.of(2021, 1, 1), LocalDate.of(2021, 12, 31), ursprungsbehandlingId = førstegangsbehandling.id)
+                Andel(200, LocalDate.of(2021, 1, 1), LocalDate.of(2021, 12, 31))
         opprettTilkjentYtelse(førstegangsbehandling, periode1, periode2)
     }
 
@@ -76,9 +76,9 @@ internal class PlukkBehandlingTilKonsistensavstemmingTest : OppslagSpringRunnerT
         val revurderingBehandling = behandlingRepository.insert(behandling(fagsak = fagsak))
         logger.info("Oppretter revurdering: {}", revurderingBehandling.id)
         val revurderingPeriode2 =
-                Andel(100, LocalDate.of(2021, 1, 1), LocalDate.of(2021, 4, 30), ursprungsbehandlingId = revurderingBehandling.id)
+                Andel(100, LocalDate.of(2021, 1, 1), LocalDate.of(2021, 4, 30))
         val revurderingPeriode3 =
-                Andel(200, LocalDate.of(2021, 5, 1), LocalDate.of(2021, 12, 31), ursprungsbehandlingId = revurderingBehandling.id)
+                Andel(200, LocalDate.of(2021, 5, 1), LocalDate.of(2021, 12, 31))
         opprettTilkjentYtelse(revurderingBehandling,
                               periode1,
                               revurderingPeriode2,
@@ -108,7 +108,7 @@ internal class PlukkBehandlingTilKonsistensavstemmingTest : OppslagSpringRunnerT
     @Test
     fun `Opphør i november i førsta perioden`() {
         val opphør = behandlingRepository.insert(behandling(fagsak = fagsak))
-        val opphørsAndel = Andel(100, LocalDate.of(2020, 10, 1), LocalDate.of(2020, 10, 31), ursprungsbehandlingId = opphør.id)
+        val opphørsAndel = Andel(100, LocalDate.of(2020, 10, 1), LocalDate.of(2020, 10, 31))
 
         opprettTilkjentYtelse(opphør, opphørsAndel, periode2)
 
@@ -130,7 +130,7 @@ internal class PlukkBehandlingTilKonsistensavstemmingTest : OppslagSpringRunnerT
     @Test
     fun `En tredje behandling endrer på første perioden i den første behandlingen`() {
         val revurdering = behandlingRepository.insert(behandling(fagsak = fagsak))
-        val nyAndel = Andel(50, LocalDate.of(2022, 3, 1), LocalDate.of(2023, 3, 31), ursprungsbehandlingId = revurdering.id)
+        val nyAndel = Andel(50, LocalDate.of(2022, 3, 1), LocalDate.of(2023, 3, 31))
 
         opprettTilkjentYtelse(revurdering, periode1, periode2, nyAndel)
 
@@ -164,7 +164,7 @@ internal class PlukkBehandlingTilKonsistensavstemmingTest : OppslagSpringRunnerT
                                    førstegangsbehandling.eksternId.id, opphørPaAndraPeriodeBehandling2.eksternId.id)
     }
 
-    data class Andel(val beløp: Int, val stønadFom: LocalDate, val stønadTom: LocalDate, val ursprungsbehandlingId: UUID)
+    data class Andel(val beløp: Int, val stønadFom: LocalDate, val stønadTom: LocalDate, val ursprungsbehandlingId: UUID? = null)
 
     private fun opprettTilkjentYtelse(behandling: Behandling, vararg andel: Andel) {
 
@@ -185,8 +185,7 @@ internal class PlukkBehandlingTilKonsistensavstemmingTest : OppslagSpringRunnerT
 
     private fun assertKonsistensavstemming(datoForAvstemming: LocalDate, feilmelding: String, vararg externBehandlingId: Long) {
         val stønadstype = Stønadstype.OVERGANGSSTØNAD
-        val oppdragIdForFagsystem = tilkjentYtelseRepository.finnAktiveBehandlinger(datoForAvstemming = datoForAvstemming,
-                                                                                    stønadstype = stønadstype)
+        val oppdragIdForFagsystem = tilkjentYtelseService.finnLøpendeUtbetalninger(stønadstype = stønadstype, datoForAvstemming = datoForAvstemming)
         val faktiskBehandlingIdn = oppdragIdForFagsystem.map { it.behandlingsId }
         try {
             assertThat(faktiskBehandlingIdn)
