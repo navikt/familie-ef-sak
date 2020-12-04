@@ -25,7 +25,7 @@ fun KjedeId.tilNullAndelTilkjentYtelse(behandlingId: UUID, periodeId: PeriodeId?
                             stønadTom = NULL_DATO,
                             personIdent = this.personIdent,
                             periodeId = periodeId?.gjeldende,
-                            ursprungsbehandlingId = behandlingId,
+                            opprinnelsesbehandlingId = behandlingId,
                             forrigePeriodeId = periodeId?.forrige)
 
 object ØkonomiUtils {
@@ -43,7 +43,7 @@ object ØkonomiUtils {
     fun beståendeAndelerPerKjede(forrigeKjeder: Map<KjedeId, List<AndelTilkjentYtelse>>,
                                  oppdaterteKjeder: Map<KjedeId, List<AndelTilkjentYtelse>>)
             : Map<KjedeId, List<AndelTilkjentYtelse>> {
-        val alleKjedeIder = forrigeKjeder.keys.union(oppdaterteKjeder.keys) // TRENGER VI DETTE?
+        val alleKjedeIder = forrigeKjeder.keys.union(oppdaterteKjeder.keys)
         return alleKjedeIder.associateWith { kjedeId ->
             beståendeAndelerIKjede(forrigeKjede = forrigeKjeder[kjedeId],
                                    oppdatertKjede = oppdaterteKjeder[kjedeId])

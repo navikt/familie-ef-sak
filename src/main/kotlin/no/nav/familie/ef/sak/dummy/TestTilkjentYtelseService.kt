@@ -21,8 +21,7 @@ class TestTilkjentYtelseService(private val behandlingService: BehandlingService
                                                           tilkjentYtelseTestDTO.stønadstype)
 
         behandlingService.opprettBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                             fagsakId = fagsak.id)
-
+                                            fagsakId = fagsak.id)
 
         return tilkjentYtelseService.opprettTilkjentYtelse(tilkjentYtelseTestDTO.nyTilkjentYtelse.tilDto())
     }

@@ -13,12 +13,13 @@ interface TilkjentYtelseRepository : RepositoryInterface<TilkjentYtelse, UUID>, 
 
     // language=PostgreSQL
     @Query("""
-    SELECT ty.* FROM tilkjent_ytelse ty
-        JOIN behandling b ON b.id = ty.behandling_id
-    WHERE b.fagsak_id = :fagsakId AND b.status = 'FERDIGSTILT'
-    ORDER BY b.opprettet_tid DESC
-    LIMIT 1""")
-    fun finnNyesteTilkjentYtelse(fagsakId: UUID): TilkjentYtelse?
+        SELECT ty.*
+            FROM tilkjent_ytelse ty
+                JOIN behandling b ON b.id = ty.behandling_id
+            WHERE b.fagsak_id = :fagsakId AND b.status = 'FERDIGSTILT'
+            ORDER BY b.opprettet_tid DESC
+            LIMIT 1""")
+    fun finnSisteTilkjentYtelse(fagsakId: UUID): TilkjentYtelse?
 
     // language=PostgreSQL
     @Query("""
@@ -30,16 +31,16 @@ interface TilkjentYtelseRepository : RepositoryInterface<TilkjentYtelse, UUID>, 
                 WHERE b.status = 'FERDIGSTILT' AND f.stonadstype = :stønadstype
         ) q WHERE rn=1
         """)
-    fun finnNyesteBehandlingForVarjeFagsak(stønadstype: Stønadstype): List<UUID>
+    fun finnSisteBehandlingForFagsak(stønadstype: Stønadstype): List<UUID>
 
     // language=PostgreSQL
     @Query("""
-    SELECT DISTINCT be.id as behandlings_id, t.personIdent as person_ident
+        SELECT DISTINCT be.id as behandlings_id, aty.person_ident as person_ident
         FROM andel_tilkjent_ytelse aty
             JOIN tilkjent_ytelse t on t.id = aty.tilkjent_ytelse
-            JOIN behandling_ekstern be ON be.behandling_id = aty.ursprungsbehandling_id
+            JOIN behandling_ekstern be ON be.behandling_id = aty.opprinnelsesbehandling_id
         WHERE t.behandling_id IN (:sisteBehandlinger)
             AND aty.stonad_tom >= :datoForAvstemming    
     """)
-    fun finnUrsprungsbehandlingerFraAndelTilkjentYtelse(datoForAvstemming: LocalDate, sisteBehandlinger: List<UUID>): List<OppdragIdForFagsystem>
+    fun finnOpprinnelsesbehandlingIdFraAndelTilkjentYtelse(datoForAvstemming: LocalDate, sisteBehandlinger: List<UUID>): List<OppdragIdForFagsystem>
 }

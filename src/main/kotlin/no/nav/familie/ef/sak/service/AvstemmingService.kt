@@ -4,19 +4,19 @@ import no.nav.familie.ef.sak.api.avstemming.GrensesnittavstemmingDto
 import no.nav.familie.ef.sak.api.avstemming.KonsistensavstemmingDto
 import no.nav.familie.ef.sak.api.avstemming.tilTask
 import no.nav.familie.ef.sak.integration.OppdragClient
-import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.økonomi.tilKlassifisering
 import no.nav.familie.kontrakter.felles.oppdrag.GrensesnittavstemmingRequest
 import no.nav.familie.kontrakter.felles.oppdrag.KonsistensavstemmingRequest
-import no.nav.familie.kontrakter.felles.oppdrag.OppdragIdForFagsystem
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Service
-class AvstemmingService(private val oppdragClient: OppdragClient, private val taskRepository: TaskRepository, private val tilkjentYtelseService: TilkjentYtelseService) {
+class AvstemmingService(private val oppdragClient: OppdragClient,
+                        private val taskRepository: TaskRepository,
+                        private val tilkjentYtelseService: TilkjentYtelseService) {
 
     fun opprettGrensesnittavstemmingTask(grensesnittavstemmingDto: GrensesnittavstemmingDto) =
             grensesnittavstemmingDto

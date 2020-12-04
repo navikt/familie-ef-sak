@@ -24,18 +24,16 @@ import java.util.*
 class TilkjentYtelseService(private val oppdragClient: OppdragClient,
                             private val behandlingService: BehandlingService,
                             private val fagsakService: FagsakService,
-                            private val tilkjentYtelseRepository: TilkjentYtelseRepository
-) {
+                            private val tilkjentYtelseRepository: TilkjentYtelseRepository) {
 
     fun hentStatus(tilkjentYtelseId: UUID): OppdragStatus {
-
         val tilkjentYtelse = hentTilkjentYtelse(tilkjentYtelseId)
         val behandling = behandlingService.hentBehandling(tilkjentYtelse.behandlingId)
         val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
 
         val oppdragId = OppdragId(fagsystem = fagsak.stønadstype.tilKlassifisering(),
                                   personIdent = tilkjentYtelse.personident,
-                                  behandlingsId = behandling.eksternId.id.toString()) //TODO SKA DET VARA LONG ELER UUID HER ???????
+                                  behandlingsId = behandling.eksternId.id.toString())
 
         return oppdragClient.hentStatus(oppdragId)
     }
@@ -44,11 +42,6 @@ class TilkjentYtelseService(private val oppdragClient: OppdragClient,
         val tilkjentYtelse = hentTilkjentYtelse(tilkjentYtelseId)
         return tilkjentYtelse.tilDto()
     }
-
-    fun abc(utbetalingsoppdrag: Utbetalingsoppdrag) {
-        oppdragClient.iverksettOppdrag(utbetalingsoppdrag)
-    }
-
 
     @Transactional
     fun opprettTilkjentYtelse(tilkjentYtelseDTO: TilkjentYtelseDTO): TilkjentYtelse {
@@ -62,21 +55,24 @@ class TilkjentYtelseService(private val oppdragClient: OppdragClient,
                                                                      stønadstype = fagsak.stønadstype,
                                                                      eksternFagsakId = fagsak.eksternId.id)
 
-        val forrigeTilkjentYtelse = tilkjentYtelseRepository.finnNyesteTilkjentYtelse(fagsakId = fagsak.id)
+        val forrigeTilkjentYtelse = tilkjentYtelseRepository.finnSisteTilkjentYtelse(fagsakId = fagsak.id)
 
-       return UtbetalingsoppdragGenerator
+        return UtbetalingsoppdragGenerator
                 .lagTilkjentYtelseMedUtbetalingsoppdrag(nyTilkjentYtelseMedMetaData = nyTilkjentYtelseMedEksternId,
                                                         forrigeTilkjentYtelse = forrigeTilkjentYtelse)
                 .let { tilkjentYtelseRepository.insert(it) }
-                .also { oppdragClient.iverksettOppdrag(it.utbetalingsoppdrag!!) }
+                .also {
+                    oppdragClient.iverksettOppdrag(it.utbetalingsoppdrag
+                                                   ?: error("utbetalingsoppdrag skal være generert i UtbetalingsoppdragGenerator"))
+                }
     }
 
     fun finnLøpendeUtbetalninger(stønadstype: Stønadstype, datoForAvstemming: LocalDate): List<OppdragIdForFagsystem> {
-        return tilkjentYtelseRepository.finnNyesteBehandlingForVarjeFagsak(stønadstype = stønadstype)
+        return tilkjentYtelseRepository.finnSisteBehandlingForFagsak(stønadstype = stønadstype)
                 .chunked(1000)
                 .flatMap {
-                    tilkjentYtelseRepository.finnUrsprungsbehandlingerFraAndelTilkjentYtelse(datoForAvstemming = datoForAvstemming,
-                                                                                             sisteBehandlinger = it)
+                    tilkjentYtelseRepository.finnOpprinnelsesbehandlingIdFraAndelTilkjentYtelse(datoForAvstemming = datoForAvstemming,
+                                                                                               sisteBehandlinger = it)
                 }
     }
 
