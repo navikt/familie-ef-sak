@@ -149,7 +149,7 @@ class VurderingService(private val behandlingService: BehandlingService,
                                                                                                             søknad)
             DelvilkårType.SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON -> måDokumentereSamlivsbrudd(sivilstandType, søknad)
             DelvilkårType.SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING -> samslivsbruddDatoerSamsvarer(sivilstandType)
-            DelvilkårType.KRAV_SIVILSTAND -> kravTilSivilstand(sivilstandType, søknad)
+            DelvilkårType.KRAV_SIVILSTAND -> kravTilSivilstand(sivilstandType)
 
             else -> true
         }
@@ -170,11 +170,9 @@ class VurderingService(private val behandlingService: BehandlingService,
                                       søknad: SøknadsskjemaOvergangsstønad) =
             (sivilstandType == Sivilstandstype.UGIFT || sivilstandType == Sivilstandstype.UOPPGITT) && søknad.sivilstand.erUformeltGift == true
 
-    private fun kravTilSivilstand(sivilstandType: Sivilstandstype,
-                                  søknad: SøknadsskjemaOvergangsstønad) = !(samslivsbruddDatoerSamsvarer(sivilstandType)
-                                                                            || måDokumentereSamlivsbrudd(sivilstandType, søknad)
-                                                                            || måDokumentereSeparasjonEllerSkilsmisse(sivilstandType, søknad)
-                                                                            || måDokumentereEkteskap(sivilstandType, søknad))
+    private fun kravTilSivilstand(sivilstandType: Sivilstandstype) = sivilstandType != Sivilstandstype.ENKE_ELLER_ENKEMANN
+
+
 
     fun hentInngangsvilkårSomManglerVurdering(behandlingId: UUID): List<VilkårType> {
         val lagredeVilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(behandlingId)
