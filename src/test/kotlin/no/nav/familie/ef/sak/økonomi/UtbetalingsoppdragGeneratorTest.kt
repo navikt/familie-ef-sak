@@ -1,10 +1,14 @@
 package no.nav.familie.ef.sak.økonomi
 
+import no.nav.familie.ef.sak.repository.domain.*
+import no.nav.familie.ef.sak.økonomi.UtbetalingsoppdragGenerator.lagTilkjentYtelseMedUtbetalingsoppdrag
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Test
 import org.opentest4j.AssertionFailedError
 import org.opentest4j.ValueWrapper
+import java.time.LocalDate
+import java.util.*
 
 internal class UtbetalingsoppdragGeneratorTest {
 
@@ -62,6 +66,29 @@ internal class UtbetalingsoppdragGeneratorTest {
         assertExpectedOgActualErLikeUtenomFeltSomFeiler(catchThrowable, "periodeId")
     }
 
+    @Test
+    internal fun `Andeler med behandlingId, periodeId og forrigePeriodeId blir oppdaterte i lagTilkjentYtelseMedUtbetalingsoppdrag`() {
+        val behandlingA = UUID.randomUUID()
+        val behandlingB = UUID.randomUUID()
+        val andel1 = opprettAndel(2,
+                                  LocalDate.of(2020, 1, 1),
+                                  LocalDate.of(2020, 12, 31)) // endres ikke, beholder ursprungsbehandlingId
+        val andel2 = opprettAndel(2, LocalDate.of(2021, 1, 1), LocalDate.of(2021, 12, 31)) // endres i behandling b
+        val andel3 = opprettAndel(2, LocalDate.of(2022, 1, 1), LocalDate.of(2022, 12, 31)) // ny i behandling b
+        val førsteTilkjentYtelse =
+                lagTilkjentYtelseMedUtbetalingsoppdrag(opprettTilkjentYtelseMedMetadata(behandlingA, andel1, andel2))
+
+        assertFørsteBehandling(førsteTilkjentYtelse, behandlingA)
+
+        val nyePerioder = opprettTilkjentYtelseMedMetadata(behandlingB,
+                                                           andel1,
+                                                           andel2.copy(stønadTom = andel2.stønadTom.minusMonths(2)),
+                                                           andel3)
+        val utbetalingsoppdragB = lagTilkjentYtelseMedUtbetalingsoppdrag(nyePerioder, førsteTilkjentYtelse)
+
+        assertThatAndreBehandlingIkkeEndrerPåUrsprungsbehandlingsIdPåPeriode1(utbetalingsoppdragB, behandlingA, behandlingB)
+    }
+
     private fun assertExpectedOgActualErLikeUtenomFeltSomFeiler(catchThrowable: Throwable?,
                                                                 feltSomSkalFiltreres: String) {
         val assertionFailedError = catchThrowable as AssertionFailedError
@@ -75,5 +102,69 @@ internal class UtbetalingsoppdragGeneratorTest {
                     .split("\n")
                     .filterNot { it.contains(feltSomSkalFiltreres) }
                     .joinToString("\n")
+
+    private fun assertThatAndreBehandlingIkkeEndrerPåUrsprungsbehandlingsIdPåPeriode1(utbetalingsoppdragB: TilkjentYtelse,
+                                                                                      behandlingA: UUID?,
+                                                                                      behandlingB: UUID?) {
+        assertAndel(andelTilkjentYtelse = utbetalingsoppdragB.andelerTilkjentYtelse[0],
+                    expectedPeriodeId = 1,
+                    expectedForrigePeriodeId = null,
+                    expectedUrsprungsBehandlingId = behandlingA)
+        assertAndel(andelTilkjentYtelse = utbetalingsoppdragB.andelerTilkjentYtelse[1],
+                    expectedPeriodeId = 3,
+                    expectedForrigePeriodeId = 2,
+                    expectedUrsprungsBehandlingId = behandlingB)
+        assertAndel(andelTilkjentYtelse = utbetalingsoppdragB.andelerTilkjentYtelse[2],
+                    expectedPeriodeId = 4,
+                    expectedForrigePeriodeId = 3,
+                    expectedUrsprungsBehandlingId = behandlingB)
+    }
+
+    private fun assertFørsteBehandling(førsteTilkjentYtelse: TilkjentYtelse,
+                                       behandlingA: UUID?) {
+        assertAndel(andelTilkjentYtelse = førsteTilkjentYtelse.andelerTilkjentYtelse[0],
+                    expectedPeriodeId = 1,
+                    expectedForrigePeriodeId = null,
+                    expectedUrsprungsBehandlingId = behandlingA)
+        assertAndel(andelTilkjentYtelse = førsteTilkjentYtelse.andelerTilkjentYtelse[1],
+                    expectedPeriodeId = 2,
+                    expectedForrigePeriodeId = 1,
+                    expectedUrsprungsBehandlingId = behandlingA)
+    }
+
+    private fun assertAndel(andelTilkjentYtelse: AndelTilkjentYtelse,
+                            expectedPeriodeId: Long?,
+                            expectedForrigePeriodeId: Long?,
+                            expectedUrsprungsBehandlingId: UUID?) {
+        assertThat(andelTilkjentYtelse.periodeId).isEqualTo(expectedPeriodeId)
+        assertThat(andelTilkjentYtelse.forrigePeriodeId).isEqualTo(expectedForrigePeriodeId)
+        assertThat(andelTilkjentYtelse.ursprungsbehandlingId).isEqualTo(expectedUrsprungsBehandlingId)
+    }
+
+    private fun opprettAndel(beløp: Int, stønadFom: LocalDate, stønadTom: LocalDate) =
+            AndelTilkjentYtelse(beløp,
+                                stønadFom = stønadFom,
+                                stønadTom = stønadTom,
+                                personIdent = "1",
+                                periodeId = 100, // overskreves
+                                forrigePeriodeId = 100, // overskreves
+                                ursprungsbehandlingId = UUID.randomUUID()) // overskreves
+
+    private fun opprettTilkjentYtelseMedMetadata(behandlingId: UUID,
+                                                 vararg andelTilkjentYtelse: AndelTilkjentYtelse) =
+            TilkjentYtelseMedMetaData(tilkjentYtelse = TilkjentYtelse(id = UUID.randomUUID(),
+                                                                      behandlingId = behandlingId,
+                                                                      personident = "1",
+                                                                      stønadFom = null,
+                                                                      stønadTom = null,
+                                                                      opphørFom = null,
+                                                                      utbetalingsoppdrag = null,
+                                                                      vedtaksdato = LocalDate.now(),
+                                                                      status = TilkjentYtelseStatus.OPPRETTET,
+                                                                      type = TilkjentYtelseType.ENDRING,
+                                                                      andelerTilkjentYtelse = andelTilkjentYtelse.toList()),
+                                      eksternBehandlingId = 1,
+                                      stønadstype = Stønadstype.OVERGANGSSTØNAD,
+                                      eksternFagsakId = 1)
 
 }

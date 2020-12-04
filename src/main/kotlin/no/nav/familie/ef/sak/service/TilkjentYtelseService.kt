@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.økonomi.tilKlassifisering
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragIdForFagsystem
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
+import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -42,6 +43,10 @@ class TilkjentYtelseService(private val oppdragClient: OppdragClient,
     fun hentTilkjentYtelseDto(tilkjentYtelseId: UUID): TilkjentYtelseDTO {
         val tilkjentYtelse = hentTilkjentYtelse(tilkjentYtelseId)
         return tilkjentYtelse.tilDto()
+    }
+
+    fun abc(utbetalingsoppdrag: Utbetalingsoppdrag) {
+        oppdragClient.iverksettOppdrag(utbetalingsoppdrag)
     }
 
 
