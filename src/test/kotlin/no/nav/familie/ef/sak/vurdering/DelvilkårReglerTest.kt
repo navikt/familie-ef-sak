@@ -1,14 +1,14 @@
 package no.nav.familie.ef.sak.vurdering
 
-import no.nav.familie.ef.sak.api.dto.*
+import no.nav.familie.ef.sak.api.dto.Sivilstandstype
 import no.nav.familie.ef.sak.mapper.SøknadsskjemaMapper
-import no.nav.familie.ef.sak.repository.domain.DelvilkårType
+import no.nav.familie.ef.sak.repository.domain.DelvilkårMetadata
 import no.nav.familie.ef.sak.repository.domain.DelvilkårType.*
 import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
 import no.nav.familie.kontrakter.ef.søknad.Sivilstandsdetaljer
 import no.nav.familie.kontrakter.ef.søknad.Søknadsfelt
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 internal class DelvilkårReglerTest {
@@ -17,15 +17,15 @@ internal class DelvilkårReglerTest {
     internal fun `skal ha initiell verdi IKKE_VURDERT for delvilkår uten spesialregler`() {
         val søknad = SøknadsskjemaMapper.tilDomene(Testsøknad.søknadOvergangsstønad)
 
-        Assertions.assertThat(utledDelvilkårResultat(DelvilkårType.TRE_ÅRS_MEDLEMSKAP, søknad, inngangsvilkårTestdata()))
+        assertThat(utledDelvilkårResultat(TRE_ÅRS_MEDLEMSKAP, søknad, delvilkårMetadata()))
                 .isEqualTo(Vilkårsresultat.IKKE_VURDERT)
 
-        Assertions.assertThat(utledDelvilkårResultat(DelvilkårType.DOKUMENTERT_FLYKTNINGSTATUS, søknad, inngangsvilkårTestdata()))
+        assertThat(utledDelvilkårResultat(DOKUMENTERT_FLYKTNINGSTATUS, søknad, delvilkårMetadata()))
                 .isEqualTo(Vilkårsresultat.IKKE_VURDERT)
 
-        Assertions.assertThat(utledDelvilkårResultat(DelvilkårType.BOR_OG_OPPHOLDER_SEG_I_NORGE,
-                                                     søknad,
-                                                     inngangsvilkårTestdata()))
+        assertThat(utledDelvilkårResultat(BOR_OG_OPPHOLDER_SEG_I_NORGE,
+                                          søknad,
+                                          delvilkårMetadata()))
                 .isEqualTo(Vilkårsresultat.IKKE_VURDERT)
     }
 
@@ -41,30 +41,30 @@ internal class DelvilkårReglerTest {
                                                   Sivilstandsdetaljer(erUformeltGift = Søknadsfelt("", false)))
         ))
 
-        Assertions.assertThat(utledDelvilkårResultat(DOKUMENTERT_EKTESKAP,
-                                                     søknadUformeltgift,
-                                                     inngangsvilkårGrunnlagDtoMedSivilstandstype(Sivilstandstype.UOPPGITT)))
+        assertThat(utledDelvilkårResultat(DOKUMENTERT_EKTESKAP,
+                                          søknadUformeltgift,
+                                          delvilkårMetadata(Sivilstandstype.UOPPGITT)))
                 .isEqualTo(Vilkårsresultat.IKKE_VURDERT)
 
-        Assertions.assertThat(utledDelvilkårResultat(DOKUMENTERT_EKTESKAP,
-                                                     søknadUformeltgift,
-                                                     inngangsvilkårGrunnlagDtoMedSivilstandstype(Sivilstandstype.UGIFT)))
+        assertThat(utledDelvilkårResultat(DOKUMENTERT_EKTESKAP,
+                                          søknadUformeltgift,
+                                          delvilkårMetadata(Sivilstandstype.UGIFT)))
                 .isEqualTo(Vilkårsresultat.IKKE_VURDERT)
 
 
-        Assertions.assertThat(utledDelvilkårResultat(DOKUMENTERT_EKTESKAP,
-                                                     søknadIkkeUformeltgift,
-                                                     inngangsvilkårGrunnlagDtoMedSivilstandstype(Sivilstandstype.UOPPGITT)))
+        assertThat(utledDelvilkårResultat(DOKUMENTERT_EKTESKAP,
+                                          søknadIkkeUformeltgift,
+                                          delvilkårMetadata(Sivilstandstype.UOPPGITT)))
                 .isEqualTo(Vilkårsresultat.IKKE_AKTUELL)
 
-        Assertions.assertThat(utledDelvilkårResultat(DOKUMENTERT_EKTESKAP,
-                                                     søknadIkkeUformeltgift,
-                                                     inngangsvilkårGrunnlagDtoMedSivilstandstype(Sivilstandstype.UGIFT)))
+        assertThat(utledDelvilkårResultat(DOKUMENTERT_EKTESKAP,
+                                          søknadIkkeUformeltgift,
+                                          delvilkårMetadata(Sivilstandstype.UGIFT)))
                 .isEqualTo(Vilkårsresultat.IKKE_AKTUELL)
 
-        Assertions.assertThat(utledDelvilkårResultat(DOKUMENTERT_EKTESKAP,
-                                                     søknadUformeltgift,
-                                                     inngangsvilkårGrunnlagDtoMedSivilstandstype(Sivilstandstype.GIFT)))
+        assertThat(utledDelvilkårResultat(DOKUMENTERT_EKTESKAP,
+                                          søknadUformeltgift,
+                                          delvilkårMetadata(Sivilstandstype.GIFT)))
                 .isEqualTo(Vilkårsresultat.IKKE_AKTUELL)
 
     }
@@ -81,30 +81,30 @@ internal class DelvilkårReglerTest {
                                                   Sivilstandsdetaljer(erUformeltSeparertEllerSkilt = Søknadsfelt("", false)))
         ))
 
-        Assertions.assertThat(utledDelvilkårResultat(DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE,
-                                                     søknadUformeltSkilt,
-                                                     inngangsvilkårGrunnlagDtoMedSivilstandstype(Sivilstandstype.UOPPGITT)))
+        assertThat(utledDelvilkårResultat(DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE,
+                                          søknadUformeltSkilt,
+                                          delvilkårMetadata(Sivilstandstype.UOPPGITT)))
                 .isEqualTo(Vilkårsresultat.IKKE_VURDERT)
 
-        Assertions.assertThat(utledDelvilkårResultat(DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE,
-                                                     søknadUformeltSkilt,
-                                                     inngangsvilkårGrunnlagDtoMedSivilstandstype(Sivilstandstype.UGIFT)))
+        assertThat(utledDelvilkårResultat(DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE,
+                                          søknadUformeltSkilt,
+                                          delvilkårMetadata(Sivilstandstype.UGIFT)))
                 .isEqualTo(Vilkårsresultat.IKKE_VURDERT)
 
 
-        Assertions.assertThat(utledDelvilkårResultat(DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE,
-                                                     søknadIkkeUformeltSkilt,
-                                                     inngangsvilkårGrunnlagDtoMedSivilstandstype(Sivilstandstype.UOPPGITT)))
+        assertThat(utledDelvilkårResultat(DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE,
+                                          søknadIkkeUformeltSkilt,
+                                          delvilkårMetadata(Sivilstandstype.UOPPGITT)))
                 .isEqualTo(Vilkårsresultat.IKKE_AKTUELL)
 
-        Assertions.assertThat(utledDelvilkårResultat(DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE,
-                                                     søknadIkkeUformeltSkilt,
-                                                     inngangsvilkårGrunnlagDtoMedSivilstandstype(Sivilstandstype.UGIFT)))
+        assertThat(utledDelvilkårResultat(DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE,
+                                          søknadIkkeUformeltSkilt,
+                                          delvilkårMetadata(Sivilstandstype.UGIFT)))
                 .isEqualTo(Vilkårsresultat.IKKE_AKTUELL)
 
-        Assertions.assertThat(utledDelvilkårResultat(DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE,
-                                                     søknadIkkeUformeltSkilt,
-                                                     inngangsvilkårGrunnlagDtoMedSivilstandstype(Sivilstandstype.GIFT)))
+        assertThat(utledDelvilkårResultat(DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE,
+                                          søknadIkkeUformeltSkilt,
+                                          delvilkårMetadata(Sivilstandstype.GIFT)))
                 .isEqualTo(Vilkårsresultat.IKKE_AKTUELL)
 
     }
@@ -121,30 +121,30 @@ internal class DelvilkårReglerTest {
                                                   Sivilstandsdetaljer(søktOmSkilsmisseSeparasjon = Søknadsfelt("", false)))
         ))
 
-        Assertions.assertThat(utledDelvilkårResultat(SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
-                                                     søknadSomHarSøktOmSkilsmisse,
-                                                     inngangsvilkårGrunnlagDtoMedSivilstandstype(Sivilstandstype.GIFT)))
+        assertThat(utledDelvilkårResultat(SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
+                                          søknadSomHarSøktOmSkilsmisse,
+                                          delvilkårMetadata(Sivilstandstype.GIFT)))
                 .isEqualTo(Vilkårsresultat.IKKE_VURDERT)
 
-        Assertions.assertThat(utledDelvilkårResultat(SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
-                                                     søknadSomHarSøktOmSkilsmisse,
-                                                     inngangsvilkårGrunnlagDtoMedSivilstandstype(Sivilstandstype.REGISTRERT_PARTNER)))
+        assertThat(utledDelvilkårResultat(SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
+                                          søknadSomHarSøktOmSkilsmisse,
+                                          delvilkårMetadata(Sivilstandstype.REGISTRERT_PARTNER)))
                 .isEqualTo(Vilkårsresultat.IKKE_VURDERT)
 
 
-        Assertions.assertThat(utledDelvilkårResultat(SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
-                                                     søknadSomIkkeHarSøktOmSkilsmisse,
-                                                     inngangsvilkårGrunnlagDtoMedSivilstandstype(Sivilstandstype.GIFT)))
+        assertThat(utledDelvilkårResultat(SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
+                                          søknadSomIkkeHarSøktOmSkilsmisse,
+                                          delvilkårMetadata(Sivilstandstype.GIFT)))
                 .isEqualTo(Vilkårsresultat.IKKE_AKTUELL)
 
-        Assertions.assertThat(utledDelvilkårResultat(SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
-                                                     søknadSomIkkeHarSøktOmSkilsmisse,
-                                                     inngangsvilkårGrunnlagDtoMedSivilstandstype(Sivilstandstype.REGISTRERT_PARTNER)))
+        assertThat(utledDelvilkårResultat(SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
+                                          søknadSomIkkeHarSøktOmSkilsmisse,
+                                          delvilkårMetadata(Sivilstandstype.REGISTRERT_PARTNER)))
                 .isEqualTo(Vilkårsresultat.IKKE_AKTUELL)
 
-        Assertions.assertThat(utledDelvilkårResultat(SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
-                                                     søknadSomIkkeHarSøktOmSkilsmisse,
-                                                     inngangsvilkårGrunnlagDtoMedSivilstandstype(Sivilstandstype.UGIFT)))
+        assertThat(utledDelvilkårResultat(SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
+                                          søknadSomIkkeHarSøktOmSkilsmisse,
+                                          delvilkårMetadata(Sivilstandstype.UGIFT)))
                 .isEqualTo(Vilkårsresultat.IKKE_AKTUELL)
 
     }
@@ -153,30 +153,30 @@ internal class DelvilkårReglerTest {
     internal fun `skal vurdere om dato for samlivsbrudd samsvarer med fraflyttingsdato`() {
         val søknad = SøknadsskjemaMapper.tilDomene(Testsøknad.søknadOvergangsstønad)
 
-        Assertions.assertThat(utledDelvilkårResultat(SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
-                                                     søknad,
-                                                     inngangsvilkårGrunnlagDtoMedSivilstandstype(Sivilstandstype.SEPARERT)))
+        assertThat(utledDelvilkårResultat(SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
+                                          søknad,
+                                          delvilkårMetadata(Sivilstandstype.SEPARERT)))
                 .isEqualTo(Vilkårsresultat.IKKE_VURDERT)
 
-        Assertions.assertThat(utledDelvilkårResultat(SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
-                                                     søknad,
-                                                     inngangsvilkårGrunnlagDtoMedSivilstandstype(Sivilstandstype.SEPARERT_PARTNER)))
+        assertThat(utledDelvilkårResultat(SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
+                                          søknad,
+                                          delvilkårMetadata(Sivilstandstype.SEPARERT_PARTNER)))
                 .isEqualTo(Vilkårsresultat.IKKE_VURDERT)
 
 
-        Assertions.assertThat(utledDelvilkårResultat(SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
-                                                     søknad,
-                                                     inngangsvilkårGrunnlagDtoMedSivilstandstype(Sivilstandstype.GIFT)))
+        assertThat(utledDelvilkårResultat(SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
+                                          søknad,
+                                          delvilkårMetadata(Sivilstandstype.GIFT)))
                 .isEqualTo(Vilkårsresultat.IKKE_AKTUELL)
 
-        Assertions.assertThat(utledDelvilkårResultat(SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
-                                                     søknad,
-                                                     inngangsvilkårGrunnlagDtoMedSivilstandstype(Sivilstandstype.REGISTRERT_PARTNER)))
+        assertThat(utledDelvilkårResultat(SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
+                                          søknad,
+                                          delvilkårMetadata(Sivilstandstype.REGISTRERT_PARTNER)))
                 .isEqualTo(Vilkårsresultat.IKKE_AKTUELL)
 
-        Assertions.assertThat(utledDelvilkårResultat(SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
-                                                     søknad,
-                                                     inngangsvilkårGrunnlagDtoMedSivilstandstype(Sivilstandstype.UGIFT)))
+        assertThat(utledDelvilkårResultat(SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
+                                          søknad,
+                                          delvilkårMetadata(Sivilstandstype.UGIFT)))
                 .isEqualTo(Vilkårsresultat.IKKE_AKTUELL)
 
     }
@@ -188,14 +188,14 @@ internal class DelvilkårReglerTest {
         Sivilstandstype.values().forEach {
             when (it) {
                 Sivilstandstype.ENKE_ELLER_ENKEMANN,
-                Sivilstandstype.GJENLEVENDE_PARTNER -> Assertions.assertThat(utledDelvilkårResultat(KRAV_SIVILSTAND,
-                                                                                                    søknad,
-                                                                                                    inngangsvilkårGrunnlagDtoMedSivilstandstype(
-                                                                                                            it)))
+                Sivilstandstype.GJENLEVENDE_PARTNER -> assertThat(utledDelvilkårResultat(KRAV_SIVILSTAND,
+                                                                                         søknad,
+                                                                                         delvilkårMetadata(
+                                                                                                 it)))
                         .isEqualTo(Vilkårsresultat.IKKE_AKTUELL)
-                else -> Assertions.assertThat(utledDelvilkårResultat(KRAV_SIVILSTAND,
-                                                                     søknad,
-                                                                     inngangsvilkårGrunnlagDtoMedSivilstandstype(it)))
+                else -> assertThat(utledDelvilkårResultat(KRAV_SIVILSTAND,
+                                                          søknad,
+                                                          delvilkårMetadata(it)))
                         .isEqualTo(Vilkårsresultat.IKKE_VURDERT)
 
 
@@ -203,33 +203,8 @@ internal class DelvilkårReglerTest {
         }
     }
 
-    private fun inngangsvilkårGrunnlagDtoMedSivilstandstype(sivilstandstype: Sivilstandstype) =
-            inngangsvilkårTestdata().copy(sivilstand = sivilstandInngangsvilkårDtoTestdata()
-                    .copy(registergrunnlag = SivilstandRegistergrunnlagDto(sivilstandstype, null)))
+    private fun delvilkårMetadata(sivilstandstype: Sivilstandstype = Sivilstandstype.GIFT): DelvilkårMetadata =
+            DelvilkårMetadata(sivilstandstype = sivilstandstype)
 
-    private fun inngangsvilkårTestdata(): InngangsvilkårGrunnlagDto {
-        return InngangsvilkårGrunnlagDto(
-                medlemskap = medlemskapDtoTestdata(),
-                sivilstand = sivilstandInngangsvilkårDtoTestdata()
-        )
-    }
 
-    private fun sivilstandInngangsvilkårDtoTestdata(): SivilstandInngangsvilkårDto {
-        return SivilstandInngangsvilkårDto(
-                SivilstandSøknadsgrunnlagDto(null, null, null, null, null, null, null, null, null),
-                SivilstandRegistergrunnlagDto(Sivilstandstype.GIFT, null))
-    }
-
-    private fun medlemskapDtoTestdata(): MedlemskapDto {
-        return MedlemskapDto(
-                MedlemskapSøknadsgrunnlagDto(true, true, emptyList()),
-                MedlemskapRegistergrunnlagDto(emptyList(),
-                                              emptyList(),
-                                              emptyList(),
-                                              emptyList(),
-                                              emptyList(),
-                                              emptyList(),
-                                              null)
-        )
-    }
 }

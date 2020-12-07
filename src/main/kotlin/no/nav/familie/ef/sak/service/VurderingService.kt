@@ -58,7 +58,8 @@ class VurderingService(private val behandlingService: BehandlingService,
         val sivilstand = SivilstandMapper.tilDto(sivilstandsdetaljer = søknad.sivilstand,
                                                  pdlSøker = pdlSøker)
         val registergrunnlag = InngangsvilkårGrunnlagDto(medlemskap, sivilstand)
-        val vurderinger = hentVurderinger(behandlingId, søknad, registergrunnlag)
+        val delvilkårMetadata = DelvilkårMetadata(sivilstandstype = registergrunnlag.sivilstand.registergrunnlag.type)
+        val vurderinger = hentVurderinger(behandlingId, søknad, delvilkårMetadata)
 
         return InngangsvilkårDto(vurderinger = vurderinger,
                                  grunnlag = registergrunnlag)
@@ -66,8 +67,8 @@ class VurderingService(private val behandlingService: BehandlingService,
 
     private fun hentVurderinger(behandlingId: UUID,
                                 søknad: SøknadsskjemaOvergangsstønad,
-                                registerGrunnlag: InngangsvilkårGrunnlagDto): List<VilkårsvurderingDto> {
-        return hentEllerOpprettVurderingerForInngangsvilkår(behandlingId, søknad, registerGrunnlag)
+                                delvilkårMetadata: DelvilkårMetadata): List<VilkårsvurderingDto> {
+        return hentEllerOpprettVurderingerForInngangsvilkår(behandlingId, søknad, delvilkårMetadata)
                 .map {
                     VilkårsvurderingDto(id = it.id,
                                         behandlingId = it.behandlingId,
@@ -86,7 +87,7 @@ class VurderingService(private val behandlingService: BehandlingService,
 
     private fun hentEllerOpprettVurderingerForInngangsvilkår(behandlingId: UUID,
                                                              søknad: SøknadsskjemaOvergangsstønad,
-                                                             registerGrunnlag: InngangsvilkårGrunnlagDto): List<Vilkårsvurdering> {
+                                                             delvilkårMetadata: DelvilkårMetadata): List<Vilkårsvurdering> {
         val lagredeVilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(behandlingId)
 
         if (behandlingErLåstForVidereRedigering(behandlingId)) {
@@ -101,7 +102,7 @@ class VurderingService(private val behandlingService: BehandlingService,
                     val delvilkårsvurderinger = it.delvilkår
                             .map { delvilkårType ->
                                 Delvilkårsvurdering(delvilkårType,
-                                                    utledDelvilkårResultat(delvilkårType, søknad, registerGrunnlag))
+                                                    utledDelvilkårResultat(delvilkårType, søknad, delvilkårMetadata))
                             }
                     Vilkårsvurdering(behandlingId = behandlingId,
                                      type = it,

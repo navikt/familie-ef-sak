@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.repository.domain
 
+import no.nav.familie.ef.sak.api.dto.Sivilstandstype
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
@@ -24,6 +25,8 @@ data class DelvilkårsvurderingWrapper(val delvilkårsvurderinger: List<Delvilk�
 
 data class Delvilkårsvurdering(val type: DelvilkårType,
                                val resultat: Vilkårsresultat = Vilkårsresultat.IKKE_VURDERT)
+
+data class DelvilkårMetadata(val sivilstandstype: Sivilstandstype)
 
 enum class DelvilkårType {
     TRE_ÅRS_MEDLEMSKAP,

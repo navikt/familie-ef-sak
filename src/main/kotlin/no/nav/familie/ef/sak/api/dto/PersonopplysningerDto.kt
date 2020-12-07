@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.api.dto
 
-import no.nav.familie.ef.sak.integration.dto.pdl.*
+import no.nav.familie.ef.sak.integration.dto.pdl.Navn
+import no.nav.familie.ef.sak.integration.dto.pdl.visningsnavn
 import java.time.LocalDate
 import no.nav.familie.ef.sak.integration.dto.pdl.Folkeregisterpersonstatus as PdlFolkeregisterpersonstatus
 
@@ -57,7 +58,14 @@ enum class Sivilstandstype {
     REGISTRERT_PARTNER,
     SEPARERT_PARTNER,
     SKILT_PARTNER,
-    GJENLEVENDE_PARTNER
+    GJENLEVENDE_PARTNER;
+
+    fun erGift(): Boolean = this == REGISTRERT_PARTNER || this == GIFT;
+    fun erUgiftEllerUoppgitt(): Boolean = this == UGIFT || this == UOPPGITT;
+    fun erSeparert(): Boolean = this == SEPARERT_PARTNER || this == SEPARERT;
+    fun erEnkeEllerEnkemann(): Boolean = this == ENKE_ELLER_ENKEMANN || this == GJENLEVENDE_PARTNER;
+    fun erSkilt(): Boolean = this == SKILT || this == SKILT_PARTNER;
+
 }
 
 data class AdresseDto(val visningsadresse: String?,

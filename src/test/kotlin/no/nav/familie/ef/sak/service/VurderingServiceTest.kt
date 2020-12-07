@@ -150,7 +150,7 @@ internal class VurderingServiceTest {
                                                                 vilkårType = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
                                                                 endretAv = "",
                                                                 endretTid = LocalDateTime.now()))
-        }).hasMessageContaining("Delvilkårstyper motsvarer ikke de som finnes lagrede på vilkåret")
+        }).hasMessageContaining("Nye og eksisterende delvilkårsvurderinger har ulike antall vurderinger")
     }
 
     @Test
