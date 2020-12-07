@@ -23,9 +23,7 @@ data class TilkjentYtelse(@Id
                           val type: TilkjentYtelseType = TilkjentYtelseType.FØRSTEGANGSBEHANDLING,
                           val andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
                           @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                          val sporbar: Sporbar = Sporbar()) {
-
-}
+                          val sporbar: Sporbar = Sporbar())
 
 enum class TilkjentYtelseStatus {
     IKKE_KLAR,

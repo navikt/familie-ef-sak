@@ -130,7 +130,7 @@ object UtbetalingsoppdragGenerator {
                     kjede.sortedBy { it.stønadFom }.mapIndexed { index, andel ->
 
                         andel.copy(periodeId = nestePeriodeIdIKjede + index,
-                                   opprinnelsesbehandlingId = behandlingId,
+                                   kildeBehandlingId = behandlingId,
                                    forrigePeriodeId = if (index == 0) forrigePeriodeIdIKjede
                                    else nestePeriodeIdIKjede + index - 1)
                     }

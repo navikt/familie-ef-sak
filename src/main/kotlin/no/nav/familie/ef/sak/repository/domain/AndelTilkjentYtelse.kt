@@ -5,7 +5,7 @@ import java.time.LocalDate
 import java.util.*
 
 /**
- * opprinnelsesbehandlingId er kun nullable her og ikke i databasen fordi når man mapper DTO til andel,
+ * kildeBehandlingId er kun nullable her og ikke i databasen fordi når man mapper DTO til andel,
  *  som sendes inn til UtbetalingsoppdragGenerator så har vi ikke det verdiet. Men det settes i generatorn.
  *  På slik måte som att periodeId og forrigePeriodeId også settes der
  */
@@ -18,7 +18,7 @@ data class AndelTilkjentYtelse(@Column("belop")
                                val personIdent: String,
                                val periodeId: Long? = null,
                                val forrigePeriodeId: Long? = null,
-                               val opprinnelsesbehandlingId: UUID? = null) {
+                               val kildeBehandlingId: UUID? = null) {
 
     private fun erTilsvarendeForUtbetaling(other: AndelTilkjentYtelse): Boolean {
         return (this.personIdent == other.personIdent

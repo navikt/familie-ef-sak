@@ -44,8 +44,8 @@ fun AndelTilkjentYtelse.tilDto(): AndelTilkjentYtelseDTO {
     return AndelTilkjentYtelseDTO(beløp = this.beløp,
                                   stønadFom = this.stønadFom,
                                   stønadTom = this.stønadTom,
-                                  opprinnelsesbehandlingId = this.opprinnelsesbehandlingId
-                                                          ?: error("Savner opprinnelsesbehandlingId på andel med periodeId=${this.periodeId}"),
+                                  kildeBehandlingId = this.kildeBehandlingId
+                                                          ?: error("Savner kildeBehandlingId på andel med periodeId=${this.periodeId}"),
                                   personIdent = this.personIdent)
 }
 

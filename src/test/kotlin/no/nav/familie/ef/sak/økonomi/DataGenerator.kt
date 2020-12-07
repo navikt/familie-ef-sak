@@ -21,7 +21,7 @@ object DataGenerator {
             AndelTilkjentYtelse(beløp = beløp,
                                 stønadFom = stønadFom,
                                 stønadTom = stønadTom,
-                                opprinnelsesbehandlingId = behandlingId,
+                                kildeBehandlingId = behandlingId,
                                 personIdent = personIdent)
 
     fun tilfeldigTilkjentYtelse(behandling: Behandling = behandling(fagsak()), antallAndelerTilkjentYtelse: Int = 1) =

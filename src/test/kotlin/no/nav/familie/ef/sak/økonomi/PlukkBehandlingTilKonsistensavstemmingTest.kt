@@ -50,9 +50,9 @@ internal class PlukkBehandlingTilKonsistensavstemmingTest : OppslagSpringRunnerT
         førstegangsbehandling = behandlingRepository.insert(behandling(fagsak = fagsak))
         logger.info("Første behandlingen: {}", førstegangsbehandling.id)
         periode1 =
-                Andel(100, LocalDate.of(2020, 1, 1), LocalDate.of(2020, 12, 31), opprinnelsesbehandlingId = førstegangsbehandling.id)
+                Andel(100, LocalDate.of(2020, 1, 1), LocalDate.of(2020, 12, 31), kildeBehandlingId = førstegangsbehandling.id)
         periode2 =
-                Andel(200, LocalDate.of(2021, 1, 1), LocalDate.of(2021, 12, 31), opprinnelsesbehandlingId = førstegangsbehandling.id)
+                Andel(200, LocalDate.of(2021, 1, 1), LocalDate.of(2021, 12, 31), kildeBehandlingId = førstegangsbehandling.id)
         opprettTilkjentYtelse(førstegangsbehandling, periode1, periode2)
     }
 
@@ -73,9 +73,9 @@ internal class PlukkBehandlingTilKonsistensavstemmingTest : OppslagSpringRunnerT
         val revurderingBehandling = behandlingRepository.insert(behandling(fagsak = fagsak))
         logger.info("Oppretter revurdering: {}", revurderingBehandling.id)
         val revurderingPeriode2 =
-                Andel(100, LocalDate.of(2021, 1, 1), LocalDate.of(2021, 4, 30), opprinnelsesbehandlingId = revurderingBehandling.id)
+                Andel(100, LocalDate.of(2021, 1, 1), LocalDate.of(2021, 4, 30), kildeBehandlingId = revurderingBehandling.id)
         val revurderingPeriode3 =
-                Andel(200, LocalDate.of(2021, 5, 1), LocalDate.of(2021, 12, 31), opprinnelsesbehandlingId = revurderingBehandling.id)
+                Andel(200, LocalDate.of(2021, 5, 1), LocalDate.of(2021, 12, 31), kildeBehandlingId = revurderingBehandling.id)
         opprettTilkjentYtelse(revurderingBehandling,
                               periode1,
                               revurderingPeriode2,
@@ -105,7 +105,7 @@ internal class PlukkBehandlingTilKonsistensavstemmingTest : OppslagSpringRunnerT
     @Test
     fun `Opphør i november i førsta perioden`() {
         val opphør = behandlingRepository.insert(behandling(fagsak = fagsak))
-        val opphørsAndel = Andel(100, LocalDate.of(2020, 10, 1), LocalDate.of(2020, 10, 31), opprinnelsesbehandlingId = opphør.id)
+        val opphørsAndel = Andel(100, LocalDate.of(2020, 10, 1), LocalDate.of(2020, 10, 31), kildeBehandlingId = opphør.id)
 
         opprettTilkjentYtelse(opphør, opphørsAndel, periode2)
 
@@ -127,7 +127,7 @@ internal class PlukkBehandlingTilKonsistensavstemmingTest : OppslagSpringRunnerT
     @Test
     fun `En tredje behandling endrer på første perioden i den første behandlingen`() {
         val revurdering = behandlingRepository.insert(behandling(fagsak = fagsak))
-        val nyAndel = Andel(50, LocalDate.of(2022, 3, 1), LocalDate.of(2023, 3, 31), opprinnelsesbehandlingId = revurdering.id)
+        val nyAndel = Andel(50, LocalDate.of(2022, 3, 1), LocalDate.of(2023, 3, 31), kildeBehandlingId = revurdering.id)
 
         opprettTilkjentYtelse(revurdering, periode1, periode2, nyAndel)
 
@@ -160,7 +160,7 @@ internal class PlukkBehandlingTilKonsistensavstemmingTest : OppslagSpringRunnerT
                                    førstegangsbehandling.eksternId.id, opphørPaAndraPeriodeBehandling2.eksternId.id)
     }
 
-    data class Andel(val beløp: Int, val stønadFom: LocalDate, val stønadTom: LocalDate, val opprinnelsesbehandlingId: UUID)
+    data class Andel(val beløp: Int, val stønadFom: LocalDate, val stønadTom: LocalDate, val kildeBehandlingId: UUID)
 
     private fun opprettTilkjentYtelse(behandling: Behandling, vararg andel: Andel) {
 
@@ -169,7 +169,7 @@ internal class PlukkBehandlingTilKonsistensavstemmingTest : OppslagSpringRunnerT
                                    stønadFom = it.stønadFom,
                                    stønadTom = it.stønadTom,
                                    personIdent = "1",
-                                   opprinnelsesbehandlingId = it.opprinnelsesbehandlingId)
+                                   kildeBehandlingId = it.kildeBehandlingId)
         }
         tilkjentYtelseService.opprettTilkjentYtelse(TilkjentYtelseDTO("1",
                                                                       LocalDate.now(),

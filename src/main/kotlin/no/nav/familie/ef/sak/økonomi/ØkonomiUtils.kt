@@ -25,7 +25,7 @@ fun KjedeId.tilNullAndelTilkjentYtelse(behandlingId: UUID, periodeId: PeriodeId?
                             stønadTom = NULL_DATO,
                             personIdent = this.personIdent,
                             periodeId = periodeId?.gjeldende,
-                            opprinnelsesbehandlingId = behandlingId,
+                            kildeBehandlingId = behandlingId,
                             forrigePeriodeId = periodeId?.forrige)
 
 object ØkonomiUtils {

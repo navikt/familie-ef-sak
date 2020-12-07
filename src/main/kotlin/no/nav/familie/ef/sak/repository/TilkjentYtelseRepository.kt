@@ -38,9 +38,9 @@ interface TilkjentYtelseRepository : RepositoryInterface<TilkjentYtelse, UUID>, 
         SELECT DISTINCT be.id as behandlings_id, aty.person_ident as person_ident
         FROM andel_tilkjent_ytelse aty
             JOIN tilkjent_ytelse t on t.id = aty.tilkjent_ytelse
-            JOIN behandling_ekstern be ON be.behandling_id = aty.opprinnelsesbehandling_id
+            JOIN behandling_ekstern be ON be.behandling_id = aty.kilde_behandling_id
         WHERE t.behandling_id IN (:sisteBehandlinger)
             AND aty.stonad_tom >= :datoForAvstemming    
     """)
-    fun finnOpprinnelsesbehandlingIdFraAndelTilkjentYtelse(datoForAvstemming: LocalDate, sisteBehandlinger: List<UUID>): List<OppdragIdForFagsystem>
+    fun finnKildeBehandlingIdFraAndelTilkjentYtelse(datoForAvstemming: LocalDate, sisteBehandlinger: List<UUID>): List<OppdragIdForFagsystem>
 }

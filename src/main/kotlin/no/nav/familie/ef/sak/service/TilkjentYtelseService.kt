@@ -71,7 +71,7 @@ class TilkjentYtelseService(private val oppdragClient: OppdragClient,
         return tilkjentYtelseRepository.finnSisteBehandlingForFagsak(stønadstype = stønadstype)
                 .chunked(1000)
                 .flatMap {
-                    tilkjentYtelseRepository.finnOpprinnelsesbehandlingIdFraAndelTilkjentYtelse(datoForAvstemming = datoForAvstemming,
+                    tilkjentYtelseRepository.finnKildeBehandlingIdFraAndelTilkjentYtelse(datoForAvstemming = datoForAvstemming,
                                                                                                sisteBehandlinger = it)
                 }
     }

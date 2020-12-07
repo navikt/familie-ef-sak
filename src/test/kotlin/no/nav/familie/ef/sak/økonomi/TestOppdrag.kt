@@ -51,7 +51,7 @@ data class TestOppdrag(val type: TestOppdragType,
                                 stønadTom = sluttPeriode,
                                 personIdent = fnr,
                                 periodeId = linjeId,
-                                opprinnelsesbehandlingId = if (TestOppdragType.Output == type) oppdragId else null,
+                                kildeBehandlingId = if (TestOppdragType.Output == type) oppdragId else null,
                                 forrigePeriodeId = forrigeLinjeId)
         else if (TestOppdragType.Output == type && beløp == null && startPeriode == null && sluttPeriode == null)
             KjedeId(ytelse, fnr).tilNullAndelTilkjentYtelse(oppdragId ?: error("Må ha satt OppdragId på Output"),
