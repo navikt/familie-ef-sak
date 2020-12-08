@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.steg.StegType.BEHANDLING_FERDIGSTILT
 import no.nav.familie.ef.sak.service.steg.StegType.VILKÅRSVURDERE_INNGANGSVILKÅR
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.prosessering.domene.Task
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -37,6 +38,15 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
         val behandlingSteg: InngangsvilkårSteg = hentBehandlingSteg(VILKÅRSVURDERE_INNGANGSVILKÅR)
         return håndterSteg(behandling, behandlingSteg, null)
     }
+
+    @Transactional
+    fun håndterStatusPåOppdrag(behandling: Behandling, task: Task): Behandling {
+        val behandlingSteg: StatusPåOppdragSteg = hentBehandlingSteg(StegType.STATUS_PÅ_OPPDRAG)
+
+        return håndterSteg(behandling, behandlingSteg, task)
+    }
+
+
 
     // Generelle stegmetoder
     private fun <T> håndterSteg(behandling: Behandling,

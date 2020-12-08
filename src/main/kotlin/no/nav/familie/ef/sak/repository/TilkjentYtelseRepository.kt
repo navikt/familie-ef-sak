@@ -6,4 +6,6 @@ import java.util.*
 interface TilkjentYtelseRepository : RepositoryInterface<TilkjentYtelse, UUID>, InsertUpdateRepository<TilkjentYtelse> {
 
     fun findByPersonident(personident: String): TilkjentYtelse?
+
+    fun findByBehandlingId(behandlingId: UUID): TilkjentYtelse?
 }
