@@ -31,25 +31,16 @@ object ØkonomiUtils {
      * Lager oversikt over siste andel i hver kjede som finnes uten endring i oppdatert tilstand.
      * Vi må opphøre og eventuelt gjenoppbygge hver kjede etter denne. Må ta vare på andel og ikke kun offset da
      * filtrering av oppdaterte andeler senere skjer før offset blir satt.
-     * Personident er identifikator for hver kjede, med unntak av småbarnstillegg som vil være en egen "person".
      *
      * @param[forrigeKjeder] forrige behandlings tilstand
      * @param[oppdaterteKjeder] nåværende tilstand
-     * @return map med personident og siste bestående andel. Bestående andel=null dersom alle opphøres eller ny person.
+     * @return liste med bestående andeler
      */
     fun beståendeAndelerPerKjede(forrigeKjeder: List<AndelTilkjentYtelse>,
-                                 oppdaterteKjeder: List<AndelTilkjentYtelse>)
-            : List<AndelTilkjentYtelse> {
-        return beståendeAndelerIKjede(forrigeKjede = forrigeKjeder,
-                                      oppdatertKjede = oppdaterteKjeder)
-    }
-
-    private fun beståendeAndelerIKjede(forrigeKjede: List<AndelTilkjentYtelse>?,
-                                       oppdatertKjede: List<AndelTilkjentYtelse>?): List<AndelTilkjentYtelse> {
-        val forrigeAndeler = forrigeKjede?.toSet() ?: emptySet()
-        val oppdaterteAndeler = oppdatertKjede?.toSet() ?: emptySet()
+                                 oppdaterteKjeder: List<AndelTilkjentYtelse>): List<AndelTilkjentYtelse> {
+        val forrigeAndeler = forrigeKjeder.toSet()
+        val oppdaterteAndeler = oppdaterteKjeder.toSet()
         val førsteEndring = forrigeAndeler.disjunkteAndeler(oppdaterteAndeler).minByOrNull { it.stønadFom }?.stønadFom
-
         val består = if (førsteEndring != null) forrigeAndeler.snittAndeler(oppdaterteAndeler)
                 .filter { it.stønadFom.isBefore(førsteEndring) } else forrigeAndeler
         return består.sortedBy { it.periodeId }
@@ -80,7 +71,7 @@ object ØkonomiUtils {
      *
      * @param[forrigeKjeder] forrige behandlings tilstand
      * @param[oppdaterteKjeder] nåværende tilstand
-     * @return map av siste andel og opphørsdato fra kjeder med opphør
+     * @return siste andel og opphørsdato fra kjeder med opphør, returnerer null hvis det ikke finnes ett opphørsdato
      */
     fun andelTilOpphørMedDato(forrigeKjeder: List<AndelTilkjentYtelse>,
                               oppdaterteKjeder: List<AndelTilkjentYtelse>)
