@@ -22,6 +22,8 @@ object SivilstandMapper {
                                              erUformeltSeparertEllerSkilt = sivilstandsdetaljer.erUformeltSeparertEllerSkilt,
                                              datoSøktSeparasjon = sivilstandsdetaljer.datoSøktSeparasjon,
                                              søktOmSkilsmisseSeparasjon = sivilstandsdetaljer.søktOmSkilsmisseSeparasjon,
+                                             årsakEnslig = sivilstandsdetaljer.årsakEnslig,
+                                             tidligereSamboer = sivilstandsdetaljer.tidligereSamboer?.let { PersonMinimumMapper.tilDto(it) }
                 )
 
         return SivilstandInngangsvilkårDto(
