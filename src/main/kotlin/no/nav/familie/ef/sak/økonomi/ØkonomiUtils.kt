@@ -104,7 +104,7 @@ object ØkonomiUtils {
                     .disjunkteAndeler(oppdaterteAndeler).minByOrNull { it.stønadFom }?.stønadFom
 
             //Hvis første endring er etter maks dato fra forrige perioden skal vi ikke sette opphørsdato
-            if (forrigeMaksDato != null && førsteEndring != null && forrigeMaksDato.isBefore(førsteEndring)) {
+            if (erNyPeriode(forrigeMaksDato, førsteEndring)) {
                 førsteEndring = null
             }
 
@@ -114,5 +114,8 @@ object ØkonomiUtils {
                 .mapValues { (_, pair) -> Pair(pair.first!!, pair.second!!) }
 
     }
+
+    private fun erNyPeriode(forrigeMaksDato: LocalDate?, førsteEndring: LocalDate?) =
+            forrigeMaksDato != null && førsteEndring != null && forrigeMaksDato.isBefore(førsteEndring)
 }
 
