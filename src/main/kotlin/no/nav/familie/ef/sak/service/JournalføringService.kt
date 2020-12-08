@@ -93,7 +93,6 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
                     DokumentBrevkode.erGyldigBrevkode(dokument.brevkode.toString()) && harOriginalDokument(dokument)
                 }
                 ?.forEach {
-                    try {
                         when (DokumentBrevkode.fraBrevkode(it.brevkode)) {
                             DokumentBrevkode.OVERGANGSSTØNAD -> {
                                 val søknad = journalpostClient.hentOvergangsstønadSøknad(journalpostId, it.dokumentInfoId)
@@ -108,11 +107,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
                                 behandlingService.lagreSøknadForSkolepenger(søknad, behandlingsId, fagsakId, journalpostId)
                             }
                         }
-                    } catch (e: JsonProcessingException) {
-                        secureLogger.error("Kan ikke konvertere journalpostDokument til søknadsobjekt", e)
-                        logger.error("Kan ikke konvertere journalpostDokument til søknadsobjekt ${e.javaClass.simpleName}")
                     }
-                }
     }
 
     private fun harOriginalDokument(dokument: no.nav.familie.kontrakter.felles.journalpost.DokumentInfo): Boolean =
