@@ -2,7 +2,10 @@ package no.nav.familie.ef.sak.mapper
 
 import no.nav.familie.ef.sak.api.dto.AndelTilkjentYtelseDTO
 import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
-import no.nav.familie.ef.sak.repository.domain.*
+import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
+import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus
+import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseType
 import java.time.LocalDate
 
 fun TilkjentYtelseDTO.tilTilkjentYtelse(status: TilkjentYtelseStatus = TilkjentYtelseStatus.OPPRETTET): TilkjentYtelse {
@@ -41,6 +44,8 @@ fun AndelTilkjentYtelse.tilDto(): AndelTilkjentYtelseDTO {
     return AndelTilkjentYtelseDTO(beløp = this.beløp,
                                   stønadFom = this.stønadFom,
                                   stønadTom = this.stønadTom,
+                                  kildeBehandlingId = this.kildeBehandlingId
+                                                          ?: error("Savner kildeBehandlingId på andel med periodeId=${this.periodeId}"),
                                   personIdent = this.personIdent)
 }
 
