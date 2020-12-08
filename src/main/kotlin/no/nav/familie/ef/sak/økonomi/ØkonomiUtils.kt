@@ -86,17 +86,25 @@ object ØkonomiUtils {
                               oppdaterteKjeder: List<AndelTilkjentYtelse>)
             : Pair<AndelTilkjentYtelse, LocalDate>? {
 
+        val forrigeMaksDato = forrigeKjeder.map { it.stønadTom }.maxOrNull()
         val forrigeAndeler = forrigeKjeder.toSet()
         val oppdaterteAndeler = oppdaterteKjeder.toSet()
         val førsteEndring = forrigeAndeler
                 .disjunkteAndeler(oppdaterteAndeler).minByOrNull { it.stønadFom }?.stønadFom
 
         val sisteForrigeAndel = forrigeKjeder.lastOrNull()
-        return if (sisteForrigeAndel == null || førsteEndring == null) {
+        return if (sisteForrigeAndel == null || førsteEndring == null || erNyPeriode(forrigeMaksDato, førsteEndring)) {
             null
         } else {
             Pair(sisteForrigeAndel, førsteEndring)
         }
     }
+
+    /**
+     * Sjekker om den nye endringen er etter maks datot for tidligere perioder
+     */
+    private fun erNyPeriode(forrigeMaksDato: LocalDate?, førsteEndring: LocalDate) =
+            forrigeMaksDato != null && førsteEndring.isAfter(forrigeMaksDato)
+
 }
 
