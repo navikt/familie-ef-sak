@@ -98,11 +98,18 @@ object ØkonomiUtils {
                               oppdaterteKjeder: Map<KjedeId, List<AndelTilkjentYtelse>>)
             : Map<KjedeId, Pair<AndelTilkjentYtelse, LocalDate>> {
 
+        val forrigeMaksDato = forrigeKjeder.values.flatMap { it }.map { it.stønadTom }.maxOrNull()
+
         return forrigeKjeder.mapValues { (kjedeId, kjede) ->
             val forrigeAndeler = kjede.toSet()
             val oppdaterteAndeler = oppdaterteKjeder[kjedeId]?.toSet() ?: emptySet()
-            val førsteEndring = forrigeAndeler
+            var førsteEndring = forrigeAndeler
                     .disjunkteAndeler(oppdaterteAndeler).minByOrNull { it.stønadFom }?.stønadFom
+
+            //Hvis første endring er etter maks dato fra forrige perioden skal vi ikke sette opphørsdato
+            if (erNyPeriode(forrigeMaksDato, førsteEndring)) {
+                førsteEndring = null
+            }
 
             Pair(kjede.lastOrNull(), førsteEndring)
         }
@@ -110,5 +117,8 @@ object ØkonomiUtils {
                 .mapValues { (_, pair) -> Pair(pair.first!!, pair.second!!) }
 
     }
+
+    private fun erNyPeriode(forrigeMaksDato: LocalDate?, førsteEndring: LocalDate?) =
+            forrigeMaksDato != null && førsteEndring != null && forrigeMaksDato.isBefore(førsteEndring)
 }
 
