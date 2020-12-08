@@ -3,8 +3,6 @@ package no.nav.familie.ef.sak.økonomi
 import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse.Companion.disjunkteAndeler
 import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse.Companion.snittAndeler
-import no.nav.familie.ef.sak.repository.domain.Behandling
-import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import java.time.LocalDate
 import java.util.*
 
@@ -13,17 +11,16 @@ data class KjedeId(val klassifisering: String, val personIdent: String)
 data class PeriodeId(val gjeldende: Long?,
                      val forrige: Long? = null)
 
-fun AndelTilkjentYtelse.tilKjedeId(type: Stønadstype): KjedeId = KjedeId(type.tilKlassifisering(), this.personIdent)
 fun AndelTilkjentYtelse.tilPeriodeId(): PeriodeId = PeriodeId(this.periodeId, this.forrigePeriodeId)
 
 @Deprecated("Bør erstattes med å gjøre 'stønadFom' og  'stønadTom'  nullable")
 val NULL_DATO: LocalDate = LocalDate.MIN
 
-fun KjedeId.tilNullAndelTilkjentYtelse(behandlingId: UUID, periodeId: PeriodeId?): AndelTilkjentYtelse =
+fun nullAndelTilkjentYtelse(behandlingId: UUID, personIdent: String, periodeId: PeriodeId?): AndelTilkjentYtelse =
         AndelTilkjentYtelse(beløp = 0,
                             stønadFom = NULL_DATO,
                             stønadTom = NULL_DATO,
-                            personIdent = this.personIdent,
+                            personIdent = personIdent,
                             periodeId = periodeId?.gjeldende,
                             kildeBehandlingId = behandlingId,
                             forrigePeriodeId = periodeId?.forrige)
@@ -40,14 +37,11 @@ object ØkonomiUtils {
      * @param[oppdaterteKjeder] nåværende tilstand
      * @return map med personident og siste bestående andel. Bestående andel=null dersom alle opphøres eller ny person.
      */
-    fun beståendeAndelerPerKjede(forrigeKjeder: Map<KjedeId, List<AndelTilkjentYtelse>>,
-                                 oppdaterteKjeder: Map<KjedeId, List<AndelTilkjentYtelse>>)
-            : Map<KjedeId, List<AndelTilkjentYtelse>> {
-        val alleKjedeIder = forrigeKjeder.keys.union(oppdaterteKjeder.keys)
-        return alleKjedeIder.associateWith { kjedeId ->
-            beståendeAndelerIKjede(forrigeKjede = forrigeKjeder[kjedeId],
-                                   oppdatertKjede = oppdaterteKjeder[kjedeId])
-        }
+    fun beståendeAndelerPerKjede(forrigeKjeder: List<AndelTilkjentYtelse>,
+                                 oppdaterteKjeder: List<AndelTilkjentYtelse>)
+            : List<AndelTilkjentYtelse> {
+        return beståendeAndelerIKjede(forrigeKjede = forrigeKjeder,
+                                      oppdatertKjede = oppdaterteKjeder)
     }
 
     private fun beståendeAndelerIKjede(forrigeKjede: List<AndelTilkjentYtelse>?,
@@ -68,23 +62,17 @@ object ØkonomiUtils {
      * @param[beståendeAndelerIHverKjede] andeler man må bygge opp etter
      * @return andeler som må bygges fordelt på kjeder
      */
-    fun andelerTilOpprettelse(oppdaterteKjeder: Map<KjedeId, List<AndelTilkjentYtelse>>,
-                              beståendeAndelerIHverKjede: Map<KjedeId, List<AndelTilkjentYtelse>>)
-            : Map<KjedeId, List<AndelTilkjentYtelse>> {
+    fun andelerTilOpprettelse(oppdaterteKjeder: List<AndelTilkjentYtelse>,
+                              beståendeAndelerIHverKjede: List<AndelTilkjentYtelse>)
+            : List<AndelTilkjentYtelse> {
 
-        val sisteBeståendeAndelIHverKjede =
-                beståendeAndelerIHverKjede.map { (kjedeId, kjede) ->
-                    Pair(kjedeId, kjede.sortedBy { it.periodeId }.lastOrNull())
-                }.toMap()
+        val sisteBeståendeAndelIHverKjede = beståendeAndelerIHverKjede.sortedBy { it.periodeId }.lastOrNull()
 
-        return oppdaterteKjeder.map { (kjedeId, oppdaterteAndeler) ->
-            if (sisteBeståendeAndelIHverKjede[kjedeId] != null)
-                Pair(kjedeId, oppdaterteAndeler
-                        .filter { it.stønadFom.isAfter(sisteBeståendeAndelIHverKjede[kjedeId]!!.stønadTom) })
-            else Pair(kjedeId, oppdaterteAndeler)
+        return if (sisteBeståendeAndelIHverKjede !== null) {
+            oppdaterteKjeder.filter { it.stønadFom.isAfter(sisteBeståendeAndelIHverKjede.stønadTom) }
+        } else {
+            oppdaterteKjeder
         }
-                .toMap()
-                .filter { (_, kjede) -> kjede.isNotEmpty() }
     }
 
     /**
@@ -94,21 +82,21 @@ object ØkonomiUtils {
      * @param[oppdaterteKjeder] nåværende tilstand
      * @return map av siste andel og opphørsdato fra kjeder med opphør
      */
-    fun andelTilOpphørMedDato(forrigeKjeder: Map<KjedeId, List<AndelTilkjentYtelse>>,
-                              oppdaterteKjeder: Map<KjedeId, List<AndelTilkjentYtelse>>)
-            : Map<KjedeId, Pair<AndelTilkjentYtelse, LocalDate>> {
+    fun andelTilOpphørMedDato(forrigeKjeder: List<AndelTilkjentYtelse>,
+                              oppdaterteKjeder: List<AndelTilkjentYtelse>)
+            : Pair<AndelTilkjentYtelse, LocalDate>? {
 
-        return forrigeKjeder.mapValues { (kjedeId, kjede) ->
-            val forrigeAndeler = kjede.toSet()
-            val oppdaterteAndeler = oppdaterteKjeder[kjedeId]?.toSet() ?: emptySet()
-            val førsteEndring = forrigeAndeler
-                    .disjunkteAndeler(oppdaterteAndeler).minByOrNull { it.stønadFom }?.stønadFom
+        val forrigeAndeler = forrigeKjeder.toSet()
+        val oppdaterteAndeler = oppdaterteKjeder.toSet()
+        val førsteEndring = forrigeAndeler
+                .disjunkteAndeler(oppdaterteAndeler).minByOrNull { it.stønadFom }?.stønadFom
 
-            Pair(kjede.lastOrNull(), førsteEndring)
+        val sisteForrigeAndel = forrigeKjeder.lastOrNull()
+        return if (sisteForrigeAndel == null || førsteEndring == null) {
+            null
+        } else {
+            Pair(sisteForrigeAndel, førsteEndring)
         }
-                .filter { (_, pair) -> pair.first != null && pair.second != null }
-                .mapValues { (_, pair) -> Pair(pair.first!!, pair.second!!) }
-
     }
 }
 
