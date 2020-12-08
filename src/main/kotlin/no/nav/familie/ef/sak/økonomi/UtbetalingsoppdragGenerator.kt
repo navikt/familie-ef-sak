@@ -12,8 +12,6 @@ import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag.KodeEndring.E
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag.KodeEndring.NY
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
 import java.util.*
 
 object UtbetalingsoppdragGenerator {
@@ -63,10 +61,6 @@ object UtbetalingsoppdragGenerator {
                                    fagSystem = nyTilkjentYtelseMedMetaData.stønadstype.tilKlassifisering(),
                                    saksnummer = nyTilkjentYtelseMedMetaData.eksternFagsakId.toString(),
                                    aktoer = nyTilkjentYtelse.personident,
-                        //TODO Trunkert avstemmingstidspunkt for å kunne skape forutsigbarhet mtp tester.
-                        // Tester vil kunne feile hver nye time
-                        //TODO Løsning kan være å putte avstemmingstidspunkt også i TilkjentYtelse.
-                                   avstemmingTidspunkt = LocalDateTime.now().truncatedTo(ChronoUnit.HOURS),
                                    utbetalingsperiode = listOf(utbetalingsperioderSomOpprettes,
                                                                utbetalingsperioderSomOpphøres)
                                            .flatten()
