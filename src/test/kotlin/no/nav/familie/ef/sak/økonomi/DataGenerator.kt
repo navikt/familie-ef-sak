@@ -26,8 +26,6 @@ object DataGenerator {
 
     fun tilfeldigTilkjentYtelse(behandling: Behandling = behandling(fagsak()), antallAndelerTilkjentYtelse: Int = 1) =
             TilkjentYtelse(personident = tilfeldigFødselsnummer(),
-                           stønadFom = LocalDate.now(),
-                           stønadTom = LocalDate.now(),
                            vedtaksdato = LocalDate.now(),
                            behandlingId = behandling.id,
                            andelerTilkjentYtelse = flereTilfeldigeAndelerTilkjentYtelse(antallAndelerTilkjentYtelse, behandling.id))

@@ -133,8 +133,6 @@ class TestOppdragGroup {
                        andelerTilkjentYtelse = andelerTilkjentYtelseUt,
                        utbetalingsoppdrag = utbetalingsoppdrag,
                        vedtaksdato = input.vedtaksdato,
-                       stønadFom = andelerTilkjentYtelseUt.filter { it.stønadFom != NULL_DATO }.minOfOrNull { it.stønadFom },
-                       stønadTom = andelerTilkjentYtelseInn.filter { it.stønadTom != NULL_DATO }.maxOfOrNull { it.stønadTom },
                        sporbar = sporbar)
 
     }
@@ -259,7 +257,7 @@ object TestOppdragRunner {
 
     private fun truncateAvstemmingDato(tilkjentYtelse: TilkjentYtelse): TilkjentYtelse {
         val utbetalingsoppdrag = tilkjentYtelse.utbetalingsoppdrag
-        if(utbetalingsoppdrag == null) {
+        if (utbetalingsoppdrag == null) {
             return tilkjentYtelse
         }
         val nyAvstemmingsitdspunkt = utbetalingsoppdrag.avstemmingTidspunkt.truncatedTo(ChronoUnit.HOURS)

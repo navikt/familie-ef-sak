@@ -30,9 +30,7 @@ data class UtbetalingsperiodeMal(val tilkjentYtelse: TilkjentYtelse,
                            behandlingId: Long,
                            opphørKjedeFom: LocalDate? = null): Utbetalingsperiode =
             Utbetalingsperiode(erEndringPåEksisterendePeriode = erEndringPåEksisterendePeriode,
-                               opphør = if (erEndringPåEksisterendePeriode)
-                                   utledOpphørPåLinje(opphørForVedtak = tilkjentYtelse.opphørFom,
-                                                      opphørForLinje = opphørKjedeFom!!) else null,
+                               opphør = if (erEndringPåEksisterendePeriode) Opphør(opphørKjedeFom!!) else null,
                                forrigePeriodeId = andel.forrigePeriodeId,
                                periodeId = andel.periodeId!!,
                                datoForVedtak = tilkjentYtelse.vedtaksdato!!,
@@ -44,12 +42,4 @@ data class UtbetalingsperiodeMal(val tilkjentYtelse: TilkjentYtelse,
                                utbetalesTil = tilkjentYtelse.personident,
                                behandlingId = behandlingId)
 
-
-    private fun utledOpphørPåLinje(opphørForVedtak: LocalDate?, opphørForLinje: LocalDate): Opphør? {
-        return if (opphørForVedtak != null) {
-            Opphør(maxOf(opphørForVedtak, opphørForLinje))
-        } else {
-            Opphør(opphørForLinje)
-        }
-    }
 }

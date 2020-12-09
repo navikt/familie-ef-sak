@@ -11,12 +11,6 @@ data class TilkjentYtelse(@Id
                           val id: UUID = UUID.randomUUID(),
                           val behandlingId: UUID,
                           val personident: String,
-                          @Column("stonad_fom")
-                          val stønadFom: LocalDate? = null, //min andeltilkjentYtelseDt
-                          @Column("stonad_tom")
-                          val stønadTom: LocalDate? = null,
-                          @Column("opphor_fom")
-                          val opphørFom: LocalDate? = null,
                           val utbetalingsoppdrag: Utbetalingsoppdrag? = null,
                           val vedtaksdato: LocalDate? = null,
                           val status: TilkjentYtelseStatus = TilkjentYtelseStatus.IKKE_KLAR,
