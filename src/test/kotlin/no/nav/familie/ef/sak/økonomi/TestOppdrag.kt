@@ -54,8 +54,9 @@ data class TestOppdrag(val type: TestOppdragType,
                                 kildeBehandlingId = if (TestOppdragType.Output == type) oppdragId else null,
                                 forrigePeriodeId = forrigeLinjeId)
         else if (TestOppdragType.Output == type && beløp == null && startPeriode == null && sluttPeriode == null)
-            KjedeId(ytelse, fnr).tilNullAndelTilkjentYtelse(oppdragId ?: error("Må ha satt OppdragId på Output"),
-                                                            PeriodeId(linjeId!!, forrigeLinjeId))
+            nullAndelTilkjentYtelse(behandlingId = oppdragId ?: error("Må ha satt OppdragId på Output"),
+                                    personIdent = fnr,
+                                    periodeId = PeriodeId(linjeId!!, forrigeLinjeId))
         else
             null
     }
@@ -249,11 +250,20 @@ object TestOppdragRunner {
         grupper.forEachIndexed { indeks, gruppe ->
             val input = gruppe.input
             val faktisk = lagTilkjentYtelseMedUtbetalingsoppdrag(input, forrigeTilkjentYtelse)
-            Assertions.assertEquals(om.writeValueAsString(gruppe.output),
-                                    om.writeValueAsString(faktisk),
+            Assertions.assertEquals(om.writeValueAsString(truncateAvstemmingDato(gruppe.output)),
+                                    om.writeValueAsString(truncateAvstemmingDato(faktisk)),
                                     "Feiler for gruppe med indeks $indeks")
             forrigeTilkjentYtelse = faktisk
         }
+    }
+
+    private fun truncateAvstemmingDato(tilkjentYtelse: TilkjentYtelse): TilkjentYtelse {
+        val utbetalingsoppdrag = tilkjentYtelse.utbetalingsoppdrag
+        if(utbetalingsoppdrag == null) {
+            return tilkjentYtelse
+        }
+        val nyAvstemmingsitdspunkt = utbetalingsoppdrag.avstemmingTidspunkt.truncatedTo(ChronoUnit.HOURS)
+        return tilkjentYtelse.copy(utbetalingsoppdrag = utbetalingsoppdrag.copy(avstemmingTidspunkt = nyAvstemmingsitdspunkt))
     }
 
     private fun lagTilkjentYtelseMedUtbetalingsoppdrag(nyTilkjentYtelse: TilkjentYtelse,

@@ -23,17 +23,22 @@ internal class UtbetalingsoppdragGeneratorTest {
     }
 
     @Test
-    fun `Har to perioder og får en endring første perioden`() {
+    fun `Har to perioder og får en endring i første perioden`() {
         TestOppdragRunner.run(javaClass.getResource("/oppdrag/2_perioder_får_en_endring_i_første_perioden.csv"))
     }
 
     @Test
-    fun `Har tre perioder og får en endring første perioden`() {
+    fun `Har to perioder og får en endring for start og sluttdatot i andre perioden`() {
+        TestOppdragRunner.run(javaClass.getResource("/oppdrag/2_perioder_får_en_endring_i_andre_perioden.csv"))
+    }
+
+    @Test
+    fun `Har tre perioder og får en endring i første perioden`() {
         TestOppdragRunner.run(javaClass.getResource("/oppdrag/3_perioder_får_en_endring_i_første_perioden.csv"))
     }
 
     @Test
-    fun `Har tre perioder og får en endring andre perioden`() {
+    fun `Har tre perioder og får en endring i andre perioden`() {
         TestOppdragRunner.run(javaClass.getResource("/oppdrag/3_perioder_får_en_endring_i_andre_perioden.csv"))
     }
 

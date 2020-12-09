@@ -4,18 +4,14 @@ import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseMedMetaData
-import no.nav.familie.ef.sak.util.hasList
-import no.nav.familie.ef.sak.util.mergeMultiMap
 import no.nav.familie.ef.sak.økonomi.ØkonomiUtils.andelTilOpphørMedDato
 import no.nav.familie.ef.sak.økonomi.ØkonomiUtils.andelerTilOpprettelse
-import no.nav.familie.ef.sak.økonomi.ØkonomiUtils.beståendeAndelerPerKjede
+import no.nav.familie.ef.sak.økonomi.ØkonomiUtils.beståendeAndeler
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag.KodeEndring.ENDR
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag.KodeEndring.NY
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
 import java.util.*
 
 object UtbetalingsoppdragGenerator {
@@ -30,126 +26,108 @@ object UtbetalingsoppdragGenerator {
      */
     fun lagTilkjentYtelseMedUtbetalingsoppdrag(nyTilkjentYtelseMedMetaData: TilkjentYtelseMedMetaData,
                                                forrigeTilkjentYtelse: TilkjentYtelse? = null): TilkjentYtelse {
-        val stønadstype = nyTilkjentYtelseMedMetaData.stønadstype
         val nyTilkjentYtelse = nyTilkjentYtelseMedMetaData.tilkjentYtelse
-        val oppdaterteKjeder = lagKjederUtenNullVerdier(stønadstype, nyTilkjentYtelse)
-        val forrigeKjeder = lagKjederUtenNullVerdier(stønadstype, forrigeTilkjentYtelse)
-        val sistePeriodeIder = sistePeriodeIder(stønadstype, forrigeTilkjentYtelse)
+        val andelerNyTilkjentYtelse = andelerUtenNullVerdier(nyTilkjentYtelse)
+        val andelerForrigeTilkjentYtelse = andelerUtenNullVerdier(forrigeTilkjentYtelse)
+        val sistePeriodeIdIForrigeKjede = sistePeriodeId(forrigeTilkjentYtelse)
 
-        val aksjonskodePåOppdragsnivå =
-                if (forrigeTilkjentYtelse == null) NY
-                else ENDR
+        val beståendeAndeler = beståendeAndeler(andelerForrigeTilkjentYtelse, andelerNyTilkjentYtelse)
+        val andelTilOpphørMedDato = andelTilOpphørMedDato(andelerForrigeTilkjentYtelse, andelerNyTilkjentYtelse)
+        val andelerTilOpprettelse = andelerTilOpprettelse(andelerNyTilkjentYtelse, beståendeAndeler)
 
-        val beståendeAndelerIHverKjede = beståendeAndelerPerKjede(forrigeKjeder, oppdaterteKjeder)
-        val andelerTilOpphør = andelTilOpphørMedDato(forrigeKjeder, oppdaterteKjeder)
-        val andelerTilOpprettelse = andelerTilOpprettelse(oppdaterteKjeder, beståendeAndelerIHverKjede)
-
-        val andelerTilOpprettelseMedPeriodeIder =
-                lagAndelerMedPeriodeIder(andelerTilOpprettelse, sistePeriodeIder, nyTilkjentYtelse.behandlingId)
+        val andelerTilOpprettelseMedPeriodeId =
+                lagAndelerMedPeriodeId(andelerTilOpprettelse, sistePeriodeIdIForrigeKjede, nyTilkjentYtelse.behandlingId)
 
         val utbetalingsperioderSomOpprettes =
-                lagUtbetalingsperioderForOpprettelse(andeler = andelerTilOpprettelseMedPeriodeIder,
+                lagUtbetalingsperioderForOpprettelse(andeler = andelerTilOpprettelseMedPeriodeId,
                                                      behandlingId = nyTilkjentYtelseMedMetaData.eksternBehandlingId,
                                                      tilkjentYtelse = nyTilkjentYtelse,
                                                      type = nyTilkjentYtelseMedMetaData.stønadstype)
 
-        val utbetalingsperioderSomOpphøres =
-                lagUtbetalingsperioderForOpphør(andeler = andelerTilOpphør,
-                                                tilkjentYtelse = nyTilkjentYtelse,
-                                                behandlingId = nyTilkjentYtelseMedMetaData.eksternBehandlingId,
-                                                type = nyTilkjentYtelseMedMetaData.stønadstype)
+        val utbetalingsperioderSomOpphøres = andelTilOpphørMedDato?.let {
+            lagUtbetalingsperioderForOpphør(andeler = andelTilOpphørMedDato,
+                                            tilkjentYtelse = nyTilkjentYtelse,
+                                            behandlingId = nyTilkjentYtelseMedMetaData.eksternBehandlingId,
+                                            type = nyTilkjentYtelseMedMetaData.stønadstype)
+        } ?: emptyList()
 
         val utbetalingsoppdrag =
                 Utbetalingsoppdrag(saksbehandlerId = nyTilkjentYtelse.sporbar.endret.endretAv,
-                                   kodeEndring = aksjonskodePåOppdragsnivå,
+                                   kodeEndring = if (forrigeTilkjentYtelse == null) NY else ENDR,
                                    fagSystem = nyTilkjentYtelseMedMetaData.stønadstype.tilKlassifisering(),
                                    saksnummer = nyTilkjentYtelseMedMetaData.eksternFagsakId.toString(),
                                    aktoer = nyTilkjentYtelse.personident,
-                        //TODO Trunkert avstemmingstidspunkt for å kunne skape forutsigbarhet mtp tester.
-                        // Tester vil kunne feile hver nye time
-                        //TODO Løsning kan være å putte avstemmingstidspunkt også i TilkjentYtelse.
-                                   avstemmingTidspunkt = LocalDateTime.now().truncatedTo(ChronoUnit.HOURS),
                                    utbetalingsperiode = listOf(utbetalingsperioderSomOpprettes,
                                                                utbetalingsperioderSomOpphøres)
                                            .flatten()
                                            .sortedBy { it.periodeId }
                 )
 
-        val gjeldendeAndeler = mergeMultiMap(beståendeAndelerIHverKjede, andelerTilOpprettelseMedPeriodeIder)
-
-        // Hvis det ikke er noen andeler igjen, må vi opprette en "null-andel" som tar vare på periodeId'en for ytelsestypen
-        // På toppen av metoden filtrerer vi bort disse når vi bygger kjedene, men bruker dem til å finne siste periodeId
-        val nullAndeler = sistePeriodeIder
-                .filterKeys { !gjeldendeAndeler.hasList(it) }
-                .mapValues { (kjedeId, periodeId) ->
-                    listOf(kjedeId.tilNullAndelTilkjentYtelse(nyTilkjentYtelse.behandlingId, periodeId))
-                }
+        val nyeAndeler = beståendeAndeler + andelerTilOpprettelseMedPeriodeId
+        val gjeldendeAndeler = nyeAndeler.ellerNullAndel(nyTilkjentYtelseMedMetaData, sistePeriodeIdIForrigeKjede)
 
         return nyTilkjentYtelse.copy(utbetalingsoppdrag = utbetalingsoppdrag,
-                                     stønadFom = gjeldendeAndeler.values.flatten().minOfOrNull { it.stønadFom },
-                                     stønadTom = gjeldendeAndeler.values.flatten().maxOfOrNull { it.stønadTom },
-                                     andelerTilkjentYtelse = mergeMultiMap(gjeldendeAndeler, nullAndeler).values.flatten())
+                                     stønadFom = nyeAndeler.minOfOrNull { it.stønadFom },
+                                     stønadTom = nyeAndeler.maxOfOrNull { it.stønadTom },
+                                     andelerTilkjentYtelse = gjeldendeAndeler)
         //TODO legge til startperiode, sluttperiode, opphørsdato. Se i BA-sak - legges på i konsistensavstemming?
     }
 
-    private fun lagUtbetalingsperioderForOpphør(andeler: Map<KjedeId, Pair<AndelTilkjentYtelse, LocalDate>>,
+    /**
+     * Hvis det ikke er noen andeler igjen, må vi opprette en "null-andel" som tar vare på periodeId'en for ytelsestypen
+     */
+    private fun List<AndelTilkjentYtelse>.ellerNullAndel(nyTilkjentYtelseMedMetaData: TilkjentYtelseMedMetaData,
+                                                         sistePeriodeIdIForrigeKjede: PeriodeId?): List<AndelTilkjentYtelse> {
+        return if (this.isEmpty()) {
+            listOf(nullAndelTilkjentYtelse(nyTilkjentYtelseMedMetaData.tilkjentYtelse.behandlingId,
+                                           nyTilkjentYtelseMedMetaData.tilkjentYtelse.personident,
+                                           sistePeriodeIdIForrigeKjede))
+
+        } else {
+            this
+        }
+    }
+
+    private fun lagUtbetalingsperioderForOpphør(andeler: Pair<AndelTilkjentYtelse, LocalDate>,
                                                 behandlingId: Long,
                                                 type: Stønadstype,
                                                 tilkjentYtelse: TilkjentYtelse): List<Utbetalingsperiode> {
         val utbetalingsperiodeMal = UtbetalingsperiodeMal(tilkjentYtelse, true)
-        return andeler.values.map { (sisteAndelIKjede, opphørKjedeFom) ->
-            utbetalingsperiodeMal.lagPeriodeFraAndel(andel = sisteAndelIKjede,
-                                                     behandlingId = behandlingId,
-                                                     type = type,
-                                                     opphørKjedeFom = opphørKjedeFom)
-        }
+        val (sisteAndelIKjede, opphørKjedeFom) = andeler
+        return listOf(utbetalingsperiodeMal.lagPeriodeFraAndel(andel = sisteAndelIKjede,
+                                                               behandlingId = behandlingId,
+                                                               type = type,
+                                                               opphørKjedeFom = opphørKjedeFom))
     }
 
-    private fun lagUtbetalingsperioderForOpprettelse(andeler: Map<KjedeId, List<AndelTilkjentYtelse>>,
+    private fun lagUtbetalingsperioderForOpprettelse(andeler: List<AndelTilkjentYtelse>,
                                                      behandlingId: Long,
                                                      type: Stønadstype,
                                                      tilkjentYtelse: TilkjentYtelse): List<Utbetalingsperiode> {
 
         val utbetalingsperiodeMal = UtbetalingsperiodeMal(tilkjentYtelse)
-        return andeler
-                .flatMap { (_, andeler) -> andeler }
-                .map {
-                    utbetalingsperiodeMal.lagPeriodeFraAndel(it, type, behandlingId)
-                }
+        return andeler.map { utbetalingsperiodeMal.lagPeriodeFraAndel(it, type, behandlingId) }
     }
 
-    private fun lagAndelerMedPeriodeIder(andeler: Map<KjedeId, List<AndelTilkjentYtelse>>,
-                                         sisteOffsetIKjedeOversikt: Map<KjedeId, PeriodeId?>,
-                                         behandlingId: UUID)
-            : Map<KjedeId, List<AndelTilkjentYtelse>> {
-        return andeler.filter { (_, andeler) -> andeler.isNotEmpty() }
-                .mapValues { (kjedeId, kjede: List<AndelTilkjentYtelse>) ->
-                    val forrigePeriodeIdIKjede: Long? = sisteOffsetIKjedeOversikt[kjedeId]?.gjeldende
-                    val nestePeriodeIdIKjede = forrigePeriodeIdIKjede?.plus(1) ?: 1
+    private fun lagAndelerMedPeriodeId(andeler: List<AndelTilkjentYtelse>,
+                                       sisteOffsetIKjedeOversikt: PeriodeId?,
+                                       behandlingId: UUID): List<AndelTilkjentYtelse> {
+        val forrigePeriodeIdIKjede: Long? = sisteOffsetIKjedeOversikt?.gjeldende
+        val nestePeriodeIdIKjede = forrigePeriodeIdIKjede?.plus(1) ?: 1
 
-                    kjede.sortedBy { it.stønadFom }.mapIndexed { index, andel ->
-
-                        andel.copy(periodeId = nestePeriodeIdIKjede + index,
-                                   kildeBehandlingId = behandlingId,
-                                   forrigePeriodeId = if (index == 0) forrigePeriodeIdIKjede
-                                   else nestePeriodeIdIKjede + index - 1)
-                    }
-                }
+        return andeler.sortedBy { it.stønadFom }.mapIndexed { index, andel ->
+            andel.copy(periodeId = nestePeriodeIdIKjede + index,
+                       kildeBehandlingId = behandlingId,
+                       forrigePeriodeId = if (index == 0) forrigePeriodeIdIKjede else nestePeriodeIdIKjede + index - 1)
+        }
     }
 
-    private fun sistePeriodeIder(type: Stønadstype, tilkjentYtelse: TilkjentYtelse?): Map<KjedeId, PeriodeId?> {
+    private fun sistePeriodeId(tilkjentYtelse: TilkjentYtelse?): PeriodeId? {
         return tilkjentYtelse?.let { ytelse ->
-            ytelse.andelerTilkjentYtelse
-                    .groupBy { it.tilKjedeId(type = type) }
-                    .mapValues { (_, kjede) ->
-                        kjede.filter { it.periodeId != null }.maxByOrNull { it.periodeId!! }?.tilPeriodeId()
-                    }
-        } ?: emptyMap()
+            ytelse.andelerTilkjentYtelse.filter { it.periodeId != null }.maxByOrNull { it.periodeId!! }?.tilPeriodeId()
+        }
     }
 
-    private fun lagKjederUtenNullVerdier(type: Stønadstype,
-                                         tilkjentYtelse: TilkjentYtelse?): Map<KjedeId, List<AndelTilkjentYtelse>> =
-            tilkjentYtelse?.andelerTilkjentYtelse
-                    ?.filter { !it.erNull() }
-                    ?.groupBy { it.tilKjedeId(type = type) } ?: emptyMap()
+    private fun andelerUtenNullVerdier(tilkjentYtelse: TilkjentYtelse?): List<AndelTilkjentYtelse> =
+            tilkjentYtelse?.andelerTilkjentYtelse?.filter { !it.erNull() } ?: emptyList()
 }
