@@ -63,22 +63,29 @@ object UtbetalingsoppdragGenerator {
                                            .sortedBy { it.periodeId }
                 )
 
-        val gjeldendeAndeler = beståendeAndeler + andelerTilOpprettelseMedPeriodeId
-
-        // Hvis det ikke er noen andeler igjen, må vi opprette en "null-andel" som tar vare på periodeId'en for ytelsestypen
-        // På toppen av metoden filtrerer vi bort disse når vi bygger kjedene, men bruker dem til å finne siste periodeId
-        val andelerTilkjentYtelse =
-                if (gjeldendeAndeler.isEmpty())
-                    listOf(nullAndelTilkjentYtelse(nyTilkjentYtelseMedMetaData.tilkjentYtelse.behandlingId,
-                                                   nyTilkjentYtelseMedMetaData.tilkjentYtelse.personident,
-                                                   sistePeriodeIdIForrigeKjede))
-                else gjeldendeAndeler
+        val gjeldendeAndeler = (beståendeAndeler + andelerTilOpprettelseMedPeriodeId)
+                .ellerNullAndel(nyTilkjentYtelseMedMetaData, sistePeriodeIdIForrigeKjede)
 
         return nyTilkjentYtelse.copy(utbetalingsoppdrag = utbetalingsoppdrag,
                                      stønadFom = gjeldendeAndeler.minOfOrNull { it.stønadFom },
                                      stønadTom = gjeldendeAndeler.maxOfOrNull { it.stønadTom },
-                                     andelerTilkjentYtelse = andelerTilkjentYtelse)
+                                     andelerTilkjentYtelse = gjeldendeAndeler)
         //TODO legge til startperiode, sluttperiode, opphørsdato. Se i BA-sak - legges på i konsistensavstemming?
+    }
+
+    /**
+     * Hvis det ikke er noen andeler igjen, må vi opprette en "null-andel" som tar vare på periodeId'en for ytelsestypen
+     */
+    private fun List<AndelTilkjentYtelse>.ellerNullAndel(nyTilkjentYtelseMedMetaData: TilkjentYtelseMedMetaData,
+                                                         sistePeriodeIdIForrigeKjede: PeriodeId?): List<AndelTilkjentYtelse> {
+        return if (this.isEmpty()) {
+            listOf(nullAndelTilkjentYtelse(nyTilkjentYtelseMedMetaData.tilkjentYtelse.behandlingId,
+                                           nyTilkjentYtelseMedMetaData.tilkjentYtelse.personident,
+                                           sistePeriodeIdIForrigeKjede))
+
+        } else {
+            this
+        }
     }
 
     private fun lagUtbetalingsperioderForOpphør(andeler: Pair<AndelTilkjentYtelse, LocalDate>,
