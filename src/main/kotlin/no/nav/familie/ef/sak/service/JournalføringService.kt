@@ -41,13 +41,13 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         val behandling: Behandling = hentBehandling(journalføringRequest)
         val journalpost = hentJournalpost(journalpostId)
 
+        settSøknadPåBehandling(journalpostId, behandling.fagsakId, behandling.id)
+        knyttJournalpostTilBehandling(journalpost, behandling)
+
         val eksternFagsakId = fagsakService.hentEksternId(journalføringRequest.fagsakId)
         oppdaterJournalpost(journalpost, journalføringRequest.dokumentTitler, eksternFagsakId)
         ferdigstillJournalføring(journalpostId, journalføringRequest.journalførendeEnhet)
         ferdigstillJournalføringsoppgave(journalføringRequest)
-
-        settSøknadPåBehandling(journalpostId, behandling.fagsakId, behandling.id)
-        knyttJournalpostTilBehandling(journalpost, behandling)
 
         return opprettSaksbehandlingsoppgave(behandling, journalføringRequest.navIdent)
 
