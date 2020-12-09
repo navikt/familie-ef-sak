@@ -41,7 +41,7 @@ object ØkonomiUtils {
         val forrigeAndeler = andelerForrigeTilkjentYtelse.toSet()
         val oppdaterteAndeler = andelerNyTilkjentYtelse.toSet()
 
-        val førsteEndring = forrigeAndeler.disjunkteAndeler(oppdaterteAndeler).minByOrNull { it.stønadFom }?.stønadFom
+        val førsteEndring = finnDatoForFørsteEndredeAndel(forrigeAndeler, oppdaterteAndeler)
         val består =
                 if (førsteEndring != null)
                     forrigeAndeler.snittAndeler(oppdaterteAndeler).filter { it.stønadFom.isBefore(førsteEndring) }
@@ -66,27 +66,29 @@ object ØkonomiUtils {
     /**
      * Tar utgangspunkt i forrige tilstand og finner kjede med andeler til opphør og tilhørende opphørsdato
      *
-     * @param[forrigeTilkjentYtelseAndeler] forrige behandlings tilstand
-     * @param[nyTilkjentYtelseAndeler] nåværende tilstand
+     * @param[andelerForrigeTilkjentYtelse] forrige behandlings tilstand
+     * @param[andelerNyTilkjentYtelse] nåværende tilstand
      * @return siste andel og opphørsdato fra kjede med opphør, returnerer null hvis det ikke finnes ett opphørsdato
      */
-    fun andelTilOpphørMedDato(forrigeTilkjentYtelseAndeler: List<AndelTilkjentYtelse>,
-                              nyTilkjentYtelseAndeler: List<AndelTilkjentYtelse>)
-            : Pair<AndelTilkjentYtelse, LocalDate>? {
+    fun andelTilOpphørMedDato(andelerForrigeTilkjentYtelse: List<AndelTilkjentYtelse>,
+                              andelerNyTilkjentYtelse: List<AndelTilkjentYtelse>): Pair<AndelTilkjentYtelse, LocalDate>? {
 
-        val forrigeMaksDato = forrigeTilkjentYtelseAndeler.map { it.stønadTom }.maxOrNull()
-        val forrigeAndeler = forrigeTilkjentYtelseAndeler.toSet()
-        val oppdaterteAndeler = nyTilkjentYtelseAndeler.toSet()
-        val førsteEndring = forrigeAndeler
-                .disjunkteAndeler(oppdaterteAndeler).minByOrNull { it.stønadFom }?.stønadFom
+        val forrigeMaksDato = andelerForrigeTilkjentYtelse.map { it.stønadTom }.maxOrNull()
+        val forrigeAndeler = andelerForrigeTilkjentYtelse.toSet()
+        val oppdaterteAndeler = andelerNyTilkjentYtelse.toSet()
+        val førsteEndring = finnDatoForFørsteEndredeAndel(forrigeAndeler, oppdaterteAndeler)
 
-        val sisteForrigeAndel = forrigeTilkjentYtelseAndeler.lastOrNull()
+        val sisteForrigeAndel = andelerForrigeTilkjentYtelse.lastOrNull()
         return if (sisteForrigeAndel == null || førsteEndring == null || erNyPeriode(forrigeMaksDato, førsteEndring)) {
             null
         } else {
             Pair(sisteForrigeAndel, førsteEndring)
         }
     }
+
+    private fun finnDatoForFørsteEndredeAndel(andelerForrigeTilkjentYtelse: Set<AndelTilkjentYtelse>,
+                                              andelerNyTilkjentYtelse: Set<AndelTilkjentYtelse>) =
+            andelerForrigeTilkjentYtelse.disjunkteAndeler(andelerNyTilkjentYtelse).minByOrNull { it.stønadFom }?.stønadFom
 
     /**
      * Sjekker om den nye endringen er etter maks datot for tidligere perioder
