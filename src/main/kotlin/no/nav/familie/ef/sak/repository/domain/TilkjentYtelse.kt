@@ -12,7 +12,7 @@ data class TilkjentYtelse(@Id
                           val behandlingId: UUID,
                           val personident: String,
                           @Column("stonad_fom")
-                          val stønadFom: LocalDate? = null,
+                          val stønadFom: LocalDate? = null, //min andeltilkjentYtelseDt
                           @Column("stonad_tom")
                           val stønadTom: LocalDate? = null,
                           @Column("opphor_fom")
@@ -23,9 +23,7 @@ data class TilkjentYtelse(@Id
                           val type: TilkjentYtelseType = TilkjentYtelseType.FØRSTEGANGSBEHANDLING,
                           val andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
                           @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                          val sporbar: Sporbar = Sporbar()) {
-
-}
+                          val sporbar: Sporbar = Sporbar())
 
 enum class TilkjentYtelseStatus {
     IKKE_KLAR,

@@ -69,7 +69,7 @@ internal class PersonopplysningerServiceTest {
     "gyldigTilOgMedDato" : "2020-01-01"
   } ],
   "sivilstand" : [ {
-    "type" : "SKILT",
+    "type" : "GIFT",
     "gyldigFraOgMed" : "2020-01-01",
     "relatertVedSivilstand" : "11111122222",
     "navn" : "11111122222 mellomnavn Etternavn"
