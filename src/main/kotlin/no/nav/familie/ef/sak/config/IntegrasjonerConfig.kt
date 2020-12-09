@@ -37,6 +37,8 @@ class IntegrasjonerConfig(@Value("\${FAMILIE_INTEGRASJONER_URL}") private val in
 
     val dokarkivUri: URI = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_DOKARKIV).build().toUri()
 
+    val medlemskapUri: URI = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_MEDLEMSKAP).build().toUri()
+
     companion object {
 
         private const val PATH_PING = "/internal/status/isAlive"
@@ -50,5 +52,6 @@ class IntegrasjonerConfig(@Value("\${FAMILIE_INTEGRASJONER_URL}") private val in
         private const val PATH_OPPGAVE = "api/oppgave"
         private const val PATH_JOURNALPOST = "api/journalpost"
         private const val PATH_DOKARKIV = "api/arkiv"
+        private const val PATH_MEDLEMSKAP = "api/medlemskap"
     }
 }
