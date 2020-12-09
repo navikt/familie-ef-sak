@@ -63,12 +63,10 @@ object UtbetalingsoppdragGenerator {
                                            .sortedBy { it.periodeId }
                 )
 
-        val nyeAndeler = beståendeAndeler + andelerTilOpprettelseMedPeriodeId
-        val gjeldendeAndeler = nyeAndeler.ellerNullAndel(nyTilkjentYtelseMedMetaData, sistePeriodeIdIForrigeKjede)
+        val gjeldendeAndeler = (beståendeAndeler + andelerTilOpprettelseMedPeriodeId)
+                .ellerNullAndel(nyTilkjentYtelseMedMetaData, sistePeriodeIdIForrigeKjede)
 
         return nyTilkjentYtelse.copy(utbetalingsoppdrag = utbetalingsoppdrag,
-                                     stønadFom = nyeAndeler.minOfOrNull { it.stønadFom },
-                                     stønadTom = nyeAndeler.maxOfOrNull { it.stønadTom },
                                      andelerTilkjentYtelse = gjeldendeAndeler)
         //TODO legge til startperiode, sluttperiode, opphørsdato. Se i BA-sak - legges på i konsistensavstemming?
     }
