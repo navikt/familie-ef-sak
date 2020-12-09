@@ -5,13 +5,13 @@ import no.nav.familie.ef.sak.service.TilkjentYtelseService
 import org.springframework.stereotype.Service
 
 @Service
-class IverksettMotOppdragSteg (private val tilkjentYtelseService: TilkjentYtelseService) : BehandlingSteg<Void> {
+class IverksettMotOppdragSteg (private val tilkjentYtelseService: TilkjentYtelseService) : BehandlingSteg<Void?> {
 
     override fun stegType(): StegType {
-        TODO("Not yet implemented")
+       return StegType.IVERKSETT_MOT_OPPDRAG
     }
 
-    override fun utførSteg(behandling: Behandling, data: Void) {
-        TODO("Not yet implemented")
+    override fun utførSteg(behandling: Behandling, data: Void?) {
+
     }
 }
