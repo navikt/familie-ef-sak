@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.dummy
 
-import no.nav.familie.ef.sak.api.dto.TilkjentYtelseTestDTO
-import no.nav.familie.ef.sak.mapper.tilDto
+import no.nav.familie.ef.sak.api.fagsak.FagsakDto
+import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.service.BehandlingService
@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.TilkjentYtelseService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.util.*
 
 @Service
 class TestTilkjentYtelseService(private val behandlingService: BehandlingService,
@@ -17,12 +18,24 @@ class TestTilkjentYtelseService(private val behandlingService: BehandlingService
 
     @Transactional
     fun lagreTilkjentYtelseOgIverksettUtbetaling(tilkjentYtelseTestDTO: TilkjentYtelseTestDTO): TilkjentYtelse {
-        val fagsak = fagsakService.hentEllerOpprettFagsak(tilkjentYtelseTestDTO.nyTilkjentYtelse.personident,
+        val fagsak = fagsakService.hentEllerOpprettFagsak(tilkjentYtelseTestDTO.nyTilkjentYtelse.søker,
                                                           tilkjentYtelseTestDTO.stønadstype)
 
-        behandlingService.opprettBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                            fagsakId = fagsak.id)
+        val behandling = behandlingService.opprettBehandling(behandlingType = behandlingType(fagsak),
+                                                             fagsakId = fagsak.id)
 
-        return tilkjentYtelseService.opprettTilkjentYtelse(tilkjentYtelseTestDTO.nyTilkjentYtelse.tilDto())
+        val tilkjentYtelseDTO = tilkjentYtelseTestDTO.nyTilkjentYtelse.copy(id = UUID.randomUUID(),
+                                                                            behandlingId = behandling.id)
+        val opprettTilkjentYtelse = tilkjentYtelseService.opprettTilkjentYtelse(tilkjentYtelseDTO)
+        behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id,
+                                                     status = BehandlingStatus.FERDIGSTILT)
+        return opprettTilkjentYtelse
     }
+
+    private fun behandlingType(fagsak: FagsakDto): BehandlingType =
+            if (behandlingService.hentBehandlinger(fagsakId = fagsak.id).isEmpty()) {
+                BehandlingType.FØRSTEGANGSBEHANDLING
+            } else {
+                BehandlingType.REVURDERING
+            }
 }

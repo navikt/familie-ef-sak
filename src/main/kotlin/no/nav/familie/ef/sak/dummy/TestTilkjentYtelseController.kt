@@ -2,10 +2,7 @@ package no.nav.familie.ef.sak.dummy
 
 import no.nav.familie.ef.sak.api.dto.AndelTilkjentYtelseDTO
 import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
-import no.nav.familie.ef.sak.api.dto.TilkjentYtelseTestDTO
-import no.nav.familie.ef.sak.mapper.tilTilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.context.annotation.Profile
@@ -28,7 +25,7 @@ class TestTilkjentYtelseController(private val testTilkjentYtelseService: TestTi
     }
 
     @PostMapping("/dummy")
-    fun dummyTilkjentYtelse(@RequestBody dummyIverksettingDTO: DummyIverksettingDTO?): Ressurs<TilkjentYtelse> {
+    fun dummyTilkjentYtelse(@RequestBody dummyIverksettingDTO: DummyIverksettingDTO?): Ressurs<TilkjentYtelseDTO> {
         val dummyDTO = dummyIverksettingDTO ?: DummyIverksettingDTO()
         val søker = dummyDTO.personIdent
         val andelTilkjentYtelseDto = AndelTilkjentYtelseDTO(personIdent = søker,
@@ -39,7 +36,7 @@ class TestTilkjentYtelseController(private val testTilkjentYtelseService: TestTi
         val tilkjentYtelseDto = TilkjentYtelseDTO(søker = søker,
                                                   behandlingId = UUID.randomUUID(),
                                                   andelerTilkjentYtelse = listOf(andelTilkjentYtelseDto, andelTilkjentYtelseDto))
-        return Ressurs.success(tilkjentYtelseDto.tilTilkjentYtelse())
+        return Ressurs.success(tilkjentYtelseDto)
     }
 
 }
