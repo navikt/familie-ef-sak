@@ -32,14 +32,14 @@ object ØkonomiUtils {
      * Vi må opphøre og eventuelt gjenoppbygge hver kjede etter denne. Må ta vare på andel og ikke kun offset da
      * filtrering av oppdaterte andeler senere skjer før offset blir satt.
      *
-     * @param[forrigeKjeder] forrige behandlings tilstand
-     * @param[oppdaterteKjeder] nåværende tilstand
+     * @param[forrigeKjede] forrige behandlings tilstand
+     * @param[oppdaterteKjede] nåværende tilstand
      * @return liste med bestående andeler
      */
-    fun beståendeAndelerPerKjede(forrigeKjeder: List<AndelTilkjentYtelse>,
-                                 oppdaterteKjeder: List<AndelTilkjentYtelse>): List<AndelTilkjentYtelse> {
-        val forrigeAndeler = forrigeKjeder.toSet()
-        val oppdaterteAndeler = oppdaterteKjeder.toSet()
+    fun beståendeAndelerIKjede(forrigeKjede: List<AndelTilkjentYtelse>,
+                               oppdaterteKjede: List<AndelTilkjentYtelse>): List<AndelTilkjentYtelse> {
+        val forrigeAndeler = forrigeKjede.toSet()
+        val oppdaterteAndeler = oppdaterteKjede.toSet()
         val førsteEndring = forrigeAndeler.disjunkteAndeler(oppdaterteAndeler).minByOrNull { it.stønadFom }?.stønadFom
         val består = if (førsteEndring != null) forrigeAndeler.snittAndeler(oppdaterteAndeler)
                 .filter { it.stønadFom.isBefore(førsteEndring) } else forrigeAndeler
@@ -49,41 +49,36 @@ object ØkonomiUtils {
     /**
      * Tar utgangspunkt i ny tilstand og finner andeler som må bygges opp (nye, endrede og bestående etter første endring)
      *
-     * @param[oppdaterteKjeder] ny tilstand
-     * @param[beståendeAndelerIHverKjede] andeler man må bygge opp etter
-     * @return andeler som må bygges fordelt på kjeder
+     * @param[oppdatertKjede] ny tilstand
+     * @param[beståendeAndelerIKjeden] andeler man må bygge opp etter
+     * @return andeler som må opprettes, hvis det ikke er noen beståendeAndeler returneres oppdatertKjede
      */
-    fun andelerTilOpprettelse(oppdaterteKjeder: List<AndelTilkjentYtelse>,
-                              beståendeAndelerIHverKjede: List<AndelTilkjentYtelse>)
-            : List<AndelTilkjentYtelse> {
+    fun andelerTilOpprettelse(oppdatertKjede: List<AndelTilkjentYtelse>,
+                              beståendeAndelerIKjeden: List<AndelTilkjentYtelse>): List<AndelTilkjentYtelse> {
 
-        val sisteBeståendeAndelIHverKjede = beståendeAndelerIHverKjede.sortedBy { it.periodeId }.lastOrNull()
-
-        return if (sisteBeståendeAndelIHverKjede !== null) {
-            oppdaterteKjeder.filter { it.stønadFom.isAfter(sisteBeståendeAndelIHverKjede.stønadTom) }
-        } else {
-            oppdaterteKjeder
-        }
+        return beståendeAndelerIKjeden.maxByOrNull { it.stønadTom }?.let { beståendeAndel ->
+            oppdatertKjede.filter { it.stønadFom.isAfter(beståendeAndel.stønadTom) }
+        } ?: oppdatertKjede
     }
 
     /**
-     * Tar utgangspunkt i forrige tilstand og finner kjeder med andeler til opphør og tilhørende opphørsdato
+     * Tar utgangspunkt i forrige tilstand og finner kjede med andeler til opphør og tilhørende opphørsdato
      *
-     * @param[forrigeKjeder] forrige behandlings tilstand
-     * @param[oppdaterteKjeder] nåværende tilstand
-     * @return siste andel og opphørsdato fra kjeder med opphør, returnerer null hvis det ikke finnes ett opphørsdato
+     * @param[forrigeKjede] forrige behandlings tilstand
+     * @param[oppdaterteKjede] nåværende tilstand
+     * @return siste andel og opphørsdato fra kjede med opphør, returnerer null hvis det ikke finnes ett opphørsdato
      */
-    fun andelTilOpphørMedDato(forrigeKjeder: List<AndelTilkjentYtelse>,
-                              oppdaterteKjeder: List<AndelTilkjentYtelse>)
+    fun andelTilOpphørMedDato(forrigeKjede: List<AndelTilkjentYtelse>,
+                              oppdaterteKjede: List<AndelTilkjentYtelse>)
             : Pair<AndelTilkjentYtelse, LocalDate>? {
 
-        val forrigeMaksDato = forrigeKjeder.map { it.stønadTom }.maxOrNull()
-        val forrigeAndeler = forrigeKjeder.toSet()
-        val oppdaterteAndeler = oppdaterteKjeder.toSet()
+        val forrigeMaksDato = forrigeKjede.map { it.stønadTom }.maxOrNull()
+        val forrigeAndeler = forrigeKjede.toSet()
+        val oppdaterteAndeler = oppdaterteKjede.toSet()
         val førsteEndring = forrigeAndeler
                 .disjunkteAndeler(oppdaterteAndeler).minByOrNull { it.stønadFom }?.stønadFom
 
-        val sisteForrigeAndel = forrigeKjeder.lastOrNull()
+        val sisteForrigeAndel = forrigeKjede.lastOrNull()
         return if (sisteForrigeAndel == null || førsteEndring == null || erNyPeriode(forrigeMaksDato, førsteEndring)) {
             null
         } else {

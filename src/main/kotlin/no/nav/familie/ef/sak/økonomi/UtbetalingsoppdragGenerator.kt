@@ -6,7 +6,7 @@ import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseMedMetaData
 import no.nav.familie.ef.sak.økonomi.ØkonomiUtils.andelTilOpphørMedDato
 import no.nav.familie.ef.sak.økonomi.ØkonomiUtils.andelerTilOpprettelse
-import no.nav.familie.ef.sak.økonomi.ØkonomiUtils.beståendeAndelerPerKjede
+import no.nav.familie.ef.sak.økonomi.ØkonomiUtils.beståendeAndelerIKjede
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag.KodeEndring.ENDR
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag.KodeEndring.NY
@@ -27,17 +27,17 @@ object UtbetalingsoppdragGenerator {
     fun lagTilkjentYtelseMedUtbetalingsoppdrag(nyTilkjentYtelseMedMetaData: TilkjentYtelseMedMetaData,
                                                forrigeTilkjentYtelse: TilkjentYtelse? = null): TilkjentYtelse {
         val nyTilkjentYtelse = nyTilkjentYtelseMedMetaData.tilkjentYtelse
-        val oppdaterteKjeder = lagKjederUtenNullVerdier(nyTilkjentYtelse)
-        val forrigeKjeder = lagKjederUtenNullVerdier(forrigeTilkjentYtelse)
+        val oppdatertKjede = lagKjedeUtenNullVerdier(nyTilkjentYtelse)
+        val forrigeKjede = lagKjedeUtenNullVerdier(forrigeTilkjentYtelse)
         val sistePeriodeId = sistePeriodeId(forrigeTilkjentYtelse)
 
         val aksjonskodePåOppdragsnivå =
                 if (forrigeTilkjentYtelse == null) NY
                 else ENDR
 
-        val beståendeAndelerIHverKjede = beståendeAndelerPerKjede(forrigeKjeder, oppdaterteKjeder)
-        val andelTilOpphør = andelTilOpphørMedDato(forrigeKjeder, oppdaterteKjeder)
-        val andelerTilOpprettelse = andelerTilOpprettelse(oppdaterteKjeder, beståendeAndelerIHverKjede)
+        val beståendeAndelerIKjede = beståendeAndelerIKjede(forrigeKjede, oppdatertKjede)
+        val andelTilOpphør = andelTilOpphørMedDato(forrigeKjede, oppdatertKjede)
+        val andelerTilOpprettelse = andelerTilOpprettelse(oppdatertKjede, beståendeAndelerIKjede)
 
         val andelerTilOpprettelseMedPeriodeId =
                 lagAndelerMedPeriodeId(andelerTilOpprettelse, sistePeriodeId, nyTilkjentYtelse.behandlingId)
@@ -67,7 +67,7 @@ object UtbetalingsoppdragGenerator {
                                            .sortedBy { it.periodeId }
                 )
 
-        val gjeldendeAndeler = beståendeAndelerIHverKjede + andelerTilOpprettelseMedPeriodeId
+        val gjeldendeAndeler = beståendeAndelerIKjede + andelerTilOpprettelseMedPeriodeId
 
         // Hvis det ikke er noen andeler igjen, må vi opprette en "null-andel" som tar vare på periodeId'en for ytelsestypen
         // På toppen av metoden filtrerer vi bort disse når vi bygger kjedene, men bruker dem til å finne siste periodeId
@@ -125,6 +125,6 @@ object UtbetalingsoppdragGenerator {
         }
     }
 
-    private fun lagKjederUtenNullVerdier(tilkjentYtelse: TilkjentYtelse?): List<AndelTilkjentYtelse> =
+    private fun lagKjedeUtenNullVerdier(tilkjentYtelse: TilkjentYtelse?): List<AndelTilkjentYtelse> =
             tilkjentYtelse?.andelerTilkjentYtelse?.filter { !it.erNull() } ?: emptyList()
 }
