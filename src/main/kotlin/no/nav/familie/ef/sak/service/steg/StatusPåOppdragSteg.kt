@@ -15,14 +15,14 @@ class StatusPåOppdragSteg(private val tilkjentYtelseService: TilkjentYtelseServ
             when (it) {
                 OppdragStatus.KVITTERT_OK -> TODO()
                 else -> {
-                    kastFeilSlikAtPrøverHenteStatusPåNytt(status = it, behandingId = behandling.id)
+                    prøvHentStatusPåNytt(status = it, behandingId = behandling.id)
                 }
             }
         }
     }
 
 
-    fun kastFeilSlikAtPrøverHenteStatusPåNytt(status: OppdragStatus, behandingId: UUID) {
+    fun prøvHentStatusPåNytt(status: OppdragStatus, behandingId: UUID) {
         error("Mottok status '$status' fra oppdrag for behandlingId $behandingId")
     }
 
