@@ -39,21 +39,17 @@ class TilkjentYtelseService(private val oppdragClient: OppdragClient,
         return tilkjentYtelse.tilDto()
     }
 
-    fun opprettTilkjentYtelse(behandling: Behandling): TilkjentYtelse {
-        val nyTilkjentYtelse = hentTilkjentYtelseFraBehandlingId(behandlingId = behandling.id)
-        return opprettTilkjentYtelse(nyTilkjentYtelse, behandling)
-    }
-
-
     fun opprettTilkjentYtelse(tilkjentYtelseDTO: TilkjentYtelseDTO): TilkjentYtelse {
         val nyTilkjentYtelse = tilkjentYtelseDTO.tilTilkjentYtelse()
-        val behandling = behandlingService.hentBehandling(nyTilkjentYtelse.behandlingId)
-        return opprettTilkjentYtelse(nyTilkjentYtelse, behandling)
+        val andelerMedGodtykkligKildeId = nyTilkjentYtelse.andelerTilkjentYtelse.map { it.copy(kildeBehandlingId = nyTilkjentYtelse.behandlingId) }
+        return tilkjentYtelseRepository.insert(nyTilkjentYtelse.copy(andelerTilkjentYtelse = andelerMedGodtykkligKildeId))
     }
 
     @Transactional
-    fun opprettTilkjentYtelse(nyTilkjentYtelse: TilkjentYtelse,
-                              behandling: Behandling): TilkjentYtelse {
+    fun oppdaterMedUtbetalingsoppdrag(behandling: Behandling): TilkjentYtelse {
+
+        val nyTilkjentYtelse = hentTilkjentYtelseFraBehandlingId(behandlingId = behandling.id)
+
         val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
 
         val nyTilkjentYtelseMedEksternId = TilkjentYtelseMedMetaData(nyTilkjentYtelse,
@@ -66,7 +62,7 @@ class TilkjentYtelseService(private val oppdragClient: OppdragClient,
         return UtbetalingsoppdragGenerator
                 .lagTilkjentYtelseMedUtbetalingsoppdrag(nyTilkjentYtelseMedMetaData = nyTilkjentYtelseMedEksternId,
                                                         forrigeTilkjentYtelse = forrigeTilkjentYtelse)
-                .let { tilkjentYtelseRepository.insert(it) }
+                .let { tilkjentYtelseRepository.update(it) }
                 .also {
                     oppdragClient.iverksettOppdrag(it.utbetalingsoppdrag
                                                    ?: error("utbetalingsoppdrag skal være generert i UtbetalingsoppdragGenerator"))
