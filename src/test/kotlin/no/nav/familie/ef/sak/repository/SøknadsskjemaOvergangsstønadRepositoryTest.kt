@@ -35,6 +35,20 @@ internal class SøknadsskjemaOvergangsstønadRepositoryTest : OppslagSpringRunne
     }
 
     @Test
+    internal fun `søknad om overgangsstønad uten utdanning lagres korrekt`() {
+
+        val aktivitet = Testsøknad.søknadOvergangsstønad.aktivitet
+        val aktivitetUtenUtdanning = aktivitet.verdi.copy(underUtdanning = null)
+        val søknadTilLagring = SøknadsskjemaMapper.tilDomene(Testsøknad.søknadOvergangsstønad.copy(aktivitet = aktivitet.copy(verdi = aktivitetUtenUtdanning)))
+
+        søknadOvergangsstønadRepository.insert(søknadTilLagring)
+        val søknadFraDatabase = søknadOvergangsstønadRepository.findByIdOrThrow(søknadTilLagring.id)
+
+        // Jdbc returnerer tomt objekt for barnepass selv om Embedded.OnEmpty.USE_NULL er satt
+        assertThat(søknadFraDatabase).isEqualToIgnoringGivenFields(søknadTilLagring, "barn")
+    }
+
+    @Test
     internal fun `søknad om skolepenger lagres korrekt`() {
         val søknadTilLagring = SøknadsskjemaMapper.tilDomene(Testsøknad.søknadSkolepenger)
 
