@@ -5,16 +5,12 @@ import no.nav.familie.ef.sak.integration.OppdragClient
 import no.nav.familie.ef.sak.mapper.tilDto
 import no.nav.familie.ef.sak.mapper.tilTilkjentYtelse
 import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
-import no.nav.familie.ef.sak.repository.domain.Behandling
-import no.nav.familie.ef.sak.repository.domain.Stønadstype
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseMedMetaData
+import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.økonomi.UtbetalingsoppdragGenerator
 import no.nav.familie.ef.sak.økonomi.tilKlassifisering
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragIdForFagsystem
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
-import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -43,11 +39,21 @@ class TilkjentYtelseService(private val oppdragClient: OppdragClient,
         return tilkjentYtelse.tilDto()
     }
 
-    @Transactional
+    fun opprettTilkjentYtelse(behandling: Behandling): TilkjentYtelse {
+        val nyTilkjentYtelse = hentTilkjentYtelseFraBehandlingId(behandlingId = behandling.id)
+        return opprettTilkjentYtelse(nyTilkjentYtelse, behandling)
+    }
+
+
     fun opprettTilkjentYtelse(tilkjentYtelseDTO: TilkjentYtelseDTO): TilkjentYtelse {
         val nyTilkjentYtelse = tilkjentYtelseDTO.tilTilkjentYtelse()
-
         val behandling = behandlingService.hentBehandling(nyTilkjentYtelse.behandlingId)
+        return opprettTilkjentYtelse(nyTilkjentYtelse, behandling)
+    }
+
+    @Transactional
+    fun opprettTilkjentYtelse(nyTilkjentYtelse: TilkjentYtelse,
+                              behandling: Behandling): TilkjentYtelse {
         val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
 
         val nyTilkjentYtelseMedEksternId = TilkjentYtelseMedMetaData(nyTilkjentYtelse,
@@ -72,7 +78,7 @@ class TilkjentYtelseService(private val oppdragClient: OppdragClient,
                 .chunked(1000)
                 .flatMap {
                     tilkjentYtelseRepository.finnKildeBehandlingIdFraAndelTilkjentYtelse(datoForAvstemming = datoForAvstemming,
-                                                                                               sisteBehandlinger = it)
+                                                                                         sisteBehandlinger = it)
                 }
     }
 

@@ -78,6 +78,18 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(hentetTilkjentYtelse).isEqualTo(lagretTilkjentYtelse)
     }
 
+    @Test
+    fun `Finn tilkjent ytelse på behandlingId`() {
+        val behandling = opprettBehandling()
+        val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(behandling)
+        val lagretTilkjentYtelse = tilkjentYtelseRepository.insert(tilkjentYtelse)
+
+        val hentetTilkjentYtelse =
+                tilkjentYtelseRepository.findByBehandlingId(behandling.id)
+
+        assertThat(hentetTilkjentYtelse).isEqualTo(lagretTilkjentYtelse)
+    }
+
     private fun opprettBehandling() : Behandling {
         val fagsak = fagsakRepository.insert(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))

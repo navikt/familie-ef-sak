@@ -29,7 +29,7 @@ class TilkjentYtelseServiceTest {
 
     @AfterEach
     fun afterEach() {
-        confirmVerified(tilkjentYtelseRepository, økonomiKlient)
+        confirmVerified(økonomiKlient)
     }
 
     @Test
@@ -52,18 +52,16 @@ class TilkjentYtelseServiceTest {
     @Test
     fun `hent status fra oppdragstjenesten`() {
         val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse()
-        val id = tilkjentYtelse.id
         val oppdragId = OppdragId("EFOG",
                                   tilkjentYtelse.personident,
                                   behandling.eksternId.id.toString())
-        every { tilkjentYtelseRepository.findByIdOrNull(id) } returns tilkjentYtelse
+        every { tilkjentYtelseRepository.findByBehandlingId(behandling.id) } returns tilkjentYtelse
         every { behandlingService.hentBehandling(any()) } returns behandling
         every { fagsakService.hentFagsak(any()) } returns fagsak
         every { økonomiKlient.hentStatus(oppdragId) } returns OppdragStatus.KVITTERT_OK
 
-        tilkjentYtelseService.hentStatus(id)
+        tilkjentYtelseService.hentStatus(behandling)
 
-        verify { tilkjentYtelseRepository.findByIdOrNull(id) }
         verify { økonomiKlient.hentStatus(oppdragId) }
     }
 
