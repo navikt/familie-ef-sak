@@ -21,25 +21,12 @@ internal class SøknadsskjemaMapperTest {
     @Test
     internal fun `skal mappe samboer fødselsdato`() {
 
-        //val kontraktsøknad = Testsøknad.søknadOvergangsstønad
-
-
         val nyPerson = TestsøknadBuilder.Builder().defaultPersonMinimum(fødselsdato = LocalDate.now())
         val søknad = TestsøknadBuilder.Builder().setBosituasjon(samboerdetaljer = nyPerson).build().søknadOvergangsstønad
 
-        /**val nyFødselsdato : Søknadsfelt<LocalDate> = kontraktsøknad.bosituasjon.verdi.samboerdetaljer!!.verdi.fødselsdato!!.copy(verdi = LocalDate.now())
-        val nyPersonMinimum : PersonMinimum = kontraktsøknad.bosituasjon.verdi.samboerdetaljer!!.verdi.copy(fødselsdato = nyFødselsdato)
-        val nyBosituasjon : Bosituasjon = kontraktsøknad.bosituasjon.verdi.copy(samboerdetaljer = Søknadsfelt("", nyPersonMinimum))
-        val nySøknad : SøknadOvergangsstønad = kontraktsøknad.copy(bosituasjon = Søknadsfelt(kontraktsøknad.bosituasjon.label, nyBosituasjon))
-             **/
         val søknadTilLagring = SøknadsskjemaMapper.tilDomene(søknad)
         Assertions.assertThat(søknadTilLagring.bosituasjon.samboer!!.fødselsdato!!).isEqualTo(LocalDate.now())
 
-    }
-    @Test
-    internal fun `skal mappe sivilstand`(){
-        val kontraktsøknad = Testsøknad.søknadOvergangsstønad
-        val sivilstandsdetaljer : Sivilstandsdetaljer = kontraktsøknad.sivilstandsdetaljer.verdi
     }
 
 }
