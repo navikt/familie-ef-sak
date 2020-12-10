@@ -41,13 +41,13 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         val behandling: Behandling = hentBehandling(journalføringRequest)
         val journalpost = hentJournalpost(journalpostId)
 
+        settSøknadPåBehandling(journalpostId, behandling.fagsakId, behandling.id)
+        knyttJournalpostTilBehandling(journalpost, behandling)
+
         val eksternFagsakId = fagsakService.hentEksternId(journalføringRequest.fagsakId)
         oppdaterJournalpost(journalpost, journalføringRequest.dokumentTitler, eksternFagsakId)
         ferdigstillJournalføring(journalpostId, journalføringRequest.journalførendeEnhet)
         ferdigstillJournalføringsoppgave(journalføringRequest)
-
-        settSøknadPåBehandling(journalpostId, behandling.fagsakId, behandling.id)
-        knyttJournalpostTilBehandling(journalpost, behandling)
 
         return opprettSaksbehandlingsoppgave(behandling, journalføringRequest.navIdent)
 
@@ -93,7 +93,6 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
                     DokumentBrevkode.erGyldigBrevkode(dokument.brevkode.toString()) && harOriginalDokument(dokument)
                 }
                 ?.forEach {
-                    try {
                         when (DokumentBrevkode.fraBrevkode(it.brevkode)) {
                             DokumentBrevkode.OVERGANGSSTØNAD -> {
                                 val søknad = journalpostClient.hentOvergangsstønadSøknad(journalpostId, it.dokumentInfoId)
@@ -108,11 +107,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
                                 behandlingService.lagreSøknadForSkolepenger(søknad, behandlingsId, fagsakId, journalpostId)
                             }
                         }
-                    } catch (e: JsonProcessingException) {
-                        secureLogger.error("Kan ikke konvertere journalpostDokument til søknadsobjekt", e)
-                        logger.error("Kan ikke konvertere journalpostDokument til søknadsobjekt ${e.javaClass.simpleName}")
                     }
-                }
     }
 
     private fun harOriginalDokument(dokument: no.nav.familie.kontrakter.felles.journalpost.DokumentInfo): Boolean =
