@@ -25,12 +25,6 @@ class IverksettMotOppdragTask(
         stegService.håndterIverksettingOppdrag(behandling)
     }
 
-    override fun onCompletion(task: Task) {
-        taskRepository.save(Task(type = StatusPåOppdragTask.TYPE,
-                                 payload = task.payload,
-                                 triggerTid = LocalDateTime.now().plusMinutes(15)))
-    }
-
     companion object {
 
         const val TYPE = "utførIverksettingAvUtbetalning"
