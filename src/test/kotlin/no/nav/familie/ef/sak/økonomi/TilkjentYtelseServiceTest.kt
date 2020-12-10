@@ -29,7 +29,7 @@ class TilkjentYtelseServiceTest {
 
     @AfterEach
     fun afterEach() {
-        confirmVerified(økonomiKlient)
+        confirmVerified(økonomiKlient, tilkjentYtelseRepository)
     }
 
     @Test
@@ -63,6 +63,7 @@ class TilkjentYtelseServiceTest {
         tilkjentYtelseService.hentStatus(behandling)
 
         verify { økonomiKlient.hentStatus(oppdragId) }
+        verify { tilkjentYtelseRepository.findByBehandlingId(behandling.id) }
     }
 
     companion object {
