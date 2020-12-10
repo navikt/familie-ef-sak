@@ -5,9 +5,11 @@ import no.nav.familie.ef.sak.integration.dto.pdl.visningsnavn
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.service.BehandlingService
-import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.PersonService
+import no.nav.familie.kontrakter.ef.søknad.NavnOgFnr
+import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
+import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.context.annotation.Profile
@@ -34,11 +36,14 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
         val behandling = behandlingService.opprettBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, fagsak.id)
         val søkerMedBarn = personService.hentPersonMedRelasjoner(testFagsakRequest.personIdent)
 
-        val barnNavnOgFnr = søkerMedBarn.barn.map { Testsøknad.NavnOgFnr(it.value.navn.gjeldende().visningsnavn(), it.key) }
-        val søknad = Testsøknad.søknadOvergangsstønadMedSøker(søker = Testsøknad.NavnOgFnr(søkerMedBarn.søker.navn.gjeldende()
-                                                                                                   .visningsnavn(),
-                                                                                           søkerMedBarn.søkerIdent),
-                                                              barneliste = barnNavnOgFnr)
+        val barnNavnOgFnr = søkerMedBarn.barn.map { NavnOgFnr(it.value.navn.gjeldende().visningsnavn(), it.key) }
+
+        val søknad: SøknadOvergangsstønad = TestsøknadBuilder.Builder()
+                .setPersonalia(søkerMedBarn.søker.navn.gjeldende().visningsnavn(), søkerMedBarn.søkerIdent)
+                .setBarn(barnNavnOgFnr)
+                .build().søknadOvergangsstønad
+
+
         behandlingService.lagreSøknadForOvergangsstønad(søknad,
                                                         behandling.id,
                                                         fagsak.id,
