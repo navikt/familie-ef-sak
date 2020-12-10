@@ -30,7 +30,7 @@ class FamilieIntegrasjonerClient(@Qualifier("azure") restOperations: RestOperati
     }
 
     fun hentMedlemskapsinfo(ident: String): Medlemskapsinfo {
-        return postForEntity<Ressurs<Medlemskapsinfo>>(integrasjonerConfig.personopplysningerUri, Ident(ident)).data!!
+        return postForEntity<Ressurs<Medlemskapsinfo>>(integrasjonerConfig.medlemskapUri, Ident(ident)).data!!
     }
 
     fun hentKodeverkLandkoder(): KodeverkDto {
