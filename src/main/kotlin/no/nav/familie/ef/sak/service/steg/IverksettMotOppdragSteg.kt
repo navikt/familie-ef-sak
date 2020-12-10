@@ -22,6 +22,10 @@ class IverksettMotOppdragSteg(private val tilkjentYtelseService: TilkjentYtelseS
 
     override fun utførSteg(behandling: Behandling, data: Void?) {
         tilkjentYtelseService.oppdaterMedUtbetalingsoppdrag(behandling)
+        oprettStatusPåOppdragTask(behandling)
+    }
+
+    private fun oprettStatusPåOppdragTask(behandling: Behandling) {
         taskRepository.save(Task(type = StatusPåOppdragTask.TYPE,
                                  payload = behandling.id.toString(),
                                  triggerTid = LocalDateTime.now().plusMinutes(15)))
