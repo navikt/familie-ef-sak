@@ -117,7 +117,7 @@ class PdlClientConfig {
                                    gyldigTilOgMed = startdato))
 
     private fun sivilstand(): List<Sivilstand> =
-            listOf(Sivilstand(type = Sivilstandstype.SKILT,
+            listOf(Sivilstand(type = Sivilstandstype.GIFT,
                               gyldigFraOgMed = startdato,
                               myndighet = "Myndighet",
                               kommune = "0301",

@@ -1,8 +1,6 @@
 package no.nav.familie.ef.sak.økonomi
 
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Opphør
@@ -15,6 +13,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
+import java.util.*
 
 private const val behandlingEksternId = 0L
 private const val fagsakEksternId = 1L
@@ -25,8 +24,15 @@ enum class TestOppdragType {
     Oppdrag
 }
 
+/**
+ * OppdragId
+ *  * På input er oppdragId som settes på tilkjentYtelse. For hver ny gruppe med input skal de ha samme input
+ *  * På output er oppdragId som sjekker att andelTilkjentYtelse har fått riktig output
+ *  * På oppdrag trengs den ikke
+ */
 data class TestOppdrag(val type: TestOppdragType,
                        val fnr: String,
+                       val oppdragId: UUID?,
                        val ytelse: String,
                        val linjeId: Long? = null,
                        val forrigeLinjeId: Long? = null,
@@ -45,10 +51,12 @@ data class TestOppdrag(val type: TestOppdragType,
                                 stønadTom = sluttPeriode,
                                 personIdent = fnr,
                                 periodeId = linjeId,
+                                kildeBehandlingId = if (TestOppdragType.Output == type) oppdragId else null,
                                 forrigePeriodeId = forrigeLinjeId)
         else if (TestOppdragType.Output == type && beløp == null && startPeriode == null && sluttPeriode == null)
-            AndelTilkjentYtelse.nullAndel(KjedeId(ytelse, fnr),
-                                          PeriodeId(linjeId!!, forrigeLinjeId))
+            nullAndelTilkjentYtelse(behandlingId = oppdragId ?: error("Må ha satt OppdragId på Output"),
+                                    personIdent = fnr,
+                                    periodeId = PeriodeId(linjeId!!, forrigeLinjeId))
         else
             null
     }
@@ -81,8 +89,10 @@ class TestOppdragGroup {
     private val sporbar = Sporbar()
     private var oppdragKode110: Utbetalingsoppdrag.KodeEndring = Utbetalingsoppdrag.KodeEndring.NY
     private var personIdent: String? = null
+    private var oppdragId: UUID? = null
 
     fun add(to: TestOppdrag) {
+        oppdragId = to.oppdragId
         when (to.type) {
             TestOppdragType.Input -> {
                 personIdent = to.fnr
@@ -99,7 +109,7 @@ class TestOppdragGroup {
     }
 
     val input: TilkjentYtelse by lazy {
-        TilkjentYtelse(behandlingId = behandling(fagsak = fagsak()).id,
+        TilkjentYtelse(behandlingId = oppdragId ?: error("Må ha satt oppdragId når man kaller input"),
                        personident = personIdent!!,
                        andelerTilkjentYtelse = andelerTilkjentYtelseInn,
                 // Ikke påkrevd, men exception ellers
@@ -123,8 +133,6 @@ class TestOppdragGroup {
                        andelerTilkjentYtelse = andelerTilkjentYtelseUt,
                        utbetalingsoppdrag = utbetalingsoppdrag,
                        vedtaksdato = input.vedtaksdato,
-                       stønadFom = andelerTilkjentYtelseUt.filter { it.stønadFom != NULL_DATO }.minOfOrNull { it.stønadFom },
-                       stønadTom = andelerTilkjentYtelseInn.filter { it.stønadTom != NULL_DATO }.maxOfOrNull { it.stønadTom },
                        sporbar = sporbar)
 
     }
@@ -134,6 +142,7 @@ object TestOppdragParser {
 
     private const val KEY_TYPE = "Type"
     private const val KEY_FNR = "Fnr"
+    private const val KEY_OPPDRAG = "Oppdrag"
     private const val KEY_YTELSE = "Ytelse"
     private const val KEY_LINJE_ID = "LID"
     private const val KEY_FORRIGE_LINJE_ID = "Pre-LID"
@@ -141,7 +150,16 @@ object TestOppdragParser {
     private const val KEY_ER_ENDRING = "Er endring"
 
     private val RESERVERED_KEYS =
-            listOf(KEY_TYPE, KEY_FNR, KEY_YTELSE, KEY_LINJE_ID, KEY_FORRIGE_LINJE_ID, KEY_STATUS_OPPDRAG, KEY_ER_ENDRING)
+            listOf(KEY_TYPE,
+                   KEY_FNR,
+                   KEY_OPPDRAG,
+                   KEY_YTELSE,
+                   KEY_LINJE_ID,
+                   KEY_FORRIGE_LINJE_ID,
+                   KEY_STATUS_OPPDRAG,
+                   KEY_ER_ENDRING)
+
+    private val oppdragIdn = mutableMapOf<Int, UUID>()
 
     private fun parse(url: URL): List<TestOppdrag> {
         val fileContent = url.openStream()!!
@@ -164,8 +182,16 @@ object TestOppdragParser {
             val lastYearMonth = datoKeysMedBeløp.lastOrNull()?.let { YearMonth.parse(it) }
             val beløp = datoKeysMedBeløp.firstOrNull()?.let { row[it]?.trim('x') }?.toIntOrNull()
 
+            val value = row.getValue(KEY_OPPDRAG)
+            val oppdragId: UUID? = if (value.isEmpty()) {
+                null
+            } else {
+                oppdragIdn.getOrPut(value.toInt()) { UUID.randomUUID() }
+            }
+
             TestOppdrag(type = row[KEY_TYPE]?.let { TestOppdragType.valueOf(it) }!!,
                         fnr = row.getValue(KEY_FNR),
+                        oppdragId = oppdragId,
                         ytelse = row.getValue(KEY_YTELSE),
                         linjeId = row[KEY_LINJE_ID]?.let { emptyAsNull(it) }?.let { Integer.parseInt(it).toLong() },
                         forrigeLinjeId = row[KEY_FORRIGE_LINJE_ID]
@@ -222,11 +248,20 @@ object TestOppdragRunner {
         grupper.forEachIndexed { indeks, gruppe ->
             val input = gruppe.input
             val faktisk = lagTilkjentYtelseMedUtbetalingsoppdrag(input, forrigeTilkjentYtelse)
-            Assertions.assertEquals(om.writeValueAsString(gruppe.output),
-                                    om.writeValueAsString(faktisk),
+            Assertions.assertEquals(om.writeValueAsString(truncateAvstemmingDato(gruppe.output)),
+                                    om.writeValueAsString(truncateAvstemmingDato(faktisk)),
                                     "Feiler for gruppe med indeks $indeks")
             forrigeTilkjentYtelse = faktisk
         }
+    }
+
+    private fun truncateAvstemmingDato(tilkjentYtelse: TilkjentYtelse): TilkjentYtelse {
+        val utbetalingsoppdrag = tilkjentYtelse.utbetalingsoppdrag
+        if (utbetalingsoppdrag == null) {
+            return tilkjentYtelse
+        }
+        val nyAvstemmingsitdspunkt = utbetalingsoppdrag.avstemmingTidspunkt.truncatedTo(ChronoUnit.HOURS)
+        return tilkjentYtelse.copy(utbetalingsoppdrag = utbetalingsoppdrag.copy(avstemmingTidspunkt = nyAvstemmingsitdspunkt))
     }
 
     private fun lagTilkjentYtelseMedUtbetalingsoppdrag(nyTilkjentYtelse: TilkjentYtelse,

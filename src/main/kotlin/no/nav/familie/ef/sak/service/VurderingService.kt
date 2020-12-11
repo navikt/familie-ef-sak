@@ -11,6 +11,8 @@ import no.nav.familie.ef.sak.repository.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsstønad
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.ef.sak.vurdering.utledDelvilkårResultat
+import no.nav.familie.ef.sak.vurdering.validerDelvilkår
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.*
@@ -46,17 +48,6 @@ class VurderingService(private val behandlingService: BehandlingService,
         return vilkårsvurderingRepository.update(nyVilkårsvurdering).id
     }
 
-    private fun validerDelvilkår(vurdering: VilkårsvurderingDto,
-                                 vilkårsvurdering: Vilkårsvurdering) {
-        val innkommendeDelvurderinger = vurdering.delvilkårsvurderinger.map { it.type }.toSet()
-        val lagredeDelvurderinger = vilkårsvurdering.delvilkårsvurdering.delvilkårsvurderinger.map { it.type }.toSet()
-
-        if (innkommendeDelvurderinger.size != lagredeDelvurderinger.size
-            || !innkommendeDelvurderinger.containsAll(lagredeDelvurderinger)) {
-            error("Delvilkårstyper motsvarer ikke de som finnes lagrede på vilkåret")
-        }
-    }
-
     fun hentInngangsvilkår(behandlingId: UUID): InngangsvilkårDto {
         val søknad = behandlingService.hentOvergangsstønad(behandlingId)
         val fnr = søknad.fødselsnummer
@@ -66,15 +57,18 @@ class VurderingService(private val behandlingService: BehandlingService,
                                                  pdlSøker = pdlSøker)
         val sivilstand = SivilstandMapper.tilDto(sivilstandsdetaljer = søknad.sivilstand,
                                                  pdlSøker = pdlSøker)
-        val vurderinger = hentVurderinger(behandlingId, søknad)
+        val registergrunnlag = InngangsvilkårGrunnlagDto(medlemskap, sivilstand)
+        val delvilkårMetadata = DelvilkårMetadata(sivilstandstype = registergrunnlag.sivilstand.registergrunnlag.type)
+        val vurderinger = hentVurderinger(behandlingId, søknad, delvilkårMetadata)
 
         return InngangsvilkårDto(vurderinger = vurderinger,
-                                 grunnlag = InngangsvilkårGrunnlagDto(medlemskap, sivilstand))
+                                 grunnlag = registergrunnlag)
     }
 
     private fun hentVurderinger(behandlingId: UUID,
-                                søknad: SøknadsskjemaOvergangsstønad): List<VilkårsvurderingDto> {
-        return hentEllerOpprettVurderingerForInngangsvilkår(behandlingId, søknad)
+                                søknad: SøknadsskjemaOvergangsstønad,
+                                delvilkårMetadata: DelvilkårMetadata): List<VilkårsvurderingDto> {
+        return hentEllerOpprettVurderingerForInngangsvilkår(behandlingId, søknad, delvilkårMetadata)
                 .map {
                     VilkårsvurderingDto(id = it.id,
                                         behandlingId = it.behandlingId,
@@ -92,7 +86,8 @@ class VurderingService(private val behandlingService: BehandlingService,
     }
 
     private fun hentEllerOpprettVurderingerForInngangsvilkår(behandlingId: UUID,
-                                                             søknad: SøknadsskjemaOvergangsstønad): List<Vilkårsvurdering> {
+                                                             søknad: SøknadsskjemaOvergangsstønad,
+                                                             delvilkårMetadata: DelvilkårMetadata): List<Vilkårsvurdering> {
         val lagredeVilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(behandlingId)
 
         if (behandlingErLåstForVidereRedigering(behandlingId)) {
@@ -105,8 +100,10 @@ class VurderingService(private val behandlingService: BehandlingService,
                 }
                 .map {
                     val delvilkårsvurderinger = it.delvilkår
-                            .filter { delvilkårType -> erDelvilkårAktueltForSøknaden(delvilkårType, søknad) }
-                            .map { delvilkårType -> Delvilkårsvurdering(delvilkårType) }
+                            .map { delvilkårType ->
+                                Delvilkårsvurdering(delvilkårType,
+                                                    utledDelvilkårResultat(delvilkårType, søknad, delvilkårMetadata))
+                            }
                     Vilkårsvurdering(behandlingId = behandlingId,
                                      type = it,
                                      delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurderinger))
@@ -117,16 +114,7 @@ class VurderingService(private val behandlingService: BehandlingService,
         return lagredeVilkårsvurderinger + nyeVilkårsvurderinger
     }
 
-    /**
-     * Filtrerer bort delvikår som ikke skall vurderes iht data i søknaden
-     */
-    private fun erDelvilkårAktueltForSøknaden(it: DelvilkårType,
-                                              søknad: SøknadsskjemaOvergangsstønad): Boolean =
-            when (it) {
-                DelvilkårType.DOKUMENTERT_EKTESKAP -> søknad.sivilstand.erUformeltGift == true
-                DelvilkårType.DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE -> søknad.sivilstand.erUformeltSeparertEllerSkilt == true
-                else -> true
-            }
+
 
     fun hentInngangsvilkårSomManglerVurdering(behandlingId: UUID): List<VilkårType> {
         val lagredeVilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(behandlingId)

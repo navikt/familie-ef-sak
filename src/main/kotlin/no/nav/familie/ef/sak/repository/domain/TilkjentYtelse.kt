@@ -11,21 +11,13 @@ data class TilkjentYtelse(@Id
                           val id: UUID = UUID.randomUUID(),
                           val behandlingId: UUID,
                           val personident: String,
-                          @Column("stonad_fom")
-                          val stønadFom: LocalDate? = null,
-                          @Column("stonad_tom")
-                          val stønadTom: LocalDate? = null,
-                          @Column("opphor_fom")
-                          val opphørFom: LocalDate? = null,
                           val utbetalingsoppdrag: Utbetalingsoppdrag? = null,
                           val vedtaksdato: LocalDate? = null,
                           val status: TilkjentYtelseStatus = TilkjentYtelseStatus.IKKE_KLAR,
                           val type: TilkjentYtelseType = TilkjentYtelseType.FØRSTEGANGSBEHANDLING,
                           val andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
                           @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                          val sporbar: Sporbar = Sporbar()) {
-
-}
+                          val sporbar: Sporbar = Sporbar())
 
 enum class TilkjentYtelseStatus {
     IKKE_KLAR,

@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.repository.domain
 
+import no.nav.familie.ef.sak.api.dto.Sivilstandstype
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
@@ -25,19 +26,24 @@ data class DelvilkårsvurderingWrapper(val delvilkårsvurderinger: List<Delvilk�
 data class Delvilkårsvurdering(val type: DelvilkårType,
                                val resultat: Vilkårsresultat = Vilkårsresultat.IKKE_VURDERT)
 
+data class DelvilkårMetadata(val sivilstandstype: Sivilstandstype)
+
 enum class DelvilkårType {
     TRE_ÅRS_MEDLEMSKAP,
     DOKUMENTERT_FLYKTNINGSTATUS,
     BOR_OG_OPPHOLDER_SEG_I_NORGE,
     DOKUMENTERT_EKTESKAP,
     DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE,
+    SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
+    SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
     KRAV_SIVILSTAND,
 }
 
 enum class Vilkårsresultat {
     JA,
     NEI,
-    IKKE_VURDERT
+    IKKE_VURDERT,
+    IKKE_AKTUELL
 }
 
 //TODO Denne bør kanskje utvides til å inneholde en NARE-spesifikasjon
@@ -52,7 +58,10 @@ enum class VilkårType(val beskrivelse: String,
 
     SIVILSTAND("§15-4 Sivilstand", listOf(DelvilkårType.DOKUMENTERT_EKTESKAP,
                                           DelvilkårType.DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE,
-                                          DelvilkårType.KRAV_SIVILSTAND));
+                                          DelvilkårType.SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
+                                          DelvilkårType.SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
+                                          DelvilkårType.KRAV_SIVILSTAND,));
+
 
     companion object {
 

@@ -14,6 +14,7 @@ import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.vilkårsvurdering
 import no.nav.familie.ef.sak.repository.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.repository.domain.*
+import no.nav.familie.ef.sak.repository.domain.DelvilkårType.*
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
@@ -68,16 +69,19 @@ internal class VurderingServiceTest {
 
         every { behandlingService.hentOvergangsstønad(any()) }.returns(søknad)
         vurderingService.hentInngangsvilkår(BEHANDLING_ID)
-        assertThat(nyeVilkårsvurderinger.captured.flatMap { it.delvilkårsvurdering.delvilkårsvurderinger.map { it.type } })
-                .containsExactlyInAnyOrderElementsOf(DelvilkårType.values().toList())
+        assertThat(nyeVilkårsvurderinger.captured.flatMap {
+            it.delvilkårsvurdering.delvilkårsvurderinger
+                    .filter { it.resultat != Vilkårsresultat.IKKE_AKTUELL }
+                    .map { it.type }
+        }).containsExactlyInAnyOrderElementsOf(
+                listOf(
+                        TRE_ÅRS_MEDLEMSKAP,
+                        DOKUMENTERT_FLYKTNINGSTATUS,
+                        BOR_OG_OPPHOLDER_SEG_I_NORGE,
+                        SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
+                        KRAV_SIVILSTAND,
+                ))
 
-        // DOKUMENTERT_EKTESKAP skal ikke med når erUformeltGift = false
-        every { behandlingService.hentOvergangsstønad(any()) }
-                .returns(søknad.copy(sivilstand = søknad.sivilstand.copy(erUformeltGift = false)))
-        vurderingService.hentInngangsvilkår(BEHANDLING_ID)
-        assertThat(nyeVilkårsvurderinger.captured.flatMap { it.delvilkårsvurdering.delvilkårsvurderinger.map { it.type } })
-                .containsExactlyInAnyOrderElementsOf(DelvilkårType.values()
-                                                             .filterNot { it == DelvilkårType.DOKUMENTERT_EKTESKAP })
     }
 
     @Test
@@ -146,7 +150,7 @@ internal class VurderingServiceTest {
                                                                 vilkårType = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
                                                                 endretAv = "",
                                                                 endretTid = LocalDateTime.now()))
-        }).hasMessageContaining("Delvilkårstyper motsvarer ikke de som finnes lagrede på vilkåret")
+        }).hasMessageContaining("Nye og eksisterende delvilkårsvurderinger har ulike antall vurderinger")
     }
 
     @Test
@@ -155,7 +159,7 @@ internal class VurderingServiceTest {
         val vilkårsvurdering = vilkårsvurdering(BEHANDLING_ID,
                                                 Vilkårsresultat.IKKE_VURDERT,
                                                 VilkårType.FORUTGÅENDE_MEDLEMSKAP,
-                                                listOf(Delvilkårsvurdering(DelvilkårType.TRE_ÅRS_MEDLEMSKAP,
+                                                listOf(Delvilkårsvurdering(TRE_ÅRS_MEDLEMSKAP,
                                                                            Vilkårsresultat.IKKE_VURDERT)))
         every { vilkårsvurderingRepository.findByIdOrNull(vilkårsvurdering.id) } returns vilkårsvurdering
         val lagretVilkårsvurdering = slot<Vilkårsvurdering>()
