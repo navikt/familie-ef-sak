@@ -2,16 +2,18 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandlingHistorikk
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.BehandlingHistorikkRepository
 import no.nav.familie.ef.sak.repository.BehandlingRepository
 import no.nav.familie.ef.sak.repository.FagsakRepository
 import no.nav.familie.ef.sak.repository.domain.BehandlingHistorikk
 import no.nav.familie.ef.sak.service.BehandlingHistorikkService
+import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.LocalDateTime
+
 
 internal class BehandlingHistorikkServiceTest : OppslagSpringRunnerTest() {
 
@@ -26,10 +28,14 @@ internal class BehandlingHistorikkServiceTest : OppslagSpringRunnerTest() {
         /** Lagre */
         val fagsak = fagsakRepository.insert(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
-        val behandlingHistorikk = behandlingHistorikkRepository.insert(behandlingHistorikk(behandling))
+        val behandlingHistorikk = behandlingHistorikkRepository.insert(BehandlingHistorikk(behandlingId = behandling.id,
+                                                                                           steg = behandling.steg,
+                                                                                           endretAvNavn = "Saksbehandlernavn",
+                                                                                           endretAvMail = SikkerhetContext.hentSaksbehandler(),
+                                                                                           endretTid = LocalDateTime.now()))
 
         /** Hent */
-        val innslag : BehandlingHistorikk = behandlingHistorikkService.finnBehandlingHistorikk(behandling.id).get(0)
+        val innslag : BehandlingHistorikk = behandlingHistorikkService.finnBehandlingHistorikk(behandling.id)[0]
 
         assertThat(innslag).isEqualTo(behandlingHistorikk)
     }

@@ -15,8 +15,7 @@ data class BehandlingHistorikk(@Id
                                val endretTid: LocalDateTime = LocalDateTime.now())
 
 inline fun BehandlingHistorikk.tilDto(): BehandlingsHistorikkDto {
-    return BehandlingsHistorikkDto(this.id,
-                                   this.behandlingId,
+    return BehandlingsHistorikkDto(this.behandlingId,
                                    this.steg,
                                    this.endretAvNavn,
                                    this.endretAvMail,

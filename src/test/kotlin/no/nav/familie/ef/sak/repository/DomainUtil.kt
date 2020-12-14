@@ -26,12 +26,6 @@ fun behandling(fagsak: Fagsak,
                    steg = steg,
                    aktiv = aktiv)
 
-fun behandlingHistorikk(behandling: Behandling) = BehandlingHistorikk(behandlingId = behandling.id,
-                                                                      steg = behandling.steg,
-                                                                      endretAvNavn = "Saksbehandlernavn",
-                                                                      endretAvMail = SikkerhetContext.hentSaksbehandler(),
-                                                                      endretTid = LocalDateTime.now()
-                                                                              .truncatedTo(ChronoUnit.MILLIS))
 
 fun fagsak(identer: Set<FagsakPerson> = setOf(), stønadstype: Stønadstype = Stønadstype.OVERGANGSSTØNAD) =
         Fagsak(stønadstype = stønadstype, søkerIdenter = identer)
