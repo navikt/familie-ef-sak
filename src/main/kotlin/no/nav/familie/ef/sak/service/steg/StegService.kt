@@ -4,6 +4,8 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ef.sak.config.RolleConfig
 import no.nav.familie.ef.sak.repository.domain.Behandling
+import no.nav.familie.ef.sak.repository.domain.BehandlingHistorikk
+import no.nav.familie.ef.sak.service.BehandlingHistorikkService
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.steg.StegType.BEHANDLING_FERDIGSTILT
 import no.nav.familie.ef.sak.service.steg.StegType.VILKÅRSVURDERE_INNGANGSVILKÅR
@@ -16,7 +18,8 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
                   private val behandlingService: BehandlingService,
-                  private val rolleConfig: RolleConfig) {
+                  private val rolleConfig: RolleConfig,
+                  private val behandlingHistorikkService: BehandlingHistorikkService) {
 
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -66,6 +69,12 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
             }
 
             behandlingSteg.validerSteg(behandling)
+
+            behandlingHistorikkService.opprettHistorikkInnslag(BehandlingHistorikk(behandlingId = behandling.id,
+                                                                                   steg = behandling.steg,
+                                                                                   endretAvNavn = saksbehandlerNavn,
+                                                                                   endretAvMail = SikkerhetContext.hentSaksbehandler()))
+
             val nesteSteg = behandlingSteg.utførOgReturnerNesteSteg(behandling, data)
 
             stegSuksessMetrics[stegType]?.increment()
