@@ -21,7 +21,7 @@ class IverksettMotOppdragSteg(private val tilkjentYtelseService: TilkjentYtelseS
     }
 
     override fun utførSteg(behandling: Behandling, data: Void?) {
-        tilkjentYtelseService.oppdaterMedUtbetalingsoppdrag(behandling)
+        tilkjentYtelseService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(behandling)
         oprettStatusPåOppdragTask(behandling)
     }
 

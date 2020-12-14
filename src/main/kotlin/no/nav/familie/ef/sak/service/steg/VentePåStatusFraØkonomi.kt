@@ -8,7 +8,7 @@ import java.util.*
 
 
 @Service
-class StatusPåOppdragSteg(private val tilkjentYtelseService: TilkjentYtelseService) : BehandlingSteg<Void?> {
+class VentePåStatusFraØkonomi(private val tilkjentYtelseService: TilkjentYtelseService) : BehandlingSteg<Void?> {
 
     override fun utførSteg(behandling: Behandling, data: Void?) {
         tilkjentYtelseService.hentStatus(behandling).let {
@@ -27,6 +27,6 @@ class StatusPåOppdragSteg(private val tilkjentYtelseService: TilkjentYtelseServ
     }
 
     override fun stegType(): StegType {
-        return StegType.STATUS_PÅ_OPPDRAG
+        return StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI
     }
 }

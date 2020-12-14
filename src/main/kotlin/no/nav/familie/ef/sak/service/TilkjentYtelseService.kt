@@ -46,7 +46,7 @@ class TilkjentYtelseService(private val oppdragClient: OppdragClient,
     }
 
     @Transactional
-    fun oppdaterMedUtbetalingsoppdrag(behandling: Behandling): TilkjentYtelse {
+    fun oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(behandling: Behandling): TilkjentYtelse {
 
         val nyTilkjentYtelse = hentTilkjentYtelseFraBehandlingId(behandlingId = behandling.id)
 

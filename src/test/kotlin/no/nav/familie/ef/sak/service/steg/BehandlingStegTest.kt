@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.service.steg
 
 import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
@@ -18,7 +17,7 @@ internal class BehandlingStegTest {
                        StegType.SEND_TIL_BESLUTTER,
                        StegType.BESLUTTE_VEDTAK,
                        StegType.IVERKSETT_MOT_OPPDRAG,
-                       StegType.STATUS_PÅ_OPPDRAG,
+                       StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
                        StegType.JOURNALFØR_VEDTAKSBREV,
                        StegType.DISTRIBUER_VEDTAKSBREV,
                        StegType.FERDIGSTILLE_BEHANDLING,
@@ -37,7 +36,7 @@ internal class BehandlingStegTest {
                 StegType.SEND_TIL_BESLUTTER,
                 StegType.BESLUTTE_VEDTAK,
                 StegType.IVERKSETT_MOT_OPPDRAG,
-                StegType.STATUS_PÅ_OPPDRAG,
+                StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
                 StegType.FERDIGSTILLE_BEHANDLING,
                 StegType.BEHANDLING_FERDIGSTILT)
 
@@ -65,7 +64,7 @@ internal class BehandlingStegTest {
         assertTrue(StegType.SEND_TIL_BESLUTTER.erGyldigIKombinasjonMedStatus(BehandlingStatus.UTREDES))
         assertTrue(StegType.BESLUTTE_VEDTAK.erGyldigIKombinasjonMedStatus(BehandlingStatus.FATTER_VEDTAK))
         assertTrue(StegType.IVERKSETT_MOT_OPPDRAG.erGyldigIKombinasjonMedStatus(BehandlingStatus.IVERKSETTER_VEDTAK))
-        assertTrue(StegType.STATUS_PÅ_OPPDRAG.erGyldigIKombinasjonMedStatus(BehandlingStatus.IVERKSETTER_VEDTAK))
+        assertTrue(StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI.erGyldigIKombinasjonMedStatus(BehandlingStatus.IVERKSETTER_VEDTAK))
         assertTrue(StegType.JOURNALFØR_VEDTAKSBREV.erGyldigIKombinasjonMedStatus(BehandlingStatus.IVERKSETTER_VEDTAK))
         assertTrue(StegType.DISTRIBUER_VEDTAKSBREV.erGyldigIKombinasjonMedStatus(BehandlingStatus.IVERKSETTER_VEDTAK))
         assertTrue(StegType.FERDIGSTILLE_BEHANDLING.erGyldigIKombinasjonMedStatus(BehandlingStatus.IVERKSETTER_VEDTAK))

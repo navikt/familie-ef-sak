@@ -25,6 +25,6 @@ class TestTilkjentYtelseService(private val behandlingService: BehandlingService
 
         tilkjentYtelseService.opprettTilkjentYtelse(tilkjentYtelseTestDTO.nyTilkjentYtelse.tilDto()
                                                             .copy(behandlingId = behandling.id))
-        return tilkjentYtelseService.oppdaterMedUtbetalingsoppdrag(behandling)
+        return tilkjentYtelseService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(behandling)
     }
 }
