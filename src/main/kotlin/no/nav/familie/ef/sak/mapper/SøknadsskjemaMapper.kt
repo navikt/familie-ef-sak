@@ -215,7 +215,8 @@ object SøknadsskjemaMapper {
                       underUtdanning = tilDomene(aktivitet.underUtdanning?.verdi),
                       aksjeselskap = tilAksjeselskap(aktivitet.aksjeselskap?.verdi),
                       erIArbeid = aktivitet.erIArbeid?.verdi,
-                      erIArbeidDokumentasjon = tilDomene(aktivitet.erIArbeidDokumentasjon?.verdi))
+                      erIArbeidDokumentasjon = tilDomene(aktivitet.erIArbeidDokumentasjon?.verdi),
+                      tidligereUtdanninger = tilTidligereUtdanninger(aktivitet.underUtdanning?.verdi?.tidligereUtdanninger?.verdi))
 
     private fun tilFirmaer(list: List<KontraktSelvstendig>?): Set<Selvstendig>? =
             list?.map {
@@ -242,13 +243,12 @@ object SøknadsskjemaMapper {
                                hvorMyeSkalDuStudere = it.hvorMyeSkalDuStudere?.verdi,
                                hvaErMåletMedUtdanningen = it.hvaErMåletMedUtdanningen?.verdi,
                                utdanningEtterGrunnskolen = it.utdanningEtterGrunnskolen.verdi,
-                               tidligereUtdanninger = tilTidligereUtdanninger(it.tidligereUtdanninger?.verdi),
                                semesteravgift = it.semesteravgift?.verdi?.roundToInt(),
                                studieavgift = it.studieavgift?.verdi?.roundToInt(),
                                eksamensgebyr = it.eksamensgebyr?.verdi?.roundToInt())
             }
 
-    private fun tilTidligereUtdanninger(list: List<KontraktTidligereUtdanning>?): Set<TidligereUtdanning>? =
+    private fun tilTidligereUtdanninger(list: List<KontraktTidligereUtdanning>?): Set<TidligereUtdanning> =
             list?.map {
                 TidligereUtdanning(linjeKursGrad = it.linjeKursGrad.verdi,
                                    fra = YearMonth.of(it.nårVarSkalDuVæreElevStudent.verdi.fraÅr,
