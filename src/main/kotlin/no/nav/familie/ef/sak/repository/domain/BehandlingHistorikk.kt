@@ -7,14 +7,14 @@ import java.time.LocalDateTime
 import java.util.*
 
 data class BehandlingHistorikk(@Id
-                                val id: UUID = UUID.randomUUID(),
+                               val id: UUID = UUID.randomUUID(),
                                val behandlingId: UUID,
                                var steg: StegType,
                                val endretAvNavn: String,
                                val endretAvMail: String,
                                val endretTid: LocalDateTime = LocalDateTime.now())
 
-inline fun BehandlingHistorikk.tilDto() : BehandlingsHistorikkDto {
+inline fun BehandlingHistorikk.tilDto(): BehandlingsHistorikkDto {
     return BehandlingsHistorikkDto(this.id,
                                    this.behandlingId,
                                    this.steg,
