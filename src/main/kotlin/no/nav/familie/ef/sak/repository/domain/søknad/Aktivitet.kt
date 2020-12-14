@@ -18,7 +18,10 @@ data class Aktivitet(val hvordanErArbeidssituasjonen: String,
                      @MappedCollection(idColumn = "soknadsskjema_id")
                      val aksjeselskap: Set<Aksjeselskap>? = emptySet(),
                      val erIArbeid: String? = null,
-                     val erIArbeidDokumentasjon: Dokumentasjon? = null)
+                     val erIArbeidDokumentasjon: Dokumentasjon? = null,
+                     @MappedCollection(idColumn = "soknadsskjema_id")
+                     val tidligereUtdanninger: Set<TidligereUtdanning> = emptySet()
+)
 
 data class Arbeidsgiver(val arbeidsgivernavn: String,
                         val arbeidsmengde: Int? = null,
