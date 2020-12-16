@@ -8,17 +8,14 @@ import no.nav.familie.prosessering.domene.Task
 import org.springframework.stereotype.Service
 import java.util.*
 
-
-data class StatusPåOppdragTaskPayload(val behandlingId: UUID)
-
 @Service
-@TaskStepBeskrivelse(taskStepType = StatusPåOppdragTask.TYPE,
+@TaskStepBeskrivelse(taskStepType = VentePåStatusFraØkonomiTask.TYPE,
                      maxAntallFeil = 50,
                      settTilManuellOppfølgning = true,
                      triggerTidVedFeilISekunder = 15*60L,
                      beskrivelse = "Sjekker status på utbetalningsoppdraget mot økonomi.")
 
-class StatusPåOppdragTask(private val stegService: StegService,
+class VentePåStatusFraØkonomiTask(private val stegService: StegService,
                           private val behandlingService: BehandlingService) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
