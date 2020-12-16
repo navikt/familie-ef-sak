@@ -20,9 +20,11 @@ class TestTilkjentYtelseService(private val behandlingService: BehandlingService
         val fagsak = fagsakService.hentEllerOpprettFagsak(tilkjentYtelseTestDTO.nyTilkjentYtelse.personident,
                                                           tilkjentYtelseTestDTO.stønadstype)
 
-        behandlingService.opprettBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                            fagsakId = fagsak.id)
+        val behandling = behandlingService.opprettBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                                                             fagsakId = fagsak.id)
 
-        return tilkjentYtelseService.opprettTilkjentYtelse(tilkjentYtelseTestDTO.nyTilkjentYtelse.tilDto())
+        tilkjentYtelseService.opprettTilkjentYtelse(tilkjentYtelseTestDTO.nyTilkjentYtelse.tilDto()
+                                                            .copy(behandlingId = behandling.id))
+        return tilkjentYtelseService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(behandling)
     }
 }
