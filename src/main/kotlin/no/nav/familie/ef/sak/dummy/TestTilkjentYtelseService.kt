@@ -9,7 +9,6 @@ import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.TilkjentYtelseService
 import no.nav.familie.ef.sak.økonomi.tilKlassifisering
-import no.nav.familie.kontrakter.felles.oppdrag.KonsistensavstemmingRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -36,8 +35,6 @@ class TestTilkjentYtelseService(private val behandlingService: BehandlingService
                                                      status = BehandlingStatus.FERDIGSTILT)
         return opprettTilkjentYtelse
     }
-
-
 
     fun konsistensavstemOppdrag(stønadstype: Stønadstype): KonsistensavstemmingRequestV2 {
         val oppdragIdListe = tilkjentYtelseService.finnLøpendeUtbetalninger2(datoForAvstemming = LocalDate.now(),

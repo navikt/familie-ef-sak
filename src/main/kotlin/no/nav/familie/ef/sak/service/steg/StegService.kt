@@ -38,6 +38,22 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
         return håndterSteg(behandling, behandlingSteg, null)
     }
 
+    @Transactional
+    fun håndterIverksettingOppdrag(behandling: Behandling): Behandling {
+        val behandlingSteg: IverksettMotOppdragSteg = hentBehandlingSteg(StegType.IVERKSETT_MOT_OPPDRAG)
+
+        return håndterSteg(behandling, behandlingSteg, null)
+    }
+
+    @Transactional
+    fun håndterStatusPåOppdrag(behandling: Behandling): Behandling {
+        val behandlingSteg: VentePåStatusFraØkonomi = hentBehandlingSteg(StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI)
+
+        return håndterSteg(behandling, behandlingSteg, null)
+    }
+
+
+
     // Generelle stegmetoder
     private fun <T> håndterSteg(behandling: Behandling,
                                 behandlingSteg: BehandlingSteg<T>,

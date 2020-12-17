@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.repository.domain.DelvilkårsvurderingWrapper
 import no.nav.familie.ef.sak.repository.domain.Endret
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus
 import no.nav.familie.ef.sak.repository.domain.søknad.Dokumentasjon
+import no.nav.familie.ef.sak.repository.domain.søknad.UnderUtdanning
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.prosessering.PropertiesWrapperTilStringConverter

@@ -6,15 +6,12 @@ import no.nav.familie.ef.sak.integration.OppdragClient
 import no.nav.familie.ef.sak.mapper.tilDto
 import no.nav.familie.ef.sak.mapper.tilTilkjentYtelse
 import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
-import no.nav.familie.ef.sak.repository.domain.Stønadstype
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseMedMetaData
+import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.økonomi.UtbetalingsoppdragGenerator
 import no.nav.familie.ef.sak.økonomi.tilKlassifisering
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragIdForFagsystem
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
-import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -27,9 +24,8 @@ class TilkjentYtelseService(private val oppdragClient: OppdragClient,
                             private val fagsakService: FagsakService,
                             private val tilkjentYtelseRepository: TilkjentYtelseRepository) {
 
-    fun hentStatus(tilkjentYtelseId: UUID): OppdragStatus {
-        val tilkjentYtelse = hentTilkjentYtelse(tilkjentYtelseId)
-        val behandling = behandlingService.hentBehandling(tilkjentYtelse.behandlingId)
+    fun hentStatus(behandling: Behandling): OppdragStatus {
+        val tilkjentYtelse = hentTilkjentYtelseFraBehandlingId(behandling.id)
         val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
 
         val oppdragId = OppdragId(fagsystem = fagsak.stønadstype.tilKlassifisering(),
@@ -44,11 +40,17 @@ class TilkjentYtelseService(private val oppdragClient: OppdragClient,
         return tilkjentYtelse.tilDto()
     }
 
-    @Transactional
     fun opprettTilkjentYtelse(tilkjentYtelseDTO: TilkjentYtelseDTO): TilkjentYtelse {
         val nyTilkjentYtelse = tilkjentYtelseDTO.tilTilkjentYtelse()
+        val andelerMedGodtykkligKildeId = nyTilkjentYtelse.andelerTilkjentYtelse.map { it.copy(kildeBehandlingId = nyTilkjentYtelse.behandlingId) }
+        return tilkjentYtelseRepository.insert(nyTilkjentYtelse.copy(andelerTilkjentYtelse = andelerMedGodtykkligKildeId))
+    }
 
-        val behandling = behandlingService.hentBehandling(nyTilkjentYtelse.behandlingId)
+    @Transactional
+    fun oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(behandling: Behandling): TilkjentYtelse {
+
+        val nyTilkjentYtelse = hentTilkjentYtelseFraBehandlingId(behandlingId = behandling.id)
+
         val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
 
         val nyTilkjentYtelseMedEksternId = TilkjentYtelseMedMetaData(nyTilkjentYtelse,
@@ -61,7 +63,7 @@ class TilkjentYtelseService(private val oppdragClient: OppdragClient,
         return UtbetalingsoppdragGenerator
                 .lagTilkjentYtelseMedUtbetalingsoppdrag(nyTilkjentYtelseMedMetaData = nyTilkjentYtelseMedEksternId,
                                                         forrigeTilkjentYtelse = forrigeTilkjentYtelse)
-                .let { tilkjentYtelseRepository.insert(it) }
+                .let { tilkjentYtelseRepository.update(it) }
                 .also {
                     oppdragClient.iverksettOppdrag(it.utbetalingsoppdrag
                                                    ?: error("utbetalingsoppdrag skal være generert i UtbetalingsoppdragGenerator"))
@@ -73,7 +75,7 @@ class TilkjentYtelseService(private val oppdragClient: OppdragClient,
                 .chunked(1000)
                 .flatMap {
                     tilkjentYtelseRepository.finnKildeBehandlingIdFraAndelTilkjentYtelse(datoForAvstemming = datoForAvstemming,
-                                                                                               sisteBehandlinger = it)
+                                                                                         sisteBehandlinger = it)
                 }
     }
 
@@ -91,5 +93,10 @@ class TilkjentYtelseService(private val oppdragClient: OppdragClient,
     private fun hentTilkjentYtelse(tilkjentYtelseId: UUID) =
             tilkjentYtelseRepository.findByIdOrNull(tilkjentYtelseId)
             ?: error("Fant ikke tilkjent ytelse med id $tilkjentYtelseId")
+
+
+    private fun hentTilkjentYtelseFraBehandlingId(behandlingId: UUID) =
+            tilkjentYtelseRepository.findByBehandlingId(behandlingId)
+            ?: error("Fant ikke tilkjent ytelse med behandlingsid $behandlingId")
 
 }

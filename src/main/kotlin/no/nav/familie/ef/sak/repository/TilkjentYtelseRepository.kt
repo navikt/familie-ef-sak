@@ -11,6 +11,8 @@ interface TilkjentYtelseRepository : RepositoryInterface<TilkjentYtelse, UUID>, 
 
     fun findByPersonident(personident: String): TilkjentYtelse?
 
+    fun findByBehandlingId(behandlingId: UUID): TilkjentYtelse?
+
     // language=PostgreSQL
     @Query("""
         SELECT ty.*

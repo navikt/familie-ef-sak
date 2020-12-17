@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.repository.domain.søknad
 
 import org.springframework.data.relational.core.mapping.Column
-import org.springframework.data.relational.core.mapping.MappedCollection
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -15,8 +14,6 @@ data class UnderUtdanning(val skoleUtdanningssted: String,
                           @Column("hva_er_malet_med_utdanningen")
                           val hvaErMåletMedUtdanningen: String?,
                           val utdanningEtterGrunnskolen: Boolean,
-                          @MappedCollection(idColumn = "soknadsskjema_id")
-                          val tidligereUtdanninger: Set<TidligereUtdanning>? = emptySet(),
                           val semesteravgift: Int? = null,
                           val studieavgift: Int? = null,
                           val eksamensgebyr: Int? = null)
