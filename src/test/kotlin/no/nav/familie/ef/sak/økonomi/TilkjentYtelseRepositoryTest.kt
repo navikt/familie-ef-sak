@@ -13,6 +13,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
+import java.time.LocalDate
 
 
 internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
@@ -76,6 +77,25 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
                 tilkjentYtelseRepository.findByPersonident(tilkjentYtelse.personident)
 
         assertThat(hentetTilkjentYtelse).isEqualTo(lagretTilkjentYtelse)
+    }
+
+    @Test
+    internal fun `finn periodeIdn for behandlinger`() {
+        val fagsak = fagsakRepository.insert(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak))
+        var tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(behandling)
+        val nyeAndeler =
+                tilkjentYtelse.andelerTilkjentYtelse.map { it.copy(stønadTom = LocalDate.now().plusYears(1),
+                                                                   periodeId = 1) }
+        tilkjentYtelse = tilkjentYtelse.copy(andelerTilkjentYtelse = nyeAndeler)
+        tilkjentYtelseRepository.insert(tilkjentYtelse)
+        val finnKildeBehandlingIdFraAndelTilkjentYtelse2 =
+                tilkjentYtelseRepository.finnKildeBehandlingIdFraAndelTilkjentYtelse2(LocalDate.now(), listOf(behandling.id))
+        assertThat(finnKildeBehandlingIdFraAndelTilkjentYtelse2).hasSize(1)
+        assertThat(finnKildeBehandlingIdFraAndelTilkjentYtelse2[0].first).isEqualTo(fagsak.eksternId.id)
+        assertThat(finnKildeBehandlingIdFraAndelTilkjentYtelse2[0].second)
+                .isEqualTo(tilkjentYtelse.andelerTilkjentYtelse[0].periodeId)
+
     }
 
     private fun opprettBehandling() : Behandling {

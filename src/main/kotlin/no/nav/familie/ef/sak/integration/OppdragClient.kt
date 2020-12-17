@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.integration
 
+import no.nav.familie.ef.sak.dummy.KonsistensavstemmingRequestV2
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.http.config.RestTemplateBuilderBean
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -30,6 +31,9 @@ class OppdragClient(@Value("\${FAMILIE_OPPDRAG_API_URL}")
     private val konsistensavstemmingUri: URI =
             UriComponentsBuilder.fromUri(familieOppdragUri).pathSegment("api/konsistensavstemming").build().toUri()
 
+    private val konsistensavstemmingUriV2: URI =
+            UriComponentsBuilder.fromUri(familieOppdragUri).pathSegment("api/v2/konsistensavstemming").build().toUri()
+
     fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag): String {
         return postForEntity<Ressurs<String>>(postOppdragUri, utbetalingsoppdrag).getDataOrThrow()
     }
@@ -44,6 +48,10 @@ class OppdragClient(@Value("\${FAMILIE_OPPDRAG_API_URL}")
 
     fun konsistensavstemming(konsistensavstemmingRequest: KonsistensavstemmingRequest): String {
         return postForEntity<Ressurs<String>>(konsistensavstemmingUri, konsistensavstemmingRequest).getDataOrThrow()
+    }
+
+    fun konsistensavstemming(konsistensavstemmingRequest: KonsistensavstemmingRequestV2): String {
+        return postForEntity<Ressurs<String>>(konsistensavstemmingUriV2, konsistensavstemmingRequest).getDataOrThrow()
     }
 
 }

@@ -37,11 +37,13 @@ class TestTilkjentYtelseService(private val behandlingService: BehandlingService
         return opprettTilkjentYtelse
     }
 
-    fun konsistensavstemOppdrag(stønadstype: Stønadstype): KonsistensavstemmingRequest {
-        val oppdragIdListe = tilkjentYtelseService.finnLøpendeUtbetalninger(datoForAvstemming = LocalDate.now(),
+
+
+    fun konsistensavstemOppdrag(stønadstype: Stønadstype): KonsistensavstemmingRequestV2 {
+        val oppdragIdListe = tilkjentYtelseService.finnLøpendeUtbetalninger2(datoForAvstemming = LocalDate.now(),
                                                                             stønadstype = stønadstype)
-        return KonsistensavstemmingRequest(fagsystem = stønadstype.tilKlassifisering(),
-                                           oppdragIdListe = oppdragIdListe,
+        return KonsistensavstemmingRequestV2(fagsystem = stønadstype.tilKlassifisering(),
+                                           periodeIdn = oppdragIdListe,
                                            avstemmingstidspunkt = LocalDateTime.now())
     }
 

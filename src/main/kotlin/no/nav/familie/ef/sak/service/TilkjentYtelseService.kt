@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
+import no.nav.familie.ef.sak.dummy.PeriodeIdnForFagsak
 import no.nav.familie.ef.sak.integration.OppdragClient
 import no.nav.familie.ef.sak.mapper.tilDto
 import no.nav.familie.ef.sak.mapper.tilTilkjentYtelse
@@ -73,6 +74,17 @@ class TilkjentYtelseService(private val oppdragClient: OppdragClient,
                 .flatMap {
                     tilkjentYtelseRepository.finnKildeBehandlingIdFraAndelTilkjentYtelse(datoForAvstemming = datoForAvstemming,
                                                                                                sisteBehandlinger = it)
+                }
+    }
+
+    fun finnLøpendeUtbetalninger2(stønadstype: Stønadstype, datoForAvstemming: LocalDate): List<PeriodeIdnForFagsak> {
+        return tilkjentYtelseRepository.finnSisteBehandlingForFagsak(stønadstype = stønadstype)
+                .chunked(1000)
+                .flatMap {
+                    val finnKildeBehandlingIdFraAndelTilkjentYtelse =
+                            tilkjentYtelseRepository.finnKildeBehandlingIdFraAndelTilkjentYtelse2(datoForAvstemming = datoForAvstemming,
+                                                                                                 sisteBehandlinger = it)
+                    return finnKildeBehandlingIdFraAndelTilkjentYtelse.groupBy( { it.first },{it.second}).map { PeriodeIdnForFagsak(it.key.toString(), it.value.toSet()) }
                 }
     }
 

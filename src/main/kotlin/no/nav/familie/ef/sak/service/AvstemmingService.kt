@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.service
 import no.nav.familie.ef.sak.api.avstemming.GrensesnittavstemmingDto
 import no.nav.familie.ef.sak.api.avstemming.KonsistensavstemmingDto
 import no.nav.familie.ef.sak.api.avstemming.tilTask
+import no.nav.familie.ef.sak.dummy.KonsistensavstemmingRequestV2
 import no.nav.familie.ef.sak.integration.OppdragClient
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.økonomi.tilKlassifisering
@@ -37,9 +38,9 @@ class AvstemmingService(private val oppdragClient: OppdragClient,
     }
 
     fun konsistensavstemOppdrag(stønadstype: Stønadstype) {
-        val oppdragIdListe = tilkjentYtelseService.finnLøpendeUtbetalninger(datoForAvstemming = LocalDate.now(), stønadstype = stønadstype)
-        val konsistensavstemmingRequest = KonsistensavstemmingRequest(fagsystem = stønadstype.tilKlassifisering(),
-                                                                      oppdragIdListe = oppdragIdListe,
+        val oppdragIdListe = tilkjentYtelseService.finnLøpendeUtbetalninger2(datoForAvstemming = LocalDate.now(), stønadstype = stønadstype)
+        val konsistensavstemmingRequest = KonsistensavstemmingRequestV2(fagsystem = stønadstype.tilKlassifisering(),
+                                                                      periodeIdn = oppdragIdListe,
                                                                       avstemmingstidspunkt = LocalDateTime.now())
         oppdragClient.konsistensavstemming(konsistensavstemmingRequest)
     }

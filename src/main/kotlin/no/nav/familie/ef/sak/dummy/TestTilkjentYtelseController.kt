@@ -26,7 +26,7 @@ class TestTilkjentYtelseController(private val testTilkjentYtelseService: TestTi
     }
 
     @GetMapping("/konsistensavstemming/{stønadstype}")
-    fun getKonsistensavstemming(@PathVariable stønadstype: Stønadstype): Ressurs<KonsistensavstemmingRequest> {
+    fun getKonsistensavstemming(@PathVariable stønadstype: Stønadstype): Ressurs<KonsistensavstemmingRequestV2> {
         return Ressurs.success(testTilkjentYtelseService.konsistensavstemOppdrag(stønadstype))
     }
 
