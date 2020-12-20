@@ -30,7 +30,7 @@
         <changelist>-SNAPSHOT</changelist>
         <jvmTarget>11</jvmTarget>
         <kotlin.version>1.4.21</kotlin.version>
-        <kotlin-coroutines.version>1.4.2</kotlin-coroutines.version>
+        <kotlin-coroutines.version>1.4.2-native-mt</kotlin-coroutines.version>
         <springfox.version>3.0.0</springfox.version>
         <mockk.version>1.10.3</mockk.version>
         <felles.version>1.20201123131335_671787f</felles.version>
