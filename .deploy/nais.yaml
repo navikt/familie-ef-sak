@@ -8,6 +8,8 @@ metadata:
 
 spec:
   image: {{ image }}
+  ingresses:
+    - {{ingress}}
   liveness:
     path: /internal/status/isAlive
     initialDelay: 30
@@ -34,7 +36,7 @@ spec:
     enabled: true
   gcp:
     sqlInstances:
-      - type: POSTGRES_11
+      - type: POSTGRES_13 # IF This is changed, all data will be lost. Read on nais.io how to upgrade
         databases:
           - name: familie-ef-sak
             envVarPrefix: DB
@@ -45,10 +47,12 @@ spec:
         - application: familie-ef-sak-frontend
     outbound:
       external:
-        - { { #each externalHosts as |host|}}
-              - host: {{host } }
-            {{/each}}
-        - host: login.microsoftonline.com
+        {{ #each externalHosts as |host|}}
+        - host: {{host } }
+        {{/each}}
+  azure:
+    application:
+      enabled: true
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: {{springProfile}}
