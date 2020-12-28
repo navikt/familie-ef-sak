@@ -88,7 +88,7 @@ FAMILIE_INTEGRASJONER_URL: http://familie-integrasjoner
 STS_URL: http://security-token-service.default.svc.nais.local/rest/v1/sts/token?grant_type=client_credentials&scope=openid
 PDL_URL: http://pdl-api
 FAMILIE_OPPDRAG_API_URL: http://familie-oppdrag
-INFOTRYGD_FEED_API_URL: https://familie-ef-infotrygd-feed
+INFOTRYGD_FEED_API_URL: https://familie-ef-infotrygd-feed.nais.adeo.no
 
 FRONTEND_OPPGAVE_URL: https://ensligmorellerfar.prod-fss.nais.io/fagsak
 
