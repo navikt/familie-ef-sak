@@ -29,14 +29,14 @@
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <jvmTarget>11</jvmTarget>
-        <kotlin.version>1.4.21</kotlin.version>
+        <kotlin.version>1.4.21-2</kotlin.version>
         <kotlin-coroutines.version>1.4.2</kotlin-coroutines.version>
         <springfox.version>3.0.0</springfox.version>
-        <mockk.version>1.10.3</mockk.version>
+        <mockk.version>1.10.4</mockk.version>
         <felles.version>1.20201123131335_671787f</felles.version>
         <prosessering.version>1.20201116145947_63cf900</prosessering.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>2.0_20201217132236_b7bcab2</kontrakter.version>
+        <kontrakter.version>2.0_20210104141601_662329d</kontrakter.version>
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
         <sonar.organization>navit</sonar.organization>
@@ -224,7 +224,7 @@
         <dependency>
             <groupId>com.github.doyaaaaaken</groupId>
             <artifactId>kotlin-csv-jvm</artifactId>
-            <version>0.14.0</version>
+            <version>0.15.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -232,7 +232,7 @@
         <dependency>
             <groupId>no.nav.fpsak.tidsserie</groupId>
             <artifactId>fpsak-tidsserie</artifactId>
-            <version>2.3-20201105073711-3f1c6f2</version>
+            <version>2.5.5</version>
         </dependency>
     </dependencies>
 
