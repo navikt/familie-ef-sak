@@ -1,17 +1,20 @@
 package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
-import no.nav.familie.ef.sak.dummy.PeriodeIdnForFagsak
 import no.nav.familie.ef.sak.integration.OppdragClient
 import no.nav.familie.ef.sak.mapper.tilDto
 import no.nav.familie.ef.sak.mapper.tilTilkjentYtelse
 import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
-import no.nav.familie.ef.sak.repository.domain.*
+import no.nav.familie.ef.sak.repository.domain.Behandling
+import no.nav.familie.ef.sak.repository.domain.Stønadstype
+import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseMedMetaData
 import no.nav.familie.ef.sak.økonomi.UtbetalingsoppdragGenerator
 import no.nav.familie.ef.sak.økonomi.tilKlassifisering
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragIdForFagsystem
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
+import no.nav.familie.kontrakter.felles.oppdrag.PeriodeIdnForFagsak
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -70,16 +73,7 @@ class TilkjentYtelseService(private val oppdragClient: OppdragClient,
                 }
     }
 
-    fun finnLøpendeUtbetalninger(stønadstype: Stønadstype, datoForAvstemming: LocalDate): List<OppdragIdForFagsystem> {
-        return tilkjentYtelseRepository.finnSisteBehandlingForFagsak(stønadstype = stønadstype)
-                .chunked(1000)
-                .flatMap {
-                    tilkjentYtelseRepository.finnKildeBehandlingIdFraAndelTilkjentYtelse(datoForAvstemming = datoForAvstemming,
-                                                                                         sisteBehandlinger = it)
-                }
-    }
-
-    fun finnLøpendeUtbetalninger2(stønadstype: Stønadstype, datoForAvstemming: LocalDate): List<PeriodeIdnForFagsak> {
+    fun finnLøpendeUtbetalninger(stønadstype: Stønadstype, datoForAvstemming: LocalDate): List<PeriodeIdnForFagsak> {
         return tilkjentYtelseRepository.finnSisteBehandlingForFagsak(stønadstype = stønadstype)
                 .chunked(1000)
                 .flatMap {
