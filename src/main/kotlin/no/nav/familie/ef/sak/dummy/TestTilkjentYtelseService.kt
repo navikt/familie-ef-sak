@@ -41,8 +41,8 @@ class TestTilkjentYtelseService(private val behandlingService: BehandlingService
         val oppdragIdListe = tilkjentYtelseService.finnLøpendeUtbetalninger(datoForAvstemming = LocalDate.now(),
                                                                             stønadstype = stønadstype)
         return KonsistensavstemmingRequestV2(fagsystem = stønadstype.tilKlassifisering(),
-                                           periodeIdn = oppdragIdListe,
-                                           avstemmingstidspunkt = LocalDateTime.now())
+                                             perioderForBehandlinger = oppdragIdListe,
+                                             avstemmingstidspunkt = LocalDateTime.now())
     }
 
     private fun behandlingType(fagsak: FagsakDto): BehandlingType =

@@ -37,10 +37,11 @@ class AvstemmingService(private val oppdragClient: OppdragClient,
     }
 
     fun konsistensavstemOppdrag(stønadstype: Stønadstype) {
-        val oppdragIdListe = tilkjentYtelseService.finnLøpendeUtbetalninger(datoForAvstemming = LocalDate.now(), stønadstype = stønadstype)
+        val oppdragIdListe =
+                tilkjentYtelseService.finnLøpendeUtbetalninger(datoForAvstemming = LocalDate.now(), stønadstype = stønadstype)
         val konsistensavstemmingRequest = KonsistensavstemmingRequestV2(fagsystem = stønadstype.tilKlassifisering(),
-                                                                      periodeIdn = oppdragIdListe,
-                                                                      avstemmingstidspunkt = LocalDateTime.now())
+                                                                        perioderForBehandlinger = oppdragIdListe,
+                                                                        avstemmingstidspunkt = LocalDateTime.now())
         oppdragClient.konsistensavstemming(konsistensavstemmingRequest)
     }
 

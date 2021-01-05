@@ -102,9 +102,9 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
         tilkjentYtelse = tilkjentYtelse.copy(andelerTilkjentYtelse = nyeAndeler)
         tilkjentYtelseRepository.insert(tilkjentYtelse)
         val finnKildeBehandlingIdFraAndelTilkjentYtelse2 =
-                tilkjentYtelseRepository.finnKildeBehandlingIdFraAndelTilkjentYtelse2(LocalDate.now(), listOf(behandling.id))
+                tilkjentYtelseRepository.finnKildeBehandlingIdFraAndelTilkjentYtelse(LocalDate.now(), listOf(behandling.id))
         assertThat(finnKildeBehandlingIdFraAndelTilkjentYtelse2).hasSize(1)
-        assertThat(finnKildeBehandlingIdFraAndelTilkjentYtelse2[0].first).isEqualTo(fagsak.eksternId.id)
+        assertThat(finnKildeBehandlingIdFraAndelTilkjentYtelse2[0].first).isEqualTo(behandling.eksternId.id)
         assertThat(finnKildeBehandlingIdFraAndelTilkjentYtelse2[0].second)
                 .isEqualTo(tilkjentYtelse.andelerTilkjentYtelse[0].periodeId)
 

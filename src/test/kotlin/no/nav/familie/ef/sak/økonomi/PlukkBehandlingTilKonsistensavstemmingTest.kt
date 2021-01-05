@@ -184,7 +184,7 @@ internal class PlukkBehandlingTilKonsistensavstemmingTest : OppslagSpringRunnerT
         val stønadstype = Stønadstype.OVERGANGSSTØNAD
         val oppdragIdForFagsystem = tilkjentYtelseService.finnLøpendeUtbetalninger(datoForAvstemming = datoForAvstemming,
                                                                                     stønadstype = stønadstype)
-        val faktiskePeriodeIdn = oppdragIdForFagsystem.flatMap { it.periodeIdn }
+        val faktiskePeriodeIdn = oppdragIdForFagsystem.flatMap { it.perioder }
         try {
             assertThat(faktiskePeriodeIdn)
                     .withFailMessage("$feilmelding - forventet:${periodeIdn.toList()}, faktisk:$faktiskePeriodeIdn")

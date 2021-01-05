@@ -12,9 +12,8 @@ import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseMedMetaData
 import no.nav.familie.ef.sak.økonomi.UtbetalingsoppdragGenerator
 import no.nav.familie.ef.sak.økonomi.tilKlassifisering
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
-import no.nav.familie.kontrakter.felles.oppdrag.OppdragIdForFagsystem
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
-import no.nav.familie.kontrakter.felles.oppdrag.PeriodeIdnForFagsak
+import no.nav.familie.kontrakter.felles.oppdrag.PerioderForBehandling
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -73,14 +72,15 @@ class TilkjentYtelseService(private val oppdragClient: OppdragClient,
                 }
     }
 
-    fun finnLøpendeUtbetalninger(stønadstype: Stønadstype, datoForAvstemming: LocalDate): List<PeriodeIdnForFagsak> {
+    fun finnLøpendeUtbetalninger(stønadstype: Stønadstype, datoForAvstemming: LocalDate): List<PerioderForBehandling> {
         return tilkjentYtelseRepository.finnSisteBehandlingForFagsak(stønadstype = stønadstype)
                 .chunked(1000)
-                .flatMap {
+                .flatMap { sisteBehandlinger ->
                     val finnKildeBehandlingIdFraAndelTilkjentYtelse =
-                            tilkjentYtelseRepository.finnKildeBehandlingIdFraAndelTilkjentYtelse2(datoForAvstemming = datoForAvstemming,
-                                                                                                 sisteBehandlinger = it)
-                    return finnKildeBehandlingIdFraAndelTilkjentYtelse.groupBy( { it.first },{it.second}).map { PeriodeIdnForFagsak(it.key.toString(), it.value.toSet()) }
+                            tilkjentYtelseRepository.finnKildeBehandlingIdFraAndelTilkjentYtelse(datoForAvstemming = datoForAvstemming,
+                                                                                                 sisteBehandlinger = sisteBehandlinger)
+                    return finnKildeBehandlingIdFraAndelTilkjentYtelse.groupBy({ it.first }, { it.second })
+                            .map { PerioderForBehandling(it.key.toString(), it.value.toSet()) }
                 }
     }
 
