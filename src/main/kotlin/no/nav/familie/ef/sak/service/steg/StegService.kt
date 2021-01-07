@@ -40,7 +40,7 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
 
     @Transactional
     fun håndterStønadsvilkår(behandling: Behandling): Behandling {
-        val behandlingSteg: InngangsvilkårSteg = hentBehandlingSteg(VILKÅRSVURDERE_STØNAD)
+        val behandlingSteg: StønadsvilkårSteg = hentBehandlingSteg(VILKÅRSVURDERE_STØNAD)
         return håndterSteg(behandling, behandlingSteg, null)
     }
 

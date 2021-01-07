@@ -15,7 +15,7 @@ import java.util.*
 
 
 @RestController
-@RequestMapping(path = ["/api/beregning"], produces = [MediaType.APPLICATION_JSON_VALUE])
+@RequestMapping(path = ["/api/vedtak"], produces = [MediaType.APPLICATION_JSON_VALUE])
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class VedtakController(private val stegService: StegService,
