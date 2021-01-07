@@ -104,7 +104,7 @@ class PdlClientTest {
     fun `pdlClient håndterer response for uthenting av identer`() {
         wiremockServerItem.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
                                            .willReturn(okJson(readFile("hent_identer.json"))))
-        val response = pdlClient.hentAktørId("12345")
+        val response = pdlClient.hentAktørIder("12345")
         assertThat(response.identer.first().ident).isEqualTo("12345678901")
     }
 

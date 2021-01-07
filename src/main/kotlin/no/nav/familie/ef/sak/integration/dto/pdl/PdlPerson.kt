@@ -38,9 +38,9 @@ interface PdlPerson {
 
 data class PdlIdent(val ident: String)
 
-data class PdlAktørId(val identer: List<PdlIdent>)
+data class PdlIdenter(val identer: List<PdlIdent>)
 
-data class PdlHentIdenter(val hentIdenter: PdlAktørId?)
+data class PdlHentIdenter(val hentIdenter: PdlIdenter?)
 
 data class PdlPersonKort(val navn: List<Navn>)
 

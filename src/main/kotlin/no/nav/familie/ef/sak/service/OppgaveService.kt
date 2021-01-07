@@ -45,7 +45,7 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
             oppgaveFinnesFraFør.gsakOppgaveId
         } else {
 
-            val aktørId = pdlClient.hentAktørId(fagsak.hentAktivIdent()).identer.first().ident
+            val aktørId = pdlClient.hentAktørIder(fagsak.hentAktivIdent()).identer.first().ident
             val enhetsnummer = arbeidsfordelingService.hentNavEnhet(fagsak.hentAktivIdent())
             val opprettOppgave =
                     OpprettOppgaveRequest(ident = OppgaveIdentV2(ident = aktørId, gruppe = IdentGruppe.AKTOERID),
