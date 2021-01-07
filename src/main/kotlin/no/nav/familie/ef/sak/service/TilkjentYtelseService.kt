@@ -5,7 +5,11 @@ import no.nav.familie.ef.sak.integration.OppdragClient
 import no.nav.familie.ef.sak.mapper.tilDto
 import no.nav.familie.ef.sak.mapper.tilTilkjentYtelse
 import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
-import no.nav.familie.ef.sak.repository.domain.*
+import no.nav.familie.ef.sak.repository.domain.Behandling
+import no.nav.familie.ef.sak.repository.domain.Stønadstype
+import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseMedMetaData
+import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus.*
 import no.nav.familie.ef.sak.økonomi.UtbetalingsoppdragGenerator
 import no.nav.familie.ef.sak.økonomi.tilKlassifisering
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
@@ -76,6 +80,16 @@ class TilkjentYtelseService(private val oppdragClient: OppdragClient,
                     tilkjentYtelseRepository.finnKildeBehandlingIdFraAndelTilkjentYtelse(datoForAvstemming = datoForAvstemming,
                                                                                          sisteBehandlinger = it)
                 }
+    }
+
+    fun slettTilkjentYtelseForBehandling(behandlingId: UUID) {
+        val eksisterendeTilkjentYtelse = tilkjentYtelseRepository.findByBehandlingId(behandlingId)
+        eksisterendeTilkjentYtelse?.let {
+            when (it.status) {
+                IKKE_KLAR, OPPRETTET -> tilkjentYtelseRepository.deleteById(it.id)
+                SENDT_TIL_IVERKSETTING, AVSLUTTET, AKTIV -> error("Kan ikke reberegne tilkjent ytelse som er ${it.status}")
+            }
+        }
     }
 
     private fun hentTilkjentYtelse(tilkjentYtelseId: UUID) =

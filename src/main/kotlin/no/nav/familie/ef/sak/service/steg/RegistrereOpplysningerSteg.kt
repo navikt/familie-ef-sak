@@ -6,9 +6,9 @@ import no.nav.familie.ef.sak.service.BehandlingService
 import org.springframework.stereotype.Service
 
 @Service
-class RegistrereOpplysningerSteg(private val behandlingService: BehandlingService) : BehandlingSteg<String> {
+class RegistrereOpplysningerSteg(private val behandlingService: BehandlingService) : BehandlingSteg<String?> {
 
-    override fun utførSteg(behandling: Behandling, data: String) {
+    override fun utførSteg(behandling: Behandling, data: String?) {
         // TODO: Søknad og behandling kan kobles sammen her
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.UTREDES)
     }

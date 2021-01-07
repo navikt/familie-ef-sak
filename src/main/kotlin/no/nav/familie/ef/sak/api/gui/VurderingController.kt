@@ -41,4 +41,12 @@ class VurderingController(private val vurderingService: VurderingService,
         val behandling = behandlingService.hentBehandling(behandlingId)
         return Ressurs.success(stegService.håndterInngangsvilkår(behandling).id)
     }
+    @PostMapping("/{behandlingId}/overgangsstønad/fullfor")
+    fun fullførStønadsvilkår(@PathVariable behandlingId: UUID): Ressurs<UUID> {
+        tilgangService.validerTilgangTilBehandling(behandlingId)
+        val behandling = behandlingService.hentBehandling(behandlingId)
+        stegService.håndterRegistrerOpplysninger(behandling, null)
+
+        return Ressurs.success(stegService.håndterStønadsvilkår(behandling).id)
+    }
 }
