@@ -24,6 +24,15 @@ no.nav.security.jwt:
           client-id: ${AZURE_CLIENT_ID}
           client-secret: ${AZURE_CLIENT_SECRET}
           client-auth-method: client_secret_basic
+      familie-integrasjoner-clientcredentials:
+        resource-url: ${FAMILIE_INTEGRASJONER_URL}
+        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
+        grant-type: client_credentials
+        scope: ${FAMILIE_INTEGRASJONER_SCOPE}
+        authentication:
+          client-id: ${AZURE_CLIENT_ID}
+          client-secret: ${AZURE_CLIENT_SECRET}
+          client-auth-method: client_secret_basic
       familie-oppdrag:
         resource-url: ${FAMILIE_OPPDRAG_API_URL}
         token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
