@@ -30,7 +30,7 @@ internal class OppgaveControllerTest {
     internal fun `skal sende med aktoerId i request `() {
         val finnOppgaveRequestSlot = slot<FinnOppgaveRequest>()
         tilgangOgRolleJustRuns()
-        every { pdlClient.hentAktørIder("4321") } returns PdlIdenter(listOf(PdlIdent("1234")))
+        every { pdlClient.hentAktørIder("4321") } returns PdlIdenter(listOf(PdlIdent("1234", false)))
         every { oppgaveService.hentOppgaver(capture(finnOppgaveRequestSlot)) } returns FinnOppgaveResponseDto(0, listOf())
         oppgaveController.hentOppgaver(FinnOppgaveRequestDto(ident = "4321"))
         assertThat(finnOppgaveRequestSlot.captured.aktørId).isEqualTo("1234")

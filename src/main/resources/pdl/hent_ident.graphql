@@ -2,6 +2,7 @@ query($ident: ID!, $gruppe: [IdentGruppe!], $historikk: Boolean = false) {
     hentIdenter(ident: $ident, grupper: $gruppe, historikk: $historikk) {
         identer {
             ident
+            historisk
         }
     }
 }

@@ -32,7 +32,7 @@ internal class JournalføringControllerTest {
 
         every {
             pdlClient.hentPersonidenter(aktørId)
-        } returns PdlIdenter(listOf(PdlIdent(personIdentFraPdl)))
+        } returns PdlIdenter(listOf(PdlIdent(personIdentFraPdl, false)))
 
         every {
             journalføringService.hentJournalpost(any())

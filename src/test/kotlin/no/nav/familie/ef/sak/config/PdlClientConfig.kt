@@ -59,10 +59,10 @@ class PdlClientConfig {
 
         every { pdlClient.hentBarn(any()) } returns barn()
 
-        every { pdlClient.hentAktørIder(any()) } returns PdlIdenter(listOf(PdlIdent("12345678901232")))
+        every { pdlClient.hentAktørIder(any()) } returns PdlIdenter(listOf(PdlIdent("12345678901232", false)))
 
         every { pdlClient.hentPersonidenter(any(), eq(true)) } answers
-                { PdlIdenter(listOf(PdlIdent(firstArg()),PdlIdent("98765432109"))) }
+                { PdlIdenter(listOf(PdlIdent(firstArg(), false), PdlIdent("98765432109", true))) }
 
         return pdlClient
     }
