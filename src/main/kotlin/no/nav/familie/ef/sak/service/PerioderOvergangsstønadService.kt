@@ -8,13 +8,6 @@ import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadRequest
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
 import org.springframework.stereotype.Service
 
-/**
- * TODO fullOvergangsstønad - er den kanskje kun intressant for BA, og de trenger den kun når de henter aktuelle perioder nå.
- * Dvs vi skal bruke dagens grunnbeløp og 2.25 (ef-faktor?)
- * Grunnbeløp kan hentes fra https://github.com/navikt/g
- *
- * TODO hent perioder fra EF-sak sin database
- */
 @Service
 class PerioderOvergangsstønadService(private val infotrygdReplikaClient: InfotrygdReplikaClient,
                                      private val pdlClient: PdlClient) {
@@ -33,7 +26,6 @@ class PerioderOvergangsstønadService(private val infotrygdReplikaClient: Infotr
             PeriodeOvergangsstønad(ident = it.ident,
                                    fomDato = it.fomDato,
                                    tomDato = it.tomDato,
-                                   fullOvergangsstønad = false, //TODO gjøres i egen PR? // burde vi sette denne til null?
                                    datakilde = PeriodeOvergangsstønad.Datakilde.INFOTRYGD)
         }
     }
