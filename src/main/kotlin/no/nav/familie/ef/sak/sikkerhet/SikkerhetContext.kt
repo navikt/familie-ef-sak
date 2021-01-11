@@ -32,6 +32,19 @@ object SikkerhetContext {
                       onFailure = { emptyList() })
     }
 
+    /**
+     * Henter ut system fra tokens med formatet <issuer>/<system>, eks sts/srvArena
+     */
+    fun hentSystemIder(): Set<String> {
+        return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
+                .fold(onSuccess = {
+                    it.issuers.mapNotNull { issuer ->
+                        val system = it.getClaims(issuer)?.get("azp") as String? ?: return@mapNotNull null
+                        "$issuer/$system"
+                    }.toSet()
+                }, onFailure = { emptySet() })
+    }
+
     fun harTilgangTilGittRolle(rolleConfig: RolleConfig, minimumsrolle: BehandlerRolle): Boolean {
         val rollerFraToken = hentGruppeFraToken()
         val rollerForBruker = when {

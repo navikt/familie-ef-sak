@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.service
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.api.ManglerTilgang
+import no.nav.familie.ef.sak.config.KlientValidatorConfig
 import no.nav.familie.ef.sak.config.RolleConfig
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.dto.familie.Tilgang
@@ -21,8 +22,14 @@ internal class TilgangServiceTest {
     private val familieIntegrasjonerClient: FamilieIntegrasjonerClient = mockk()
     private val behandlingService: BehandlingService = mockk()
     private val fagsakService: FagsakService = mockk()
+    private val klientValidatorConfig = KlientValidatorConfig(mapOf(KlientValidatorConfig.Klient.ARENA to "sts/123"))
     private val tilgangService =
-            TilgangService(familieIntegrasjonerClient, personService, behandlingService, fagsakService, RolleConfig("", "", ""))
+            TilgangService(familieIntegrasjonerClient,
+                           personService,
+                           behandlingService,
+                           fagsakService,
+                           RolleConfig("", "", ""),
+                           klientValidatorConfig)
     private val mocketPersonIdent = "12345"
 
     val fagsak = fagsak(fagsakpersoner(setOf(mocketPersonIdent)))
