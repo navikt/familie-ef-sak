@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.mapper
 
 import no.nav.familie.ef.sak.api.dto.*
-import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.dto.pdl.Folkeregistermetadata
 import no.nav.familie.ef.sak.integration.dto.pdl.InnflyttingTilNorge
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker

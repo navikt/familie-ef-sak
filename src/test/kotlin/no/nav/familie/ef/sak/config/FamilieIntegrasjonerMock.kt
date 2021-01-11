@@ -15,6 +15,7 @@ import no.nav.familie.kontrakter.felles.journalpost.*
 import no.nav.familie.kontrakter.felles.kodeverk.BeskrivelseDto
 import no.nav.familie.kontrakter.felles.kodeverk.BetydningDto
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
+import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Profile
@@ -60,7 +61,9 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                            .withQueryParam("variantFormat", equalTo("ARKIV"))
                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(Ressurs.success(pdfAsBase64String)))),
                    WireMock.put(WireMock.urlMatching("${integrasjonerConfig.dokarkivUri.path}.*"))
-                           .willReturn(WireMock.okJson(objectMapper.writeValueAsString(oppdatertJournalpostResponse)))
+                           .willReturn(WireMock.okJson(objectMapper.writeValueAsString(oppdatertJournalpostResponse))),
+                   WireMock.get(WireMock.urlPathEqualTo(integrasjonerConfig.medlemskapUri.path))
+                           .willReturn(WireMock.okJson(objectMapper.writeValueAsString(medl))),
 
             )
 
@@ -93,6 +96,13 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
         private val arbeidsfordeling =
                 Ressurs.success(listOf(Arbeidsfordelingsenhet("1234", "nerd-enhet")))
 
+        val fnr = "23097825289"
+        private val medl =
+                Ressurs.success(Medlemskapsinfo(personIdent = fnr,
+                                                gyldigePerioder = emptyList(),
+                                                uavklartePerioder = emptyList(),
+                                                avvistePerioder = emptyList()))
+
         private val oppdatertJournalpostResponse =
                 Ressurs.success(OppdaterJournalpostResponse(journalpostId = "1234"))
         val pdfAsBase64String =
@@ -105,7 +115,7 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                                             tema = "ENF",
                                             behandlingstema = "ab0071",
                                             tittel = "abrakadabra",
-                                            bruker = Bruker(type = BrukerIdType.FNR, id = "23097825289"),
+                                            bruker = Bruker(type = BrukerIdType.FNR, id = fnr),
                                             journalforendeEnhet = "4817",
                                             kanal = "SKAN_IM",
                                             relevanteDatoer = listOf(RelevantDato(LocalDateTime.now(), "DATO_REGISTRERT")),
