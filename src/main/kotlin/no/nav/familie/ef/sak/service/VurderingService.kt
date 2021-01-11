@@ -54,6 +54,7 @@ class VurderingService(private val behandlingService: BehandlingService,
         val pdlSøker = pdlClient.hentSøker(fnr)
 
         val medlemskap = medlemskapMapper.tilDto(medlemskapsdetaljer = søknad.medlemskap,
+                                                 personIdent = fnr,
                                                  pdlSøker = pdlSøker)
         val sivilstand = SivilstandMapper.tilDto(sivilstandsdetaljer = søknad.sivilstand,
                                                  pdlSøker = pdlSøker)
@@ -128,6 +129,11 @@ class VurderingService(private val behandlingService: BehandlingService,
             || lagredeVilkårsvurderinger.none { vurdering -> vurdering.type == it }
         }
     }
+
+
+    private fun hentMedlInfo(behandlingId: UUID) =
+            behandlingService.hentBehandling(behandlingId).status.behandlingErLåstForVidereRedigering()
+
 
     private fun behandlingErLåstForVidereRedigering(behandlingId: UUID) =
             behandlingService.hentBehandling(behandlingId).status.behandlingErLåstForVidereRedigering()
