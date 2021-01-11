@@ -8,11 +8,15 @@ server:
       max-request-size: 200MB
 
 no.nav.security.jwt:
-  issuer.azuread:
-    discoveryurl: ${AZUREAD_DISCOVERY_URL}
-    accepted_audience: ${AZURE_CLIENT_ID}
-    proxyurl: http://webproxy-nais.nav.no:8088
-    cookie_name: azure_token
+  issuer:
+    azuread:
+      discoveryurl: ${AZUREAD_DISCOVERY_URL}
+      accepted_audience: ${AZURE_CLIENT_ID}
+      proxyurl: http://webproxy-nais.nav.no:8088
+      cookie_name: azure_token
+    sts:
+      discoveryurl: ${STS_URL}
+      accepted_audience: ${GYLDIG_SERVICE_BRUKER}
   client:
     registration:
       familie-integrasjoner:
@@ -105,6 +109,8 @@ rolle:
   veileder: "31778fd8-3b71-4867-8db6-a81235fbe001"
   saksbehandler: "6406aba2-b930-41d3-a85b-dd13731bc974"
   beslutter: "5fcc0e1d-a4c2-49f0-93dc-27c9fea41e54"
+
+GYLDIG_SERVICE_BRUKER: srvArena
 
 tilgang:
   klienter:
