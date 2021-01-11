@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.api.dto.*
+import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.integration.dto.pdl.Familierelasjonsrolle
 import no.nav.familie.ef.sak.mapper.AleneomsorgMapper
@@ -20,6 +21,7 @@ import java.util.*
 @Service
 class VurderingService(private val behandlingService: BehandlingService,
                        private val pdlClient: PdlClient,
+                       private val familieIntegrasjonerClient: FamilieIntegrasjonerClient,
                        private val vilkårsvurderingRepository: VilkårsvurderingRepository,
                        private val medlemskapMapper: MedlemskapMapper) {
 
@@ -52,10 +54,12 @@ class VurderingService(private val behandlingService: BehandlingService,
         val søknad = behandlingService.hentOvergangsstønad(behandlingId)
         val fnr = søknad.fødselsnummer
         val pdlSøker = pdlClient.hentSøker(fnr)
+        val medlMedlemskapgrunnlag = familieIntegrasjonerClient.hentMedlemskapsinfo(ident = fnr)
 
         val medlemskap = medlemskapMapper.tilDto(medlemskapsdetaljer = søknad.medlemskap,
-                                                 personIdent = fnr,
+                                                 medlMedlemskapgrunnlag = medlMedlemskapgrunnlag,
                                                  pdlSøker = pdlSøker)
+
         val sivilstand = SivilstandMapper.tilDto(sivilstandsdetaljer = søknad.sivilstand,
                                                  pdlSøker = pdlSøker)
         val registergrunnlag = InngangsvilkårGrunnlagDto(medlemskap, sivilstand)

@@ -9,17 +9,17 @@ import no.nav.familie.ef.sak.integration.dto.pdl.UtflyttingFraNorge
 import no.nav.familie.ef.sak.repository.domain.søknad.Medlemskap
 import no.nav.familie.ef.sak.service.KodeverkService
 import no.nav.familie.ef.sak.util.min
+import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 
 @Component
 class MedlemskapMapper(private val statsborgerskapMapper: StatsborgerskapMapper,
                        private val kodeverkService: KodeverkService,
-                       private val familieIntegrasjonerClient: FamilieIntegrasjonerClient,
                        private val adresseMapper: AdresseMapper) {
 
     fun tilDto(medlemskapsdetaljer: Medlemskap,
-               personIdent: String,
+               medlMedlemskapgrunnlag: Medlemskapsinfo,
                pdlSøker: PdlSøker): MedlemskapDto {
 
         val statsborgerskap = statsborgerskapMapper.map(pdlSøker.statsborgerskap)
@@ -44,7 +44,6 @@ class MedlemskapMapper(private val statsborgerskapMapper: StatsborgerskapMapper,
                                                       ?.let(Folkeregisterpersonstatus::fraPdl))
 
 
-        val medlMedlemskapgrunnlag = familieIntegrasjonerClient.hentMedlemskapsinfo(ident = personIdent)
 
         return MedlemskapDto(søknadsgrunnlag = søknadsgrunnlag,
                              pdlMedlemskapgrunnlag = pdlMedlemskapgrunnlag,
