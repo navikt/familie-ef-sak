@@ -14,15 +14,13 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping(path = ["/api/ekstern/periode/overgangsstonad"],
         consumes = [APPLICATION_JSON_VALUE],
         produces = [APPLICATION_JSON_VALUE])
-@ProtectedWithClaims(issuer = "azuread")
 @Validated
-@Profile("dev") // TODO Kan slettes når det finnes tilgangssjekk. Uklart hvordan denne kommer bli brukt saksbeh/system?
 class PerioderOvergangsstønadController(private val perioderOvergangsstønadService: PerioderOvergangsstønadService) {
 
     @PostMapping
+    @ProtectedWithClaims(issuer = "sts", claimMap = ["sub=srvArena"])
     fun hentPerioder(@RequestBody request: PerioderOvergangsstønadRequest,
-                     @RequestParam("delvisOvergangsstonad") boolean: Boolean = false)
-            : PerioderOvergangsstønadResponse {
+                     @RequestParam("delvisOvergangsstonad") boolean: Boolean = false): PerioderOvergangsstønadResponse {
         return perioderOvergangsstønadService.hentPerioder(request)
     }
 
