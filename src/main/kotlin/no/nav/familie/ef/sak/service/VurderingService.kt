@@ -52,27 +52,29 @@ class VurderingService(private val behandlingService: BehandlingService,
 
     fun hentInngangsvilkår(behandlingId: UUID): InngangsvilkårDto {
         val søknad = behandlingService.hentOvergangsstønad(behandlingId)
-        val fnr = søknad.fødselsnummer
+        val grunnlag = hentGrunnlag(søknad.fødselsnummer, søknad)
+        val vurderinger = hentVurderinger(behandlingId, søknad, grunnlag)
+        return InngangsvilkårDto(vurderinger = vurderinger, grunnlag = grunnlag)
+    }
+
+    private fun hentGrunnlag(fnr: String,
+                             søknad: SøknadsskjemaOvergangsstønad): InngangsvilkårGrunnlagDto {
         val pdlSøker = pdlClient.hentSøker(fnr)
-        val medlMedlemskapgrunnlag = familieIntegrasjonerClient.hentMedlemskapsinfo(ident = fnr)
+        val medlUnntak = familieIntegrasjonerClient.hentMedlemskapsinfo(ident = fnr)
 
         val medlemskap = medlemskapMapper.tilDto(medlemskapsdetaljer = søknad.medlemskap,
-                                                 medlMedlemskapgrunnlag = medlMedlemskapgrunnlag,
+                                                 medlUnntak = medlUnntak,
                                                  pdlSøker = pdlSøker)
 
         val sivilstand = SivilstandMapper.tilDto(sivilstandsdetaljer = søknad.sivilstand,
                                                  pdlSøker = pdlSøker)
-        val registergrunnlag = InngangsvilkårGrunnlagDto(medlemskap, sivilstand)
-        val delvilkårMetadata = DelvilkårMetadata(sivilstandstype = registergrunnlag.sivilstand.registergrunnlag.type)
-        val vurderinger = hentVurderinger(behandlingId, søknad, delvilkårMetadata)
-
-        return InngangsvilkårDto(vurderinger = vurderinger,
-                                 grunnlag = registergrunnlag)
+        return InngangsvilkårGrunnlagDto(medlemskap, sivilstand)
     }
 
     private fun hentVurderinger(behandlingId: UUID,
                                 søknad: SøknadsskjemaOvergangsstønad,
-                                delvilkårMetadata: DelvilkårMetadata): List<VilkårsvurderingDto> {
+                                registergrunnlag: InngangsvilkårGrunnlagDto): List<VilkårsvurderingDto> {
+        val delvilkårMetadata = DelvilkårMetadata(sivilstandstype = registergrunnlag.sivilstand.registergrunnlag.type)
         return hentEllerOpprettVurderingerForInngangsvilkår(behandlingId, søknad, delvilkårMetadata)
                 .map {
                     VilkårsvurderingDto(id = it.id,
