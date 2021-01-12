@@ -14,9 +14,6 @@ no.nav.security.jwt:
       accepted_audience: ${AZURE_CLIENT_ID}
       proxyurl: http://webproxy-nais.nav.no:8088
       cookie_name: azure_token
-    sts:
-      discoveryurl: ${STS_URL}
-      accepted_audience: ${GYLDIG_SERVICE_BRUKER}
   client:
     registration:
       familie-integrasjoner:

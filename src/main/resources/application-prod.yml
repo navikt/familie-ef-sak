@@ -1,0 +1,5 @@
+no.nav.security.jwt:
+  issuer:
+    sts:
+      discoveryurl: ${STS_URL}
+      accepted_audience: ${GYLDIG_SERVICE_BRUKER}
