@@ -36,11 +36,11 @@ interface PdlPerson {
     val bostedsadresse: List<Bostedsadresse>
 }
 
-data class PdlIdent(val ident: String)
+data class PdlIdent(val ident: String, val historisk: Boolean)
 
-data class PdlAktørId(val identer: List<PdlIdent>)
+data class PdlIdenter(val identer: List<PdlIdent>)
 
-data class PdlHentIdenter(val hentIdenter: PdlAktørId?)
+data class PdlHentIdenter(val hentIdenter: PdlIdenter?)
 
 data class PdlPersonKort(val navn: List<Navn>)
 

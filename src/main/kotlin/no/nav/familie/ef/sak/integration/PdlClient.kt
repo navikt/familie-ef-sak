@@ -76,22 +76,31 @@ class PdlClient(val pdlConfig: PdlConfig,
         return feilsjekkOgReturnerData(pdlResponse)
     }
 
-    fun hentAktørId(personIdent: String): PdlAktørId {
-        val pdlPersonRequest = PdlIdentRequest(variables = PdlIdentRequestVariables(personIdent, "AKTORID"),
+    /**
+     * @param ident Ident til personen, samme hvilke type (Folkeregisterident, aktørid eller npid)
+     * @return liste med aktørider
+     */
+    fun hentAktørIder(ident: String): PdlIdenter {
+        val pdlPersonRequest = PdlIdentRequest(variables = PdlIdentRequestVariables(ident, "AKTORID"),
                                                query = PdlConfig.hentIdentQuery)
         val pdlResponse: PdlResponse<PdlHentIdenter> = postForEntity(pdlConfig.pdlUri,
                                                                      pdlPersonRequest,
                                                                      httpHeaders())
-        return feilsjekkOgReturnerData(personIdent, pdlResponse) { it.hentIdenter }
+        return feilsjekkOgReturnerData(ident, pdlResponse) { it.hentIdenter }
     }
 
-    fun hentPersonident(aktørId: String): PdlAktørId {
-        val pdlPersonRequest = PdlIdentRequest(variables = PdlIdentRequestVariables(aktørId, "FOLKEREGISTERIDENT"),
+    /**
+     * @param ident Ident til personen, samme hvilke type (Folkeregisterident, aktørid eller npid)
+     * @param historikk default false, tar med historikk hvis det er ønskelig
+     * @return liste med folkeregisteridenter
+     */
+    fun hentPersonidenter(ident: String, historikk: Boolean = false): PdlIdenter {
+        val pdlPersonRequest = PdlIdentRequest(variables = PdlIdentRequestVariables(ident, "FOLKEREGISTERIDENT", historikk),
                                                query = PdlConfig.hentIdentQuery)
         val pdlResponse: PdlResponse<PdlHentIdenter> = postForEntity(pdlConfig.pdlUri,
                                                                      pdlPersonRequest,
                                                                      httpHeaders())
-        return feilsjekkOgReturnerData(aktørId, pdlResponse) { it.hentIdenter }
+        return feilsjekkOgReturnerData(ident, pdlResponse) { it.hentIdenter }
     }
 
     private inline fun <reified DATA : Any, reified T : Any> feilsjekkOgReturnerData(ident: String,

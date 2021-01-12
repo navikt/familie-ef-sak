@@ -3,7 +3,8 @@
     "hentIdenter": {
       "identer": [
         {
-          "ident": "12345678901"
+          "ident": "12345678901",
+          "historisk": false
         }
       ]
     }
