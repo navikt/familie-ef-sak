@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.api.gui
 
-import no.nav.familie.ef.sak.api.dto.BehandlingsHistorikkDto
-import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
+import no.nav.familie.ef.sak.api.dto.BehandlingshistorikkDto
 import no.nav.familie.ef.sak.repository.domain.tilDto
 import no.nav.familie.ef.sak.service.BehandlingHistorikkService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -15,7 +14,7 @@ import java.util.*
 class BehandlingsHistorikkController(private val behandlingHistorikkService: BehandlingHistorikkService) {
 
     @GetMapping("{behandlingId}")
-    fun hentTilkjentYtelse(@PathVariable behandlingId: UUID): Ressurs<List<BehandlingsHistorikkDto>> {
+    fun hentBehandlingshistorikk(@PathVariable behandlingId: UUID): Ressurs<List<BehandlingshistorikkDto>> {
         val behandlingHistorikk = (behandlingHistorikkService.finnBehandlingHistorikk(behandlingId)).map { it.tilDto() }
         return Ressurs.success(behandlingHistorikk)
     }

@@ -1,4 +1,4 @@
-CREATE TABLE behandling_historikk
+CREATE TABLE behandlingshistorikk
 (
     id                  UUID         PRIMARY KEY,
     behandling_id       UUID         REFERENCES behandling(id),
