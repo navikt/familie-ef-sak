@@ -31,8 +31,7 @@ internal class BehandlingshistorikkServiceTest : OppslagSpringRunnerTest() {
         val behandlingHistorikk = behandlingHistorikkRepository.insert(Behandlingshistorikk(behandlingId = behandling.id,
                                                                                             steg = behandling.steg,
                                                                                             endretAvNavn = "Saksbehandlernavn",
-                                                                                            endretAvMail = SikkerhetContext.hentSaksbehandler(),
-                                                                                            endretTid = LocalDateTime.now()))
+                                                                                            endretAvMail = SikkerhetContext.hentSaksbehandler()))
 
         /** Hent */
         val innslag : Behandlingshistorikk = behandlingHistorikkService.finnBehandlingHistorikk(behandling.id)[0]
