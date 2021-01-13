@@ -4,7 +4,6 @@ import no.nav.familie.ef.sak.service.PerioderOvergangsstønadService
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadRequest
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import org.springframework.context.annotation.Profile
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
