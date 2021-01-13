@@ -9,7 +9,7 @@ import no.nav.familie.http.sts.StsRestClient
 import no.nav.familie.kontrakter.ef.infotrygd.OpprettPeriodeHendelseDto
 import no.nav.familie.kontrakter.ef.infotrygd.OpprettStartBehandlingHendelseDto
 import no.nav.familie.kontrakter.ef.infotrygd.OpprettVedtakHendelseDto
-import no.nav.familie.kontrakter.ef.infotrygd.StønadType
+import no.nav.familie.kontrakter.ef.felles.StønadType
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
