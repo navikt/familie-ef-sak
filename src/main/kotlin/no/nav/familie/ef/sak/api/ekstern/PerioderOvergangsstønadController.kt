@@ -11,15 +11,14 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping(path = ["/api/ekstern/periode/overgangsstonad"],
-        consumes = [APPLICATION_JSON_VALUE],
-        produces = [APPLICATION_JSON_VALUE])
+                consumes = [APPLICATION_JSON_VALUE],
+                produces = [APPLICATION_JSON_VALUE])
 @Validated
 class PerioderOvergangsstønadController(private val perioderOvergangsstønadService: PerioderOvergangsstønadService) {
 
     @PostMapping
     @ProtectedWithClaims(issuer = "sts", claimMap = ["sub=srvArena"])
-    fun hentPerioder(@RequestBody request: PerioderOvergangsstønadRequest,
-                     @RequestParam("delvisOvergangsstonad") boolean: Boolean = false): PerioderOvergangsstønadResponse {
+    fun hentPerioder(@RequestBody request: PerioderOvergangsstønadRequest): PerioderOvergangsstønadResponse {
         return perioderOvergangsstønadService.hentPerioder(request)
     }
 
