@@ -70,12 +70,12 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
 
             behandlingSteg.validerSteg(behandling)
 
+            val nesteSteg = behandlingSteg.utførOgReturnerNesteSteg(behandling, data)
+
             behandlingHistorikkService.opprettHistorikkInnslag(Behandlingshistorikk(behandlingId = behandling.id,
                                                                                     steg = behandling.steg,
                                                                                     endretAvNavn = saksbehandlerNavn,
                                                                                     endretAvMail = SikkerhetContext.hentSaksbehandler()))
-
-            val nesteSteg = behandlingSteg.utførOgReturnerNesteSteg(behandling, data)
 
             stegSuksessMetrics[stegType]?.increment()
 
