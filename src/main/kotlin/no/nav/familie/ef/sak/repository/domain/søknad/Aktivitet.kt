@@ -1,10 +1,12 @@
 package no.nav.familie.ef.sak.repository.domain.søknad
 
+import no.nav.familie.kontrakter.ef.søknad.EnumTekstverdiMedSvarId
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.MappedCollection
 import java.time.LocalDate
 
-data class Aktivitet(val hvordanErArbeidssituasjonen: String,
+data class Aktivitet(@Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "hvordan_er_arbeidssituasjonen_")
+                     val hvordanErArbeidssituasjonen: EnumTekstverdiMedSvarId,
                      @MappedCollection(idColumn = "soknadsskjema_id")
                      val arbeidsforhold: Set<Arbeidsgiver>? = emptySet(),
                      @MappedCollection(idColumn = "soknadsskjema_id")

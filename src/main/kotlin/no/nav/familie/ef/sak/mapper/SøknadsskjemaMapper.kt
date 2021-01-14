@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.repository.domain.søknad.*
 import no.nav.familie.kontrakter.ef.søknad.Medlemskapsdetaljer
 import no.nav.familie.kontrakter.ef.søknad.Sivilstandsdetaljer
 import no.nav.familie.kontrakter.ef.søknad.Stønadsstart
+import no.nav.familie.kontrakter.ef.søknad.EnumTekstverdiMedSvarId
 import org.apache.commons.lang3.StringUtils
 import java.time.YearMonth
 import kotlin.math.roundToInt
@@ -92,7 +93,9 @@ object SøknadsskjemaMapper {
                           søktOmSkilsmisseSeparasjon = sivilstandsdetaljer.søktOmSkilsmisseSeparasjon?.verdi,
                           datoSøktSeparasjon = sivilstandsdetaljer.datoSøktSeparasjon?.verdi,
                           separasjonsbekreftelse = tilDomene(sivilstandsdetaljer.separasjonsbekreftelse?.verdi),
-                          årsakEnslig = sivilstandsdetaljer.årsakEnslig?.verdi,
+                          årsakEnslig = sivilstandsdetaljer.årsakEnslig?.let {
+                              EnumTekstverdiMedSvarId(it.verdi, it.svarId ?: "manglerSvarid")
+                          },
                           samlivsbruddsdokumentasjon = tilDomene(sivilstandsdetaljer.samlivsbruddsdokumentasjon?.verdi),
                           samlivsbruddsdato = sivilstandsdetaljer.samlivsbruddsdato?.verdi,
                           fraflytningsdato = sivilstandsdetaljer.fraflytningsdato?.verdi,
@@ -131,7 +134,8 @@ object SøknadsskjemaMapper {
             }?.toSet() ?: emptySet()
 
     private fun tilDomene(bosituasjon: KontraktBosituasjon): Bosituasjon =
-            Bosituasjon(delerDuBolig = bosituasjon.delerDuBolig.verdi,
+            Bosituasjon(delerDuBolig = EnumTekstverdiMedSvarId(bosituasjon.delerDuBolig.verdi,
+                                                               bosituasjon.delerDuBolig.svarId ?: "manglerSvarid"),
                         samboer = tilDomene(bosituasjon.samboerdetaljer?.verdi),
                         sammenflyttingsdato = bosituasjon.sammenflyttingsdato?.verdi,
                         datoFlyttetFraHverandre = bosituasjon.datoFlyttetFraHverandre?.verdi,
@@ -207,7 +211,10 @@ object SøknadsskjemaMapper {
             }
 
     private fun tilDomene(aktivitet: KontraktAktivitet): Aktivitet =
-            Aktivitet(hvordanErArbeidssituasjonen = StringUtils.join(aktivitet.hvordanErArbeidssituasjonen.verdi, ";"),
+            Aktivitet(hvordanErArbeidssituasjonen = aktivitet.hvordanErArbeidssituasjonen.let {
+                EnumTekstverdiMedSvarId(StringUtils.join(it.verdi, ";"),
+                                        StringUtils.join(it.svarId, ";"))
+            },
                       arbeidsforhold = tilArbeidsgivere(aktivitet.arbeidsforhold?.verdi),
                       firmaer = tilFirmaer(aktivitet.firmaer?.verdi),
                       virksomhet = tilDomene(aktivitet.virksomhet?.verdi),
@@ -285,7 +292,9 @@ object SøknadsskjemaMapper {
             }?.toSet() ?: emptySet()
 
     private fun tilDomene(situasjon: KontraktSituasjon): Situasjon =
-            Situasjon(gjelderDetteDeg = StringUtils.join(situasjon.gjelderDetteDeg.verdi, "; "),
+            Situasjon(gjelderDetteDeg = EnumTekstverdiMedSvarId(StringUtils.join(situasjon.gjelderDetteDeg.verdi,
+                                                                                 ";"), // TODO: whitespace etter ;?
+                                                                StringUtils.join(situasjon.gjelderDetteDeg.svarId, ";")),
                       sykdom = tilDomene(situasjon.sykdom?.verdi),
                       barnsSykdom = tilDomene(situasjon.barnsSykdom?.verdi),
                       manglendeBarnepass = tilDomene(situasjon.manglendeBarnepass?.verdi),
@@ -295,7 +304,11 @@ object SøknadsskjemaMapper {
                       oppstartNyJobb = situasjon.oppstartNyJobb?.verdi,
                       utdanningstilbud = tilDomene(situasjon.utdanningstilbud?.verdi),
                       oppstartUtdanning = situasjon.oppstartUtdanning?.verdi,
-                      sagtOppEllerRedusertStilling = situasjon.sagtOppEllerRedusertStilling?.verdi,
+                      sagtOppEllerRedusertStilling = situasjon.sagtOppEllerRedusertStilling?.let {
+                          EnumTekstverdiMedSvarId(it.verdi,
+                                                  it.svarId
+                                                  ?: "manglerSvarId")
+                      },
                       oppsigelseReduksjonÅrsak = situasjon.oppsigelseReduksjonÅrsak?.verdi,
                       oppsigelseReduksjonTidspunkt = situasjon.oppsigelseReduksjonTidspunkt?.verdi,
                       reduksjonAvArbeidsforholdDokumentasjon = tilDomene(situasjon.reduksjonAvArbeidsforholdDokumentasjon?.verdi),

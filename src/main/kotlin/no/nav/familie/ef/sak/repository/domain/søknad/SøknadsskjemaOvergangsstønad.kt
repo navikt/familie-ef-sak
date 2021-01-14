@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.repository.domain.søknad
 
 import no.nav.familie.ef.sak.repository.domain.SøknadType
+import no.nav.familie.kontrakter.ef.søknad.EnumTekstverdiMedSvarId
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
@@ -39,7 +40,8 @@ data class SøknadsskjemaOvergangsstønad(@Id
                                         @Column("soker_fra_bestemt_maned")
                                         val søkerFraBestemtMåned: Boolean) : ISøknadsskjema
 
-data class Situasjon(val gjelderDetteDeg: String,
+data class Situasjon(@Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "gjelder_dette_deg_")
+                     val gjelderDetteDeg: EnumTekstverdiMedSvarId,
                      val sykdom: Dokumentasjon? = null,
                      val barnsSykdom: Dokumentasjon? = null,
                      val manglendeBarnepass: Dokumentasjon? = null,
@@ -51,7 +53,8 @@ data class Situasjon(val gjelderDetteDeg: String,
                      val oppstartNyJobb: LocalDate? = null,
                      val utdanningstilbud: Dokumentasjon? = null,
                      val oppstartUtdanning: LocalDate? = null,
-                     val sagtOppEllerRedusertStilling: String? = null,
+                     @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "sagt_opp_eller_redusert_stilling_")
+                     val sagtOppEllerRedusertStilling: EnumTekstverdiMedSvarId? = null,
                      @Column("oppsigelse_reduksjon_arsak")
                      val oppsigelseReduksjonÅrsak: String? = null,
                      val oppsigelseReduksjonTidspunkt: LocalDate? = null,
