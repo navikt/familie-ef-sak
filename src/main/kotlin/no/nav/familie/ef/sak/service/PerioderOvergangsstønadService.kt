@@ -21,11 +21,11 @@ class PerioderOvergangsstønadService(private val infotrygdReplikaClient: Infotr
      * Henter perioder fra infotrygd for en person
      */
     fun hentPerioder(request: PerioderOvergangsstønadRequest): PerioderOvergangsstønadResponse {
-        val identer = hentIdenter(request.ident)
-        val infotrygdRequest = InfotrygdPerioderOvergangsstønadRequest(identer, request.fomDato, request.tomDato)
+        val personIdenter = hentIdenter(request.personIdent)
+        val infotrygdRequest = InfotrygdPerioderOvergangsstønadRequest(personIdenter, request.fomDato, request.tomDato)
         val infotrygdPerioder = infotrygdReplikaClient.hentPerioderOvergangsstønad(infotrygdRequest)
         val perioder = infotrygdPerioder.perioder.map {
-            PeriodeOvergangsstønad(ident = it.ident,
+            PeriodeOvergangsstønad(personIdent = it.personIdent,
                                    fomDato = it.fomDato,
                                    tomDato = it.tomDato,
                                    datakilde = PeriodeOvergangsstønad.Datakilde.INFOTRYGD)
