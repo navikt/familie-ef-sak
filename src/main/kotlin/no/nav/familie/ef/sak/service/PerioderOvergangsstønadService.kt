@@ -13,17 +13,17 @@ class PerioderOvergangsstønadService(private val infotrygdReplikaClient: Infotr
                                      private val pdlClient: PdlClient) {
 
     fun hentPerioder(request: PerioderOvergangsstønadRequest): PerioderOvergangsstønadResponse {
-        val identer = pdlClient.hentPersonidenter(request.ident, true).identer.map { it.ident }.toSet()
-        val perioder = hentPerioderFraInfotrygd(identer, request)
+        val personIdenter = pdlClient.hentPersonidenter(request.personIdent, true).identer.map { it.ident }.toSet()
+        val perioder = hentPerioderFraInfotrygd(personIdenter, request)
         return PerioderOvergangsstønadResponse(perioder)
     }
 
-    private fun hentPerioderFraInfotrygd(identer: Set<String>,
+    private fun hentPerioderFraInfotrygd(personIdenter: Set<String>,
                                          request: PerioderOvergangsstønadRequest): List<PeriodeOvergangsstønad> {
-        val infotrygdRequest = InfotrygdPerioderOvergangsstønadRequest(identer, request.fomDato, request.tomDato)
+        val infotrygdRequest = InfotrygdPerioderOvergangsstønadRequest(personIdenter, request.fomDato, request.tomDato)
         val infotrygdPerioder = infotrygdReplikaClient.hentPerioderOvergangsstønad(infotrygdRequest)
         return infotrygdPerioder.perioder.map {
-            PeriodeOvergangsstønad(ident = it.ident,
+            PeriodeOvergangsstønad(personIdent = it.personIdent,
                                    fomDato = it.fomDato,
                                    tomDato = it.tomDato,
                                    datakilde = PeriodeOvergangsstønad.Datakilde.INFOTRYGD)
