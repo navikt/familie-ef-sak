@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.api.gui
+package no.nav.familie.ef.sak.api.beregning
 
 import no.nav.familie.ef.sak.api.dto.AndelTilkjentYtelseDTO
 import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.*
 
@@ -28,17 +29,18 @@ class BeregningController(private val stegService: StegService,
                           private val tilgangService: TilgangService) {
 
     @PostMapping("/{behandlingId}/fullfor")
-    fun beregnYtelseForStønad(@PathVariable behandlingId: UUID): Ressurs<UUID> {
+    fun beregnYtelseForStønad(@PathVariable behandlingId: UUID, beregningRequest: BeregningRequest): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         val behandling = behandlingService.hentBehandling(behandlingId)
         val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
+        val maksUtbetaling = BigDecimal(101351).multiply(BigDecimal(2.25)).divide(BigDecimal(12)).toInt()
         val tilkjentYtelse = TilkjentYtelseDTO(
                 fagsak.hentAktivIdent(),
                 vedtaksdato = LocalDate.now(),
                 behandlingId = behandling.id,
-                andelerTilkjentYtelse = listOf(AndelTilkjentYtelseDTO(beløp = 100,
-                                                                      stønadFom = LocalDate.now(),
-                                                                      stønadTom = LocalDate.now().plusDays(100),
+                andelerTilkjentYtelse = listOf(AndelTilkjentYtelseDTO(beløp = maksUtbetaling,
+                                                                      stønadFom = beregningRequest.stønadFom,
+                                                                      stønadTom = beregningRequest.stønadTom,
                                                                       kildeBehandlingId = behandling.id,
                                                                       personIdent = fagsak.hentAktivIdent()))
         )
