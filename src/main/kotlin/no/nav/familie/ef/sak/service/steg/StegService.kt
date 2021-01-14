@@ -5,7 +5,7 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ef.sak.config.RolleConfig
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.Behandlingshistorikk
-import no.nav.familie.ef.sak.service.BehandlingHistorikkService
+import no.nav.familie.ef.sak.service.BehandlingshistorikkService
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.steg.StegType.BEHANDLING_FERDIGSTILT
 import no.nav.familie.ef.sak.service.steg.StegType.VILKÅRSVURDERE_INNGANGSVILKÅR
@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional
 class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
                   private val behandlingService: BehandlingService,
                   private val rolleConfig: RolleConfig,
-                  private val behandlingHistorikkService: BehandlingHistorikkService) {
+                  private val behandlingshistorikkService: BehandlingshistorikkService) {
 
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -72,10 +72,10 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
 
             val nesteSteg = behandlingSteg.utførOgReturnerNesteSteg(behandling, data)
 
-            behandlingHistorikkService.opprettHistorikkInnslag(Behandlingshistorikk(behandlingId = behandling.id,
-                                                                                    steg = behandling.steg,
-                                                                                    endretAvNavn = saksbehandlerNavn,
-                                                                                    endretAvMail = SikkerhetContext.hentSaksbehandler()))
+            behandlingshistorikkService.opprettHistorikkInnslag(Behandlingshistorikk(behandlingId = behandling.id,
+                                                                                     steg = behandling.steg,
+                                                                                     opprettetAvNavn = saksbehandlerNavn,
+                                                                                     opprettetAv = SikkerhetContext.hentSaksbehandler()))
 
             stegSuksessMetrics[stegType]?.increment()
 

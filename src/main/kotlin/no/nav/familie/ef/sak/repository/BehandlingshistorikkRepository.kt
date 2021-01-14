@@ -5,8 +5,8 @@ import org.springframework.stereotype.Repository
 import java.util.*
 
 @Repository
-interface BehandlingHistorikkRepository : RepositoryInterface<Behandlingshistorikk, UUID>,
-                                          InsertUpdateRepository<Behandlingshistorikk> {
+interface BehandlingshistorikkRepository : RepositoryInterface<Behandlingshistorikk, UUID>,
+                                           InsertUpdateRepository<Behandlingshistorikk> {
 
     fun findByBehandlingId(behandlingId: UUID): List<Behandlingshistorikk>
 }
