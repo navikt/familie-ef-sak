@@ -55,7 +55,7 @@ internal class InfotrygdFeedClientTest {
         wiremockServerItem.stubFor(
                 WireMock.post(WireMock.urlPathMatching(client.opprettPeriodeUri.path))
                         .willReturn(WireMock.ok()))
-        client.opprettPeriodeHendelse(OpprettPeriodeHendelseDto("", StønadType.BARNETILSYN, emptyList()))
+        client.opprettPeriodeHendelse(OpprettPeriodeHendelseDto(setOf(""), StønadType.BARNETILSYN, emptyList()))
     }
 
     @Test
@@ -63,7 +63,7 @@ internal class InfotrygdFeedClientTest {
         wiremockServerItem.stubFor(
                 WireMock.post(WireMock.urlPathMatching(client.opprettStartBehandlingUri.path))
                         .willReturn(WireMock.ok()))
-        client.opprettStartBehandlingHendelse(OpprettStartBehandlingHendelseDto("", StønadType.BARNETILSYN))
+        client.opprettStartBehandlingHendelse(OpprettStartBehandlingHendelseDto(setOf(""), StønadType.BARNETILSYN))
     }
 
     @Test
@@ -71,6 +71,6 @@ internal class InfotrygdFeedClientTest {
         wiremockServerItem.stubFor(
                 WireMock.post(WireMock.urlPathMatching(client.opprettVedtakUri.path))
                         .willReturn(WireMock.ok()))
-        client.opprettVedtakHendelse(OpprettVedtakHendelseDto("", StønadType.BARNETILSYN, LocalDate.now()))
+        client.opprettVedtakHendelse(OpprettVedtakHendelseDto(setOf(""), StønadType.BARNETILSYN, LocalDate.now()))
     }
 }
