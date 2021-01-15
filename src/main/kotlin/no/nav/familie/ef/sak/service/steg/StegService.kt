@@ -78,6 +78,27 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
         return håndterSteg(behandling, behandlingSteg, null)
     }
 
+    @Transactional
+    fun håndterJournalførVedtaksbrev(behandling: Behandling): Behandling {
+        val behandlingSteg: JournalførVedtaksbrevSteg = hentBehandlingSteg(JOURNALFØR_VEDTAKSBREV)
+
+        return håndterSteg(behandling, behandlingSteg, null)
+    }
+
+    @Transactional
+    fun håndterDistribuerVedtaksbrev(behandling: Behandling): Behandling {
+        val behandlingSteg: JournalførVedtaksbrevSteg = hentBehandlingSteg(DISTRIBUER_VEDTAKSBREV)
+
+        return håndterSteg(behandling, behandlingSteg, null)
+    }
+
+    @Transactional
+    fun håndterFerdigsitllBehandling(behandling: Behandling): Behandling {
+        val behandlingSteg: JournalførVedtaksbrevSteg = hentBehandlingSteg(FERDIGSTILLE_BEHANDLING)
+
+        return håndterSteg(behandling, behandlingSteg, null)
+    }
+
 
     // Generelle stegmetoder
     private fun <T> håndterSteg(behandling: Behandling,
@@ -148,4 +169,5 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
                                              "${it.stegType().rekkefølge} ${it.stegType().displayName()}")
         }.toMap()
     }
+
 }
