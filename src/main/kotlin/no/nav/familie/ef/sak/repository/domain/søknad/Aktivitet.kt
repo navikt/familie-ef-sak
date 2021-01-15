@@ -19,7 +19,8 @@ data class Aktivitet(@Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "hv
                      val underUtdanning: UnderUtdanning? = null,
                      @MappedCollection(idColumn = "soknadsskjema_id")
                      val aksjeselskap: Set<Aksjeselskap>? = emptySet(),
-                     val erIArbeid: String? = null,
+                     @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "er_i_arbeid_")
+                     val erIArbeid: EnumTekstverdiMedSvarId? = null,
                      val erIArbeidDokumentasjon: Dokumentasjon? = null,
                      @MappedCollection(idColumn = "soknadsskjema_id")
                      val tidligereUtdanninger: Set<TidligereUtdanning> = emptySet()
@@ -27,7 +28,8 @@ data class Aktivitet(@Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "hv
 
 data class Arbeidsgiver(val arbeidsgivernavn: String,
                         val arbeidsmengde: Int? = null,
-                        val fastEllerMidlertidig: String,
+                        @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "fast_eller_midlertidig_")
+                        val fastEllerMidlertidig: EnumTekstverdiMedSvarId,
                         val harSluttdato: Boolean?,
                         val sluttdato: LocalDate? = null)
 

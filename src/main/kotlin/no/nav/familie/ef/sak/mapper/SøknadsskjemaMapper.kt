@@ -36,6 +36,8 @@ import no.nav.familie.kontrakter.ef.søknad.Virksomhet as KontraktVirksomhet
 
 object SøknadsskjemaMapper {
 
+    const val MANGLER_SVAR_ID = "manglerSvarId"
+
     fun tilDomene(kontraktsøknad: KontraktSøknadOvergangsstønad): SøknadsskjemaOvergangsstønad {
         return SøknadsskjemaOvergangsstønad(fødselsnummer = kontraktsøknad.personalia.verdi.fødselsnummer.verdi.verdi,
                                             navn = kontraktsøknad.personalia.verdi.navn.verdi,
@@ -165,12 +167,17 @@ object SøknadsskjemaMapper {
 
     private fun tilDomene(barnepass: KontraktBarnepass?): Barnepass? =
             barnepass?.let {
-                Barnepass(årsakBarnepass = it.årsakBarnepass?.verdi,
+                Barnepass(årsakBarnepass = it.årsakBarnepass?.let {
+                    EnumTekstverdiMedSvarId(it.verdi,
+                                            it.svarId ?: MANGLER_SVAR_ID)
+                },
                           barnepassordninger = tilBarnepass(it.barnepassordninger.verdi))
             }
 
     private fun tilBarnepass(list: List<KontraktBarnepassOrdning>): Set<Barnepassordning> = list.map {
-        Barnepassordning(hvaSlagsBarnepassordning = it.hvaSlagsBarnepassOrdning.verdi,
+        Barnepassordning(hvaSlagsBarnepassordning = EnumTekstverdiMedSvarId(it.hvaSlagsBarnepassOrdning.verdi,
+                                                                            it.hvaSlagsBarnepassOrdning.svarId
+                                                                            ?: MANGLER_SVAR_ID),
                          navn = it.navn.verdi,
                          datoperiode = tilDomene(it.datoperiode?.verdi),
                          beløp = it.belop.verdi.roundToInt())
@@ -187,24 +194,43 @@ object SøknadsskjemaMapper {
             samvær?.let {
                 Samvær(spørsmålAvtaleOmDeltBosted = it.spørsmålAvtaleOmDeltBosted?.verdi,
                        avtaleOmDeltBosted = tilDomene(it.avtaleOmDeltBosted?.verdi),
-                       skalAnnenForelderHaSamvær = it.skalAnnenForelderHaSamvær?.verdi,
-                       harDereSkriftligAvtaleOmSamvær = it.harDereSkriftligAvtaleOmSamvær?.verdi,
+                       skalAnnenForelderHaSamvær = it.skalAnnenForelderHaSamvær?.let {
+                           EnumTekstverdiMedSvarId(it.verdi,
+                                                   it.svarId
+                                                   ?: MANGLER_SVAR_ID)
+                       },
+                       harDereSkriftligAvtaleOmSamvær = it.harDereSkriftligAvtaleOmSamvær?.let {
+                           EnumTekstverdiMedSvarId(it.verdi,
+                                                   it.svarId
+                                                   ?: MANGLER_SVAR_ID)
+                       },
                        samværsavtale = tilDomene(it.samværsavtale?.verdi),
                        skalBarnetBoHosSøkerMenAnnenForelderSamarbeiderIkke =
                        tilDomene(it.skalBarnetBoHosSøkerMenAnnenForelderSamarbeiderIkke?.verdi),
                        hvordanPraktiseresSamværet = it.hvordanPraktiseresSamværet?.verdi,
-                       borAnnenForelderISammeHus = it.borAnnenForelderISammeHus?.verdi,
+                       borAnnenForelderISammeHus = it.borAnnenForelderISammeHus?.let {
+                           EnumTekstverdiMedSvarId(it.verdi,
+                                                   it.svarId
+                                                   ?: MANGLER_SVAR_ID)
+                       },
                        borAnnenForelderISammeHusBeskrivelse = it.borAnnenForelderISammeHusBeskrivelse?.verdi,
                        harDereTidligereBoddSammen = it.harDereTidligereBoddSammen?.verdi,
                        nårFlyttetDereFraHverandre = it.nårFlyttetDereFraHverandre?.verdi,
                        erklæringOmSamlivsbrudd = tilDomene(it.erklæringOmSamlivsbrudd?.verdi),
-                       hvorMyeErDuSammenMedAnnenForelder = it.hvorMyeErDuSammenMedAnnenForelder?.verdi,
+                       hvorMyeErDuSammenMedAnnenForelder = it.hvorMyeErDuSammenMedAnnenForelder?.let {
+                           EnumTekstverdiMedSvarId(it.verdi,
+                                                   it.svarId
+                                                   ?: MANGLER_SVAR_ID)
+                       },
                        beskrivSamværUtenBarn = it.beskrivSamværUtenBarn?.verdi)
             }
 
     private fun tilDomene(annenForelder: KontraktAnnenForelder?): AnnenForelder? =
             annenForelder?.let {
-                AnnenForelder(ikkeOppgittAnnenForelderBegrunnelse = annenForelder.ikkeOppgittAnnenForelderBegrunnelse?.verdi,
+                AnnenForelder(ikkeOppgittAnnenForelderBegrunnelse = annenForelder.ikkeOppgittAnnenForelderBegrunnelse?.let {
+                    EnumTekstverdiMedSvarId(it.verdi,
+                                            it.svarId ?: MANGLER_SVAR_ID)
+                },
                               bosattNorge = annenForelder.bosattNorge?.verdi,
                               land = annenForelder.land?.verdi,
                               person = tilDomene(annenForelder.person?.verdi))
@@ -221,7 +247,7 @@ object SøknadsskjemaMapper {
                       arbeidssøker = tilDomene(aktivitet.arbeidssøker?.verdi),
                       underUtdanning = tilDomene(aktivitet.underUtdanning?.verdi),
                       aksjeselskap = tilAksjeselskap(aktivitet.aksjeselskap?.verdi),
-                      erIArbeid = aktivitet.erIArbeid?.verdi,
+                      erIArbeid = aktivitet.erIArbeid?.let { EnumTekstverdiMedSvarId(it.verdi, it.svarId ?: MANGLER_SVAR_ID) },
                       erIArbeidDokumentasjon = tilDomene(aktivitet.erIArbeidDokumentasjon?.verdi),
                       tidligereUtdanninger = tilTidligereUtdanninger(aktivitet.underUtdanning?.verdi?.tidligereUtdanninger?.verdi))
 
@@ -245,8 +271,16 @@ object SøknadsskjemaMapper {
                                linjeKursGrad = it.gjeldendeUtdanning!!.verdi.linjeKursGrad.verdi,
                                fra = it.gjeldendeUtdanning!!.verdi.nårVarSkalDuVæreElevStudent.verdi.fra,
                                til = it.gjeldendeUtdanning!!.verdi.nårVarSkalDuVæreElevStudent.verdi.til,
-                               offentligEllerPrivat = it.offentligEllerPrivat.verdi,
-                               heltidEllerDeltid = it.heltidEllerDeltid.verdi,
+                               offentligEllerPrivat = it.offentligEllerPrivat.let {
+                                   EnumTekstverdiMedSvarId(it.verdi,
+                                                           it.svarId
+                                                           ?: MANGLER_SVAR_ID)
+                               },
+                               heltidEllerDeltid = it.heltidEllerDeltid.let {
+                                   EnumTekstverdiMedSvarId(it.verdi,
+                                                           it.svarId
+                                                           ?: MANGLER_SVAR_ID)
+                               },
                                hvorMyeSkalDuStudere = it.hvorMyeSkalDuStudere?.verdi,
                                hvaErMåletMedUtdanningen = it.hvaErMåletMedUtdanningen?.verdi,
                                utdanningEtterGrunnskolen = it.utdanningEtterGrunnskolen.verdi,
@@ -286,7 +320,8 @@ object SøknadsskjemaMapper {
             list?.map {
                 Arbeidsgiver(arbeidsgivernavn = it.arbeidsgivernavn.verdi,
                              arbeidsmengde = it.arbeidsmengde?.verdi,
-                             fastEllerMidlertidig = it.fastEllerMidlertidig.verdi,
+                             fastEllerMidlertidig = EnumTekstverdiMedSvarId(it.fastEllerMidlertidig.verdi,
+                                                                            it.fastEllerMidlertidig.svarId ?: MANGLER_SVAR_ID),
                              harSluttdato = it.harSluttdato?.verdi,
                              sluttdato = it.sluttdato?.verdi)
             }?.toSet() ?: emptySet()
