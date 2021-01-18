@@ -37,12 +37,13 @@ interface TilkjentYtelseRepository : RepositoryInterface<TilkjentYtelse, UUID>, 
 
     // language=PostgreSQL
     @Query("""
-        SELECT DISTINCT be.id as behandlings_id, aty.person_ident as person_ident
+        SELECT DISTINCT be.id as first, aty.periode_id as second
         FROM andel_tilkjent_ytelse aty
             JOIN tilkjent_ytelse t on t.id = aty.tilkjent_ytelse
+            JOIN behandling b on b.id = t.behandling_id
             JOIN behandling_ekstern be ON be.behandling_id = aty.kilde_behandling_id
         WHERE t.behandling_id IN (:sisteBehandlinger)
-            AND aty.stonad_tom >= :datoForAvstemming    
+            AND aty.stonad_tom >= :datoForAvstemming
     """)
-    fun finnKildeBehandlingIdFraAndelTilkjentYtelse(datoForAvstemming: LocalDate, sisteBehandlinger: List<UUID>): List<OppdragIdForFagsystem>
+    fun finnKildeBehandlingIdFraAndelTilkjentYtelse(datoForAvstemming: LocalDate, sisteBehandlinger: List<UUID>): List<Pair<Long, Long>>
 }

@@ -53,7 +53,7 @@ enum class VilkårType(val beskrivelse: String,
     OPPHOLDSTILLATELSE("Vises kun for ikke-nordiske statsborgere - " +
                        "Foreligger det oppholdstillatelse eller annen bekreftelse på gyldig opphold?"),
     FORUTGÅENDE_MEDLEMSKAP("§15-2 Forutgående medlemskap",
-                           listOf(DelvilkårType.TRE_ÅRS_MEDLEMSKAP, DelvilkårType.DOKUMENTERT_FLYKTNINGSTATUS)),
+                           listOf(DelvilkårType.TRE_ÅRS_MEDLEMSKAP)),
     LOVLIG_OPPHOLD("§15-3 Lovlig opphold", listOf(DelvilkårType.BOR_OG_OPPHOLDER_SEG_I_NORGE)),
 
     SIVILSTAND("§15-4 Sivilstand", listOf(DelvilkårType.DOKUMENTERT_EKTESKAP,

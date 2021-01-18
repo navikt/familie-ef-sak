@@ -27,7 +27,7 @@ class OppgaveController(private val oppgaveService: OppgaveService,
     fun hentOppgaver(@RequestBody finnOppgaveRequest: FinnOppgaveRequestDto): Ressurs<FinnOppgaveResponseDto> {
 
         val aktørId = finnOppgaveRequest.ident.takeUnless { it.isNullOrBlank() }
-                ?.let { pdlClient.hentAktørId(it).identer.first().ident }
+                ?.let { pdlClient.hentAktørIder(it).identer.first().ident }
 
         secureLogger.info("AktoerId: ${aktørId}, Ident: ${finnOppgaveRequest.ident}")
         return Ressurs.success(oppgaveService.hentOppgaver(finnOppgaveRequest.tilFinnOppgaveRequest(aktørId)))

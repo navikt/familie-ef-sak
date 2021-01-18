@@ -6,7 +6,7 @@ import io.mockk.just
 import io.mockk.mockk
 import no.nav.familie.ef.sak.api.ManglerTilgang
 import no.nav.familie.ef.sak.integration.PdlClient
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlAktørId
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlIdenter
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlIdent
 import no.nav.familie.ef.sak.service.JournalføringService
 import no.nav.familie.ef.sak.service.TilgangService
@@ -31,8 +31,8 @@ internal class JournalføringControllerTest {
 
 
         every {
-            pdlClient.hentPersonident(aktørId)
-        } returns PdlAktørId(listOf(PdlIdent(personIdentFraPdl)))
+            pdlClient.hentPersonidenter(aktørId)
+        } returns PdlIdenter(listOf(PdlIdent(personIdentFraPdl, false)))
 
         every {
             journalføringService.hentJournalpost(any())

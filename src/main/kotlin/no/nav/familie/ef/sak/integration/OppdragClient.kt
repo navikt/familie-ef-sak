@@ -27,8 +27,9 @@ class OppdragClient(@Value("\${FAMILIE_OPPDRAG_API_URL}")
 
     private val grensesnittavstemmingUri: URI =
             UriComponentsBuilder.fromUri(familieOppdragUri).pathSegment("api/grensesnittavstemming").build().toUri()
-    private val konsistensavstemmingUri: URI =
-            UriComponentsBuilder.fromUri(familieOppdragUri).pathSegment("api/konsistensavstemming").build().toUri()
+
+    private val konsistensavstemmingUriV2: URI =
+            UriComponentsBuilder.fromUri(familieOppdragUri).pathSegment("api/v2/konsistensavstemming").build().toUri()
 
     fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag): String {
         return postForEntity<Ressurs<String>>(postOppdragUri, utbetalingsoppdrag).getDataOrThrow()
@@ -42,8 +43,8 @@ class OppdragClient(@Value("\${FAMILIE_OPPDRAG_API_URL}")
         return postForEntity<Ressurs<String>>(grensesnittavstemmingUri, grensesnittavstemmingRequest).getDataOrThrow()
     }
 
-    fun konsistensavstemming(konsistensavstemmingRequest: KonsistensavstemmingRequest): String {
-        return postForEntity<Ressurs<String>>(konsistensavstemmingUri, konsistensavstemmingRequest).getDataOrThrow()
+    fun konsistensavstemming(konsistensavstemmingRequest: KonsistensavstemmingRequestV2): String {
+        return postForEntity<Ressurs<String>>(konsistensavstemmingUriV2, konsistensavstemmingRequest).getDataOrThrow()
     }
 
 }

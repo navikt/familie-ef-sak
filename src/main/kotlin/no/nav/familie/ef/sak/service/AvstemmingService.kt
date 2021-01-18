@@ -7,7 +7,7 @@ import no.nav.familie.ef.sak.integration.OppdragClient
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.økonomi.tilKlassifisering
 import no.nav.familie.kontrakter.felles.oppdrag.GrensesnittavstemmingRequest
-import no.nav.familie.kontrakter.felles.oppdrag.KonsistensavstemmingRequest
+import no.nav.familie.kontrakter.felles.oppdrag.KonsistensavstemmingRequestV2
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -37,10 +37,11 @@ class AvstemmingService(private val oppdragClient: OppdragClient,
     }
 
     fun konsistensavstemOppdrag(stønadstype: Stønadstype) {
-        val oppdragIdListe = tilkjentYtelseService.finnLøpendeUtbetalninger(datoForAvstemming = LocalDate.now(), stønadstype = stønadstype)
-        val konsistensavstemmingRequest = KonsistensavstemmingRequest(fagsystem = stønadstype.tilKlassifisering(),
-                                                                      oppdragIdListe = oppdragIdListe,
-                                                                      avstemmingstidspunkt = LocalDateTime.now())
+        val oppdragIdListe =
+                tilkjentYtelseService.finnLøpendeUtbetalninger(datoForAvstemming = LocalDate.now(), stønadstype = stønadstype)
+        val konsistensavstemmingRequest = KonsistensavstemmingRequestV2(fagsystem = stønadstype.tilKlassifisering(),
+                                                                        perioderForBehandlinger = oppdragIdListe,
+                                                                        avstemmingstidspunkt = LocalDateTime.now())
         oppdragClient.konsistensavstemming(konsistensavstemmingRequest)
     }
 

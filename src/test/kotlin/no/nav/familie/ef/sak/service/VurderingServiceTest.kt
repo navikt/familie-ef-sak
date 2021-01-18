@@ -76,7 +76,6 @@ internal class VurderingServiceTest {
         }).containsExactlyInAnyOrderElementsOf(
                 listOf(
                         TRE_ÅRS_MEDLEMSKAP,
-                        DOKUMENTERT_FLYKTNINGSTATUS,
                         BOR_OG_OPPHOLDER_SEG_I_NORGE,
                         SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
                         KRAV_SIVILSTAND,
