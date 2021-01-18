@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.api.gui
 
+import no.nav.familie.ef.sak.api.ApiExceptionHandler
 import no.nav.familie.ef.sak.api.dto.InngangsvilkårDto
 import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.service.BehandlingService
@@ -8,6 +9,7 @@ import no.nav.familie.ef.sak.service.VurderingService
 import no.nav.familie.ef.sak.service.steg.StegService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*

@@ -24,7 +24,8 @@ data class Vilkårsvurdering(@Id
 data class DelvilkårsvurderingWrapper(val delvilkårsvurderinger: List<Delvilkårsvurdering>)
 
 data class Delvilkårsvurdering(val type: DelvilkårType,
-                               val resultat: Vilkårsresultat = Vilkårsresultat.IKKE_VURDERT)
+                               val resultat: Vilkårsresultat = Vilkårsresultat.IKKE_VURDERT,
+                               val begrunnelse: String? = null)
 
 data class DelvilkårMetadata(val sivilstandstype: Sivilstandstype)
 
