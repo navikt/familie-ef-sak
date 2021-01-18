@@ -96,7 +96,7 @@ object SøknadsskjemaMapper {
                           datoSøktSeparasjon = sivilstandsdetaljer.datoSøktSeparasjon?.verdi,
                           separasjonsbekreftelse = tilDomene(sivilstandsdetaljer.separasjonsbekreftelse?.verdi),
                           årsakEnslig = sivilstandsdetaljer.årsakEnslig?.let {
-                              EnumTekstverdiMedSvarId(it.verdi, it.svarId ?: "manglerSvarid")
+                              EnumTekstverdiMedSvarId(it.verdi, it.svarId ?: MANGLER_SVAR_ID)
                           },
                           samlivsbruddsdokumentasjon = tilDomene(sivilstandsdetaljer.samlivsbruddsdokumentasjon?.verdi),
                           samlivsbruddsdato = sivilstandsdetaljer.samlivsbruddsdato?.verdi,
@@ -137,7 +137,7 @@ object SøknadsskjemaMapper {
 
     private fun tilDomene(bosituasjon: KontraktBosituasjon): Bosituasjon =
             Bosituasjon(delerDuBolig = EnumTekstverdiMedSvarId(bosituasjon.delerDuBolig.verdi,
-                                                               bosituasjon.delerDuBolig.svarId ?: "manglerSvarid"),
+                                                               bosituasjon.delerDuBolig.svarId ?: MANGLER_SVAR_ID),
                         samboer = tilDomene(bosituasjon.samboerdetaljer?.verdi),
                         sammenflyttingsdato = bosituasjon.sammenflyttingsdato?.verdi,
                         datoFlyttetFraHverandre = bosituasjon.datoFlyttetFraHverandre?.verdi,
@@ -342,7 +342,7 @@ object SøknadsskjemaMapper {
                       sagtOppEllerRedusertStilling = situasjon.sagtOppEllerRedusertStilling?.let {
                           EnumTekstverdiMedSvarId(it.verdi,
                                                   it.svarId
-                                                  ?: "manglerSvarId")
+                                                  ?: MANGLER_SVAR_ID)
                       },
                       oppsigelseReduksjonÅrsak = situasjon.oppsigelseReduksjonÅrsak?.verdi,
                       oppsigelseReduksjonTidspunkt = situasjon.oppsigelseReduksjonTidspunkt?.verdi,
