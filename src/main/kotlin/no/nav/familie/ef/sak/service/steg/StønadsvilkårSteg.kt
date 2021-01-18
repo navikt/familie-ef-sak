@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service
 class StønadsvilkårSteg : BehandlingSteg<Void?> {
 
     override fun validerSteg(behandling: Behandling) {
-        if (behandling.type == BehandlingType.TEKNISK_OPPHØR) return
+
     }
 
     override fun stegType(): StegType {

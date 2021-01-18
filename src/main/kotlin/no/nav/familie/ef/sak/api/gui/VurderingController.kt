@@ -39,6 +39,7 @@ class VurderingController(private val vurderingService: VurderingService,
     fun fullførInngangsvilkår(@PathVariable behandlingId: UUID): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         val behandling = behandlingService.hentBehandling(behandlingId)
+        // TODO; Trenger vi registrer opplysninger?
         val oppdatertBehandling = stegService.håndterRegistrerOpplysninger(behandling, null)
         return Ressurs.success(stegService.håndterInngangsvilkår(oppdatertBehandling).id)
     }
