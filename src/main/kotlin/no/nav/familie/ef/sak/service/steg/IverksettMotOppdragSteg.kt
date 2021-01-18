@@ -26,8 +26,6 @@ class IverksettMotOppdragSteg(private val tilkjentYtelseService: TilkjentYtelseS
     }
 
     private fun venterPåStatusFraØkonomiTask(behandling: Behandling) {
-        taskRepository.save(Task(type = VentePåStatusFraØkonomiTask.TYPE,
-                                 payload = behandling.id.toString(),
-                                 triggerTid = LocalDateTime.now().plusMinutes(15)))
+        taskRepository.save(VentePåStatusFraØkonomiTask.opprettTask(behandling))
     }
 }

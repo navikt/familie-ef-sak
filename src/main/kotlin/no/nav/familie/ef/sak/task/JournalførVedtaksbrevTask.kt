@@ -11,30 +11,28 @@ import java.time.LocalDateTime
 import java.util.*
 
 @Service
-@TaskStepBeskrivelse(taskStepType = VentePåStatusFraØkonomiTask.TYPE,
+@TaskStepBeskrivelse(taskStepType = JournalførVedtaksbrevTask.TYPE,
                      maxAntallFeil = 50,
                      settTilManuellOppfølgning = true,
-                     triggerTidVedFeilISekunder = 15 * 60L,
-                     beskrivelse = "Sjekker status på utbetalningsoppdraget mot økonomi.")
+                     triggerTidVedFeilISekunder = 15*60L,
+                     beskrivelse = "Journalfører vedtaksbrev.")
 
-class VentePåStatusFraØkonomiTask(private val stegService: StegService,
-                                  private val behandlingService: BehandlingService) : AsyncTaskStep {
+class JournalførVedtaksbrevTask(private val stegService: StegService,
+                                private val behandlingService: BehandlingService) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val behandlingId = UUID.fromString(task.payload)
         val behandling = behandlingService.hentBehandling(behandlingId)
-        stegService.håndterStatusPåOppdrag(behandling)
+        stegService.håndterJournalførVedtaksbrev(behandling)
     }
 
     companion object {
-
         fun opprettTask(behandling: Behandling): Task =
                 Task(type = TYPE,
                      payload = behandling.id.toString(),
                      triggerTid = LocalDateTime.now().plusMinutes(15))
 
-
-        const val TYPE = "sjekkStatusPåOppdrag"
+        const val TYPE = "journalførVedtaksbrev"
     }
 
 
