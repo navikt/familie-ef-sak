@@ -22,14 +22,14 @@ class VedtakController(private val stegService: StegService,
                        private val behandlingService: BehandlingService,
                        private val tilgangService: TilgangService) {
 
-    @PostMapping("/{behandlingId}/sendTilBeslutter")
+    @PostMapping("/{behandlingId}/send-til-beslutter")
     fun sendTilBeslutter(@PathVariable behandlingId: UUID): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         val behandling = behandlingService.hentBehandling(behandlingId)
         return Ressurs.success(stegService.håndterSendTilBeslutter(behandling).id)
     }
 
-    @PostMapping("/{behandlingId}/beslutteVedtak")
+    @PostMapping("/{behandlingId}/beslutte-vedtak")
     fun beslutteVedtak(@PathVariable behandlingId: UUID): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         val behandling = behandlingService.hentBehandling(behandlingId)
