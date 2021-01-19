@@ -1,28 +1,77 @@
 package no.nav.familie.ef.sak.service.steg
 
+import no.nav.familie.ef.sak.api.Feil
+import no.nav.familie.ef.sak.api.dto.TotrinnskontrollDto
 import no.nav.familie.ef.sak.repository.domain.Behandling
+import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import no.nav.familie.ef.sak.service.FagsakService
-import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.service.OppgaveService
+import no.nav.familie.ef.sak.service.TotrinnskontrollService
+import no.nav.familie.ef.sak.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.task.IverksettMotOppdragTask
+import no.nav.familie.ef.sak.task.OpprettOppgaveTask
+import no.nav.familie.ef.sak.task.OpprettOppgaveTask.OpprettOppgaveTaskData
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 
 @Service
-class BeslutteVedtakSteg(val taskRepository: TaskRepository, val fagsakService: FagsakService) : BehandlingSteg<Void?> {
+class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
+                         private val fagsakService: FagsakService,
+                         private val oppgaveService: OppgaveService,
+                         private val totrinnskontrollService: TotrinnskontrollService) : BehandlingSteg<TotrinnskontrollDto> {
 
     override fun validerSteg(behandling: Behandling) {
+        // TODO burde denne gjøres her eller i stegService?
+        if (behandling.steg != stegType()) {
+            throw Feil("Behandling er i feil steg=${behandling.steg}")
+        }
+    }
 
+    override fun utførOgReturnerNesteSteg(behandling: Behandling, data: TotrinnskontrollDto): StegType {
+        val saksbehandlerSomGodkjenteVedtak = totrinnskontrollService.lagreTotrinnskontroll(behandling, data)
+
+        ferdigstillOppgave(behandling)
+
+        return if (data.godkjent) {
+            // TODO oppdater brev
+            opprettTaskForIverksettMotOppdrag(behandling)
+            stegType().hentNesteSteg(behandling.type)
+        } else {
+            opprettBehandleUnderkjentVedtakOppgave(behandling, saksbehandlerSomGodkjenteVedtak)
+            StegType.SEND_TIL_BESLUTTER
+        }
+    }
+
+    private fun ferdigstillOppgave(behandling: Behandling) {
+        val oppgavetype = Oppgavetype.GodkjenneVedtak
+        oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype, behandling)?.let {
+            taskRepository.save(FerdigstillOppgaveTask.opprettTask(behandlingId = behandling.id, oppgavetype))
+        }
+    }
+
+    private fun opprettBehandleUnderkjentVedtakOppgave(behandling: Behandling,
+                                                       saksbehandlerSomGodkjenteVedtak: String) {
+        taskRepository.save(OpprettOppgaveTask.opprettTask(
+                OpprettOppgaveTaskData(behandlingId = behandling.id,
+                                       oppgavetype = Oppgavetype.BehandleUnderkjentVedtak,
+                                       fristForFerdigstillelse = LocalDate.now(),
+                                       tilordnetNavIdent = saksbehandlerSomGodkjenteVedtak)))
+    }
+
+    private fun opprettTaskForIverksettMotOppdrag(behandling: Behandling) {
+        val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
+        val task = IverksettMotOppdragTask.opprettTask(behandling, fagsak.hentAktivIdent())
+        taskRepository.save(task)
     }
 
     override fun stegType(): StegType {
         return StegType.BESLUTTE_VEDTAK
     }
 
-    override fun utførSteg(behandling: Behandling, data: Void?) {
-        val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
-        // Hvis godkjent
-        val task = IverksettMotOppdragTask.opprettTask(behandling, fagsak.hentAktivIdent(), SikkerhetContext.hentSaksbehandler())
-        taskRepository.save(task)
+    override fun utførSteg(behandling: Behandling, data: TotrinnskontrollDto) {
+        error("Bruker utførOgReturnerNesteSteg")
     }
 
 }

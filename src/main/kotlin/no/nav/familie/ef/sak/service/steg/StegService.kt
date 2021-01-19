@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.service.steg
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
+import no.nav.familie.ef.sak.api.dto.TotrinnskontrollDto
 import no.nav.familie.ef.sak.config.RolleConfig
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.Behandlingshistorikk
@@ -61,10 +62,10 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
     }
 
     @Transactional
-    fun håndterBeslutteVedtak(behandling: Behandling): Behandling {
+    fun håndterBeslutteVedtak(behandling: Behandling, totrinnskontrollDto: TotrinnskontrollDto): Behandling {
         val behandlingSteg: BeslutteVedtakSteg = hentBehandlingSteg(BESLUTTE_VEDTAK)
 
-        return håndterSteg(behandling, behandlingSteg, null)
+        return håndterSteg(behandling, behandlingSteg, totrinnskontrollDto)
     }
 
     @Transactional
@@ -126,7 +127,7 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
                       "men behandlingen er på steg '${behandling.steg.displayName()}'")
             }
 
-            if (behandling.steg == StegType.BESLUTTE_VEDTAK && stegType != StegType.BESLUTTE_VEDTAK) {
+            if (behandling.steg == BESLUTTE_VEDTAK && stegType != BESLUTTE_VEDTAK) {
                 error("Behandlingen er på steg '${behandling.steg.displayName()}', og er da låst for alle andre type endringer.")
             }
 

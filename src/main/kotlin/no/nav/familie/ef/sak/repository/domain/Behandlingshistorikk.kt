@@ -12,8 +12,8 @@ data class Behandlingshistorikk(@Id
                                 val id: UUID = UUID.randomUUID(),
                                 val behandlingId: UUID,
                                 val steg: StegType,
-                                val utfall: String? = null,
-                                val metadata: String? = null,
+                                //val utfall: String? = null,
+                                //val metadata: String? = null,
                                 val opprettetAvNavn: String = SikkerhetContext.hentSaksbehandler(),
                                 val opprettetAv: String = SikkerhetContext.hentSaksbehandlerNavn(),
                                 val endretTid: LocalDateTime = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS))
@@ -24,4 +24,8 @@ inline fun Behandlingshistorikk.tilDto(): BehandlingshistorikkDto {
                                    this.opprettetAvNavn,
                                    this.opprettetAv,
                                    this.endretTid)
+}
+
+enum class StegUtfall {
+    BESLUTTE_VEDTAK_GODKJENT
 }

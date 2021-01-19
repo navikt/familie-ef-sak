@@ -9,4 +9,7 @@ interface BehandlingshistorikkRepository : RepositoryInterface<Behandlingshistor
                                            InsertUpdateRepository<Behandlingshistorikk> {
 
     fun findByBehandlingId(behandlingId: UUID): List<Behandlingshistorikk>
+
+    fun findTopByBehandlingIdOrderByEndretTidDesc(behandlingId: UUID): Behandlingshistorikk
+
 }

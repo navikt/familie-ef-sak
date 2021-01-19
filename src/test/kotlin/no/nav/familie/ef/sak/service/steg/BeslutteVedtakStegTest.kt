@@ -5,6 +5,8 @@ import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.service.FagsakService
+import no.nav.familie.ef.sak.service.OppgaveService
+import no.nav.familie.ef.sak.service.TotrinnskontrollService
 import no.nav.familie.ef.sak.task.IverksettMotOppdragTask
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -17,7 +19,10 @@ internal class BeslutteVedtakStegTest {
 
     private val taskRepository = mockk<TaskRepository>()
     private val fagsakService = mockk<FagsakService>()
-    val beslutteVedtakSteg = BeslutteVedtakSteg(taskRepository, fagsakService)
+    private val totrinnskontrollService = mockk<TotrinnskontrollService>()
+    private val oppgaveService = mockk<OppgaveService>()
+
+    private val beslutteVedtakSteg = BeslutteVedtakSteg(taskRepository, fagsakService, oppgaveService, totrinnskontrollService)
 
     @Test
     internal fun `skal opprette iverksettMotOppdragTask etter beslutte vedtak`() {
@@ -38,7 +43,7 @@ internal class BeslutteVedtakStegTest {
                                                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                                 status = BehandlingStatus.FATTER_VEDTAK,
                                                 steg = beslutteVedtakSteg.stegType()),
-                                     null)
+                                     mockk())
 
         Assertions.assertThat(taskSlot.captured.type).isEqualTo(IverksettMotOppdragTask.TYPE)
     }
