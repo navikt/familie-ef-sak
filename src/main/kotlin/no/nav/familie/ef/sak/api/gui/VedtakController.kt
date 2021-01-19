@@ -40,4 +40,6 @@ class VedtakController(private val stegService: StegService,
         return Ressurs.success(stegService.håndterBeslutteVedtak(behandling, request).id)
     }
 
+
+    //TODO status ish på totrinn
 }
