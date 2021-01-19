@@ -42,6 +42,7 @@ spec:
   ingresses: # Optional. List of ingress URLs that will route HTTP traffic to the application.
     - https://familie-ef-sak.nais.preprod.local
     - https://familie-ef-sak.dev-fss.nais.io
+    - https://familie-ef-sak.dev-fss-pub.nais.io
   secureLogs:
     enabled: true
   env:
