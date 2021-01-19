@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.api.fagsak
+package no.nav.familie.ef.sak.api.dto
 
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 

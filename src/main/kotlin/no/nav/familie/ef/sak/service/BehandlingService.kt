@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.service
 
-import no.nav.familie.ef.sak.api.fagsak.BehandlingDto
+import no.nav.familie.ef.sak.api.dto.BehandlingDto
+import no.nav.familie.ef.sak.api.dto.tilDto
 import no.nav.familie.ef.sak.mapper.SøknadsskjemaMapper
 import no.nav.familie.ef.sak.repository.*
 import no.nav.familie.ef.sak.repository.domain.*
@@ -103,13 +104,7 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
     }
 
     fun hentBehandlinger(fagsakId: UUID): List<BehandlingDto> {
-        return behandlingRepository.findByFagsakId(fagsakId).map {
-            BehandlingDto(id = it.id,
-                          type = it.type,
-                          status = it.status,
-                          aktiv = it.aktiv,
-                          sistEndret = it.sporbar.endret.endretTid.toLocalDate())
-        }
+        return behandlingRepository.findByFagsakId(fagsakId).map(Behandling::tilDto)
     }
 
     fun oppdaterJournalpostIdPåBehandling(journalpost: Journalpost, behandling: Behandling) {

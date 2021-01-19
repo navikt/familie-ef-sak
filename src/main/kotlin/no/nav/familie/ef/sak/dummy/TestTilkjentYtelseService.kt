@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.dummy
 
-import no.nav.familie.ef.sak.api.fagsak.FagsakDto
+import no.nav.familie.ef.sak.api.dto.FagsakDto
 import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
