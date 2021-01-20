@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.api.dto
 
-import no.nav.familie.kontrakter.ef.søknad.EnumTekstverdiMedSvarId
 import java.time.LocalDate
 
 data class SivilstandInngangsvilkårDto(val søknadsgrunnlag: SivilstandSøknadsgrunnlagDto,
@@ -13,7 +12,7 @@ data class SivilstandSøknadsgrunnlagDto(val samlivsbruddsdato: LocalDate?,
                                         val erUformeltSeparertEllerSkilt: Boolean?,
                                         val datoSøktSeparasjon: LocalDate?,
                                         val søktOmSkilsmisseSeparasjon: Boolean?,
-                                        val årsakEnslig: EnumTekstverdiMedSvarId?,
+                                        val årsakEnslig: String?,
                                         val tidligereSamboer: PersonMinimumDto?)
 
 data class SivilstandRegistergrunnlagDto(val type: Sivilstandstype,

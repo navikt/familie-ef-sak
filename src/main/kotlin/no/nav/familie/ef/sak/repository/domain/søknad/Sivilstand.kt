@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.repository.domain.søknad
 
-import no.nav.familie.kontrakter.ef.søknad.EnumTekstverdiMedSvarId
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
 import java.time.LocalDate
@@ -14,8 +13,8 @@ data class Sivilstand(val erUformeltGift: Boolean? = null,
                       @Column("dato_sokt_separasjon")
                       val datoSøktSeparasjon: LocalDate? = null,
                       val separasjonsbekreftelse: Dokumentasjon? = null,
-                      @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "arsak_enslig_")
-                      val årsakEnslig: EnumTekstverdiMedSvarId? = null,
+                      @Column("arsak_enslig")
+                      val årsakEnslig: String? = null,
                       val samlivsbruddsdokumentasjon: Dokumentasjon? = null,
                       val samlivsbruddsdato: LocalDate? = null,
                       val fraflytningsdato: LocalDate? = null,

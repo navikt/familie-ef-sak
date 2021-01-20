@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.repository.domain.søknad
 
-import no.nav.familie.kontrakter.ef.søknad.EnumTekstverdiMedSvarId
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
@@ -43,19 +42,18 @@ interface IAnnenForelder {
 }
 
 data class AnnenForelder(@Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "ikke_oppgitt_annen_forelder_begrunnelse_")
-                         val ikkeOppgittAnnenForelderBegrunnelse: EnumTekstverdiMedSvarId? = null,
+                         val ikkeOppgittAnnenForelderBegrunnelse: String? = null,
                          val bosattNorge: Boolean? = null,
                          val land: String? = null,
                          @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL)
                          override val person: PersonMinimum? = null) : IAnnenForelder
 
-data class Barnepass(@Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "arsak_barnepass_")
-                     val årsakBarnepass: EnumTekstverdiMedSvarId? = null,
+data class Barnepass(@Column("arsak_barnepass")
+                     val årsakBarnepass: String? = null,
                      @MappedCollection(idColumn = "barn_id")
                      val barnepassordninger: Set<Barnepassordning>?)
 
-data class Barnepassordning(@Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "hva_slags_barnepassordning_")
-                            val hvaSlagsBarnepassordning: EnumTekstverdiMedSvarId,
+data class Barnepassordning(val hvaSlagsBarnepassordning: String? = null,
                             val navn: String,
                             @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL)
                             val datoperiode: Datoperiode? = null,
@@ -66,9 +64,9 @@ data class Samvær(@Column("sporsmal_avtale_om_delt_bosted")
                   val spørsmålAvtaleOmDeltBosted: Boolean? = null,
                   val avtaleOmDeltBosted: Dokumentasjon? = null,
                   @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "skal_annen_forelder_ha_samver_")
-                  val skalAnnenForelderHaSamvær: EnumTekstverdiMedSvarId? = null,
+                  val skalAnnenForelderHaSamvær: String? = null,
                   @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "har_dere_skriftlig_avtale_om_samver_")
-                  val harDereSkriftligAvtaleOmSamvær: EnumTekstverdiMedSvarId? = null,
+                  val harDereSkriftligAvtaleOmSamvær: String? = null,
                   @Column("samversavtale")
                   val samværsavtale: Dokumentasjon? = null,
                   @Column("barn_skal_bo_hos_soker_annen_forelder_samarbeider_ikke")
@@ -76,7 +74,7 @@ data class Samvær(@Column("sporsmal_avtale_om_delt_bosted")
                   @Column("hvordan_praktiseres_samveret")
                   val hvordanPraktiseresSamværet: String? = null,
                   @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "bor_annen_forelder_i_samme_hus_")
-                  val borAnnenForelderISammeHus: EnumTekstverdiMedSvarId? = null,
+                  val borAnnenForelderISammeHus: String? = null,
                   val borAnnenForelderISammeHusBeskrivelse: String? = null,
                   val harDereTidligereBoddSammen: Boolean? = null,
                   @Column("nar_flyttet_dere_fra_hverandre")
@@ -84,7 +82,7 @@ data class Samvær(@Column("sporsmal_avtale_om_delt_bosted")
                   @Column("erklering_om_samlivsbrudd")
                   val erklæringOmSamlivsbrudd: Dokumentasjon? = null,
                   @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "hvor_mye_er_du_sammen_med_annen_forelder_")
-                  val hvorMyeErDuSammenMedAnnenForelder: EnumTekstverdiMedSvarId? = null,
+                  val hvorMyeErDuSammenMedAnnenForelder: String? = null,
                   @Column("beskriv_samver_uten_barn")
                   val beskrivSamværUtenBarn: String? = null)
 

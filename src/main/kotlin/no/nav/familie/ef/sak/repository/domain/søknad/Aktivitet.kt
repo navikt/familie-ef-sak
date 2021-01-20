@@ -1,12 +1,10 @@
 package no.nav.familie.ef.sak.repository.domain.søknad
 
-import no.nav.familie.kontrakter.ef.søknad.EnumTekstverdiMedSvarId
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.MappedCollection
 import java.time.LocalDate
 
-data class Aktivitet(@Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "hvordan_er_arbeidssituasjonen_")
-                     val hvordanErArbeidssituasjonen: EnumTekstverdiMedSvarId,
+data class Aktivitet(val hvordanErArbeidssituasjonen: String,
                      @MappedCollection(idColumn = "soknadsskjema_id")
                      val arbeidsforhold: Set<Arbeidsgiver>? = emptySet(),
                      @MappedCollection(idColumn = "soknadsskjema_id")
@@ -20,7 +18,7 @@ data class Aktivitet(@Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "hv
                      @MappedCollection(idColumn = "soknadsskjema_id")
                      val aksjeselskap: Set<Aksjeselskap>? = emptySet(),
                      @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "er_i_arbeid_")
-                     val erIArbeid: EnumTekstverdiMedSvarId? = null,
+                     val erIArbeid: String? = null,
                      val erIArbeidDokumentasjon: Dokumentasjon? = null,
                      @MappedCollection(idColumn = "soknadsskjema_id")
                      val tidligereUtdanninger: Set<TidligereUtdanning> = emptySet()
@@ -28,8 +26,7 @@ data class Aktivitet(@Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "hv
 
 data class Arbeidsgiver(val arbeidsgivernavn: String,
                         val arbeidsmengde: Int? = null,
-                        @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "fast_eller_midlertidig_")
-                        val fastEllerMidlertidig: EnumTekstverdiMedSvarId,
+                        val fastEllerMidlertidig: String? = null,
                         val harSluttdato: Boolean?,
                         val sluttdato: LocalDate? = null)
 
