@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.api.gui
+package no.nav.familie.ef.sak.api.gui
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.api.dto.BehandlingDto
