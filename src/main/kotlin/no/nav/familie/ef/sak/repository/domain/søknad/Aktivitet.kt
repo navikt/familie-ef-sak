@@ -17,7 +17,6 @@ data class Aktivitet(val hvordanErArbeidssituasjonen: String,
                      val underUtdanning: UnderUtdanning? = null,
                      @MappedCollection(idColumn = "soknadsskjema_id")
                      val aksjeselskap: Set<Aksjeselskap>? = emptySet(),
-                     @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "er_i_arbeid_")
                      val erIArbeid: String? = null,
                      val erIArbeidDokumentasjon: Dokumentasjon? = null,
                      @MappedCollection(idColumn = "soknadsskjema_id")

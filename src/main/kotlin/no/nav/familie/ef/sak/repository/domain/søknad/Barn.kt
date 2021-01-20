@@ -41,8 +41,7 @@ interface IAnnenForelder {
     val person: PersonMinimum?
 }
 
-data class AnnenForelder(@Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "ikke_oppgitt_annen_forelder_begrunnelse_")
-                         val ikkeOppgittAnnenForelderBegrunnelse: String? = null,
+data class AnnenForelder(val ikkeOppgittAnnenForelderBegrunnelse: String? = null,
                          val bosattNorge: Boolean? = null,
                          val land: String? = null,
                          @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL)
@@ -63,9 +62,9 @@ data class Barnepassordning(val hvaSlagsBarnepassordning: String? = null,
 data class Samvær(@Column("sporsmal_avtale_om_delt_bosted")
                   val spørsmålAvtaleOmDeltBosted: Boolean? = null,
                   val avtaleOmDeltBosted: Dokumentasjon? = null,
-                  @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "skal_annen_forelder_ha_samver_")
+                  @Column("skal_annen_forelder_ha_samver")
                   val skalAnnenForelderHaSamvær: String? = null,
-                  @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "har_dere_skriftlig_avtale_om_samver_")
+                  @Column("har_dere_skriftlig_avtale_om_samver")
                   val harDereSkriftligAvtaleOmSamvær: String? = null,
                   @Column("samversavtale")
                   val samværsavtale: Dokumentasjon? = null,
@@ -73,7 +72,6 @@ data class Samvær(@Column("sporsmal_avtale_om_delt_bosted")
                   val skalBarnetBoHosSøkerMenAnnenForelderSamarbeiderIkke: Dokumentasjon? = null,
                   @Column("hvordan_praktiseres_samveret")
                   val hvordanPraktiseresSamværet: String? = null,
-                  @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "bor_annen_forelder_i_samme_hus_")
                   val borAnnenForelderISammeHus: String? = null,
                   val borAnnenForelderISammeHusBeskrivelse: String? = null,
                   val harDereTidligereBoddSammen: Boolean? = null,
@@ -81,7 +79,6 @@ data class Samvær(@Column("sporsmal_avtale_om_delt_bosted")
                   val nårFlyttetDereFraHverandre: LocalDate? = null,
                   @Column("erklering_om_samlivsbrudd")
                   val erklæringOmSamlivsbrudd: Dokumentasjon? = null,
-                  @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "hvor_mye_er_du_sammen_med_annen_forelder_")
                   val hvorMyeErDuSammenMedAnnenForelder: String? = null,
                   @Column("beskriv_samver_uten_barn")
                   val beskrivSamværUtenBarn: String? = null)
