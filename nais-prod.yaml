@@ -44,6 +44,7 @@ spec:
   ingresses: # Optional. List of ingress URLs that will route HTTP traffic to the application.
     - https://familie-ef-sak.nais.adeo.no
     - https://familie-ef-sak.prod-fss.nais.io
+    - https://familie-ef-sak.prod-fss-pub.nais.io
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: prod
