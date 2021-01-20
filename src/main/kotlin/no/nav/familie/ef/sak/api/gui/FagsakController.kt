@@ -1,5 +1,7 @@
-package no.nav.familie.ef.sak.api.fagsak
+package no.nav.familie.ef.sak.api.gui
 
+import no.nav.familie.ef.sak.api.dto.FagsakDto
+import no.nav.familie.ef.sak.api.dto.FagsakRequest
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
