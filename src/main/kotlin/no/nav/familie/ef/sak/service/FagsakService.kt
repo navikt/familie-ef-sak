@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.service
 
-import no.nav.familie.ef.sak.api.fagsak.FagsakDto
+import no.nav.familie.ef.sak.api.dto.FagsakDto
 import no.nav.familie.ef.sak.repository.FagsakRepository
 import no.nav.familie.ef.sak.repository.domain.Fagsak
 import no.nav.familie.ef.sak.repository.domain.FagsakPerson
