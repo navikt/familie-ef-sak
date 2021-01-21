@@ -80,9 +80,18 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                 søker.bostedsadresse.map(adresseMapper::tilAdresse) +
                 søker.kontaktadresse.map(adresseMapper::tilAdresse) +
                 søker.oppholdsadresse.map(adresseMapper::tilAdresse)
-        return adresser.sortedWith(compareByDescending<AdresseDto>
-                                   { it.gyldigFraOgMed ?: LocalDate.MAX }
-                                           .thenBy(AdresseDto::type))
+
+        return sorterAdresser(adresser)
+    }
+
+    fun sorterAdresser(adresser: List<AdresseDto>): List<AdresseDto> {
+        val (historiskeAdresser, aktiveAdresser) = adresser
+                .sortedWith(compareByDescending<AdresseDto> { it.gyldigFraOgMed ?: LocalDate.MAX }.thenBy(AdresseDto::type))
+                .partition { it.gyldigTilOgMed != null }
+
+        val (bostedsadresse, aktivUtenBostedsadresse) = aktiveAdresser.partition { it.type == AdresseType.BOSTEDADRESSE }
+
+        return bostedsadresse + aktivUtenBostedsadresse + historiskeAdresser
     }
 
     fun mapBarn(personIdent: String,
@@ -134,5 +143,4 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
             && (it.sluttdatoForKontrakt == null || it.sluttdatoForKontrakt.isAfter(LocalDateTime.now()))
         }
     }
-
 }
