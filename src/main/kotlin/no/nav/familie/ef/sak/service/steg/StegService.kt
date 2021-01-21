@@ -7,8 +7,8 @@ import no.nav.familie.ef.sak.api.dto.TotrinnskontrollDto
 import no.nav.familie.ef.sak.config.RolleConfig
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.Behandlingshistorikk
-import no.nav.familie.ef.sak.service.BehandlingshistorikkService
 import no.nav.familie.ef.sak.service.BehandlingService
+import no.nav.familie.ef.sak.service.BehandlingshistorikkService
 import no.nav.familie.ef.sak.service.steg.StegType.*
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import org.slf4j.Logger

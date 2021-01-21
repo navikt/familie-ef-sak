@@ -3,7 +3,6 @@ package no.nav.familie.ef.sak.service.steg
 import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.api.dto.TotrinnskontrollDto
 import no.nav.familie.ef.sak.repository.domain.Behandling
-import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.OppgaveService
 import no.nav.familie.ef.sak.service.TotrinnskontrollService
@@ -62,8 +61,7 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
 
     private fun opprettTaskForIverksettMotOppdrag(behandling: Behandling) {
         val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
-        val task = IverksettMotOppdragTask.opprettTask(behandling, fagsak.hentAktivIdent())
-        taskRepository.save(task)
+        taskRepository.save(IverksettMotOppdragTask.opprettTask(behandling, fagsak.hentAktivIdent()))
     }
 
     override fun stegType(): StegType {

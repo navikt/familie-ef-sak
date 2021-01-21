@@ -4,11 +4,13 @@ import no.nav.familie.ef.sak.api.ApiFeil
 import no.nav.familie.ef.sak.api.dto.TotrinnskontrollDto
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.TilgangService
+import no.nav.familie.ef.sak.service.TotrinnskontrollService
 import no.nav.familie.ef.sak.service.steg.StegService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import java.util.*
@@ -20,6 +22,7 @@ import java.util.*
 @Validated
 class VedtakController(private val stegService: StegService,
                        private val behandlingService: BehandlingService,
+                       private val totrinnskontrollService: TotrinnskontrollService,
                        private val tilgangService: TilgangService) {
 
     @PostMapping("/{behandlingId}/send-til-beslutter")
@@ -40,6 +43,11 @@ class VedtakController(private val stegService: StegService,
         return Ressurs.success(stegService.håndterBeslutteVedtak(behandling, request).id)
     }
 
+    @GetMapping("{behandlingId}/totrinnskontroll")
+    fun hentTotrinnskontroll(@PathVariable behandlingId: UUID): ResponseEntity<Any> {
+        tilgangService.validerTilgangTilBehandling(behandlingId)
+        val totrinnskontroll = totrinnskontrollService.hentTotrinnskontroll(behandlingId)
+        return ResponseEntity.ok(Ressurs.success(totrinnskontroll))
+    }
 
-    //TODO status ish på totrinn
 }
