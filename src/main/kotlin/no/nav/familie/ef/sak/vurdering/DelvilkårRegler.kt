@@ -47,7 +47,7 @@ private fun erDelvilkårAktueltForSøknaden(delvilkårType: DelvilkårType,
         DelvilkårType.SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON -> måDokumentereSamlivsbrudd(sivilstandType, søknad)
         DelvilkårType.SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING -> måVerifisereDatoerForSamlivsbrudd(sivilstandType)
         DelvilkårType.KRAV_SIVILSTAND -> måVerifisereKravTilSivilstand(sivilstandType)
-        DelvilkårType.HAR_FLYTTET_FRA_HVERANDRE -> søknad.sivilstand.årsakEnslig?.svarId === SvarIdKonstanter.samlivsbruddAndre
+        DelvilkårType.HAR_FLYTTET_FRA_HVERANDRE -> søknad.sivilstand.årsakEnslig === SvarIdKonstanter.samlivsbruddAndre
         else -> true
     }
 }

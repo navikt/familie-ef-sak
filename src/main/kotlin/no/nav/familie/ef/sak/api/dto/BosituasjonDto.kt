@@ -4,7 +4,7 @@ import no.nav.familie.kontrakter.ef.søknad.EnumTekstverdiMedSvarId
 import java.time.LocalDate
 
 
-data class BosituasjonDto(val delerDuBolig: EnumTekstverdiMedSvarId,
+data class BosituasjonDto(val delerDuBolig: String?,
                           val samboer: PersonMinimumDto?,
                           val sammenflyttingsdato: LocalDate?,
                           val datoFlyttetFraHverandre: LocalDate?,
