@@ -16,7 +16,7 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
@@ -26,7 +26,7 @@ internal class BeslutteVedtakStegTest {
 
     private val taskRepository = mockk<TaskRepository>()
     private val fagsakService = mockk<FagsakService>()
-    private val totrinnskontrollService = mockk<TotrinnskontrollService>()
+    private val totrinnskontrollService = mockk<TotrinnskontrollService>(relaxed = true)
     private val oppgaveService = mockk<OppgaveService>()
 
     private val beslutteVedtakSteg = BeslutteVedtakSteg(taskRepository, fagsakService, oppgaveService, totrinnskontrollService)
@@ -37,21 +37,22 @@ internal class BeslutteVedtakStegTest {
 
     @BeforeEach
     internal fun setUp() {
-        taskSlot = slot<Task>()
+        taskSlot = slot()
         every {
             fagsakService.hentFagsak(any())
         } returns fagsak
         every {
             taskRepository.save(capture(taskSlot))
         } returns Task("", "", Properties())
+        every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(any(), any()) } returns mockk()
     }
 
     @Test
     internal fun `skal opprette iverksettMotOppdragTask etter beslutte vedtak hvis godkjent`() {
         val nesteSteg = utførTotrinnskontroll(godkjent = true)
 
-        Assertions.assertThat(nesteSteg).isEqualTo(StegType.IVERKSETT_MOT_OPPDRAG)
-        Assertions.assertThat(taskSlot.captured.type).isEqualTo(IverksettMotOppdragTask.TYPE)
+        assertThat(nesteSteg).isEqualTo(StegType.IVERKSETT_MOT_OPPDRAG)
+        assertThat(taskSlot.captured.type).isEqualTo(IverksettMotOppdragTask.TYPE)
     }
 
     @Test
@@ -60,9 +61,9 @@ internal class BeslutteVedtakStegTest {
 
         val deserializedPayload = objectMapper.readValue<OpprettOppgaveTask.OpprettOppgaveTaskData>(taskSlot.captured.payload)
 
-        Assertions.assertThat(nesteSteg).isEqualTo(StegType.SEND_TIL_BESLUTTER)
-        Assertions.assertThat(taskSlot.captured.type).isEqualTo(OpprettOppgaveTask.TYPE)
-        Assertions.assertThat(deserializedPayload.oppgavetype).isEqualTo(Oppgavetype.BehandleUnderkjentVedtak)
+        assertThat(nesteSteg).isEqualTo(StegType.SEND_TIL_BESLUTTER)
+        assertThat(taskSlot.captured.type).isEqualTo(OpprettOppgaveTask.TYPE)
+        assertThat(deserializedPayload.oppgavetype).isEqualTo(Oppgavetype.BehandleUnderkjentVedtak)
     }
 
     private fun utførTotrinnskontroll(godkjent: Boolean): StegType {

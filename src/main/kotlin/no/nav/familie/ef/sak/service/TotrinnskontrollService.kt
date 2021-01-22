@@ -25,7 +25,7 @@ class TotrinnskontrollService(private val behandlingshistorikkService: Behandlin
      * @return ident til saksbehandler som godkjente vedtaket
      */
     @Transactional
-    fun lagreTotrinnskontroll(behandling: Behandling, totrinnskontrollDto: TotrinnskontrollDto): String {
+    fun lagreTotrinnskontroll(behandling: Behandling, totrinnskontrollDto: TotrinnskontrollDto) {
         val sisteBehandlingshistorikk = behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId = behandling.id)
 
         require(sisteBehandlingshistorikk.steg == StegType.BESLUTTE_VEDTAK) {
@@ -45,7 +45,6 @@ class TotrinnskontrollService(private val behandlingshistorikkService: Behandlin
                                                             metadata = totrinnskontrollDto)
 
         behandlingService.oppdaterStatusPåBehandling(behandling.id, nyStatus)
-        return sisteBehandlingshistorikk.opprettetAv
     }
 
     fun hentTotrinnskontrollStatus(behandlingId: UUID): TotrinnskontrollStatusDto {

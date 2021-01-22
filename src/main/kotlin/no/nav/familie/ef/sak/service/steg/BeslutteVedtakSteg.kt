@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.OppgaveService
 import no.nav.familie.ef.sak.service.TotrinnskontrollService
+import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ef.sak.task.OpprettOppgaveTask
@@ -29,7 +30,7 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
     }
 
     override fun utførOgReturnerNesteSteg(behandling: Behandling, data: TotrinnskontrollDto): StegType {
-        val saksbehandlerSomGodkjenteVedtak = totrinnskontrollService.lagreTotrinnskontroll(behandling, data)
+        totrinnskontrollService.lagreTotrinnskontroll(behandling, data)
 
         ferdigstillOppgave(behandling)
 
@@ -38,7 +39,7 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
             opprettTaskForIverksettMotOppdrag(behandling)
             stegType().hentNesteSteg(behandling.type)
         } else {
-            opprettBehandleUnderkjentVedtakOppgave(behandling, saksbehandlerSomGodkjenteVedtak)
+            opprettBehandleUnderkjentVedtakOppgave(behandling)
             StegType.SEND_TIL_BESLUTTER
         }
     }
@@ -50,13 +51,12 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
         }
     }
 
-    private fun opprettBehandleUnderkjentVedtakOppgave(behandling: Behandling,
-                                                       saksbehandlerSomGodkjenteVedtak: String) {
+    private fun opprettBehandleUnderkjentVedtakOppgave(behandling: Behandling) {
         taskRepository.save(OpprettOppgaveTask.opprettTask(
                 OpprettOppgaveTaskData(behandlingId = behandling.id,
                                        oppgavetype = Oppgavetype.BehandleUnderkjentVedtak,
                                        fristForFerdigstillelse = LocalDate.now(),
-                                       tilordnetNavIdent = saksbehandlerSomGodkjenteVedtak)))
+                                       tilordnetNavIdent = SikkerhetContext.hentSaksbehandler())))
     }
 
     private fun opprettTaskForIverksettMotOppdrag(behandling: Behandling) {
