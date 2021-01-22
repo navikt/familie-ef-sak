@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.service
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.api.Feil
+import no.nav.familie.ef.sak.api.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.api.dto.TotrinnkontrollStatus.*
 import no.nav.familie.ef.sak.api.dto.TotrinnskontrollDto
 import no.nav.familie.ef.sak.api.dto.TotrinnskontrollStatusDto
@@ -25,7 +26,7 @@ class TotrinnskontrollService(private val behandlingshistorikkService: Behandlin
      * @return ident til saksbehandler som godkjente vedtaket
      */
     @Transactional
-    fun lagreTotrinnskontroll(behandling: Behandling, totrinnskontrollDto: TotrinnskontrollDto) {
+    fun lagreTotrinnskontroll(behandling: Behandling, beslutteVedtak: BeslutteVedtakDto) {
         val sisteBehandlingshistorikk = behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId = behandling.id)
 
         require(sisteBehandlingshistorikk.steg == StegType.BESLUTTE_VEDTAK) {
@@ -37,12 +38,12 @@ class TotrinnskontrollService(private val behandlingshistorikkService: Behandlin
                        frontendFeilmelding = "Beslutter kan ikke behandle en behandling som den selv har sendt til beslutter")
         }
 
-        val nyStatus = if (totrinnskontrollDto.godkjent) BehandlingStatus.IVERKSETTER_VEDTAK else BehandlingStatus.UTREDES
-        val utfall = if (totrinnskontrollDto.godkjent) BESLUTTE_VEDTAK_GODKJENT else BESLUTTE_VEDTAK_UNDERKJENT
+        val nyStatus = if (beslutteVedtak.godkjent) BehandlingStatus.IVERKSETTER_VEDTAK else BehandlingStatus.UTREDES
+        val utfall = if (beslutteVedtak.godkjent) BESLUTTE_VEDTAK_GODKJENT else BESLUTTE_VEDTAK_UNDERKJENT
 
         behandlingshistorikkService.opprettHistorikkInnslag(behandling = behandling,
                                                             utfall = utfall,
-                                                            metadata = totrinnskontrollDto)
+                                                            metadata = beslutteVedtak)
 
         behandlingService.oppdaterStatusPåBehandling(behandling.id, nyStatus)
     }
@@ -80,8 +81,12 @@ class TotrinnskontrollService(private val behandlingshistorikkService: Behandlin
         return when (beslutteVedtakHendelse.utfall) {
             BESLUTTE_VEDTAK_UNDERKJENT -> {
                 requireNotNull(beslutteVedtakHendelse.metadata) { "Har underkjent vedtak - savner metadata" }
-                val totrinnskontroll = objectMapper.readValue<TotrinnskontrollDto>(beslutteVedtakHendelse.metadata.json)
-                TotrinnskontrollStatusDto(TOTRINNSKONTROLL_UNDERKJENT, totrinnskontroll.begrunnelse)
+                val beslut = objectMapper.readValue<BeslutteVedtakDto>(beslutteVedtakHendelse.metadata.json)
+                TotrinnskontrollStatusDto(TOTRINNSKONTROLL_UNDERKJENT,
+                                          TotrinnskontrollDto(beslutteVedtakHendelse.opprettetAvNavn,
+                                                              beslutteVedtakHendelse.endretTid,
+                                                              beslut.godkjent,
+                                                              beslut.begrunnelse))
             }
             else -> error("Skal ikke kunne være annen status enn UNDERKJENT når behandligStatus!=${BehandlingStatus.FATTER_VEDTAK}")
         }

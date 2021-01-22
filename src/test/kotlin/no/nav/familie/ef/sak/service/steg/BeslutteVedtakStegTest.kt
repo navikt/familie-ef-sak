@@ -5,6 +5,7 @@ import io.mockk.CapturingSlot
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import no.nav.familie.ef.sak.api.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.api.dto.TotrinnskontrollDto
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.service.FagsakService
@@ -71,7 +72,7 @@ internal class BeslutteVedtakStegTest {
                                                                                type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                                                                status = BehandlingStatus.FATTER_VEDTAK,
                                                                                steg = beslutteVedtakSteg.stegType()),
-                                                                    TotrinnskontrollDto(godkjent = godkjent))
+                                                                    BeslutteVedtakDto(godkjent = godkjent))
         return nesteSteg
     }
 }

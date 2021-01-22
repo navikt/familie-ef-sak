@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.api.gui
 
 import no.nav.familie.ef.sak.api.ApiFeil
-import no.nav.familie.ef.sak.api.dto.TotrinnskontrollDto
+import no.nav.familie.ef.sak.api.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.TilgangService
 import no.nav.familie.ef.sak.service.TotrinnskontrollService
@@ -34,7 +34,7 @@ class VedtakController(private val stegService: StegService,
 
     @PostMapping("/{behandlingId}/beslutte-vedtak")
     fun beslutteVedtak(@PathVariable behandlingId: UUID,
-                       @RequestBody request: TotrinnskontrollDto): Ressurs<UUID> {
+                       @RequestBody request: BeslutteVedtakDto): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         if (!request.godkjent && request.begrunnelse.isNullOrBlank()) {
             throw ApiFeil("Mangler begrunnelse", HttpStatus.BAD_REQUEST)

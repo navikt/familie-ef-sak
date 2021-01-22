@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.service.steg
 
 import no.nav.familie.ef.sak.api.Feil
-import no.nav.familie.ef.sak.api.dto.TotrinnskontrollDto
+import no.nav.familie.ef.sak.api.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.OppgaveService
@@ -20,16 +20,15 @@ import java.time.LocalDate
 class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
                          private val fagsakService: FagsakService,
                          private val oppgaveService: OppgaveService,
-                         private val totrinnskontrollService: TotrinnskontrollService) : BehandlingSteg<TotrinnskontrollDto> {
+                         private val totrinnskontrollService: TotrinnskontrollService) : BehandlingSteg<BeslutteVedtakDto> {
 
     override fun validerSteg(behandling: Behandling) {
-        // TODO burde denne gjøres her eller i stegService?
         if (behandling.steg != stegType()) {
             throw Feil("Behandling er i feil steg=${behandling.steg}")
         }
     }
 
-    override fun utførOgReturnerNesteSteg(behandling: Behandling, data: TotrinnskontrollDto): StegType {
+    override fun utførOgReturnerNesteSteg(behandling: Behandling, data: BeslutteVedtakDto): StegType {
         totrinnskontrollService.lagreTotrinnskontroll(behandling, data)
 
         ferdigstillOppgave(behandling)
@@ -68,7 +67,7 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
         return StegType.BESLUTTE_VEDTAK
     }
 
-    override fun utførSteg(behandling: Behandling, data: TotrinnskontrollDto) {
+    override fun utførSteg(behandling: Behandling, data: BeslutteVedtakDto) {
         error("Bruker utførOgReturnerNesteSteg")
     }
 

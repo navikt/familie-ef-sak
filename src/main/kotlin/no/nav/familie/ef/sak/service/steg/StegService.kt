@@ -2,8 +2,8 @@ package no.nav.familie.ef.sak.service.steg
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ef.sak.api.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
-import no.nav.familie.ef.sak.api.dto.TotrinnskontrollDto
 import no.nav.familie.ef.sak.config.RolleConfig
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.Behandlingshistorikk
@@ -62,7 +62,7 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
     }
 
     @Transactional
-    fun håndterBeslutteVedtak(behandling: Behandling, totrinnskontrollDto: TotrinnskontrollDto): Behandling {
+    fun håndterBeslutteVedtak(behandling: Behandling, totrinnskontrollDto: BeslutteVedtakDto): Behandling {
         val behandlingSteg: BeslutteVedtakSteg = hentBehandlingSteg(BESLUTTE_VEDTAK)
 
         return håndterSteg(behandling, behandlingSteg, totrinnskontrollDto)

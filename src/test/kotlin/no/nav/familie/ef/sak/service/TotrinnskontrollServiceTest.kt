@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.service
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ef.sak.api.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.api.dto.TotrinnkontrollStatus
 import no.nav.familie.ef.sak.api.dto.TotrinnskontrollDto
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
@@ -30,7 +31,7 @@ internal class TotrinnskontrollServiceTest {
 
         val totrinnskontroll = totrinnskontrollService.hentTotrinnskontrollStatus(ID)
         assertThat(totrinnskontroll.status).isEqualTo(TotrinnkontrollStatus.UAKTUELT)
-        assertThat(totrinnskontroll.begrunnelse).isNull()
+        assertThat(totrinnskontroll.totrinnskontroll).isNull()
     }
 
     @Test
@@ -39,7 +40,7 @@ internal class TotrinnskontrollServiceTest {
 
         val totrinnskontroll = totrinnskontrollService.hentTotrinnskontrollStatus(ID)
         assertThat(totrinnskontroll.status).isEqualTo(TotrinnkontrollStatus.UAKTUELT)
-        assertThat(totrinnskontroll.begrunnelse).isNull()
+        assertThat(totrinnskontroll.totrinnskontroll).isNull()
     }
 
     @Test
@@ -49,7 +50,7 @@ internal class TotrinnskontrollServiceTest {
 
         val totrinnskontroll = totrinnskontrollService.hentTotrinnskontrollStatus(ID)
         assertThat(totrinnskontroll.status).isEqualTo(TotrinnkontrollStatus.UAKTUELT)
-        assertThat(totrinnskontroll.begrunnelse).isNull()
+        assertThat(totrinnskontroll.totrinnskontroll).isNull()
     }
 
     @Test
@@ -59,11 +60,11 @@ internal class TotrinnskontrollServiceTest {
                 behandlingshistorikk(steg = StegType.BESLUTTE_VEDTAK,
                                      utfall = StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT,
                                      opprettetAv = "Noe",
-                                     totrinnskontroll = TotrinnskontrollDto(false, "begrunnelse"))
+                                     beslutt = BeslutteVedtakDto(false, "begrunnelse"))
 
         val totrinnskontroll = totrinnskontrollService.hentTotrinnskontrollStatus(ID)
         assertThat(totrinnskontroll.status).isEqualTo(TotrinnkontrollStatus.TOTRINNSKONTROLL_UNDERKJENT)
-        assertThat(totrinnskontroll.begrunnelse).isEqualTo("begrunnelse")
+        assertThat(totrinnskontroll.totrinnskontroll).isEqualTo("begrunnelse")
     }
 
     @Test
@@ -76,7 +77,7 @@ internal class TotrinnskontrollServiceTest {
 
         val totrinnskontroll = totrinnskontrollService.hentTotrinnskontrollStatus(ID)
         assertThat(totrinnskontroll.status).isEqualTo(TotrinnkontrollStatus.KAN_FATTE_VEDTAK)
-        assertThat(totrinnskontroll.begrunnelse).isNull()
+        assertThat(totrinnskontroll.totrinnskontroll).isNull()
     }
 
     @Test
@@ -89,7 +90,7 @@ internal class TotrinnskontrollServiceTest {
 
         val totrinnskontroll = totrinnskontrollService.hentTotrinnskontrollStatus(ID)
         assertThat(totrinnskontroll.status).isEqualTo(TotrinnkontrollStatus.IKKE_AUTORISERT)
-        assertThat(totrinnskontroll.begrunnelse).isNull()
+        assertThat(totrinnskontroll.totrinnskontroll).isNull()
     }
 
     @Test
@@ -119,12 +120,12 @@ internal class TotrinnskontrollServiceTest {
     private fun behandlingshistorikk(steg: StegType,
                                      utfall: StegUtfall,
                                      opprettetAv: String,
-                                     totrinnskontroll: TotrinnskontrollDto? = null) =
+                                     beslutt: BeslutteVedtakDto? = null) =
             Behandlingshistorikk(behandlingId = UUID.randomUUID(),
                                         steg = steg,
                                         utfall = utfall,
                                         opprettetAv = opprettetAv,
-                                        metadata = totrinnskontroll?.let {
+                                        metadata = beslutt?.let {
                                             JsonWrapper(objectMapper.writeValueAsString(it))
                                         })
 
