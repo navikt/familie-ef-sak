@@ -111,7 +111,7 @@ INFOTRYGD_REPLIKA_API_URL: https://infotrygd-enslig-forsoerger.nais.adeo.no
 
 FRONTEND_OPPGAVE_URL: https://ensligmorellerfar.prod-fss.nais.io/fagsak
 
-GYLDIG_SERVICE_BRUKER: srvArena
+GYLDIGE_SERVICE_BRUKERE: srvArena
 
 rolle:
   veileder: "31778fd8-3b71-4867-8db6-a81235fbe001"
