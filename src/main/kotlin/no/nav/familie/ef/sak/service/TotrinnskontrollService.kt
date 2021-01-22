@@ -38,7 +38,6 @@ class TotrinnskontrollService(private val behandlingshistorikkService: Behandlin
         }
 
         val nyStatus = if (totrinnskontrollDto.godkjent) BehandlingStatus.IVERKSETTER_VEDTAK else BehandlingStatus.UTREDES
-
         val utfall = if (totrinnskontrollDto.godkjent) BESLUTTE_VEDTAK_GODKJENT else BESLUTTE_VEDTAK_UNDERKJENT
 
         behandlingshistorikkService.opprettHistorikkInnslag(behandling = behandling,
@@ -49,27 +48,28 @@ class TotrinnskontrollService(private val behandlingshistorikkService: Behandlin
         return sisteBehandlingshistorikk.opprettetAv
     }
 
-    fun hentTotrinnskontroll(behandlingId: UUID): TotrinnskontrollStatusDto {
+    fun hentTotrinnskontrollStatus(behandlingId: UUID): TotrinnskontrollStatusDto {
         val behandlingStatus = behandlingService.hentBehandling(behandlingId).status
 
-        if (behandlingErGodkjend(behandlingStatus)) {
+        if (behandlingErGodkjendEllerOpprettet(behandlingStatus)) {
             return TotrinnskontrollStatusDto(UAKTUELT)
         }
 
-        val beslutteVedtakHendelse = sisteBeslutteVedtakHendelse(behandlingId)
+        val beslutteVedtakHendelse = sisteBeslutteVedtakHendelse(behandlingId) ?: return TotrinnskontrollStatusDto(UAKTUELT)
 
-        return when {
-            behandlingStatus == BehandlingStatus.FATTER_VEDTAK -> skalFatteVedtak(beslutteVedtakHendelse)
-            beslutteVedtakHendelse != null  -> harBesluttetVedtak(beslutteVedtakHendelse)
-            else -> TotrinnskontrollStatusDto(UAKTUELT)
+        return when (behandlingStatus) {
+            BehandlingStatus.FATTER_VEDTAK -> skalFatteVedtak(beslutteVedtakHendelse)
+            BehandlingStatus.UTREDES -> harBesluttetVedtak(beslutteVedtakHendelse)
+            else -> error("Har ikke lagt til håndtering av behandlingStatus=$behandlingStatus")
         }
     }
 
-    private fun behandlingErGodkjend(behandlingStatus: BehandlingStatus) =
-            behandlingStatus == BehandlingStatus.FERDIGSTILT || behandlingStatus == BehandlingStatus.IVERKSETTER_VEDTAK
+    private fun behandlingErGodkjendEllerOpprettet(behandlingStatus: BehandlingStatus) =
+            behandlingStatus == BehandlingStatus.FERDIGSTILT
+            || behandlingStatus == BehandlingStatus.IVERKSETTER_VEDTAK
+            || behandlingStatus == BehandlingStatus.OPPRETTET
 
-    private fun skalFatteVedtak(beslutteVedtakHendelse: Behandlingshistorikk?): TotrinnskontrollStatusDto {
-        requireNotNull(beslutteVedtakHendelse) { "BehandlingStatus=${BehandlingStatus.FATTER_VEDTAK} - mangler historikk" }
+    private fun skalFatteVedtak(beslutteVedtakHendelse: Behandlingshistorikk): TotrinnskontrollStatusDto {
         return if (beslutterErLikBehandler(beslutteVedtakHendelse)) {
             TotrinnskontrollStatusDto(IKKE_AUTORISERT)
         } else {
@@ -77,23 +77,20 @@ class TotrinnskontrollService(private val behandlingshistorikkService: Behandlin
         }
     }
 
-    private fun beslutterErLikBehandler(beslutteVedtakHendelse: Behandlingshistorikk) =
-            SikkerhetContext.hentSaksbehandler() == beslutteVedtakHendelse.opprettetAv
-
     private fun harBesluttetVedtak(beslutteVedtakHendelse: Behandlingshistorikk): TotrinnskontrollStatusDto {
         return when (beslutteVedtakHendelse.utfall) {
             BESLUTTE_VEDTAK_UNDERKJENT -> {
                 requireNotNull(beslutteVedtakHendelse.metadata) { "Har underkjent vedtak - savner metadata" }
-                val totrinnskontroll = objectMapper.readValue<TotrinnskontrollDto>(beslutteVedtakHendelse.metadata)
+                val totrinnskontroll = objectMapper.readValue<TotrinnskontrollDto>(beslutteVedtakHendelse.metadata.json)
                 TotrinnskontrollStatusDto(TOTRINNSKONTROLL_UNDERKJENT, totrinnskontroll.begrunnelse)
             }
             else -> error("Skal ikke kunne være annen status enn UNDERKJENT når behandligStatus!=${BehandlingStatus.FATTER_VEDTAK}")
         }
     }
 
-    private fun sisteBeslutteVedtakHendelse(behandlingId: UUID): Behandlingshistorikk? =
-            behandlingshistorikkService.finnBehandlingshistorikk(behandlingId)
-                    .filter { it.steg == StegType.BESLUTTE_VEDTAK }
-                    .maxByOrNull { it.endretTid }
+    private fun sisteBeslutteVedtakHendelse(behandlingId: UUID) =
+            behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId, StegType.BESLUTTE_VEDTAK)
 
+    private fun beslutterErLikBehandler(beslutteVedtakHendelse: Behandlingshistorikk) =
+            SikkerhetContext.hentSaksbehandler() == beslutteVedtakHendelse.opprettetAv
 }

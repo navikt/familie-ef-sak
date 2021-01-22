@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.config
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.repository.domain.DelvilkårsvurderingWrapper
 import no.nav.familie.ef.sak.repository.domain.Endret
+import no.nav.familie.ef.sak.repository.domain.JsonWrapper
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus
 import no.nav.familie.ef.sak.repository.domain.søknad.Dokumentasjon
 import no.nav.familie.ef.sak.repository.domain.søknad.UnderUtdanning
@@ -66,7 +67,9 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
                                             PropertiesWrapperTilStringConverter(),
                                             StringTilPropertiesWrapperConverter(),
                                             PGobjectTilDelvilkårConverter(),
-                                            DelvilkårTilPGobjectConverter()))
+                                            DelvilkårTilPGobjectConverter(),
+                                            PGobjectTilJsonWrapperConverter(),
+                                            JsonWrapperTilPGobjectConverter()))
     }
 
     @WritingConverter
@@ -144,6 +147,24 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
                 PGobject().apply {
                     type = "json"
                     value = objectMapper.writeValueAsString(delvilkårsvurdering.delvilkårsvurderinger)
+                }
+    }
+
+    @ReadingConverter
+    class PGobjectTilJsonWrapperConverter : Converter<PGobject, JsonWrapper?> {
+
+        override fun convert(pGobject: PGobject): JsonWrapper? {
+            return pGobject.value?.let { JsonWrapper(it) }
+        }
+    }
+
+    @WritingConverter
+    class JsonWrapperTilPGobjectConverter : Converter<JsonWrapper?, PGobject> {
+
+        override fun convert(jsonWrapper: JsonWrapper?): PGobject =
+                PGobject().apply {
+                    type = "json"
+                    value = jsonWrapper?.let { objectMapper.writeValueAsString(it.json) }
                 }
     }
 

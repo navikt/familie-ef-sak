@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import no.nav.familie.ef.sak.repository.domain.Behandlingshistorikk
+import no.nav.familie.ef.sak.repository.domain.JsonWrapper
 import no.nav.familie.ef.sak.repository.domain.StegUtfall
 import no.nav.familie.ef.sak.service.steg.StegType
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
@@ -27,7 +28,7 @@ internal class TotrinnskontrollServiceTest {
     internal fun `skal returnere UAKTUELT når behandlingen FERDIGSTILT`() {
         every { behandlingService.hentBehandling(any()) } returns behandling(BehandlingStatus.FERDIGSTILT)
 
-        val totrinnskontroll = totrinnskontrollService.hentTotrinnskontroll(ID)
+        val totrinnskontroll = totrinnskontrollService.hentTotrinnskontrollStatus(ID)
         assertThat(totrinnskontroll.status).isEqualTo(TotrinnkontrollStatus.UAKTUELT)
         assertThat(totrinnskontroll.begrunnelse).isNull()
     }
@@ -36,7 +37,7 @@ internal class TotrinnskontrollServiceTest {
     internal fun `skal returnere UAKTUELT når behandlingen IVERKSETTER_VEDTAK`() {
         every { behandlingService.hentBehandling(any()) } returns behandling(BehandlingStatus.IVERKSETTER_VEDTAK)
 
-        val totrinnskontroll = totrinnskontrollService.hentTotrinnskontroll(ID)
+        val totrinnskontroll = totrinnskontrollService.hentTotrinnskontrollStatus(ID)
         assertThat(totrinnskontroll.status).isEqualTo(TotrinnkontrollStatus.UAKTUELT)
         assertThat(totrinnskontroll.begrunnelse).isNull()
     }
@@ -46,7 +47,7 @@ internal class TotrinnskontrollServiceTest {
         every { behandlingService.hentBehandling(any()) } returns behandling(BehandlingStatus.UTREDES)
         every { behandlingshistorikkService.finnBehandlingshistorikk(any()) } returns emptyList()
 
-        val totrinnskontroll = totrinnskontrollService.hentTotrinnskontroll(ID)
+        val totrinnskontroll = totrinnskontrollService.hentTotrinnskontrollStatus(ID)
         assertThat(totrinnskontroll.status).isEqualTo(TotrinnkontrollStatus.UAKTUELT)
         assertThat(totrinnskontroll.begrunnelse).isNull()
     }
@@ -60,7 +61,7 @@ internal class TotrinnskontrollServiceTest {
                                      opprettetAv = "Noe",
                                      totrinnskontroll = TotrinnskontrollDto(false, "begrunnelse"))
 
-        val totrinnskontroll = totrinnskontrollService.hentTotrinnskontroll(ID)
+        val totrinnskontroll = totrinnskontrollService.hentTotrinnskontrollStatus(ID)
         assertThat(totrinnskontroll.status).isEqualTo(TotrinnkontrollStatus.TOTRINNSKONTROLL_UNDERKJENT)
         assertThat(totrinnskontroll.begrunnelse).isEqualTo("begrunnelse")
     }
@@ -73,7 +74,7 @@ internal class TotrinnskontrollServiceTest {
                                      utfall = StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT,
                                      opprettetAv = "Annen saksbehandler")
 
-        val totrinnskontroll = totrinnskontrollService.hentTotrinnskontroll(ID)
+        val totrinnskontroll = totrinnskontrollService.hentTotrinnskontrollStatus(ID)
         assertThat(totrinnskontroll.status).isEqualTo(TotrinnkontrollStatus.KAN_FATTE_VEDTAK)
         assertThat(totrinnskontroll.begrunnelse).isNull()
     }
@@ -86,7 +87,7 @@ internal class TotrinnskontrollServiceTest {
                                      utfall = StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT,
                                      opprettetAv = SikkerhetContext.hentSaksbehandler())
 
-        val totrinnskontroll = totrinnskontrollService.hentTotrinnskontroll(ID)
+        val totrinnskontroll = totrinnskontrollService.hentTotrinnskontrollStatus(ID)
         assertThat(totrinnskontroll.status).isEqualTo(TotrinnkontrollStatus.IKKE_AUTORISERT)
         assertThat(totrinnskontroll.begrunnelse).isNull()
     }
@@ -99,7 +100,7 @@ internal class TotrinnskontrollServiceTest {
                                      utfall = StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT,
                                      opprettetAv = "Annen saksbehandler")
 
-        assertThat(catchThrowable { totrinnskontrollService.hentTotrinnskontroll(ID) })
+        assertThat(catchThrowable { totrinnskontrollService.hentTotrinnskontrollStatus(ID) })
                 .hasMessageContaining("Har underkjent vedtak - savner metadata")
     }
 
@@ -108,7 +109,7 @@ internal class TotrinnskontrollServiceTest {
         every { behandlingService.hentBehandling(any()) } returns behandling(BehandlingStatus.FATTER_VEDTAK)
         every { behandlingshistorikkService.finnBehandlingshistorikk(any()) } returns emptyList()
 
-        assertThat(catchThrowable { totrinnskontrollService.hentTotrinnskontroll(ID) })
+        assertThat(catchThrowable { totrinnskontrollService.hentTotrinnskontrollStatus(ID) })
                 .hasMessageContaining("BehandlingStatus=FATTER_VEDTAK - mangler historikk")
     }
 
@@ -120,7 +121,7 @@ internal class TotrinnskontrollServiceTest {
                                      utfall = StegUtfall.BESLUTTE_VEDTAK_GODKJENT,
                                      opprettetAv = "Annen saksbehandler")
 
-        assertThat(catchThrowable { totrinnskontrollService.hentTotrinnskontroll(ID) })
+        assertThat(catchThrowable { totrinnskontrollService.hentTotrinnskontrollStatus(ID) })
                 .hasMessageContaining("Skal ikke kunne være annen status enn UNDERKJENT")
     }
 
@@ -133,7 +134,7 @@ internal class TotrinnskontrollServiceTest {
                                         utfall = utfall,
                                         opprettetAv = opprettetAv,
                                         metadata = totrinnskontroll?.let {
-                                            objectMapper.writeValueAsString(it)
+                                            JsonWrapper(objectMapper.writeValueAsString(it))
                                         }))
 
     private fun behandling(status: BehandlingStatus) = behandling(fagsak, true, status)

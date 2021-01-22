@@ -46,7 +46,7 @@ class VedtakController(private val stegService: StegService,
     @GetMapping("{behandlingId}/totrinnskontroll")
     fun hentTotrinnskontroll(@PathVariable behandlingId: UUID): ResponseEntity<Any> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
-        val totrinnskontroll = totrinnskontrollService.hentTotrinnskontroll(behandlingId)
+        val totrinnskontroll = totrinnskontrollService.hentTotrinnskontrollStatus(behandlingId)
         return ResponseEntity.ok(Ressurs.success(totrinnskontroll))
     }
 

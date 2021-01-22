@@ -13,7 +13,7 @@ data class Behandlingshistorikk(@Id
                                 val behandlingId: UUID,
                                 val steg: StegType,
                                 val utfall: StegUtfall? = null,
-                                val metadata: String? = null,
+                                val metadata: JsonWrapper? = null,
                                 val opprettetAvNavn: String = SikkerhetContext.hentSaksbehandler(),
                                 val opprettetAv: String = SikkerhetContext.hentSaksbehandlerNavn(),
                                 val endretTid: LocalDateTime = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS))
