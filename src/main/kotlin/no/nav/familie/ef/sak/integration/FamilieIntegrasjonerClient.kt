@@ -12,7 +12,6 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestOperations
@@ -30,9 +29,7 @@ class FamilieIntegrasjonerClient(@Qualifier("azure") restOperations: RestOperati
     }
 
     fun hentMedlemskapsinfo(ident: String): Medlemskapsinfo {
-        val headers = HttpHeaders()
-        headers.add("Nav-Personident", ident)
-        return getForEntity<Ressurs<Medlemskapsinfo>>(integrasjonerConfig.medlemskapUri, headers).data!!
+        return postForEntity<Ressurs<Medlemskapsinfo>>(integrasjonerConfig.medlemskapUri, PersonIdent(ident)).data!!
     }
 
     fun hentKodeverkLandkoder(): KodeverkDto {
