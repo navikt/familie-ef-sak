@@ -34,8 +34,8 @@ class InfotrygdReplikaClient(@Value("\${INFOTRYGD_REPLIKA_API_URL}")
      * Infotrygd skal alltid returnere en stønadTreff for hver søknadType som er input
      */
     fun eksistererPerson(request: SøkFlereStønaderRequest): EksistererStønadResponse {
-        require(request.personIdenter.isNotEmpty()) { "Forventer att identer ikke er empty" }
-        require(request.stønader.isNotEmpty()) { "Forventer att søknadstyper ikke er empty" }
+        require(request.personIdenter.isNotEmpty()) { "Identer har ingen verdier" }
+        require(request.stønader.isNotEmpty()) { "Søknadstyper har ingen verdier" }
         return postForEntity(eksistererUri, request)
     }
 

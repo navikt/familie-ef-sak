@@ -46,25 +46,6 @@ internal class PerioderOvergangsstønadServiceTest {
         }
     }
 
-    @Test
-    internal fun `eksisterer mapper enums`() {
-        val slot = slot<SøkFlereStønaderRequest>()
-        mockPdl()
-        every { infotrygdReplikaClient.eksistererPerson(capture(slot)) } answers {
-            val stønader = firstArg<SøkFlereStønaderRequest>().stønader.map { it to StønadTreff(false, false) }.toMap()
-            EksistererStønadResponse(stønader)
-        }
-        SøknadType.values().forEach {
-            val eksisterer = perioderOvergangsstønadService.eksisterer(ident, setOf(it))
-            assertThat(eksisterer.keys).containsExactly(it)
-            assertThat(slot.captured.stønader)
-                    .withFailMessage("Skal kun kalle klienten med $it men ble kallt med ${slot.captured.stønader}")
-                    .containsExactly(it.tilStønadType())
-        }
-    }
-
-    private fun SøknadType.tilStønadType() = StønadType.valueOf(name)
-
     private fun mockPdl(historiskIdent: String? = null) {
         val pdlIdenter = mutableListOf(PdlIdent(ident, false))
         if (historiskIdent != null) {
