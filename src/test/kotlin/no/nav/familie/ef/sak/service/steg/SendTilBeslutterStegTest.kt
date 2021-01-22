@@ -9,7 +9,9 @@ import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.OppgaveService
 import no.nav.familie.ef.sak.task.FerdigstillOppgaveTask
+import no.nav.familie.ef.sak.task.FerdigstillOppgaveTask.FerdigstillOppgaveTaskData
 import no.nav.familie.ef.sak.task.OpprettOppgaveTask
+import no.nav.familie.ef.sak.task.OpprettOppgaveTask.OpprettOppgaveTaskData
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.Task
@@ -66,11 +68,11 @@ internal class SendTilBeslutterStegTest {
         verify { behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.FATTER_VEDTAK) }
 
         assertThat(taskSlot[0].type).isEqualTo(OpprettOppgaveTask.TYPE)
-        assertThat(objectMapper.readValue<OpprettOppgaveTask.OpprettOppgaveTaskData>(taskSlot[0].payload).oppgavetype)
+        assertThat(objectMapper.readValue<OpprettOppgaveTaskData>(taskSlot[0].payload).oppgavetype)
                 .isEqualTo(Oppgavetype.GodkjenneVedtak)
 
         assertThat(taskSlot[1].type).isEqualTo(FerdigstillOppgaveTask.TYPE)
-        assertThat(objectMapper.readValue<FerdigstillOppgaveTask.FerdigstillOppgaveTaskData>(taskSlot[1].payload).oppgavetype)
+        assertThat(objectMapper.readValue<FerdigstillOppgaveTaskData>(taskSlot[1].payload).oppgavetype)
                 .isEqualTo(oppgavetype)
     }
 
