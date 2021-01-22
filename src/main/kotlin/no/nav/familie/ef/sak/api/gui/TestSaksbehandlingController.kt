@@ -3,10 +3,13 @@ package no.nav.familie.ef.sak.api.gui
 import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
 import no.nav.familie.ef.sak.integration.dto.pdl.visningsnavn
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
+import no.nav.familie.ef.sak.repository.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.service.BehandlingService
+import no.nav.familie.ef.sak.service.BehandlingshistorikkService
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.PersonService
+import no.nav.familie.ef.sak.service.steg.StegType
 import no.nav.familie.kontrakter.ef.søknad.NavnOgFnr
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
@@ -25,6 +28,7 @@ import java.util.*
 @ProtectedWithClaims(issuer = "azuread")
 @Profile("!prod")
 class TestSaksbehandlingController(private val fagsakService: FagsakService,
+                                   private val behandlingshistorikkService: BehandlingshistorikkService,
                                    private val behandlingService: BehandlingService,
                                    private val personService: PersonService) {
 
@@ -34,6 +38,8 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
                 fagsakService.hentEllerOpprettFagsak(testFagsakRequest.personIdent, Stønadstype.OVERGANGSSTØNAD)
         val fagsak = fagsakService.hentFagsak(fagsakDto.id)
         val behandling = behandlingService.opprettBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, fagsak.id)
+        behandlingshistorikkService.opprettHistorikkInnslag(Behandlingshistorikk(behandlingId = behandling.id,
+                                                                                 steg = StegType.REGISTRERE_OPPLYSNINGER))
         val søkerMedBarn = personService.hentPersonMedRelasjoner(testFagsakRequest.personIdent)
 
         val barnNavnOgFnr = søkerMedBarn.barn.map { NavnOgFnr(it.value.navn.gjeldende().visningsnavn(), it.key) }
