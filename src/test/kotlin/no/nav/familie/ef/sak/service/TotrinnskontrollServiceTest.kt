@@ -45,7 +45,7 @@ internal class TotrinnskontrollServiceTest {
     @Test
     internal fun `skal returnere UAKTUELT når behandlingen UTREDES og ikke har noen totrinnshistorikk`() {
         every { behandlingService.hentBehandling(any()) } returns behandling(BehandlingStatus.UTREDES)
-        every { behandlingshistorikkService.finnBehandlingshistorikk(any()) } returns emptyList()
+        every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any(), any()) } returns null
 
         val totrinnskontroll = totrinnskontrollService.hentTotrinnskontrollStatus(ID)
         assertThat(totrinnskontroll.status).isEqualTo(TotrinnkontrollStatus.UAKTUELT)
@@ -55,7 +55,7 @@ internal class TotrinnskontrollServiceTest {
     @Test
     internal fun `skal returnere TOTRINNSKONTROLL_UNDERKJENT når behandlingen UTREDES og vedtak er underkjent`() {
         every { behandlingService.hentBehandling(any()) } returns behandling(BehandlingStatus.UTREDES)
-        every { behandlingshistorikkService.finnBehandlingshistorikk(any()) } returns
+        every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any(), any()) } returns
                 behandlingshistorikk(steg = StegType.BESLUTTE_VEDTAK,
                                      utfall = StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT,
                                      opprettetAv = "Noe",
@@ -69,7 +69,7 @@ internal class TotrinnskontrollServiceTest {
     @Test
     internal fun `skal returnere KAN_FATTE_VEDTAK når behandlingen FATTER_VEDTAK og saksbehandler er utreder og ikke er den som sendte behandlingen til fatte vedtak`() {
         every { behandlingService.hentBehandling(any()) } returns behandling(BehandlingStatus.FATTER_VEDTAK)
-        every { behandlingshistorikkService.finnBehandlingshistorikk(any()) } returns
+        every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any(), any()) } returns
                 behandlingshistorikk(steg = StegType.BESLUTTE_VEDTAK,
                                      utfall = StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT,
                                      opprettetAv = "Annen saksbehandler")
@@ -82,7 +82,7 @@ internal class TotrinnskontrollServiceTest {
     @Test
     internal fun `skal returnere IKKE_AUTORISERT når behandlingen FATTER_VEDTAK og saksbehandler er utreder, men er den som sendte behandlingen til fatte vedtak`() {
         every { behandlingService.hentBehandling(any()) } returns behandling(BehandlingStatus.FATTER_VEDTAK)
-        every { behandlingshistorikkService.finnBehandlingshistorikk(any()) } returns
+        every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any(), any()) } returns
                 behandlingshistorikk(steg = StegType.BESLUTTE_VEDTAK,
                                      utfall = StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT,
                                      opprettetAv = SikkerhetContext.hentSaksbehandler())
@@ -95,7 +95,7 @@ internal class TotrinnskontrollServiceTest {
     @Test
     internal fun `skal kaste feil når BESLUTTE_VEDTAK mangler utfall`() {
         every { behandlingService.hentBehandling(any()) } returns behandling(BehandlingStatus.UTREDES)
-        every { behandlingshistorikkService.finnBehandlingshistorikk(any()) } returns
+        every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any(), any()) } returns
                 behandlingshistorikk(steg = StegType.BESLUTTE_VEDTAK,
                                      utfall = StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT,
                                      opprettetAv = "Annen saksbehandler")
@@ -105,18 +105,9 @@ internal class TotrinnskontrollServiceTest {
     }
 
     @Test
-    internal fun `skal kaste feil når historikken mangler BESLUTTE_VEDTAK`() {
-        every { behandlingService.hentBehandling(any()) } returns behandling(BehandlingStatus.FATTER_VEDTAK)
-        every { behandlingshistorikkService.finnBehandlingshistorikk(any()) } returns emptyList()
-
-        assertThat(catchThrowable { totrinnskontrollService.hentTotrinnskontrollStatus(ID) })
-                .hasMessageContaining("BehandlingStatus=FATTER_VEDTAK - mangler historikk")
-    }
-
-    @Test
     internal fun `skal kaste feil når behandlingstatus er UTREDES og utfall er GODKJENT`() {
         every { behandlingService.hentBehandling(any()) } returns behandling(BehandlingStatus.UTREDES)
-        every { behandlingshistorikkService.finnBehandlingshistorikk(any()) } returns
+        every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any(), any()) } returns
                 behandlingshistorikk(steg = StegType.BESLUTTE_VEDTAK,
                                      utfall = StegUtfall.BESLUTTE_VEDTAK_GODKJENT,
                                      opprettetAv = "Annen saksbehandler")
@@ -129,13 +120,13 @@ internal class TotrinnskontrollServiceTest {
                                      utfall: StegUtfall,
                                      opprettetAv: String,
                                      totrinnskontroll: TotrinnskontrollDto? = null) =
-            listOf(Behandlingshistorikk(behandlingId = UUID.randomUUID(),
+            Behandlingshistorikk(behandlingId = UUID.randomUUID(),
                                         steg = steg,
                                         utfall = utfall,
                                         opprettetAv = opprettetAv,
                                         metadata = totrinnskontroll?.let {
                                             JsonWrapper(objectMapper.writeValueAsString(it))
-                                        }))
+                                        })
 
     private fun behandling(status: BehandlingStatus) = behandling(fagsak, true, status)
 
