@@ -28,8 +28,8 @@ class TotrinnskontrollService(private val behandlingshistorikkService: Behandlin
     fun lagreTotrinnskontroll(behandling: Behandling, totrinnskontrollDto: TotrinnskontrollDto): String {
         val sisteBehandlingshistorikk = behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId = behandling.id)
 
-        if (sisteBehandlingshistorikk.steg != StegType.BESLUTTE_VEDTAK) {
-            throw Feil("Siste innslag i behandlingshistorikken har feil steg=${sisteBehandlingshistorikk.steg}")
+        require(sisteBehandlingshistorikk.steg == StegType.BESLUTTE_VEDTAK) {
+            "Siste innslag i behandlingshistorikken har feil steg=${sisteBehandlingshistorikk.steg}"
         }
 
         if (beslutterErLikBehandler(sisteBehandlingshistorikk)) {
@@ -37,38 +37,38 @@ class TotrinnskontrollService(private val behandlingshistorikkService: Behandlin
                        frontendFeilmelding = "Beslutter kan ikke behandle en behandling som den selv har sendt til beslutter")
         }
 
-        lagreTotrinnskontrollIHistorikk(behandling, totrinnskontrollDto)
-
         val nyStatus = if (totrinnskontrollDto.godkjent) BehandlingStatus.IVERKSETTER_VEDTAK else BehandlingStatus.UTREDES
+
+        val utfall = if (totrinnskontrollDto.godkjent) BESLUTTE_VEDTAK_GODKJENT else BESLUTTE_VEDTAK_UNDERKJENT
+
+        behandlingshistorikkService.opprettHistorikkInnslag(behandling = behandling,
+                                                            utfall = utfall,
+                                                            metadata = totrinnskontrollDto)
+
         behandlingService.oppdaterStatusPåBehandling(behandling.id, nyStatus)
         return sisteBehandlingshistorikk.opprettetAv
-    }
-
-    private fun lagreTotrinnskontrollIHistorikk(behandling: Behandling,
-                                                totrinnskontrollDto: TotrinnskontrollDto) {
-        behandlingshistorikkService.opprettHistorikkInnslag(
-                Behandlingshistorikk(
-                        behandlingId = behandling.id,
-                        steg = behandling.steg,
-                        utfall = if (totrinnskontrollDto.godkjent) BESLUTTE_VEDTAK_GODKJENT else BESLUTTE_VEDTAK_UNDERKJENT,
-                        metadata = objectMapper.writeValueAsString(totrinnskontrollDto)))
     }
 
     fun hentTotrinnskontroll(behandlingId: UUID): TotrinnskontrollStatusDto {
         val behandlingStatus = behandlingService.hentBehandling(behandlingId).status
 
-        if (behandlingStatus == BehandlingStatus.FERDIGSTILT || behandlingStatus == BehandlingStatus.IVERKSETTER_VEDTAK) {
+        if (behandlingErGodkjend(behandlingStatus)) {
             return TotrinnskontrollStatusDto(UAKTUELT)
         }
+
         val beslutteVedtakHendelse = sisteBeslutteVedtakHendelse(behandlingId)
+
         return when {
-            behandlingStatus == BehandlingStatus.FATTER_VEDTAK -> behandlingStatusFatterVedtak(beslutteVedtakHendelse)
-            beslutteVedtakHendelse != null -> harBesluttetVedtak(beslutteVedtakHendelse)
+            behandlingStatus == BehandlingStatus.FATTER_VEDTAK -> skalFatteVedtak(beslutteVedtakHendelse)
+            beslutteVedtakHendelse != null  -> harBesluttetVedtak(beslutteVedtakHendelse)
             else -> TotrinnskontrollStatusDto(UAKTUELT)
         }
     }
 
-    private fun behandlingStatusFatterVedtak(beslutteVedtakHendelse: Behandlingshistorikk?): TotrinnskontrollStatusDto {
+    private fun behandlingErGodkjend(behandlingStatus: BehandlingStatus) =
+            behandlingStatus == BehandlingStatus.FERDIGSTILT || behandlingStatus == BehandlingStatus.IVERKSETTER_VEDTAK
+
+    private fun skalFatteVedtak(beslutteVedtakHendelse: Behandlingshistorikk?): TotrinnskontrollStatusDto {
         requireNotNull(beslutteVedtakHendelse) { "BehandlingStatus=${BehandlingStatus.FATTER_VEDTAK} - mangler historikk" }
         return if (beslutterErLikBehandler(beslutteVedtakHendelse)) {
             TotrinnskontrollStatusDto(IKKE_AUTORISERT)
