@@ -1,16 +1,23 @@
 package no.nav.familie.ef.sak.service.steg
 
+import com.fasterxml.jackson.module.kotlin.readValue
+import io.mockk.CapturingSlot
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import no.nav.familie.ef.sak.api.dto.TotrinnskontrollDto
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.OppgaveService
 import no.nav.familie.ef.sak.service.TotrinnskontrollService
 import no.nav.familie.ef.sak.task.IverksettMotOppdragTask
+import no.nav.familie.ef.sak.task.OpprettOppgaveTask
+import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
 
@@ -23,28 +30,47 @@ internal class BeslutteVedtakStegTest {
     private val oppgaveService = mockk<OppgaveService>()
 
     private val beslutteVedtakSteg = BeslutteVedtakSteg(taskRepository, fagsakService, oppgaveService, totrinnskontrollService)
+    private val fagsak = Fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD,
+                                søkerIdenter = setOf(FagsakPerson(ident = "12345678901")))
 
-    @Test
-    internal fun `skal opprette iverksettMotOppdragTask etter beslutte vedtak`() {
-        val fnr = "12345678901"
-        val fagsak = Fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD,
-                            søkerIdenter = setOf(FagsakPerson(ident = fnr)))
+    private lateinit var taskSlot: CapturingSlot<Task>
 
-        val taskSlot = slot<Task>()
+    @BeforeEach
+    internal fun setUp() {
+        taskSlot = slot<Task>()
         every {
             fagsakService.hentFagsak(any())
         } returns fagsak
-
         every {
             taskRepository.save(capture(taskSlot))
         } returns Task("", "", Properties())
+    }
 
-        beslutteVedtakSteg.utførSteg(Behandling(fagsakId = fagsak.id,
-                                                type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                status = BehandlingStatus.FATTER_VEDTAK,
-                                                steg = beslutteVedtakSteg.stegType()),
-                                     mockk())
+    @Test
+    internal fun `skal opprette iverksettMotOppdragTask etter beslutte vedtak hvis godkjent`() {
+        val nesteSteg = utførTotrinnskontroll(godkjent = true)
 
+        Assertions.assertThat(nesteSteg).isEqualTo(StegType.IVERKSETT_MOT_OPPDRAG)
         Assertions.assertThat(taskSlot.captured.type).isEqualTo(IverksettMotOppdragTask.TYPE)
+    }
+
+    @Test
+    internal fun `skal opprette opprettBehandleUnderkjentVedtakOppgave etter beslutte vedtak hvis underkjent`() {
+        val nesteSteg = utførTotrinnskontroll(godkjent = false)
+
+        val deserializedPayload = objectMapper.readValue<OpprettOppgaveTask.OpprettOppgaveTaskData>(taskSlot.captured.payload)
+
+        Assertions.assertThat(nesteSteg).isEqualTo(StegType.SEND_TIL_BESLUTTER)
+        Assertions.assertThat(taskSlot.captured.type).isEqualTo(OpprettOppgaveTask.TYPE)
+        Assertions.assertThat(deserializedPayload.oppgavetype).isEqualTo(Oppgavetype.BehandleUnderkjentVedtak)
+    }
+
+    private fun utførTotrinnskontroll(godkjent: Boolean): StegType {
+        val nesteSteg = beslutteVedtakSteg.utførOgReturnerNesteSteg(Behandling(fagsakId = fagsak.id,
+                                                                               type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                                                                               status = BehandlingStatus.FATTER_VEDTAK,
+                                                                               steg = beslutteVedtakSteg.stegType()),
+                                                                    TotrinnskontrollDto(godkjent = godkjent))
+        return nesteSteg
     }
 }
