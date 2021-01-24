@@ -92,7 +92,7 @@ object SøknadsskjemaMapper {
                           søktOmSkilsmisseSeparasjon = sivilstandsdetaljer.søktOmSkilsmisseSeparasjon?.verdi,
                           datoSøktSeparasjon = sivilstandsdetaljer.datoSøktSeparasjon?.verdi,
                           separasjonsbekreftelse = tilDomene(sivilstandsdetaljer.separasjonsbekreftelse?.verdi),
-                          årsakEnslig = sivilstandsdetaljer.årsakEnslig?.let { it.svarId },
+                          årsakEnslig = sivilstandsdetaljer.årsakEnslig?.svarId,
                           samlivsbruddsdokumentasjon = tilDomene(sivilstandsdetaljer.samlivsbruddsdokumentasjon?.verdi),
                           samlivsbruddsdato = sivilstandsdetaljer.samlivsbruddsdato?.verdi,
                           fraflytningsdato = sivilstandsdetaljer.fraflytningsdato?.verdi,
@@ -161,7 +161,7 @@ object SøknadsskjemaMapper {
 
     private fun tilDomene(barnepass: KontraktBarnepass?): Barnepass? =
             barnepass?.let {
-                Barnepass(årsakBarnepass = it.årsakBarnepass?.let { it.svarId },
+                Barnepass(årsakBarnepass = it.årsakBarnepass?.svarId,
                           barnepassordninger = tilBarnepass(it.barnepassordninger.verdi))
             }
 
@@ -183,37 +183,37 @@ object SøknadsskjemaMapper {
             samvær?.let {
                 Samvær(spørsmålAvtaleOmDeltBosted = it.spørsmålAvtaleOmDeltBosted?.verdi,
                        avtaleOmDeltBosted = tilDomene(it.avtaleOmDeltBosted?.verdi),
-                       skalAnnenForelderHaSamvær = it.skalAnnenForelderHaSamvær?.let { it.svarId },
-                       harDereSkriftligAvtaleOmSamvær = it.harDereSkriftligAvtaleOmSamvær?.let { it.svarId },
+                       skalAnnenForelderHaSamvær = it.skalAnnenForelderHaSamvær?.svarId,
+                       harDereSkriftligAvtaleOmSamvær = it.harDereSkriftligAvtaleOmSamvær?.svarId,
                        samværsavtale = tilDomene(it.samværsavtale?.verdi),
                        skalBarnetBoHosSøkerMenAnnenForelderSamarbeiderIkke = tilDomene(it.skalBarnetBoHosSøkerMenAnnenForelderSamarbeiderIkke?.verdi),
                        hvordanPraktiseresSamværet = it.hvordanPraktiseresSamværet?.verdi,
-                       borAnnenForelderISammeHus = it.borAnnenForelderISammeHus?.let { it.svarId },
+                       borAnnenForelderISammeHus = it.borAnnenForelderISammeHus?.svarId,
                        borAnnenForelderISammeHusBeskrivelse = it.borAnnenForelderISammeHusBeskrivelse?.verdi,
                        harDereTidligereBoddSammen = it.harDereTidligereBoddSammen?.verdi,
                        nårFlyttetDereFraHverandre = it.nårFlyttetDereFraHverandre?.verdi,
                        erklæringOmSamlivsbrudd = tilDomene(it.erklæringOmSamlivsbrudd?.verdi),
-                       hvorMyeErDuSammenMedAnnenForelder = it.hvorMyeErDuSammenMedAnnenForelder?.let { it.svarId },
+                       hvorMyeErDuSammenMedAnnenForelder = it.hvorMyeErDuSammenMedAnnenForelder?.svarId,
                        beskrivSamværUtenBarn = it.beskrivSamværUtenBarn?.verdi)
             }
 
     private fun tilDomene(annenForelder: KontraktAnnenForelder?): AnnenForelder? =
             annenForelder?.let {
-                AnnenForelder(ikkeOppgittAnnenForelderBegrunnelse = annenForelder.ikkeOppgittAnnenForelderBegrunnelse?.let { it.svarId },
+                AnnenForelder(ikkeOppgittAnnenForelderBegrunnelse = annenForelder.ikkeOppgittAnnenForelderBegrunnelse?.verdi,
                               bosattNorge = annenForelder.bosattNorge?.verdi,
                               land = annenForelder.land?.verdi,
                               person = tilDomene(annenForelder.person?.verdi))
             }
 
     private fun tilDomene(aktivitet: KontraktAktivitet): Aktivitet =
-            Aktivitet(hvordanErArbeidssituasjonen = aktivitet.hvordanErArbeidssituasjonen.let { StringUtils.join(it.svarId, ";") },
+            Aktivitet(hvordanErArbeidssituasjonen = aktivitet.hvordanErArbeidssituasjonen.let { StringUtils.join(it.svarId, ";") }, // TODO: Gjør til List<String>
                       arbeidsforhold = tilArbeidsgivere(aktivitet.arbeidsforhold?.verdi),
                       firmaer = tilFirmaer(aktivitet.firmaer?.verdi),
                       virksomhet = tilDomene(aktivitet.virksomhet?.verdi),
                       arbeidssøker = tilDomene(aktivitet.arbeidssøker?.verdi),
                       underUtdanning = tilDomene(aktivitet.underUtdanning?.verdi),
                       aksjeselskap = tilAksjeselskap(aktivitet.aksjeselskap?.verdi),
-                      erIArbeid = aktivitet.erIArbeid?.let { it.svarId  },
+                      erIArbeid = aktivitet.erIArbeid?.svarId,
                       erIArbeidDokumentasjon = tilDomene(aktivitet.erIArbeidDokumentasjon?.verdi),
                       tidligereUtdanninger = tilTidligereUtdanninger(aktivitet.underUtdanning?.verdi?.tidligereUtdanninger?.verdi))
 
@@ -237,8 +237,8 @@ object SøknadsskjemaMapper {
                                linjeKursGrad = it.gjeldendeUtdanning!!.verdi.linjeKursGrad.verdi,
                                fra = it.gjeldendeUtdanning!!.verdi.nårVarSkalDuVæreElevStudent.verdi.fra,
                                til = it.gjeldendeUtdanning!!.verdi.nårVarSkalDuVæreElevStudent.verdi.til,
-                               offentligEllerPrivat = it.offentligEllerPrivat.let { it.svarId },
-                               heltidEllerDeltid = it.heltidEllerDeltid.let { it.svarId },
+                               offentligEllerPrivat = it.offentligEllerPrivat.svarId,
+                               heltidEllerDeltid = it.heltidEllerDeltid.svarId,
                                hvorMyeSkalDuStudere = it.hvorMyeSkalDuStudere?.verdi,
                                hvaErMåletMedUtdanningen = it.hvaErMåletMedUtdanningen?.verdi,
                                utdanningEtterGrunnskolen = it.utdanningEtterGrunnskolen.verdi,
@@ -284,7 +284,7 @@ object SøknadsskjemaMapper {
             }?.toSet() ?: emptySet()
 
     private fun tilDomene(situasjon: KontraktSituasjon): Situasjon =
-            Situasjon(gjelderDetteDeg = StringUtils.join(situasjon.gjelderDetteDeg.svarId, ";"),
+            Situasjon(gjelderDetteDeg = StringUtils.join(situasjon.gjelderDetteDeg.svarId, ";"), //TODO: Gjør til List<String>
                       sykdom = tilDomene(situasjon.sykdom?.verdi),
                       barnsSykdom = tilDomene(situasjon.barnsSykdom?.verdi),
                       manglendeBarnepass = tilDomene(situasjon.manglendeBarnepass?.verdi),
@@ -294,7 +294,7 @@ object SøknadsskjemaMapper {
                       oppstartNyJobb = situasjon.oppstartNyJobb?.verdi,
                       utdanningstilbud = tilDomene(situasjon.utdanningstilbud?.verdi),
                       oppstartUtdanning = situasjon.oppstartUtdanning?.verdi,
-                      sagtOppEllerRedusertStilling = situasjon.sagtOppEllerRedusertStilling?.let { it.svarId },
+                      sagtOppEllerRedusertStilling = situasjon.sagtOppEllerRedusertStilling?.svarId,
                       oppsigelseReduksjonÅrsak = situasjon.oppsigelseReduksjonÅrsak?.verdi,
                       oppsigelseReduksjonTidspunkt = situasjon.oppsigelseReduksjonTidspunkt?.verdi,
                       reduksjonAvArbeidsforholdDokumentasjon = tilDomene(situasjon.reduksjonAvArbeidsforholdDokumentasjon?.verdi),

@@ -17,7 +17,7 @@ data class AktivitetDto(val arbeidssituasjon: List<String>,
                         val situasjon: SituasjonDto,
                         val virksomhet: VirksomhetDto?)
 
-data class SagtOppEllerRedusertStillingDto(val sagtOppEllerRedusertStilling: String,
+data class SagtOppEllerRedusertStillingDto(val sagtOppEllerRedusertStilling: String?,
                                            val årsak: String?,
                                            val dato: LocalDate?,
                                            val dokumentasjon: DokumentasjonDto?)
