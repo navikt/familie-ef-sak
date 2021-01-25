@@ -10,10 +10,10 @@ import java.time.LocalDateTime
 
 fun pdlPerson(vararg perioder: Pair<LocalDate, LocalDateTime?>) = object : PdlPerson {
 
-    override val fødsel: List<Fødsel> = listOf(Fødsel(null, null, null, null, null))
+    override val fødsel: List<Fødsel> = listOf(Fødsel(null, null, null, null, null, Metadata(false)))
 
     override val bostedsadresse: List<Bostedsadresse> = perioder.map {
-        Bostedsadresse(it.first, null, Folkeregistermetadata(null, it.second), null, null, null, null)
+        Bostedsadresse(it.first, null, Folkeregistermetadata(null, it.second), null, null, null, null, Metadata(false))
     }
 }
 

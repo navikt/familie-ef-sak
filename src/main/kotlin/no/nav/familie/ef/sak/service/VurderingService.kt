@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.api.dto.*
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.integration.dto.pdl.Familierelasjonsrolle
+import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
 import no.nav.familie.ef.sak.mapper.AleneomsorgMapper
 import no.nav.familie.ef.sak.mapper.MedlemskapMapper
 import no.nav.familie.ef.sak.mapper.SivilstandMapper
@@ -142,7 +143,7 @@ class VurderingService(private val behandlingService: BehandlingService,
                 .filter { it.relatertPersonsRolle == Familierelasjonsrolle.BARN }
                 .map { it.relatertPersonsIdent }
                 .let { pdlClient.hentBarn(it) }
-                .filter { it.value.fødsel.firstOrNull()?.fødselsdato != null }
+                .filter { it.value.fødsel.gjeldende()?.fødselsdato != null }
                 .filter { it.value.fødsel.first().fødselsdato!!.plusYears(18).isAfter(LocalDate.now()) }
 
         val barneforeldreFraSøknad =

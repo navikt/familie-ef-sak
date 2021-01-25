@@ -1,10 +1,8 @@
 package no.nav.familie.ef.sak.mapper
 
 import no.nav.familie.ef.sak.api.dto.*
-import no.nav.familie.ef.sak.integration.dto.pdl.Folkeregistermetadata
-import no.nav.familie.ef.sak.integration.dto.pdl.InnflyttingTilNorge
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker
-import no.nav.familie.ef.sak.integration.dto.pdl.UtflyttingFraNorge
+import no.nav.familie.ef.sak.api.dto.Folkeregisterpersonstatus
+import no.nav.familie.ef.sak.integration.dto.pdl.*
 import no.nav.familie.ef.sak.repository.domain.søknad.Medlemskap
 import no.nav.familie.ef.sak.service.KodeverkService
 import no.nav.familie.ef.sak.util.min
@@ -37,7 +35,7 @@ class MedlemskapMapper(private val statsborgerskapMapper: StatsborgerskapMapper,
                                               bostedsadresse = pdlSøker.bostedsadresse.map(adresseMapper::tilAdresse),
                                               innflytting = mapInnflytting(pdlSøker.innflyttingTilNorge),
                                               utflytting = mapUtflytting(pdlSøker.utflyttingFraNorge),
-                                              folkeregisterpersonstatus = pdlSøker.folkeregisterpersonstatus.firstOrNull()
+                                              folkeregisterpersonstatus = pdlSøker.folkeregisterpersonstatus.gjeldende()
                                                       ?.let(Folkeregisterpersonstatus::fraPdl))
         return MedlemskapDto(søknadsgrunnlag = søknadsgrunnlag,
                              registergrunnlag = registergrunnlag)

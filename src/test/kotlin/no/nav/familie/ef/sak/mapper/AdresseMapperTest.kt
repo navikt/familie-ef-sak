@@ -14,7 +14,7 @@ internal class AdresseMapperTest {
 
     private val kodeverkService = KodeverkServiceMock().kodeverkService()
     private val mapper = AdresseMapper(kodeverkService)
-
+    private val metadataGjeldende = Metadata(historisk = false)
     @Test
     internal fun `Bostedsadresse formatert adresse`() {
         val bostedsadresse =
@@ -26,7 +26,8 @@ internal class AdresseMapperTest {
                                utenlandskAdresse(),
                                vegadresse = vegadresse(),
                                ukjentBosted = UkjentBosted(bostedskommune = "ukjentBostedKommune"),
-                               null
+                               null,
+                               metadata = metadataGjeldende
                 )
         assertThat(mapper.tilAdresse(bostedsadresse).visningsadresse)
                 .isEqualTo("Charlies vei 13 b, 0575 Oslo")
@@ -46,7 +47,8 @@ internal class AdresseMapperTest {
                                               coAdressenavn = null,
                                               utenlandskAdresse = null,
                                               vegadresse = null,
-                                              oppholdAnnetSted = null)
+                                              oppholdAnnetSted = null,
+                                              metadataGjeldende)
 
         val adresseMedVegadresseMedAdressenavn = oppholdsadresse.copy(vegadresse = tomVegadresse().copy(adressenavn = "adresse"))
         assertThat(mapper.tilAdresse(adresseMedVegadresseMedAdressenavn).visningsadresse)

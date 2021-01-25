@@ -86,13 +86,13 @@ data class PdlAnnenForelder(val adressebeskyttelse: List<Adressebeskyttelse>,
                             val innflyttingTilNorge: List<InnflyttingTilNorge>,
                             val utflyttingFraNorge: List<UtflyttingFraNorge>) : PdlPerson
 
-data class MetadataEndringer(val registrert: LocalDate)
-data class Metadata(val endringer: List<MetadataEndringer>)
+data class Metadata(val historisk: Boolean)
 
 data class DeltBosted(val startdatoForKontrakt: LocalDateTime,
                       val sluttdatoForKontrakt: LocalDateTime?,
                       val vegadresse: Vegadresse?,
-                      val ukjentBosted: UkjentBosted?
+                      val ukjentBosted: UkjentBosted?,
+                      val metadata: Metadata
 )
 
 data class Folkeregistermetadata(val gyldighetstidspunkt: LocalDateTime?,
@@ -104,7 +104,8 @@ data class Bostedsadresse(val angittFlyttedato: LocalDate?,
                           val utenlandskAdresse: UtenlandskAdresse?,
                           val vegadresse: Vegadresse?,
                           val ukjentBosted: UkjentBosted?,
-                          val matrikkeladresse: Matrikkeladresse?) {
+                          val matrikkeladresse: Matrikkeladresse?,
+                          val metadata: Metadata) {
 
     fun matrikkelId(): Long? {
         return matrikkeladresse?.matrikkelId ?: vegadresse?.matrikkelId
@@ -115,7 +116,8 @@ data class Oppholdsadresse(val oppholdsadressedato: LocalDate?,
                            val coAdressenavn: String?,
                            val utenlandskAdresse: UtenlandskAdresse?,
                            val vegadresse: Vegadresse?,
-                           val oppholdAnnetSted: String?)
+                           val oppholdAnnetSted: String?,
+                           val metadata: Metadata)
 
 data class Kontaktadresse(val coAdressenavn: String?,
                           val gyldigFraOgMed: LocalDate?,
@@ -160,7 +162,7 @@ data class Koordinater(val x: Float?,
                        val z: Float?,
                        val kvalitet: Int?)
 
-data class Adressebeskyttelse(val gradering: AdressebeskyttelseGradering)
+data class Adressebeskyttelse(val gradering: AdressebeskyttelseGradering, val metadata: Metadata)
 
 enum class AdressebeskyttelseGradering {
     STRENGT_FORTROLIG,
@@ -173,7 +175,8 @@ data class Fødsel(@JsonProperty("foedselsaar") val fødselsår: Int?,
                   @JsonProperty("foedselsdato") val fødselsdato: LocalDate?,
                   @JsonProperty("foedeland") val fødeland: String?,
                   @JsonProperty("foedested") val fødested: String?,
-                  @JsonProperty("foedekommune") val fødekommune: String?)
+                  @JsonProperty("foedekommune") val fødekommune: String?,
+                  val metadata: Metadata)
 
 data class Dødsfall(@JsonProperty("doedsdato") val dødsdato: LocalDate?)
 
@@ -189,7 +192,8 @@ enum class Familierelasjonsrolle {
 }
 
 data class Folkeregisterpersonstatus(val status: String,
-                                     val forenkletStatus: String)
+                                     val forenkletStatus: String,
+                                     val metadata: Metadata)
 
 data class Fullmakt(val gyldigFraOgMed: LocalDate,
                     val gyldigTilOgMed: LocalDate,
@@ -250,7 +254,8 @@ data class Sivilstand(val type: Sivilstandstype,
                       val sted: String?,
                       val utland: String?,
                       val relatertVedSivilstand: String?,
-                      val bekreftelsesdato: String?)
+                      val bekreftelsesdato: String?,
+                      val metadata: Metadata)
 
 enum class Sivilstandstype {
     UOPPGITT,
