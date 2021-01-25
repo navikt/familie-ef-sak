@@ -118,8 +118,9 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         sendTilBeslutter(SAKSBEHANDLER)
         underkjennTotrinnskontroll(BESLUTTER)
 
-        validerBehandlingFatterVedtak()
+        validerBehandlingUtredes()
 
+        sendTilBeslutter(SAKSBEHANDLER)
         godkjennTotrinnskontroll(BESLUTTER)
     }
 
@@ -205,16 +206,17 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         return response.body.data!!
     }
 
-    private fun validerBehandlingIverksetter() {
-        val behandling = behandlingRepository.findByIdOrThrow(behandling.id)
-        assertThat(behandling.status).isEqualTo(BehandlingStatus.IVERKSETTER_VEDTAK)
-        assertThat(behandling.steg).isEqualTo(StegType.IVERKSETT_MOT_OPPDRAG)
-    }
+    private fun validerBehandlingUtredes() = validerBehandling(BehandlingStatus.UTREDES, StegType.SEND_TIL_BESLUTTER)
 
-    private fun validerBehandlingFatterVedtak() {
+    private fun validerBehandlingIverksetter() =
+            validerBehandling(BehandlingStatus.IVERKSETTER_VEDTAK, StegType.IVERKSETT_MOT_OPPDRAG)
+
+    private fun validerBehandlingFatterVedtak() = validerBehandling(BehandlingStatus.FATTER_VEDTAK, StegType.BESLUTTE_VEDTAK)
+
+    private fun validerBehandling(status: BehandlingStatus, steg: StegType) {
         val behandling = behandlingRepository.findByIdOrThrow(behandling.id)
-        assertThat(behandling.status).isEqualTo(BehandlingStatus.FATTER_VEDTAK)
-        assertThat(behandling.steg).isEqualTo(StegType.BESLUTTE_VEDTAK)
+        assertThat(behandling.status).isEqualTo(status)
+        assertThat(behandling.steg).isEqualTo(steg)
     }
 
     private fun validerTotrinnskontrollUaktuelt(saksbehandler: Saksbehandler) {

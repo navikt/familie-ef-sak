@@ -9,6 +9,7 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 import java.util.*
 
 @Service
@@ -18,7 +19,8 @@ import java.util.*
 class FerdigstillOppgaveTask(private val oppgaveService: OppgaveService) : AsyncTaskStep {
 
     data class FerdigstillOppgaveTaskData(val behandlingId: UUID,
-                                          val oppgavetype: Oppgavetype)
+                                          val oppgavetype: Oppgavetype,
+                                          val unik: LocalDateTime? = LocalDateTime.now())
 
     override fun doTask(task: Task) {
         val data = objectMapper.readValue<FerdigstillOppgaveTaskData>(task.payload)

@@ -10,6 +10,7 @@ import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 @Service
@@ -22,7 +23,8 @@ class OpprettOppgaveTask(private val oppgaveService: OppgaveService) : AsyncTask
                                       val oppgavetype: Oppgavetype,
                                       val fristForFerdigstillelse: LocalDate,
                                       val tilordnetNavIdent: String? = null,
-                                      val beskrivelse: String? = null)
+                                      val beskrivelse: String? = null,
+                                      val unik: LocalDateTime? = LocalDateTime.now())
 
     override fun doTask(task: Task) {
         val data = objectMapper.readValue<OpprettOppgaveTaskData>(task.payload)
