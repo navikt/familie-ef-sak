@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.api.gui
 
+import no.nav.familie.ef.sak.api.dto.BrevRequest
 import no.nav.familie.ef.sak.api.dto.InngangsvilkårDto
 import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.service.BehandlingService
@@ -49,4 +50,21 @@ class VurderingController(private val vurderingService: VurderingService,
         val behandling = behandlingService.hentBehandling(behandlingId)
         return Ressurs.success(stegService.håndterStønadsvilkår(behandling).id)
     }
+
+    @PostMapping("/{behandlingId}/lagBrev")
+    fun lagBrev(@PathVariable behandlingId: UUID, @RequestBody brevParams: BrevRequest): Ressurs<String> {
+        tilgangService.validerTilgangTilBehandling(behandlingId)
+        val behandling = behandlingService.hentBehandling(behandlingId)
+
+        // 1. lag brev request
+        //
+        // 2. send til brev-klient/familie-brev
+        //
+        // 3. motta generert brev
+        //
+        // 4. returner generert brev
+
+        return  Ressurs.success("lagBrev-dummy")
+    }
+
 }
