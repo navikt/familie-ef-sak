@@ -23,7 +23,8 @@ internal class TotrinnskontrollServiceTest {
 
     private val behandlingshistorikkService = mockk<BehandlingshistorikkService>()
     private val behandlingService = mockk<BehandlingService>()
-    private val totrinnskontrollService = TotrinnskontrollService(behandlingshistorikkService, behandlingService)
+    private val tilgangService = mockk<TilgangService>()
+    private val totrinnskontrollService = TotrinnskontrollService(behandlingshistorikkService, behandlingService, tilgangService)
 
     @Test
     internal fun `skal returnere UAKTUELT når behandlingen FERDIGSTILT`() {

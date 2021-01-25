@@ -21,6 +21,8 @@ interface BehandlingSteg<T> {
 
     fun stegType(): StegType
 
+    fun settInnHistorikk() = true
+
 }
 
 enum class StegType(val rekkefølge: Int,

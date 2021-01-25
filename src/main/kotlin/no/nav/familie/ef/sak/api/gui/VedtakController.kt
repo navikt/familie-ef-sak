@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.api.gui
 
 import no.nav.familie.ef.sak.api.ApiFeil
 import no.nav.familie.ef.sak.api.dto.BeslutteVedtakDto
+import no.nav.familie.ef.sak.api.dto.TotrinnskontrollStatusDto
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.TilgangService
 import no.nav.familie.ef.sak.service.TotrinnskontrollService
@@ -44,7 +45,7 @@ class VedtakController(private val stegService: StegService,
     }
 
     @GetMapping("{behandlingId}/totrinnskontroll")
-    fun hentTotrinnskontroll(@PathVariable behandlingId: UUID): ResponseEntity<Any> {
+    fun hentTotrinnskontroll(@PathVariable behandlingId: UUID): ResponseEntity<Ressurs<TotrinnskontrollStatusDto>> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         val totrinnskontroll = totrinnskontrollService.hentTotrinnskontrollStatus(behandlingId)
         return ResponseEntity.ok(Ressurs.success(totrinnskontroll))

@@ -135,10 +135,13 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
 
             val nesteSteg = behandlingSteg.utførOgReturnerNesteSteg(behandling, data)
 
-            behandlingshistorikkService.opprettHistorikkInnslag(Behandlingshistorikk(behandlingId = behandling.id,
-                                                                                     steg = behandling.steg,
-                                                                                     opprettetAvNavn = saksbehandlerNavn,
-                                                                                     opprettetAv = SikkerhetContext.hentSaksbehandler()))
+            if (behandlingSteg.settInnHistorikk()) {
+                behandlingshistorikkService.opprettHistorikkInnslag(
+                        Behandlingshistorikk(behandlingId = behandling.id,
+                                             steg = behandling.steg,
+                                             opprettetAvNavn = saksbehandlerNavn,
+                                             opprettetAv = SikkerhetContext.hentSaksbehandler()))
+            }
 
             stegSuksessMetrics[stegType]?.increment()
 

@@ -71,4 +71,5 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
         error("Bruker utførOgReturnerNesteSteg")
     }
 
+    override fun settInnHistorikk(): Boolean = false
 }
