@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.api.beregning
 
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.TestFactory
@@ -32,7 +32,7 @@ internal class BeregningTest {
         return testData
                 .map { (periode, fasit) ->
                     dynamicTest("skal finne grunnbeløp for perioden=[${periode.first}-${periode.second}] med forventet svar: $fasit") {
-                        Assertions.assertThat(finnGrunnbeløpsPerioder(LocalDate.parse(periode.first),
+                        assertThat(finnGrunnbeløpsPerioder(LocalDate.parse(periode.first),
                                                                       LocalDate.parse(periode.second)))
                                 .isEqualTo(fasit.map {
                                     Beløpsperiode(LocalDate.parse(it.first),
