@@ -116,6 +116,8 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         underkjennTotrinnskontroll(BESLUTTER)
 
         sendTilBeslutter(SAKSBEHANDLER)
+        underkjennTotrinnskontroll(BESLUTTER)
+
         validerBehandlingFatterVedtak()
 
         godkjennTotrinnskontroll(BESLUTTER)
