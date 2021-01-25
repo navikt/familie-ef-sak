@@ -51,61 +51,58 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `totrinn er uaktuell når behandlingen ikke er klar for totrinn`() {
-        opprettBehandling()
-        validerTotrinnskontrollUaktuelt(SAKSBEHANDLER)
-    }
-
-    @Test
-    internal fun `godkjenner vedtak`() {
-        opprettBehandling()
-
-        sendTilBeslutter(SAKSBEHANDLER)
-        validerBehandlingFatterVedtak()
-
-        validerTotrinnskontrollIkkeAutorisert(SAKSBEHANDLER)
-        validerTotrinnskontrollKanFatteVedtak(BESLUTTER)
-        godkjennTotrinnskontroll(BESLUTTER)
-
-        validerBehandlingIverksetter()
-
-        validerTotrinnskontrollUaktuelt(SAKSBEHANDLER)
-    }
-
-    @Test
-    internal fun `underkjenner vedtak og senere godkjenner det`() {
-        opprettBehandling()
-        sendTilBeslutter(SAKSBEHANDLER)
-        validerBehandlingFatterVedtak()
-        validerTotrinnskontrollIkkeAutorisert(SAKSBEHANDLER)
-
-        underkjennTotrinnskontroll(BESLUTTER)
-        validerBehandlingSendTilBeslutter()
-        validerTotrinnskontrollUnderkjent(SAKSBEHANDLER)
-        sendTilBeslutter(SAKSBEHANDLER)
-        validerBehandlingFatterVedtak()
-
-        godkjennTotrinnskontroll(BESLUTTER)
-        validerBehandlingFatterVedtak()
-
-        validerTotrinnskontrollUaktuelt(SAKSBEHANDLER)
+        opprettBehandling(steg = StegType.VILKÅRSVURDERE_INNGANGSVILKÅR)
         validerTotrinnskontrollUaktuelt(BESLUTTER)
     }
 
     @Test
-    internal fun `beslutter saksbehandler behandling, en annen beslutter må godkjenne totrinnskontroll`() {
+    internal fun `skal sette behandling til fatter vedtak når man sendt til beslutter`() {
         opprettBehandling()
-        sendTilBeslutter(BESLUTTER)
+
+        sendTilBeslutter(SAKSBEHANDLER)
         validerBehandlingFatterVedtak()
+    }
+
+    @Test
+    internal fun `skal sette behandling til iverksett når man godkjent totrinnskontroll`() {
+        opprettBehandling()
+
+        sendTilBeslutter(SAKSBEHANDLER)
+        godkjennTotrinnskontroll(BESLUTTER)
+        validerBehandlingIverksetter()
+    }
+
+    @Test
+    internal fun `hvis man underkjenner den så skal man få ut det som status`() {
+        opprettBehandling()
+
+        sendTilBeslutter(SAKSBEHANDLER)
+        underkjennTotrinnskontroll(BESLUTTER)
+        validerTotrinnskontrollUnderkjent(SAKSBEHANDLER)
+        validerTotrinnskontrollUnderkjent(BESLUTTER)
+        validerTotrinnskontrollUnderkjent(BESLUTTER_2)
+    }
+
+    @Test
+    internal fun `en annen beslutter enn den som sendte til beslutter må godkjenne behandlingen`() {
+        opprettBehandling()
+
+        sendTilBeslutter(BESLUTTER)
         validerTotrinnskontrollIkkeAutorisert(SAKSBEHANDLER)
         validerTotrinnskontrollIkkeAutorisert(BESLUTTER)
+        validerTotrinnskontrollKanFatteVedtak(BESLUTTER_2)
 
-        godkjennTotrinnskontroll(BESLUTTER) {
-            assertThat(it.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR) // TODO burde man returnere noe annet?
-        }
-
+        godkjennTotrinnskontroll(SAKSBEHANDLER, responseServerError())
+        godkjennTotrinnskontroll(BESLUTTER, responseServerError())
         godkjennTotrinnskontroll(BESLUTTER_2)
+    }
 
-        validerBehandlingIverksetter()
+    @Test
+    internal fun `skal gi totrinnskontroll uaktuelt hvis totrinnskontrollen er godkjent`() {
+        opprettBehandling()
+
+        sendTilBeslutter(SAKSBEHANDLER)
+        godkjennTotrinnskontroll(BESLUTTER)
 
         validerTotrinnskontrollUaktuelt(SAKSBEHANDLER)
         validerTotrinnskontrollUaktuelt(BESLUTTER)
@@ -113,7 +110,32 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `kan ikke beslutte før behandling er i riktig steg`() {
+    internal fun `hvis man underkjenner behandlingen må man sende den til beslutter på nytt og sen godkjenne den`() {
+        opprettBehandling()
+        sendTilBeslutter(SAKSBEHANDLER)
+        underkjennTotrinnskontroll(BESLUTTER)
+
+        sendTilBeslutter(SAKSBEHANDLER)
+        validerBehandlingFatterVedtak()
+
+        godkjennTotrinnskontroll(BESLUTTER)
+    }
+
+    @Test
+    internal fun `en annen beslutter enn den som sendte behandlingen til beslutter må godkjenne behandlingen`() {
+        opprettBehandling()
+        sendTilBeslutter(BESLUTTER)
+        validerTotrinnskontrollIkkeAutorisert(SAKSBEHANDLER)
+        validerTotrinnskontrollIkkeAutorisert(BESLUTTER)
+        validerTotrinnskontrollKanFatteVedtak(BESLUTTER_2)
+
+        godkjennTotrinnskontroll(BESLUTTER, responseServerError())
+
+        godkjennTotrinnskontroll(BESLUTTER_2)
+    }
+
+    @Test
+    internal fun `kan ikke godkjenne totrinnskontroll når behandling utredes`() {
         opprettBehandling()
         godkjennTotrinnskontroll(BESLUTTER) {
             assertThat(it.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -134,13 +156,17 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
                                                     steg = steg))
     }
 
-    private fun <T : Any> responseSuccessValidator(): (ResponseEntity<Ressurs<T>>) -> Unit = {
+    private fun <T> responseOK(): (ResponseEntity<Ressurs<T>>) -> Unit = {
         assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(it.body.status).isEqualTo(Ressurs.Status.SUKSESS)
     }
 
+    private fun <T> responseServerError(): (ResponseEntity<Ressurs<T>>) -> Unit = {
+        assertThat(it.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
     private fun sendTilBeslutter(saksbehandler: Saksbehandler,
-                                 validator: (ResponseEntity<Ressurs<UUID>>) -> Unit = responseSuccessValidator()) {
+                                 validator: (ResponseEntity<Ressurs<UUID>>) -> Unit = responseOK()) {
         headers.setBearerAuth(token(saksbehandler))
         val response = restTemplate.exchange<Ressurs<UUID>>(localhost("/api/vedtak/${behandling.id}/send-til-beslutter"),
                                                             HttpMethod.POST,
@@ -149,12 +175,12 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     }
 
     private fun godkjennTotrinnskontroll(saksbehandler: Saksbehandler,
-                                         validator: (ResponseEntity<Ressurs<UUID>>) -> Unit = responseSuccessValidator()) {
+                                         validator: (ResponseEntity<Ressurs<UUID>>) -> Unit = responseOK()) {
         beslutteVedtak(saksbehandler, BeslutteVedtakDto(true), validator)
     }
 
     private fun underkjennTotrinnskontroll(saksbehandler: Saksbehandler,
-                                           validator: (ResponseEntity<Ressurs<UUID>>) -> Unit = responseSuccessValidator()) {
+                                           validator: (ResponseEntity<Ressurs<UUID>>) -> Unit = responseOK()) {
         beslutteVedtak(saksbehandler, BeslutteVedtakDto(false, "begrunnelse"), validator)
     }
 
@@ -173,7 +199,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
                 restTemplate.exchange<Ressurs<TotrinnskontrollStatusDto>>(localhost("/api/vedtak/${behandling.id}/totrinnskontroll"),
                                                                           HttpMethod.GET,
                                                                           HttpEntity<Any>(headers))
-        responseSuccessValidator<TotrinnskontrollStatusDto>().invoke(response)
+        responseOK<TotrinnskontrollStatusDto>().invoke(response)
         return response.body.data!!
     }
 
@@ -187,12 +213,6 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         val behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         assertThat(behandling.status).isEqualTo(BehandlingStatus.FATTER_VEDTAK)
         assertThat(behandling.steg).isEqualTo(StegType.BESLUTTE_VEDTAK)
-    }
-
-    private fun validerBehandlingSendTilBeslutter() {
-        val behandling = behandlingRepository.findByIdOrThrow(behandling.id)
-        assertThat(behandling.status).isEqualTo(BehandlingStatus.UTREDES)
-        assertThat(behandling.steg).isEqualTo(StegType.SEND_TIL_BESLUTTER)
     }
 
     private fun validerTotrinnskontrollUaktuelt(saksbehandler: Saksbehandler) {
@@ -221,7 +241,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
     private fun token(saksbehandler: Saksbehandler): String {
         val rolle = if (saksbehandler.beslutter) rolleConfig.beslutterRolle else rolleConfig.saksbehandlerRolle
-        var claimsSet = JwtTokenGenerator.createSignedJWT("subject").jwtClaimsSet // ??
+        var claimsSet = JwtTokenGenerator.createSignedJWT("subject").jwtClaimsSet
         claimsSet = JWTClaimsSet.Builder(claimsSet)
                 .claim("preferred_username", saksbehandler)
                 .claim("groups", listOf(rolle))

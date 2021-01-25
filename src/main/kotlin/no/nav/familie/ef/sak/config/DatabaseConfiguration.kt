@@ -6,7 +6,6 @@ import no.nav.familie.ef.sak.repository.domain.Endret
 import no.nav.familie.ef.sak.repository.domain.JsonWrapper
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus
 import no.nav.familie.ef.sak.repository.domain.søknad.Dokumentasjon
-import no.nav.familie.ef.sak.repository.domain.søknad.UnderUtdanning
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.prosessering.PropertiesWrapperTilStringConverter
@@ -164,7 +163,7 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
         override fun convert(jsonWrapper: JsonWrapper?): PGobject =
                 PGobject().apply {
                     type = "json"
-                    value = jsonWrapper?.let { objectMapper.writeValueAsString(it.json) }
+                    value = jsonWrapper?.let { it.json }
                 }
     }
 

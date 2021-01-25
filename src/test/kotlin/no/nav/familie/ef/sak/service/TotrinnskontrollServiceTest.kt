@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.service
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import no.nav.familie.ef.sak.api.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.api.dto.TotrinnkontrollStatus
 import no.nav.familie.ef.sak.api.dto.TotrinnskontrollDto
@@ -16,6 +17,7 @@ import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
 
@@ -25,6 +27,11 @@ internal class TotrinnskontrollServiceTest {
     private val behandlingService = mockk<BehandlingService>()
     private val tilgangService = mockk<TilgangService>()
     private val totrinnskontrollService = TotrinnskontrollService(behandlingshistorikkService, behandlingService, tilgangService)
+
+    @BeforeEach
+    internal fun setUp() {
+        every { tilgangService.harTilgangTilRolle(any()) } returns true
+    }
 
     @Test
     internal fun `skal returnere UAKTUELT når behandlingen FERDIGSTILT`() {
@@ -65,15 +72,14 @@ internal class TotrinnskontrollServiceTest {
 
         val totrinnskontroll = totrinnskontrollService.hentTotrinnskontrollStatus(ID)
         assertThat(totrinnskontroll.status).isEqualTo(TotrinnkontrollStatus.TOTRINNSKONTROLL_UNDERKJENT)
-        assertThat(totrinnskontroll.totrinnskontroll).isEqualTo("begrunnelse")
+        assertThat(totrinnskontroll.totrinnskontroll?.begrunnelse).isEqualTo("begrunnelse")
     }
 
     @Test
     internal fun `skal returnere KAN_FATTE_VEDTAK når behandlingen FATTER_VEDTAK og saksbehandler er utreder og ikke er den som sendte behandlingen til fatte vedtak`() {
         every { behandlingService.hentBehandling(any()) } returns behandling(BehandlingStatus.FATTER_VEDTAK)
-        every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any(), any()) } returns
-                behandlingshistorikk(steg = StegType.BESLUTTE_VEDTAK,
-                                     utfall = StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT,
+        every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any()) } returns
+                behandlingshistorikk(steg = StegType.SEND_TIL_BESLUTTER,
                                      opprettetAv = "Annen saksbehandler")
 
         val totrinnskontroll = totrinnskontrollService.hentTotrinnskontrollStatus(ID)
@@ -84,14 +90,27 @@ internal class TotrinnskontrollServiceTest {
     @Test
     internal fun `skal returnere IKKE_AUTORISERT når behandlingen FATTER_VEDTAK og saksbehandler er utreder, men er den som sendte behandlingen til fatte vedtak`() {
         every { behandlingService.hentBehandling(any()) } returns behandling(BehandlingStatus.FATTER_VEDTAK)
-        every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any(), any()) } returns
-                behandlingshistorikk(steg = StegType.BESLUTTE_VEDTAK,
-                                     utfall = StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT,
+        every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any()) } returns
+                behandlingshistorikk(steg = StegType.SEND_TIL_BESLUTTER,
                                      opprettetAv = SikkerhetContext.hentSaksbehandler())
 
         val totrinnskontroll = totrinnskontrollService.hentTotrinnskontrollStatus(ID)
         assertThat(totrinnskontroll.status).isEqualTo(TotrinnkontrollStatus.IKKE_AUTORISERT)
-        assertThat(totrinnskontroll.totrinnskontroll).isNull()
+        assertThat(totrinnskontroll.totrinnskontroll).isNotNull
+    }
+
+    @Test
+    internal fun `skal returnere IKKE_AUTORISERT når behandlingen FATTER_VEDTAK og saksbehandler ikke er utreder`() {
+        every { tilgangService.harTilgangTilRolle(any()) } returns false
+        every { behandlingService.hentBehandling(any()) } returns behandling(BehandlingStatus.FATTER_VEDTAK)
+        every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any()) } returns
+                behandlingshistorikk(steg = StegType.SEND_TIL_BESLUTTER,
+                                     opprettetAv = "Annen saksbehandler")
+
+        val totrinnskontroll = totrinnskontrollService.hentTotrinnskontrollStatus(ID)
+        assertThat(totrinnskontroll.status).isEqualTo(TotrinnkontrollStatus.IKKE_AUTORISERT)
+        assertThat(totrinnskontroll.totrinnskontroll).isNotNull
+        verify(exactly = 1) { tilgangService.harTilgangTilRolle(any()) }
     }
 
     @Test
@@ -119,7 +138,7 @@ internal class TotrinnskontrollServiceTest {
     }
 
     private fun behandlingshistorikk(steg: StegType,
-                                     utfall: StegUtfall,
+                                     utfall: StegUtfall? = null,
                                      opprettetAv: String,
                                      beslutt: BeslutteVedtakDto? = null) =
             Behandlingshistorikk(behandlingId = UUID.randomUUID(),

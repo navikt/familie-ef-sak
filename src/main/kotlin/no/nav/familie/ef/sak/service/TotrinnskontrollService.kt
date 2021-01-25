@@ -89,12 +89,12 @@ class TotrinnskontrollService(private val behandlingshistorikkService: Behandlin
         return when (besluttetVedtakHendelse.utfall) {
             BESLUTTE_VEDTAK_UNDERKJENT -> {
                 requireNotNull(besluttetVedtakHendelse.metadata) { "Har underkjent vedtak - savner metadata" }
-                val beslut = objectMapper.readValue<BeslutteVedtakDto>(besluttetVedtakHendelse.metadata.json)
+                val beslutt = objectMapper.readValue<BeslutteVedtakDto>(besluttetVedtakHendelse.metadata.json)
                 TotrinnskontrollStatusDto(TOTRINNSKONTROLL_UNDERKJENT,
                                           TotrinnskontrollDto(besluttetVedtakHendelse.opprettetAvNavn,
                                                               besluttetVedtakHendelse.endretTid,
-                                                              beslut.godkjent,
-                                                              beslut.begrunnelse))
+                                                              beslutt.godkjent,
+                                                              beslutt.begrunnelse))
             }
             else -> error("Skal ikke kunne være annen status enn UNDERKJENT når behandligStatus!=${BehandlingStatus.FATTER_VEDTAK}")
         }
