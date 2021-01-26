@@ -1,16 +1,19 @@
 package no.nav.familie.ef.sak.api.gui
 
+import no.nav.familie.ef.sak.api.ApiFeil
+import no.nav.familie.ef.sak.api.dto.BeslutteVedtakDto
+import no.nav.familie.ef.sak.api.dto.TotrinnskontrollStatusDto
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.TilgangService
+import no.nav.familie.ef.sak.service.TotrinnskontrollService
 import no.nav.familie.ef.sak.service.steg.StegService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import java.util.*
 
 
@@ -20,6 +23,7 @@ import java.util.*
 @Validated
 class VedtakController(private val stegService: StegService,
                        private val behandlingService: BehandlingService,
+                       private val totrinnskontrollService: TotrinnskontrollService,
                        private val tilgangService: TilgangService) {
 
     @PostMapping("/{behandlingId}/send-til-beslutter")
@@ -30,10 +34,21 @@ class VedtakController(private val stegService: StegService,
     }
 
     @PostMapping("/{behandlingId}/beslutte-vedtak")
-    fun beslutteVedtak(@PathVariable behandlingId: UUID): Ressurs<UUID> {
+    fun beslutteVedtak(@PathVariable behandlingId: UUID,
+                       @RequestBody request: BeslutteVedtakDto): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
+        if (!request.godkjent && request.begrunnelse.isNullOrBlank()) {
+            throw ApiFeil("Mangler begrunnelse", HttpStatus.BAD_REQUEST)
+        }
         val behandling = behandlingService.hentBehandling(behandlingId)
-        return Ressurs.success(stegService.håndterBeslutteVedtak(behandling).id)
+        return Ressurs.success(stegService.håndterBeslutteVedtak(behandling, request).id)
+    }
+
+    @GetMapping("{behandlingId}/totrinnskontroll")
+    fun hentTotrinnskontroll(@PathVariable behandlingId: UUID): ResponseEntity<Ressurs<TotrinnskontrollStatusDto>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId)
+        val totrinnskontroll = totrinnskontrollService.hentTotrinnskontrollStatus(behandlingId)
+        return ResponseEntity.ok(Ressurs.success(totrinnskontroll))
     }
 
 }
