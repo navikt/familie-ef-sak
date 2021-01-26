@@ -3,6 +3,12 @@ spring:
   datasource:
     url: jdbc:postgresql://b27dbvl008.preprod.local:5432/familie-ef-sak
 
+no.nav.security.jwt:
+  issuer:
+    sts:
+      discoveryurl: ${STS_DISCOVERY_URL}
+      accepted_audience: ${GYLDIGE_SERVICE_BRUKERE}
+
 AZUREAD_DISCOVERY_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/v2.0/.well-known/openid-configuration
 AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
 

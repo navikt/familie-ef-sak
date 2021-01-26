@@ -32,11 +32,11 @@
         <kotlin.version>1.4.21-2</kotlin.version>
         <kotlin-coroutines.version>1.4.2</kotlin-coroutines.version>
         <springfox.version>3.0.0</springfox.version>
-        <mockk.version>1.10.4</mockk.version>
-        <felles.version>1.20210111144144_6eff1f3</felles.version>
-        <prosessering.version>1.20210111133056_4e2e58e</prosessering.version>
+        <mockk.version>1.10.5</mockk.version>
+        <felles.version>1.20210121113106_ca34836</felles.version>
+        <prosessering.version>1.20210112120136_9956e1e</prosessering.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>2.0_20210114082116_8e47040</kontrakter.version>
+        <kontrakter.version>2.0_20210122103953_cb55034</kontrakter.version>
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
         <sonar.organization>navit</sonar.organization>
@@ -277,7 +277,7 @@
                 <plugin>
                     <groupId>org.sonarsource.scanner.maven</groupId>
                     <artifactId>sonar-maven-plugin</artifactId>
-                    <version>3.7.0.1746</version>
+                    <version>3.8.0.2131</version>
                 </plugin>
                 <plugin>
                     <groupId>org.jacoco</groupId>

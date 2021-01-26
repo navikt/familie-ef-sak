@@ -5,6 +5,9 @@ query($identer: [ID!]!){
         person {
             adressebeskyttelse {
                 gradering
+                metadata {
+                    historisk
+                }
             }
             bostedsadresse(historikk: true) {
                 angittFlyttedato
@@ -44,6 +47,9 @@ query($identer: [ID!]!){
                 ukjentBosted {
                     bostedskommune
                 }
+                metadata {
+                    historisk
+                }
             }
             doedsfall {
                 doedsdato
@@ -54,15 +60,16 @@ query($identer: [ID!]!){
                 foedeland
                 foedested
                 foedekommune
+                metadata {
+                    historisk
+                }
             }
             navn {
                 fornavn
                 mellomnavn
                 etternavn
                 metadata {
-                    endringer {
-                        registrert
-                    }
+                    historisk
                 }
             }
             opphold(historikk: true) {
@@ -99,6 +106,9 @@ query($identer: [ID!]!){
                     matrikkelId
                 }
                 oppholdAnnetSted
+                metadata {
+                  historisk
+                }
             }
             statsborgerskap(historikk: true) {
                 land

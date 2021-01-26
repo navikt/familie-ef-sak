@@ -1,10 +1,8 @@
 package no.nav.familie.ef.sak.mapper
 
 import no.nav.familie.ef.sak.api.dto.*
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlAnnenForelder
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlBarn
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker
-import no.nav.familie.ef.sak.integration.dto.pdl.visningsnavn
+import no.nav.familie.ef.sak.api.dto.DeltBosted
+import no.nav.familie.ef.sak.integration.dto.pdl.*
 import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsstønad
 
 
@@ -26,9 +24,9 @@ object AleneomsorgMapper {
     private fun tilBarn(barn: MatchetBarn,
                         barneforeldre: Map<String, PdlAnnenForelder>,
                         søkersFnr: String): Barn {
-        val navn = barn.pdlBarn?.navn?.firstOrNull()?.visningsnavn() ?: barn.søknadsbarn.navn ?: "Ubestemt"
+        val navn = barn.pdlBarn?.navn?.gjeldende()?.visningsnavn() ?: barn.søknadsbarn.navn ?: "Ubestemt"
         val fødselsnummer = barn.fødselsnummer ?: barn.søknadsbarn.fødselsnummer
-        val termindatoFødselsdato = barn.pdlBarn?.fødsel?.firstOrNull()?.fødselsdato ?: barn.søknadsbarn.fødselTermindato
+        val termindatoFødselsdato = barn.pdlBarn?.fødsel?.gjeldende()?.fødselsdato ?: barn.søknadsbarn.fødselTermindato
         val begrunnelseIkkeOppgittAnnenForelder = barn.søknadsbarn.annenForelder?.ikkeOppgittAnnenForelderBegrunnelse
         val annenForelder = tilAnnenForelder(barn, barneforeldre, søkersFnr)
         val skalBoBorHosSøker = barn.søknadsbarn.harSkalHaSammeAdresse
@@ -53,14 +51,14 @@ object AleneomsorgMapper {
         val pdlAnnenForelder = barneforeldre[fnr]
 
         val bostedsland = if (pdlAnnenForelder?.bostedsadresse != null) {
-            pdlAnnenForelder.bostedsadresse.firstOrNull()?.utenlandskAdresse?.landkode ?: "NORGE"
+            pdlAnnenForelder.bostedsadresse.gjeldende()?.utenlandskAdresse?.landkode ?: "NORGE"
         } else {
-            pdlAnnenForelder?.oppholdsadresse?.firstOrNull()?.utenlandskAdresse?.landkode
+            pdlAnnenForelder?.oppholdsadresse?.gjeldende()?.utenlandskAdresse?.landkode //
             ?: barn.søknadsbarn.annenForelder?.land ?: "UKJENT"
         }
 
         return Forelder(fødselsnummerAnnenForelder = fnr,
-                        navn = pdlAnnenForelder?.navn?.firstOrNull()?.visningsnavn()
+                        navn = pdlAnnenForelder?.navn?.gjeldende()?.visningsnavn()
                                ?: barn.søknadsbarn.annenForelder?.person?.navn,
                         fødselsdato = barn.søknadsbarn.annenForelder?.person?.fødselsdato,
                         bostedsland = bostedsland,
@@ -78,8 +76,8 @@ object AleneomsorgMapper {
 
         val søknadDeltBosted = barn.søknadsbarn.samvær?.spørsmålAvtaleOmDeltBosted
         val dokumentasjon = barn.søknadsbarn.samvær?.avtaleOmDeltBosted?.dokumenter ?: emptyList()
-        val startdatoForKontrakt = barn.pdlBarn?.deltBosted?.firstOrNull()?.startdatoForKontrakt
-        val sluttdatoForKontrakt = barn.pdlBarn?.deltBosted?.firstOrNull()?.sluttdatoForKontrakt
+        val startdatoForKontrakt = barn.pdlBarn?.deltBosted?.gjeldende()?.startdatoForKontrakt
+        val sluttdatoForKontrakt = barn.pdlBarn?.deltBosted?.gjeldende()?.sluttdatoForKontrakt
 
         return DeltBosted(søknadDeltBosted, dokumentasjon, startdatoForKontrakt, sluttdatoForKontrakt)
 

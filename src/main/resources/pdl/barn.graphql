@@ -5,10 +5,16 @@ query($identer: [ID!]!){
         person {
             adressebeskyttelse {
                 gradering
+                metadata {
+                    historisk
+                }
             }
             bostedsadresse {
                 angittFlyttedato
                 coAdressenavn
+                metadata {
+                    historisk
+                }
                 folkeregistermetadata {
                     gyldighetstidspunkt
                     opphoerstidspunkt
@@ -67,6 +73,9 @@ query($identer: [ID!]!){
                 ukjentBosted {
                     bostedskommune
                 }
+                metadata {
+                    historisk
+                }
             }
             doedsfall {
                 doedsdato
@@ -82,15 +91,16 @@ query($identer: [ID!]!){
                 foedeland
                 foedested
                 foedekommune
+                metadata {
+                    historisk
+                }
             }
             navn {
                 fornavn
                 mellomnavn
                 etternavn
                 metadata {
-                    endringer {
-                        registrert
-                    }
+                    historisk
                 }
             }
         }

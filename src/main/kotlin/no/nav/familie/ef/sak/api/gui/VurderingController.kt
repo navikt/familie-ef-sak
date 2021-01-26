@@ -36,9 +36,17 @@ class VurderingController(private val vurderingService: VurderingService,
     }
 
     @PostMapping("/{behandlingId}/inngangsvilkar/fullfor")
-    fun validerInngangsvilkår(@PathVariable behandlingId: UUID): Ressurs<UUID> {
+    fun fullførInngangsvilkår(@PathVariable behandlingId: UUID): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         val behandling = behandlingService.hentBehandling(behandlingId)
-        return Ressurs.success(stegService.håndterInngangsvilkår(behandling).id)
+        // TODO; Trenger vi registrer opplysninger?
+        val oppdatertBehandling = stegService.håndterRegistrerOpplysninger(behandling, null)
+        return Ressurs.success(stegService.håndterInngangsvilkår(oppdatertBehandling).id)
+    }
+    @PostMapping("/{behandlingId}/overgangsstonad/fullfor")
+    fun fullførStønadsvilkår(@PathVariable behandlingId: UUID): Ressurs<UUID> {
+        tilgangService.validerTilgangTilBehandling(behandlingId)
+        val behandling = behandlingService.hentBehandling(behandlingId)
+        return Ressurs.success(stegService.håndterStønadsvilkår(behandling).id)
     }
 }

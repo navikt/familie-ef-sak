@@ -11,9 +11,7 @@ query($identer: [ID!]!){
                 mellomnavn
                 etternavn
                 metadata {
-                    endringer {
-                        registrert
-                    }
+                    historisk
                 }
             }
         }

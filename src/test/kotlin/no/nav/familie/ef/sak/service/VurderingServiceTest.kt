@@ -7,6 +7,7 @@ import io.mockk.verify
 import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.api.dto.DelvilkårsvurderingDto
 import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
+import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.mapper.SøknadsskjemaMapper
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.config.PdlClientConfig
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
@@ -16,6 +17,7 @@ import no.nav.familie.ef.sak.repository.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.repository.domain.DelvilkårType.*
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
+import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.BeforeEach
@@ -29,15 +31,24 @@ internal class VurderingServiceTest {
 
     private val behandlingService = mockk<BehandlingService>()
     private val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
+    private val familieIntegrasjonerClient = mockk<FamilieIntegrasjonerClient>()
     private val vurderingService = VurderingService(behandlingService = behandlingService,
                                                     pdlClient = PdlClientConfig().pdlClient(),
                                                     medlemskapMapper = mockk(relaxed = true),
+                                                    familieIntegrasjonerClient = familieIntegrasjonerClient,
                                                     vilkårsvurderingRepository = vilkårsvurderingRepository)
 
     @BeforeEach
     fun setUp() {
+        val noe = SøknadsskjemaMapper.tilDomene(Testsøknad.søknadOvergangsstønad)
         every { behandlingService.hentOvergangsstønad(any()) }
-                .returns(SøknadsskjemaMapper.tilDomene(Testsøknad.søknadOvergangsstønad))
+                .returns(noe)
+        every { familieIntegrasjonerClient.hentMedlemskapsinfo(any()) }
+                .returns(Medlemskapsinfo(personIdent = noe.fødselsnummer,
+                                         gyldigePerioder = emptyList(),
+                                         uavklartePerioder = emptyList(),
+                                         avvistePerioder = emptyList(),
+                ))
     }
 
     @Test

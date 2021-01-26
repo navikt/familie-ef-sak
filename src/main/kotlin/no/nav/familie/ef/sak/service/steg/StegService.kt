@@ -2,13 +2,13 @@ package no.nav.familie.ef.sak.service.steg
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
 import no.nav.familie.ef.sak.config.RolleConfig
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.service.BehandlingshistorikkService
 import no.nav.familie.ef.sak.service.BehandlingService
-import no.nav.familie.ef.sak.service.steg.StegType.BEHANDLING_FERDIGSTILT
-import no.nav.familie.ef.sak.service.steg.StegType.VILKÅRSVURDERE_INNGANGSVILKÅR
+import no.nav.familie.ef.sak.service.steg.StegType.*
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -30,8 +30,8 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
     private val stegFeiletMetrics: Map<StegType, Counter> = initStegMetrikker("feil")
 
     @Transactional
-    fun håndterRegistrerOpplysninger(behandling: Behandling, søknad: String): Behandling {
-        val behandlingSteg: RegistrereOpplysningerSteg = hentBehandlingSteg(StegType.REGISTRERE_OPPLYSNINGER)
+    fun håndterRegistrerOpplysninger(behandling: Behandling, søknad: String?): Behandling {
+        val behandlingSteg: RegistrereOpplysningerSteg = hentBehandlingSteg(REGISTRERE_OPPLYSNINGER)
         return håndterSteg(behandling, behandlingSteg, søknad)
     }
 
@@ -42,19 +42,65 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
     }
 
     @Transactional
+    fun håndterStønadsvilkår(behandling: Behandling): Behandling {
+        val behandlingSteg: StønadsvilkårSteg = hentBehandlingSteg(VILKÅRSVURDERE_STØNAD)
+        return håndterSteg(behandling, behandlingSteg, null)
+    }
+
+    @Transactional
+    fun håndterBeregnYtelseForStønad(behandling: Behandling, tilkjentYtelse: TilkjentYtelseDTO): Behandling {
+        val behandlingSteg: BeregnYtelseSteg = hentBehandlingSteg(BEREGNE_YTELSE)
+        return håndterSteg(behandling, behandlingSteg, tilkjentYtelse)
+    }
+
+    @Transactional
+    fun håndterSendTilBeslutter(behandling: Behandling): Behandling {
+        val behandlingSteg: SendTilBeslutterSteg = hentBehandlingSteg(SEND_TIL_BESLUTTER)
+
+        return håndterSteg(behandling, behandlingSteg, null)
+    }
+
+    @Transactional
+    fun håndterBeslutteVedtak(behandling: Behandling): Behandling {
+        val behandlingSteg: BeslutteVedtakSteg = hentBehandlingSteg(BESLUTTE_VEDTAK)
+
+        return håndterSteg(behandling, behandlingSteg, null)
+    }
+
+    @Transactional
     fun håndterIverksettingOppdrag(behandling: Behandling): Behandling {
-        val behandlingSteg: IverksettMotOppdragSteg = hentBehandlingSteg(StegType.IVERKSETT_MOT_OPPDRAG)
+        val behandlingSteg: IverksettMotOppdragSteg = hentBehandlingSteg(IVERKSETT_MOT_OPPDRAG)
 
         return håndterSteg(behandling, behandlingSteg, null)
     }
 
     @Transactional
     fun håndterStatusPåOppdrag(behandling: Behandling): Behandling {
-        val behandlingSteg: VentePåStatusFraØkonomi = hentBehandlingSteg(StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI)
+        val behandlingSteg: VentePåStatusFraØkonomi = hentBehandlingSteg(VENTE_PÅ_STATUS_FRA_ØKONOMI)
 
         return håndterSteg(behandling, behandlingSteg, null)
     }
 
+    @Transactional
+    fun håndterJournalførVedtaksbrev(behandling: Behandling): Behandling {
+        val behandlingSteg: JournalførVedtaksbrevSteg = hentBehandlingSteg(JOURNALFØR_VEDTAKSBREV)
+
+        return håndterSteg(behandling, behandlingSteg, null)
+    }
+
+    @Transactional
+    fun håndterDistribuerVedtaksbrev(behandling: Behandling): Behandling {
+        val behandlingSteg: JournalførVedtaksbrevSteg = hentBehandlingSteg(DISTRIBUER_VEDTAKSBREV)
+
+        return håndterSteg(behandling, behandlingSteg, null)
+    }
+
+    @Transactional
+    fun håndterFerdigsitllBehandling(behandling: Behandling): Behandling {
+        val behandlingSteg: JournalførVedtaksbrevSteg = hentBehandlingSteg(FERDIGSTILLE_BEHANDLING)
+
+        return håndterSteg(behandling, behandlingSteg, null)
+    }
 
 
     // Generelle stegmetoder
@@ -132,4 +178,5 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
                                              "${it.stegType().rekkefølge} ${it.stegType().displayName()}")
         }.toMap()
     }
+
 }
