@@ -3,11 +3,17 @@
     "person": {
       "adressebeskyttelse": [
         {
-          "gradering": "UGRADERT"
+          "gradering": "UGRADERT",
+          "metadata":  {
+            "historisk": false
+          }
         }
       ],
       "bostedsadresse": [
         {
+          "metadata":  {
+            "historisk": false
+          },
           "angittFlyttedato": "1966-11-18",
           "coAdressenavn": null,
           "folkeregistermetadata": {
@@ -35,13 +41,19 @@
           "foedselsdato": "1966-11-18",
           "foedeland": null,
           "foedested": null,
-          "foedekommune": null
+          "foedekommune": null,
+          "metadata":  {
+            "historisk": false
+          }
         }
       ],
       "folkeregisterpersonstatus": [
         {
           "status": "bosatt",
-          "forenkletStatus": "bosattEtterFolkeregisterloven"
+          "forenkletStatus": "bosattEtterFolkeregisterloven",
+          "metadata":  {
+            "historisk": false
+          }
         }
       ],
       "fullmakt": [],
@@ -90,6 +102,9 @@
       ],
       "oppholdsadresse": [
         {
+          "metadata":  {
+            "historisk": false
+          },
           "oppholdsadressedato": "1966-11-18",
           "coAdressenavn": null,
           "utenlandskAdresse": null,
@@ -108,6 +123,9 @@
       ],
       "sivilstand": [
         {
+          "metadata":  {
+            "historisk": false
+          },
           "type": "UGIFT",
           "gyldigFraOgMed": null,
           "myndighet": null,

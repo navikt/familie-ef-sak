@@ -7,11 +7,22 @@
         "person": {
           "adressebeskyttelse": [
             {
-              "gradering": "UGRADERT"
+              "gradering": "STRENGT_FORTROLIG",
+              "metadata":  {
+                "historisk": true
+              }
+            },
+            {  "gradering": "UGRADERT",
+              "metadata":  {
+                "historisk": false
+              }
             }
           ],
           "bostedsadresse": [
             {
+              "metadata":  {
+                "historisk": false
+              },
               "angittFlyttedato": "1966-11-18",
               "coAdressenavn": null,
               "folkeregistermetadata": {
@@ -40,7 +51,10 @@
               "foedselsdato": "1966-11-18",
               "foedeland": null,
               "foedested": null,
-              "foedekommune": null
+              "foedekommune": null,
+              "metadata":  {
+                "historisk": false
+              }
             }
           ],
           "navn": [

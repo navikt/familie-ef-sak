@@ -26,11 +26,11 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                               identNavn: Map<String, String>): PersonopplysningerDto {
         val søker = personMedRelasjoner.søker
         return PersonopplysningerDto(
-                adressebeskyttelse = søker.adressebeskyttelse.firstOrNull()
+                adressebeskyttelse = søker.adressebeskyttelse.gjeldende()
                         ?.let { Adressebeskyttelse.valueOf(it.gradering.name) },
-                folkeregisterpersonstatus = søker.folkeregisterpersonstatus.firstOrNull()
+                folkeregisterpersonstatus = søker.folkeregisterpersonstatus.gjeldende()
                         ?.let { Folkeregisterpersonstatus.fraPdl(it) },
-                dødsdato = søker.dødsfall.firstOrNull()?.dødsdato,
+                dødsdato = søker.dødsfall.gjeldende()?.dødsdato,
                 navn = NavnDto.fraNavn(søker.navn.gjeldende()),
                 kjønn = søker.kjønn.single().kjønn.let { Kjønn.valueOf(it.name) },
                 personIdent = ident,
@@ -109,7 +109,7 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                 annenForelder = annenForelderIdent?.let { AnnenForelderDTO(it, identNavnMap[it] ?: "Finner ikke navn") },
                 adresse = pdlBarn.bostedsadresse.map(adresseMapper::tilAdresse),
                 borHosSøker = borPåSammeAdresse(pdlBarn, bostedsadresserForelder),
-                fødselsdato = pdlBarn.fødsel.firstOrNull()?.fødselsdato
+                fødselsdato = pdlBarn.fødsel.gjeldende()?.fødselsdato
         )
     }
 
@@ -120,21 +120,13 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
             return false
         }
 
-        val gjeldendeBostedsadresseBarn = finnGjeldendeBostedsadresse(barn.bostedsadresse)
-        val gjeldendeBostedsadresseForelder = finnGjeldendeBostedsadresse(bostedsadresserForelder)
+        val gjeldendeBostedsadresseForelder = bostedsadresserForelder.gjeldende()
 
-        return gjeldendeBostedsadresseBarn?.let { adresseBarn ->
+        return barn.bostedsadresse.gjeldende()?.let { adresseBarn ->
             return adresseBarn.matrikkelId()?.let { matrikkelId ->
                 return matrikkelId == gjeldendeBostedsadresseForelder?.matrikkelId()
             } ?: adresseBarn.vegadresse != null && adresseBarn.vegadresse == gjeldendeBostedsadresseForelder?.vegadresse
         } ?: false
-    }
-
-    private fun finnGjeldendeBostedsadresse(bostedsadresser: List<Bostedsadresse>): Bostedsadresse? {
-        val bostedsadresse = bostedsadresser
-                .filter { it.folkeregistermetadata.gyldighetstidspunkt != null && it.folkeregistermetadata.opphørstidspunkt == null }
-                .maxByOrNull { it.folkeregistermetadata.gyldighetstidspunkt!! }
-        return bostedsadresse ?: bostedsadresser.firstOrNull()
     }
 
     private fun harDeltBosted(barn: PdlBarn): Boolean {
