@@ -12,21 +12,21 @@ import org.springframework.stereotype.Service
 class PerioderOvergangsstønadService(private val infotrygdReplikaClient: InfotrygdReplikaClient,
                                      private val pdlClient: PdlClient) {
 
+    /**
+     * Henter perioder fra infotrygd for en person
+     * SKal hente perioder fra ef-sak også i fremtiden
+     */
     fun hentPerioder(request: PerioderOvergangsstønadRequest): PerioderOvergangsstønadResponse {
         val personIdenter = pdlClient.hentPersonidenter(request.personIdent, true).identer.map { it.ident }.toSet()
-        val perioder = hentPerioderFraInfotrygd(personIdenter, request)
-        return PerioderOvergangsstønadResponse(perioder)
-    }
-
-    private fun hentPerioderFraInfotrygd(personIdenter: Set<String>,
-                                         request: PerioderOvergangsstønadRequest): List<PeriodeOvergangsstønad> {
         val infotrygdRequest = InfotrygdPerioderOvergangsstønadRequest(personIdenter, request.fomDato, request.tomDato)
         val infotrygdPerioder = infotrygdReplikaClient.hentPerioderOvergangsstønad(infotrygdRequest)
-        return infotrygdPerioder.perioder.map {
+        val perioder = infotrygdPerioder.perioder.map {
             PeriodeOvergangsstønad(personIdent = it.personIdent,
                                    fomDato = it.fomDato,
                                    tomDato = it.tomDato,
                                    datakilde = PeriodeOvergangsstønad.Datakilde.INFOTRYGD)
         }
+        return PerioderOvergangsstønadResponse(perioder)
     }
+
 }

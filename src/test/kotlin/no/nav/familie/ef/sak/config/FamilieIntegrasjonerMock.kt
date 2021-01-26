@@ -15,6 +15,7 @@ import no.nav.familie.kontrakter.felles.journalpost.*
 import no.nav.familie.kontrakter.felles.kodeverk.BeskrivelseDto
 import no.nav.familie.kontrakter.felles.kodeverk.BetydningDto
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
+import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Profile
@@ -27,42 +28,45 @@ import java.time.LocalDateTime
 class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
 
     val responses =
-            listOf(WireMock.get(WireMock.urlEqualTo(integrasjonerConfig.pingUri.path))
-                           .willReturn(WireMock.aResponse().withStatus(200)),
-                   WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.egenAnsattUri.path))
-                           .willReturn(WireMock.okJson(objectMapper.writeValueAsString(egenAnsatt))),
-                   WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.tilgangUri.path))
-                           .withRequestBody(WireMock.matching(".*ikkeTilgang.*"))
-                           .atPriority(1)
-                           .willReturn(WireMock.okJson(objectMapper
-                                                               .writeValueAsString(listOf(Tilgang(false,
-                                                                                                  "Mock sier: Du har " +
-                                                                                                  "ikke tilgang " +
-                                                                                                  "til person ikkeTilgang"))))),
-                   WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.tilgangUri.path))
-                           .willReturn(WireMock.okJson(objectMapper.writeValueAsString(listOf(Tilgang(true, null))))),
-                   WireMock.get(WireMock.urlEqualTo(integrasjonerConfig.kodeverkPoststedUri.path))
-                           .willReturn(WireMock.okJson(objectMapper.writeValueAsString(kodeverkPoststed))),
-                   WireMock.get(WireMock.urlEqualTo(integrasjonerConfig.kodeverkLandkoderUri.path))
-                           .willReturn(WireMock.okJson(objectMapper.writeValueAsString(kodeverkLand))),
-                   WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.arbeidsfordelingUri.path))
-                           .willReturn(WireMock.okJson(objectMapper.writeValueAsString(arbeidsfordeling))),
+            listOf(
+                    WireMock.get(WireMock.urlEqualTo(integrasjonerConfig.pingUri.path))
+                            .willReturn(WireMock.aResponse().withStatus(200)),
+                    WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.egenAnsattUri.path))
+                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(egenAnsatt))),
+                    WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.tilgangUri.path))
+                            .withRequestBody(WireMock.matching(".*ikkeTilgang.*"))
+                            .atPriority(1)
+                            .willReturn(WireMock.okJson(objectMapper
+                                                                .writeValueAsString(listOf(Tilgang(false,
+                                                                                                   "Mock sier: Du har " +
+                                                                                                   "ikke tilgang " +
+                                                                                                   "til person ikkeTilgang"))))),
+                    WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.tilgangUri.path))
+                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(listOf(Tilgang(true, null))))),
+                    WireMock.get(WireMock.urlEqualTo(integrasjonerConfig.kodeverkPoststedUri.path))
+                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(kodeverkPoststed))),
+                    WireMock.get(WireMock.urlEqualTo(integrasjonerConfig.kodeverkLandkoderUri.path))
+                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(kodeverkLand))),
+                    WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.arbeidsfordelingUri.path))
+                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(arbeidsfordeling))),
 
-                   WireMock.get(WireMock.urlPathEqualTo(integrasjonerConfig.journalPostUri.path))
-                           .withQueryParam("journalpostId", equalTo("1234"))
-                           .willReturn(WireMock.okJson(objectMapper.writeValueAsString(journalpost))),
-                   WireMock.get(WireMock.urlPathMatching("${integrasjonerConfig.journalPostUri.path}/hentdokument/([0-9]*)/([0-9]*)"))
-                           .withQueryParam("variantFormat", equalTo("ORIGINAL"))
-                           .willReturn(WireMock.okJson(
-                                   objectMapper.writeValueAsString(Ressurs.success(objectMapper.writeValueAsBytes(Testsøknad.søknadOvergangsstønad)))
-                           )),
-                   WireMock.get(WireMock.urlPathMatching("${integrasjonerConfig.journalPostUri.path}/hentdokument/([0-9]*)/([0-9]*)"))
-                           .withQueryParam("variantFormat", equalTo("ARKIV"))
-                           .willReturn(WireMock.okJson(objectMapper.writeValueAsString(Ressurs.success(pdfAsBase64String)))),
-                   WireMock.put(WireMock.urlMatching("${integrasjonerConfig.dokarkivUri.path}.*"))
-                           .willReturn(WireMock.okJson(objectMapper.writeValueAsString(oppdatertJournalpostResponse)))
+                    WireMock.get(WireMock.urlPathEqualTo(integrasjonerConfig.journalPostUri.path))
+                            .withQueryParam("journalpostId", equalTo("1234"))
+                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(journalpost))),
+                    WireMock.get(WireMock.urlPathMatching("${integrasjonerConfig.journalPostUri.path}/hentdokument/([0-9]*)/([0-9]*)"))
+                            .withQueryParam("variantFormat", equalTo("ORIGINAL"))
+                            .willReturn(WireMock.okJson(
+                                    objectMapper.writeValueAsString(Ressurs.success(objectMapper.writeValueAsBytes(Testsøknad.søknadOvergangsstønad)))
+                            )),
+                    WireMock.get(WireMock.urlPathMatching("${integrasjonerConfig.journalPostUri.path}/hentdokument/([0-9]*)/([0-9]*)"))
+                            .withQueryParam("variantFormat", equalTo("ARKIV"))
+                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(Ressurs.success(pdfAsBase64String)))),
+                    WireMock.put(WireMock.urlMatching("${integrasjonerConfig.dokarkivUri.path}.*"))
+                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(oppdatertJournalpostResponse))),
+                    WireMock.post(WireMock.urlPathEqualTo(integrasjonerConfig.medlemskapUri.path))
+                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(medl))),
 
-            )
+                    )
 
     @Bean("mock-integrasjoner")
     @Profile("mock-integrasjoner")
@@ -93,6 +97,13 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
         private val arbeidsfordeling =
                 Ressurs.success(listOf(Arbeidsfordelingsenhet("1234", "nerd-enhet")))
 
+        val fnr = "23097825289"
+        private val medl =
+                Ressurs.success(Medlemskapsinfo(personIdent = fnr,
+                                                gyldigePerioder = emptyList(),
+                                                uavklartePerioder = emptyList(),
+                                                avvistePerioder = emptyList()))
+
         private val oppdatertJournalpostResponse =
                 Ressurs.success(OppdaterJournalpostResponse(journalpostId = "1234"))
         val pdfAsBase64String =
@@ -105,7 +116,7 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                                             tema = "ENF",
                                             behandlingstema = "ab0071",
                                             tittel = "abrakadabra",
-                                            bruker = Bruker(type = BrukerIdType.FNR, id = "23097825289"),
+                                            bruker = Bruker(type = BrukerIdType.FNR, id = fnr),
                                             journalforendeEnhet = "4817",
                                             kanal = "SKAN_IM",
                                             relevanteDatoer = listOf(RelevantDato(LocalDateTime.now(), "DATO_REGISTRERT")),

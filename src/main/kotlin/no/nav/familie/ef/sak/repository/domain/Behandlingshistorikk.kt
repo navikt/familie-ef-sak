@@ -14,8 +14,8 @@ data class Behandlingshistorikk(@Id
                                 val steg: StegType,
                                 val utfall: StegUtfall? = null,
                                 val metadata: JsonWrapper? = null,
-                                val opprettetAvNavn: String = SikkerhetContext.hentSaksbehandler(),
-                                val opprettetAv: String = SikkerhetContext.hentSaksbehandlerNavn(),
+                                val opprettetAvNavn: String = SikkerhetContext.hentSaksbehandlerNavn(),
+                                val opprettetAv: String = SikkerhetContext.hentSaksbehandler(),
                                 val endretTid: LocalDateTime = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS))
 
 inline fun Behandlingshistorikk.tilDto(): BehandlingshistorikkDto {
