@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.*
 
@@ -26,6 +25,7 @@ import java.util.*
 class BeregningController(private val stegService: StegService,
                           private val behandlingService: BehandlingService,
                           private val fagsakService: FagsakService,
+                          private val beregningService: BeregningService,
                           private val tilgangService: TilgangService) {
 
     @PostMapping("/{behandlingId}/fullfor")
@@ -33,16 +33,17 @@ class BeregningController(private val stegService: StegService,
         tilgangService.validerTilgangTilBehandling(behandlingId)
         val behandling = behandlingService.hentBehandling(behandlingId)
         val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
-        val maksUtbetaling = BigDecimal(101351).multiply(BigDecimal(2.25)).divide(BigDecimal(12)).toInt()
+        val beløpsperioder = beregningService.beregnFullYtelse(beregningRequest) // TODO: Tar ikke høyde for inntekt
         val tilkjentYtelse = TilkjentYtelseDTO(
                 fagsak.hentAktivIdent(),
                 vedtaksdato = LocalDate.now(),
                 behandlingId = behandling.id,
-                andelerTilkjentYtelse = listOf(AndelTilkjentYtelseDTO(beløp = maksUtbetaling,
-                                                                      stønadFom = beregningRequest.stønadFom,
-                                                                      stønadTom = beregningRequest.stønadTom,
+                andelerTilkjentYtelse = beløpsperioder.map { AndelTilkjentYtelseDTO(beløp = it.beløp.toInt(),
+                                                                      stønadFom = it.fraOgMedDato,
+                                                                      stønadTom = it.tilDato,
                                                                       kildeBehandlingId = behandling.id,
-                                                                      personIdent = fagsak.hentAktivIdent()))
+                                                                      personIdent = fagsak.hentAktivIdent())
+                }
         )
         return Ressurs.success(stegService.håndterBeregnYtelseForStønad(behandling, tilkjentYtelse).id)
     }
