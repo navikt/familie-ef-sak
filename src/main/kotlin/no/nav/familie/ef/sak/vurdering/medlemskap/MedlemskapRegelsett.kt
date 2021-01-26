@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.vurdering.medlemskap
 
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlPerson
+import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
 import no.nav.familie.ef.sak.nare.evaluations.Evaluering
 import no.nav.familie.ef.sak.nare.specifications.Regel
 import no.nav.familie.ef.sak.vurdering.antallÅrOpphold
@@ -91,7 +92,7 @@ class MedlemskapRegelsett {
     }
 
     private fun erBosattINorge(medlemskapsgrunnlag: Medlemskapsgrunnlag): Evaluering {
-        return if ("bosatt" == medlemskapsgrunnlag.søker.folkeregisterpersonstatus.firstOrNull()?.status) {
+        return if ("bosatt" == medlemskapsgrunnlag.søker.folkeregisterpersonstatus.gjeldende()?.status) {
             Evaluering.ja("Bosatt i Norge.")
         } else {
             Evaluering.nei("Ikke bosatt i Norge.")
@@ -227,7 +228,7 @@ class MedlemskapRegelsett {
     }
 
     private fun datoFor16Årsdag(person: PdlPerson?): LocalDate {
-        val fødselsdato = person?.fødsel?.firstOrNull()?.fødselsdato ?: error("Person er ikke født")
+        val fødselsdato = person?.fødsel?.gjeldende()?.fødselsdato ?: error("Person er ikke født")
         return fødselsdato.plusYears(16)
     }
 

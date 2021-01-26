@@ -2,10 +2,16 @@ query($ident: ID!){
     person: hentPerson(ident: $ident) {
         adressebeskyttelse {
             gradering
+            metadata {
+                historisk
+            }
         }
         bostedsadresse(historikk: true) {
             angittFlyttedato
             coAdressenavn
+            metadata {
+                historisk
+            }
             folkeregistermetadata {
                 gyldighetstidspunkt
                 opphoerstidspunkt
@@ -56,10 +62,16 @@ query($ident: ID!){
             foedeland
             foedested
             foedekommune
+            metadata {
+                historisk
+            }
         }
-        folkeregisterpersonstatus(historikk: true) {
+        folkeregisterpersonstatus {
             status
             forenkletStatus
+            metadata {
+                historisk
+            }
         }
         fullmakt(historikk: true) {
             gyldigFraOgMed
@@ -76,9 +88,7 @@ query($ident: ID!){
             mellomnavn
             etternavn
             metadata {
-                endringer {
-                    registrert
-                }
+                historisk
             }
         }
         opphold(historikk: true) {
@@ -183,6 +193,9 @@ query($ident: ID!){
                 matrikkelId
             }
             oppholdAnnetSted
+            metadata {
+                historisk
+            }
         }
         sivilstand(historikk: true) {
             type
@@ -193,6 +206,9 @@ query($ident: ID!){
             utland
             relatertVedSivilstand
             bekreftelsesdato
+            metadata {
+              historisk
+            }
         }
         statsborgerskap {
             land

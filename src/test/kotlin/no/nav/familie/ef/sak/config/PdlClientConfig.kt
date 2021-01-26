@@ -20,6 +20,7 @@ class PdlClientConfig {
     private val sluttdato = LocalDate.of(2021, 1, 1)
     private val barnFnr = "01012067050"
     private val søkerFnr = "01010172272"
+    val metadataGjeldende = Metadata(historisk = false)
 
     @Bean
     @Primary
@@ -35,12 +36,12 @@ class PdlClientConfig {
         }
 
         every { pdlClient.hentSøker(any()) } returns
-                PdlSøker(adressebeskyttelse = listOf(Adressebeskyttelse(gradering = AdressebeskyttelseGradering.UGRADERT)),
+                PdlSøker(adressebeskyttelse = listOf(Adressebeskyttelse(gradering = AdressebeskyttelseGradering.UGRADERT, metadata = metadataGjeldende)),
                          bostedsadresse = bostedsadresse(),
                          dødsfall = listOf(),
                          familierelasjoner = familierelasjoner(),
                          fødsel = listOf(),
-                         folkeregisterpersonstatus = listOf(Folkeregisterpersonstatus("bosatt", "bosattEtterFolkeregisterloven")),
+                         folkeregisterpersonstatus = listOf(Folkeregisterpersonstatus("bosatt", "bosattEtterFolkeregisterloven", metadataGjeldende)),
                          fullmakt = fullmakter(),
                          kjønn = lagKjønn(KjønnType.KVINNE),
                          kontaktadresse = kontaktadresse(),
@@ -73,13 +74,15 @@ class PdlClientConfig {
 
     private fun lagKjønn(kjønnType: KjønnType = KjønnType.KVINNE) = listOf(Kjønn(kjønnType))
 
+
     private fun lagNavn(fornavn: String = "Fornavn",
                         mellomnavn: String? = "mellomnavn",
-                        etternavn: String = "Etternavn"): List<Navn> =
-            listOf(Navn(fornavn,
-                        mellomnavn,
-                        etternavn,
-                        Metadata(endringer = listOf(MetadataEndringer(LocalDate.now())))))
+                        etternavn: String = "Etternavn"): List<Navn> {
+        return listOf(Navn(fornavn,
+                           mellomnavn,
+                           etternavn,
+                           metadataGjeldende))
+                        }
 
     private fun barn(): Map<String, PdlBarn> =
             mapOf(barnFnr to PdlBarn(adressebeskyttelse = listOf(),
@@ -128,7 +131,8 @@ class PdlClientConfig {
                               sted = "Oslo",
                               utland = null,
                               relatertVedSivilstand = "11111122222",
-                              bekreftelsesdato = "2020-01-01"))
+                              bekreftelsesdato = "2020-01-01",
+                              metadata = metadataGjeldende))
 
     private fun fullmakter(): List<Fullmakt> =
             listOf(Fullmakt(gyldigTilOgMed = startdato,
@@ -145,7 +149,8 @@ class PdlClientConfig {
                                   coAdressenavn = "CONAVN",
                                   vegadresse = vegadresse(),
                                   ukjentBosted = null,
-                                  matrikkeladresse = null
+                                  matrikkeladresse = null,
+                                  metadata = metadataGjeldende
             ))
 
     private fun vegadresse(): Vegadresse =

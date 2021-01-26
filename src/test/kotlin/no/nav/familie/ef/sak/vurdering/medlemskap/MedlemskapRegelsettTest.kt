@@ -17,12 +17,14 @@ import java.time.Month
 
 internal class MedlemskapRegelsettTest {
 
+    private val metadataGjeldende = Metadata(false)
+
     @Test
     fun `vurderingMedlemskapSøker returnerer Nei hvis søker er registrert som ikke medlem`() {
         val medlemskapsinfoUtenUnntak = Medlemskapsinfo("3213213", emptyList(), emptyList(), emptyList())
-        val pdlSøker = pdlSøker(fødsel = listOf(Fødsel(null, LocalDate.of(1999, 4, 5), null, null, null)),
+        val pdlSøker = pdlSøker(fødsel = listOf(Fødsel(null, LocalDate.of(1999, 4, 5), null, null, null, metadataGjeldende)),
                                 bostedsadresse = emptyList(),
-                                folkeregisterpersonstatus = listOf(Folkeregisterpersonstatus("bosatt", "bo")),
+                                folkeregisterpersonstatus = listOf(Folkeregisterpersonstatus("bosatt", "bo", metadataGjeldende)),
                                 statsborgerskap = listOf(Statsborgerskap("SE", LocalDate.of(2002, 2, 2), null)))
         val søknad = søknad(medlemskapsdetaljer = Søknadsfelt("", Medlemskapsdetaljer(Søknadsfelt("", true), mockk(), mockk())),
                             stønadsstart = Søknadsfelt("", Stønadsstart(Søknadsfelt("", Month.AUGUST),
@@ -50,8 +52,8 @@ internal class MedlemskapRegelsettTest {
     @Test
     fun `vurderingMedlemskapSøker returnerer Ja hvis søker er medlem og oppfyller kravet til forutgående medlemskap`() {
         val medlemskapsinfoUtenUnntak = Medlemskapsinfo("3213213", emptyList(), emptyList(), emptyList())
-        val pdlSøker = pdlSøker(fødsel = listOf(Fødsel(null, LocalDate.of(1999, 4, 5), null, null, null)),
-                                folkeregisterpersonstatus = listOf(Folkeregisterpersonstatus("bosatt", "bo")),
+        val pdlSøker = pdlSøker(fødsel = listOf(Fødsel(null, LocalDate.of(1999, 4, 5), null, null, null, metadataGjeldende)),
+                                folkeregisterpersonstatus = listOf(Folkeregisterpersonstatus("bosatt", "bo", metadataGjeldende)),
                                 bostedsadresse = listOf(Bostedsadresse(null,
                                                                        null,
                                                                        Folkeregistermetadata(LocalDateTime.of(1999, 4, 5, 0, 0),
@@ -59,7 +61,7 @@ internal class MedlemskapRegelsettTest {
                                                                        null,
                                                                        null,
                                                                        null,
-                                                                       null)),
+                                                                       null, metadataGjeldende)),
                                 statsborgerskap = listOf(Statsborgerskap("SE", LocalDate.of(2002, 2, 2), null)))
         val søknad = søknad(medlemskapsdetaljer = Søknadsfelt("",
                                                               Medlemskapsdetaljer(Søknadsfelt("oppholdINorge", true),
@@ -90,8 +92,8 @@ internal class MedlemskapRegelsettTest {
     @Test
     fun `vurderingMedlemskapSøker returnerer Kanskje hvis søker ikke oppholder seg i Norge`() {
         val medlemskapsinfoUtenUnntak = Medlemskapsinfo("3213213", emptyList(), emptyList(), emptyList())
-        val pdlSøker = pdlSøker(fødsel = listOf(Fødsel(null, LocalDate.of(1999, 4, 5), null, null, null)),
-                                folkeregisterpersonstatus = listOf(Folkeregisterpersonstatus("bosatt", "bo")),
+        val pdlSøker = pdlSøker(fødsel = listOf(Fødsel(null, LocalDate.of(1999, 4, 5), null, null, null, metadataGjeldende)),
+                                folkeregisterpersonstatus = listOf(Folkeregisterpersonstatus("bosatt", "bo", metadataGjeldende)),
                                 bostedsadresse = listOf(Bostedsadresse(null,
                                                                        null,
                                                                        Folkeregistermetadata(LocalDateTime.of(1999, 4, 5, 0, 0),
@@ -99,7 +101,8 @@ internal class MedlemskapRegelsettTest {
                                                                        null,
                                                                        null,
                                                                        null,
-                                                                       null)),
+                                                                       null,
+                                                                       metadataGjeldende)),
                                 statsborgerskap = listOf(Statsborgerskap("SE", LocalDate.of(2002, 2, 2), null)))
         val søknad = søknad(medlemskapsdetaljer = Søknadsfelt("",
                                                               Medlemskapsdetaljer(Søknadsfelt("oppholdINorge", false),

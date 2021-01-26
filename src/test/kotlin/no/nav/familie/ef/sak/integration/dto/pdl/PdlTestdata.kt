@@ -6,6 +6,8 @@ import java.time.LocalDateTime
 
 object PdlTestdata {
 
+    private val metadataGjeldende = Metadata(false)
+
     private val vegadresse = Vegadresse("",
                                         "",
                                         "",
@@ -24,12 +26,12 @@ object PdlTestdata {
 
     private val folkeregistermetadata = Folkeregistermetadata(LocalDateTime.now(), LocalDateTime.now())
 
-    private val navn = listOf(Navn("", "", "", Metadata(listOf(MetadataEndringer(LocalDate.now())))))
+    private val navn = listOf(Navn("", "", "", metadataGjeldende))
 
     val pdlSøkerKortBolk = PersonBolk(listOf(PersonDataBolk("11111122222", "ok",
                                                             PdlSøkerKort(listOf(Kjønn(KjønnType.KVINNE)), navn))))
 
-    private val adressebeskyttelse = listOf(Adressebeskyttelse(AdressebeskyttelseGradering.FORTROLIG))
+    private val adressebeskyttelse = listOf(Adressebeskyttelse(AdressebeskyttelseGradering.FORTROLIG, metadataGjeldende))
 
     private val bostedsadresse = listOf(Bostedsadresse(LocalDate.now(),
                                                        "",
@@ -37,19 +39,20 @@ object PdlTestdata {
                                                        utenlandskAdresse,
                                                        vegadresse,
                                                        UkjentBosted(""),
-                                                       matrikkeladresse))
+                                                       matrikkeladresse,
+                                                       metadataGjeldende))
 
     private val dødsfall = listOf(Dødsfall(LocalDate.now()))
 
     private val familierelasjon = listOf(Familierelasjon("", Familierelasjonsrolle.BARN, Familierelasjonsrolle.FAR))
 
-    private val fødsel = listOf(Fødsel(1, LocalDate.now(), "", "", ""))
+    private val fødsel = listOf(Fødsel(1, LocalDate.now(), "", "", "", metadataGjeldende))
 
     private val opphold = listOf(Opphold(Oppholdstillatelse.MIDLERTIDIG, LocalDate.now(), LocalDate.now()))
 
     private val oppholdsadresse = listOf(Oppholdsadresse(LocalDate.now(), "",
                                                          utenlandskAdresse,
-                                                         vegadresse, ""))
+                                                         vegadresse, "", metadataGjeldende))
 
     private val statsborgerskap = listOf(Statsborgerskap("", LocalDate.now(), LocalDate.now()))
 
@@ -63,7 +66,7 @@ object PdlTestdata {
                                   dødsfall,
                                   familierelasjon,
                                   fødsel,
-                                  listOf(Folkeregisterpersonstatus("", "")),
+                                  listOf(Folkeregisterpersonstatus("", "", metadataGjeldende)),
                                   listOf(Fullmakt(LocalDate.now(),
                                                   LocalDate.now(),
                                                   "",
@@ -82,7 +85,7 @@ object PdlTestdata {
                                   navn,
                                   opphold,
                                   oppholdsadresse,
-                                  listOf(Sivilstand(Sivilstandstype.GIFT, LocalDate.now(), "", "", "", "", "", "")),
+                                  listOf(Sivilstand(Sivilstandstype.GIFT, LocalDate.now(), "", "", "", "", "", "", metadataGjeldende)),
                                   statsborgerskap,
                                   listOf(Telefonnummer("", "", 1)),
                                   listOf(TilrettelagtKommunikasjon(Tolk(""), Tolk(""))),
@@ -102,7 +105,7 @@ object PdlTestdata {
                                                                           listOf(DeltBosted(LocalDateTime.now(),
                                                                                             LocalDateTime.now(),
                                                                                             vegadresse,
-                                                                                            UkjentBosted(""))),
+                                                                                            UkjentBosted(""), metadataGjeldende)),
                                                                           dødsfall,
                                                                           familierelasjon,
                                                                           fødsel,
