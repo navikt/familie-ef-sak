@@ -39,7 +39,7 @@ data class SøknadsskjemaOvergangsstønad(@Id
                                         @Column("soker_fra_bestemt_maned")
                                         val søkerFraBestemtMåned: Boolean) : ISøknadsskjema
 
-data class Situasjon(val gjelderDetteDeg: String? = null,
+data class Situasjon(val gjelderDetteDeg: GjelderDeg = GjelderDeg(emptyList()),
                      val sykdom: Dokumentasjon? = null,
                      val barnsSykdom: Dokumentasjon? = null,
                      val manglendeBarnepass: Dokumentasjon? = null,
@@ -57,3 +57,5 @@ data class Situasjon(val gjelderDetteDeg: String? = null,
                      val oppsigelseReduksjonTidspunkt: LocalDate? = null,
                      val reduksjonAvArbeidsforholdDokumentasjon: Dokumentasjon? = null,
                      val oppsigelseDokumentasjon: Dokumentasjon? = null)
+
+data class GjelderDeg(val verdier: List<String>)

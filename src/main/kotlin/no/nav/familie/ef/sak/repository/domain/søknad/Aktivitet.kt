@@ -4,7 +4,7 @@ import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.MappedCollection
 import java.time.LocalDate
 
-data class Aktivitet(val hvordanErArbeidssituasjonen: String,
+data class Aktivitet(val hvordanErArbeidssituasjonen: Arbeidssituasjon = Arbeidssituasjon(emptyList()),
                      @MappedCollection(idColumn = "soknadsskjema_id")
                      val arbeidsforhold: Set<Arbeidsgiver>? = emptySet(),
                      @MappedCollection(idColumn = "soknadsskjema_id")
@@ -40,3 +40,5 @@ data class Virksomhet(val virksomhetsbeskrivelse: String,
 
 data class Aksjeselskap(val navn: String,
                         val arbeidsmengde: Int? = null)
+
+data class Arbeidssituasjon(val verdier: List<String>)

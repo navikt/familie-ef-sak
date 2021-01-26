@@ -4,12 +4,12 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.repository.domain.DelvilkårsvurderingWrapper
 import no.nav.familie.ef.sak.repository.domain.Endret
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus
-import no.nav.familie.ef.sak.repository.domain.søknad.Dokumentasjon
-import no.nav.familie.ef.sak.repository.domain.søknad.UnderUtdanning
+import no.nav.familie.ef.sak.repository.domain.søknad.*
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.prosessering.PropertiesWrapperTilStringConverter
 import no.nav.familie.prosessering.StringTilPropertiesWrapperConverter
+import org.apache.commons.lang3.StringUtils
 import org.postgresql.util.PGobject
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -66,7 +66,11 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
                                             PropertiesWrapperTilStringConverter(),
                                             StringTilPropertiesWrapperConverter(),
                                             PGobjectTilDelvilkårConverter(),
-                                            DelvilkårTilPGobjectConverter()))
+                                            DelvilkårTilPGobjectConverter(),
+                                            GjelderDegTilStringConverter(),
+                                            StringTilGjelderDegConverter(),
+                                            ArbeidssituasjonTilStringConverter(),
+                                            StringTilArbeidssituasjonConverter()))
     }
 
     @WritingConverter
@@ -145,6 +149,39 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
                     type = "json"
                     value = objectMapper.writeValueAsString(delvilkårsvurdering.delvilkårsvurderinger)
                 }
+    }
+
+
+    @WritingConverter
+    class GjelderDegTilStringConverter : Converter<GjelderDeg, String> {
+
+        override fun convert(verdier: GjelderDeg): String {
+            return StringUtils.join(verdier.verdier,";")
+        }
+    }
+
+    @ReadingConverter
+    class StringTilGjelderDegConverter : Converter<String, GjelderDeg> {
+
+        override fun convert(verdi: String): GjelderDeg {
+            return GjelderDeg(verdi.split(";"))
+        }
+    }
+
+    @WritingConverter
+    class ArbeidssituasjonTilStringConverter : Converter<Arbeidssituasjon, String> {
+
+        override fun convert(verdier: Arbeidssituasjon): String {
+            return StringUtils.join(verdier.verdier,";")
+        }
+    }
+
+    @ReadingConverter
+    class StringTilArbeidssituasjonConverter : Converter<String, Arbeidssituasjon> {
+
+        override fun convert(verdi: String): Arbeidssituasjon {
+            return Arbeidssituasjon(verdi.split(";"))
+        }
     }
 
 }

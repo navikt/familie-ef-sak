@@ -5,7 +5,6 @@ import no.nav.familie.ef.sak.repository.domain.søknad.*
 import no.nav.familie.kontrakter.ef.søknad.Medlemskapsdetaljer
 import no.nav.familie.kontrakter.ef.søknad.Sivilstandsdetaljer
 import no.nav.familie.kontrakter.ef.søknad.Stønadsstart
-import org.apache.commons.lang3.StringUtils
 import java.time.YearMonth
 import kotlin.math.roundToInt
 import no.nav.familie.kontrakter.ef.søknad.Aksjeselskap as KontraktAksjeselskap
@@ -206,7 +205,7 @@ object SøknadsskjemaMapper {
             }
 
     private fun tilDomene(aktivitet: KontraktAktivitet): Aktivitet =
-            Aktivitet(hvordanErArbeidssituasjonen = aktivitet.hvordanErArbeidssituasjonen.let { StringUtils.join(it.svarId, ";") }, // TODO: Gjør til List<String>
+            Aktivitet(hvordanErArbeidssituasjonen = Arbeidssituasjon(aktivitet.hvordanErArbeidssituasjonen.svarId ?: emptyList()),
                       arbeidsforhold = tilArbeidsgivere(aktivitet.arbeidsforhold?.verdi),
                       firmaer = tilFirmaer(aktivitet.firmaer?.verdi),
                       virksomhet = tilDomene(aktivitet.virksomhet?.verdi),
@@ -284,7 +283,7 @@ object SøknadsskjemaMapper {
             }?.toSet() ?: emptySet()
 
     private fun tilDomene(situasjon: KontraktSituasjon): Situasjon =
-            Situasjon(gjelderDetteDeg = StringUtils.join(situasjon.gjelderDetteDeg.svarId, ";"), //TODO: Gjør til List<String>
+            Situasjon(gjelderDetteDeg = GjelderDeg(situasjon.gjelderDetteDeg.svarId ?: emptyList()),
                       sykdom = tilDomene(situasjon.sykdom?.verdi),
                       barnsSykdom = tilDomene(situasjon.barnsSykdom?.verdi),
                       manglendeBarnepass = tilDomene(situasjon.manglendeBarnepass?.verdi),
