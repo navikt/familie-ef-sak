@@ -6,7 +6,7 @@ spring:
 no.nav.security.jwt:
   issuer:
     sts:
-      discoveryurl: ${STS_URL}
+      discoveryurl: ${STS_DISCOVERY_URL}
       accepted_audience: ${GYLDIGE_SERVICE_BRUKERE}
 
 AZUREAD_DISCOVERY_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/v2.0/.well-known/openid-configuration

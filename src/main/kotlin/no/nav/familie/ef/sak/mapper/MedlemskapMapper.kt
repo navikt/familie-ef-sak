@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.integration.dto.pdl.*
 import no.nav.familie.ef.sak.repository.domain.søknad.Medlemskap
 import no.nav.familie.ef.sak.service.KodeverkService
 import no.nav.familie.ef.sak.util.min
+import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 
@@ -15,6 +16,7 @@ class MedlemskapMapper(private val statsborgerskapMapper: StatsborgerskapMapper,
                        private val adresseMapper: AdresseMapper) {
 
     fun tilDto(medlemskapsdetaljer: Medlemskap,
+               medlUnntak: Medlemskapsinfo,
                pdlSøker: PdlSøker): MedlemskapDto {
 
         val statsborgerskap = statsborgerskapMapper.map(pdlSøker.statsborgerskap)
@@ -26,6 +28,7 @@ class MedlemskapMapper(private val statsborgerskapMapper: StatsborgerskapMapper,
                                                                      it.tildato,
                                                                      it.årsakUtenlandsopphold)
                                              })
+
         val registergrunnlag =
                 MedlemskapRegistergrunnlagDto(nåværendeStatsborgerskap =
                                               statsborgerskap.filter { it.gyldigTilOgMedDato == null }
@@ -36,7 +39,9 @@ class MedlemskapMapper(private val statsborgerskapMapper: StatsborgerskapMapper,
                                               innflytting = mapInnflytting(pdlSøker.innflyttingTilNorge),
                                               utflytting = mapUtflytting(pdlSøker.utflyttingFraNorge),
                                               folkeregisterpersonstatus = pdlSøker.folkeregisterpersonstatus.gjeldende()
-                                                      ?.let(Folkeregisterpersonstatus::fraPdl))
+                                                      ?.let(Folkeregisterpersonstatus::fraPdl),
+                                              medlUnntak = medlUnntak.tilDto())
+
         return MedlemskapDto(søknadsgrunnlag = søknadsgrunnlag,
                              registergrunnlag = registergrunnlag)
     }
