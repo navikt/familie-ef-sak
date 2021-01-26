@@ -1,5 +1,5 @@
 no.nav.security.jwt:
   issuer:
     sts:
-      discoveryurl: ${STS_URL}
+      discoveryurl: ${STS_DISCOVERY_URL}
       accepted_audience: ${GYLDIGE_SERVICE_BRUKERE}
