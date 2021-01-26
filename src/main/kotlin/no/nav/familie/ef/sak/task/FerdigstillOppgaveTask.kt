@@ -18,6 +18,9 @@ import java.util.*
                      maxAntallFeil = 3)
 class FerdigstillOppgaveTask(private val oppgaveService: OppgaveService) : AsyncTaskStep {
 
+    /**
+     * Då payload er unik per task type, så settes unik inn
+     */
     data class FerdigstillOppgaveTaskData(val behandlingId: UUID,
                                           val oppgavetype: Oppgavetype,
                                           val unik: LocalDateTime? = LocalDateTime.now())

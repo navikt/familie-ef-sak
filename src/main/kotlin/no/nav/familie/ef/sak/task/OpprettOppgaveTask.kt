@@ -19,6 +19,9 @@ import java.util.*
                      maxAntallFeil = 3)
 class OpprettOppgaveTask(private val oppgaveService: OppgaveService) : AsyncTaskStep {
 
+    /**
+     * Då payload er unik per task type, så settes unik inn
+     */
     data class OpprettOppgaveTaskData(val behandlingId: UUID,
                                       val oppgavetype: Oppgavetype,
                                       val fristForFerdigstillelse: LocalDate,

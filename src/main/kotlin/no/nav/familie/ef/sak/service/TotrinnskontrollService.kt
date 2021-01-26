@@ -24,9 +24,6 @@ class TotrinnskontrollService(private val behandlingshistorikkService: Behandlin
                               private val behandlingService: BehandlingService,
                               private val tilgangService: TilgangService) {
 
-    /**
-     * @return ident til saksbehandler som godkjente vedtaket
-     */
     @Transactional
     fun lagreTotrinnskontroll(behandling: Behandling, beslutteVedtak: BeslutteVedtakDto) {
         val sisteBehandlingshistorikk = behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId = behandling.id)
@@ -69,6 +66,9 @@ class TotrinnskontrollService(private val behandlingshistorikkService: Behandlin
             || behandlingStatus == BehandlingStatus.IVERKSETTER_VEDTAK
             || behandlingStatus == BehandlingStatus.OPPRETTET
 
+    /**
+     * Hvis behandlingsstatus er FATTER_VEDTAK så sjekkes det att saksbehandleren er autorisert til å fatte vedtak
+     */
     private fun skalFatteVedtak(behandlingId: UUID): TotrinnskontrollStatusDto {
         val historikkHendelse = behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId)
         require(historikkHendelse.steg == StegType.SEND_TIL_BESLUTTER) {
@@ -82,6 +82,9 @@ class TotrinnskontrollService(private val behandlingshistorikkService: Behandlin
         }
     }
 
+    /**
+     * Hvis behandlingen utredes sjekkes det for om det finnes ett tidligere beslutt, som då kun kan være underkjent
+     */
     private fun harBesluttetVedtak(behandlingId: UUID): TotrinnskontrollStatusDto {
         val besluttetVedtakHendelse =
                 behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId, StegType.BESLUTTE_VEDTAK)

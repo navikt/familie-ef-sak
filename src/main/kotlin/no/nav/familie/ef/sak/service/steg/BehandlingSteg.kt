@@ -21,6 +21,10 @@ interface BehandlingSteg<T> {
 
     fun stegType(): StegType
 
+    /**
+     * Setter om StegService skal sette inn historikk for steget.
+     * Hvis den settes til false så må Steget selv legge in historikk
+     */
     fun settInnHistorikk() = true
 
 }
