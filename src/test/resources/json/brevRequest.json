@@ -1,0 +1,28 @@
+{
+  "flettefelter": {
+    "navn": [
+      "Navn Navnesen"
+    ],
+    "fodselsnummer": [
+      "1123456789"
+    ],
+    "dato": [
+      "01.01.1986"
+    ],
+    "dokumentliste": [
+      "tekst 1",
+      "tekst 2",
+      "tekst 3"
+    ]
+  },
+  "delmalData": {
+    "signatur": {
+      "enhet": [
+        "Nav arbeid og ... - OSLO"
+      ],
+      "saksbehandler": [
+        "Saksbehandler Saksbehandlersen"
+      ]
+    }
+  }
+}
