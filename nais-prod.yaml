@@ -53,6 +53,6 @@ spec:
     - name: AZURE_CLIENT_SECRET
       value: /run/secrets/nais.io/azuread/client_secret
     - name: CREDENTIAL_USERNAME
-      value: /run/secrets/nais.io/azuread/srvfamilie-ef-sak/username
+      value: /run/secrets/nais.io/srvfamilie-ef-sak/username
     - name: CREDENTIAL_PASSWORD
-      value: /run/secrets/nais.io/azuread/srvfamilie-ef-sak/password
+      value: /run/secrets/nais.io/srvfamilie-ef-sak/password
