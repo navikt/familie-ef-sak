@@ -7,6 +7,27 @@ import org.springframework.stereotype.Service
 class BrevService(private val brevClient: BrevClient) {
 
     fun lagBrev(): ByteArray {
-        return brevClient.genererBrev("bokmål", "dummy", "hei")
+        val body = """
+            {
+                "flettefelter": {
+                    "navn": [
+                        "Navn Navnesen"
+                    ],
+                    "fodselsnummer": [
+                        "1123456789"
+                    ],
+                    "dato": [
+                        "01.01.1986"
+                    ]
+                }
+            }
+        """.trimIndent()
+
+
+        /*
+        * Logikk for brevgenering her
+        */
+
+        return brevClient.genererBrev("brukesIkke", "brukesIkke", body)
     }
 }

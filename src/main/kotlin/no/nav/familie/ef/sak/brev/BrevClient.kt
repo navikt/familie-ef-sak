@@ -28,22 +28,6 @@ class BrevClient(@Value("\${FAMILIE_BREV_API_URL}")
     fun genererBrev(målform: String, malnavn: String, body: String): ByteArray {
         val url = URI.create("$familieBrevUri/api/ef-brev/dokument/bokmaal/testDokument/pdf")
 
-        val body: String = """
-            {
-                "flettefelter": {
-                    "navn": [
-                        "Navn Navnesen"
-                    ],
-                    "fodselsnummer": [
-                        "1123456789"
-                    ],
-                    "dato": [
-                        "01.01.1986"
-                    ]
-                }
-            }
-        """.trimIndent()
-
         val request = RequestEntity.post(url)
                 .contentType(MediaType.APPLICATION_JSON)
                 .acceptCharset(Charsets.UTF_8)
