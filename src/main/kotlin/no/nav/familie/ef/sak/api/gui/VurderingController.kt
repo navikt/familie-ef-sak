@@ -1,7 +1,5 @@
 package no.nav.familie.ef.sak.api.gui
 
-import net.minidev.json.JSONObject
-import no.nav.familie.ef.sak.api.dto.BrevRequest
 import no.nav.familie.ef.sak.api.dto.InngangsvilkårDto
 import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.service.BehandlingService
@@ -10,14 +8,9 @@ import no.nav.familie.ef.sak.service.VurderingService
 import no.nav.familie.ef.sak.service.steg.StegService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
-import org.springframework.http.converter.ByteArrayHttpMessageConverter
-import org.springframework.http.converter.HttpMessageConverter
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.client.RestTemplate
 import java.util.*
 
 
