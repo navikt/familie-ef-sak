@@ -14,7 +14,7 @@ import java.util.*
 class BehandlingshistorikkService(private val behandlingshistorikkRepository: BehandlingshistorikkRepository) {
 
     fun finnBehandlingshistorikk(behandlingId: UUID): List<Behandlingshistorikk> {
-        return behandlingshistorikkRepository.findByBehandlingId(behandlingId)
+        return behandlingshistorikkRepository.findByBehandlingIdOrderByEndretTidDesc(behandlingId)
     }
 
     fun finnSisteBehandlingshistorikk(behandlingId: UUID): Behandlingshistorikk {
