@@ -16,4 +16,4 @@ data class VilkårsvurderingDto(val id: UUID,
                                val endretTid: LocalDateTime,
                                val delvilkårsvurderinger: List<DelvilkårsvurderingDto> = emptyList())
 
-data class DelvilkårsvurderingDto(val type: DelvilkårType, val resultat: Vilkårsresultat)
+data class DelvilkårsvurderingDto(val type: DelvilkårType, val resultat: Vilkårsresultat, val begrunnelse: String? = null)

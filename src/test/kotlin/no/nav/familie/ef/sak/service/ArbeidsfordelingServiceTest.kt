@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.domene.SøkerMedBarn
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.dto.pdl.Adressebeskyttelse
 import no.nav.familie.ef.sak.integration.dto.pdl.AdressebeskyttelseGradering
+import no.nav.familie.ef.sak.integration.dto.pdl.Metadata
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vurdering.medlemskap.pdlBarn
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vurdering.medlemskap.pdlSøker
 import org.junit.jupiter.api.BeforeEach
@@ -56,7 +57,7 @@ internal class ArbeidsfordelingServiceTest {
             pdlSøker(adressebeskyttelse = adressebeskyttelse(adressebeskyttelseGradering))
 
     private fun adressebeskyttelse(adressebeskyttelseGradering: AdressebeskyttelseGradering) =
-            listOf(Adressebeskyttelse(adressebeskyttelseGradering))
+            listOf(Adressebeskyttelse(adressebeskyttelseGradering, Metadata(false)))
 
     companion object {
 

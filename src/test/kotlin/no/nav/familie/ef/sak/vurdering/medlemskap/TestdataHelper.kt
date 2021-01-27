@@ -10,10 +10,10 @@ import java.time.LocalDateTime
 
 fun pdlPerson(vararg perioder: Pair<LocalDate, LocalDateTime?>) = object : PdlPerson {
 
-    override val fødsel: List<Fødsel> = listOf(Fødsel(null, null, null, null, null))
+    override val fødsel: List<Fødsel> = listOf(Fødsel(null, null, null, null, null, Metadata(false)))
 
     override val bostedsadresse: List<Bostedsadresse> = perioder.map {
-        Bostedsadresse(it.first, null, Folkeregistermetadata(null, it.second), null, null, null, null)
+        Bostedsadresse(it.first, null, Folkeregistermetadata(null, it.second), null, null, null, null, Metadata(false))
     }
 }
 
@@ -104,4 +104,4 @@ fun søknad(personalia: Søknadsfelt<Personalia> = mockk(),
                               situasjon,
                               stønadsstart)
 
-fun <T> søknadsfelt(verdi: T): Søknadsfelt<T> = Søknadsfelt("label", verdi)
+fun <T> søknadsfelt(verdi: T, svarId: T? = null): Søknadsfelt<T> = Søknadsfelt(label = "label", verdi = verdi, svarId = svarId)

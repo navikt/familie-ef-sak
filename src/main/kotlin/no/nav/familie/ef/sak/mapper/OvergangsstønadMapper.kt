@@ -21,7 +21,7 @@ object OvergangsstønadMapper {
 
     fun tilSagtOppEllerRedusertStilling(situasjon: Situasjon): SagtOppEllerRedusertStillingDto? {
         val sagtOppEllerRedusertStilling = situasjon.sagtOppEllerRedusertStilling ?: return null
-        return SagtOppEllerRedusertStillingDto(sagtOppEllerRedusertStilling = sagtOppEllerRedusertStilling.verdi,
+        return SagtOppEllerRedusertStillingDto(sagtOppEllerRedusertStilling = sagtOppEllerRedusertStilling.svarId,
                                                årsak = situasjon.oppsigelseReduksjonÅrsak?.verdi,
                                                dato = situasjon.oppsigelseReduksjonTidspunkt?.verdi,
                                                dokumentasjon = tilDokumentasjonDto(situasjon.oppsigelseDokumentasjon))

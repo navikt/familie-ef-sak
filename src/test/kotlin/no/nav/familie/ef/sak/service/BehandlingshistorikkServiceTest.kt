@@ -6,12 +6,15 @@ import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.BehandlingshistorikkRepository
 import no.nav.familie.ef.sak.repository.BehandlingRepository
 import no.nav.familie.ef.sak.repository.FagsakRepository
+import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.service.BehandlingshistorikkService
+import no.nav.familie.ef.sak.service.steg.StegType
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.LocalDateTime
 
 
 internal class BehandlingshistorikkServiceTest : OppslagSpringRunnerTest() {
@@ -33,10 +36,50 @@ internal class BehandlingshistorikkServiceTest : OppslagSpringRunnerTest() {
                                                                                              opprettetAv = SikkerhetContext.hentSaksbehandler()))
 
         /** Hent */
-        val innslag : Behandlingshistorikk = behandlingshistorikkService.finnBehandlingshistorikk(behandling.id)[0]
+        val innslag: Behandlingshistorikk = behandlingshistorikkService.finnBehandlingshistorikk(behandling.id)[0]
 
         assertThat(innslag).isEqualTo(behandlingHistorikk)
     }
+
+    @Test
+    internal fun `finn seneste behandlinghistorikk`() {
+        val fagsak = fagsakRepository.insert(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak))
+
+        insert(behandling, "A", LocalDateTime.now().minusDays(1))
+        insert(behandling, "B", LocalDateTime.now().plusDays(1))
+        insert(behandling, "C", LocalDateTime.now())
+
+        val siste = behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId = behandling.id)
+        assertThat(siste.opprettetAvNavn).isEqualTo("B")
+    }
+
+    @Test
+    internal fun `finn seneste behandlinghistorikk med type`() {
+        val fagsak = fagsakRepository.insert(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak))
+
+        insert(behandling, "A", LocalDateTime.now().minusDays(1))
+        insert(behandling, "B", LocalDateTime.now().plusDays(1))
+        insert(behandling, "C", LocalDateTime.now())
+
+        var siste = behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId = behandling.id, StegType.BESLUTTE_VEDTAK)
+        assertThat(siste).isNull()
+
+        siste = behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId = behandling.id, behandling.steg)
+        assertThat(siste!!.opprettetAvNavn).isEqualTo("B")
+    }
+
+    private fun insert(behandling: Behandling,
+               opprettetAv: String,
+               endretTid: LocalDateTime) {
+        behandlingshistorikkRepository.insert(Behandlingshistorikk(behandlingId = behandling.id,
+                                                                   steg = behandling.steg,
+                                                                   opprettetAvNavn = opprettetAv,
+                                                                   endretTid = endretTid))
+    }
+
+
 }
 
 

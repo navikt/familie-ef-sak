@@ -24,7 +24,8 @@ data class Vilkårsvurdering(@Id
 data class DelvilkårsvurderingWrapper(val delvilkårsvurderinger: List<Delvilkårsvurdering>)
 
 data class Delvilkårsvurdering(val type: DelvilkårType,
-                               val resultat: Vilkårsresultat = Vilkårsresultat.IKKE_VURDERT)
+                               val resultat: Vilkårsresultat = Vilkårsresultat.IKKE_VURDERT,
+                               val begrunnelse: String? = null)
 
 data class DelvilkårMetadata(val sivilstandstype: Sivilstandstype)
 
@@ -37,6 +38,9 @@ enum class DelvilkårType {
     SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
     SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
     KRAV_SIVILSTAND,
+    HAR_FLYTTET_FRA_HVERANDRE,
+    LEVER_IKKE_MED_ANNEN_FORELDER,
+    LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD,
 }
 
 enum class Vilkårsresultat {
@@ -56,17 +60,25 @@ enum class VilkårType(val beskrivelse: String,
                            listOf(DelvilkårType.TRE_ÅRS_MEDLEMSKAP)),
     LOVLIG_OPPHOLD("§15-3 Lovlig opphold", listOf(DelvilkårType.BOR_OG_OPPHOLDER_SEG_I_NORGE)),
 
-    SIVILSTAND("§15-4 Sivilstand", listOf(DelvilkårType.DOKUMENTERT_EKTESKAP,
-                                          DelvilkårType.DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE,
-                                          DelvilkårType.SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
-                                          DelvilkårType.SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
-                                          DelvilkårType.KRAV_SIVILSTAND,));
+    SIVILSTAND("§15-4 Sivilstand",
+               listOf(
+                       DelvilkårType.DOKUMENTERT_EKTESKAP,
+                       DelvilkårType.DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE,
+                       DelvilkårType.SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
+                       DelvilkårType.SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
+                       DelvilkårType.KRAV_SIVILSTAND,
+               )),
+    SAMLIV("§15-4 Samliv",
+           listOf(DelvilkårType.HAR_FLYTTET_FRA_HVERANDRE,
+                  DelvilkårType.LEVER_IKKE_MED_ANNEN_FORELDER,
+                  DelvilkårType.LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD));
 
 
     companion object {
 
         fun hentInngangsvilkår(): List<VilkårType> = listOf(FORUTGÅENDE_MEDLEMSKAP,
                                                             LOVLIG_OPPHOLD,
-                                                            SIVILSTAND)
+                                                            SIVILSTAND,
+                                                            SAMLIV)
     }
 }

@@ -90,6 +90,8 @@ internal class VurderingServiceTest {
                         BOR_OG_OPPHOLDER_SEG_I_NORGE,
                         SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
                         KRAV_SIVILSTAND,
+                        LEVER_IKKE_MED_ANNEN_FORELDER,
+                        LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD
                 ))
 
     }
@@ -195,6 +197,39 @@ internal class VurderingServiceTest {
         assertThat(lagretVilkårsvurdering.captured.delvilkårsvurdering.delvilkårsvurderinger.first().resultat)
                 .isEqualTo(Vilkårsresultat.JA)
         assertThat(lagretVilkårsvurdering.captured.type).isEqualTo(vilkårsvurdering.type)
+    }
+
+    @Test
+    internal fun `skal oppdatere begrunnelse og resultat for delvilkårsvurdering`() {
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling(fagsak(), true, BehandlingStatus.OPPRETTET)
+        val vilkårsvurdering = vilkårsvurdering(BEHANDLING_ID,
+                                                Vilkårsresultat.IKKE_VURDERT,
+                                                VilkårType.SAMLIV,
+                                                listOf(
+                                                        Delvilkårsvurdering(LEVER_IKKE_MED_ANNEN_FORELDER,
+                                                                            Vilkårsresultat.IKKE_VURDERT,
+                                                                            null),
+                                                ))
+        every { vilkårsvurderingRepository.findByIdOrNull(vilkårsvurdering.id) } returns vilkårsvurdering
+        val lagretVilkårsvurdering = slot<Vilkårsvurdering>()
+        every { vilkårsvurderingRepository.update(capture(lagretVilkårsvurdering)) } answers
+                { it.invocation.args.first() as Vilkårsvurdering }
+
+        val oppdatertVilkårsvurderingDto = VilkårsvurderingDto(vilkårsvurdering.id,
+                                                               vilkårsvurdering.behandlingId,
+                                                               Vilkårsresultat.JA,
+                                                               vilkårsvurdering.type,
+                                                               null,
+                                                               null,
+                                                               "jens123@trugdeetaten.no",
+                                                               LocalDateTime.now(),
+                                                               listOf(DelvilkårsvurderingDto(LEVER_IKKE_MED_ANNEN_FORELDER,
+                                                                                             Vilkårsresultat.JA,
+                                                                                             "Delvilkår ok")))
+        vurderingService.oppdaterVilkår(oppdatertVilkårsvurderingDto)
+
+        assertThat(lagretVilkårsvurdering.captured.delvilkårsvurdering.delvilkårsvurderinger.first().resultat).isEqualTo(Vilkårsresultat.JA)
+        assertThat(lagretVilkårsvurdering.captured.delvilkårsvurdering.delvilkårsvurderinger.first().begrunnelse).isEqualTo("Delvilkår ok")
     }
 
     @Test
