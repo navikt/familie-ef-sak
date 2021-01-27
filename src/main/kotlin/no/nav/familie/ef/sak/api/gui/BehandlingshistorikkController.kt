@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*
 import java.util.*
 
 @RestController
-@RequestMapping(path = ["/api/behandlinghistorikk"])
+@RequestMapping(path = ["/api/behandlingshistorikk"])
 @ProtectedWithClaims(issuer = "azuread")
 class BehandlingshistorikkController(private val behandlingshistorikkService: BehandlingshistorikkService,
                     private val tilgangService: TilgangService) {

@@ -2,12 +2,13 @@ package no.nav.familie.ef.sak.service.steg
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ef.sak.api.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
 import no.nav.familie.ef.sak.config.RolleConfig
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.Behandlingshistorikk
-import no.nav.familie.ef.sak.service.BehandlingshistorikkService
 import no.nav.familie.ef.sak.service.BehandlingService
+import no.nav.familie.ef.sak.service.BehandlingshistorikkService
 import no.nav.familie.ef.sak.service.steg.StegType.*
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import org.slf4j.Logger
@@ -61,10 +62,10 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
     }
 
     @Transactional
-    fun håndterBeslutteVedtak(behandling: Behandling): Behandling {
+    fun håndterBeslutteVedtak(behandling: Behandling, data: BeslutteVedtakDto): Behandling {
         val behandlingSteg: BeslutteVedtakSteg = hentBehandlingSteg(BESLUTTE_VEDTAK)
 
-        return håndterSteg(behandling, behandlingSteg, null)
+        return håndterSteg(behandling, behandlingSteg, data)
     }
 
     @Transactional
@@ -126,7 +127,7 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
                       "men behandlingen er på steg '${behandling.steg.displayName()}'")
             }
 
-            if (behandling.steg == StegType.BESLUTTE_VEDTAK && stegType != StegType.BESLUTTE_VEDTAK) {
+            if (behandling.steg == BESLUTTE_VEDTAK && stegType != BESLUTTE_VEDTAK) {
                 error("Behandlingen er på steg '${behandling.steg.displayName()}', og er da låst for alle andre type endringer.")
             }
 
@@ -134,10 +135,13 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
 
             val nesteSteg = behandlingSteg.utførOgReturnerNesteSteg(behandling, data)
 
-            behandlingshistorikkService.opprettHistorikkInnslag(Behandlingshistorikk(behandlingId = behandling.id,
-                                                                                     steg = behandling.steg,
-                                                                                     opprettetAvNavn = saksbehandlerNavn,
-                                                                                     opprettetAv = SikkerhetContext.hentSaksbehandler()))
+            if (behandlingSteg.settInnHistorikk()) {
+                behandlingshistorikkService.opprettHistorikkInnslag(
+                        Behandlingshistorikk(behandlingId = behandling.id,
+                                             steg = behandling.steg,
+                                             opprettetAvNavn = saksbehandlerNavn,
+                                             opprettetAv = SikkerhetContext.hentSaksbehandler()))
+            }
 
             stegSuksessMetrics[stegType]?.increment()
 

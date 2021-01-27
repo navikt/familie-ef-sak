@@ -3,8 +3,11 @@ package no.nav.familie.ef.sak.config
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.repository.domain.DelvilkårsvurderingWrapper
 import no.nav.familie.ef.sak.repository.domain.Endret
+import no.nav.familie.ef.sak.repository.domain.JsonWrapper
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus
-import no.nav.familie.ef.sak.repository.domain.søknad.*
+import no.nav.familie.ef.sak.repository.domain.søknad.Arbeidssituasjon
+import no.nav.familie.ef.sak.repository.domain.søknad.Dokumentasjon
+import no.nav.familie.ef.sak.repository.domain.søknad.GjelderDeg
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.prosessering.PropertiesWrapperTilStringConverter
@@ -70,7 +73,10 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
                                             GjelderDegTilStringConverter(),
                                             StringTilGjelderDegConverter(),
                                             ArbeidssituasjonTilStringConverter(),
-                                            StringTilArbeidssituasjonConverter()))
+                                            StringTilArbeidssituasjonConverter(),
+                                            PGobjectTilJsonWrapperConverter(),
+                                            JsonWrapperTilPGobjectConverter()
+        ))
     }
 
     @WritingConverter
@@ -151,12 +157,11 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
                 }
     }
 
-
     @WritingConverter
     class GjelderDegTilStringConverter : Converter<GjelderDeg, String> {
 
         override fun convert(verdier: GjelderDeg): String {
-            return StringUtils.join(verdier.verdier,";")
+            return StringUtils.join(verdier.verdier, ";")
         }
     }
 
@@ -165,6 +170,15 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
         override fun convert(verdi: String): GjelderDeg {
             return GjelderDeg(verdi.split(";"))
+
+        }
+    }
+
+    @ReadingConverter
+    class PGobjectTilJsonWrapperConverter : Converter<PGobject, JsonWrapper?> {
+
+        override fun convert(pGobject: PGobject): JsonWrapper? {
+            return pGobject.value?.let { JsonWrapper(it) }
         }
     }
 
@@ -172,7 +186,7 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
     class ArbeidssituasjonTilStringConverter : Converter<Arbeidssituasjon, String> {
 
         override fun convert(verdier: Arbeidssituasjon): String {
-            return StringUtils.join(verdier.verdier,";")
+            return StringUtils.join(verdier.verdier, ";")
         }
     }
 
@@ -181,7 +195,18 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
         override fun convert(verdi: String): Arbeidssituasjon {
             return Arbeidssituasjon(verdi.split(";"))
+
         }
+    }
+
+    @WritingConverter
+    class JsonWrapperTilPGobjectConverter : Converter<JsonWrapper?, PGobject> {
+
+        override fun convert(jsonWrapper: JsonWrapper?): PGobject =
+                PGobject().apply {
+                    type = "json"
+                    value = jsonWrapper?.let { it.json }
+                }
     }
 
 }
