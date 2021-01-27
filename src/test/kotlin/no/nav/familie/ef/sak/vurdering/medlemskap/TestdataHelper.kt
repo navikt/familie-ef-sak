@@ -104,4 +104,4 @@ fun søknad(personalia: Søknadsfelt<Personalia> = mockk(),
                               situasjon,
                               stønadsstart)
 
-fun <T> søknadsfelt(verdi: T): Søknadsfelt<T> = Søknadsfelt("label", verdi)
+fun <T> søknadsfelt(verdi: T, svarId: T? = null): Søknadsfelt<T> = Søknadsfelt(label = "label", verdi = verdi, svarId = svarId)

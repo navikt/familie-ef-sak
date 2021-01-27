@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.integration.dto.pdl.Familierelasjonsrolle
 import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
 import no.nav.familie.ef.sak.mapper.AleneomsorgMapper
+import no.nav.familie.ef.sak.mapper.BosituasjonMapper
 import no.nav.familie.ef.sak.mapper.MedlemskapMapper
 import no.nav.familie.ef.sak.mapper.SivilstandMapper
 import no.nav.familie.ef.sak.repository.VilkårsvurderingRepository
@@ -45,7 +46,8 @@ class VurderingService(private val behandlingService: BehandlingService,
                                       DelvilkårsvurderingWrapper(vilkårsvurderingDto.delvilkårsvurderinger
                                                                          .map { delvurdering ->
                                                                              Delvilkårsvurdering(delvurdering.type,
-                                                                                                 delvurdering.resultat)
+                                                                                                 delvurdering.resultat,
+                                                                                                 delvurdering.begrunnelse)
                                                                          })
                 )
         return vilkårsvurderingRepository.update(nyVilkårsvurdering).id
@@ -69,7 +71,9 @@ class VurderingService(private val behandlingService: BehandlingService,
 
         val sivilstand = SivilstandMapper.tilDto(sivilstandsdetaljer = søknad.sivilstand,
                                                  pdlSøker = pdlSøker)
-        return InngangsvilkårGrunnlagDto(medlemskap, sivilstand)
+        val bosituasjon = BosituasjonMapper.tilDto(søknad.bosituasjon)
+
+        return InngangsvilkårGrunnlagDto(medlemskap, sivilstand, bosituasjon)
     }
 
     private fun hentVurderinger(behandlingId: UUID,
@@ -88,7 +92,8 @@ class VurderingService(private val behandlingService: BehandlingService,
                                         endretTid = it.sporbar.endret.endretTid,
                                         delvilkårsvurderinger = it.delvilkårsvurdering.delvilkårsvurderinger.map { delvurdering ->
                                             DelvilkårsvurderingDto(delvurdering.type,
-                                                                   delvurdering.resultat)
+                                                                   delvurdering.resultat,
+                                                                   delvurdering.begrunnelse)
                                         })
                 }
     }
@@ -121,7 +126,6 @@ class VurderingService(private val behandlingService: BehandlingService,
 
         return lagredeVilkårsvurderinger + nyeVilkårsvurderinger
     }
-
 
 
     fun hentInngangsvilkårSomManglerVurdering(behandlingId: UUID): List<VilkårType> {

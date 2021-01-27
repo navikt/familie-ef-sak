@@ -52,7 +52,7 @@ data class Barnepass(@Column("arsak_barnepass")
                      @MappedCollection(idColumn = "barn_id")
                      val barnepassordninger: Set<Barnepassordning>?)
 
-data class Barnepassordning(val hvaSlagsBarnepassordning: String,
+data class Barnepassordning(val hvaSlagsBarnepassordning: String? = null,
                             val navn: String,
                             @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL)
                             val datoperiode: Datoperiode? = null,

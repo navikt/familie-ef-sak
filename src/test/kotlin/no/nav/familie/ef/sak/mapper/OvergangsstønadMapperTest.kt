@@ -37,7 +37,7 @@ internal class OvergangsstønadMapperTest {
                                   oppsigelseReduksjonÅrsak = søknadsfelt("Årsak"),
                                   oppstartNyJobb = null,
                                   oppstartUtdanning = null,
-                                  sagtOppEllerRedusertStilling = søknadsfelt("Ja"),
+                                  sagtOppEllerRedusertStilling = søknadsfelt("Ja", svarId = "sagtOpp"),
                                   sykdom = dokumentliste(),
                                   utdanningstilbud = dokumentliste()))
 
