@@ -17,7 +17,7 @@ internal class DelvilkårReglerTest {
     internal fun `skal ha initiell verdi IKKE_VURDERT for delvilkår uten spesialregler`() {
         val søknad = SøknadsskjemaMapper.tilDomene(Testsøknad.søknadOvergangsstønad)
 
-        assertThat(utledDelvilkårResultat(TRE_ÅRS_MEDLEMSKAP, søknad, delvilkårMetadata()))
+        assertThat(utledDelvilkårResultat(FEM_ÅRS_MEDLEMSKAP, søknad, delvilkårMetadata()))
                 .isEqualTo(Vilkårsresultat.IKKE_VURDERT)
 
         assertThat(utledDelvilkårResultat(DOKUMENTERT_FLYKTNINGSTATUS, søknad, delvilkårMetadata()))
