@@ -30,8 +30,8 @@ inline fun Behandlingshistorikk.tilDto(): BehandlingshistorikkDto {
                                    metadata = this.metadata.tilJson())
 }
 
-fun JsonWrapper?.tilJson(): Map<Any, Any>? {
-    return this?.json?.let { objectMapper.readValue<Map<Any, Any>>(it) }
+fun JsonWrapper?.tilJson(): Map<String, Any>? {
+    return this?.json?.let { objectMapper.readValue(it) }
 }
 
 enum class StegUtfall {
