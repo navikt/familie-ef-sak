@@ -39,7 +39,7 @@ internal class GrunnlagsdataRepositoryTest : OppslagSpringRunnerTest() {
 
         val data = opprettData()
         grunnlagsdataRepository.insert(Grunnlagsdata(behandlingId = behandling.id,
-                                                     data = JsonWrapper(objectMapper.writeValueAsString(data))))
+                                                     data = data))
     }
 
     @Test

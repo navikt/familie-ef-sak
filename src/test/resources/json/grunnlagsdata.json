@@ -1,0 +1,153 @@
+{
+  "medlemskap" : {
+    "name" : "medlemskap",
+    "type" : "Object",
+    "fields" : {
+      "nåværendeStatsborgerskap" : {
+        "name" : "nåværendeStatsborgerskap",
+        "type" : "Collection",
+        "fields" : { }
+      },
+      "statsborgerskap" : {
+        "name" : "statsborgerskap",
+        "type" : "Collection",
+        "fields" : {
+          "land" : {
+            "name" : "land",
+            "type" : "String"
+          },
+          "gyldigFraOgMedDato" : {
+            "name" : "gyldigFraOgMedDato",
+            "type" : "LocalDate"
+          },
+          "gyldigTilOgMedDato" : {
+            "name" : "gyldigTilOgMedDato",
+            "type" : "LocalDate"
+          }
+        }
+      },
+      "oppholdstatus" : {
+        "name" : "oppholdstatus",
+        "type" : "Collection",
+        "fields" : {
+          "oppholdstillatelse" : {
+            "name" : "oppholdstillatelse",
+            "type" : "Enum",
+            "values" : [ "PERMANENT", "MIDLERTIDIG", "UKJENT" ]
+          },
+          "fraDato" : {
+            "name" : "fraDato",
+            "type" : "LocalDate"
+          },
+          "tilDato" : {
+            "name" : "tilDato",
+            "type" : "LocalDate"
+          }
+        }
+      },
+      "bostedsadresse" : {
+        "name" : "bostedsadresse",
+        "type" : "Collection",
+        "fields" : {
+          "visningsadresse" : {
+            "name" : "visningsadresse",
+            "type" : "String"
+          },
+          "type" : {
+            "name" : "type",
+            "type" : "Enum",
+            "values" : [ "BOSTEDADRESSE", "KONTAKTADRESSE", "KONTAKTADRESSE_UTLAND", "OPPHOLDSADRESSE" ]
+          },
+          "gyldigFraOgMed" : {
+            "name" : "gyldigFraOgMed",
+            "type" : "LocalDate"
+          },
+          "gyldigTilOgMed" : {
+            "name" : "gyldigTilOgMed",
+            "type" : "LocalDate"
+          }
+        }
+      },
+      "innflytting" : {
+        "name" : "innflytting",
+        "type" : "Collection",
+        "fields" : {
+          "fraflyttingsland" : {
+            "name" : "fraflyttingsland",
+            "type" : "String"
+          },
+          "dato" : {
+            "name" : "dato",
+            "type" : "LocalDate"
+          },
+          "fraflyttingssted" : {
+            "name" : "fraflyttingssted",
+            "type" : "String"
+          }
+        }
+      },
+      "utflytting" : {
+        "name" : "utflytting",
+        "type" : "Collection",
+        "fields" : {
+          "tilflyttingsland" : {
+            "name" : "tilflyttingsland",
+            "type" : "String"
+          },
+          "dato" : {
+            "name" : "dato",
+            "type" : "LocalDate"
+          },
+          "tilflyttingssted" : {
+            "name" : "tilflyttingssted",
+            "type" : "String"
+          }
+        }
+      },
+      "folkeregisterpersonstatus" : {
+        "name" : "folkeregisterpersonstatus",
+        "type" : "Enum",
+        "values" : [ "BOSATT", "UTFLYTTET", "FORSVUNNET", "DØD", "OPPHØRT", "FØDSELSREGISTRERT", "MIDLERTIDIG", "INAKTIV", "UKJENT" ]
+      },
+      "medlUnntak" : {
+        "name" : "medlUnntak",
+        "type" : "Object",
+        "fields" : {
+          "gyldigeVedtaksPerioder" : {
+            "name" : "gyldigeVedtaksPerioder",
+            "type" : "Collection",
+            "fields" : {
+              "fraogmedDato" : {
+                "name" : "fraogmedDato",
+                "type" : "LocalDate"
+              },
+              "tilogmedDato" : {
+                "name" : "tilogmedDato",
+                "type" : "LocalDate"
+              },
+              "erMedlemIFolketrygden" : {
+                "name" : "erMedlemIFolketrygden",
+                "type" : "Boolean"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "sivilstand" : {
+    "name" : "sivilstand",
+    "type" : "Object",
+    "fields" : {
+      "type" : {
+        "name" : "type",
+        "type" : "Enum",
+        "values" : [ "UOPPGITT", "UGIFT", "GIFT", "ENKE_ELLER_ENKEMANN", "SKILT", "SEPARERT", "REGISTRERT_PARTNER", "SEPARERT_PARTNER", "SKILT_PARTNER", "GJENLEVENDE_PARTNER" ]
+      },
+      "gyldigFraOgMed" : {
+        "name" : "gyldigFraOgMed",
+        "type" : "LocalDate"
+      }
+    }
+  }
+}

@@ -7,9 +7,14 @@ import org.springframework.data.annotation.Version
 import org.springframework.data.relational.core.mapping.Embedded
 import java.util.*
 
+/**
+ * TODO borde DATA lagras som JsonWrapper/json string och heta eks inngangsvilkar?
+ * så hvis det er diff og man henter inngangsvilkår henter man grunnlagsdata fra her og fra "nye"/diff
+ */
 data class Grunnlagsdata(@Id
                          val behandlingId: UUID,
                          val data: GrunnlagsdataData,
+                         //val tidligereData: GrunnlagsdataData? = null,
                          val diff: Boolean = false,
                          @Version
                          val versjon: Int = 0,
@@ -17,6 +22,4 @@ data class Grunnlagsdata(@Id
                          val sporbar: Sporbar = Sporbar())
 
 data class GrunnlagsdataData(val medlemskap: MedlemskapRegistergrunnlagDto,
-                             val sivilstand: SivilstandRegistergrunnlagDto,
-                             val version: Int = 1)
-
+                             val sivilstand: SivilstandRegistergrunnlagDto)

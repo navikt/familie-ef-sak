@@ -10,5 +10,5 @@ import java.util.*
 interface GrunnlagsdataRepository : RepositoryInterface<Grunnlagsdata, UUID>, InsertUpdateRepository<Grunnlagsdata> {
 
     @Query("SELECT diff FROM grunnlagsdata WHERE behandling_id=:behandling_id")
-    fun harDiffIGrunnlagsdata(@Param("behandling_id") behandlingId: UUID): Boolean
+    fun harDiffIGrunnlagsdata(@Param("behandling_id") behandlingId: UUID): Boolean?
 }

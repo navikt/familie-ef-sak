@@ -17,10 +17,12 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.util.*
 
 @Service
 class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
                   private val behandlingService: BehandlingService,
+                  private val grunnlagsdataService: GrunnlagsdataService,
                   private val rolleConfig: RolleConfig,
                   private val behandlingshistorikkService: BehandlingshistorikkService) {
 
@@ -106,6 +108,27 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
     }
 
 
+    @Transactional
+    fun resetSteg(behandlingId: UUID, steg: StegType) {
+        val behandling = behandlingService.hentBehandling(behandlingId)
+        if (behandling.status != BehandlingStatus.UTREDES) {
+            error("Kan ikke endre steg når status=${behandling.status}")
+        }
+        if (!behandling.steg.kommerEtter(steg, behandling.type)) {
+            error("Kan ikke sette behandling til steg=$steg når behandling allerede er på ${behandling.steg}")
+        }
+        grunnlagsdataService.oppdaterGrunnlagsdata(behandling)
+
+        val saksbehandler = SikkerhetContext.hentSaksbehandler()
+        val harTilgangTilSteg = SikkerhetContext.harTilgangTilGittRolle(rolleConfig, behandling.steg.tillattFor)
+        val harTilgangTilNesteSteg = SikkerhetContext.harTilgangTilGittRolle(rolleConfig, steg.tillattFor)
+        if (!harTilgangTilSteg || !harTilgangTilNesteSteg) {
+            error("$saksbehandler kan ikke endre fra steg=${behandling.steg.displayName()} til steg=${steg.displayName()} pga manglende rolle.")
+        }
+        behandlingService.oppdaterStegPåBehandling(behandlingId, steg)
+        grunnlagsdataService.oppdaterGrunnlagsdata(behandling)
+    }
+
     // Generelle stegmetoder
     private fun <T> håndterSteg(behandling: Behandling,
                                 behandlingSteg: BehandlingSteg<T>,
@@ -146,7 +169,7 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
             }
 
             if (behandling.status == BehandlingStatus.UTREDES) {
-                behandlingService.opprettGrunnlagsdataEllerDiff(behandling)
+                grunnlagsdataService.oppdaterGrunnlagsdata(behandling)
             }
 
             stegSuksessMetrics[stegType]?.increment()
@@ -172,7 +195,7 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
         }
     }
 
-    fun <T : BehandlingSteg<*>> hentBehandlingSteg(stegType: StegType): T {
+    private fun <T : BehandlingSteg<*>> hentBehandlingSteg(stegType: StegType): T {
         val firstOrNull = behandlingSteg.singleOrNull { it.stegType() == stegType }
                           ?: error("Finner ikke behandling steg for type $stegType")
         @Suppress("UNCHECKED_CAST")
