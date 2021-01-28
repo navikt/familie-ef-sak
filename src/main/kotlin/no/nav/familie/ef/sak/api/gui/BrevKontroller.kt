@@ -8,17 +8,18 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
+import java.util.*
 
 @RestController
-@RequestMapping(path = ["/api/lag-brev"])
+@RequestMapping(path = ["/api/brev"])
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class BrevKontroller(private val brevService: BrevService,
                      private val behandlingService: BehandlingService,
                      private val tilgangService: TilgangService) {
 
-    @PostMapping
-    fun lagBrev(@RequestBody brevParams: BrevRequest): Ressurs<ByteArray> {
+    @PostMapping("/{behandlingId}")
+    fun lagBrev(@PathVariable behandlingId: UUID, @RequestBody brevParams: BrevRequest): Ressurs<ByteArray> {
         val respons = brevService.lagBrev()
 
         return Ressurs.Companion.success(respons)
