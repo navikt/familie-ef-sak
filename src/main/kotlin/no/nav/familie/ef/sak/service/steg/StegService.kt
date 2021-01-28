@@ -6,9 +6,11 @@ import no.nav.familie.ef.sak.api.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
 import no.nav.familie.ef.sak.config.RolleConfig
 import no.nav.familie.ef.sak.repository.domain.Behandling
+import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import no.nav.familie.ef.sak.repository.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.BehandlingshistorikkService
+import no.nav.familie.ef.sak.service.GrunnlagsdataService
 import no.nav.familie.ef.sak.service.steg.StegType.*
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import org.slf4j.Logger
@@ -141,6 +143,10 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
                                              steg = behandling.steg,
                                              opprettetAvNavn = saksbehandlerNavn,
                                              opprettetAv = SikkerhetContext.hentSaksbehandler()))
+            }
+
+            if (behandling.status == BehandlingStatus.UTREDES) {
+                behandlingService.opprettGrunnlagsdataEllerDiff(behandling)
             }
 
             stegSuksessMetrics[stegType]?.increment()

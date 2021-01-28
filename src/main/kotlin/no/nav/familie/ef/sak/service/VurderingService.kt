@@ -60,8 +60,8 @@ class VurderingService(private val behandlingService: BehandlingService,
         return InngangsvilkårDto(vurderinger = vurderinger, grunnlag = grunnlag)
     }
 
-    private fun hentGrunnlag(fnr: String,
-                             søknad: SøknadsskjemaOvergangsstønad): InngangsvilkårGrunnlagDto {
+    fun hentGrunnlag(fnr: String,
+                     søknad: SøknadsskjemaOvergangsstønad): InngangsvilkårGrunnlagDto {
         val pdlSøker = pdlClient.hentSøker(fnr)
         val medlUnntak = familieIntegrasjonerClient.hentMedlemskapsinfo(ident = fnr)
 

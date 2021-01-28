@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.service
 
+import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.api.dto.BehandlingDto
 import no.nav.familie.ef.sak.api.dto.tilDto
 import no.nav.familie.ef.sak.mapper.SøknadsskjemaMapper
@@ -26,7 +27,8 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
                         private val søknadOvergangsstønadRepository: SøknadOvergangsstønadRepository,
                         private val søknadSkolepengerRepository: SøknadSkolepengerRepository,
                         private val søknadBarnetilsynRepository: SøknadBarnetilsynRepository,
-                        private val behandlingRepository: BehandlingRepository) {
+                        private val behandlingRepository: BehandlingRepository,
+                        private val grunnlagsdataService: GrunnlagsdataService) {
 
     val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
@@ -63,6 +65,24 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
     }
 
     fun hentBehandling(behandlingId: UUID): Behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+
+    fun hentBehandlingDto(behandlingId: UUID): BehandlingDto {
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        return if (!behandling.status.behandlingErLåstForVidereRedigering()) {
+            behandling.tilDto(grunnlagsdiff = grunnlagsdataService.harDiffIGrunnlagsdata(behandling))
+        } else {
+            behandling.tilDto()
+        }
+    }
+
+    fun opprettGrunnlagsdataEllerDiff(behandling: Behandling) {
+        grunnlagsdataService.opprettGrunnlagsdataEllerDiff(behandling, hentOvergangsstønad(behandling.id))
+    }
+
+    fun oppdaterGrunnlagsdata(behandlingId: UUID) {
+        val behandling = hentBehandling(behandlingId)
+        grunnlagsdataService.oppdaterGrunnlagsdata(behandling, hentOvergangsstønad(behandling.id))
+    }
 
     fun hentOvergangsstønad(behandlingId: UUID): SøknadsskjemaOvergangsstønad {
         val søknad = hentSøknad(behandlingId)

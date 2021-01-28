@@ -1,10 +1,7 @@
 package no.nav.familie.ef.sak.config
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.familie.ef.sak.repository.domain.DelvilkårsvurderingWrapper
-import no.nav.familie.ef.sak.repository.domain.Endret
-import no.nav.familie.ef.sak.repository.domain.JsonWrapper
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus
+import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.repository.domain.søknad.Arbeidssituasjon
 import no.nav.familie.ef.sak.repository.domain.søknad.Dokumentasjon
 import no.nav.familie.ef.sak.repository.domain.søknad.GjelderDeg
@@ -75,7 +72,9 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
                                             ArbeidssituasjonTilStringConverter(),
                                             StringTilArbeidssituasjonConverter(),
                                             PGobjectTilJsonWrapperConverter(),
-                                            JsonWrapperTilPGobjectConverter()
+                                            JsonWrapperTilPGobjectConverter(),
+                                            PGobjectTilGrunnlagsdataConverter(),
+                                            GrunnlagsdataTilPGobjectConverter()
         ))
     }
 
@@ -174,14 +173,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
         }
     }
 
-    @ReadingConverter
-    class PGobjectTilJsonWrapperConverter : Converter<PGobject, JsonWrapper?> {
-
-        override fun convert(pGobject: PGobject): JsonWrapper? {
-            return pGobject.value?.let { JsonWrapper(it) }
-        }
-    }
-
     @WritingConverter
     class ArbeidssituasjonTilStringConverter : Converter<Arbeidssituasjon, String> {
 
@@ -199,6 +190,14 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
         }
     }
 
+    @ReadingConverter
+    class PGobjectTilJsonWrapperConverter : Converter<PGobject, JsonWrapper?> {
+
+        override fun convert(pGobject: PGobject): JsonWrapper? {
+            return pGobject.value?.let { JsonWrapper(it) }
+        }
+    }
+
     @WritingConverter
     class JsonWrapperTilPGobjectConverter : Converter<JsonWrapper?, PGobject> {
 
@@ -206,6 +205,24 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
                 PGobject().apply {
                     type = "json"
                     value = jsonWrapper?.let { it.json }
+                }
+    }
+
+    @ReadingConverter
+    class PGobjectTilGrunnlagsdataConverter : Converter<PGobject, GrunnlagsdataData> {
+
+        override fun convert(pGobject: PGobject): GrunnlagsdataData {
+            return objectMapper.readValue(pGobject.value!!)
+        }
+    }
+
+    @WritingConverter
+    class GrunnlagsdataTilPGobjectConverter : Converter<GrunnlagsdataData, PGobject> {
+
+        override fun convert(data: GrunnlagsdataData): PGobject =
+                PGobject().apply {
+                    type = "json"
+                    value = objectMapper.writeValueAsString(data)
                 }
     }
 

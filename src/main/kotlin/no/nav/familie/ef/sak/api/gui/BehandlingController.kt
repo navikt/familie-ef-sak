@@ -1,16 +1,12 @@
 package no.nav.familie.ef.sak.api.gui
 
 import no.nav.familie.ef.sak.api.dto.BehandlingDto
-import no.nav.familie.ef.sak.api.dto.tilDto
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import java.util.*
 
 @RestController
@@ -23,7 +19,14 @@ class BehandlingController(private val behandlingService: BehandlingService,
     @GetMapping("{behandlingId}")
     fun hentBehandling(@PathVariable behandlingId: UUID): Ressurs<BehandlingDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
-        return Ressurs.success(behandlingService.hentBehandling(behandlingId).tilDto())
+        return Ressurs.success(behandlingService.hentBehandlingDto(behandlingId))
+    }
+
+    @PostMapping("{behandlingId}/grunnlagsdata/oppdater")
+    fun oppdaterGrunnlagsdata(@PathVariable behandlingId: UUID): Ressurs<UUID> {
+        tilgangService.validerTilgangTilBehandling(behandlingId)
+        behandlingService.oppdaterGrunnlagsdata(behandlingId)
+        return Ressurs.success(behandlingId)
     }
 
 }
