@@ -1,47 +1,32 @@
 package no.nav.familie.ef.sak.brev
 
-import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.familie.log.NavHttpHeaders
-import no.nav.familie.log.mdc.MDCConstants
-import org.slf4j.LoggerFactory
-import org.slf4j.MDC
+import no.nav.familie.ef.sak.util.medContentTypeJsonUTF8
+import no.nav.familie.http.client.AbstractPingableRestClient
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.MediaType
-import org.springframework.http.RequestEntity
-import org.springframework.http.converter.ByteArrayHttpMessageConverter
-import org.springframework.http.converter.StringHttpMessageConverter
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
+import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Component
-import org.springframework.web.client.RestTemplate
+import org.springframework.web.client.RestOperations
 import java.net.URI
-import java.nio.charset.StandardCharsets
 
 
 @Component
 class BrevClient(@Value("\${FAMILIE_BREV_API_URL}")
-                 private val familieBrevUri: String) {
+                 private val familieBrevUri: String,
+                 @Qualifier("utenAuth")
+                 private val restOperations: RestOperations) : AbstractPingableRestClient(restOperations, "familie.brev") {
 
-    val restTemplate = RestTemplate(listOf(StringHttpMessageConverter(StandardCharsets.UTF_8),
-                                           ByteArrayHttpMessageConverter(),
-                                           MappingJackson2HttpMessageConverter(objectMapper)))
+    override val pingUri: URI
+        get() = URI.create(familieBrevUri)
+
+    override fun ping() {
+        operations.optionsForAllow(pingUri)
+    }
 
     fun genererBrev(målform: String, malnavn: String, body: String): ByteArray {
         val url = URI.create("$familieBrevUri/api/ef-brev/dokument/bokmaal/testDokument/pdf")
 
-        val request = RequestEntity.post(url)
-                .contentType(MediaType.APPLICATION_JSON)
-                .acceptCharset(Charsets.UTF_8)
-                .header(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
-                .body(body)
-
-        secureLogger.info("Kaller familie brev($url) med data ${body}")
-        val response = restTemplate.exchange(request, ByteArray::class.java)
-        return response.body ?: error("Klarte ikke generere brev med familie-brev")
-    }
-
-    companion object {
-
-        val secureLogger = LoggerFactory.getLogger("secureLogger")
+        return postForEntity(url, body, HttpHeaders().medContentTypeJsonUTF8())
     }
 }
 
