@@ -10,10 +10,7 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import java.time.LocalDate
 import java.util.*
 
@@ -29,7 +26,7 @@ class BeregningController(private val stegService: StegService,
                           private val tilgangService: TilgangService) {
 
     @PostMapping("/{behandlingId}/fullfor")
-    fun beregnYtelseForStønad(@PathVariable behandlingId: UUID, beregningRequest: BeregningRequest): Ressurs<UUID> {
+    fun beregnYtelseForStønad(@PathVariable behandlingId: UUID, @RequestBody beregningRequest: BeregningRequest): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         val behandling = behandlingService.hentBehandling(behandlingId)
         val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
