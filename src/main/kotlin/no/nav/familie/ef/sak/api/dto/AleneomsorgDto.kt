@@ -10,10 +10,9 @@ data class AleneomsorgDto(
 
 
 data class AleneomsorgSøknadsgrunnlagDto(
-    val navn: String,
+    val navn: String?,
     val fødselsnummer: String?,
-    val fødselsdato: LocalDate?,
-    val termindato: LocalDate,
+    val fødselTermindato: LocalDate?,
     val skalBoBorHosSøker: Boolean?,
     val forelder: AnnenForelder?,
     val ikkeOppgittAnnenForelderBegrunnelse: String?,
