@@ -1,0 +1,4 @@
+CREATE TABLE Brev (
+    id  UUID PRIMARY KEY,
+    pdf BYTEA
+)
