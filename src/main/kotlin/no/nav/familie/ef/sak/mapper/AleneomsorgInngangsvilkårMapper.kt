@@ -3,47 +3,89 @@ package no.nav.familie.ef.sak.mapper
 import no.nav.familie.ef.sak.api.dto.AleneomsorgDto
 import no.nav.familie.ef.sak.api.dto.AleneomsorgRegistergrunnlagDto
 import no.nav.familie.ef.sak.api.dto.AleneomsorgSøknadsgrunnlagDto
+import no.nav.familie.ef.sak.api.dto.AleneomsorgAnnenForelderDto
+import no.nav.familie.ef.sak.integration.dto.pdl.Familierelasjonsrolle
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlAnnenForelder
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlBarn
 import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
 import no.nav.familie.ef.sak.integration.dto.pdl.visningsnavn
+import no.nav.familie.ef.sak.repository.domain.søknad.AnnenForelder
 import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsstønad
 
 object AleneomsorgInngangsvilkårMapper {
 
-    fun tilDto(pdlBarn: Map<String, PdlBarn>, søknad: SøknadsskjemaOvergangsstønad): List<AleneomsorgDto> {
+    fun tilDto(pdlBarn: Map<String, PdlBarn>,
+               barneforeldre: Map<String, PdlAnnenForelder>,
+               søknad: SøknadsskjemaOvergangsstønad): List<AleneomsorgDto> {
 
         val alleBarn: List<MatchetBarn> = BarnMatcher.kobleSøknadsbarnOgRegisterBarn(søknad.barn, pdlBarn)
 
-        return alleBarn.map { tilDtoPerBarn(it, søknad) }
+        return alleBarn.map { barn ->
+            val fnr = barn.pdlBarn?.familierelasjoner?.firstOrNull {
+                it.relatertPersonsIdent != søknad.fødselsnummer && it.relatertPersonsRolle != Familierelasjonsrolle.BARN
+            }?.relatertPersonsIdent
+                      ?: barn.søknadsbarn.annenForelder?.person?.fødselsnummer
+            val pdlAnnenForelder = barneforeldre[fnr]
+
+            tilDtoPerBarn(barn, pdlAnnenForelder, fnr)
+        }
     }
 
-    fun tilDtoPerBarn(matchetBarn: MatchetBarn, søknad: SøknadsskjemaOvergangsstønad): AleneomsorgDto {
+    private fun tilDtoPerBarn(matchetBarn: MatchetBarn,
+                              pdlAnnenForelder: PdlAnnenForelder?,
+                              annenForelderFnr: String?): AleneomsorgDto {
+        val søknadsbarn = matchetBarn.søknadsbarn
+        val samvær = søknadsbarn.samvær
         return AleneomsorgDto(
-            barneId = matchetBarn.søknadsbarn.id.toString(),
-            søknadsgrunnlag = AleneomsorgSøknadsgrunnlagDto(
-                navn = matchetBarn.søknadsbarn.navn,
-                fødselsnummer = matchetBarn.søknadsbarn.fødselsnummer,
-                fødselTermindato = matchetBarn.søknadsbarn.fødselTermindato,
-                skalBoBorHosSøker = matchetBarn.søknadsbarn.harSkalHaSammeAdresse,
-                forelder = matchetBarn.søknadsbarn.annenForelder,
-                ikkeOppgittAnnenForelderBegrunnelse = matchetBarn.søknadsbarn.annenForelder?.ikkeOppgittAnnenForelderBegrunnelse,
-                spørsmålAvtaleOmDeltBosted = matchetBarn.søknadsbarn.samvær?.spørsmålAvtaleOmDeltBosted,
-                skalAnnenForelderHaSamvær = matchetBarn.søknadsbarn.samvær?.skalAnnenForelderHaSamvær,
-                harDereSkriftligAvtaleOmSamvær = matchetBarn.søknadsbarn.samvær?.harDereSkriftligAvtaleOmSamvær,
-                hvordanPraktiseresSamværet = matchetBarn.søknadsbarn.samvær?.hvordanPraktiseresSamværet,
-                borAnnenForelderISammeHus = matchetBarn.søknadsbarn.samvær?.borAnnenForelderISammeHus,
-                borAnnenForelderISammeHusBeskrivelse = matchetBarn.søknadsbarn.samvær?.borAnnenForelderISammeHusBeskrivelse,
-                harDereTidligereBoddSammen = matchetBarn.søknadsbarn.samvær?.harDereTidligereBoddSammen,
-                nårFlyttetDereFraHverandre = matchetBarn.søknadsbarn.samvær?.nårFlyttetDereFraHverandre,
-                hvorMyeErDuSammenMedAnnenForelder = matchetBarn.søknadsbarn.samvær?.hvorMyeErDuSammenMedAnnenForelder,
-                beskrivSamværUtenBarn = matchetBarn.søknadsbarn.samvær?.beskrivSamværUtenBarn,
-            ),
-            registergrunnlagDto = AleneomsorgRegistergrunnlagDto(
-                navn = matchetBarn.pdlBarn?.navn?.gjeldende().visningsnavn(),
+                barneId = søknadsbarn.id.toString(),
+                søknadsgrunnlag = AleneomsorgSøknadsgrunnlagDto(
+                        navn = søknadsbarn.navn,
+                        fødselsnummer = søknadsbarn.fødselsnummer,
+                        fødselTermindato = søknadsbarn.fødselTermindato,
+                        skalBoBorHosSøker = søknadsbarn.harSkalHaSammeAdresse,
+                        forelder = søknadsbarn.annenForelder?.let { tilAnnenForelderDto(it) },
+                        ikkeOppgittAnnenForelderBegrunnelse = søknadsbarn.annenForelder?.ikkeOppgittAnnenForelderBegrunnelse,
+                        spørsmålAvtaleOmDeltBosted = samvær?.spørsmålAvtaleOmDeltBosted,
+                        skalAnnenForelderHaSamvær = samvær?.skalAnnenForelderHaSamvær,
+                        harDereSkriftligAvtaleOmSamvær = samvær?.harDereSkriftligAvtaleOmSamvær,
+                        hvordanPraktiseresSamværet = samvær?.hvordanPraktiseresSamværet,
+                        borAnnenForelderISammeHus = samvær?.borAnnenForelderISammeHus,
+                        borAnnenForelderISammeHusBeskrivelse = samvær?.borAnnenForelderISammeHusBeskrivelse,
+                        harDereTidligereBoddSammen = samvær?.harDereTidligereBoddSammen,
+                        nårFlyttetDereFraHverandre = samvær?.nårFlyttetDereFraHverandre,
+                        hvorMyeErDuSammenMedAnnenForelder = samvær?.hvorMyeErDuSammenMedAnnenForelder,
+                        beskrivSamværUtenBarn = samvær?.beskrivSamværUtenBarn,
+                ),
+                registergrunnlagDto = AleneomsorgRegistergrunnlagDto(
+                        navn = matchetBarn.pdlBarn?.navn?.gjeldende()?.visningsnavn(),
                         fødselsnummer = matchetBarn.fødselsnummer,
-                        skalBoBorHosSøker = matchetBarn.pdlBarn, // TODO : finn ut av denne
-                        forelder = matchetBarn.pdlBarn. // TODO: må hentes uavhengig
-            )
+                        skalBoBorHosSøker = matchetBarn.pdlBarn?.let {
+                            AdresseHjelper.borPåSammeAdresse(it, pdlAnnenForelder?.bostedsadresse ?: emptyList())
+                        },
+                        forelder = pdlAnnenForelder?.let { tilAnnenForelderDto(it, annenForelderFnr) }
+                )
         )
+    }
+
+    private fun tilAnnenForelderDto(annenForelder: AnnenForelder): AleneomsorgAnnenForelderDto {
+        return AleneomsorgAnnenForelderDto(
+                navn = annenForelder.person?.navn,
+                fødselsnummer = annenForelder.person?.fødselsnummer,
+                fødselsdato = annenForelder.person?.fødselsdato,
+                bosattINorge = annenForelder.bosattNorge,
+                land = annenForelder.land
+        )
+
+    }
+
+    private fun tilAnnenForelderDto(pdlAnnenForelder: PdlAnnenForelder, annenForelderFnr: String?): AleneomsorgAnnenForelderDto {
+        return AleneomsorgAnnenForelderDto(
+                navn = pdlAnnenForelder.navn.gjeldende().visningsnavn(),
+                fødselsnummer = annenForelderFnr,
+                fødselsdato = pdlAnnenForelder.fødsel.gjeldende()?.fødselsdato,
+                bosattINorge = pdlAnnenForelder.bostedsadresse.gjeldende()?.utenlandskAdresse?.let { false } ?: true,
+                land = pdlAnnenForelder.bostedsadresse.gjeldende()?.utenlandskAdresse?.landkode
+        )
+
     }
 }

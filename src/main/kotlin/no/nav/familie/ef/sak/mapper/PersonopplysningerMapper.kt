@@ -11,7 +11,6 @@ import no.nav.familie.ef.sak.service.ArbeidsfordelingService
 import no.nav.familie.ef.sak.service.KodeverkService
 import org.springframework.stereotype.Component
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 @Component
 class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
@@ -81,17 +80,7 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                 søker.kontaktadresse.map(adresseMapper::tilAdresse) +
                 søker.oppholdsadresse.map(adresseMapper::tilAdresse)
 
-        return sorterAdresser(adresser)
-    }
-
-    fun sorterAdresser(adresser: List<AdresseDto>): List<AdresseDto> {
-        val (historiskeAdresser, aktiveAdresser) = adresser
-                .sortedWith(compareByDescending<AdresseDto> { it.gyldigFraOgMed ?: LocalDate.MAX }.thenBy(AdresseDto::type))
-                .partition { it.gyldigTilOgMed != null }
-
-        val (bostedsadresse, aktivUtenBostedsadresse) = aktiveAdresser.partition { it.type == AdresseType.BOSTEDADRESSE }
-
-        return bostedsadresse + aktivUtenBostedsadresse + historiskeAdresser
+        return AdresseHjelper.sorterAdresser(adresser)
     }
 
     fun mapBarn(personIdent: String,
@@ -108,31 +97,8 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                 navn = pdlBarn.navn.gjeldende().visningsnavn(),
                 annenForelder = annenForelderIdent?.let { AnnenForelderDTO(it, identNavnMap[it] ?: "Finner ikke navn") },
                 adresse = pdlBarn.bostedsadresse.map(adresseMapper::tilAdresse),
-                borHosSøker = borPåSammeAdresse(pdlBarn, bostedsadresserForelder),
+                borHosSøker = AdresseHjelper.borPåSammeAdresse(pdlBarn, bostedsadresserForelder),
                 fødselsdato = pdlBarn.fødsel.gjeldende()?.fødselsdato
         )
-    }
-
-
-    fun borPåSammeAdresse(barn: PdlBarn, bostedsadresserForelder: List<Bostedsadresse>): Boolean {
-
-        if (harDeltBosted(barn)) {
-            return false
-        }
-
-        val gjeldendeBostedsadresseForelder = bostedsadresserForelder.gjeldende()
-
-        return barn.bostedsadresse.gjeldende()?.let { adresseBarn ->
-            return adresseBarn.matrikkelId()?.let { matrikkelId ->
-                return matrikkelId == gjeldendeBostedsadresseForelder?.matrikkelId()
-            } ?: adresseBarn.vegadresse != null && adresseBarn.vegadresse == gjeldendeBostedsadresseForelder?.vegadresse
-        } ?: false
-    }
-
-    private fun harDeltBosted(barn: PdlBarn): Boolean {
-        return barn.deltBosted.any {
-            it.startdatoForKontrakt.isBefore(LocalDateTime.now())
-            && (it.sluttdatoForKontrakt == null || it.sluttdatoForKontrakt.isAfter(LocalDateTime.now()))
-        }
     }
 }
