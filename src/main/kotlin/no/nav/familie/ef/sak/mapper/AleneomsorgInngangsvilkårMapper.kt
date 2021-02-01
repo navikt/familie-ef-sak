@@ -37,12 +37,14 @@ object AleneomsorgInngangsvilkårMapper {
         val søknadsbarn = matchetBarn.søknadsbarn
         val samvær = søknadsbarn.samvær
         return AleneomsorgDto(
-                barneId = søknadsbarn.id.toString(),
-                søknadsgrunnlag = AleneomsorgSøknadsgrunnlagDto(
+            barneId = søknadsbarn.id.toString(),
+            søknadsgrunnlag = AleneomsorgSøknadsgrunnlagDto(
                         navn = søknadsbarn.navn,
                         fødselsnummer = søknadsbarn.fødselsnummer,
                         fødselTermindato = søknadsbarn.fødselTermindato,
-                        skalBoBorHosSøker = søknadsbarn.harSkalHaSammeAdresse,
+                        erBarnetFødt = søknadsbarn.erBarnetFødt,
+                        harSammeAdresse = søknadsbarn.harSkalHaSammeAdresse,
+                        skalBoBorHosSøker = null, // TODO: må legges til i api og kontrakter
                         forelder = søknadsbarn.annenForelder?.let { tilAnnenForelderDto(it) },
                         ikkeOppgittAnnenForelderBegrunnelse = søknadsbarn.annenForelder?.ikkeOppgittAnnenForelderBegrunnelse,
                         spørsmålAvtaleOmDeltBosted = samvær?.spørsmålAvtaleOmDeltBosted,
@@ -56,10 +58,10 @@ object AleneomsorgInngangsvilkårMapper {
                         hvorMyeErDuSammenMedAnnenForelder = samvær?.hvorMyeErDuSammenMedAnnenForelder,
                         beskrivSamværUtenBarn = samvær?.beskrivSamværUtenBarn,
                 ),
-                registergrunnlagDto = AleneomsorgRegistergrunnlagDto(
+            registergrunnlag = AleneomsorgRegistergrunnlagDto(
                         navn = matchetBarn.pdlBarn?.navn?.gjeldende()?.visningsnavn(),
                         fødselsnummer = matchetBarn.fødselsnummer,
-                        skalBoBorHosSøker = matchetBarn.pdlBarn?.let {
+                        harSammeAdresse =  matchetBarn.pdlBarn?.let {
                             AdresseHjelper.borPåSammeAdresse(it, pdlAnnenForelder?.bostedsadresse ?: emptyList())
                         },
                         forelder = pdlAnnenForelder?.let { tilAnnenForelderDto(it, annenForelderFnr) }

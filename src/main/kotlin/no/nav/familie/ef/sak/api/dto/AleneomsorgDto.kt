@@ -5,7 +5,7 @@ import java.time.LocalDate
 data class AleneomsorgDto(
         val barneId: String,
         val søknadsgrunnlag: AleneomsorgSøknadsgrunnlagDto,
-        val registergrunnlagDto: AleneomsorgRegistergrunnlagDto
+        val registergrunnlag: AleneomsorgRegistergrunnlagDto
 )
 
 
@@ -13,7 +13,9 @@ data class AleneomsorgSøknadsgrunnlagDto(
         val navn: String?,
         val fødselsnummer: String?,
         val fødselTermindato: LocalDate?,
-        val skalBoBorHosSøker: Boolean?,
+        val erBarnetFødt: Boolean,
+        val harSammeAdresse: Boolean?,
+        val skalBoBorHosSøker: String?,
         val forelder: AleneomsorgAnnenForelderDto?,
         val ikkeOppgittAnnenForelderBegrunnelse: String?,
         val spørsmålAvtaleOmDeltBosted: Boolean?,
@@ -31,7 +33,7 @@ data class AleneomsorgSøknadsgrunnlagDto(
 data class AleneomsorgRegistergrunnlagDto(
         val navn: String?,
         val fødselsnummer: String?,
-        val skalBoBorHosSøker: Boolean?,
+        val harSammeAdresse: Boolean?,
         val forelder: AleneomsorgAnnenForelderDto?,
 )
 
