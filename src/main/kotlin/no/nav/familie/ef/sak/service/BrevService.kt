@@ -1,10 +1,12 @@
 package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.brev.BrevClient
+import no.nav.familie.ef.sak.repository.BrevRepository
+import no.nav.familie.ef.sak.repository.domain.Brev
 import org.springframework.stereotype.Service
 
 @Service
-class BrevService(private val brevClient: BrevClient) {
+class BrevService(private val brevClient: BrevClient, private val brevRepository: BrevRepository) {
 
     fun lagBrev(): ByteArray {
         val body = """
@@ -27,7 +29,9 @@ class BrevService(private val brevClient: BrevClient) {
         /*
         * Logikk for brevgenering her
         */
+        val brev = Brev(pdf = brevClient.genererBrev("brukesIkke", "brukesIkke", body));
+        brevRepository.insert(brev);
 
-        return brevClient.genererBrev("brukesIkke", "brukesIkke", body)
+        return brev.pdf;
     }
 }

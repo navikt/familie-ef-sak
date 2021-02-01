@@ -50,3 +50,4 @@ class VurderingController(private val vurderingService: VurderingService,
         return Ressurs.success(stegService.håndterStønadsvilkår(behandling).id)
     }
 }
+
