@@ -36,12 +36,15 @@ class PdlClientConfig {
         }
 
         every { pdlClient.hentSøker(any()) } returns
-                PdlSøker(adressebeskyttelse = listOf(Adressebeskyttelse(gradering = AdressebeskyttelseGradering.UGRADERT, metadata = metadataGjeldende)),
+                PdlSøker(adressebeskyttelse = listOf(Adressebeskyttelse(gradering = AdressebeskyttelseGradering.UGRADERT,
+                                                                        metadata = metadataGjeldende)),
                          bostedsadresse = bostedsadresse(),
                          dødsfall = listOf(),
                          familierelasjoner = familierelasjoner(),
                          fødsel = listOf(),
-                         folkeregisterpersonstatus = listOf(Folkeregisterpersonstatus("bosatt", "bosattEtterFolkeregisterloven", metadataGjeldende)),
+                         folkeregisterpersonstatus = listOf(Folkeregisterpersonstatus("bosatt",
+                                                                                      "bosattEtterFolkeregisterloven",
+                                                                                      metadataGjeldende)),
                          fullmakt = fullmakter(),
                          kjønn = lagKjønn(KjønnType.KVINNE),
                          kontaktadresse = kontaktadresse(),
@@ -59,6 +62,8 @@ class PdlClientConfig {
         every { pdlClient.hentSøkerAsMap(any()) } returns mapOf()
 
         every { pdlClient.hentBarn(any()) } returns barn()
+
+        every { pdlClient.hentAndreForeldre(any()) } returns mapOf()
 
         every { pdlClient.hentAktørIder(any()) } returns PdlIdenter(listOf(PdlIdent("12345678901232", false)))
 
@@ -82,7 +87,7 @@ class PdlClientConfig {
                            mellomnavn,
                            etternavn,
                            metadataGjeldende))
-                        }
+    }
 
     private fun barn(): Map<String, PdlBarn> =
             mapOf(barnFnr to PdlBarn(adressebeskyttelse = listOf(),
@@ -90,8 +95,16 @@ class PdlClientConfig {
                                      deltBosted = listOf(),
                                      dødsfall = listOf(),
                                      familierelasjoner = familierelasjonerBarn(),
-                                     fødsel = listOf(),
+                                     fødsel = fødsel(),
                                      navn = lagNavn("Barn", null, "Barnesen")))
+
+    private fun fødsel(): List<Fødsel> =
+            listOf(Fødsel(fødselsår = 2018,
+                          fødselsdato = LocalDate.of(2018, 1, 1),
+                          metadata = metadataGjeldende,
+                          fødested = null,
+                          fødekommune = null,
+                          fødeland = null))
 
     private fun familierelasjoner(): List<Familierelasjon> =
             listOf(Familierelasjon(relatertPersonsIdent = barnFnr,
