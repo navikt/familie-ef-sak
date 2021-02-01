@@ -20,8 +20,15 @@ class BrevKontroller(private val brevService: BrevService,
 
     @PostMapping("/{behandlingId}")
     fun lagBrev(@PathVariable behandlingId: UUID, @RequestBody brevParams: BrevRequest): Ressurs<ByteArray> {
-        val respons = brevService.lagBrev()
+        val respons = brevService.lagBrev(behandlingId)
 
-        return Ressurs.Companion.success(respons)
+        return Ressurs.success(respons)
+    }
+
+    @GetMapping("/{behandlingId}")
+    fun hentBrev(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
+        val respons = brevService.hentBrev(behandlingId)
+
+        return respons?.let { Ressurs.success(it.pdf) } ?: Ressurs.funksjonellFeil("Fant ingen brev for behandling")
     }
 }
