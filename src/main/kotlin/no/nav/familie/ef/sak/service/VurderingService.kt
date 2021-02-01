@@ -2,14 +2,10 @@ package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.api.dto.*
-import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.integration.dto.pdl.Familierelasjonsrolle
 import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
 import no.nav.familie.ef.sak.mapper.AleneomsorgMapper
-import no.nav.familie.ef.sak.mapper.BosituasjonMapper
-import no.nav.familie.ef.sak.mapper.MedlemskapMapper
-import no.nav.familie.ef.sak.mapper.SivilstandMapper
 import no.nav.familie.ef.sak.repository.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsstønad
@@ -23,9 +19,8 @@ import java.util.*
 @Service
 class VurderingService(private val behandlingService: BehandlingService,
                        private val pdlClient: PdlClient,
-                       private val familieIntegrasjonerClient: FamilieIntegrasjonerClient,
                        private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-                       private val medlemskapMapper: MedlemskapMapper) {
+                       private val grunnlagsdataService: GrunnlagsdataService) {
 
     fun oppdaterVilkår(vilkårsvurderingDto: VilkårsvurderingDto): UUID {
         val vilkårsvurdering = vilkårsvurderingRepository.findByIdOrThrow(vilkårsvurderingDto.id)
@@ -55,25 +50,9 @@ class VurderingService(private val behandlingService: BehandlingService,
 
     fun hentInngangsvilkår(behandlingId: UUID): InngangsvilkårDto {
         val søknad = behandlingService.hentOvergangsstønad(behandlingId)
-        val grunnlag = hentGrunnlag(søknad.fødselsnummer, søknad)
+        val grunnlag = grunnlagsdataService.hentGrunnlag(søknad.fødselsnummer, søknad)
         val vurderinger = hentVurderinger(behandlingId, søknad, grunnlag)
         return InngangsvilkårDto(vurderinger = vurderinger, grunnlag = grunnlag)
-    }
-
-    fun hentGrunnlag(fnr: String,
-                     søknad: SøknadsskjemaOvergangsstønad): InngangsvilkårGrunnlagDto {
-        val pdlSøker = pdlClient.hentSøker(fnr)
-        val medlUnntak = familieIntegrasjonerClient.hentMedlemskapsinfo(ident = fnr)
-
-        val medlemskap = medlemskapMapper.tilDto(medlemskapsdetaljer = søknad.medlemskap,
-                                                 medlUnntak = medlUnntak,
-                                                 pdlSøker = pdlSøker)
-
-        val sivilstand = SivilstandMapper.tilDto(sivilstandsdetaljer = søknad.sivilstand,
-                                                 pdlSøker = pdlSøker)
-        val bosituasjon = BosituasjonMapper.tilDto(søknad.bosituasjon)
-
-        return InngangsvilkårGrunnlagDto(medlemskap, sivilstand, bosituasjon)
     }
 
     private fun hentVurderinger(behandlingId: UUID,

@@ -30,7 +30,7 @@ class BehandlingController(private val behandlingService: BehandlingService,
             behandling.tilDto()
         } else {
 
-            behandling.tilDto(grunnlagsdiff = grunnlagsdataService.harDiffIGrunnlagsdata(behandling))
+            behandling.tilDto(grunnlagsdiff = grunnlagsdataService.sjekkOmDetErDiffIGrunnlagsdata(behandling))
         }
         return Ressurs.success(behandlingDto)
     }

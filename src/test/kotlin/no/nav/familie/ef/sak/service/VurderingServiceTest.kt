@@ -34,9 +34,8 @@ internal class VurderingServiceTest {
     private val familieIntegrasjonerClient = mockk<FamilieIntegrasjonerClient>()
     private val vurderingService = VurderingService(behandlingService = behandlingService,
                                                     pdlClient = PdlClientConfig().pdlClient(),
-                                                    medlemskapMapper = mockk(relaxed = true),
-                                                    familieIntegrasjonerClient = familieIntegrasjonerClient,
-                                                    vilkårsvurderingRepository = vilkårsvurderingRepository)
+                                                    vilkårsvurderingRepository = vilkårsvurderingRepository,
+                                                    grunnlagsdataService = mockk())
 
     @BeforeEach
     fun setUp() {

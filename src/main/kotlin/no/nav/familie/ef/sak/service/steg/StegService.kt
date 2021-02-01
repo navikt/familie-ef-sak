@@ -168,7 +168,7 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
                                              opprettetAv = SikkerhetContext.hentSaksbehandler()))
             }
 
-            if (behandling.status == BehandlingStatus.UTREDES) {
+            if (behandling.steg == VILKÅRSVURDERE_INNGANGSVILKÅR) {
                 grunnlagsdataService.opprettEllerGodkjennGrunnlagsdata(behandling)
             }
 
