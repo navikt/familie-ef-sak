@@ -1,18 +1,18 @@
 package no.nav.familie.ef.sak.service
 
-import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.familie.ef.sak.repository.GrunnlagsdataRepository
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.Grunnlagsdata
 import no.nav.familie.ef.sak.repository.domain.GrunnlagsdataData
 import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsstønad
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
-import no.nav.familie.kontrakter.felles.objectMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
+import kotlin.reflect.KClass
+import kotlin.reflect.full.memberProperties
 
 @Service
 class GrunnlagsdataService(private val grunnlagsdataRepository: GrunnlagsdataRepository,
@@ -67,44 +67,16 @@ class GrunnlagsdataService(private val grunnlagsdataRepository: GrunnlagsdataRep
                                  grunnlag.sivilstand.registergrunnlag)
     }
 
-    fun diffGrunnlagsdata(newValue: GrunnlagsdataData, oldValue: GrunnlagsdataData): Map<String, Map<String, GrunnlagStatus>> {
-        val newValues = objectMapper.convertValue<Map<String, Map<String, Any?>>>(newValue)
-        val oldValues = objectMapper.convertValue<Map<String, Map<String, Any?>>>(oldValue)
-        if (newValues.size != oldValues.size || !newValues.keys.containsAll(oldValues.keys)) {
-            error("Forskjell i antall felt/nullable felt i Grunnlagsdata," +
-                  " hvis denne feiler finnes det nullable felt i GrunnlagsdataData og diff må forbedres")
-        }
-        return newValues.map { (k, v) ->
-            k to diff(v, oldValues[k]!!)
+    private fun diffGrunnlagsdata(value1: GrunnlagsdataData, value2: GrunnlagsdataData): Map<String, Map<String, Boolean>> {
+        fun diff(value1: Any, value2: Any, kClass: KClass<*>): Map<String, Boolean> =
+                kClass.memberProperties.map {
+                    it.name to (it.getter.call(value1) == it.getter.call(value2))
+                }.toMap()
+        return GrunnlagsdataData::class.memberProperties.map {
+            it.name to diff(it.getter.call(value1) as Any,
+                            it.getter.call(value2) as Any,
+                            it.returnType.classifier as KClass<*>)
         }.toMap()
-    }
-
-    enum class GrunnlagStatus {
-        NY,
-        SAVNES,
-        ENDRET,
-        UENDRET
-    }
-
-    private fun diff(newValues: Map<String, Any?>, oldValues: Map<String, Any?>): Map<String, GrunnlagStatus> {
-        val values = newValues.map { (name, newValue) ->
-            val oldValue = oldValues[name]
-            val status = when {
-                oldValue == newValue -> GrunnlagStatus.UENDRET
-                oldValue == null -> GrunnlagStatus.NY
-                newValue == null -> GrunnlagStatus.SAVNES
-                else -> GrunnlagStatus.ENDRET
-            }
-            name to status
-        }.toMap()
-        return if (newValues.keys.containsAll(oldValues.keys)) {
-            values
-        } else {
-            val verdierSomSavnes = oldValues.filterNot { newValues.containsKey(it.key) }
-                    .map { (name, _) -> name to GrunnlagStatus.SAVNES }
-                    .toMap()
-            values + verdierSomSavnes
-        }
     }
 
 }
