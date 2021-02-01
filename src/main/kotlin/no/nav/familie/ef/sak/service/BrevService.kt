@@ -8,18 +8,27 @@ import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-class BrevService(private val brevClient: BrevClient, private val brevRepository: BrevRepository) {
+class BrevService(private val brevClient: BrevClient,
+                  private val brevRepository: BrevRepository,
+                  private val behandlingService: BehandlingService,
+                  private val fagsakService: FagsakService,
+                  private val personService: PersonService) {
 
-    object Constants {
+    fun lagBrev(behandlingId: UUID): ByteArray {
+        val behandling = behandlingService.hentBehandling(behandlingId)
+        val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
+        val person = personService.hentSøker(fagsak.hentAktivIdent())
+
+        val navn = person.navn.get(0)
 
         val body = """
             {
                 "flettefelter": {
                     "navn": [
-                        "Navn Navnesen"
+                        "${navn.fornavn} ${navn.etternavn}"
                     ],
                     "fodselsnummer": [
-                        "1123456789"
+                        "${fagsak.hentAktivIdent()}"
                     ],
                     "dato": [
                         "01.01.1986"
@@ -27,10 +36,7 @@ class BrevService(private val brevClient: BrevClient, private val brevRepository
                 }
             }
         """.trimIndent()
-    }
 
-
-    fun lagBrev(behandlingId: UUID): ByteArray {
 
         /*
         * Logikk for brevgenering her
@@ -38,7 +44,7 @@ class BrevService(private val brevClient: BrevClient, private val brevRepository
         val brev = brevRepository.insert(Brev(behandling = behandlingId,
                                               pdf = brevClient.genererBrev("brukesIkke",
                                                                            "brukesIkke",
-                                                                           Constants.body)))
+                                                                           body)))
         return brev.pdf;
     }
 
