@@ -26,10 +26,11 @@ class BehandlingController(private val behandlingService: BehandlingService,
     fun hentBehandling(@PathVariable behandlingId: UUID): Ressurs<BehandlingDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         val behandling = behandlingService.hentBehandling(behandlingId)
-        val behandlingDto = if (!behandling.status.behandlingErLåstForVidereRedigering()) {
-            behandling.tilDto(grunnlagsdiff = grunnlagsdataService.harDiffIGrunnlagsdata(behandling))
-        } else {
+        val behandlingDto = if(behandling.status.behandlingErLåstForVidereRedigering()) {
             behandling.tilDto()
+        } else {
+
+            behandling.tilDto(grunnlagsdiff = grunnlagsdataService.harDiffIGrunnlagsdata(behandling))
         }
         return Ressurs.success(behandlingDto)
     }

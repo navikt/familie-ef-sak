@@ -117,7 +117,7 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
         if (!behandling.steg.kommerEtter(steg, behandling.type)) {
             error("Kan ikke sette behandling til steg=$steg når behandling allerede er på ${behandling.steg}")
         }
-        grunnlagsdataService.oppdaterGrunnlagsdata(behandling)
+        grunnlagsdataService.opprettEllerGodkjennGrunnlagsdata(behandling)
 
         val saksbehandler = SikkerhetContext.hentSaksbehandler()
         val harTilgangTilSteg = SikkerhetContext.harTilgangTilGittRolle(rolleConfig, behandling.steg.tillattFor)
@@ -126,7 +126,7 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
             error("$saksbehandler kan ikke endre fra steg=${behandling.steg.displayName()} til steg=${steg.displayName()} pga manglende rolle.")
         }
         behandlingService.oppdaterStegPåBehandling(behandlingId, steg)
-        grunnlagsdataService.oppdaterGrunnlagsdata(behandling)
+        grunnlagsdataService.opprettEllerGodkjennGrunnlagsdata(behandling)
     }
 
     // Generelle stegmetoder
@@ -169,7 +169,7 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
             }
 
             if (behandling.status == BehandlingStatus.UTREDES) {
-                grunnlagsdataService.oppdaterGrunnlagsdata(behandling)
+                grunnlagsdataService.opprettEllerGodkjennGrunnlagsdata(behandling)
             }
 
             stegSuksessMetrics[stegType]?.increment()

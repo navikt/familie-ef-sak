@@ -1,10 +1,8 @@
 package no.nav.familie.ef.sak.service
 
 import com.fasterxml.jackson.module.kotlin.convertValue
-import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.repository.GrunnlagsdataRepository
 import no.nav.familie.ef.sak.repository.domain.Behandling
-import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import no.nav.familie.ef.sak.repository.domain.Grunnlagsdata
 import no.nav.familie.ef.sak.repository.domain.GrunnlagsdataData
 import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsstønad
@@ -14,7 +12,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
-import java.util.*
+import java.time.LocalDateTime
 
 @Service
 class GrunnlagsdataService(private val grunnlagsdataRepository: GrunnlagsdataRepository,
@@ -23,48 +21,44 @@ class GrunnlagsdataService(private val grunnlagsdataRepository: GrunnlagsdataRep
 
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-    fun oppdaterGrunnlagsdata(behandling: Behandling) {
+    /**
+     * Setter inn grunnlagsdata hvis det ikke eksisterer siden tidligere.
+     * Hvis det eksisterer siden tidligere og det finnes endringer, så settes endringene til data
+     */
+    fun opprettEllerGodkjennGrunnlagsdata(behandling: Behandling) {
         val søknad = behandlingService.hentOvergangsstønad(behandling.id)
         val grunnlagsdataData = lagGrunnlagsdataData(søknad)
         val eksisterendeGrunnlagsdata = grunnlagsdataRepository.findByIdOrNull(behandling.id)
         if (eksisterendeGrunnlagsdata == null) {
             grunnlagsdataRepository.insert(Grunnlagsdata(behandlingId = behandling.id,
                                                          data = grunnlagsdataData))
-        } else {
-            val diff = eksisterendeGrunnlagsdata.data == grunnlagsdataData
-            if (diff != eksisterendeGrunnlagsdata.diff) {
-                logger.info("Oppdaterer behandling=${behandling.id} steg=${behandling.steg} med diff=$diff")
-                grunnlagsdataRepository.update(eksisterendeGrunnlagsdata.copy(data = grunnlagsdataData,
-                                                                              //tidligereData = eksisterendeGrunnlagsdata.data,
-                                                                              diff = diff))
-            }
+        } else if (eksisterendeGrunnlagsdata.endringer != null) {
+            grunnlagsdataRepository.update(eksisterendeGrunnlagsdata.copy(data = eksisterendeGrunnlagsdata.endringer,
+                                                                          endringer = null,
+                                                                          diff = false))
         }
     }
 
-    // TODO inngangsvilkår -> godkjenn grunnlagsdataendringer?
-
-    /*
-    fun oppdaterGrunnlagsdata(behandlingId: UUID) {
-        val behandling = behandlingService.hentBehandling(behandlingId)
-        if (behandling.status != BehandlingStatus.UTREDES) {
-            val message = "Prøver å oppdatere grunnlagsdata på en behandling som ikke utredes"
-            throw Feil(message = "$message - behandling=${behandling.id}",
-                       frontendFeilmelding = message)
-        }
-        val søknad = behandlingService.hentOvergangsstønad(behandlingId)
-        val grunnlagsdataData = lagGrunnlagsdataData(søknad)
-        val eksisterendeGrunnlagsdata = grunnlagsdataRepository.findByIdOrThrow(behandling.id)
-        if (eksisterendeGrunnlagsdata.data == grunnlagsdataData) {
-            throw Feil(message = "Ingen forskjell i grunnlagsdata",
-                       frontendFeilmelding = "Ingen forskjell i grunnlagsdata")
-        }
-        grunnlagsdataRepository.update(eksisterendeGrunnlagsdata.copy(data = grunnlagsdataData,
-                                                                      tidligereData = eksisterendeGrunnlagsdata.data,
-                                                                      diff = true))
-    }*/
-
     fun harDiffIGrunnlagsdata(behandling: Behandling): Boolean {
-        return grunnlagsdataRepository.harDiffIGrunnlagsdata(behandling.id) ?: false
+        val grunnlagsdata = grunnlagsdataRepository.findByIdOrThrow(behandling.id)
+        return if (grunnlagsdata.sporbar.endret.endretTid.isBefore(LocalDateTime.now().minusHours(4))) {
+            beregnOgLagreNyDiff(behandling, grunnlagsdata)
+        } else {
+            grunnlagsdata.diff
+        }
+
+    }
+
+    private fun beregnOgLagreNyDiff(behandling: Behandling, grunnlagsdata: Grunnlagsdata): Boolean {
+        val søknad = behandlingService.hentOvergangsstønad(behandling.id)
+        val grunnlagsdataData = lagGrunnlagsdataData(søknad)
+        val diff = grunnlagsdata.data == grunnlagsdataData
+        if (diff != grunnlagsdata.diff) {
+            logger.info("Oppdaterer behandling=${behandling.id} steg=${behandling.steg} med diff=$diff")
+            grunnlagsdataRepository.update(grunnlagsdata.copy(endringer = grunnlagsdataData,
+                                                              diff = diff))
+        }
+        return diff
     }
 
     private fun lagGrunnlagsdataData(søknad: SøknadsskjemaOvergangsstønad): GrunnlagsdataData {

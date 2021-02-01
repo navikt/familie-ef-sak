@@ -14,7 +14,7 @@ import java.util.*
 data class Grunnlagsdata(@Id
                          val behandlingId: UUID,
                          val data: GrunnlagsdataData,
-                         //val tidligereData: GrunnlagsdataData? = null,
+                         val endringer: GrunnlagsdataData? = null,
                          val diff: Boolean = false,
                          @Version
                          val versjon: Int = 0,
