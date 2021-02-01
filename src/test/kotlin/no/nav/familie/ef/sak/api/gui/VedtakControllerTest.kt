@@ -247,7 +247,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         val rolle = if (saksbehandler.beslutter) rolleConfig.beslutterRolle else rolleConfig.saksbehandlerRolle
         var claimsSet = JwtTokenGenerator.createSignedJWT("subject").jwtClaimsSet
         claimsSet = JWTClaimsSet.Builder(claimsSet)
-                .claim("preferred_username", saksbehandler)
+                .claim("NAVident", saksbehandler)
                 .claim("groups", listOf(rolle))
                 .build()
         val createSignedJWT = JwtTokenGenerator.createSignedJWT(JwkGenerator.getDefaultRSAKey(), claimsSet)

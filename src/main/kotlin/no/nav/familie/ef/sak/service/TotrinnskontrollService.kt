@@ -24,8 +24,11 @@ class TotrinnskontrollService(private val behandlingshistorikkService: Behandlin
                               private val behandlingService: BehandlingService,
                               private val tilgangService: TilgangService) {
 
+    /**
+     * Lagrer data om besluttning av totrinnskontroll og returnerer saksbehandleren som sendte behandling til beslutter
+     */
     @Transactional
-    fun lagreTotrinnskontroll(behandling: Behandling, beslutteVedtak: BeslutteVedtakDto) {
+    fun lagreTotrinnskontrollOgReturnerBehandler(behandling: Behandling, beslutteVedtak: BeslutteVedtakDto): String {
         val sisteBehandlingshistorikk = behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId = behandling.id)
 
         if (sisteBehandlingshistorikk.steg != StegType.SEND_TIL_BESLUTTER) {
@@ -46,6 +49,7 @@ class TotrinnskontrollService(private val behandlingshistorikkService: Behandlin
                                                             metadata = beslutteVedtak)
 
         behandlingService.oppdaterStatusPåBehandling(behandling.id, nyStatus)
+        return sisteBehandlingshistorikk.opprettetAv
     }
 
     fun hentTotrinnskontrollStatus(behandlingId: UUID): TotrinnskontrollStatusDto {

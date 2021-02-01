@@ -5,7 +5,6 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ef.sak.api.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.api.dto.TotrinnkontrollStatus
-import no.nav.familie.ef.sak.api.dto.TotrinnskontrollDto
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
@@ -23,14 +22,24 @@ import java.util.*
 
 internal class TotrinnskontrollServiceTest {
 
-    private val behandlingshistorikkService = mockk<BehandlingshistorikkService>()
-    private val behandlingService = mockk<BehandlingService>()
+    private val behandlingshistorikkService = mockk<BehandlingshistorikkService>(relaxed = true)
+    private val behandlingService = mockk<BehandlingService>(relaxed = true)
     private val tilgangService = mockk<TilgangService>()
     private val totrinnskontrollService = TotrinnskontrollService(behandlingshistorikkService, behandlingService, tilgangService)
 
     @BeforeEach
     internal fun setUp() {
         every { tilgangService.harTilgangTilRolle(any()) } returns true
+    }
+
+    @Test
+    internal fun `skal returnere saksbehandler som sendte behandling til besluttning`() {
+        val opprettetAv = "Behandler"
+        every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any()) } returns
+                behandlingshistorikk(StegType.SEND_TIL_BESLUTTER, opprettetAv = opprettetAv)
+        val response = totrinnskontrollService.lagreTotrinnskontrollOgReturnerBehandler(behandling(BehandlingStatus.UTREDES),
+                                                                                        BeslutteVedtakDto(false, ""))
+        assertThat(response).isEqualTo(opprettetAv)
     }
 
     @Test
@@ -142,12 +151,12 @@ internal class TotrinnskontrollServiceTest {
                                      opprettetAv: String,
                                      beslutt: BeslutteVedtakDto? = null) =
             Behandlingshistorikk(behandlingId = UUID.randomUUID(),
-                                        steg = steg,
-                                        utfall = utfall,
-                                        opprettetAv = opprettetAv,
-                                        metadata = beslutt?.let {
-                                            JsonWrapper(objectMapper.writeValueAsString(it))
-                                        })
+                                 steg = steg,
+                                 utfall = utfall,
+                                 opprettetAv = opprettetAv,
+                                 metadata = beslutt?.let {
+                                     JsonWrapper(objectMapper.writeValueAsString(it))
+                                 })
 
     private fun behandling(status: BehandlingStatus) = behandling(fagsak, true, status)
 
