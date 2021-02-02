@@ -209,17 +209,17 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
     }
 
     @ReadingConverter
-    class PGobjectTilGrunnlagsdataConverter : Converter<PGobject, GrunnlagsdataData> {
+    class PGobjectTilGrunnlagsdataConverter : Converter<PGobject, RegistergrunnlagData> {
 
-        override fun convert(pGobject: PGobject): GrunnlagsdataData {
+        override fun convert(pGobject: PGobject): RegistergrunnlagData {
             return objectMapper.readValue(pGobject.value!!)
         }
     }
 
     @WritingConverter
-    class GrunnlagsdataTilPGobjectConverter : Converter<GrunnlagsdataData, PGobject> {
+    class GrunnlagsdataTilPGobjectConverter : Converter<RegistergrunnlagData, PGobject> {
 
-        override fun convert(data: GrunnlagsdataData): PGobject =
+        override fun convert(data: RegistergrunnlagData): PGobject =
                 PGobject().apply {
                     type = "json"
                     value = objectMapper.writeValueAsString(data)

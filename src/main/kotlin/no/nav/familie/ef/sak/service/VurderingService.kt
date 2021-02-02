@@ -50,7 +50,7 @@ class VurderingService(private val behandlingService: BehandlingService,
 
     fun hentInngangsvilkår(behandlingId: UUID): InngangsvilkårDto {
         val søknad = behandlingService.hentOvergangsstønad(behandlingId)
-        val grunnlag = grunnlagsdataService.hentGrunnlag(søknad.fødselsnummer, søknad)
+        val grunnlag = grunnlagsdataService.hentGrunnlag(behandlingId, søknad)
         val vurderinger = hentVurderinger(behandlingId, søknad, grunnlag)
         return InngangsvilkårDto(vurderinger = vurderinger, grunnlag = grunnlag)
     }

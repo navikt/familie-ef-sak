@@ -11,15 +11,15 @@ import java.util.*
  * TODO borde DATA lagras som JsonWrapper/json string och heta eks inngangsvilkar?
  * så hvis det er diff og man henter inngangsvilkår henter man grunnlagsdata fra her og fra "nye"/diff
  */
-data class Grunnlagsdata(@Id
+data class Registergrunnlag(@Id
                          val behandlingId: UUID,
-                         val data: GrunnlagsdataData,
-                         val endringer: GrunnlagsdataData? = null,
-                         val diff: Boolean = false,
-                         @Version
+                            val data: RegistergrunnlagData,
+                            val endringer: RegistergrunnlagData? = null,
+                            val diff: Boolean = false,
+                            @Version
                          val versjon: Int = 0,
-                         @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+                            @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                          val sporbar: Sporbar = Sporbar())
 
-data class GrunnlagsdataData(val medlemskap: MedlemskapRegistergrunnlagDto,
-                             val sivilstand: SivilstandRegistergrunnlagDto)
+data class RegistergrunnlagData(val medlemskap: MedlemskapRegistergrunnlagDto,
+                                val sivilstand: SivilstandRegistergrunnlagDto)

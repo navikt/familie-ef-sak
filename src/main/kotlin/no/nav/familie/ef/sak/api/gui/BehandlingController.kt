@@ -29,8 +29,7 @@ class BehandlingController(private val behandlingService: BehandlingService,
         val behandlingDto = if(behandling.status.behandlingErLåstForVidereRedigering()) {
             behandling.tilDto()
         } else {
-
-            behandling.tilDto(grunnlagsdiff = grunnlagsdataService.sjekkOmDetErDiffIGrunnlagsdata(behandling))
+            behandling.tilDto(grunnlagsdiff = grunnlagsdataService.sjekkForEndringerIRegistergrunnlag(behandling))
         }
         return Ressurs.success(behandlingDto)
     }
@@ -39,6 +38,13 @@ class BehandlingController(private val behandlingService: BehandlingService,
     fun oppdaterGrunnlagsdata(@PathVariable behandlingId: UUID, @PathVariable steg: StegType): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         stegService.resetSteg(behandlingId, steg)
+        return Ressurs.success(behandlingId)
+    }
+
+    @PostMapping("{behandlignId}/grunnlagsdata/godkjenn")
+    fun godkjennGrunnlagsdata(@PathVariable behandlingId: UUID): Ressurs<UUID> {
+        tilgangService.validerTilgangTilBehandling(behandlingId)
+        grunnlagsdataService.godkjennEndringerIRegistergrunnlag(behandlingId)
         return Ressurs.success(behandlingId)
     }
 

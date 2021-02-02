@@ -1,9 +1,8 @@
 package no.nav.familie.ef.sak.service
 
 import com.fasterxml.jackson.annotation.JsonInclude
-import no.nav.familie.ef.sak.repository.domain.GrunnlagsdataData
+import no.nav.familie.ef.sak.repository.domain.RegistergrunnlagData
 import no.nav.familie.kontrakter.felles.objectMapper
-import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -12,7 +11,7 @@ import java.time.YearMonth
 import kotlin.reflect.KClass
 import kotlin.reflect.full.isSubclassOf
 
-internal class GrunnlagsdataServiceTest {
+internal class RegistergrunnlagTest {
     private val om = objectMapper.copy()
             .setSerializationInclusion(JsonInclude.Include.NON_NULL)
             .writerWithDefaultPrettyPrinter()
@@ -25,7 +24,7 @@ internal class GrunnlagsdataServiceTest {
     @Test
     internal fun `diff av grunnlagsdata`() {
         val tidligereDefinisjon = this::class.java.getResource("/json/grunnlagsdata.json").readText()
-        val nyDefinisjon = om.writeValueAsString(getClassInfo(GrunnlagsdataData::class))
+        val nyDefinisjon = om.writeValueAsString(getClassInfo(RegistergrunnlagData::class))
         assertThat(nyDefinisjon).isEqualTo(tidligereDefinisjon)
     }
 
@@ -35,7 +34,7 @@ internal class GrunnlagsdataServiceTest {
      */
     @Test
     internal fun `GrunnlagsdataData kan ikke ha nullable felt`() {
-        val nullableFeltIRootGrunnlagsdata = GrunnlagsdataData::class.constructors.first().parameters.filter {
+        val nullableFeltIRootGrunnlagsdata = RegistergrunnlagData::class.constructors.first().parameters.filter {
             it.type.isMarkedNullable
         }.map { it.name }
         assertThat(nullableFeltIRootGrunnlagsdata).isEmpty()
