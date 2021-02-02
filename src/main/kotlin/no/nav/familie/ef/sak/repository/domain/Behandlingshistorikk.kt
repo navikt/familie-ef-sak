@@ -24,7 +24,7 @@ inline fun Behandlingshistorikk.tilDto(): BehandlingshistorikkDto {
     return BehandlingshistorikkDto(behandlingId = this.behandlingId,
                                    steg = this.steg,
                                    endretAvNavn = this.opprettetAvNavn,
-                                   endretAvMail = this.opprettetAv,
+                                   endretAv = this.opprettetAv,
                                    endretTid = this.endretTid,
                                    utfall = this.utfall,
                                    metadata = this.metadata.tilJson())
