@@ -49,12 +49,12 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
         }
     }
 
-    private fun opprettBehandleUnderkjentVedtakOppgave(behandling: Behandling, saksbehandler: String) {
+    private fun opprettBehandleUnderkjentVedtakOppgave(behandling: Behandling, navIdent: String) {
         taskRepository.save(OpprettOppgaveTask.opprettTask(
                 OpprettOppgaveTaskData(behandlingId = behandling.id,
                                        oppgavetype = Oppgavetype.BehandleUnderkjentVedtak,
                                        fristForFerdigstillelse = LocalDate.now(),
-                                       tilordnetNavIdent = saksbehandler)))
+                                       tilordnetNavIdent = navIdent)))
     }
 
     private fun opprettTaskForIverksettMotOppdrag(behandling: Behandling) {

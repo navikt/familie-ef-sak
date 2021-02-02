@@ -25,7 +25,7 @@ class TotrinnskontrollService(private val behandlingshistorikkService: Behandlin
                               private val tilgangService: TilgangService) {
 
     /**
-     * Lagrer data om besluttning av totrinnskontroll og returnerer saksbehandleren som sendte behandling til beslutter
+     * Lagrer data om besluttning av totrinnskontroll og returnerer navIdent til saksbehandleren som sendte behandling til beslutter
      */
     @Transactional
     fun lagreTotrinnskontrollOgReturnerBehandler(behandling: Behandling, beslutteVedtak: BeslutteVedtakDto): String {
