@@ -1,0 +1,58 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: familie-ef-sak
+  namespace: default
+  labels:
+    team: teamfamilie
+
+spec:
+  image: {{ image }}
+  liveness:
+    path: /internal/status/isAlive
+    initialDelay: 30
+    failureThreshold: 10
+  readiness:
+    path: /internal/status/isAlive
+    initialDelay: 30
+    failureThreshold: 10
+  prometheus:
+    enabled: true
+    path: /internal/prometheus
+  vault:
+    enabled: true
+    paths:
+      - kvPath: /kv/preprod/fss/familie-ef-sak/default
+        mountPath: /var/run/secrets/nais.io/vault
+      - kvPath: /azuread/data/dev/creds/familie-ef-sak
+        mountPath: /var/run/secrets/nais.io/azuread
+      - kvPath: /serviceuser/data/test/srvfamilie-ef-sak
+        mountPath: /var/run/secrets/nais.io/srvfamilie-ef-sak
+  replicas:
+    min: 2
+    max: 4
+    cpuThresholdPercentage: 50
+  resources:
+    limits:
+      memory: 1024Mi
+      cpu: "1"
+    requests:
+      memory: 512Mi
+      cpu: 500m
+  ingresses: # Optional. List of ingress URLs that will route HTTP traffic to the application.
+    - https://familie-ef-sak-t4.nais.preprod.local
+  secureLogs:
+    enabled: true
+  env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: dev
+    - name: AZURE_CLIENT_ID
+      value: /run/secrets/nais.io/azuread/client_id
+    - name: AZURE_CLIENT_SECRET
+      value: /run/secrets/nais.io/azuread/client_secret
+    - name: CREDENTIAL_USERNAME_PATH
+      value: /run/secrets/nais.io/srvfamilie-ef-sak/username
+    - name: CREDENTIAL_PASSWORD_PATH
+      value: /run/secrets/nais.io/srvfamilie-ef-sak/password
+    - name: STS_URL_ENV
+      value: https://security-token-service-t4.nais.preprod.local
