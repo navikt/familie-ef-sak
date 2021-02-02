@@ -8,7 +8,7 @@ import java.util.*
 data class BehandlingshistorikkDto(val behandlingId: UUID,
                                    var steg: StegType,
                                    val endretAvNavn: String,
-                                   val endretAvMail: String,
+                                   val endretAv: String,
                                    val endretTid: LocalDateTime = LocalDateTime.now(),
                                    val utfall: StegUtfall? = null,
                                    val metadata: Map<String, Any>? = null)

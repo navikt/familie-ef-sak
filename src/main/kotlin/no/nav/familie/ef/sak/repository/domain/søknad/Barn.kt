@@ -19,6 +19,8 @@ data class Barn(@Id
                 @Column("fodselsnummer")
                 override val fødselsnummer: String? = null,
                 val harSkalHaSammeAdresse: Boolean,
+                @Column("skal_bo_hos_soker")
+                val skalBoHosSøker: String? = null,
                 @Column("ikke_registrert_pa_sokers_adresse_beskrivelse")
                 val ikkeRegistrertPåSøkersAdresseBeskrivelse: String?,
                 @Column("er_barnet_fodt")
