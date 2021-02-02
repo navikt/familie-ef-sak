@@ -18,39 +18,46 @@ class BrevService(private val brevClient: BrevClient,
         val behandling = behandlingService.hentBehandling(behandlingId)
         val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
         val person = personService.hentSøker(fagsak.hentAktivIdent())
-
         val navn = person.navn.get(0)
 
-        val body = """
-            {
-                "flettefelter": {
-                    "navn": [
-                        "${navn.fornavn} ${navn.etternavn}"
-                    ],
-                    "fodselsnummer": [
-                        "${fagsak.hentAktivIdent()}"
-                    ],
-                    "dato": [
-                        "01.01.1986"
-                    ]
-                }
-            }
-        """.trimIndent()
+        val request = BrevRequest(navn = "${navn.fornavn} ${navn.etternavn}", ident = fagsak.hentAktivIdent())
 
 
         /*
         * Logikk for brevgenering her
         */
+
         val brev = brevRepository.insert(Brev(behandling = behandlingId,
                                               pdf = brevClient.genererBrev("brukesIkke",
                                                                            "brukesIkke",
-                                                                           body)))
+                                                                           request)))
         return brev.pdf;
     }
 
     fun hentBrev(behandlingId: UUID): Brev? {
         return brevRepository.findByBehandlingId(behandlingId)
     }
+}
+
+data class BrevRequest(val navn: String, val ident: String) {
+
+    fun lagBody(): String {
+        return """
+            {
+                "flettefelter": {
+                    "navn": [
+                        "$navn"
+            ],
+            "fodselsnummer": [
+                "$ident"
+            ],
+            "dato": [
+                "01.01.1986"
+            ]
+        }
+            }
+        """.trimIndent()
 
 
+    }
 }

@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.brev
 
+import no.nav.familie.ef.sak.service.BrevRequest
 import no.nav.familie.ef.sak.util.medContentTypeJsonUTF8
 import no.nav.familie.http.client.AbstractPingableRestClient
 import org.springframework.beans.factory.annotation.Qualifier
@@ -23,10 +24,10 @@ class BrevClient(@Value("\${FAMILIE_BREV_API_URL}")
         operations.optionsForAllow(pingUri)
     }
 
-    fun genererBrev(målform: String, malnavn: String, body: String): ByteArray {
+    fun genererBrev(målform: String, malnavn: String, request: BrevRequest): ByteArray {
         val url = URI.create("$familieBrevUri/api/ef-brev/dokument/bokmaal/testDokument/pdf")
 
-        return postForEntity(url, body, HttpHeaders().medContentTypeJsonUTF8())
+        return postForEntity(url, request.lagBody(), HttpHeaders().medContentTypeJsonUTF8())
     }
 }
 
