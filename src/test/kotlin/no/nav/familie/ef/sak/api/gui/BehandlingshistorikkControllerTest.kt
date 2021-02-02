@@ -57,7 +57,7 @@ internal class BehandlingshistorikkControllerTest : OppslagSpringRunnerTest() {
         leggInnHistorikk(behandling, "3", LocalDateTime.now().plusDays(1))
 
         val respons = hentHistorikk(behandling.id)
-        assertThat(respons.body.data!!.map { it.endretAvMail }).containsExactly("3", "1", "2")
+        assertThat(respons.body.data!!.map { it.endretAv }).containsExactly("3", "1", "2")
     }
 
     @Test

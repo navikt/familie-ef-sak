@@ -85,7 +85,7 @@ internal class VurderingServiceTest {
                     .map { it.type }
         }).containsExactlyInAnyOrderElementsOf(
                 listOf(
-                        TRE_ÅRS_MEDLEMSKAP,
+                        FEM_ÅRS_MEDLEMSKAP,
                         BOR_OG_OPPHOLDER_SEG_I_NORGE,
                         SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
                         KRAV_SIVILSTAND,
@@ -170,7 +170,7 @@ internal class VurderingServiceTest {
         val vilkårsvurdering = vilkårsvurdering(BEHANDLING_ID,
                                                 Vilkårsresultat.IKKE_VURDERT,
                                                 VilkårType.FORUTGÅENDE_MEDLEMSKAP,
-                                                listOf(Delvilkårsvurdering(TRE_ÅRS_MEDLEMSKAP,
+                                                listOf(Delvilkårsvurdering(FEM_ÅRS_MEDLEMSKAP,
                                                                            Vilkårsresultat.IKKE_VURDERT)))
         every { vilkårsvurderingRepository.findByIdOrNull(vilkårsvurdering.id) } returns vilkårsvurdering
         val lagretVilkårsvurdering = slot<Vilkårsvurdering>()
