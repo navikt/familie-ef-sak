@@ -1,3 +1,5 @@
 package no.nav.familie.ef.sak.exception
 
-class PdlRequestException(melding: String) : Exception(melding)
+open class PdlRequestException(melding: String? = null) : Exception(melding)
+
+class PdlNotFoundException: PdlRequestException()

@@ -2,15 +2,15 @@ package no.nav.familie.ef.sak.service
 
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.slot
 import io.mockk.verify
+import no.nav.familie.ef.sak.exception.PdlNotFoundException
 import no.nav.familie.ef.sak.integration.InfotrygdReplikaClient
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlIdent
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlIdenter
-import no.nav.familie.ef.sak.repository.domain.SøknadType
-import no.nav.familie.kontrakter.ef.felles.StønadType
-import no.nav.familie.kontrakter.ef.infotrygd.*
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeOvergangsstønad
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPerioderOvergangsstønadRequest
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPerioderOvergangsstønadResponse
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadRequest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -19,7 +19,7 @@ import java.time.LocalDate
 internal class PerioderOvergangsstønadServiceTest {
 
     private val pdlClient = mockk<PdlClient>()
-    private val infotrygdReplikaClient = mockk<InfotrygdReplikaClient>()
+    private val infotrygdReplikaClient = mockk<InfotrygdReplikaClient>(relaxed = true)
     private val perioderOvergangsstønadService = PerioderOvergangsstønadService(infotrygdReplikaClient, pdlClient)
 
     private val ident = "01234567890"
@@ -43,6 +43,16 @@ internal class PerioderOvergangsstønadServiceTest {
         verify(exactly = 1) {
             val infotrygdRequest = InfotrygdPerioderOvergangsstønadRequest(setOf(ident, historiskIdent), fomDato, tomDato)
             infotrygdReplikaClient.hentPerioderOvergangsstønad(infotrygdRequest)
+        }
+    }
+
+    @Test
+    internal fun `skal kalle infotrygd hvis pdl ikke finner personIdent med personIdent i requesten`() {
+        every { pdlClient.hentPersonidenter(any(), true) } throws PdlNotFoundException()
+
+        perioderOvergangsstønadService.hentPerioder(PerioderOvergangsstønadRequest(ident))
+        verify(exactly = 1) {
+            infotrygdReplikaClient.hentPerioderOvergangsstønad(InfotrygdPerioderOvergangsstønadRequest(setOf(ident)))
         }
     }
 
