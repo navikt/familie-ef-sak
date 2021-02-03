@@ -104,8 +104,8 @@ AZUREAD_DISCOVERY_URL: https://login.microsoftonline.com/navno.onmicrosoft.com/v
 AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navno.onmicrosoft.com/oauth2/v2.0/token
 FAMILIE_INTEGRASJONER_URL: http://familie-integrasjoner
 STS_PREFIX: ${STS_URL_ENV:http://security-token-service.default.svc.nais.local}
-STS_URL: $STS_PREFIX/rest/v1/sts/token?grant_type=client_credentials&scope=openid
-STS_DISCOVERY_URL: $STS_PREFIX/rest/v1/sts/.well-known/openid-configuration
+STS_URL: ${STS_PREFIX}/rest/v1/sts/token?grant_type=client_credentials&scope=openid
+STS_DISCOVERY_URL: ${STS_PREFIX}/rest/v1/sts/.well-known/openid-configuration
 PDL_URL: http://pdl-api
 FAMILIE_OPPDRAG_API_URL: http://familie-oppdrag
 INFOTRYGD_FEED_API_URL: https://familie-ef-infotrygd-feed.nais.adeo.no
