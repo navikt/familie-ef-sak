@@ -20,6 +20,8 @@ class PdlClientConfig {
     private val sluttdato = LocalDate.of(2021, 1, 1)
     private val barnFnr = "01012067050"
     private val søkerFnr = "01010172272"
+    private val annenForelderFnr = "17097926735"
+
     val metadataGjeldende = Metadata(historisk = false)
 
     @Bean
@@ -63,7 +65,7 @@ class PdlClientConfig {
 
         every { pdlClient.hentBarn(any()) } returns barn()
 
-        every { pdlClient.hentAndreForeldre(any()) } returns mapOf()
+        every { pdlClient.hentAndreForeldre(any()) } returns mapOf(annenForelderFnr to annenForelder())
 
         every { pdlClient.hentAktørIder(any()) } returns PdlIdenter(listOf(PdlIdent("12345678901232", false)))
 
@@ -98,13 +100,27 @@ class PdlClientConfig {
                                      fødsel = fødsel(),
                                      navn = lagNavn("Barn", null, "Barnesen")))
 
-    private fun fødsel(): List<Fødsel> =
-            listOf(Fødsel(fødselsår = 2018,
-                          fødselsdato = LocalDate.of(2018, 1, 1),
+    private fun fødsel(år: Int = 2018, måned: Int = 1, dag: Int = 1): List<Fødsel> =
+            listOf(Fødsel(fødselsår = år,
+                          fødselsdato = LocalDate.of(år, måned, dag),
                           metadata = metadataGjeldende,
                           fødested = null,
                           fødekommune = null,
                           fødeland = null))
+
+    private fun annenForelder(): PdlAnnenForelder =
+            PdlAnnenForelder(
+                    adressebeskyttelse = emptyList(),
+                            bostedsadresse = bostedsadresse(),
+                            dødsfall = emptyList(),
+                            fødsel = fødsel(1994, 11, 1),
+                            navn = listOf(Navn("Bob", "", "Burger", metadataGjeldende)),
+                            opphold = emptyList(),
+                            oppholdsadresse = emptyList(),
+                            statsborgerskap = statsborgerskap(),
+                            innflyttingTilNorge = emptyList(),
+                            utflyttingFraNorge = emptyList(),
+            )
 
     private fun familierelasjoner(): List<Familierelasjon> =
             listOf(Familierelasjon(relatertPersonsIdent = barnFnr,
@@ -114,6 +130,9 @@ class PdlClientConfig {
     private fun familierelasjonerBarn(): List<Familierelasjon> =
             listOf(Familierelasjon(relatertPersonsIdent = søkerFnr,
                                    relatertPersonsRolle = Familierelasjonsrolle.MOR,
+                                   minRolleForPerson = Familierelasjonsrolle.BARN),
+                   Familierelasjon(relatertPersonsIdent = annenForelderFnr,
+                                   relatertPersonsRolle = Familierelasjonsrolle.FAR,
                                    minRolleForPerson = Familierelasjonsrolle.BARN))
 
 
