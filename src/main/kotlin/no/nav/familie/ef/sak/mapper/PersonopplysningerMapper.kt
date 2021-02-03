@@ -95,7 +95,7 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
         return BarnDto(
                 personIdent = personIdent,
                 navn = pdlBarn.navn.gjeldende().visningsnavn(),
-                annenForelder = annenForelderIdent?.let { AnnenForelderDTO(it, identNavnMap[it] ?: "Finner ikke navn") },
+                annenForelder = annenForelderIdent?.let { AnnenForelderMinimumDto(it, identNavnMap[it] ?: "Finner ikke navn") },
                 adresse = pdlBarn.bostedsadresse.map(adresseMapper::tilAdresse),
                 borHosSøker = AdresseHjelper.borPåSammeAdresse(pdlBarn, bostedsadresserForelder),
                 fødselsdato = pdlBarn.fødsel.gjeldende()?.fødselsdato

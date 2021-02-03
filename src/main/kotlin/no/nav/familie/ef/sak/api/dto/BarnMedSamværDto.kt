@@ -2,21 +2,21 @@ package no.nav.familie.ef.sak.api.dto
 
 import java.time.LocalDate
 
-data class AleneomsorgDto(
+data class BarnMedSamværDto(
         val barneId: String,
-        val søknadsgrunnlag: AleneomsorgSøknadsgrunnlagDto,
-        val registergrunnlag: AleneomsorgRegistergrunnlagDto
+        val søknadsgrunnlag: BarnMedSamværSøknadsgrunnlagDto,
+        val registergrunnlag: BarnMedSamværRegistergrunnlagDto
 )
 
 
-data class AleneomsorgSøknadsgrunnlagDto(
+data class BarnMedSamværSøknadsgrunnlagDto(
         val navn: String?,
         val fødselsnummer: String?,
         val fødselTermindato: LocalDate?,
         val erBarnetFødt: Boolean,
         val harSammeAdresse: Boolean?,
         val skalBoBorHosSøker: String?,
-        val forelder: AleneomsorgAnnenForelderDto?,
+        val forelder: AnnenForelderDto?,
         val ikkeOppgittAnnenForelderBegrunnelse: String?,
         val spørsmålAvtaleOmDeltBosted: Boolean?,
         val skalAnnenForelderHaSamvær: String?,
@@ -30,14 +30,14 @@ data class AleneomsorgSøknadsgrunnlagDto(
         val beskrivSamværUtenBarn: String?
 )
 
-data class AleneomsorgRegistergrunnlagDto(
+data class BarnMedSamværRegistergrunnlagDto(
         val navn: String?,
         val fødselsnummer: String?,
         val harSammeAdresse: Boolean?,
-        val forelder: AleneomsorgAnnenForelderDto?,
+        val forelder: AnnenForelderDto?,
 )
 
-data class AleneomsorgAnnenForelderDto(
+data class AnnenForelderDto(
         val navn: String?,
         val fødselsnummer: String?,
         val fødselsdato: LocalDate?,

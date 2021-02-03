@@ -1,9 +1,9 @@
 package no.nav.familie.ef.sak.mapper
 
-import no.nav.familie.ef.sak.api.dto.AleneomsorgDto
-import no.nav.familie.ef.sak.api.dto.AleneomsorgRegistergrunnlagDto
-import no.nav.familie.ef.sak.api.dto.AleneomsorgSøknadsgrunnlagDto
-import no.nav.familie.ef.sak.api.dto.AleneomsorgAnnenForelderDto
+import no.nav.familie.ef.sak.api.dto.BarnMedSamværDto
+import no.nav.familie.ef.sak.api.dto.BarnMedSamværRegistergrunnlagDto
+import no.nav.familie.ef.sak.api.dto.BarnMedSamværSøknadsgrunnlagDto
+import no.nav.familie.ef.sak.api.dto.AnnenForelderDto
 import no.nav.familie.ef.sak.integration.dto.pdl.Familierelasjonsrolle
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlAnnenForelder
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlBarn
@@ -12,11 +12,11 @@ import no.nav.familie.ef.sak.integration.dto.pdl.visningsnavn
 import no.nav.familie.ef.sak.repository.domain.søknad.AnnenForelder
 import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsstønad
 
-object AleneomsorgInngangsvilkårMapper {
+object BarnMedSamværMapper {
 
     fun tilDto(pdlBarn: Map<String, PdlBarn>,
                barneforeldre: Map<String, PdlAnnenForelder>,
-               søknad: SøknadsskjemaOvergangsstønad): List<AleneomsorgDto> {
+               søknad: SøknadsskjemaOvergangsstønad): List<BarnMedSamværDto> {
 
         val alleBarn: List<MatchetBarn> = BarnMatcher.kobleSøknadsbarnOgRegisterBarn(søknad.barn, pdlBarn)
 
@@ -33,12 +33,12 @@ object AleneomsorgInngangsvilkårMapper {
 
     private fun tilDtoPerBarn(matchetBarn: MatchetBarn,
                               pdlAnnenForelder: PdlAnnenForelder?,
-                              annenForelderFnr: String?): AleneomsorgDto {
+                              annenForelderFnr: String?): BarnMedSamværDto {
         val søknadsbarn = matchetBarn.søknadsbarn
         val samvær = søknadsbarn.samvær
-        return AleneomsorgDto(
+        return BarnMedSamværDto(
             barneId = søknadsbarn.id.toString(),
-            søknadsgrunnlag = AleneomsorgSøknadsgrunnlagDto(
+            søknadsgrunnlag = BarnMedSamværSøknadsgrunnlagDto(
                         navn = søknadsbarn.navn,
                         fødselsnummer = søknadsbarn.fødselsnummer,
                         fødselTermindato = søknadsbarn.fødselTermindato,
@@ -58,7 +58,7 @@ object AleneomsorgInngangsvilkårMapper {
                         hvorMyeErDuSammenMedAnnenForelder = samvær?.hvorMyeErDuSammenMedAnnenForelder,
                         beskrivSamværUtenBarn = samvær?.beskrivSamværUtenBarn,
                 ),
-            registergrunnlag = AleneomsorgRegistergrunnlagDto(
+            registergrunnlag = BarnMedSamværRegistergrunnlagDto(
                         navn = matchetBarn.pdlBarn?.navn?.gjeldende()?.visningsnavn(),
                         fødselsnummer = matchetBarn.fødselsnummer,
                         harSammeAdresse =  matchetBarn.pdlBarn?.let {
@@ -69,8 +69,8 @@ object AleneomsorgInngangsvilkårMapper {
         )
     }
 
-    private fun tilAnnenForelderDto(annenForelder: AnnenForelder): AleneomsorgAnnenForelderDto {
-        return AleneomsorgAnnenForelderDto(
+    private fun tilAnnenForelderDto(annenForelder: AnnenForelder): AnnenForelderDto {
+        return AnnenForelderDto(
                 navn = annenForelder.person?.navn,
                 fødselsnummer = annenForelder.person?.fødselsnummer,
                 fødselsdato = annenForelder.person?.fødselsdato,
@@ -80,8 +80,8 @@ object AleneomsorgInngangsvilkårMapper {
 
     }
 
-    private fun tilAnnenForelderDto(pdlAnnenForelder: PdlAnnenForelder, annenForelderFnr: String?): AleneomsorgAnnenForelderDto {
-        return AleneomsorgAnnenForelderDto(
+    private fun tilAnnenForelderDto(pdlAnnenForelder: PdlAnnenForelder, annenForelderFnr: String?): AnnenForelderDto {
+        return AnnenForelderDto(
                 navn = pdlAnnenForelder.navn.gjeldende().visningsnavn(),
                 fødselsnummer = annenForelderFnr,
                 fødselsdato = pdlAnnenForelder.fødsel.gjeldende()?.fødselsdato,

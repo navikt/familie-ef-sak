@@ -9,7 +9,7 @@ import no.nav.familie.ef.sak.integration.dto.pdl.PdlAnnenForelder
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlBarn
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker
 import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
-import no.nav.familie.ef.sak.mapper.AleneomsorgInngangsvilkårMapper
+import no.nav.familie.ef.sak.mapper.BarnMedSamværMapper
 import no.nav.familie.ef.sak.mapper.BosituasjonMapper
 import no.nav.familie.ef.sak.mapper.MedlemskapMapper
 import no.nav.familie.ef.sak.mapper.SivilstandMapper
@@ -78,9 +78,9 @@ class VurderingService(private val behandlingService: BehandlingService,
                                                  pdlSøker = pdlSøker)
         val bosituasjon = BosituasjonMapper.tilDto(søknad.bosituasjon)
 
-        val aleneomsorg = AleneomsorgInngangsvilkårMapper.tilDto(pdlBarn,barneForeldre,søknad)
+        val barnMedSamvær = BarnMedSamværMapper.tilDto(pdlBarn, barneForeldre, søknad)
 
-        return InngangsvilkårGrunnlagDto(medlemskap, sivilstand, bosituasjon, aleneomsorg)
+        return InngangsvilkårGrunnlagDto(medlemskap, sivilstand, bosituasjon, barnMedSamvær)
     }
 
     private fun hentVurderinger(behandlingId: UUID,
