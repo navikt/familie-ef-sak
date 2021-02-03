@@ -44,7 +44,7 @@ object AleneomsorgInngangsvilkårMapper {
                         fødselTermindato = søknadsbarn.fødselTermindato,
                         erBarnetFødt = søknadsbarn.erBarnetFødt,
                         harSammeAdresse = søknadsbarn.harSkalHaSammeAdresse,
-                        skalBoBorHosSøker = null, // TODO: må legges til i api og kontrakter
+                        skalBoBorHosSøker = søknadsbarn.skalBoHosSøker,
                         forelder = søknadsbarn.annenForelder?.let { tilAnnenForelderDto(it) },
                         ikkeOppgittAnnenForelderBegrunnelse = søknadsbarn.annenForelder?.ikkeOppgittAnnenForelderBegrunnelse,
                         spørsmålAvtaleOmDeltBosted = samvær?.spørsmålAvtaleOmDeltBosted,
