@@ -13,9 +13,9 @@ data class BehandlingDto(val id: UUID,
                          val aktiv: Boolean,
                          val status: BehandlingStatus,
                          val sistEndret: LocalDate,
-                         val endringerIRegistergrunnlag: Boolean?)
+                         val endringerIRegistergrunnlag: Map<String, List<String>>?)
 
-fun Behandling.tilDto(endringerIRegistergrunnlag: Boolean? = null): BehandlingDto =
+fun Behandling.tilDto(endringerIRegistergrunnlag: Map<String, List<String>>? = null): BehandlingDto =
         BehandlingDto(id = this.id,
                       steg = this.steg,
                       type = this.type,

@@ -5,5 +5,4 @@ data class InngangsvilkårDto(val vurderinger: List<VilkårsvurderingDto>,
 
 data class InngangsvilkårGrunnlagDto(val medlemskap: MedlemskapDto,
                                      val sivilstand: SivilstandInngangsvilkårDto,
-                                     val bosituasjon: BosituasjonDto,
-                                     val endringer: Map<String, List<String>>)
+                                     val bosituasjon: BosituasjonDto)

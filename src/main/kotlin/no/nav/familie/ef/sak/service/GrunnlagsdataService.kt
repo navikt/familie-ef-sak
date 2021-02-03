@@ -34,7 +34,7 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
 
     fun hentGrunnlag(behandlingId: UUID,
                      søknad: SøknadsskjemaOvergangsstønad): InngangsvilkårGrunnlagDto {
-        val registergrunnlag = hentEllerOpprettRegistergrunnlag(søknad.fødselsnummer, behandlingId)
+        val registergrunnlag = registergrunnlagRepository.findByIdOrThrow(behandlingId)
         val registergrunnlagData = registergrunnlag.endringer ?: registergrunnlag.data
         val medlemskapSøknadsgrunnlag = medlemskapMapper.mapSøknadsgrunnlag(medlemskapsdetaljer = søknad.medlemskap)
         val medlemskap = MedlemskapDto(søknadsgrunnlag = medlemskapSøknadsgrunnlag,
@@ -46,9 +46,7 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
 
         return InngangsvilkårGrunnlagDto(medlemskap = medlemskap,
                                          sivilstand = sivilstand,
-                                         bosituasjon = BosituasjonMapper.tilDto(søknad.bosituasjon),
-                                         endringer = finnEndringerIRegistergrunnlag(registergrunnlag)
-        )
+                                         bosituasjon = BosituasjonMapper.tilDto(søknad.bosituasjon))
     }
 
     fun godkjennEndringerIRegistergrunnlag(behandlingId: UUID) {
@@ -61,51 +59,55 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
         godkjennOgSjekkForNyeEndringer(behandlingId, eksisterendeRegistergrunnlag)
     }
 
-    fun sjekkForEndringerIRegistergrunnlag(behandling: Behandling): Boolean {
-        val grunnlagsdata = registergrunnlagRepository.findByIdOrNull(behandling.id) ?: return false
-        if (grunnlagsdata.sporbar.endret.endretTid.isBefore(LocalDateTime.now().minusHours(4))) {
-            val søknad = behandlingService.hentOvergangsstønad(behandling.id)
-            val grunnlagsdataData = opprettRegistergrunnlag(søknad.fødselsnummer)
-            val diff = grunnlagsdata.data != grunnlagsdataData
-            if (diff) {
-                logger.info("Oppdaterer registergrunnlag behandling=${behandling.id} med diff=$diff")
-                registergrunnlagRepository.update(grunnlagsdata.copy(endringer = grunnlagsdataData))
-            } else {
-                logger.info("Fjerner endringer i registergrunnlag behandling=${behandling.id} med diff=$diff")
-                registergrunnlagRepository.update(grunnlagsdata.copy(endringer = null))
-            }
-            return diff
+    fun sjekkForEndringerIRegistergrunnlag(behandling: Behandling): Map<String, List<String>> {
+        val registergrunnlag = hentEllerOpprettRegistergrunnlag(behandling.id)
+        return finnEndringerIRegistergrunnlag(registergrunnlag)
+    }
+
+    private fun hentEllerOpprettRegistergrunnlag(behandlingId: UUID): Registergrunnlag {
+        val personIdent = behandlingService.hentOvergangsstønad(behandlingId).fødselsnummer // TODO Annet alternativ?
+        var registergrunnlag = registergrunnlagRepository.findByIdOrNull(behandlingId)
+        if (registergrunnlag == null) {
+            logger.debug("Oppretter registergrunnlag for behandling=$behandlingId")
+            registergrunnlag = Registergrunnlag(behandlingId = behandlingId, data = hentRegistergrunnlag(personIdent))
+            return registergrunnlagRepository.insert(registergrunnlag)
+        } else if (registergrunnlag.sporbar.endret.endretTid.isBefore(LocalDateTime.now().minusHours(4))) {
+            return oppdaterRegistergrunnlag(registergrunnlag)
         } else {
-            return grunnlagsdata.endringer != null
+            return registergrunnlag
         }
     }
 
-    private fun hentEllerOpprettRegistergrunnlag(personIdent: String, behandlingId: UUID): Registergrunnlag {
-        var grunnlagsdata = registergrunnlagRepository.findByIdOrNull(behandlingId)
-        if (grunnlagsdata == null) {
-            logger.debug("Oppretter registergrunnlag for behandling=$behandlingId")
-            grunnlagsdata = Registergrunnlag(behandlingId = behandlingId, data = opprettRegistergrunnlag(personIdent))
-            registergrunnlagRepository.insert(grunnlagsdata)
+    private fun oppdaterRegistergrunnlag(grunnlagsdata: Registergrunnlag): Registergrunnlag {
+        val behandlingId = grunnlagsdata.behandlingId
+        val søknad = behandlingService.hentOvergangsstønad(behandlingId)
+        val grunnlagsdataData = hentRegistergrunnlag(søknad.fødselsnummer)
+        val diff = grunnlagsdata.data != grunnlagsdataData
+        return if (diff) {
+            logger.info("Oppdaterer registergrunnlag behandling=${behandlingId} med diff=$diff")
+            registergrunnlagRepository.update(grunnlagsdata.copy(endringer = grunnlagsdataData))
+        } else {
+            logger.info("Fjerner endringer i registergrunnlag behandling=${behandlingId} med diff=$diff")
+            registergrunnlagRepository.update(grunnlagsdata.copy(endringer = null))
         }
-        return grunnlagsdata
     }
 
     private fun godkjennOgSjekkForNyeEndringer(behandlingId: UUID,
                                                eksisterendeRegistergrunnlag: Registergrunnlag) {
         val søknad = behandlingService.hentOvergangsstønad(behandlingId)
-        val registergrunnlag = opprettRegistergrunnlag(søknad.fødselsnummer)
+        val nyttRegistergrunnlag = hentRegistergrunnlag(søknad.fødselsnummer)
         requireNotNull(eksisterendeRegistergrunnlag.endringer) { "Endringer kan ikke være null - behandling=$behandlingId" }
-        if (registergrunnlag != eksisterendeRegistergrunnlag.endringer) {
+        if (nyttRegistergrunnlag != eksisterendeRegistergrunnlag.endringer) {
             logger.warn("Godkjenner nye endringer i registergrunnlag, men har nye endringer behandling=$behandlingId")
             registergrunnlagRepository.update(eksisterendeRegistergrunnlag.copy(data = eksisterendeRegistergrunnlag.endringer,
-                                                                                endringer = registergrunnlag))
+                                                                                endringer = nyttRegistergrunnlag))
         } else {
             registergrunnlagRepository.update(eksisterendeRegistergrunnlag.copy(data = eksisterendeRegistergrunnlag.endringer,
                                                                                 endringer = null))
         }
     }
 
-    private fun opprettRegistergrunnlag(personIdent: String): RegistergrunnlagData {
+    private fun hentRegistergrunnlag(personIdent: String): RegistergrunnlagData {
         val pdlSøker = pdlClient.hentSøker(personIdent)
         val medlUnntak = familieIntegrasjonerClient.hentMedlemskapsinfo(ident = personIdent)
         return RegistergrunnlagData(medlemskap = medlemskapMapper.mapRegistergrunnlag(pdlSøker, medlUnntak),
