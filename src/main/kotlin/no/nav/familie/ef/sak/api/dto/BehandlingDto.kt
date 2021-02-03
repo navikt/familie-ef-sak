@@ -13,7 +13,7 @@ data class BehandlingDto(val id: UUID,
                          val aktiv: Boolean,
                          val status: BehandlingStatus,
                          val sistEndret: LocalDate,
-                         val grunnlagsdiff: Boolean?)
+                         val endringerIRegistergrunnlag: Boolean?)
 
 fun Behandling.tilDto(endringerIRegistergrunnlag: Boolean? = null): BehandlingDto =
         BehandlingDto(id = this.id,
@@ -22,4 +22,4 @@ fun Behandling.tilDto(endringerIRegistergrunnlag: Boolean? = null): BehandlingDt
                       aktiv = this.aktiv,
                       status = this.status,
                       sistEndret = this.sporbar.endret.endretTid.toLocalDate(),
-                      grunnlagsdiff = endringerIRegistergrunnlag)
+                      endringerIRegistergrunnlag = endringerIRegistergrunnlag)

@@ -66,15 +66,17 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
         if (grunnlagsdata.sporbar.endret.endretTid.isBefore(LocalDateTime.now().minusHours(4))) {
             val søknad = behandlingService.hentOvergangsstønad(behandling.id)
             val grunnlagsdataData = opprettRegistergrunnlag(søknad.fødselsnummer)
-            val diff = grunnlagsdata.data == grunnlagsdataData
-            if (diff != grunnlagsdata.diff) {
-                logger.info("Oppdaterer registergrunnlag behandling=${behandling.id} steg=${behandling.steg} med diff=$diff")
-                registergrunnlagRepository.update(grunnlagsdata.copy(endringer = grunnlagsdataData,
-                                                                     diff = diff))
+            val diff = grunnlagsdata.data != grunnlagsdataData
+            if (diff) {
+                logger.info("Oppdaterer registergrunnlag behandling=${behandling.id} med diff=$diff")
+                registergrunnlagRepository.update(grunnlagsdata.copy(endringer = grunnlagsdataData))
+            } else {
+                logger.info("Fjerner endringer i registergrunnlag behandling=${behandling.id} med diff=$diff")
+                registergrunnlagRepository.update(grunnlagsdata.copy(endringer = null))
             }
             return diff
         } else {
-            return grunnlagsdata.diff
+            return grunnlagsdata.endringer != null
         }
     }
 
@@ -96,12 +98,10 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
         if (registergrunnlag != eksisterendeRegistergrunnlag.endringer) {
             logger.warn("Godkjenner nye endringer i registergrunnlag, men har nye endringer behandling=$behandlingId")
             registergrunnlagRepository.update(eksisterendeRegistergrunnlag.copy(data = eksisterendeRegistergrunnlag.endringer,
-                                                                                endringer = registergrunnlag,
-                                                                                diff = true))
+                                                                                endringer = registergrunnlag))
         } else {
             registergrunnlagRepository.update(eksisterendeRegistergrunnlag.copy(data = eksisterendeRegistergrunnlag.endringer,
-                                                                                endringer = null,
-                                                                                diff = false))
+                                                                                endringer = null))
         }
     }
 
@@ -112,7 +112,7 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
                                     sivilstand = SivilstandMapper.mapRegistergrunnlag(pdlSøker))
     }
 
-    private fun finnEndringerIRegistergrunnlag(registergrunnlag: Registergrunnlag): Map<String, Map<String, Boolean>> {
+    private fun finnEndringerIRegistergrunnlag(registergrunnlag: Registergrunnlag): Map<String, List<String>> {
         val endringer = registergrunnlag.endringer ?: return emptyMap()
         val data = registergrunnlag.data
         return RegistergrunnlagData::class.memberProperties.map {
@@ -122,9 +122,9 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
         }.toMap()
     }
 
-    private fun diff(value1: Any, value2: Any, kClass: KClass<*>): Map<String, Boolean> =
-            kClass.memberProperties.map {
-                it.name to (it.getter.call(value1) != it.getter.call(value2))
-            }.toMap()
+    private fun diff(value1: Any, value2: Any, kClass: KClass<*>): List<String> =
+            kClass.memberProperties
+                    .filter { (it.getter.call(value1) != it.getter.call(value2)) }
+                    .map { it.name }
 
 }

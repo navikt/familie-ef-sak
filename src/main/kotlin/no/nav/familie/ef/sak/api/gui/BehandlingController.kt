@@ -41,7 +41,7 @@ class BehandlingController(private val behandlingService: BehandlingService,
         return Ressurs.success(behandlingId)
     }
 
-    @PostMapping("{behandlignId}/grunnlagsdata/godkjenn")
+    @PostMapping("{behandlingId}/registergrunnlag/godkjenn")
     fun godkjennGrunnlagsdata(@PathVariable behandlingId: UUID): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         grunnlagsdataService.godkjennEndringerIRegistergrunnlag(behandlingId)

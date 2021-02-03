@@ -12,14 +12,13 @@ import java.util.*
  * så hvis det er diff og man henter inngangsvilkår henter man grunnlagsdata fra her og fra "nye"/diff
  */
 data class Registergrunnlag(@Id
-                         val behandlingId: UUID,
+                            val behandlingId: UUID,
                             val data: RegistergrunnlagData,
                             val endringer: RegistergrunnlagData? = null,
-                            val diff: Boolean = false,
                             @Version
-                         val versjon: Int = 0,
+                            val versjon: Int = 0,
                             @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                         val sporbar: Sporbar = Sporbar())
+                            val sporbar: Sporbar = Sporbar())
 
 data class RegistergrunnlagData(val medlemskap: MedlemskapRegistergrunnlagDto,
                                 val sivilstand: SivilstandRegistergrunnlagDto)

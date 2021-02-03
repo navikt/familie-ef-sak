@@ -1,8 +1,8 @@
-CREATE TABLE grunnlagsdata
+CREATE TABLE registergrunnlag
 (
     behandling_id UUID PRIMARY KEY REFERENCES behandling (id),
     data          JSON         NOT NULL,
-    diff          BOOLEAN      NOT NULL,
+    endringer     JSON,
 
     versjon       INT          NOT NULL,
 

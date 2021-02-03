@@ -14,6 +14,7 @@ class DbContainerInitializer : ApplicationContextInitializer<ConfigurableApplica
                 "spring.datasource.username=${postgres.username}",
                 "spring.datasource.password=${postgres.password}"
         ).applyTo(applicationContext.environment)
+        println("url")
     }
 
     companion object {
