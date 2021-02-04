@@ -1,14 +1,13 @@
 package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.api.Feil
-import no.nav.familie.ef.sak.api.dto.*
+import no.nav.familie.ef.sak.api.dto.DelvilkårsvurderingDto
+import no.nav.familie.ef.sak.api.dto.InngangsvilkårDto
+import no.nav.familie.ef.sak.api.dto.InngangsvilkårGrunnlagDto
+import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.PdlClient
-import no.nav.familie.ef.sak.integration.dto.pdl.Familierelasjonsrolle
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlAnnenForelder
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlBarn
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker
-import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
+import no.nav.familie.ef.sak.integration.dto.pdl.*
 import no.nav.familie.ef.sak.mapper.BarnMedSamværMapper
 import no.nav.familie.ef.sak.mapper.BosituasjonMapper
 import no.nav.familie.ef.sak.mapper.MedlemskapMapper
@@ -95,6 +94,7 @@ class VurderingService(private val behandlingService: BehandlingService,
                                         vilkårType = it.type,
                                         begrunnelse = it.begrunnelse,
                                         unntak = it.unntak,
+                                        barnId = it.barnId,
                                         endretAv = it.sporbar.endret.endretAv,
                                         endretTid = it.sporbar.endret.endretTid,
                                         delvilkårsvurderinger = it.delvilkårsvurdering.delvilkårsvurderinger.map { delvurdering ->
@@ -114,24 +114,40 @@ class VurderingService(private val behandlingService: BehandlingService,
             return lagredeVilkårsvurderinger
         }
 
-        val nyeVilkårsvurderinger = VilkårType.hentInngangsvilkår()
+        val nyeVilkårsvurderinger: List<Vilkårsvurdering> = VilkårType.hentInngangsvilkår()
                 .filter {
-                    lagredeVilkårsvurderinger.find { vurdering -> vurdering.type == it } == null
+                    lagredeVilkårsvurderinger.find { vurdering -> vurdering.type == it } == null // Sjekk barnId ?
                 }
-                .map {
-                    val delvilkårsvurderinger = it.delvilkår
-                            .map { delvilkårType ->
-                                Delvilkårsvurdering(delvilkårType,
-                                                    utledDelvilkårResultat(delvilkårType, søknad, delvilkårMetadata))
-                            }
-                    Vilkårsvurdering(behandlingId = behandlingId,
-                                     type = it,
-                                     delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurderinger))
-                }
+                .map {vilkårType ->
+                    if (vilkårType == VilkårType.ALENEOMSORG) {
+                        søknad.barn.map {
+                            lagNyVilkårsvurdering(vilkårType, søknad, delvilkårMetadata, behandlingId, it.id)
+                        }
+
+                    } else {
+                        listOf(lagNyVilkårsvurdering(vilkårType, søknad, delvilkårMetadata, behandlingId))
+                    }
+                }.flatten()
 
         vilkårsvurderingRepository.insertAll(nyeVilkårsvurderinger)
 
         return lagredeVilkårsvurderinger + nyeVilkårsvurderinger
+    }
+
+    private fun lagNyVilkårsvurdering(it: VilkårType,
+                                      søknad: SøknadsskjemaOvergangsstønad,
+                                      delvilkårMetadata: DelvilkårMetadata,
+                                      behandlingId: UUID,
+                                      barnId: UUID? = null): Vilkårsvurdering {
+        val delvilkårsvurderinger = it.delvilkår
+                .map { delvilkårType ->
+                    Delvilkårsvurdering(delvilkårType,
+                                        utledDelvilkårResultat(delvilkårType, søknad, delvilkårMetadata))
+                }
+        return Vilkårsvurdering(behandlingId = behandlingId,
+                                type = it,
+                                barnId = barnId,
+                                delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurderinger))
     }
 
 

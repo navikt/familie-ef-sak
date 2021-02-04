@@ -221,6 +221,7 @@ internal class VurderingServiceTest {
                                                                vilkårsvurdering.type,
                                                                null,
                                                                null,
+                                                               null,
                                                                "jens123@trugdeetaten.no",
                                                                LocalDateTime.now(),
                                                                listOf(DelvilkårsvurderingDto(LEVER_IKKE_MED_ANNEN_FORELDER,
