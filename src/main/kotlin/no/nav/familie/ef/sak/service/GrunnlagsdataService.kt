@@ -59,15 +59,15 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
         godkjennOgSjekkForNyeEndringer(behandlingId, eksisterendeRegistergrunnlag)
     }
 
-    fun hentEndringerIRegistergrunnlag(behandling: Behandling): Map<String, List<String>> {
-        val registergrunnlag = hentEllerOpprettRegistergrunnlag(behandling.id)
+    fun hentEndringerIRegistergrunnlag(behandlingId: UUID): Map<String, List<String>> {
+        val registergrunnlag = hentEllerOpprettRegistergrunnlag(behandlingId)
         return finnEndringerIRegistergrunnlag(registergrunnlag)
     }
 
     private fun hentEllerOpprettRegistergrunnlag(behandlingId: UUID): Registergrunnlag {
-        val personIdent = behandlingService.hentOvergangsstønad(behandlingId).fødselsnummer // TODO Annet alternativ?
         var registergrunnlag = registergrunnlagRepository.findByIdOrNull(behandlingId)
         if (registergrunnlag == null) {
+            val personIdent = behandlingService.hentOvergangsstønad(behandlingId).fødselsnummer // TODO Annet alternativ?
             logger.debug("Oppretter registergrunnlag for behandling=$behandlingId")
             registergrunnlag = Registergrunnlag(behandlingId = behandlingId, data = hentRegistergrunnlag(personIdent))
             return registergrunnlagRepository.insert(registergrunnlag)
