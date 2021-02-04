@@ -30,13 +30,13 @@ data class PersonopplysningerDto(val personIdent: String,
 
 data class BarnDto(val personIdent: String,
                    val navn: String,
-                   val annenForelder: AnnenForelderDTO?,
+                   val annenForelder: AnnenForelderMinimumDto?,
                    val adresse: List<AdresseDto>,
                    val borHosSøker: Boolean,
                    val fødselsdato: LocalDate?)
 
-data class AnnenForelderDTO(val personIdent: String,
-                            val navn: String)
+data class AnnenForelderMinimumDto(val personIdent: String,
+                                   val navn: String)
 
 data class TelefonnummerDto(val landskode: String,
                             val nummer: String)
