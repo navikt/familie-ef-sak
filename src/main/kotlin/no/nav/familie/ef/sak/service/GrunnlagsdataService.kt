@@ -36,6 +36,7 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
                      søknad: SøknadsskjemaOvergangsstønad): InngangsvilkårGrunnlagDto {
         val registergrunnlag = registergrunnlagRepository.findByIdOrThrow(behandlingId)
         val registergrunnlagData = registergrunnlag.endringer ?: registergrunnlag.data
+
         val medlemskapSøknadsgrunnlag = medlemskapMapper.mapSøknadsgrunnlag(medlemskapsdetaljer = søknad.medlemskap)
         val medlemskap = MedlemskapDto(søknadsgrunnlag = medlemskapSøknadsgrunnlag,
                                        registergrunnlag = registergrunnlagData.medlemskap)

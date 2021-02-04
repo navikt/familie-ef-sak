@@ -5,8 +5,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ef.sak.api.Feil
-import no.nav.familie.ef.sak.api.dto.DelvilkårsvurderingDto
-import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
+import no.nav.familie.ef.sak.api.dto.*
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.mapper.SøknadsskjemaMapper
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.config.PdlClientConfig
@@ -32,22 +31,24 @@ internal class VurderingServiceTest {
     private val behandlingService = mockk<BehandlingService>()
     private val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
     private val familieIntegrasjonerClient = mockk<FamilieIntegrasjonerClient>()
+    private val grunnlagsdataService = mockk<GrunnlagsdataService>()
     private val vurderingService = VurderingService(behandlingService = behandlingService,
                                                     pdlClient = PdlClientConfig().pdlClient(),
                                                     vilkårsvurderingRepository = vilkårsvurderingRepository,
-                                                    grunnlagsdataService = mockk())
+                                                    grunnlagsdataService = grunnlagsdataService)
 
     @BeforeEach
     fun setUp() {
-        val noe = SøknadsskjemaMapper.tilDomene(Testsøknad.søknadOvergangsstønad)
-        every { behandlingService.hentOvergangsstønad(any()) }
-                .returns(noe)
+        val søknad = SøknadsskjemaMapper.tilDomene(Testsøknad.søknadOvergangsstønad)
+        every { behandlingService.hentOvergangsstønad(any()) }.returns(søknad)
         every { familieIntegrasjonerClient.hentMedlemskapsinfo(any()) }
-                .returns(Medlemskapsinfo(personIdent = noe.fødselsnummer,
+                .returns(Medlemskapsinfo(personIdent = søknad.fødselsnummer,
                                          gyldigePerioder = emptyList(),
                                          uavklartePerioder = emptyList(),
-                                         avvistePerioder = emptyList(),
-                ))
+                                         avvistePerioder = emptyList()))
+        every { grunnlagsdataService.hentGrunnlag(any(), any()) } returns InngangsvilkårGrunnlagDto(mockk(relaxed = true),
+                                                                                                    mockk(relaxed = true),
+                                                                                                    mockk(relaxed = true))
     }
 
     @Test
@@ -75,9 +76,8 @@ internal class VurderingServiceTest {
                 { it.invocation.args.first() as List<Vilkårsvurdering> }
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling(fagsak(), true, BehandlingStatus.OPPRETTET)
         every { vilkårsvurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns emptyList()
-        val søknad = SøknadsskjemaMapper.tilDomene(Testsøknad.søknadOvergangsstønad)
+        every { grunnlagsdataService.hentGrunnlag(BEHANDLING_ID, any()) } returns mockkInngangsvilkårMedUformeltGiftPerson()
 
-        every { behandlingService.hentOvergangsstønad(any()) }.returns(søknad)
         vurderingService.hentInngangsvilkår(BEHANDLING_ID)
         assertThat(nyeVilkårsvurderinger.captured.flatMap {
             it.delvilkårsvurdering.delvilkårsvurderinger
@@ -286,6 +286,16 @@ internal class VurderingServiceTest {
 
         val vilkårtyper = VilkårType.hentInngangsvilkår().filterNot { it === VilkårType.FORUTGÅENDE_MEDLEMSKAP }
         assertThat(vilkårTyperUtenVurdering).containsExactlyInAnyOrderElementsOf(vilkårtyper)
+    }
+
+
+    private fun mockkInngangsvilkårMedUformeltGiftPerson(): InngangsvilkårGrunnlagDto {
+        val sivilstandSøknadsgrunnlagDto = mockk<SivilstandSøknadsgrunnlagDto>(relaxed = true)
+        every { sivilstandSøknadsgrunnlagDto.erUformeltGift } returns true
+        val sivilstandRegistergrunnlagDto = SivilstandRegistergrunnlagDto(Sivilstandstype.GIFT, null)
+        return InngangsvilkårGrunnlagDto(mockk(), SivilstandInngangsvilkårDto(
+                sivilstandSøknadsgrunnlagDto,
+                sivilstandRegistergrunnlagDto), mockk())
     }
 
     companion object {
