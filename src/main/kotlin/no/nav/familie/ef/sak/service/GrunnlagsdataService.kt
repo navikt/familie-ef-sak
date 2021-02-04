@@ -59,7 +59,7 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
         godkjennOgSjekkForNyeEndringer(behandlingId, eksisterendeRegistergrunnlag)
     }
 
-    fun sjekkForEndringerIRegistergrunnlag(behandling: Behandling): Map<String, List<String>> {
+    fun hentEndringerIRegistergrunnlag(behandling: Behandling): Map<String, List<String>> {
         val registergrunnlag = hentEllerOpprettRegistergrunnlag(behandling.id)
         return finnEndringerIRegistergrunnlag(registergrunnlag)
     }

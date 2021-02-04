@@ -29,7 +29,7 @@ class BehandlingController(private val behandlingService: BehandlingService,
         val behandlingDto = if(behandling.status.behandlingErLåstForVidereRedigering()) {
             behandling.tilDto()
         } else {
-            behandling.tilDto(endringerIRegistergrunnlag = grunnlagsdataService.sjekkForEndringerIRegistergrunnlag(behandling))
+            behandling.tilDto(endringerIRegistergrunnlag = grunnlagsdataService.hentEndringerIRegistergrunnlag(behandling))
         }
         return Ressurs.success(behandlingDto)
     }
