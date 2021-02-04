@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.config
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.familie.ef.sak.api.dto.BrevRequest
 import no.nav.familie.ef.sak.repository.domain.DelvilkårsvurderingWrapper
 import no.nav.familie.ef.sak.repository.domain.Endret
 import no.nav.familie.ef.sak.repository.domain.JsonWrapper
@@ -75,7 +76,9 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
                                             ArbeidssituasjonTilStringConverter(),
                                             StringTilArbeidssituasjonConverter(),
                                             PGobjectTilJsonWrapperConverter(),
-                                            JsonWrapperTilPGobjectConverter()
+                                            JsonWrapperTilPGobjectConverter(),
+                                            BrevRequestTilStringConverter(),
+                                            StringTilBrevRequestConverter(),
         ))
     }
 
@@ -181,6 +184,23 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
             return pGobject.value?.let { JsonWrapper(it) }
         }
     }
+
+    @WritingConverter
+    class BrevRequestTilStringConverter : Converter<BrevRequest, String> {
+
+        override fun convert(brevRequest: BrevRequest): String {
+            return objectMapper.writeValueAsString(brevRequest)
+        }
+    }
+
+    @ReadingConverter
+    class StringTilBrevRequestConverter : Converter<String, BrevRequest> {
+
+        override fun convert(brevRequest: String): BrevRequest {
+            return objectMapper.readValue(brevRequest, BrevRequest::class.java)
+        }
+    }
+
 
     @WritingConverter
     class ArbeidssituasjonTilStringConverter : Converter<Arbeidssituasjon, String> {

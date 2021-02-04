@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.service.BrevService
 import no.nav.familie.ef.sak.service.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.springframework.boot.configurationprocessor.json.JSONObject
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import java.util.*

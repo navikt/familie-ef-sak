@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.brev
 
-import no.nav.familie.ef.sak.service.BrevRequest
+import no.nav.familie.ef.sak.api.dto.BrevRequest
 import no.nav.familie.ef.sak.util.medContentTypeJsonUTF8
 import no.nav.familie.http.client.AbstractPingableRestClient
 import org.springframework.beans.factory.annotation.Qualifier
