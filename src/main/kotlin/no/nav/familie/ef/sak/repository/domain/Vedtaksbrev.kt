@@ -3,7 +3,6 @@ package no.nav.familie.ef.sak.repository.domain
 
 import no.nav.familie.ef.sak.api.dto.BrevRequest
 import no.nav.familie.ef.sak.service.steg.StegType
-import org.postgresql.util.PGobject
 import org.springframework.data.annotation.Id
 import java.util.*
 

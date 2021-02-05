@@ -2,14 +2,14 @@ package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.api.dto.BrevRequest
 import no.nav.familie.ef.sak.brev.BrevClient
-import no.nav.familie.ef.sak.repository.BrevRepository
+import no.nav.familie.ef.sak.repository.VedtaksbrevRepository
 import no.nav.familie.ef.sak.repository.domain.Vedtaksbrev
 import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
 class BrevService(private val brevClient: BrevClient,
-                  private val brevRepository: BrevRepository,
+                  private val brevRepository: VedtaksbrevRepository,
                   private val behandlingService: BehandlingService,
                   private val fagsakService: FagsakService,
                   private val personService: PersonService) {
@@ -32,7 +32,7 @@ class BrevService(private val brevClient: BrevClient,
                                                      pdf = brevClient.genererBrev("brukesIkke",
                                                                                   "brukesIkke",
                                                                                   request)))
-        return brev.pdf;
+        return brev.pdf
     }
 
     fun hentBrev(behandlingId: UUID): Vedtaksbrev? {
