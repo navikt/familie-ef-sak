@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.api.dto.BrevRequest
 import no.nav.familie.ef.sak.brev.BrevClient
 import no.nav.familie.ef.sak.repository.VedtaksbrevRepository
 import no.nav.familie.ef.sak.repository.domain.Vedtaksbrev
+import no.nav.familie.ef.sak.service.steg.StegType
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -22,20 +23,21 @@ class BrevService(private val brevClient: BrevClient,
 
         val request = BrevRequest(navn = "${navn.fornavn} ${navn.etternavn}", ident = fagsak.hentAktivIdent())
 
-        /*
-        * Logikk for brevgenering her
-        */
-
         val brev = brevRepository.insert(Vedtaksbrev(behandlingId = behandlingId,
                                                      brevRequest = request,
                                                      steg = behandling.steg,
-                                                     pdf = brevClient.genererBrev("brukesIkke",
-                                                                                  "brukesIkke",
+                                                     pdf = brevClient.genererBrev("bokmaal",
+                                                                                  "testDokument",
                                                                                   request)))
         return brev.pdf
     }
 
     fun hentBrev(behandlingId: UUID): Vedtaksbrev? {
-        return brevRepository.findByBehandlingId(behandlingId)
+        return brevRepository.findByBehandlingId(behandlingId).first()
     }
+
+    fun hentBrevForTotrinnskontroll(behandlingId: UUID): Vedtaksbrev? {
+        return brevRepository.findByBehandlingId(behandlingId).firstOrNull { it.steg === StegType.BESLUTTE_VEDTAK }
+    }
+
 }

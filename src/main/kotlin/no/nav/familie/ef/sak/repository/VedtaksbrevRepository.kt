@@ -7,6 +7,6 @@ import java.util.*
 @Repository
 interface VedtaksbrevRepository : RepositoryInterface<Vedtaksbrev, UUID>, InsertUpdateRepository<Vedtaksbrev> {
 
-    fun findByBehandlingId(behandlingId: UUID): Vedtaksbrev?
+    fun findByBehandlingId(behandlingId: UUID): List<Vedtaksbrev>
 
 }

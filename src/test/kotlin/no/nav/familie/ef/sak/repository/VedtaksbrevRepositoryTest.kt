@@ -21,13 +21,13 @@ internal class VedtaksbrevRepositoryTest : OppslagSpringRunnerTest() {
     internal fun findByBehandlingId() {
         val fagsak = fagsakRepository.insert(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
+        val vedtaksbrev = Vedtaksbrev(behandlingId = behandling.id,
+                                      steg = StegType.SEND_TIL_BESLUTTER,
+                                      brevRequest = BrevRequest("Olav Olavssen", "12345678910"),
+                                      pdf = ByteArray(123))
 
-        val vedtaksbrev =
-                vedtaksbrevRepository.insert(Vedtaksbrev(behandlingId = behandling.id,
-                                                         steg = StegType.SEND_TIL_BESLUTTER,
-                                                         brevRequest = BrevRequest("Olav Olavssen", "12345678910"),
-                                                         pdf = ByteArray(123)))
+        vedtaksbrevRepository.insert(vedtaksbrev)
 
-        assertThat(vedtaksbrevRepository.findByBehandlingId(behandling.id)).isEqualToComparingFieldByField(vedtaksbrev)
+        assertThat(vedtaksbrevRepository.findByBehandlingId(behandling.id)).first().isEqualToComparingFieldByField(vedtaksbrev)
     }
 }
