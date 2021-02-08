@@ -37,4 +37,3 @@ class DistribuerVedtaksbrevTask(private val stegService: StegService,
 
 
 }
-
