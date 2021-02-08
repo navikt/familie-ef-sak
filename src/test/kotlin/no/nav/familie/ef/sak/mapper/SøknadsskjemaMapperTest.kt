@@ -29,4 +29,20 @@ internal class SøknadsskjemaMapperTest {
 
     }
 
+    @Test
+    internal fun `skal mappe feltet skalBoHosSøker`() {
+        val svarSkalBarnetBoHosSøker = "jaMenSamarbeiderIkke"
+        val barn = TestsøknadBuilder.Builder()
+                .defaultBarn()
+                .copy(
+                        skalBarnetBoHosSøker = Søknadsfelt("", "", null, svarSkalBarnetBoHosSøker),
+                        )
+        val søknad = TestsøknadBuilder.Builder()
+                .build().søknadOvergangsstønad.copy(barn = Søknadsfelt("",listOf(barn)))
+
+        val søknadTilLagring = SøknadsskjemaMapper.tilDomene(søknad)
+        Assertions.assertThat(søknadTilLagring.barn.first().skalBoHosSøker).isEqualTo(svarSkalBarnetBoHosSøker)
+
+    }
+
 }

@@ -113,8 +113,7 @@ object SøknadsskjemaMapper {
             personMinimum?.let {
                 PersonMinimum(navn = it.navn.verdi,
                               fødselsnummer = it.fødselsnummer?.verdi?.verdi,
-                              fødselsdato = it.fødselsdato?.verdi,
-                              land = it.land?.verdi)
+                              fødselsdato = it.fødselsdato?.verdi)
             }
 
     private fun tilDomene(medlemskapsdetaljer: Medlemskapsdetaljer): Medlemskap =
@@ -155,7 +154,9 @@ object SøknadsskjemaMapper {
                      samvær = tilDomene(it.samvær?.verdi),
                      skalHaBarnepass = it.skalHaBarnepass?.verdi,
                      særligeTilsynsbehov = it.særligeTilsynsbehov?.verdi,
-                     barnepass = tilDomene(it.barnepass?.verdi))
+                     barnepass = tilDomene(it.barnepass?.verdi),
+                     skalBoHosSøker = it.skalBarnetBoHosSøker?.svarId)
+
             }.toSet()
 
     private fun tilDomene(barnepass: KontraktBarnepass?): Barnepass? =

@@ -1,14 +1,13 @@
-name: Build-Deploy
+name: Build-Deploy T env (arena)
 on:
   workflow_dispatch:
-  pull_request:
 
 env:
   IMAGE: docker.pkg.github.com/${{ github.repository }}/familie-ef-sak:${{ github.sha }}
 
 jobs:
   build:
-    name: Build, push and deploy to dev-fss
+    name: Build, push and deploy to t4 (arena test env)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -49,4 +48,4 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-fss
-          RESOURCE: nais-dev.yaml
+          RESOURCE: nais-t4.yaml

@@ -107,7 +107,7 @@ internal class PersonopplysningerServiceTest {
       "gyldigTilOgMed" : "2020-01-01"
     } ],
     "borHosSøker" : true,
-    "fødselsdato" : null
+    "fødselsdato" : "2018-01-01"
   } ],
    "innflyttingTilNorge" : [ {
     "fraflyttingsland" : "Sverige",
