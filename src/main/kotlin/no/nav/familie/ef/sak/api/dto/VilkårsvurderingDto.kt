@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.api.dto
 
 import no.nav.familie.ef.sak.repository.domain.DelvilkårType
+import no.nav.familie.ef.sak.repository.domain.DelvilkårÅrsak
 import no.nav.familie.ef.sak.repository.domain.VilkårType
 import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
 import java.time.LocalDateTime
@@ -19,5 +20,5 @@ data class VilkårsvurderingDto(val id: UUID,
 
 data class DelvilkårsvurderingDto(val type: DelvilkårType,
                                   val resultat: Vilkårsresultat,
-                                  val årsak: String? = null,
+                                  val årsak: DelvilkårÅrsak? = null,
                                   val begrunnelse: String? = null)

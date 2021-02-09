@@ -26,7 +26,7 @@ data class DelvilkårsvurderingWrapper(val delvilkårsvurderinger: List<Delvilk�
 
 data class Delvilkårsvurdering(val type: DelvilkårType,
                                val resultat: Vilkårsresultat = Vilkårsresultat.IKKE_VURDERT,
-                               val årsak: String? = null, //enum
+                               val årsak: DelvilkårÅrsak? = null,
                                val begrunnelse: String? = null)
 
 data class DelvilkårMetadata(val sivilstandstype: Sivilstandstype)
@@ -46,6 +46,15 @@ enum class DelvilkårType {
     SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
     NÆRE_BOFORHOLD,
     MER_AV_DAGLIG_OMSORG,
+}
+
+enum class DelvilkårÅrsak {
+    SAMME_HUS_OG_FÆRRE_ENN_4_BOENHETER,
+    SAMME_HUS_OG_FLERE_ENN_4_BOENHETER_MEN_VURDERT_NÆRT,
+    SELVSTENDIGE_BOLIGER_SAMME_TOMT,
+    SELVSTENDIGE_BOLIGER_SAMME_GÅRDSTUN,
+    NÆRMESTE_BOLIG_ELLER_REKKEHUS_I_SAMMEGATE,
+    TILSTØTENDE_BOLIGER_ELLER_REKKEHUS_I_SAMMEGATE
 }
 
 enum class Vilkårsresultat {

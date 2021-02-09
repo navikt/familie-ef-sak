@@ -247,7 +247,7 @@ internal class VurderingServiceTest {
                                                 listOf(
                                                         Delvilkårsvurdering(NÆRE_BOFORHOLD,
                                                                             Vilkårsresultat.IKKE_VURDERT,
-                                                                            null),
+                                                                            DelvilkårÅrsak.SELVSTENDIGE_BOLIGER_SAMME_GÅRDSTUN),
                                                 ))
         every { vilkårsvurderingRepository.findByIdOrNull(vilkårsvurdering.id) } returns vilkårsvurdering
         val lagretVilkårsvurdering = slot<Vilkårsvurdering>()
@@ -265,10 +265,10 @@ internal class VurderingServiceTest {
                                                                LocalDateTime.now(),
                                                                listOf(DelvilkårsvurderingDto(NÆRE_BOFORHOLD,
                                                                                              Vilkårsresultat.JA,
-                                                                                             "sammeHusOgFærreEnn4Boenheter",
+                                                                                             DelvilkårÅrsak.SAMME_HUS_OG_FLERE_ENN_4_BOENHETER_MEN_VURDERT_NÆRT,
                                                                                              "Delvilkår ok")))
         vurderingService.oppdaterVilkår(oppdatertVilkårsvurderingDto)
-        assertThat(lagretVilkårsvurdering.captured.delvilkårsvurdering.delvilkårsvurderinger.first().årsak).isEqualTo("sammeHusOgFærreEnn4Boenheter")
+        assertThat(lagretVilkårsvurdering.captured.delvilkårsvurdering.delvilkårsvurderinger.first().årsak).isEqualTo(DelvilkårÅrsak.SAMME_HUS_OG_FLERE_ENN_4_BOENHETER_MEN_VURDERT_NÆRT)
     }
 
     @Test
