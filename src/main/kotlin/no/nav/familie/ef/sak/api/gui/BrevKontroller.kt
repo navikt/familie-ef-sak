@@ -15,11 +15,11 @@ import java.util.*
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class BrevKontroller(private val brevService: BrevService,
-                     private val behandlingService: BehandlingService,
                      private val tilgangService: TilgangService) {
 
     @PostMapping("/{behandlingId}")
     fun lagBrev(@PathVariable behandlingId: UUID, @RequestBody brevParams: BrevRequest): Ressurs<ByteArray> {
+        tilgangService.validerTilgangTilBehandling(behandlingId)
         val respons = brevService.lagBrev(behandlingId)
 
         return Ressurs.success(respons)
@@ -27,6 +27,7 @@ class BrevKontroller(private val brevService: BrevService,
 
     @GetMapping("/{behandlingId}")
     fun hentBrev(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
+        tilgangService.validerTilgangTilBehandling(behandlingId)
         val respons = brevService.hentBrev(behandlingId)
 
         return respons?.let { Ressurs.success(it.pdf) } ?: Ressurs.funksjonellFeil("Fant ingen brev for behandling")
