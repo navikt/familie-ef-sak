@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.integration
 
 import no.nav.familie.ef.sak.config.PdlConfig
+import no.nav.familie.ef.sak.exception.PdlNotFoundException
 import no.nav.familie.ef.sak.exception.PdlRequestException
 import no.nav.familie.ef.sak.integration.dto.pdl.*
 import no.nav.familie.http.client.AbstractRestClient
@@ -108,6 +109,9 @@ class PdlClient(val pdlConfig: PdlConfig,
                                                                                      dataMapper: (DATA) -> T?): T {
 
         if (pdlResponse.harFeil()) {
+            if (pdlResponse.errors?.any { it.extensions?.notFound() == true } == true) {
+                throw PdlNotFoundException()
+            }
             secureLogger.error("Feil ved henting av ${T::class} fra PDL: ${pdlResponse.errorMessages()}")
             throw PdlRequestException("Feil ved henting av ${T::class} fra PDL. Se secure logg for detaljer.")
         }

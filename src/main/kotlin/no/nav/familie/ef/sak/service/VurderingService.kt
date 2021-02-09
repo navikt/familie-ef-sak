@@ -5,8 +5,11 @@ import no.nav.familie.ef.sak.api.dto.*
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.integration.dto.pdl.Familierelasjonsrolle
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlAnnenForelder
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlBarn
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker
 import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
-import no.nav.familie.ef.sak.mapper.AleneomsorgMapper
+import no.nav.familie.ef.sak.mapper.BarnMedSamværMapper
 import no.nav.familie.ef.sak.mapper.BosituasjonMapper
 import no.nav.familie.ef.sak.mapper.MedlemskapMapper
 import no.nav.familie.ef.sak.mapper.SivilstandMapper
@@ -63,6 +66,8 @@ class VurderingService(private val behandlingService: BehandlingService,
     private fun hentGrunnlag(fnr: String,
                              søknad: SøknadsskjemaOvergangsstønad): InngangsvilkårGrunnlagDto {
         val pdlSøker = pdlClient.hentSøker(fnr)
+        val pdlBarn = hentPdlBarn(pdlSøker)
+        val barneForeldre = hentPdlBarneForeldre(søknad, pdlBarn)
         val medlUnntak = familieIntegrasjonerClient.hentMedlemskapsinfo(ident = fnr)
 
         val medlemskap = medlemskapMapper.tilDto(medlemskapsdetaljer = søknad.medlemskap,
@@ -73,7 +78,9 @@ class VurderingService(private val behandlingService: BehandlingService,
                                                  pdlSøker = pdlSøker)
         val bosituasjon = BosituasjonMapper.tilDto(søknad.bosituasjon)
 
-        return InngangsvilkårGrunnlagDto(medlemskap, sivilstand, bosituasjon)
+        val barnMedSamvær = BarnMedSamværMapper.tilDto(pdlBarn, barneForeldre, søknad)
+
+        return InngangsvilkårGrunnlagDto(medlemskap, sivilstand, bosituasjon, barnMedSamvær)
     }
 
     private fun hentVurderinger(behandlingId: UUID,
@@ -149,19 +156,9 @@ class VurderingService(private val behandlingService: BehandlingService,
     private fun behandlingErLåstForVidereRedigering(behandlingId: UUID) =
             behandlingService.hentBehandling(behandlingId).status.behandlingErLåstForVidereRedigering()
 
-    fun vurderAleneomsorg(behandlingId: UUID): Aleneomsorg {
-        val søknad = behandlingService.hentOvergangsstønad(behandlingId)
-        val fnrSøker = "" //TODO
-        val pdlSøker = pdlClient.hentSøker(fnrSøker)
 
-
-        val barn = pdlSøker.familierelasjoner
-                .filter { it.relatertPersonsRolle == Familierelasjonsrolle.BARN }
-                .map { it.relatertPersonsIdent }
-                .let { pdlClient.hentBarn(it) }
-                .filter { it.value.fødsel.gjeldende()?.fødselsdato != null }
-                .filter { it.value.fødsel.first().fødselsdato!!.plusYears(18).isAfter(LocalDate.now()) }
-
+    private fun hentPdlBarneForeldre(søknad: SøknadsskjemaOvergangsstønad,
+                                     barn: Map<String, PdlBarn>): Map<String, PdlAnnenForelder> {
         val barneforeldreFraSøknad =
                 søknad.barn.mapNotNull {
                     it.annenForelder?.person?.fødselsnummer
@@ -169,16 +166,22 @@ class VurderingService(private val behandlingService: BehandlingService,
 
         val barneforeldre = barn.map { it.value.familierelasjoner }
                 .flatten()
-                .filter { it.relatertPersonsIdent != fnrSøker && it.relatertPersonsRolle != Familierelasjonsrolle.BARN }
+                .filter { it.relatertPersonsIdent != søknad.fødselsnummer && it.relatertPersonsRolle != Familierelasjonsrolle.BARN }
                 .map { it.relatertPersonsIdent }
                 .plus(barneforeldreFraSøknad)
                 .distinct()
                 .let { pdlClient.hentAndreForeldre(it) }
+        return barneforeldre
+    }
 
-        return AleneomsorgMapper.tilDto(pdlSøker,
-                                        barn,
-                                        barneforeldre,
-                                        søknad)
+    private fun hentPdlBarn(pdlSøker: PdlSøker): Map<String, PdlBarn> {
+        val barn = pdlSøker.familierelasjoner
+                .filter { it.relatertPersonsRolle == Familierelasjonsrolle.BARN }
+                .map { it.relatertPersonsIdent }
+                .let { pdlClient.hentBarn(it) }
+                .filter { it.value.fødsel.gjeldende()?.fødselsdato != null }
+                .filter { it.value.fødsel.first().fødselsdato!!.plusYears(18).isAfter(LocalDate.now()) }
+        return barn
     }
 
 

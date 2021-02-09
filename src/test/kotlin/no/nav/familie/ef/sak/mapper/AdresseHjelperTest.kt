@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.mapper
 
-import io.mockk.mockk
 import no.nav.familie.ef.sak.api.dto.AdresseDto
 import no.nav.familie.ef.sak.api.dto.AdresseType
 import no.nav.familie.ef.sak.integration.dto.pdl.*
@@ -10,9 +9,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalDateTime.now
 
-internal class PersonopplysningerMapperTest {
-
-    val personopplysningerMapper = PersonopplysningerMapper(mockk(), mockk(), mockk(), mockk())
+internal class AdresseHjelperTest {
 
     fun adresseOslo() = Vegadresse("1", "ABC", "123", "Oslogata", "01", null, "0101", null, null)
     fun adresseTrondheim() = Vegadresse("1", "ABC", "123", "Trøndergata", "01", null, "7080", null, null)
@@ -39,7 +36,7 @@ internal class PersonopplysningerMapperTest {
         )
 
         val pdlBarn = PdlBarn(emptyList(), barnAdresser, emptyList(), emptyList(), emptyList(), emptyList(), emptyList())
-        Assertions.assertThat(personopplysningerMapper.borPåSammeAdresse(pdlBarn, forelderAdresser)).isTrue
+        Assertions.assertThat(AdresseHjelper.borPåSammeAdresse(pdlBarn, forelderAdresser)).isTrue
     }
 
     @Test
@@ -53,7 +50,7 @@ internal class PersonopplysningerMapperTest {
         )
 
         val pdlBarn = PdlBarn(emptyList(), barnAdresser, emptyList(), emptyList(), emptyList(), emptyList(), emptyList())
-        Assertions.assertThat(personopplysningerMapper.borPåSammeAdresse(pdlBarn, forelderAdresser)).isTrue
+        Assertions.assertThat(AdresseHjelper.borPåSammeAdresse(pdlBarn, forelderAdresser)).isTrue
     }
 
     @Test
@@ -63,7 +60,7 @@ internal class PersonopplysningerMapperTest {
         val forelderAdresser = listOf(lagAdresse(null, now().minusDays(1), null, matrikkeladresse()))
 
         val pdlBarn = PdlBarn(emptyList(), barnAdresser, emptyList(), emptyList(), emptyList(), emptyList(), emptyList())
-        Assertions.assertThat(personopplysningerMapper.borPåSammeAdresse(pdlBarn, forelderAdresser)).isTrue
+        Assertions.assertThat(AdresseHjelper.borPåSammeAdresse(pdlBarn, forelderAdresser)).isTrue
     }
 
     @Test
@@ -73,7 +70,7 @@ internal class PersonopplysningerMapperTest {
         val forelderAdresser = listOf(lagAdresse(null, now().minusDays(1), null, matrikkeladresse(999L)))
 
         val pdlBarn = PdlBarn(emptyList(), barnAdresser, emptyList(), emptyList(), emptyList(), emptyList(), emptyList())
-        Assertions.assertThat(personopplysningerMapper.borPåSammeAdresse(pdlBarn, forelderAdresser)).isFalse
+        Assertions.assertThat(AdresseHjelper.borPåSammeAdresse(pdlBarn, forelderAdresser)).isFalse
     }
 
     @Test
@@ -104,11 +101,11 @@ internal class PersonopplysningerMapperTest {
         val pdlBarn3 = PdlBarn(emptyList(), ugyldigeAdresser, emptyList(), emptyList(), emptyList(), emptyList(), emptyList())
         val pdlBarn4 = PdlBarn(emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), listOf())
 
-        Assertions.assertThat(personopplysningerMapper.borPåSammeAdresse(pdlBarn1, forelderAdresser)).isFalse
-        Assertions.assertThat(personopplysningerMapper.borPåSammeAdresse(pdlBarn2, forelderAdresser)).isFalse
-        Assertions.assertThat(personopplysningerMapper.borPåSammeAdresse(pdlBarn3, forelderAdresser)).isFalse
-        Assertions.assertThat(personopplysningerMapper.borPåSammeAdresse(pdlBarn4, forelderAdresser)).isFalse
-        Assertions.assertThat(personopplysningerMapper.borPåSammeAdresse(pdlBarn4, emptyList())).isFalse
+        Assertions.assertThat(AdresseHjelper.borPåSammeAdresse(pdlBarn1, forelderAdresser)).isFalse
+        Assertions.assertThat(AdresseHjelper.borPåSammeAdresse(pdlBarn2, forelderAdresser)).isFalse
+        Assertions.assertThat(AdresseHjelper.borPåSammeAdresse(pdlBarn3, forelderAdresser)).isFalse
+        Assertions.assertThat(AdresseHjelper.borPåSammeAdresse(pdlBarn4, forelderAdresser)).isFalse
+        Assertions.assertThat(AdresseHjelper.borPåSammeAdresse(pdlBarn4, emptyList())).isFalse
     }
 
     @Test
@@ -123,13 +120,14 @@ internal class PersonopplysningerMapperTest {
                                            emptyList())
         val forelderAdresser = listOf(lagAdresse(adresseOslo(), now().minusDays(1000), null))
 
-        Assertions.assertThat(personopplysningerMapper.borPåSammeAdresse(pdlBarnMedDeltBosted, forelderAdresser)).isFalse
+        Assertions.assertThat(AdresseHjelper.borPåSammeAdresse(pdlBarnMedDeltBosted, forelderAdresser)).isFalse
     }
 
     @Test
     internal fun `forelder og barn bor på samme adresse selv om det ikke finnes gyldighetsdato`() {
 
-        val barnAdresser = listOf(lagAdresse(vegadresse = adresseTromsø(), metadata = metadataGjeldende), lagAdresse(vegadresse = adresseOslo(),metadata = metadataHistorisk))
+        val barnAdresser = listOf(lagAdresse(vegadresse = adresseTromsø(), metadata = metadataGjeldende),
+                                  lagAdresse(vegadresse = adresseOslo(), metadata = metadataHistorisk))
         val forelderAdresser = listOf(
                 lagAdresse(adresseOslo(), now().minusDays(1000), now().minusDays(100), null, metadataHistorisk),
                 lagAdresse(adresseBergen(), now().minusDays(100), now().minusDays(1), null, metadataHistorisk),
@@ -137,7 +135,7 @@ internal class PersonopplysningerMapperTest {
         )
         val pdlBarn = PdlBarn(emptyList(), barnAdresser, emptyList(), emptyList(), emptyList(), emptyList(), emptyList())
 
-        Assertions.assertThat(personopplysningerMapper.borPåSammeAdresse(pdlBarn, forelderAdresser)).isTrue()
+        Assertions.assertThat(AdresseHjelper.borPåSammeAdresse(pdlBarn, forelderAdresser)).isTrue
     }
 
     @Test
@@ -152,15 +150,15 @@ internal class PersonopplysningerMapperTest {
 
         val adresser = listOf(historiskBostedsadresse, aktivOppholdsadresse, historiskKontaktadresse, aktivBostedsadresse)
 
-        Assertions.assertThat(personopplysningerMapper.sorterAdresser(adresser))
+        Assertions.assertThat(AdresseHjelper.sorterAdresser(adresser))
                 .containsExactly(aktivBostedsadresse, aktivOppholdsadresse, historiskKontaktadresse, historiskBostedsadresse)
     }
 
-    fun lagAdresse(vegadresse: Vegadresse?,
-                   gyldighetstidspunkt: LocalDateTime? = null,
-                   opphørstidspunkt: LocalDateTime? = null,
-                   matrikkeladresse: Matrikkeladresse? = null,
-                   metadata: Metadata? = null): Bostedsadresse {
+    private fun lagAdresse(vegadresse: Vegadresse?,
+                           gyldighetstidspunkt: LocalDateTime? = null,
+                           opphørstidspunkt: LocalDateTime? = null,
+                           matrikkeladresse: Matrikkeladresse? = null,
+                           metadata: Metadata? = null): Bostedsadresse {
         return Bostedsadresse(
                 vegadresse = vegadresse,
                 angittFlyttedato = null,
