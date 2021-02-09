@@ -44,10 +44,11 @@ internal class VurderingServiceTest {
         every { behandlingService.hentOvergangsstønad(any()) }
                 .returns(noe)
         every { familieIntegrasjonerClient.hentMedlemskapsinfo(any()) }
-                .returns(Medlemskapsinfo(personIdent = noe.fødselsnummer,
-                                         gyldigePerioder = emptyList(),
-                                         uavklartePerioder = emptyList(),
-                                         avvistePerioder = emptyList(),
+                .returns(Medlemskapsinfo(
+                        personIdent = noe.fødselsnummer,
+                        gyldigePerioder = emptyList(),
+                        uavklartePerioder = emptyList(),
+                        avvistePerioder = emptyList(),
                 ))
     }
 
@@ -91,7 +92,10 @@ internal class VurderingServiceTest {
                         SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
                         KRAV_SIVILSTAND,
                         LEVER_IKKE_MED_ANNEN_FORELDER,
-                        LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD
+                        LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD,
+                        SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
+                        NÆRE_BOFORHOLD,
+                        MER_AV_DAGLIG_OMSORG
                 ))
 
     }
@@ -226,11 +230,45 @@ internal class VurderingServiceTest {
                                                                LocalDateTime.now(),
                                                                listOf(DelvilkårsvurderingDto(LEVER_IKKE_MED_ANNEN_FORELDER,
                                                                                              Vilkårsresultat.JA,
+                                                                                             null,
                                                                                              "Delvilkår ok")))
         vurderingService.oppdaterVilkår(oppdatertVilkårsvurderingDto)
 
         assertThat(lagretVilkårsvurdering.captured.delvilkårsvurdering.delvilkårsvurderinger.first().resultat).isEqualTo(Vilkårsresultat.JA)
         assertThat(lagretVilkårsvurdering.captured.delvilkårsvurdering.delvilkårsvurderinger.first().begrunnelse).isEqualTo("Delvilkår ok")
+    }
+
+    @Test
+    internal fun `skal oppdatere årsak for delvilkårsvurdering`() {
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling(fagsak(), true, BehandlingStatus.OPPRETTET)
+        val vilkårsvurdering = vilkårsvurdering(BEHANDLING_ID,
+                                                Vilkårsresultat.IKKE_VURDERT,
+                                                VilkårType.ALENEOMSORG,
+                                                listOf(
+                                                        Delvilkårsvurdering(NÆRE_BOFORHOLD,
+                                                                            Vilkårsresultat.IKKE_VURDERT,
+                                                                            null),
+                                                ))
+        every { vilkårsvurderingRepository.findByIdOrNull(vilkårsvurdering.id) } returns vilkårsvurdering
+        val lagretVilkårsvurdering = slot<Vilkårsvurdering>()
+        every { vilkårsvurderingRepository.update(capture(lagretVilkårsvurdering)) } answers
+                { it.invocation.args.first() as Vilkårsvurdering }
+
+        val oppdatertVilkårsvurderingDto = VilkårsvurderingDto(vilkårsvurdering.id,
+                                                               vilkårsvurdering.behandlingId,
+                                                               Vilkårsresultat.JA,
+                                                               vilkårsvurdering.type,
+                                                               null,
+                                                               null,
+                                                               null,
+                                                               "jens123@trugdeetaten.no",
+                                                               LocalDateTime.now(),
+                                                               listOf(DelvilkårsvurderingDto(NÆRE_BOFORHOLD,
+                                                                                             Vilkårsresultat.JA,
+                                                                                             "sammeHusOgFærreEnn4Boenheter",
+                                                                                             "Delvilkår ok")))
+        vurderingService.oppdaterVilkår(oppdatertVilkårsvurderingDto)
+        assertThat(lagretVilkårsvurdering.captured.delvilkårsvurdering.delvilkårsvurderinger.first().årsak).isEqualTo("sammeHusOgFærreEnn4Boenheter")
     }
 
     @Test

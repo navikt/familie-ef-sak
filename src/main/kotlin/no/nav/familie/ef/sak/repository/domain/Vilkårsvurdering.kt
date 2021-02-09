@@ -26,6 +26,7 @@ data class Delvilk책rsvurderingWrapper(val delvilk책rsvurderinger: List<Delvilk�
 
 data class Delvilk책rsvurdering(val type: Delvilk책rType,
                                val resultat: Vilk책rsresultat = Vilk책rsresultat.IKKE_VURDERT,
+                               val 책rsak: String? = null, //enum
                                val begrunnelse: String? = null)
 
 data class Delvilk책rMetadata(val sivilstandstype: Sivilstandstype)

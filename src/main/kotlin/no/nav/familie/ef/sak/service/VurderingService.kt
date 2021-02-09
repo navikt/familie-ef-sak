@@ -49,6 +49,7 @@ class VurderingService(private val behandlingService: BehandlingService,
                                                                          .map { delvurdering ->
                                                                              Delvilkårsvurdering(delvurdering.type,
                                                                                                  delvurdering.resultat,
+                                                                                                 delvurdering.årsak,
                                                                                                  delvurdering.begrunnelse)
                                                                          })
                 )
@@ -100,6 +101,7 @@ class VurderingService(private val behandlingService: BehandlingService,
                                         delvilkårsvurderinger = it.delvilkårsvurdering.delvilkårsvurderinger.map { delvurdering ->
                                             DelvilkårsvurderingDto(delvurdering.type,
                                                                    delvurdering.resultat,
+                                                                   delvurdering.årsak,
                                                                    delvurdering.begrunnelse)
                                         })
                 }
