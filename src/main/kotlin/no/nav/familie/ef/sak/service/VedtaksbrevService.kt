@@ -9,11 +9,11 @@ import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-class BrevService(private val brevClient: BrevClient,
-                  private val brevRepository: VedtaksbrevRepository,
-                  private val behandlingService: BehandlingService,
-                  private val fagsakService: FagsakService,
-                  private val personService: PersonService) {
+class VedtaksbrevService(private val brevClient: BrevClient,
+                         private val brevRepository: VedtaksbrevRepository,
+                         private val behandlingService: BehandlingService,
+                         private val fagsakService: FagsakService,
+                         private val personService: PersonService) {
 
     fun lagBrev(behandlingId: UUID): ByteArray {
         val behandling = behandlingService.hentBehandling(behandlingId)
