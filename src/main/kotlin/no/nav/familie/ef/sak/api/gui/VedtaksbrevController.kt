@@ -14,8 +14,8 @@ import java.util.*
 @RequestMapping(path = ["/api/brev"])
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class BrevKontroller(private val brevService: BrevService,
-                     private val tilgangService: TilgangService) {
+class VedtaksbrevController(private val brevService: BrevService,
+                            private val tilgangService: TilgangService) {
 
     @PostMapping("/{behandlingId}")
     fun lagBrev(@PathVariable behandlingId: UUID, @RequestBody brevParams: BrevRequest): Ressurs<ByteArray> {
