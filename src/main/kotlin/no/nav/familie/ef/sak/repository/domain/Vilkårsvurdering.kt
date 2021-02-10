@@ -44,8 +44,8 @@ enum class DelvilkårType {
 }
 
 enum class Vilkårsresultat {
-    JA,
-    NEI,
+    OPPFYLT,
+    IKKE_OPPFYLT,
     IKKE_VURDERT,
     IKKE_AKTUELL
 }
