@@ -15,6 +15,7 @@ data class Vilkårsvurdering(@Id
                             val type: VilkårType,
                             val begrunnelse: String? = null,
                             val unntak: String? = null,
+                            val barnId: UUID? = null,
                             @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                             val sporbar: Sporbar = Sporbar(),
                             @Column("delvilkar")
@@ -25,6 +26,7 @@ data class DelvilkårsvurderingWrapper(val delvilkårsvurderinger: List<Delvilk�
 
 data class Delvilkårsvurdering(val type: DelvilkårType,
                                val resultat: Vilkårsresultat = Vilkårsresultat.IKKE_VURDERT,
+                               val årsak: DelvilkårÅrsak? = null,
                                val begrunnelse: String? = null)
 
 data class DelvilkårMetadata(val sivilstandstype: Sivilstandstype)
@@ -41,6 +43,18 @@ enum class DelvilkårType {
     HAR_FLYTTET_FRA_HVERANDRE,
     LEVER_IKKE_MED_ANNEN_FORELDER,
     LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD,
+    SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
+    NÆRE_BOFORHOLD,
+    MER_AV_DAGLIG_OMSORG,
+}
+
+enum class DelvilkårÅrsak {
+    SAMME_HUS_OG_FÆRRE_ENN_4_BOENHETER,
+    SAMME_HUS_OG_FLERE_ENN_4_BOENHETER_MEN_VURDERT_NÆRT,
+    SELVSTENDIGE_BOLIGER_SAMME_TOMT,
+    SELVSTENDIGE_BOLIGER_SAMME_GÅRDSTUN,
+    NÆRMESTE_BOLIG_ELLER_REKKEHUS_I_SAMMEGATE,
+    TILSTØTENDE_BOLIGER_ELLER_REKKEHUS_I_SAMMEGATE
 }
 
 enum class Vilkårsresultat {
@@ -71,7 +85,11 @@ enum class VilkårType(val beskrivelse: String,
     SAMLIV("§15-4 Samliv",
            listOf(DelvilkårType.HAR_FLYTTET_FRA_HVERANDRE,
                   DelvilkårType.LEVER_IKKE_MED_ANNEN_FORELDER,
-                  DelvilkårType.LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD));
+                  DelvilkårType.LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD)),
+    ALENEOMSORG("§15-4 Aleneomsorg",
+                listOf(DelvilkårType.SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
+                       DelvilkårType.NÆRE_BOFORHOLD,
+                       DelvilkårType.MER_AV_DAGLIG_OMSORG));
 
 
     companion object {
@@ -79,6 +97,7 @@ enum class VilkårType(val beskrivelse: String,
         fun hentInngangsvilkår(): List<VilkårType> = listOf(FORUTGÅENDE_MEDLEMSKAP,
                                                             LOVLIG_OPPHOLD,
                                                             SIVILSTAND,
-                                                            SAMLIV)
+                                                            SAMLIV,
+                                                            ALENEOMSORG)
     }
 }
