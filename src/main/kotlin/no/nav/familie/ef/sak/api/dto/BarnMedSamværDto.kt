@@ -3,7 +3,7 @@ package no.nav.familie.ef.sak.api.dto
 import java.time.LocalDate
 
 data class BarnMedSamværDto(
-        val barneId: String,
+        val barnId: String,
         val søknadsgrunnlag: BarnMedSamværSøknadsgrunnlagDto,
         val registergrunnlag: BarnMedSamværRegistergrunnlagDto
 )
