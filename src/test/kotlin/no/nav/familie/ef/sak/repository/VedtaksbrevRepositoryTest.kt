@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.service.steg.StegType
 import org.junit.jupiter.api.Test
 import org.assertj.core.api.Assertions.assertThat
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.LocalDate
 
 internal class VedtaksbrevRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -23,7 +24,7 @@ internal class VedtaksbrevRepositoryTest : OppslagSpringRunnerTest() {
         val behandling = behandlingRepository.insert(behandling(fagsak))
         val vedtaksbrev = Vedtaksbrev(behandlingId = behandling.id,
                                       steg = StegType.SEND_TIL_BESLUTTER,
-                                      brevRequest = BrevRequest("Olav Olavssen", "12345678910"),
+                                      brevRequest = BrevRequest("Olav Olavssen", "12345678910", LocalDate.now(), LocalDate.now(), "fordi jepp", LocalDate.now(), 1300),
                                       pdf = ByteArray(123))
 
         vedtaksbrevRepository.insert(vedtaksbrev)

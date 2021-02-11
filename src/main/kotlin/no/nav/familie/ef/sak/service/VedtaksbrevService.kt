@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.repository.VedtaksbrevRepository
 import no.nav.familie.ef.sak.repository.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.service.steg.StegType
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.util.*
 
 @Service
@@ -22,15 +23,20 @@ class VedtaksbrevService(private val brevClient: BrevClient,
         val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
         val person = personService.hentSøker(fagsak.hentAktivIdent())
         val navn = person.navn.gjeldende().visningsnavn()
+        val innvilgelseFra = LocalDate.now()
+        val innvilgelseTil = LocalDate.now()
+        val begrunnelseFomDatoInnvilgelse = "fordi jajaja"
+        val brevdato = LocalDate.now()
+        val belopOvergangsstonad = 13943
 
-        val request = BrevRequest(navn = navn, ident = fagsak.hentAktivIdent())
+        val request = BrevRequest(navn = navn, ident = fagsak.hentAktivIdent(), innvilgelseFra = innvilgelseFra, innvilgelseTil = innvilgelseTil, begrunnelseFomDatoInnvilgelse = begrunnelseFomDatoInnvilgelse, brevdato = brevdato, belopOvergangsstonad = belopOvergangsstonad)
 
         val brev = brevRepository.insert(Vedtaksbrev(behandlingId = behandlingId,
-                                                     brevRequest = request,
-                                                     steg = behandling.steg,
-                                                     pdf = brevClient.genererBrev("bokmaal",
-                                                                                  "testDokument",
-                                                                                  request)))
+                brevRequest = request,
+                steg = behandling.steg,
+                pdf = brevClient.genererBrev("bokmaal",
+                        "innvilgetVedtakMVP",
+                        request)))
         return brev.pdf
     }
 
