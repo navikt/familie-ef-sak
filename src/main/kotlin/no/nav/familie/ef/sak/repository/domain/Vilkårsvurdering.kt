@@ -38,7 +38,6 @@ enum class DelvilkårType {
     SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
     SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
     KRAV_SIVILSTAND,
-    HAR_FLYTTET_FRA_HVERANDRE,
     LEVER_IKKE_MED_ANNEN_FORELDER,
     LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD,
 }
@@ -69,8 +68,7 @@ enum class VilkårType(val beskrivelse: String,
                        DelvilkårType.KRAV_SIVILSTAND,
                )),
     SAMLIV("§15-4 Samliv",
-           listOf(DelvilkårType.HAR_FLYTTET_FRA_HVERANDRE,
-                  DelvilkårType.LEVER_IKKE_MED_ANNEN_FORELDER,
+           listOf(DelvilkårType.LEVER_IKKE_MED_ANNEN_FORELDER,
                   DelvilkårType.LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD));
 
 
