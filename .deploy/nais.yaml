@@ -58,7 +58,3 @@ spec:
       value: {{springProfile}}
   envFrom:
     - secret: familie-ef-sak
-    - secret: sts-apikey
-    - secret: pdl-apikey
-    - secret: familie-oppdrag-apikey
-    - secret: familie-integrasjoner-apikey

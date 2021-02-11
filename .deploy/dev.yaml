@@ -2,4 +2,8 @@ ingress: https://familie-ef-sak.dev.intern.nav.no
 externalHosts:
   - api-gw-q1.oera.no
   - unleash.dev-adeo.no
+  - familie-oppdrag.dev-fss-pub.nais.io
+  - familie-ef-infotrygd-feed.dev-fss-pub.nais.io
+  - familie-integrasjoner.dev-fss-pub.nais.io
+  - infotrygd-enslig-forsoerger.dev-fss-pub.nais.io
 springProfile: dev
