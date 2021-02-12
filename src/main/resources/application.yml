@@ -119,7 +119,7 @@ FAMILIE_INTEGRASJONER_URL: http://familie-integrasjoner.${ON_PREM_URL_ENV}-fss-p
 INFOTRYGD_FEED_API_URL: https://familie-ef-infotrygd-feed.${ON_PREM_URL_ENV}-fss-pub.nais.io
 INFOTRYGD_REPLIKA_API_URL: https://infotrygd-enslig-forsoerger.${ON_PREM_URL_ENV}-fss-pub.nais.io
 
-FRONTEND_OPPGAVE_URL: https://ensligmorellerfar.prod-fss.nais.io/fagsak #TODO
+FRONTEND_OPPGAVE_URL: https://ensligmorellerfar.dev.intern.nav.no/fagsak
 
 GYLDIGE_SERVICE_BRUKERE: srvArena
 
