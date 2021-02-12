@@ -17,6 +17,7 @@ import no.nav.familie.ef.sak.repository.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.repository.domain.DelvilkårType.*
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
+import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
@@ -40,7 +41,10 @@ internal class VurderingServiceTest {
 
     @BeforeEach
     fun setUp() {
-        val noe = SøknadsskjemaMapper.tilDomene(Testsøknad.søknadOvergangsstønad)
+        val noe = SøknadsskjemaMapper.tilDomene(TestsøknadBuilder.Builder().setBarn(listOf(
+                TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "13071489536"),
+                TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "01012067050")
+        )).build().søknadOvergangsstønad)
         every { behandlingService.hentOvergangsstønad(any()) }
                 .returns(noe)
         every { familieIntegrasjonerClient.hentMedlemskapsinfo(any()) }
@@ -64,8 +68,10 @@ internal class VurderingServiceTest {
 
         vurderingService.hentInngangsvilkår(BEHANDLING_ID)
 
-        assertThat(nyeVilkårsvurderinger.captured).hasSize(inngangsvilkår.size)
-        assertThat(nyeVilkårsvurderinger.captured.map { it.type }).containsExactlyElementsOf(inngangsvilkår)
+        assertThat(nyeVilkårsvurderinger.captured).hasSize(inngangsvilkår.size + 1)
+        assertThat(nyeVilkårsvurderinger.captured.map { it.type }.distinct()).containsExactlyElementsOf(inngangsvilkår)
+        assertThat(nyeVilkårsvurderinger.captured.filter { it.type == VilkårType.ALENEOMSORG }).hasSize(2)
+        assertThat(nyeVilkårsvurderinger.captured.filter { it.barnId != null }).hasSize(2)
         assertThat(nyeVilkårsvurderinger.captured.map { it.resultat }.toSet()).containsOnly(Vilkårsresultat.IKKE_VURDERT)
         assertThat(nyeVilkårsvurderinger.captured.map { it.behandlingId }.toSet()).containsOnly(BEHANDLING_ID)
     }
@@ -114,10 +120,14 @@ internal class VurderingServiceTest {
         val inngangsvilkår = VilkårType.hentInngangsvilkår()
 
         val alleVilkårsvurderinger = vurderingService.hentInngangsvilkår(BEHANDLING_ID).vurderinger
-
-        assertThat(nyeVilkårsvurderinger.captured).hasSize(inngangsvilkår.size - 1)
-        assertThat(alleVilkårsvurderinger).hasSize(inngangsvilkår.size)
+        assertThat(nyeVilkårsvurderinger.captured).hasSize(inngangsvilkår.size)
+        assertThat(nyeVilkårsvurderinger.captured.filter { it.type == VilkårType.ALENEOMSORG}).hasSize(2)
+        assertThat(alleVilkårsvurderinger).hasSize(inngangsvilkår.size  + 1)
         assertThat(nyeVilkårsvurderinger.captured.map { it.type }).doesNotContain(VilkårType.FORUTGÅENDE_MEDLEMSKAP)
+        assertThat(nyeVilkårsvurderinger.captured.map { it.type }).contains(VilkårType.LOVLIG_OPPHOLD)
+        assertThat(nyeVilkårsvurderinger.captured.map { it.type }).contains(VilkårType.SIVILSTAND)
+        assertThat(nyeVilkårsvurderinger.captured.map { it.type }).contains(VilkårType.SAMLIV)
+
     }
 
     @Test

@@ -29,14 +29,14 @@
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <jvmTarget>11</jvmTarget>
-        <kotlin.version>1.4.21-2</kotlin.version>
+        <kotlin.version>1.4.30</kotlin.version>
         <kotlin-coroutines.version>1.4.2</kotlin-coroutines.version>
         <springfox.version>3.0.0</springfox.version>
         <mockk.version>1.10.5</mockk.version>
-        <felles.version>1.20210208071653_c36fa32</felles.version>
+        <felles.version>1.20210208115050_88991d1</felles.version>
         <prosessering.version>1.20210112120136_9956e1e</prosessering.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>2.0_20210202160936_4b5ec93</kontrakter.version>
+        <kontrakter.version>2.0_20210210155242_35b4f85</kontrakter.version>
 
         <!-- Setter disse til token-support sine versjoner, versjoner(9.x) i spring er ikke kompatibel med oauth2-oidc-sdk -->
         <nimbus-jose-jwt.version>8.20.2</nimbus-jose-jwt.version>

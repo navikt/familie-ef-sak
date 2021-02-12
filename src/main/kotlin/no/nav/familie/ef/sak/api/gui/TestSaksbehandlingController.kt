@@ -10,7 +10,10 @@ import no.nav.familie.ef.sak.service.BehandlingshistorikkService
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.PersonService
 import no.nav.familie.ef.sak.service.steg.StegType
-import no.nav.familie.kontrakter.ef.søknad.*
+import no.nav.familie.kontrakter.ef.søknad.Barn
+import no.nav.familie.kontrakter.ef.søknad.Fødselsnummer
+import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
+import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.context.annotation.Profile
@@ -41,41 +44,39 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
                                                                                  steg = StegType.REGISTRERE_OPPLYSNINGER))
         val søkerMedBarn = personService.hentPersonMedRelasjoner(testFagsakRequest.personIdent)
 
-        val barnNavnOgFnr = søkerMedBarn.barn.map { NavnOgFnr(it.value.navn.gjeldende().visningsnavn(), it.key) }
+        val barneListe: List<Barn> = søkerMedBarn.barn.map {
+            TestsøknadBuilder.Builder().defaultBarn(
+                    navn = it.value.navn.gjeldende().visningsnavn(),
+                    fødselsnummer = it.key,
+                    harSkalHaSammeAdresse = true,
+                    ikkeRegistrertPåSøkersAdresseBeskrivelse = "Fordi",
+                    erBarnetFødt = true,
+                    fødselTermindato = Fødselsnummer(it.key).fødselsdato,
+                    annenForelder = TestsøknadBuilder.Builder().defaultAnnenForelder(
+                            ikkeOppgittAnnenForelderBegrunnelse = null,
+                            bosattINorge = false,
+                            land = "Sverige",
+                            personMinimum = TestsøknadBuilder.Builder().defaultPersonMinimum("Bob Burger", LocalDate.of(1979, 9, 17)),
+                    ),
+                    samvær = TestsøknadBuilder.Builder().defaultSamvær(
+                            beskrivSamværUtenBarn = "Har sjelden sett noe til han",
+                            borAnnenForelderISammeHus =  "ja",
+                            borAnnenForelderISammeHusBeskrivelse = "Samme blokk",
+                            harDereSkriftligAvtaleOmSamvær =  "jaIkkeKonkreteTidspunkter",
+                            harDereTidligereBoddSammen = true,
+                            hvorMyeErDuSammenMedAnnenForelder = "møtesUtenom",
+                            hvordanPraktiseresSamværet =  "Bytter litt på innimellom",
+                            nårFlyttetDereFraHverandre = LocalDate.of(2020, 12, 31),
+                            skalAnnenForelderHaSamvær = "jaMerEnnVanlig",
+                            spørsmålAvtaleOmDeltBosted = true
+                    ),
+                    skalBoHosSøker = "jaMenSamarbeiderIkke"
+            )
+        }
 
         val søknad: SøknadOvergangsstønad = TestsøknadBuilder.Builder()
                 .setPersonalia(søkerMedBarn.søker.navn.gjeldende().visningsnavn(), søkerMedBarn.søkerIdent)
-                .setBarn(
-                        navn = barnNavnOgFnr[0].navn,
-                        fødselsnummer = Fødselsnummer(barnNavnOgFnr[0].fødselsnummer),
-                        harSkalHaSammeAdresse = true,
-                        ikkeRegistrertPåSøkersAdresseBeskrivelse = "Fordi",
-                        erBarnetFødt = true,
-                        fødselTermindato = Fødselsnummer(barnNavnOgFnr[0].fødselsnummer).fødselsdato,
-                        annenForelder = AnnenForelder(
-                                ikkeOppgittAnnenForelderBegrunnelse = null,
-                                bosattNorge = Søknadsfelt("Bosatt i norge", false),
-                                land = Søknadsfelt("Land", "Sverige"),
-                                person = Søknadsfelt("annenForelder", TestsøknadBuilder.Builder().defaultPersonMinimum("Bob Burger", LocalDate.of(1979, 9, 17))),
-                        ),
-                        samvær = Samvær(
-                                avtaleOmDeltBosted = null,
-                                beskrivSamværUtenBarn = Søknadsfelt("Beskrivelse av samvær", "Har sjelden sett noe til han"),
-                                borAnnenForelderISammeHus = Søknadsfelt("Samme hus", "Jepp", null, "ja"),
-                                borAnnenForelderISammeHusBeskrivelse = Søknadsfelt("Samme hus beskrivelse", "Samme blokk"),
-                                erklæringOmSamlivsbrudd = null,
-                                harDereSkriftligAvtaleOmSamvær = Søknadsfelt("Avtale", "Jepps", null, "jaIkkeKonkreteTidspunkter"),
-                                harDereTidligereBoddSammen = Søknadsfelt("Bodd sammen", true),
-                                hvorMyeErDuSammenMedAnnenForelder = Søknadsfelt("Hvor mye sammen", "Mye", null, "møtesUtenom"),
-                                hvordanPraktiseresSamværet = Søknadsfelt("Hvordan praktiseres", "Bytter litt på innimellom"),
-                                nårFlyttetDereFraHverandre = Søknadsfelt("Når fraflytting", LocalDate.of(2020, 12, 31)),
-                                samværsavtale = null,
-                                skalAnnenForelderHaSamvær = Søknadsfelt("Skal annen forelder ha samvær", "Jepps", null, "jaMerEnnVanlig"),
-                                skalBarnetBoHosSøkerMenAnnenForelderSamarbeiderIkke = null,
-                                spørsmålAvtaleOmDeltBosted = Søknadsfelt("Delt bosted", true)
-
-                        )
-                        )
+                .setBarn(barneListe)
                 .build().søknadOvergangsstønad
 
 
