@@ -17,6 +17,7 @@ import no.nav.familie.ef.sak.repository.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.repository.domain.DelvilkårType.*
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
+import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
@@ -40,14 +41,18 @@ internal class VurderingServiceTest {
 
     @BeforeEach
     fun setUp() {
-        val noe = SøknadsskjemaMapper.tilDomene(Testsøknad.søknadOvergangsstønad)
+        val noe = SøknadsskjemaMapper.tilDomene(TestsøknadBuilder.Builder().setBarn(listOf(
+                TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "13071489536"),
+                TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "01012067050")
+        )).build().søknadOvergangsstønad)
         every { behandlingService.hentOvergangsstønad(any()) }
                 .returns(noe)
         every { familieIntegrasjonerClient.hentMedlemskapsinfo(any()) }
-                .returns(Medlemskapsinfo(personIdent = noe.fødselsnummer,
-                                         gyldigePerioder = emptyList(),
-                                         uavklartePerioder = emptyList(),
-                                         avvistePerioder = emptyList(),
+                .returns(Medlemskapsinfo(
+                        personIdent = noe.fødselsnummer,
+                        gyldigePerioder = emptyList(),
+                        uavklartePerioder = emptyList(),
+                        avvistePerioder = emptyList(),
                 ))
     }
 
@@ -63,8 +68,10 @@ internal class VurderingServiceTest {
 
         vurderingService.hentInngangsvilkår(BEHANDLING_ID)
 
-        assertThat(nyeVilkårsvurderinger.captured).hasSize(inngangsvilkår.size)
-        assertThat(nyeVilkårsvurderinger.captured.map { it.type }).containsExactlyElementsOf(inngangsvilkår)
+        assertThat(nyeVilkårsvurderinger.captured).hasSize(inngangsvilkår.size + 1)
+        assertThat(nyeVilkårsvurderinger.captured.map { it.type }.distinct()).containsExactlyElementsOf(inngangsvilkår)
+        assertThat(nyeVilkårsvurderinger.captured.filter { it.type == VilkårType.ALENEOMSORG }).hasSize(2)
+        assertThat(nyeVilkårsvurderinger.captured.filter { it.barnId != null }).hasSize(2)
         assertThat(nyeVilkårsvurderinger.captured.map { it.resultat }.toSet()).containsOnly(Vilkårsresultat.IKKE_VURDERT)
         assertThat(nyeVilkårsvurderinger.captured.map { it.behandlingId }.toSet()).containsOnly(BEHANDLING_ID)
     }
@@ -91,7 +98,10 @@ internal class VurderingServiceTest {
                         SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
                         KRAV_SIVILSTAND,
                         LEVER_IKKE_MED_ANNEN_FORELDER,
-                        LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD
+                        LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD,
+                        SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
+                        NÆRE_BOFORHOLD,
+                        MER_AV_DAGLIG_OMSORG
                 ))
 
     }
@@ -110,10 +120,14 @@ internal class VurderingServiceTest {
         val inngangsvilkår = VilkårType.hentInngangsvilkår()
 
         val alleVilkårsvurderinger = vurderingService.hentInngangsvilkår(BEHANDLING_ID).vurderinger
-
-        assertThat(nyeVilkårsvurderinger.captured).hasSize(inngangsvilkår.size - 1)
-        assertThat(alleVilkårsvurderinger).hasSize(inngangsvilkår.size)
+        assertThat(nyeVilkårsvurderinger.captured).hasSize(inngangsvilkår.size)
+        assertThat(nyeVilkårsvurderinger.captured.filter { it.type == VilkårType.ALENEOMSORG}).hasSize(2)
+        assertThat(alleVilkårsvurderinger).hasSize(inngangsvilkår.size  + 1)
         assertThat(nyeVilkårsvurderinger.captured.map { it.type }).doesNotContain(VilkårType.FORUTGÅENDE_MEDLEMSKAP)
+        assertThat(nyeVilkårsvurderinger.captured.map { it.type }).contains(VilkårType.LOVLIG_OPPHOLD)
+        assertThat(nyeVilkårsvurderinger.captured.map { it.type }).contains(VilkårType.SIVILSTAND)
+        assertThat(nyeVilkårsvurderinger.captured.map { it.type }).contains(VilkårType.SAMLIV)
+
     }
 
     @Test
@@ -221,15 +235,50 @@ internal class VurderingServiceTest {
                                                                vilkårsvurdering.type,
                                                                null,
                                                                null,
+                                                               null,
                                                                "jens123@trugdeetaten.no",
                                                                LocalDateTime.now(),
                                                                listOf(DelvilkårsvurderingDto(LEVER_IKKE_MED_ANNEN_FORELDER,
                                                                                              Vilkårsresultat.JA,
+                                                                                             null,
                                                                                              "Delvilkår ok")))
         vurderingService.oppdaterVilkår(oppdatertVilkårsvurderingDto)
 
         assertThat(lagretVilkårsvurdering.captured.delvilkårsvurdering.delvilkårsvurderinger.first().resultat).isEqualTo(Vilkårsresultat.JA)
         assertThat(lagretVilkårsvurdering.captured.delvilkårsvurdering.delvilkårsvurderinger.first().begrunnelse).isEqualTo("Delvilkår ok")
+    }
+
+    @Test
+    internal fun `skal oppdatere årsak for delvilkårsvurdering`() {
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling(fagsak(), true, BehandlingStatus.OPPRETTET)
+        val vilkårsvurdering = vilkårsvurdering(BEHANDLING_ID,
+                                                Vilkårsresultat.IKKE_VURDERT,
+                                                VilkårType.ALENEOMSORG,
+                                                listOf(
+                                                        Delvilkårsvurdering(NÆRE_BOFORHOLD,
+                                                                            Vilkårsresultat.IKKE_VURDERT,
+                                                                            DelvilkårÅrsak.SELVSTENDIGE_BOLIGER_SAMME_GÅRDSTUN),
+                                                ))
+        every { vilkårsvurderingRepository.findByIdOrNull(vilkårsvurdering.id) } returns vilkårsvurdering
+        val lagretVilkårsvurdering = slot<Vilkårsvurdering>()
+        every { vilkårsvurderingRepository.update(capture(lagretVilkårsvurdering)) } answers
+                { it.invocation.args.first() as Vilkårsvurdering }
+
+        val oppdatertVilkårsvurderingDto = VilkårsvurderingDto(vilkårsvurdering.id,
+                                                               vilkårsvurdering.behandlingId,
+                                                               Vilkårsresultat.JA,
+                                                               vilkårsvurdering.type,
+                                                               null,
+                                                               null,
+                                                               null,
+                                                               "jens123@trugdeetaten.no",
+                                                               LocalDateTime.now(),
+                                                               listOf(DelvilkårsvurderingDto(NÆRE_BOFORHOLD,
+                                                                                             Vilkårsresultat.JA,
+                                                                                             DelvilkårÅrsak.SAMME_HUS_OG_FLERE_ENN_4_BOENHETER_MEN_VURDERT_NÆRT,
+                                                                                             "Delvilkår ok")))
+        vurderingService.oppdaterVilkår(oppdatertVilkårsvurderingDto)
+        assertThat(lagretVilkårsvurdering.captured.delvilkårsvurdering.delvilkårsvurderinger.first().årsak).isEqualTo(DelvilkårÅrsak.SAMME_HUS_OG_FLERE_ENN_4_BOENHETER_MEN_VURDERT_NÆRT)
     }
 
     @Test

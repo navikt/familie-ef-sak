@@ -37,7 +37,7 @@ object BarnMedSamværMapper {
         val søknadsbarn = matchetBarn.søknadsbarn
         val samvær = søknadsbarn.samvær
         return BarnMedSamværDto(
-            barneId = søknadsbarn.id.toString(),
+            barnId = søknadsbarn.id.toString(),
             søknadsgrunnlag = BarnMedSamværSøknadsgrunnlagDto(
                         navn = søknadsbarn.navn,
                         fødselsnummer = søknadsbarn.fødselsnummer,

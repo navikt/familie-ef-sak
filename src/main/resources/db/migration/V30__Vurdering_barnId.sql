@@ -1,0 +1,1 @@
+ALTER TABLE vilkarsvurdering ADD COLUMN barn_id VARCHAR;
