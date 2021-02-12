@@ -37,11 +37,16 @@ data class BrevRequest(val navn: String,
                 ]
               },
               "valgfelter": {
-                "barnAlder": [
-                  {
-                    "navn": "barnFodt"
-                  }
-                ]
+                  "barnAlder": [
+                      {
+                          "navn": "barnFodt",
+                          "dokumentVariabler":{
+                              "flettefelter": { 
+                                  "blirEttAarDato": ["12.12.2012"]
+                              }
+                          }
+                      }
+                  ]
               },
               "delmalData": {
                 "signatur": {
