@@ -5,13 +5,11 @@ import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.service.TilkjentYtelseService
-import no.nav.familie.ef.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ef.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.util.*
 
@@ -37,10 +35,11 @@ internal class VentePåStatusFraØkonomiTest {
         } returns OppdragStatus.KVITTERT_OK
 
         ventPåStatusFraØkonomi.utførSteg(Behandling(fagsakId = fagsak.id,
-                                                   type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                   status = BehandlingStatus.IVERKSETTER_VEDTAK,
-                                                   steg = ventPåStatusFraØkonomi.stegType()),
-                                        null)
+                                                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                                                    status = BehandlingStatus.IVERKSETTER_VEDTAK,
+                                                    steg = ventPåStatusFraØkonomi.stegType(),
+                                                    resultat = BehandlingResultat.INNVILGET),
+                                         null)
 
         Assertions.assertThat(taskSlot.captured.type).isEqualTo(JournalførVedtaksbrevTask.TYPE)
     }

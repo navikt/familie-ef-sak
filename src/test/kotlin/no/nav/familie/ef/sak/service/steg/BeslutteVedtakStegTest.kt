@@ -71,7 +71,8 @@ internal class BeslutteVedtakStegTest {
         val nesteSteg = beslutteVedtakSteg.utførOgReturnerNesteSteg(Behandling(fagsakId = fagsak.id,
                                                                                type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                                                                status = BehandlingStatus.FATTER_VEDTAK,
-                                                                               steg = beslutteVedtakSteg.stegType()),
+                                                                               steg = beslutteVedtakSteg.stegType(),
+                                                                               resultat = BehandlingResultat.IKKE_SATT),
                                                                     BeslutteVedtakDto(godkjent = godkjent))
         return nesteSteg
     }

@@ -24,7 +24,8 @@ fun behandling(fagsak: Fagsak,
                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
                    status = status,
                    steg = steg,
-                   aktiv = aktiv)
+                   aktiv = aktiv,
+                   resultat = BehandlingResultat.IKKE_SATT)
 
 
 fun fagsak(identer: Set<FagsakPerson> = setOf(), stønadstype: Stønadstype = Stønadstype.OVERGANGSSTØNAD) =

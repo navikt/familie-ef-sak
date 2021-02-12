@@ -35,7 +35,8 @@ internal class SendTilBeslutterStegTest {
     private val behandling = Behandling(fagsakId = fagsak.id,
                                         type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                         status = BehandlingStatus.UTREDES,
-                                        steg = beslutteVedtakSteg.stegType())
+                                        steg = beslutteVedtakSteg.stegType(),
+                                        resultat = BehandlingResultat.IKKE_SATT)
     private lateinit var taskSlot: MutableList<Task>
 
     @BeforeEach
