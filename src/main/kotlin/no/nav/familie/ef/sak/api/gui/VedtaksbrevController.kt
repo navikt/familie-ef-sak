@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.api.gui
 
-import no.nav.familie.ef.sak.api.dto.BrevRequest
 import no.nav.familie.ef.sak.service.VedtaksbrevService
 import no.nav.familie.ef.sak.service.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -27,8 +26,6 @@ class VedtaksbrevController(private val brevService: VedtaksbrevService,
     @GetMapping("/{behandlingId}")
     fun hentBrev(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
-        val respons = brevService.hentBrev(behandlingId)
-
-        return respons?.let { Ressurs.success(it.pdf) } ?: Ressurs.funksjonellFeil("Fant ingen brev for behandling")
+        return  Ressurs.success(brevService.hentBrev(behandlingId).utkastPdf)
     }
 }
