@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.api.dto
 
 import no.nav.familie.ef.sak.repository.domain.Behandling
+import no.nav.familie.ef.sak.repository.domain.BehandlingResultat
 import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.service.steg.StegType
@@ -12,7 +13,9 @@ data class BehandlingDto(val id: UUID,
                          val type: BehandlingType,
                          val aktiv: Boolean,
                          val status: BehandlingStatus,
-                         val sistEndret: LocalDate)
+                         val sistEndret: LocalDate,
+                         val resultat: BehandlingResultat,
+                         val opprettet: LocalDate)
 
 fun Behandling.tilDto(): BehandlingDto =
         BehandlingDto(id = this.id,
@@ -20,4 +23,6 @@ fun Behandling.tilDto(): BehandlingDto =
                       type = this.type,
                       aktiv = this.aktiv,
                       status = this.status,
-                      sistEndret = this.sporbar.endret.endretTid.toLocalDate())
+                      sistEndret = this.sporbar.endret.endretTid.toLocalDate(),
+                      resultat = this.resultat,
+                      opprettet = this.sporbar.opprettetTid.toLocalDate())

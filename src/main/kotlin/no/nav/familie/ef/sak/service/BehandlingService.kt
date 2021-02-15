@@ -59,7 +59,8 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
         return behandlingRepository.insert(Behandling(fagsakId = fagsakId,
                                                       type = behandlingType,
                                                       steg = StegType.REGISTRERE_OPPLYSNINGER,
-                                                      status = BehandlingStatus.OPPRETTET))
+                                                      status = BehandlingStatus.OPPRETTET,
+                                                      resultat = BehandlingResultat.IKKE_SATT))
     }
 
     fun hentBehandling(behandlingId: UUID): Behandling = behandlingRepository.findByIdOrThrow(behandlingId)

@@ -70,14 +70,16 @@ internal class JournalføringServiceTest {
                                     fagsakId = fagsakId,
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     status = BehandlingStatus.UTREDES,
-                                    steg = StegType.REGISTRERE_OPPLYSNINGER))
+                                    steg = StegType.REGISTRERE_OPPLYSNINGER,
+                                    resultat = BehandlingResultat.IKKE_SATT))
 
         every { behandlingService.opprettBehandling(any(), any()) }
                 .returns(Behandling(id = behandlingId,
                                     fagsakId = fagsakId,
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     status = BehandlingStatus.UTREDES,
-                                    steg = StegType.REGISTRERE_OPPLYSNINGER))
+                                    steg = StegType.REGISTRERE_OPPLYSNINGER,
+                                    resultat = BehandlingResultat.IKKE_SATT))
 
         every { oppgaveService.ferdigstillOppgave(any()) } just runs
         every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any()) } returns nyOppgaveId
@@ -141,7 +143,7 @@ internal class JournalføringServiceTest {
 
         every {
             journalpostClient.hentOvergangsstønadSøknad(any(), any())
-        } returns  Testsøknad.søknadOvergangsstønad
+        } returns Testsøknad.søknadOvergangsstønad
 
         val behandleSakOppgaveId =
                 journalføringService.fullførJournalpost(
