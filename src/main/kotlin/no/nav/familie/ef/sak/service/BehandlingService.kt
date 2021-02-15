@@ -29,6 +29,7 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
                         private val behandlingRepository: BehandlingRepository) {
 
     val logger: Logger = LoggerFactory.getLogger(this.javaClass)
+    private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     @Transactional
     fun lagreSøknadForOvergangsstønad(søknad: SøknadOvergangsstønadKontrakt,
@@ -81,7 +82,7 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
 
     fun oppdaterStatusPåBehandling(behandlingId: UUID, status: BehandlingStatus): Behandling {
         val behandling = hentBehandling(behandlingId)
-        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer status på behandling $behandlingId " +
+        secureLogger.info("${SikkerhetContext.hentSaksbehandler()} endrer status på behandling $behandlingId " +
                     "fra ${behandling.status} til $status")
 
         behandling.status = status
@@ -90,7 +91,7 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
 
     fun oppdaterStegPåBehandling(behandlingId: UUID, steg: StegType): Behandling {
         val behandling = hentBehandling(behandlingId)
-        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer steg på behandling $behandlingId " +
+        secureLogger.info("${SikkerhetContext.hentSaksbehandler()} endrer steg på behandling $behandlingId " +
                     "fra ${behandling.steg} til $steg")
 
         behandling.steg = steg
