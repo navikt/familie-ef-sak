@@ -19,6 +19,7 @@ class PdlClientConfig {
     private val startdato = LocalDate.of(2020, 1, 1)
     private val sluttdato = LocalDate.of(2021, 1, 1)
     private val barnFnr = "01012067050"
+    private val barn2Fnr = "13071489536"
     private val søkerFnr = "01010172272"
     private val annenForelderFnr = "17097926735"
 
@@ -98,7 +99,14 @@ class PdlClientConfig {
                                      dødsfall = listOf(),
                                      familierelasjoner = familierelasjonerBarn(),
                                      fødsel = fødsel(),
-                                     navn = lagNavn("Barn", null, "Barnesen")))
+                                     navn = lagNavn("Barn", null, "Barnesen")),
+                  barn2Fnr to PdlBarn(adressebeskyttelse = listOf(),
+                                     bostedsadresse = bostedsadresse(),
+                                     deltBosted = listOf(),
+                                     dødsfall = listOf(),
+                                     familierelasjoner = familierelasjonerBarn(),
+                                     fødsel = fødsel(),
+                                     navn = lagNavn("Barn2", null, "Barnesen")))
 
     private fun fødsel(år: Int = 2018, måned: Int = 1, dag: Int = 1): List<Fødsel> =
             listOf(Fødsel(fødselsår = år,
@@ -124,6 +132,9 @@ class PdlClientConfig {
 
     private fun familierelasjoner(): List<Familierelasjon> =
             listOf(Familierelasjon(relatertPersonsIdent = barnFnr,
+                                   relatertPersonsRolle = Familierelasjonsrolle.BARN,
+                                   minRolleForPerson = Familierelasjonsrolle.MOR),
+                   Familierelasjon(relatertPersonsIdent = barn2Fnr,
                                    relatertPersonsRolle = Familierelasjonsrolle.BARN,
                                    minRolleForPerson = Familierelasjonsrolle.MOR))
 

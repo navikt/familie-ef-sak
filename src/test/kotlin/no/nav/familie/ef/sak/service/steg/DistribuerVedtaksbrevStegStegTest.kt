@@ -32,7 +32,8 @@ internal class DistribuerVedtaksbrevStegStegTest {
         distribuerVedtaksbrev.utførSteg(Behandling(fagsakId = fagsak.id,
                                                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                                 status = BehandlingStatus.IVERKSETTER_VEDTAK,
-                                                steg = distribuerVedtaksbrev.stegType()),
+                                                steg = distribuerVedtaksbrev.stegType(),
+                                                resultat = BehandlingResultat.IKKE_SATT),
                                      null)
 
         Assertions.assertThat(taskSlot.captured.type).isEqualTo(FerdigstillBehandlingTask.TYPE)

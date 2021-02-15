@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.api.dto.FagsakDto
+import no.nav.familie.ef.sak.api.dto.tilDto
 import no.nav.familie.ef.sak.repository.FagsakRepository
 import no.nav.familie.ef.sak.repository.domain.Fagsak
 import no.nav.familie.ef.sak.repository.domain.FagsakPerson
@@ -24,6 +25,9 @@ class FagsakService(private val fagsakRepository: FagsakRepository, private val 
                          stønadstype = fagsak.stønadstype,
                          behandlinger = behandlinger)
     }
+
+    fun hentFagsakMedBehandlinger(fagsakId: UUID): FagsakDto =
+            hentFagsak(fagsakId).tilDto(behandlinger = behandlingService.hentBehandlinger(fagsakId))
 
     fun hentFagsak(fagsakId: UUID): Fagsak = fagsakRepository.findByIdOrThrow(fagsakId)
 

@@ -2,15 +2,16 @@ package no.nav.familie.ef.sak.api.gui
 
 import no.nav.familie.ef.sak.api.dto.FagsakDto
 import no.nav.familie.ef.sak.api.dto.FagsakRequest
+import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.security.token.support.core.api.Unprotected
+import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
+import java.util.*
 
 @RestController
 @RequestMapping(path = ["/api/fagsak"])
@@ -24,4 +25,9 @@ class FagsakController(private val fagsakService: FagsakService, private val til
         return Ressurs.success(fagsakService.hentEllerOpprettFagsak(fagsakRequest.personIdent, fagsakRequest.stønadstype))
     }
 
+    @GetMapping("{fagsakId}")
+    fun hentFagsak(@PathVariable fagsakId: UUID): Ressurs<FagsakDto> {
+        tilgangService.validerTilgangTilFagsak(fagsakId)
+        return Ressurs.success(fagsakService.hentFagsakMedBehandlinger(fagsakId))
+    }
 }

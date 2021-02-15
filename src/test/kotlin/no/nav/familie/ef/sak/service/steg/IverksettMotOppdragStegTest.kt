@@ -26,7 +26,8 @@ internal class IverksettMotOppdragStegTest {
         val behandling = Behandling(fagsakId = fagsak.id,
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     status = BehandlingStatus.IVERKSETTER_VEDTAK,
-                                    steg = iverksettMotOppdragSteg.stegType())
+                                    steg = iverksettMotOppdragSteg.stegType(),
+                                    resultat = BehandlingResultat.IKKE_SATT)
 
         val taskSlot = slot<Task>()
         every {

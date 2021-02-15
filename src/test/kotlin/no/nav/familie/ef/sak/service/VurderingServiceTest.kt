@@ -17,6 +17,7 @@ import no.nav.familie.ef.sak.repository.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.repository.domain.DelvilkårType.*
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
+import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
@@ -40,7 +41,10 @@ internal class VurderingServiceTest {
 
     @BeforeEach
     fun setUp() {
-        val noe = SøknadsskjemaMapper.tilDomene(Testsøknad.søknadOvergangsstønad)
+        val noe = SøknadsskjemaMapper.tilDomene(TestsøknadBuilder.Builder().setBarn(listOf(
+                TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "13071489536"),
+                TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "01012067050")
+        )).build().søknadOvergangsstønad)
         every { behandlingService.hentOvergangsstønad(any()) }
                 .returns(noe)
         every { familieIntegrasjonerClient.hentMedlemskapsinfo(any()) }
@@ -64,8 +68,10 @@ internal class VurderingServiceTest {
 
         vurderingService.hentInngangsvilkår(BEHANDLING_ID)
 
-        assertThat(nyeVilkårsvurderinger.captured).hasSize(inngangsvilkår.size)
-        assertThat(nyeVilkårsvurderinger.captured.map { it.type }).containsExactlyElementsOf(inngangsvilkår)
+        assertThat(nyeVilkårsvurderinger.captured).hasSize(inngangsvilkår.size + 1)
+        assertThat(nyeVilkårsvurderinger.captured.map { it.type }.distinct()).containsExactlyElementsOf(inngangsvilkår)
+        assertThat(nyeVilkårsvurderinger.captured.filter { it.type == VilkårType.ALENEOMSORG }).hasSize(2)
+        assertThat(nyeVilkårsvurderinger.captured.filter { it.barnId != null }).hasSize(2)
         assertThat(nyeVilkårsvurderinger.captured.map { it.resultat }.toSet()).containsOnly(Vilkårsresultat.IKKE_VURDERT)
         assertThat(nyeVilkårsvurderinger.captured.map { it.behandlingId }.toSet()).containsOnly(BEHANDLING_ID)
     }
@@ -104,7 +110,7 @@ internal class VurderingServiceTest {
     fun `skal ikke opprette nye Vilkårsvurderinger for inngangsvilkår som allerede har en vurdering`() {
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling(fagsak(), true, BehandlingStatus.OPPRETTET)
         every { vilkårsvurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns
-                listOf(vilkårsvurdering(resultat = Vilkårsresultat.JA,
+                listOf(vilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT,
                                         type = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
                                         behandlingId = BEHANDLING_ID))
 
@@ -114,16 +120,20 @@ internal class VurderingServiceTest {
         val inngangsvilkår = VilkårType.hentInngangsvilkår()
 
         val alleVilkårsvurderinger = vurderingService.hentInngangsvilkår(BEHANDLING_ID).vurderinger
-
-        assertThat(nyeVilkårsvurderinger.captured).hasSize(inngangsvilkår.size - 1)
-        assertThat(alleVilkårsvurderinger).hasSize(inngangsvilkår.size)
+        assertThat(nyeVilkårsvurderinger.captured).hasSize(inngangsvilkår.size)
+        assertThat(nyeVilkårsvurderinger.captured.filter { it.type == VilkårType.ALENEOMSORG}).hasSize(2)
+        assertThat(alleVilkårsvurderinger).hasSize(inngangsvilkår.size  + 1)
         assertThat(nyeVilkårsvurderinger.captured.map { it.type }).doesNotContain(VilkårType.FORUTGÅENDE_MEDLEMSKAP)
+        assertThat(nyeVilkårsvurderinger.captured.map { it.type }).contains(VilkårType.LOVLIG_OPPHOLD)
+        assertThat(nyeVilkårsvurderinger.captured.map { it.type }).contains(VilkårType.SIVILSTAND)
+        assertThat(nyeVilkårsvurderinger.captured.map { it.type }).contains(VilkårType.SAMLIV)
+
     }
 
     @Test
     internal fun `skal ikke opprette vilkårsvurderinger hvis behandling er låst for videre vurdering`() {
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling(fagsak(), true, BehandlingStatus.FERDIGSTILT)
-        val vilkårsvurderinger = listOf(vilkårsvurdering(resultat = Vilkårsresultat.JA,
+        val vilkårsvurderinger = listOf(vilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT,
                                                          type = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
                                                          behandlingId = BEHANDLING_ID))
         every { vilkårsvurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns vilkårsvurderinger
@@ -142,7 +152,7 @@ internal class VurderingServiceTest {
         assertThat(catchThrowable {
             vurderingService.oppdaterVilkår(VilkårsvurderingDto(id = vurderingId,
                                                                 behandlingId = BEHANDLING_ID,
-                                                                resultat = Vilkårsresultat.JA,
+                                                                resultat = Vilkårsresultat.OPPFYLT,
                                                                 vilkårType = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
                                                                 endretAv = "",
                                                                 endretTid = LocalDateTime.now()))
@@ -162,7 +172,7 @@ internal class VurderingServiceTest {
         assertThat(catchThrowable {
             vurderingService.oppdaterVilkår(VilkårsvurderingDto(id = vilkårsvurdering.id,
                                                                 behandlingId = BEHANDLING_ID,
-                                                                resultat = Vilkårsresultat.JA,
+                                                                resultat = Vilkårsresultat.OPPFYLT,
                                                                 vilkårType = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
                                                                 endretAv = "",
                                                                 endretTid = LocalDateTime.now()))
@@ -184,7 +194,7 @@ internal class VurderingServiceTest {
 
         vurderingService.oppdaterVilkår(VilkårsvurderingDto(id = vilkårsvurdering.id,
                                                             behandlingId = BEHANDLING_ID,
-                                                            resultat = Vilkårsresultat.JA,
+                                                            resultat = Vilkårsresultat.OPPFYLT,
                                                             begrunnelse = "Ok",
                                                             unntak = "Nei",
                                                             vilkårType = vilkårsvurdering.type,
@@ -192,14 +202,14 @@ internal class VurderingServiceTest {
                                                             listOf(DelvilkårsvurderingDto(vilkårsvurdering.delvilkårsvurdering
                                                                                                   .delvilkårsvurderinger
                                                                                                   .first().type,
-                                                                                          Vilkårsresultat.JA)),
+                                                                                          Vilkårsresultat.OPPFYLT)),
                                                             endretAv = "",
                                                             endretTid = LocalDateTime.now()))
-        assertThat(lagretVilkårsvurdering.captured.resultat).isEqualTo(Vilkårsresultat.JA)
+        assertThat(lagretVilkårsvurdering.captured.resultat).isEqualTo(Vilkårsresultat.OPPFYLT)
         assertThat(lagretVilkårsvurdering.captured.begrunnelse).isEqualTo("Ok")
         assertThat(lagretVilkårsvurdering.captured.unntak).isEqualTo("Nei")
         assertThat(lagretVilkårsvurdering.captured.delvilkårsvurdering.delvilkårsvurderinger.first().resultat)
-                .isEqualTo(Vilkårsresultat.JA)
+                .isEqualTo(Vilkårsresultat.OPPFYLT)
         assertThat(lagretVilkårsvurdering.captured.type).isEqualTo(vilkårsvurdering.type)
     }
 
@@ -221,7 +231,7 @@ internal class VurderingServiceTest {
 
         val oppdatertVilkårsvurderingDto = VilkårsvurderingDto(vilkårsvurdering.id,
                                                                vilkårsvurdering.behandlingId,
-                                                               Vilkårsresultat.JA,
+                                                               Vilkårsresultat.OPPFYLT,
                                                                vilkårsvurdering.type,
                                                                null,
                                                                null,
@@ -229,12 +239,12 @@ internal class VurderingServiceTest {
                                                                "jens123@trugdeetaten.no",
                                                                LocalDateTime.now(),
                                                                listOf(DelvilkårsvurderingDto(LEVER_IKKE_MED_ANNEN_FORELDER,
-                                                                                             Vilkårsresultat.JA,
+                                                                                             Vilkårsresultat.OPPFYLT,
                                                                                              null,
                                                                                              "Delvilkår ok")))
         vurderingService.oppdaterVilkår(oppdatertVilkårsvurderingDto)
 
-        assertThat(lagretVilkårsvurdering.captured.delvilkårsvurdering.delvilkårsvurderinger.first().resultat).isEqualTo(Vilkårsresultat.JA)
+        assertThat(lagretVilkårsvurdering.captured.delvilkårsvurdering.delvilkårsvurderinger.first().resultat).isEqualTo(Vilkårsresultat.OPPFYLT)
         assertThat(lagretVilkårsvurdering.captured.delvilkårsvurdering.delvilkårsvurderinger.first().begrunnelse).isEqualTo("Delvilkår ok")
     }
 
@@ -256,7 +266,7 @@ internal class VurderingServiceTest {
 
         val oppdatertVilkårsvurderingDto = VilkårsvurderingDto(vilkårsvurdering.id,
                                                                vilkårsvurdering.behandlingId,
-                                                               Vilkårsresultat.JA,
+                                                               Vilkårsresultat.OPPFYLT,
                                                                vilkårsvurdering.type,
                                                                null,
                                                                null,
@@ -264,7 +274,7 @@ internal class VurderingServiceTest {
                                                                "jens123@trugdeetaten.no",
                                                                LocalDateTime.now(),
                                                                listOf(DelvilkårsvurderingDto(NÆRE_BOFORHOLD,
-                                                                                             Vilkårsresultat.JA,
+                                                                                             Vilkårsresultat.OPPFYLT,
                                                                                              DelvilkårÅrsak.SAMME_HUS_OG_FLERE_ENN_4_BOENHETER_MEN_VURDERT_NÆRT,
                                                                                              "Delvilkår ok")))
         vurderingService.oppdaterVilkår(oppdatertVilkårsvurderingDto)
@@ -282,7 +292,7 @@ internal class VurderingServiceTest {
         assertThat(catchThrowable {
             vurderingService.oppdaterVilkår(VilkårsvurderingDto(id = vilkårsvurdering.id,
                                                                 behandlingId = BEHANDLING_ID,
-                                                                resultat = Vilkårsresultat.JA,
+                                                                resultat = Vilkårsresultat.OPPFYLT,
                                                                 begrunnelse = "Ok",
                                                                 unntak = "Nei",
                                                                 vilkårType = vilkårsvurdering.type,
@@ -302,7 +312,7 @@ internal class VurderingServiceTest {
                                                  resultat = Vilkårsresultat.IKKE_VURDERT,
                                                  VilkårType.FORUTGÅENDE_MEDLEMSKAP)
         val vurdertVilkår = vilkårsvurdering(BEHANDLING_ID,
-                                             resultat = Vilkårsresultat.JA,
+                                             resultat = Vilkårsresultat.OPPFYLT,
                                              VilkårType.LOVLIG_OPPHOLD)
         every { vilkårsvurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns listOf(ikkeVurdertVilkår, vurdertVilkår)
 
@@ -317,7 +327,7 @@ internal class VurderingServiceTest {
         val behandling = behandling(fagsak(), true, BehandlingStatus.UTREDES)
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
         val vurdertVilkår = vilkårsvurdering(BEHANDLING_ID,
-                                             resultat = Vilkårsresultat.NEI,
+                                             resultat = Vilkårsresultat.IKKE_OPPFYLT,
                                              VilkårType.FORUTGÅENDE_MEDLEMSKAP)
 
         every { vilkårsvurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns listOf(vurdertVilkår)

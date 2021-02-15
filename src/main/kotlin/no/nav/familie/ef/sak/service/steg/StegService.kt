@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.BehandlingshistorikkService
 import no.nav.familie.ef.sak.service.steg.StegType.*
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.task.FerdigstillBehandlingTask
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -98,7 +99,7 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
 
     @Transactional
     fun håndterFerdigsitllBehandling(behandling: Behandling): Behandling {
-        val behandlingSteg: JournalførVedtaksbrevSteg = hentBehandlingSteg(FERDIGSTILLE_BEHANDLING)
+        val behandlingSteg: FerdigstillBehandlingSteg = hentBehandlingSteg(FERDIGSTILLE_BEHANDLING)
 
         return håndterSteg(behandling, behandlingSteg, null)
     }
