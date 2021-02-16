@@ -16,9 +16,9 @@ class VedtaksbrevController(private val brevService: VedtaksbrevService,
                             private val tilgangService: TilgangService) {
 
     @PostMapping("/{behandlingId}")
-    fun lagBrev(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
+    fun forhåndsvisBrev(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
-        val respons = brevService.lagBrev(behandlingId)
+        val respons = brevService.forhåndsvisBrev(behandlingId)
 
         return Ressurs.success(respons)
     }

@@ -18,7 +18,7 @@ class VedtaksbrevService(private val brevClient: BrevClient,
                          private val fagsakService: FagsakService,
                          private val personService: PersonService) {
 
-    fun lagBrev(behandlingId: UUID): ByteArray {
+    fun lagBrevRequest(behandlingId: UUID): BrevRequest {
         val behandling = behandlingService.hentBehandling(behandlingId)
         val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
         val person = personService.hentSøker(fagsak.hentAktivIdent())
@@ -29,14 +29,30 @@ class VedtaksbrevService(private val brevClient: BrevClient,
         val brevdato = LocalDate.now()
         val belopOvergangsstonad = 13943
 
-        val request = BrevRequest(navn = navn, ident = fagsak.hentAktivIdent(), innvilgelseFra = innvilgelseFra, innvilgelseTil = innvilgelseTil, begrunnelseFomDatoInnvilgelse = begrunnelseFomDatoInnvilgelse, brevdato = brevdato, belopOvergangsstonad = belopOvergangsstonad)
+        return BrevRequest(navn = navn,
+                           ident = fagsak.hentAktivIdent(),
+                           innvilgelseFra = innvilgelseFra,
+                           innvilgelseTil = innvilgelseTil,
+                           begrunnelseFomDatoInnvilgelse = begrunnelseFomDatoInnvilgelse,
+                           brevdato = brevdato,
+                           belopOvergangsstonad = belopOvergangsstonad)
+    }
 
-        val brev = brevRepository.insert(Vedtaksbrev(behandlingId = behandlingId,
-                utkastBrevRequest = request,
-                utkastPdf = brevClient.genererBrev("bokmaal",
-                        "innvilgetVedtakMVP",
-                        request)))
-        return brev.utkastPdf
+    fun lagPdf(brevRequest: BrevRequest): ByteArray {
+        return brevClient.genererBrev("bokmaal",
+                                      "innvilgetVedtakMVP",
+                                      brevRequest)
+    }
+
+    fun lagreBrev(behandlingId: UUID) {
+        val request = lagBrevRequest(behandlingId)
+        val pdf = lagPdf(request)
+        val brev = Vedtaksbrev(behandlingId, request, null, pdf, null)
+        brevRepository.insert(brev)
+    }
+
+    fun forhåndsvisBrev(behandlingId: UUID): ByteArray{
+        return  lagPdf(lagBrevRequest(behandlingId))
     }
 
     fun hentBrev(behandlingId: UUID): Vedtaksbrev {
