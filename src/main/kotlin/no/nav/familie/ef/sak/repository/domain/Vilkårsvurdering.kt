@@ -45,6 +45,7 @@ enum class DelvilkårType {
     SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
     NÆRE_BOFORHOLD,
     MER_AV_DAGLIG_OMSORG,
+    OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN,
 }
 
 enum class DelvilkårÅrsak {
@@ -73,6 +74,9 @@ enum class VilkårType(val beskrivelse: String,
                            listOf(DelvilkårType.FEM_ÅRS_MEDLEMSKAP)),
     LOVLIG_OPPHOLD("§15-3 Lovlig opphold", listOf(DelvilkårType.BOR_OG_OPPHOLDER_SEG_I_NORGE)),
 
+    MOR_ELLER_FAR("§15-4 Mor eller far",
+                  listOf(DelvilkårType.OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN)),
+
     SIVILSTAND("§15-4 Sivilstand",
                listOf(
                        DelvilkårType.DOKUMENTERT_EKTESKAP,
@@ -90,11 +94,11 @@ enum class VilkårType(val beskrivelse: String,
                        DelvilkårType.NÆRE_BOFORHOLD,
                        DelvilkårType.MER_AV_DAGLIG_OMSORG));
 
-
     companion object {
 
         fun hentInngangsvilkår(): List<VilkårType> = listOf(FORUTGÅENDE_MEDLEMSKAP,
                                                             LOVLIG_OPPHOLD,
+                                                            MOR_ELLER_FAR,
                                                             SIVILSTAND,
                                                             SAMLIV,
                                                             ALENEOMSORG)
