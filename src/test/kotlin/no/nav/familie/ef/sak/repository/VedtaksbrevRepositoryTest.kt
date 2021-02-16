@@ -7,10 +7,8 @@ import no.nav.familie.ef.sak.repository.FagsakRepository
 import no.nav.familie.ef.sak.repository.VedtaksbrevRepository
 import no.nav.familie.ef.sak.repository.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
-import no.nav.familie.ef.sak.service.steg.StegType
-import org.junit.jupiter.api.Test
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.util.*
@@ -31,6 +29,6 @@ internal class VedtaksbrevRepositoryTest : OppslagSpringRunnerTest() {
 
         vedtaksbrevRepository.insert(vedtaksbrev)
 
-        assertThat(vedtaksbrevRepository.findByIdOrThrow(behandling.id)).isEqualTo(behandling)
+        assertThat(vedtaksbrevRepository.findById(behandling.id).get()).usingRecursiveComparison().isEqualTo(vedtaksbrev)
     }
 }
