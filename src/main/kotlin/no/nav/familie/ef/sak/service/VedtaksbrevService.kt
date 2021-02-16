@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.brev.BrevClient
 import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
 import no.nav.familie.ef.sak.integration.dto.pdl.visningsnavn
 import no.nav.familie.ef.sak.repository.VedtaksbrevRepository
+import no.nav.familie.ef.sak.repository.domain.Fil
 import no.nav.familie.ef.sak.repository.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import org.springframework.stereotype.Service
@@ -47,7 +48,7 @@ class VedtaksbrevService(private val brevClient: BrevClient,
     fun lagreBrev(behandlingId: UUID) {
         val request = lagBrevRequest(behandlingId)
         val pdf = lagPdf(request)
-        val brev = Vedtaksbrev(behandlingId, request, null, pdf, null)
+        val brev = Vedtaksbrev(behandlingId, request, null, Fil(pdf), null)
         brevRepository.insert(brev)
     }
 

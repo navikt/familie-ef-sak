@@ -26,6 +26,6 @@ class VedtaksbrevController(private val brevService: VedtaksbrevService,
     @GetMapping("/{behandlingId}")
     fun hentBrev(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
-        return  Ressurs.success(brevService.hentBrev(behandlingId).utkastPdf)
+        return  Ressurs.success(brevService.hentBrev(behandlingId).utkastPdf.bytes)
     }
 }
