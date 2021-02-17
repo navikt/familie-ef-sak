@@ -48,7 +48,7 @@ spec:
     outbound:
       external:
         {{ #each externalHosts as |host|}}
-        - host: {{host } }
+        - host: {{host }}
         {{/each}}
   azure:
     application:
