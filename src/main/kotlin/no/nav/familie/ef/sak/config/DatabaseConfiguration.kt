@@ -2,10 +2,7 @@ package no.nav.familie.ef.sak.config
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.api.dto.BrevRequest
-import no.nav.familie.ef.sak.repository.domain.DelvilkårsvurderingWrapper
-import no.nav.familie.ef.sak.repository.domain.Endret
-import no.nav.familie.ef.sak.repository.domain.JsonWrapper
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus
+import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.repository.domain.søknad.Arbeidssituasjon
 import no.nav.familie.ef.sak.repository.domain.søknad.Dokumentasjon
 import no.nav.familie.ef.sak.repository.domain.søknad.GjelderDeg
@@ -79,6 +76,8 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
                                             JsonWrapperTilPGobjectConverter(),
                                             BrevRequestTilStringConverter(),
                                             StringTilBrevRequestConverter(),
+                                            FilTilBytearrayConverter(),
+                                            BytearrayTilFilConverter()
         ))
     }
 
@@ -227,6 +226,22 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
                     type = "json"
                     value = jsonWrapper?.let { it.json }
                 }
+    }
+
+    @WritingConverter
+    class  FilTilBytearrayConverter : Converter<Fil, ByteArray> {
+
+        override fun convert(fil: Fil): ByteArray {
+            return fil.bytes
+        }
+    }
+
+    @ReadingConverter
+    class BytearrayTilFilConverter : Converter<ByteArray, Fil> {
+
+        override fun convert(bytes: ByteArray): Fil {
+            return Fil(bytes)
+        }
     }
 
 }

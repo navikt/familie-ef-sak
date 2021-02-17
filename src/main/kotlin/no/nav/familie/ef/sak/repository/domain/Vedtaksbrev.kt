@@ -9,5 +9,5 @@ data class Vedtaksbrev(@Id
                        val behandlingId: UUID,
                        val utkastBrevRequest: BrevRequest,
                        val brevRequest: BrevRequest? = null,
-                       val utkastPdf: ByteArray,
-                       val pdf: ByteArray? = null)
+                       val utkastPdf: Fil,
+                       val pdf: Fil? = null)

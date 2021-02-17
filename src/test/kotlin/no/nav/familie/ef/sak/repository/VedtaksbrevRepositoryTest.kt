@@ -5,12 +5,11 @@ import no.nav.familie.ef.sak.api.dto.BrevRequest
 import no.nav.familie.ef.sak.repository.BehandlingRepository
 import no.nav.familie.ef.sak.repository.FagsakRepository
 import no.nav.familie.ef.sak.repository.VedtaksbrevRepository
+import no.nav.familie.ef.sak.repository.domain.Fil
 import no.nav.familie.ef.sak.repository.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
-import no.nav.familie.ef.sak.service.steg.StegType
-import org.junit.jupiter.api.Test
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.util.*
@@ -27,10 +26,10 @@ internal class VedtaksbrevRepositoryTest : OppslagSpringRunnerTest() {
         val behandling = behandlingRepository.insert(behandling(fagsak))
         val vedtaksbrev = Vedtaksbrev(behandlingId = behandling.id,
                                       utkastBrevRequest = BrevRequest("Olav Olavssen", "12345678910", LocalDate.now(), LocalDate.now(), "fordi jepp", LocalDate.now(), 1300),
-                                      utkastPdf = ByteArray(123))
+                                      utkastPdf = Fil(ByteArray(123)))
 
         vedtaksbrevRepository.insert(vedtaksbrev)
 
-        assertThat(vedtaksbrevRepository.findByIdOrThrow(behandling.id)).isEqualTo(behandling)
+        assertThat(vedtaksbrevRepository.findById(behandling.id).get()).isEqualTo(vedtaksbrev)
     }
 }
