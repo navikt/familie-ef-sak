@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.service.steg
 
 import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.api.dto.BeslutteVedtakDto
+import no.nav.familie.ef.sak.repository.VedtaksbrevRepository
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.OppgaveService
@@ -19,7 +20,8 @@ import java.time.LocalDate
 class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
                          private val fagsakService: FagsakService,
                          private val oppgaveService: OppgaveService,
-                         private val totrinnskontrollService: TotrinnskontrollService) : BehandlingSteg<BeslutteVedtakDto> {
+                         private val totrinnskontrollService: TotrinnskontrollService,
+                         private val vedtaksbrevRepository: VedtaksbrevRepository) : BehandlingSteg<BeslutteVedtakDto> {
 
     override fun validerSteg(behandling: Behandling) {
         if (behandling.steg != stegType()) {
@@ -37,6 +39,7 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
             opprettTaskForIverksettMotOppdrag(behandling)
             stegType().hentNesteSteg(behandling.type)
         } else {
+            vedtaksbrevRepository.deleteById(behandling.id)
             opprettBehandleUnderkjentVedtakOppgave(behandling, saksbehandler)
             StegType.SEND_TIL_BESLUTTER
         }
