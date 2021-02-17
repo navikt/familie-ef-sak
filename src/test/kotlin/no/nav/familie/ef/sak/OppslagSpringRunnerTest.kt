@@ -27,7 +27,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @SpringBootTest(classes = [ApplicationLocal::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("integrasjonstest", "mock-oauth", "mock-pdl", "mock-integrasjoner", "mock-oppdrag", "mock-infotrygd-replika")
+@ActiveProfiles("integrasjonstest", "mock-oauth", "mock-pdl", "mock-integrasjoner", "mock-oppdrag", "mock-infotrygd-replika", "mock-brev")
 abstract class OppslagSpringRunnerTest {
 
     protected val listAppender = initLoggingEventListAppender()
@@ -60,14 +60,16 @@ abstract class OppslagSpringRunnerTest {
     }
 
     private fun resetDatabase() {
-        listOf(Søknad::class,
-               SøknadsskjemaOvergangsstønad::class,
-               TilkjentYtelse::class,
-               Oppgave::class,
-               Vilkårsvurdering::class,
-               Behandlingshistorikk::class,
-               Behandling::class,
-               Fagsak::class,
+        listOf(
+                Søknad::class,
+                SøknadsskjemaOvergangsstønad::class,
+                TilkjentYtelse::class,
+                Oppgave::class,
+                Vilkårsvurdering::class,
+                Behandlingshistorikk::class,
+                Vedtaksbrev::class,
+                Behandling::class,
+                Fagsak::class,
         ).forEach { jdbcAggregateOperations.deleteAll(it.java) }
     }
 

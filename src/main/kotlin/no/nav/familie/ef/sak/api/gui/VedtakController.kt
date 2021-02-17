@@ -3,9 +3,7 @@ package no.nav.familie.ef.sak.api.gui
 import no.nav.familie.ef.sak.api.ApiFeil
 import no.nav.familie.ef.sak.api.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.api.dto.TotrinnskontrollStatusDto
-import no.nav.familie.ef.sak.service.BehandlingService
-import no.nav.familie.ef.sak.service.TilgangService
-import no.nav.familie.ef.sak.service.TotrinnskontrollService
+import no.nav.familie.ef.sak.service.*
 import no.nav.familie.ef.sak.service.steg.StegService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -24,11 +22,13 @@ import java.util.*
 class VedtakController(private val stegService: StegService,
                        private val behandlingService: BehandlingService,
                        private val totrinnskontrollService: TotrinnskontrollService,
-                       private val tilgangService: TilgangService) {
+                       private val tilgangService: TilgangService,
+                       private val vedtaksbrevService: VedtaksbrevService) {
 
     @PostMapping("/{behandlingId}/send-til-beslutter")
     fun sendTilBeslutter(@PathVariable behandlingId: UUID): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
+        vedtaksbrevService.lagreBrev(behandlingId)
         val behandling = behandlingService.hentBehandling(behandlingId)
         return Ressurs.success(stegService.håndterSendTilBeslutter(behandling).id)
     }
