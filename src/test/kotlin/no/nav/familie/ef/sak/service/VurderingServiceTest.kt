@@ -101,7 +101,8 @@ internal class VurderingServiceTest {
                         LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD,
                         SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
                         NÆRE_BOFORHOLD,
-                        MER_AV_DAGLIG_OMSORG
+                        MER_AV_DAGLIG_OMSORG,
+                        OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN
                 ))
 
     }
