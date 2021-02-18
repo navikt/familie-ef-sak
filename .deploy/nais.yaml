@@ -49,8 +49,8 @@ spec:
       rules:
         - application: familie-brev
       external:
-        {{ #each externalHosts as |host|}}
-        - host: {{host }}
+        {{#each externalHosts as |host|}}
+        - host: {{host}}
         {{/each}}
   azure:
     application:
