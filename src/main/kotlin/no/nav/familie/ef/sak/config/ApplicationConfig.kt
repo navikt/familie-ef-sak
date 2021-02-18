@@ -58,12 +58,19 @@ class ApplicationConfig {
         return filterRegistration
     }
 
+    //Overskrever felles sin som bruker proxy, som ikke skal brukes på gcp
+    @Bean
+    @Primary
+    fun restTemplateBuilder(): RestTemplateBuilder {
+        return RestTemplateBuilder()
+                .setConnectTimeout(Duration.of(2, ChronoUnit.SECONDS))
+                .setReadTimeout(Duration.of(120, ChronoUnit.SECONDS))
+    }
+
     @Bean("utenAuth")
     fun restTemplate(restTemplateBuilder: RestTemplateBuilder,
                      consumerIdClientInterceptor: ConsumerIdClientInterceptor): RestOperations {
         return restTemplateBuilder
-                .setConnectTimeout(Duration.of(2, ChronoUnit.SECONDS))
-                .setReadTimeout(Duration.of(10, ChronoUnit.SECONDS))
                 .additionalInterceptors(consumerIdClientInterceptor,
                                         MdcValuesPropagatingClientInterceptor()).build()
     }
@@ -80,8 +87,6 @@ class ApplicationConfig {
                         consumerIdClientInterceptor: ConsumerIdClientInterceptor,
                         apiKeyInjectingClientInterceptor: ApiKeyInjectingClientInterceptor): RestOperations {
         return RestTemplateBuilder()
-                .setConnectTimeout(Duration.of(2, ChronoUnit.SECONDS))
-                .setReadTimeout(Duration.of(10, ChronoUnit.SECONDS))
                 .additionalInterceptors(consumerIdClientInterceptor,
                                         stsBearerTokenClientInterceptor,
                                         apiKeyInjectingClientInterceptor,
