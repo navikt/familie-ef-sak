@@ -31,7 +31,6 @@ internal class InsertUpdateRepositoryImplTest : OppslagSpringRunnerTest() {
         assertThat(fagsakRepository.count()).isEqualTo(1)
     }
 
-    @Disabled
     @Test
     internal fun `skal lagre entiteter`() {
         fagsakRepository.insertAll(listOf(fagsak(), fagsak()))
