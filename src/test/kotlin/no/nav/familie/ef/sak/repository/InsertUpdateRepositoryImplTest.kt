@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.relational.core.conversion.DbActionExecutionException
@@ -30,6 +31,7 @@ internal class InsertUpdateRepositoryImplTest : OppslagSpringRunnerTest() {
         assertThat(fagsakRepository.count()).isEqualTo(1)
     }
 
+    @Disabled
     @Test
     internal fun `skal lagre entiteter`() {
         fagsakRepository.insertAll(listOf(fagsak(), fagsak()))
