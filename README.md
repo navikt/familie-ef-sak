@@ -11,7 +11,6 @@ Appen kjører på JRE 11. Bygging gjøres ved å kjøre `mvn clean install`.
 Dersom man vil gjøre autentiserte kall mot andre tjenester eller vil kjøre applikasjonen sammen med frontend, må man sette opp følgende miljø-variabler:
 * `AZURE_APP_CLIENT_SECRET`
 * `AZURE_APP_CLIENT_ID`
-* `EF_SAK_FRONTEND_CLIENT_ID`
 * Scope for den aktuelle tjenesten (`FAMILIE_INTEGRASJONER_SCOPE`, `FAMILIE_OPPDRAG_SCOPE`, ...)
 
 Alle disse variablene finnes i applikasjonens mappe for preprod-fss på vault. Merk at client id og client secret har andre navn i applikasjonens mappe. 

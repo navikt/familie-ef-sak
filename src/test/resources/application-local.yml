@@ -23,6 +23,9 @@ FAMILIE_INTEGRASJONER_URL: http://localhost:8085
 FAMILIE_OPPDRAG_API_URL: http://localhost:8087
 FAMILIE_BREV_API_URL: http://localhost:8001
 
+STS_APIKEY: 1
+PDL_API_APIKEY: 2
+
 CREDENTIAL_USERNAME: not-a-real-srvuser
 CREDENTIAL_PASSWORD: not-a-real-pw
 

@@ -21,10 +21,11 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Import
-import org.springframework.http.client.ClientHttpRequestInterceptor
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.web.client.RestOperations
 import java.net.URI
+import java.time.Duration
+import java.time.temporal.ChronoUnit
 
 @SpringBootConfiguration
 @ConfigurationPropertiesScan
@@ -61,13 +62,16 @@ class ApplicationConfig {
     @Bean("utenAuth")
     fun restTemplate(restTemplateBuilder: RestTemplateBuilder,
                      consumerIdClientInterceptor: ConsumerIdClientInterceptor): RestOperations {
-        return restTemplateBuilder.additionalInterceptors(consumerIdClientInterceptor,
-                                                          MdcValuesPropagatingClientInterceptor()).build()
+        return restTemplateBuilder
+                .setConnectTimeout(Duration.of(2, ChronoUnit.SECONDS))
+                .setReadTimeout(Duration.of(10, ChronoUnit.SECONDS))
+                .additionalInterceptors(consumerIdClientInterceptor,
+                                        MdcValuesPropagatingClientInterceptor()).build()
     }
 
     @Bean
     fun apiKeyInjectingClientInterceptor(@Value("\${PDL_API_APIKEY}") pdlApiKey: String,
-                                         @Value("\${PDL_API_URL}") pdlBaseUrl: String): ClientHttpRequestInterceptor {
+                                         @Value("\${PDL_API_URL}") pdlBaseUrl: String): ApiKeyInjectingClientInterceptor {
         val map = mapOf(Pair(URI.create(pdlBaseUrl), Pair(apiKeyHeader, pdlApiKey)))
         return ApiKeyInjectingClientInterceptor(map)
     }
@@ -75,13 +79,15 @@ class ApplicationConfig {
     @Bean("stsMedApiKey")
     fun restTemplateSts(stsBearerTokenClientInterceptor: StsBearerTokenClientInterceptor,
                         consumerIdClientInterceptor: ConsumerIdClientInterceptor,
-                        apiKeyInjectingClientInterceptor: ClientHttpRequestInterceptor
-    ): RestOperations {
-        return RestTemplateBuilder().additionalInterceptors(consumerIdClientInterceptor,
-                                                            stsBearerTokenClientInterceptor,
-                                                            apiKeyInjectingClientInterceptor,
-                                                            MdcValuesPropagatingClientInterceptor()
-        ).build()
+                        apiKeyInjectingClientInterceptor: ApiKeyInjectingClientInterceptor): RestOperations {
+        return RestTemplateBuilder()
+                .setConnectTimeout(Duration.of(2, ChronoUnit.SECONDS))
+                .setReadTimeout(Duration.of(10, ChronoUnit.SECONDS))
+                .additionalInterceptors(consumerIdClientInterceptor,
+                                        stsBearerTokenClientInterceptor,
+                                        apiKeyInjectingClientInterceptor,
+                                        MdcValuesPropagatingClientInterceptor()
+                ).build()
     }
 
     companion object {
