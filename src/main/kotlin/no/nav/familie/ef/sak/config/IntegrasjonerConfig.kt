@@ -8,6 +8,8 @@ import java.net.URI
 @Configuration
 class IntegrasjonerConfig(@Value("\${FAMILIE_INTEGRASJONER_URL}") private val integrasjonUri: URI) {
 
+    val sendInnUri = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_SEND_INN).build().toUri()
+
     val pingUri: URI = UriComponentsBuilder.fromUri(integrasjonUri).path(PATH_PING).build().toUri()
 
     val tilgangUri: URI = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_TILGANGER).build().toUri()
@@ -53,5 +55,6 @@ class IntegrasjonerConfig(@Value("\${FAMILIE_INTEGRASJONER_URL}") private val in
         private const val PATH_JOURNALPOST = "api/journalpost"
         private const val PATH_DOKARKIV = "api/arkiv"
         private const val PATH_MEDLEMSKAP = "api/medlemskap/v3"
+        private const val PATH_SEND_INN = "arkiv/v3"
     }
 }

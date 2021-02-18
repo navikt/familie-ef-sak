@@ -2,12 +2,16 @@ package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.api.dto.BrevRequest
 import no.nav.familie.ef.sak.brev.BrevClient
+import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
 import no.nav.familie.ef.sak.integration.dto.pdl.visningsnavn
 import no.nav.familie.ef.sak.repository.VedtaksbrevRepository
 import no.nav.familie.ef.sak.repository.domain.Fil
 import no.nav.familie.ef.sak.repository.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentRequest
+import no.nav.familie.kontrakter.felles.dokarkiv.Dokument
+import no.nav.familie.kontrakter.felles.dokarkiv.FilType
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.*
@@ -17,7 +21,9 @@ class VedtaksbrevService(private val brevClient: BrevClient,
                          private val brevRepository: VedtaksbrevRepository,
                          private val behandlingService: BehandlingService,
                          private val fagsakService: FagsakService,
-                         private val personService: PersonService) {
+                         private val personService: PersonService,
+                         private val familieIntegrasjonerClient: FamilieIntegrasjonerClient
+                         ) {
 
     fun lagBrevRequest(behandlingId: UUID): BrevRequest {
         val behandling = behandlingService.hentBehandling(behandlingId)
@@ -60,4 +66,21 @@ class VedtaksbrevService(private val brevClient: BrevClient,
         return brevRepository.findByIdOrThrow(behandlingId)
     }
 
+    fun journalførVedtaksbrev(behandlingId: UUID): String {
+        val behandling = behandlingService.hentBehandling(behandlingId)
+        val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
+        val ident = fagsak.hentAktivIdent();
+
+        val vedtaksbrev = hentBrev(behandlingId)
+
+        val dokumenter = listOf(Dokument(vedtaksbrev.pdf!!.bytes, FilType.PDFA, null, null, "U"))
+
+        val request = ArkiverDokumentRequest(ident,
+                false,
+                dokumenter)
+
+        val dokumentResponse = familieIntegrasjonerClient.arkiver(request)
+
+        return dokumentResponse.journalpostId
+    }
 }
