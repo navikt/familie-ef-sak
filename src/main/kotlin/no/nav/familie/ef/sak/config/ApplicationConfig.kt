@@ -11,6 +11,7 @@ import no.nav.familie.http.sts.StsRestClient
 import no.nav.familie.log.filter.LogFilter
 import no.nav.familie.log.filter.RequestTimeFilter
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
+import no.nav.security.token.support.core.configuration.ProxyAwareResourceRetriever
 import no.nav.security.token.support.spring.api.EnableJwtTokenValidation
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -21,6 +22,7 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Import
+import org.springframework.context.annotation.Primary
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.web.client.RestOperations
 import java.net.URI
@@ -88,6 +90,15 @@ class ApplicationConfig {
                                         apiKeyInjectingClientInterceptor,
                                         MdcValuesPropagatingClientInterceptor()
                 ).build()
+    }
+
+    //Brukes for sts issuer, slik at apiKey blir lagt til når man henter metadata for STS_DISCOVERY_URL
+    @Bean
+    @Primary
+    fun oidcResourceRetriever(@Value("\${STS_APIKEY}") stsApiKey: String): ProxyAwareResourceRetriever {
+        val proxyAwareResourceRetriever = ProxyAwareResourceRetriever(null, false)
+        proxyAwareResourceRetriever.headers = mapOf(apiKeyHeader to listOf(stsApiKey))
+        return proxyAwareResourceRetriever
     }
 
     companion object {
