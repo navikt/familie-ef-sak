@@ -18,7 +18,7 @@ import java.net.URI
 @Import(RestTemplateBuilderBean::class)
 class OppdragClient(@Value("\${FAMILIE_OPPDRAG_API_URL}")
                     private val familieOppdragUri: URI,
-                    @Qualifier("azureMedApiKey")
+                    @Qualifier("azure")
                     restOperations: RestOperations) : AbstractRestClient(restOperations, "familie.oppdrag") {
 
     private val postOppdragUri: URI = UriComponentsBuilder.fromUri(familieOppdragUri).pathSegment("api/oppdrag").build().toUri()

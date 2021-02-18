@@ -14,7 +14,7 @@ import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 
 @Component
-class OppgaveClient(@Qualifier("azureMedApiKey") restOperations: RestOperations,
+class OppgaveClient(@Qualifier("azure") restOperations: RestOperations,
                     integrasjonerConfig: IntegrasjonerConfig)
     : AbstractPingableRestClient(restOperations, "oppgave") {
 

@@ -70,8 +70,8 @@ class ApplicationConfig {
     }
 
     @Bean
-    fun apiKeyInjectingClientInterceptor(@Value("\${PDL_API_APIKEY}") pdlApiKey: String,
-                                         @Value("\${PDL_API_URL}") pdlBaseUrl: String): ApiKeyInjectingClientInterceptor {
+    fun apiKeyInjectingClientInterceptor(@Value("\${PDL_APIKEY}") pdlApiKey: String,
+                                         @Value("\${PDL_URL}") pdlBaseUrl: String): ApiKeyInjectingClientInterceptor {
         val map = mapOf(Pair(URI.create(pdlBaseUrl), Pair(apiKeyHeader, pdlApiKey)))
         return ApiKeyInjectingClientInterceptor(map)
     }
