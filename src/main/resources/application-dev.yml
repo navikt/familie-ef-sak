@@ -8,7 +8,7 @@ no.nav.security.jwt:
       accepted_audience: ${GYLDIGE_SERVICE_BRUKERE}
 
 ON_PREM_URL_ENV: dev
-GATEWAT_PREFIX: api-gw-q1
+GATEWAY_PREFIX: api-gw-q1
 
 
 rolle:
