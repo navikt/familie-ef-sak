@@ -9,8 +9,8 @@ Appen kjører på JRE 11. Bygging gjøres ved å kjøre `mvn clean install`.
 
 ### Autentisering lokalt
 Dersom man vil gjøre autentiserte kall mot andre tjenester eller vil kjøre applikasjonen sammen med frontend, må man sette opp følgende miljø-variabler:
-* `AZURE_APP_CLIENT_SECRET`
-* `AZURE_APP_CLIENT_ID`
+* `AZURE_CLIENT_SECRET`
+* `AZURE_CLIENT_ID`
 * Scope for den aktuelle tjenesten (`FAMILIE_INTEGRASJONER_SCOPE`, `FAMILIE_OPPDRAG_SCOPE`, ...)
 
 Alle disse variablene finnes i applikasjonens mappe for preprod-fss på vault. Merk at client id og client secret har andre navn i applikasjonens mappe. 
@@ -30,6 +30,12 @@ For å kjøre opp postgres containern så kjører man `docker-compose up`
 For å ta ned containern så kjører man `docker-compose down`
 For å slette volymen `docker-compose down -v`
 
+### GCP
+GCP bruker secrets i stedet for vault.
+Anbefaler å bruke [modify-secrets](https://github.com/rajatjindal/kubectl-modify-secret)
+
+#### Database
+[Nais doc](https://doc.nais.io/persistence/postgres/)
 
 ## Produksjonssetting
 Applikasjonen vil deployes til produksjon ved ny commit på master-branchen. Det er dermed tilstrekkelig å merge PR for å trigge produksjonsbygget. 

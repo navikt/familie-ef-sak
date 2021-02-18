@@ -46,6 +46,8 @@ spec:
       rules:
         - application: familie-ef-sak-frontend
     outbound:
+      rules:
+        - application: familie-brev
       external:
         {{ #each externalHosts as |host|}}
         - host: {{host }}

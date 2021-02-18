@@ -1,7 +1,7 @@
 ingress: https://familie-ef-sak.intern.nav.no
 externalHosts:
   - api-gw.oera.no
-  - unleash.adeo.no
+  - unleash.nais.io
   - familie-oppdrag.prod-fss-pub.nais.io
   - familie-ef-infotrygd-feed.prod-fss-pub.nais.io
   - familie-integrasjoner.prod-fss-pub.nais.io
