@@ -36,7 +36,7 @@ spec:
     enabled: true
   gcp:
     sqlInstances:
-      - type: POSTGRES_13 # IF This is changed, all data will be lost. Read on nais.io how to upgrade
+      - type: POSTGRES_12 # IF This is changed, all data will be lost. Read on nais.io how to upgrade
         databases:
           - name: familie-ef-sak
             envVarPrefix: DB
