@@ -106,7 +106,7 @@ GATEWAY_PREFIX: api-gw
 
 AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/oauth2/v2.0/token
 
-STS_PREFIX: https://${GATEWAY_PREFIX}.oera.no/security-token-service
+STS_PREFIX: https://${GATEWAY_PREFIX}.oera.no/legacy-sts
 STS_URL: ${STS_PREFIX}/rest/v1/sts/token?grant_type=client_credentials&scope=openid
 STS_DISCOVERY_URL: ${STS_PREFIX}/rest/v1/sts/.well-known/openid-configuration
 
