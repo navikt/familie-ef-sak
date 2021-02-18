@@ -22,7 +22,7 @@ class PdlClient(val pdlConfig: PdlConfig,
         get() = pdlConfig.pdlUri
 
     override fun ping() {
-        operations.headForHeaders(pingUri)
+        operations.optionsForAllow(pingUri)
     }
 
     fun hentSøkerKortBolk(personIdenter: List<String>): Map<String, PdlSøkerKort> {
