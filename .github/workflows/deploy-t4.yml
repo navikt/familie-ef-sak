@@ -7,7 +7,7 @@ env:
 
 jobs:
   build:
-    name: Build, push and deploy to t4 (arena test env)
+    name: Build, push and deploy to fss-t4 (arena test env)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
