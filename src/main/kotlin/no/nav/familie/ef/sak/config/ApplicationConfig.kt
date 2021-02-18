@@ -92,7 +92,7 @@ class ApplicationConfig {
                 ).build()
     }
 
-    //Brukes for sts issuer, slik at apiKey blir lagt til når man henter metadata for STS_DISCOVERY_URL
+    //Brukes for sts issuer som brukes for sts validering. ApiKey blir lagt til når man henter metadata for STS_DISCOVERY_URL
     @Bean
     @Primary
     fun oidcResourceRetriever(@Value("\${STS_APIKEY}") stsApiKey: String): ProxyAwareResourceRetriever {
