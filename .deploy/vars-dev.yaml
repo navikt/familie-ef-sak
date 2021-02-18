@@ -7,3 +7,4 @@ externalHosts:
   - familie-integrasjoner.dev-fss-pub.nais.io
   - infotrygd-enslig-forsoerger.dev-fss-pub.nais.io
 springProfile: dev
+tenant: trygdeetaten.no

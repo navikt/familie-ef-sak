@@ -7,3 +7,4 @@ externalHosts:
   - familie-integrasjoner.prod-fss-pub.nais.io
   - infotrygd-enslig-forsoerger.prod-fss-pub.nais.io
 springProfile: prod
+tenant: nav.no
