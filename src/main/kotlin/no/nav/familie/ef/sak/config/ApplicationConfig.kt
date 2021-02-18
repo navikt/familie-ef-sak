@@ -19,10 +19,7 @@ import org.springframework.boot.SpringBootConfiguration
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.boot.web.servlet.FilterRegistrationBean
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.ComponentScan
-import org.springframework.context.annotation.Import
-import org.springframework.context.annotation.Primary
+import org.springframework.context.annotation.*
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.web.client.RestOperations
 import java.net.URI
@@ -74,7 +71,7 @@ class ApplicationConfig {
     @Bean
     fun apiKeyInjectingClientInterceptor(@Value("\${PDL_APIKEY}") pdlApiKey: String,
                                          @Value("\${PDL_URL}") pdlBaseUrl: String): ApiKeyInjectingClientInterceptor {
-        val map = mapOf(Pair(URI.create(pdlBaseUrl), Pair(apiKeyHeader, pdlApiKey)))
+        val map = mapOf(Pair(URI.create(pdlBaseUrl), Pair(API_KEY_HEADER, pdlApiKey)))
         return ApiKeyInjectingClientInterceptor(map)
     }
 
@@ -95,14 +92,15 @@ class ApplicationConfig {
     //Brukes for sts issuer som brukes for sts validering. ApiKey blir lagt til når man henter metadata for STS_DISCOVERY_URL
     @Bean
     @Primary
+    @Profile("!integrasjonstest && !local")
     fun oidcResourceRetriever(@Value("\${STS_APIKEY}") stsApiKey: String): ProxyAwareResourceRetriever {
         val proxyAwareResourceRetriever = ProxyAwareResourceRetriever(null, false)
-        proxyAwareResourceRetriever.headers = mapOf(apiKeyHeader to listOf(stsApiKey))
+        proxyAwareResourceRetriever.headers = mapOf(API_KEY_HEADER to listOf(stsApiKey))
         return proxyAwareResourceRetriever
     }
 
     companion object {
 
-        private const val apiKeyHeader = "x-nav-apiKey"
+        private const val API_KEY_HEADER = "x-nav-apiKey"
     }
 }
