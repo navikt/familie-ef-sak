@@ -89,7 +89,8 @@ class ApplicationConfig {
                 ).build()
     }
 
-    //Brukes for sts issuer som brukes for sts validering. ApiKey blir lagt til når man henter metadata for STS_DISCOVERY_URL
+    // Brukes for sts issuer som brukes for sts validering. ApiKey blir lagt til når man henter metadata for STS_DISCOVERY_URL
+    // trenger override pga token-support-test som allerede overridear denne i test scope
     @Bean
     @Primary
     @Profile("!integrasjonstest && !local")
