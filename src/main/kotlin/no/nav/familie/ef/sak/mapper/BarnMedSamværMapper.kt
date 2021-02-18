@@ -18,6 +18,7 @@ object BarnMedSamværMapper {
     fun tilDto(pdlBarn: Map<String, PdlBarn>,
                barneforeldre: Map<String, PdlAnnenForelder>,
                søknad: SøknadsskjemaOvergangsstønad): List<BarnMedSamværDto> {
+
         val alleBarn: List<MatchetBarn> = BarnMatcher.kobleSøknadsbarnOgRegisterBarn(søknad.barn, pdlBarn)
                 .sortedByDescending {
                     if (it.fødselsnummer != null)
