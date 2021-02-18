@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.service
 
+import no.nav.familie.ef.sak.api.ApiExceptionHandler
 import no.nav.familie.ef.sak.api.dto.BrevRequest
 import no.nav.familie.ef.sak.brev.BrevClient
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
@@ -12,6 +13,7 @@ import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.Dokument
 import no.nav.familie.kontrakter.felles.dokarkiv.FilType
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.*
@@ -80,6 +82,10 @@ class VedtaksbrevService(private val brevClient: BrevClient,
                 dokumenter)
 
         val dokumentResponse = familieIntegrasjonerClient.arkiver(request)
+
+        val logger = LoggerFactory.getLogger(VedtaksbrevService::class.java)
+
+        logger.info("DOKUMENTRESPONSE: " + dokumentResponse)
 
         return dokumentResponse.journalpostId
     }
