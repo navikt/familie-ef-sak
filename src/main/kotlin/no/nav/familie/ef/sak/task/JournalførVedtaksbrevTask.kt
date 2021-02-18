@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.task
 
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.service.BehandlingService
-import no.nav.familie.ef.sak.service.VedtaksbrevService
 import no.nav.familie.ef.sak.service.steg.StegService
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -15,18 +14,15 @@ import java.util.*
 @TaskStepBeskrivelse(taskStepType = JournalførVedtaksbrevTask.TYPE,
                      maxAntallFeil = 50,
                      settTilManuellOppfølgning = true,
-                     triggerTidVedFeilISekunder = 15*60L,
+                     triggerTidVedFeilISekunder = 15 * 60L,
                      beskrivelse = "Journalfører vedtaksbrev.")
 
 class JournalførVedtaksbrevTask(private val stegService: StegService,
-                                private val behandlingService: BehandlingService,
-                                private val vedtaksbrevService: VedtaksbrevService
-                                ) : AsyncTaskStep {
+                                private val behandlingService: BehandlingService) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val behandlingId = UUID.fromString(task.payload)
         val behandling = behandlingService.hentBehandling(behandlingId)
-        val journalpostId = vedtaksbrevService.journalførVedtaksbrev(behandlingId)
         stegService.håndterJournalførVedtaksbrev(behandling)
     }
 
