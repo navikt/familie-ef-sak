@@ -83,11 +83,11 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         return behandlingId?.let { behandlingService.hentBehandling(it) }
     }
 
-    private fun knyttJournalpostTilBehandling(journalpost: Journalpost, behandling: Behandling) {
+    fun knyttJournalpostTilBehandling(journalpost: Journalpost, behandling: Behandling) {
         behandlingService.oppdaterJournalpostIdPåBehandling(journalpost, behandling)
     }
 
-    private fun settSøknadPåBehandling(journalpostId: String, fagsakId: UUID, behandlingsId: UUID) {
+    fun settSøknadPåBehandling(journalpostId: String, fagsakId: UUID, behandlingsId: UUID) {
         hentJournalpost(journalpostId).dokumenter
                 ?.filter { dokument ->
                     DokumentBrevkode.erGyldigBrevkode(dokument.brevkode.toString()) && harOriginalDokument(dokument)

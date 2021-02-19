@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.service.steg
 import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.api.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.repository.domain.Behandling
+import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.OppgaveService
 import no.nav.familie.ef.sak.service.TotrinnskontrollService
@@ -34,8 +35,13 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
 
         return if (data.godkjent) {
             // TODO oppdater brev
-            opprettTaskForIverksettMotOppdrag(behandling)
+                if (behandling.type != BehandlingType.BLANKETT) {
+                    opprettTaskForIverksettMotOppdrag(behandling)
+                } else {
+                    opprettTaskForJournalførBlankett(behandling)
+                }
             stegType().hentNesteSteg(behandling.type)
+
         } else {
             opprettBehandleUnderkjentVedtakOppgave(behandling, saksbehandler)
             StegType.SEND_TIL_BESLUTTER
@@ -61,6 +67,13 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
         val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
         taskRepository.save(IverksettMotOppdragTask.opprettTask(behandling, fagsak.hentAktivIdent()))
     }
+
+    private fun opprettTaskForJournalførBlankett(behandling: Behandling) {
+        val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
+
+        taskRepository.save(IverksettMotOppdragTask.opprettTask(behandling, fagsak.hentAktivIdent()))
+    }
+
 
     override fun stegType(): StegType {
         return StegType.BESLUTTE_VEDTAK
