@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.blankett
 
-import no.nav.familie.ef.sak.api.dto.InngangsvilkårDto
 import no.nav.familie.ef.sak.util.medContentTypeJsonUTF8
 import no.nav.familie.http.client.AbstractPingableRestClient
 import org.springframework.beans.factory.annotation.Qualifier
@@ -24,8 +23,8 @@ class BlankettClient(@Value("\${FAMILIE_BLANKETT_API_URL}")
         operations.optionsForAllow(pingUri)
     }
 
-    fun genererBlankett(inngangsvilkårDto: InngangsvilkårDto): ByteArray {
+    fun genererBlankett(blankettPdfRequest: BlankettPdfRequest): ByteArray {
         val url = URI.create("$familieBlankettUri/api/pdf")
-        return postForEntity(url, inngangsvilkårDto, HttpHeaders().medContentTypeJsonUTF8())
+        return postForEntity(url, blankettPdfRequest, HttpHeaders().medContentTypeJsonUTF8())
     }
 }
