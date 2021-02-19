@@ -1,8 +1,6 @@
 package no.nav.familie.ef.sak.api.gui
 
-import no.nav.familie.ef.sak.api.dto.FagsakDto
-import no.nav.familie.ef.sak.api.dto.FagsakRequest
-import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
+import no.nav.familie.ef.sak.api.dto.*
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -23,6 +21,12 @@ class FagsakController(private val fagsakService: FagsakService, private val til
     fun hentFagsakForPerson(@RequestBody fagsakRequest: FagsakRequest): Ressurs<FagsakDto> {
         tilgangService.validerTilgangTilPersonMedBarn(fagsakRequest.personIdent)
         return Ressurs.success(fagsakService.hentEllerOpprettFagsak(fagsakRequest.personIdent, fagsakRequest.stønadstype))
+    }
+
+    @PostMapping("/sok")
+    fun sokPerson(@RequestBody personIdent: String): Ressurs<Søkeresultat> {
+        tilgangService.validerTilgangTilPersonMedBarn(personIdent)
+        return Ressurs.success(fagsakService.soekPerson(personIdent))
     }
 
     @GetMapping("{fagsakId}")
