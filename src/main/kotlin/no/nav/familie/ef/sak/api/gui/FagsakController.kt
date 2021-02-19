@@ -24,9 +24,9 @@ class FagsakController(private val fagsakService: FagsakService, private val til
     }
 
     @PostMapping("/sok")
-    fun sokPerson(@RequestBody personIdent: String): Ressurs<Søkeresultat> {
-        tilgangService.validerTilgangTilPersonMedBarn(personIdent)
-        return Ressurs.success(fagsakService.soekPerson(personIdent))
+    fun sokPerson(@RequestBody personIdentRequest: PersonIdentDto): Ressurs<Søkeresultat> {
+        tilgangService.validerTilgangTilPersonMedBarn(personIdentRequest.personIdent)
+        return Ressurs.success(fagsakService.soekPerson(personIdentRequest.personIdent))
     }
 
     @GetMapping("{fagsakId}")

@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.service
 
+import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.api.dto.*
 import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
 import no.nav.familie.ef.sak.mapper.KjønnMapper
@@ -30,7 +31,8 @@ class FagsakService(private val fagsakRepository: FagsakRepository, private val 
     }
 
     fun soekPerson(personIdent: String): Søkeresultat {
-        val fagsak = fagsakRepository.findBySøkerIdent(personIdent, stønadstype = Stønadstype.OVERGANGSSTØNAD) ?: throw NullPointerException("Finner ikke fagsak for søkte personen")
+        val fagsak = fagsakRepository.findBySøkerIdent(personIdent, stønadstype = Stønadstype.OVERGANGSSTØNAD) ?: throw  Feil(message = "Finner ikke fagsak for søkte personen",
+                   frontendFeilmelding = "Finner ikke fagsak for søkte personen")
         val person = personService.hentSøker(fagsak.hentAktivIdent())
 
         return Søkeresultat(personIdent = fagsak.hentAktivIdent(),
