@@ -41,7 +41,7 @@ class IntegrasjonerConfig(@Value("\${FAMILIE_INTEGRASJONER_URL}") private val in
 
     companion object {
 
-        private const val PATH_PING = "internal/status/isAlive"
+        private const val PATH_PING = "api/ping"
         private const val PATH_KODEVERK_LANDKODER = "api/kodeverk/landkoder"
         private const val PATH_KODEVERK_POSTSTED = "api/kodeverk/poststed"
         private const val PATH_TILGANGER = "api/tilgang/personer"
