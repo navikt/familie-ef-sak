@@ -38,7 +38,6 @@ class BlankettController(private val tilgangService: TilgangService,
 
     private fun hentGjeldendeNavn(hentAktivIdent: String): String {
         val navnMap = personopplysningerService.hentGjeldeneNavn(listOf(hentAktivIdent))
-        val navn = navnMap.getValue(hentAktivIdent)
-        return navn
+        return navnMap.getValue(hentAktivIdent)
     }
 }
