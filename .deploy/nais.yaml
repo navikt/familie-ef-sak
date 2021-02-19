@@ -56,6 +56,13 @@ spec:
     application:
       enabled: true
       tenant: {{tenant}}
+      claims:
+        groups:
+        {{#each claimGroups as |group|}}
+          - id: {{group}}
+        {{/each}}
+        extra:
+          - "NAVident"
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: {{springProfile}}

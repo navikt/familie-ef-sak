@@ -9,8 +9,13 @@ Appen kjører på JRE 11. Bygging gjøres ved å kjøre `mvn clean install`.
 
 ### Autentisering lokalt
 Dersom man vil gjøre autentiserte kall mot andre tjenester eller vil kjøre applikasjonen sammen med frontend, må man sette opp følgende miljø-variabler:
-* `AZURE_CLIENT_SECRET`
-* `AZURE_CLIENT_ID`
+
+#### Client id & client secret
+secret kan hentes fra cluster med
+`kubectl -n teamfamilie get secret azuread-familie-ef-sak-lokal -o json | jq '.data | map_values(@base64d)'`
+
+* `AZURE_APP_CLIENT_ID` (fra secret)
+* `AZURE_APP_CLIENT_SECRET` (fra secret)
 * Scope for den aktuelle tjenesten (`FAMILIE_INTEGRASJONER_SCOPE`, `FAMILIE_OPPDRAG_SCOPE`, ...)
 
 Alle disse variablene finnes i applikasjonens mappe for preprod-fss på vault. Merk at client id og client secret har andre navn i applikasjonens mappe. 

@@ -1,3 +1,4 @@
+springProfile: prod
 ingress: https://familie-ef-sak.intern.nav.no
 externalHosts:
   - api-gw.oera.no
@@ -6,5 +7,9 @@ externalHosts:
   - familie-ef-infotrygd-feed.prod-fss-pub.nais.io
   - familie-integrasjoner.prod-fss-pub.nais.io
   - infotrygd-enslig-forsoerger.prod-fss-pub.nais.io
-springProfile: prod
+
 tenant: nav.no
+claimGroups:
+  - "31778fd8-3b71-4867-8db6-a81235fbe001"
+  - "6406aba2-b930-41d3-a85b-dd13731bc974"
+  - "5fcc0e1d-a4c2-49f0-93dc-27c9fea41e54"
