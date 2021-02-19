@@ -78,7 +78,7 @@ class VurderingService(private val behandlingService: BehandlingService,
                                                  pdlSøker = pdlSøker)
         val bosituasjon = BosituasjonMapper.tilDto(søknad.bosituasjon)
 
-        val barnMedSamvær = BarnMedSamværMapper.tilDto(pdlBarn, barneForeldre, søknad)
+        val barnMedSamvær = BarnMedSamværMapper.tilDto(pdlBarn, barneForeldre, søknad, pdlSøker.bostedsadresse)
 
         return InngangsvilkårGrunnlagDto(medlemskap, sivilstand, bosituasjon, barnMedSamvær)
     }
