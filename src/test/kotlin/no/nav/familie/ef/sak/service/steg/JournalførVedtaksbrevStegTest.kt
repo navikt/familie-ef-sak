@@ -1,9 +1,12 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.service.steg
 
+import io.mockk.Runs
+import io.mockk.just
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ef.sak.repository.domain.*
+import no.nav.familie.ef.sak.service.VedtaksbrevService
 import no.nav.familie.ef.sak.service.steg.JournalførVedtaksbrevSteg
 import no.nav.familie.ef.sak.task.DistribuerVedtaksbrevTask
 import no.nav.familie.prosessering.domene.Task
@@ -16,7 +19,8 @@ internal class JournalførVedtaksbrevStegTest {
 
 
     private val taskRepository = mockk<TaskRepository>()
-    val journalførVedtaksbrev = JournalførVedtaksbrevSteg(taskRepository)
+    private val vedtaksbrevService = mockk<VedtaksbrevService>()
+    val journalførVedtaksbrev = JournalførVedtaksbrevSteg(taskRepository, vedtaksbrevService)
 
     @Test
     internal fun `skal opprette distribuerVedtaksbrevTask etter journalføring av vedtaksbrev`() {
@@ -28,6 +32,8 @@ internal class JournalførVedtaksbrevStegTest {
         every {
             taskRepository.save(capture(taskSlot))
         } returns Task("", "", Properties())
+
+        every { vedtaksbrevService.journalførVedtaksbrev(any()) } returns "1234"
 
         journalførVedtaksbrev.utførSteg(Behandling(fagsakId = fagsak.id,
                                                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
