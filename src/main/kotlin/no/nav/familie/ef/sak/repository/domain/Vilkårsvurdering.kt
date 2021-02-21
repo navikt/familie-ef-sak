@@ -40,12 +40,12 @@ enum class DelvilkårType {
     SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
     SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
     KRAV_SIVILSTAND,
-    HAR_FLYTTET_FRA_HVERANDRE,
     LEVER_IKKE_MED_ANNEN_FORELDER,
     LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD,
     SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
     NÆRE_BOFORHOLD,
     MER_AV_DAGLIG_OMSORG,
+    OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN,
 }
 
 enum class DelvilkårÅrsak {
@@ -58,8 +58,8 @@ enum class DelvilkårÅrsak {
 }
 
 enum class Vilkårsresultat {
-    JA,
-    NEI,
+    OPPFYLT,
+    IKKE_OPPFYLT,
     IKKE_VURDERT,
     IKKE_AKTUELL
 }
@@ -74,6 +74,9 @@ enum class VilkårType(val beskrivelse: String,
                            listOf(DelvilkårType.FEM_ÅRS_MEDLEMSKAP)),
     LOVLIG_OPPHOLD("§15-3 Lovlig opphold", listOf(DelvilkårType.BOR_OG_OPPHOLDER_SEG_I_NORGE)),
 
+    MOR_ELLER_FAR("§15-4 Mor eller far",
+                  listOf(DelvilkårType.OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN)),
+
     SIVILSTAND("§15-4 Sivilstand",
                listOf(
                        DelvilkårType.DOKUMENTERT_EKTESKAP,
@@ -83,19 +86,19 @@ enum class VilkårType(val beskrivelse: String,
                        DelvilkårType.KRAV_SIVILSTAND,
                )),
     SAMLIV("§15-4 Samliv",
-           listOf(DelvilkårType.HAR_FLYTTET_FRA_HVERANDRE,
-                  DelvilkårType.LEVER_IKKE_MED_ANNEN_FORELDER,
-                  DelvilkårType.LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD)),
+           listOf(DelvilkårType.LEVER_IKKE_MED_ANNEN_FORELDER,
+                  DelvilkårType.LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD
+           )),
     ALENEOMSORG("§15-4 Aleneomsorg",
                 listOf(DelvilkårType.SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
                        DelvilkårType.NÆRE_BOFORHOLD,
                        DelvilkårType.MER_AV_DAGLIG_OMSORG));
 
-
     companion object {
 
         fun hentInngangsvilkår(): List<VilkårType> = listOf(FORUTGÅENDE_MEDLEMSKAP,
                                                             LOVLIG_OPPHOLD,
+                                                            MOR_ELLER_FAR,
                                                             SIVILSTAND,
                                                             SAMLIV,
                                                             ALENEOMSORG)

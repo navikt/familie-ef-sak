@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.BehandlingshistorikkService
 import no.nav.familie.ef.sak.service.steg.StegType.*
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.task.FerdigstillBehandlingTask
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -105,7 +106,7 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
 
     @Transactional
     fun håndterFerdigsitllBehandling(behandling: Behandling): Behandling {
-        val behandlingSteg: JournalførVedtaksbrevSteg = hentBehandlingSteg(FERDIGSTILLE_BEHANDLING)
+        val behandlingSteg: FerdigstillBehandlingSteg = hentBehandlingSteg(FERDIGSTILLE_BEHANDLING)
 
         return håndterSteg(behandling, behandlingSteg, null)
     }
@@ -116,13 +117,15 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
                                 behandlingSteg: BehandlingSteg<T>,
                                 data: T): Behandling {
         val stegType = behandlingSteg.stegType()
+        val saksbehandlerIdent = SikkerhetContext.hentSaksbehandler()
         try {
-            val saksbehandlerNavn = SikkerhetContext.hentSaksbehandlerNavn()
             val harTilgangTilSteg = SikkerhetContext.harTilgangTilGittRolle(rolleConfig, behandling.steg.tillattFor)
 
-            logger.info("$saksbehandlerNavn håndterer $stegType på behandling ${behandling.id}")
+            logger.info("Starter håndtering av $stegType på behandling ${behandling.id}")
+            secureLogger.info("Starter håndtering av $stegType på behandling ${behandling.id} med saksbehandler=[$saksbehandlerIdent]")
+
             if (!harTilgangTilSteg) {
-                error("$saksbehandlerNavn kan ikke utføre steg '${stegType.displayName()} pga manglende rolle.")
+                error("$saksbehandlerIdent kan ikke utføre steg '${stegType.displayName()} pga manglende rolle.")
             }
 
             if (behandling.steg == BEHANDLING_FERDIGSTILT) {
@@ -130,7 +133,7 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
             }
 
             if (stegType.kommerEtter(behandling.steg, behandling.type)) {
-                error("$saksbehandlerNavn prøver å utføre steg '${stegType.displayName()}', " +
+                error("$saksbehandlerIdent prøver å utføre steg '${stegType.displayName()}', " +
                       "men behandlingen er på steg '${behandling.steg.displayName()}'")
             }
 
@@ -146,15 +149,11 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
                 behandlingshistorikkService.opprettHistorikkInnslag(
                         Behandlingshistorikk(behandlingId = behandling.id,
                                              steg = behandling.steg,
-                                             opprettetAvNavn = saksbehandlerNavn,
-                                             opprettetAv = SikkerhetContext.hentSaksbehandler()))
+                                             opprettetAvNavn = SikkerhetContext.hentSaksbehandlerNavn(),
+                                             opprettetAv = saksbehandlerIdent))
             }
 
             stegSuksessMetrics[stegType]?.increment()
-
-            if (nesteSteg == BEHANDLING_FERDIGSTILT) {
-                logger.info("$saksbehandlerNavn er ferdig med stegprosess på behandling ${behandling.id}")
-            }
 
             if (!nesteSteg.erGyldigIKombinasjonMedStatus(behandlingService.hentBehandling(behandling.id).status)) {
                 error("Steg '${nesteSteg.displayName()}' kan ikke settes " +
@@ -163,12 +162,11 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
 
             val returBehandling = behandlingService.oppdaterStegPåBehandling(behandlingId = behandling.id, steg = nesteSteg)
 
-            logger.info("$saksbehandlerNavn har håndtert $stegType på behandling ${behandling.id}")
+            logger.info("$stegType på behandling ${behandling.id} er håndtert")
             return returBehandling
         } catch (exception: Exception) {
             stegFeiletMetrics[stegType]?.increment()
             logger.error("Håndtering av stegtype '$stegType' feilet på behandling ${behandling.id}.")
-            secureLogger.info("Håndtering av stegtype '$stegType' feilet.", exception)
             throw exception
         }
     }

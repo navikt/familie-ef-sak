@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
 import no.nav.familie.ef.sak.integration.dto.pdl.visningsnavn
 import no.nav.familie.ef.sak.repository.domain.søknad.AnnenForelder
 import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsstønad
+import no.nav.familie.kontrakter.ef.søknad.Fødselsnummer
 
 object BarnMedSamværMapper {
 
@@ -19,6 +20,11 @@ object BarnMedSamværMapper {
                søknad: SøknadsskjemaOvergangsstønad): List<BarnMedSamværDto> {
 
         val alleBarn: List<MatchetBarn> = BarnMatcher.kobleSøknadsbarnOgRegisterBarn(søknad.barn, pdlBarn)
+                .sortedByDescending {
+                    if (it.fødselsnummer != null)
+                        Fødselsnummer(it.fødselsnummer).fødselsdato
+                    else it.søknadsbarn.fødselTermindato
+                }
 
         return alleBarn.map { barn ->
             val fnr = barn.pdlBarn?.familierelasjoner?.firstOrNull {
@@ -37,8 +43,8 @@ object BarnMedSamværMapper {
         val søknadsbarn = matchetBarn.søknadsbarn
         val samvær = søknadsbarn.samvær
         return BarnMedSamværDto(
-            barnId = søknadsbarn.id.toString(),
-            søknadsgrunnlag = BarnMedSamværSøknadsgrunnlagDto(
+                barnId = søknadsbarn.id.toString(),
+                søknadsgrunnlag = BarnMedSamværSøknadsgrunnlagDto(
                         navn = søknadsbarn.navn,
                         fødselsnummer = søknadsbarn.fødselsnummer,
                         fødselTermindato = søknadsbarn.fødselTermindato,
@@ -58,10 +64,10 @@ object BarnMedSamværMapper {
                         hvorMyeErDuSammenMedAnnenForelder = samvær?.hvorMyeErDuSammenMedAnnenForelder,
                         beskrivSamværUtenBarn = samvær?.beskrivSamværUtenBarn,
                 ),
-            registergrunnlag = BarnMedSamværRegistergrunnlagDto(
+                registergrunnlag = BarnMedSamværRegistergrunnlagDto(
                         navn = matchetBarn.pdlBarn?.navn?.gjeldende()?.visningsnavn(),
                         fødselsnummer = matchetBarn.fødselsnummer,
-                        harSammeAdresse =  matchetBarn.pdlBarn?.let {
+                        harSammeAdresse = matchetBarn.pdlBarn?.let {
                             AdresseHjelper.borPåSammeAdresse(it, pdlAnnenForelder?.bostedsadresse ?: emptyList())
                         },
                         forelder = pdlAnnenForelder?.let { tilAnnenForelderDto(it, annenForelderFnr) }

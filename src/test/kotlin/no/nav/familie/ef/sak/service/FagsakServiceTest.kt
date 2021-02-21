@@ -44,12 +44,14 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
                                            type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                            status = BehandlingStatus.FERDIGSTILT,
                                            aktiv = false,
-                                           steg = StegType.BEHANDLING_FERDIGSTILT)
+                                           steg = StegType.BEHANDLING_FERDIGSTILT,
+                                           resultat = BehandlingResultat.INNVILGET)
         val behandlingAktiv = Behandling(fagsakId = fagsakDB.id,
                                          type = BehandlingType.REVURDERING,
                                          status = BehandlingStatus.UTREDES,
                                          aktiv = true,
-                                         steg = StegType.REGISTRERE_OPPLYSNINGER)
+                                         steg = StegType.REGISTRERE_OPPLYSNINGER,
+                                         resultat = BehandlingResultat.INNVILGET)
 
         behandlingRepository.insert(behandlingInaktiv)
         behandlingRepository.insert(behandlingAktiv)

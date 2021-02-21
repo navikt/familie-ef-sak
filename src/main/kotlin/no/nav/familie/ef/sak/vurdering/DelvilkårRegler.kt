@@ -8,9 +8,6 @@ import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
 import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
 import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsstønad
 
-object SvarIdKonstanter{
-    const val samlivsbruddAndre = "samlivsbruddAndre"
-}
 
 /**
  * Filtrerer bort delvikår som ikke skall vurderes iht data i søknaden
@@ -47,7 +44,6 @@ private fun erDelvilkårAktueltForSøknaden(delvilkårType: DelvilkårType,
         DelvilkårType.SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON -> måDokumentereSamlivsbrudd(sivilstandType, søknad)
         DelvilkårType.SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING -> måVerifisereDatoerForSamlivsbrudd(sivilstandType)
         DelvilkårType.KRAV_SIVILSTAND -> måVerifisereKravTilSivilstand(sivilstandType)
-        DelvilkårType.HAR_FLYTTET_FRA_HVERANDRE -> søknad.sivilstand.årsakEnslig === SvarIdKonstanter.samlivsbruddAndre
         else -> true
     }
 }
