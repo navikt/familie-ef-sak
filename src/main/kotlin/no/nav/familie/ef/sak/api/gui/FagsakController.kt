@@ -23,12 +23,6 @@ class FagsakController(private val fagsakService: FagsakService, private val til
         return Ressurs.success(fagsakService.hentEllerOpprettFagsak(fagsakRequest.personIdent, fagsakRequest.stønadstype))
     }
 
-    @PostMapping("/sok")
-    fun sokPerson(@RequestBody personIdentRequest: PersonIdentDto): Ressurs<Søkeresultat> {
-        tilgangService.validerTilgangTilPersonMedBarn(personIdentRequest.personIdent)
-        return Ressurs.success(fagsakService.soekPerson(personIdentRequest.personIdent))
-    }
-
     @GetMapping("{fagsakId}")
     fun hentFagsak(@PathVariable fagsakId: UUID): Ressurs<FagsakDto> {
         tilgangService.validerTilgangTilFagsak(fagsakId)

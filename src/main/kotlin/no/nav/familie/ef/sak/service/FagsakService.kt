@@ -15,7 +15,9 @@ import java.lang.NullPointerException
 import java.util.*
 
 @Service
-class FagsakService(private val fagsakRepository: FagsakRepository, private val behandlingService: BehandlingService, private val personService: PersonService) {
+class FagsakService(private val fagsakRepository: FagsakRepository,
+                    private val behandlingService: BehandlingService,
+                    private val personService: PersonService) {
 
     fun hentEllerOpprettFagsak(personIdent: String, stønadstype: Stønadstype): FagsakDto {
         val fagsak = (fagsakRepository.findBySøkerIdent(personIdent, stønadstype)
@@ -31,14 +33,20 @@ class FagsakService(private val fagsakRepository: FagsakRepository, private val 
     }
 
     fun soekPerson(personIdent: String): Søkeresultat {
-        val fagsak = fagsakRepository.findBySøkerIdent(personIdent, stønadstype = Stønadstype.OVERGANGSSTØNAD) ?: throw  Feil(message = "Finner ikke fagsak for søkte personen",
-                   frontendFeilmelding = "Finner ikke fagsak for søkte personen")
-        val person = personService.hentSøker(fagsak.hentAktivIdent())
+        val fagsaker = fagsakRepository.findBySøkerIdent(personIdent)
 
-        return Søkeresultat(personIdent = fagsak.hentAktivIdent(),
+        if (fagsaker.isEmpty()) {
+            throw Feil(message = "Finner ikke fagsak for søkte personen",
+                        frontendFeilmelding = "Finner ikke fagsak for søkte personen")
+        }
+
+        val personIdent = fagsaker.first().hentAktivIdent();
+        val person = personService.hentSøker(personIdent)
+
+        return Søkeresultat(personIdent = personIdent,
                             kjønn = KjønnMapper.tilKjønn(person),
                             visningsnavn = NavnDto.fraNavn(person.navn.gjeldende()).visningsnavn,
-                            fagsaker = listOf(fagsak.id)
+                            fagsaker = fagsaker.map { FagsakForSøkeresultat(fagsakId = it.id, stønadstype = it.stønadstype) }
         )
     }
 

@@ -36,6 +36,24 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(fagsak.søkerIdenter.map { it.ident }).contains("98765432109")
     }
 
+
+    @Test
+    internal fun `skal returnere en liste med fagsaker hvis stønadstypen ikke satt`() {
+        val fagsakPerson = fagsakpersoner(setOf("12345678901"))
+        fagsakRepository.insert(fagsak(identer = fagsakPerson, stønadstype = Stønadstype.OVERGANGSSTØNAD))
+        fagsakRepository.insert(fagsak(identer = fagsakPerson, stønadstype = Stønadstype.SKOLEPENGER))
+        val fagsaker = fagsakRepository.findBySøkerIdent("12345678901")
+
+        assertThat(fagsaker.forEach { fagsak ->
+                assertThat(fagsak.søkerIdenter.size).isEqualTo(1)
+                assertThat(fagsak.søkerIdenter.map { it.ident }).contains("12345678901")
+        })
+
+
+        assertThat(fagsaker.map { it.stønadstype }).contains(Stønadstype.SKOLEPENGER)
+        assertThat(fagsaker.map { it.stønadstype }).contains(Stønadstype.OVERGANGSSTØNAD)
+    }
+
     @Test
     internal fun finnMedEksternId() {
         val fagsak = fagsakRepository.insert(fagsak())
