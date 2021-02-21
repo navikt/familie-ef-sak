@@ -1,17 +1,12 @@
 package no.nav.familie.ef.sak.service
 
-import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.api.dto.*
-import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
-import no.nav.familie.ef.sak.mapper.KjønnMapper
-import no.nav.familie.ef.sak.mapper.PersonopplysningerMapper
 import no.nav.familie.ef.sak.repository.FagsakRepository
 import no.nav.familie.ef.sak.repository.domain.Fagsak
 import no.nav.familie.ef.sak.repository.domain.FagsakPerson
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import org.springframework.stereotype.Service
-import java.lang.NullPointerException
 import java.util.*
 
 @Service
@@ -30,24 +25,6 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
                          personIdent = fagsak.hentAktivIdent(),
                          stønadstype = fagsak.stønadstype,
                          behandlinger = behandlinger)
-    }
-
-    fun soekPerson(personIdent: String): Søkeresultat {
-        val fagsaker = fagsakRepository.findBySøkerIdent(personIdent)
-
-        if (fagsaker.isEmpty()) {
-            throw Feil(message = "Finner ikke fagsak for søkte personen",
-                        frontendFeilmelding = "Finner ikke fagsak for søkte personen")
-        }
-
-        val personIdent = fagsaker.first().hentAktivIdent();
-        val person = personService.hentSøker(personIdent)
-
-        return Søkeresultat(personIdent = personIdent,
-                            kjønn = KjønnMapper.tilKjønn(person),
-                            visningsnavn = NavnDto.fraNavn(person.navn.gjeldende()).visningsnavn,
-                            fagsaker = fagsaker.map { FagsakForSøkeresultat(fagsakId = it.id, stønadstype = it.stønadstype) }
-        )
     }
 
     fun hentFagsakMedBehandlinger(fagsakId: UUID): FagsakDto =

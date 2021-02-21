@@ -31,7 +31,7 @@ internal class SøkControllerTest : OppslagSpringRunnerTest() {
     internal fun `Gitt person med fagsak når søk på personensident kallas skal det returneres 200 OK med Søkeresultat`() {
          fagsakRepository.insert(fagsak(identer = setOf(FagsakPerson("01010199999"))))
 
-        val response = soekPerson("01010199999")
+        val response = søkPerson("01010199999")
         Assertions.assertThat(response.statusCode).isEqualTo(
                 HttpStatus.OK)
         Assertions.assertThat(response.body?.data?.personIdent).isEqualTo("01010199999")
@@ -39,15 +39,15 @@ internal class SøkControllerTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `Gitt person uten fagsak når søk på personensident kallas skal det returneres 200 OK med RessursFeiler`() {
-        val response = soekPerson("01010166666")
+    internal fun `Gitt person uten fagsak når søk på personensident kallas skal det returneres RessursFeilet`() {
+        val response = søkPerson("01010166666")
         Assertions.assertThat(response.body.status).isEqualTo(Ressurs.Status.FEILET)
         Assertions.assertThat(response.body.frontendFeilmelding).isEqualTo("Finner ikke fagsak for søkte personen")
     }
 
-    private fun soekPerson(personIdent: String): ResponseEntity<Ressurs<Søkeresultat>> {
-        return restTemplate.exchange<Ressurs<Søkeresultat>>(localhost("/api/sok/"),
-                                                                    HttpMethod.POST,
-                                                                    HttpEntity(PersonIdentDto(personIdent = personIdent), headers))
+    private fun søkPerson(personIdent: String): ResponseEntity<Ressurs<Søkeresultat>> {
+        return restTemplate.exchange(localhost("/api/sok/"),
+                                     HttpMethod.POST,
+                                     HttpEntity(PersonIdentDto(personIdent = personIdent), headers))
     }
 }
