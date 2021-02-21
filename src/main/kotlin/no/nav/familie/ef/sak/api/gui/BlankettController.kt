@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.api.gui
 
 import no.nav.familie.ef.sak.api.ApiFeil
-import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.service.BehandlingService
@@ -10,7 +9,7 @@ import no.nav.familie.ef.sak.service.JournalføringService
 import no.nav.familie.ef.sak.service.OppgaveService
 import no.nav.familie.ef.sak.service.PersonService
 import no.nav.familie.ef.sak.service.TilgangService
-import no.nav.familie.kontrakter.felles.journalpost.BrukerIdType
+import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
 import org.springframework.validation.annotation.Validated
@@ -32,7 +31,7 @@ class BlankettController(private val fagsakService: FagsakService,
                          private val journalføringService: JournalføringService) {
 
     @PostMapping("/oppgave/{oppgaveId}")
-    fun opprettBlankettBehandling(@PathVariable oppgaveId: Long): UUID {
+    fun opprettBlankettBehandling(@PathVariable oppgaveId: Long): Ressurs<UUID> {
         oppgaveService.hentEfOppgave(oppgaveId)?.let {
             throw ApiFeil("Det finnes allerede en behandling for denne oppgaven - kan ikke opprettes på nytt",
                           HttpStatus.BAD_REQUEST)
@@ -48,6 +47,6 @@ class BlankettController(private val fagsakService: FagsakService,
         journalføringService.settSøknadPåBehandling(oppgave.journalpostId.toString(), behandling.fagsakId, behandling.id)
         journalføringService.knyttJournalpostTilBehandling(journalpost, behandling)
 
-        return behandling.id
+        return Ressurs.success(behandling.id)
     }
 }
