@@ -40,7 +40,9 @@ GCP bruker secrets i stedet for vault.
 Anbefaler å bruke [modify-secrets](https://github.com/rajatjindal/kubectl-modify-secret)
 
 #### Database
-[Nais doc](https://doc.nais.io/persistence/postgres/)
+[Nais doc - Postgres](https://doc.nais.io/persistence/postgres/)
+
+[Nais doc - Responsibilities](https://doc.nais.io/persistence/responsibilities/)
 
 ## Produksjonssetting
 Applikasjonen vil deployes til produksjon ved ny commit på master-branchen. Det er dermed tilstrekkelig å merge PR for å trigge produksjonsbygget. 
