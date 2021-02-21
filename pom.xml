@@ -50,6 +50,9 @@
         <spring.cloud-contract>3.0.1</spring.cloud-contract>
         <!--suppress UnresolvedMavenProperty -->
         <sonar.login>${SONAR_LOGIN}</sonar.login>
+
+        <common-java-modules.version>1.2019.11.06-15.14-6ca860e6cead</common-java-modules.version>
+        <cxf.version>3.3.4</cxf.version>
     </properties>
 
     <dependencyManagement>
@@ -240,6 +243,53 @@
             <groupId>no.nav.fpsak.tidsserie</groupId>
             <artifactId>fpsak-tidsserie</artifactId>
             <version>2.5.5</version>
+        </dependency>
+
+        <!-- SOAP/CXF -->
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-core</artifactId>
+            <version>${cxf.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-frontend-jaxws</artifactId>
+            <version>${cxf.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-transports-http</artifactId>
+            <version>${cxf.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-ws-security</artifactId>
+            <version>${cxf.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.ws</groupId>
+            <artifactId>jaxws-ri</artifactId>
+            <version>2.3.3</version>
+            <type>pom</type>
+        </dependency>
+        <dependency>
+            <!-- trenger denne . inneholder gamle com.sun.activation.registries klasser som er nødvendig -->
+            <groupId>javax.activation</groupId>
+            <artifactId>activation</artifactId>
+            <version>1.1.1</version>
+        </dependency>
+
+        <!-- NAV-interne avhengigheter -->
+        <dependency>
+            <groupId>no.nav.common</groupId>
+            <artifactId>cxf</artifactId>
+            <version>${common-java-modules.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>no.nav.common</groupId>
+                    <artifactId>log</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 
