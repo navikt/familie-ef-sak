@@ -8,10 +8,7 @@ import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.integration.dto.pdl.*
-import no.nav.familie.ef.sak.mapper.BarnMedSamværMapper
-import no.nav.familie.ef.sak.mapper.BosituasjonMapper
-import no.nav.familie.ef.sak.mapper.MedlemskapMapper
-import no.nav.familie.ef.sak.mapper.SivilstandMapper
+import no.nav.familie.ef.sak.mapper.*
 import no.nav.familie.ef.sak.repository.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsstønad
@@ -80,7 +77,9 @@ class VurderingService(private val behandlingService: BehandlingService,
 
         val barnMedSamvær = BarnMedSamværMapper.tilDto(pdlBarn, barneForeldre, søknad)
 
-        return InngangsvilkårGrunnlagDto(medlemskap, sivilstand, bosituasjon, barnMedSamvær)
+        val sivilstandsplaner = SivilstandsplanerMapper.tilDto(sivilstandsplaner = søknad.sivilstandsplaner)
+
+        return InngangsvilkårGrunnlagDto(medlemskap, sivilstand, bosituasjon, barnMedSamvær, sivilstandsplaner)
     }
 
     private fun hentVurderinger(behandlingId: UUID,
