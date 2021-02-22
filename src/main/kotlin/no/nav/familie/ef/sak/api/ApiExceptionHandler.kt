@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.api
 
 import no.nav.familie.ef.sak.exception.IntegrasjonException
+import no.nav.familie.ef.sak.exception.PdlNotFoundException
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.slf4j.LoggerFactory
 import org.springframework.core.NestedExceptionUtils
@@ -43,11 +44,18 @@ class ApiExceptionHandler {
         return ResponseEntity.status(feil.httpStatus).body(Ressurs.failure(frontendFeilmelding = feil.frontendFeilmelding))
     }
 
+    @ExceptionHandler(PdlNotFoundException::class)
+    fun handleThrowable(feil: PdlNotFoundException): ResponseEntity<Ressurs<Nothing>> {
+        logger.info("Finner ikke personen i PDL")
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Ressurs.failure(frontendFeilmelding = "Finner ikke personen"))
+    }
+
     @ExceptionHandler(ManglerTilgang::class)
     fun handleThrowable(manglerTilgang: ManglerTilgang): ResponseEntity<Ressurs<Nothing>> {
         secureLogger.error("En håndtert tilgangsfeil har oppstått - ${manglerTilgang.melding}", manglerTilgang)
         logger.info("En håndtert tilgangsfeil har oppstått")
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Ressurs.ikkeTilgang(melding = manglerTilgang.melding))
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(Ressurs.funksjonellFeil(frontendFeilmelding = "Mangler tilgang til opplysningene", melding = manglerTilgang.melding))
     }
 
     @ExceptionHandler(IntegrasjonException::class)

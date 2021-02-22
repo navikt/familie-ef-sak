@@ -16,13 +16,9 @@ import org.springframework.web.bind.annotation.*
 @Validated
 class SøkController(private val søkService: SøkService, private val tilgangService: TilgangService) {
 
-    @PostMapping()
+    @PostMapping
     fun søkPerson(@RequestBody personIdentRequest: PersonIdentDto): Ressurs<Søkeresultat> {
-        return try {
-            tilgangService.validerTilgangTilPersonMedBarn(personIdentRequest.personIdent)
-            Ressurs.success(søkService.søkPerson(personIdentRequest.personIdent))
-        } catch (e: PdlNotFoundException) {
-            Ressurs.failure(frontendFeilmelding = "Finner ikke søkte personen")
-        }
+        tilgangService.validerTilgangTilPersonMedBarn(personIdentRequest.personIdent)
+        return Ressurs.success(søkService.søkPerson(personIdentRequest.personIdent))
     }
 }
