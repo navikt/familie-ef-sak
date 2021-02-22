@@ -43,6 +43,11 @@ Anbefaler å bruke [modify-secrets](https://github.com/rajatjindal/kubectl-modif
 [Nais doc - Postgres](https://doc.nais.io/persistence/postgres/)
 
 [Nais doc - Responsibilities](https://doc.nais.io/persistence/responsibilities/)
+* `brew tap tclass/cloud_sql_proxy`
+* `brew install cloud_sql_proxy`
+
+1h temp token
+* `gcloud projects add-iam-policy-binding familie-ef-sak --member=user:<FIRSTNAME>.<LASTNAME>@nav.no --role=roles/cloudsql.instanceUser --condition="expression=request.time < timestamp('$(date -v '+1H' -u +'%Y-%m-%dT%H:%M:%SZ')'),title=temp_access"`
 
 ## Produksjonssetting
 Applikasjonen vil deployes til produksjon ved ny commit på master-branchen. Det er dermed tilstrekkelig å merge PR for å trigge produksjonsbygget. 
