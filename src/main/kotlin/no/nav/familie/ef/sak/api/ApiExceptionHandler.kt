@@ -55,12 +55,11 @@ class ApiExceptionHandler {
         secureLogger.error("En håndtert tilgangsfeil har oppstått - ${manglerTilgang.melding}", manglerTilgang)
         logger.info("En håndtert tilgangsfeil har oppstått")
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(Ressurs(
-                        data = null,
-                        status = Ressurs.Status.IKKE_TILGANG,
-                        frontendFeilmelding = "Mangler tilgang til opplysningene",
-                        melding = manglerTilgang.melding,
-                        stacktrace = null
+                .body(Ressurs(data = null,
+                              status = Ressurs.Status.IKKE_TILGANG,
+                              frontendFeilmelding = "Mangler tilgang til opplysningene",
+                              melding = manglerTilgang.melding,
+                              stacktrace = null
                 ))
     }
 
