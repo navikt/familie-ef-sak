@@ -8,7 +8,7 @@ env:
 
 jobs:
   build:
-    name: Build
+    name: Build and sonar
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -25,8 +25,10 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 1.11
-      - name: Bygg med Maven
+      - name: Bygg og SonarCloud
         env:
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: mvn -B --no-transfer-progress package --settings .m2/maven-settings.xml --file pom.xml
+          SONAR_PROJECTKEY: ${{ secrets.SONAR_PROJECTKEY }}
+          SONAR_LOGIN: ${{ secrets.SONAR_LOGIN }}
+        run: mvn verify sonar:sonar --settings .m2/maven-settings.xml --file pom.xml
