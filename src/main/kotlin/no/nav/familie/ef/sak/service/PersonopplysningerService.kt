@@ -30,8 +30,9 @@ class PersonopplysningerService(private val personService: PersonService,
             val fullmakter = personMedRelasjoner.søker.fullmakt.filter { it.motpartsRolle == MotpartsRolle.FULLMEKTIG }
 
             val identer = fullmakter.map { it.motpartsPersonident } +
-                          personMedRelasjoner.søker.sivilstand.mapNotNull { it.relatertVedSivilstand }.filterNot { it.endsWith("00000") }
-            val identNavn = hentNavn(identer + andreForelderIdenter(personMedRelasjoner))
+                          personMedRelasjoner.søker.sivilstand.mapNotNull { it.relatertVedSivilstand }
+                                  .filterNot { it.endsWith("00000") }
+            val identNavn = hentGjeldeneNavn(identer + andreForelderIdenter(personMedRelasjoner))
             personopplysningerMapper.tilPersonopplysninger(
                     personMedRelasjoner,
                     ident,
@@ -49,7 +50,7 @@ class PersonopplysningerService(private val personService: PersonService,
                     .map { it.relatertPersonsIdent }
                     .distinct()
 
-    private fun hentNavn(identer: List<String>): Map<String, String> {
+    fun hentGjeldeneNavn(identer: List<String>): Map<String, String> {
         if (identer.isEmpty()) return emptyMap()
         logger.info("Henter navn til {} personer", identer.size)
         return personService.hentPdlPersonKort(identer).map { it.key to it.value.navn.gjeldende().visningsnavn() }.toMap()
