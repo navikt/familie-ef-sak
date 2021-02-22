@@ -111,6 +111,7 @@ FAMILIE_OPPDRAG_API_URL: http://familie-oppdrag
 INFOTRYGD_FEED_API_URL: https://familie-ef-infotrygd-feed.nais.adeo.no
 INFOTRYGD_REPLIKA_API_URL: https://infotrygd-enslig-forsoerger.nais.adeo.no
 FAMILIE_BREV_API_URL: https://familie-brev.intern.nav.no
+FAMILIE_BLANKETT_API_URL: https://familie-ef-blankett.intern.nav.no
 
 FRONTEND_OPPGAVE_URL: https://ensligmorellerfar.prod-fss.nais.io/fagsak
 
