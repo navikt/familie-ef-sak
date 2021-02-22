@@ -45,12 +45,12 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
     fun fullførJournalpost(journalføringRequest: JournalføringRequest, journalpostId: String): Long {
         val behandling: Behandling = hentBehandling(journalføringRequest)
         val journalpost = hentJournalpost(journalpostId)
+        val fagsak = fagsakService.hentFagsak(journalføringRequest.fagsakId)
 
-        settSøknadPåBehandling(journalpostId, behandling.fagsakId, behandling.id)
+        settSøknadPåBehandling(journalpostId, fagsak, behandling.id)
         knyttJournalpostTilBehandling(journalpost, behandling)
 
-        val eksternFagsakId = fagsakService.hentEksternId(journalføringRequest.fagsakId)
-        oppdaterJournalpost(journalpost, journalføringRequest.dokumentTitler, eksternFagsakId)
+        oppdaterJournalpost(journalpost, journalføringRequest.dokumentTitler, fagsak.eksternId.id)
         ferdigstillJournalføring(journalpostId, journalføringRequest.journalførendeEnhet)
         ferdigstillJournalføringsoppgave(journalføringRequest)
 
@@ -58,6 +58,35 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
 
     }
 
+    fun hentSøknadFraJournalpostForOvergangsstønad(journalpostId: String) : SøknadOvergangsstønad {
+       val dokumentinfo =
+        hentJournalpost(journalpostId).dokumenter
+                ?.first {
+                    DokumentBrevkode.OVERGANGSSTØNAD == DokumentBrevkode.fraBrevkode(it.brevkode.toString()) && harOriginalDokument(it)
+                } ?: error("Fant ingen søknad")
+
+        return journalpostClient.hentOvergangsstønadSøknad(journalpostId, dokumentinfo.dokumentInfoId)
+    }
+
+    fun hentSøknadFraJournalpostForBarnetilsyn(journalpostId: String) : SøknadBarnetilsyn {
+        val dokumentinfo =
+                hentJournalpost(journalpostId).dokumenter
+                        ?.first {
+                            DokumentBrevkode.BARNETILSYN == DokumentBrevkode.fraBrevkode(it.brevkode.toString()) && harOriginalDokument(it)
+                        } ?: error("Fant ingen søknad")
+
+        return journalpostClient.hentBarnetilsynSøknad(journalpostId, dokumentinfo.dokumentInfoId)
+    }
+
+    fun hentSøknadFraJournalpostForSkolepenger(journalpostId: String) : SøknadSkolepenger {
+        val dokumentinfo =
+                hentJournalpost(journalpostId).dokumenter
+                        ?.first {
+                            DokumentBrevkode.SKOLEPENGER == DokumentBrevkode.fraBrevkode(it.brevkode.toString()) && harOriginalDokument(it)
+                        } ?: error("Fant ingen søknad")
+
+        return journalpostClient.hentSkolepengerSøknad(journalpostId, dokumentinfo.dokumentInfoId)
+    }
     private fun ferdigstillJournalføring(journalpostId: String, journalførendeEnhet: String) {
         journalpostClient.ferdigstillJournalpost(journalpostId, journalførendeEnhet)
     }
@@ -88,36 +117,8 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         return behandlingId?.let { behandlingService.hentBehandling(it) }
     }
 
-    fun knyttJournalpostTilBehandling(journalpost: Journalpost, behandling: Behandling) {
+    private fun knyttJournalpostTilBehandling(journalpost: Journalpost, behandling: Behandling) {
         behandlingService.oppdaterJournalpostIdPåBehandling(journalpost, behandling)
-    }
-    fun hentSøknadFraJournalpostForOvergangsstønad(journalpostId: String) : SøknadOvergangsstønad {
-       val dokumentinfo =
-        hentJournalpost(journalpostId).dokumenter
-                ?.first {
-                    DokumentBrevkode.OVERGANGSSTØNAD == DokumentBrevkode.fraBrevkode(it.brevkode.toString()) && harOriginalDokument(it)
-                } ?: error("Fant ingen søknad")
-
-        return journalpostClient.hentOvergangsstønadSøknad(journalpostId, dokumentinfo.dokumentInfoId)
-    }
-    fun hentSøknadFraJournalpostForBarnetilsyn(journalpostId: String) : SøknadBarnetilsyn {
-        val dokumentinfo =
-                hentJournalpost(journalpostId).dokumenter
-                        ?.first {
-                            DokumentBrevkode.BARNETILSYN == DokumentBrevkode.fraBrevkode(it.brevkode.toString()) && harOriginalDokument(it)
-                        } ?: error("Fant ingen søknad")
-
-        return journalpostClient.hentBarnetilsynSøknad(journalpostId, dokumentinfo.dokumentInfoId)
-    }
-
-    fun hentSøknadFraJournalpostForSkolepenger(journalpostId: String) : SøknadSkolepenger {
-        val dokumentinfo =
-                hentJournalpost(journalpostId).dokumenter
-                        ?.first {
-                            DokumentBrevkode.SKOLEPENGER == DokumentBrevkode.fraBrevkode(it.brevkode.toString()) && harOriginalDokument(it)
-                        } ?: error("Fant ingen søknad")
-
-        return journalpostClient.hentSkolepengerSøknad(journalpostId, dokumentinfo.dokumentInfoId)
     }
 
     private fun settSøknadPåBehandling(journalpostId: String, fagsak: Fagsak, behandlingId : UUID) {

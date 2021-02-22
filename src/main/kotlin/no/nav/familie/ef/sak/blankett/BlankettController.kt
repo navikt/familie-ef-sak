@@ -49,9 +49,8 @@ class BlankettController(private val tilgangService: TilgangService,
         val personIdent = personService.hentIdentForJournalpost(journalpost)
         tilgangService.validerTilgangTilPersonMedBarn(personIdent)
         val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, Stønadstype.OVERGANGSSTØNAD)
-        val behandling = behandlingService.opprettBehandling(BehandlingType.BLANKETT, fagsak.id)
-        journalføringService.settSøknadPåBehandling(oppgave.journalpostId.toString(), behandling.fagsakId, behandling.id)
-        journalføringService.knyttJournalpostTilBehandling(journalpost, behandling)
+        val søknad = journalføringService.hentSøknadFraJournalpostForOvergangsstønad(oppgave.journalpostId.toString())
+        val behandling = behandlingService.opprettBehandling(BehandlingType.BLANKETT, fagsak.id, søknad, journalpost)
 
         return Ressurs.success(behandling.id)
     }
