@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.service.OppgaveService
 import no.nav.familie.ef.sak.service.TotrinnskontrollService
 import no.nav.familie.ef.sak.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.task.IverksettMotOppdragTask
+import no.nav.familie.ef.sak.task.JournalførBlankettTask
 import no.nav.familie.ef.sak.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.task.OpprettOppgaveTask.OpprettOppgaveTaskData
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
@@ -74,7 +75,7 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
     private fun opprettTaskForJournalførBlankett(behandling: Behandling) {
         val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
 
-        taskRepository.save(IverksettMotOppdragTask.opprettTask(behandling, fagsak.hentAktivIdent()))
+        taskRepository.save(JournalførBlankettTask.opprettTask(behandling, fagsak.hentAktivIdent()))
     }
 
 
