@@ -6,13 +6,14 @@ import no.nav.familie.ef.sak.exception.PdlNotFoundException
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.InfotrygdReplikaClient
 import no.nav.familie.ef.sak.integration.PdlClient
+import no.nav.familie.ef.sak.util.isEqualOrAfter
+import no.nav.familie.ef.sak.util.isEqualOrBefore
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPerioderOvergangsstønadRequest
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadRequest
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 import java.time.YearMonth
 
 @Service
@@ -80,10 +81,10 @@ class PerioderOvergangsstønadService(private val infotrygdReplikaClient: Infotr
             }
             val last = mergedePerioder.last()
             if (sammenhengendePeriode(last, period)) {
-                mergedePerioder[mergedePerioder.size - 1] = last.copy(tomDato = last(last.tomDato, period.tomDato))
+                mergedePerioder[mergedePerioder.size - 1] = last.copy(tomDato = maxOf(last.tomDato, period.tomDato))
             } else if (erOverlappende(last, period)) {
-                mergedePerioder[mergedePerioder.size - 1] = last.copy(fomDato = first(last.fomDato, period.fomDato),
-                                                                      tomDato = last(last.tomDato, period.tomDato))
+                mergedePerioder[mergedePerioder.size - 1] = last.copy(fomDato = minOf(last.fomDato, period.fomDato),
+                                                                      tomDato = maxOf(last.tomDato, period.tomDato))
             } else {
                 mergedePerioder.add(period)
             }
@@ -100,14 +101,8 @@ class PerioderOvergangsstønadService(private val infotrygdReplikaClient: Infotr
         return firstTomDato == secondFom || firstTomDato.plusMonths(1) == secondFom
     }
 
-    private fun last(first: LocalDate, second: LocalDate) = if (first.isAfter(second)) first else second
-    private fun first(first: LocalDate, second: LocalDate) = if (first.isBefore(second)) first else second
-
     private fun erOverlappende(mergedPeriode: PeriodeOvergangsstønad, period: PeriodeOvergangsstønad) =
             mergedPeriode.fomDato.isEqualOrBefore(period.tomDato) && mergedPeriode.tomDato.isEqualOrAfter(period.fomDato)
-
-    fun LocalDate.isEqualOrBefore(other: LocalDate) = this == other || this.isBefore(other)
-    fun LocalDate.isEqualOrAfter(other: LocalDate) = this == other || this.isAfter(other)
 
     private fun hentPersonIdenter(request: PerioderOvergangsstønadRequest): Set<String> {
         return try {
