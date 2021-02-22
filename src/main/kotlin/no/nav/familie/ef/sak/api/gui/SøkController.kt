@@ -18,11 +18,11 @@ class SøkController(private val søkService: SøkService, private val tilgangSe
 
     @PostMapping()
     fun søkPerson(@RequestBody personIdentRequest: PersonIdentDto): Ressurs<Søkeresultat> {
-        try {
+        return try {
             tilgangService.validerTilgangTilPersonMedBarn(personIdentRequest.personIdent)
-            return Ressurs.success(søkService.søkPerson(personIdentRequest.personIdent))
+            Ressurs.success(søkService.søkPerson(personIdentRequest.personIdent))
         } catch (e: PdlNotFoundException) {
-            return Ressurs.failure(frontendFeilmelding = "Finner ikke søkte personen")
+            Ressurs.failure(frontendFeilmelding = "Finner ikke søkte personen")
         }
     }
 }
