@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.api.gui
 
 import no.nav.familie.ef.sak.api.dto.PersonIdentDto
 import no.nav.familie.ef.sak.api.dto.Søkeresultat
+import no.nav.familie.ef.sak.exception.PdlNotFoundException
 import no.nav.familie.ef.sak.service.SøkService
 import no.nav.familie.ef.sak.service.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -16,8 +17,12 @@ import org.springframework.web.bind.annotation.*
 class SøkController(private val søkService: SøkService, private val tilgangService: TilgangService) {
 
     @PostMapping()
-    fun sokPerson(@RequestBody personIdentRequest: PersonIdentDto): Ressurs<Søkeresultat> {
-        tilgangService.validerTilgangTilPersonMedBarn(personIdentRequest.personIdent)
-        return Ressurs.success(søkService.søkPerson(personIdentRequest.personIdent))
+    fun søkPerson(@RequestBody personIdentRequest: PersonIdentDto): Ressurs<Søkeresultat> {
+        try {
+            tilgangService.validerTilgangTilPersonMedBarn(personIdentRequest.personIdent)
+            return Ressurs.success(søkService.søkPerson(personIdentRequest.personIdent))
+        } catch (e: PdlNotFoundException) {
+            return Ressurs.failure(frontendFeilmelding = "Finner ikke søkte personen")
+        }
     }
 }
