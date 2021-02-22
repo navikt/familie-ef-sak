@@ -31,7 +31,7 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                         ?.let { Folkeregisterpersonstatus.fraPdl(it) },
                 dødsdato = søker.dødsfall.gjeldende()?.dødsdato,
                 navn = NavnDto.fraNavn(søker.navn.gjeldende()),
-                kjønn = søker.kjønn.single().kjønn.let { Kjønn.valueOf(it.name) },
+                kjønn = KjønnMapper.tilKjønn(søker),
                 personIdent = ident,
                 telefonnummer = søker.telefonnummer.find { it.prioritet == 1 }
                         ?.let { TelefonnummerDto(it.landskode, it.nummer) },
