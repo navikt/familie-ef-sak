@@ -6,7 +6,12 @@ import no.nav.familie.ef.sak.domene.DokumentVariantformat
 import no.nav.familie.ef.sak.integration.JournalpostClient
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
+import no.nav.familie.ef.sak.repository.domain.Fagsak
+import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
+import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
+import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
+import no.nav.familie.kontrakter.ef.søknad.SøknadSkolepenger
 import no.nav.familie.kontrakter.felles.dokarkiv.*
 import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariant
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
@@ -86,28 +91,50 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
     fun knyttJournalpostTilBehandling(journalpost: Journalpost, behandling: Behandling) {
         behandlingService.oppdaterJournalpostIdPåBehandling(journalpost, behandling)
     }
-
-    fun settSøknadPåBehandling(journalpostId: String, fagsakId: UUID, behandlingsId: UUID) {
+    fun hentSøknadFraJournalpostForOvergangsstønad(journalpostId: String) : SøknadOvergangsstønad {
+       val dokumentinfo =
         hentJournalpost(journalpostId).dokumenter
-                ?.filter { dokument ->
-                    DokumentBrevkode.erGyldigBrevkode(dokument.brevkode.toString()) && harOriginalDokument(dokument)
-                }
-                ?.forEach {
-                        when (DokumentBrevkode.fraBrevkode(it.brevkode)) {
-                            DokumentBrevkode.OVERGANGSSTØNAD -> {
-                                val søknad = journalpostClient.hentOvergangsstønadSøknad(journalpostId, it.dokumentInfoId)
-                                behandlingService.lagreSøknadForOvergangsstønad(søknad, behandlingsId, fagsakId, journalpostId)
-                            }
-                            DokumentBrevkode.BARNETILSYN -> {
-                                val søknad = journalpostClient.hentBarnetilsynSøknad(journalpostId, it.dokumentInfoId)
-                                behandlingService.lagreSøknadForBarnetilsyn(søknad, behandlingsId, fagsakId, journalpostId)
-                            }
-                            DokumentBrevkode.SKOLEPENGER -> {
-                                val søknad = journalpostClient.hentSkolepengerSøknad(journalpostId, it.dokumentInfoId)
-                                behandlingService.lagreSøknadForSkolepenger(søknad, behandlingsId, fagsakId, journalpostId)
-                            }
-                        }
-                    }
+                ?.first {
+                    DokumentBrevkode.OVERGANGSSTØNAD == DokumentBrevkode.fraBrevkode(it.brevkode.toString()) && harOriginalDokument(it)
+                } ?: error("Fant ingen søknad")
+
+        return journalpostClient.hentOvergangsstønadSøknad(journalpostId, dokumentinfo.dokumentInfoId)
+    }
+    fun hentSøknadFraJournalpostForBarnetilsyn(journalpostId: String) : SøknadBarnetilsyn {
+        val dokumentinfo =
+                hentJournalpost(journalpostId).dokumenter
+                        ?.first {
+                            DokumentBrevkode.BARNETILSYN == DokumentBrevkode.fraBrevkode(it.brevkode.toString()) && harOriginalDokument(it)
+                        } ?: error("Fant ingen søknad")
+
+        return journalpostClient.hentBarnetilsynSøknad(journalpostId, dokumentinfo.dokumentInfoId)
+    }
+
+    fun hentSøknadFraJournalpostForSkolepenger(journalpostId: String) : SøknadSkolepenger {
+        val dokumentinfo =
+                hentJournalpost(journalpostId).dokumenter
+                        ?.first {
+                            DokumentBrevkode.SKOLEPENGER == DokumentBrevkode.fraBrevkode(it.brevkode.toString()) && harOriginalDokument(it)
+                        } ?: error("Fant ingen søknad")
+
+        return journalpostClient.hentSkolepengerSøknad(journalpostId, dokumentinfo.dokumentInfoId)
+    }
+
+    private fun settSøknadPåBehandling(journalpostId: String, fagsak: Fagsak, behandlingId : UUID) {
+        when (fagsak.stønadstype) {
+            Stønadstype.OVERGANGSSTØNAD -> {
+                val søknad = hentSøknadFraJournalpostForOvergangsstønad(journalpostId)
+                behandlingService.lagreSøknadForOvergangsstønad(søknad, behandlingId, fagsak.id, journalpostId)
+            }
+            Stønadstype.BARNETILSYN -> {
+                val søknad = hentSøknadFraJournalpostForBarnetilsyn(journalpostId)
+                behandlingService.lagreSøknadForBarnetilsyn(søknad, behandlingId, fagsak.id, journalpostId)
+            }
+            Stønadstype.SKOLEPENGER -> {
+                val søknad = hentSøknadFraJournalpostForSkolepenger(journalpostId)
+                behandlingService.lagreSøknadForSkolepenger(søknad, behandlingId, fagsak.id, journalpostId)
+            }
+        }
     }
 
     private fun harOriginalDokument(dokument: no.nav.familie.kontrakter.felles.journalpost.DokumentInfo): Boolean =
