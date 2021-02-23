@@ -18,6 +18,13 @@ interface FagsakRepository : RepositoryInterface<Fagsak, UUID>, InsertUpdateRepo
     fun findBySøkerIdent(ident: String, stønadstype: Stønadstype): Fagsak?
 
     // language=PostgreSQL
+    @Query("""SELECT f.* FROM fagsak f 
+                     LEFT JOIN fagsak_person fp 
+                     ON fp.fagsak_id = f.id 
+                     WHERE ident = :ident""")
+    fun findBySøkerIdent(ident: String): List<Fagsak>
+
+    // language=PostgreSQL
     @Query("""SELECT f.*, fe.id AS eksternId_id         
                      FROM fagsak f         
                      JOIN fagsak_ekstern fe 
