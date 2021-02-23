@@ -7,8 +7,8 @@ import java.util.*
 @Service
 class BlankettService(val blankettRepository: BlankettRepository) {
 
-    fun lagreBlankett(behandlingId : UUID, pdf : Fil)  {
-        val blankett = Blankett(behandlingId, pdf)
+    fun lagreBlankett(behandlingId: UUID, pdf: ByteArray) {
+        val blankett = Blankett(behandlingId, Fil(pdf))
         blankettRepository.insert(blankett)
     }
 }

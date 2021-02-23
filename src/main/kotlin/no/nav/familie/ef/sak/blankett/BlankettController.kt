@@ -21,6 +21,7 @@ import java.util.*
 class BlankettController(private val tilgangService: TilgangService,
                          private val vurderingService: VurderingService,
                          private val blankettClient: BlankettClient,
+                         private val blankettService: BlankettService,
                          private val oppgaveService: OppgaveService,
                          private val journalføringService: JournalføringService,
                          private val personService: PersonService,
@@ -33,7 +34,9 @@ class BlankettController(private val tilgangService: TilgangService,
         tilgangService.validerTilgangTilBehandling(behandlingId)
         val blankettPdfRequest = BlankettPdfRequest(lagPersonopplysningerDto(behandlingId),
                                                     hentInngangsvilkårDto(behandlingId))
-        return Ressurs.success(blankettClient.genererBlankett(blankettPdfRequest))
+        val blankett = blankettClient.genererBlankett(blankettPdfRequest)
+        blankettService.lagreBlankett(behandlingId, blankett)
+        return Ressurs.success(blankett)
     }
 
     @PostMapping("/oppgave/{oppgaveId}")
