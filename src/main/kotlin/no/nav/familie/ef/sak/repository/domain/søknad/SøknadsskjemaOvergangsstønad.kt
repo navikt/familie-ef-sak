@@ -26,7 +26,7 @@ data class SøknadsskjemaOvergangsstønad(@Id
                                         val medlemskap: Medlemskap,
                                         @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "bosituasjon_")
                                         val bosituasjon: Bosituasjon,
-                                        @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "sivilstandsplaner_")
+                                        @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY, prefix = "sivilstandsplaner_")
                                         val sivilstandsplaner: Sivilstandsplaner,
                                         @MappedCollection(idColumn = "soknadsskjema_id")
                                         override val barn: Set<Barn>,
