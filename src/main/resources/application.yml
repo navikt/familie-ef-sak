@@ -106,7 +106,7 @@ FAMILIE_INTEGRASJONER_URL: http://familie-integrasjoner
 STS_PREFIX: ${STS_URL_ENV:http://security-token-service.default.svc.nais.local}
 STS_URL: ${STS_PREFIX}/rest/v1/sts/token?grant_type=client_credentials&scope=openid
 STS_DISCOVERY_URL: ${STS_PREFIX}/rest/v1/sts/.well-known/openid-configuration
-PDL_URL: http://pdl-api
+PDL_URL: http://pdl-api.default
 FAMILIE_OPPDRAG_API_URL: http://familie-oppdrag
 INFOTRYGD_FEED_API_URL: https://familie-ef-infotrygd-feed.nais.adeo.no
 INFOTRYGD_REPLIKA_API_URL: https://infotrygd-enslig-forsoerger.nais.adeo.no
