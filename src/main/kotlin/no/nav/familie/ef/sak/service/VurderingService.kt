@@ -1,20 +1,30 @@
 package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.api.Feil
-import no.nav.familie.ef.sak.api.dto.*
+import no.nav.familie.ef.sak.api.dto.DelvilkårsvurderingDto
+import no.nav.familie.ef.sak.api.dto.InngangsvilkårDto
+import no.nav.familie.ef.sak.api.dto.InngangsvilkårGrunnlagDto
+import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.integration.dto.pdl.Familierelasjonsrolle
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlAnnenForelder
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlBarn
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker
 import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
-import no.nav.familie.ef.sak.mapper.AleneomsorgMapper
 import no.nav.familie.ef.sak.repository.VilkårsvurderingRepository
-import no.nav.familie.ef.sak.repository.domain.*
+import no.nav.familie.ef.sak.repository.domain.DelvilkårMetadata
+import no.nav.familie.ef.sak.repository.domain.Delvilkårsvurdering
+import no.nav.familie.ef.sak.repository.domain.DelvilkårsvurderingWrapper
+import no.nav.familie.ef.sak.repository.domain.VilkårType
+import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
+import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
 import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsstønad
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.vurdering.utledDelvilkårResultat
 import no.nav.familie.ef.sak.vurdering.validerDelvilkår
 import org.springframework.stereotype.Service
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 @Service
 class VurderingService(private val behandlingService: BehandlingService,
@@ -42,6 +52,7 @@ class VurderingService(private val behandlingService: BehandlingService,
                                                                          .map { delvurdering ->
                                                                              Delvilkårsvurdering(delvurdering.type,
                                                                                                  delvurdering.resultat,
+                                                                                                 delvurdering.årsak,
                                                                                                  delvurdering.begrunnelse)
                                                                          })
                 )
@@ -67,11 +78,13 @@ class VurderingService(private val behandlingService: BehandlingService,
                                         vilkårType = it.type,
                                         begrunnelse = it.begrunnelse,
                                         unntak = it.unntak,
+                                        barnId = it.barnId,
                                         endretAv = it.sporbar.endret.endretAv,
                                         endretTid = it.sporbar.endret.endretTid,
                                         delvilkårsvurderinger = it.delvilkårsvurdering.delvilkårsvurderinger.map { delvurdering ->
                                             DelvilkårsvurderingDto(delvurdering.type,
                                                                    delvurdering.resultat,
+                                                                   delvurdering.årsak,
                                                                    delvurdering.begrunnelse)
                                         })
                 }
@@ -86,24 +99,40 @@ class VurderingService(private val behandlingService: BehandlingService,
             return lagredeVilkårsvurderinger
         }
 
-        val nyeVilkårsvurderinger = VilkårType.hentInngangsvilkår()
+        val nyeVilkårsvurderinger: List<Vilkårsvurdering> = VilkårType.hentInngangsvilkår()
                 .filter {
-                    lagredeVilkårsvurderinger.find { vurdering -> vurdering.type == it } == null
+                    lagredeVilkårsvurderinger.find { vurdering -> vurdering.type == it } == null // Sjekk barnId ?
                 }
-                .map {
-                    val delvilkårsvurderinger = it.delvilkår
-                            .map { delvilkårType ->
-                                Delvilkårsvurdering(delvilkårType,
-                                                    utledDelvilkårResultat(delvilkårType, søknad, delvilkårMetadata))
-                            }
-                    Vilkårsvurdering(behandlingId = behandlingId,
-                                     type = it,
-                                     delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurderinger))
-                }
+                .map {vilkårType ->
+                    if (vilkårType == VilkårType.ALENEOMSORG) {
+                        søknad.barn.map {
+                            lagNyVilkårsvurdering(vilkårType, søknad, delvilkårMetadata, behandlingId, it.id)
+                        }
+
+                    } else {
+                        listOf(lagNyVilkårsvurdering(vilkårType, søknad, delvilkårMetadata, behandlingId))
+                    }
+                }.flatten()
 
         vilkårsvurderingRepository.insertAll(nyeVilkårsvurderinger)
 
         return lagredeVilkårsvurderinger + nyeVilkårsvurderinger
+    }
+
+    private fun lagNyVilkårsvurdering(it: VilkårType,
+                                      søknad: SøknadsskjemaOvergangsstønad,
+                                      delvilkårMetadata: DelvilkårMetadata,
+                                      behandlingId: UUID,
+                                      barnId: UUID? = null): Vilkårsvurdering {
+        val delvilkårsvurderinger = it.delvilkår
+                .map { delvilkårType ->
+                    Delvilkårsvurdering(delvilkårType,
+                                        utledDelvilkårResultat(delvilkårType, søknad, delvilkårMetadata))
+                }
+        return Vilkårsvurdering(behandlingId = behandlingId,
+                                type = it,
+                                barnId = barnId,
+                                delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurderinger))
     }
 
 
@@ -120,45 +149,7 @@ class VurderingService(private val behandlingService: BehandlingService,
         }
     }
 
-
-    private fun hentMedlInfo(behandlingId: UUID) =
-            behandlingService.hentBehandling(behandlingId).status.behandlingErLåstForVidereRedigering()
-
-
     private fun behandlingErLåstForVidereRedigering(behandlingId: UUID) =
             behandlingService.hentBehandling(behandlingId).status.behandlingErLåstForVidereRedigering()
-
-    fun vurderAleneomsorg(behandlingId: UUID): Aleneomsorg {
-        val søknad = behandlingService.hentOvergangsstønad(behandlingId)
-        val fnrSøker = "" //TODO
-        val pdlSøker = pdlClient.hentSøker(fnrSøker)
-
-
-        val barn = pdlSøker.familierelasjoner
-                .filter { it.relatertPersonsRolle == Familierelasjonsrolle.BARN }
-                .map { it.relatertPersonsIdent }
-                .let { pdlClient.hentBarn(it) }
-                .filter { it.value.fødsel.gjeldende()?.fødselsdato != null }
-                .filter { it.value.fødsel.first().fødselsdato!!.plusYears(18).isAfter(LocalDate.now()) }
-
-        val barneforeldreFraSøknad =
-                søknad.barn.mapNotNull {
-                    it.annenForelder?.person?.fødselsnummer
-                }
-
-        val barneforeldre = barn.map { it.value.familierelasjoner }
-                .flatten()
-                .filter { it.relatertPersonsIdent != fnrSøker && it.relatertPersonsRolle != Familierelasjonsrolle.BARN }
-                .map { it.relatertPersonsIdent }
-                .plus(barneforeldreFraSøknad)
-                .distinct()
-                .let { pdlClient.hentAndreForeldre(it) }
-
-        return AleneomsorgMapper.tilDto(pdlSøker,
-                                        barn,
-                                        barneforeldre,
-                                        søknad)
-    }
-
 
 }

@@ -10,9 +10,7 @@ import no.nav.familie.ef.sak.service.BehandlingshistorikkService
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.PersonService
 import no.nav.familie.ef.sak.service.steg.StegType
-import no.nav.familie.kontrakter.ef.søknad.NavnOgFnr
-import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
-import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
+import no.nav.familie.kontrakter.ef.søknad.*
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.context.annotation.Profile
@@ -21,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDate
 import java.util.*
 
 @RestController
@@ -42,11 +41,45 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
                                                                                  steg = StegType.VILKÅRSVURDERE_INNGANGSVILKÅR))
         val søkerMedBarn = personService.hentPersonMedRelasjoner(testFagsakRequest.personIdent)
 
-        val barnNavnOgFnr = søkerMedBarn.barn.map { NavnOgFnr(it.value.navn.gjeldende().visningsnavn(), it.key) }
+        val barneListe: List<Barn> = søkerMedBarn.barn.map {
+            TestsøknadBuilder.Builder().defaultBarn(
+                    navn = it.value.navn.gjeldende().visningsnavn(),
+                    fødselsnummer = it.key,
+                    harSkalHaSammeAdresse = true,
+                    ikkeRegistrertPåSøkersAdresseBeskrivelse = "Fordi",
+                    erBarnetFødt = true,
+                    fødselTermindato = Fødselsnummer(it.key).fødselsdato,
+                    annenForelder = TestsøknadBuilder.Builder().defaultAnnenForelder(
+                            ikkeOppgittAnnenForelderBegrunnelse = null,
+                            bosattINorge = false,
+                            land = "Sverige",
+                            personMinimum = TestsøknadBuilder.Builder().defaultPersonMinimum("Bob Burger", LocalDate.of(1979, 9, 17)),
+                    ),
+                    samvær = TestsøknadBuilder.Builder().defaultSamvær(
+                            beskrivSamværUtenBarn = "Har sjelden sett noe til han",
+                            borAnnenForelderISammeHus =  "ja",
+                            borAnnenForelderISammeHusBeskrivelse = "Samme blokk",
+                            harDereSkriftligAvtaleOmSamvær =  "jaIkkeKonkreteTidspunkter",
+                            harDereTidligereBoddSammen = true,
+                            hvorMyeErDuSammenMedAnnenForelder = "møtesUtenom",
+                            hvordanPraktiseresSamværet =  "Bytter litt på innimellom",
+                            nårFlyttetDereFraHverandre = LocalDate.of(2020, 12, 31),
+                            skalAnnenForelderHaSamvær = "jaMerEnnVanlig",
+                            spørsmålAvtaleOmDeltBosted = true
+                    ),
+                    skalBoHosSøker = "jaMenSamarbeiderIkke"
+            )
+        }
 
         val søknad: SøknadOvergangsstønad = TestsøknadBuilder.Builder()
                 .setPersonalia(søkerMedBarn.søker.navn.gjeldende().visningsnavn(), søkerMedBarn.søkerIdent)
-                .setBarn(barnNavnOgFnr)
+                .setBarn(barneListe)
+                .setBosituasjon(delerDuBolig = EnumTekstverdiMedSvarId(verdi = "Nei, jeg bor alene med barn eller jeg er gravid og bor alene",
+                                                                   svarId = "borAleneMedBarnEllerGravid"))
+                .setSivilstandsplaner(harPlaner = true,
+                                      fraDato = LocalDate.of(2019, 9, 17),
+                                      vordendeSamboerEktefelle = TestsøknadBuilder.Builder().defaultPersonMinimum(navn = "Fyren som skal bli min samboer", fødselsdato = LocalDate.of(1979, 9, 17)),
+                )
                 .build().søknadOvergangsstønad
 
 

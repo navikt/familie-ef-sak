@@ -1,0 +1,1 @@
+ALTER TABLE barn ADD COLUMN skal_bo_hos_soker VARCHAR;

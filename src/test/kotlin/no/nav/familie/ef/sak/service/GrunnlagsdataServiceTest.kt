@@ -4,7 +4,12 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.familie.ef.sak.api.dto.*
+import no.nav.familie.ef.sak.api.dto.BarnMedSamværRegistergrunnlagDto
+import no.nav.familie.ef.sak.api.dto.Folkeregisterpersonstatus
+import no.nav.familie.ef.sak.api.dto.MedlUnntakDto
+import no.nav.familie.ef.sak.api.dto.MedlemskapRegistergrunnlagDto
+import no.nav.familie.ef.sak.api.dto.SivilstandRegistergrunnlagDto
+import no.nav.familie.ef.sak.api.dto.Sivilstandstype
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.mapper.MedlemskapMapper
 import no.nav.familie.ef.sak.mapper.SøknadsskjemaMapper
@@ -115,7 +120,8 @@ internal class GrunnlagsdataServiceTest {
         every { registergrunnlagRepository.findByIdOrNull(behandlingId) } returns registergrunnlag(true)
         val endringer = service.hentEndringerIRegistergrunnlag(behandlingId)
         assertThat(endringer).isEqualTo(mapOf("medlemskap" to listOf("folkeregisterpersonstatus"),
-                                              "sivilstand" to listOf("type")))
+                                              "sivilstand" to listOf("type"),
+                                              "barnMedSamvær" to emptyList()))
     }
 
     @Test
@@ -174,6 +180,13 @@ internal class GrunnlagsdataServiceTest {
                         folkeregisterpersonstatus = if (medEndringer) null else Folkeregisterpersonstatus.BOSATT,
                         medlUnntak = MedlUnntakDto(emptyList())),
                 SivilstandRegistergrunnlagDto(type = if (medEndringer) Sivilstandstype.GIFT else Sivilstandstype.UGIFT,
-                                              gyldigFraOgMed = null))
+                                              gyldigFraOgMed = null),
+                søknad.barn.map {
+                    BarnMedSamværRegistergrunnlagDto(id = it.id,
+                                                     navn = null,
+                                                     fødselsnummer = null,
+                                                     harSammeAdresse = null,
+                                                     forelder = null)
+                })
     }
 }

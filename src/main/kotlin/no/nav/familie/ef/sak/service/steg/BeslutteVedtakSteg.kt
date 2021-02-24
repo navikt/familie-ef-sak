@@ -2,12 +2,15 @@ package no.nav.familie.ef.sak.service.steg
 
 import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.api.dto.BeslutteVedtakDto
+import no.nav.familie.ef.sak.repository.VedtaksbrevRepository
 import no.nav.familie.ef.sak.repository.domain.Behandling
+import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.OppgaveService
 import no.nav.familie.ef.sak.service.TotrinnskontrollService
 import no.nav.familie.ef.sak.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.task.IverksettMotOppdragTask
+import no.nav.familie.ef.sak.task.JournalførBlankettTask
 import no.nav.familie.ef.sak.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.task.OpprettOppgaveTask.OpprettOppgaveTaskData
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
@@ -19,7 +22,8 @@ import java.time.LocalDate
 class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
                          private val fagsakService: FagsakService,
                          private val oppgaveService: OppgaveService,
-                         private val totrinnskontrollService: TotrinnskontrollService) : BehandlingSteg<BeslutteVedtakDto> {
+                         private val totrinnskontrollService: TotrinnskontrollService,
+                         private val vedtaksbrevRepository: VedtaksbrevRepository) : BehandlingSteg<BeslutteVedtakDto> {
 
     override fun validerSteg(behandling: Behandling) {
         if (behandling.steg != stegType()) {
@@ -34,9 +38,15 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
 
         return if (data.godkjent) {
             // TODO oppdater brev
-            opprettTaskForIverksettMotOppdrag(behandling)
+                if (behandling.type != BehandlingType.BLANKETT) {
+                    opprettTaskForIverksettMotOppdrag(behandling)
+                } else {
+                    opprettTaskForJournalførBlankett(behandling)
+                }
             stegType().hentNesteSteg(behandling.type)
+
         } else {
+            vedtaksbrevRepository.deleteById(behandling.id)
             opprettBehandleUnderkjentVedtakOppgave(behandling, saksbehandler)
             StegType.SEND_TIL_BESLUTTER
         }
@@ -61,6 +71,13 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
         val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
         taskRepository.save(IverksettMotOppdragTask.opprettTask(behandling, fagsak.hentAktivIdent()))
     }
+
+    private fun opprettTaskForJournalførBlankett(behandling: Behandling) {
+        val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
+
+        taskRepository.save(JournalførBlankettTask.opprettTask(behandling, fagsak.hentAktivIdent()))
+    }
+
 
     override fun stegType(): StegType {
         return StegType.BESLUTTE_VEDTAK

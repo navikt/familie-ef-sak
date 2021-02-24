@@ -49,7 +49,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
         val respons: ResponseEntity<Ressurs<UUID>> =
                 restTemplate.exchange(localhost("/api/vurdering/inngangsvilkar"),
                                       HttpMethod.POST,
-                                      HttpEntity(opprettetVurdering.copy(resultat = Vilkårsresultat.JA,
+                                      HttpEntity(opprettetVurdering.copy(resultat = Vilkårsresultat.OPPFYLT,
                                                                          begrunnelse = "Godkjent"),
                                                  headers))
 

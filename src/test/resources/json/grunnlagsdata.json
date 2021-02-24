@@ -149,5 +149,53 @@
         "type" : "LocalDate"
       }
     }
+  },
+  "barnMedSamvær" : {
+    "name" : "barnMedSamvær",
+    "type" : "Collection",
+    "fields" : {
+      "id" : {
+        "name" : "id",
+        "type" : "UUID"
+      },
+      "navn" : {
+        "name" : "navn",
+        "type" : "String"
+      },
+      "fødselsnummer" : {
+        "name" : "fødselsnummer",
+        "type" : "String"
+      },
+      "harSammeAdresse" : {
+        "name" : "harSammeAdresse",
+        "type" : "Boolean"
+      },
+      "forelder" : {
+        "name" : "forelder",
+        "type" : "Object",
+        "fields" : {
+          "navn" : {
+            "name" : "navn",
+            "type" : "String"
+          },
+          "fødselsnummer" : {
+            "name" : "fødselsnummer",
+            "type" : "String"
+          },
+          "fødselsdato" : {
+            "name" : "fødselsdato",
+            "type" : "LocalDate"
+          },
+          "bosattINorge" : {
+            "name" : "bosattINorge",
+            "type" : "Boolean"
+          },
+          "land" : {
+            "name" : "land",
+            "type" : "String"
+          }
+        }
+      }
+    }
   }
 }

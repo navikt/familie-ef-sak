@@ -5,9 +5,16 @@ import no.nav.familie.ef.sak.api.dto.MedlemskapDto
 import no.nav.familie.ef.sak.api.dto.SivilstandInngangsvilkårDto
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.PdlClient
+import no.nav.familie.ef.sak.integration.dto.pdl.Familierelasjonsrolle
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlAnnenForelder
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlBarn
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker
+import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
+import no.nav.familie.ef.sak.mapper.BarnMedSamværMapper
 import no.nav.familie.ef.sak.mapper.BosituasjonMapper
 import no.nav.familie.ef.sak.mapper.MedlemskapMapper
 import no.nav.familie.ef.sak.mapper.SivilstandMapper
+import no.nav.familie.ef.sak.mapper.SivilstandsplanerMapper
 import no.nav.familie.ef.sak.repository.RegistergrunnlagRepository
 import no.nav.familie.ef.sak.repository.domain.Registergrunnlag
 import no.nav.familie.ef.sak.repository.domain.RegistergrunnlagData
@@ -18,6 +25,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.reflect.KClass
@@ -53,10 +61,14 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
         val sivilstandSøknadsgrunnlag = SivilstandMapper.mapSøknadsgrunnlag(sivilstandsdetaljer = søknad.sivilstand)
         val sivilstand = SivilstandInngangsvilkårDto(søknadsgrunnlag = sivilstandSøknadsgrunnlag,
                                                      registergrunnlag = registergrunnlagData.sivilstand)
-
+        val sivilstandsplaner = SivilstandsplanerMapper.tilDto(sivilstandsplaner = søknad.sivilstandsplaner)
+        val barnMedSamvær = BarnMedSamværMapper.slåSammenBarnMedSamvær(BarnMedSamværMapper.mapSøknadsgrunnlag(søknad.barn),
+                                                   registergrunnlagData.barnMedSamvær)
         return InngangsvilkårGrunnlagDto(medlemskap = medlemskap,
                                          sivilstand = sivilstand,
-                                         bosituasjon = BosituasjonMapper.tilDto(søknad.bosituasjon))
+                                         bosituasjon = BosituasjonMapper.tilDto(søknad.bosituasjon),
+                                         barnMedSamvær = barnMedSamvær,
+                                         sivilstandsplaner = sivilstandsplaner)
     }
 
     fun godkjennEndringerIRegistergrunnlag(behandlingId: UUID) {
@@ -77,11 +89,8 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
     private fun hentEllerOpprettRegistergrunnlag(behandlingId: UUID): Registergrunnlag {
         var registergrunnlag = registergrunnlagRepository.findByIdOrNull(behandlingId)
         if (registergrunnlag == null) {
-            val personIdent =
-                    behandlingService.hentOvergangsstønad(behandlingId).fødselsnummer // TODO hente aktivident fra fagsak?
             logger.debug("Oppretter registergrunnlag for behandling=$behandlingId")
-
-            registergrunnlag = Registergrunnlag(behandlingId = behandlingId, data = hentRegistergrunnlag(personIdent))
+            registergrunnlag = Registergrunnlag(behandlingId = behandlingId, data = hentRegistergrunnlag(behandlingId))
             return registergrunnlagRepository.insert(registergrunnlag)
         } else if (registergrunnlag.sporbar.endret.endretTid.isBefore(LocalDateTime.now().minusHours(4))) {
             return oppdaterRegistergrunnlag(registergrunnlag)
@@ -107,8 +116,7 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
      */
     private fun oppdaterRegistergrunnlag(grunnlagsdata: Registergrunnlag): Registergrunnlag {
         val behandlingId = grunnlagsdata.behandlingId
-        val søknad = behandlingService.hentOvergangsstønad(behandlingId) // TODO hente aktivident fra fagsak?
-        val grunnlagsdataData = hentRegistergrunnlag(søknad.fødselsnummer)
+        val grunnlagsdataData = hentRegistergrunnlag(behandlingId)
         val diff = grunnlagsdata.data != grunnlagsdataData
 
         return if (diff) {
@@ -125,8 +133,7 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
 
     private fun godkjennOgSjekkForNyeEndringer(behandlingId: UUID,
                                                eksisterendeRegistergrunnlag: Registergrunnlag) {
-        val søknad = behandlingService.hentOvergangsstønad(behandlingId)
-        val nyttRegistergrunnlag = hentRegistergrunnlag(søknad.fødselsnummer)
+        val nyttRegistergrunnlag = hentRegistergrunnlag(behandlingId)
         requireNotNull(eksisterendeRegistergrunnlag.endringer) { "Endringer kan ikke være null - behandling=$behandlingId" }
         if (nyttRegistergrunnlag != eksisterendeRegistergrunnlag.endringer) {
             logger.warn("Godkjenner nye endringer i registergrunnlag, men har nye endringer behandling=$behandlingId")
@@ -138,11 +145,46 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
         }
     }
 
-    private fun hentRegistergrunnlag(personIdent: String): RegistergrunnlagData {
+    private fun hentRegistergrunnlag(behandlingId: UUID): RegistergrunnlagData {
+        val søknad = behandlingService.hentOvergangsstønad(behandlingId)
+        val personIdent = søknad.fødselsnummer
+
         val pdlSøker = pdlClient.hentSøker(personIdent)
+        val pdlBarn = hentPdlBarn(pdlSøker)
+        val barneForeldre = hentPdlBarneForeldre(søknad, pdlBarn)
         val medlUnntak = familieIntegrasjonerClient.hentMedlemskapsinfo(ident = personIdent)
+
+        val barnMedSamvær = BarnMedSamværMapper.mapRegistergrunnlag(pdlBarn, barneForeldre, søknad, pdlSøker.bostedsadresse)
         return RegistergrunnlagData(medlemskap = medlemskapMapper.mapRegistergrunnlag(pdlSøker, medlUnntak),
-                                    sivilstand = SivilstandMapper.mapRegistergrunnlag(pdlSøker))
+                                    sivilstand = SivilstandMapper.mapRegistergrunnlag(pdlSøker),
+                                    barnMedSamvær = barnMedSamvær)
+    }
+
+    private fun hentPdlBarneForeldre(søknad: SøknadsskjemaOvergangsstønad,
+                                     barn: Map<String, PdlBarn>): Map<String, PdlAnnenForelder> {
+        val barneforeldreFraSøknad =
+                søknad.barn.mapNotNull {
+                    it.annenForelder?.person?.fødselsnummer
+                }
+
+        val barneforeldre = barn.map { it.value.familierelasjoner }
+                .flatten()
+                .filter { it.relatertPersonsIdent != søknad.fødselsnummer && it.relatertPersonsRolle != Familierelasjonsrolle.BARN }
+                .map { it.relatertPersonsIdent }
+                .plus(barneforeldreFraSøknad)
+                .distinct()
+                .let { pdlClient.hentAndreForeldre(it) }
+        return barneforeldre
+    }
+
+    private fun hentPdlBarn(pdlSøker: PdlSøker): Map<String, PdlBarn> {
+        val barn = pdlSøker.familierelasjoner
+                .filter { it.relatertPersonsRolle == Familierelasjonsrolle.BARN }
+                .map { it.relatertPersonsIdent }
+                .let { pdlClient.hentBarn(it) }
+                .filter { it.value.fødsel.gjeldende()?.fødselsdato != null }
+                .filter { it.value.fødsel.first().fødselsdato!!.plusYears(18).isAfter(LocalDate.now()) }
+        return barn
     }
 
     private fun finnEndringerIRegistergrunnlag(registergrunnlag: Registergrunnlag): Registergrunnlagsendringer {

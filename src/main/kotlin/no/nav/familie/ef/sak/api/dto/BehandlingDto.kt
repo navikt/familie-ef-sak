@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.api.dto
 
 import no.nav.familie.ef.sak.repository.domain.Behandling
+import no.nav.familie.ef.sak.repository.domain.BehandlingResultat
 import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.domain.Registergrunnlagsendringer
@@ -14,6 +15,8 @@ data class BehandlingDto(val id: UUID,
                          val aktiv: Boolean,
                          val status: BehandlingStatus,
                          val sistEndret: LocalDate,
+                         val resultat: BehandlingResultat,
+                         val opprettet: LocalDate,
                          val endringerIRegistergrunnlag: Registergrunnlagsendringer?)
 
 fun Behandling.tilDto(endringerIRegistergrunnlag: Registergrunnlagsendringer? = null): BehandlingDto =
@@ -23,4 +26,6 @@ fun Behandling.tilDto(endringerIRegistergrunnlag: Registergrunnlagsendringer? = 
                       aktiv = this.aktiv,
                       status = this.status,
                       sistEndret = this.sporbar.endret.endretTid.toLocalDate(),
+                      resultat = this.resultat,
+                      opprettet = this.sporbar.opprettetTid.toLocalDate(),
                       endringerIRegistergrunnlag = endringerIRegistergrunnlag)

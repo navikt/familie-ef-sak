@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
+import java.util.UUID
 import kotlin.reflect.KClass
 import kotlin.reflect.full.isSubclassOf
 
@@ -46,6 +47,7 @@ internal class RegistergrunnlagTest {
                                   val values: List<String>? = null)
 
     private val endClasses = setOf(String::class,
+                                   UUID::class,
                                    Int::class,
                                    Long::class,
                                    LocalDate::class,

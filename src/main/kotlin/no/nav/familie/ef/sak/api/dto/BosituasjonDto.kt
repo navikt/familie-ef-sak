@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.api.dto
 
-import no.nav.familie.kontrakter.ef.søknad.EnumTekstverdiMedSvarId
 import java.time.LocalDate
 
 

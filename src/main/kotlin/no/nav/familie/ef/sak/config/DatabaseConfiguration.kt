@@ -1,7 +1,13 @@
 package no.nav.familie.ef.sak.config
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.familie.ef.sak.repository.domain.*
+import no.nav.familie.ef.sak.api.dto.BrevRequest
+import no.nav.familie.ef.sak.repository.domain.DelvilkårsvurderingWrapper
+import no.nav.familie.ef.sak.repository.domain.Endret
+import no.nav.familie.ef.sak.repository.domain.Fil
+import no.nav.familie.ef.sak.repository.domain.JsonWrapper
+import no.nav.familie.ef.sak.repository.domain.RegistergrunnlagData
+import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus
 import no.nav.familie.ef.sak.repository.domain.søknad.Arbeidssituasjon
 import no.nav.familie.ef.sak.repository.domain.søknad.Dokumentasjon
 import no.nav.familie.ef.sak.repository.domain.søknad.GjelderDeg
@@ -28,7 +34,7 @@ import org.springframework.transaction.PlatformTransactionManager
 import java.sql.Date
 import java.time.LocalDate
 import java.time.YearMonth
-import java.util.*
+import java.util.Optional
 import javax.sql.DataSource
 
 
@@ -73,6 +79,10 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
                                             StringTilArbeidssituasjonConverter(),
                                             PGobjectTilJsonWrapperConverter(),
                                             JsonWrapperTilPGobjectConverter(),
+                                            BrevRequestTilStringConverter(),
+                                            StringTilBrevRequestConverter(),
+                                            FilTilBytearrayConverter(),
+                                            BytearrayTilFilConverter(),
                                             PGobjectTilGrunnlagsdataConverter(),
                                             GrunnlagsdataTilPGobjectConverter()
         ))
@@ -174,6 +184,23 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
     }
 
     @WritingConverter
+    class BrevRequestTilStringConverter : Converter<BrevRequest, String> {
+
+        override fun convert(brevRequest: BrevRequest): String {
+            return objectMapper.writeValueAsString(brevRequest)
+        }
+    }
+
+    @ReadingConverter
+    class StringTilBrevRequestConverter : Converter<String, BrevRequest> {
+
+        override fun convert(brevRequest: String): BrevRequest {
+            return objectMapper.readValue(brevRequest, BrevRequest::class.java)
+        }
+    }
+
+
+    @WritingConverter
     class ArbeidssituasjonTilStringConverter : Converter<Arbeidssituasjon, String> {
 
         override fun convert(verdier: Arbeidssituasjon): String {
@@ -224,6 +251,22 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
                     type = "json"
                     value = objectMapper.writeValueAsString(data)
                 }
+    }
+
+    @WritingConverter
+    class FilTilBytearrayConverter : Converter<Fil, ByteArray> {
+
+        override fun convert(fil: Fil): ByteArray {
+            return fil.bytes
+        }
+    }
+
+    @ReadingConverter
+    class BytearrayTilFilConverter : Converter<ByteArray, Fil> {
+
+        override fun convert(bytes: ByteArray): Fil {
+            return Fil(bytes)
+        }
     }
 
 }

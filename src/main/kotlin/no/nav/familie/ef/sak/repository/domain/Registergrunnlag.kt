@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.repository.domain
 
+import no.nav.familie.ef.sak.api.dto.BarnMedSamværRegistergrunnlagDto
 import no.nav.familie.ef.sak.api.dto.MedlemskapRegistergrunnlagDto
 import no.nav.familie.ef.sak.api.dto.SivilstandRegistergrunnlagDto
 import org.springframework.data.annotation.Id
@@ -17,7 +18,8 @@ data class Registergrunnlag(@Id
                             val sporbar: Sporbar = Sporbar())
 
 data class RegistergrunnlagData(val medlemskap: MedlemskapRegistergrunnlagDto,
-                                val sivilstand: SivilstandRegistergrunnlagDto)
+                                val sivilstand: SivilstandRegistergrunnlagDto,
+                                val barnMedSamvær: List<BarnMedSamværRegistergrunnlagDto>)
 
 /**
  * Typ som definierer felt som har endringer i [RegistergrunnlagData], eks returnerer den

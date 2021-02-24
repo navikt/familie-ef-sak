@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.service
 
-import no.nav.familie.ef.sak.api.dto.FagsakDto
+import no.nav.familie.ef.sak.api.dto.*
 import no.nav.familie.ef.sak.repository.FagsakRepository
 import no.nav.familie.ef.sak.repository.domain.Fagsak
 import no.nav.familie.ef.sak.repository.domain.FagsakPerson
@@ -10,7 +10,9 @@ import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-class FagsakService(private val fagsakRepository: FagsakRepository, private val behandlingService: BehandlingService) {
+class FagsakService(private val fagsakRepository: FagsakRepository,
+                    private val behandlingService: BehandlingService,
+                    private val personService: PersonService) {
 
     fun hentEllerOpprettFagsak(personIdent: String, stønadstype: Stønadstype): FagsakDto {
         val fagsak = (fagsakRepository.findBySøkerIdent(personIdent, stønadstype)
@@ -24,6 +26,9 @@ class FagsakService(private val fagsakRepository: FagsakRepository, private val 
                          stønadstype = fagsak.stønadstype,
                          behandlinger = behandlinger)
     }
+
+    fun hentFagsakMedBehandlinger(fagsakId: UUID): FagsakDto =
+            hentFagsak(fagsakId).tilDto(behandlinger = behandlingService.hentBehandlinger(fagsakId))
 
     fun hentFagsak(fagsakId: UUID): Fagsak = fagsakRepository.findByIdOrThrow(fagsakId)
 

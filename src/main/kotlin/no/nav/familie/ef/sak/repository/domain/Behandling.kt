@@ -21,13 +21,20 @@ data class Behandling(@Id
                       var journalposter: Set<Behandlingsjournalpost> = setOf(),
 
                       @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                      val sporbar: Sporbar = Sporbar())
+                      val sporbar: Sporbar = Sporbar(),
+                      val resultat: BehandlingResultat)
 
 enum class BehandlingType(val visningsnavn: String) {
     FØRSTEGANGSBEHANDLING("Førstegangsbehandling"),
+    BLANKETT("Blankett"),
     REVURDERING("Revurdering"),
     KLAGE("Klage"),
     TEKNISK_OPPHØR("Teknisk opphør")
+}
+
+enum class BehandlingResultat(val displayName: String) {
+    INNVILGET(displayName = "Innvilget"),
+    IKKE_SATT(displayName = "Ikke satt"),
 }
 
 enum class BehandlingStatus {

@@ -30,10 +30,11 @@ internal class JournalførVedtaksbrevStegTest {
         } returns Task("", "", Properties())
 
         journalførVedtaksbrev.utførSteg(Behandling(fagsakId = fagsak.id,
-                                                type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                status = BehandlingStatus.IVERKSETTER_VEDTAK,
-                                                steg = journalførVedtaksbrev.stegType()),
-                                     null)
+                                                   type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                                                   status = BehandlingStatus.IVERKSETTER_VEDTAK,
+                                                   steg = journalførVedtaksbrev.stegType(),
+                                                   resultat = BehandlingResultat.IKKE_SATT),
+                                        null)
 
         Assertions.assertThat(taskSlot.captured.type).isEqualTo(DistribuerVedtaksbrevTask.TYPE)
     }

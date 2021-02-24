@@ -28,9 +28,7 @@ class TilgangService(private val integrasjonerClient: FamilieIntegrasjonerClient
 
     fun validerTilgangTilBehandling(behandlingId: UUID) {
         val fagsakId = behandlingService.hentBehandling(behandlingId).fagsakId
-        val personIdent = fagsakService.hentFagsak(fagsakId).hentAktivIdent()
-
-        validerTilgangTilPersonMedBarn(personIdent)
+        validerTilgangTilFagsak(fagsakId)
     }
 
     fun validerHarSaksbehandlerrolle() {
@@ -46,5 +44,10 @@ class TilgangService(private val integrasjonerClient: FamilieIntegrasjonerClient
 
     fun harTilgangTilRolle(minimumsrolle: BehandlerRolle): Boolean {
         return SikkerhetContext.harTilgangTilGittRolle(rolleConfig, minimumsrolle)
+    }
+
+    fun validerTilgangTilFagsak(fagsakId: UUID) {
+        val personIdent = fagsakService.hentFagsak(fagsakId).hentAktivIdent()
+        validerTilgangTilPersonMedBarn(personIdent)
     }
 }

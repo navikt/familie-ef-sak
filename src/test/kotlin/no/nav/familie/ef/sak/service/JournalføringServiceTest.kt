@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.api.journalføring.JournalføringBehandling
 import no.nav.familie.ef.sak.api.journalføring.JournalføringRequest
 import no.nav.familie.ef.sak.domene.DokumentVariantformat
 import no.nav.familie.ef.sak.integration.JournalpostClient
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.service.steg.StegType
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
@@ -70,14 +71,16 @@ internal class JournalføringServiceTest {
                                     fagsakId = fagsakId,
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     status = BehandlingStatus.UTREDES,
-                                    steg = StegType.REGISTRERE_OPPLYSNINGER))
+                                    steg = StegType.REGISTRERE_OPPLYSNINGER,
+                                    resultat = BehandlingResultat.IKKE_SATT))
 
         every { behandlingService.opprettBehandling(any(), any()) }
                 .returns(Behandling(id = behandlingId,
                                     fagsakId = fagsakId,
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     status = BehandlingStatus.UTREDES,
-                                    steg = StegType.REGISTRERE_OPPLYSNINGER))
+                                    steg = StegType.REGISTRERE_OPPLYSNINGER,
+                                    resultat = BehandlingResultat.IKKE_SATT))
 
         every { oppgaveService.ferdigstillOppgave(any()) } just runs
         every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any()) } returns nyOppgaveId
@@ -103,6 +106,10 @@ internal class JournalføringServiceTest {
         every {
             journalpostClient.hentOvergangsstønadSøknad(any(), capture(slotDokumentInfoIder))
         } returns Testsøknad.søknadOvergangsstønad
+
+        every {
+            fagsakService.hentFagsak(any())
+        } returns fagsak().copy(id = fagsakId, eksternId = EksternFagsakId(fagsakEksternId))
 
         val behandleSakOppgaveId =
                 journalføringService.fullførJournalpost(journalpostId = journalpostId,
@@ -141,7 +148,7 @@ internal class JournalføringServiceTest {
 
         every {
             journalpostClient.hentOvergangsstønadSøknad(any(), any())
-        } returns  Testsøknad.søknadOvergangsstønad
+        } returns Testsøknad.søknadOvergangsstønad
 
         val behandleSakOppgaveId =
                 journalføringService.fullførJournalpost(

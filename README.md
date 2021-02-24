@@ -31,7 +31,6 @@ For å kjøre opp postgres containern så kjører man `docker-compose up`
 For å ta ned containern så kjører man `docker-compose down`
 For å slette volymen `docker-compose down -v`
 
-
 ## Produksjonssetting
 Applikasjonen vil deployes til produksjon ved ny commit på master-branchen. Det er dermed tilstrekkelig å merge PR for å trigge produksjonsbygget. 
 

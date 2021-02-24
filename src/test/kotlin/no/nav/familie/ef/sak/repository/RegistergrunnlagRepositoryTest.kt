@@ -66,6 +66,6 @@ internal class RegistergrunnlagRepositoryTest : OppslagSpringRunnerTest() {
 
         val sivilstand = SivilstandMapper.tilDto(sivilstandsdetaljer = søknad.sivilstand,
                                                  pdlSøker = pdlSøker)
-        return RegistergrunnlagData(medlemskap.registergrunnlag, sivilstand.registergrunnlag)
+        return RegistergrunnlagData(medlemskap.registergrunnlag, sivilstand.registergrunnlag, emptyList())
     }
 }
