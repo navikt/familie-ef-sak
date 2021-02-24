@@ -35,7 +35,7 @@ class BlankettController(private val tilgangService: TilgangService,
         val blankettPdfRequest = BlankettPdfRequest(lagPersonopplysningerDto(behandlingId),
                                                     hentInngangsvilkårDto(behandlingId))
         val blankett = blankettClient.genererBlankett(blankettPdfRequest)
-        blankettService.lagreBlankett(behandlingId, blankett)
+        blankettService.lagreEllerOppdaterBlankett(behandlingId, blankett)
         return Ressurs.success(blankett)
     }
 
