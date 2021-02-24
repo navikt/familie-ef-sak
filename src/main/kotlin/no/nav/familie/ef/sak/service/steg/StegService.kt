@@ -70,6 +70,13 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
     }
 
     @Transactional
+    fun håndterBlankett(behandling: Behandling): Behandling {
+        val behandlingSteg: BlankettSteg = hentBehandlingSteg(JOURNALFØR_BLANKETT)
+
+        return håndterSteg(behandling, behandlingSteg, null)
+    }
+
+    @Transactional
     fun håndterIverksettingOppdrag(behandling: Behandling): Behandling {
         val behandlingSteg: IverksettMotOppdragSteg = hentBehandlingSteg(IVERKSETT_MOT_OPPDRAG)
 

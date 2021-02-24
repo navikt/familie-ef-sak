@@ -6,6 +6,8 @@ import no.nav.familie.ef.sak.integration.dto.pdl.Familierelasjonsrolle
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlAnnenForelder
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlPersonKort
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker
+import no.nav.familie.kontrakter.felles.journalpost.BrukerIdType
+import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import org.springframework.stereotype.Service
 
 @Service
@@ -28,6 +30,17 @@ class PersonService(private val pdlClient: PdlClient) {
 
     fun hentAndreForeldre(identer: List<String>): Map<String, PdlAnnenForelder> {
         return pdlClient.hentAndreForeldre(identer)
+    }
+
+    fun hentIdentForJournalpost(journalpost: Journalpost): String {
+        return journalpost.bruker?.let {
+            when (it.type) {
+                BrukerIdType.FNR -> it.id
+                BrukerIdType.AKTOERID -> pdlClient.hentPersonidenter(it.id).identer.first().ident
+                BrukerIdType.ORGNR -> error("Kan ikke hente journalpost=${journalpost.journalpostId} for orgnr")
+            }
+        } ?: error("Kan ikke hente journalpost=${journalpost.journalpostId} uten bruker")
+
     }
 
     fun hentIdenterForBarnOgForeldre(forelderIdent: String): List<String>{
