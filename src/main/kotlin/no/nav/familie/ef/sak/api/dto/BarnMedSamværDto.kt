@@ -1,15 +1,17 @@
 package no.nav.familie.ef.sak.api.dto
 
 import java.time.LocalDate
+import java.util.UUID
 
 data class BarnMedSamværDto(
-        val barnId: String,
+        val barnId: UUID,
         val søknadsgrunnlag: BarnMedSamværSøknadsgrunnlagDto,
         val registergrunnlag: BarnMedSamværRegistergrunnlagDto
 )
 
 
 data class BarnMedSamværSøknadsgrunnlagDto(
+        val id: UUID,
         val navn: String?,
         val fødselsnummer: String?,
         val fødselTermindato: LocalDate?,
@@ -31,6 +33,7 @@ data class BarnMedSamværSøknadsgrunnlagDto(
 )
 
 data class BarnMedSamværRegistergrunnlagDto(
+        val id: UUID,
         val navn: String?,
         val fødselsnummer: String?,
         val harSammeAdresse: Boolean?,
