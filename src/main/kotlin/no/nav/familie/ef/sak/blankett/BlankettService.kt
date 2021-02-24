@@ -7,13 +7,14 @@ import java.util.*
 @Service
 class BlankettService(val blankettRepository: BlankettRepository) {
 
-    fun lagreEllerOppdaterBlankett(behandlingId: UUID, pdf: ByteArray) {
+    fun oppdaterBlankett(behandlingId: UUID, pdf: ByteArray) {
         val blankett = Blankett(behandlingId, Fil(pdf))
-        if (!blankettRepository.existsById(behandlingId)) {
-            blankettRepository.insert(blankett)
-        }
-        else {
-            blankettRepository.update(blankett)
-        }
+        blankettRepository.update(blankett)
     }
+
+    fun lagreTomBlankett(behandlingId: UUID) {
+        val blankett = Blankett(behandlingId, Fil(byteArrayOf()))
+        blankettRepository.insert(blankett)
+    }
+
 }

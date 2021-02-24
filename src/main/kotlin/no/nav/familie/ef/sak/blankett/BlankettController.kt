@@ -35,7 +35,7 @@ class BlankettController(private val tilgangService: TilgangService,
         val blankettPdfRequest = BlankettPdfRequest(lagPersonopplysningerDto(behandlingId),
                                                     hentInngangsvilkårDto(behandlingId))
         val blankett = blankettClient.genererBlankett(blankettPdfRequest)
-        blankettService.lagreEllerOppdaterBlankett(behandlingId, blankett)
+        blankettService.oppdaterBlankett(behandlingId, blankett)
         return Ressurs.success(blankett)
     }
 
@@ -54,6 +54,7 @@ class BlankettController(private val tilgangService: TilgangService,
         val søknad = journalføringService.hentSøknadFraJournalpostForOvergangsstønad(oppgave.journalpostId.toString())
         val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, Stønadstype.OVERGANGSSTØNAD)
         val behandling = behandlingService.opprettBehandling(BehandlingType.BLANKETT, fagsak.id, søknad, journalpost)
+        blankettService.lagreTomBlankett(behandling.id)
 
         return Ressurs.success(behandling.id)
     }
