@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.api.Feil
+import no.nav.familie.ef.sak.api.dto.BarnMedSamværDto
 import no.nav.familie.ef.sak.api.dto.DelvilkårsvurderingDto
 import no.nav.familie.ef.sak.api.dto.InngangsvilkårDto
 import no.nav.familie.ef.sak.api.dto.InngangsvilkårGrunnlagDto
@@ -75,11 +76,20 @@ class VurderingService(private val behandlingService: BehandlingService,
                                                  pdlSøker = pdlSøker)
         val bosituasjon = BosituasjonMapper.tilDto(søknad.bosituasjon)
 
-        val barnMedSamvær = BarnMedSamværMapper.tilDto(pdlBarn, barneForeldre, søknad, pdlSøker.bostedsadresse)
+        val barnMedSamvær = mapBarnmedSamvær(pdlBarn, barneForeldre, søknad, pdlSøker)
 
         val sivilstandsplaner = SivilstandsplanerMapper.tilDto(sivilstandsplaner = søknad.sivilstandsplaner)
 
         return InngangsvilkårGrunnlagDto(medlemskap, sivilstand, bosituasjon, barnMedSamvær, sivilstandsplaner)
+    }
+
+    private fun mapBarnmedSamvær(pdlBarn: Map<String, PdlBarn>,
+                                 barneForeldre: Map<String, PdlAnnenForelder>,
+                                 søknad: SøknadsskjemaOvergangsstønad,
+                                 pdlSøker: PdlSøker): List<BarnMedSamværDto> {
+        val registergrunnlag = BarnMedSamværMapper.mapRegistergrunnlag(pdlBarn, barneForeldre, søknad, pdlSøker.bostedsadresse)
+        return BarnMedSamværMapper.slåSammenBarnMedSamvær(søknadsgrunnlag = BarnMedSamværMapper.mapSøknadsgrunnlag(søknad.barn),
+                                                          registergrunnlag = registergrunnlag)
     }
 
     private fun hentVurderinger(behandlingId: UUID,
