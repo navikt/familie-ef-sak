@@ -119,12 +119,13 @@ internal class GrunnlagsdataServiceTest {
     }
 
     @Test
-    internal fun `hentEndringer - skal oppdatere registergrunnlag hvis det har gått mer enn 4h`() {
+    internal fun `hentEndringer - har gått mer en 4h - skal oppdatere registergrunnlag ved endringer`() {
         val registergrunnlag = registergrunnlag(false, LocalDateTime.now().minusDays(1))
         every { registergrunnlagRepository.findByIdOrNull(behandlingId) } returns registergrunnlag
 
         service.hentEndringerIRegistergrunnlag(behandlingId)
 
+        assertThat(updateSlot.captured.endringer).isNotNull
         verify(exactly = 1) { behandlingService.hentOvergangsstønad(any()) }
         verify(exactly = 1) { registergrunnlagRepository.update(any()) }
     }
@@ -153,7 +154,8 @@ internal class GrunnlagsdataServiceTest {
         assertThat(captured.data).isEqualTo(registergrunnlag.endringer)
     }
 
-    private fun registergrunnlag(medEndringer: Boolean = false, endretTid: LocalDateTime = LocalDateTime.now()): Registergrunnlag {
+    private fun registergrunnlag(medEndringer: Boolean = false,
+                                 endretTid: LocalDateTime = LocalDateTime.now()): Registergrunnlag {
         return Registergrunnlag(behandlingId = behandlingId,
                                 data = registergrunnlagData(),
                                 endringer = if (medEndringer) registergrunnlagData(medEndringer) else null,

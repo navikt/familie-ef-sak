@@ -9,9 +9,9 @@ import no.nav.familie.ef.sak.mapper.BosituasjonMapper
 import no.nav.familie.ef.sak.mapper.MedlemskapMapper
 import no.nav.familie.ef.sak.mapper.SivilstandMapper
 import no.nav.familie.ef.sak.repository.RegistergrunnlagRepository
-import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.Registergrunnlag
 import no.nav.familie.ef.sak.repository.domain.RegistergrunnlagData
+import no.nav.familie.ef.sak.repository.domain.Registergrunnlagsendringer
 import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsstønad
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import org.slf4j.Logger
@@ -19,10 +19,19 @@ import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import kotlin.reflect.KClass
 import kotlin.reflect.full.memberProperties
 
+/**
+ * Denne klassen håndterer henting, persistering og oppdatering av grunnlagsdata
+ *
+ * Når man henter grunnlagsdata første gangen så legges disse inn i databasen.
+ * Hvis det har gått mer enn 4h fra att man henter dataen sist så sjekker man om det er en diff i grunnlagsdataen
+ *  Hvis det finnes endringer legges disse inn i feltet endringer.
+ *
+ * Saksbehandler må godkjenne de nye endringene for att de skal bli lagret i data i [Registergrunnlag]
+ */
 @Service
 class GrunnlagsdataService(private val registergrunnlagRepository: RegistergrunnlagRepository,
                            private val pdlClient: PdlClient,
@@ -60,7 +69,7 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
         godkjennOgSjekkForNyeEndringer(behandlingId, eksisterendeRegistergrunnlag)
     }
 
-    fun hentEndringerIRegistergrunnlag(behandlingId: UUID): Map<String, List<String>> {
+    fun hentEndringerIRegistergrunnlag(behandlingId: UUID): Registergrunnlagsendringer {
         val registergrunnlag = hentEllerOpprettRegistergrunnlag(behandlingId)
         return finnEndringerIRegistergrunnlag(registergrunnlag)
     }
@@ -68,8 +77,10 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
     private fun hentEllerOpprettRegistergrunnlag(behandlingId: UUID): Registergrunnlag {
         var registergrunnlag = registergrunnlagRepository.findByIdOrNull(behandlingId)
         if (registergrunnlag == null) {
-            val personIdent = behandlingService.hentOvergangsstønad(behandlingId).fødselsnummer // TODO Annet alternativ?
+            val personIdent =
+                    behandlingService.hentOvergangsstønad(behandlingId).fødselsnummer // TODO hente aktivident fra fagsak?
             logger.debug("Oppretter registergrunnlag for behandling=$behandlingId")
+
             registergrunnlag = Registergrunnlag(behandlingId = behandlingId, data = hentRegistergrunnlag(personIdent))
             return registergrunnlagRepository.insert(registergrunnlag)
         } else if (registergrunnlag.sporbar.endret.endretTid.isBefore(LocalDateTime.now().minusHours(4))) {
@@ -79,17 +90,36 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
         }
     }
 
+    /**
+     * Spesielle caser:
+     *
+     * Case 1 - Saksbehandler godkjenner ikke ny grunnlagsdata, men går inn på saken senere igjen, hvor det er nye endringer på nytt
+     * Kl 00 - saksbehandler går inn på saker og det er en diff i dataen, NY != opprinnelig
+     *  data=opprinnelig, endringer = NY
+     * Kl 04 - saksbehandler går inn på nytt og det er ny diff, NY2 !=opprinnelig && NY2 != NY
+     *  data=opprinnelig, endringer = NY2
+     *
+     * Case 2 - Saksbehandler godkjenner ikke ny grunnlagsdata, når man går inn senere så er det en ny diff mot forrige gang, men som ikke er en diff mot opprinnelig data
+     * Kl 00 - saksbehandler går inn på saker og det er en diff i dataen NY != opprinnelig
+     *  data=opprinnelig, endringer = NY
+     * Kl 04 - saksbehandler går inn på nytt og det er ny diff, NY = opprinnelig
+     *  data=opprinnelig, endringer = null
+     */
     private fun oppdaterRegistergrunnlag(grunnlagsdata: Registergrunnlag): Registergrunnlag {
         val behandlingId = grunnlagsdata.behandlingId
-        val søknad = behandlingService.hentOvergangsstønad(behandlingId)
+        val søknad = behandlingService.hentOvergangsstønad(behandlingId) // TODO hente aktivident fra fagsak?
         val grunnlagsdataData = hentRegistergrunnlag(søknad.fødselsnummer)
         val diff = grunnlagsdata.data != grunnlagsdataData
+
         return if (diff) {
-            logger.info("Oppdaterer registergrunnlag behandling=${behandlingId} med diff=$diff")
+            logger.info("Oppdaterer registergrunnlag behandling=$behandlingId med diff=$diff")
             registergrunnlagRepository.update(grunnlagsdata.copy(endringer = grunnlagsdataData))
-        } else {
-            logger.info("Fjerner endringer i registergrunnlag behandling=${behandlingId} med diff=$diff")
+        } else if (grunnlagsdata.endringer != null) {
+            logger.info("Fjerner endringer i registergrunnlag behandling=$behandlingId med diff=$diff")
             registergrunnlagRepository.update(grunnlagsdata.copy(endringer = null))
+        } else {
+            logger.debug("Trigger oppdatering av endretTid registergrunnlag behandling=$behandlingId")
+            registergrunnlagRepository.update(grunnlagsdata)
         }
     }
 
@@ -115,7 +145,7 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
                                     sivilstand = SivilstandMapper.mapRegistergrunnlag(pdlSøker))
     }
 
-    private fun finnEndringerIRegistergrunnlag(registergrunnlag: Registergrunnlag): Map<String, List<String>> {
+    private fun finnEndringerIRegistergrunnlag(registergrunnlag: Registergrunnlag): Registergrunnlagsendringer {
         val endringer = registergrunnlag.endringer ?: return emptyMap()
         val data = registergrunnlag.data
         return RegistergrunnlagData::class.memberProperties.map {

@@ -5,12 +5,8 @@ import no.nav.familie.ef.sak.api.dto.SivilstandRegistergrunnlagDto
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Version
 import org.springframework.data.relational.core.mapping.Embedded
-import java.util.*
+import java.util.UUID
 
-/**
- * TODO borde DATA lagras som JsonWrapper/json string och heta eks inngangsvilkar?
- * så hvis det er diff og man henter inngangsvilkår henter man grunnlagsdata fra her og fra "nye"/diff
- */
 data class Registergrunnlag(@Id
                             val behandlingId: UUID,
                             val data: RegistergrunnlagData,
@@ -22,3 +18,13 @@ data class Registergrunnlag(@Id
 
 data class RegistergrunnlagData(val medlemskap: MedlemskapRegistergrunnlagDto,
                                 val sivilstand: SivilstandRegistergrunnlagDto)
+
+/**
+ * Typ som definierer felt som har endringer i [RegistergrunnlagData], eks returnerer den
+ * * Hvis det ikke er noen endringer
+ *      {medlemskap: [], sivilstand: []}
+ *
+ * * Hvis det er en endring i medlemskap->statsborgerskap
+ *      {medlemskap: [statsborgerskap], sivilstand: []}
+ */
+typealias Registergrunnlagsendringer = Map<String, List<String>>
