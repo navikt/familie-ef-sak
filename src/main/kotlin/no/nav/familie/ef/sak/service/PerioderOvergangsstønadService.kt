@@ -37,7 +37,7 @@ class PerioderOvergangsstønadService(private val infotrygdReplikaClient: Infotr
             val asyncResponse = async { familieIntegrasjonerClient.hentInfotrygdPerioder(request) }
             val responseFraReplika = hentReplikaPerioder(request)
             val response = asyncResponse.await()
-            diffResponse(request.personIdent, response, responseFraReplika)
+            sjekkOmDetFinnesDiffIPerioder(request.personIdent, response, responseFraReplika)
             response
         }
     }
@@ -47,14 +47,14 @@ class PerioderOvergangsstønadService(private val infotrygdReplikaClient: Infotr
         return hentPerioderFraReplika(personIdenter, request)
     }
 
-    private fun diffResponse(fnr: String,
-                             response: PerioderOvergangsstønadResponse,
-                             responseFraReplika: PerioderOvergangsstønadResponse) {
+    private fun sjekkOmDetFinnesDiffIPerioder(fnr: String,
+                                              response: PerioderOvergangsstønadResponse,
+                                              responseFraReplika: PerioderOvergangsstønadResponse) {
         val replikaPerioder = responseFraReplika.perioder.sortedBy { it.fomDato }.map { it.fomDato to it.tomDato }
         val perioder = response.perioder.sortedBy { it.fomDato }.map { it.fomDato to it.tomDato }
         if (perioder != replikaPerioder) {
-            logger.warn("Diff in periods")
-            secureLogger.info("Diff for fnr=$fnr perioder=$perioder replikaPerioder=$replikaPerioder")
+            logger.warn("Det finnes forskjell i periodene fra infotrygd og replika")
+            secureLogger.info("Diff i perioder for fnr=$fnr perioder=$perioder replikaPerioder=$replikaPerioder")
         }
     }
 
@@ -62,7 +62,7 @@ class PerioderOvergangsstønadService(private val infotrygdReplikaClient: Infotr
                                        request: PerioderOvergangsstønadRequest): PerioderOvergangsstønadResponse {
         val infotrygdRequest = InfotrygdPerioderOvergangsstønadRequest(personIdenter, request.fomDato, request.tomDato)
         val infotrygdPerioder = infotrygdReplikaClient.hentPerioderOvergangsstønad(infotrygdRequest)
-        val perioder = mapOfFiltrer(infotrygdPerioder)
+        val perioder = mapOgFiltrer(infotrygdPerioder)
         return PerioderOvergangsstønadResponse(slåSammenPerioder(perioder))
     }
 
@@ -70,7 +70,7 @@ class PerioderOvergangsstønadService(private val infotrygdReplikaClient: Infotr
      * Skal filtrere bort de som har beløp = 0
      * Skal filtere bort de som har tomdato < fomDato || opphørdato < tomDato
      */
-    private fun mapOfFiltrer(infotrygdPerioder: InfotrygdPerioderOvergangsstønadResponse) =
+    private fun mapOgFiltrer(infotrygdPerioder: InfotrygdPerioderOvergangsstønadResponse) =
             infotrygdPerioder.perioder.filter { it.beløp > 0 }.map {
                 PeriodeOvergangsstønad(personIdent = it.personIdent,
                                        fomDato = it.fomDato,
@@ -89,6 +89,7 @@ class PerioderOvergangsstønadService(private val infotrygdReplikaClient: Infotr
 
     /**
      * Slår sammen perioder som er sammenhengende og overlappende.
+     * Dette er noe som idag gjøres i infotrygd men er ikke sikkert burde gjøres når vi henter perioder fra vår egen database
      */
     private fun slåSammenPerioder(perioder: List<PeriodeOvergangsstønad>): List<PeriodeOvergangsstønad> {
         val mergedePerioder = Stack<PeriodeOvergangsstønad>()
