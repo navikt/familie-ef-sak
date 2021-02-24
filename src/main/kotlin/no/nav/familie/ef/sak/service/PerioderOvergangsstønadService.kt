@@ -8,13 +8,17 @@ import no.nav.familie.ef.sak.integration.InfotrygdReplikaClient
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.util.isEqualOrAfter
 import no.nav.familie.ef.sak.util.isEqualOrBefore
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeOvergangsstønad
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPerioderOvergangsstønadRequest
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPerioderOvergangsstønadResponse
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadRequest
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.time.YearMonth
+import java.util.Stack
 
 @Service
 class PerioderOvergangsstønadService(private val infotrygdReplikaClient: InfotrygdReplikaClient,
@@ -58,39 +62,54 @@ class PerioderOvergangsstønadService(private val infotrygdReplikaClient: Infotr
                                        request: PerioderOvergangsstønadRequest): PerioderOvergangsstønadResponse {
         val infotrygdRequest = InfotrygdPerioderOvergangsstønadRequest(personIdenter, request.fomDato, request.tomDato)
         val infotrygdPerioder = infotrygdReplikaClient.hentPerioderOvergangsstønad(infotrygdRequest)
-        val perioder = infotrygdPerioder.perioder.filter { it.beløp > 0 }.map {
-            val tomDato = it.opphørsdato?.let { opphørsdato -> if (opphørsdato.isBefore(it.tomDato)) opphørsdato else it.tomDato }
-                          ?: it.tomDato
-            PeriodeOvergangsstønad(personIdent = it.personIdent,
-                                   fomDato = it.fomDato,
-                                   tomDato = tomDato,
-                                   datakilde = PeriodeOvergangsstønad.Datakilde.INFOTRYGD)
-        }.filterNot { it.tomDato.isBefore(it.fomDato) }.sortedBy { it.fomDato }
+        val perioder = mapOfFiltrer(infotrygdPerioder)
         return PerioderOvergangsstønadResponse(slåSammenPerioder(perioder))
+    }
+
+    /**
+     * Skal filtrere bort de som har beløp = 0
+     * Skal filtere bort de som har tomdato < fomDato || opphørdato < tomDato
+     */
+    private fun mapOfFiltrer(infotrygdPerioder: InfotrygdPerioderOvergangsstønadResponse) =
+            infotrygdPerioder.perioder.filter { it.beløp > 0 }.map {
+                PeriodeOvergangsstønad(personIdent = it.personIdent,
+                                       fomDato = it.fomDato,
+                                       tomDato = it.opphørsdatoEllerTomDato(),
+                                       datakilde = PeriodeOvergangsstønad.Datakilde.INFOTRYGD)
+            }.filterNot { it.tomDato.isBefore(it.fomDato) }
+
+    fun InfotrygdPeriodeOvergangsstønad.opphørsdatoEllerTomDato(): LocalDate {
+        val opphørsdato = this.opphørsdato
+        return if (opphørsdato != null && opphørsdato.isBefore(tomDato)) {
+            opphørsdato
+        } else {
+            tomDato
+        }
     }
 
     /**
      * Slår sammen perioder som er sammenhengende og overlappende.
      */
     private fun slåSammenPerioder(perioder: List<PeriodeOvergangsstønad>): List<PeriodeOvergangsstønad> {
-        val mergedePerioder = mutableListOf<PeriodeOvergangsstønad>()
-        perioder.forEach { period ->
+        val mergedePerioder = Stack<PeriodeOvergangsstønad>()
+        perioder.sortedBy { it.fomDato }.forEach { period ->
             if (mergedePerioder.isEmpty()) {
-                mergedePerioder.add(period)
-                return@forEach
+                mergedePerioder.push(period)
             }
-            val last = mergedePerioder.last()
-            if (sammenhengendePeriode(last, period)) {
-                mergedePerioder[mergedePerioder.size - 1] = last.copy(tomDato = maxOf(last.tomDato, period.tomDato))
-            } else if (erOverlappende(last, period)) {
-                mergedePerioder[mergedePerioder.size - 1] = last.copy(fomDato = minOf(last.fomDato, period.fomDato),
-                                                                      tomDato = maxOf(last.tomDato, period.tomDato))
+            val last = mergedePerioder.peek()
+            if (erSammenhengendeEllerOverlappende(last, period)) {
+                mergedePerioder.push(mergedePerioder.pop().copy(fomDato = minOf(last.fomDato, period.fomDato),
+                                                                tomDato = maxOf(last.tomDato, period.tomDato)))
             } else {
-                mergedePerioder.add(period)
+                mergedePerioder.push(period)
             }
         }
         return mergedePerioder
     }
+
+    private fun erSammenhengendeEllerOverlappende(last: PeriodeOvergangsstønad,
+                                                  period: PeriodeOvergangsstønad) =
+            sammenhengendePeriode(last, period) || erOverlappende(last, period)
 
     /**
      * En periode er sammenhengende hvis perioden er i den samme måneden, eller om måned + 1 er lik
