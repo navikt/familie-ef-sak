@@ -26,6 +26,7 @@ data class Behandling(@Id
 
 enum class BehandlingType(val visningsnavn: String) {
     FØRSTEGANGSBEHANDLING("Førstegangsbehandling"),
+    BLANKETT("Blankett"),
     REVURDERING("Revurdering"),
     KLAGE("Klage"),
     TEKNISK_OPPHØR("Teknisk opphør")

@@ -10,7 +10,7 @@ env:
 
 jobs:
   build:
-    name: Build, push and deploy to dev-fss
+    name: Build, push and deploy to dev-fss and prod-fss
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -53,6 +53,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
+      - name: Deploy til dev-fss
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: dev-fss
+          RESOURCE: nais-dev.yaml
       - name: Deploy til prod-fss
         uses: nais/deploy/actions/deploy@v1
         env:

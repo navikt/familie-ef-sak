@@ -55,6 +55,22 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
         søknadRepository.insert(SøknadMapper.toDomain(fagsakId.toString(), journalpostId, søknadsskjema, behandlingId))
     }
 
+    @Transactional
+    fun opprettBehandling(behandlingType: BehandlingType,
+                          fagsakId: UUID,
+                          søknad: SøknadOvergangsstønadKontrakt,
+                          journalpost: Journalpost): Behandling {
+        val behandling = behandlingRepository.insert(Behandling(fagsakId = fagsakId,
+                                                                type = behandlingType,
+                                                                steg = StegType.REGISTRERE_OPPLYSNINGER,
+                                                                status = BehandlingStatus.OPPRETTET,
+                                                                resultat = BehandlingResultat.IKKE_SATT,
+                                                                journalposter = setOf(Behandlingsjournalpost(journalpost.journalpostId,
+                                                                                                             journalpost.journalposttype))))
+
+        lagreSøknadForOvergangsstønad(søknad, behandling.id, fagsakId, journalpost.journalpostId)
+        return behandling
+    }
 
     fun opprettBehandling(behandlingType: BehandlingType, fagsakId: UUID): Behandling {
         return behandlingRepository.insert(Behandling(fagsakId = fagsakId,
@@ -84,7 +100,7 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
     fun oppdaterStatusPåBehandling(behandlingId: UUID, status: BehandlingStatus): Behandling {
         val behandling = hentBehandling(behandlingId)
         secureLogger.info("${SikkerhetContext.hentSaksbehandler()} endrer status på behandling $behandlingId " +
-                    "fra ${behandling.status} til $status")
+                          "fra ${behandling.status} til $status")
 
         behandling.status = status
         return behandlingRepository.update(behandling)
@@ -93,7 +109,7 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
     fun oppdaterStegPåBehandling(behandlingId: UUID, steg: StegType): Behandling {
         val behandling = hentBehandling(behandlingId)
         secureLogger.info("${SikkerhetContext.hentSaksbehandler()} endrer steg på behandling $behandlingId " +
-                    "fra ${behandling.steg} til $steg")
+                          "fra ${behandling.steg} til $steg")
 
         behandling.steg = steg
         return behandlingRepository.update(behandling)
