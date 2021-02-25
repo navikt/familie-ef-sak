@@ -49,7 +49,7 @@ class BlankettController(private val tilgangService: TilgangService,
         require(oppgave.journalpostId != null) { "For å plukke oppgaven må det eksistere en journalpostId" }
 
         val journalpost = journalføringService.hentJournalpost(oppgave.journalpostId!!)
-        val personIdent = personService.hentIdentForJournalpost(journalpost)
+        val personIdent = journalføringService.hentIdentForJournalpost(journalpost)
         tilgangService.validerTilgangTilPersonMedBarn(personIdent)
         val søknad = journalføringService.hentSøknadFraJournalpostForOvergangsstønad(oppgave.journalpostId.toString())
         val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, Stønadstype.OVERGANGSSTØNAD)

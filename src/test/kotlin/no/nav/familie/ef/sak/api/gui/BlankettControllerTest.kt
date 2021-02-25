@@ -9,7 +9,7 @@ import no.nav.familie.ef.sak.repository.FagsakRepository
 import no.nav.familie.ef.sak.repository.OppgaveRepository
 import no.nav.familie.ef.sak.repository.domain.FagsakPerson
 import no.nav.familie.kontrakter.felles.Ressurs
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -37,19 +37,19 @@ class BlankettControllerTest : OppslagSpringRunnerTest() {
 
         val respons: ResponseEntity<Ressurs<UUID>> = opprettBlankettBehandling(oppgaveId)
 
-        Assertions.assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
-        Assertions.assertThat(respons.body.data).isNotNull
+        assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(respons.body.data).isNotNull
     }
 
     @Test
-    internal fun `Oppgave finnes allerede i db returner 401`() {
+    internal fun `Oppgave finnes allerede i db returner 400 BadRequestException`() {
 
         val fagsak = fagsakRepository.insert(fagsak(setOf(FagsakPerson(""))))
         val behandling = behandlingRepository.insert(behandling(fagsak))
         val oppgave = oppgaveRepository.insert(oppgave(behandling, false))
         val respons: ResponseEntity<Ressurs<UUID>> = opprettBlankettBehandling(oppgave.gsakOppgaveId)
 
-        Assertions.assertThat(respons.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
+        assertThat(respons.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
     }
 
     @Test
@@ -57,7 +57,7 @@ class BlankettControllerTest : OppslagSpringRunnerTest() {
 
         val respons: ResponseEntity<Ressurs<UUID>> = opprettBlankettBehandling(11)
 
-        Assertions.assertThat(respons.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
+        assertThat(respons.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 
