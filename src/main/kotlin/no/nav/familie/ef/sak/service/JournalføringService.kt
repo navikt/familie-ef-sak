@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.service
 
-import com.fasterxml.jackson.core.JsonProcessingException
 import no.nav.familie.ef.sak.api.journalføring.JournalføringRequest
 import no.nav.familie.ef.sak.domene.DokumentVariantformat
 import no.nav.familie.ef.sak.integration.JournalpostClient
@@ -59,34 +58,28 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
     }
 
     fun hentSøknadFraJournalpostForOvergangsstønad(journalpostId: String) : SøknadOvergangsstønad {
-       val dokumentinfo =
-        hentJournalpost(journalpostId).dokumenter
-                ?.first {
-                    DokumentBrevkode.OVERGANGSSTØNAD == DokumentBrevkode.fraBrevkode(it.brevkode.toString()) && harOriginalDokument(it)
-                } ?: error("Fant ingen søknad")
-
+        val dokumentinfo = hentOriginaldokument(journalpostId, DokumentBrevkode.OVERGANGSSTØNAD)
         return journalpostClient.hentOvergangsstønadSøknad(journalpostId, dokumentinfo.dokumentInfoId)
     }
 
     fun hentSøknadFraJournalpostForBarnetilsyn(journalpostId: String) : SøknadBarnetilsyn {
-        val dokumentinfo =
-                hentJournalpost(journalpostId).dokumenter
-                        ?.first {
-                            DokumentBrevkode.BARNETILSYN == DokumentBrevkode.fraBrevkode(it.brevkode.toString()) && harOriginalDokument(it)
-                        } ?: error("Fant ingen søknad")
-
+        val dokumentinfo = hentOriginaldokument(journalpostId, DokumentBrevkode.BARNETILSYN)
         return journalpostClient.hentBarnetilsynSøknad(journalpostId, dokumentinfo.dokumentInfoId)
     }
 
     fun hentSøknadFraJournalpostForSkolepenger(journalpostId: String) : SøknadSkolepenger {
-        val dokumentinfo =
-                hentJournalpost(journalpostId).dokumenter
-                        ?.first {
-                            DokumentBrevkode.SKOLEPENGER == DokumentBrevkode.fraBrevkode(it.brevkode.toString()) && harOriginalDokument(it)
-                        } ?: error("Fant ingen søknad")
-
+        val dokumentinfo = hentOriginaldokument(journalpostId, DokumentBrevkode.SKOLEPENGER)
         return journalpostClient.hentSkolepengerSøknad(journalpostId, dokumentinfo.dokumentInfoId)
     }
+
+    private fun hentOriginaldokument(journalpostId: String, dokumentBrevkode: DokumentBrevkode): no.nav.familie.kontrakter.felles.journalpost.DokumentInfo {
+        return hentJournalpost(journalpostId).dokumenter
+                        ?.first {
+                            dokumentBrevkode == DokumentBrevkode.fraBrevkode(it.brevkode.toString()) && harOriginalDokument(
+                                    it)
+                        } ?: error("Fant ingen søknad")
+    }
+
     private fun ferdigstillJournalføring(journalpostId: String, journalførendeEnhet: String) {
         journalpostClient.ferdigstillJournalpost(journalpostId, journalførendeEnhet)
     }

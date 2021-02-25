@@ -54,7 +54,6 @@ class BlankettController(private val tilgangService: TilgangService,
         val søknad = journalføringService.hentSøknadFraJournalpostForOvergangsstønad(oppgave.journalpostId.toString())
         val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, Stønadstype.OVERGANGSSTØNAD)
         val behandling = behandlingService.opprettBehandling(BehandlingType.BLANKETT, fagsak.id, søknad, journalpost)
-        blankettService.lagreTomBlankett(behandling.id)
 
         return Ressurs.success(behandling.id)
     }
