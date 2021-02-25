@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.mapper.SøknadsskjemaMapper
 import no.nav.familie.ef.sak.repository.SøknadBarnetilsynRepository
 import no.nav.familie.ef.sak.repository.SøknadOvergangsstønadRepository
 import no.nav.familie.ef.sak.repository.SøknadSkolepengerRepository
+import no.nav.familie.ef.sak.repository.domain.søknad.Sivilstandsplaner
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.kontrakter.ef.søknad.Søknadsfelt
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
@@ -22,6 +23,15 @@ internal class SøknadsskjemaOvergangsstønadRepositoryTest : OppslagSpringRunne
 
     @Autowired
     private lateinit var søknadSkolepengerRepository: SøknadSkolepengerRepository
+
+    @Test
+    internal fun `søknad om overgangsstønad lagres korrekt med tom sivilstandsplaner`() {
+        val søknadTilLagring = SøknadsskjemaMapper.tilDomene(Testsøknad.søknadOvergangsstønad.copy(sivilstandsplaner =  null))
+        søknadOvergangsstønadRepository.insert(søknadTilLagring)
+        val søknadFraDatabase = søknadOvergangsstønadRepository.findByIdOrThrow(søknadTilLagring.id)
+        assertThat(søknadFraDatabase.sivilstandsplaner).isEqualTo(Sivilstandsplaner(null, null, null))
+    }
+
 
     @Test
     internal fun `søknad om overgangsstønad lagres korrekt`() {

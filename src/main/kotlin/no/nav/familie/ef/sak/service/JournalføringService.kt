@@ -5,7 +5,12 @@ import no.nav.familie.ef.sak.domene.DokumentVariantformat
 import no.nav.familie.ef.sak.integration.JournalpostClient
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
+import no.nav.familie.ef.sak.repository.domain.Fagsak
+import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
+import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
+import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
+import no.nav.familie.kontrakter.ef.søknad.SøknadSkolepenger
 import no.nav.familie.kontrakter.felles.dokarkiv.*
 import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariant
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
@@ -39,17 +44,40 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
     fun fullførJournalpost(journalføringRequest: JournalføringRequest, journalpostId: String): Long {
         val behandling: Behandling = hentBehandling(journalføringRequest)
         val journalpost = hentJournalpost(journalpostId)
+        val fagsak = fagsakService.hentFagsak(journalføringRequest.fagsakId)
 
-        settSøknadPåBehandling(journalpostId, behandling.fagsakId, behandling.id)
+        settSøknadPåBehandling(journalpostId, fagsak, behandling.id)
         knyttJournalpostTilBehandling(journalpost, behandling)
 
-        val eksternFagsakId = fagsakService.hentEksternId(journalføringRequest.fagsakId)
-        oppdaterJournalpost(journalpost, journalføringRequest.dokumentTitler, eksternFagsakId)
+        oppdaterJournalpost(journalpost, journalføringRequest.dokumentTitler, fagsak.eksternId.id)
         ferdigstillJournalføring(journalpostId, journalføringRequest.journalførendeEnhet)
         ferdigstillJournalføringsoppgave(journalføringRequest)
 
         return opprettSaksbehandlingsoppgave(behandling, journalføringRequest.navIdent)
 
+    }
+
+    fun hentSøknadFraJournalpostForOvergangsstønad(journalpostId: String) : SøknadOvergangsstønad {
+        val dokumentinfo = hentOriginaldokument(journalpostId, DokumentBrevkode.OVERGANGSSTØNAD)
+        return journalpostClient.hentOvergangsstønadSøknad(journalpostId, dokumentinfo.dokumentInfoId)
+    }
+
+    fun hentSøknadFraJournalpostForBarnetilsyn(journalpostId: String) : SøknadBarnetilsyn {
+        val dokumentinfo = hentOriginaldokument(journalpostId, DokumentBrevkode.BARNETILSYN)
+        return journalpostClient.hentBarnetilsynSøknad(journalpostId, dokumentinfo.dokumentInfoId)
+    }
+
+    fun hentSøknadFraJournalpostForSkolepenger(journalpostId: String) : SøknadSkolepenger {
+        val dokumentinfo = hentOriginaldokument(journalpostId, DokumentBrevkode.SKOLEPENGER)
+        return journalpostClient.hentSkolepengerSøknad(journalpostId, dokumentinfo.dokumentInfoId)
+    }
+
+    private fun hentOriginaldokument(journalpostId: String, dokumentBrevkode: DokumentBrevkode): no.nav.familie.kontrakter.felles.journalpost.DokumentInfo {
+        return hentJournalpost(journalpostId).dokumenter
+                        ?.first {
+                            dokumentBrevkode == DokumentBrevkode.fraBrevkode(it.brevkode.toString()) && harOriginalDokument(
+                                    it)
+                        } ?: error("Fant ingen søknad")
     }
 
     private fun ferdigstillJournalføring(journalpostId: String, journalførendeEnhet: String) {
@@ -86,27 +114,21 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         behandlingService.oppdaterJournalpostIdPåBehandling(journalpost, behandling)
     }
 
-    private fun settSøknadPåBehandling(journalpostId: String, fagsakId: UUID, behandlingsId: UUID) {
-        hentJournalpost(journalpostId).dokumenter
-                ?.filter { dokument ->
-                    DokumentBrevkode.erGyldigBrevkode(dokument.brevkode.toString()) && harOriginalDokument(dokument)
-                }
-                ?.forEach {
-                        when (DokumentBrevkode.fraBrevkode(it.brevkode)) {
-                            DokumentBrevkode.OVERGANGSSTØNAD -> {
-                                val søknad = journalpostClient.hentOvergangsstønadSøknad(journalpostId, it.dokumentInfoId)
-                                behandlingService.lagreSøknadForOvergangsstønad(søknad, behandlingsId, fagsakId, journalpostId)
-                            }
-                            DokumentBrevkode.BARNETILSYN -> {
-                                val søknad = journalpostClient.hentBarnetilsynSøknad(journalpostId, it.dokumentInfoId)
-                                behandlingService.lagreSøknadForBarnetilsyn(søknad, behandlingsId, fagsakId, journalpostId)
-                            }
-                            DokumentBrevkode.SKOLEPENGER -> {
-                                val søknad = journalpostClient.hentSkolepengerSøknad(journalpostId, it.dokumentInfoId)
-                                behandlingService.lagreSøknadForSkolepenger(søknad, behandlingsId, fagsakId, journalpostId)
-                            }
-                        }
-                    }
+    private fun settSøknadPåBehandling(journalpostId: String, fagsak: Fagsak, behandlingId : UUID) {
+        when (fagsak.stønadstype) {
+            Stønadstype.OVERGANGSSTØNAD -> {
+                val søknad = hentSøknadFraJournalpostForOvergangsstønad(journalpostId)
+                behandlingService.lagreSøknadForOvergangsstønad(søknad, behandlingId, fagsak.id, journalpostId)
+            }
+            Stønadstype.BARNETILSYN -> {
+                val søknad = hentSøknadFraJournalpostForBarnetilsyn(journalpostId)
+                behandlingService.lagreSøknadForBarnetilsyn(søknad, behandlingId, fagsak.id, journalpostId)
+            }
+            Stønadstype.SKOLEPENGER -> {
+                val søknad = hentSøknadFraJournalpostForSkolepenger(journalpostId)
+                behandlingService.lagreSøknadForSkolepenger(søknad, behandlingId, fagsak.id, journalpostId)
+            }
+        }
     }
 
     private fun harOriginalDokument(dokument: no.nav.familie.kontrakter.felles.journalpost.DokumentInfo): Boolean =

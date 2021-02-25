@@ -11,3 +11,6 @@ fun min(dato1: LocalDateTime?, dato2: LocalDateTime?): LocalDateTime? =
         } else {
             minOf(dato1 ?: LocalDateTime.MAX, dato2 ?: LocalDateTime.MAX)
         }
+
+fun LocalDate.isEqualOrBefore(other: LocalDate) = this == other || this.isBefore(other)
+fun LocalDate.isEqualOrAfter(other: LocalDate) = this == other || this.isAfter(other)
