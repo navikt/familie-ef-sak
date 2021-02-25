@@ -1,8 +1,8 @@
 package no.nav.familie.ef.sak.service
 
-import no.nav.familie.ef.sak.api.ApiExceptionHandler
 import no.nav.familie.ef.sak.api.dto.BrevRequest
-import no.nav.familie.ef.sak.brev.BrevClient
+import no.nav.familie.ef.sak.Vedtaksbrev.BrevClient
+import no.nav.familie.ef.sak.Vedtaksbrev.BrevType
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
 import no.nav.familie.ef.sak.integration.dto.pdl.visningsnavn
@@ -13,7 +13,6 @@ import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.Dokument
 import no.nav.familie.kontrakter.felles.dokarkiv.FilType
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.*
@@ -24,8 +23,8 @@ class VedtaksbrevService(private val brevClient: BrevClient,
                          private val behandlingService: BehandlingService,
                          private val fagsakService: FagsakService,
                          private val personService: PersonService,
-                         private val familieIntegrasjonerClient: FamilieIntegrasjonerClient
-                         ) {
+                         private val familieIntegrasjonerClient: FamilieIntegrasjonerClient,
+                         private val arbeidsfordelingService: ArbeidsfordelingService) {
 
     fun lagBrevRequest(behandlingId: UUID): BrevRequest {
         val behandling = behandlingService.hentBehandling(behandlingId)
@@ -60,8 +59,8 @@ class VedtaksbrevService(private val brevClient: BrevClient,
         brevRepository.insert(brev)
     }
 
-    fun forhåndsvisBrev(behandlingId: UUID): ByteArray{
-        return  lagPdf(lagBrevRequest(behandlingId))
+    fun forhåndsvisBrev(behandlingId: UUID): ByteArray {
+        return lagPdf(lagBrevRequest(behandlingId))
     }
 
     fun hentBrev(behandlingId: UUID): Vedtaksbrev {
@@ -72,21 +71,17 @@ class VedtaksbrevService(private val brevClient: BrevClient,
         val behandling = behandlingService.hentBehandling(behandlingId)
         val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
         val ident = fagsak.hentAktivIdent();
-
         val vedtaksbrev = hentBrev(behandlingId)
+        val dokumenter =
+                listOf(Dokument(vedtaksbrev.pdf!!.bytes, FilType.PDFA, dokumentType = BrevType.VEDTAKSBREV.arkivMetadataType))
+        val journalførendeEnhet = arbeidsfordelingService.hentNavEnhet(ident)
 
-        val dokumenter = listOf(Dokument(vedtaksbrev.pdf!!.bytes, FilType.PDFA, null, null, "U"))
-
-        val request = ArkiverDokumentRequest(ident,
-                false,
-                dokumenter)
-
-        val dokumentResponse = familieIntegrasjonerClient.arkiver(request)
-
-        val logger = LoggerFactory.getLogger(VedtaksbrevService::class.java)
-
-        logger.info("DOKUMENTRESPONSE: " + dokumentResponse)
-
-        return dokumentResponse.journalpostId
+        return familieIntegrasjonerClient.arkiver(ArkiverDokumentRequest(
+                fnr = ident,
+                forsøkFerdigstill = true,
+                hoveddokumentvarianter = dokumenter,
+                fagsakId = fagsak.eksternId.toString(),
+                journalførendeEnhet = journalførendeEnhet?.enhetId
+        )).journalpostId
     }
 }

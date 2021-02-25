@@ -64,7 +64,6 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         validerBehandlingFatterVedtak()
     }
 
-    @Disabled // TODO: Fjern anotasjon før merge
     @Test
     internal fun `skal sette behandling til iverksett når man godkjent totrinnskontroll`() {
         opprettBehandling()

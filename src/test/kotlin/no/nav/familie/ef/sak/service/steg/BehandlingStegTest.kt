@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test
 
 internal class BehandlingStegTest {
 
-    @Disabled // TODO: Fjern denne før merge
     @Test
     fun `Tester rekkefølgen på steg`() {
         val riktigRekkefølge =

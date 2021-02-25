@@ -136,4 +136,5 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         journalpostClient.oppdaterJournalpost(oppdatertJournalpost, journalpost.journalpostId)
     }
 
+
 }

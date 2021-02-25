@@ -105,7 +105,7 @@ enum class StegType(val rekkefølge: Int,
                     VILKÅRSVURDERE_STØNAD -> BEREGNE_YTELSE
                     BEREGNE_YTELSE -> SEND_TIL_BESLUTTER
                     SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
-                    BESLUTTE_VEDTAK -> JOURNALFØR_VEDTAKSBREV // TODO: Sett til IVERKSETT_MOT_OPPDRAG før merge
+                    BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
                     IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
                     VENTE_PÅ_STATUS_FRA_ØKONOMI -> JOURNALFØR_VEDTAKSBREV
                     JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV

@@ -21,8 +21,8 @@ class IverksettMotOppdragSteg(private val tilkjentYtelseService: TilkjentYtelseS
     }
 
     override fun utførSteg(behandling: Behandling, data: Void?) {
-        // tilkjentYtelseService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(behandling) // TODO: Skal ikke merges
-        // venterPåStatusFraØkonomiTask(behandling) // TODO: Skal ikke merges
+        tilkjentYtelseService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(behandling)
+        venterPåStatusFraØkonomiTask(behandling)
     }
 
     private fun venterPåStatusFraØkonomiTask(behandling: Behandling) {

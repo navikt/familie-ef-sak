@@ -49,7 +49,6 @@ internal class BeslutteVedtakStegTest {
         every { vedtaksbrevRepository.deleteById(any()) } just Runs
     }
 
-    @Disabled // TODO: Fjern denne før merge (disabled notasjonen)
     @Test
     internal fun `skal opprette iverksettMotOppdragTask etter beslutte vedtak hvis godkjent`() {
         val nesteSteg = utførTotrinnskontroll(godkjent = true)

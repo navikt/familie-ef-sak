@@ -21,7 +21,6 @@ internal class IverksettMotOppdragStegTest {
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
     val iverksettMotOppdragSteg = IverksettMotOppdragSteg(tilkjentYtelseService, taskRepository)
 
-    @Disabled // TODO: Fjern før merge
     @Test
     internal fun `skal opprette ventePåStatusFraØkonomiTask etter å ha iverksatt mot oppdrag`() {
         val fnr = "12345678901"
