@@ -36,7 +36,8 @@ data class Barn(@Id
                 @Column("serlige_tilsynsbehov")
                 val særligeTilsynsbehov: String? = null,
                 @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "barnepass_")
-                val barnepass: Barnepass? = null) : IBarn
+                val barnepass: Barnepass? = null,
+                val lagtTilManuelt: Boolean) : IBarn
 
 interface IAnnenForelder {
 

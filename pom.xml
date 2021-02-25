@@ -36,7 +36,7 @@
         <felles.version>1.20210208115050_88991d1</felles.version>
         <prosessering.version>1.20210112120136_9956e1e</prosessering.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>2.0_20210210155242_35b4f85</kontrakter.version>
+        <kontrakter.version>2.0_20210225122520_04c86e9</kontrakter.version>
 
         <!-- Setter disse til token-support sine versjoner, versjoner(9.x) i spring er ikke kompatibel med oauth2-oidc-sdk -->
         <nimbus-jose-jwt.version>8.20.2</nimbus-jose-jwt.version>
