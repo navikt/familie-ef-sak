@@ -156,7 +156,7 @@ object SøknadsskjemaMapper {
                      særligeTilsynsbehov = it.særligeTilsynsbehov?.verdi,
                      barnepass = tilDomene(it.barnepass?.verdi),
                      skalBoHosSøker = it.skalBarnetBoHosSøker?.svarId,
-                     lagtTilManuelt = it.lagtTilManuellt ?: false)
+                     lagtTilManuelt = it.lagtTilManuelt ?: false)
 
             }.toSet()
 

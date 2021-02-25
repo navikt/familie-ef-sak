@@ -140,7 +140,8 @@ internal class BarnMatcherTest {
                  fødselTermindato = terminDato,
                  erBarnetFødt = true,
                  harSkalHaSammeAdresse = true,
-                 ikkeRegistrertPåSøkersAdresseBeskrivelse = "")
+                 ikkeRegistrertPåSøkersAdresseBeskrivelse = "",
+                 lagtTilManuelt = false)
 
     private fun pdlBarn(fnr: String) =
             fnr to PdlBarn(emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList())
