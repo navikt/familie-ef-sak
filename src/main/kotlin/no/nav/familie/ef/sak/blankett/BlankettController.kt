@@ -1,9 +1,8 @@
 package no.nav.familie.ef.sak.blankett
 
 import no.nav.familie.ef.sak.api.ApiFeil
-import no.nav.familie.ef.sak.repository.domain.BehandlingType
-import no.nav.familie.ef.sak.repository.domain.Stønadstype
-import no.nav.familie.ef.sak.service.*
+import no.nav.familie.ef.sak.service.OppgaveService
+import no.nav.familie.ef.sak.service.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.security.token.support.core.api.Unprotected
@@ -19,23 +18,13 @@ import java.util.*
 @ProtectedWithClaims(issuer = "azuread")
 @Unprotected
 class BlankettController(private val tilgangService: TilgangService,
-                         private val vurderingService: VurderingService,
-                         private val blankettClient: BlankettClient,
                          private val blankettService: BlankettService,
-                         private val oppgaveService: OppgaveService,
-                         private val journalføringService: JournalføringService,
-                         private val personService: PersonService,
-                         private val behandlingService: BehandlingService,
-                         private val fagsakService: FagsakService,
-                         private val personopplysningerService: PersonopplysningerService) {
+                         private val oppgaveService: OppgaveService) {
 
     @PostMapping("{behandlingId}")
     fun lagBlankettPdf(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
-        val blankettPdfRequest = BlankettPdfRequest(lagPersonopplysningerDto(behandlingId),
-                                                    hentInngangsvilkårDto(behandlingId))
-        val blankett = blankettClient.genererBlankett(blankettPdfRequest)
-        blankettService.oppdaterBlankett(behandlingId, blankett)
+        val blankett = blankettService.lagBlankett(behandlingId)
         return Ressurs.success(blankett)
     }
 
@@ -48,26 +37,8 @@ class BlankettController(private val tilgangService: TilgangService,
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
         require(oppgave.journalpostId != null) { "For å plukke oppgaven må det eksistere en journalpostId" }
 
-        val journalpost = journalføringService.hentJournalpost(oppgave.journalpostId!!)
-        val personIdent = journalføringService.hentIdentForJournalpost(journalpost)
-        tilgangService.validerTilgangTilPersonMedBarn(personIdent)
-        val søknad = journalføringService.hentSøknadFraJournalpostForOvergangsstønad(oppgave.journalpostId.toString())
-        val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, Stønadstype.OVERGANGSSTØNAD)
-        val behandling = behandlingService.opprettBehandling(BehandlingType.BLANKETT, fagsak.id, søknad, journalpost)
+        val behandling = blankettService.opprettBlankettBehandling(oppgave.journalpostId!!)
 
         return Ressurs.success(behandling.id)
-    }
-
-
-    private fun hentInngangsvilkårDto(behandlingId: UUID) = vurderingService.hentInngangsvilkår(behandlingId)
-
-    private fun lagPersonopplysningerDto(behandlingId: UUID): PersonopplysningerDto {
-        val ident = fagsakService.hentFagsak(behandlingService.hentBehandling(behandlingId).fagsakId).hentAktivIdent()
-        return PersonopplysningerDto(hentGjeldendeNavn(ident), ident)
-    }
-
-    private fun hentGjeldendeNavn(hentAktivIdent: String): String {
-        val navnMap = personopplysningerService.hentGjeldeneNavn(listOf(hentAktivIdent))
-        return navnMap.getValue(hentAktivIdent)
     }
 }
