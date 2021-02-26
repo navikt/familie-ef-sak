@@ -24,7 +24,9 @@ class BlankettService(private val tilgangService: TilgangService,
         tilgangService.validerTilgangTilPersonMedBarn(personIdent)
         val søknad = journalføringService.hentSøknadFraJournalpostForOvergangsstønad(journalpostId)
         val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, Stønadstype.OVERGANGSSTØNAD)
-        return behandlingService.opprettBehandling(BehandlingType.BLANKETT, fagsak.id, søknad, journalpost)
+        val opprettBehandling = behandlingService.opprettBehandling(BehandlingType.BLANKETT, fagsak.id, søknad, journalpost)
+        lagreTomBlankett(opprettBehandling.id)
+        return opprettBehandling
     }
 
     fun lagBlankett(behandlingId: UUID): ByteArray {
@@ -40,7 +42,7 @@ class BlankettService(private val tilgangService: TilgangService,
         return blankettRepository.update(blankett)
     }
 
-    fun lagreTomBlankett(behandlingId: UUID) {
+    private fun lagreTomBlankett(behandlingId: UUID) {
         val blankett = Blankett(behandlingId, Fil(byteArrayOf()))
         blankettRepository.insert(blankett)
     }
