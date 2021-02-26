@@ -5,8 +5,8 @@ import java.util.UUID
 
 data class BarnMedSamværDto(
         val barnId: UUID,
-        val søknadsgrunnlag: BarnMedSamværSøknadsgrunnlagDto,
-        val registergrunnlag: BarnMedSamværRegistergrunnlagDto
+        val søknadsgrunnlag: BarnMedSamværSøknadsgrunnlagDto?,
+        val registergrunnlag: BarnMedSamværRegistergrunnlagDto?
 )
 
 
@@ -33,7 +33,7 @@ data class BarnMedSamværSøknadsgrunnlagDto(
 )
 
 data class BarnMedSamværRegistergrunnlagDto(
-        val id: UUID,
+        val id: UUID?,
         val navn: String?,
         val fødselsnummer: String?,
         val harSammeAdresse: Boolean?,

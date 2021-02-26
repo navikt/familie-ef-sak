@@ -11,7 +11,8 @@ object BarnMatcher {
 
         val søknadsbarnMedFnrMatchetTilPdlBarn =
                 søknadsbarn.map {
-                    val firstOrNull = pdlBarnMap.entries.firstOrNull { entry -> it.fødselsnummer == entry.key }
+                    val firstOrNull =
+                            pdlBarnMap.entries.firstOrNull { entry -> it.fødselsnummer == entry.key && !it.lagtTilManuelt }
                     MatchetBarn(firstOrNull?.key, firstOrNull?.value, it)
                 }
 
@@ -31,13 +32,13 @@ object BarnMatcher {
                 }
                 barnForsøktMatchetPåFødselsdato
             }
-        }
+        } + pdlBarnIkkeISøknad.map { MatchetBarn(fødselsnummer = it.key, pdlBarn = it.value, søknadsbarn = null) }
     }
 
     private fun forsøkMatchPåFødselsdato(barn: MatchetBarn,
                                          pdlBarnIkkeISøknad: Map<String, PdlBarn>): MatchetBarn {
 
-        val fødselTermindato = barn.søknadsbarn.fødselTermindato ?: return barn
+        val fødselTermindato = barn.søknadsbarn?.fødselTermindato ?: return barn
         val uke20 = fødselTermindato.minusWeeks(20)
         val uke44 = fødselTermindato.plusWeeks(4)
 
@@ -57,4 +58,4 @@ object BarnMatcher {
 
 }
 
-data class MatchetBarn(val fødselsnummer: String?, val pdlBarn: PdlBarn?, val søknadsbarn: Barn)
+data class MatchetBarn(val fødselsnummer: String?, val pdlBarn: PdlBarn?, val søknadsbarn: Barn?)

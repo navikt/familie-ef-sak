@@ -27,10 +27,10 @@ internal class BarnMatcherTest {
         val barn = BarnMatcher.kobleSøknadsbarnOgRegisterBarn(søknadsbarn, pdlBarnMap)
 
         assertThat(barn).hasSize(4)
-        assertThat(barn.first { it.fødselsnummer == fnrBarn1 }.søknadsbarn.fødselsnummer).isEqualTo(fnrBarn1)
-        assertThat(barn.first { it.fødselsnummer == fnrBarn2 }.søknadsbarn.fødselsnummer).isEqualTo(fnrBarn2)
-        assertThat(barn.first { it.fødselsnummer == fnrBarn3 }.søknadsbarn.fødselsnummer).isEqualTo(fnrBarn3)
-        assertThat(barn.first { it.fødselsnummer == fnrBarn4 }.søknadsbarn.fødselTermindato)
+        assertThat(barn.first { it.fødselsnummer == fnrBarn1 }.søknadsbarn?.fødselsnummer).isEqualTo(fnrBarn1)
+        assertThat(barn.first { it.fødselsnummer == fnrBarn2 }.søknadsbarn?.fødselsnummer).isEqualTo(fnrBarn2)
+        assertThat(barn.first { it.fødselsnummer == fnrBarn3 }.søknadsbarn?.fødselsnummer).isEqualTo(fnrBarn3)
+        assertThat(barn.first { it.fødselsnummer == fnrBarn4 }.søknadsbarn?.fødselTermindato)
                 .isEqualTo(LocalDate.of(2018, 5, 4))
     }
 
@@ -52,10 +52,10 @@ internal class BarnMatcherTest {
         val barn = BarnMatcher.kobleSøknadsbarnOgRegisterBarn(søknadsbarn, pdlBarnMap)
 
         assertThat(barn).hasSize(4)
-        assertThat(barn.first { it.fødselsnummer == fnrBarn1 }.søknadsbarn.fødselsnummer).isEqualTo(fnrBarn1)
-        assertThat(barn.first { it.fødselsnummer == fnrBarn2 }.søknadsbarn.fødselsnummer).isEqualTo(fnrBarn2)
-        assertThat(barn.first { it.fødselsnummer == fnrBarn3 }.søknadsbarn.fødselsnummer).isEqualTo(fnrBarn3)
-        assertThat(barn.first { it.fødselsnummer == fnrBarn4 }.søknadsbarn.fødselTermindato)
+        assertThat(barn.first { it.fødselsnummer == fnrBarn1 }.søknadsbarn?.fødselsnummer).isEqualTo(fnrBarn1)
+        assertThat(barn.first { it.fødselsnummer == fnrBarn2 }.søknadsbarn?.fødselsnummer).isEqualTo(fnrBarn2)
+        assertThat(barn.first { it.fødselsnummer == fnrBarn3 }.søknadsbarn?.fødselsnummer).isEqualTo(fnrBarn3)
+        assertThat(barn.first { it.fødselsnummer == fnrBarn4 }.søknadsbarn?.fødselTermindato)
                 .isEqualTo(LocalDate.of(2018, 9, 4))
     }
 
@@ -77,10 +77,10 @@ internal class BarnMatcherTest {
         val barn = BarnMatcher.kobleSøknadsbarnOgRegisterBarn(søknadsbarn, pdlBarnMap)
 
         assertThat(barn).hasSize(4)
-        assertThat(barn.first { it.fødselsnummer == fnrBarn1 }.søknadsbarn.fødselsnummer).isEqualTo(fnrBarn1)
-        assertThat(barn.first { it.fødselsnummer == fnrBarn2 }.søknadsbarn.fødselsnummer).isEqualTo(fnrBarn2)
-        assertThat(barn.first { it.fødselsnummer == fnrBarn3 }.søknadsbarn.fødselsnummer).isEqualTo(fnrBarn3)
-        assertThat(barn.first { it.fødselsnummer == fnrBarn4 }.søknadsbarn.fødselTermindato)
+        assertThat(barn.first { it.fødselsnummer == fnrBarn1 }.søknadsbarn?.fødselsnummer).isEqualTo(fnrBarn1)
+        assertThat(barn.first { it.fødselsnummer == fnrBarn2 }.søknadsbarn?.fødselsnummer).isEqualTo(fnrBarn2)
+        assertThat(barn.first { it.fødselsnummer == fnrBarn3 }.søknadsbarn?.fødselsnummer).isEqualTo(fnrBarn3)
+        assertThat(barn.first { it.fødselsnummer == fnrBarn4 }.søknadsbarn?.fødselTermindato)
                 .isEqualTo(LocalDate.of(2018, 5, 4))
     }
 
@@ -102,11 +102,11 @@ internal class BarnMatcherTest {
         val barn = BarnMatcher.kobleSøknadsbarnOgRegisterBarn(søknadsbarn, pdlBarnMap)
 
         assertThat(barn).hasSize(4)
-        assertThat(barn.first { it.fødselsnummer == fnrBarn1 }.søknadsbarn.fødselsnummer).isEqualTo(fnrBarn1)
-        assertThat(barn.first { it.fødselsnummer == fnrBarn2 }.søknadsbarn.fødselsnummer).isEqualTo(fnrBarn2)
-        assertThat(barn.first { it.fødselsnummer == fnrBarn3 }.søknadsbarn.fødselTermindato)
+        assertThat(barn.first { it.fødselsnummer == fnrBarn1 }.søknadsbarn?.fødselsnummer).isEqualTo(fnrBarn1)
+        assertThat(barn.first { it.fødselsnummer == fnrBarn2 }.søknadsbarn?.fødselsnummer).isEqualTo(fnrBarn2)
+        assertThat(barn.first { it.fødselsnummer == fnrBarn3 }.søknadsbarn?.fødselTermindato)
                 .isEqualTo(LocalDate.of(2018, 5, 4))
-        assertThat(barn.first { it.fødselsnummer == fnrBarn4 }.søknadsbarn.fødselTermindato)
+        assertThat(barn.first { it.fødselsnummer == fnrBarn4 }.søknadsbarn?.fødselTermindato)
                 .isEqualTo(LocalDate.of(2018, 5, 4))
     }
 
@@ -126,22 +126,41 @@ internal class BarnMatcherTest {
 
         val barn = BarnMatcher.kobleSøknadsbarnOgRegisterBarn(søknadsbarn, pdlBarnMap)
 
-        assertThat(barn).hasSize(3)
-        assertThat(barn.first { it.fødselsnummer == fnrBarn1 }.søknadsbarn.fødselsnummer).isEqualTo(fnrBarn1)
-        assertThat(barn.first { it.fødselsnummer == fnrBarn2 }.søknadsbarn.fødselsnummer).isEqualTo(fnrBarn2)
-        assertThat(barn.first { it.fødselsnummer == fnrBarn3 }.søknadsbarn.fødselTermindato)
+        assertThat(barn).hasSize(4)
+        assertThat(barn.first { it.fødselsnummer == fnrBarn1 }.søknadsbarn?.fødselsnummer).isEqualTo(fnrBarn1)
+        assertThat(barn.first { it.fødselsnummer == fnrBarn2 }.søknadsbarn?.fødselsnummer).isEqualTo(fnrBarn2)
+        assertThat(barn.first { it.fødselsnummer == fnrBarn3 }.søknadsbarn?.fødselTermindato)
                 .isEqualTo(LocalDate.of(2018, 5, 4))
-        assertThat(barn.firstOrNull { it.fødselsnummer == fnrBarn4 }).isNull()
+        assertThat(barn.first { it.fødselsnummer == fnrBarn4 }.søknadsbarn).isNull()
+    }
+
+    @Test
+    fun `kobleSøknadsbarnOgRegisterBarn kobler barn fra søknad til register hvis ikke lagt til manuelt`() {
+        val fnrBarn1 = FnrGenerator.generer()
+
+        val søknadsBarn1 = søknadsbarn(fnr = fnrBarn1, lagtTilManuelt = true)
+        val søknadsBarn2 = søknadsbarn(fnr = fnrBarn1)
+        val søknadsbarn = setOf(søknadsBarn1, søknadsBarn2)
+
+        val pdlBarn = pdlBarn(fnrBarn1)
+        val pdlBarnMap: Map<String, PdlBarn> = mapOf(pdlBarn)
+
+        val barn = BarnMatcher.kobleSøknadsbarnOgRegisterBarn(søknadsbarn, pdlBarnMap)
+
+        assertThat(barn).hasSize(2)
+
+        assertThat(barn.first { it.søknadsbarn == søknadsBarn1 }.pdlBarn).isNull()
+        assertThat(barn.first { it.søknadsbarn == søknadsBarn2 }.pdlBarn).isEqualTo(pdlBarn.second)
     }
 
 
-    private fun søknadsbarn(terminDato: LocalDate? = null, fnr: String? = null) =
+    private fun søknadsbarn(terminDato: LocalDate? = null, fnr: String? = null, lagtTilManuelt: Boolean = false) =
             Barn(fødselsnummer = fnr,
                  fødselTermindato = terminDato,
                  erBarnetFødt = true,
                  harSkalHaSammeAdresse = true,
                  ikkeRegistrertPåSøkersAdresseBeskrivelse = "",
-                 lagtTilManuelt = false)
+                 lagtTilManuelt = lagtTilManuelt)
 
     private fun pdlBarn(fnr: String) =
             fnr to PdlBarn(emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList())
