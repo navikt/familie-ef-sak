@@ -22,4 +22,10 @@ class PerioderOvergangsstønadController(private val perioderOvergangsstønadSer
         return perioderOvergangsstønadService.hentPerioder(request)
     }
 
+    @PostMapping("azure")
+    @ProtectedWithClaims(issuer = "azuread")
+    fun hentPerioderAzure(@RequestBody request: PerioderOvergangsstønadRequest): PerioderOvergangsstønadResponse {
+        return perioderOvergangsstønadService.hentPerioder(request)
+    }
+
 }
