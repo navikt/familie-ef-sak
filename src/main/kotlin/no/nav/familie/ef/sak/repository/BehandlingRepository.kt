@@ -27,6 +27,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
     @Query("""SELECT fp.ident FROM fagsak f
                     JOIN behandling b ON f.id = b.fagsak_id
                     JOIN fagsak_person fp ON b.fagsak_id=fp.fagsak_id
+                    WHERE b.id = :behandlingId
                     ORDER BY fp.opprettet_tid DESC 
                     LIMIT 1
                     """)
