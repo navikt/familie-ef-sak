@@ -24,11 +24,12 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
     fun finnMedEksternId(eksternId: Long): Behandling?
 
     // language=PostgreSQL
-    @Query("""SELECT f.id FROM fagsak f
+    @Query("""SELECT fp.ident FROM fagsak f
                     JOIN behandling b ON f.id = b.fagsak_id
                     JOIN fagsak_person fp ON b.fagsak_id=fp.fagsak_id
-                    WHERE b.id = :behandlingId AND fp.opprettet_tid IN 
-                        (SELECT MAX(opprettet_tid) FROM fagsak_person fp2 WHERE fp2.ident = fp.ident)""")
+                    ORDER BY fp.opprettet_tid DESC 
+                    LIMIT 1
+                    """)
     fun finnFnrForBehandlingId(behandlingId: UUID): String
 
 }
