@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.repository.VedtaksbrevRepository
 import no.nav.familie.ef.sak.repository.domain.Fil
 import no.nav.familie.ef.sak.repository.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.*
@@ -29,6 +30,7 @@ class VedtaksbrevService(private val brevClient: BrevClient,
         val begrunnelseFomDatoInnvilgelse = "den måneden du ble separert"
         val brevdato = LocalDate.now()
         val belopOvergangsstonad = 13943
+        val signaturSaksbehandler = SikkerhetContext.hentSaksbehandlerNavn()
 
         return BrevRequest(navn = navn,
                            ident = fagsak.hentAktivIdent(),
@@ -36,7 +38,8 @@ class VedtaksbrevService(private val brevClient: BrevClient,
                            innvilgelseTil = innvilgelseTil,
                            begrunnelseFomDatoInnvilgelse = begrunnelseFomDatoInnvilgelse,
                            brevdato = brevdato,
-                           belopOvergangsstonad = belopOvergangsstonad)
+                           belopOvergangsstonad = belopOvergangsstonad,
+                           signaturSaksbehandler = signaturSaksbehandler)
     }
 
     fun lagPdf(brevRequest: BrevRequest): ByteArray {
@@ -45,15 +48,27 @@ class VedtaksbrevService(private val brevClient: BrevClient,
                                       brevRequest)
     }
 
-    fun lagreBrev(behandlingId: UUID) {
+    fun lagreBrevUtkast(behandlingId: UUID): Vedtaksbrev {
         val request = lagBrevRequest(behandlingId)
         val pdf = lagPdf(request)
         val brev = Vedtaksbrev(behandlingId, request, null, Fil(pdf), null)
-        brevRepository.insert(brev)
+        return brevRepository.insert(brev)
     }
 
-    fun forhåndsvisBrev(behandlingId: UUID): ByteArray{
-        return  lagPdf(lagBrevRequest(behandlingId))
+    fun lagreEndeligBrev(behandlingId: UUID): Vedtaksbrev {
+        try {
+            brevRepository.findById(behandlingId).get().let {
+                val endeligRequest = it.utkastBrevRequest.copy(signaturBeslutter = SikkerhetContext.hentSaksbehandlerNavn())
+                return brevRepository.update(it.copy(pdf = Fil(lagPdf(endeligRequest)), brevRequest = endeligRequest))
+            }
+        } catch (exception: Exception) {
+            error("Feil ved lagring av endelig brev. Finner ikke brev-utkast for behandling $behandlingId")
+            throw exception
+        }
+    }
+
+    fun forhåndsvisBrev(behandlingId: UUID): ByteArray {
+        return lagPdf(lagBrevRequest(behandlingId))
     }
 
     fun hentBrev(behandlingId: UUID): Vedtaksbrev {

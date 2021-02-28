@@ -28,7 +28,6 @@ class VedtakController(private val stegService: StegService,
     @PostMapping("/{behandlingId}/send-til-beslutter")
     fun sendTilBeslutter(@PathVariable behandlingId: UUID): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
-        vedtaksbrevService.lagreBrev(behandlingId)
         val behandling = behandlingService.hentBehandling(behandlingId)
         return Ressurs.success(stegService.håndterSendTilBeslutter(behandling).id)
     }

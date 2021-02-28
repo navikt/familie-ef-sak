@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.api.dto
 
+import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import java.time.LocalDate
 
 data class BrevRequest(val navn: String,
@@ -8,8 +9,9 @@ data class BrevRequest(val navn: String,
                        val innvilgelseTil: LocalDate,
                        val begrunnelseFomDatoInnvilgelse: String,
                        val brevdato: LocalDate,
-                       val belopOvergangsstonad: Int
-) {
+                       val belopOvergangsstonad: Int,
+                       val signaturSaksbehandler: String,
+                       val signaturBeslutter: String? = null) {
     fun lagBody(): String {
         return """
             {
@@ -54,7 +56,7 @@ data class BrevRequest(val navn: String,
                     "Nav arbeid og ... - OSLO"
                   ],
                   "saksbehandler": [
-                    "Saksbehandler Saksbehandlersen"
+                    "$signaturSaksbehandler"
                   ]
                 }
               }
