@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.service
 import no.nav.familie.ef.sak.api.journalføring.JournalføringRequest
 import no.nav.familie.ef.sak.domene.DokumentVariantformat
 import no.nav.familie.ef.sak.integration.JournalpostClient
+import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.domain.Fagsak
@@ -12,6 +13,7 @@ import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
 import no.nav.familie.kontrakter.ef.søknad.SøknadSkolepenger
 import no.nav.familie.kontrakter.felles.dokarkiv.*
+import no.nav.familie.kontrakter.felles.journalpost.BrukerIdType
 import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariant
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
@@ -25,6 +27,7 @@ import java.util.*
 class JournalføringService(private val journalpostClient: JournalpostClient,
                            private val behandlingService: BehandlingService,
                            private val fagsakService: FagsakService,
+                           private val pdlClient: PdlClient,
                            private val oppgaveService: OppgaveService) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -70,6 +73,16 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
     fun hentSøknadFraJournalpostForSkolepenger(journalpostId: String) : SøknadSkolepenger {
         val dokumentinfo = hentOriginaldokument(journalpostId, DokumentBrevkode.SKOLEPENGER)
         return journalpostClient.hentSkolepengerSøknad(journalpostId, dokumentinfo.dokumentInfoId)
+    }
+
+    fun hentIdentForJournalpost(journalpost: Journalpost): String {
+        return journalpost.bruker?.let {
+            when (it.type) {
+                BrukerIdType.FNR -> it.id
+                BrukerIdType.AKTOERID -> pdlClient.hentPersonidenter(it.id).identer.first().ident
+                BrukerIdType.ORGNR -> error("Kan ikke hente journalpost=${journalpost.journalpostId} for orgnr")
+            }
+        } ?: error("Kan ikke hente journalpost=${journalpost.journalpostId} uten bruker")
     }
 
     private fun hentOriginaldokument(journalpostId: String, dokumentBrevkode: DokumentBrevkode): no.nav.familie.kontrakter.felles.journalpost.DokumentInfo {
