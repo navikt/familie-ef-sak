@@ -67,7 +67,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         val fagsak = fagsakRepository.insert(fagsak(gammel + ny))
         val behandling = behandlingRepository.insert(behandling(fagsak))
         //
-        val fnr = behandlingRepository.finnFnrForBehandlingId(behandling.id)
+        val fnr = behandlingRepository.finnGjeldendeIdentForBehandling(behandling.id)
         //
         assertThat("ny").isEqualTo(fnr)
     }

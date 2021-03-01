@@ -11,7 +11,6 @@ import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.BehandlingshistorikkService
 import no.nav.familie.ef.sak.service.steg.StegType.*
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.ef.sak.task.FerdigstillBehandlingTask
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -119,55 +118,89 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
         val stegType = behandlingSteg.stegType()
         val saksbehandlerIdent = SikkerhetContext.hentSaksbehandler()
         try {
-            val harTilgangTilSteg = SikkerhetContext.harTilgangTilGittRolle(rolleConfig, behandling.steg.tillattFor)
-
-            logger.info("Starter håndtering av $stegType på behandling ${behandling.id}")
-            secureLogger.info("Starter håndtering av $stegType på behandling ${behandling.id} med saksbehandler=[$saksbehandlerIdent]")
-
-            if (!harTilgangTilSteg) {
-                error("$saksbehandlerIdent kan ikke utføre steg '${stegType.displayName()} pga manglende rolle.")
-            }
-
-            if (behandling.steg == BEHANDLING_FERDIGSTILT) {
-                error("Behandlingen er avsluttet og stegprosessen kan ikke gjenåpnes")
-            }
-
-            if (stegType.kommerEtter(behandling.steg, behandling.type)) {
-                error("$saksbehandlerIdent prøver å utføre steg '${stegType.displayName()}', " +
-                      "men behandlingen er på steg '${behandling.steg.displayName()}'")
-            }
-
-            if (behandling.steg == BESLUTTE_VEDTAK && stegType != BESLUTTE_VEDTAK) {
-                error("Behandlingen er på steg '${behandling.steg.displayName()}', og er da låst for alle andre type endringer.")
-            }
-
-            behandlingSteg.validerSteg(behandling)
-
+            valider(behandling, stegType, saksbehandlerIdent, behandlingSteg)
             val nesteSteg = behandlingSteg.utførOgReturnerNesteSteg(behandling, data)
-
-            if (behandlingSteg.settInnHistorikk()) {
-                behandlingshistorikkService.opprettHistorikkInnslag(
-                        Behandlingshistorikk(behandlingId = behandling.id,
-                                             steg = behandling.steg,
-                                             opprettetAvNavn = SikkerhetContext.hentSaksbehandlerNavn(),
-                                             opprettetAv = saksbehandlerIdent))
-            }
-
-            stegSuksessMetrics[stegType]?.increment()
-
-            if (!nesteSteg.erGyldigIKombinasjonMedStatus(behandlingService.hentBehandling(behandling.id).status)) {
-                error("Steg '${nesteSteg.displayName()}' kan ikke settes " +
-                      "på behandling i kombinasjon med status ${behandling.status}")
-            }
-
-            val returBehandling = behandlingService.oppdaterStegPåBehandling(behandlingId = behandling.id, steg = nesteSteg)
-
+            oppdaterHistorikk(behandlingSteg, behandling, saksbehandlerIdent)
+            oppdaterMetrikk(stegType, stegSuksessMetrics)
+            validerNesteSteg(nesteSteg, behandling)
             logger.info("$stegType på behandling ${behandling.id} er håndtert")
-            return returBehandling
+            return behandlingService.oppdaterStegPåBehandling(behandlingId = behandling.id, steg = nesteSteg)
         } catch (exception: Exception) {
-            stegFeiletMetrics[stegType]?.increment()
+            oppdaterMetrikk(stegType, stegFeiletMetrics)
             logger.error("Håndtering av stegtype '$stegType' feilet på behandling ${behandling.id}.")
             throw exception
+        }
+    }
+
+    private fun validerNesteSteg(nesteSteg: StegType, behandling: Behandling) {
+        if (!nesteSteg.erGyldigIKombinasjonMedStatus(behandlingService.hentBehandling(behandling.id).status)) {
+            error("Steg '${nesteSteg.displayName()}' kan ikke settes " +
+                  "på behandling i kombinasjon med status ${behandling.status}")
+        }
+    }
+
+    private fun <T> valider(behandling: Behandling,
+                            stegType: StegType,
+                            saksbehandlerIdent: String,
+                            behandlingSteg: BehandlingSteg<T>) {
+        validerHarTilgang(behandling, stegType, saksbehandlerIdent)
+
+        validerGyldigTilstand(behandling, stegType, saksbehandlerIdent)
+
+        utførBehandlingsvalidering(behandlingSteg, behandling)
+    }
+
+    private fun oppdaterMetrikk(stegType: StegType, metrikk: Map<StegType, Counter>) {
+        metrikk[stegType]?.increment()
+    }
+
+    private fun <T> oppdaterHistorikk(behandlingSteg: BehandlingSteg<T>,
+                                      behandling: Behandling,
+                                      saksbehandlerIdent: String) {
+        if (behandlingSteg.settInnHistorikk()) {
+            behandlingshistorikkService.opprettHistorikkInnslag(
+                    Behandlingshistorikk(behandlingId = behandling.id,
+                                         steg = behandling.steg,
+                                         opprettetAvNavn = SikkerhetContext.hentSaksbehandlerNavn(),
+                                         opprettetAv = saksbehandlerIdent))
+        }
+    }
+
+    private fun <T> utførBehandlingsvalidering(behandlingSteg: BehandlingSteg<T>,
+                                               behandling: Behandling) {
+        if (!behandlingSteg.stegType().erGyldigIKombinasjonMedStatus(behandling.status)) {
+            error("Kan ikke utføre ${behandlingSteg.stegType()} når behandlingstatus er ${behandling.status}")
+        }
+        behandlingSteg.validerSteg(behandling)
+    }
+
+    private fun validerGyldigTilstand(behandling: Behandling,
+                                      stegType: StegType,
+                                      saksbehandlerIdent: String) {
+        if (behandling.steg == BEHANDLING_FERDIGSTILT) {
+            error("Behandlingen er avsluttet og stegprosessen kan ikke gjenåpnes")
+        }
+
+        if (stegType.kommerEtter(behandling.steg, behandling.type)) {
+            error("$saksbehandlerIdent prøver å utføre steg '${stegType.displayName()}', " +
+                  "men behandlingen er på steg '${behandling.steg.displayName()}'")
+        }
+
+        if (behandling.steg == BESLUTTE_VEDTAK && stegType != BESLUTTE_VEDTAK) {
+            error("Behandlingen er på steg '${behandling.steg.displayName()}', og er da låst for alle andre type endringer.")
+        }
+    }
+
+    private fun validerHarTilgang(behandling: Behandling,
+                                  stegType: StegType,
+                                  saksbehandlerIdent: String) {
+        val harTilgangTilSteg = SikkerhetContext.harTilgangTilGittRolle(rolleConfig, behandling.steg.tillattFor)
+
+        logger.info("Starter håndtering av $stegType på behandling ${behandling.id}")
+        secureLogger.info("Starter håndtering av $stegType på behandling ${behandling.id} med saksbehandler=[$saksbehandlerIdent]")
+
+        if (!harTilgangTilSteg) {
+            error("$saksbehandlerIdent kan ikke utføre steg '${stegType.displayName()} pga manglende rolle.")
         }
     }
 

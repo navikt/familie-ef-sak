@@ -7,8 +7,6 @@ import no.nav.familie.ef.sak.integration.JournalpostClient
 import no.nav.familie.ef.sak.repository.BehandlingRepository
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.service.steg.BlankettSteg
-import no.nav.familie.ef.sak.task.DistribuerVedtaksbrevTask
-import no.nav.familie.ef.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostResponse
@@ -18,7 +16,6 @@ import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.Properties
 
 class JournalførBlankettStegTest {
 
@@ -62,7 +59,7 @@ class JournalførBlankettStegTest {
         } returns journalpost
 
         every {
-            behandlingRepository.finnFnrForBehandlingId(any())
+            behandlingRepository.finnGjeldendeIdentForBehandling(any())
         } returns fnr
 
         every {
