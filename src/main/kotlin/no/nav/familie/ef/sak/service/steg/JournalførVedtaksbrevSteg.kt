@@ -4,9 +4,7 @@ import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.VedtaksbrevService
 import no.nav.familie.ef.sak.task.DistribuerVedtaksbrevTask
-import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
-import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -22,10 +20,10 @@ class JournalførVedtaksbrevSteg(private val taskRepository: TaskRepository,
 
     override fun utførSteg(behandling: Behandling, data: Void?) {
         val journalpostId = vedtaksbrevService.journalførVedtaksbrev(behandling.id)
-        behandlingService.oppdaterJournalpostIdPåBehandling(Journalpost(journalpostId
-                                                                        ?: error("Feil ved journalføring av vedtaksbrev"),
-                                                                        Journalposttype.U,
-                                                                        Journalstatus.JOURNALFOERT), behandling)
+        behandlingService.oppdaterJournalpostIdPåBehandling(journalpostId
+                                                            ?: error("Feil ved journalføring av vedtaksbrev"),
+                                                            Journalposttype.U,
+                                                            behandling)
         logger.info("Journalfør vedtaksbrev [${behandling.id}] fullført med journalpostId [$journalpostId]")
         distribuerVedtaksbrev(behandling)
     }

@@ -3,64 +3,125 @@ package no.nav.familie.ef.sak.service
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.integration.JournalpostClient
 import no.nav.familie.ef.sak.integration.dto.familie.Arbeidsfordelingsenhet
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.repository.BehandlingRepository
+import no.nav.familie.ef.sak.repository.FagsakRepository
 import no.nav.familie.ef.sak.repository.VedtaksbrevRepository
-import no.nav.familie.ef.sak.repository.domain.*
-import no.nav.familie.ef.sak.service.steg.StegType
+import no.nav.familie.ef.sak.repository.domain.FagsakPerson
+import no.nav.familie.ef.sak.repository.domain.Fil
+import no.nav.familie.ef.sak.repository.domain.Vedtaksbrev
+import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.ef.sak.vedtaksbrev.BrevClient
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentRequest
-import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostResponse
-import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
-import org.assertj.core.api.Assertions
+import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import org.springframework.beans.factory.annotation.Autowired
+import java.lang.IllegalStateException
 import java.util.*
 
-internal class VedtaksbrevServiceTest {
+internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
 
-    private val taskRepository = mockk<TaskRepository>()
-    private val behandlingService = mockk<BehandlingService>()
-    private val fagsakService = mockk<FagsakService>()
-    private val vedtaksbrevRepository = mockk<VedtaksbrevRepository>()
-    private val journalpostClient = mockk<JournalpostClient>()
-    private val arbeidsfordelingService = mockk<ArbeidsfordelingService>()
-    private val vedtaksbrevService = VedtaksbrevService(mockk(),
-                                                        vedtaksbrevRepository,
-                                                        behandlingService,
-                                                        fagsakService,
-                                                        mockk(),
-                                                        journalpostClient,
-                                                        arbeidsfordelingService)
 
-    val fnr = "12345678901"
-    val fagsak = Fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD,
-                        søkerIdenter = setOf(FagsakPerson(ident = fnr)))
-    val behandling = Behandling(fagsakId = fagsak.id,
-                                type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                status = BehandlingStatus.IVERKSETTER_VEDTAK,
-                                steg = StegType.JOURNALFØR_VEDTAKSBREV,
-                                resultat = BehandlingResultat.IKKE_SATT)
-    val vedtaksbrev = Vedtaksbrev(behandling.id, mockk(), null, Fil("123".toByteArray()), Fil("123".toByteArray()))
-    val arkiverDokumentRequestSlot = slot<ArkiverDokumentRequest>()
+    @Autowired lateinit var vedtaksbrevService: VedtaksbrevService
+    @Autowired private lateinit var fagsakRepository: FagsakRepository
+    @Autowired private lateinit var behandlingRepository: BehandlingRepository
+    @Autowired private lateinit var vedtaksbrevRepository: VedtaksbrevRepository
+
+    private val fagsak = fagsak(setOf(FagsakPerson("")))
+    private val behandling = behandling(fagsak)
+
+
+    @BeforeEach
+    internal fun setUp() {
+        fagsakRepository.insert(fagsak)
+        behandlingRepository.insert(behandling)
+    }
+
+    @Test
+    fun `skal ikke kunne lage endelig brev hvis utkast ikke finnes`() {
+        assertThrows<IllegalStateException> { vedtaksbrevService.lagreEndeligBrev(behandlingId = behandling.id) }
+    }
+
+    @Test
+    fun `skal lage endelig brev basert på utkast`() {
+        val utkast = vedtaksbrevService.lagreBrevUtkast(behandlingId = behandling.id)
+        val endelig = vedtaksbrevService.lagreEndeligBrev(behandlingId = behandling.id)
+
+        assertThat(utkast).usingRecursiveComparison().ignoringFields("brevRequest", "pdf").isEqualTo(endelig)
+        assertThat(utkast.utkastBrevRequest).usingRecursiveComparison()
+                .ignoringFields("signaturBeslutter")
+                .isEqualTo(endelig.brevRequest)
+    }
+
+    @Test
+    fun `utkast skal lagres i databasen`() {
+        val utkast = vedtaksbrevService.lagreBrevUtkast(behandlingId = behandling.id)
+        val forventetRequest = vedtaksbrevService.lagBrevRequest(behandlingId = behandling.id)
+
+        assertThat(utkast).isEqualTo(vedtaksbrevRepository.findByIdOrThrow(behandling.id))
+        assertThat(forventetRequest).isEqualTo(vedtaksbrevRepository.findByIdOrThrow(behandling.id).utkastBrevRequest)
+        assertThat(vedtaksbrevRepository.findByIdOrThrow(behandling.id).utkastPdf).isNotNull
+    }
+
+    @Test
+    fun `endelig brev skal lagres i databasen`() {
+        vedtaksbrevService.lagreBrevUtkast(behandlingId = behandling.id)
+        val endelig = vedtaksbrevService.lagreEndeligBrev(behandlingId = behandling.id)
+
+        assertThat(endelig).isEqualTo(vedtaksbrevRepository.findByIdOrThrow(behandling.id))
+        assertThat(vedtaksbrevRepository.findByIdOrThrow(behandling.id).pdf).isNotNull
+    }
+
+    @Test
+    fun `endelig brev skal ikke lagres ved generering av utkast`() {
+        vedtaksbrevService.lagreBrevUtkast(behandlingId = behandling.id)
+
+        assertThat(vedtaksbrevRepository.findByIdOrThrow(behandling.id).brevRequest).isNull()
+        assertThat(vedtaksbrevRepository.findByIdOrThrow(behandling.id).pdf).isNull()
+    }
 
     @Test
     internal fun `skal journalføre vedtaksbrev`() {
+        val brevClient = mockk<BrevClient>()
+        val behandlingService = mockk<BehandlingService>()
+        val fagsakService = mockk<FagsakService>()
+        val personService = mockk<PersonService>()
+        val journalpostClient = mockk<JournalpostClient>()
+        val arbeidsfordelingService = mockk<ArbeidsfordelingService>()
+        val vedtaksbrevRepository = mockk<VedtaksbrevRepository>()
+
+        val vedtaksbrev = Vedtaksbrev(behandling.id, mockk(), null, Fil("123".toByteArray()), Fil("123".toByteArray()))
+
+        val vedtaksbrevService = VedtaksbrevService(brevClient,
+                                                vedtaksbrevRepository,
+                                                behandlingService,
+                                                fagsakService,
+                                                personService,
+                                                journalpostClient,
+                                                arbeidsfordelingService)
+
+        val arkiverDokumentRequestSlot = slot<ArkiverDokumentRequest>()
+
+
         every { arbeidsfordelingService.hentNavEnhet(any()) } returns Arbeidsfordelingsenhet("4321", "enhetNavn")
         every { behandlingService.hentBehandling(behandling.id) } returns behandling
         every { fagsakService.hentFagsak(fagsak.id) } returns fagsak
         every { vedtaksbrevRepository.findById(behandling.id) } returns Optional.of(vedtaksbrev)
         every {
             journalpostClient.arkiverDokument(capture(arkiverDokumentRequestSlot))
-        } returns OppdaterJournalpostResponse("1234")
-        every {
-            taskRepository.save(any())
-        } returns Task("", "", Properties())
+        } returns ArkiverDokumentResponse("1234", true)
 
         vedtaksbrevService.journalførVedtaksbrev(behandling.id)
 
-        Assertions.assertThat(arkiverDokumentRequestSlot.captured.fnr).isEqualTo(fnr)
-        Assertions.assertThat(arkiverDokumentRequestSlot.captured.fagsakId).isEqualTo(fagsak.eksternId.toString())
+        assertThat(arkiverDokumentRequestSlot.captured.fnr).isEqualTo(fagsak.hentAktivIdent())
+        assertThat(arkiverDokumentRequestSlot.captured.fagsakId).isEqualTo(fagsak.eksternId.toString())
     }
-
 
 }

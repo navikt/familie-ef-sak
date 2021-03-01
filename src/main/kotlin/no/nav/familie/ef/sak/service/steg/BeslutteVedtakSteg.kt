@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.OppgaveService
 import no.nav.familie.ef.sak.service.TotrinnskontrollService
+import no.nav.familie.ef.sak.service.VedtaksbrevService
 import no.nav.familie.ef.sak.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ef.sak.task.JournalførBlankettTask
@@ -23,7 +24,8 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
                          private val fagsakService: FagsakService,
                          private val oppgaveService: OppgaveService,
                          private val totrinnskontrollService: TotrinnskontrollService,
-                         private val vedtaksbrevRepository: VedtaksbrevRepository) : BehandlingSteg<BeslutteVedtakDto> {
+                         private val vedtaksbrevRepository: VedtaksbrevRepository,
+                         private val vedtaksbrevService: VedtaksbrevService) : BehandlingSteg<BeslutteVedtakDto> {
 
     override fun validerSteg(behandling: Behandling) {
         if (behandling.steg != stegType()) {
@@ -37,12 +39,12 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
         ferdigstillOppgave(behandling)
 
         return if (data.godkjent) {
-            // TODO oppdater brev
-                if (behandling.type != BehandlingType.BLANKETT) {
-                    opprettTaskForIverksettMotOppdrag(behandling)
-                } else {
-                    opprettTaskForJournalførBlankett(behandling)
-                }
+            if (behandling.type != BehandlingType.BLANKETT) {
+                vedtaksbrevService.lagreEndeligBrev(behandling.id)
+                opprettTaskForIverksettMotOppdrag(behandling)
+            } else {
+                opprettTaskForJournalførBlankett(behandling)
+            }
             stegType().hentNesteSteg(behandling.type)
 
         } else {

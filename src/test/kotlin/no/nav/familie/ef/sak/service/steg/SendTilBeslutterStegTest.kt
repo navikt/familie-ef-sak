@@ -1,13 +1,12 @@
 package no.nav.familie.ef.sak.service.steg
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
+import io.mockk.*
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.OppgaveService
+import no.nav.familie.ef.sak.service.VedtaksbrevService
 import no.nav.familie.ef.sak.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.task.FerdigstillOppgaveTask.FerdigstillOppgaveTaskData
 import no.nav.familie.ef.sak.task.OpprettOppgaveTask
@@ -27,8 +26,9 @@ internal class SendTilBeslutterStegTest {
     private val fagsakService = mockk<FagsakService>()
     private val oppgaveService = mockk<OppgaveService>()
     private val behandlingService = mockk<BehandlingService>(relaxed = true)
+    private val vedtaksbrevService = mockk<VedtaksbrevService>()
 
-    private val beslutteVedtakSteg = SendTilBeslutterSteg(taskRepository, oppgaveService, behandlingService)
+    private val beslutteVedtakSteg = SendTilBeslutterSteg(taskRepository, oppgaveService, behandlingService, vedtaksbrevService)
     private val fagsak = Fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD,
                                 søkerIdenter = setOf(FagsakPerson(ident = "12345678901")))
 
@@ -49,6 +49,8 @@ internal class SendTilBeslutterStegTest {
             taskRepository.save(capture(taskSlot))
         } returns Task("", "", Properties())
         every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(any(), any()) } returns null
+
+        every { vedtaksbrevService.lagreBrevUtkast(any()) } returns mockk()
     }
 
     @Test
@@ -59,6 +61,13 @@ internal class SendTilBeslutterStegTest {
     @Test
     internal fun `Skal avslutte oppgave BehandleUnderkjentVedtak hvis den finnes`() {
         utførOgVerifiserKall(Oppgavetype.BehandleUnderkjentVedtak)
+    }
+
+    @Test
+    internal fun `Skal lagre brev`(){
+        utførSteg()
+
+        verify { vedtaksbrevService.lagreBrevUtkast(behandling.id) }
     }
 
     private fun utførOgVerifiserKall(oppgavetype: Oppgavetype) {
