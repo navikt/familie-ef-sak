@@ -13,7 +13,6 @@ import no.nav.familie.ef.sak.integration.dto.pdl.visningsnavn
 import no.nav.familie.ef.sak.repository.domain.søknad.AnnenForelder
 import no.nav.familie.ef.sak.repository.domain.søknad.Barn
 import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsstønad
-import no.nav.familie.kontrakter.ef.søknad.Fødselsnummer
 
 object BarnMedSamværMapper {
 
@@ -64,11 +63,6 @@ object BarnMedSamværMapper {
                             søkerAdresse: List<Bostedsadresse>): List<BarnMedSamværRegistergrunnlagDto> {
 
         val alleBarn: List<MatchetBarn> = BarnMatcher.kobleSøknadsbarnOgRegisterBarn(søknad.barn, pdlBarn)
-                .sortedByDescending {
-                    if (it.fødselsnummer != null)
-                        Fødselsnummer(it.fødselsnummer).fødselsdato
-                    else it.søknadsbarn.fødselTermindato
-                }
 
         return alleBarn.map { barn ->
             val fnr = barn.pdlBarn?.familierelasjoner?.firstOrNull {

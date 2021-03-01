@@ -16,6 +16,7 @@ import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsst
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.vurdering.utledDelvilkårResultat
 import no.nav.familie.ef.sak.vurdering.validerDelvilkår
+import no.nav.familie.kontrakter.ef.søknad.Fødselsnummer
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.*
@@ -89,7 +90,13 @@ class VurderingService(private val behandlingService: BehandlingService,
                                  pdlSøker: PdlSøker): List<BarnMedSamværDto> {
         val registergrunnlag = BarnMedSamværMapper.mapRegistergrunnlag(pdlBarn, barneForeldre, søknad, pdlSøker.bostedsadresse)
         return BarnMedSamværMapper.slåSammenBarnMedSamvær(søknadsgrunnlag = BarnMedSamværMapper.mapSøknadsgrunnlag(søknad.barn),
-                                                          registergrunnlag = registergrunnlag)
+                                                          registergrunnlag = registergrunnlag).sortedByDescending {
+            if (it.registergrunnlag != null)
+                it.registergrunnlag.fødselsnummer?.let { fødsesnummer -> Fødselsnummer(fødsesnummer).fødselsdato }
+            else {
+                it.søknadsgrunnlag.fødselTermindato
+            }
+        }
     }
 
     private fun hentVurderinger(behandlingId: UUID,
