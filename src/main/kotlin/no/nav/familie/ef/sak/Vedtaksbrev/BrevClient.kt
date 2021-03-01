@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.Vedtaksbrev
+package no.nav.familie.ef.sak.vedtaksbrev
 
 import no.nav.familie.ef.sak.api.dto.BrevRequest
 import no.nav.familie.ef.sak.util.medContentTypeJsonUTF8
