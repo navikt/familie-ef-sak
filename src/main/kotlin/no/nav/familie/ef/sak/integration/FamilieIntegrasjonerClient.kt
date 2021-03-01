@@ -9,8 +9,6 @@ import no.nav.familie.ef.sak.integration.dto.familie.Tilgang
 import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentRequest
-import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadRequest
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
 import no.nav.familie.kontrakter.felles.getDataOrThrow
@@ -30,13 +28,6 @@ class FamilieIntegrasjonerClient(@Qualifier("azure") restOperations: RestOperati
 
     override val pingUri: URI = integrasjonerConfig.pingUri
     val logger = LoggerFactory.getLogger(this::class.java)
-
-    fun arkiver(arkiverDokumentRequest: ArkiverDokumentRequest): ArkiverDokumentResponse {
-        logger.info("Arkiver dokument med request:",arkiverDokumentRequest)
-        val response =
-                postForEntity<Ressurs<ArkiverDokumentResponse>>(integrasjonerConfig.sendInnUri, arkiverDokumentRequest)
-        return response.getDataOrThrow()
-    }
 
     fun sjekkTilgangTilPersoner(identer: List<String>): List<Tilgang> {
         return postForEntity(integrasjonerConfig.tilgangUri, identer)

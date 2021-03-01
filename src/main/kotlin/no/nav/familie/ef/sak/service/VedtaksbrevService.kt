@@ -3,7 +3,7 @@ package no.nav.familie.ef.sak.service
 import no.nav.familie.ef.sak.api.dto.BrevRequest
 import no.nav.familie.ef.sak.Vedtaksbrev.BrevClient
 import no.nav.familie.ef.sak.Vedtaksbrev.BrevType
-import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
+import no.nav.familie.ef.sak.integration.JournalpostClient
 import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
 import no.nav.familie.ef.sak.integration.dto.pdl.visningsnavn
 import no.nav.familie.ef.sak.repository.VedtaksbrevRepository
@@ -23,7 +23,7 @@ class VedtaksbrevService(private val brevClient: BrevClient,
                          private val behandlingService: BehandlingService,
                          private val fagsakService: FagsakService,
                          private val personService: PersonService,
-                         private val familieIntegrasjonerClient: FamilieIntegrasjonerClient,
+                         private val journalpostClient: JournalpostClient,
                          private val arbeidsfordelingService: ArbeidsfordelingService) {
 
     fun lagBrevRequest(behandlingId: UUID): BrevRequest {
@@ -76,7 +76,7 @@ class VedtaksbrevService(private val brevClient: BrevClient,
                 listOf(Dokument(vedtaksbrev.pdf!!.bytes, FilType.PDFA, dokumentType = BrevType.VEDTAKSBREV.arkivMetadataType))
         val journalførendeEnhet = arbeidsfordelingService.hentNavEnhet(ident)
 
-        return familieIntegrasjonerClient.arkiver(ArkiverDokumentRequest(
+        return journalpostClient.arkiverDokument(ArkiverDokumentRequest(
                 fnr = ident,
                 forsøkFerdigstill = true,
                 hoveddokumentvarianter = dokumenter,
