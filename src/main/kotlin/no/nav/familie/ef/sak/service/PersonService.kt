@@ -32,17 +32,6 @@ class PersonService(private val pdlClient: PdlClient) {
         return pdlClient.hentAndreForeldre(identer)
     }
 
-    fun hentIdentForJournalpost(journalpost: Journalpost): String {
-        return journalpost.bruker?.let {
-            when (it.type) {
-                BrukerIdType.FNR -> it.id
-                BrukerIdType.AKTOERID -> pdlClient.hentPersonidenter(it.id).identer.first().ident
-                BrukerIdType.ORGNR -> error("Kan ikke hente journalpost=${journalpost.journalpostId} for orgnr")
-            }
-        } ?: error("Kan ikke hente journalpost=${journalpost.journalpostId} uten bruker")
-
-    }
-
     fun hentIdenterForBarnOgForeldre(forelderIdent: String): List<String>{
         val søkerMedBarn = hentPersonMedRelasjoner(forelderIdent)
 
