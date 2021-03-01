@@ -44,7 +44,7 @@ internal class VedtaksbrevServiceTest {
     val arkiverDokumentRequestSlot = slot<ArkiverDokumentRequest>()
 
     @Test
-    fun `skal journalføre vedtaksbrev`() {
+    internal fun `skal journalføre vedtaksbrev`() {
         every { arbeidsfordelingService.hentNavEnhet(any()) } returns Arbeidsfordelingsenhet("4321", "enhetNavn")
         every { behandlingService.hentBehandling(behandling.id) } returns behandling
         every { fagsakService.hentFagsak(fagsak.id) } returns fagsak
