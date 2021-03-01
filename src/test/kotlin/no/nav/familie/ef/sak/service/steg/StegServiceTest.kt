@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.BehandlingRepository
 import no.nav.familie.ef.sak.repository.FagsakRepository
+import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
@@ -18,7 +19,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `skal håndtere en ny søknad`() {
         val fagsak = fagsakRepository.insert(fagsak())
-        val behandling = behandlingRepository.insert(behandling(fagsak))
+        val behandling = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.UTREDES))
 
         stegService.håndterRegistrerOpplysninger(behandling, "")
     }
