@@ -35,7 +35,7 @@ enum class StegType(val rekkefølge: Int,
 
     REGISTRERE_OPPLYSNINGER(rekkefølge = 1,
                             tillattFor = BehandlerRolle.SAKSBEHANDLER,
-                            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
+                            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES, BehandlingStatus.OPPRETTET)),
     VILKÅRSVURDERE_INNGANGSVILKÅR(rekkefølge = 2,
                                   tillattFor = BehandlerRolle.SAKSBEHANDLER,
                                   gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
