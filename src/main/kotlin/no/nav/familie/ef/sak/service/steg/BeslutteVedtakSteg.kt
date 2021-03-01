@@ -39,8 +39,8 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
         ferdigstillOppgave(behandling)
 
         return if (data.godkjent) {
-            vedtaksbrevService.lagreEndeligBrev(behandling.id)
             if (behandling.type != BehandlingType.BLANKETT) {
+                vedtaksbrevService.lagreEndeligBrev(behandling.id)
                 opprettTaskForIverksettMotOppdrag(behandling)
             } else {
                 opprettTaskForJournalførBlankett(behandling)
