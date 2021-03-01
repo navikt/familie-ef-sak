@@ -6,7 +6,7 @@ import java.util.UUID
 data class BarnMedSamværDto(
         val barnId: UUID,
         val søknadsgrunnlag: BarnMedSamværSøknadsgrunnlagDto,
-        val registergrunnlag: BarnMedSamværRegistergrunnlagDto?
+        val registergrunnlag: BarnMedSamværRegistergrunnlagDto
 )
 
 
