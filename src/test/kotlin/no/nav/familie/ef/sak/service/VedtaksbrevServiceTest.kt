@@ -8,7 +8,7 @@ import no.nav.familie.ef.sak.repository.FagsakRepository
 import no.nav.familie.ef.sak.repository.VedtaksbrevRepository
 import no.nav.familie.ef.sak.repository.domain.FagsakPerson
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -42,8 +42,8 @@ internal class VedtaksbrevServiceTest: OppslagSpringRunnerTest() {
         val utkast = vedtaksbrevService.lagreBrevUtkast(behandlingId = behandling.id)
         val endelig = vedtaksbrevService.lagreEndeligBrev(behandlingId = behandling.id)
 
-        Assertions.assertThat(utkast).usingRecursiveComparison().ignoringFields("brevRequest", "pdf").isEqualTo(endelig)
-        Assertions.assertThat(utkast.utkastBrevRequest).usingRecursiveComparison().ignoringFields("signaturBeslutter").isEqualTo(endelig.brevRequest)
+        assertThat(utkast).usingRecursiveComparison().ignoringFields("brevRequest", "pdf").isEqualTo(endelig)
+        assertThat(utkast.utkastBrevRequest).usingRecursiveComparison().ignoringFields("signaturBeslutter").isEqualTo(endelig.brevRequest)
     }
 
     @Test
@@ -51,9 +51,9 @@ internal class VedtaksbrevServiceTest: OppslagSpringRunnerTest() {
         val utkast = vedtaksbrevService.lagreBrevUtkast(behandlingId = behandling.id)
         val forventetRequest = vedtaksbrevService.lagBrevRequest(behandlingId = behandling.id)
 
-        Assertions.assertThat(utkast).isEqualTo(vedtaksbrevRepository.findByIdOrThrow(behandling.id))
-        Assertions.assertThat(forventetRequest).isEqualTo(vedtaksbrevRepository.findByIdOrThrow(behandling.id).utkastBrevRequest)
-        Assertions.assertThat(vedtaksbrevRepository.findByIdOrThrow(behandling.id).utkastPdf).isNotNull
+        assertThat(utkast).isEqualTo(vedtaksbrevRepository.findByIdOrThrow(behandling.id))
+        assertThat(forventetRequest).isEqualTo(vedtaksbrevRepository.findByIdOrThrow(behandling.id).utkastBrevRequest)
+        assertThat(vedtaksbrevRepository.findByIdOrThrow(behandling.id).utkastPdf).isNotNull
     }
 
     @Test
@@ -61,16 +61,16 @@ internal class VedtaksbrevServiceTest: OppslagSpringRunnerTest() {
         vedtaksbrevService.lagreBrevUtkast(behandlingId = behandling.id)
         val endelig = vedtaksbrevService.lagreEndeligBrev(behandlingId = behandling.id)
 
-        Assertions.assertThat(endelig).isEqualTo(vedtaksbrevRepository.findByIdOrThrow(behandling.id))
-        Assertions.assertThat(vedtaksbrevRepository.findByIdOrThrow(behandling.id).pdf).isNotNull
+        assertThat(endelig).isEqualTo(vedtaksbrevRepository.findByIdOrThrow(behandling.id))
+        assertThat(vedtaksbrevRepository.findByIdOrThrow(behandling.id).pdf).isNotNull
     }
 
     @Test
     fun `endelig brev skal ikke lagres ved generering av utkast`(){
         vedtaksbrevService.lagreBrevUtkast(behandlingId = behandling.id)
 
-        Assertions.assertThat(vedtaksbrevRepository.findByIdOrThrow(behandling.id).brevRequest).isNull()
-        Assertions.assertThat(vedtaksbrevRepository.findByIdOrThrow(behandling.id).pdf).isNull()
+        assertThat(vedtaksbrevRepository.findByIdOrThrow(behandling.id).brevRequest).isNull()
+        assertThat(vedtaksbrevRepository.findByIdOrThrow(behandling.id).pdf).isNull()
     }
 
 }

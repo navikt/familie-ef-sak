@@ -63,6 +63,13 @@ internal class SendTilBeslutterStegTest {
         utførOgVerifiserKall(Oppgavetype.BehandleUnderkjentVedtak)
     }
 
+    @Test
+    internal fun `Skal lagre brev`(){
+        utførSteg()
+
+        verify { vedtaksbrevService.lagreBrevUtkast(behandling.id) }
+    }
+
     private fun utførOgVerifiserKall(oppgavetype: Oppgavetype) {
         every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype, any()) } returns mockk()
 
