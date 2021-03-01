@@ -1,8 +1,8 @@
 package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.api.dto.BrevRequest
-import no.nav.familie.ef.sak.Vedtaksbrev.BrevClient
-import no.nav.familie.ef.sak.Vedtaksbrev.BrevType
+import no.nav.familie.ef.sak.vedtaksbrev.BrevClient
+import no.nav.familie.ef.sak.vedtaksbrev.BrevType
 import no.nav.familie.ef.sak.integration.JournalpostClient
 import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
 import no.nav.familie.ef.sak.integration.dto.pdl.visningsnavn
@@ -67,13 +67,13 @@ class VedtaksbrevService(private val brevClient: BrevClient,
         return brevRepository.findByIdOrThrow(behandlingId)
     }
 
-    fun journalførVedtaksbrev(behandlingId: UUID): String {
+    fun journalførVedtaksbrev(behandlingId: UUID): String? {
         val behandling = behandlingService.hentBehandling(behandlingId)
         val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
         val ident = fagsak.hentAktivIdent();
         val vedtaksbrev = hentBrev(behandlingId)
         val dokumenter =
-                listOf(Dokument(vedtaksbrev.pdf!!.bytes, FilType.PDFA, dokumentType = BrevType.VEDTAKSBREV.arkivMetadataType))
+                listOf(Dokument(vedtaksbrev.pdf?.bytes ?: error("Mangler pdf ved journalføring av brev"), FilType.PDFA, dokumentType = BrevType.VEDTAKSBREV.arkivMetadataType))
         val journalførendeEnhet = arbeidsfordelingService.hentNavEnhet(ident)
 
         return journalpostClient.arkiverDokument(ArkiverDokumentRequest(

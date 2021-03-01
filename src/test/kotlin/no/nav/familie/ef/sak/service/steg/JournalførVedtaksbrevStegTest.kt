@@ -1,10 +1,9 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.service.steg
 
-import io.mockk.Runs
-import io.mockk.just
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import io.mockk.verify
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.service.VedtaksbrevService
 import no.nav.familie.ef.sak.service.steg.JournalførVedtaksbrevSteg
@@ -12,6 +11,7 @@ import no.nav.familie.ef.sak.task.DistribuerVedtaksbrevTask
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
 
@@ -22,26 +22,36 @@ internal class JournalførVedtaksbrevStegTest {
     private val vedtaksbrevService = mockk<VedtaksbrevService>()
     val journalførVedtaksbrev = JournalførVedtaksbrevSteg(taskRepository, vedtaksbrevService)
 
-    @Test
-    internal fun `skal opprette distribuerVedtaksbrevTask etter journalføring av vedtaksbrev`() {
-        val fnr = "12345678901"
-        val fagsak = Fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD,
-                            søkerIdenter = setOf(FagsakPerson(ident = fnr)))
+    val fnr = "12345678901"
+    val fagsak = Fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD,
+                        søkerIdenter = setOf(FagsakPerson(ident = fnr)))
+    val behandling = Behandling(fagsakId = fagsak.id,
+                                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                                status = BehandlingStatus.IVERKSETTER_VEDTAK,
+                                steg = journalførVedtaksbrev.stegType(),
+                                resultat = BehandlingResultat.IKKE_SATT)
+    val taskSlot = slot<Task>()
 
-        val taskSlot = slot<Task>()
+    @BeforeEach
+    fun setUp(){
         every {
             taskRepository.save(capture(taskSlot))
         } returns Task("", "", Properties())
 
         every { vedtaksbrevService.journalførVedtaksbrev(any()) } returns "1234"
+    }
 
-        journalførVedtaksbrev.utførSteg(Behandling(fagsakId = fagsak.id,
-                                                   type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                   status = BehandlingStatus.IVERKSETTER_VEDTAK,
-                                                   steg = journalførVedtaksbrev.stegType(),
-                                                   resultat = BehandlingResultat.IKKE_SATT),
-                                        null)
+    @Test
+    internal fun `skal opprette distribuerVedtaksbrevTask etter journalføring av vedtaksbrev`() {
+        journalførVedtaksbrev.utførSteg(behandling,null)
 
         Assertions.assertThat(taskSlot.captured.type).isEqualTo(DistribuerVedtaksbrevTask.TYPE)
+    }
+
+    @Test
+    internal fun `skal journalføre dokument ved utførelse av journalførVedtaksbrevSteg`() {
+        journalførVedtaksbrev.utførSteg(behandling, null)
+
+        verify { vedtaksbrevService.journalførVedtaksbrev(behandling.id) }
     }
 }
