@@ -56,15 +56,9 @@ class VedtaksbrevService(private val brevClient: BrevClient,
     }
 
     fun lagreEndeligBrev(behandlingId: UUID): Vedtaksbrev {
-        try {
-            brevRepository.findById(behandlingId).get().let {
-                val endeligRequest = it.utkastBrevRequest.copy(signaturBeslutter = SikkerhetContext.hentSaksbehandlerNavn())
-                return brevRepository.update(it.copy(pdf = Fil(lagPdf(endeligRequest)), brevRequest = endeligRequest))
-            }
-        } catch (exception: Exception) {
-            error("Feil ved lagring av endelig brev. Finner ikke brev-utkast for behandling $behandlingId")
-            throw exception
-        }
+        val vedtaksbrev = brevRepository.findByIdOrThrow(behandlingId)
+        val endeligRequest = vedtaksbrev.utkastBrevRequest.copy(signaturBeslutter = SikkerhetContext.hentSaksbehandlerNavn())
+        return brevRepository.update(vedtaksbrev.copy(pdf = Fil(lagPdf(endeligRequest)), brevRequest = endeligRequest))
     }
 
     fun forhåndsvisBrev(behandlingId: UUID): ByteArray {
