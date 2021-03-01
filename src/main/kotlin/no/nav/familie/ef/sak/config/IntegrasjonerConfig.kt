@@ -58,6 +58,6 @@ class IntegrasjonerConfig(@Value("\${FAMILIE_INTEGRASJONER_URL}") private val in
         private const val PATH_JOURNALPOST = "api/journalpost"
         private const val PATH_DOKARKIV = "api/arkiv"
         private const val PATH_MEDLEMSKAP = "api/medlemskap/v3"
-        private const val PATH_SEND_INN = "arkiv/v3"
+        private const val PATH_SEND_INN = "api/arkiv/v3"
     }
 }
