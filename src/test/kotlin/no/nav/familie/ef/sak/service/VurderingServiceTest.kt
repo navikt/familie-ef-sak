@@ -36,6 +36,7 @@ import no.nav.familie.ef.sak.repository.domain.DelvilkårÅrsak
 import no.nav.familie.ef.sak.repository.domain.VilkårType
 import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
 import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
+import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import org.assertj.core.api.Assertions.assertThat
@@ -104,6 +105,8 @@ internal class VurderingServiceTest {
                 { it.invocation.args.first() as List<Vilkårsvurdering> }
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling(fagsak(), true, BehandlingStatus.OPPRETTET)
         every { vilkårsvurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns emptyList()
+        val søknadMed1Barn = SøknadsskjemaMapper.tilDomene(Testsøknad.søknadOvergangsstønad)
+        every { behandlingService.hentOvergangsstønad(any()) }.returns(søknadMed1Barn)
         every { grunnlagsdataService.hentGrunnlag(BEHANDLING_ID, any()) } returns mockkInngangsvilkårMedUformeltGiftPerson()
 
         vurderingService.hentInngangsvilkår(BEHANDLING_ID)
