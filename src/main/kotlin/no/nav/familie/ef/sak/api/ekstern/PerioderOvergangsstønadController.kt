@@ -28,9 +28,9 @@ class PerioderOvergangsstønadController(private val perioderOvergangsstønadSer
 
     @PostMapping("azure")
     @ProtectedWithClaims(issuer = "azuread")
-    fun hentPerioderAzure(@RequestBody request: PerioderOvergangsstønadRequest): Ressurs<Any> {
+    fun hentPerioderAzure(@RequestBody request: PerioderOvergangsstønadRequest): Ressurs<PerioderOvergangsstønadResponse> {
         return try {
-            Ressurs.Companion.success(perioderOvergangsstønadService.hentPerioder(request))
+            Ressurs.success(perioderOvergangsstønadService.hentPerioder(request))
         } catch (e: Exception) {
             Ressurs.failure("Henting av perioder for overgangsstønad feilet", error = e)
         }
