@@ -6,16 +6,19 @@ import no.nav.familie.ef.sak.integration.JournalpostClient
 import no.nav.familie.ef.sak.repository.BehandlingRepository
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.Dokument
 import no.nav.familie.kontrakter.felles.dokarkiv.FilType
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
+import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
 
 @Service
 class BlankettSteg(
+        private val behandlingService: BehandlingService,
         private val behandlingRepository: BehandlingRepository,
         private val journalpostClient: JournalpostClient,
         private val blankettRepository: BlankettRepository,
@@ -32,7 +35,8 @@ class BlankettSteg(
         val journalpostForBehandling = journalpostClient.hentJournalpost(behandling.journalposter.first().journalpostId)
 
         val arkiverDokumentRequest = lagArkiverBlankettRequest(behandling, journalpostForBehandling)
-        journalpostClient.arkiverDokument(arkiverDokumentRequest)
+        val journalpostRespons = journalpostClient.arkiverDokument(arkiverDokumentRequest)
+        behandlingService.oppdaterJournalpostIdPåBehandling(journalpostRespons.journalpostId, Journalposttype.N, behandling)
 
         ferdigstillBehandling(behandling)
     }

@@ -1,17 +1,17 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.service.steg
 
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.slot
+import io.mockk.*
 import no.nav.familie.ef.sak.blankett.Blankett
 import no.nav.familie.ef.sak.blankett.BlankettRepository
 import no.nav.familie.ef.sak.integration.JournalpostClient
 import no.nav.familie.ef.sak.repository.BehandlingRepository
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.steg.BlankettSteg
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentRequest
+import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.dokarkiv.FilType
 import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostResponse
 import no.nav.familie.kontrakter.felles.journalpost.*
@@ -26,11 +26,12 @@ import java.util.*
 class JournalførBlankettStegTest {
 
     private val behandlingRepository = mockk<BehandlingRepository>()
+    private val behandlingService = mockk<BehandlingService>()
     private val journalpostClient = mockk<JournalpostClient>()
     private val taskRepository = mockk<TaskRepository>()
     private val blankettRepository = mockk<BlankettRepository>()
 
-    private val blankettSteg = BlankettSteg(behandlingRepository, journalpostClient, blankettRepository, taskRepository)
+    private val blankettSteg = BlankettSteg(behandlingService, behandlingRepository, journalpostClient, blankettRepository, taskRepository)
 
     private lateinit var taskSlot: MutableList<Task>
 
@@ -80,7 +81,7 @@ class JournalførBlankettStegTest {
 
         every {
             journalpostClient.arkiverDokument(any())
-        } returns OppdaterJournalpostResponse("1")
+        } returns ArkiverDokumentResponse("1", false)
 
         every {
             blankettRepository.findByIdOrThrow(any())
@@ -95,10 +96,16 @@ class JournalførBlankettStegTest {
     internal fun `skal arkivere dokument ved utførelse av blankett steg`() {
 
         val arkiverDokumentRequestSlot = slot<ArkiverDokumentRequest>()
+        val journalpostIdSlot = slot<String>()
+        val journalpostId = "12345678"
+
         every {
             journalpostClient.arkiverDokument(capture(arkiverDokumentRequestSlot))
-        } returns OppdaterJournalpostResponse("1234")
+        } returns ArkiverDokumentResponse(journalpostId, false)
 
+        every {
+            behandlingService.oppdaterJournalpostIdPåBehandling(capture(journalpostIdSlot), any(), any())
+        } just Runs
 
         blankettSteg.utførSteg(behandling, null)
 
@@ -106,6 +113,7 @@ class JournalførBlankettStegTest {
         assertThat(arkiverDokumentRequestSlot.captured.fagsakId).isEqualTo(fagsak.id.toString())
         assertThat(arkiverDokumentRequestSlot.captured.hoveddokumentvarianter.first().dokument).isEqualTo(pdf)
         assertThat(arkiverDokumentRequestSlot.captured.hoveddokumentvarianter.first().filType).isEqualTo(FilType.PDFA)
+        assertThat(journalpostIdSlot.captured).isEqualTo(journalpostId)
     }
 
 }
