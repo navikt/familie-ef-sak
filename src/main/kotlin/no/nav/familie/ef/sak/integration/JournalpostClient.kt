@@ -8,6 +8,7 @@ import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
 import no.nav.familie.kontrakter.ef.søknad.SøknadSkolepenger
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostResponse
 import no.nav.familie.kontrakter.felles.getDataOrThrow
@@ -73,6 +74,12 @@ class JournalpostClient(@Qualifier("azure") restOperations: RestOperations,
         return putForEntity<Ressurs<OppdaterJournalpostResponse>>(URI.create("${dokarkivUri}/v2/${journalpostId}"),
                                                                   oppdaterJournalpostRequest).data
                ?: error("Kunne ikke oppdatere journalpost med id $journalpostId")
+    }
+
+    fun arkiverDokument(arkiverDokumentRequest: ArkiverDokumentRequest): OppdaterJournalpostResponse {
+        return postForEntity<Ressurs<OppdaterJournalpostResponse>>(URI.create("${dokarkivUri}/v3/"),
+                                                                  arkiverDokumentRequest).data
+               ?: error("Kunne ikke arkivere dokument med fagsakid ${arkiverDokumentRequest.fagsakId}")
     }
 
     fun ferdigstillJournalpost(journalpostId: String, journalførendeEnhet: String) {
