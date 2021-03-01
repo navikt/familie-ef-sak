@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaSkolepenger
 import no.nav.familie.ef.sak.service.steg.StegType
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
+import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -125,11 +126,11 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
         return behandlingRepository.findByFagsakId(fagsakId).map(Behandling::tilDto)
     }
 
-    fun oppdaterJournalpostIdPåBehandling(journalpost: Journalpost, behandling: Behandling) {
+    fun oppdaterJournalpostIdPåBehandling(journalpostId: String, journalposttype: Journalposttype, behandling: Behandling) {
         behandling.journalposter = behandling.journalposter +
-                                   Behandlingsjournalpost(journalpostId = journalpost.journalpostId,
+                                   Behandlingsjournalpost(journalpostId = journalpostId,
                                                           sporbar = Sporbar(),
-                                                          journalpostType = journalpost.journalposttype)
+                                                          journalpostType = journalposttype)
         behandlingRepository.update(behandling)
     }
 
