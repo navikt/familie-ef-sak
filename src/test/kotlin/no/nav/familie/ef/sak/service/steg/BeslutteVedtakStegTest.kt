@@ -40,9 +40,10 @@ internal class BeslutteVedtakStegTest {
                                                         vedtaksbrevService)
     private val fagsak = Fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD,
                                 søkerIdenter = setOf(FagsakPerson(ident = "12345678901")))
+    private val behandlingId = UUID.randomUUID()
 
     private lateinit var taskSlot: CapturingSlot<Task>
-    private lateinit var behandlingId: UUID
+
 
     @BeforeEach
     internal fun setUp() {
@@ -78,18 +79,19 @@ internal class BeslutteVedtakStegTest {
     }
 
     @Test
-    internal fun `Skal lagre brev`(){
+    internal fun `Skal lagre brev`() {
         utførTotrinnskontroll(true)
 
         verify { vedtaksbrevService.lagreEndeligBrev(behandlingId) }
     }
 
     private fun utførTotrinnskontroll(godkjent: Boolean): StegType {
-        val nesteSteg = beslutteVedtakSteg.utførOgReturnerNesteSteg(Behandling(fagsakId = fagsak.id,
+        val nesteSteg = beslutteVedtakSteg.utførOgReturnerNesteSteg(Behandling(id = behandlingId,
+                                                                               fagsakId = fagsak.id,
                                                                                type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                                                                status = BehandlingStatus.FATTER_VEDTAK,
                                                                                steg = beslutteVedtakSteg.stegType(),
-                                                                               resultat = BehandlingResultat.IKKE_SATT).also { behandlingId = it.id },
+                                                                               resultat = BehandlingResultat.IKKE_SATT),
                                                                     BeslutteVedtakDto(godkjent = godkjent))
         return nesteSteg
     }
