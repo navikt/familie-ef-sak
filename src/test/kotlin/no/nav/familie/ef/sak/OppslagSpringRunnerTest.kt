@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
 import com.github.tomakehurst.wiremock.WireMockServer
+import no.nav.familie.ef.sak.blankett.Blankett
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.database.DbContainerInitializer
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsstønad
@@ -68,6 +69,7 @@ abstract class OppslagSpringRunnerTest {
                 Vilkårsvurdering::class,
                 Behandlingshistorikk::class,
                 Vedtaksbrev::class,
+                Blankett::class,
                 Behandling::class,
                 Fagsak::class,
         ).forEach { jdbcAggregateOperations.deleteAll(it.java) }
