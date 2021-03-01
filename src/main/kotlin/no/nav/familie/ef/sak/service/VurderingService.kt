@@ -16,7 +16,6 @@ import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsst
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.vurdering.utledDelvilkårResultat
 import no.nav.familie.ef.sak.vurdering.validerDelvilkår
-import no.nav.familie.kontrakter.ef.søknad.Fødselsnummer
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.*
@@ -77,13 +76,7 @@ class VurderingService(private val behandlingService: BehandlingService,
                                                  pdlSøker = pdlSøker)
         val bosituasjon = BosituasjonMapper.tilDto(søknad.bosituasjon)
 
-        val barnMedSamvær = mapBarnmedSamvær(pdlBarn, barneForeldre, søknad, pdlSøker).sortedByDescending {
-            if (it.registergrunnlag != null)
-                it.registergrunnlag.fødselsnummer?.let { fødsesnummer -> Fødselsnummer(fødsesnummer).fødselsdato }
-            else {
-                it.søknadsgrunnlag?.fødselTermindato
-            }
-        }
+        val barnMedSamvær = mapBarnmedSamvær(pdlBarn, barneForeldre, søknad, pdlSøker)
 
         val sivilstandsplaner = SivilstandsplanerMapper.tilDto(sivilstandsplaner = søknad.sivilstandsplaner)
 
@@ -136,7 +129,7 @@ class VurderingService(private val behandlingService: BehandlingService,
                 .filter {
                     lagredeVilkårsvurderinger.find { vurdering -> vurdering.type == it } == null // Sjekk barnId ?
                 }
-                .map { vilkårType ->
+                .map {vilkårType ->
                     if (vilkårType == VilkårType.ALENEOMSORG) {
                         søknad.barn.map {
                             lagNyVilkårsvurdering(vilkårType, søknad, delvilkårMetadata, behandlingId, it.id)

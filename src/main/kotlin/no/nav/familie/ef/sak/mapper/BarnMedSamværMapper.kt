@@ -64,12 +64,17 @@ object BarnMedSamværMapper {
                             søkerAdresse: List<Bostedsadresse>): List<BarnMedSamværRegistergrunnlagDto> {
 
         val alleBarn: List<MatchetBarn> = BarnMatcher.kobleSøknadsbarnOgRegisterBarn(søknad.barn, pdlBarn)
+                .sortedByDescending {
+                    if (it.fødselsnummer != null)
+                        Fødselsnummer(it.fødselsnummer).fødselsdato
+                    else it.søknadsbarn.fødselTermindato
+                }
 
         return alleBarn.map { barn ->
             val fnr = barn.pdlBarn?.familierelasjoner?.firstOrNull {
                 it.relatertPersonsIdent != søknad.fødselsnummer && it.relatertPersonsRolle != Familierelasjonsrolle.BARN
             }?.relatertPersonsIdent
-
+                      ?: barn.søknadsbarn.annenForelder?.person?.fødselsnummer
             val pdlAnnenForelder = barneforeldre[fnr]
 
             mapRegistergrunnlag(barn, søkerAdresse, pdlAnnenForelder, fnr)
@@ -81,7 +86,7 @@ object BarnMedSamværMapper {
                                     pdlAnnenForelder: PdlAnnenForelder?,
                                     annenForelderFnr: String?): BarnMedSamværRegistergrunnlagDto {
         return BarnMedSamværRegistergrunnlagDto(
-                id = matchetBarn.søknadsbarn?.id,
+                id = matchetBarn.søknadsbarn.id,
                 navn = matchetBarn.pdlBarn?.navn?.gjeldende()?.visningsnavn(),
                 fødselsnummer = matchetBarn.fødselsnummer,
                 harSammeAdresse = matchetBarn.pdlBarn?.let {
