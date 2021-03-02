@@ -24,7 +24,7 @@ class JournalførVedtaksbrevSteg(private val taskRepository: TaskRepository,
                                                             ?: error("Feil ved journalføring av vedtaksbrev"),
                                                             Journalposttype.U,
                                                             behandling)
-        logger.info("Journalfør vedtaksbrev [${behandling.id}] fullført med journalpostId [$journalpostId]")
+        logger.info("Journalfør vedtaksbrev behandling=[${behandling.id}] fullført med journalpost=[$journalpostId]")
         distribuerVedtaksbrev(behandling)
     }
 
