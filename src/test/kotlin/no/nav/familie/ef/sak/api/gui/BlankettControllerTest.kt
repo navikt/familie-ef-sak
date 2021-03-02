@@ -39,6 +39,7 @@ class BlankettControllerTest : OppslagSpringRunnerTest() {
 
         assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(respons.body.data).isNotNull
+        assertThat(oppgaveRepository.findByGsakOppgaveId(1L)).isNotNull
     }
 
     @Test

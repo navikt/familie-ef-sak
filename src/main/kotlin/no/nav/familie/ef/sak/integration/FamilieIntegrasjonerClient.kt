@@ -14,6 +14,7 @@ import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
 import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClientException
@@ -26,6 +27,7 @@ class FamilieIntegrasjonerClient(@Qualifier("azure") restOperations: RestOperati
     : AbstractPingableRestClient(restOperations, "familie.integrasjoner") {
 
     override val pingUri: URI = integrasjonerConfig.pingUri
+    val logger = LoggerFactory.getLogger(this::class.java)
 
     fun sjekkTilgangTilPersoner(identer: List<String>): List<Tilgang> {
         return postForEntity(integrasjonerConfig.tilgangUri, identer)

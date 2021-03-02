@@ -3,22 +3,21 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.service.steg
 import io.mockk.*
 import no.nav.familie.ef.sak.blankett.Blankett
 import no.nav.familie.ef.sak.blankett.BlankettRepository
+import no.nav.familie.ef.sak.blankett.BlankettSteg
 import no.nav.familie.ef.sak.integration.JournalpostClient
 import no.nav.familie.ef.sak.repository.BehandlingRepository
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.ef.sak.service.ArbeidsfordelingService
 import no.nav.familie.ef.sak.service.BehandlingService
-import no.nav.familie.ef.sak.service.steg.BlankettSteg
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.dokarkiv.FilType
-import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostResponse
 import no.nav.familie.kontrakter.felles.journalpost.*
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
-import org.assertj.core.api.Assertions
-import org.assertj.core.api.Assertions.*
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
@@ -30,8 +29,9 @@ class JournalførBlankettStegTest {
     private val journalpostClient = mockk<JournalpostClient>()
     private val taskRepository = mockk<TaskRepository>()
     private val blankettRepository = mockk<BlankettRepository>()
+    private val arbeidsfordelingService = mockk<ArbeidsfordelingService>()
 
-    private val blankettSteg = BlankettSteg(behandlingService, behandlingRepository, journalpostClient, blankettRepository, taskRepository)
+    private val blankettSteg = BlankettSteg(behandlingService, behandlingRepository, journalpostClient, arbeidsfordelingService, blankettRepository, taskRepository)
 
     private lateinit var taskSlot: MutableList<Task>
 
@@ -90,6 +90,10 @@ class JournalførBlankettStegTest {
         every {
             taskRepository.save(any())
         } returns Task("", "", Properties())
+
+        every {
+            arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(any())
+        } returns "1234"
     }
 
     @Test
