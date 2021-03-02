@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.api.dto.BrevRequest
+import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.vedtaksbrev.BrevClient
 import no.nav.familie.ef.sak.vedtaksbrev.BrevType
 import no.nav.familie.ef.sak.integration.JournalpostClient
@@ -25,7 +26,8 @@ class VedtaksbrevService(private val brevClient: BrevClient,
                          private val fagsakService: FagsakService,
                          private val personService: PersonService,
                          private val journalpostClient: JournalpostClient,
-                         private val arbeidsfordelingService: ArbeidsfordelingService) {
+                         private val arbeidsfordelingService: ArbeidsfordelingService,
+                         private val familieIntegrasjonerClient: FamilieIntegrasjonerClient) {
 
     fun lagBrevRequest(behandlingId: UUID): BrevRequest {
         val behandling = behandlingService.hentBehandling(behandlingId)
@@ -92,5 +94,9 @@ class VedtaksbrevService(private val brevClient: BrevClient,
                 fagsakId = fagsak.eksternId.toString(),
                 journalførendeEnhet = journalførendeEnhet?.enhetId
         )).journalpostId
+    }
+
+    fun distribuerVedtaksbrev(behandlingId: UUID, journpostId: String): String{
+        return familieIntegrasjonerClient.distribuerBrev(journpostId)
     }
 }

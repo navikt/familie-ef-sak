@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
+import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.JournalpostClient
 import no.nav.familie.ef.sak.integration.dto.familie.Arbeidsfordelingsenhet
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
@@ -96,16 +97,18 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         val journalpostClient = mockk<JournalpostClient>()
         val arbeidsfordelingService = mockk<ArbeidsfordelingService>()
         val vedtaksbrevRepository = mockk<VedtaksbrevRepository>()
+        val familieIntegrasjonerClient = mockk<FamilieIntegrasjonerClient>()
 
         val vedtaksbrev = Vedtaksbrev(behandling.id, mockk(), null, Fil("123".toByteArray()), Fil("123".toByteArray()))
 
         val vedtaksbrevService = VedtaksbrevService(brevClient,
-                                                vedtaksbrevRepository,
-                                                behandlingService,
-                                                fagsakService,
-                                                personService,
-                                                journalpostClient,
-                                                arbeidsfordelingService)
+                                                    vedtaksbrevRepository,
+                                                    behandlingService,
+                                                    fagsakService,
+                                                    personService,
+                                                    journalpostClient,
+                                                    arbeidsfordelingService,
+                                                    familieIntegrasjonerClient)
 
         val arkiverDokumentRequestSlot = slot<ArkiverDokumentRequest>()
 
