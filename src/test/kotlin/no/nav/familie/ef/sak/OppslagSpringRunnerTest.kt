@@ -68,6 +68,7 @@ abstract class OppslagSpringRunnerTest {
                 Oppgave::class,
                 Vilkårsvurdering::class,
                 Behandlingshistorikk::class,
+                Registergrunnlag::class,
                 Vedtaksbrev::class,
                 Blankett::class,
                 Behandling::class,
