@@ -38,7 +38,7 @@ internal class OppgaveServiceTest {
                            oppgaveRepository,
                            arbeidsfordelingService,
                            pdlClient,
-                           URI.create("https://ensligmorellerfar.prod-fss.nais.io/fagsak"))
+                           URI.create("https://ensligmorellerfar.intern.nav.no/oppgavebenk"))
 
     @Test
     fun `Opprett oppgave skal samle data og opprette en ny oppgave basert på fagsak, behandling, fnr og enhet`() {
@@ -65,7 +65,7 @@ internal class OppgaveServiceTest {
         assertThat(slot.captured.fristFerdigstillelse).isEqualTo(LocalDate.now().plusDays(1))
         assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())
         assertThat(slot.captured.tema).isEqualTo(Tema.ENF)
-        assertThat(slot.captured.beskrivelse).contains("https://ensligmorellerfar.prod-fss.nais.io/fagsak/$FAGSAK_ID")
+        assertThat(slot.captured.beskrivelse).contains("https://ensligmorellerfar.intern.nav.no/oppgavebenk")
     }
 
     @Test
