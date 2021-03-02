@@ -16,7 +16,7 @@ INFOTRYGD_FEED_API_URL: https://familie-ef-infotrygd-feed.dev.adeo.no
 INFOTRYGD_REPLIKA_API_URL: https://infotrygd-enslig-forsoerger.dev.adeo.no
 FAMILIE_BREV_API_URL: https://familie-brev.dev.intern.nav.no
 FAMILIE_BLANKETT_API_URL: https://familie-ef-blankett.dev.intern.nav.no
-
+FRONTEND_OPPGAVE_URL: https://ensligmorellerfar.dev.intern.nav.no/oppgavebenk
 rolle:
   veileder: "19dcbfde-4cdb-4c64-a1ea-ac9802b03339"
   beslutter: "01166863-22f1-4e16-9785-d7a05a22df74"
