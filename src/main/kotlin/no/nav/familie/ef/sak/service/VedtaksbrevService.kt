@@ -82,7 +82,7 @@ class VedtaksbrevService(private val brevClient: BrevClient,
         val ident = fagsak.hentAktivIdent();
         val vedtaksbrev = hentBrev(behandlingId)
         val dokumenter =
-                listOf(Dokument(vedtaksbrev.pdf?.bytes ?: error("Mangler pdf ved journalføring av brev"), FilType.PDFA, dokumentType = BrevType.VEDTAKSBREV.arkivMetadataType))
+                listOf(Dokument(vedtaksbrev.pdf?.bytes ?: error("Mangler pdf ved journalføring av brev for bedhandling $behandlingId"), FilType.PDFA, dokumentType = BrevType.VEDTAKSBREV.arkivMetadataType))
         val journalførendeEnhet = arbeidsfordelingService.hentNavEnhet(ident)
 
         return journalpostClient.arkiverDokument(ArkiverDokumentRequest(
