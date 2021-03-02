@@ -231,7 +231,7 @@
         <dependency>
             <groupId>com.github.doyaaaaaken</groupId>
             <artifactId>kotlin-csv-jvm</artifactId>
-            <version>0.15.0</version>
+            <version>0.15.1</version>
             <scope>test</scope>
         </dependency>
 
