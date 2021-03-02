@@ -14,7 +14,7 @@ import java.util.*
 @TaskStepBeskrivelse(taskStepType = JournalførVedtaksbrevTask.TYPE,
                      maxAntallFeil = 50,
                      settTilManuellOppfølgning = true,
-                     triggerTidVedFeilISekunder = 15*60L,
+                     triggerTidVedFeilISekunder = 15 * 60L,
                      beskrivelse = "Journalfører vedtaksbrev.")
 
 class JournalførVedtaksbrevTask(private val stegService: StegService,
