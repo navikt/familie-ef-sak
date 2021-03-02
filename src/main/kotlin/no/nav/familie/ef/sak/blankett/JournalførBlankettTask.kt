@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.task
+package no.nav.familie.ef.sak.blankett
 
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.service.BehandlingService
