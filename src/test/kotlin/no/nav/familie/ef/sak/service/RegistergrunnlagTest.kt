@@ -19,7 +19,8 @@ internal class RegistergrunnlagTest {
 
     /**
      * For å få med seg breaking changes i Grunnlagsdata. Hvis noe faktiskt er breaking change får man vurdere om man skal
-     * gjøre noe annen diffing, eks att man lage en diff av Map i stedet for GrunnlagsdataData
+     * gjøre noe annen diffing, eks att man lage en diff av Map i stedet for GrunnlagsdataData.
+     * Ellers kan man oppdatere grunnlagsdata.json med den nye diffen
      * Eks hvis ett felt slettes.
      */
     @Test
