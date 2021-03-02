@@ -64,7 +64,10 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
                                                      registergrunnlag = registergrunnlagData.sivilstand)
         val sivilstandsplaner = SivilstandsplanerMapper.tilDto(sivilstandsplaner = søknad.sivilstandsplaner)
         val barnMedSamvær = BarnMedSamværMapper.slåSammenBarnMedSamvær(BarnMedSamværMapper.mapSøknadsgrunnlag(søknad.barn),
-                                                   registergrunnlagData.barnMedSamvær)
+                                                                       registergrunnlagData.barnMedSamvær).sortedByDescending {
+            it.registergrunnlag.fødselsnummer?.let { fødsesnummer -> Fødselsnummer(fødsesnummer).fødselsdato }
+            ?: it.søknadsgrunnlag.fødselTermindato
+        }
         return InngangsvilkårGrunnlagDto(medlemskap = medlemskap,
                                          sivilstand = sivilstand,
                                          bosituasjon = BosituasjonMapper.tilDto(søknad.bosituasjon),
