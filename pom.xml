@@ -32,7 +32,7 @@
         <kotlin.version>1.4.31</kotlin.version>
         <kotlin-coroutines.version>1.4.2</kotlin-coroutines.version>
         <springfox.version>3.0.0</springfox.version>
-        <mockk.version>1.10.5</mockk.version>
+        <mockk.version>1.10.6</mockk.version>
         <felles.version>1.20210208115050_88991d1</felles.version>
         <prosessering.version>1.20210219072056_4474948</prosessering.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
