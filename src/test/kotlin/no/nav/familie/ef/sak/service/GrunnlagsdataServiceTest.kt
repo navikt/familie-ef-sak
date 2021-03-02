@@ -22,12 +22,14 @@ import no.nav.familie.ef.sak.repository.domain.Registergrunnlag
 import no.nav.familie.ef.sak.repository.domain.RegistergrunnlagData
 import no.nav.familie.ef.sak.repository.domain.Sporbar
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
+import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.data.repository.findByIdOrNull
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 internal class GrunnlagsdataServiceTest {
@@ -48,7 +50,10 @@ internal class GrunnlagsdataServiceTest {
     private val updateSlot = slot<Registergrunnlag>()
     private val insertSlot = slot<Registergrunnlag>()
 
-    private val søknad = SøknadsskjemaMapper.tilDomene(Testsøknad.søknadOvergangsstønad)
+    private val søknad = SøknadsskjemaMapper.tilDomene(TestsøknadBuilder.Builder().setBarn(listOf(
+            TestsøknadBuilder.Builder().defaultBarn("Navn1 navnesen", fødselTermindato = LocalDate.now().plusMonths(4)),
+            TestsøknadBuilder.Builder().defaultBarn("Navn2 navnesen", fødselTermindato = LocalDate.now().plusMonths(6))
+    )).build().søknadOvergangsstønad)
     private val medlemskapsinfo = Medlemskapsinfo(søknad.fødselsnummer, emptyList(), emptyList(), emptyList())
 
     @BeforeEach
@@ -158,6 +163,18 @@ internal class GrunnlagsdataServiceTest {
         val captured = updateSlot.captured
         assertThat(captured.endringer).isNotNull
         assertThat(captured.data).isEqualTo(registergrunnlag.endringer)
+    }
+
+    @Test
+    internal fun `sortering av barnMedSamvær`() {
+        val registergrunnlag = registergrunnlag()
+        every { registergrunnlagRepository.findByIdOrNull(behandlingId) } returns registergrunnlag
+
+        val grunnlag = service.hentGrunnlag(behandlingId, søknad)
+
+        assertThat(grunnlag.barnMedSamvær.size).isEqualTo(2)
+        assertThat(grunnlag.barnMedSamvær.get(0).søknadsgrunnlag.navn).isEqualTo("Navn2 navnesen")
+        assertThat(grunnlag.barnMedSamvær.get(1).søknadsgrunnlag.navn).isEqualTo("Navn1 navnesen")
     }
 
     private fun registergrunnlag(medEndringer: Boolean = false,
