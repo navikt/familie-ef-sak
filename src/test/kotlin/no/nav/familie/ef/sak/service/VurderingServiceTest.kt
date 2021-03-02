@@ -6,6 +6,11 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.api.dto.DelvilkårsvurderingDto
+import no.nav.familie.ef.sak.api.dto.InngangsvilkårGrunnlagDto
+import no.nav.familie.ef.sak.api.dto.SivilstandInngangsvilkårDto
+import no.nav.familie.ef.sak.api.dto.SivilstandRegistergrunnlagDto
+import no.nav.familie.ef.sak.api.dto.SivilstandSøknadsgrunnlagDto
+import no.nav.familie.ef.sak.api.dto.Sivilstandstype
 import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.mapper.SøknadsskjemaMapper
@@ -14,8 +19,23 @@ import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.vilkårsvurdering
 import no.nav.familie.ef.sak.repository.VilkårsvurderingRepository
-import no.nav.familie.ef.sak.repository.domain.*
-import no.nav.familie.ef.sak.repository.domain.DelvilkårType.*
+import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
+import no.nav.familie.ef.sak.repository.domain.DelvilkårType
+import no.nav.familie.ef.sak.repository.domain.DelvilkårType.BOR_OG_OPPHOLDER_SEG_I_NORGE
+import no.nav.familie.ef.sak.repository.domain.DelvilkårType.FEM_ÅRS_MEDLEMSKAP
+import no.nav.familie.ef.sak.repository.domain.DelvilkårType.KRAV_SIVILSTAND
+import no.nav.familie.ef.sak.repository.domain.DelvilkårType.LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD
+import no.nav.familie.ef.sak.repository.domain.DelvilkårType.LEVER_IKKE_MED_ANNEN_FORELDER
+import no.nav.familie.ef.sak.repository.domain.DelvilkårType.MER_AV_DAGLIG_OMSORG
+import no.nav.familie.ef.sak.repository.domain.DelvilkårType.NÆRE_BOFORHOLD
+import no.nav.familie.ef.sak.repository.domain.DelvilkårType.OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN
+import no.nav.familie.ef.sak.repository.domain.DelvilkårType.SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON
+import no.nav.familie.ef.sak.repository.domain.DelvilkårType.SKRIFTLIG_AVTALE_OM_DELT_BOSTED
+import no.nav.familie.ef.sak.repository.domain.Delvilkårsvurdering
+import no.nav.familie.ef.sak.repository.domain.DelvilkårÅrsak
+import no.nav.familie.ef.sak.repository.domain.VilkårType
+import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
+import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
@@ -25,7 +45,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.data.repository.findByIdOrNull
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 
 internal class VurderingServiceTest {
@@ -33,27 +53,29 @@ internal class VurderingServiceTest {
     private val behandlingService = mockk<BehandlingService>()
     private val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
     private val familieIntegrasjonerClient = mockk<FamilieIntegrasjonerClient>()
+    private val grunnlagsdataService = mockk<GrunnlagsdataService>()
     private val vurderingService = VurderingService(behandlingService = behandlingService,
                                                     pdlClient = PdlClientConfig().pdlClient(),
-                                                    medlemskapMapper = mockk(relaxed = true),
-                                                    familieIntegrasjonerClient = familieIntegrasjonerClient,
-                                                    vilkårsvurderingRepository = vilkårsvurderingRepository)
+                                                    vilkårsvurderingRepository = vilkårsvurderingRepository,
+                                                    grunnlagsdataService = grunnlagsdataService)
 
     @BeforeEach
     fun setUp() {
-        val noe = SøknadsskjemaMapper.tilDomene(TestsøknadBuilder.Builder().setBarn(listOf(
+        val søknad = SøknadsskjemaMapper.tilDomene(TestsøknadBuilder.Builder().setBarn(listOf(
                 TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "13071489536"),
                 TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "01012067050")
         )).build().søknadOvergangsstønad)
-        every { behandlingService.hentOvergangsstønad(any()) }
-                .returns(noe)
+        every { behandlingService.hentOvergangsstønad(any()) }.returns(søknad)
         every { familieIntegrasjonerClient.hentMedlemskapsinfo(any()) }
-                .returns(Medlemskapsinfo(
-                        personIdent = noe.fødselsnummer,
-                        gyldigePerioder = emptyList(),
-                        uavklartePerioder = emptyList(),
-                        avvistePerioder = emptyList(),
-                ))
+                .returns(Medlemskapsinfo(personIdent = søknad.fødselsnummer,
+                                         gyldigePerioder = emptyList(),
+                                         uavklartePerioder = emptyList(),
+                                         avvistePerioder = emptyList()))
+        every { grunnlagsdataService.hentGrunnlag(any(), any()) } returns InngangsvilkårGrunnlagDto(mockk(relaxed = true),
+                                                                                                    mockk(relaxed = true),
+                                                                                                    mockk(relaxed = true),
+                                                                                                    mockk(relaxed = true),
+                                                                                                    mockk(relaxed = true))
     }
 
     @Test
@@ -83,9 +105,10 @@ internal class VurderingServiceTest {
                 { it.invocation.args.first() as List<Vilkårsvurdering> }
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling(fagsak(), true, BehandlingStatus.OPPRETTET)
         every { vilkårsvurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns emptyList()
-        val søknad = SøknadsskjemaMapper.tilDomene(Testsøknad.søknadOvergangsstønad)
+        val søknadMed1Barn = SøknadsskjemaMapper.tilDomene(Testsøknad.søknadOvergangsstønad)
+        every { behandlingService.hentOvergangsstønad(any()) }.returns(søknadMed1Barn)
+        every { grunnlagsdataService.hentGrunnlag(BEHANDLING_ID, any()) } returns mockkInngangsvilkårMedUformeltGiftPerson()
 
-        every { behandlingService.hentOvergangsstønad(any()) }.returns(søknad)
         vurderingService.hentInngangsvilkår(BEHANDLING_ID)
         assertThat(nyeVilkårsvurderinger.captured.flatMap {
             it.delvilkårsvurdering.delvilkårsvurderinger
@@ -122,8 +145,8 @@ internal class VurderingServiceTest {
 
         val alleVilkårsvurderinger = vurderingService.hentInngangsvilkår(BEHANDLING_ID).vurderinger
         assertThat(nyeVilkårsvurderinger.captured).hasSize(inngangsvilkår.size)
-        assertThat(nyeVilkårsvurderinger.captured.filter { it.type == VilkårType.ALENEOMSORG}).hasSize(2)
-        assertThat(alleVilkårsvurderinger).hasSize(inngangsvilkår.size  + 1)
+        assertThat(nyeVilkårsvurderinger.captured.filter { it.type == VilkårType.ALENEOMSORG }).hasSize(2)
+        assertThat(alleVilkårsvurderinger).hasSize(inngangsvilkår.size + 1)
         assertThat(nyeVilkårsvurderinger.captured.map { it.type }).doesNotContain(VilkårType.FORUTGÅENDE_MEDLEMSKAP)
         assertThat(nyeVilkårsvurderinger.captured.map { it.type }).contains(VilkårType.LOVLIG_OPPHOLD)
         assertThat(nyeVilkårsvurderinger.captured.map { it.type }).contains(VilkårType.SIVILSTAND)
@@ -245,7 +268,8 @@ internal class VurderingServiceTest {
                                                                                              "Delvilkår ok")))
         vurderingService.oppdaterVilkår(oppdatertVilkårsvurderingDto)
 
-        assertThat(lagretVilkårsvurdering.captured.delvilkårsvurdering.delvilkårsvurderinger.first().resultat).isEqualTo(Vilkårsresultat.OPPFYLT)
+        assertThat(lagretVilkårsvurdering.captured.delvilkårsvurdering.delvilkårsvurderinger.first().resultat).isEqualTo(
+                Vilkårsresultat.OPPFYLT)
         assertThat(lagretVilkårsvurdering.captured.delvilkårsvurdering.delvilkårsvurderinger.first().begrunnelse).isEqualTo("Delvilkår ok")
     }
 
@@ -279,7 +303,8 @@ internal class VurderingServiceTest {
                                                                                              DelvilkårÅrsak.SAMME_HUS_OG_FLERE_ENN_4_BOENHETER_MEN_VURDERT_NÆRT,
                                                                                              "Delvilkår ok")))
         vurderingService.oppdaterVilkår(oppdatertVilkårsvurderingDto)
-        assertThat(lagretVilkårsvurdering.captured.delvilkårsvurdering.delvilkårsvurderinger.first().årsak).isEqualTo(DelvilkårÅrsak.SAMME_HUS_OG_FLERE_ENN_4_BOENHETER_MEN_VURDERT_NÆRT)
+        assertThat(lagretVilkårsvurdering.captured.delvilkårsvurdering.delvilkårsvurderinger.first().årsak).isEqualTo(
+                DelvilkårÅrsak.SAMME_HUS_OG_FLERE_ENN_4_BOENHETER_MEN_VURDERT_NÆRT)
     }
 
     @Test
@@ -337,6 +362,18 @@ internal class VurderingServiceTest {
 
         val vilkårtyper = VilkårType.hentInngangsvilkår().filterNot { it === VilkårType.FORUTGÅENDE_MEDLEMSKAP }
         assertThat(vilkårTyperUtenVurdering).containsExactlyInAnyOrderElementsOf(vilkårtyper)
+    }
+
+
+    private fun mockkInngangsvilkårMedUformeltGiftPerson(): InngangsvilkårGrunnlagDto {
+        val sivilstandSøknadsgrunnlagDto = mockk<SivilstandSøknadsgrunnlagDto>(relaxed = true)
+        every { sivilstandSøknadsgrunnlagDto.erUformeltGift } returns true
+        val sivilstandRegistergrunnlagDto = SivilstandRegistergrunnlagDto(Sivilstandstype.GIFT, null)
+        return InngangsvilkårGrunnlagDto(mockk(),
+                                         SivilstandInngangsvilkårDto(sivilstandSøknadsgrunnlagDto, sivilstandRegistergrunnlagDto),
+                                         mockk(),
+                                         mockk(),
+                                         mockk())
     }
 
     companion object {

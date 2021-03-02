@@ -19,31 +19,34 @@ class MedlemskapMapper(private val statsborgerskapMapper: StatsborgerskapMapper,
                medlUnntak: Medlemskapsinfo,
                pdlSøker: PdlSøker): MedlemskapDto {
 
+        return MedlemskapDto(søknadsgrunnlag = mapSøknadsgrunnlag(medlemskapsdetaljer),
+                             registergrunnlag = mapRegistergrunnlag(pdlSøker, medlUnntak))
+    }
+
+    fun mapSøknadsgrunnlag(medlemskapsdetaljer: Medlemskap): MedlemskapSøknadsgrunnlagDto {
+        return MedlemskapSøknadsgrunnlagDto(bosattNorgeSisteÅrene = medlemskapsdetaljer.bosattNorgeSisteÅrene,
+                                            oppholderDuDegINorge = medlemskapsdetaljer.oppholderDuDegINorge,
+                                            utenlandsopphold = medlemskapsdetaljer.utenlandsopphold.map {
+                                                UtenlandsoppholdDto(it.fradato,
+                                                                    it.tildato,
+                                                                    it.årsakUtenlandsopphold)
+                                            })
+    }
+
+    fun mapRegistergrunnlag(pdlSøker: PdlSøker,
+                            medlUnntak: Medlemskapsinfo): MedlemskapRegistergrunnlagDto {
         val statsborgerskap = statsborgerskapMapper.map(pdlSøker.statsborgerskap)
-        val søknadsgrunnlag =
-                MedlemskapSøknadsgrunnlagDto(bosattNorgeSisteÅrene = medlemskapsdetaljer.bosattNorgeSisteÅrene,
-                                             oppholderDuDegINorge = medlemskapsdetaljer.oppholderDuDegINorge,
-                                             utenlandsopphold = medlemskapsdetaljer.utenlandsopphold.map {
-                                                 UtenlandsoppholdDto(it.fradato,
-                                                                     it.tildato,
-                                                                     it.årsakUtenlandsopphold)
-                                             })
-
-        val registergrunnlag =
-                MedlemskapRegistergrunnlagDto(nåværendeStatsborgerskap =
-                                              statsborgerskap.filter { it.gyldigTilOgMedDato == null }
-                                                      .map { it.land },
-                                              statsborgerskap = statsborgerskap,
-                                              oppholdstatus = OppholdstillatelseMapper.map(pdlSøker.opphold),
-                                              bostedsadresse = pdlSøker.bostedsadresse.map(adresseMapper::tilAdresse),
-                                              innflytting = mapInnflytting(pdlSøker.innflyttingTilNorge),
-                                              utflytting = mapUtflytting(pdlSøker.utflyttingFraNorge),
-                                              folkeregisterpersonstatus = pdlSøker.folkeregisterpersonstatus.gjeldende()
-                                                      ?.let(Folkeregisterpersonstatus::fraPdl),
-                                              medlUnntak = medlUnntak.tilDto())
-
-        return MedlemskapDto(søknadsgrunnlag = søknadsgrunnlag,
-                             registergrunnlag = registergrunnlag)
+        return MedlemskapRegistergrunnlagDto(nåværendeStatsborgerskap =
+                                             statsborgerskap.filter { it.gyldigTilOgMedDato == null }
+                                                     .map { it.land },
+                                             statsborgerskap = statsborgerskap,
+                                             oppholdstatus = OppholdstillatelseMapper.map(pdlSøker.opphold),
+                                             bostedsadresse = pdlSøker.bostedsadresse.map(adresseMapper::tilAdresse),
+                                             innflytting = mapInnflytting(pdlSøker.innflyttingTilNorge),
+                                             utflytting = mapUtflytting(pdlSøker.utflyttingFraNorge),
+                                             folkeregisterpersonstatus = pdlSøker.folkeregisterpersonstatus.gjeldende()
+                                                     ?.let(Folkeregisterpersonstatus::fraPdl),
+                                             medlUnntak = medlUnntak.tilDto())
     }
 
     private fun mapInnflytting(innflyttingTilNorge: List<InnflyttingTilNorge>): List<InnflyttingDto> =
