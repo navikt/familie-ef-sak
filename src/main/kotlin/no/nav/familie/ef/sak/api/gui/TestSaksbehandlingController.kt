@@ -38,7 +38,7 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
         val fagsak = fagsakService.hentFagsak(fagsakDto.id)
         val behandling = behandlingService.opprettBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, fagsak.id)
         behandlingshistorikkService.opprettHistorikkInnslag(Behandlingshistorikk(behandlingId = behandling.id,
-                                                                                 steg = StegType.VILKÅRSVURDERE_INNGANGSVILKÅR))
+                                                                                 steg = StegType.REGISTRERE_OPPLYSNINGER))
         val søkerMedBarn = personService.hentPersonMedRelasjoner(testFagsakRequest.personIdent)
 
         val barneListe: List<Barn> = søkerMedBarn.barn.map {
