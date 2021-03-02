@@ -1,12 +1,13 @@
-package no.nav.familie.ef.sak.service.steg
+package no.nav.familie.ef.sak.blankett
 
 import no.nav.familie.ef.sak.api.Feil
-import no.nav.familie.ef.sak.blankett.BlankettRepository
 import no.nav.familie.ef.sak.integration.JournalpostClient
 import no.nav.familie.ef.sak.repository.BehandlingRepository
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.service.BehandlingService
+import no.nav.familie.ef.sak.service.steg.BehandlingSteg
+import no.nav.familie.ef.sak.service.steg.StegType
 import no.nav.familie.ef.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.Dokument
