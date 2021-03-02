@@ -21,6 +21,7 @@ import no.nav.familie.ef.sak.repository.domain.RegistergrunnlagData
 import no.nav.familie.ef.sak.repository.domain.Registergrunnlagsendringer
 import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsstønad
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.kontrakter.ef.søknad.Fødselsnummer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
@@ -63,7 +64,10 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
                                                      registergrunnlag = registergrunnlagData.sivilstand)
         val sivilstandsplaner = SivilstandsplanerMapper.tilDto(sivilstandsplaner = søknad.sivilstandsplaner)
         val barnMedSamvær = BarnMedSamværMapper.slåSammenBarnMedSamvær(BarnMedSamværMapper.mapSøknadsgrunnlag(søknad.barn),
-                                                   registergrunnlagData.barnMedSamvær)
+                                                                       registergrunnlagData.barnMedSamvær).sortedByDescending {
+            it.registergrunnlag.fødselsnummer?.let { fødsesnummer -> Fødselsnummer(fødsesnummer).fødselsdato }
+            ?: it.søknadsgrunnlag.fødselTermindato
+        }
         return InngangsvilkårGrunnlagDto(medlemskap = medlemskap,
                                          sivilstand = sivilstand,
                                          bosituasjon = BosituasjonMapper.tilDto(søknad.bosituasjon),

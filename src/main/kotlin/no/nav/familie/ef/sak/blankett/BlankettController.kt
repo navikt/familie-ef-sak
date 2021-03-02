@@ -35,9 +35,10 @@ class BlankettController(private val tilgangService: TilgangService,
                           HttpStatus.BAD_REQUEST)
         }
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
-        require(oppgave.journalpostId != null) { "For å plukke oppgaven må det eksistere en journalpostId" }
+        val journalpostId = oppgave.journalpostId
+        require(journalpostId != null) { "For å plukke oppgaven må det eksistere en journalpostId" }
 
-        val behandling = blankettService.opprettBlankettBehandling(oppgave.journalpostId!!)
+        val behandling = blankettService.opprettBlankettBehandling(journalpostId, oppgaveId)
 
         return Ressurs.success(behandling.id)
     }

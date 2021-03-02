@@ -1,10 +1,9 @@
 package no.nav.familie.ef.sak.blankett
 
-import no.nav.familie.ef.sak.repository.domain.Behandling
-import no.nav.familie.ef.sak.repository.domain.BehandlingType
-import no.nav.familie.ef.sak.repository.domain.Fil
-import no.nav.familie.ef.sak.repository.domain.Stønadstype
+import no.nav.familie.ef.sak.repository.OppgaveRepository
+import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.service.*
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -16,17 +15,26 @@ class BlankettService(private val tilgangService: TilgangService,
                       private val journalføringService: JournalføringService,
                       private val behandlingService: BehandlingService,
                       private val fagsakService: FagsakService,
-                      private val personopplysningerService: PersonopplysningerService) {
+                      private val personopplysningerService: PersonopplysningerService,
+                      private val oppgaveRepository: OppgaveRepository) {
 
-    fun opprettBlankettBehandling(journalpostId: String) : Behandling {
+    fun opprettBlankettBehandling(journalpostId: String, oppgaveId: Long) : Behandling {
         val journalpost = journalføringService.hentJournalpost(journalpostId)
         val personIdent = journalføringService.hentIdentForJournalpost(journalpost)
         tilgangService.validerTilgangTilPersonMedBarn(personIdent)
         val søknad = journalføringService.hentSøknadFraJournalpostForOvergangsstønad(journalpostId)
         val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, Stønadstype.OVERGANGSSTØNAD)
-        val opprettBehandling = behandlingService.opprettBehandling(BehandlingType.BLANKETT, fagsak.id, søknad, journalpost)
-        lagreTomBlankett(opprettBehandling.id)
-        return opprettBehandling
+        val behandling = behandlingService.opprettBehandling(BehandlingType.BLANKETT, fagsak.id, søknad, journalpost)
+        opprettEfOppgave(behandling.id, oppgaveId)
+        lagreTomBlankett(behandling.id)
+        return behandling
+    }
+
+    private fun opprettEfOppgave(behandlingId: UUID, oppgaveId: Long) {
+        val oppgave = Oppgave(gsakOppgaveId = oppgaveId,
+                                behandlingId = behandlingId,
+                                type = Oppgavetype.BehandleSak)
+        oppgaveRepository.insert(oppgave)
     }
 
     fun lagBlankett(behandlingId: UUID): ByteArray {
