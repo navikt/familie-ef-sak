@@ -91,7 +91,7 @@ class VedtaksbrevService(private val brevClient: BrevClient,
                 fnr = ident,
                 forsøkFerdigstill = true,
                 hoveddokumentvarianter = dokumenter,
-                fagsakId = fagsak.eksternId.toString(),
+                fagsakId = fagsak.eksternId.id.toString(),
                 journalførendeEnhet = journalførendeEnhet?.enhetId
         )).journalpostId
     }
