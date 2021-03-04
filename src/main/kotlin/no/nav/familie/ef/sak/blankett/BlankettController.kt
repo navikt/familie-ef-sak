@@ -1,16 +1,14 @@
 package no.nav.familie.ef.sak.blankett
 
 import no.nav.familie.ef.sak.api.ApiFeil
+import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.service.OppgaveService
 import no.nav.familie.ef.sak.service.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.HttpStatus
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import java.util.*
 
 @RestController
@@ -19,13 +17,21 @@ import java.util.*
 @Unprotected
 class BlankettController(private val tilgangService: TilgangService,
                          private val blankettService: BlankettService,
-                         private val oppgaveService: OppgaveService) {
+                         private val oppgaveService: OppgaveService,
+                         private val blankettRepository: BlankettRepository) {
 
     @PostMapping("{behandlingId}")
     fun lagBlankettPdf(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         val blankett = blankettService.lagBlankett(behandlingId)
         return Ressurs.success(blankett)
+    }
+
+    @GetMapping("{behandlingId}")
+    fun hentBlankettPdf(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
+        tilgangService.validerTilgangTilBehandling(behandlingId)
+        val blankett = blankettRepository.findByIdOrThrow(behandlingId)
+        return Ressurs.success(blankett.pdf.bytes)
     }
 
     @PostMapping("/oppgave/{oppgaveId}")
