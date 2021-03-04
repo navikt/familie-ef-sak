@@ -6,7 +6,7 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.api.dto.DelvilkårsvurderingDto
-import no.nav.familie.ef.sak.api.dto.InngangsvilkårGrunnlagDto
+import no.nav.familie.ef.sak.api.dto.VilkårGrunnlagDto
 import no.nav.familie.ef.sak.api.dto.SivilstandInngangsvilkårDto
 import no.nav.familie.ef.sak.api.dto.SivilstandRegistergrunnlagDto
 import no.nav.familie.ef.sak.api.dto.SivilstandSøknadsgrunnlagDto
@@ -71,11 +71,11 @@ internal class VurderingServiceTest {
                                          gyldigePerioder = emptyList(),
                                          uavklartePerioder = emptyList(),
                                          avvistePerioder = emptyList()))
-        every { grunnlagsdataService.hentGrunnlag(any(), any()) } returns InngangsvilkårGrunnlagDto(mockk(relaxed = true),
-                                                                                                    mockk(relaxed = true),
-                                                                                                    mockk(relaxed = true),
-                                                                                                    mockk(relaxed = true),
-                                                                                                    mockk(relaxed = true))
+        every { grunnlagsdataService.hentGrunnlag(any(), any()) } returns VilkårGrunnlagDto(mockk(relaxed = true),
+                                                                                            mockk(relaxed = true),
+                                                                                            mockk(relaxed = true),
+                                                                                            mockk(relaxed = true),
+                                                                                            mockk(relaxed = true))
     }
 
     @Test
@@ -86,7 +86,7 @@ internal class VurderingServiceTest {
         val nyeVilkårsvurderinger = slot<List<Vilkårsvurdering>>()
         every { vilkårsvurderingRepository.insertAll(capture(nyeVilkårsvurderinger)) } answers
                 { it.invocation.args.first() as List<Vilkårsvurdering> }
-        val inngangsvilkår = VilkårType.hentInngangsvilkår()
+        val inngangsvilkår = VilkårType.hentVilkår()
 
         vurderingService.hentInngangsvilkår(BEHANDLING_ID)
 
@@ -141,7 +141,7 @@ internal class VurderingServiceTest {
         val nyeVilkårsvurderinger = slot<List<Vilkårsvurdering>>()
         every { vilkårsvurderingRepository.insertAll(capture(nyeVilkårsvurderinger)) } answers
                 { it.invocation.args.first() as List<Vilkårsvurdering> }
-        val inngangsvilkår = VilkårType.hentInngangsvilkår()
+        val inngangsvilkår = VilkårType.hentVilkår()
 
         val alleVilkårsvurderinger = vurderingService.hentInngangsvilkår(BEHANDLING_ID).vurderinger
         assertThat(nyeVilkårsvurderinger.captured).hasSize(inngangsvilkår.size)
@@ -344,7 +344,7 @@ internal class VurderingServiceTest {
 
         val vilkårTyperUtenVurdering = vurderingService.hentInngangsvilkårSomManglerVurdering(BEHANDLING_ID)
 
-        val vilkårtyper = VilkårType.hentInngangsvilkår().filterNot { it === VilkårType.LOVLIG_OPPHOLD }
+        val vilkårtyper = VilkårType.hentVilkår().filterNot { it === VilkårType.LOVLIG_OPPHOLD }
         assertThat(vilkårTyperUtenVurdering).containsExactlyInAnyOrderElementsOf(vilkårtyper)
     }
 
@@ -360,20 +360,20 @@ internal class VurderingServiceTest {
 
         val vilkårTyperUtenVurdering = vurderingService.hentInngangsvilkårSomManglerVurdering(BEHANDLING_ID)
 
-        val vilkårtyper = VilkårType.hentInngangsvilkår().filterNot { it === VilkårType.FORUTGÅENDE_MEDLEMSKAP }
+        val vilkårtyper = VilkårType.hentVilkår().filterNot { it === VilkårType.FORUTGÅENDE_MEDLEMSKAP }
         assertThat(vilkårTyperUtenVurdering).containsExactlyInAnyOrderElementsOf(vilkårtyper)
     }
 
 
-    private fun mockkInngangsvilkårMedUformeltGiftPerson(): InngangsvilkårGrunnlagDto {
+    private fun mockkInngangsvilkårMedUformeltGiftPerson(): VilkårGrunnlagDto {
         val sivilstandSøknadsgrunnlagDto = mockk<SivilstandSøknadsgrunnlagDto>(relaxed = true)
         every { sivilstandSøknadsgrunnlagDto.erUformeltGift } returns true
         val sivilstandRegistergrunnlagDto = SivilstandRegistergrunnlagDto(Sivilstandstype.GIFT, null)
-        return InngangsvilkårGrunnlagDto(mockk(),
-                                         SivilstandInngangsvilkårDto(sivilstandSøknadsgrunnlagDto, sivilstandRegistergrunnlagDto),
-                                         mockk(),
-                                         mockk(),
-                                         mockk())
+        return VilkårGrunnlagDto(mockk(),
+                                 SivilstandInngangsvilkårDto(sivilstandSøknadsgrunnlagDto, sivilstandRegistergrunnlagDto),
+                                 mockk(),
+                                 mockk(),
+                                 mockk())
     }
 
     companion object {

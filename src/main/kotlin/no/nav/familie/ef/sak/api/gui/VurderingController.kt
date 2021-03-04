@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.api.gui
 
-import no.nav.familie.ef.sak.api.dto.InngangsvilkårDto
+import no.nav.familie.ef.sak.api.dto.VilkårDto
 import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.TilgangService
@@ -30,7 +30,7 @@ class VurderingController(private val vurderingService: VurderingService,
     }
 
     @GetMapping("{behandlingId}/inngangsvilkar")
-    fun getInngangsvilkår(@PathVariable behandlingId: UUID): Ressurs<InngangsvilkårDto> {
+    fun getInngangsvilkår(@PathVariable behandlingId: UUID): Ressurs<VilkårDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         return Ressurs.success(vurderingService.hentInngangsvilkår(behandlingId))
     }

@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.api.gui
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.api.dto.InngangsvilkårDto
+import no.nav.familie.ef.sak.api.dto.VilkårDto
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
@@ -35,7 +35,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal hente inngangsvilkår`() {
-        val respons: ResponseEntity<Ressurs<InngangsvilkårDto>> = opprettInngangsvilkår()
+        val respons: ResponseEntity<Ressurs<VilkårDto>> = opprettInngangsvilkår()
 
         assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(respons.body.status).isEqualTo(Ressurs.Status.SUKSESS)
@@ -58,7 +58,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
         assertThat(respons.body.data).isEqualTo(opprettetVurdering.id)
     }
 
-    private fun opprettInngangsvilkår(): ResponseEntity<Ressurs<InngangsvilkårDto>> {
+    private fun opprettInngangsvilkår(): ResponseEntity<Ressurs<VilkårDto>> {
         val søknad = SøknadMedVedlegg(Testsøknad.søknadOvergangsstønad, emptyList())
         val fagsak = fagsakService.hentEllerOpprettFagsak(søknad.søknad.personalia.verdi.fødselsnummer.verdi.verdi,
                                                           Stønadstype.OVERGANGSSTØNAD)

@@ -1,16 +1,8 @@
 package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.api.Feil
-import no.nav.familie.ef.sak.api.dto.DelvilkårsvurderingDto
-import no.nav.familie.ef.sak.api.dto.InngangsvilkårDto
-import no.nav.familie.ef.sak.api.dto.InngangsvilkårGrunnlagDto
-import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
+import no.nav.familie.ef.sak.api.dto.*
 import no.nav.familie.ef.sak.integration.PdlClient
-import no.nav.familie.ef.sak.integration.dto.pdl.Familierelasjonsrolle
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlAnnenForelder
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlBarn
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker
-import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
 import no.nav.familie.ef.sak.repository.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.repository.domain.DelvilkårMetadata
 import no.nav.familie.ef.sak.repository.domain.Delvilkårsvurdering
@@ -23,7 +15,6 @@ import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.vurdering.utledDelvilkårResultat
 import no.nav.familie.ef.sak.vurdering.validerDelvilkår
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 import java.util.UUID
 
 @Service
@@ -59,18 +50,18 @@ class VurderingService(private val behandlingService: BehandlingService,
         return vilkårsvurderingRepository.update(nyVilkårsvurdering).id
     }
 
-    fun hentInngangsvilkår(behandlingId: UUID): InngangsvilkårDto {
+    fun hentInngangsvilkår(behandlingId: UUID): VilkårDto {
         val søknad = behandlingService.hentOvergangsstønad(behandlingId)
         val grunnlag = grunnlagsdataService.hentGrunnlag(behandlingId, søknad)
         val vurderinger = hentVurderinger(behandlingId, søknad, grunnlag)
-        return InngangsvilkårDto(vurderinger = vurderinger, grunnlag = grunnlag)
+        return VilkårDto(vurderinger = vurderinger, grunnlag = grunnlag)
     }
 
     private fun hentVurderinger(behandlingId: UUID,
                                 søknad: SøknadsskjemaOvergangsstønad,
-                                registergrunnlag: InngangsvilkårGrunnlagDto): List<VilkårsvurderingDto> {
+                                registergrunnlag: VilkårGrunnlagDto): List<VilkårsvurderingDto> {
         val delvilkårMetadata = DelvilkårMetadata(sivilstandstype = registergrunnlag.sivilstand.registergrunnlag.type)
-        return hentEllerOpprettVurderingerForInngangsvilkår(behandlingId, søknad, delvilkårMetadata)
+        return hentEllerOpprettVurderingerForVilkår(behandlingId, søknad, delvilkårMetadata)
                 .map {
                     VilkårsvurderingDto(id = it.id,
                                         behandlingId = it.behandlingId,
@@ -90,16 +81,16 @@ class VurderingService(private val behandlingService: BehandlingService,
                 }
     }
 
-    private fun hentEllerOpprettVurderingerForInngangsvilkår(behandlingId: UUID,
-                                                             søknad: SøknadsskjemaOvergangsstønad,
-                                                             delvilkårMetadata: DelvilkårMetadata): List<Vilkårsvurdering> {
+    private fun hentEllerOpprettVurderingerForVilkår(behandlingId: UUID,
+                                                     søknad: SøknadsskjemaOvergangsstønad,
+                                                     delvilkårMetadata: DelvilkårMetadata): List<Vilkårsvurdering> {
         val lagredeVilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(behandlingId)
 
         if (behandlingErLåstForVidereRedigering(behandlingId)) {
             return lagredeVilkårsvurderinger
         }
 
-        val nyeVilkårsvurderinger: List<Vilkårsvurdering> = VilkårType.hentInngangsvilkår()
+        val nyeVilkårsvurderinger: List<Vilkårsvurdering> = VilkårType.hentVilkår()
                 .filter {
                     lagredeVilkårsvurderinger.find { vurdering -> vurdering.type == it } == null // Sjekk barnId ?
                 }
@@ -138,7 +129,7 @@ class VurderingService(private val behandlingService: BehandlingService,
 
     fun hentInngangsvilkårSomManglerVurdering(behandlingId: UUID): List<VilkårType> {
         val lagredeVilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(behandlingId)
-        val inngangsvilkår = VilkårType.hentInngangsvilkår()
+        val inngangsvilkår = VilkårType.hentVilkår()
 
         return inngangsvilkår.filter {
             lagredeVilkårsvurderinger.any { vurdering ->

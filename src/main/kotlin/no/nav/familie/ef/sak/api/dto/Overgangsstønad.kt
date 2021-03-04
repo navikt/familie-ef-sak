@@ -1,5 +1,7 @@
 package no.nav.familie.ef.sak.api.dto
 
+import no.nav.familie.ef.sak.mapper.OvergangsstønadMapper
+import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsstønad
 import java.time.LocalDate
 import java.time.YearMonth
 
