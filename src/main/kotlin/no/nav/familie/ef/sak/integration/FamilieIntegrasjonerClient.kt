@@ -71,8 +71,9 @@ class FamilieIntegrasjonerClient(@Qualifier("azure") restOperations: RestOperati
     fun distribuerBrev(journalpostId: String): String {
         logger.info("Kaller dokdist-tjeneste for journalpost=$journalpostId")
 
-        val journalpostRequest = DistribuerJournalpostRequest(
-                journalpostId, "EF", "FAMILIE_EF_SAK")
+        val journalpostRequest = DistribuerJournalpostRequest(journalpostId = journalpostId,
+                                                              bestillendeFagsystem = "EF",
+                                                              dokumentProdApp = "FAMILIE_EF_SAK")
 
         return postForEntity<Ressurs<String>>(integrasjonerConfig.distribuerDokumentUri,
                                               journalpostRequest,
