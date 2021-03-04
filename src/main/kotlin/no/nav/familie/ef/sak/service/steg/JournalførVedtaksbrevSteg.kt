@@ -5,12 +5,10 @@ import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.VedtaksbrevService
 import no.nav.familie.ef.sak.task.DistribuerVedtaksbrevTask
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.util.*
 
 
 @Service
@@ -27,10 +25,10 @@ class JournalførVedtaksbrevSteg(private val taskRepository: TaskRepository,
                                                             Journalposttype.U,
                                                             behandling)
         logger.info("Journalfør vedtaksbrev behandling=[${behandling.id}] fullført med journalpost=[$journalpostId]")
-        distribuerVedtaksbrev(behandling, journalpostId)
+        lagDistribuerVedtaksbrevTask(behandling, journalpostId)
     }
 
-    private fun distribuerVedtaksbrev(behandling: Behandling, journalpostId: String) {
+    private fun lagDistribuerVedtaksbrevTask(behandling: Behandling, journalpostId: String) {
         taskRepository.save(DistribuerVedtaksbrevTask.opprettTask(behandling, journalpostId))
     }
 

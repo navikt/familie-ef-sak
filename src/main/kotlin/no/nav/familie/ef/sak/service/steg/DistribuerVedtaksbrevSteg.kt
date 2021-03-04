@@ -17,7 +17,7 @@ class DistribuerVedtaksbrevSteg(private val taskRepository: TaskRepository,
 
     override fun utførSteg(behandling: Behandling, jourpostId: String) {
         logger.info("Distribuer vedtaksbrev journalpost=[$jourpostId] for behandling=[${behandling.id}]")
-        val bestillingId = vedtaksbrevService.distribuerVedtaksbrev(behandling.id, jourpostId).also { logger }
+        val bestillingId = vedtaksbrevService.distribuerVedtaksbrev(behandling.id, jourpostId)
         logger.info("Distribuer vedtaksbrev journalpost=[$jourpostId] for behandling=[${behandling.id}] med bestillingId=[$bestillingId]")
         ferdigstillBehandling(behandling)
     }
