@@ -9,5 +9,5 @@ data class VilkårGrunnlagDto(val medlemskap: MedlemskapDto,
                              val bosituasjon: BosituasjonDto,
                              val barnMedSamvær: List<BarnMedSamværDto>,
                              val sivilstandsplaner: SivilstandsplanerDto,
-                             val aktivitetDto: AktivitetDto,
-                             val sagtOppEllerRedusertStillingDto: SagtOppEllerRedusertStillingDto)
+                             val aktivitet: AktivitetDto,
+                             val sagtOppEllerRedusertStilling: SagtOppEllerRedusertStillingDto)

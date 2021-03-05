@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.service
 
-import no.nav.familie.ef.sak.api.dto.AktivitetDto
 import no.nav.familie.ef.sak.api.dto.VilkårGrunnlagDto
 import no.nav.familie.ef.sak.api.dto.MedlemskapDto
 import no.nav.familie.ef.sak.api.dto.SivilstandInngangsvilkårDto
@@ -66,12 +65,15 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
             ?: it.søknadsgrunnlag.fødselTermindato
         }
 
-        val aktivitetDto = AktivitetDto.tilAktivitetDto(søknad, )
+        val aktivitetDto = AktivitetMapper.tilDto(aktivitet = søknad.aktivitet)
+        val sagtOppEllerRedusertStilling = SagtOppEllerRedusertStillingMapper.tilDto(situasjon = søknad.situasjon)
         return VilkårGrunnlagDto(medlemskap = medlemskap,
                                  sivilstand = sivilstand,
                                  bosituasjon = BosituasjonMapper.tilDto(søknad.bosituasjon),
                                  barnMedSamvær = barnMedSamvær,
-                                 sivilstandsplaner = sivilstandsplaner,)
+                                 sivilstandsplaner = sivilstandsplaner,
+                                 aktivitet = aktivitetDto,
+                                 sagtOppEllerRedusertStilling = sagtOppEllerRedusertStilling)
     }
 
     fun godkjennEndringerIRegistergrunnlag(behandlingId: UUID) {
