@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.blankett
 
 import no.nav.familie.ef.sak.repository.OppgaveRepository
 import no.nav.familie.ef.sak.repository.domain.*
+import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.service.*
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.springframework.stereotype.Service
@@ -65,6 +66,10 @@ class BlankettService(private val tilgangService: TilgangService,
     private fun hentGjeldendeNavn(hentAktivIdent: String): String {
         val navnMap = personopplysningerService.hentGjeldeneNavn(listOf(hentAktivIdent))
         return navnMap.getValue(hentAktivIdent)
+    }
+
+    fun hentBlankettPdf(behandlingId: UUID): Blankett {
+        return blankettRepository.findByIdOrThrow(behandlingId);
     }
 
 }
