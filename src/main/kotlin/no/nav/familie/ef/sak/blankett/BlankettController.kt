@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.blankett
 
 import no.nav.familie.ef.sak.api.ApiFeil
-import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.service.OppgaveService
 import no.nav.familie.ef.sak.service.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -17,8 +16,7 @@ import java.util.*
 @Unprotected
 class BlankettController(private val tilgangService: TilgangService,
                          private val blankettService: BlankettService,
-                         private val oppgaveService: OppgaveService,
-                         private val blankettRepository: BlankettRepository) {
+                         private val oppgaveService: OppgaveService) {
 
     @PostMapping("{behandlingId}")
     fun lagBlankettPdf(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
@@ -30,7 +28,7 @@ class BlankettController(private val tilgangService: TilgangService,
     @GetMapping("{behandlingId}")
     fun hentBlankettPdf(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
-        val blankett = blankettRepository.findByIdOrThrow(behandlingId)
+        val blankett = blankettService.hentBlankettPdf(behandlingId)
         return Ressurs.success(blankett.pdf.bytes)
     }
 
