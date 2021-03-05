@@ -50,7 +50,7 @@ class VurderingService(private val behandlingService: BehandlingService,
         return vilkårsvurderingRepository.update(nyVilkårsvurdering).id
     }
 
-    fun hentInngangsvilkår(behandlingId: UUID): VilkårDto {
+    fun hentVilkår(behandlingId: UUID): VilkårDto {
         val søknad = behandlingService.hentOvergangsstønad(behandlingId)
         val grunnlag = grunnlagsdataService.hentGrunnlag(behandlingId, søknad)
         val vurderinger = hentVurderinger(behandlingId, søknad, grunnlag)
@@ -127,11 +127,11 @@ class VurderingService(private val behandlingService: BehandlingService,
     }
 
 
-    fun hentInngangsvilkårSomManglerVurdering(behandlingId: UUID): List<VilkårType> {
+    fun hentVilkårSomManglerVurdering(behandlingId: UUID): List<VilkårType> {
         val lagredeVilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(behandlingId)
-        val inngangsvilkår = VilkårType.hentVilkår()
+        val vilkår = VilkårType.hentVilkår()
 
-        return inngangsvilkår.filter {
+        return vilkår.filter {
             lagredeVilkårsvurderinger.any { vurdering ->
                 vurdering.type == it
                 && vurdering.resultat == Vilkårsresultat.IKKE_VURDERT

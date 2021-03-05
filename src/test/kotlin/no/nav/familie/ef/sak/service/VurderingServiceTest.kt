@@ -21,16 +21,7 @@ import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.vilkårsvurdering
 import no.nav.familie.ef.sak.repository.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import no.nav.familie.ef.sak.repository.domain.DelvilkårType
-import no.nav.familie.ef.sak.repository.domain.DelvilkårType.BOR_OG_OPPHOLDER_SEG_I_NORGE
-import no.nav.familie.ef.sak.repository.domain.DelvilkårType.FEM_ÅRS_MEDLEMSKAP
-import no.nav.familie.ef.sak.repository.domain.DelvilkårType.KRAV_SIVILSTAND
-import no.nav.familie.ef.sak.repository.domain.DelvilkårType.LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD
-import no.nav.familie.ef.sak.repository.domain.DelvilkårType.LEVER_IKKE_MED_ANNEN_FORELDER
-import no.nav.familie.ef.sak.repository.domain.DelvilkårType.MER_AV_DAGLIG_OMSORG
-import no.nav.familie.ef.sak.repository.domain.DelvilkårType.NÆRE_BOFORHOLD
-import no.nav.familie.ef.sak.repository.domain.DelvilkårType.OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN
-import no.nav.familie.ef.sak.repository.domain.DelvilkårType.SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON
-import no.nav.familie.ef.sak.repository.domain.DelvilkårType.SKRIFTLIG_AVTALE_OM_DELT_BOSTED
+import no.nav.familie.ef.sak.repository.domain.DelvilkårType.*
 import no.nav.familie.ef.sak.repository.domain.Delvilkårsvurdering
 import no.nav.familie.ef.sak.repository.domain.DelvilkårÅrsak
 import no.nav.familie.ef.sak.repository.domain.VilkårType
@@ -76,24 +67,23 @@ internal class VurderingServiceTest {
                                                                                             mockk(relaxed = true),
                                                                                             mockk(relaxed = true),
                                                                                             mockk(relaxed = true),
-                                                                                            mockk(relaxed = true),
-                                                                                            mockk(relaxed = true))
+                                                                                            mockk(relaxed = true),)
     }
 
     @Test
-    fun `skal opprette nye Vilkårsvurdering for alle inngangsvilkår dersom ingen vurderinger finnes`() {
+    fun `skal opprette nye Vilkårsvurdering for alle vilkår dersom ingen vurderinger finnes`() {
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling(fagsak(), true, BehandlingStatus.OPPRETTET)
         every { vilkårsvurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns emptyList()
 
         val nyeVilkårsvurderinger = slot<List<Vilkårsvurdering>>()
         every { vilkårsvurderingRepository.insertAll(capture(nyeVilkårsvurderinger)) } answers
                 { it.invocation.args.first() as List<Vilkårsvurdering> }
-        val inngangsvilkår = VilkårType.hentVilkår()
+        val vilkår = VilkårType.hentVilkår()
 
-        vurderingService.hentInngangsvilkår(BEHANDLING_ID)
+        vurderingService.hentVilkår(BEHANDLING_ID)
 
-        assertThat(nyeVilkårsvurderinger.captured).hasSize(inngangsvilkår.size + 1)
-        assertThat(nyeVilkårsvurderinger.captured.map { it.type }.distinct()).containsExactlyElementsOf(inngangsvilkår)
+        assertThat(nyeVilkårsvurderinger.captured).hasSize(vilkår.size + 1)
+        assertThat(nyeVilkårsvurderinger.captured.map { it.type }.distinct()).containsExactlyElementsOf(vilkår)
         assertThat(nyeVilkårsvurderinger.captured.filter { it.type == VilkårType.ALENEOMSORG }).hasSize(2)
         assertThat(nyeVilkårsvurderinger.captured.filter { it.barnId != null }).hasSize(2)
         assertThat(nyeVilkårsvurderinger.captured.map { it.resultat }.toSet()).containsOnly(Vilkårsresultat.IKKE_VURDERT)
@@ -109,9 +99,9 @@ internal class VurderingServiceTest {
         every { vilkårsvurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns emptyList()
         val søknadMed1Barn = SøknadsskjemaMapper.tilDomene(Testsøknad.søknadOvergangsstønad)
         every { behandlingService.hentOvergangsstønad(any()) }.returns(søknadMed1Barn)
-        every { grunnlagsdataService.hentGrunnlag(BEHANDLING_ID, any()) } returns mockkInngangsvilkårMedUformeltGiftPerson()
+        every { grunnlagsdataService.hentGrunnlag(BEHANDLING_ID, any()) } returns mockkVilkårMedUformeltGiftPerson()
 
-        vurderingService.hentInngangsvilkår(BEHANDLING_ID)
+        vurderingService.hentVilkår(BEHANDLING_ID)
         assertThat(nyeVilkårsvurderinger.captured.flatMap {
             it.delvilkårsvurdering.delvilkårsvurderinger
                     .filter { it.resultat != Vilkårsresultat.IKKE_AKTUELL }
@@ -127,13 +117,15 @@ internal class VurderingServiceTest {
                         SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
                         NÆRE_BOFORHOLD,
                         MER_AV_DAGLIG_OMSORG,
-                        OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN
+                        OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN,
+                        SAGT_OPP_REDUSERT,
+                        RIMELIG_GRUNN_SAGT_OPP
                 ))
 
     }
 
     @Test
-    fun `skal ikke opprette nye Vilkårsvurderinger for inngangsvilkår som allerede har en vurdering`() {
+    fun `skal ikke opprette nye Vilkårsvurderinger for vilkår som allerede har en vurdering`() {
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling(fagsak(), true, BehandlingStatus.OPPRETTET)
         every { vilkårsvurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns
                 listOf(vilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT,
@@ -143,12 +135,12 @@ internal class VurderingServiceTest {
         val nyeVilkårsvurderinger = slot<List<Vilkårsvurdering>>()
         every { vilkårsvurderingRepository.insertAll(capture(nyeVilkårsvurderinger)) } answers
                 { it.invocation.args.first() as List<Vilkårsvurdering> }
-        val inngangsvilkår = VilkårType.hentVilkår()
+        val vilkår = VilkårType.hentVilkår()
 
-        val alleVilkårsvurderinger = vurderingService.hentInngangsvilkår(BEHANDLING_ID).vurderinger
-        assertThat(nyeVilkårsvurderinger.captured).hasSize(inngangsvilkår.size)
+        val alleVilkårsvurderinger = vurderingService.hentVilkår(BEHANDLING_ID).vurderinger
+        assertThat(nyeVilkårsvurderinger.captured).hasSize(vilkår.size)
         assertThat(nyeVilkårsvurderinger.captured.filter { it.type == VilkårType.ALENEOMSORG }).hasSize(2)
-        assertThat(alleVilkårsvurderinger).hasSize(inngangsvilkår.size + 1)
+        assertThat(alleVilkårsvurderinger).hasSize(vilkår.size + 1)
         assertThat(nyeVilkårsvurderinger.captured.map { it.type }).doesNotContain(VilkårType.FORUTGÅENDE_MEDLEMSKAP)
         assertThat(nyeVilkårsvurderinger.captured.map { it.type }).contains(VilkårType.LOVLIG_OPPHOLD)
         assertThat(nyeVilkårsvurderinger.captured.map { it.type }).contains(VilkårType.SIVILSTAND)
@@ -164,7 +156,7 @@ internal class VurderingServiceTest {
                                                          behandlingId = BEHANDLING_ID))
         every { vilkårsvurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns vilkårsvurderinger
 
-        val alleVilkårsvurderinger = vurderingService.hentInngangsvilkår(BEHANDLING_ID).vurderinger
+        val alleVilkårsvurderinger = vurderingService.hentVilkår(BEHANDLING_ID).vurderinger
 
         assertThat(alleVilkårsvurderinger).hasSize(1)
         verify(exactly = 0) { vilkårsvurderingRepository.insertAll(any()) }
@@ -333,7 +325,7 @@ internal class VurderingServiceTest {
     }
 
     @Test
-    fun `skal hente vilkårtyper for inngangsvilkår som mangler vurdering`() {
+    fun `skal hente vilkårtyper for vilkår som mangler vurdering`() {
         val behandling = behandling(fagsak(), true, BehandlingStatus.UTREDES)
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
         val ikkeVurdertVilkår = vilkårsvurdering(BEHANDLING_ID,
@@ -344,14 +336,14 @@ internal class VurderingServiceTest {
                                              VilkårType.LOVLIG_OPPHOLD)
         every { vilkårsvurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns listOf(ikkeVurdertVilkår, vurdertVilkår)
 
-        val vilkårTyperUtenVurdering = vurderingService.hentInngangsvilkårSomManglerVurdering(BEHANDLING_ID)
+        val vilkårTyperUtenVurdering = vurderingService.hentVilkårSomManglerVurdering(BEHANDLING_ID)
 
         val vilkårtyper = VilkårType.hentVilkår().filterNot { it === VilkårType.LOVLIG_OPPHOLD }
         assertThat(vilkårTyperUtenVurdering).containsExactlyInAnyOrderElementsOf(vilkårtyper)
     }
 
     @Test
-    fun `skal hente vilkårtyper for inngangsvilkår som ikke finnes`() {
+    fun `skal hente vilkårtyper for vilkår som ikke finnes`() {
         val behandling = behandling(fagsak(), true, BehandlingStatus.UTREDES)
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
         val vurdertVilkår = vilkårsvurdering(BEHANDLING_ID,
@@ -360,20 +352,19 @@ internal class VurderingServiceTest {
 
         every { vilkårsvurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns listOf(vurdertVilkår)
 
-        val vilkårTyperUtenVurdering = vurderingService.hentInngangsvilkårSomManglerVurdering(BEHANDLING_ID)
+        val vilkårTyperUtenVurdering = vurderingService.hentVilkårSomManglerVurdering(BEHANDLING_ID)
 
         val vilkårtyper = VilkårType.hentVilkår().filterNot { it === VilkårType.FORUTGÅENDE_MEDLEMSKAP }
         assertThat(vilkårTyperUtenVurdering).containsExactlyInAnyOrderElementsOf(vilkårtyper)
     }
 
 
-    private fun mockkInngangsvilkårMedUformeltGiftPerson(): VilkårGrunnlagDto {
+    private fun mockkVilkårMedUformeltGiftPerson(): VilkårGrunnlagDto {
         val sivilstandSøknadsgrunnlagDto = mockk<SivilstandSøknadsgrunnlagDto>(relaxed = true)
         every { sivilstandSøknadsgrunnlagDto.erUformeltGift } returns true
         val sivilstandRegistergrunnlagDto = SivilstandRegistergrunnlagDto(Sivilstandstype.GIFT, null)
         return VilkårGrunnlagDto(mockk(),
                                  SivilstandInngangsvilkårDto(sivilstandSøknadsgrunnlagDto, sivilstandRegistergrunnlagDto),
-                                 mockk(),
                                  mockk(),
                                  mockk(),
                                  mockk(),

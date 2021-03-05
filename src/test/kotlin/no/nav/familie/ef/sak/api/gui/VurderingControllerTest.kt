@@ -34,7 +34,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `skal hente inngangsvilkår`() {
+    internal fun `skal hente vilkår`() {
         val respons: ResponseEntity<Ressurs<VilkårDto>> = opprettInngangsvilkår()
 
         assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)

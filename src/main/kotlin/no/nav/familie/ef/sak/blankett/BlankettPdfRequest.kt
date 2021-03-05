@@ -4,7 +4,7 @@ import no.nav.familie.ef.sak.api.dto.VilkårDto
 
 data class BlankettPdfRequest(
         val personopplysninger: PersonopplysningerDto,
-        val inngangsvilkår: VilkårDto
+        val vilkår: VilkårDto
 )
 
 data class PersonopplysningerDto(

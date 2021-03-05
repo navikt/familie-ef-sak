@@ -23,27 +23,27 @@ class VurderingController(private val vurderingService: VurderingService,
                           private val behandlingService: BehandlingService,
                           private val tilgangService: TilgangService) {
 
-    @PostMapping("inngangsvilkar")
-    fun oppdaterVurderingInngangsvilkår(@RequestBody vilkårsvurdering: VilkårsvurderingDto): Ressurs<UUID> {
+    @PostMapping(value = ["inngangsvilkar", "vilkår"])
+    fun oppdaterVurderingVilkår(@RequestBody vilkårsvurdering: VilkårsvurderingDto): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(vilkårsvurdering.behandlingId)
         return Ressurs.success(vurderingService.oppdaterVilkår(vilkårsvurdering))
     }
 
-    @GetMapping("{behandlingId}/inngangsvilkar")
-    fun getInngangsvilkår(@PathVariable behandlingId: UUID): Ressurs<VilkårDto> {
+    @GetMapping(value = ["{behandlingId}/inngangsvilkar","{behandlingId}/vilkår"])
+    fun getVilkår(@PathVariable behandlingId: UUID): Ressurs<VilkårDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
-        return Ressurs.success(vurderingService.hentInngangsvilkår(behandlingId))
+        return Ressurs.success(vurderingService.hentVilkår(behandlingId))
     }
 
-    @PostMapping("/{behandlingId}/inngangsvilkar/fullfor")
-    fun fullførInngangsvilkår(@PathVariable behandlingId: UUID): Ressurs<UUID> {
+    @PostMapping(value = ["/{behandlingId}/inngangsvilkar/fullfor", "/{behandlingId}/vilkår/fullfor"])
+    fun fullførVilkår(@PathVariable behandlingId: UUID): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         val behandling = behandlingService.hentBehandling(behandlingId)
         // TODO; Trenger vi registrer opplysninger?
         val oppdatertBehandling = stegService.håndterRegistrerOpplysninger(behandling, null)
         return Ressurs.success(stegService.håndterInngangsvilkår(oppdatertBehandling).id)
     }
-    @PostMapping("/{behandlingId}/overgangsstonad/fullfor")
+    @PostMapping(value = ["/{behandlingId}/overgangsstonad/fullfor", "/{behandlingId}/overgangsstonad/fullfor"])
     fun fullførStønadsvilkår(@PathVariable behandlingId: UUID): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         val behandling = behandlingService.hentBehandling(behandlingId)
