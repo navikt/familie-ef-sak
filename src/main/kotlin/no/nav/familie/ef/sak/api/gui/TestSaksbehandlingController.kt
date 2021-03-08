@@ -140,4 +140,4 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
     }
 }
 
-data class TestFagsakRequest(val personIdent: String, val behandlingsType: String = "BLANKETT")
+data class TestFagsakRequest(val personIdent: String, val behandlingsType: String = "FØRSTEGANGSBEHANDLING")
