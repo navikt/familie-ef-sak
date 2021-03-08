@@ -51,7 +51,7 @@ class BlankettService(private val tilgangService: TilgangService,
         return blankettRepository.update(blankett)
     }
 
-    private fun lagreTomBlankett(behandlingId: UUID) {
+    fun lagreTomBlankett(behandlingId: UUID) {
         val blankett = Blankett(behandlingId, Fil(byteArrayOf()))
         blankettRepository.insert(blankett)
     }
