@@ -115,7 +115,7 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
                                        false,
                                        listOf(Dokument("TEST".toByteArray(),
                                                        FilType.PDFA, null, null,
-                                                       "TEKST")),
+                                                       "DOKUMENTTYPE_OVERGANGSSTØNAD")),
                                        emptyList())
 
         val dokumentResponse = journalpostClient.arkiverDokument(arkiverDokumentRequest)
