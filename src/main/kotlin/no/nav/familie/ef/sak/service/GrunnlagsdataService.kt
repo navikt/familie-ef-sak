@@ -65,15 +65,11 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
             ?: it.søknadsgrunnlag.fødselTermindato
         }
 
-        //val aktivitetDto = AktivitetMapper.tilDto(aktivitet = søknad.aktivitet)
-        val sagtOppEllerRedusertStilling = SagtOppEllerRedusertStillingMapper.tilDto(situasjon = søknad.situasjon)
         return VilkårGrunnlagDto(medlemskap = medlemskap,
                                  sivilstand = sivilstand,
                                  bosituasjon = BosituasjonMapper.tilDto(søknad.bosituasjon),
                                  barnMedSamvær = barnMedSamvær,
-                                 sivilstandsplaner = sivilstandsplaner,
-                                 //aktivitet = aktivitetDto,
-                                 sagtOppEllerRedusertStilling = sagtOppEllerRedusertStilling)
+                                 sivilstandsplaner = sivilstandsplaner)
     }
 
     fun godkjennEndringerIRegistergrunnlag(behandlingId: UUID) {
