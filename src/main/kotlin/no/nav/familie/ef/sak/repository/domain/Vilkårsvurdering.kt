@@ -94,10 +94,7 @@ enum class VilkårType(val beskrivelse: String,
     ALENEOMSORG("§15-4 Aleneomsorg",
                 listOf(DelvilkårType.SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
                        DelvilkårType.NÆRE_BOFORHOLD,
-                       DelvilkårType.MER_AV_DAGLIG_OMSORG)),
-    AKTIVITET("§15-4 Aktvitet", emptyList<DelvilkårType>()),
-    SAGT_OPP_REDUSERT("§15-4 Sagt opp eller redusert stilling",
-                      listOf(DelvilkårType.SAGT_OPP_REDUSERT, DelvilkårType.RIMELIG_GRUNN_SAGT_OPP));
+                       DelvilkårType.MER_AV_DAGLIG_OMSORG));
 
     companion object {
 
@@ -106,8 +103,6 @@ enum class VilkårType(val beskrivelse: String,
                                                     MOR_ELLER_FAR,
                                                     SIVILSTAND,
                                                     SAMLIV,
-                                                    ALENEOMSORG,
-                                                    AKTIVITET,
-                                                    SAGT_OPP_REDUSERT)
+                                                    ALENEOMSORG)
     }
 }
