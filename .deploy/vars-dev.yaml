@@ -1,5 +1,7 @@
 springProfile: dev
 ingress: https://familie-ef-sak.dev.intern.nav.no
+inboundApplications:
+  - familie-ef-sak-frontend-lokal
 externalHosts:
   - api-gw-q1.oera.no
   - unleash.nais.io

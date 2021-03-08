@@ -45,6 +45,9 @@ spec:
     inbound:
       rules:
         - application: familie-ef-sak-frontend
+        {{#each inboundApplications as |application|}}
+        - application: {{application}}
+        {{/each}}
     outbound:
       rules:
         - application: familie-brev
