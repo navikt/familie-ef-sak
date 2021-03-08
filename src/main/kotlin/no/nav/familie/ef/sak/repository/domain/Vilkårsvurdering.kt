@@ -46,6 +46,7 @@ enum class DelvilkårType {
     NÆRE_BOFORHOLD,
     MER_AV_DAGLIG_OMSORG,
     OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN,
+    HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER,
 }
 
 enum class DelvilkårÅrsak {
@@ -92,7 +93,9 @@ enum class VilkårType(val beskrivelse: String,
     ALENEOMSORG("§15-4 Aleneomsorg",
                 listOf(DelvilkårType.SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
                        DelvilkårType.NÆRE_BOFORHOLD,
-                       DelvilkårType.MER_AV_DAGLIG_OMSORG));
+                       DelvilkårType.MER_AV_DAGLIG_OMSORG)),
+    NYTT_BARN_SAMME_PARTNER("§15-4 Nytt barn samme partner",
+                            listOf(DelvilkårType.HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER));
 
     companion object {
 
@@ -101,6 +104,8 @@ enum class VilkårType(val beskrivelse: String,
                                                             MOR_ELLER_FAR,
                                                             SIVILSTAND,
                                                             SAMLIV,
-                                                            ALENEOMSORG)
+                                                            ALENEOMSORG,
+                                                            NYTT_BARN_SAMME_PARTNER
+        )
     }
 }
