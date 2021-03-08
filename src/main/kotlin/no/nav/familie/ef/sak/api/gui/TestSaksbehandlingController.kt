@@ -94,17 +94,23 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
                 if (testFagsakRequest.behandlingsType == "BLANKETT") {
                     lagBlankettBehandling(fagsak, testFagsakRequest.personIdent, søknad)
                 } else {
-                    behandlingService.opprettBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, fagsak.id)
+                    lagFørstegangsbehandling(fagsak, søknad)
                 }
 
         behandlingshistorikkService.opprettHistorikkInnslag(Behandlingshistorikk(behandlingId = behandling.id,
                                                                                  steg = StegType.REGISTRERE_OPPLYSNINGER))
 
+
+        return Ressurs.success(behandling.id)
+    }
+
+    private fun lagFørstegangsbehandling(fagsak: Fagsak, søknad: SøknadOvergangsstønad): Behandling {
+        val behandling = behandlingService.opprettBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, fagsak.id)
         behandlingService.lagreSøknadForOvergangsstønad(søknad,
                                                         behandling.id,
                                                         fagsak.id,
                                                         behandling.journalposter.firstOrNull()?.journalpostId ?: "TESTJPID")
-        return Ressurs.success(behandling.id)
+        return behandling
     }
 
     private fun arkiver(fnr: String): String {
@@ -124,15 +130,8 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
 
         val journalpostId = arkiver(fnr)
         val journalpost = journalpostClient.hentJournalpost(journalpostId)
-
         val behandling = behandlingService.opprettBehandling(BehandlingType.BLANKETT, fagsak.id, søknad, journalpost)
-
-
-
         blankettService.lagreTomBlankett(behandling.id)
-        // lag journalføring
-
-
         return behandling
     }
 }
