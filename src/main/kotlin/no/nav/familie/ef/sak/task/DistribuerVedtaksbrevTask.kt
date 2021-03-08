@@ -33,8 +33,7 @@ class DistribuerVedtaksbrevTask(private val stegService: StegService,
         fun opprettTask(behandling: Behandling, journalpostId: String): Task =
                 Task(type = TYPE,
                      payload = objectMapper.writeValueAsString(DistribuerVedtaksbrevTaskData(behandlingId = behandling.id,
-                                                                                             journalpostId = journalpostId)),
-                     triggerTid = LocalDateTime.now().plusMinutes(15))
+                                                                                             journalpostId = journalpostId)))
 
         const val TYPE = "distribuerVedtaksbrev"
     }
