@@ -108,15 +108,12 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
     }
 
     private fun arkiver(fnr: String): String {
-        val arkiverDokumentRequest =
-
-
-                ArkiverDokumentRequest(fnr,
-                                       false,
-                                       listOf(Dokument("TEST".toByteArray(),
-                                                       FilType.PDFA, null, null,
-                                                       "DOKUMENTTYPE_OVERGANGSSTØNAD")),
-                                       emptyList())
+        val arkiverDokumentRequest = ArkiverDokumentRequest(fnr,
+                                                            false,
+                                                            listOf(Dokument("TEST".toByteArray(),
+                                                                            FilType.PDFA, null, null,
+                                                                            "OVERGANGSSTØNAD_SØKNAD")),
+                                                            emptyList())
 
         val dokumentResponse = journalpostClient.arkiverDokument(arkiverDokumentRequest)
         return dokumentResponse.journalpostId
