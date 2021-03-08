@@ -25,7 +25,14 @@ internal class VedtaksbrevRepositoryTest : OppslagSpringRunnerTest() {
         val fagsak = fagsakRepository.insert(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
         val vedtaksbrev = Vedtaksbrev(behandlingId = behandling.id,
-                                      utkastBrevRequest = BrevRequest("Olav Olavssen", "12345678910", LocalDate.now(), LocalDate.now(), "fordi jepp", LocalDate.now(), 1300),
+                                      utkastBrevRequest = BrevRequest("Olav Olavssen",
+                                                                      "12345678910",
+                                                                      LocalDate.now(),
+                                                                      LocalDate.now(),
+                                                                      "fordi jepp",
+                                                                      LocalDate.now(),
+                                                                      1300,
+                                                                      "Saksbehandler Saksbehandlersen"),
                                       utkastPdf = Fil(ByteArray(123)))
 
         vedtaksbrevRepository.insert(vedtaksbrev)

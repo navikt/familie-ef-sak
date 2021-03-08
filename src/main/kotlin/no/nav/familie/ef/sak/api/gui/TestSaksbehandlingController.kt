@@ -10,10 +10,7 @@ import no.nav.familie.ef.sak.service.BehandlingshistorikkService
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.PersonService
 import no.nav.familie.ef.sak.service.steg.StegType
-import no.nav.familie.kontrakter.ef.søknad.Barn
-import no.nav.familie.kontrakter.ef.søknad.Fødselsnummer
-import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
-import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
+import no.nav.familie.kontrakter.ef.søknad.*
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.context.annotation.Profile
@@ -77,6 +74,12 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
         val søknad: SøknadOvergangsstønad = TestsøknadBuilder.Builder()
                 .setPersonalia(søkerMedBarn.søker.navn.gjeldende().visningsnavn(), søkerMedBarn.søkerIdent)
                 .setBarn(barneListe)
+                .setBosituasjon(delerDuBolig = EnumTekstverdiMedSvarId(verdi = "Nei, jeg bor alene med barn eller jeg er gravid og bor alene",
+                                                                   svarId = "borAleneMedBarnEllerGravid"))
+                .setSivilstandsplaner(harPlaner = true,
+                                      fraDato = LocalDate.of(2019, 9, 17),
+                                      vordendeSamboerEktefelle = TestsøknadBuilder.Builder().defaultPersonMinimum(navn = "Fyren som skal bli min samboer", fødselsdato = LocalDate.of(1979, 9, 17)),
+                )
                 .build().søknadOvergangsstønad
 
 

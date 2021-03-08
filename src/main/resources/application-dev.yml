@@ -10,6 +10,7 @@ no.nav.security.jwt:
 ON_PREM_URL_ENV: dev
 GATEWAY_PREFIX: api-gw-q1
 
+FRONTEND_OPPGAVE_URL: https://ensligmorellerfar.dev.intern.nav.no/oppgavebenk
 
 rolle:
   veileder: "19dcbfde-4cdb-4c64-a1ea-ac9802b03339"

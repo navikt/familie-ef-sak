@@ -6,6 +6,8 @@ import no.nav.familie.ef.sak.integration.dto.pdl.Familierelasjonsrolle
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlAnnenForelder
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlPersonKort
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker
+import no.nav.familie.kontrakter.felles.journalpost.BrukerIdType
+import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import org.springframework.stereotype.Service
 
 @Service

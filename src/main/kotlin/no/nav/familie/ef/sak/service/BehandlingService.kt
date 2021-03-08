@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.service
 
+import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.api.dto.BehandlingDto
 import no.nav.familie.ef.sak.api.dto.tilDto
 import no.nav.familie.ef.sak.mapper.SøknadsskjemaMapper
@@ -11,6 +12,7 @@ import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaSkolepenger
 import no.nav.familie.ef.sak.service.steg.StegType
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
+import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -55,6 +57,22 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
         søknadRepository.insert(SøknadMapper.toDomain(fagsakId.toString(), journalpostId, søknadsskjema, behandlingId))
     }
 
+    @Transactional
+    fun opprettBehandling(behandlingType: BehandlingType,
+                          fagsakId: UUID,
+                          søknad: SøknadOvergangsstønadKontrakt,
+                          journalpost: Journalpost): Behandling {
+        val behandling = behandlingRepository.insert(Behandling(fagsakId = fagsakId,
+                                                                type = behandlingType,
+                                                                steg = StegType.REGISTRERE_OPPLYSNINGER,
+                                                                status = BehandlingStatus.OPPRETTET,
+                                                                resultat = BehandlingResultat.IKKE_SATT,
+                                                                journalposter = setOf(Behandlingsjournalpost(journalpost.journalpostId,
+                                                                                                             journalpost.journalposttype))))
+
+        lagreSøknadForOvergangsstønad(søknad, behandling.id, fagsakId, journalpost.journalpostId)
+        return behandling
+    }
 
     fun opprettBehandling(behandlingType: BehandlingType, fagsakId: UUID): Behandling {
         return behandlingRepository.insert(Behandling(fagsakId = fagsakId,
@@ -84,7 +102,7 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
     fun oppdaterStatusPåBehandling(behandlingId: UUID, status: BehandlingStatus): Behandling {
         val behandling = hentBehandling(behandlingId)
         secureLogger.info("${SikkerhetContext.hentSaksbehandler()} endrer status på behandling $behandlingId " +
-                    "fra ${behandling.status} til $status")
+                          "fra ${behandling.status} til $status")
 
         behandling.status = status
         return behandlingRepository.update(behandling)
@@ -93,7 +111,7 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
     fun oppdaterStegPåBehandling(behandlingId: UUID, steg: StegType): Behandling {
         val behandling = hentBehandling(behandlingId)
         secureLogger.info("${SikkerhetContext.hentSaksbehandler()} endrer steg på behandling $behandlingId " +
-                    "fra ${behandling.steg} til $steg")
+                          "fra ${behandling.steg} til $steg")
 
         behandling.steg = steg
         return behandlingRepository.update(behandling)
@@ -109,11 +127,11 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
         return behandlingRepository.findByFagsakId(fagsakId).map(Behandling::tilDto)
     }
 
-    fun oppdaterJournalpostIdPåBehandling(journalpost: Journalpost, behandling: Behandling) {
+    fun oppdaterJournalpostIdPåBehandling(journalpostId: String, journalposttype: Journalposttype, behandling: Behandling) {
         behandling.journalposter = behandling.journalposter +
-                                   Behandlingsjournalpost(journalpostId = journalpost.journalpostId,
+                                   Behandlingsjournalpost(journalpostId = journalpostId,
                                                           sporbar = Sporbar(),
-                                                          journalpostType = journalpost.journalposttype)
+                                                          journalpostType = journalposttype)
         behandlingRepository.update(behandling)
     }
 

@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.repository
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -56,6 +57,21 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(findByEksternId).isEqualTo(behandling)
         assertThat(findByEksternId).isEqualTo(findByBehandlingId.get())
     }
+
+
+    @Test
+    internal fun `finnFnrForBehandlingId(sql) skal finne gjeldende fnr for behandlingsid`() {
+        val gammel = fagsakpersoner(setOf("gammel"))
+        Thread.sleep(3)
+        val ny = fagsakpersoner(setOf("ny"))
+        val fagsak = fagsakRepository.insert(fagsak(gammel + ny))
+        val behandling = behandlingRepository.insert(behandling(fagsak))
+        //
+        val fnr = behandlingRepository.finnGjeldendeIdentForBehandling(behandling.id)
+        //
+        assertThat("ny").isEqualTo(fnr)
+    }
+
 
     @Test
     internal fun `finnMedEksternId skal gi null når det ikke finnes behandling for gitt id`() {

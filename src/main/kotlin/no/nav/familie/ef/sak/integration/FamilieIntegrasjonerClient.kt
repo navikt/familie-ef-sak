@@ -9,8 +9,12 @@ import no.nav.familie.ef.sak.integration.dto.familie.Tilgang
 import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadRequest
+import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
+import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClientException
@@ -23,6 +27,7 @@ class FamilieIntegrasjonerClient(@Qualifier("azure") restOperations: RestOperati
     : AbstractPingableRestClient(restOperations, "familie.integrasjoner") {
 
     override val pingUri: URI = integrasjonerConfig.pingUri
+    val logger = LoggerFactory.getLogger(this::class.java)
 
     fun sjekkTilgangTilPersoner(identer: List<String>): List<Tilgang> {
         return postForEntity(integrasjonerConfig.tilgangUri, identer)
@@ -53,5 +58,10 @@ class FamilieIntegrasjonerClient(@Qualifier("azure") restOperations: RestOperati
     fun egenAnsatt(ident: String): Boolean {
         return postForEntity<Ressurs<EgenAnsattResponse>>(integrasjonerConfig.egenAnsattUri,
                                                           EgenAnsattRequest(ident)).data!!.erEgenAnsatt
+    }
+
+    fun hentInfotrygdPerioder(request: PerioderOvergangsstønadRequest): PerioderOvergangsstønadResponse {
+        return postForEntity<Ressurs<PerioderOvergangsstønadResponse>>(integrasjonerConfig.infotrygdVedtaksperioder, request)
+                .getDataOrThrow()
     }
 }

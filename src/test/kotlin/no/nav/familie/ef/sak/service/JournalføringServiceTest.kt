@@ -1,21 +1,39 @@
 package no.nav.familie.ef.sak.service
 
-import io.mockk.*
+import io.mockk.Runs
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.runs
+import io.mockk.slot
+import io.mockk.verify
 import no.nav.familie.ef.sak.api.journalføring.JournalføringBehandling
 import no.nav.familie.ef.sak.api.journalføring.JournalføringRequest
 import no.nav.familie.ef.sak.domene.DokumentVariantformat
 import no.nav.familie.ef.sak.integration.JournalpostClient
-import no.nav.familie.ef.sak.repository.domain.*
+import no.nav.familie.ef.sak.integration.PdlClient
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.repository.domain.Behandling
+import no.nav.familie.ef.sak.repository.domain.BehandlingResultat
+import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
+import no.nav.familie.ef.sak.repository.domain.BehandlingType
+import no.nav.familie.ef.sak.repository.domain.EksternFagsakId
+import no.nav.familie.ef.sak.repository.domain.Fagsak
+import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.service.steg.StegType
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostResponse
-import no.nav.familie.kontrakter.felles.journalpost.*
+import no.nav.familie.kontrakter.felles.journalpost.DokumentInfo
+import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariant
+import no.nav.familie.kontrakter.felles.journalpost.Journalpost
+import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
+import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.*
+import java.util.UUID
 
 internal class JournalføringServiceTest {
 
@@ -23,8 +41,10 @@ internal class JournalføringServiceTest {
     private val behandlingService: BehandlingService = mockk()
     private val oppgaveService: OppgaveService = mockk()
     private val fagsakService: FagsakService = mockk()
+    private val pdlClient: PdlClient = mockk()
 
-    private val journalføringService = JournalføringService(journalpostClient, behandlingService, fagsakService, oppgaveService)
+    private val journalføringService =
+            JournalføringService(journalpostClient, behandlingService, fagsakService, pdlClient, oppgaveService)
 
     private val fagsakId: UUID = UUID.randomUUID()
     private val fagsakEksternId = 12345L
@@ -83,7 +103,7 @@ internal class JournalføringServiceTest {
 
         every { oppgaveService.ferdigstillOppgave(any()) } just runs
         every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any()) } returns nyOppgaveId
-        every { behandlingService.oppdaterJournalpostIdPåBehandling(any(), any()) } just runs
+        every { behandlingService.oppdaterJournalpostIdPåBehandling(any(), any(), any()) } just runs
         every { journalpostClient.ferdigstillJournalpost(any(), any()) } just runs
 
         every {
@@ -105,6 +125,10 @@ internal class JournalføringServiceTest {
         every {
             journalpostClient.hentOvergangsstønadSøknad(any(), capture(slotDokumentInfoIder))
         } returns Testsøknad.søknadOvergangsstønad
+
+        every {
+            fagsakService.hentFagsak(any())
+        } returns fagsak().copy(id = fagsakId, eksternId = EksternFagsakId(fagsakEksternId))
 
         val behandleSakOppgaveId =
                 journalføringService.fullførJournalpost(journalpostId = journalpostId,

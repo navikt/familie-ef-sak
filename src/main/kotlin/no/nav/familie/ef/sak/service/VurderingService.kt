@@ -5,29 +5,32 @@ import no.nav.familie.ef.sak.api.dto.DelvilkårsvurderingDto
 import no.nav.familie.ef.sak.api.dto.InngangsvilkårDto
 import no.nav.familie.ef.sak.api.dto.InngangsvilkårGrunnlagDto
 import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
-import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.PdlClient
-import no.nav.familie.ef.sak.integration.dto.pdl.*
-import no.nav.familie.ef.sak.mapper.BarnMedSamværMapper
-import no.nav.familie.ef.sak.mapper.BosituasjonMapper
-import no.nav.familie.ef.sak.mapper.MedlemskapMapper
-import no.nav.familie.ef.sak.mapper.SivilstandMapper
+import no.nav.familie.ef.sak.integration.dto.pdl.Familierelasjonsrolle
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlAnnenForelder
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlBarn
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker
+import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
 import no.nav.familie.ef.sak.repository.VilkårsvurderingRepository
-import no.nav.familie.ef.sak.repository.domain.*
+import no.nav.familie.ef.sak.repository.domain.DelvilkårMetadata
+import no.nav.familie.ef.sak.repository.domain.Delvilkårsvurdering
+import no.nav.familie.ef.sak.repository.domain.DelvilkårsvurderingWrapper
+import no.nav.familie.ef.sak.repository.domain.VilkårType
+import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
+import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
 import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsstønad
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.vurdering.utledDelvilkårResultat
 import no.nav.familie.ef.sak.vurdering.validerDelvilkår
 import org.springframework.stereotype.Service
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 @Service
 class VurderingService(private val behandlingService: BehandlingService,
                        private val pdlClient: PdlClient,
-                       private val familieIntegrasjonerClient: FamilieIntegrasjonerClient,
                        private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-                       private val medlemskapMapper: MedlemskapMapper) {
+                       private val grunnlagsdataService: GrunnlagsdataService) {
 
     fun oppdaterVilkår(vilkårsvurderingDto: VilkårsvurderingDto): UUID {
         val vilkårsvurdering = vilkårsvurderingRepository.findByIdOrThrow(vilkårsvurderingDto.id)
@@ -58,29 +61,9 @@ class VurderingService(private val behandlingService: BehandlingService,
 
     fun hentInngangsvilkår(behandlingId: UUID): InngangsvilkårDto {
         val søknad = behandlingService.hentOvergangsstønad(behandlingId)
-        val grunnlag = hentGrunnlag(søknad.fødselsnummer, søknad)
+        val grunnlag = grunnlagsdataService.hentGrunnlag(behandlingId, søknad)
         val vurderinger = hentVurderinger(behandlingId, søknad, grunnlag)
         return InngangsvilkårDto(vurderinger = vurderinger, grunnlag = grunnlag)
-    }
-
-    private fun hentGrunnlag(fnr: String,
-                             søknad: SøknadsskjemaOvergangsstønad): InngangsvilkårGrunnlagDto {
-        val pdlSøker = pdlClient.hentSøker(fnr)
-        val pdlBarn = hentPdlBarn(pdlSøker)
-        val barneForeldre = hentPdlBarneForeldre(søknad, pdlBarn)
-        val medlUnntak = familieIntegrasjonerClient.hentMedlemskapsinfo(ident = fnr)
-
-        val medlemskap = medlemskapMapper.tilDto(medlemskapsdetaljer = søknad.medlemskap,
-                                                 medlUnntak = medlUnntak,
-                                                 pdlSøker = pdlSøker)
-
-        val sivilstand = SivilstandMapper.tilDto(sivilstandsdetaljer = søknad.sivilstand,
-                                                 pdlSøker = pdlSøker)
-        val bosituasjon = BosituasjonMapper.tilDto(søknad.bosituasjon)
-
-        val barnMedSamvær = BarnMedSamværMapper.tilDto(pdlBarn, barneForeldre, søknad)
-
-        return InngangsvilkårGrunnlagDto(medlemskap, sivilstand, bosituasjon, barnMedSamvær)
     }
 
     private fun hentVurderinger(behandlingId: UUID,
@@ -166,41 +149,7 @@ class VurderingService(private val behandlingService: BehandlingService,
         }
     }
 
-
-    private fun hentMedlInfo(behandlingId: UUID) =
-            behandlingService.hentBehandling(behandlingId).status.behandlingErLåstForVidereRedigering()
-
-
     private fun behandlingErLåstForVidereRedigering(behandlingId: UUID) =
             behandlingService.hentBehandling(behandlingId).status.behandlingErLåstForVidereRedigering()
-
-
-    private fun hentPdlBarneForeldre(søknad: SøknadsskjemaOvergangsstønad,
-                                     barn: Map<String, PdlBarn>): Map<String, PdlAnnenForelder> {
-        val barneforeldreFraSøknad =
-                søknad.barn.mapNotNull {
-                    it.annenForelder?.person?.fødselsnummer
-                }
-
-        val barneforeldre = barn.map { it.value.familierelasjoner }
-                .flatten()
-                .filter { it.relatertPersonsIdent != søknad.fødselsnummer && it.relatertPersonsRolle != Familierelasjonsrolle.BARN }
-                .map { it.relatertPersonsIdent }
-                .plus(barneforeldreFraSøknad)
-                .distinct()
-                .let { pdlClient.hentAndreForeldre(it) }
-        return barneforeldre
-    }
-
-    private fun hentPdlBarn(pdlSøker: PdlSøker): Map<String, PdlBarn> {
-        val barn = pdlSøker.familierelasjoner
-                .filter { it.relatertPersonsRolle == Familierelasjonsrolle.BARN }
-                .map { it.relatertPersonsIdent }
-                .let { pdlClient.hentBarn(it) }
-                .filter { it.value.fødsel.gjeldende()?.fødselsdato != null }
-                .filter { it.value.fødsel.first().fødselsdato!!.plusYears(18).isAfter(LocalDate.now()) }
-        return barn
-    }
-
 
 }

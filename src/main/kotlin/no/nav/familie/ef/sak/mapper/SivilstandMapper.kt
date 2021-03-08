@@ -11,24 +11,28 @@ import no.nav.familie.ef.sak.repository.domain.søknad.Sivilstand
 object SivilstandMapper {
 
     fun tilDto(sivilstandsdetaljer: Sivilstand, pdlSøker: PdlSøker): SivilstandInngangsvilkårDto {
+        return SivilstandInngangsvilkårDto(søknadsgrunnlag = mapSøknadsgrunnlag(sivilstandsdetaljer),
+                                           registergrunnlag = mapRegistergrunnlag(pdlSøker))
+    }
+
+    fun mapRegistergrunnlag(pdlSøker: PdlSøker): SivilstandRegistergrunnlagDto {
         val sivilstand = pdlSøker.sivilstand.gjeldende()
-        val registergrunnlag = SivilstandRegistergrunnlagDto(type = Sivilstandstype.valueOf(sivilstand.type.name),
-                                                             gyldigFraOgMed = sivilstand.gyldigFraOgMed)
+        return SivilstandRegistergrunnlagDto(type = Sivilstandstype.valueOf(sivilstand.type.name),
+                                             gyldigFraOgMed = sivilstand.gyldigFraOgMed)
+    }
 
-        val søknadsgrunnlag =
-                SivilstandSøknadsgrunnlagDto(samlivsbruddsdato = sivilstandsdetaljer.samlivsbruddsdato,
-                                             endringSamværsordningDato = sivilstandsdetaljer.endringSamværsordningDato,
-                                             fraflytningsdato = sivilstandsdetaljer.fraflytningsdato,
-                                             erUformeltGift = sivilstandsdetaljer.erUformeltGift,
-                                             erUformeltSeparertEllerSkilt = sivilstandsdetaljer.erUformeltSeparertEllerSkilt,
-                                             datoSøktSeparasjon = sivilstandsdetaljer.datoSøktSeparasjon,
-                                             søktOmSkilsmisseSeparasjon = sivilstandsdetaljer.søktOmSkilsmisseSeparasjon,
-                                             årsakEnslig = sivilstandsdetaljer.årsakEnslig,
-                                             tidligereSamboer = sivilstandsdetaljer.tidligereSamboer?.let { PersonMinimumMapper.tilDto(it) }
-                )
-
-        return SivilstandInngangsvilkårDto(
-                søknadsgrunnlag, registergrunnlag
+    fun mapSøknadsgrunnlag(sivilstandsdetaljer: Sivilstand): SivilstandSøknadsgrunnlagDto {
+        return SivilstandSøknadsgrunnlagDto(samlivsbruddsdato = sivilstandsdetaljer.samlivsbruddsdato,
+                                            endringSamværsordningDato = sivilstandsdetaljer.endringSamværsordningDato,
+                                            fraflytningsdato = sivilstandsdetaljer.fraflytningsdato,
+                                            erUformeltGift = sivilstandsdetaljer.erUformeltGift,
+                                            erUformeltSeparertEllerSkilt = sivilstandsdetaljer.erUformeltSeparertEllerSkilt,
+                                            datoSøktSeparasjon = sivilstandsdetaljer.datoSøktSeparasjon,
+                                            søktOmSkilsmisseSeparasjon = sivilstandsdetaljer.søktOmSkilsmisseSeparasjon,
+                                            årsakEnslig = sivilstandsdetaljer.årsakEnslig,
+                                            tidligereSamboer = sivilstandsdetaljer.tidligereSamboer?.let {
+                                                PersonMinimumMapper.tilDto(it)
+                                            }
         )
     }
 }
