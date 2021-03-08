@@ -65,14 +65,14 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
             ?: it.søknadsgrunnlag.fødselTermindato
         }
 
-        //val aktivitetDto = AktivitetMapper.tilDto(aktivitet = søknad.aktivitet)
+        val aktivitetDto = AktivitetMapper.tilDto(aktivitet = søknad.aktivitet, situasjon = søknad.situasjon, barn = søknad.barn )
         val sagtOppEllerRedusertStilling = SagtOppEllerRedusertStillingMapper.tilDto(situasjon = søknad.situasjon)
         return VilkårGrunnlagDto(medlemskap = medlemskap,
                                  sivilstand = sivilstand,
                                  bosituasjon = BosituasjonMapper.tilDto(søknad.bosituasjon),
                                  barnMedSamvær = barnMedSamvær,
                                  sivilstandsplaner = sivilstandsplaner,
-                                 //aktivitet = aktivitetDto,
+                                 aktivitet = aktivitetDto,
                                  sagtOppEllerRedusertStilling = sagtOppEllerRedusertStilling)
     }
 

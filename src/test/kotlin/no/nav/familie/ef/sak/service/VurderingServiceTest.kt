@@ -67,7 +67,8 @@ internal class VurderingServiceTest {
                                                                                             mockk(relaxed = true),
                                                                                             mockk(relaxed = true),
                                                                                             mockk(relaxed = true),
-                                                                                            mockk(relaxed = true),)
+                                                                                            mockk(relaxed = true),
+                                                                                            mockk(relaxed = true))
     }
 
     @Test
@@ -365,6 +366,7 @@ internal class VurderingServiceTest {
         val sivilstandRegistergrunnlagDto = SivilstandRegistergrunnlagDto(Sivilstandstype.GIFT, null)
         return VilkårGrunnlagDto(mockk(),
                                  SivilstandInngangsvilkårDto(sivilstandSøknadsgrunnlagDto, sivilstandRegistergrunnlagDto),
+                                 mockk(),
                                  mockk(),
                                  mockk(),
                                  mockk(),

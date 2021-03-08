@@ -21,7 +21,7 @@ import no.nav.familie.ef.sak.repository.domain.søknad.UnderUtdanning
 
 object AktivitetMapper {
 
-    fun tilDto(aktivitet: Aktivitet, situasjon: Situasjon, barn: List<Barn>): AktivitetDto {
+    fun tilDto(aktivitet: Aktivitet, situasjon: Situasjon, barn: Set<Barn>): AktivitetDto {
         return AktivitetDto(arbeidssituasjon = aktivitet.hvordanErArbeidssituasjonen.verdier,
                             arbeidsforhold = tilArbeidforholdDto(aktivitet.arbeidsforhold),
                             selvstendig = tilSelvstendigDto(aktivitet.firmaer),
@@ -102,7 +102,7 @@ object AktivitetMapper {
         }
     }
 
-    private fun tilSærligeTilsynsbehovDto(barn: List<Barn>): List<SærligeTilsynsbehovDto> {
+    private fun tilSærligeTilsynsbehovDto(barn: Set<Barn>): List<SærligeTilsynsbehovDto> {
         return barn.map {
             SærligeTilsynsbehovDto(id = it.id,
                                    navn = it.navn,
