@@ -53,7 +53,7 @@ object BarnMedSamværMapper {
                 harDereTidligereBoddSammen = samvær?.harDereTidligereBoddSammen,
                 nårFlyttetDereFraHverandre = samvær?.nårFlyttetDereFraHverandre,
                 hvorMyeErDuSammenMedAnnenForelder = samvær?.hvorMyeErDuSammenMedAnnenForelder,
-                beskrivSamværUtenBarn = samvær?.beskrivSamværUtenBarn
+                beskrivSamværUtenBarn = samvær?.beskrivSamværUtenBarn,
         )
     }
 
