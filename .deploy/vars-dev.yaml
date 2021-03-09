@@ -6,8 +6,8 @@ inboundApplicationsExternal:
   - application: familie-ef-proxy
     namespace: teamfamilie
     cluster: dev-fss
-  - application: familie-ef-proxy
-    namespace: t4
+  - application: familie-ef-proxy-test
+    namespace: teamfamilie
     cluster: dev-fss
 externalHosts:
   - api-gw-q1.oera.no
