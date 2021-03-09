@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.api.gui
 
 import no.nav.familie.ef.sak.blankett.BlankettService
+import no.nav.familie.ef.sak.domene.SøkerMedBarn
 import no.nav.familie.ef.sak.integration.JournalpostClient
 import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
 import no.nav.familie.ef.sak.integration.dto.pdl.visningsnavn
@@ -41,10 +42,40 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
         val fagsakDto =
                 fagsakService.hentEllerOpprettFagsak(testFagsakRequest.personIdent, Stønadstype.OVERGANGSSTØNAD)
         val fagsak = fagsakService.hentFagsak(fagsakDto.id)
+        val søknad: SøknadOvergangsstønad = lagSøknad(testFagsakRequest.personIdent)
+        val behandling: Behandling =
+                if (testFagsakRequest.behandlingsType == "BLANKETT") {
+                    lagBlankettBehandling(fagsak, testFagsakRequest.personIdent, søknad)
+                } else {
+                    lagFørstegangsbehandling(fagsak, søknad)
+                }
 
+        behandlingshistorikkService.opprettHistorikkInnslag(Behandlingshistorikk(behandlingId = behandling.id,
+                                                                                 steg = StegType.REGISTRERE_OPPLYSNINGER))
 
-        val søkerMedBarn = personService.hentPersonMedRelasjoner(testFagsakRequest.personIdent)
+        return Ressurs.success(behandling.id)
+    }
 
+    private fun lagSøknad(personIdent: String): SøknadOvergangsstønad {
+        val søkerMedBarn = personService.hentPersonMedRelasjoner(personIdent)
+        val barneListe: List<Barn> = mapSøkersBarn(søkerMedBarn)
+        val søknad: SøknadOvergangsstønad = TestsøknadBuilder.Builder()
+                .setPersonalia(søkerMedBarn.søker.navn.gjeldende().visningsnavn(), søkerMedBarn.søkerIdent)
+                .setBarn(barneListe)
+                .setBosituasjon(delerDuBolig = EnumTekstverdiMedSvarId(verdi = "Nei, jeg bor alene med barn eller jeg er gravid og bor alene",
+                                                                       svarId = "borAleneMedBarnEllerGravid"))
+                .setSivilstandsplaner(
+                        harPlaner = true,
+                        fraDato = LocalDate.of(2019, 9, 17),
+                        vordendeSamboerEktefelle = TestsøknadBuilder.Builder()
+                                .defaultPersonMinimum(navn = "Fyren som skal bli min samboer",
+                                                      fødselsdato = LocalDate.of(1979, 9, 17)),
+                )
+                .build().søknadOvergangsstønad
+        return søknad
+    }
+
+    private fun mapSøkersBarn(søkerMedBarn: SøkerMedBarn): List<Barn> {
         val barneListe: List<Barn> = søkerMedBarn.barn.map {
             TestsøknadBuilder.Builder().defaultBarn(
                     navn = it.value.navn.gjeldende().visningsnavn(),
@@ -75,33 +106,7 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
                     skalBoHosSøker = "jaMenSamarbeiderIkke"
             )
         }
-
-        val søknad: SøknadOvergangsstønad = TestsøknadBuilder.Builder()
-                .setPersonalia(søkerMedBarn.søker.navn.gjeldende().visningsnavn(), søkerMedBarn.søkerIdent)
-                .setBarn(barneListe)
-                .setBosituasjon(delerDuBolig = EnumTekstverdiMedSvarId(verdi = "Nei, jeg bor alene med barn eller jeg er gravid og bor alene",
-                                                                       svarId = "borAleneMedBarnEllerGravid"))
-                .setSivilstandsplaner(
-                        harPlaner = true,
-                        fraDato = LocalDate.of(2019, 9, 17),
-                        vordendeSamboerEktefelle = TestsøknadBuilder.Builder()
-                                .defaultPersonMinimum(navn = "Fyren som skal bli min samboer",
-                                                      fødselsdato = LocalDate.of(1979, 9, 17)),
-                )
-                .build().søknadOvergangsstønad
-
-        val behandling: Behandling =
-                if (testFagsakRequest.behandlingsType == "BLANKETT") {
-                    lagBlankettBehandling(fagsak, testFagsakRequest.personIdent, søknad)
-                } else {
-                    lagFørstegangsbehandling(fagsak, søknad)
-                }
-
-        behandlingshistorikkService.opprettHistorikkInnslag(Behandlingshistorikk(behandlingId = behandling.id,
-                                                                                 steg = StegType.REGISTRERE_OPPLYSNINGER))
-
-
-        return Ressurs.success(behandling.id)
+        return barneListe
     }
 
     private fun lagFørstegangsbehandling(fagsak: Fagsak, søknad: SøknadOvergangsstønad): Behandling {
@@ -127,7 +132,6 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
 
 
     private fun lagBlankettBehandling(fagsak: Fagsak, fnr: String, søknad: SøknadOvergangsstønad): Behandling {
-
         val journalpostId = arkiver(fnr)
         val journalpost = journalpostClient.hentJournalpost(journalpostId)
         val behandling = behandlingService.opprettBehandling(BehandlingType.BLANKETT, fagsak.id, søknad, journalpost)
