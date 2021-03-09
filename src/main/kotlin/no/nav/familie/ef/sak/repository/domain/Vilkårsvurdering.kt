@@ -47,6 +47,8 @@ enum class DelvilkårType {
     MER_AV_DAGLIG_OMSORG,
     OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN,
     HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER,
+    SAGT_OPP_REDUSERT,
+    RIMELIG_GRUNN_SAGT_OPP
 }
 
 enum class DelvilkårÅrsak {
@@ -99,13 +101,13 @@ enum class VilkårType(val beskrivelse: String,
 
     companion object {
 
-        fun hentInngangsvilkår(): List<VilkårType> = listOf(FORUTGÅENDE_MEDLEMSKAP,
-                                                            LOVLIG_OPPHOLD,
-                                                            MOR_ELLER_FAR,
-                                                            SIVILSTAND,
-                                                            SAMLIV,
-                                                            ALENEOMSORG,
-                                                            NYTT_BARN_SAMME_PARTNER
+        fun hentVilkår(): List<VilkårType> = listOf(FORUTGÅENDE_MEDLEMSKAP,
+                                                    LOVLIG_OPPHOLD,
+                                                    MOR_ELLER_FAR,
+                                                    SIVILSTAND,
+                                                    SAMLIV,
+                                                    ALENEOMSORG,
+                                                    NYTT_BARN_SAMME_PARTNER
         )
     }
 }

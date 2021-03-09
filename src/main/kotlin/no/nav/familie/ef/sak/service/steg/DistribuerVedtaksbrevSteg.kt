@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.service.steg
 
 import no.nav.familie.ef.sak.repository.domain.Behandling
+import no.nav.familie.ef.sak.service.VedtaksbrevService
 import no.nav.familie.ef.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.Logger
@@ -9,13 +10,15 @@ import org.springframework.stereotype.Service
 
 
 @Service
-class DistribuerVedtaksbrevSteg(private val taskRepository: TaskRepository) : BehandlingSteg<Void?> {
+class DistribuerVedtaksbrevSteg(private val taskRepository: TaskRepository,
+                                private val vedtaksbrevService: VedtaksbrevService) : BehandlingSteg<String> {
 
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-    override fun utførSteg(behandling: Behandling, data: Void?) {
-        // TODO: Implementer dette
-        logger.info("Distribuer vedtaksbrev [${behandling.id}]")
+    override fun utførSteg(behandling: Behandling, jourpostId: String) {
+        logger.info("Distribuer vedtaksbrev journalpost=[$jourpostId] for behandling=[${behandling.id}]")
+        val bestillingId = vedtaksbrevService.distribuerVedtaksbrev(behandling.id, jourpostId)
+        logger.info("Distribuer vedtaksbrev journalpost=[$jourpostId] for behandling=[${behandling.id}] med bestillingId=[$bestillingId]")
         ferdigstillBehandling(behandling)
     }
 
