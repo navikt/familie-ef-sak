@@ -11,4 +11,13 @@ data class Fil(val bytes: ByteArray) {
     override fun hashCode(): Int {
         return bytes.contentHashCode()
     }
+
+    /**
+     * Ønsker ikke å printe ut bytes i loggen hvis det blir feil
+     */
+    override fun toString(): String {
+        return "Fil(bytes=visesIkke)"
+    }
+
+
 }

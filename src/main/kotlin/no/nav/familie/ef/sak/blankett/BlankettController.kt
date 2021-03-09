@@ -7,10 +7,7 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.HttpStatus
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import java.util.*
 
 @RestController
@@ -26,6 +23,13 @@ class BlankettController(private val tilgangService: TilgangService,
         tilgangService.validerTilgangTilBehandling(behandlingId)
         val blankett = blankettService.lagBlankett(behandlingId)
         return Ressurs.success(blankett)
+    }
+
+    @GetMapping("{behandlingId}")
+    fun hentBlankettPdf(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
+        tilgangService.validerTilgangTilBehandling(behandlingId)
+        val blankett = blankettService.hentBlankettPdf(behandlingId)
+        return Ressurs.success(blankett.pdf.bytes)
     }
 
     @PostMapping("/oppgave/{oppgaveId}")
