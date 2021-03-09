@@ -31,6 +31,7 @@ import no.nav.familie.ef.sak.repository.domain.DelvilkårType.NÆRE_BOFORHOLD
 import no.nav.familie.ef.sak.repository.domain.DelvilkårType.OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN
 import no.nav.familie.ef.sak.repository.domain.DelvilkårType.SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON
 import no.nav.familie.ef.sak.repository.domain.DelvilkårType.SKRIFTLIG_AVTALE_OM_DELT_BOSTED
+import no.nav.familie.ef.sak.repository.domain.DelvilkårType.HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER
 import no.nav.familie.ef.sak.repository.domain.Delvilkårsvurdering
 import no.nav.familie.ef.sak.repository.domain.DelvilkårÅrsak
 import no.nav.familie.ef.sak.repository.domain.VilkårType
@@ -125,7 +126,8 @@ internal class VurderingServiceTest {
                         SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
                         NÆRE_BOFORHOLD,
                         MER_AV_DAGLIG_OMSORG,
-                        OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN
+                        OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN,
+                        HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER
                 ))
 
     }
