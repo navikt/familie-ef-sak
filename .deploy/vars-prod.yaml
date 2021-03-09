@@ -1,5 +1,9 @@
 springProfile: prod
 ingress: https://familie-ef-sak.intern.nav.no
+inboundApplicationsExternal:
+  - application: familie-ef-proxy
+    namespace: teamfamilie
+    cluster: prod-fss
 externalHosts:
   - api-gw.oera.no
   - unleash.nais.io

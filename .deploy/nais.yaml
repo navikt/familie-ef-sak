@@ -48,6 +48,11 @@ spec:
         {{#each inboundApplications as |application|}}
         - application: {{application}}
         {{/each}}
+        {{#each inboundApplicationsExternal}}
+        - application: {{this.application}}
+          namespace: {{this.namespace}}
+          cluster: {{this.cluster}}
+        {{/each}}
     outbound:
       rules:
         - application: familie-brev

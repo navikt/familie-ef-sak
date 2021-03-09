@@ -2,6 +2,13 @@ springProfile: dev
 ingress: https://familie-ef-sak.dev.intern.nav.no
 inboundApplications:
   - familie-ef-sak-frontend-lokal
+inboundApplicationsExternal:
+  - application: familie-ef-proxy
+    namespace: teamfamilie
+    cluster: dev-fss
+  - application: familie-ef-proxy
+    namespace: t4
+    cluster: dev-fss
 externalHosts:
   - api-gw-q1.oera.no
   - unleash.nais.io
