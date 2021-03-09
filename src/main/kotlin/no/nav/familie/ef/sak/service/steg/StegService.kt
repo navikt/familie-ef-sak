@@ -112,10 +112,10 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
     }
 
     @Transactional
-    fun håndterDistribuerVedtaksbrev(behandling: Behandling): Behandling {
-        val behandlingSteg: JournalførVedtaksbrevSteg = hentBehandlingSteg(DISTRIBUER_VEDTAKSBREV)
+    fun håndterDistribuerVedtaksbrev(behandling: Behandling, journalpostId: String): Behandling {
+        val behandlingSteg: DistribuerVedtaksbrevSteg = hentBehandlingSteg(DISTRIBUER_VEDTAKSBREV)
 
-        return håndterSteg(behandling, behandlingSteg, null)
+        return håndterSteg(behandling, behandlingSteg, journalpostId)
     }
 
     @Transactional
