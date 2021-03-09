@@ -40,7 +40,7 @@ class BlankettService(private val tilgangService: TilgangService,
 
     fun lagBlankett(behandlingId: UUID): ByteArray {
         val blankettPdfRequest = BlankettPdfRequest(lagPersonopplysningerDto(behandlingId),
-                                                    hentInngangsvilkårDto(behandlingId))
+                                                    hentVilkårDto(behandlingId))
         val blankettPdfAsByteArray = blankettClient.genererBlankett(blankettPdfRequest)
         oppdaterBlankett(behandlingId, blankettPdfAsByteArray)
         return blankettPdfAsByteArray
@@ -56,7 +56,7 @@ class BlankettService(private val tilgangService: TilgangService,
         blankettRepository.insert(blankett)
     }
 
-    private fun hentInngangsvilkårDto(behandlingId: UUID) = vurderingService.hentInngangsvilkår(behandlingId)
+    private fun hentVilkårDto(behandlingId: UUID) = vurderingService.hentVilkår(behandlingId)
 
     private fun lagPersonopplysningerDto(behandlingId: UUID): PersonopplysningerDto {
         val ident = fagsakService.hentFagsak(behandlingService.hentBehandling(behandlingId).fagsakId).hentAktivIdent()

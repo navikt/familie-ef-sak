@@ -19,7 +19,7 @@ internal class InngangsvilkårStegTest {
     @Test
     fun `skal feile validering når inngangsvilkår ikke er vurdert`() {
         val behandling = behandling(fagsak())
-        every { vurderingService.hentInngangsvilkårSomManglerVurdering(behandling.id) } returns
+        every { vurderingService.hentVilkårSomManglerVurdering(behandling.id) } returns
                 listOf(VilkårType.FORUTGÅENDE_MEDLEMSKAP)
 
         val exception = assertThrows<Feil> { inngangsvilkårSteg.validerSteg(behandling) }
