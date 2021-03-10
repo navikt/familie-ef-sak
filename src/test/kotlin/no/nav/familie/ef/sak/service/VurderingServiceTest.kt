@@ -116,7 +116,8 @@ internal class VurderingServiceTest {
                         SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
                         NÆRE_BOFORHOLD,
                         MER_AV_DAGLIG_OMSORG,
-                        OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN
+                        OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN,
+                        HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER
                 ))
 
     }
