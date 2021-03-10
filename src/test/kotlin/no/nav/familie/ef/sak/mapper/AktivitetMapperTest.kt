@@ -25,7 +25,7 @@ internal class AktivitetMapperTest {
 
     @Test
     internal fun `sjekker at mappet aktivitet har fått satt alle verdier`() {
-        val dto = AktivitetMapper.tilDto(aktivitet(),situasjon(),barn())
+        val dto = AktivitetMapper.tilDto(aktivitet(), situasjon(), barn())
         sjekkAtAlleVerdierErSatt(dto)
     }
 
@@ -107,19 +107,19 @@ internal class AktivitetMapperTest {
 
     private fun barn(): Set<Barn> =
             setOf(Barn(id = UUID.randomUUID(),
-                        navn = "navn",
-                        fødselsnummer = null,
-                        harSkalHaSammeAdresse = false,
-                        skalBoHosSøker = null,
-                        ikkeRegistrertPåSøkersAdresseBeskrivelse = null,
-                        erBarnetFødt = false,
-                        fødselTermindato = LocalDate.now().plusMonths(1),
-                        terminbekreftelse = dokumentliste(),
-                        annenForelder = null,
-                        samvær = null,
-                        skalHaBarnepass = false,
-                        særligeTilsynsbehov = "Ja",
-                        barnepass = null,
-                        lagtTilManuelt = true
+                       navn = "navn",
+                       fødselsnummer = null,
+                       harSkalHaSammeAdresse = false,
+                       skalBoHosSøker = null,
+                       ikkeRegistrertPåSøkersAdresseBeskrivelse = null,
+                       erBarnetFødt = false,
+                       fødselTermindato = LocalDate.now().plusMonths(1),
+                       terminbekreftelse = dokumentliste(),
+                       annenForelder = null,
+                       samvær = null,
+                       skalHaBarnepass = false,
+                       særligeTilsynsbehov = "Ja",
+                       barnepass = null,
+                       lagtTilManuelt = true
             ))
 }

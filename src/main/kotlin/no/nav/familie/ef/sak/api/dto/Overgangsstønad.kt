@@ -8,7 +8,6 @@ data class OvergangsstønadDto(val aktivitet: AktivitetDto,
                               val sagtOppEllerRedusertStilling: SagtOppEllerRedusertStillingDto?,
                               val stønadsperiode: StønadsperiodeDto)
 
-//TODO oppdatere med frilanser
 data class AktivitetDto(val arbeidssituasjon: List<String>,
                         val arbeidsforhold: List<ArbeidsforholdDto>,
                         val selvstendig: List<SelvstendigDto>,
