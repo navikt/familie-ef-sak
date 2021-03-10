@@ -6,9 +6,11 @@ import no.nav.familie.ef.sak.integration.dto.familie.Arbeidsfordelingsenhet
 import no.nav.familie.ef.sak.integration.dto.familie.EgenAnsattRequest
 import no.nav.familie.ef.sak.integration.dto.familie.EgenAnsattResponse
 import no.nav.familie.ef.sak.integration.dto.familie.Tilgang
+import no.nav.familie.ef.sak.util.medContentTypeJsonUTF8
 import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.dokdist.DistribuerJournalpostRequest
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadRequest
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
 import no.nav.familie.kontrakter.felles.getDataOrThrow
@@ -16,6 +18,7 @@ import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestOperations
@@ -64,4 +67,17 @@ class FamilieIntegrasjonerClient(@Qualifier("azure") restOperations: RestOperati
         return postForEntity<Ressurs<PerioderOvergangsstønadResponse>>(integrasjonerConfig.infotrygdVedtaksperioder, request)
                 .getDataOrThrow()
     }
+
+    fun distribuerBrev(journalpostId: String): String {
+        logger.info("Kaller dokdist-tjeneste for journalpost=$journalpostId")
+
+        val journalpostRequest = DistribuerJournalpostRequest(journalpostId = journalpostId,
+                                                              bestillendeFagsystem = "EF",
+                                                              dokumentProdApp = "FAMILIE_EF_SAK")
+
+        return postForEntity<Ressurs<String>>(integrasjonerConfig.distribuerDokumentUri,
+                                              journalpostRequest,
+                                              HttpHeaders().medContentTypeJsonUTF8()).getDataOrThrow()
+    }
+
 }

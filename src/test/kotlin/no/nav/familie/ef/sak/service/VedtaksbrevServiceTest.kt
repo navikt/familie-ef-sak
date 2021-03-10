@@ -3,7 +3,9 @@ package no.nav.familie.ef.sak.service
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import io.mockk.verify
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
+import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.JournalpostClient
 import no.nav.familie.ef.sak.integration.dto.familie.Arbeidsfordelingsenhet
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
@@ -34,9 +36,26 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
     @Autowired private lateinit var vedtaksbrevRepository: VedtaksbrevRepository
 
+    val brevClientMock = mockk<BrevClient>()
+    val behandlingServiceMock = mockk<BehandlingService>()
+    val fagsakServiceMock = mockk<FagsakService>()
+    val personServiceMock = mockk<PersonService>()
+    val journalpostClientMock = mockk<JournalpostClient>()
+    val arbeidsfordelingServiceMock = mockk<ArbeidsfordelingService>()
+    val vedtaksbrevRepositoryMock = mockk<VedtaksbrevRepository>()
+    val familieIntegrasjonerClientMock = mockk<FamilieIntegrasjonerClient>()
+
     private val fagsak = fagsak(setOf(FagsakPerson("")))
     private val behandling = behandling(fagsak)
 
+    internal fun lagServiceMedMocker() = VedtaksbrevService(brevClientMock,
+                                                            vedtaksbrevRepositoryMock,
+                                                            behandlingServiceMock,
+                                                            fagsakServiceMock,
+                                                            personServiceMock,
+                                                            journalpostClientMock,
+                                                            arbeidsfordelingServiceMock,
+                                                            familieIntegrasjonerClientMock)
 
     @BeforeEach
     internal fun setUp() {
@@ -96,16 +115,18 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         val journalpostClient = mockk<JournalpostClient>()
         val arbeidsfordelingService = mockk<ArbeidsfordelingService>()
         val vedtaksbrevRepository = mockk<VedtaksbrevRepository>()
+        val familieIntegrasjonerClient = mockk<FamilieIntegrasjonerClient>()
 
         val vedtaksbrev = Vedtaksbrev(behandling.id, mockk(), null, Fil("123".toByteArray()), Fil("123".toByteArray()))
 
         val vedtaksbrevService = VedtaksbrevService(brevClient,
-                                                vedtaksbrevRepository,
-                                                behandlingService,
-                                                fagsakService,
-                                                personService,
-                                                journalpostClient,
-                                                arbeidsfordelingService)
+                                                    vedtaksbrevRepository,
+                                                    behandlingService,
+                                                    fagsakService,
+                                                    personService,
+                                                    journalpostClient,
+                                                    arbeidsfordelingService,
+                                                    familieIntegrasjonerClient)
 
         val arkiverDokumentRequestSlot = slot<ArkiverDokumentRequest>()
 
@@ -121,7 +142,21 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         vedtaksbrevService.journalførVedtaksbrev(behandling.id)
 
         assertThat(arkiverDokumentRequestSlot.captured.fnr).isEqualTo(fagsak.hentAktivIdent())
-        assertThat(arkiverDokumentRequestSlot.captured.fagsakId).isEqualTo(fagsak.eksternId.toString())
+        assertThat(arkiverDokumentRequestSlot.captured.fagsakId).isEqualTo(fagsak.eksternId.id.toString())
+    }
+
+    @Test
+    internal fun `distribuerBrev skal distribuere brev`() {
+        val journalpostId = "5555"
+        val vedtaksbrevService = lagServiceMedMocker()
+
+        every { familieIntegrasjonerClientMock.distribuerBrev(any()) } returns "9876"
+
+
+        vedtaksbrevService.distribuerVedtaksbrev(behandling.id, journalpostId)
+
+        verify { familieIntegrasjonerClientMock.distribuerBrev(journalpostId) }
+
     }
 
 }

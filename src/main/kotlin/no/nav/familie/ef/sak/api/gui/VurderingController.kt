@@ -23,19 +23,19 @@ class VurderingController(private val vurderingService: VurderingService,
                           private val behandlingService: BehandlingService,
                           private val tilgangService: TilgangService) {
 
-    @PostMapping(value = ["inngangsvilkar", "vilkår"])
+    @PostMapping(value = ["inngangsvilkar", "vilkar"])
     fun oppdaterVurderingVilkår(@RequestBody vilkårsvurdering: VilkårsvurderingDto): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(vilkårsvurdering.behandlingId)
         return Ressurs.success(vurderingService.oppdaterVilkår(vilkårsvurdering))
     }
 
-    @GetMapping(value = ["{behandlingId}/inngangsvilkar","{behandlingId}/vilkår"])
+    @GetMapping(value = ["{behandlingId}/inngangsvilkar","{behandlingId}/vilkar"])
     fun getVilkår(@PathVariable behandlingId: UUID): Ressurs<VilkårDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         return Ressurs.success(vurderingService.hentVilkår(behandlingId))
     }
 
-    @PostMapping(value = ["/{behandlingId}/inngangsvilkar/fullfor", "/{behandlingId}/vilkår/fullfor"])
+    @PostMapping(value = ["/{behandlingId}/inngangsvilkar/fullfor", "/{behandlingId}/vilkar/fullfor"])
     fun fullførVilkår(@PathVariable behandlingId: UUID): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         val behandling = behandlingService.hentBehandling(behandlingId)
@@ -43,7 +43,7 @@ class VurderingController(private val vurderingService: VurderingService,
         val oppdatertBehandling = stegService.håndterRegistrerOpplysninger(behandling, null)
         return Ressurs.success(stegService.håndterInngangsvilkår(oppdatertBehandling).id)
     }
-    @PostMapping(value = ["/{behandlingId}/overgangsstonad/fullfor", "/{behandlingId}/overgangsstonad/fullfor"])
+    @PostMapping("/{behandlingId}/overgangsstonad/fullfor")
     fun fullførStønadsvilkår(@PathVariable behandlingId: UUID): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         val behandling = behandlingService.hentBehandling(behandlingId)

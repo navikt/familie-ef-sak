@@ -25,15 +25,17 @@ class JournalførVedtaksbrevSteg(private val taskRepository: TaskRepository,
                                                             Journalposttype.U,
                                                             behandling)
         logger.info("Journalfør vedtaksbrev behandling=[${behandling.id}] fullført med journalpost=[$journalpostId]")
-        distribuerVedtaksbrev(behandling)
+        lagDistribuerVedtaksbrevTask(behandling, journalpostId)
     }
 
-    private fun distribuerVedtaksbrev(behandling: Behandling) {
-        taskRepository.save(DistribuerVedtaksbrevTask.opprettTask(behandling))
+    private fun lagDistribuerVedtaksbrevTask(behandling: Behandling, journalpostId: String) {
+        taskRepository.save(DistribuerVedtaksbrevTask.opprettTask(behandling, journalpostId))
     }
 
 
     override fun stegType(): StegType {
         return StegType.JOURNALFØR_VEDTAKSBREV
     }
+
+
 }
