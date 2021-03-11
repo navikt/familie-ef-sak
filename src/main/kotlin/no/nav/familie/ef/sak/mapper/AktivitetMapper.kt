@@ -33,7 +33,8 @@ object AktivitetMapper {
                             },
                             tidligereUtdanninger = tilTidligereUtdaningDto(aktivitet.tidligereUtdanninger),
                             gjelderDeg = situasjon.gjelderDetteDeg.verdier,
-                            særligeTilsynsbehov = tilSærligeTilsynsbehovDto(barn)
+                            særligeTilsynsbehov = tilSærligeTilsynsbehovDto(barn),
+                            datoOppstartJobb = situasjon.oppstartNyJobb
         )
     }
 
