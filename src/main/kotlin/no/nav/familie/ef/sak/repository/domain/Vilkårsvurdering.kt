@@ -95,7 +95,7 @@ enum class VilkårType(val beskrivelse: String,
                 listOf(DelvilkårType.SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
                        DelvilkårType.NÆRE_BOFORHOLD,
                        DelvilkårType.MER_AV_DAGLIG_OMSORG)),
-    SAGT_OPP_ELLER_REDUSERT_STILLING("§15-4 Sagt opp eller redusert stilling",
+    SAGT_OPP_ELLER_REDUSERT("§15-4 Sagt opp eller redusert stilling",
                                      listOf(DelvilkårType.SAGT_OPP_REDUSERT, DelvilkårType.RIMELIG_GRUNN_SAGT_OPP));
 
     companion object {
@@ -106,6 +106,6 @@ enum class VilkårType(val beskrivelse: String,
                                                     SIVILSTAND,
                                                     SAMLIV,
                                                     ALENEOMSORG,
-                                                    SAGT_OPP_ELLER_REDUSERT_STILLING)
+                                                    SAGT_OPP_ELLER_REDUSERT)
     }
 }
