@@ -66,6 +66,7 @@ internal class VurderingServiceTest {
                                                                                             mockk(relaxed = true),
                                                                                             mockk(relaxed = true),
                                                                                             mockk(relaxed = true),
+                                                                                            mockk(relaxed = true),
                                                                                             mockk(relaxed = true))
     }
 
@@ -116,7 +117,9 @@ internal class VurderingServiceTest {
                         SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
                         NÆRE_BOFORHOLD,
                         MER_AV_DAGLIG_OMSORG,
-                        OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN
+                        OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN,
+                        SAGT_OPP_REDUSERT,
+                        RIMELIG_GRUNN_SAGT_OPP
                 ))
 
     }
@@ -362,6 +365,7 @@ internal class VurderingServiceTest {
         val sivilstandRegistergrunnlagDto = SivilstandRegistergrunnlagDto(Sivilstandstype.GIFT, null)
         return VilkårGrunnlagDto(mockk(),
                                  SivilstandInngangsvilkårDto(sivilstandSøknadsgrunnlagDto, sivilstandRegistergrunnlagDto),
+                                 mockk(),
                                  mockk(),
                                  mockk(),
                                  mockk())
