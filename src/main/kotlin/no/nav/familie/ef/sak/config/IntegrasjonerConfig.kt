@@ -42,6 +42,8 @@ class IntegrasjonerConfig(@Value("\${FAMILIE_INTEGRASJONER_URL}") private val in
     val infotrygdVedtaksperioder =
             UriComponentsBuilder.fromUri(integrasjonUri).path("api/infotrygd/vedtak-perioder").build().toUri()
 
+    val distribuerDokumentUri: URI = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_DISTRIBUER_DOKUMENT).build().toUri()
+
     companion object {
 
         private const val PATH_PING = "/internal/status/isAlive"
@@ -56,5 +58,6 @@ class IntegrasjonerConfig(@Value("\${FAMILIE_INTEGRASJONER_URL}") private val in
         private const val PATH_JOURNALPOST = "api/journalpost"
         private const val PATH_DOKARKIV = "api/arkiv"
         private const val PATH_MEDLEMSKAP = "api/medlemskap/v3"
+        private const val PATH_DISTRIBUER_DOKUMENT = "api/dist/v1"
     }
 }

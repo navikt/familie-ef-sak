@@ -1,10 +1,10 @@
 package no.nav.familie.ef.sak.blankett
 
-import no.nav.familie.ef.sak.api.dto.InngangsvilkårDto
+import no.nav.familie.ef.sak.api.dto.VilkårDto
 
 data class BlankettPdfRequest(
         val personopplysninger: PersonopplysningerDto,
-        val inngangsvilkår: InngangsvilkårDto
+        val vilkår: VilkårDto
 )
 
 data class PersonopplysningerDto(

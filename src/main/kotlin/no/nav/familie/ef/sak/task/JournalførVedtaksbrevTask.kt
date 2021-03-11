@@ -29,8 +29,7 @@ class JournalførVedtaksbrevTask(private val stegService: StegService,
     companion object {
         fun opprettTask(behandling: Behandling): Task =
                 Task(type = TYPE,
-                     payload = behandling.id.toString(),
-                     triggerTid = LocalDateTime.now().plusMinutes(15))
+                     payload = behandling.id.toString())
 
         const val TYPE = "journalførVedtaksbrev"
     }
