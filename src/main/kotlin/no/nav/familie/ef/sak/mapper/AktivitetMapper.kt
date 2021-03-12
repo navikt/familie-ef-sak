@@ -104,7 +104,7 @@ object AktivitetMapper {
     }
 
     private fun tilSærligeTilsynsbehovDto(barn: Set<Barn>): List<SærligeTilsynsbehovDto> {
-        return barn.map {
+        return barn.filter { it.særligeTilsynsbehov != null }.map {
             SærligeTilsynsbehovDto(id = it.id,
                                    navn = it.navn,
                                    erBarnetFødt = it.erBarnetFødt,
