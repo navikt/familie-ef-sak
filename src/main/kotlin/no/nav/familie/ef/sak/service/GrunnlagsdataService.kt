@@ -68,11 +68,13 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
 
         val sagtOppEllerRedusertStilling = SagtOppEllerRedusertStillingMapper.tilDto(situasjon = søknad.situasjon)
 
+        val aktivitet = AktivitetMapper.tilDto(aktivitet = søknad.aktivitet, situasjon = søknad.situasjon, barn = søknad.barn )
         return VilkårGrunnlagDto(medlemskap = medlemskap,
                                  sivilstand = sivilstand,
                                  bosituasjon = BosituasjonMapper.tilDto(søknad.bosituasjon),
                                  barnMedSamvær = barnMedSamvær,
                                  sivilstandsplaner = sivilstandsplaner,
+                                 aktivitet = aktivitet,
                                  sagtOppEllerRedusertStilling = sagtOppEllerRedusertStilling)
     }
 
