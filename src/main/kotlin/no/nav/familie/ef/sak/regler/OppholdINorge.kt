@@ -7,7 +7,9 @@ private enum class OppholdINorgeRegel(override val id: String,
     UNNTAK("O2", "Er unntak fra hovedregelen oppfylt?")
 }
 
+@Suppress("unused")
 enum class OppholdINorgeUnntakÅrsaker(override val resultat: Resultat = Resultat.OPPFYLT) : Årsak {
+
     ARBEID_NORSK_ARBEIDSGIVER,
     UTENLANDSOPPHOLD_MINDRE_ENN_6_UKER,
     NEI(resultat = Resultat.IKKE_OPPFYLT)
@@ -15,7 +17,7 @@ enum class OppholdINorgeUnntakÅrsaker(override val resultat: Resultat = Resulta
 
 class OppholdINorge : Vilkårsregel(vilkårType = VilkårType.LOVLIG_OPPHOLD,
                                    regler = setOf(borEllerOppholderSegINorgeRegel, unntaksregel),
-                                   root = borEllerOppholderSegINorgeRegel.regelId) {
+                                   root = regelIds(borEllerOppholderSegINorgeRegel)) {
 
     companion object {
 

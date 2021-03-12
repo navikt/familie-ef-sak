@@ -8,7 +8,7 @@ private enum class MorEllerFarRegel(override val id: String,
 
 class MorEllerFar : Vilkårsregel(vilkårType = VilkårType.MOR_ELLER_FAR,
                                  regler = setOf(harBrukerOmsorgForBarn),
-                                 root = harBrukerOmsorgForBarn.regelId) {
+                                 root = regelIds(harBrukerOmsorgForBarn)) {
 
     companion object {
 

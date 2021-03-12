@@ -7,5 +7,9 @@ abstract class Vilkårsregel(val vilkårType: VilkårType,
 enum class VilkårType {
     MEDLEMSKAP,
     LOVLIG_OPPHOLD,
-    MOR_ELLER_FAR
+    MOR_ELLER_FAR,
+    SIVILSTAND,
+    SAMLIV,
+    ALENEOMSORG,
+    NYTT_BARN_SAMME_PARTNER
 }

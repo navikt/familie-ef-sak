@@ -7,7 +7,9 @@ private enum class ForutgåendeMedlemskapRegel(override val id: String,
     UNNTAK("M2", "Er unntak fra hovedreglen oppfylt?")
 }
 
+@Suppress("unused")
 enum class MedlemskapUnntakÅrsak(override val resultat: Resultat = Resultat.OPPFYLT) : Årsak {
+
     MEDLEM_MER_ENN_5_ÅR_AVBRUDD_MINDRE_ENN_10_ÅR,
     MEDLEM_MER_ENN_7_ÅR_AVBRUDD_MER_ENN_10ÅR,
     I_LANDET_FOR_GJENFORENING_ELLER_GIFTE_SEG,
@@ -18,9 +20,10 @@ enum class MedlemskapUnntakÅrsak(override val resultat: Resultat = Resultat.OPP
     NEI(resultat = Resultat.IKKE_OPPFYLT)
 }
 
-class ForutgåendeMedlemskap : Vilkårsregel(vilkårType = VilkårType.MEDLEMSKAP,
-                                           regler = setOf(søkerMedlemIFolketrygdenSiste5Åren, unntaksregel),
-                                           root = søkerMedlemIFolketrygdenSiste5Åren.regelId) {
+class ForutgåendeMedlemskap
+    : Vilkårsregel(vilkårType = VilkårType.MEDLEMSKAP,
+                   regler = setOf(søkerMedlemIFolketrygdenSiste5Åren, unntaksregel),
+                   root = regelIds(søkerMedlemIFolketrygdenSiste5Åren)) {
 
     companion object {
 

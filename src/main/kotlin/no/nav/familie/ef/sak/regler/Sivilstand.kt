@@ -11,53 +11,36 @@ private enum class SivilstandRegel(override val id: String,
     UNNTAK("S_UNNTAK", "Er unntak fra hovedregelen oppfylt?")
 }
 
+@Suppress("unused")
 enum class SivilstandUnntakÅrsaker(override val resultat: Resultat = Resultat.OPPFYLT) : Årsak {
+
     ARBEID_NORSK_ARBEIDSGIVER,
     UTENLANDSOPPHOLD_MINDRE_ENN_6_UKER,
     NEI(resultat = Resultat.IKKE_OPPFYLT)
 }
 
 //TODO noen vilkår er her skal være beroende på hva som finnes i søknaden/pdl ?
-class Sivilstand : Vilkårsregel(vilkårType = VilkårType.LOVLIG_OPPHOLD,
-                                regler = setOf(),
-                                root = borEllerOppholderSegINorgeRegel.regelId) {
+class Sivilstand : Vilkårsregel(vilkårType = VilkårType.SIVILSTAND,
+                                regler = setOf(DOKUMENTERT_EKTESKAP,
+                                               DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE,
+                                               SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
+                                               SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
+                                               KRAV_SIVILSTAND, UNNTAK),
+                                root = regelIds()) {
 
     companion object {
 
-        val DOKUMENTERT_EKTESKAP =
-                RegelSteg(regelId = SivilstandRegel.DOKUMENTERT_EKTESKAP,
-                          hvisJa =,
-                          hvisNei =)
-        val DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE =
-                RegelSteg(regelId = SivilstandRegel.DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE,
-                          hvisJa =,
-                          hvisNei =)
-        val SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON =
-                RegelSteg(regelId = SivilstandRegel.SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
-                          hvisJa =,
-                          hvisNei =)
-        val SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING =
-                RegelSteg(regelId = SivilstandRegel.SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
-                          hvisJa =,
-                          hvisNei =)
-        val KRAV_SIVILSTAND =
-                RegelSteg(regelId = SivilstandRegel.KRAV_SIVILSTAND,
-                          hvisJa =,
-                          hvisNei =)
-        val UNNTAK =
-                RegelSteg(regelId = SivilstandRegel.UNNTAK,
-                          hvisJa =,
-                          hvisNei =)
+        private fun påkrevdBegrunnelse(regelId: SivilstandRegel) =
+                RegelSteg(regelId = regelId,
+                          hvisJaBegrunnelse = Begrunnelse.PÅKREVD,
+                          hvisNeiBegrunnelse = Begrunnelse.PÅKREVD)
 
-        val unntaksregel =
-                RegelSteg(regelId = SivilstandRegel.UNNTAK,
-                          hvisJa = ResultatRegel.OPPFYLT_MED_OPTIONAL_BEGRUNNELSE,
-                          hvisNei = ResultatRegel.OPPFYLT_MED_OPTIONAL_BEGRUNNELSE,
-                          årsaker = MedlemskapUnntakÅrsak::class)
-
-        val borEllerOppholderSegINorgeRegel =
-                RegelSteg(regelId = SivilstandRegel.BOR_OG_OPPHOLDER_SEG_I_NORGE,
-                          hvisJa = ResultatRegel.OPPFYLT_MED_OPTIONAL_BEGRUNNELSE,
-                          hvisNei = unntaksregel.regelId)
+        val DOKUMENTERT_EKTESKAP = påkrevdBegrunnelse(SivilstandRegel.DOKUMENTERT_EKTESKAP)
+        val DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE = påkrevdBegrunnelse(SivilstandRegel.DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE)
+        val SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON = påkrevdBegrunnelse(SivilstandRegel.SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON)
+        val SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING = påkrevdBegrunnelse(SivilstandRegel.SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING)
+        val KRAV_SIVILSTAND = påkrevdBegrunnelse(SivilstandRegel.KRAV_SIVILSTAND)
+        val UNNTAK = RegelSteg(regelId = SivilstandRegel.UNNTAK,
+                               årsaker = SivilstandUnntakÅrsaker::class)
     }
 }
