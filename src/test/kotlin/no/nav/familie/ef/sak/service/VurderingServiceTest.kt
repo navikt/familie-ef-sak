@@ -118,8 +118,7 @@ internal class VurderingServiceTest {
                         NÆRE_BOFORHOLD,
                         MER_AV_DAGLIG_OMSORG,
                         OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN,
-                        SAGT_OPP_REDUSERT,
-                        RIMELIG_GRUNN_SAGT_OPP
+                        SAGT_OPP_ELLER_REDUSERT
                 ))
 
     }

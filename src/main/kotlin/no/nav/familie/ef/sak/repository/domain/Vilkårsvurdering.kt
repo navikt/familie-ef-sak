@@ -46,8 +46,7 @@ enum class DelvilkårType {
     NÆRE_BOFORHOLD,
     MER_AV_DAGLIG_OMSORG,
     OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN,
-    SAGT_OPP_REDUSERT,
-    RIMELIG_GRUNN_SAGT_OPP
+    SAGT_OPP_ELLER_REDUSERT,
 }
 
 enum class DelvilkårÅrsak {
@@ -95,8 +94,8 @@ enum class VilkårType(val beskrivelse: String,
                 listOf(DelvilkårType.SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
                        DelvilkårType.NÆRE_BOFORHOLD,
                        DelvilkårType.MER_AV_DAGLIG_OMSORG)),
-    SAGT_OPP_ELLER_REDUSERT("§15-4 Sagt opp eller redusert stilling",
-                                     listOf(DelvilkårType.SAGT_OPP_REDUSERT, DelvilkårType.RIMELIG_GRUNN_SAGT_OPP));
+    SAGT_OPP_ELLER_REDUSERT("Sagt opp eller redusert stilling",
+                                     listOf(DelvilkårType.SAGT_OPP_ELLER_REDUSERT));
 
     companion object {
 
