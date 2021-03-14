@@ -16,7 +16,9 @@ import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsst
 fun utledDelvilkårResultat(delvilkårType: DelvilkårType,
                            søknad: SøknadsskjemaOvergangsstønad,
                            delvilkårMetadata: DelvilkårMetadata): Vilkårsresultat {
-    return if (erDelvilkårAktueltForSøknaden(delvilkårType, søknad, delvilkårMetadata)) {
+    return if (delvilkårType == DelvilkårType.HAR_TIDLIGERE_ANDRE_STØNADER_SOM_HAR_BETYDNING || delvilkårType == DelvilkårType.HAR_TIDLIGERE_MOTTATT_OVERGANSSTØNAD) {
+        Vilkårsresultat.OPPFYLT //TODO MIDDERTIDLIG MVP 0.3 FIKS!!!
+    } else if (erDelvilkårAktueltForSøknaden(delvilkårType, søknad, delvilkårMetadata)) {
         Vilkårsresultat.IKKE_VURDERT
     } else {
         Vilkårsresultat.IKKE_AKTUELL

@@ -118,7 +118,10 @@ internal class VurderingServiceTest {
                         NÆRE_BOFORHOLD,
                         MER_AV_DAGLIG_OMSORG,
                         OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN,
-                        HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER
+                        HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER,
+                        HAR_TIDLIGERE_MOTTATT_OVERGANSSTØNAD,
+                        HAR_TIDLIGERE_ANDRE_STØNADER_SOM_HAR_BETYDNING
+
                 ))
 
     }
