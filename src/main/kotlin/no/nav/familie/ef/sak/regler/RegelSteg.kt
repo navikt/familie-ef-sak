@@ -21,7 +21,7 @@ data class SluttRegel private constructor(@JsonIgnore // resultat trengs ikke fo
                                           val resultat: Resultat,
                                           override val begrunnelse: Begrunnelse = Begrunnelse.UTEN) : RegelNode {
 
-    override val regelId: RegelId = SluttNode
+    override val regelId: RegelId = SluttNode.SLUTT_NODE
 
     companion object {
 

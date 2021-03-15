@@ -10,6 +10,6 @@ interface RegelIdMedBeskrivelse : RegelId {
     val beskrivelse: String
 }
 
-object SluttNode : RegelId {
-    override val id: String = "SLUTT_NODE"
+enum class SluttNode(override val id: String = "SLUTT_NODE") : RegelId {
+    SLUTT_NODE
 }
