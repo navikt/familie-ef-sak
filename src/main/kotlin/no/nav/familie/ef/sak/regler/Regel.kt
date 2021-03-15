@@ -1,19 +1,5 @@
 package no.nav.familie.ef.sak.regler
 
-interface RegelId {
-
-    val id: String
-}
-
-interface RegelIdMedBeskrivelse : RegelId {
-
-    val beskrivelse: String
-}
-
-enum class SluttNod(override val id: String) : RegelId {
-    SLUTTNOD("")
-}
-
 enum class Begrunnelse {
     UTEN,
     PÅKREVD,
@@ -28,7 +14,7 @@ enum class Resultat {
 interface Svar
 interface SvarMedSvarsalternativ : Svar {
 
-    val regelNod: RegelNod
+    val regelNode: RegelNode
 }
 
 enum class DefaultSvar : Svar {
@@ -36,7 +22,7 @@ enum class DefaultSvar : Svar {
     NEI
 }
 
-fun defaultSvarMapping(hvisJa: RegelNod = SluttRegel.OPPFYLT,
-                       hvisNei: RegelNod = SluttRegel.IKKE_OPPFYLT): Map<Svar, RegelNod> =
+fun jaNeiMapping(hvisJa: RegelNode = SluttRegel.OPPFYLT,
+                 hvisNei: RegelNode = SluttRegel.IKKE_OPPFYLT): Map<Svar, RegelNode> =
         mapOf(DefaultSvar.JA to hvisJa,
               DefaultSvar.NEI to hvisNei)

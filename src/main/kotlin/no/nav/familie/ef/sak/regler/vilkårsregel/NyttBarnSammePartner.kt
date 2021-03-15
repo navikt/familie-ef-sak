@@ -14,6 +14,6 @@ class NyttBarnSammePartner : Vilkårsregel(vilkårType = VilkårType.NYTT_BARN_S
 
         val HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER =
                 RegelSteg(regelId = NyttBarnSammePartnerRegel.HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER,
-                          svarMapping = defaultSvarMapping())
+                          svarMapping = jaNeiMapping())
     }
 }

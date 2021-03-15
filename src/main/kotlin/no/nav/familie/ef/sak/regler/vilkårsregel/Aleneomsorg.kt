@@ -9,7 +9,7 @@ private enum class AleneomsorgRegel(override val id: String,
 }
 
 @Suppress("unused")
-private enum class NæreBofoorholdÅrsaker(override val regelNod: RegelNod = SluttRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE)
+private enum class NæreBofoorholdÅrsaker(override val regelNode: RegelNode = SluttRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE)
     : SvarMedSvarsalternativ {
 
     SAMME_HUS_OG_FÆRRE_ENN_4_BOENHETER,
@@ -32,7 +32,7 @@ class Aleneomsorg : Vilkårsregel(vilkårType = VilkårType.ALENEOMSORG,
 
         val MER_AV_DAGLIG_OMSORG =
                 RegelSteg(regelId = AleneomsorgRegel.MER_AV_DAGLIG_OMSORG,
-                          svarMapping = defaultSvarMapping())
+                          svarMapping = jaNeiMapping())
 
         val NÆRE_BOFORHOLD =
                 RegelSteg(regelId = AleneomsorgRegel.NÆRE_BOFORHOLD,
@@ -40,8 +40,8 @@ class Aleneomsorg : Vilkårsregel(vilkårType = VilkårType.ALENEOMSORG,
 
         val SKRIFTLIG_AVTALE_OM_DELT_BOSTED =
                 RegelSteg(regelId = AleneomsorgRegel.SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
-                          defaultSvarMapping(hvisJa = SluttRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                                             hvisNei = SluttRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE))
+                          jaNeiMapping(hvisJa = SluttRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                                       hvisNei = SluttRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE))
 
     }
 }

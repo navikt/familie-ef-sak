@@ -8,7 +8,7 @@ private enum class OppholdINorgeRegel(override val id: String,
 }
 
 @Suppress("unused")
-private enum class OppholdINorgeUnntakÅrsaker(override val regelNod: RegelNod) : SvarMedSvarsalternativ {
+private enum class OppholdINorgeUnntakÅrsaker(override val regelNode: RegelNode) : SvarMedSvarsalternativ {
 
     ARBEID_NORSK_ARBEIDSGIVER(SluttRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE),
     UTENLANDSOPPHOLD_MINDRE_ENN_6_UKER(SluttRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE),
@@ -27,9 +27,7 @@ class OppholdINorge : Vilkårsregel(vilkårType = VilkårType.LOVLIG_OPPHOLD,
 
         val borEllerOppholderSegINorgeRegel =
                 RegelSteg(regelId = OppholdINorgeRegel.BOR_OG_OPPHOLDER_SEG_I_NORGE,
-                          svarMapping = defaultSvarMapping(hvisJa = SluttRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
-                                                           hvisNei = NesteRegel(unntaksregel.regelId)
-                          )
-                )
+                          svarMapping = jaNeiMapping(hvisJa = SluttRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
+                                                     hvisNei = NesteRegel(unntaksregel.regelId)))
     }
 }

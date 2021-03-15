@@ -14,6 +14,6 @@ class MorEllerFar : Vilkårsregel(vilkårType = VilkårType.MOR_ELLER_FAR,
 
         val harBrukerOmsorgForBarn =
                 RegelSteg(regelId = MorEllerFarRegel.OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN,
-                          svarMapping = defaultSvarMapping())
+                          svarMapping = jaNeiMapping())
     }
 }

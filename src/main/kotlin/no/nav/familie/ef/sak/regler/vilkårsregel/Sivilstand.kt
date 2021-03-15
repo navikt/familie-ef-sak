@@ -12,12 +12,14 @@ private enum class SivilstandRegel(override val id: String,
 }
 
 @Suppress("unused")
-private enum class SivilstandUnntakÅrsaker(override val regelNod: RegelNod) : SvarMedSvarsalternativ {
+private enum class SivilstandUnntakÅrsaker(override val regelNode: RegelNode) : SvarMedSvarsalternativ {
 
     ARBEID_NORSK_ARBEIDSGIVER(SluttRegel.OPPFYLT),
     UTENLANDSOPPHOLD_MINDRE_ENN_6_UKER(SluttRegel.OPPFYLT),
     NEI(SluttRegel.IKKE_OPPFYLT)
 }
+
+// skalIkkeVurdere: [DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE, SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON]
 
 //TODO noen vilkår er her skal være beroende på hva som finnes i søknaden/pdl ?
 class Sivilstand : Vilkårsregel(vilkårType = VilkårType.SIVILSTAND,
