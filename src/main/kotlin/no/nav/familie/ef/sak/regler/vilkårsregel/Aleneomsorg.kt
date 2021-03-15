@@ -9,7 +9,8 @@ private enum class AleneomsorgRegel(override val id: String,
 }
 
 @Suppress("unused")
-private enum class NæreBofoorholdÅrsaker(override val mapping: JaNei = JaNei.JA) : Årsak {
+private enum class NæreBofoorholdÅrsaker(override val regelNod: RegelNod = SluttRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE)
+    : SvarMedSvarsalternativ {
 
     SAMME_HUS_OG_FÆRRE_ENN_4_BOENHETER,
     SAMME_HUS_OG_FLERE_ENN_4_BOENHETER_MEN_VURDERT_NÆRT,
@@ -23,25 +24,24 @@ class Aleneomsorg : Vilkårsregel(vilkårType = VilkårType.ALENEOMSORG,
                                  regler = setOf(SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
                                                 NÆRE_BOFORHOLD,
                                                 MER_AV_DAGLIG_OMSORG),
-                                 root = regelIds(SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
-                                                 NÆRE_BOFORHOLD,
-                                                 MER_AV_DAGLIG_OMSORG)) {
+                                 rotregler = regelIds(SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
+                                                      NÆRE_BOFORHOLD,
+                                                      MER_AV_DAGLIG_OMSORG)) {
 
     companion object {
 
         val MER_AV_DAGLIG_OMSORG =
-                RegelSteg(regelId = AleneomsorgRegel.MER_AV_DAGLIG_OMSORG)
+                RegelSteg(regelId = AleneomsorgRegel.MER_AV_DAGLIG_OMSORG,
+                          svarMapping = defaultSvarMapping())
 
         val NÆRE_BOFORHOLD =
                 RegelSteg(regelId = AleneomsorgRegel.NÆRE_BOFORHOLD,
-                          hvisJaBegrunnelse = Begrunnelse.PÅKREVD,
-                          hvisNeiBegrunnelse = Begrunnelse.PÅKREVD,
-                          årsaker = NæreBofoorholdÅrsaker::class)
+                          svarMapping = NæreBofoorholdÅrsaker::class)
 
         val SKRIFTLIG_AVTALE_OM_DELT_BOSTED =
                 RegelSteg(regelId = AleneomsorgRegel.SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
-                          hvisJaBegrunnelse = Begrunnelse.PÅKREVD,
-                          hvisNeiBegrunnelse = Begrunnelse.PÅKREVD)
+                          defaultSvarMapping(hvisJa = SluttRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                                             hvisNei = SluttRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE))
 
     }
 }

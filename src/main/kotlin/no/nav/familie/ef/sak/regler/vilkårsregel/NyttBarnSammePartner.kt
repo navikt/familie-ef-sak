@@ -1,9 +1,5 @@
 package no.nav.familie.ef.sak.regler
 
-/**
- * TODO: denne skal kunne opprettes per barn som man har ?
- */
-
 private enum class NyttBarnSammePartnerRegel(override val id: String,
                                              override val beskrivelse: String) : RegelIdMedBeskrivelse {
 
@@ -12,11 +8,12 @@ private enum class NyttBarnSammePartnerRegel(override val id: String,
 
 class NyttBarnSammePartner : Vilkårsregel(vilkårType = VilkårType.NYTT_BARN_SAMME_PARTNER,
                                           regler = setOf(HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER),
-                                          root = regelIds(HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER)) {
+                                          rotregler = regelIds(HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER)) {
 
     companion object {
 
         val HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER =
-                RegelSteg(regelId = NyttBarnSammePartnerRegel.HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER)
+                RegelSteg(regelId = NyttBarnSammePartnerRegel.HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER,
+                          svarMapping = defaultSvarMapping())
     }
 }

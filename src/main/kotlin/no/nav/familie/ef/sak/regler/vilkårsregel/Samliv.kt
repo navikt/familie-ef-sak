@@ -12,19 +12,20 @@ private enum class SamlivRegel(override val id: String,
 class Samliv : Vilkårsregel(vilkårType = VilkårType.SAMLIV,
                             regler = setOf(LEVER_IKKE_MED_ANNEN_FORELDER,
                                            LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD),
-                            root = regelIds(LEVER_IKKE_MED_ANNEN_FORELDER,
-                                            LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD)) {
+                            rotregler = regelIds(LEVER_IKKE_MED_ANNEN_FORELDER,
+                                                 LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD)) {
 
     companion object {
 
         val LEVER_IKKE_MED_ANNEN_FORELDER =
                 RegelSteg(regelId = SamlivRegel.LEVER_IKKE_MED_ANNEN_FORELDER,
-                          hvisJaBegrunnelse = Begrunnelse.VALGFRI,
-                          hvisNeiBegrunnelse = Begrunnelse.VALGFRI)
+                          svarMapping = defaultSvarMapping(hvisJa = SluttRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
+                                                           hvisNei = SluttRegel.IKKE_OPPFYLT_MED_VALGFRI_BEGRUNNELSE))
 
         val LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD =
                 RegelSteg(regelId = SamlivRegel.LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD,
-                          hvisJaBegrunnelse = Begrunnelse.PÅKREVD,
-                          hvisNeiBegrunnelse = Begrunnelse.PÅKREVD)
+                          svarMapping = defaultSvarMapping(hvisJa = SluttRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                                                           hvisNei = SluttRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE))
     }
 }
+

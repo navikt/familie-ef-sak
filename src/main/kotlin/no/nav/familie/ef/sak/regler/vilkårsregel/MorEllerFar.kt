@@ -8,13 +8,12 @@ private enum class MorEllerFarRegel(override val id: String,
 
 class MorEllerFar : Vilkårsregel(vilkårType = VilkårType.MOR_ELLER_FAR,
                                  regler = setOf(harBrukerOmsorgForBarn),
-                                 root = regelIds(harBrukerOmsorgForBarn)) {
+                                 rotregler = regelIds(harBrukerOmsorgForBarn)) {
 
     companion object {
 
         val harBrukerOmsorgForBarn =
                 RegelSteg(regelId = MorEllerFarRegel.OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN,
-                          hvisJa = ResultatRegel.OPPFYLT,
-                          hvisNei = ResultatRegel.IKKE_OPPFYLT)
+                          svarMapping = defaultSvarMapping())
     }
 }

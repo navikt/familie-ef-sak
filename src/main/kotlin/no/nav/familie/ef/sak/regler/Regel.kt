@@ -10,14 +10,12 @@ interface RegelIdMedBeskrivelse : RegelId {
     val beskrivelse: String
 }
 
-/*
-enum class RegelType {
-    REGEL_STEG,
-    RESULTAT
-}*/
+enum class SluttNod(override val id: String) : RegelId {
+    SLUTTNOD("")
+}
 
 enum class Begrunnelse {
-    //UTEN,
+    UTEN,
     PÅKREVD,
     VALGFRI
 }
@@ -27,18 +25,18 @@ enum class Resultat {
     IKKE_OPPFYLT
 }
 
-enum class JaNei {
+interface Svar
+interface SvarMedSvarsalternativ : Svar {
+
+    val regelNod: RegelNod
+}
+
+enum class DefaultSvar : Svar {
     JA,
     NEI
 }
 
-interface RegelFlyt {
-
-    //val type: RegelType
-}
-
-//TODO burde mappe til JA/NEI?
-interface Årsak {
-
-    val mapping: JaNei
-}
+fun defaultSvarMapping(hvisJa: RegelNod = SluttRegel.OPPFYLT,
+                       hvisNei: RegelNod = SluttRegel.IKKE_OPPFYLT): Map<Svar, RegelNod> =
+        mapOf(DefaultSvar.JA to hvisJa,
+              DefaultSvar.NEI to hvisNei)

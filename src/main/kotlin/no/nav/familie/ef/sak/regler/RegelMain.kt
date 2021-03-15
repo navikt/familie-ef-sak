@@ -1,25 +1,25 @@
 package no.nav.familie.ef.sak.regler
 
-import com.fasterxml.jackson.annotation.JsonInclude
 import no.nav.familie.kontrakter.felles.objectMapper
 
-data class Specifications(val resultatregler: Map<RegelId, Resultat>,
-                          val vilkårsregler: Map<VilkårType, Vilkårsregel>)
+data class Specification(val vilkårsregler: Map<VilkårType, Vilkårsregel>)
 
 val vilkårsregler: Map<VilkårType, Vilkårsregel> =
-        listOf(ForutgåendeMedlemskap(),
-               OppholdINorge(),
-               MorEllerFar(),
-               Sivilstand(),
-               Samliv(),
-               Aleneomsorg(),
-               NyttBarnSammePartner())
+        listOf(
+                ForutgåendeMedlemskap(),
+                OppholdINorge(),
+                MorEllerFar(),
+                Sivilstand(),
+                Samliv(),
+                Aleneomsorg(),
+                NyttBarnSammePartner()
+        )
                 .map { it.vilkårType to it }.toMap()
-val specifications = Specifications(ResultatRegel.values().map { it to it.resultat }.toMap(), vilkårsregler)
+val specifications = Specification(vilkårsregler)
 
 fun main() {
     val objectMapper = objectMapper
-            .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+            //.setSerializationInclusion(JsonInclude.Include.NON_NULL)
             .writerWithDefaultPrettyPrinter()
     println(objectMapper.writeValueAsString(specifications))
 }
@@ -36,4 +36,7 @@ Hvordan håndtere det når man har annet enn Ja / Nei ?
 Aleneomsorg skal være per barn?
 
 Sivilstand - regler skal opprettes hvis det trengs
+
+Hvordan håndtere att delvilkår er obligatoriske/ikke obligatoriske?
+Eks aleneomsorg dær man har flera delvilkår dær de inte ær obligatoriske
  */

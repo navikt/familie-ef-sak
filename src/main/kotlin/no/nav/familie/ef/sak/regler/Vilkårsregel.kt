@@ -1,8 +1,11 @@
 package no.nav.familie.ef.sak.regler
 
 abstract class Vilkårsregel(val vilkårType: VilkårType,
-                            val regler: Set<RegelSteg>,
-                            val root: Set<RegelId>)
+                            val regler: Map<RegelId, RegelSteg>,
+                            val rotregler: Set<RegelId>) {
+    constructor(vilkårType: VilkårType, regler: Set<RegelSteg>, rotregler: Set<RegelId>):
+            this(vilkårType, regler.associateBy {it.regelId}, rotregler)
+}
 
 enum class VilkårType {
     MEDLEMSKAP,

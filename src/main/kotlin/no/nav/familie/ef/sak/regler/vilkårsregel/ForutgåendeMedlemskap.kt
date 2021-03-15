@@ -8,7 +8,8 @@ private enum class ForutgåendeMedlemskapRegel(override val id: String,
 }
 
 @Suppress("unused")
-enum class MedlemskapUnntakÅrsak(override val mapping: JaNei = JaNei.JA) : Årsak {
+enum class MedlemskapUnntakÅrsak(override val regelNod: RegelNod = SluttRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE)
+    : SvarMedSvarsalternativ {
 
     MEDLEM_MER_ENN_5_ÅR_AVBRUDD_MINDRE_ENN_10_ÅR,
     MEDLEM_MER_ENN_7_ÅR_AVBRUDD_MER_ENN_10ÅR,
@@ -17,26 +18,25 @@ enum class MedlemskapUnntakÅrsak(override val mapping: JaNei = JaNei.JA) : Års
     ANDRE_FORELDER_MEDLEM_MINST_5_ÅR_AVBRUDD_MINDRE_ENN_10_ÅR,
     ANDRE_FORELDER_MEDLEM_MINST_7_ÅR_AVBRUDD_MER_ENN_10_ÅR,
     TOTALVURDERING_OPPFYLLER_FORSKRIFT,
-    NEI(mapping = JaNei.NEI)
+    NEI(SluttRegel.IKKE_OPPFYLT_MED_VALGFRI_BEGRUNNELSE)
 }
 
 class ForutgåendeMedlemskap
     : Vilkårsregel(vilkårType = VilkårType.MEDLEMSKAP,
                    regler = setOf(søkerMedlemIFolketrygdenSiste5Åren, unntaksregel),
-                   root = regelIds(søkerMedlemIFolketrygdenSiste5Åren)) {
+                   rotregler = regelIds(søkerMedlemIFolketrygdenSiste5Åren)) {
 
     companion object {
 
         val unntaksregel =
                 RegelSteg(regelId = ForutgåendeMedlemskapRegel.UNNTAK,
-                          hvisJaBegrunnelse = Begrunnelse.VALGFRI,
-                          hvisNeiBegrunnelse = Begrunnelse.VALGFRI,
-                          årsaker = MedlemskapUnntakÅrsak::class)
+                          svarMapping = MedlemskapUnntakÅrsak::class)
 
         val søkerMedlemIFolketrygdenSiste5Åren =
                 RegelSteg(regelId = ForutgåendeMedlemskapRegel.SØKER_MEDLEM_I_FOLKETRYGDEN,
-                          hvisJaBegrunnelse = Begrunnelse.VALGFRI,
-                          hvisNei = unntaksregel.regelId)
+                          svarMapping = defaultSvarMapping(hvisJa = SluttRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
+                                                           hvisNei = NesteRegel(unntaksregel.regelId))
+                )
     }
 
 }
