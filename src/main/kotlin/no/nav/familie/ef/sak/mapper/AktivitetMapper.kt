@@ -31,7 +31,7 @@ object AktivitetMapper {
                             virksomhet = aktivitet.virksomhet?.let {
                                 VirksomhetDto(virksomhetsbeskrivelse = it.virksomhetsbeskrivelse)
                             },
-                            tidligereUtdanninger = tilTidligereUtdaningDto(aktivitet.tidligereUtdanninger),
+                            tidligereUtdanninger = tilTidligereUtdanningDto(aktivitet.tidligereUtdanninger),
                             gjelderDeg = situasjon.gjelderDetteDeg.verdier,
                             særligeTilsynsbehov = tilSærligeTilsynsbehovDto(barn),
                             datoOppstartJobb = situasjon.oppstartNyJobb
@@ -94,7 +94,7 @@ object AktivitetMapper {
         }
     }
 
-    private fun tilTidligereUtdaningDto(tidligereUtdanning: Set<TidligereUtdanning>): List<TidligereUtdanningDto> {
+    private fun tilTidligereUtdanningDto(tidligereUtdanning: Set<TidligereUtdanning>): List<TidligereUtdanningDto> {
         return tidligereUtdanning.map {
             TidligereUtdanningDto(linjeKursGrad = it.linjeKursGrad,
                                   fra = it.fra,
