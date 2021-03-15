@@ -1,6 +1,8 @@
 package no.nav.familie.ef.sak.blankett
 
 import no.nav.familie.ef.sak.api.ApiFeil
+import no.nav.familie.ef.sak.repository.domain.Behandling
+import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.OppgaveService
 import no.nav.familie.ef.sak.service.TilgangService
@@ -23,7 +25,9 @@ class BlankettController(private val tilgangService: TilgangService,
     @PostMapping("{behandlingId}")
     fun lagBlankettPdf(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
-        validerBehandlingStatusForBlankettGenerering(behandlingId)
+        val behandling = behandlingService.hentBehandling(behandlingId)
+        validerBehandlingStatusForBlankettGenerering(behandling)
+        validerBehandlingTypeBlankett(behandling)
         val blankett = blankettService.lagBlankett(behandlingId)
         return Ressurs.success(blankett)
     }
@@ -50,8 +54,11 @@ class BlankettController(private val tilgangService: TilgangService,
         return Ressurs.success(behandling.id)
     }
 
-    private fun validerBehandlingStatusForBlankettGenerering(behandlingId: UUID) {
-        val behandling = behandlingService.hentBehandling(behandlingId)
+    private fun validerBehandlingStatusForBlankettGenerering(behandling: Behandling) {
         require(!behandling.status.behandlingErLåstForVidereRedigering())
+    }
+
+    private fun validerBehandlingTypeBlankett(behandling: Behandling) {
+        require(behandling.type == BehandlingType.BLANKETT)
     }
 }
