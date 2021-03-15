@@ -1,25 +1,14 @@
-package no.nav.familie.ef.sak.regler
+package no.nav.familie.ef.sak.regler.vilkårsregel
 
-private enum class ForutgåendeMedlemskapRegel(override val id: String,
-                                              override val beskrivelse: String) : RegelIdMedBeskrivelse {
-
-    SØKER_MEDLEM_I_FOLKETRYGDEN("F1", "Har søker vært medlem i folketrygden i de siste 5 årene?"),
-    UNNTAK("F2", "Er unntak fra hovedreglen oppfylt?")
-}
-
-@Suppress("unused")
-enum class MedlemskapUnntakÅrsak(override val regelNode: RegelNode = SluttRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE)
-    : SvarMedSvarsalternativ {
-
-    MEDLEM_MER_ENN_5_ÅR_AVBRUDD_MINDRE_ENN_10_ÅR,
-    MEDLEM_MER_ENN_7_ÅR_AVBRUDD_MER_ENN_10ÅR,
-    I_LANDET_FOR_GJENFORENING_ELLER_GIFTE_SEG,
-    ANDRE_FORELDER_MEDLEM_SISTE_5_ÅR,
-    ANDRE_FORELDER_MEDLEM_MINST_5_ÅR_AVBRUDD_MINDRE_ENN_10_ÅR,
-    ANDRE_FORELDER_MEDLEM_MINST_7_ÅR_AVBRUDD_MER_ENN_10_ÅR,
-    TOTALVURDERING_OPPFYLLER_FORSKRIFT,
-    NEI(SluttRegel.IKKE_OPPFYLT_MED_VALGFRI_BEGRUNNELSE)
-}
+import no.nav.familie.ef.sak.regler.NesteRegel
+import no.nav.familie.ef.sak.regler.RegelId
+import no.nav.familie.ef.sak.regler.RegelSteg
+import no.nav.familie.ef.sak.regler.SluttRegel
+import no.nav.familie.ef.sak.regler.SvarId
+import no.nav.familie.ef.sak.regler.VilkårType
+import no.nav.familie.ef.sak.regler.Vilkårsregel
+import no.nav.familie.ef.sak.regler.jaNeiMapping
+import no.nav.familie.ef.sak.regler.regelIds
 
 class ForutgåendeMedlemskap
     : Vilkårsregel(vilkårType = VilkårType.MEDLEMSKAP,
@@ -28,12 +17,22 @@ class ForutgåendeMedlemskap
 
     companion object {
 
+        private val unntakSvarMapping = setOf(
+                SvarId.MEDLEM_MER_ENN_5_ÅR_AVBRUDD_MINDRE_ENN_10_ÅR,
+                SvarId.MEDLEM_MER_ENN_7_ÅR_AVBRUDD_MER_ENN_10ÅR,
+                SvarId.I_LANDET_FOR_GJENFORENING_ELLER_GIFTE_SEG,
+                SvarId.ANDRE_FORELDER_MEDLEM_SISTE_5_ÅR,
+                SvarId.ANDRE_FORELDER_MEDLEM_MINST_5_ÅR_AVBRUDD_MINDRE_ENN_10_ÅR,
+                SvarId.ANDRE_FORELDER_MEDLEM_MINST_7_ÅR_AVBRUDD_MER_ENN_10_ÅR,
+                SvarId.TOTALVURDERING_OPPFYLLER_FORSKRIFT)
+                                                    .map { it to SluttRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE }.toMap() +
+                                        mapOf(SvarId.NEI to SluttRegel.IKKE_OPPFYLT_MED_VALGFRI_BEGRUNNELSE)
         val unntaksregel =
-                RegelSteg(regelId = ForutgåendeMedlemskapRegel.UNNTAK,
-                          svarMapping = MedlemskapUnntakÅrsak::class)
+                RegelSteg(regelId = RegelId.MEDLEMSKAP_UNNTAK,
+                          svarMapping = unntakSvarMapping)
 
         val søkerMedlemIFolketrygdenSiste5Åren =
-                RegelSteg(regelId = ForutgåendeMedlemskapRegel.SØKER_MEDLEM_I_FOLKETRYGDEN,
+                RegelSteg(regelId = RegelId.SØKER_MEDLEM_I_FOLKETRYGDEN,
                           svarMapping = jaNeiMapping(hvisJa = SluttRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
                                                      hvisNei = NesteRegel(unntaksregel.regelId)))
     }

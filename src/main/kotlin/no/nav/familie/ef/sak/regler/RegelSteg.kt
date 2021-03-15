@@ -1,15 +1,10 @@
 package no.nav.familie.ef.sak.regler
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import kotlin.reflect.KClass
 
 
 data class RegelSteg(val regelId: RegelId,
-                     val svarMapping: Map<Svar, RegelNode>) {
-
-    constructor(regelId: RegelId, svarMapping: KClass<out SvarMedSvarsalternativ>) :
-            this(regelId, svarMapping.java.enumConstants.map { it to it.regelNode }.toMap())
-}
+                     val svarMapping: Map<SvarId, RegelNode>)
 
 interface RegelNode {
 
@@ -21,7 +16,7 @@ data class SluttRegel private constructor(@JsonIgnore // resultat trengs ikke fo
                                           val resultat: Resultat,
                                           override val begrunnelse: Begrunnelse = Begrunnelse.UTEN) : RegelNode {
 
-    override val regelId: RegelId = SluttNode.SLUTT_NODE
+    override val regelId: RegelId = RegelId.SLUTT_NODE
 
     companion object {
 

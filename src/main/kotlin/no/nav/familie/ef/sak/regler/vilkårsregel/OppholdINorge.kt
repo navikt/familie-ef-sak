@@ -1,32 +1,32 @@
-package no.nav.familie.ef.sak.regler
+package no.nav.familie.ef.sak.regler.vilkårsregel
 
-private enum class OppholdINorgeRegel(override val id: String,
-                                      override val beskrivelse: String) : RegelIdMedBeskrivelse {
+import no.nav.familie.ef.sak.regler.NesteRegel
+import no.nav.familie.ef.sak.regler.RegelId
+import no.nav.familie.ef.sak.regler.RegelSteg
+import no.nav.familie.ef.sak.regler.SluttRegel
+import no.nav.familie.ef.sak.regler.SvarId
+import no.nav.familie.ef.sak.regler.VilkårType
+import no.nav.familie.ef.sak.regler.Vilkårsregel
+import no.nav.familie.ef.sak.regler.jaNeiMapping
+import no.nav.familie.ef.sak.regler.regelIds
 
-    BOR_OG_OPPHOLDER_SEG_I_NORGE("O1", "Bor og oppholder bruker og barna seg i Norge?"),
-    OPPHOLD_UNNTAK("O2", "Er unntak fra hovedregelen oppfylt?")
-}
-
-@Suppress("unused")
-private enum class OppholdINorgeUnntakÅrsaker(override val regelNode: RegelNode) : SvarMedSvarsalternativ {
-
-    ARBEID_NORSK_ARBEIDSGIVER(SluttRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE),
-    UTENLANDSOPPHOLD_MINDRE_ENN_6_UKER(SluttRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE),
-    NEI(SluttRegel.IKKE_OPPFYLT_MED_VALGFRI_BEGRUNNELSE)
-}
-
-class OppholdINorge : Vilkårsregel(vilkårType = VilkårType.LOVLIG_OPPHOLD,
-                                   regler = setOf(borEllerOppholderSegINorgeRegel, unntaksregel),
-                                   rotregler = regelIds(borEllerOppholderSegINorgeRegel)) {
+class OppholdINorge :
+        Vilkårsregel(vilkårType = VilkårType.LOVLIG_OPPHOLD,
+                     regler = setOf(borEllerOppholderSegINorgeRegel, unntaksregel),
+                     rotregler = regelIds(borEllerOppholderSegINorgeRegel)) {
 
     companion object {
 
         val unntaksregel =
-                RegelSteg(regelId = OppholdINorgeRegel.OPPHOLD_UNNTAK,
-                          svarMapping = OppholdINorgeUnntakÅrsaker::class)
+                RegelSteg(regelId = RegelId.OPPHOLD_UNNTAK,
+                          svarMapping = mapOf(
+                                  SvarId.ARBEID_NORSK_ARBEIDSGIVER to SluttRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
+                                  SvarId.UTENLANDSOPPHOLD_MINDRE_ENN_6_UKER to SluttRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
+                                  SvarId.NEI to SluttRegel.IKKE_OPPFYLT_MED_VALGFRI_BEGRUNNELSE
+                          ))
 
         val borEllerOppholderSegINorgeRegel =
-                RegelSteg(regelId = OppholdINorgeRegel.BOR_OG_OPPHOLDER_SEG_I_NORGE,
+                RegelSteg(regelId = RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE,
                           svarMapping = jaNeiMapping(hvisJa = SluttRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
                                                      hvisNei = NesteRegel(unntaksregel.regelId)))
     }

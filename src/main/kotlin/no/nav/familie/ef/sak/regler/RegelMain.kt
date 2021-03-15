@@ -1,5 +1,12 @@
 package no.nav.familie.ef.sak.regler
 
+import no.nav.familie.ef.sak.regler.vilkårsregel.Aleneomsorg
+import no.nav.familie.ef.sak.regler.vilkårsregel.ForutgåendeMedlemskap
+import no.nav.familie.ef.sak.regler.vilkårsregel.NyttBarnSammePartner
+import no.nav.familie.ef.sak.regler.vilkårsregel.OppholdINorge
+import no.nav.familie.ef.sak.regler.vilkårsregel.Samliv
+import no.nav.familie.ef.sak.regler.vilkårsregel.Sivilstand
+import no.nav.familie.ef.sak.regler.vilkårsregel.vilkårsregel.MorEllerFar
 import no.nav.familie.kontrakter.felles.objectMapper
 
 data class Specification(val vilkårsregler: Map<VilkårType, Vilkårsregel>)

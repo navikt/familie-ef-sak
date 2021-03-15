@@ -1,15 +1,37 @@
 package no.nav.familie.ef.sak.regler
 
-interface RegelId {
+enum class RegelId(val beskrivelse: String) {
+    SLUTT_NODE("SLUTT_NODE"),
 
-    val id: String
-}
+    // Medlemskap
+    SØKER_MEDLEM_I_FOLKETRYGDEN("Har søker vært medlem i folketrygden i de siste 5 årene?"),
+    MEDLEMSKAP_UNNTAK("Er unntak fra hovedreglen oppfylt?"),
 
-interface RegelIdMedBeskrivelse : RegelId {
+    // Opphold
+    BOR_OG_OPPHOLDER_SEG_I_NORGE("Bor og oppholder bruker og barna seg i Norge?"),
+    OPPHOLD_UNNTAK("Er unntak fra hovedregelen oppfylt?"),
 
-    val beskrivelse: String
-}
+    // Samliv
+    LEVER_IKKE_MED_ANNEN_FORELDER("Er vilkåret om å ikke leve sammen med den andre av barnets/barnas foreldre oppfylt?"),
+    LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD("Er vilkåret om å ikke leve i et ekteskapslignende forhold i felles husholdning uten felles barn oppfylt?"),
 
-enum class SluttNode(override val id: String = "SLUTT_NODE") : RegelId {
-    SLUTT_NODE
+    // Aleneomsorg
+    SKRIFTLIG_AVTALE_OM_DELT_BOSTED(""),
+    NÆRE_BOFORHOLD(""),
+    MER_AV_DAGLIG_OMSORG(""),
+
+    // Mor eller far
+    OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN("Har bruker omsorgen for egne/adopterte barn?"),
+
+    // Sivilstand
+    DOKUMENTERT_EKTESKAP("Foreligger det dokumentasjon på ekteskap?"),
+    DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE("Foreligger det dokumentasjon på separasjon eller skilsmisse?"),
+    SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON("Kan samlivsbrudd likestilles med formell separasjon?"),
+    SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING("Er det samsvar mellom datoene for separasjon og fraflytting?"),
+    KRAV_SIVILSTAND("Er krav til sivilstand oppfylt?"),
+    SIVILSTAND_UNNTAK("Er unntak fra hovedregelen oppfylt?"),
+
+    // Nytt barn samme partner
+    HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER("Bor og oppholder bruker og barna seg i Norge?");
+
 }

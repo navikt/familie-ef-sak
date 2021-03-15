@@ -1,23 +1,12 @@
-package no.nav.familie.ef.sak.regler
+package no.nav.familie.ef.sak.regler.vilkårsregel
 
-private enum class SivilstandRegel(override val id: String,
-                                   override val beskrivelse: String) : RegelIdMedBeskrivelse {
-
-    DOKUMENTERT_EKTESKAP("S1", "Foreligger det dokumentasjon på ekteskap?"),
-    DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE("S2", "Foreligger det dokumentasjon på separasjon eller skilsmisse?"),
-    SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON("S3", "Kan samlivsbrudd likestilles med formell separasjon?"),
-    SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING("S4", "Er det samsvar mellom datoene for separasjon og fraflytting?"),
-    KRAV_SIVILSTAND("S5", "Er krav til sivilstand oppfylt?"),
-    SIVILSTAND_UNNTAK("S_UNNTAK", "Er unntak fra hovedregelen oppfylt?")
-}
-
-@Suppress("unused")
-private enum class SivilstandUnntakÅrsaker(override val regelNode: RegelNode) : SvarMedSvarsalternativ {
-
-    ARBEID_NORSK_ARBEIDSGIVER(SluttRegel.OPPFYLT),
-    UTENLANDSOPPHOLD_MINDRE_ENN_6_UKER(SluttRegel.OPPFYLT),
-    NEI(SluttRegel.IKKE_OPPFYLT)
-}
+import no.nav.familie.ef.sak.regler.RegelId
+import no.nav.familie.ef.sak.regler.RegelSteg
+import no.nav.familie.ef.sak.regler.SluttRegel
+import no.nav.familie.ef.sak.regler.SvarId
+import no.nav.familie.ef.sak.regler.VilkårType
+import no.nav.familie.ef.sak.regler.Vilkårsregel
+import no.nav.familie.ef.sak.regler.regelIds
 
 // skalIkkeVurdere: [DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE, SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON]
 
@@ -33,19 +22,23 @@ class Sivilstand : Vilkårsregel(vilkårType = VilkårType.SIVILSTAND,
 
     companion object {
 
-        private fun påkrevdBegrunnelse(regelId: SivilstandRegel) =
+        private fun påkrevdBegrunnelse(regelId: RegelId) =
                 RegelSteg(regelId = regelId,
                           svarMapping = mapOf(
-                                  DefaultSvar.JA to SluttRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                                  DefaultSvar.NEI to SluttRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE
+                                  SvarId.JA to SluttRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                                  SvarId.NEI to SluttRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE
                           ))
 
-        val DOKUMENTERT_EKTESKAP = påkrevdBegrunnelse(SivilstandRegel.DOKUMENTERT_EKTESKAP)
-        val DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE = påkrevdBegrunnelse(SivilstandRegel.DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE)
-        val SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON = påkrevdBegrunnelse(SivilstandRegel.SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON)
-        val SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING = påkrevdBegrunnelse(SivilstandRegel.SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING)
-        val KRAV_SIVILSTAND = påkrevdBegrunnelse(SivilstandRegel.KRAV_SIVILSTAND)
-        val UNNTAK = RegelSteg(regelId = SivilstandRegel.SIVILSTAND_UNNTAK,
-                               svarMapping = SivilstandUnntakÅrsaker::class)
+        val DOKUMENTERT_EKTESKAP = påkrevdBegrunnelse(RegelId.DOKUMENTERT_EKTESKAP)
+        val DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE = påkrevdBegrunnelse(RegelId.DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE)
+        val SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON = påkrevdBegrunnelse(RegelId.SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON)
+        val SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING = påkrevdBegrunnelse(RegelId.SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING)
+        val KRAV_SIVILSTAND = påkrevdBegrunnelse(RegelId.KRAV_SIVILSTAND)
+        val UNNTAK = RegelSteg(regelId = RegelId.SIVILSTAND_UNNTAK,
+                               svarMapping = mapOf(
+                                       SvarId.GJENLEVENDE_IKKE_RETT_TIL_YTELSER to SluttRegel.OPPFYLT,
+                                       SvarId.GJENLEVENDE_OVERTAR_OMSORG to SluttRegel.OPPFYLT,
+                                       SvarId.NEI to SluttRegel.IKKE_OPPFYLT
+                               ))
     }
 }
