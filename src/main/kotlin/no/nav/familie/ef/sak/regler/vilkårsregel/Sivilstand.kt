@@ -12,11 +12,11 @@ private enum class SivilstandRegel(override val id: String,
 }
 
 @Suppress("unused")
-enum class SivilstandUnntakÅrsaker(override val resultat: Resultat = Resultat.OPPFYLT) : Årsak {
+private enum class SivilstandUnntakÅrsaker(override val mapping: JaNei = JaNei.JA) : Årsak {
 
     ARBEID_NORSK_ARBEIDSGIVER,
     UTENLANDSOPPHOLD_MINDRE_ENN_6_UKER,
-    NEI(resultat = Resultat.IKKE_OPPFYLT)
+    NEI(mapping = JaNei.NEI)
 }
 
 //TODO noen vilkår er her skal være beroende på hva som finnes i søknaden/pdl ?

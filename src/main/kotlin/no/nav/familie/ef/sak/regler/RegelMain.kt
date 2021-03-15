@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.regler
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import no.nav.familie.kontrakter.felles.objectMapper
 
 data class Specifications(val resultatregler: Map<RegelId, Resultat>,
@@ -11,12 +12,16 @@ val vilkårsregler: Map<VilkårType, Vilkårsregel> =
                MorEllerFar(),
                Sivilstand(),
                Samliv(),
-               Aleneomsorg())
+               Aleneomsorg(),
+               NyttBarnSammePartner())
                 .map { it.vilkårType to it }.toMap()
 val specifications = Specifications(ResultatRegel.values().map { it to it.resultat }.toMap(), vilkårsregler)
 
 fun main() {
-    println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(specifications))
+    val objectMapper = objectMapper
+            .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+            .writerWithDefaultPrettyPrinter()
+    println(objectMapper.writeValueAsString(specifications))
 }
 
 /**

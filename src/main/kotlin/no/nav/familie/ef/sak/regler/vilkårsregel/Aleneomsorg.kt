@@ -9,7 +9,7 @@ private enum class AleneomsorgRegel(override val id: String,
 }
 
 @Suppress("unused")
-enum class NæreBofoorholdÅrsaker(override val resultat: Resultat = Resultat.OPPFYLT) : Årsak {
+private enum class NæreBofoorholdÅrsaker(override val mapping: JaNei = JaNei.JA) : Årsak {
 
     SAMME_HUS_OG_FÆRRE_ENN_4_BOENHETER,
     SAMME_HUS_OG_FLERE_ENN_4_BOENHETER_MEN_VURDERT_NÆRT,

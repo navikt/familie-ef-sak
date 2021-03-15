@@ -8,11 +8,11 @@ private enum class OppholdINorgeRegel(override val id: String,
 }
 
 @Suppress("unused")
-enum class OppholdINorgeUnntakÅrsaker(override val resultat: Resultat = Resultat.OPPFYLT) : Årsak {
+private enum class OppholdINorgeUnntakÅrsaker(override val mapping: JaNei = JaNei.JA) : Årsak {
 
     ARBEID_NORSK_ARBEIDSGIVER,
     UTENLANDSOPPHOLD_MINDRE_ENN_6_UKER,
-    NEI(resultat = Resultat.IKKE_OPPFYLT)
+    NEI(mapping = JaNei.NEI)
 }
 
 class OppholdINorge : Vilkårsregel(vilkårType = VilkårType.LOVLIG_OPPHOLD,
