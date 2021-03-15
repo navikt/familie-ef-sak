@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.blankett
 
 import no.nav.familie.ef.sak.api.ApiFeil
+import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.OppgaveService
 import no.nav.familie.ef.sak.service.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -16,11 +17,13 @@ import java.util.*
 @Unprotected
 class BlankettController(private val tilgangService: TilgangService,
                          private val blankettService: BlankettService,
+                         private val behandlingService: BehandlingService,
                          private val oppgaveService: OppgaveService) {
 
     @PostMapping("{behandlingId}")
     fun lagBlankettPdf(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
+        validerBehandlingStatusForBlankettGenerering(behandlingId)
         val blankett = blankettService.lagBlankett(behandlingId)
         return Ressurs.success(blankett)
     }
@@ -45,5 +48,10 @@ class BlankettController(private val tilgangService: TilgangService,
         val behandling = blankettService.opprettBlankettBehandling(journalpostId, oppgaveId)
 
         return Ressurs.success(behandling.id)
+    }
+
+    private fun validerBehandlingStatusForBlankettGenerering(behandlingId: UUID) {
+        val behandling = behandlingService.hentBehandling(behandlingId)
+        require(!behandling.status.behandlingErLåstForVidereRedigering())
     }
 }
