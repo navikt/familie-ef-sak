@@ -55,10 +55,14 @@ class BlankettController(private val tilgangService: TilgangService,
     }
 
     private fun validerBehandlingStatusForBlankettGenerering(behandling: Behandling) {
-        require(!behandling.status.behandlingErLåstForVidereRedigering())
+        if (behandling.status.behandlingErLåstForVidereRedigering()) {
+            throw ApiFeil("Behandling er låst for videre redigering : ${behandling}", HttpStatus.BAD_REQUEST)
+        }
     }
 
     private fun validerBehandlingTypeBlankett(behandling: Behandling) {
-        require(behandling.type == BehandlingType.BLANKETT)
+        if (behandling.type != BehandlingType.BLANKETT) {
+            throw ApiFeil("Behandling er ikke av typen blankett, behandling : ${behandling}", HttpStatus.BAD_REQUEST)
+        }
     }
 }
