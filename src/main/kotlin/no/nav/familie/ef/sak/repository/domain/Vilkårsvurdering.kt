@@ -1,11 +1,13 @@
 package no.nav.familie.ef.sak.repository.domain
 
 import no.nav.familie.ef.sak.api.dto.Sivilstandstype
+import no.nav.familie.ef.sak.regler.RegelId
+import no.nav.familie.ef.sak.regler.SvarId
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.Table
-import java.util.*
+import java.util.UUID
 
 @Table("vilkarsvurdering")
 data class Vilkårsvurdering(@Id
@@ -28,6 +30,14 @@ data class Delvilkårsvurdering(val type: DelvilkårType,
                                val resultat: Vilkårsresultat = Vilkårsresultat.IKKE_VURDERT,
                                val årsak: DelvilkårÅrsak? = null,
                                val begrunnelse: String? = null)
+
+data class Delvilkårsvurdering2(val type: RegelId,
+                                val resultat: Vilkårsresultat = Vilkårsresultat.IKKE_VURDERT,
+                                val svar: List<VilkårSvar>)
+
+data class VilkårSvar(val regelId: RegelId,
+                      val svar: SvarId,
+                      val begrunnelse: String?)
 
 data class DelvilkårMetadata(val sivilstandstype: Sivilstandstype)
 

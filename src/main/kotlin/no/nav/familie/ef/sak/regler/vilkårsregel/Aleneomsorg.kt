@@ -4,10 +4,10 @@ import no.nav.familie.ef.sak.regler.RegelId
 import no.nav.familie.ef.sak.regler.RegelSteg
 import no.nav.familie.ef.sak.regler.SluttRegel
 import no.nav.familie.ef.sak.regler.SvarId
-import no.nav.familie.ef.sak.regler.VilkårType
 import no.nav.familie.ef.sak.regler.Vilkårsregel
 import no.nav.familie.ef.sak.regler.jaNeiMapping
 import no.nav.familie.ef.sak.regler.regelIds
+import no.nav.familie.ef.sak.repository.domain.VilkårType
 
 class Aleneomsorg : Vilkårsregel(vilkårType = VilkårType.ALENEOMSORG,
                                  regler = setOf(SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
@@ -19,7 +19,7 @@ class Aleneomsorg : Vilkårsregel(vilkårType = VilkårType.ALENEOMSORG,
 
     companion object {
 
-        val MER_AV_DAGLIG_OMSORG =
+        private val MER_AV_DAGLIG_OMSORG =
                 RegelSteg(regelId = RegelId.MER_AV_DAGLIG_OMSORG,
                           svarMapping = jaNeiMapping())
 
@@ -32,11 +32,11 @@ class Aleneomsorg : Vilkårsregel(vilkårType = VilkårType.ALENEOMSORG,
                       SvarId.TILSTØTENDE_BOLIGER_ELLER_REKKEHUS_I_SAMMEGATE)
                         .map { it to SluttRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE }
                         .toMap()
-        val NÆRE_BOFORHOLD =
+        private val NÆRE_BOFORHOLD =
                 RegelSteg(regelId = RegelId.NÆRE_BOFORHOLD,
                           svarMapping = næreBoForholdMapping)
 
-        val SKRIFTLIG_AVTALE_OM_DELT_BOSTED =
+        private val SKRIFTLIG_AVTALE_OM_DELT_BOSTED =
                 RegelSteg(regelId = RegelId.SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
                           jaNeiMapping(hvisJa = SluttRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
                                        hvisNei = SluttRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE))
