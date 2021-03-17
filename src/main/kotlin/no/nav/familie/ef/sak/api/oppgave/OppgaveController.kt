@@ -104,7 +104,7 @@ private fun Oppgave.tilDto(): OppgaveEfDto {
                         endretTidspunkt,
                         prioritet,
                         status,
-                        hentMetadata("kanLageBlankett") == "true"
+                        behandlesAvApplikasjon == "familie-ef-sak-blankett"
     )
 }
 
