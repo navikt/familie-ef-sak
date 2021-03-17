@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.api.beregning
 
 import no.nav.familie.ef.sak.api.dto.AndelTilkjentYtelseDTO
+import no.nav.familie.ef.sak.api.dto.SøknadDataDto
 import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.FagsakService
@@ -45,4 +46,11 @@ class BeregningController(private val stegService: StegService,
         return Ressurs.success(stegService.håndterBeregnYtelseForStønad(behandling, tilkjentYtelse).id)
     }
 
+    @GetMapping("/{behandlingId}/hent-soknad")
+    fun hentSøknadsMetaData(@PathVariable behandlingId: UUID): Ressurs<SøknadDataDto> {
+        tilgangService.validerTilgangTilBehandling(behandlingId)
+        val overgangsstønad = behandlingService.hentOvergangsstønad(behandlingId)
+        return Ressurs.success(SøknadDataDto(søknadsdato = overgangsstønad.datoMottatt,
+                                             søkerStønadFra = overgangsstønad.søkerFra))
+    }
 }
