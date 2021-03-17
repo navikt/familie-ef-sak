@@ -24,7 +24,8 @@ class BeregningController(private val stegService: StegService,
                           private val behandlingService: BehandlingService,
                           private val fagsakService: FagsakService,
                           private val beregningService: BeregningService,
-                          private val tilgangService: TilgangService) {
+                          private val tilgangService: TilgangService,
+                          private val vedtakService: VedtakService) {
 
     @PostMapping("/{behandlingId}/fullfor")
     fun beregnYtelseForStønad(@PathVariable behandlingId: UUID, @RequestBody beregningRequest: BeregningRequest): Ressurs<UUID> {
@@ -36,14 +37,20 @@ class BeregningController(private val stegService: StegService,
                 fagsak.hentAktivIdent(),
                 vedtaksdato = LocalDate.now(),
                 behandlingId = behandling.id,
-                andelerTilkjentYtelse = beløpsperioder.map { AndelTilkjentYtelseDTO(beløp = it.beløp.toInt(),
-                                                                      stønadFom = it.fraOgMedDato,
-                                                                      stønadTom = it.tilDato,
-                                                                      kildeBehandlingId = behandling.id,
-                                                                      personIdent = fagsak.hentAktivIdent())
+                andelerTilkjentYtelse = beløpsperioder.map {
+                    AndelTilkjentYtelseDTO(beløp = it.beløp.toInt(),
+                            stønadFom = it.fraOgMedDato,
+                            stønadTom = it.tilDato,
+                            kildeBehandlingId = behandling.id,
+                            personIdent = fagsak.hentAktivIdent())
                 }
         )
         return Ressurs.success(stegService.håndterBeregnYtelseForStønad(behandling, tilkjentYtelse).id)
+    }
+
+    @PostMapping("/{behandlingId}/lagre-vedtak")
+    fun lagreVedtak(@PathVariable behandlingId: UUID, @RequestBody vedtakRequest: VedtakRequest): Ressurs<UUID> {
+        return Ressurs.success(vedtakService.lagreVedtak(vedtakRequest, behandlingId))
     }
 
     @GetMapping("/{behandlingId}/hent-soknad")
@@ -51,6 +58,6 @@ class BeregningController(private val stegService: StegService,
         tilgangService.validerTilgangTilBehandling(behandlingId)
         val overgangsstønad = behandlingService.hentOvergangsstønad(behandlingId)
         return Ressurs.success(SøknadDataDto(søknadsdato = overgangsstønad.datoMottatt,
-                                             søkerStønadFra = overgangsstønad.søkerFra))
+                søkerStønadFra = overgangsstønad.søkerFra))
     }
 }
