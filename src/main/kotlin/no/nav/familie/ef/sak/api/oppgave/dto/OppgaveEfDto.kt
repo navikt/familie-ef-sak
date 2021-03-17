@@ -42,5 +42,5 @@ data class OppgaveEfDto(val id: Long? = null,
                         val endretTidspunkt: String? = null,
                         val prioritet: OppgavePrioritet? = null,
                         val status: StatusEnum? = null,
-                        val kanLageBlankett: Boolean? = null
+                        val kanStarteBlankettbehandling: Boolean = false
 )
