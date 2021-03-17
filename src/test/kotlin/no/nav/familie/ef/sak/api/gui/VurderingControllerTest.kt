@@ -1,7 +1,9 @@
 package no.nav.familie.ef.sak.api.gui
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
+import no.nav.familie.ef.sak.api.dto.OppdaterVilkårsvurderingDto
 import no.nav.familie.ef.sak.api.dto.VilkårDto
+import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
@@ -44,19 +46,22 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal oppdatere vilkår`() {
-        val opprettetVurdering = opprettInngangsvilkår().body.data!!.vurderinger.first()
+        val opprettetVurdering = opprettInngangsvilkår().body.data!!.vurderinger.first().tilOppdaterVilkårDto()
 
         val respons: ResponseEntity<Ressurs<UUID>> =
                 restTemplate.exchange(localhost("/api/vurdering/inngangsvilkar"),
                                       HttpMethod.POST,
-                                      HttpEntity(opprettetVurdering.copy(resultat = Vilkårsresultat.OPPFYLT,
-                                                                         begrunnelse = "Godkjent"),
-                                                 headers))
+                                      HttpEntity(opprettetVurdering, headers))
 
         assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(respons.body.status).isEqualTo(Ressurs.Status.SUKSESS)
         assertThat(respons.body.data).isEqualTo(opprettetVurdering.id)
     }
+
+    private fun VilkårsvurderingDto.tilOppdaterVilkårDto(): OppdaterVilkårsvurderingDto =
+            OppdaterVilkårsvurderingDto(this.id,
+                                        this.behandlingId,
+                                        this.delvilkårsvurderinger)
 
     private fun opprettInngangsvilkår(): ResponseEntity<Ressurs<VilkårDto>> {
         val søknad = SøknadMedVedlegg(Testsøknad.søknadOvergangsstønad, emptyList())

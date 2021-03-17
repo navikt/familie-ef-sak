@@ -1,10 +1,16 @@
 package no.nav.familie.ef.sak.regler
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import no.nav.familie.ef.sak.api.Feil
 
 
 data class RegelSteg(val regelId: RegelId,
-                     val svarMapping: Map<SvarId, RegelNode>)
+                     val svarMapping: Map<SvarId, RegelNode>) {
+
+    fun svarMapping(svarId: SvarId): RegelNode {
+        return svarMapping[svarId] ?: throw Feil("Finner ikke svarId=$svarId for regelId=${regelId}")
+    }
+}
 
 interface RegelNode {
 

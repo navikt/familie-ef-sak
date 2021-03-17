@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.api.gui
 
 import no.nav.familie.ef.sak.api.dto.OppdaterVilkårsvurderingDto
 import no.nav.familie.ef.sak.api.dto.VilkårDto
-import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.TilgangService
 import no.nav.familie.ef.sak.service.VurderingService
@@ -11,8 +10,13 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.*
-import java.util.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
+import java.util.UUID
 
 
 @RestController
@@ -27,6 +31,7 @@ class VurderingController(private val vurderingService: VurderingService,
     @PostMapping(value = ["inngangsvilkar", "vilkar"])
     fun oppdaterVurderingVilkår(@RequestBody vilkårsvurdering: OppdaterVilkårsvurderingDto): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(vilkårsvurdering.behandlingId)
+        //TODO legg till feilhåndtering og logg body?
         return Ressurs.success(vurderingService.oppdaterVilkår(vilkårsvurdering))
     }
 

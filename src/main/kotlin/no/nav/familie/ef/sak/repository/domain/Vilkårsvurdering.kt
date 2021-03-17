@@ -25,7 +25,7 @@ data class Vilkårsvurdering(@Id
 data class DelvilkårsvurderingWrapper(val delvilkårsvurderinger: List<Delvilkårsvurdering>)
 
 //Kan vi bestemme att vi skal vurdere alle delvilkår eller ikke, og att vi ikke trenger resultat på delviljkår
-data class Delvilkårsvurdering(val type: RegelId,
+data class Delvilkårsvurdering(val type: RegelId, // TODO trengs denne?
                                val resultat: Vilkårsresultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
                                val svar: List<VilkårSvar>)
 

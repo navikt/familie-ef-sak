@@ -1,3 +1,4 @@
+/*
 package no.nav.familie.ef.sak.vurdering
 
 import no.nav.familie.ef.sak.api.dto.Sivilstandstype
@@ -207,4 +208,4 @@ internal class DelvilkårReglerTest {
             DelvilkårMetadata(sivilstandstype = sivilstandstype)
 
 
-}
+}*/

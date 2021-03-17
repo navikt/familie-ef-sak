@@ -24,7 +24,6 @@ data class OppdaterVilkårsvurderingDto(val id: UUID,
                                        val delvilkårsvurderinger: List<DelvilkårsvurderingDto> = emptyList())
 
 data class DelvilkårsvurderingDto(val type: RegelId,
-                                  val resultat: Vilkårsresultat,
                                   val svar: List<VilkårSvarDto>)
 
 data class VilkårSvarDto(val regelId: RegelId,
@@ -34,7 +33,7 @@ data class VilkårSvarDto(val regelId: RegelId,
 fun VilkårSvar.tilDto() = VilkårSvarDto(this.regelId, this.svar, this.begrunnelse)
 
 fun Delvilkårsvurdering.tilDto() =
-        DelvilkårsvurderingDto(this.type, this.resultat, this.svar.map { it.tilDto() })
+        DelvilkårsvurderingDto(this.type, this.svar.map { it.tilDto() })
 
 fun Vilkårsvurdering.tilDto() =
         VilkårsvurderingDto(id = this.id,
@@ -46,4 +45,5 @@ fun Vilkårsvurdering.tilDto() =
                             endretTid = this.sporbar.endret.endretTid,
                             delvilkårsvurderinger = this.delvilkårsvurdering.delvilkårsvurderinger.map { it.tilDto() })
 
+fun DelvilkårsvurderingDto.svarTilDomene() = this.svar.map { it.tilDomene() }
 fun VilkårSvarDto.tilDomene() = VilkårSvar(this.regelId, this.svar, this.begrunnelse)
