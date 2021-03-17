@@ -12,6 +12,11 @@ data class RegelSteg(val regelId: RegelId,
     }
 }
 
+fun jaNeiMapping(hvisJa: RegelNode = SluttRegel.OPPFYLT,
+                 hvisNei: RegelNode = SluttRegel.IKKE_OPPFYLT): Map<SvarId, RegelNode> =
+        mapOf(SvarId.JA to hvisJa,
+              SvarId.NEI to hvisNei)
+
 interface RegelNode {
 
     val regelId: RegelId

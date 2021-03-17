@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.vurdering
 
 import no.nav.familie.ef.sak.api.dto.OppdaterVilkårsvurderingDto
 import no.nav.familie.ef.sak.api.dto.Sivilstandstype
-import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.regler.RegelId
 import no.nav.familie.ef.sak.repository.domain.DelvilkårMetadata
 import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
@@ -13,7 +12,6 @@ import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsst
 /**
  * Filtrerer bort delvikår som ikke skall vurderes iht data i søknaden
  */
-
 fun utledDelvilkårResultat(regelId: RegelId,
                            søknad: SøknadsskjemaOvergangsstønad,
                            delvilkårMetadata: DelvilkårMetadata): Vilkårsresultat {
@@ -23,15 +21,17 @@ fun utledDelvilkårResultat(regelId: RegelId,
         Vilkårsresultat.IKKE_TATT_STILLING_TIL
     }
 }
-
+/*
 fun validerDelvilkår(oppdatert: OppdaterVilkårsvurderingDto,
                      eksisterende: Vilkårsvurdering) {
-    val innkommendeDelvurderinger = oppdatert.delvilkårsvurderinger.map { it.type }.toSet()
+    val innkommendeDelvurderinger = oppdatert.delvilkårsvurderinger.map { it.rootRegelId }.toSet()
     val lagredeDelvurderinger = eksisterende.delvilkårsvurdering.delvilkårsvurderinger.map { it.type }.toSet()
 
+    //TODO vurder om man burde sjekke disse i det nye
     require(innkommendeDelvurderinger.size == lagredeDelvurderinger.size) { "Nye og eksisterende delvilkårsvurderinger har ulike antall vurderinger" }
     require(innkommendeDelvurderinger.containsAll(lagredeDelvurderinger)) { "Nye delvilkårsvurderinger mangler noen eksisterende vurderinger" }
 }
+ */
 
 private fun erDelvilkårAktueltForSøknaden(regelId: RegelId,
                                           søknad: SøknadsskjemaOvergangsstønad,

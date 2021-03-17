@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.api.dto.tilDto
 import no.nav.familie.ef.sak.regler.Vilkårsregel
 import no.nav.familie.ef.sak.regler.alleVilkårsregler
+import no.nav.familie.ef.sak.regler.validering.OppdaterVilkår
 import no.nav.familie.ef.sak.repository.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.repository.domain.DelvilkårMetadata
 import no.nav.familie.ef.sak.repository.domain.Delvilkårsvurdering
@@ -18,8 +19,6 @@ import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
 import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
 import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsstønad
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
-import no.nav.familie.ef.sak.vurdering.utledDelvilkårResultat
-import no.nav.familie.ef.sak.vurdering.validerDelvilkår
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -37,18 +36,9 @@ class VurderingService(private val behandlingService: BehandlingService,
                        "Behandlingen er låst for videre redigering")
         }
 
-        validerDelvilkår(vilkårsvurderingDto, vilkårsvurdering)
-
-        // Todo skal validere hvert delvilkår og samtidig sette resultat på vilkåret
-        val delvilkårsvurderinger = vilkårsvurderingDto.delvilkårsvurderinger
-                .map { delvurdering ->
-                    Delvilkårsvurdering(delvurdering.type,
-                                        delvurdering.resultat, // TODO skal settes fra backend må håndtere att man ikke skal ta stilling til det
-                                        delvurdering.svar.map { VilkårSvar(it.regelId, it.svar, it.begrunnelse) })
-                }
-        val nyVilkårsvurdering =
-                vilkårsvurdering.copy(resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL, // TODO skal settes fra backend
-                                      delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurderinger))
+        val nyVilkårsvurdering = OppdaterVilkår.validerOgOppdater(vilkårsvurdering,
+                                                                  alleVilkårsregler(),
+                                                                  vilkårsvurderingDto.delvilkårsvurderinger)
         return vilkårsvurderingRepository.update(nyVilkårsvurdering).id
     }
 
@@ -100,9 +90,7 @@ class VurderingService(private val behandlingService: BehandlingService,
                                       behandlingId: UUID,
                                       barnId: UUID? = null): Vilkårsvurdering {
         val delvilkårsvrdering = vilkårsregel.rotregler.map {
-            Delvilkårsvurdering(type = it,
-                                resultat = utledDelvilkårResultat(it, søknad, delvilkårMetadata),
-                                svar = emptyList())
+            Delvilkårsvurdering(svar = listOf(VilkårSvar(regelId = it)))
         }
         return Vilkårsvurdering(behandlingId = behandlingId,
                                 type = vilkårsregel.vilkårType,

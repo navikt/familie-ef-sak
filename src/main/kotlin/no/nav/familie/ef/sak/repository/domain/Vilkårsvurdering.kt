@@ -25,19 +25,23 @@ data class Vilkårsvurdering(@Id
 data class DelvilkårsvurderingWrapper(val delvilkårsvurderinger: List<Delvilkårsvurdering>)
 
 //Kan vi bestemme att vi skal vurdere alle delvilkår eller ikke, og att vi ikke trenger resultat på delviljkår
-data class Delvilkårsvurdering(val type: RegelId, // TODO trengs denne?
-                               val resultat: Vilkårsresultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-                               val svar: List<VilkårSvar>)
+data class Delvilkårsvurdering(val resultat: Vilkårsresultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+                               val svar: List<VilkårSvar>) {
+
+    val rotRegelId = svar.first().regelId
+
+}
 
 data class VilkårSvar(val regelId: RegelId,
-                      val svar: SvarId?,
-                      val begrunnelse: String?)
+                      val svar: SvarId? = null,
+                      val begrunnelse: String? = null)
 
 data class DelvilkårMetadata(val sivilstandstype: Sivilstandstype)
 
 enum class Vilkårsresultat {
     OPPFYLT,
     IKKE_OPPFYLT,
+    IKKE_AKTUELL,
     IKKE_TATT_STILLING_TIL,
     SKAL_IKKE_VURDERES
 }
