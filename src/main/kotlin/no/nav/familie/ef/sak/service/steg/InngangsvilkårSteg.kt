@@ -13,12 +13,13 @@ class InngangsvilkårSteg(private val vurderingService: VurderingService) : Beha
     override fun validerSteg(behandling: Behandling) {
         if (behandling.type == BehandlingType.TEKNISK_OPPHØR) return
 
-        val vilkårSomManglerVurdering = vurderingService.hentVilkårSomManglerVurdering(behandling.id)
-
-        if (vilkårSomManglerVurdering.isNotEmpty())
-            throw Feil(frontendFeilmelding = lagFrontendMelding("Følgende inngangsvilkår mangler vurdering: ",
-                                                                vilkårSomManglerVurdering.map { it.beskrivelse }),
-                       message = "Validering av inngangsvilkår feilet for behandling ${behandling.id}")
+        // TODO: Må finne en bra måte å validere vilkår på
+//        val vilkårSomManglerVurdering = vurderingService.hentVilkårSomManglerVurdering(behandling.id)
+//
+//        if (vilkårSomManglerVurdering.isNotEmpty())
+//            throw Feil(frontendFeilmelding = lagFrontendMelding("Følgende inngangsvilkår mangler vurdering: ",
+//                                                                vilkårSomManglerVurdering.map { it.beskrivelse }),
+//                       message = "Validering av inngangsvilkår feilet for behandling ${behandling.id}")
     }
 
     override fun stegType(): StegType {
