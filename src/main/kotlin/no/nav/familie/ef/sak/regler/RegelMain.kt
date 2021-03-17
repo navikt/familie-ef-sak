@@ -12,18 +12,22 @@ import no.nav.familie.kontrakter.felles.objectMapper
 
 data class Specification(val vilkårsregler: Map<VilkårType, Vilkårsregel>)
 
-val vilkårsregler: Map<VilkårType, Vilkårsregel> =
-        listOf(
-                ForutgåendeMedlemskap(),
-                OppholdINorge(),
-                MorEllerFar(),
-                Sivilstand(),
-                Samliv(),
-                Aleneomsorg(),
-                NyttBarnSammePartner()
-        )
-                .map { it.vilkårType to it }.toMap()
-val specifications = Specification(vilkårsregler)
+fun alleVilkårsregler(): List<Vilkårsregel> {
+    return listOf(
+            ForutgåendeMedlemskap(),
+            OppholdINorge(),
+            MorEllerFar(),
+            Sivilstand(),
+            Samliv(),
+            Aleneomsorg(),
+            NyttBarnSammePartner()
+    )
+}
+
+val vilkårsreglerPåVilkårType: Map<VilkårType, Vilkårsregel> = alleVilkårsregler().map { it.vilkårType to it }.toMap()
+
+
+val specifications = Specification(vilkårsreglerPåVilkårType)
 
 fun main() {
     val objectMapper = objectMapper

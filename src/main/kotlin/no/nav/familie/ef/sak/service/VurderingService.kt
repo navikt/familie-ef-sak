@@ -1,12 +1,18 @@
 package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.api.Feil
-import no.nav.familie.ef.sak.api.dto.*
-import no.nav.familie.ef.sak.integration.PdlClient
+import no.nav.familie.ef.sak.api.dto.OppdaterVilkårsvurderingDto
+import no.nav.familie.ef.sak.api.dto.VilkårDto
+import no.nav.familie.ef.sak.api.dto.VilkårGrunnlagDto
+import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
+import no.nav.familie.ef.sak.api.dto.tilDto
+import no.nav.familie.ef.sak.regler.Vilkårsregel
+import no.nav.familie.ef.sak.regler.alleVilkårsregler
 import no.nav.familie.ef.sak.repository.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.repository.domain.DelvilkårMetadata
 import no.nav.familie.ef.sak.repository.domain.Delvilkårsvurdering
 import no.nav.familie.ef.sak.repository.domain.DelvilkårsvurderingWrapper
+import no.nav.familie.ef.sak.repository.domain.VilkårSvar
 import no.nav.familie.ef.sak.repository.domain.VilkårType
 import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
 import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
@@ -19,11 +25,10 @@ import java.util.UUID
 
 @Service
 class VurderingService(private val behandlingService: BehandlingService,
-                       private val pdlClient: PdlClient,
                        private val vilkårsvurderingRepository: VilkårsvurderingRepository,
                        private val grunnlagsdataService: GrunnlagsdataService) {
 
-    fun oppdaterVilkår(vilkårsvurderingDto: VilkårsvurderingDto): UUID {
+    fun oppdaterVilkår(vilkårsvurderingDto: OppdaterVilkårsvurderingDto): UUID {
         val vilkårsvurdering = vilkårsvurderingRepository.findByIdOrThrow(vilkårsvurderingDto.id)
 
         val behandlingId = vilkårsvurdering.behandlingId
@@ -34,19 +39,16 @@ class VurderingService(private val behandlingService: BehandlingService,
 
         validerDelvilkår(vilkårsvurderingDto, vilkårsvurdering)
 
+        // Todo skal validere hvert delvilkår og samtidig sette resultat på vilkåret
+        val delvilkårsvurderinger = vilkårsvurderingDto.delvilkårsvurderinger
+                .map { delvurdering ->
+                    Delvilkårsvurdering(delvurdering.type,
+                                        delvurdering.resultat, // TODO skal settes fra backend må håndtere att man ikke skal ta stilling til det
+                                        delvurdering.svar.map { VilkårSvar(it.regelId, it.svar, it.begrunnelse) })
+                }
         val nyVilkårsvurdering =
-                vilkårsvurdering.copy(resultat = vilkårsvurderingDto.resultat,
-                                      begrunnelse = vilkårsvurderingDto.begrunnelse,
-                                      unntak = vilkårsvurderingDto.unntak,
-                                      delvilkårsvurdering =
-                                      DelvilkårsvurderingWrapper(vilkårsvurderingDto.delvilkårsvurderinger
-                                                                         .map { delvurdering ->
-                                                                             Delvilkårsvurdering(delvurdering.type,
-                                                                                                 delvurdering.resultat,
-                                                                                                 delvurdering.årsak,
-                                                                                                 delvurdering.begrunnelse)
-                                                                         })
-                )
+                vilkårsvurdering.copy(resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL, // TODO skal settes fra backend
+                                      delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurderinger))
         return vilkårsvurderingRepository.update(nyVilkårsvurdering).id
     }
 
@@ -62,23 +64,7 @@ class VurderingService(private val behandlingService: BehandlingService,
                                 registergrunnlag: VilkårGrunnlagDto): List<VilkårsvurderingDto> {
         val delvilkårMetadata = DelvilkårMetadata(sivilstandstype = registergrunnlag.sivilstand.registergrunnlag.type)
         return hentEllerOpprettVurderingerForVilkår(behandlingId, søknad, delvilkårMetadata)
-                .map {
-                    VilkårsvurderingDto(id = it.id,
-                                        behandlingId = it.behandlingId,
-                                        resultat = it.resultat,
-                                        vilkårType = it.type,
-                                        begrunnelse = it.begrunnelse,
-                                        unntak = it.unntak,
-                                        barnId = it.barnId,
-                                        endretAv = it.sporbar.endret.endretAv,
-                                        endretTid = it.sporbar.endret.endretTid,
-                                        delvilkårsvurderinger = it.delvilkårsvurdering.delvilkårsvurderinger.map { delvurdering ->
-                                            DelvilkårsvurderingDto(delvurdering.type,
-                                                                   delvurdering.resultat,
-                                                                   delvurdering.årsak,
-                                                                   delvurdering.begrunnelse)
-                                        })
-                }
+                .map(Vilkårsvurdering::tilDto)
     }
 
     private fun hentEllerOpprettVurderingerForVilkår(behandlingId: UUID,
@@ -90,40 +76,38 @@ class VurderingService(private val behandlingService: BehandlingService,
             return lagredeVilkårsvurderinger
         }
 
-        val nyeVilkårsvurderinger: List<Vilkårsvurdering> = VilkårType.hentVilkår()
-                .filter {
-                    lagredeVilkårsvurderinger.find { vurdering -> vurdering.type == it } == null // Sjekk barnId ?
-                }
-                .map {vilkårType ->
-                    if (vilkårType == VilkårType.ALENEOMSORG) {
-                        søknad.barn.map {
-                            lagNyVilkårsvurdering(vilkårType, søknad, delvilkårMetadata, behandlingId, it.id)
-                        }
+        // todo håndtere vilkår som allerede finnes eller barn som allerede finnes, men hvordan håndtere barn som blir slettede?
+        // alleVilkårsregler skal kanskje ikke være en funksjon?
+        val nyeVilkårsvurderinger: List<Vilkårsvurdering> = alleVilkårsregler()
+                .filter { lagredeVilkårsvurderinger.find { vurdering -> vurdering.type === it.vilkårType } == null }
+                .flatMap { vilkårsregel ->
 
+                    if (vilkårsregel.vilkårType == VilkårType.ALENEOMSORG) {
+                        søknad.barn.map { lagNyVilkårsvurdering(vilkårsregel, søknad, delvilkårMetadata, behandlingId, it.id) }
                     } else {
-                        listOf(lagNyVilkårsvurdering(vilkårType, søknad, delvilkårMetadata, behandlingId))
+                        listOf(lagNyVilkårsvurdering(vilkårsregel, søknad, delvilkårMetadata, behandlingId))
                     }
-                }.flatten()
+                }
 
         vilkårsvurderingRepository.insertAll(nyeVilkårsvurderinger)
 
         return lagredeVilkårsvurderinger + nyeVilkårsvurderinger
     }
 
-    private fun lagNyVilkårsvurdering(it: VilkårType,
+    private fun lagNyVilkårsvurdering(vilkårsregel: Vilkårsregel,
                                       søknad: SøknadsskjemaOvergangsstønad,
                                       delvilkårMetadata: DelvilkårMetadata,
                                       behandlingId: UUID,
                                       barnId: UUID? = null): Vilkårsvurdering {
-        val delvilkårsvurderinger = it.delvilkår
-                .map { delvilkårType ->
-                    Delvilkårsvurdering(delvilkårType,
-                                        utledDelvilkårResultat(delvilkårType, søknad, delvilkårMetadata))
-                }
+        val delvilkårsvrdering = vilkårsregel.rotregler.map {
+            Delvilkårsvurdering(type = it,
+                                resultat = utledDelvilkårResultat(it, søknad, delvilkårMetadata),
+                                svar = emptyList())
+        }
         return Vilkårsvurdering(behandlingId = behandlingId,
-                                type = it,
+                                type = vilkårsregel.vilkårType,
                                 barnId = barnId,
-                                delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurderinger))
+                                delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvrdering))
     }
 
 
@@ -134,7 +118,7 @@ class VurderingService(private val behandlingService: BehandlingService,
         return vilkår.filter {
             lagredeVilkårsvurderinger.any { vurdering ->
                 vurdering.type == it
-                && vurdering.resultat == Vilkårsresultat.IKKE_VURDERT
+                && vurdering.resultat == Vilkårsresultat.IKKE_TATT_STILLING_TIL
             }
             || lagredeVilkårsvurderinger.none { vurdering -> vurdering.type == it }
         }

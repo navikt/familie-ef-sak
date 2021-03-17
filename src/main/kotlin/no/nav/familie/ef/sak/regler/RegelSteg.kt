@@ -9,12 +9,12 @@ data class RegelSteg(val regelId: RegelId,
 interface RegelNode {
 
     val regelId: RegelId
-    val begrunnelse: Begrunnelse
+    val begrunnelseType: BegrunnelseType
 }
 
 data class SluttRegel private constructor(@JsonIgnore // resultat trengs ikke for frontend, men for validering i backend
                                           val resultat: Resultat,
-                                          override val begrunnelse: Begrunnelse = Begrunnelse.UTEN) : RegelNode {
+                                          override val begrunnelseType: BegrunnelseType = BegrunnelseType.UTEN) : RegelNode {
 
     override val regelId: RegelId = RegelId.SLUTT_NODE
 
@@ -22,18 +22,18 @@ data class SluttRegel private constructor(@JsonIgnore // resultat trengs ikke fo
 
         val OPPFYLT = SluttRegel(resultat = Resultat.OPPFYLT)
         val OPPFYLT_MED_PÅKREVD_BEGRUNNELSE = SluttRegel(resultat = Resultat.OPPFYLT,
-                                                         begrunnelse = Begrunnelse.PÅKREVD)
+                                                         begrunnelseType = BegrunnelseType.PÅKREVD)
         val OPPFYLT_MED_VALGFRI_BEGRUNNELSE = SluttRegel(resultat = Resultat.OPPFYLT,
-                                                         begrunnelse = Begrunnelse.VALGFRI)
+                                                         begrunnelseType = BegrunnelseType.VALGFRI)
 
         val IKKE_OPPFYLT = SluttRegel(resultat = Resultat.IKKE_OPPFYLT)
         val IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE = SluttRegel(resultat = Resultat.IKKE_OPPFYLT,
-                                                              begrunnelse = Begrunnelse.PÅKREVD)
+                                                              begrunnelseType = BegrunnelseType.PÅKREVD)
         val IKKE_OPPFYLT_MED_VALGFRI_BEGRUNNELSE = SluttRegel(resultat = Resultat.IKKE_OPPFYLT,
-                                                              begrunnelse = Begrunnelse.VALGFRI)
+                                                              begrunnelseType = BegrunnelseType.VALGFRI)
     }
 
 }
 
 data class NesteRegel(override val regelId: RegelId,
-                      override val begrunnelse: Begrunnelse = Begrunnelse.UTEN) : RegelNode
+                      override val begrunnelseType: BegrunnelseType = BegrunnelseType.UTEN) : RegelNode

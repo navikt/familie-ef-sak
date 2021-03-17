@@ -2,10 +2,7 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository
 
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.service.steg.StegType
-import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
 import java.util.*
 
 fun oppgave(behandling: Behandling, erFerdigstilt: Boolean = false): Oppgave =

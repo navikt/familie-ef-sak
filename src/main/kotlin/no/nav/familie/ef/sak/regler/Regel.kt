@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.regler
 
-enum class Begrunnelse {
+enum class BegrunnelseType {
     UTEN,
     PÅKREVD,
     VALGFRI

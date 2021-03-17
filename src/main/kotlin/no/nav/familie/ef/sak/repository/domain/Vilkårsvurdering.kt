@@ -13,10 +13,8 @@ import java.util.UUID
 data class Vilkårsvurdering(@Id
                             val id: UUID = UUID.randomUUID(),
                             val behandlingId: UUID,
-                            val resultat: Vilkårsresultat = Vilkårsresultat.IKKE_VURDERT,
+                            val resultat: Vilkårsresultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
                             val type: VilkårType,
-                            val begrunnelse: String? = null,
-                            val unntak: String? = null,
                             val barnId: UUID? = null,
                             @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                             val sporbar: Sporbar = Sporbar(),
@@ -26,88 +24,38 @@ data class Vilkårsvurdering(@Id
 // Ingen støtte for å ha en liste direkt i entiteten, wrapper+converter virker
 data class DelvilkårsvurderingWrapper(val delvilkårsvurderinger: List<Delvilkårsvurdering>)
 
-data class Delvilkårsvurdering(val type: DelvilkårType,
-                               val resultat: Vilkårsresultat = Vilkårsresultat.IKKE_VURDERT,
-                               val årsak: DelvilkårÅrsak? = null,
-                               val begrunnelse: String? = null)
-
-data class Delvilkårsvurdering2(val type: RegelId,
-                                val resultat: Vilkårsresultat = Vilkårsresultat.IKKE_VURDERT,
-                                val svar: List<VilkårSvar>)
+//Kan vi bestemme att vi skal vurdere alle delvilkår eller ikke, og att vi ikke trenger resultat på delviljkår
+data class Delvilkårsvurdering(val type: RegelId,
+                               val resultat: Vilkårsresultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+                               val svar: List<VilkårSvar>)
 
 data class VilkårSvar(val regelId: RegelId,
-                      val svar: SvarId,
+                      val svar: SvarId?,
                       val begrunnelse: String?)
 
 data class DelvilkårMetadata(val sivilstandstype: Sivilstandstype)
 
-enum class DelvilkårType {
-    FEM_ÅRS_MEDLEMSKAP,
-    DOKUMENTERT_FLYKTNINGSTATUS,
-    BOR_OG_OPPHOLDER_SEG_I_NORGE,
-    DOKUMENTERT_EKTESKAP,
-    DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE,
-    SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
-    SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
-    KRAV_SIVILSTAND,
-    LEVER_IKKE_MED_ANNEN_FORELDER,
-    LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD,
-    SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
-    NÆRE_BOFORHOLD,
-    MER_AV_DAGLIG_OMSORG,
-    OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN,
-    HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER,
-    SAGT_OPP_REDUSERT,
-    RIMELIG_GRUNN_SAGT_OPP
-}
-
-enum class DelvilkårÅrsak {
-    SAMME_HUS_OG_FÆRRE_ENN_4_BOENHETER,
-    SAMME_HUS_OG_FLERE_ENN_4_BOENHETER_MEN_VURDERT_NÆRT,
-    SELVSTENDIGE_BOLIGER_SAMME_TOMT,
-    SELVSTENDIGE_BOLIGER_SAMME_GÅRDSTUN,
-    NÆRMESTE_BOLIG_ELLER_REKKEHUS_I_SAMMEGATE,
-    TILSTØTENDE_BOLIGER_ELLER_REKKEHUS_I_SAMMEGATE
-}
-
 enum class Vilkårsresultat {
     OPPFYLT,
     IKKE_OPPFYLT,
-    IKKE_VURDERT,
-    IKKE_AKTUELL
+    IKKE_TATT_STILLING_TIL,
+    SKAL_IKKE_VURDERES
 }
 
-//TODO Denne bør kanskje utvides til å inneholde en NARE-spesifikasjon
-enum class VilkårType(val beskrivelse: String,
-                      val delvilkår: List<DelvilkårType> = emptyList()) {
+enum class VilkårType(val beskrivelse: String) {
 
+    //TODO burde denne slettes?
     OPPHOLDSTILLATELSE("Vises kun for ikke-nordiske statsborgere - " +
                        "Foreligger det oppholdstillatelse eller annen bekreftelse på gyldig opphold?"),
-    FORUTGÅENDE_MEDLEMSKAP("§15-2 Forutgående medlemskap",
-                           listOf(DelvilkårType.FEM_ÅRS_MEDLEMSKAP)),
-    LOVLIG_OPPHOLD("§15-3 Lovlig opphold", listOf(DelvilkårType.BOR_OG_OPPHOLDER_SEG_I_NORGE)),
+    FORUTGÅENDE_MEDLEMSKAP("§15-2 Forutgående medlemskap"),
+    LOVLIG_OPPHOLD("§15-3 Lovlig opphold"),
 
-    MOR_ELLER_FAR("§15-4 Mor eller far",
-                  listOf(DelvilkårType.OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN)),
+    MOR_ELLER_FAR("§15-4 Mor eller far"),
 
-    SIVILSTAND("§15-4 Sivilstand",
-               listOf(
-                       DelvilkårType.DOKUMENTERT_EKTESKAP,
-                       DelvilkårType.DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE,
-                       DelvilkårType.SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
-                       DelvilkårType.SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
-                       DelvilkårType.KRAV_SIVILSTAND,
-               )),
-    SAMLIV("§15-4 Samliv",
-           listOf(DelvilkårType.LEVER_IKKE_MED_ANNEN_FORELDER,
-                  DelvilkårType.LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD
-           )),
-    ALENEOMSORG("§15-4 Aleneomsorg",
-                listOf(DelvilkårType.SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
-                       DelvilkårType.NÆRE_BOFORHOLD,
-                       DelvilkårType.MER_AV_DAGLIG_OMSORG)),
-    NYTT_BARN_SAMME_PARTNER("§15-4 Nytt barn samme partner",
-                            listOf(DelvilkårType.HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER));
+    SIVILSTAND("§15-4 Sivilstand"),
+    SAMLIV("§15-4 Samliv"),
+    ALENEOMSORG("§15-4 Aleneomsorg"),
+    NYTT_BARN_SAMME_PARTNER("§15-4 Nytt barn samme partner");
 
     companion object {
 
@@ -117,7 +65,6 @@ enum class VilkårType(val beskrivelse: String,
                                                     SIVILSTAND,
                                                     SAMLIV,
                                                     ALENEOMSORG,
-                                                    NYTT_BARN_SAMME_PARTNER
-        )
+                                                    NYTT_BARN_SAMME_PARTNER)
     }
 }

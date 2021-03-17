@@ -1,9 +1,10 @@
 package no.nav.familie.ef.sak.vurdering
 
+import no.nav.familie.ef.sak.api.dto.OppdaterVilkårsvurderingDto
 import no.nav.familie.ef.sak.api.dto.Sivilstandstype
 import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
+import no.nav.familie.ef.sak.regler.RegelId
 import no.nav.familie.ef.sak.repository.domain.DelvilkårMetadata
-import no.nav.familie.ef.sak.repository.domain.DelvilkårType
 import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
 import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
 import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsstønad
@@ -13,17 +14,17 @@ import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsst
  * Filtrerer bort delvikår som ikke skall vurderes iht data i søknaden
  */
 
-fun utledDelvilkårResultat(delvilkårType: DelvilkårType,
+fun utledDelvilkårResultat(regelId: RegelId,
                            søknad: SøknadsskjemaOvergangsstønad,
                            delvilkårMetadata: DelvilkårMetadata): Vilkårsresultat {
-    return if (erDelvilkårAktueltForSøknaden(delvilkårType, søknad, delvilkårMetadata)) {
-        Vilkårsresultat.IKKE_VURDERT
+    return if (erDelvilkårAktueltForSøknaden(regelId, søknad, delvilkårMetadata)) {
+        Vilkårsresultat.IKKE_TATT_STILLING_TIL
     } else {
-        Vilkårsresultat.IKKE_AKTUELL
+        Vilkårsresultat.IKKE_TATT_STILLING_TIL
     }
 }
 
-fun validerDelvilkår(oppdatert: VilkårsvurderingDto,
+fun validerDelvilkår(oppdatert: OppdaterVilkårsvurderingDto,
                      eksisterende: Vilkårsvurdering) {
     val innkommendeDelvurderinger = oppdatert.delvilkårsvurderinger.map { it.type }.toSet()
     val lagredeDelvurderinger = eksisterende.delvilkårsvurdering.delvilkårsvurderinger.map { it.type }.toSet()
@@ -32,18 +33,17 @@ fun validerDelvilkår(oppdatert: VilkårsvurderingDto,
     require(innkommendeDelvurderinger.containsAll(lagredeDelvurderinger)) { "Nye delvilkårsvurderinger mangler noen eksisterende vurderinger" }
 }
 
-
-private fun erDelvilkårAktueltForSøknaden(delvilkårType: DelvilkårType,
+private fun erDelvilkårAktueltForSøknaden(regelId: RegelId,
                                           søknad: SøknadsskjemaOvergangsstønad,
                                           delvilkårMetadata: DelvilkårMetadata): Boolean {
     val sivilstandType = delvilkårMetadata.sivilstandstype
 
-    return when (delvilkårType) {
-        DelvilkårType.DOKUMENTERT_EKTESKAP -> måDokumentereEkteskap(sivilstandType, søknad)
-        DelvilkårType.DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE -> måDokumentereSeparasjonEllerSkilsmisse(sivilstandType, søknad)
-        DelvilkårType.SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON -> måDokumentereSamlivsbrudd(sivilstandType, søknad)
-        DelvilkårType.SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING -> måVerifisereDatoerForSamlivsbrudd(sivilstandType)
-        DelvilkårType.KRAV_SIVILSTAND -> måVerifisereKravTilSivilstand(sivilstandType)
+    return when (regelId) {
+        RegelId.DOKUMENTERT_EKTESKAP -> måDokumentereEkteskap(sivilstandType, søknad)
+        RegelId.DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE -> måDokumentereSeparasjonEllerSkilsmisse(sivilstandType, søknad)
+        RegelId.SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON -> måDokumentereSamlivsbrudd(sivilstandType, søknad)
+        RegelId.SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING -> måVerifisereDatoerForSamlivsbrudd(sivilstandType)
+        RegelId.KRAV_SIVILSTAND -> måVerifisereKravTilSivilstand(sivilstandType)
         else -> true
     }
 }

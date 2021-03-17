@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.api.gui
 
+import no.nav.familie.ef.sak.api.dto.OppdaterVilkårsvurderingDto
 import no.nav.familie.ef.sak.api.dto.VilkårDto
 import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.service.BehandlingService
@@ -24,7 +25,7 @@ class VurderingController(private val vurderingService: VurderingService,
                           private val tilgangService: TilgangService) {
 
     @PostMapping(value = ["inngangsvilkar", "vilkar"])
-    fun oppdaterVurderingVilkår(@RequestBody vilkårsvurdering: VilkårsvurderingDto): Ressurs<UUID> {
+    fun oppdaterVurderingVilkår(@RequestBody vilkårsvurdering: OppdaterVilkårsvurderingDto): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(vilkårsvurdering.behandlingId)
         return Ressurs.success(vurderingService.oppdaterVilkår(vilkårsvurdering))
     }
@@ -43,6 +44,7 @@ class VurderingController(private val vurderingService: VurderingService,
         val oppdatertBehandling = stegService.håndterRegistrerOpplysninger(behandling, null)
         return Ressurs.success(stegService.håndterInngangsvilkår(oppdatertBehandling).id)
     }
+
     @PostMapping("/{behandlingId}/overgangsstonad/fullfor")
     fun fullførStønadsvilkår(@PathVariable behandlingId: UUID): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
