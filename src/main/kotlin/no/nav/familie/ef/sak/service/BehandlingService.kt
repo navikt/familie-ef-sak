@@ -145,12 +145,7 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
         behandling.status = BehandlingStatus.FERDIGSTILT;
         behandling.resultat = BehandlingResultat.ANNULLERT;
         behandling.steg = StegType.BEHANDLING_FERDIGSTILT;
-        behandlingshistorikkService.opprettHistorikkInnslag(
-
-                Behandlingshistorikk(behandlingId = behandling.id,
-                        steg = behandling.steg,
-                        opprettetAvNavn = SikkerhetContext.hentSaksbehandlerNavn(),
-                        opprettetAv = SikkerhetContext.hentSaksbehandler()))
+        behandlingshistorikkService.opprettHistorikkInnslag(behandling)
         return behandlingRepository.update(behandling)
     }
 
