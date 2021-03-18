@@ -141,14 +141,7 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
 
     fun annullerBehandling(behandlingId: UUID): Behandling {
         val behandling = hentBehandling(behandlingId)
-        if (!behandling.kanAnnulleres()) {
-            throw Feil(
-                    message = "Kan ikke annullere en behandling med status ${behandling.status} for ${behandling.type}",
-                    frontendFeilmelding = "Kan ikke annullere en behandling med status ${behandling.status} for ${behandling.type}",
-                    httpStatus = HttpStatus.BAD_REQUEST,
-                    throwable = null
-            )
-        }
+        validerAtBehandlingenKanAnnulleres(behandling)
         behandling.status = BehandlingStatus.FERDIGSTILT;
         behandling.resultat = BehandlingResultat.ANNULLERT;
         behandling.steg = StegType.BEHANDLING_FERDIGSTILT;
@@ -159,6 +152,17 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
                         opprettetAvNavn = SikkerhetContext.hentSaksbehandlerNavn(),
                         opprettetAv = SikkerhetContext.hentSaksbehandler()))
         return behandlingRepository.update(behandling)
+    }
+
+    private fun validerAtBehandlingenKanAnnulleres(behandling: Behandling) {
+        if (!behandling.kanAnnulleres()) {
+            throw Feil(
+                    message = "Kan ikke annullere en behandling med status ${behandling.status} for ${behandling.type}",
+                    frontendFeilmelding = "Kan ikke annullere en behandling med status ${behandling.status} for ${behandling.type}",
+                    httpStatus = HttpStatus.BAD_REQUEST,
+                    throwable = null
+            )
+        }
     }
 
 }
