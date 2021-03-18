@@ -8,16 +8,14 @@ import no.nav.familie.ef.sak.regler.Vilkårsregel
 import no.nav.familie.ef.sak.regler.regelIds
 import no.nav.familie.ef.sak.repository.domain.VilkårType
 
-// skalIkkeVurdere: [DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE, SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON]
-
-class Sivilstand : Vilkårsregel(vilkårType = VilkårType.SIVILSTAND,
-                                regler = setOf(DOKUMENTERT_EKTESKAP,
-                                               DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE,
-                                               SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
-                                               SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
-                                               KRAV_SIVILSTAND,
-                                               UNNTAK),
-                                hovedregler = regelIds()) { //TODO?
+class SivilstandRegel : Vilkårsregel(vilkårType = VilkårType.SIVILSTAND,
+                                     regler = setOf(DOKUMENTERT_EKTESKAP,
+                                                    DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE,
+                                                    SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
+                                                    SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
+                                                    KRAV_SIVILSTAND,
+                                                    UNNTAK),
+                                     hovedregler = regelIds()) { //TODO?
 
     companion object {
 

@@ -10,7 +10,11 @@ import org.springframework.data.relational.core.mapping.Table
 import java.util.UUID
 
 /**
- * TODO kommentar for vilkårsvurdering
+ * En vilkårsvurdering per type [VilkårType].
+ * For noen typer så er det per [VilkårType] og [barnId], hvor man må vurdere vilkåret per barn til søkeren
+ *
+ * Hver vilkårsvurdering har delvilkår. Hvert delvilkår har vurderinger med svar, og kanskje begrunnelse.
+ *
  */
 @Table("vilkarsvurdering")
 data class Vilkårsvurdering(@Id
@@ -39,6 +43,9 @@ data class Vurdering(val regelId: RegelId,
                      val svar: SvarId? = null,
                      val begrunnelse: String? = null)
 
+/**
+ * Brukes for å utlede hvilke delvilkår som må besvares
+ */
 data class DelvilkårMetadata(val sivilstandstype: Sivilstandstype)
 
 enum class Vilkårsresultat(val beskrivelse: String) {
@@ -46,7 +53,9 @@ enum class Vilkårsresultat(val beskrivelse: String) {
     IKKE_OPPFYLT("Vilkåret er ikke oppfylt hvis alle delvilkår er oppfylt eller ikke oppfylt, men minimum 1 ikke oppfylt"),
     IKKE_AKTUELL("Hvis søknaden/pdl data inneholder noe som gjør att delvilkåret ikke må besvares"),
     IKKE_TATT_STILLING_TIL("Init state, eller att brukeren ikke svaret på hele delvilkåret"),
-    SKAL_IKKE_VURDERES("Saksbehandleren kan sette att ett delvilkår ikke skal vurderes")
+    SKAL_IKKE_VURDERES("Saksbehandleren kan sette att ett delvilkår ikke skal vurderes");
+
+    fun oppfyltEllerIkkeOppfylt() = this == OPPFYLT || this == IKKE_OPPFYLT
 }
 
 enum class VilkårType(val beskrivelse: String) {

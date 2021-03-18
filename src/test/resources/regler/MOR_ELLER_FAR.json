@@ -1,0 +1,18 @@
+{
+  "vilkårType" : "MOR_ELLER_FAR",
+  "regler" : {
+    "OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN" : {
+      "regelId" : "OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN",
+      "svarMapping" : {
+        "JA" : {
+          "begrunnelseType" : "UTEN",
+          "regelId" : "SLUTT_NODE"
+        },
+        "NEI" : {
+          "begrunnelseType" : "UTEN",
+          "regelId" : "SLUTT_NODE"
+        }
+      }
+    }
+  }
+}

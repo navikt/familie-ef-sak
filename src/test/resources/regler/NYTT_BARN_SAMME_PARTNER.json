@@ -1,0 +1,18 @@
+{
+  "vilkårType" : "NYTT_BARN_SAMME_PARTNER",
+  "regler" : {
+    "HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER" : {
+      "regelId" : "HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER",
+      "svarMapping" : {
+        "JA" : {
+          "begrunnelseType" : "UTEN",
+          "regelId" : "SLUTT_NODE"
+        },
+        "NEI" : {
+          "begrunnelseType" : "UTEN",
+          "regelId" : "SLUTT_NODE"
+        }
+      }
+    }
+  }
+}

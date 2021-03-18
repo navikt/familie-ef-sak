@@ -10,9 +10,9 @@ import no.nav.familie.ef.sak.regler.jaNeiMapping
 import no.nav.familie.ef.sak.regler.regelIds
 import no.nav.familie.ef.sak.repository.domain.VilkårType
 
-class OppholdINorge : Vilkårsregel(vilkårType = VilkårType.LOVLIG_OPPHOLD,
-                                   regler = setOf(BOR_OG_OPPHOLDER_SEG_I_NORGE, OPPHOLD_UNNTAK),
-                                   hovedregler = regelIds(BOR_OG_OPPHOLDER_SEG_I_NORGE)) {
+class OppholdINorgeRegel : Vilkårsregel(vilkårType = VilkårType.LOVLIG_OPPHOLD,
+                                        regler = setOf(BOR_OG_OPPHOLDER_SEG_I_NORGE, OPPHOLD_UNNTAK),
+                                        hovedregler = regelIds(BOR_OG_OPPHOLDER_SEG_I_NORGE)) {
 
     companion object {
 

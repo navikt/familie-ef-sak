@@ -8,10 +8,10 @@ import no.nav.familie.ef.sak.regler.jaNeiMapping
 import no.nav.familie.ef.sak.regler.regelIds
 import no.nav.familie.ef.sak.repository.domain.VilkårType
 
-class Samliv : Vilkårsregel(vilkårType = VilkårType.SAMLIV,
-                            regler = setOf(LEVER_IKKE_MED_ANNEN_FORELDER, LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD),
-                            hovedregler = regelIds(LEVER_IKKE_MED_ANNEN_FORELDER,
-                                                   LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD)) {
+class SamlivRegel : Vilkårsregel(vilkårType = VilkårType.SAMLIV,
+                                 regler = setOf(LEVER_IKKE_MED_ANNEN_FORELDER, LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD),
+                                 hovedregler = regelIds(LEVER_IKKE_MED_ANNEN_FORELDER,
+                                                        LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD)) {
 
     companion object {
 

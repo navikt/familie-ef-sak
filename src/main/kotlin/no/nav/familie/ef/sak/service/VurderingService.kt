@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.api.dto.OppdaterVilkårsvurderingDto
+import no.nav.familie.ef.sak.api.dto.OppdatertVilkårsvurderingResponseDto
 import no.nav.familie.ef.sak.api.dto.VilkårDto
 import no.nav.familie.ef.sak.api.dto.VilkårGrunnlagDto
 import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
@@ -13,10 +14,10 @@ import no.nav.familie.ef.sak.repository.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.repository.domain.DelvilkårMetadata
 import no.nav.familie.ef.sak.repository.domain.Delvilkårsvurdering
 import no.nav.familie.ef.sak.repository.domain.DelvilkårsvurderingWrapper
-import no.nav.familie.ef.sak.repository.domain.Vurdering
 import no.nav.familie.ef.sak.repository.domain.VilkårType
 import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
 import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
+import no.nav.familie.ef.sak.repository.domain.Vurdering
 import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsstønad
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import org.springframework.stereotype.Service
@@ -27,7 +28,7 @@ class VurderingService(private val behandlingService: BehandlingService,
                        private val vilkårsvurderingRepository: VilkårsvurderingRepository,
                        private val grunnlagsdataService: GrunnlagsdataService) {
 
-    fun oppdaterVilkår(vilkårsvurderingDto: OppdaterVilkårsvurderingDto): UUID {
+    fun oppdaterVilkår(vilkårsvurderingDto: OppdaterVilkårsvurderingDto): OppdatertVilkårsvurderingResponseDto {
         val vilkårsvurdering = vilkårsvurderingRepository.findByIdOrThrow(vilkårsvurderingDto.id)
 
         val behandlingId = vilkårsvurdering.behandlingId
@@ -36,10 +37,11 @@ class VurderingService(private val behandlingService: BehandlingService,
                        "Behandlingen er låst for videre redigering")
         }
 
-        val nyVilkårsvurdering = OppdaterVilkår.validerOgOppdater(vilkårsvurdering,
-                                                                  alleVilkårsregler(),
-                                                                  vilkårsvurderingDto.delvilkårsvurderinger)
-        return vilkårsvurderingRepository.update(nyVilkårsvurdering).id
+        val nyVilkårsvurdering = OppdaterVilkår.lagNyOppdatertVilkårsvurdering(vilkårsvurdering,
+                                                                               vilkårsvurderingDto.delvilkårsvurderinger)
+        val oppdatertVilkårsvurdering = vilkårsvurderingRepository.update(nyVilkårsvurdering)
+        return OppdatertVilkårsvurderingResponseDto(id = oppdatertVilkårsvurdering.id,
+                                                    resultat = oppdatertVilkårsvurdering.resultat)
     }
 
     fun hentVilkår(behandlingId: UUID): VilkårDto {
@@ -68,7 +70,7 @@ class VurderingService(private val behandlingService: BehandlingService,
 
         // todo håndtere vilkår som allerede finnes eller barn som allerede finnes, men hvordan håndtere barn som blir slettede?
         // alleVilkårsregler skal kanskje ikke være en funksjon?
-        val nyeVilkårsvurderinger: List<Vilkårsvurdering> = alleVilkårsregler()
+        val nyeVilkårsvurderinger: List<Vilkårsvurdering> = alleVilkårsregler
                 .filter { lagredeVilkårsvurderinger.find { vurdering -> vurdering.type === it.vilkårType } == null }
                 .flatMap { vilkårsregel ->
 

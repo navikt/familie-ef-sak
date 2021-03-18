@@ -6,10 +6,12 @@ import org.junit.jupiter.api.Test
 
 internal class RegelIdTest {
 
+    private val vilkårsregler = Vilkårsregler.VILKÅRSREGLER.vilkårsregler.values
+
     @Test
     internal fun `valider att regelId ikke brukes på flere steder`() {
         val sjekkedeRegelIdMap = mutableMapOf<RegelId, VilkårType>()
-        vilkårsreglerPåVilkårType.values.forEach { vilkårsregel ->
+        vilkårsregler.forEach { vilkårsregel ->
             vilkårsregel.regler.keys.forEach { regelId ->
                 val harLagtTilRegel = sjekkedeRegelIdMap.put(regelId, vilkårsregel.vilkårType) == null
                 if (regelId != RegelId.SLUTT_NODE && !harLagtTilRegel) {
@@ -21,7 +23,7 @@ internal class RegelIdTest {
 
     @Test
     internal fun `valider att svarsmapping kun refererer til regelId definiert i reglerne til vilkåret`() {
-        vilkårsreglerPåVilkårType.values.forEach { vilkårsregel ->
+        vilkårsregler.forEach { vilkårsregel ->
             val definierteRegler = vilkårsregel.regler.keys
             val definierteMappinger = vilkårsregel.regler.values.flatMap {
                 regelSteg -> regelSteg.svarMapping.values.map { svarMapping -> svarMapping.regelId }
@@ -32,7 +34,7 @@ internal class RegelIdTest {
 
     @Test
     internal fun `valider att rotregler er definiert i regler for hver vilkår`() {
-        vilkårsreglerPåVilkårType.values.forEach {
+        vilkårsregler.forEach {
             assertThat(it.regler.keys).containsAll(it.hovedregler)
         }
     }

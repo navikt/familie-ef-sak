@@ -9,13 +9,13 @@ import no.nav.familie.ef.sak.regler.jaNeiMapping
 import no.nav.familie.ef.sak.regler.regelIds
 import no.nav.familie.ef.sak.repository.domain.VilkårType
 
-class Aleneomsorg : Vilkårsregel(vilkårType = VilkårType.ALENEOMSORG,
-                                 regler = setOf(SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
-                                                NÆRE_BOFORHOLD,
-                                                MER_AV_DAGLIG_OMSORG),
-                                 hovedregler = regelIds(SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
-                                                        NÆRE_BOFORHOLD,
-                                                        MER_AV_DAGLIG_OMSORG)) {
+class AleneomsorgRegel : Vilkårsregel(vilkårType = VilkårType.ALENEOMSORG,
+                                      regler = setOf(SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
+                                                     NÆRE_BOFORHOLD,
+                                                     MER_AV_DAGLIG_OMSORG),
+                                      hovedregler = regelIds(SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
+                                                             NÆRE_BOFORHOLD,
+                                                             MER_AV_DAGLIG_OMSORG)) {
 
     companion object {
 

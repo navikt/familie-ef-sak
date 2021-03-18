@@ -7,9 +7,9 @@ import no.nav.familie.ef.sak.regler.jaNeiMapping
 import no.nav.familie.ef.sak.regler.regelIds
 import no.nav.familie.ef.sak.repository.domain.VilkårType
 
-class MorEllerFar : Vilkårsregel(vilkårType = VilkårType.MOR_ELLER_FAR,
-                                 regler = setOf(OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN),
-                                 hovedregler = regelIds(OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN)) {
+class MorEllerFarRegel : Vilkårsregel(vilkårType = VilkårType.MOR_ELLER_FAR,
+                                      regler = setOf(OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN),
+                                      hovedregler = regelIds(OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN)) {
 
     companion object {
 

@@ -10,9 +10,9 @@ import no.nav.familie.ef.sak.regler.jaNeiMapping
 import no.nav.familie.ef.sak.regler.regelIds
 import no.nav.familie.ef.sak.repository.domain.VilkårType
 
-class ForutgåendeMedlemskap : Vilkårsregel(vilkårType = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
-                                           regler = setOf(SØKER_MEDLEM_I_FOLKETRYGDEN, MEDLEMSKAP_UNNTAK),
-                                           hovedregler = regelIds(SØKER_MEDLEM_I_FOLKETRYGDEN)) {
+class ForutgåendeMedlemskapRegel : Vilkårsregel(vilkårType = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
+                                                regler = setOf(SØKER_MEDLEM_I_FOLKETRYGDEN, MEDLEMSKAP_UNNTAK),
+                                                hovedregler = regelIds(SØKER_MEDLEM_I_FOLKETRYGDEN)) {
 
     companion object {
 

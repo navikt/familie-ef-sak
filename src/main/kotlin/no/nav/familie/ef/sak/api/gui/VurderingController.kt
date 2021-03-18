@@ -1,13 +1,17 @@
 package no.nav.familie.ef.sak.api.gui
 
 import no.nav.familie.ef.sak.api.dto.OppdaterVilkårsvurderingDto
+import no.nav.familie.ef.sak.api.dto.OppdatertVilkårsvurderingResponseDto
 import no.nav.familie.ef.sak.api.dto.VilkårDto
+import no.nav.familie.ef.sak.regler.Vilkårsregler
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.TilgangService
 import no.nav.familie.ef.sak.service.VurderingService
 import no.nav.familie.ef.sak.service.steg.StegService
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -28,20 +32,35 @@ class VurderingController(private val vurderingService: VurderingService,
                           private val behandlingService: BehandlingService,
                           private val tilgangService: TilgangService) {
 
-    @PostMapping(value = ["inngangsvilkar", "vilkar"])
-    fun oppdaterVurderingVilkår(@RequestBody vilkårsvurdering: OppdaterVilkårsvurderingDto): Ressurs<UUID> {
-        tilgangService.validerTilgangTilBehandling(vilkårsvurdering.behandlingId)
-        //TODO legg till feilhåndtering og logg body?
-        return Ressurs.success(vurderingService.oppdaterVilkår(vilkårsvurdering))
+    private val secureLogger = LoggerFactory.getLogger("secureLogger")
+
+    @GetMapping("regler")
+    fun hentRegler(): Ressurs<Vilkårsregler> {
+        return Ressurs.success(Vilkårsregler.VILKÅRSREGLER)
     }
 
-    @GetMapping(value = ["{behandlingId}/inngangsvilkar","{behandlingId}/vilkar"])
+    @PostMapping("vilkar")
+    fun oppdaterVurderingVilkår(@RequestBody vilkårsvurdering: OppdaterVilkårsvurderingDto)
+            : Ressurs<OppdatertVilkårsvurderingResponseDto> {
+        tilgangService.validerTilgangTilBehandling(vilkårsvurdering.behandlingId)
+        try {
+            return Ressurs.success(vurderingService.oppdaterVilkår(vilkårsvurdering))
+        } catch (e: Exception) {
+            val delvilkårJson = objectMapper.writeValueAsString(vilkårsvurdering.delvilkårsvurderinger)
+            secureLogger.warn("id=${vilkårsvurdering.id}" +
+                              " behandlingId=${vilkårsvurdering.behandlingId}" +
+                              " svar=$delvilkårJson")
+            throw e;
+        }
+    }
+
+    @GetMapping("{behandlingId}/vilkar")
     fun getVilkår(@PathVariable behandlingId: UUID): Ressurs<VilkårDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         return Ressurs.success(vurderingService.hentVilkår(behandlingId))
     }
 
-    @PostMapping(value = ["/{behandlingId}/inngangsvilkar/fullfor", "/{behandlingId}/vilkar/fullfor"])
+    @PostMapping("/{behandlingId}/vilkar/fullfor")
     fun fullførVilkår(@PathVariable behandlingId: UUID): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         val behandling = behandlingService.hentBehandling(behandlingId)

@@ -1,0 +1,35 @@
+{
+  "vilkårType" : "LOVLIG_OPPHOLD",
+  "regler" : {
+    "BOR_OG_OPPHOLDER_SEG_I_NORGE" : {
+      "regelId" : "BOR_OG_OPPHOLDER_SEG_I_NORGE",
+      "svarMapping" : {
+        "JA" : {
+          "begrunnelseType" : "VALGFRI",
+          "regelId" : "SLUTT_NODE"
+        },
+        "NEI" : {
+          "regelId" : "OPPHOLD_UNNTAK",
+          "begrunnelseType" : "UTEN"
+        }
+      }
+    },
+    "OPPHOLD_UNNTAK" : {
+      "regelId" : "OPPHOLD_UNNTAK",
+      "svarMapping" : {
+        "ARBEID_NORSK_ARBEIDSGIVER" : {
+          "begrunnelseType" : "VALGFRI",
+          "regelId" : "SLUTT_NODE"
+        },
+        "UTENLANDSOPPHOLD_MINDRE_ENN_6_UKER" : {
+          "begrunnelseType" : "VALGFRI",
+          "regelId" : "SLUTT_NODE"
+        },
+        "NEI" : {
+          "begrunnelseType" : "VALGFRI",
+          "regelId" : "SLUTT_NODE"
+        }
+      }
+    }
+  }
+}
