@@ -11,27 +11,22 @@ import no.nav.familie.ef.sak.regler.SluttRegel
 import no.nav.familie.ef.sak.regler.SvarId
 import no.nav.familie.ef.sak.regler.Vilkårsregel
 import no.nav.familie.ef.sak.repository.domain.DelvilkårsvurderingWrapper
-import no.nav.familie.ef.sak.repository.domain.VilkårSvar
 import no.nav.familie.ef.sak.repository.domain.VilkårType
 import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
 import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
-
-/**
- * TODO skal validere att siste spørsmål  for hvert delvilkår mangler svar eller er sluttnode, slik att man kan verifisere att man har lagt till neste spørsmål
- * TODO legge inn att det er greit for frontend å sende inn re
- */
+import no.nav.familie.ef.sak.repository.domain.Vurdering
 
 /**
  * @param vilkårType type vilkår
  * @param vilkår [Vilkårsresultat] for vilkåret
- * @param delvilkår [Vilkårsresultat] for hvert delvilkår/rotRegelId
+ * @param delvilkår [Vilkårsresultat] for hver hovedregel
  */
 private data class ValideringResultat(val vilkårType: VilkårType,
                                       val vilkår: Vilkårsresultat,
                                       val delvilkår: Map<RegelId, Vilkårsresultat>) {
 
-    fun rotVilkårsresultat(rotRegelId: RegelId) =
-            delvilkår[rotRegelId] ?: throw Feil("Savner resultat for regelId=$rotRegelId vilkårType=$vilkårType")
+    fun resultatHovedregel(hovedregel: RegelId) =
+            delvilkår[hovedregel] ?: throw Feil("Savner resultat for regelId=$hovedregel vilkårType=$vilkårType")
 }
 
 object OppdaterVilkår {
@@ -44,9 +39,23 @@ object OppdaterVilkår {
         validerVurdering(vilkårsregel, oppdatering)
 
         val vilkårsresultat = utledVilkårResultat(vilkårsregel, oppdatering)
+        validerAttResultatErOppfyltEllerIkkeOppfylt(vilkårsresultat)
         val oppdaterteDelvilkår = oppdaterDelvilkår(vilkårsvurdering, vilkårsresultat, oppdatering)
         return vilkårsvurdering.copy(resultat = vilkårsresultat.vilkår,
                                      delvilkårsvurdering = oppdaterteDelvilkår)
+    }
+
+    /**
+     * Då vi ikke helt har støtte for [Vilkårsresultat.SKAL_IKKE_VURDERES] ennå så skal svaret være
+     * [Vilkårsresultat.IKKE_OPPFYLT] eller [Vilkårsresultat.OPPFYLT]
+     * Når man legger til funksjonalitet for SKAL_IKKE_VURDERES, hva skal resultatet være?
+     */
+    private fun validerAttResultatErOppfyltEllerIkkeOppfylt(vilkårsresultat: ValideringResultat) {
+        if (vilkårsresultat.vilkår == Vilkårsresultat.OPPFYLT || vilkårsresultat.vilkår == Vilkårsresultat.IKKE_OPPFYLT) {
+            val message = "Støtter ikke mellomlagring ennå, må håndtere ${Vilkårsresultat.SKAL_IKKE_VURDERES}. " +
+                          "Ett resultat på vurderingen må bli oppfylt eller ikke oppfylt"
+            throw Feil(message = message, frontendFeilmelding = message)
+        }
     }
 
     /**
@@ -63,18 +72,18 @@ object OppdaterVilkår {
             if (it.resultat == Vilkårsresultat.IKKE_AKTUELL) {
                 it
             } else {
-                val rotRegelId = it.rotRegelId
-                val resultat = vilkårsresultat.rotVilkårsresultat(rotRegelId)
-                val svar = vurderingerPåType[rotRegelId] ?: throw Feil("Savner svar for rotRegelId=$rotRegelId")
+                val hovedregel = it.hovedregel
+                val resultat = vilkårsresultat.resultatHovedregel(hovedregel)
+                val svar = vurderingerPåType[hovedregel] ?: throw Feil("Savner svar for hovedregel=$hovedregel")
 
                 //TODO burde man ha en endepunkte som settes att man ikke skal vurdere ett delvilkår?
                 if (resultat == Vilkårsresultat.SKAL_IKKE_VURDERES) {
                     // Setter svar til initiellt verdi
                     it.copy(resultat = resultat,
-                            svar = listOf(VilkårSvar(rotRegelId)))
+                            vurderinger = listOf(Vurdering(hovedregel)))
                 } else {
                     it.copy(resultat = resultat,
-                            svar = svar.svarTilDomene())
+                            vurderinger = svar.svarTilDomene())
                 }
             }
         }.toList()
@@ -83,7 +92,7 @@ object OppdaterVilkår {
 
     private fun utledVilkårResultat(vilkårsregel: Vilkårsregel, delvilkår: List<DelvilkårsvurderingDto>): ValideringResultat {
         val delvilkårResultat = delvilkår.map { vurdering ->
-            vurdering.rootRegelId() to validerDelvilkårOgReturerVilkårsresultat(vilkårsregel, vurdering)
+            vurdering.hovedregel() to validerDelvilkårOgReturerVilkårsresultat(vilkårsregel, vurdering)
         }.toMap()
         return ValideringResultat(vilkårType = vilkårsregel.vilkårType,
                                   vilkår = utledVilkårResultat(delvilkårResultat),
@@ -92,20 +101,19 @@ object OppdaterVilkår {
 
     fun utledVilkårResultat(delvilkårResultat: Map<RegelId, Vilkårsresultat>): Vilkårsresultat {
         return when {
-            delvilkårResultat.values.all { it == Vilkårsresultat.OPPFYLT } -> {
-                Vilkårsresultat.OPPFYLT
-            }
-            delvilkårResultat.values.any { it == Vilkårsresultat.IKKE_TATT_STILLING_TIL } -> {
-                Vilkårsresultat.IKKE_TATT_STILLING_TIL
-            }
-            else -> Vilkårsresultat.IKKE_OPPFYLT
+            delvilkårResultat.values.all { it == Vilkårsresultat.OPPFYLT } -> Vilkårsresultat.OPPFYLT
+            delvilkårResultat.values.all { it == Vilkårsresultat.OPPFYLT || it == Vilkårsresultat.IKKE_OPPFYLT } ->
+                Vilkårsresultat.IKKE_OPPFYLT
+            delvilkårResultat.values.any { it == Vilkårsresultat.IKKE_TATT_STILLING_TIL } -> Vilkårsresultat.IKKE_TATT_STILLING_TIL
+            delvilkårResultat.values.any { it == Vilkårsresultat.SKAL_IKKE_VURDERES } -> Vilkårsresultat.SKAL_IKKE_VURDERES //TODO?
+            else -> error("Håndterer ikke situasjonen med resultat=${delvilkårResultat.values}")
         }
     }
 
     private fun validerVurdering(vilkårsregel: Vilkårsregel,
                                  oppdatering: List<DelvilkårsvurderingDto>) {
         validerAttAlleDelvilkårHarMinimumEttSvar(vilkårsregel.vilkårType, oppdatering)
-        validerAttAlleRotvilkårFinnesMed(vilkårsregel, oppdatering)
+        validerAttAlleHovedreglerFinnesMed(vilkårsregel, oppdatering)
 
         oppdatering.forEach { delvilkårsvurderingDto ->
             validerDelviljår(vilkårsregel, delvilkårsvurderingDto)
@@ -122,7 +130,7 @@ object OppdaterVilkår {
 
             if (svarId == null) {
                 feilHvis(erIkkeSisteSvaret) {
-                    throw Feil("Mangler svar på ett spørsmål som ikke er siste besvarte spørsmålet vilkårType=$vilkårType regelId=$regelId")
+                    "Mangler svar på ett spørsmål som ikke er siste besvarte spørsmålet vilkårType=$vilkårType regelId=$regelId"
                 }
             } else {
                 val svarMapping = regelMapping.svarMapping(svarId)
@@ -157,7 +165,7 @@ object OppdaterVilkår {
 
     /**
      * Skal validere att man sender inn minimum ett svar for ett delvilkår
-     * Når backend initierar [Delvilkårsvurdering] så legges ett første svar in med regelId rotspørsmålet
+     * Når backend initierar [Delvilkårsvurdering] så legges ett første svar in med regelId(hovedregel) for hvert delvilkår
      */
     private fun validerAttAlleDelvilkårHarMinimumEttSvar(vilkårType: VilkårType, oppdatering: List<DelvilkårsvurderingDto>) {
         oppdatering.forEach { vurdering ->
@@ -165,14 +173,14 @@ object OppdaterVilkår {
         }
     }
 
-    private fun validerAttAlleRotvilkårFinnesMed(vilkårsregel: Vilkårsregel, delvilkår: List<DelvilkårsvurderingDto>) {
-        val delvilkårRegelIdn = delvilkår.map { it.rootRegelId() }
-        val regelDelvilkår = vilkårsregel.rotregler
-        if (!regelDelvilkår.containsAll(delvilkårRegelIdn)) {
-            throw Feil("Delvilkårsvurderinger savner svar på rotregler - rotregler=$regelDelvilkår delvilkår=$delvilkårRegelIdn")
+    private fun validerAttAlleHovedreglerFinnesMed(vilkårsregel: Vilkårsregel, delvilkår: List<DelvilkårsvurderingDto>) {
+        val delvilkårRegelIdn = delvilkår.map { it.hovedregel() }
+        val hovedregler = vilkårsregel.hovedregler
+        feilHvis(!hovedregler.containsAll(delvilkårRegelIdn)) {
+            "Delvilkårsvurderinger savner svar på rotregler - rotregler=$hovedregler delvilkår=$delvilkårRegelIdn"
         }
-        if (delvilkårRegelIdn.size != regelDelvilkår.size) {
-            throw Feil("Feil i antall regler dto har ${delvilkårRegelIdn.size} mens vilkår har ${regelDelvilkår.size}")
+        feilHvis(delvilkårRegelIdn.size != hovedregler.size) {
+            "Feil i antall regler dto har ${delvilkårRegelIdn.size} mens vilkår har ${hovedregler.size}"
         }
     }
 
@@ -191,7 +199,10 @@ object OppdaterVilkår {
     private fun manglerPåkrevdBegrunnelse(regelNode: RegelNode, svar: VilkårSvarDto): Boolean =
             regelNode.begrunnelseType == BegrunnelseType.PÅKREVD && svar.begrunnelse?.trim().isNullOrEmpty()
 
-    private fun DelvilkårsvurderingDto.rootRegelId() = this.svar.first().regelId
+    /**
+     * @return regelId for første svaret som er hovedregeln på delvilkåret
+     */
+    private fun DelvilkårsvurderingDto.hovedregel() = this.svar.first().regelId
 
     private inline fun feilHvis(boolean: Boolean, lazyMessage: () -> String) {
         if (boolean) {

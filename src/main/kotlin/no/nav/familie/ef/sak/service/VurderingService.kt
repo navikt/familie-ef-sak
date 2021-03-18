@@ -13,7 +13,7 @@ import no.nav.familie.ef.sak.repository.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.repository.domain.DelvilkårMetadata
 import no.nav.familie.ef.sak.repository.domain.Delvilkårsvurdering
 import no.nav.familie.ef.sak.repository.domain.DelvilkårsvurderingWrapper
-import no.nav.familie.ef.sak.repository.domain.VilkårSvar
+import no.nav.familie.ef.sak.repository.domain.Vurdering
 import no.nav.familie.ef.sak.repository.domain.VilkårType
 import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
 import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
@@ -89,8 +89,8 @@ class VurderingService(private val behandlingService: BehandlingService,
                                       delvilkårMetadata: DelvilkårMetadata,
                                       behandlingId: UUID,
                                       barnId: UUID? = null): Vilkårsvurdering {
-        val delvilkårsvrdering = vilkårsregel.rotregler.map {
-            Delvilkårsvurdering(svar = listOf(VilkårSvar(regelId = it)))
+        val delvilkårsvrdering = vilkårsregel.hovedregler.map {
+            Delvilkårsvurdering(vurderinger = listOf(Vurdering(regelId = it)))
         }
         return Vilkårsvurdering(behandlingId = behandlingId,
                                 type = vilkårsregel.vilkårType,

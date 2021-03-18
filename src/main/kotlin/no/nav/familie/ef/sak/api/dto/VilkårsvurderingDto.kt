@@ -3,7 +3,7 @@ package no.nav.familie.ef.sak.api.dto
 import no.nav.familie.ef.sak.regler.RegelId
 import no.nav.familie.ef.sak.regler.SvarId
 import no.nav.familie.ef.sak.repository.domain.Delvilkårsvurdering
-import no.nav.familie.ef.sak.repository.domain.VilkårSvar
+import no.nav.familie.ef.sak.repository.domain.Vurdering
 import no.nav.familie.ef.sak.repository.domain.VilkårType
 import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
 import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
@@ -30,9 +30,9 @@ data class VilkårSvarDto(val regelId: RegelId,
                          val svar: SvarId? = null,
                          val begrunnelse: String? = null)
 
-fun VilkårSvar.tilDto() = VilkårSvarDto(this.regelId, this.svar, this.begrunnelse)
+fun Vurdering.tilDto() = VilkårSvarDto(this.regelId, this.svar, this.begrunnelse)
 
-fun Delvilkårsvurdering.tilDto() = DelvilkårsvurderingDto(this.resultat, this.svar.map { it.tilDto() })
+fun Delvilkårsvurdering.tilDto() = DelvilkårsvurderingDto(this.resultat, this.vurderinger.map { it.tilDto() })
 
 fun Vilkårsvurdering.tilDto() =
         VilkårsvurderingDto(id = this.id,
@@ -45,4 +45,4 @@ fun Vilkårsvurdering.tilDto() =
                             delvilkårsvurderinger = this.delvilkårsvurdering.delvilkårsvurderinger.map { it.tilDto() })
 
 fun DelvilkårsvurderingDto.svarTilDomene() = this.svar.map { it.tilDomene() }
-fun VilkårSvarDto.tilDomene() = VilkårSvar(this.regelId, this.svar, this.begrunnelse)
+fun VilkårSvarDto.tilDomene() = Vurdering(this.regelId, this.svar, this.begrunnelse)

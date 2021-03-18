@@ -13,9 +13,9 @@ class Aleneomsorg : Vilkårsregel(vilkårType = VilkårType.ALENEOMSORG,
                                  regler = setOf(SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
                                                 NÆRE_BOFORHOLD,
                                                 MER_AV_DAGLIG_OMSORG),
-                                 rotregler = regelIds(SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
-                                                      NÆRE_BOFORHOLD,
-                                                      MER_AV_DAGLIG_OMSORG)) {
+                                 hovedregler = regelIds(SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
+                                                        NÆRE_BOFORHOLD,
+                                                        MER_AV_DAGLIG_OMSORG)) {
 
     companion object {
 

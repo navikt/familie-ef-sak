@@ -9,7 +9,7 @@ import no.nav.familie.ef.sak.repository.domain.VilkårType
 
 class NyttBarnSammePartner : Vilkårsregel(vilkårType = VilkårType.NYTT_BARN_SAMME_PARTNER,
                                           regler = setOf(HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER),
-                                          rotregler = regelIds(HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER)) {
+                                          hovedregler = regelIds(HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER)) {
 
     companion object {
 

@@ -33,7 +33,7 @@ internal class RegelIdTest {
     @Test
     internal fun `valider att rotregler er definiert i regler for hver vilkår`() {
         vilkårsreglerPåVilkårType.values.forEach {
-            assertThat(it.regler.keys).containsAll(it.rotregler)
+            assertThat(it.regler.keys).containsAll(it.hovedregler)
         }
     }
 }

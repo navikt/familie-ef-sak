@@ -12,7 +12,7 @@ import no.nav.familie.ef.sak.repository.domain.VilkårType
 
 class OppholdINorge : Vilkårsregel(vilkårType = VilkårType.LOVLIG_OPPHOLD,
                                    regler = setOf(BOR_OG_OPPHOLDER_SEG_I_NORGE, OPPHOLD_UNNTAK),
-                                   rotregler = regelIds(BOR_OG_OPPHOLDER_SEG_I_NORGE)) {
+                                   hovedregler = regelIds(BOR_OG_OPPHOLDER_SEG_I_NORGE)) {
 
     companion object {
 

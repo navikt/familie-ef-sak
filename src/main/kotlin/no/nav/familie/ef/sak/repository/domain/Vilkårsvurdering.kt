@@ -9,6 +9,9 @@ import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.Table
 import java.util.UUID
 
+/**
+ * TODO kommentar for vilkårsvurdering
+ */
 @Table("vilkarsvurdering")
 data class Vilkårsvurdering(@Id
                             val id: UUID = UUID.randomUUID(),
@@ -24,33 +27,30 @@ data class Vilkårsvurdering(@Id
 // Ingen støtte for å ha en liste direkt i entiteten, wrapper+converter virker
 data class DelvilkårsvurderingWrapper(val delvilkårsvurderinger: List<Delvilkårsvurdering>)
 
-//Kan vi bestemme att vi skal vurdere alle delvilkår eller ikke, og att vi ikke trenger resultat på delviljkår
 data class Delvilkårsvurdering(val resultat: Vilkårsresultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-                               val svar: List<VilkårSvar>) {
+                               val vurderinger: List<Vurdering>) {
 
-    val rotRegelId = svar.first().regelId
+    // regelId for første svaret er det samme som hovedregel
+    val hovedregel = vurderinger.first().regelId
 
 }
 
-data class VilkårSvar(val regelId: RegelId,
-                      val svar: SvarId? = null,
-                      val begrunnelse: String? = null)
+data class Vurdering(val regelId: RegelId,
+                     val svar: SvarId? = null,
+                     val begrunnelse: String? = null)
 
 data class DelvilkårMetadata(val sivilstandstype: Sivilstandstype)
 
-enum class Vilkårsresultat {
-    OPPFYLT,
-    IKKE_OPPFYLT,
-    IKKE_AKTUELL,
-    IKKE_TATT_STILLING_TIL,
-    SKAL_IKKE_VURDERES
+enum class Vilkårsresultat(val beskrivelse: String) {
+    OPPFYLT("Vilkåret er oppfylt når alle delvilkår er oppfylte"),
+    IKKE_OPPFYLT("Vilkåret er ikke oppfylt hvis alle delvilkår er oppfylt eller ikke oppfylt, men minimum 1 ikke oppfylt"),
+    IKKE_AKTUELL("Hvis søknaden/pdl data inneholder noe som gjør att delvilkåret ikke må besvares"),
+    IKKE_TATT_STILLING_TIL("Init state, eller att brukeren ikke svaret på hele delvilkåret"),
+    SKAL_IKKE_VURDERES("Saksbehandleren kan sette att ett delvilkår ikke skal vurderes")
 }
 
 enum class VilkårType(val beskrivelse: String) {
 
-    //TODO burde denne slettes?
-    OPPHOLDSTILLATELSE("Vises kun for ikke-nordiske statsborgere - " +
-                       "Foreligger det oppholdstillatelse eller annen bekreftelse på gyldig opphold?"),
     FORUTGÅENDE_MEDLEMSKAP("§15-2 Forutgående medlemskap"),
     LOVLIG_OPPHOLD("§15-3 Lovlig opphold"),
 
@@ -63,12 +63,6 @@ enum class VilkårType(val beskrivelse: String) {
 
     companion object {
 
-        fun hentVilkår(): List<VilkårType> = listOf(FORUTGÅENDE_MEDLEMSKAP,
-                                                    LOVLIG_OPPHOLD,
-                                                    MOR_ELLER_FAR,
-                                                    SIVILSTAND,
-                                                    SAMLIV,
-                                                    ALENEOMSORG,
-                                                    NYTT_BARN_SAMME_PARTNER)
+        fun hentVilkår(): List<VilkårType> = values().toList()
     }
 }

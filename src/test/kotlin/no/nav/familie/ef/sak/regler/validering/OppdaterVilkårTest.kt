@@ -14,7 +14,7 @@ import no.nav.familie.ef.sak.regler.jaNeiMapping
 import no.nav.familie.ef.sak.regler.validering.OppdaterVilkår.utledVilkårResultat
 import no.nav.familie.ef.sak.repository.domain.Delvilkårsvurdering
 import no.nav.familie.ef.sak.repository.domain.DelvilkårsvurderingWrapper
-import no.nav.familie.ef.sak.repository.domain.VilkårSvar
+import no.nav.familie.ef.sak.repository.domain.Vurdering
 import no.nav.familie.ef.sak.repository.domain.VilkårType
 import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
 import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
@@ -192,8 +192,8 @@ class OppdaterVilkårTest {
     }
 
     private fun Vilkårsvurdering.delvilkår(regelId: RegelId) =
-            this.delvilkårsvurdering.delvilkårsvurderinger.singleOrNull { it.rotRegelId == regelId }
-            ?: error("Finner ikke regelId=$regelId blant ${this.delvilkårsvurdering.delvilkårsvurderinger.map { it.rotRegelId }}")
+            this.delvilkårsvurdering.delvilkårsvurderinger.singleOrNull { it.hovedregel == regelId }
+            ?: error("Finner ikke regelId=$regelId blant ${this.delvilkårsvurdering.delvilkårsvurderinger.map { it.hovedregel }}")
 
     private fun Vilkårsvurdering.førsteDelvilkår() = this.delvilkårsvurdering.delvilkårsvurderinger.first()
 
@@ -204,7 +204,7 @@ class OppdaterVilkårTest {
                                                                                          BegrunnelseType.PÅKREVD))),
                                RegelSteg(regelId = RegelId.KRAV_SIVILSTAND,
                                          svarMapping = jaNeiMapping())),
-                         rotregler = setOf(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE))
+                         hovedregler = setOf(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE))
 
     private class VilkårsregelMedTvåRotRegler :
             Vilkårsregel(VilkårType.ALENEOMSORG,
@@ -212,8 +212,8 @@ class OppdaterVilkårTest {
                                          svarMapping = jaNeiMapping(hvisNei = IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE)),
                                RegelSteg(regelId = RegelId.KRAV_SIVILSTAND,
                                          svarMapping = jaNeiMapping())),
-                         rotregler = setOf(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE,
-                                           RegelId.KRAV_SIVILSTAND))
+                         hovedregler = setOf(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE,
+                                             RegelId.KRAV_SIVILSTAND))
 
     private fun delvilkårsvurderingDto(vararg svar: VilkårSvarDto) =
             DelvilkårsvurderingDto(resultat = Vilkårsresultat.IKKE_AKTUELL, svar = svar.toList())
@@ -233,8 +233,8 @@ class OppdaterVilkårTest {
     }
 
     private fun vurderingFraDb(regel: Vilkårsregel): Vilkårsvurdering {
-        val delvilkårsvurderinger = regel.rotregler.map {
-            Delvilkårsvurdering(resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL, svar = listOf(VilkårSvar(it)))
+        val delvilkårsvurderinger = regel.hovedregler.map {
+            Delvilkårsvurdering(resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL, vurderinger = listOf(Vurdering(it)))
         }
         return Vilkårsvurdering(behandlingId = UUID.randomUUID(),
                                 resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,

@@ -12,7 +12,7 @@ import no.nav.familie.ef.sak.repository.domain.VilkårType
 
 class ForutgåendeMedlemskap : Vilkårsregel(vilkårType = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
                                            regler = setOf(SØKER_MEDLEM_I_FOLKETRYGDEN, MEDLEMSKAP_UNNTAK),
-                                           rotregler = regelIds(SØKER_MEDLEM_I_FOLKETRYGDEN)) {
+                                           hovedregler = regelIds(SØKER_MEDLEM_I_FOLKETRYGDEN)) {
 
     companion object {
 

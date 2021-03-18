@@ -17,7 +17,7 @@ class Sivilstand : Vilkårsregel(vilkårType = VilkårType.SIVILSTAND,
                                                SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
                                                KRAV_SIVILSTAND,
                                                UNNTAK),
-                                rotregler = regelIds()) { //TODO?
+                                hovedregler = regelIds()) { //TODO?
 
     companion object {
 
