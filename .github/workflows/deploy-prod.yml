@@ -10,7 +10,7 @@ env:
 
 jobs:
   build:
-    name: "Prod: Build, push and deploy to dev-gcp and prod-gcp"
+    name: Build, push and deploy to dev-gcp and prod-gcp
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code

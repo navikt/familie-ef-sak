@@ -1,4 +1,4 @@
-name: Build-Deploy
+name: Build-Deploy dev
 on:
   workflow_dispatch:
 
@@ -7,7 +7,7 @@ env:
 
 jobs:
   build:
-    name: "Dev: Build, push and deploy to dev-gcp"
+    name: Build, push and deploy to dev-gcp
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
