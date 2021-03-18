@@ -165,7 +165,8 @@ query($ident: ID!){
             }
         }
         oppholdsadresse(historikk: true) {
-            oppholdsadressedato
+            gyldigFraOgMed
+            gyldigTilOgMed
             coAdressenavn
             utenlandskAdresse {
                 adressenavnNummer
@@ -200,10 +201,6 @@ query($ident: ID!){
         sivilstand(historikk: true) {
             type
             gyldigFraOgMed
-            myndighet
-            kommune
-            sted
-            utland
             relatertVedSivilstand
             bekreftelsesdato
             metadata {

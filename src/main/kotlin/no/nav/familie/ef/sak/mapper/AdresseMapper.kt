@@ -12,11 +12,11 @@ import java.time.LocalDate
 class AdresseMapper(private val kodeverkService: KodeverkService) {
 
     fun tilAdresse(adresse: Oppholdsadresse): AdresseDto {
-        val visningsadresse = tilFormatertAdresse(adresse, datoEllerIdag(adresse.oppholdsadressedato))
+        val visningsadresse = tilFormatertAdresse(adresse, datoEllerIdag(adresse.gyldigFraOgMed))
         return AdresseDto(visningsadresse = visningsadresse,
                           type = AdresseType.OPPHOLDSADRESSE,
-                          gyldigFraOgMed = adresse.oppholdsadressedato,
-                          gyldigTilOgMed = null)
+                          gyldigFraOgMed = adresse.gyldigFraOgMed,
+                          gyldigTilOgMed = adresse.gyldigTilOgMed)
     }
 
     fun tilAdresse(adresse: Kontaktadresse): AdresseDto {

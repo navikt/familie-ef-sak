@@ -169,10 +169,6 @@ class PdlClientConfig {
     private fun sivilstand(): List<Sivilstand> =
             listOf(Sivilstand(type = Sivilstandstype.GIFT,
                               gyldigFraOgMed = startdato,
-                              myndighet = "Myndighet",
-                              kommune = "0301",
-                              sted = "Oslo",
-                              utland = null,
                               relatertVedSivilstand = "11111122222",
                               bekreftelsesdato = "2020-01-01",
                               metadata = metadataGjeldende))

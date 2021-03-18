@@ -116,7 +116,8 @@ data class Bostedsadresse(val angittFlyttedato: LocalDate?,
     }
 }
 
-data class Oppholdsadresse(val oppholdsadressedato: LocalDate?,
+data class Oppholdsadresse(val gyldigFraOgMed: LocalDate?,
+                           val gyldigTilOgMed: LocalDate? = null,
                            val coAdressenavn: String?,
                            val utenlandskAdresse: UtenlandskAdresse?,
                            val vegadresse: Vegadresse?,
@@ -253,10 +254,6 @@ enum class Oppholdstillatelse {
 
 data class Sivilstand(val type: Sivilstandstype,
                       val gyldigFraOgMed: LocalDate?,
-                      val myndighet: String?,
-                      val kommune: String?,
-                      val sted: String?,
-                      val utland: String?,
                       val relatertVedSivilstand: String?,
                       val bekreftelsesdato: String?,
                       val metadata: Metadata)
