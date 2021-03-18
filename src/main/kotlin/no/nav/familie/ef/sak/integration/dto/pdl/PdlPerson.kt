@@ -92,8 +92,8 @@ data class PdlAnnenForelder(val adressebeskyttelse: List<Adressebeskyttelse>,
 
 data class Metadata(val historisk: Boolean)
 
-data class DeltBosted(val startdatoForKontrakt: LocalDateTime,
-                      val sluttdatoForKontrakt: LocalDateTime?,
+data class DeltBosted(val startdatoForKontrakt: LocalDate,
+                      val sluttdatoForKontrakt: LocalDate?,
                       val vegadresse: Vegadresse?,
                       val ukjentBosted: UkjentBosted?,
                       val metadata: Metadata
