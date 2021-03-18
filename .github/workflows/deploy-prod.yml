@@ -10,7 +10,7 @@ env:
 
 jobs:
   build:
-    name: Build, push and deploy to dev-gcp and prod-gcp
+    name: "Prod: Build, push and deploy to dev-gcp and prod-gcp"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -57,10 +57,10 @@ jobs:
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: dev-fss
+          CLUSTER: dev-gcp
           RESOURCE: .deploy/nais.yaml
           VARS: .deploy/vars-dev.yaml
-      - name: Deploy til prod-fss
+      - name: Deploy til prod-gcp
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}

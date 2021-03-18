@@ -7,7 +7,7 @@ env:
 
 jobs:
   build:
-    name: Build, push and deploy to dev-gcp
+    name: "Dev: Build, push and deploy to dev-gcp"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
