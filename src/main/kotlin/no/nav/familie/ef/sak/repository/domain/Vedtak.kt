@@ -12,13 +12,14 @@ data class Vedtak(@Id
                   val resultatType: ResultatType,
                   val periodeBegrunnelse: String,
                   val inntektBegrunnelse: String,
-                  val perioder: List<Vedtaksperiode>,
-                  val inntekter: List<Inntektsperiode>
-)
+                  val perioder: PeriodeWrapper,
+                  val inntekter: InntektWrapper)
 
 data class Vedtaksperiode(
         val datoFra: LocalDate,
         val datoTil: LocalDate,
         val aktivitet: String,
-        val periodeType: String
-        )
+        val periodeType: String)
+
+data class PeriodeWrapper(val perioder: List<Vedtaksperiode>)
+data class InntektWrapper(val inntekter: List<Inntektsperiode>)

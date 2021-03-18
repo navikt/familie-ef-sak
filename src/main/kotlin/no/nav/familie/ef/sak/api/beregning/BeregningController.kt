@@ -39,10 +39,10 @@ class BeregningController(private val stegService: StegService,
                 behandlingId = behandling.id,
                 andelerTilkjentYtelse = beløpsperioder.map {
                     AndelTilkjentYtelseDTO(beløp = it.beløp.toInt(),
-                            stønadFom = it.fraOgMedDato,
-                            stønadTom = it.tilDato,
-                            kildeBehandlingId = behandling.id,
-                            personIdent = fagsak.hentAktivIdent())
+                                           stønadFom = it.fraOgMedDato,
+                                           stønadTom = it.tilDato,
+                                           kildeBehandlingId = behandling.id,
+                                           personIdent = fagsak.hentAktivIdent())
                 }
         )
         return Ressurs.success(stegService.håndterBeregnYtelseForStønad(behandling, tilkjentYtelse).id)
@@ -50,14 +50,15 @@ class BeregningController(private val stegService: StegService,
 
     @PostMapping("/{behandlingId}/lagre-vedtak")
     fun lagreVedtak(@PathVariable behandlingId: UUID, @RequestBody vedtakRequest: VedtakRequest): Ressurs<UUID> {
+        tilgangService.validerTilgangTilBehandling(behandlingId)
         return Ressurs.success(vedtakService.lagreVedtak(vedtakRequest, behandlingId))
     }
 
     @GetMapping("/{behandlingId}/hent-soknad")
-    fun hentSøknadsMetaData(@PathVariable behandlingId: UUID): Ressurs<SøknadDataDto> {
+    fun hentSøknadData(@PathVariable behandlingId: UUID): Ressurs<SøknadDataDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         val overgangsstønad = behandlingService.hentOvergangsstønad(behandlingId)
         return Ressurs.success(SøknadDataDto(søknadsdato = overgangsstønad.datoMottatt,
-                søkerStønadFra = overgangsstønad.søkerFra))
+                                             søkerStønadFra = overgangsstønad.søkerFra))
     }
 }

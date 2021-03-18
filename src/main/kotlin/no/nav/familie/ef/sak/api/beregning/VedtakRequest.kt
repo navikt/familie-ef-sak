@@ -5,7 +5,14 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 enum class ResultatType {
-    INNVILGE, AVSLÅ, HENLEGGE, ANNULLERE
+    INNVILGE,
+    AVSLÅ,
+    HENLEGGE,
+    ANNULLERE
 }
 
-data class VedtakRequest(val resultatType: ResultatType, val periodeBegrunnelse: String, val inntektBegrunnelse: String, val perioder: List<Vedtaksperiode>, val inntekter: List<Inntektsperiode>)
+data class VedtakRequest(val resultatType: ResultatType,
+                         val periodeBegrunnelse: String,
+                         val inntektBegrunnelse: String,
+                         val perioder: List<Vedtaksperiode> = emptyList(),
+                         val inntekter: List<Inntektsperiode> = emptyList())
