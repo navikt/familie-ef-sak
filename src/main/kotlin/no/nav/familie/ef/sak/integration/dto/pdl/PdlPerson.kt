@@ -25,7 +25,7 @@ data class PdlBolkResponse<T>(val data: PersonBolk<T>?, val errors: List<PdlErro
 
 data class PdlError(val message: String,
                     val extensions: PdlExtensions?)
-data class PdlExtensions(val code: String) {
+data class PdlExtensions(val code: String?) {
     fun notFound() = code == "not_found"
 }
 
