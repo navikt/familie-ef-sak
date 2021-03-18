@@ -77,7 +77,7 @@ class OppdaterVilkårTest {
                               VilkårSvarDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE),
                               VilkårSvarDto(RegelId.KRAV_SIVILSTAND))
         })
-                .hasMessage("Mangler svar på ett spørsmål som ikke er siste besvarte spørsmålet vilkårType=ALENEOMSORG")
+                .hasMessage("Mangler svar på ett spørsmål som ikke er siste besvarte spørsmålet vilkårType=ALENEOMSORG regelId=BOR_OG_OPPHOLDER_SEG_I_NORGE")
                 .isInstanceOf(Feil::class.java)
     }
 

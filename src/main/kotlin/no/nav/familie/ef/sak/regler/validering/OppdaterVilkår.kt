@@ -8,8 +8,8 @@ import no.nav.familie.ef.sak.regler.BegrunnelseType
 import no.nav.familie.ef.sak.regler.RegelId
 import no.nav.familie.ef.sak.regler.RegelNode
 import no.nav.familie.ef.sak.regler.SluttRegel
+import no.nav.familie.ef.sak.regler.SvarId
 import no.nav.familie.ef.sak.regler.Vilkårsregel
-import no.nav.familie.ef.sak.regler.validering.OppdaterVilkår.rootRegelId
 import no.nav.familie.ef.sak.repository.domain.DelvilkårsvurderingWrapper
 import no.nav.familie.ef.sak.repository.domain.VilkårSvar
 import no.nav.familie.ef.sak.repository.domain.VilkårType
@@ -41,8 +41,7 @@ object OppdaterVilkår {
                           oppdatering: List<DelvilkårsvurderingDto>): Vilkårsvurdering {
         val vilkårsregel = vilkårsregler.single { it.vilkårType === vilkårsvurdering.type }
 
-        validerAttAlleDelvilkårHarMinimumEttSvar(vilkårsregel.vilkårType, oppdatering)
-        validerAttAlleRotvilkårFinnesMed(vilkårsregel, oppdatering)
+        validerVurdering(vilkårsregel, oppdatering)
 
         val vilkårsresultat = utledVilkårResultat(vilkårsregel, oppdatering)
         val oppdaterteDelvilkår = oppdaterDelvilkår(vilkårsvurdering, vilkårsresultat, oppdatering)
@@ -103,47 +102,55 @@ object OppdaterVilkår {
         }
     }
 
+    private fun validerVurdering(vilkårsregel: Vilkårsregel,
+                                 oppdatering: List<DelvilkårsvurderingDto>) {
+        validerAttAlleDelvilkårHarMinimumEttSvar(vilkårsregel.vilkårType, oppdatering)
+        validerAttAlleRotvilkårFinnesMed(vilkårsregel, oppdatering)
+
+        oppdatering.forEach { delvilkårsvurderingDto ->
+            validerDelviljår(vilkårsregel, delvilkårsvurderingDto)
+        }
+    }
+
+    private fun validerDelviljår(vilkårsregel: Vilkårsregel,
+                                 delvilkårsvurderingDto: DelvilkårsvurderingDto) {
+        val vilkårType = vilkårsregel.vilkårType
+        delvilkårsvurderingDto.svar.forEachIndexed { index, svar ->
+            val (regelId: RegelId, svarId: SvarId?, _) = svar
+            val regelMapping = vilkårsregel.regel(regelId)
+            val erIkkeSisteSvaret = index != (delvilkårsvurderingDto.svar.size - 1)
+
+            if (svarId == null) {
+                feilHvis(erIkkeSisteSvaret) {
+                    throw Feil("Mangler svar på ett spørsmål som ikke er siste besvarte spørsmålet vilkårType=$vilkårType regelId=$regelId")
+                }
+            } else {
+                val svarMapping = regelMapping.svarMapping(svarId)
+                validerSavnerBegrunnelseHvisUtenBegrunnelse(vilkårType, svarMapping, svar)
+                feilHvis(svarMapping is SluttRegel && erIkkeSisteSvaret) {
+                    "Finnes ikke noen flere regler, men finnes flere svar vilkårType=$vilkårType svarId=$svarId"
+                }
+            }
+        }
+    }
+
     /**
      * Dette setter foreløpig resultat, men fortsetter å validere resterende svar slik att man fortsatt har ett gyldig svar
      */
     private fun validerDelvilkårOgReturerVilkårsresultat(vilkårsregel: Vilkårsregel,
                                                          vurdering: DelvilkårsvurderingDto): Vilkårsresultat {
-        val vilkårType = vilkårsregel.vilkårType
-        val antallSvar = vurdering.svar.size
-
-        var foreløpigResultat: Vilkårsresultat? = null
-        var nesteSvarRegelId: RegelId? = null
-
-        vurdering.svar.forEachIndexed { index, svar ->
-            feilHvis(nesteSvarRegelId == null && index != 0) {
-                "Har ikke satt neste svar for type=$vilkårType svar=${svar.regelId}"
-            }
-
+        vurdering.svar.forEach { svar ->
             val regel = vilkårsregel.regel(svar.regelId)
-            val erIkkeSisteSvaret = index != (antallSvar - 1)
-            val svarId = svar.svar
-
-            // Hvis man ikke har besvart ett spørsmål så validerer vi att det er det siste spørsmålet, ellers setter vi resultat
-            if (svarId == null) {
-                feilHvis(erIkkeSisteSvaret) {
-                    "Mangler svar på ett spørsmål som ikke er siste besvarte spørsmålet vilkårType=$vilkårType"
-                }
-                return Vilkårsresultat.IKKE_TATT_STILLING_TIL
-            }
+            val svarId = svar.svar ?: return Vilkårsresultat.IKKE_TATT_STILLING_TIL
             val svarMapping = regel.svarMapping(svarId)
-            validerSavnerBegrunnelseHvisUtenBegrunnelse(vilkårType, svarMapping, svar)
 
             if (manglerPåkrevdBegrunnelse(svarMapping, svar)) {
-                foreløpigResultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL
+                return Vilkårsresultat.IKKE_TATT_STILLING_TIL
             }
 
             if (svarMapping is SluttRegel) {
-                feilHvis(erIkkeSisteSvaret) {
-                    "Finnes ikke noen flere regler, men finnes flere svar vilkårType=$vilkårType svarId=$svarId"
-                }
-                return foreløpigResultat ?: svarMapping.resultat.vilkårsresultat
+                return svarMapping.resultat.vilkårsresultat
             }
-            nesteSvarRegelId = svarMapping.regelId
         }
         error("Noe gikk galt, skal ikke komme til sluttet her")
     }
