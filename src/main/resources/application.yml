@@ -9,9 +9,8 @@ server:
 
 no.nav.security.jwt:
   issuer.azuread:
-    discoveryurl: ${AZUREAD_DISCOVERY_URL}
-    accepted_audience: ${AZURE_CLIENT_ID}
-    proxyurl: http://webproxy-nais.nav.no:8088
+    discoveryurl: ${AZURE_APP_WELL_KNOWN_URL}
+    accepted_audience: ${AZURE_APP_CLIENT_ID}
     cookie_name: azure_token
   client:
     registration:
@@ -21,8 +20,8 @@ no.nav.security.jwt:
         grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
         scope: ${FAMILIE_INTEGRASJONER_SCOPE}
         authentication:
-          client-id: ${AZURE_CLIENT_ID}
-          client-secret: ${AZURE_CLIENT_SECRET}
+          client-id: ${AZURE_APP_CLIENT_ID}
+          client-secret: ${AZURE_APP_CLIENT_SECRET}
           client-auth-method: client_secret_basic
       familie-integrasjoner-clientcredentials:
         resource-url: ${FAMILIE_INTEGRASJONER_URL}
@@ -30,8 +29,8 @@ no.nav.security.jwt:
         grant-type: client_credentials
         scope: ${FAMILIE_INTEGRASJONER_SCOPE}
         authentication:
-          client-id: ${AZURE_CLIENT_ID}
-          client-secret: ${AZURE_CLIENT_SECRET}
+          client-id: ${AZURE_APP_CLIENT_ID}
+          client-secret: ${AZURE_APP_CLIENT_SECRET}
           client-auth-method: client_secret_basic
       familie-oppdrag:
         resource-url: ${FAMILIE_OPPDRAG_API_URL}
@@ -39,8 +38,8 @@ no.nav.security.jwt:
         grant-type: client_credentials
         scope: ${FAMILIE_OPPDRAG_SCOPE}
         authentication:
-          client-id: ${AZURE_CLIENT_ID}
-          client-secret: ${AZURE_CLIENT_SECRET}
+          client-id: ${AZURE_APP_CLIENT_ID}
+          client-secret: ${AZURE_APP_CLIENT_SECRET}
           client-auth-method: client_secret_basic
       infotrygd-feed:
         resource-url: ${INFOTRYGD_FEED_API_URL}
@@ -48,8 +47,8 @@ no.nav.security.jwt:
         grant-type: client_credentials
         scope: ${EF_INFOTRYGD_FEED_SCOPE}
         authentication:
-          client-id: ${AZURE_CLIENT_ID}
-          client-secret: ${AZURE_CLIENT_SECRET}
+          client-id: ${AZURE_APP_CLIENT_ID}
+          client-secret: ${AZURE_APP_CLIENT_SECRET}
           client-auth-method: client_secret_basic
       infotrygd-replika:
         resource-url: ${INFOTRYGD_REPLIKA_API_URL}
@@ -57,8 +56,8 @@ no.nav.security.jwt:
         grant-type: client_credentials
         scope: ${EF_INFOTRYGD_REPLIKA_SCOPE}
         authentication:
-          client-id: ${AZURE_CLIENT_ID}
-          client-secret: ${AZURE_CLIENT_SECRET}
+          client-id: ${AZURE_APP_CLIENT_ID}
+          client-secret: ${AZURE_APP_CLIENT_SECRET}
           client-auth-method: client_secret_basic
 # PDL er per nå ikke lagt inn i azureAd, men det skal komme.
 #      pdl:
@@ -67,8 +66,8 @@ no.nav.security.jwt:
 #        grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
 #        scope: ${PDL_SCOPE}
 #        authentication:
-#          client-id: ${AZURE_CLIENT_ID}
-#          client-secret: ${AZURE_CLIENT_SECRET}
+#          client-id: ${AZURE_APP_CLIENT_ID}
+#          client-secret: ${AZURE_APP_CLIENT_SECRET}
 #          client-auth-method: client_secret_basic
 
 spring:
@@ -83,7 +82,9 @@ spring:
   flyway:
     enabled: true
   datasource:
-    url: jdbc:postgresql://A01DBVL010.adeo.no:5432/familie-ef-sak
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/familie-ef-sak
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     hikari:
       maximum-pool-size: 2
       connection-test-query: "select 1"
@@ -100,20 +101,26 @@ management:
   metrics.export.prometheus.enabled: true
   metrics.web.server.auto-time-requests: true
 
-AZUREAD_DISCOVERY_URL: https://login.microsoftonline.com/navno.onmicrosoft.com/v2.0/.well-known/openid-configuration
-AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navno.onmicrosoft.com/oauth2/v2.0/token
-FAMILIE_INTEGRASJONER_URL: http://familie-integrasjoner.default
-STS_PREFIX: ${STS_URL_ENV:http://security-token-service.default.svc.nais.local}
+ON_PREM_URL_ENV: prod
+GATEWAY_PREFIX: api-gw
+
+AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/oauth2/v2.0/token
+
+STS_PREFIX: https://${GATEWAY_PREFIX}.oera.no/legacy-sts
 STS_URL: ${STS_PREFIX}/rest/v1/sts/token?grant_type=client_credentials&scope=openid
 STS_DISCOVERY_URL: ${STS_PREFIX}/rest/v1/sts/.well-known/openid-configuration
-PDL_URL: http://pdl-api.default
-FAMILIE_OPPDRAG_API_URL: http://familie-oppdrag
-INFOTRYGD_FEED_API_URL: https://familie-ef-infotrygd-feed.nais.adeo.no
-INFOTRYGD_REPLIKA_API_URL: https://infotrygd-enslig-forsoerger.nais.adeo.no
-FAMILIE_BREV_API_URL: https://familie-brev.intern.nav.no
-FAMILIE_BLANKETT_API_URL: https://familie-ef-blankett.intern.nav.no
 
-FRONTEND_OPPGAVE_URL: https://ensligmorellerfar.intern.nav.no/oppgavebenk
+PDL_URL: https://${GATEWAY_PREFIX}.oera.no/pdl-api
+
+FAMILIE_BREV_API_URL: http://familie-brev
+FAMILIE_BLANKETT_API_URL: http://familie-ef-blankett
+
+FAMILIE_OPPDRAG_API_URL: https://familie-oppdrag.${ON_PREM_URL_ENV}-fss-pub.nais.io
+FAMILIE_INTEGRASJONER_URL: https://familie-integrasjoner.${ON_PREM_URL_ENV}-fss-pub.nais.io
+INFOTRYGD_FEED_API_URL: https://familie-ef-infotrygd-feed.${ON_PREM_URL_ENV}-fss-pub.nais.io
+INFOTRYGD_REPLIKA_API_URL: https://infotrygd-enslig-forsoerger.${ON_PREM_URL_ENV}-fss-pub.nais.io
+
+FRONTEND_OPPGAVE_URL: https://ensligmorellerfar.dev.intern.nav.no/oppgavebenk
 
 GYLDIGE_SERVICE_BRUKERE: srvArena
 

@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.integration
 
+import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.http.config.RestTemplateBuilderBean
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -19,7 +20,7 @@ import java.net.URI
 class OppdragClient(@Value("\${FAMILIE_OPPDRAG_API_URL}")
                     private val familieOppdragUri: URI,
                     @Qualifier("azure")
-                    restOperations: RestOperations) : AbstractRestClient(restOperations, "familie.oppdrag") {
+                    restOperations: RestOperations) : AbstractPingableRestClient(restOperations, "familie.oppdrag") {
 
     private val postOppdragUri: URI = UriComponentsBuilder.fromUri(familieOppdragUri).pathSegment("api/oppdrag").build().toUri()
 
@@ -47,4 +48,9 @@ class OppdragClient(@Value("\${FAMILIE_OPPDRAG_API_URL}")
         return postForEntity<Ressurs<String>>(konsistensavstemmingUriV2, konsistensavstemmingRequest).getDataOrThrow()
     }
 
+    override val pingUri = postOppdragUri
+
+    override fun ping() {
+        operations.optionsForAllow(pingUri)
+    }
 }
