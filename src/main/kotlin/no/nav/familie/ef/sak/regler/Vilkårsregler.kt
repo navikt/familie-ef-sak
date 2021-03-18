@@ -8,7 +8,6 @@ import no.nav.familie.ef.sak.regler.vilkårsregel.OppholdINorgeRegel
 import no.nav.familie.ef.sak.regler.vilkårsregel.SamlivRegel
 import no.nav.familie.ef.sak.regler.vilkårsregel.SivilstandRegel
 import no.nav.familie.ef.sak.repository.domain.VilkårType
-import no.nav.familie.kontrakter.felles.objectMapper
 
 data class Vilkårsregler private constructor(val vilkårsregler: Map<VilkårType, Vilkårsregel>) {
 
@@ -29,8 +28,3 @@ val alleVilkårsregler: List<Vilkårsregel> =
                 NyttBarnSammePartnerRegel()
         )
 
-fun main() {
-    val objectMapper = objectMapper
-            .writerWithDefaultPrettyPrinter()
-    println(objectMapper.writeValueAsString(Vilkårsregler.VILKÅRSREGLER))
-}
