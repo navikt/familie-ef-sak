@@ -48,4 +48,12 @@ class BehandlingController(private val behandlingService: BehandlingService,
         return Ressurs.success(behandlingId)
     }
 
+    @PostMapping("{behandlingId}/annuller")
+    fun annullerBehandling(@PathVariable behandlingId: UUID): Ressurs<BehandlingDto> {
+        tilgangService.validerTilgangTilBehandling(behandlingId)
+        tilgangService.validerHarSaksbehandlerrolle()
+        val annullertBehandling = behandlingService.annullerBehandling(behandlingId)
+        return Ressurs.success(annullertBehandling.tilDto())
+    }
+
 }
