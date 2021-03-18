@@ -38,7 +38,7 @@ internal class AktivitetMapperTest {
                       oppsigelseDokumentasjon = dokumentliste(),
                       oppsigelseReduksjonTidspunkt = LocalDate.now(),
                       oppsigelseReduksjonÅrsak = "Årsak",
-                      oppstartNyJobb = null,
+                      oppstartNyJobb = LocalDate.now(),
                       oppstartUtdanning = null,
                       sagtOppEllerRedusertStilling = "Ja",
                       sykdom = dokumentliste(),

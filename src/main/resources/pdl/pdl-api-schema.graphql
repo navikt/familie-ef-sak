@@ -414,13 +414,9 @@ type Sivilstand {
     bekreftelsesdato: String
     folkeregistermetadata: Folkeregistermetadata
     gyldigFraOgMed: Date
-    kommune: String
     metadata: Metadata!
-    myndighet: String
     relatertVedSivilstand: String
-    sted: String
     type: Sivilstandstype!
-    utland: String
 }
 
 type Statsborgerskap {
