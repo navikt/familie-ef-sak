@@ -50,7 +50,7 @@ object PdlTestdata {
 
     private val opphold = listOf(Opphold(Oppholdstillatelse.MIDLERTIDIG, LocalDate.now(), LocalDate.now()))
 
-    private val oppholdsadresse = listOf(Oppholdsadresse(LocalDate.now(), "",
+    private val oppholdsadresse = listOf(Oppholdsadresse(LocalDate.now(), null, "",
                                                          utenlandskAdresse,
                                                          vegadresse, "", metadataGjeldende))
 

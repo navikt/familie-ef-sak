@@ -43,12 +43,12 @@ internal class AdresseMapperTest {
 
     @Test
     internal fun `Oppholdsadresse formatert adresse`() {
-        val oppholdsadresse = Oppholdsadresse(oppholdsadressedato = null,
+        val oppholdsadresse = Oppholdsadresse(gyldigFraOgMed = null,
                                               coAdressenavn = null,
                                               utenlandskAdresse = null,
                                               vegadresse = null,
                                               oppholdAnnetSted = null,
-                                              metadataGjeldende)
+                                              metadata = metadataGjeldende)
 
         val adresseMedVegadresseMedAdressenavn = oppholdsadresse.copy(vegadresse = tomVegadresse().copy(adressenavn = "adresse"))
         assertThat(mapper.tilAdresse(adresseMedVegadresseMedAdressenavn).visningsadresse)
