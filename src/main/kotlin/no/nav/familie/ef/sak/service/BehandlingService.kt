@@ -15,6 +15,7 @@ import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
@@ -28,10 +29,13 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
                         private val søknadOvergangsstønadRepository: SøknadOvergangsstønadRepository,
                         private val søknadSkolepengerRepository: SøknadSkolepengerRepository,
                         private val søknadBarnetilsynRepository: SøknadBarnetilsynRepository,
-                        private val behandlingRepository: BehandlingRepository) {
+                        private val behandlingRepository: BehandlingRepository,
+                        private val behandlingshistorikkService: BehandlingshistorikkService) {
 
     val logger: Logger = LoggerFactory.getLogger(this.javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
+
+
 
     @Transactional
     fun lagreSøknadForOvergangsstønad(søknad: SøknadOvergangsstønadKontrakt,
@@ -133,6 +137,27 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
                                                           sporbar = Sporbar(),
                                                           journalpostType = journalposttype)
         behandlingRepository.update(behandling)
+    }
+
+    fun annullerBehandling(behandlingId: UUID): Behandling {
+        val behandling = hentBehandling(behandlingId)
+        validerAtBehandlingenKanAnnulleres(behandling)
+        behandling.status = BehandlingStatus.FERDIGSTILT;
+        behandling.resultat = BehandlingResultat.ANNULLERT;
+        behandling.steg = StegType.BEHANDLING_FERDIGSTILT;
+        behandlingshistorikkService.opprettHistorikkInnslag(behandling)
+        return behandlingRepository.update(behandling)
+    }
+
+    private fun validerAtBehandlingenKanAnnulleres(behandling: Behandling) {
+        if (!behandling.kanAnnulleres()) {
+            throw Feil(
+                    message = "Kan ikke annullere en behandling med status ${behandling.status} for ${behandling.type}",
+                    frontendFeilmelding = "Kan ikke annullere en behandling med status ${behandling.status} for ${behandling.type}",
+                    httpStatus = HttpStatus.BAD_REQUEST,
+                    throwable = null
+            )
+        }
     }
 
 }

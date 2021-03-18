@@ -6,6 +6,8 @@ import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.BehandlingRepository
 import no.nav.familie.ef.sak.repository.FagsakRepository
+import no.nav.familie.ef.sak.repository.domain.BehandlingResultat
+import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.domain.FagsakPerson
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.assertj.core.api.Assertions.assertThat
@@ -40,9 +42,25 @@ internal class BehandlingControllerTest : OppslagSpringRunnerTest() {
         assertThat(respons.body?.data).isNull()
     }
 
+    @Test
+    internal fun `Skal annullere behandling`() {
+        val fagsak = fagsakRepository.insert(fagsak(identer = setOf(FagsakPerson("12345678901"))))
+        val behandling = behandlingRepository.insert(behandling(fagsak, aktiv = true, type = BehandlingType.BLANKETT))
+        val respons = annullerBehandling(behandling.id)
+
+        assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(respons.body?.data!!.resultat).isEqualTo(BehandlingResultat.ANNULLERT)
+    }
+
     private fun hentBehandling(id: UUID): ResponseEntity<Ressurs<BehandlingDto>> {
         return restTemplate.exchange(localhost("/api/behandling/$id"),
                                      HttpMethod.GET,
+                                     HttpEntity<Ressurs<BehandlingDto>>(headers))
+    }
+
+    private fun annullerBehandling(id: UUID): ResponseEntity<Ressurs<BehandlingDto>> {
+        return restTemplate.exchange(localhost("/api/behandling/$id/annuller"),
+                                     HttpMethod.POST,
                                      HttpEntity<Ressurs<BehandlingDto>>(headers))
     }
 }

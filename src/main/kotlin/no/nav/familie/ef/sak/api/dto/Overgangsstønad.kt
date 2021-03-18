@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.api.dto
 
 import java.time.LocalDate
 import java.time.YearMonth
+import java.util.*
 
 data class OvergangsstønadDto(val aktivitet: AktivitetDto,
                               val sagtOppEllerRedusertStilling: SagtOppEllerRedusertStillingDto?,
@@ -13,18 +14,20 @@ data class AktivitetDto(val arbeidssituasjon: List<String>,
                         val aksjeselskap: List<AksjeselskapDto>,
                         val arbeidssøker: ArbeidssøkerDto?,
                         val underUtdanning: UnderUtdanningDto?,
-                        val aktivitetsplikt: String?,
-                        val situasjon: SituasjonDto,
-                        val virksomhet: VirksomhetDto?)
+                        val virksomhet: VirksomhetDto?,
+                        val tidligereUtdanninger: List<TidligereUtdanningDto>,
+                        val gjelderDeg: List<String>,
+                        val særligeTilsynsbehov: List<SærligeTilsynsbehovDto>,
+                        val datoOppstartJobb: LocalDate?)
 
 data class SagtOppEllerRedusertStillingDto(val sagtOppEllerRedusertStilling: String?,
                                            val årsak: String?,
-                                           val dato: LocalDate?,
-                                           val dokumentasjon: DokumentasjonDto?)
+                                           val dato: LocalDate?)
 
 data class ArbeidsforholdDto(val arbeidsgivernavn: String,
                              val arbeidsmengde: Int?,
-                             val fastEllerMidlertidig: String,
+                             val fastEllerMidlertidig: String?,
+                             val harSluttdato: Boolean?,
                              val sluttdato: LocalDate?)
 
 data class SelvstendigDto(val firmanavn: String,
@@ -36,24 +39,24 @@ data class SelvstendigDto(val firmanavn: String,
 data class AksjeselskapDto(val navn: String,
                            val arbeidsmengde: Int?)
 
-data class VirksomhetDto(val virksomhetsbeskrivelse: String, val dokumentasjon: DokumentasjonDto?)
+data class VirksomhetDto(val virksomhetsbeskrivelse: String)
 
 data class ArbeidssøkerDto(val registrertSomArbeidssøkerNav: Boolean,
                            val villigTilÅTaImotTilbudOmArbeid: Boolean,
                            val kanDuBegynneInnenEnUke: Boolean,
                            val kanDuSkaffeBarnepassInnenEnUke: Boolean?,
                            val hvorØnskerDuArbeid: String,
-                           val ønskerDuMinst50ProsentStilling: Boolean,
-                           val ikkeVilligTilÅTaImotTilbudOmArbeidDokumentasjon: DokumentasjonDto?)
+                           val ønskerDuMinst50ProsentStilling: Boolean)
 
 data class UnderUtdanningDto(val skoleUtdanningssted: String,
-                             val utdanning: UtdanningDto?,
-                             val offentligEllerPrivat: String,
-                             val heltidEllerDeltid: String,
+                             val linjeKursGrad: String,
+                             val fra: LocalDate,
+                             val til: LocalDate,
+                             val offentligEllerPrivat: String?,
+                             val heltidEllerDeltid: String?,
                              val hvorMyeSkalDuStudere: Int?,
                              val hvaErMåletMedUtdanningen: String?,
-                             val utdanningEtterGrunnskolen: Boolean,
-                             val tidligereUtdanninger: List<UtdanningDto>)
+                             val utdanningEtterGrunnskolen: Boolean)
 
 data class UtdanningDto(val linjeKursGrad: String,
                         val nårVarSkalDuVæreElevStudent: PeriodeDto)
@@ -65,3 +68,13 @@ data class SituasjonDto(val sykdom: DokumentasjonDto?,
 
 data class StønadsperiodeDto(val resterendeAvHovedperiode: String,
                              val søkerStønadFra: YearMonth?)
+
+data class TidligereUtdanningDto(val linjeKursGrad: String,
+                                 val fra: YearMonth,
+                                 val til: YearMonth)
+
+data class SærligeTilsynsbehovDto(val id: UUID,
+                                  val navn: String?,
+                                  val erBarnetFødt: Boolean,
+                                  val fødselTermindato: LocalDate?,
+                                  val særligeTilsynsbehov: String?)

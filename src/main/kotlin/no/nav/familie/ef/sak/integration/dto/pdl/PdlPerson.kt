@@ -25,7 +25,7 @@ data class PdlBolkResponse<T>(val data: PersonBolk<T>?, val errors: List<PdlErro
 
 data class PdlError(val message: String,
                     val extensions: PdlExtensions?)
-data class PdlExtensions(val code: String) {
+data class PdlExtensions(val code: String?) {
     fun notFound() = code == "not_found"
 }
 
@@ -92,8 +92,8 @@ data class PdlAnnenForelder(val adressebeskyttelse: List<Adressebeskyttelse>,
 
 data class Metadata(val historisk: Boolean)
 
-data class DeltBosted(val startdatoForKontrakt: LocalDateTime,
-                      val sluttdatoForKontrakt: LocalDateTime?,
+data class DeltBosted(val startdatoForKontrakt: LocalDate,
+                      val sluttdatoForKontrakt: LocalDate?,
                       val vegadresse: Vegadresse?,
                       val ukjentBosted: UkjentBosted?,
                       val metadata: Metadata
@@ -116,7 +116,8 @@ data class Bostedsadresse(val angittFlyttedato: LocalDate?,
     }
 }
 
-data class Oppholdsadresse(val oppholdsadressedato: LocalDate?,
+data class Oppholdsadresse(val gyldigFraOgMed: LocalDate?,
+                           val gyldigTilOgMed: LocalDate? = null,
                            val coAdressenavn: String?,
                            val utenlandskAdresse: UtenlandskAdresse?,
                            val vegadresse: Vegadresse?,
@@ -253,10 +254,6 @@ enum class Oppholdstillatelse {
 
 data class Sivilstand(val type: Sivilstandstype,
                       val gyldigFraOgMed: LocalDate?,
-                      val myndighet: String?,
-                      val kommune: String?,
-                      val sted: String?,
-                      val utland: String?,
                       val relatertVedSivilstand: String?,
                       val bekreftelsesdato: String?,
                       val metadata: Metadata)

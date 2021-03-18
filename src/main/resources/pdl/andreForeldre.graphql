@@ -78,7 +78,8 @@ query($identer: [ID!]!){
                 oppholdTil
             }
             oppholdsadresse(historikk: true) {
-                oppholdsadressedato
+                gyldigFraOgMed
+                gyldigTilOgMed
                 coAdressenavn
                 utenlandskAdresse {
                     adressenavnNummer

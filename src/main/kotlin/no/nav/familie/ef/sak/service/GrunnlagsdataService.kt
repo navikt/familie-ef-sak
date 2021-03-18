@@ -1,7 +1,8 @@
 package no.nav.familie.ef.sak.service
 
-import no.nav.familie.ef.sak.api.dto.InngangsvilkårGrunnlagDto
+import no.nav.familie.ef.sak.api.dto.VilkårGrunnlagDto
 import no.nav.familie.ef.sak.api.dto.MedlemskapDto
+import no.nav.familie.ef.sak.api.dto.SagtOppEllerRedusertStillingDto
 import no.nav.familie.ef.sak.api.dto.SivilstandInngangsvilkårDto
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.PdlClient
@@ -10,11 +11,7 @@ import no.nav.familie.ef.sak.integration.dto.pdl.PdlAnnenForelder
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlBarn
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker
 import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
-import no.nav.familie.ef.sak.mapper.BarnMedSamværMapper
-import no.nav.familie.ef.sak.mapper.BosituasjonMapper
-import no.nav.familie.ef.sak.mapper.MedlemskapMapper
-import no.nav.familie.ef.sak.mapper.SivilstandMapper
-import no.nav.familie.ef.sak.mapper.SivilstandsplanerMapper
+import no.nav.familie.ef.sak.mapper.*
 import no.nav.familie.ef.sak.repository.RegistergrunnlagRepository
 import no.nav.familie.ef.sak.repository.domain.Registergrunnlag
 import no.nav.familie.ef.sak.repository.domain.RegistergrunnlagData
@@ -51,7 +48,7 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     fun hentGrunnlag(behandlingId: UUID,
-                     søknad: SøknadsskjemaOvergangsstønad): InngangsvilkårGrunnlagDto {
+                     søknad: SøknadsskjemaOvergangsstønad): VilkårGrunnlagDto {
         val registergrunnlag = registergrunnlagRepository.findByIdOrThrow(behandlingId)
         val registergrunnlagData = registergrunnlag.endringer ?: registergrunnlag.data
 
@@ -68,11 +65,17 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
             it.registergrunnlag.fødselsnummer?.let { fødsesnummer -> Fødselsnummer(fødsesnummer).fødselsdato }
             ?: it.søknadsgrunnlag.fødselTermindato
         }
-        return InngangsvilkårGrunnlagDto(medlemskap = medlemskap,
-                                         sivilstand = sivilstand,
-                                         bosituasjon = BosituasjonMapper.tilDto(søknad.bosituasjon),
-                                         barnMedSamvær = barnMedSamvær,
-                                         sivilstandsplaner = sivilstandsplaner)
+
+        val sagtOppEllerRedusertStilling = SagtOppEllerRedusertStillingMapper.tilDto(situasjon = søknad.situasjon)
+
+        val aktivitet = AktivitetMapper.tilDto(aktivitet = søknad.aktivitet, situasjon = søknad.situasjon, barn = søknad.barn )
+        return VilkårGrunnlagDto(medlemskap = medlemskap,
+                                 sivilstand = sivilstand,
+                                 bosituasjon = BosituasjonMapper.tilDto(søknad.bosituasjon),
+                                 barnMedSamvær = barnMedSamvær,
+                                 sivilstandsplaner = sivilstandsplaner,
+                                 aktivitet = aktivitet,
+                                 sagtOppEllerRedusertStilling = sagtOppEllerRedusertStilling)
     }
 
     fun godkjennEndringerIRegistergrunnlag(behandlingId: UUID) {
