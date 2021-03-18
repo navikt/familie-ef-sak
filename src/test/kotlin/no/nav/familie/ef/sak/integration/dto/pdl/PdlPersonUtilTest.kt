@@ -57,9 +57,9 @@ internal class PdlPersonUtilTest {
 
     @Test
     internal fun `skal finne riktig gjeldende sivilstand`() {
-        val sivilstander = listOf(Sivilstand(Sivilstandstype.UGIFT, null, null, null, null, null, null, null, Metadata(true)),
-        Sivilstand(Sivilstandstype.GIFT, null, null, null, null, null, null, null, Metadata(true)),
-        Sivilstand(Sivilstandstype.SEPARERT, null, null, null, null, null, null, null, Metadata(false)))
+        val sivilstander = listOf(Sivilstand(Sivilstandstype.UGIFT, null, null,  null, Metadata(true)),
+        Sivilstand(Sivilstandstype.GIFT, null, null, null,  Metadata(true)),
+        Sivilstand(Sivilstandstype.SEPARERT, null, null, null, Metadata(false)))
 
         assertThat(sivilstander.gjeldende().type).isEqualTo(Sivilstandstype.SEPARERT)
     }
