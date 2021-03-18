@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.blankett
 
 import no.nav.familie.ef.sak.repository.OppgaveRepository
 import no.nav.familie.ef.sak.repository.domain.*
-import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.service.*
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.springframework.stereotype.Service
@@ -19,7 +18,7 @@ class BlankettService(private val tilgangService: TilgangService,
                       private val personopplysningerService: PersonopplysningerService,
                       private val oppgaveRepository: OppgaveRepository) {
 
-    fun opprettBlankettBehandling(journalpostId: String, oppgaveId: Long) : Behandling {
+    fun opprettBlankettBehandling(journalpostId: String, oppgaveId: Long): Behandling {
         val journalpost = journalføringService.hentJournalpost(journalpostId)
         val personIdent = journalføringService.hentIdentForJournalpost(journalpost)
         tilgangService.validerTilgangTilPersonMedBarn(personIdent)
@@ -27,14 +26,14 @@ class BlankettService(private val tilgangService: TilgangService,
         val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, Stønadstype.OVERGANGSSTØNAD)
         val behandling = behandlingService.opprettBehandling(BehandlingType.BLANKETT, fagsak.id, søknad, journalpost)
         opprettEfOppgave(behandling.id, oppgaveId)
-        lagreTomBlankett(behandling.id)
+
         return behandling
     }
 
     private fun opprettEfOppgave(behandlingId: UUID, oppgaveId: Long) {
         val oppgave = Oppgave(gsakOppgaveId = oppgaveId,
-                                behandlingId = behandlingId,
-                                type = Oppgavetype.BehandleSak)
+                              behandlingId = behandlingId,
+                              type = Oppgavetype.BehandleSak)
         oppgaveRepository.insert(oppgave)
     }
 
@@ -46,14 +45,12 @@ class BlankettService(private val tilgangService: TilgangService,
         return blankettPdfAsByteArray
     }
 
-    fun oppdaterBlankett(behandlingId: UUID, pdf: ByteArray) : Blankett {
+    fun oppdaterBlankett(behandlingId: UUID, pdf: ByteArray): Blankett {
         val blankett = Blankett(behandlingId, Fil(pdf))
-        return blankettRepository.update(blankett)
-    }
-
-    fun lagreTomBlankett(behandlingId: UUID) {
-        val blankett = Blankett(behandlingId, Fil(byteArrayOf()))
-        blankettRepository.insert(blankett)
+        if (blankettRepository.existsById(behandlingId)) {
+            return blankettRepository.update(blankett)
+        }
+        return blankettRepository.insert(blankett)
     }
 
     private fun hentVilkårDto(behandlingId: UUID) = vurderingService.hentVilkår(behandlingId)
@@ -68,8 +65,8 @@ class BlankettService(private val tilgangService: TilgangService,
         return navnMap.getValue(hentAktivIdent)
     }
 
-    fun hentBlankettPdf(behandlingId: UUID): Blankett {
-        return blankettRepository.findByIdOrThrow(behandlingId);
+    fun hentBlankettPdf(behandlingId: UUID): Optional<Blankett> {
+        return blankettRepository.findById(behandlingId)
     }
 
 }
