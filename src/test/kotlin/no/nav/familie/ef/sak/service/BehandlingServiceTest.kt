@@ -75,7 +75,7 @@ internal class BehandlingServiceTest {
         } returns behandling
 
         every {
-            behandlingshistorikkService.opprettHistorikkInnslag(any())
+            behandlingshistorikkService.opprettHistorikkInnslag(any<Behandling>())
         } just runs
 
         val behandlingSlot = slot<Behandling>()
@@ -98,7 +98,7 @@ internal class BehandlingServiceTest {
         } returns behandling
 
         every {
-            behandlingshistorikkService.opprettHistorikkInnslag(any())
+            behandlingshistorikkService.opprettHistorikkInnslag(any<Behandling>())
         } just runs
 
         val feil: Feil = assertThrows<Feil> {
