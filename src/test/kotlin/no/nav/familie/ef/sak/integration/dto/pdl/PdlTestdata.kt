@@ -102,8 +102,8 @@ object PdlTestdata {
     val pdlBarnData =
             PersonBolk(listOf(PersonDataBolk("11111122222", "ok", PdlBarn(adressebeskyttelse,
                                                                           bostedsadresse,
-                                                                          listOf(DeltBosted(LocalDateTime.now(),
-                                                                                            LocalDateTime.now(),
+                                                                          listOf(DeltBosted(LocalDate.now(),
+                                                                                            LocalDate.now(),
                                                                                             vegadresse,
                                                                                             UkjentBosted(""), metadataGjeldende)),
                                                                           dødsfall,
