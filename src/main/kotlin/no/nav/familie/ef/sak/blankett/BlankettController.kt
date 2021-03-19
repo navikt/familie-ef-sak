@@ -44,10 +44,9 @@ class BlankettController(private val tilgangService: TilgangService,
     }
 
     @PostMapping("/oppgave/{oppgaveId}")
-    fun opprettBlankettBehandling(@PathVariable oppgaveId: Long): Ressurs<UUID> {
+    fun startBlankettBehandling(@PathVariable oppgaveId: Long): Ressurs<UUID> {
         oppgaveService.hentEfOppgave(oppgaveId)?.let {
-            throw ApiFeil("Det finnes allerede en behandling for denne oppgaven - kan ikke opprettes på nytt",
-                          HttpStatus.BAD_REQUEST)
+            return Ressurs.success(it.behandlingId)
         }
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
         val journalpostId = oppgave.journalpostId
