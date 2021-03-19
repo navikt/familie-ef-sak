@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.regler.validering
+package no.nav.familie.ef.sak.regler.evalutation
 
 import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.api.dto.DelvilkårsvurderingDto
@@ -7,11 +7,11 @@ import no.nav.familie.ef.sak.regler.BegrunnelseType
 import no.nav.familie.ef.sak.regler.NesteRegel
 import no.nav.familie.ef.sak.regler.RegelId
 import no.nav.familie.ef.sak.regler.RegelSteg
-import no.nav.familie.ef.sak.regler.SluttRegel.Companion.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE
+import no.nav.familie.ef.sak.regler.SluttSvarRegel.Companion.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE
 import no.nav.familie.ef.sak.regler.SvarId
 import no.nav.familie.ef.sak.regler.Vilkårsregel
-import no.nav.familie.ef.sak.regler.jaNeiMapping
-import no.nav.familie.ef.sak.regler.validering.OppdaterVilkår.utledVilkårResultat
+import no.nav.familie.ef.sak.regler.evalutation.RegelEvaluering.utledVilkårResultat
+import no.nav.familie.ef.sak.regler.jaNeiSvarRegel
 import no.nav.familie.ef.sak.repository.domain.Delvilkårsvurdering
 import no.nav.familie.ef.sak.repository.domain.DelvilkårsvurderingWrapper
 import no.nav.familie.ef.sak.repository.domain.VilkårType
@@ -230,18 +230,18 @@ class OppdaterVilkårTest {
     private class VilkårsregelMedEttDelvilkår :
             Vilkårsregel(VilkårType.ALENEOMSORG,
                          setOf(RegelSteg(regelId = RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE,
-                                         svarMapping = jaNeiMapping(hvisNei = NesteRegel(RegelId.KRAV_SIVILSTAND,
-                                                                                         BegrunnelseType.PÅKREVD))),
+                                         svarMapping = jaNeiSvarRegel(hvisNei = NesteRegel(RegelId.KRAV_SIVILSTAND,
+                                                                                           BegrunnelseType.PÅKREVD))),
                                RegelSteg(regelId = RegelId.KRAV_SIVILSTAND,
-                                         svarMapping = jaNeiMapping())),
+                                         svarMapping = jaNeiSvarRegel())),
                          hovedregler = setOf(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE))
 
     private class VilkårsregelMedTvåRotRegler :
             Vilkårsregel(VilkårType.ALENEOMSORG,
                          setOf(RegelSteg(regelId = RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE,
-                                         svarMapping = jaNeiMapping(hvisNei = IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE)),
+                                         svarMapping = jaNeiSvarRegel(hvisNei = IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE)),
                                RegelSteg(regelId = RegelId.KRAV_SIVILSTAND,
-                                         svarMapping = jaNeiMapping())),
+                                         svarMapping = jaNeiSvarRegel())),
                          hovedregler = setOf(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE,
                                              RegelId.KRAV_SIVILSTAND))
 

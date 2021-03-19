@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.regler.vilkårsregel
 
 import no.nav.familie.ef.sak.regler.RegelId
 import no.nav.familie.ef.sak.regler.RegelSteg
-import no.nav.familie.ef.sak.regler.SluttRegel
+import no.nav.familie.ef.sak.regler.SluttSvarRegel
 import no.nav.familie.ef.sak.regler.SvarId
 import no.nav.familie.ef.sak.regler.Vilkårsregel
 import no.nav.familie.ef.sak.regler.regelIds
@@ -22,8 +22,8 @@ class SivilstandRegel : Vilkårsregel(vilkårType = VilkårType.SIVILSTAND,
         private fun påkrevdBegrunnelse(regelId: RegelId) =
                 RegelSteg(regelId = regelId,
                           svarMapping = mapOf(
-                                  SvarId.JA to SluttRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                                  SvarId.NEI to SluttRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE
+                                  SvarId.JA to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                                  SvarId.NEI to SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE
                           ))
 
         private val DOKUMENTERT_EKTESKAP = påkrevdBegrunnelse(RegelId.DOKUMENTERT_EKTESKAP)
@@ -33,9 +33,9 @@ class SivilstandRegel : Vilkårsregel(vilkårType = VilkårType.SIVILSTAND,
         private val KRAV_SIVILSTAND = påkrevdBegrunnelse(RegelId.KRAV_SIVILSTAND)
         private val UNNTAK = RegelSteg(regelId = RegelId.SIVILSTAND_UNNTAK,
                                        svarMapping = mapOf(
-                                               SvarId.GJENLEVENDE_IKKE_RETT_TIL_YTELSER to SluttRegel.OPPFYLT,
-                                               SvarId.GJENLEVENDE_OVERTAR_OMSORG to SluttRegel.OPPFYLT,
-                                               SvarId.NEI to SluttRegel.IKKE_OPPFYLT
+                                               SvarId.GJENLEVENDE_IKKE_RETT_TIL_YTELSER to SluttSvarRegel.OPPFYLT,
+                                               SvarId.GJENLEVENDE_OVERTAR_OMSORG to SluttSvarRegel.OPPFYLT,
+                                               SvarId.NEI to SluttSvarRegel.IKKE_OPPFYLT
                                        ))
     }
 }

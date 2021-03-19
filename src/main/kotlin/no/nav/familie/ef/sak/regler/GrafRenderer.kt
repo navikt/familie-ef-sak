@@ -20,11 +20,11 @@ data class Svar(val name: SvarId,
 }
 
 
-fun mapSvar(regler: Map<RegelId, RegelSteg>, svarMapping: Map<SvarId, RegelNode>): List<Svar> {
+fun mapSvar(regler: Map<RegelId, RegelSteg>, svarMapping: Map<SvarId, SvarRegel>): List<Svar> {
     return svarMapping.map {
         try {
             val value = it.value
-            if (value is SluttRegel) {
+            if (value is SluttSvarRegel) {
                 Svar(it.key, value.begrunnelseType, emptyList(), value.resultat.vilkårsresultat)
             } else {
                 Svar(it.key, value.begrunnelseType, listOf(mapFråga(regler, value.regelId)))

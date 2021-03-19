@@ -13,6 +13,6 @@ abstract class Vilkårsregel(val vilkårType: VilkårType,
             this(vilkårType, regler.associateBy { it.regelId }, hovedregler)
 
     fun regel(regelId: RegelId): RegelSteg {
-        return regler[regelId] ?: throw Feil("Finner ikke regelId=${regelId} for vilkårType=$vilkårType")
+        return regler[regelId] ?: throw Feil("Finner ikke regelId=$regelId for vilkårType=$vilkårType")
     }
 }

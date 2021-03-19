@@ -1,6 +1,11 @@
 package no.nav.familie.ef.sak.regler
 
 enum class SvarId {
+
+    // Felles
+    JA,
+    NEI,
+
     // Aleneomsorg
     SAMME_HUS_OG_FÆRRE_ENN_4_BOENHETER,
     SAMME_HUS_OG_FLERE_ENN_4_BOENHETER_MEN_VURDERT_NÆRT,
@@ -26,6 +31,4 @@ enum class SvarId {
     GJENLEVENDE_IKKE_RETT_TIL_YTELSER,
     GJENLEVENDE_OVERTAR_OMSORG,
 
-    JA,
-    NEI
 }

@@ -27,7 +27,13 @@ data class OppdatertVilkårsvurderingResponseDto(val id: UUID,
                                                 val resultat: Vilkårsresultat)
 
 data class DelvilkårsvurderingDto(val resultat: Vilkårsresultat,
-                                  val vurderinger: List<VurderingDto>)
+                                  val vurderinger: List<VurderingDto>) {
+
+    /**
+     * @return regelId for første svaret som er hovedregeln på delvilkåret
+     */
+    fun hovedregel() = this.vurderinger.first().regelId
+}
 
 data class VurderingDto(val regelId: RegelId,
                         val svar: SvarId? = null,

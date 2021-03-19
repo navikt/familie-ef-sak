@@ -9,6 +9,9 @@ import no.nav.familie.ef.sak.regler.vilkårsregel.SamlivRegel
 import no.nav.familie.ef.sak.regler.vilkårsregel.SivilstandRegel
 import no.nav.familie.ef.sak.repository.domain.VilkårType
 
+/**
+ * Singleton for å holde på alle regler
+ */
 data class Vilkårsregler private constructor(val vilkårsregler: Map<VilkårType, Vilkårsregel>) {
 
     companion object {

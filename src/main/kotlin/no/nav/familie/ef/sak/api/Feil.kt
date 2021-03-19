@@ -13,4 +13,10 @@ class Feil(message: String,
             this(message, null, httpStatus, throwable)
 }
 
+inline fun feilHvis(boolean: Boolean, lazyMessage: () -> String) {
+    if (boolean) {
+        throw Feil(lazyMessage())
+    }
+}
+
 class ManglerTilgang(val melding: String) : RuntimeException(melding)
