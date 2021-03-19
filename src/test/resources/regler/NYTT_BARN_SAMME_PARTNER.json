@@ -5,11 +5,11 @@
       "regelId" : "HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER",
       "svarMapping" : {
         "JA" : {
-          "begrunnelseType" : "UTEN",
+          "begrunnelseType" : "PÅKREVD",
           "regelId" : "SLUTT_NODE"
         },
         "NEI" : {
-          "begrunnelseType" : "UTEN",
+          "begrunnelseType" : "VALGFRI",
           "regelId" : "SLUTT_NODE"
         }
       }

@@ -5,11 +5,11 @@
       "regelId" : "OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN",
       "svarMapping" : {
         "JA" : {
-          "begrunnelseType" : "UTEN",
+          "begrunnelseType" : "VALGFRI",
           "regelId" : "SLUTT_NODE"
         },
         "NEI" : {
-          "begrunnelseType" : "UTEN",
+          "begrunnelseType" : "PÅKREVD",
           "regelId" : "SLUTT_NODE"
         }
       }

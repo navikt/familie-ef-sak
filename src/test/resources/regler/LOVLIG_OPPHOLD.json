@@ -18,15 +18,15 @@
       "regelId" : "OPPHOLD_UNNTAK",
       "svarMapping" : {
         "ARBEID_NORSK_ARBEIDSGIVER" : {
-          "begrunnelseType" : "VALGFRI",
+          "begrunnelseType" : "PÅKREVD",
           "regelId" : "SLUTT_NODE"
         },
         "UTENLANDSOPPHOLD_MINDRE_ENN_6_UKER" : {
-          "begrunnelseType" : "VALGFRI",
+          "begrunnelseType" : "PÅKREVD",
           "regelId" : "SLUTT_NODE"
         },
         "NEI" : {
-          "begrunnelseType" : "VALGFRI",
+          "begrunnelseType" : "PÅKREVD",
           "regelId" : "SLUTT_NODE"
         }
       }

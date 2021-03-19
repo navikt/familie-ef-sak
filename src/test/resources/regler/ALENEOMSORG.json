@@ -9,7 +9,7 @@
           "regelId" : "SLUTT_NODE"
         },
         "NEI" : {
-          "begrunnelseType" : "PÅKREVD",
+          "begrunnelseType" : "VALGFRI",
           "regelId" : "SLUTT_NODE"
         }
       }
@@ -40,6 +40,10 @@
         "TILSTØTENDE_BOLIGER_ELLER_REKKEHUS_I_SAMMEGATE" : {
           "begrunnelseType" : "PÅKREVD",
           "regelId" : "SLUTT_NODE"
+        },
+        "NEI" : {
+          "begrunnelseType" : "PÅKREVD",
+          "regelId" : "SLUTT_NODE"
         }
       }
     },
@@ -47,11 +51,11 @@
       "regelId" : "MER_AV_DAGLIG_OMSORG",
       "svarMapping" : {
         "JA" : {
-          "begrunnelseType" : "UTEN",
+          "begrunnelseType" : "PÅKREVD",
           "regelId" : "SLUTT_NODE"
         },
         "NEI" : {
-          "begrunnelseType" : "UTEN",
+          "begrunnelseType" : "PÅKREVD",
           "regelId" : "SLUTT_NODE"
         }
       }

@@ -9,7 +9,7 @@
           "regelId" : "SLUTT_NODE"
         },
         "NEI" : {
-          "begrunnelseType" : "VALGFRI",
+          "begrunnelseType" : "PÅKREVD",
           "regelId" : "SLUTT_NODE"
         }
       }
