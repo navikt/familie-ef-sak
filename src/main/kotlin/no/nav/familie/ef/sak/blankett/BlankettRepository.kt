@@ -8,5 +8,4 @@ import java.util.*
 @Repository
 interface BlankettRepository : RepositoryInterface<Blankett, UUID>, InsertUpdateRepository<Blankett> {
 
-
 }
