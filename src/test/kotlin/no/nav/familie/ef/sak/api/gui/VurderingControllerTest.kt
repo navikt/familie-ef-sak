@@ -1,9 +1,11 @@
 package no.nav.familie.ef.sak.api.gui
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
+import no.nav.familie.ef.sak.api.dto.DelvilkårsvurderingDto
 import no.nav.familie.ef.sak.api.dto.OppdaterVilkårsvurderingDto
 import no.nav.familie.ef.sak.api.dto.VilkårDto
 import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
+import no.nav.familie.ef.sak.regler.SvarId
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
@@ -46,22 +48,23 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal oppdatere vilkår`() {
-        val opprettetVurdering = opprettInngangsvilkår().body.data!!.vurderinger.first().tilOppdaterVilkårDto()
+        val  t = opprettInngangsvilkår().body.data!!.vurderinger.first()
+        val opprettetVurdering = t.tilOppdaterVilkårDto()
 
-        val respons: ResponseEntity<Ressurs<UUID>> =
-                restTemplate.exchange(localhost("/api/vurdering/inngangsvilkar"),
+        val respons: ResponseEntity<Ressurs<VilkårsvurderingDto>> =
+                restTemplate.exchange(localhost("/api/vurdering/vilkar"),
                                       HttpMethod.POST,
                                       HttpEntity(opprettetVurdering, headers))
 
         assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(respons.body.status).isEqualTo(Ressurs.Status.SUKSESS)
-        assertThat(respons.body.data).isEqualTo(opprettetVurdering.id)
+        assertThat(respons.body.data?.id).isEqualTo(t.id)
     }
 
     private fun VilkårsvurderingDto.tilOppdaterVilkårDto(): OppdaterVilkårsvurderingDto =
             OppdaterVilkårsvurderingDto(this.id,
                                         this.behandlingId,
-                                        this.delvilkårsvurderinger)
+                                        delvilkårsvurderinger = this.delvilkårsvurderinger.map { it.copy(vurderinger = it.vurderinger.map { vurderingDto ->  vurderingDto.copy(svar = SvarId.JA) }) })
 
     private fun opprettInngangsvilkår(): ResponseEntity<Ressurs<VilkårDto>> {
         val søknad = SøknadMedVedlegg(Testsøknad.søknadOvergangsstønad, emptyList())
@@ -71,7 +74,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
         behandlingService.lagreSøknadForOvergangsstønad(søknad.søknad, behandling.id, fagsak.id, "1234")
         grunnlagsdataService.hentEndringerIRegistergrunnlag(behandling.id)
 
-        return restTemplate.exchange(localhost("/api/vurdering/${behandling.id}/inngangsvilkar"),
+        return restTemplate.exchange(localhost("/api/vurdering/${behandling.id}/vilkar"),
                                      HttpMethod.GET,
                                      HttpEntity<Any>(headers))
     }

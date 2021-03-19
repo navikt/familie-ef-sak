@@ -28,7 +28,7 @@ class VurderingService(private val behandlingService: BehandlingService,
                        private val vilkårsvurderingRepository: VilkårsvurderingRepository,
                        private val grunnlagsdataService: GrunnlagsdataService) {
 
-    fun oppdaterVilkår(vilkårsvurderingDto: OppdaterVilkårsvurderingDto): OppdatertVilkårsvurderingResponseDto {
+    fun oppdaterVilkår(vilkårsvurderingDto: OppdaterVilkårsvurderingDto): VilkårsvurderingDto {
         val vilkårsvurdering = vilkårsvurderingRepository.findByIdOrThrow(vilkårsvurderingDto.id)
 
         val behandlingId = vilkårsvurdering.behandlingId
@@ -39,9 +39,7 @@ class VurderingService(private val behandlingService: BehandlingService,
 
         val nyVilkårsvurdering = OppdaterVilkår.lagNyOppdatertVilkårsvurdering(vilkårsvurdering,
                                                                                vilkårsvurderingDto.delvilkårsvurderinger)
-        val oppdatertVilkårsvurdering = vilkårsvurderingRepository.update(nyVilkårsvurdering)
-        return OppdatertVilkårsvurderingResponseDto(id = oppdatertVilkårsvurdering.id,
-                                                    resultat = oppdatertVilkårsvurdering.resultat)
+        return vilkårsvurderingRepository.update(nyVilkårsvurdering).tilDto()
     }
 
     fun hentVilkår(behandlingId: UUID): VilkårDto {

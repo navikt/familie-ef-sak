@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.api.gui
 import no.nav.familie.ef.sak.api.dto.OppdaterVilkårsvurderingDto
 import no.nav.familie.ef.sak.api.dto.OppdatertVilkårsvurderingResponseDto
 import no.nav.familie.ef.sak.api.dto.VilkårDto
+import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.regler.Vilkårsregler
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.TilgangService
@@ -41,7 +42,7 @@ class VurderingController(private val vurderingService: VurderingService,
 
     @PostMapping("vilkar")
     fun oppdaterVurderingVilkår(@RequestBody vilkårsvurdering: OppdaterVilkårsvurderingDto)
-            : Ressurs<OppdatertVilkårsvurderingResponseDto> {
+            : Ressurs<VilkårsvurderingDto> {
         tilgangService.validerTilgangTilBehandling(vilkårsvurdering.behandlingId)
         try {
             return Ressurs.success(vurderingService.oppdaterVilkår(vilkårsvurdering))
