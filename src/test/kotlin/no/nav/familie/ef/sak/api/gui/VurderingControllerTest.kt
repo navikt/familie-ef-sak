@@ -48,9 +48,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal oppdatere vilkår`() {
-        val  t = opprettInngangsvilkår().body.data!!.vurderinger.first()
-        val opprettetVurdering = t.tilOppdaterVilkårDto()
-
+        val opprettetVurdering = opprettInngangsvilkår().body.data!!.vurderinger.first().tilOppdaterVilkårDto()
         val respons: ResponseEntity<Ressurs<VilkårsvurderingDto>> =
                 restTemplate.exchange(localhost("/api/vurdering/vilkar"),
                                       HttpMethod.POST,
@@ -58,7 +56,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
 
         assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(respons.body.status).isEqualTo(Ressurs.Status.SUKSESS)
-        assertThat(respons.body.data?.id).isEqualTo(t.id)
+        assertThat(respons.body.data?.id).isEqualTo(opprettetVurdering.id)
     }
 
     private fun VilkårsvurderingDto.tilOppdaterVilkårDto(): OppdaterVilkårsvurderingDto =
