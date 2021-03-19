@@ -19,9 +19,9 @@ class OppholdINorgeRegel : Vilkårsregel(vilkårType = VilkårType.LOVLIG_OPPHOL
         private val OPPHOLD_UNNTAK =
                 RegelSteg(regelId = RegelId.OPPHOLD_UNNTAK,
                           svarMapping = mapOf(
-                                  SvarId.ARBEID_NORSK_ARBEIDSGIVER to SluttRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
-                                  SvarId.UTENLANDSOPPHOLD_MINDRE_ENN_6_UKER to SluttRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
-                                  SvarId.NEI to SluttRegel.IKKE_OPPFYLT_MED_VALGFRI_BEGRUNNELSE
+                                  SvarId.ARBEID_NORSK_ARBEIDSGIVER to SluttRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                                  SvarId.UTENLANDSOPPHOLD_MINDRE_ENN_6_UKER to SluttRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                                  SvarId.NEI to SluttRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE
                           ))
 
         private val BOR_OG_OPPHOLDER_SEG_I_NORGE =

@@ -18,7 +18,7 @@ class SamlivRegel : Vilkårsregel(vilkårType = VilkårType.SAMLIV,
         private val LEVER_IKKE_MED_ANNEN_FORELDER =
                 RegelSteg(regelId = RegelId.LEVER_IKKE_MED_ANNEN_FORELDER,
                           svarMapping = jaNeiMapping(hvisJa = SluttRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
-                                                     hvisNei = SluttRegel.IKKE_OPPFYLT_MED_VALGFRI_BEGRUNNELSE))
+                                                     hvisNei = SluttRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE))
 
         private val LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD =
                 RegelSteg(regelId = RegelId.LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD,

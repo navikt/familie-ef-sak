@@ -24,8 +24,8 @@ class ForutgåendeMedlemskapRegel : Vilkårsregel(vilkårType = VilkårType.FORU
                 SvarId.ANDRE_FORELDER_MEDLEM_MINST_5_ÅR_AVBRUDD_MINDRE_ENN_10_ÅR,
                 SvarId.ANDRE_FORELDER_MEDLEM_MINST_7_ÅR_AVBRUDD_MER_ENN_10_ÅR,
                 SvarId.TOTALVURDERING_OPPFYLLER_FORSKRIFT)
-                                                .map { it to SluttRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE }.toMap() +
-                                        mapOf(SvarId.NEI to SluttRegel.IKKE_OPPFYLT_MED_VALGFRI_BEGRUNNELSE)
+                                                .map { it to SluttRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE }.toMap() +
+                                        mapOf(SvarId.NEI to SluttRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE)
         private val MEDLEMSKAP_UNNTAK =
                 RegelSteg(regelId = RegelId.MEDLEMSKAP_UNNTAK,
                           svarMapping = unntakSvarMapping)

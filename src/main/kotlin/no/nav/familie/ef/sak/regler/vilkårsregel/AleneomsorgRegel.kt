@@ -21,7 +21,8 @@ class AleneomsorgRegel : Vilkårsregel(vilkårType = VilkårType.ALENEOMSORG,
 
         private val MER_AV_DAGLIG_OMSORG =
                 RegelSteg(regelId = RegelId.MER_AV_DAGLIG_OMSORG,
-                          svarMapping = jaNeiMapping())
+                          svarMapping = jaNeiMapping(hvisJa = SluttRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                                                     hvisNei = SluttRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE))
 
         private val næreBoForholdMapping =
                 setOf(SvarId.SAMME_HUS_OG_FÆRRE_ENN_4_BOENHETER,
@@ -31,15 +32,15 @@ class AleneomsorgRegel : Vilkårsregel(vilkårType = VilkårType.ALENEOMSORG,
                       SvarId.NÆRMESTE_BOLIG_ELLER_REKKEHUS_I_SAMMEGATE,
                       SvarId.TILSTØTENDE_BOLIGER_ELLER_REKKEHUS_I_SAMMEGATE)
                         .map { it to SluttRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE }
-                        .toMap()
+                        .toMap() + mapOf(SvarId.NEI to SluttRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE)
         private val NÆRE_BOFORHOLD =
                 RegelSteg(regelId = RegelId.NÆRE_BOFORHOLD,
                           svarMapping = næreBoForholdMapping)
 
         private val SKRIFTLIG_AVTALE_OM_DELT_BOSTED =
                 RegelSteg(regelId = RegelId.SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
-                          jaNeiMapping(hvisJa = SluttRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                                       hvisNei = SluttRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE))
+                          jaNeiMapping(hvisJa = SluttRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                                       hvisNei = SluttRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE))
 
     }
 }
