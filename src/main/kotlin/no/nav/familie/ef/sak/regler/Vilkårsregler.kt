@@ -1,12 +1,12 @@
 package no.nav.familie.ef.sak.regler
 
-import no.nav.familie.ef.sak.regler.vilkårsregel.AleneomsorgRegel
-import no.nav.familie.ef.sak.regler.vilkårsregel.ForutgåendeMedlemskapRegel
-import no.nav.familie.ef.sak.regler.vilkårsregel.MorEllerFarRegel
-import no.nav.familie.ef.sak.regler.vilkårsregel.NyttBarnSammePartnerRegel
-import no.nav.familie.ef.sak.regler.vilkårsregel.OppholdINorgeRegel
-import no.nav.familie.ef.sak.regler.vilkårsregel.SamlivRegel
-import no.nav.familie.ef.sak.regler.vilkårsregel.SivilstandRegel
+import no.nav.familie.ef.sak.regler.vilkår.AleneomsorgRegel
+import no.nav.familie.ef.sak.regler.vilkår.ForutgåendeMedlemskapRegel
+import no.nav.familie.ef.sak.regler.vilkår.MorEllerFarRegel
+import no.nav.familie.ef.sak.regler.vilkår.NyttBarnSammePartnerRegel
+import no.nav.familie.ef.sak.regler.vilkår.OppholdINorgeRegel
+import no.nav.familie.ef.sak.regler.vilkår.SamlivRegel
+import no.nav.familie.ef.sak.regler.vilkår.SivilstandRegel
 import no.nav.familie.ef.sak.repository.domain.VilkårType
 
 /**

@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.regler.vilkårsregel
+package no.nav.familie.ef.sak.regler.vilkår
 
 import no.nav.familie.ef.sak.regler.RegelId
 import no.nav.familie.ef.sak.regler.RegelSteg
