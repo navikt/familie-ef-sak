@@ -26,28 +26,18 @@ class BlankettController(private val tilgangService: TilgangService,
 
     val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
-    @PostMapping("{behandlingId}")
-    fun lagBlankettPdf(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
-        tilgangService.validerTilgangTilBehandling(behandlingId)
-        val behandling = behandlingService.hentBehandling(behandlingId)
-        validerBehandlingStatusForBlankettGenerering(behandling)
-        validerBehandlingTypeBlankett(behandling)
-        val blankett = blankettService.lagBlankett(behandlingId)
-        return Ressurs.success(blankett)
-    }
-
     @GetMapping("{behandlingId}")
     fun hentBlankettPdf(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
-        val blankett = blankettService.hentBlankettPdf(behandlingId)
-        return Ressurs.success(blankett.pdf.bytes)
+        return blankettService.hentBlankettPdf(behandlingId)?.let {
+            Ressurs.success(it.pdf.bytes)
+        } ?: lagBlankettPdf(behandlingId)
     }
 
     @PostMapping("/oppgave/{oppgaveId}")
-    fun opprettBlankettBehandling(@PathVariable oppgaveId: Long): Ressurs<UUID> {
+    fun startBlankettBehandling(@PathVariable oppgaveId: Long): Ressurs<UUID> {
         oppgaveService.hentEfOppgave(oppgaveId)?.let {
-            throw ApiFeil("Det finnes allerede en behandling for denne oppgaven - kan ikke opprettes på nytt",
-                          HttpStatus.BAD_REQUEST)
+            return Ressurs.success(it.behandlingId)
         }
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
         val journalpostId = oppgave.journalpostId
@@ -58,19 +48,28 @@ class BlankettController(private val tilgangService: TilgangService,
         return Ressurs.success(behandling.id)
     }
 
-    private fun validerBehandlingStatusForBlankettGenerering(behandling: Behandling) {
+    private fun lagBlankettPdf(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
+        val behandling = behandlingService.hentBehandling(behandlingId)
+        validerOpprettelseAvBlankett(behandling)
+        val blankett = blankettService.lagBlankett(behandlingId)
+        return Ressurs.success(blankett)
+    }
+
+    private fun validerOpprettelseAvBlankett(behandling: Behandling) {
         if (behandling.status.behandlingErLåstForVidereRedigering()) {
-            val feilmelding = "Behandling er låst for videre redigering : ${behandling}"
-            logger.error(feilmelding)
-            throw ApiFeil(feilmelding, HttpStatus.BAD_REQUEST)
+            kastApiFeil("Behandling er låst for videre redigering for behandling : ${behandling}", HttpStatus.BAD_REQUEST)
+        }
+        if (!typeBlankett(behandling)) {
+            kastApiFeil("Behandling er ikke av typen blankett for behandling : ${behandling}", HttpStatus.BAD_REQUEST)
         }
     }
 
-    private fun validerBehandlingTypeBlankett(behandling: Behandling) {
-        if (behandling.type != BehandlingType.BLANKETT) {
-            val feilmelding = "Behandling er ikke av typen blankett, behandling : ${behandling}"
-            logger.error(feilmelding)
-            throw ApiFeil(feilmelding, HttpStatus.BAD_REQUEST)
-        }
+    private fun typeBlankett(behandling: Behandling): Boolean {
+        return behandling.type == BehandlingType.BLANKETT
+    }
+
+    private fun kastApiFeil(feilmelding: String, httpStatus: HttpStatus) {
+        logger.error(feilmelding)
+        throw ApiFeil(feilmelding, httpStatus)
     }
 }

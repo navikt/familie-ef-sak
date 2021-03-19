@@ -1,0 +1,24 @@
+springProfile: dev
+ingress: https://familie-ef-sak.dev.intern.nav.no
+inboundApplications:
+  - familie-ef-sak-frontend-lokal
+inboundApplicationsExternal:
+  - application: familie-ef-proxy
+    namespace: teamfamilie
+    cluster: dev-fss
+  - application: familie-ef-proxy-test
+    namespace: teamfamilie
+    cluster: dev-fss
+externalHosts:
+  - api-gw-q1.oera.no
+  - unleash.nais.io
+  - familie-oppdrag.dev-fss-pub.nais.io
+  - familie-ef-infotrygd-feed.dev-fss-pub.nais.io
+  - familie-integrasjoner.dev-fss-pub.nais.io
+  - infotrygd-enslig-forsoerger.dev-fss-pub.nais.io
+
+tenant: trygdeetaten.no
+claimGroups:
+  - "01166863-22f1-4e16-9785-d7a05a22df74" # 0000-GA-Enslig-Forsorger-Beslutter
+  - "ee5e0b5e-454c-4612-b931-1fe363df7c2c" # 0000-GA-Enslig-Forsorger-Saksbehandler
+  - "19dcbfde-4cdb-4c64-a1ea-ac9802b03339" # 0000-GA-Enslig-Forsorger-Veileder

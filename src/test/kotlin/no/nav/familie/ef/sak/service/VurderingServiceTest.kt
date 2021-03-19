@@ -1,9 +1,6 @@
 package no.nav.familie.ef.sak.service
 
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.slot
-import io.mockk.verify
+import io.mockk.*
 import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.api.dto.DelvilkårsvurderingDto
 import no.nav.familie.ef.sak.api.dto.VilkårGrunnlagDto
@@ -12,6 +9,7 @@ import no.nav.familie.ef.sak.api.dto.SivilstandRegistergrunnlagDto
 import no.nav.familie.ef.sak.api.dto.SivilstandSøknadsgrunnlagDto
 import no.nav.familie.ef.sak.api.dto.Sivilstandstype
 import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
+import no.nav.familie.ef.sak.blankett.BlankettRepository
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.mapper.SøknadsskjemaMapper
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.config.PdlClientConfig
@@ -44,11 +42,13 @@ internal class VurderingServiceTest {
     private val behandlingService = mockk<BehandlingService>()
     private val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
     private val familieIntegrasjonerClient = mockk<FamilieIntegrasjonerClient>()
+    private val blankettRepository = mockk<BlankettRepository>()
     private val grunnlagsdataService = mockk<GrunnlagsdataService>()
     private val vurderingService = VurderingService(behandlingService = behandlingService,
                                                     pdlClient = PdlClientConfig().pdlClient(),
                                                     vilkårsvurderingRepository = vilkårsvurderingRepository,
-                                                    grunnlagsdataService = grunnlagsdataService)
+                                                    grunnlagsdataService = grunnlagsdataService,
+                                                    blankettRepository = blankettRepository)
 
     @BeforeEach
     fun setUp() {
@@ -57,6 +57,7 @@ internal class VurderingServiceTest {
                 TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "01012067050")
         )).build().søknadOvergangsstønad)
         every { behandlingService.hentOvergangsstønad(any()) }.returns(søknad)
+        every { blankettRepository.deleteById(any()) } just runs
         every { familieIntegrasjonerClient.hentMedlemskapsinfo(any()) }
                 .returns(Medlemskapsinfo(personIdent = søknad.fødselsnummer,
                                          gyldigePerioder = emptyList(),

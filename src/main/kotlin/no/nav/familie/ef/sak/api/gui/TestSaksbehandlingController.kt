@@ -135,7 +135,6 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
         val journalpostId = arkiver(fnr)
         val journalpost = journalpostClient.hentJournalpost(journalpostId)
         val behandling = behandlingService.opprettBehandling(BehandlingType.BLANKETT, fagsak.id, søknad, journalpost)
-        blankettService.lagreTomBlankett(behandling.id)
         return behandling
     }
 }

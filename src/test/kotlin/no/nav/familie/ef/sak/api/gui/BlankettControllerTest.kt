@@ -18,7 +18,7 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import java.util.UUID
+import java.util.*
 
 class BlankettControllerTest : OppslagSpringRunnerTest() {
 
@@ -43,14 +43,14 @@ class BlankettControllerTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `Oppgave finnes allerede i db returner 400 BadRequestException`() {
+    internal fun `Oppgave finnes allerede i db returner eksisterende bahandlingsid`() {
 
         val fagsak = fagsakRepository.insert(fagsak(setOf(FagsakPerson(""))))
         val behandling = behandlingRepository.insert(behandling(fagsak))
         val oppgave = oppgaveRepository.insert(oppgave(behandling, false))
         val respons: ResponseEntity<Ressurs<UUID>> = opprettBlankettBehandling(oppgave.gsakOppgaveId)
 
-        assertThat(respons.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
+        assertThat(respons.body.data).isEqualTo(behandling.id)
     }
 
     @Test
