@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.api.gui
 
 import no.nav.familie.ef.sak.api.dto.OppdaterVilkårsvurderingDto
-import no.nav.familie.ef.sak.api.dto.OppdatertVilkårsvurderingResponseDto
 import no.nav.familie.ef.sak.api.dto.VilkårDto
 import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.regler.Vilkårsregler

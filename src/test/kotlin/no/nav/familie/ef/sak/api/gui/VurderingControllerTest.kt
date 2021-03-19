@@ -1,14 +1,13 @@
 package no.nav.familie.ef.sak.api.gui
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.api.dto.DelvilkårsvurderingDto
 import no.nav.familie.ef.sak.api.dto.OppdaterVilkårsvurderingDto
 import no.nav.familie.ef.sak.api.dto.VilkårDto
 import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.regler.SvarId
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
-import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
+import no.nav.familie.ef.sak.repository.domain.VilkårType
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.GrunnlagsdataService
@@ -47,22 +46,31 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `skal oppdatere vilkår`() {
-        val opprettetVurdering = opprettInngangsvilkår().body.data!!.vurderinger.first().tilOppdaterVilkårDto()
+    internal fun `skal oppdatere vurderingen for FORUTGÅENDE_MEDLEMSKAP som har ett spørsmål som vi setter til JA`() {
+        val opprettetVurdering = opprettInngangsvilkår().body.data!!
+        val oppdatertVilkårsvarMedJa =
+                opprettetVurdering.vurderinger.first { it.vilkårType == VilkårType.FORUTGÅENDE_MEDLEMSKAP }.let {
+                    lagOppdaterVilkårsvurderingMedSvarJa(it)
+                }
         val respons: ResponseEntity<Ressurs<VilkårsvurderingDto>> =
                 restTemplate.exchange(localhost("/api/vurdering/vilkar"),
                                       HttpMethod.POST,
-                                      HttpEntity(opprettetVurdering, headers))
+                                      HttpEntity(oppdatertVilkårsvarMedJa, headers))
 
         assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(respons.body.status).isEqualTo(Ressurs.Status.SUKSESS)
-        assertThat(respons.body.data?.id).isEqualTo(opprettetVurdering.id)
+        assertThat(respons.body.data?.id).isEqualTo(oppdatertVilkårsvarMedJa.id)
     }
 
-    private fun VilkårsvurderingDto.tilOppdaterVilkårDto(): OppdaterVilkårsvurderingDto =
-            OppdaterVilkårsvurderingDto(this.id,
-                                        this.behandlingId,
-                                        delvilkårsvurderinger = this.delvilkårsvurderinger.map { it.copy(vurderinger = it.vurderinger.map { vurderingDto ->  vurderingDto.copy(svar = SvarId.JA) }) })
+    private fun lagOppdaterVilkårsvurderingMedSvarJa(it: VilkårsvurderingDto) =
+            OppdaterVilkårsvurderingDto(id = it.id,
+                                        behandlingId = it.behandlingId,
+                                        delvilkårsvurderinger = it.delvilkårsvurderinger.map {
+                                            it.copy(vurderinger = it.vurderinger.map { vurderingDto ->
+                                                vurderingDto.copy(svar = SvarId.JA)
+                                            })
+                                        })
+
 
     private fun opprettInngangsvilkår(): ResponseEntity<Ressurs<VilkårDto>> {
         val søknad = SøknadMedVedlegg(Testsøknad.søknadOvergangsstønad, emptyList())

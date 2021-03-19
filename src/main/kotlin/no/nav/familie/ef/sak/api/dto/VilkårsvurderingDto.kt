@@ -23,9 +23,6 @@ data class OppdaterVilkårsvurderingDto(val id: UUID,
                                        val behandlingId: UUID,
                                        val delvilkårsvurderinger: List<DelvilkårsvurderingDto> = emptyList())
 
-data class OppdatertVilkårsvurderingResponseDto(val id: UUID,
-                                                val resultat: Vilkårsresultat)
-
 data class DelvilkårsvurderingDto(val resultat: Vilkårsresultat,
                                   val vurderinger: List<VurderingDto>) {
 

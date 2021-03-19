@@ -1,16 +1,12 @@
 package no.nav.familie.ef.sak.regler.evalutation
 
-import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.api.dto.DelvilkårsvurderingDto
 import no.nav.familie.ef.sak.api.dto.VurderingDto
-import no.nav.familie.ef.sak.regler.BegrunnelseType
-import no.nav.familie.ef.sak.regler.NesteRegel
 import no.nav.familie.ef.sak.regler.RegelId
 import no.nav.familie.ef.sak.regler.RegelSteg
 import no.nav.familie.ef.sak.regler.SluttSvarRegel.Companion.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE
 import no.nav.familie.ef.sak.regler.SvarId
 import no.nav.familie.ef.sak.regler.Vilkårsregel
-import no.nav.familie.ef.sak.regler.evalutation.RegelEvaluering.utledVilkårResultat
 import no.nav.familie.ef.sak.regler.jaNeiSvarRegel
 import no.nav.familie.ef.sak.repository.domain.Delvilkårsvurdering
 import no.nav.familie.ef.sak.repository.domain.DelvilkårsvurderingWrapper
@@ -19,129 +15,16 @@ import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
 import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
 import no.nav.familie.ef.sak.repository.domain.Vurdering
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
 class OppdaterVilkårTest {
 
-
-    @Test
-    fun `utledVilkårResultat - er OPPFYLT når alle vilkår er OPPFYLT`() {
-        assertThat(utledVilkårResultat(mapOf(RegelId.OPPHOLD_UNNTAK to Vilkårsresultat.OPPFYLT)))
-                .isEqualTo(Vilkårsresultat.OPPFYLT)
-    }
-
-    @Test
-    fun `utledVilkårResultat - er IKKE_OPPFYLT når det finnes en med IKKE_OPPFYLT`() {
-        assertThat(utledVilkårResultat(mapOf(RegelId.OPPHOLD_UNNTAK to Vilkårsresultat.OPPFYLT,
-                                             RegelId.MEDLEMSKAP_UNNTAK to Vilkårsresultat.IKKE_OPPFYLT)))
-                .isEqualTo(Vilkårsresultat.IKKE_OPPFYLT)
-    }
-
-    @Test
-    fun `utledVilkårResultat - er IKKE_TATT_STILLING_TIL når det finnes en med IKKE_TATT_STILLING_TIL`() {
-        assertThat(utledVilkårResultat(mapOf(RegelId.OPPHOLD_UNNTAK to Vilkårsresultat.OPPFYLT,
-                                             RegelId.MEDLEMSKAP_UNNTAK to Vilkårsresultat.IKKE_OPPFYLT,
-                                             RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE to Vilkårsresultat.IKKE_TATT_STILLING_TIL)))
-                .isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
-    }
-
-    @Test
-    fun `sender in en tom liste med svar - skal kaste exception`() {
-        val regel = VilkårsregelMedEttDelvilkår()
-        val vilkårsvurdering = vurderingFraDb(regel)
-
-        assertThat(catchThrowable { validerOgOppdater(vilkårsvurdering, regel, *emptyArray<VurderingDto>()) })
-                .hasMessage("Savner svar for en av delvilkåren for vilkår=ALENEOMSORG")
-                .isInstanceOf(Feil::class.java)
-    }
-
-    @Test
-    fun `sender in svar med feil rootId - skal kaste exception`() {
-        val regel = VilkårsregelMedEttDelvilkår()
-        val vilkårsvurdering = vurderingFraDb(regel)
-
-        assertThat(catchThrowable {
-            validerOgOppdater(vilkårsvurdering, regel,
-                              VurderingDto(RegelId.KRAV_SIVILSTAND))
-        })
-                .hasMessageStartingWith("Delvilkårsvurderinger savner svar på rotregler")
-                .isInstanceOf(Feil::class.java)
-    }
-
-    @Test
-    fun `sender in 2 svar men mangler svarId på første - skal kaste exception`() {
-        val regel = VilkårsregelMedEttDelvilkår()
-        val vilkårsvurdering = vurderingFraDb(regel)
-
-        assertThat(catchThrowable {
-            validerOgOppdater(vilkårsvurdering, regel,
-                              VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE),
-                              VurderingDto(RegelId.KRAV_SIVILSTAND))
-        })
-                .hasMessage("Mangler svar på ett spørsmål som ikke er siste besvarte spørsmålet vilkårType=ALENEOMSORG regelId=BOR_OG_OPPHOLDER_SEG_I_NORGE")
-                .isInstanceOf(Feil::class.java)
-    }
-
-    @Test
-    fun `sender in fler svar enn det finnes mulighet for - skal kaste exception`() {
-        val regel = VilkårsregelMedEttDelvilkår()
-        val vilkårsvurdering = vurderingFraDb(regel)
-
-        assertThat(catchThrowable {
-            validerOgOppdater(vilkårsvurdering, regel,
-                              VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.NEI),
-                              VurderingDto(RegelId.KRAV_SIVILSTAND, SvarId.NEI),
-                              VurderingDto(RegelId.KRAV_SIVILSTAND))
-        })
-                .hasMessageStartingWith("Finnes ikke noen flere regler, men finnes flere svar")
-                .isInstanceOf(Feil::class.java)
-    }
-
-    @Test
-    fun `regelId for det andre spørsmålet er feil - skal kaste exception`() {
-        val regel = VilkårsregelMedEttDelvilkår()
-        val vilkårsvurdering = vurderingFraDb(regel)
-
-        assertThat(catchThrowable {
-            validerOgOppdater(vilkårsvurdering, regel,
-                              VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.NEI),
-                              VurderingDto(RegelId.NÆRE_BOFORHOLD, SvarId.NEI))
-        })
-                .hasMessage("Finner ikke regelId=NÆRE_BOFORHOLD for vilkårType=ALENEOMSORG")
-                .isInstanceOf(Feil::class.java)
-    }
-
-    @Test
-    fun `har begrunnelse på ett spørsmål som ikke skal ha begrunnelse - skal kaste exception`() {
-        val regel = VilkårsregelMedEttDelvilkår()
-        val vilkårsvurdering = vurderingFraDb(regel)
-        assertThat(catchThrowable {
-            validerOgOppdater(vilkårsvurdering, regel,
-                              VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.JA, "b"))
-        })
-                .hasMessage("Begrunnelse for vilkårType=ALENEOMSORG regelId=BOR_OG_OPPHOLDER_SEG_I_NORGE svarId=JA skal ikke ha begrunnelse")
-                .isInstanceOf(Feil::class.java)
-    }
-
-    @Test
-    fun `har en tom begrunnelse på ett spørsmål som ikke skal ha begrunnelse - skal kaste exception`() {
-        val regel = VilkårsregelMedEttDelvilkår()
-        val vilkårsvurdering = vurderingFraDb(regel)
-        assertThat(catchThrowable {
-            validerOgOppdater(vilkårsvurdering, regel,
-                              VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.JA, "      "))
-        })
-                .hasMessage("Begrunnelse for vilkårType=ALENEOMSORG regelId=BOR_OG_OPPHOLDER_SEG_I_NORGE svarId=JA skal ikke ha begrunnelse")
-                .isInstanceOf(Feil::class.java)
-    }
-
     @Test
     fun `har kun svart på første spørsmål som er en sluttnode - allt ok`() {
-        val regel = VilkårsregelMedEttDelvilkår()
-        val vilkårsvurdering = vurderingFraDb(regel)
+        val regel = VilkårsregelEnHovedregel()
+        val vilkårsvurdering = opprettVurdering(regel)
         val resultat = validerOgOppdater(vilkårsvurdering, regel,
                                          VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.JA))
 
@@ -151,8 +34,8 @@ class OppdaterVilkårTest {
 
     @Test
     fun `har svart på två spørsmål hvor det siste er en sluttnode - allt ok`() {
-        val regel = VilkårsregelMedEttDelvilkår()
-        val vilkårsvurdering = vurderingFraDb(regel)
+        val regel = VilkårsregelEnHovedregel()
+        val vilkårsvurdering = opprettVurdering(regel)
         val resultat = validerOgOppdater(vilkårsvurdering, regel,
                                          VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.NEI, "a"),
                                          VurderingDto(RegelId.KRAV_SIVILSTAND, SvarId.JA))
@@ -167,8 +50,8 @@ class OppdaterVilkårTest {
     @Test
     @Disabled
     fun `har svart på två spørsmål hvor det siste er en sluttnode men mangler begrunnelse på første`() {
-        val regel = VilkårsregelMedEttDelvilkår()
-        val vilkårsvurdering = vurderingFraDb(regel)
+        val regel = VilkårsregelEnHovedregel()
+        val vilkårsvurdering = opprettVurdering(regel)
         val resultat = validerOgOppdater(vilkårsvurdering, regel,
                                          VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.NEI),
                                          VurderingDto(RegelId.KRAV_SIVILSTAND, SvarId.JA))
@@ -179,8 +62,8 @@ class OppdaterVilkårTest {
 
     @Test
     fun `har svart på två spørsmål hvor det som gir IKKE_OPPFYLT`() {
-        val regel = VilkårsregelMedEttDelvilkår()
-        val vilkårsvurdering = vurderingFraDb(regel)
+        val regel = VilkårsregelEnHovedregel()
+        val vilkårsvurdering = opprettVurdering(regel)
         val resultat = validerOgOppdater(vilkårsvurdering, regel,
                                          VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.NEI, "a"),
                                          VurderingDto(RegelId.KRAV_SIVILSTAND, SvarId.NEI))
@@ -191,8 +74,8 @@ class OppdaterVilkårTest {
 
     @Test
     fun `två rotRegler - en IKKE_OPPFYLT og en OPPFYLT`() {
-        val regel = VilkårsregelMedTvåRotRegler()
-        val vilkårsvurdering = vurderingFraDb(regel)
+        val regel = VilkårsregelToHovedregler()
+        val vilkårsvurdering = opprettVurdering(regel)
         val resultat = validerOgOppdater(vilkårsvurdering, regel,
                                          delvilkårsvurderingDto(VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.JA)),
                                          delvilkårsvurderingDto(VurderingDto(RegelId.KRAV_SIVILSTAND, SvarId.NEI)))
@@ -208,8 +91,8 @@ class OppdaterVilkårTest {
     @Test
     @Disabled
     fun `två rotRegler - en IKKE_TATT_STILLING_TIL og en OPPFYLT`() {
-        val regel = VilkårsregelMedTvåRotRegler()
-        val vilkårsvurdering = vurderingFraDb(regel)
+        val regel = VilkårsregelToHovedregler()
+        val vilkårsvurdering = opprettVurdering(regel)
         val resultat = validerOgOppdater(vilkårsvurdering, regel,
                                          delvilkårsvurderingDto(
                                                  VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.NEI, "")),
@@ -226,24 +109,6 @@ class OppdaterVilkårTest {
             ?: error("Finner ikke regelId=$regelId blant ${this.delvilkårsvurdering.delvilkårsvurderinger.map { it.hovedregel }}")
 
     private fun Vilkårsvurdering.førsteDelvilkår() = this.delvilkårsvurdering.delvilkårsvurderinger.first()
-
-    private class VilkårsregelMedEttDelvilkår :
-            Vilkårsregel(VilkårType.ALENEOMSORG,
-                         setOf(RegelSteg(regelId = RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE,
-                                         svarMapping = jaNeiSvarRegel(hvisNei = NesteRegel(RegelId.KRAV_SIVILSTAND,
-                                                                                           BegrunnelseType.PÅKREVD))),
-                               RegelSteg(regelId = RegelId.KRAV_SIVILSTAND,
-                                         svarMapping = jaNeiSvarRegel())),
-                         hovedregler = setOf(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE))
-
-    private class VilkårsregelMedTvåRotRegler :
-            Vilkårsregel(VilkårType.ALENEOMSORG,
-                         setOf(RegelSteg(regelId = RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE,
-                                         svarMapping = jaNeiSvarRegel(hvisNei = IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE)),
-                               RegelSteg(regelId = RegelId.KRAV_SIVILSTAND,
-                                         svarMapping = jaNeiSvarRegel())),
-                         hovedregler = setOf(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE,
-                                             RegelId.KRAV_SIVILSTAND))
 
     private fun delvilkårsvurderingDto(vararg vurderinger: VurderingDto) =
             DelvilkårsvurderingDto(resultat = Vilkårsresultat.IKKE_AKTUELL, vurderinger = vurderinger.toList())
@@ -262,7 +127,7 @@ class OppdaterVilkårTest {
                                                              oppdatering = delvilkårsvurderingDto.toList())
     }
 
-    private fun vurderingFraDb(regel: Vilkårsregel): Vilkårsvurdering {
+    private fun opprettVurdering(regel: Vilkårsregel): Vilkårsvurdering {
         val delvilkårsvurderinger = regel.hovedregler.map {
             Delvilkårsvurdering(resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL, vurderinger = listOf(Vurdering(it)))
         }
@@ -271,6 +136,5 @@ class OppdaterVilkårTest {
                                 type = VilkårType.ALENEOMSORG,
                                 delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurderinger))
     }
-
 
 }
