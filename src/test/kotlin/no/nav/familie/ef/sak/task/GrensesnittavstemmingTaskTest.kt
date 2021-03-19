@@ -1,9 +1,6 @@
 package no.nav.familie.ef.sak.task
 
-import io.mockk.every
-import io.mockk.justRun
-import io.mockk.mockk
-import io.mockk.slot
+import io.mockk.*
 import no.nav.familie.ef.sak.api.avstemming.GrensesnittavstemmingDto
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.service.AvstemmingService
@@ -46,9 +43,7 @@ internal class GrensesnittavstemmingTaskTest {
         val slot = slot<GrensesnittavstemmingDto>()
         every {
             avstemmingService.opprettGrensesnittavstemmingTask(capture(slot))
-        } answers {
-            any()
-        }
+        } returns mockk()
 
         grensesnittavstemmingTask.onCompletion(Task(type = GrensesnittavstemmingTask.TYPE,
                                                     payload = payload,

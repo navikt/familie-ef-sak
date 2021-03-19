@@ -50,7 +50,7 @@ object PdlTestdata {
 
     private val opphold = listOf(Opphold(Oppholdstillatelse.MIDLERTIDIG, LocalDate.now(), LocalDate.now()))
 
-    private val oppholdsadresse = listOf(Oppholdsadresse(LocalDate.now(), "",
+    private val oppholdsadresse = listOf(Oppholdsadresse(LocalDate.now(), null, "",
                                                          utenlandskAdresse,
                                                          vegadresse, "", metadataGjeldende))
 
@@ -85,7 +85,7 @@ object PdlTestdata {
                                   navn,
                                   opphold,
                                   oppholdsadresse,
-                                  listOf(Sivilstand(Sivilstandstype.GIFT, LocalDate.now(), "", "", "", "", "", "", metadataGjeldende)),
+                                  listOf(Sivilstand(Sivilstandstype.GIFT, LocalDate.now(), "", "", metadataGjeldende)),
                                   statsborgerskap,
                                   listOf(Telefonnummer("", "", 1)),
                                   listOf(TilrettelagtKommunikasjon(Tolk(""), Tolk(""))),
@@ -102,8 +102,8 @@ object PdlTestdata {
     val pdlBarnData =
             PersonBolk(listOf(PersonDataBolk("11111122222", "ok", PdlBarn(adressebeskyttelse,
                                                                           bostedsadresse,
-                                                                          listOf(DeltBosted(LocalDateTime.now(),
-                                                                                            LocalDateTime.now(),
+                                                                          listOf(DeltBosted(LocalDate.now(),
+                                                                                            LocalDate.now(),
                                                                                             vegadresse,
                                                                                             UkjentBosted(""), metadataGjeldende)),
                                                                           dødsfall,

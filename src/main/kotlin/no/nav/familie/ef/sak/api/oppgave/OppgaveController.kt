@@ -1,10 +1,13 @@
 package no.nav.familie.ef.sak.api.oppgave
 
+import no.nav.familie.ef.sak.api.oppgave.dto.OppgaveEfDto
+import no.nav.familie.ef.sak.api.oppgave.dto.OppgaveResponseDto
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.service.OppgaveService
 import no.nav.familie.ef.sak.service.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
+import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
@@ -24,13 +27,14 @@ class OppgaveController(private val oppgaveService: OppgaveService,
     @PostMapping(path = ["/soek"],
                  consumes = [MediaType.APPLICATION_JSON_VALUE],
                  produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun hentOppgaver(@RequestBody finnOppgaveRequest: FinnOppgaveRequestDto): Ressurs<FinnOppgaveResponseDto> {
+    fun hentOppgaver(@RequestBody finnOppgaveRequest: FinnOppgaveRequestDto): Ressurs<OppgaveResponseDto> {
 
         val aktørId = finnOppgaveRequest.ident.takeUnless { it.isNullOrBlank() }
                 ?.let { pdlClient.hentAktørIder(it).identer.first().ident }
 
         secureLogger.info("AktoerId: ${aktørId}, Ident: ${finnOppgaveRequest.ident}")
-        return Ressurs.success(oppgaveService.hentOppgaver(finnOppgaveRequest.tilFinnOppgaveRequest(aktørId)))
+        val oppgaveRepons: FinnOppgaveResponseDto = oppgaveService.hentOppgaver(finnOppgaveRequest.tilFinnOppgaveRequest(aktørId))
+        return Ressurs.success(oppgaveRepons.tilDto())
     }
 
     @PostMapping(path = ["/{gsakOppgaveId}/fordel"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -57,5 +61,52 @@ class OppgaveController(private val oppgaveService: OppgaveService,
 
 
 }
+
+private fun FinnOppgaveResponseDto.tilDto(): OppgaveResponseDto {
+    val oppgaver = oppgaver.map {
+
+        it.tilDto()
+
+
+    }
+    return OppgaveResponseDto(antallTreffTotalt, oppgaver)
+}
+
+private fun Oppgave.tilDto(): OppgaveEfDto {
+    return OppgaveEfDto(id,
+                        identer,
+                        tildeltEnhetsnr,
+                        endretAvEnhetsnr,
+                        opprettetAvEnhetsnr,
+                        journalpostId,
+                        journalpostkilde,
+                        behandlesAvApplikasjon,
+                        saksreferanse,
+                        bnr,
+                        samhandlernr,
+                        aktoerId,
+                        orgnr,
+                        tilordnetRessurs,
+                        beskrivelse,
+                        temagruppe,
+                        tema,
+                        behandlingstema,
+                        oppgavetype,
+                        behandlingstype,
+                        versjon,
+                        mappeId,
+                        fristFerdigstillelse,
+                        aktivDato,
+                        opprettetTidspunkt,
+                        opprettetAv,
+                        endretAv,
+                        ferdigstiltTidspunkt,
+                        endretTidspunkt,
+                        prioritet,
+                        status,
+                        behandlesAvApplikasjon == "familie-ef-sak-blankett"
+    )
+}
+
 
 
