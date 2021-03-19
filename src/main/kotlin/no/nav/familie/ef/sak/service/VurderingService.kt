@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.api.dto.*
+import no.nav.familie.ef.sak.blankett.BlankettRepository
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.repository.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.repository.domain.DelvilkårMetadata
@@ -21,7 +22,8 @@ import java.util.UUID
 class VurderingService(private val behandlingService: BehandlingService,
                        private val pdlClient: PdlClient,
                        private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-                       private val grunnlagsdataService: GrunnlagsdataService) {
+                       private val grunnlagsdataService: GrunnlagsdataService,
+                       private val blankettRepository: BlankettRepository) {
 
     fun oppdaterVilkår(vilkårsvurderingDto: VilkårsvurderingDto): UUID {
         val vilkårsvurdering = vilkårsvurderingRepository.findByIdOrThrow(vilkårsvurderingDto.id)
@@ -47,6 +49,7 @@ class VurderingService(private val behandlingService: BehandlingService,
                                                                                                  delvurdering.begrunnelse)
                                                                          })
                 )
+        blankettRepository.deleteById(behandlingId)
         return vilkårsvurderingRepository.update(nyVilkårsvurdering).id
     }
 

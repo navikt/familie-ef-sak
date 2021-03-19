@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.repository.OppgaveRepository
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.service.*
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -65,8 +66,8 @@ class BlankettService(private val tilgangService: TilgangService,
         return navnMap.getValue(hentAktivIdent)
     }
 
-    fun hentBlankettPdf(behandlingId: UUID): Optional<Blankett> {
-        return blankettRepository.findById(behandlingId)
+    fun hentBlankettPdf(behandlingId: UUID): Blankett? {
+        return blankettRepository.findByIdOrNull(behandlingId)
     }
 
 }

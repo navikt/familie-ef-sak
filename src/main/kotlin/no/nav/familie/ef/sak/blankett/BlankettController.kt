@@ -26,32 +26,12 @@ class BlankettController(private val tilgangService: TilgangService,
 
     val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
-    @PostMapping("{behandlingId}")
-    fun lagBlankettPdf(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
-        tilgangService.validerTilgangTilBehandling(behandlingId)
-        val behandling = behandlingService.hentBehandling(behandlingId)
-        if (behandling.status.behandlingErLåstForVidereRedigering()) {
-            kastApiFeil("Behandling er låst for videre redigering for behandling : ${behandling}", HttpStatus.BAD_REQUEST)
-        }
-        if (!typeBlankett(behandling)) {
-            kastApiFeil("Behandling er ikke av typen blankett for behandling : ${behandling}", HttpStatus.BAD_REQUEST)
-        }
-        val blankett = blankettService.lagBlankett(behandlingId)
-        return Ressurs.success(blankett)
-    }
-
     @GetMapping("{behandlingId}")
     fun hentBlankettPdf(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
-        val behandling = behandlingService.hentBehandling(behandlingId)
-        val blankett = blankettService.hentBlankettPdf(behandlingId)
-        if (blankett.isEmpty && behandling.status.behandlingErLåstForVidereRedigering()) {
-            kastApiFeil("Kunne ikke finne blankett for behandling : ${behandling}", HttpStatus.NOT_FOUND)
-        }
-        if (blankett.isEmpty) {
-            return lagBlankettPdf(behandlingId)
-        }
-        return Ressurs.success(blankett.get().pdf.bytes)
+        return blankettService.hentBlankettPdf(behandlingId)?.let {
+            Ressurs.success(it.pdf.bytes)
+        } ?: lagBlankettPdf(behandlingId)
     }
 
     @PostMapping("/oppgave/{oppgaveId}")
@@ -67,6 +47,22 @@ class BlankettController(private val tilgangService: TilgangService,
         val behandling = blankettService.opprettBlankettBehandling(journalpostId, oppgaveId)
 
         return Ressurs.success(behandling.id)
+    }
+
+    private fun lagBlankettPdf(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
+        val behandling = behandlingService.hentBehandling(behandlingId)
+        validerOpprettelseAvBlankett(behandling)
+        val blankett = blankettService.lagBlankett(behandlingId)
+        return Ressurs.success(blankett)
+    }
+
+    private fun validerOpprettelseAvBlankett(behandling: Behandling) {
+        if (behandling.status.behandlingErLåstForVidereRedigering()) {
+            kastApiFeil("Behandling er låst for videre redigering for behandling : ${behandling}", HttpStatus.BAD_REQUEST)
+        }
+        if (!typeBlankett(behandling)) {
+            kastApiFeil("Behandling er ikke av typen blankett for behandling : ${behandling}", HttpStatus.BAD_REQUEST)
+        }
     }
 
     private fun typeBlankett(behandling: Behandling): Boolean {
