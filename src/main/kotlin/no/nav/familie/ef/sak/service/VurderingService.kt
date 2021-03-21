@@ -1,11 +1,7 @@
 package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.api.Feil
-import no.nav.familie.ef.sak.api.dto.OppdaterVilkårsvurderingDto
-import no.nav.familie.ef.sak.api.dto.VilkårDto
-import no.nav.familie.ef.sak.api.dto.VilkårGrunnlagDto
-import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
-import no.nav.familie.ef.sak.api.dto.tilDto
+import no.nav.familie.ef.sak.api.dto.*
 import no.nav.familie.ef.sak.regler.Vilkårsregel
 import no.nav.familie.ef.sak.regler.alleVilkårsregler
 import no.nav.familie.ef.sak.regler.evalutation.OppdaterVilkår
@@ -39,6 +35,23 @@ class VurderingService(private val behandlingService: BehandlingService,
         val nyVilkårsvurdering = OppdaterVilkår.lagNyOppdatertVilkårsvurdering(vilkårsvurdering,
                                                                                vilkårsvurderingDto.delvilkårsvurderinger)
         return vilkårsvurderingRepository.update(nyVilkårsvurdering).tilDto()
+    }
+
+
+    //Er id:et for vilkårsvurdering unikt ???
+    fun nullstillVilkår(vilkårsvurderingDto: NullstillVilkårsvurderingDto): VilkårsvurderingDto {
+        val vilkårsvurdering = vilkårsvurderingRepository.findByIdOrThrow(vilkårsvurderingDto.id)
+
+        val behandlingId = vilkårsvurdering.behandlingId
+
+        require(!behandlingErLåstForVidereRedigering(behandlingId)) { "Bruker prøver å oppdatere en vilkårsvurdering der behandling=$behandlingId er låst for videre redigering" }
+
+        if (vilkårsvurdering.resultat.oppfyltEllerIkkeOppfylt()) {
+            return vilkårsvurderingRepository.update(vilkårsvurdering.copy(resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+                                                                           delvilkårsvurdering = DelvilkårsvurderingWrapper(
+                                                                                   emptyList()))).tilDto()
+        }
+        return vilkårsvurdering.tilDto();
     }
 
     fun hentVilkår(behandlingId: UUID): VilkårDto {
