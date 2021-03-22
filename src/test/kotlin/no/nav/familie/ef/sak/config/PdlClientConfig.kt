@@ -1,7 +1,9 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.config
 
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.integration.dto.pdl.*
 import org.springframework.context.annotation.Bean
@@ -29,6 +31,8 @@ class PdlClientConfig {
     @Primary
     fun pdlClient(): PdlClient {
         val pdlClient: PdlClient = mockk()
+
+        every { pdlClient.ping() } just runs
 
         every { pdlClient.hentSøkerKortBolk(any()) } answers {
             (firstArg() as List<String>).map { it to PdlSøkerKort(lagKjønn(), lagNavn(fornavn = it)) }.toMap()
@@ -169,10 +173,6 @@ class PdlClientConfig {
     private fun sivilstand(): List<Sivilstand> =
             listOf(Sivilstand(type = Sivilstandstype.GIFT,
                               gyldigFraOgMed = startdato,
-                              myndighet = "Myndighet",
-                              kommune = "0301",
-                              sted = "Oslo",
-                              utland = null,
                               relatertVedSivilstand = "11111122222",
                               bekreftelsesdato = "2020-01-01",
                               metadata = metadataGjeldende))

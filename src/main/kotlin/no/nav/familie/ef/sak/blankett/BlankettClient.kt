@@ -16,15 +16,15 @@ class BlankettClient(@Value("\${FAMILIE_BLANKETT_API_URL}")
                      private val restOperations: RestOperations) : AbstractPingableRestClient(restOperations,
                                                                                               "familie.blankett") {
 
-    override val pingUri: URI
-        get() = URI.create(familieBlankettUri)
+    private val pdfUrl = URI.create("$familieBlankettUri/api/pdf")
+
+    override val pingUri: URI = pdfUrl
 
     override fun ping() {
         operations.optionsForAllow(pingUri)
     }
 
     fun genererBlankett(blankettPdfRequest: BlankettPdfRequest): ByteArray {
-        val url = URI.create("$familieBlankettUri/api/pdf")
-        return postForEntity(url, blankettPdfRequest, HttpHeaders().medContentTypeJsonUTF8())
+        return postForEntity(pdfUrl, blankettPdfRequest, HttpHeaders().medContentTypeJsonUTF8())
     }
 }

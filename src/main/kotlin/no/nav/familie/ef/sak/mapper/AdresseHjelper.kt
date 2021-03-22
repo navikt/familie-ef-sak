@@ -37,8 +37,8 @@ object AdresseHjelper {
 
     private fun harDeltBosted(barn: PdlBarn): Boolean {
         return barn.deltBosted.any {
-            it.startdatoForKontrakt.isBefore(LocalDateTime.now())
-            && (it.sluttdatoForKontrakt == null || it.sluttdatoForKontrakt.isAfter(LocalDateTime.now()))
+            it.startdatoForKontrakt.isBefore(LocalDate.now())
+            && (it.sluttdatoForKontrakt == null || it.sluttdatoForKontrakt.isAfter(LocalDate.now()))
         }
     }
 

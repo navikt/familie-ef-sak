@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.integration.dto.familie.Tilgang
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostResponse
 import no.nav.familie.kontrakter.felles.journalpost.*
 import no.nav.familie.kontrakter.felles.kodeverk.BeskrivelseDto
@@ -63,6 +64,8 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                             .willReturn(WireMock.okJson(objectMapper.writeValueAsString(Ressurs.success(pdfAsBase64String)))),
                     WireMock.put(WireMock.urlMatching("${integrasjonerConfig.dokarkivUri.path}.*"))
                             .willReturn(WireMock.okJson(objectMapper.writeValueAsString(oppdatertJournalpostResponse))),
+                    WireMock.post(WireMock.urlMatching("${integrasjonerConfig.dokarkivUri.path}.*"))
+                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(arkiverDokumentResponse))),
                     WireMock.post(WireMock.urlPathEqualTo(integrasjonerConfig.medlemskapUri.path))
                             .willReturn(WireMock.okJson(objectMapper.writeValueAsString(medl))),
 
@@ -108,7 +111,7 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                 Ressurs.success(OppdaterJournalpostResponse(journalpostId = "1234"))
         val pdfAsBase64String =
                 "JVBERi0xLjIgCjkgMCBvYmoKPDwKPj4Kc3RyZWFtCkJULyA5IFRmKFRlc3QpJyBFVAplbmRzdHJlYW0KZW5kb2JqCjQgMCBvYmoKPDwKL1R5cGUgL1BhZ2UKL1BhcmVudCA1IDAgUgovQ29udGVudHMgOSAwIFIKPj4KZW5kb2JqCjUgMCBvYmoKPDwKL0tpZHMgWzQgMCBSIF0KL0NvdW50IDEKL1R5cGUgL1BhZ2VzCi9NZWRpYUJveCBbIDAgMCA5OSA5IF0KPj4KZW5kb2JqCjMgMCBvYmoKPDwKL1BhZ2VzIDUgMCBSCi9UeXBlIC9DYXRhbG9nCj4+CmVuZG9iagp0cmFpbGVyCjw8Ci9Sb290IDMgMCBSCj4+CiUlRU9G"
-
+        private val arkiverDokumentResponse = Ressurs.success(ArkiverDokumentResponse(journalpostId = "1234", ferdigstilt = true))
         private val journalpost =
                 Ressurs.success(Journalpost(journalpostId = "1234",
                                             journalposttype = Journalposttype.I,

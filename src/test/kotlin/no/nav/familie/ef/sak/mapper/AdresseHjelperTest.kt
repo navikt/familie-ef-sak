@@ -113,7 +113,7 @@ internal class AdresseHjelperTest {
 
         val pdlBarnMedDeltBosted = PdlBarn(listOf(),
                                            emptyList(),
-                                           listOf(DeltBosted(LocalDateTime.MIN, null, null, null, metadataGjeldende)),
+                                           listOf(DeltBosted(LocalDate.MIN, null, null, null, metadataGjeldende)),
                                            emptyList(),
                                            emptyList(),
                                            emptyList(),

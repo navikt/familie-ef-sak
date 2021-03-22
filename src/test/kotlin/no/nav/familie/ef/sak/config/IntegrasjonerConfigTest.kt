@@ -10,7 +10,7 @@ internal class IntegrasjonerConfigTest {
 
     @Test
     fun getPingUri() {
-        assertThat(integrasjonerConfig.pingUri).isEqualTo(URI("http://familie-integrasjoner/internal/status/isAlive"))
+        assertThat(integrasjonerConfig.pingUri).isEqualTo(URI("http://familie-integrasjoner/api/ping"))
     }
 
     @Test

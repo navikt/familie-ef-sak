@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.api.dto.VilkårDto
 import no.nav.familie.ef.sak.api.dto.VilkårGrunnlagDto
 import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.api.dto.tilDto
+import no.nav.familie.ef.sak.blankett.BlankettRepository
 import no.nav.familie.ef.sak.regler.Vilkårsregel
 import no.nav.familie.ef.sak.regler.alleVilkårsregler
 import no.nav.familie.ef.sak.regler.evalutation.OppdaterVilkår
@@ -28,7 +29,8 @@ import java.util.UUID
 @Service
 class VurderingService(private val behandlingService: BehandlingService,
                        private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-                       private val grunnlagsdataService: GrunnlagsdataService) {
+                       private val grunnlagsdataService: GrunnlagsdataService,
+                       private val blankettRepository: BlankettRepository) {
 
     fun oppdaterVilkår(vilkårsvurderingDto: OppdaterVilkårsvurderingDto): VilkårsvurderingDto {
         val vilkårsvurdering = vilkårsvurderingRepository.findByIdOrThrow(vilkårsvurderingDto.id)
@@ -39,6 +41,7 @@ class VurderingService(private val behandlingService: BehandlingService,
 
         val nyVilkårsvurdering = OppdaterVilkår.lagNyOppdatertVilkårsvurdering(vilkårsvurdering,
                                                                                vilkårsvurderingDto.delvilkårsvurderinger)
+        blankettRepository.deleteById(behandlingId)
         return vilkårsvurderingRepository.update(nyVilkårsvurdering).tilDto()
     }
 
@@ -48,6 +51,8 @@ class VurderingService(private val behandlingService: BehandlingService,
 
         validerBehandlingIdErLikIRequestOgIVilkåret(behandlingId, vilkårsvurderingDto.behandlingId)
         validerLåstForVidereRedigering(behandlingId)
+
+        blankettRepository.deleteById(behandlingId)
 
         if (vilkårsvurdering.resultat.oppfyltEllerIkkeOppfylt()) {
             val nyeDelvilkår = lagNyeDelvilkår(hentVilkårsregel(vilkårsvurdering.type))

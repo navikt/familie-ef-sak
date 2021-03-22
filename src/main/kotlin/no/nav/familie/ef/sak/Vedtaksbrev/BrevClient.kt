@@ -17,8 +17,7 @@ class BrevClient(@Value("\${FAMILIE_BREV_API_URL}")
                  @Qualifier("utenAuth")
                  private val restOperations: RestOperations) : AbstractPingableRestClient(restOperations, "familie.brev") {
 
-    override val pingUri: URI
-        get() = URI.create(familieBrevUri)
+    override val pingUri: URI = URI.create("$familieBrevUri/api/status")
 
     override fun ping() {
         operations.optionsForAllow(pingUri)

@@ -4,18 +4,26 @@ import no.nav.familie.ef.sak.config.PdlConfig
 import no.nav.familie.ef.sak.exception.PdlNotFoundException
 import no.nav.familie.ef.sak.exception.PdlRequestException
 import no.nav.familie.ef.sak.integration.dto.pdl.*
-import no.nav.familie.http.client.AbstractRestClient
+import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.http.sts.StsRestClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestOperations
+import java.net.URI
 
 @Service
 class PdlClient(val pdlConfig: PdlConfig,
-                @Qualifier("sts") restTemplate: RestOperations,
+                @Qualifier("stsMedApiKey") restTemplate: RestOperations,
                 val stsRestClient: StsRestClient)
-    : AbstractRestClient(restTemplate, "pdl.personinfo") {
+    : AbstractPingableRestClient(restTemplate, "pdl.personinfo") {
+
+    override val pingUri: URI
+        get() = pdlConfig.pdlUri
+
+    override fun ping() {
+        operations.optionsForAllow(pingUri)
+    }
 
     fun hentSøkerKortBolk(personIdenter: List<String>): Map<String, PdlSøkerKort> {
         if (personIdenter.isEmpty()) return emptyMap()

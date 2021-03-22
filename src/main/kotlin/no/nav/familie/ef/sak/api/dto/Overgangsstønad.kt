@@ -17,12 +17,12 @@ data class AktivitetDto(val arbeidssituasjon: List<String>,
                         val virksomhet: VirksomhetDto?,
                         val tidligereUtdanninger: List<TidligereUtdanningDto>,
                         val gjelderDeg: List<String>,
-                        val særligeTilsynsbehov: List<SærligeTilsynsbehovDto>)
+                        val særligeTilsynsbehov: List<SærligeTilsynsbehovDto>,
+                        val datoOppstartJobb: LocalDate?)
 
 data class SagtOppEllerRedusertStillingDto(val sagtOppEllerRedusertStilling: String?,
                                            val årsak: String?,
-                                           val dato: LocalDate?,
-                                           val dokumentasjon: DokumentasjonDto?)
+                                           val dato: LocalDate?)
 
 data class ArbeidsforholdDto(val arbeidsgivernavn: String,
                              val arbeidsmengde: Int?,

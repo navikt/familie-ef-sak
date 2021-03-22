@@ -15,10 +15,11 @@ fun behandling(fagsak: Fagsak,
                aktiv: Boolean = true,
                status: BehandlingStatus = BehandlingStatus.OPPRETTET,
                steg: StegType = StegType.REGISTRERE_OPPLYSNINGER,
-               oppdragId: UUID = UUID.randomUUID()): Behandling =
+               oppdragId: UUID = UUID.randomUUID(),
+               type: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING): Behandling =
         Behandling(fagsakId = fagsak.id,
                    id = oppdragId,
-                   type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                   type = type,
                    status = status,
                    steg = steg,
                    aktiv = aktiv,
