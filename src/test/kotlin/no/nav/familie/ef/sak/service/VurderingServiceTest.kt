@@ -25,6 +25,7 @@ import no.nav.familie.ef.sak.repository.domain.DelvilkårÅrsak
 import no.nav.familie.ef.sak.repository.domain.VilkårType
 import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
 import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
+import no.nav.familie.ef.sak.service.steg.StegService
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
@@ -44,11 +45,12 @@ internal class VurderingServiceTest {
     private val familieIntegrasjonerClient = mockk<FamilieIntegrasjonerClient>()
     private val blankettRepository = mockk<BlankettRepository>()
     private val grunnlagsdataService = mockk<GrunnlagsdataService>()
+    private val stegService = mockk<StegService>()
     private val vurderingService = VurderingService(behandlingService = behandlingService,
-                                                    pdlClient = PdlClientConfig().pdlClient(),
                                                     vilkårsvurderingRepository = vilkårsvurderingRepository,
                                                     grunnlagsdataService = grunnlagsdataService,
-                                                    blankettRepository = blankettRepository)
+                                                    blankettRepository = blankettRepository,
+                                                    stegService = stegService)
 
     @BeforeEach
     fun setUp() {
@@ -186,7 +188,7 @@ internal class VurderingServiceTest {
                                                 resultat = Vilkårsresultat.IKKE_VURDERT,
                                                 type = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
                                                 delvilkårsvurdering =
-                                                listOf(Delvilkårsvurdering(DelvilkårType.DOKUMENTERT_FLYKTNINGSTATUS)))
+                                                listOf(Delvilkårsvurdering(DOKUMENTERT_FLYKTNINGSTATUS)))
         every { vilkårsvurderingRepository.findByIdOrNull(vilkårsvurdering.id) } returns vilkårsvurdering
 
         assertThat(catchThrowable {

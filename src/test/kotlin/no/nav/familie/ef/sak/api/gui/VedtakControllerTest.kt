@@ -51,7 +51,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `totrinn er uaktuell når behandlingen ikke er klar for totrinn`() {
-        opprettBehandling(steg = StegType.VILKÅRSVURDERE_INNGANGSVILKÅR)
+        opprettBehandling(steg = StegType.VILKÅR)
         validerTotrinnskontrollUaktuelt(BESLUTTER)
     }
 
@@ -147,7 +147,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `kan ikke sende til besluttning før behandling er i riktig steg`() {
-        opprettBehandling(steg = StegType.VILKÅRSVURDERE_INNGANGSVILKÅR)
+        opprettBehandling(steg = StegType.VILKÅR)
         godkjennTotrinnskontroll(BESLUTTER) {
             assertThat(it.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
         }

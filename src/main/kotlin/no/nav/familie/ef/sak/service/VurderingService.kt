@@ -5,14 +5,11 @@ import no.nav.familie.ef.sak.api.dto.*
 import no.nav.familie.ef.sak.blankett.BlankettRepository
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.repository.VilkårsvurderingRepository
-import no.nav.familie.ef.sak.repository.domain.DelvilkårMetadata
-import no.nav.familie.ef.sak.repository.domain.Delvilkårsvurdering
-import no.nav.familie.ef.sak.repository.domain.DelvilkårsvurderingWrapper
-import no.nav.familie.ef.sak.repository.domain.VilkårType
-import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
-import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
+import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsstønad
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.ef.sak.service.steg.StegService
+import no.nav.familie.ef.sak.service.steg.StegType
 import no.nav.familie.ef.sak.vurdering.utledDelvilkårResultat
 import no.nav.familie.ef.sak.vurdering.validerDelvilkår
 import org.springframework.stereotype.Service
@@ -20,9 +17,9 @@ import java.util.UUID
 
 @Service
 class VurderingService(private val behandlingService: BehandlingService,
-                       private val pdlClient: PdlClient,
                        private val vilkårsvurderingRepository: VilkårsvurderingRepository,
                        private val grunnlagsdataService: GrunnlagsdataService,
+                       private val stegService: StegService,
                        private val blankettRepository: BlankettRepository) {
 
     fun oppdaterVilkår(vilkårsvurderingDto: VilkårsvurderingDto): UUID {
@@ -145,5 +142,22 @@ class VurderingService(private val behandlingService: BehandlingService,
 
     private fun behandlingErLåstForVidereRedigering(behandlingId: UUID) =
             behandlingService.hentBehandling(behandlingId).status.behandlingErLåstForVidereRedigering()
+
+    fun oppdaterStegPåBehandling(behandlingId: UUID) {
+        val behandling = behandlingService.hentBehandling(behandlingId)
+        val vilkårUtenVurdering = hentVilkårSomManglerVurdering(behandlingId)
+
+        if (skalFerdigstilleVilkårSteg(vilkårUtenVurdering, behandling)) {
+            stegService.håndterVilkår(behandling).id
+        } else if (skalTilbakestilleTilVilkårSteg(vilkårUtenVurdering, behandling)) {
+            stegService.resetSteg(behandling.id, StegType.VILKÅR)
+        }
+    }
+
+    private fun skalTilbakestilleTilVilkårSteg(vilkårsvurdering: List<VilkårType>, behandling: Behandling) =
+        vilkårsvurdering.isNotEmpty()&& behandling.steg != StegType.VILKÅR
+
+    private fun skalFerdigstilleVilkårSteg(vilkårsvurdering: List<VilkårType>, behandling: Behandling) =
+        vilkårsvurdering.isEmpty() && behandling.steg == StegType.VILKÅR
 
 }
