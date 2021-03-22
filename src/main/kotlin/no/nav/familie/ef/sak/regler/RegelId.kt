@@ -32,6 +32,15 @@ enum class RegelId(val beskrivelse: String) {
     SIVILSTAND_UNNTAK("Er unntak fra hovedregelen oppfylt?"),
 
     // Nytt barn samme partner
-    HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER("Bor og oppholder bruker og barna seg i Norge?");
+    HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER("Bor og oppholder bruker og barna seg i Norge?"),
+
+    // Aktivitet
+    FYLLER_BRUKER_AKTIVITETSPLIKT("Fyller bruker aktivitetsplikt, unntak for aktivitetsplikt eller har barn under 1 år?"),
+
+    // Sagt opp arbeidsforhold
+    SAGT_OPP_ELLER_REDUSERT("Har søker sagt opp jobben, tatt frivillig permisjon eller redusert arbeidstiden de siste 6 månedene før søknadstidspunktet?"),
+    RIMELIG_GRUNN_SAGT_OPP("Hadde søker rimelig grunn til å si opp jobben eller redusere arbeidstiden?")
+
+    ;
 
 }

@@ -22,13 +22,19 @@ internal class RegelIdTest {
     }
 
     @Test
-    internal fun `valider att svarsmapping kun refererer til regelId definiert i reglerne til vilkåret`() {
+    internal fun `det finnes en kobling til alle regler`() {
+        fun getRegler(vilkårsregel: Vilkårsregel, regelId: RegelId): List<RegelId> {
+            val regler = vilkårsregel.regel(regelId).svarMapping.values
+                    .map(SvarRegel::regelId)
+                    .filterNot { it == RegelId.SLUTT_NODE }
+            val childrenRegler = regler.flatMap { getRegler(vilkårsregel, it) }
+            return regler + childrenRegler
+        }
         vilkårsregler.forEach { vilkårsregel ->
-            val definierteRegler = vilkårsregel.regler.keys
-            val definierteMappinger = vilkårsregel.regler.values.flatMap {
-                regelSteg -> regelSteg.svarMapping.values.map { svarMapping -> svarMapping.regelId }
-            }.filter { it != RegelId.SLUTT_NODE }
-            assertThat(definierteRegler).containsAll(definierteMappinger)
+            val alleRegler = vilkårsregel.regler.keys
+            val reglerFraHovedregler = vilkårsregel.hovedregler + vilkårsregel.hovedregler
+                    .flatMap { getRegler(vilkårsregel, it) }
+            assertThat(alleRegler).containsExactlyInAnyOrderElementsOf(reglerFraHovedregler)
         }
     }
 

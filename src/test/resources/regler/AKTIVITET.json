@@ -1,8 +1,8 @@
 {
-  "vilkårType" : "SIVILSTAND",
+  "vilkårType" : "AKTIVITET",
   "regler" : {
-    "KRAV_SIVILSTAND" : {
-      "regelId" : "KRAV_SIVILSTAND",
+    "FYLLER_BRUKER_AKTIVITETSPLIKT" : {
+      "regelId" : "FYLLER_BRUKER_AKTIVITETSPLIKT",
       "svarMapping" : {
         "JA" : {
           "begrunnelseType" : "PÅKREVD",
