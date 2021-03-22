@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.api.beregning
 
 import no.nav.familie.ef.sak.api.dto.AndelTilkjentYtelseDTO
-import no.nav.familie.ef.sak.api.dto.SøknadDataDto
 import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.FagsakService
@@ -24,8 +23,7 @@ class BeregningController(private val stegService: StegService,
                           private val behandlingService: BehandlingService,
                           private val fagsakService: FagsakService,
                           private val beregningService: BeregningService,
-                          private val tilgangService: TilgangService,
-                          private val vedtakService: VedtakService) {
+                          private val tilgangService: TilgangService) {
 
     @PostMapping("/{behandlingId}/fullfor")
     fun beregnYtelseForStønad(@PathVariable behandlingId: UUID, @RequestBody beregningRequest: BeregningRequest): Ressurs<UUID> {
@@ -56,11 +54,4 @@ class BeregningController(private val stegService: StegService,
         return Ressurs.success(stegService.håndterVedtaBlankett(behandling, vedtakRequest).id)
     }
 
-    @GetMapping("/{behandlingId}/hent-soknad")
-    fun hentSøknadData(@PathVariable behandlingId: UUID): Ressurs<SøknadDataDto> {
-        tilgangService.validerTilgangTilBehandling(behandlingId)
-        val overgangsstønad = behandlingService.hentOvergangsstønad(behandlingId)
-        return Ressurs.success(SøknadDataDto(søknadsdato = overgangsstønad.datoMottatt,
-                                             søkerStønadFra = overgangsstønad.søkerFra))
-    }
 }

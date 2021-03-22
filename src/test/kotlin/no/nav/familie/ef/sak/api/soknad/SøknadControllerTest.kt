@@ -1,7 +1,7 @@
-package no.nav.familie.ef.sak.api.beregning
+package no.nav.familie.ef.sak.no.nav.familie.ef.sak.api.soknad
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.api.dto.SøknadDataDto
+import no.nav.familie.ef.sak.api.dto.SøknadDatoerDto
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.BehandlingRepository
@@ -25,7 +25,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import java.util.*
 
-internal class BeregningControllerTest : OppslagSpringRunnerTest() {
+internal class SøknadControllerTest : OppslagSpringRunnerTest() {
 
     @Autowired private lateinit var fagsakRepository: FagsakRepository
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
@@ -56,7 +56,7 @@ internal class BeregningControllerTest : OppslagSpringRunnerTest() {
         val behandling = behandlingService.opprettBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, fagsak.id)
         behandlingService.lagreSøknadForOvergangsstønad(søknad.søknad, behandling.id, fagsak.id, "1234")
         val søknadSkjema = behandlingService.hentOvergangsstønad(behandling.id)
-        val respons: ResponseEntity<Ressurs<SøknadDataDto>> = hentSøknadData(behandling.id)
+        val respons: ResponseEntity<Ressurs<SøknadDatoerDto>> = hentSøknadData(behandling.id)
 
         Assertions.assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
         Assertions.assertThat(respons.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
@@ -65,11 +65,11 @@ internal class BeregningControllerTest : OppslagSpringRunnerTest() {
 
     }
 
-    private fun hentSøknadData(behandlingId: UUID): ResponseEntity<Ressurs<SøknadDataDto>> {
+    private fun hentSøknadData(behandlingId: UUID): ResponseEntity<Ressurs<SøknadDatoerDto>> {
 
-        return restTemplate.exchange(localhost("/api/beregning/$behandlingId/hent-soknad"),
+        return restTemplate.exchange(localhost("/api/soknad/$behandlingId/datoer"),
                                      HttpMethod.GET,
-                                     HttpEntity<Ressurs<SøknadDataDto>>(headers))
+                                     HttpEntity<Ressurs<SøknadDatoerDto>>(headers))
     }
 
 }
