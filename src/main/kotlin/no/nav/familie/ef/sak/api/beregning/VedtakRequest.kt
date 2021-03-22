@@ -1,14 +1,11 @@
 package no.nav.familie.ef.sak.api.beregning
 
 import no.nav.familie.ef.sak.repository.domain.Vedtaksperiode
-import java.math.BigDecimal
-import java.time.LocalDate
 
 enum class ResultatType {
     INNVILGE,
     AVSLÅ,
-    HENLEGGE,
-    ANNULLERE
+    HENLEGGE
 }
 
 data class VedtakRequest(val resultatType: ResultatType,
