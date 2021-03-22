@@ -31,3 +31,7 @@ val alleVilkårsregler: List<Vilkårsregel> =
                 NyttBarnSammePartnerRegel()
         )
 
+fun hentVilkårsregel(vilkårType: VilkårType): Vilkårsregel {
+    return Vilkårsregler.VILKÅRSREGLER.vilkårsregler[vilkårType] ?: error("Finner ikke vilkårsregler for vilkårType=$vilkårType")
+}
+

@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.api.gui
 
+import no.nav.familie.ef.sak.api.dto.NullstillVilkårsvurderingDto
 import no.nav.familie.ef.sak.api.dto.OppdaterVilkårsvurderingDto
 import no.nav.familie.ef.sak.api.dto.VilkårDto
 import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
@@ -50,8 +51,14 @@ class VurderingController(private val vurderingService: VurderingService,
             secureLogger.warn("id=${vilkårsvurdering.id}" +
                               " behandlingId=${vilkårsvurdering.behandlingId}" +
                               " svar=$delvilkårJson")
-            throw e;
+            throw e
         }
+    }
+
+    @PostMapping("nullstill")
+    fun nullstillVilkår(@RequestBody request: NullstillVilkårsvurderingDto): Ressurs<VilkårsvurderingDto> {
+        tilgangService.validerTilgangTilBehandling(request.behandlingId)
+        return Ressurs.success(vurderingService.nullstillVilkår(request))
     }
 
     @GetMapping("{behandlingId}/vilkar")
