@@ -14,21 +14,15 @@ import org.springframework.web.bind.annotation.RestController
 
 
 @RestController
-@RequestMapping(path = ["/api/ekstern/periode/overgangsstonad"],
+@RequestMapping(path = ["/api/ekstern/perioder"],
                 consumes = [APPLICATION_JSON_VALUE],
                 produces = [APPLICATION_JSON_VALUE])
 @Validated
 class PerioderOvergangsstønadController(private val perioderOvergangsstønadService: PerioderOvergangsstønadService) {
 
-    @PostMapping
-    @ProtectedWithClaims(issuer = "sts", claimMap = ["sub=srvArena"])
-    fun hentPerioder(@RequestBody request: PerioderOvergangsstønadRequest): PerioderOvergangsstønadResponse {
-        return perioderOvergangsstønadService.hentPerioder(request)
-    }
-
-    @PostMapping("azure")
-    @ProtectedWithClaims(issuer = "azuread")
-    fun hentPerioderAzure(@RequestBody request: PerioderOvergangsstønadRequest): Ressurs<PerioderOvergangsstønadResponse> {
+    @PostMapping()
+    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"] )
+    fun hentPerioder(@RequestBody request: PerioderOvergangsstønadRequest): Ressurs<PerioderOvergangsstønadResponse> {
         return try {
             Ressurs.success(perioderOvergangsstønadService.hentPerioder(request))
         } catch (e: Exception) {
