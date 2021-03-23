@@ -24,8 +24,6 @@ enum class RegelId(val beskrivelse: String) {
     OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN("Har bruker omsorgen for egne/adopterte barn?"),
 
     // Sivilstand
-    DOKUMENTERT_EKTESKAP("Foreligger det dokumentasjon på ekteskap?"),
-    DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE("Foreligger det dokumentasjon på separasjon eller skilsmisse?"),
     SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON("Kan samlivsbrudd likestilles med formell separasjon?"),
     SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING("Er det samsvar mellom datoene for separasjon og fraflytting?"),
     KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE("Er krav til sivilstand oppfylt?"),
