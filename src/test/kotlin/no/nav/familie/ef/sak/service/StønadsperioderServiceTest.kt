@@ -14,16 +14,15 @@ import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPerioderOvergangsstønadR
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadRequest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito.mock
 import java.time.LocalDate
 import java.time.LocalDate.parse
 
-internal class PerioderOvergangsstønadServiceTest {
+internal class StønadsperioderServiceTest {
 
     private val pdlClient = mockk<PdlClient>()
     private val infotrygdReplikaClient = mockk<InfotrygdReplikaClient>(relaxed = true)
     private val perioderOvergangsstønadService =
-            PerioderOvergangsstønadService(infotrygdReplikaClient, mockk(relaxed = true), pdlClient)
+            StønadsperioderService(infotrygdReplikaClient, mockk(relaxed = true), pdlClient)
 
     private val ident = "01234567890"
 
