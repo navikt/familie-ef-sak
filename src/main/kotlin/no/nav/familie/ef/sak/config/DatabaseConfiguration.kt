@@ -2,12 +2,7 @@ package no.nav.familie.ef.sak.config
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.api.dto.BrevRequest
-import no.nav.familie.ef.sak.repository.domain.DelvilkårsvurderingWrapper
-import no.nav.familie.ef.sak.repository.domain.Endret
-import no.nav.familie.ef.sak.repository.domain.Fil
-import no.nav.familie.ef.sak.repository.domain.JsonWrapper
-import no.nav.familie.ef.sak.repository.domain.RegistergrunnlagData
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus
+import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.repository.domain.søknad.Arbeidssituasjon
 import no.nav.familie.ef.sak.repository.domain.søknad.Dokumentasjon
 import no.nav.familie.ef.sak.repository.domain.søknad.GjelderDeg
@@ -84,7 +79,11 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
                                             FilTilBytearrayConverter(),
                                             BytearrayTilFilConverter(),
                                             PGobjectTilGrunnlagsdataConverter(),
-                                            GrunnlagsdataTilPGobjectConverter()
+                                            GrunnlagsdataTilPGobjectConverter(),
+                                            PGobjectTilVedtaksperioder(),
+                                            VedtaksperiodeTilPGobjectConverter(),
+                                            PGobjectTilInntektsperiode(),
+                                            InntektsperiodeTilPGobjectConverter()
         ))
     }
 
@@ -269,4 +268,40 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
         }
     }
 
+    @ReadingConverter
+    class PGobjectTilVedtaksperioder : Converter<PGobject, PeriodeWrapper> {
+
+        override fun convert(pGobject: PGobject): PeriodeWrapper {
+            return PeriodeWrapper(pGobject.value?.let { objectMapper.readValue(it) } ?: emptyList())
+        }
+    }
+
+    @WritingConverter
+    class VedtaksperiodeTilPGobjectConverter : Converter<PeriodeWrapper, PGobject> {
+
+        override fun convert(perioder: PeriodeWrapper): PGobject =
+                PGobject().apply {
+                    type = "json"
+                    value = objectMapper.writeValueAsString(perioder.perioder)
+                }
+
+    }
+
+    @ReadingConverter
+    class PGobjectTilInntektsperiode : Converter<PGobject, InntektWrapper> {
+
+        override fun convert(pGobject: PGobject): InntektWrapper {
+            return InntektWrapper(pGobject.value?.let { objectMapper.readValue(it) } ?: emptyList())
+        }
+    }
+
+    @WritingConverter
+    class InntektsperiodeTilPGobjectConverter : Converter<InntektWrapper, PGobject> {
+
+        override fun convert(inntekter: InntektWrapper): PGobject =
+                PGobject().apply {
+                    type = "json"
+                    value = objectMapper.writeValueAsString(inntekter.inntekter)
+                }
+    }
 }

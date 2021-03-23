@@ -35,14 +35,23 @@ class BeregningController(private val stegService: StegService,
                 fagsak.hentAktivIdent(),
                 vedtaksdato = LocalDate.now(),
                 behandlingId = behandling.id,
-                andelerTilkjentYtelse = beløpsperioder.map { AndelTilkjentYtelseDTO(beløp = it.beløp.toInt(),
-                                                                      stønadFom = it.fraOgMedDato,
-                                                                      stønadTom = it.tilDato,
-                                                                      kildeBehandlingId = behandling.id,
-                                                                      personIdent = fagsak.hentAktivIdent())
+                andelerTilkjentYtelse = beløpsperioder.map {
+                    AndelTilkjentYtelseDTO(beløp = it.beløp.toInt(),
+                                           stønadFom = it.fraOgMedDato,
+                                           stønadTom = it.tilDato,
+                                           kildeBehandlingId = behandling.id,
+                                           personIdent = fagsak.hentAktivIdent())
                 }
         )
         return Ressurs.success(stegService.håndterBeregnYtelseForStønad(behandling, tilkjentYtelse).id)
+    }
+
+    @PostMapping("/{behandlingId}/lagre-vedtak")
+    fun lagreVedtak(@PathVariable behandlingId: UUID, @RequestBody vedtakRequest: VedtakRequest): Ressurs<UUID> {
+        tilgangService.validerTilgangTilBehandling(behandlingId)
+        val behandling = behandlingService.hentBehandling(behandlingId)
+
+        return Ressurs.success(stegService.håndterVedtaBlankett(behandling, vedtakRequest).id)
     }
 
 }
