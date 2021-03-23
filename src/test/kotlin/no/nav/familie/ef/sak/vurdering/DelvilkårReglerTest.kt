@@ -17,7 +17,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
-@Disabled
+@Disabled // TODO følg opp når sivilstand er på plass
 internal class DelvilkårReglerTest {
 
     @Test

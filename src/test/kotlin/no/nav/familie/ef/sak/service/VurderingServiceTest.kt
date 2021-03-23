@@ -92,26 +92,17 @@ internal class VurderingServiceTest {
     }
 
     @Test
-    fun `skal ikke opprette nye Vilkårsvurderinger for vilkår som allerede har en vurdering`() {
+    fun `skal ikke opprette nye Vilkårsvurderinger for behandlinger som allerede har vurderinger`() {
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling(fagsak(), true, BehandlingStatus.OPPRETTET)
         every { vilkårsvurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns
                 listOf(vilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT,
                                         type = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
                                         behandlingId = BEHANDLING_ID))
 
-        val nyeVilkårsvurderinger = slot<List<Vilkårsvurdering>>()
-        every { vilkårsvurderingRepository.insertAll(capture(nyeVilkårsvurderinger)) } answers
-                { it.invocation.args.first() as List<Vilkårsvurdering> }
-        val vilkår = VilkårType.hentVilkår()
+        vurderingService.hentVilkår(BEHANDLING_ID)
 
-        val alleVilkårsvurderinger = vurderingService.hentVilkår(BEHANDLING_ID).vurderinger
-        assertThat(nyeVilkårsvurderinger.captured).hasSize(vilkår.size)
-        assertThat(nyeVilkårsvurderinger.captured.filter { it.type == VilkårType.ALENEOMSORG }).hasSize(2)
-        assertThat(alleVilkårsvurderinger).hasSize(vilkår.size + 1)
-        assertThat(nyeVilkårsvurderinger.captured.map { it.type }).doesNotContain(VilkårType.FORUTGÅENDE_MEDLEMSKAP)
-        assertThat(nyeVilkårsvurderinger.captured.map { it.type }).contains(VilkårType.LOVLIG_OPPHOLD)
-        assertThat(nyeVilkårsvurderinger.captured.map { it.type }).contains(VilkårType.SIVILSTAND)
-        assertThat(nyeVilkårsvurderinger.captured.map { it.type }).contains(VilkårType.SAMLIV)
+        verify(exactly = 0) { vilkårsvurderingRepository.updateAll(any()) }
+        verify(exactly = 0) { vilkårsvurderingRepository.insertAll(any()) }
     }
 
     @Test

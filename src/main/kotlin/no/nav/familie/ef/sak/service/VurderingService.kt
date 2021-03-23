@@ -107,22 +107,32 @@ class VurderingService(private val behandlingService: BehandlingService,
             return lagredeVilkårsvurderinger
         }
 
-        // todo håndtere vilkår som allerede finnes eller barn som allerede finnes, men hvordan håndtere barn som blir slettede?
-        // alleVilkårsregler skal kanskje ikke være en funksjon?
-        val nyeVilkårsvurderinger: List<Vilkårsvurdering> = alleVilkårsregler
-                .filter { lagredeVilkårsvurderinger.find { vurdering -> vurdering.type === it.vilkårType } == null }
-                .flatMap { vilkårsregel ->
+        if (lagredeVilkårsvurderinger.isEmpty()) {
+            return opprettNyeVilkårsvurderinger(behandlingId, delvilkårMetadata, søknad)
+        } else {
+            return lagredeVilkårsvurderinger
+        }
+    }
 
+    private fun opprettNyeVilkårsvurderinger(behandlingId: UUID,
+                                             delvilkårMetadata: DelvilkårMetadata,
+                                             søknad: SøknadsskjemaOvergangsstønad): List<Vilkårsvurdering> {
+        val nyeVilkårsvurderinger: List<Vilkårsvurdering> = alleVilkårsregler
+                .flatMap { vilkårsregel ->
                     if (vilkårsregel.vilkårType == VilkårType.ALENEOMSORG) {
-                        søknad.barn.map { lagNyVilkårsvurdering(vilkårsregel, søknad, delvilkårMetadata, behandlingId, it.id) }
+                        søknad.barn.map {
+                            lagNyVilkårsvurdering(vilkårsregel,
+                                                  søknad,
+                                                  delvilkårMetadata,
+                                                  behandlingId,
+                                                  it.id)
+                        }
                     } else {
                         listOf(lagNyVilkårsvurdering(vilkårsregel, søknad, delvilkårMetadata, behandlingId))
                     }
                 }
 
-        vilkårsvurderingRepository.insertAll(nyeVilkårsvurderinger)
-
-        return lagredeVilkårsvurderinger + nyeVilkårsvurderinger
+        return vilkårsvurderingRepository.insertAll(nyeVilkårsvurderinger)
     }
 
     private fun lagNyVilkårsvurdering(vilkårsregel: Vilkårsregel,
