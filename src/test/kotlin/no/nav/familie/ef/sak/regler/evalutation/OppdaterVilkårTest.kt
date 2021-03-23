@@ -3,11 +3,8 @@ package no.nav.familie.ef.sak.regler.evalutation
 import no.nav.familie.ef.sak.api.dto.DelvilkårsvurderingDto
 import no.nav.familie.ef.sak.api.dto.VurderingDto
 import no.nav.familie.ef.sak.regler.RegelId
-import no.nav.familie.ef.sak.regler.RegelSteg
-import no.nav.familie.ef.sak.regler.SluttSvarRegel.Companion.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE
 import no.nav.familie.ef.sak.regler.SvarId
 import no.nav.familie.ef.sak.regler.Vilkårsregel
-import no.nav.familie.ef.sak.regler.jaNeiSvarRegel
 import no.nav.familie.ef.sak.repository.domain.Delvilkårsvurdering
 import no.nav.familie.ef.sak.repository.domain.DelvilkårsvurderingWrapper
 import no.nav.familie.ef.sak.repository.domain.VilkårType
@@ -38,7 +35,7 @@ class OppdaterVilkårTest {
         val vilkårsvurdering = opprettVurdering(regel)
         val resultat = validerOgOppdater(vilkårsvurdering, regel,
                                          VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.NEI, "a"),
-                                         VurderingDto(RegelId.KRAV_SIVILSTAND, SvarId.JA))
+                                         VurderingDto(RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE, SvarId.JA))
 
         assertThat(resultat.resultat).isEqualTo(Vilkårsresultat.OPPFYLT)
         assertThat(resultat.førsteDelvilkår().resultat).isEqualTo(Vilkårsresultat.OPPFYLT)
@@ -54,7 +51,7 @@ class OppdaterVilkårTest {
         val vilkårsvurdering = opprettVurdering(regel)
         val resultat = validerOgOppdater(vilkårsvurdering, regel,
                                          VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.NEI),
-                                         VurderingDto(RegelId.KRAV_SIVILSTAND, SvarId.JA))
+                                         VurderingDto(RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE, SvarId.JA))
 
         assertThat(resultat.resultat).isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
         assertThat(resultat.førsteDelvilkår().resultat).isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
@@ -66,7 +63,7 @@ class OppdaterVilkårTest {
         val vilkårsvurdering = opprettVurdering(regel)
         val resultat = validerOgOppdater(vilkårsvurdering, regel,
                                          VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.NEI, "a"),
-                                         VurderingDto(RegelId.KRAV_SIVILSTAND, SvarId.NEI))
+                                         VurderingDto(RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE, SvarId.NEI))
 
         assertThat(resultat.resultat).isEqualTo(Vilkårsresultat.IKKE_OPPFYLT)
         assertThat(resultat.førsteDelvilkår().resultat).isEqualTo(Vilkårsresultat.IKKE_OPPFYLT)
@@ -78,11 +75,11 @@ class OppdaterVilkårTest {
         val vilkårsvurdering = opprettVurdering(regel)
         val resultat = validerOgOppdater(vilkårsvurdering, regel,
                                          delvilkårsvurderingDto(VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.JA)),
-                                         delvilkårsvurderingDto(VurderingDto(RegelId.KRAV_SIVILSTAND, SvarId.NEI)))
+                                         delvilkårsvurderingDto(VurderingDto(RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE, SvarId.NEI)))
 
         assertThat(resultat.resultat).isEqualTo(Vilkårsresultat.IKKE_OPPFYLT)
         assertThat(resultat.delvilkår(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE).resultat).isEqualTo(Vilkårsresultat.OPPFYLT)
-        assertThat(resultat.delvilkår(RegelId.KRAV_SIVILSTAND).resultat).isEqualTo(Vilkårsresultat.IKKE_OPPFYLT)
+        assertThat(resultat.delvilkår(RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE).resultat).isEqualTo(Vilkårsresultat.IKKE_OPPFYLT)
     }
 
     /**
@@ -96,12 +93,12 @@ class OppdaterVilkårTest {
         val resultat = validerOgOppdater(vilkårsvurdering, regel,
                                          delvilkårsvurderingDto(
                                                  VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.NEI, "")),
-                                         delvilkårsvurderingDto(VurderingDto(RegelId.KRAV_SIVILSTAND, SvarId.JA)))
+                                         delvilkårsvurderingDto(VurderingDto(RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE, SvarId.JA)))
 
         assertThat(resultat.resultat).isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
         assertThat(resultat.delvilkår(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE).resultat)
                 .isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
-        assertThat(resultat.delvilkår(RegelId.KRAV_SIVILSTAND).resultat).isEqualTo(Vilkårsresultat.OPPFYLT)
+        assertThat(resultat.delvilkår(RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE).resultat).isEqualTo(Vilkårsresultat.OPPFYLT)
     }
 
     private fun Vilkårsvurdering.delvilkår(regelId: RegelId) =

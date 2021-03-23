@@ -28,7 +28,8 @@ enum class RegelId(val beskrivelse: String) {
     DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE("Foreligger det dokumentasjon på separasjon eller skilsmisse?"),
     SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON("Kan samlivsbrudd likestilles med formell separasjon?"),
     SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING("Er det samsvar mellom datoene for separasjon og fraflytting?"),
-    KRAV_SIVILSTAND("Er krav til sivilstand oppfylt?"),
+    KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE("Er krav til sivilstand oppfylt?"),
+    KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE("Er krav til sivilstand oppfylt?"),
     SIVILSTAND_UNNTAK("Er unntak fra hovedregelen oppfylt?"),
 
     // Nytt barn samme partner

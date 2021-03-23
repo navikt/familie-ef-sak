@@ -31,7 +31,7 @@ internal class RegelValideringTest {
 
         assertThat(Assertions.catchThrowable {
             valider(regel,
-                    VurderingDto(RegelId.KRAV_SIVILSTAND))
+                    VurderingDto(RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE))
         })
                 .hasMessageStartingWith("Delvilkårsvurderinger savner svar på rotregler")
                 .isInstanceOf(Feil::class.java)
@@ -44,7 +44,7 @@ internal class RegelValideringTest {
         assertThat(Assertions.catchThrowable {
             valider(regel,
                     VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE),
-                    VurderingDto(RegelId.KRAV_SIVILSTAND))
+                    VurderingDto(RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE))
         })
                 .hasMessage("Mangler svar på ett spørsmål som ikke er siste besvarte spørsmålet vilkårType=ALENEOMSORG regelId=BOR_OG_OPPHOLDER_SEG_I_NORGE")
                 .isInstanceOf(Feil::class.java)
@@ -57,8 +57,8 @@ internal class RegelValideringTest {
         assertThat(Assertions.catchThrowable {
             valider(regel,
                     VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.NEI),
-                    VurderingDto(RegelId.KRAV_SIVILSTAND, SvarId.NEI),
-                    VurderingDto(RegelId.KRAV_SIVILSTAND))
+                    VurderingDto(RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE, SvarId.NEI),
+                    VurderingDto(RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE))
         })
                 .hasMessageStartingWith("Finnes ikke noen flere regler, men finnes flere svar")
                 .isInstanceOf(Feil::class.java)

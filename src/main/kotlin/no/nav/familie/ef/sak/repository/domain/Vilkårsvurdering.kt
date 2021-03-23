@@ -43,11 +43,6 @@ data class Vurdering(val regelId: RegelId,
                      val svar: SvarId? = null,
                      val begrunnelse: String? = null)
 
-/**
- * Brukes for å utlede hvilke delvilkår som må besvares
- */
-data class DelvilkårMetadata(val sivilstandstype: Sivilstandstype)
-
 enum class Vilkårsresultat(val beskrivelse: String) {
     OPPFYLT("Vilkåret er oppfylt når alle delvilkår er oppfylte"),
     IKKE_OPPFYLT("Vilkåret er ikke oppfylt hvis alle delvilkår er oppfylt eller ikke oppfylt, men minimum 1 ikke oppfylt"),

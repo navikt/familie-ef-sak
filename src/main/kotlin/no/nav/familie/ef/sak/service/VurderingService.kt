@@ -4,23 +4,21 @@ import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.api.dto.NullstillVilkårsvurderingDto
 import no.nav.familie.ef.sak.api.dto.OppdaterVilkårsvurderingDto
 import no.nav.familie.ef.sak.api.dto.VilkårDto
-import no.nav.familie.ef.sak.api.dto.VilkårGrunnlagDto
 import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.api.dto.tilDto
 import no.nav.familie.ef.sak.blankett.BlankettRepository
+import no.nav.familie.ef.sak.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.regler.Vilkårsregel
 import no.nav.familie.ef.sak.regler.alleVilkårsregler
 import no.nav.familie.ef.sak.regler.evalutation.OppdaterVilkår
 import no.nav.familie.ef.sak.regler.hentVilkårsregel
 import no.nav.familie.ef.sak.repository.VilkårsvurderingRepository
-import no.nav.familie.ef.sak.repository.domain.DelvilkårMetadata
 import no.nav.familie.ef.sak.repository.domain.Delvilkårsvurdering
 import no.nav.familie.ef.sak.repository.domain.DelvilkårsvurderingWrapper
 import no.nav.familie.ef.sak.repository.domain.VilkårType
 import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
 import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
 import no.nav.familie.ef.sak.repository.domain.Vurdering
-import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsstønad
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -35,6 +33,8 @@ class VurderingService(private val behandlingService: BehandlingService,
     fun oppdaterVilkår(vilkårsvurderingDto: OppdaterVilkårsvurderingDto): VilkårsvurderingDto {
         val vilkårsvurdering = vilkårsvurderingRepository.findByIdOrThrow(vilkårsvurderingDto.id)
         val behandlingId = vilkårsvurdering.behandlingId
+
+        // TODO sjekk att man ikke sender inne en tom liste
 
         validerBehandlingIdErLikIRequestOgIVilkåret(behandlingId, vilkårsvurderingDto.behandlingId)
         validerLåstForVidereRedigering(behandlingId)
@@ -54,20 +54,27 @@ class VurderingService(private val behandlingService: BehandlingService,
 
         blankettRepository.deleteById(behandlingId)
 
-        if (vilkårsvurdering.resultat.oppfyltEllerIkkeOppfylt()) {
-            val nyeDelvilkår = lagNyeDelvilkår(hentVilkårsregel(vilkårsvurdering.type))
-            val delvilkårsvurdering = DelvilkårsvurderingWrapper(nyeDelvilkår)
-            return vilkårsvurderingRepository.update(vilkårsvurdering.copy(resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-                                                                           delvilkårsvurdering = delvilkårsvurdering))
-                    .tilDto()
-        }
-        return vilkårsvurdering.tilDto();
+        return oppdaterVilkårMedNyeHovedregler(behandlingId, vilkårsvurdering)
+    }
+
+    private fun oppdaterVilkårMedNyeHovedregler(behandlingId: UUID,
+                                                vilkårsvurdering: Vilkårsvurdering): VilkårsvurderingDto {
+        val søknad = behandlingService.hentOvergangsstønad(behandlingId)
+        val grunnlag = grunnlagsdataService.hentGrunnlag(behandlingId, søknad)
+        val metadata = HovedregelMetadata(sivilstandstype = grunnlag.sivilstand.registergrunnlag.type,
+                                          søknad = søknad)
+        val nyeDelvilkår = lagNyeDelvilkår(hentVilkårsregel(vilkårsvurdering.type), metadata)
+        val delvilkårsvurdering = DelvilkårsvurderingWrapper(nyeDelvilkår)
+        return vilkårsvurderingRepository.update(vilkårsvurdering.copy(resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+                                                                       delvilkårsvurdering = delvilkårsvurdering)).tilDto()
     }
 
     fun hentVilkår(behandlingId: UUID): VilkårDto {
         val søknad = behandlingService.hentOvergangsstønad(behandlingId)
         val grunnlag = grunnlagsdataService.hentGrunnlag(behandlingId, søknad)
-        val vurderinger = hentVurderinger(behandlingId, søknad, grunnlag)
+        val metadata = HovedregelMetadata(sivilstandstype = grunnlag.sivilstand.registergrunnlag.type,
+                                          søknad = søknad)
+        val vurderinger = hentVurderinger(behandlingId, metadata)
         return VilkårDto(vurderinger = vurderinger, grunnlag = grunnlag)
     }
 
@@ -91,16 +98,12 @@ class VurderingService(private val behandlingService: BehandlingService,
     }
 
     private fun hentVurderinger(behandlingId: UUID,
-                                søknad: SøknadsskjemaOvergangsstønad,
-                                registergrunnlag: VilkårGrunnlagDto): List<VilkårsvurderingDto> {
-        val delvilkårMetadata = DelvilkårMetadata(sivilstandstype = registergrunnlag.sivilstand.registergrunnlag.type)
-        return hentEllerOpprettVurderingerForVilkår(behandlingId, søknad, delvilkårMetadata)
-                .map(Vilkårsvurdering::tilDto)
+                                metadata: HovedregelMetadata): List<VilkårsvurderingDto> {
+        return hentEllerOpprettVurderingerForVilkår(behandlingId, metadata).map(Vilkårsvurdering::tilDto)
     }
 
     private fun hentEllerOpprettVurderingerForVilkår(behandlingId: UUID,
-                                                     søknad: SøknadsskjemaOvergangsstønad,
-                                                     delvilkårMetadata: DelvilkårMetadata): List<Vilkårsvurdering> {
+                                                     metadata: HovedregelMetadata): List<Vilkårsvurdering> {
         val lagredeVilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(behandlingId)
 
         if (behandlingErLåstForVidereRedigering(behandlingId)) {
@@ -108,27 +111,23 @@ class VurderingService(private val behandlingService: BehandlingService,
         }
 
         if (lagredeVilkårsvurderinger.isEmpty()) {
-            return opprettNyeVilkårsvurderinger(behandlingId, delvilkårMetadata, søknad)
+            return opprettNyeVilkårsvurderinger(behandlingId, metadata)
         } else {
             return lagredeVilkårsvurderinger
         }
     }
 
     private fun opprettNyeVilkårsvurderinger(behandlingId: UUID,
-                                             delvilkårMetadata: DelvilkårMetadata,
-                                             søknad: SøknadsskjemaOvergangsstønad): List<Vilkårsvurdering> {
+                                             metadata: HovedregelMetadata): List<Vilkårsvurdering> {
+        val søknad = metadata.søknad
         val nyeVilkårsvurderinger: List<Vilkårsvurdering> = alleVilkårsregler
                 .flatMap { vilkårsregel ->
                     if (vilkårsregel.vilkårType == VilkårType.ALENEOMSORG) {
                         søknad.barn.map {
-                            lagNyVilkårsvurdering(vilkårsregel,
-                                                  søknad,
-                                                  delvilkårMetadata,
-                                                  behandlingId,
-                                                  it.id)
+                            lagNyVilkårsvurdering(vilkårsregel, metadata, behandlingId, it.id)
                         }
                     } else {
-                        listOf(lagNyVilkårsvurdering(vilkårsregel, søknad, delvilkårMetadata, behandlingId))
+                        listOf(lagNyVilkårsvurdering(vilkårsregel, metadata, behandlingId))
                     }
                 }
 
@@ -136,19 +135,18 @@ class VurderingService(private val behandlingService: BehandlingService,
     }
 
     private fun lagNyVilkårsvurdering(vilkårsregel: Vilkårsregel,
-                                      søknad: SøknadsskjemaOvergangsstønad,
-                                      delvilkårMetadata: DelvilkårMetadata,
+                                      metadata: HovedregelMetadata,
                                       behandlingId: UUID,
                                       barnId: UUID? = null): Vilkårsvurdering {
-        val delvilkårsvrdering = lagNyeDelvilkår(vilkårsregel)
+        val delvilkårsvrdering = lagNyeDelvilkår(vilkårsregel, metadata)
         return Vilkårsvurdering(behandlingId = behandlingId,
                                 type = vilkårsregel.vilkårType,
                                 barnId = barnId,
                                 delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvrdering))
     }
 
-    private fun lagNyeDelvilkår(vilkårsregel: Vilkårsregel): List<Delvilkårsvurdering> {
-        return vilkårsregel.hovedregler.map {
+    private fun lagNyeDelvilkår(vilkårsregel: Vilkårsregel, metadata: HovedregelMetadata): List<Delvilkårsvurdering> {
+        return vilkårsregel.hovedregler(metadata).map {
             Delvilkårsvurdering(vurderinger = listOf(Vurdering(regelId = it)))
         }
     }
