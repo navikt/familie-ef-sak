@@ -31,4 +31,12 @@ interface FagsakRepository : RepositoryInterface<Fagsak, UUID>, InsertUpdateRepo
                      ON fe.fagsak_id = f.id       
                      WHERE fe.id = :eksternId""")
     fun finnMedEksternId(eksternId: Long): Fagsak?
+
+    // language=PostgreSQL
+    @Query("""SELECT fp.ident FROM fagsak_person fp
+                    WHERE fp.fagsak_id=:id
+                    ORDER BY fp.opprettet_tid DESC
+                    LIMIT 1""")
+    fun finnAktivIdent(id: UUID): String
+
 }

@@ -76,7 +76,7 @@ class JournalførBlankettStegTest {
         } returns journalpost
 
         every {
-            behandlingRepository.finnGjeldendeIdentForBehandling(any())
+            behandlingRepository.finnAktivIdent(any())
         } returns fnr
 
         every {
