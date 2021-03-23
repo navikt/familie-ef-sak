@@ -26,6 +26,7 @@ import no.nav.familie.ef.sak.repository.domain.VilkårType
 import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
 import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
 import no.nav.familie.ef.sak.service.steg.StegService
+import no.nav.familie.ef.sak.service.steg.StegType
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
@@ -362,6 +363,44 @@ internal class VurderingServiceTest {
         assertThat(vilkårTyperUtenVurdering).containsExactlyInAnyOrderElementsOf(vilkårtyper)
     }
 
+    @Test
+    fun `oppdater steg på behandling når alle vilkår er vurdert`() {
+        val behandling = behandling(fagsak(), true, BehandlingStatus.UTREDES)
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+
+        val vilkår = VilkårType.hentVilkår()
+        val vilkårsvurderinger = mutableListOf<Vilkårsvurdering>()
+        for (vilkårType in vilkår) {
+            vilkårsvurderinger.add(vilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT,
+                type = vilkårType,
+                behandlingId = BEHANDLING_ID))
+        }
+
+        every { vilkårsvurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns vilkårsvurderinger
+        every { stegService.håndterVilkår(behandling) } returns behandling
+        vurderingService.oppdaterStegPåBehandling(BEHANDLING_ID)
+        verify(exactly = 1) { stegService.håndterVilkår(behandling) }
+
+    }
+
+    @Test
+    fun `oppdater steg på behandling når vilkårvurdering slettes etter at alle er vurdert`() {
+        val behandling = behandling(fagsak(), true, BehandlingStatus.UTREDES, StegType.BEREGNE_YTELSE)
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+
+        val vilkår = VilkårType.hentVilkår()
+        val vilkårsvurderinger = mutableListOf<Vilkårsvurdering>()
+        for (vilkårType in vilkår) {
+            vilkårsvurderinger.add(vilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT,
+                type = vilkårType,
+                behandlingId = BEHANDLING_ID))
+        }
+        vilkårsvurderinger.removeAt(0)
+        every { vilkårsvurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns vilkårsvurderinger
+        every { stegService.resetSteg(any(), any()) } returns Unit
+        vurderingService.oppdaterStegPåBehandling(BEHANDLING_ID)
+        verify(exactly = 1) { stegService.resetSteg(any(), StegType.BEREGNE_YTELSE) }
+    }
 
     private fun mockkVilkårMedUformeltGiftPerson(): VilkårGrunnlagDto {
         val sivilstandSøknadsgrunnlagDto = mockk<SivilstandSøknadsgrunnlagDto>(relaxed = true)

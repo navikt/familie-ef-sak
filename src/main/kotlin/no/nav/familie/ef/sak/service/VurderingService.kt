@@ -150,12 +150,12 @@ class VurderingService(private val behandlingService: BehandlingService,
         if (skalFerdigstilleVilkårSteg(vilkårUtenVurdering, behandling)) {
             stegService.håndterVilkår(behandling).id
         } else if (skalTilbakestilleTilVilkårSteg(vilkårUtenVurdering, behandling)) {
-            stegService.resetSteg(behandling.id, StegType.VILKÅR)
+            stegService.resetSteg(behandling.id, behandling.steg)
         }
     }
 
     private fun skalTilbakestilleTilVilkårSteg(vilkårsvurdering: List<VilkårType>, behandling: Behandling) =
-        vilkårsvurdering.isNotEmpty()&& behandling.steg != StegType.VILKÅR
+        vilkårsvurdering.isNotEmpty() && behandling.steg != StegType.VILKÅR
 
     private fun skalFerdigstilleVilkårSteg(vilkårsvurdering: List<VilkårType>, behandling: Behandling) =
         vilkårsvurdering.isEmpty() && behandling.steg == StegType.VILKÅR
