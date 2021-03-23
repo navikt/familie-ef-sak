@@ -77,4 +77,5 @@ spec:
     - name: SPRING_PROFILES_ACTIVE
       value: {{springProfile}}
   envFrom:
+    - secret: familie
     - secret: familie-ef-sak
