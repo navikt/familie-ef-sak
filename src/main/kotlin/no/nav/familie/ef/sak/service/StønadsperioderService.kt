@@ -24,12 +24,11 @@ import java.util.Stack
  * Denne tjenesten henter perioder for andre typer stønader fra EF også
  * Arena kaller idag en endepunkt hos infotrygd som returnerer perioder fra alle stønader, men det var sagt i starten att de
  * skulle hente perioder for overgangsstønad fra oss.
- * Lar den hete PerioderOvergangsstønad tils videre då det ikke er helt avklart hva de egentlige skal ha
  */
 @Service
-class PerioderOvergangsstønadService(private val infotrygdReplikaClient: InfotrygdReplikaClient,
-                                     private val familieIntegrasjonerClient: FamilieIntegrasjonerClient,
-                                     private val pdlClient: PdlClient) {
+class StønadsperioderService(private val infotrygdReplikaClient: InfotrygdReplikaClient,
+                             private val familieIntegrasjonerClient: FamilieIntegrasjonerClient,
+                             private val pdlClient: PdlClient) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")

@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.api.ekstern
 
-import no.nav.familie.ef.sak.service.PerioderOvergangsstønadService
+import no.nav.familie.ef.sak.service.StønadsperioderService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadRequest
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
@@ -18,13 +18,13 @@ import org.springframework.web.bind.annotation.RestController
                 consumes = [APPLICATION_JSON_VALUE],
                 produces = [APPLICATION_JSON_VALUE])
 @Validated
-class PerioderOvergangsstønadController(private val perioderOvergangsstønadService: PerioderOvergangsstønadService) {
+class EksternStønadsperioderController(private val stønadsperioderService: StønadsperioderService) {
 
     @PostMapping()
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"] )
     fun hentPerioder(@RequestBody request: PerioderOvergangsstønadRequest): Ressurs<PerioderOvergangsstønadResponse> {
         return try {
-            Ressurs.success(perioderOvergangsstønadService.hentPerioder(request))
+            Ressurs.success(stønadsperioderService.hentPerioder(request))
         } catch (e: Exception) {
             Ressurs.failure("Henting av perioder for overgangsstønad feilet", error = e)
         }
