@@ -5,12 +5,12 @@ import no.nav.familie.ef.sak.regler.RegelSteg
 import no.nav.familie.ef.sak.regler.SluttSvarRegel
 import no.nav.familie.ef.sak.regler.Vilkårsregel
 import no.nav.familie.ef.sak.regler.jaNeiSvarRegel
-import no.nav.familie.ef.sak.regler.regelIds
+import no.nav.familie.ef.sak.regler.regelIder
 import no.nav.familie.ef.sak.repository.domain.VilkårType
 
 class AktivitetRegel : Vilkårsregel(vilkårType = VilkårType.AKTIVITET,
                                     regler = setOf(FYLLER_BRUKER_AKTIVITETSPLIKT),
-                                    hovedregler = regelIds(FYLLER_BRUKER_AKTIVITETSPLIKT)) {
+                                    hovedregler = regelIder(FYLLER_BRUKER_AKTIVITETSPLIKT)) {
 
     companion object {
 

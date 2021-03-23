@@ -23,7 +23,7 @@ data class NullstillVilkårsvurderingDto(val id: UUID, val behandlingId: UUID)
 
 data class OppdaterVilkårsvurderingDto(val id: UUID,
                                        val behandlingId: UUID,
-                                       val delvilkårsvurderinger: List<DelvilkårsvurderingDto> = emptyList())
+                                       val delvilkårsvurderinger: List<DelvilkårsvurderingDto>)
 
 data class DelvilkårsvurderingDto(val resultat: Vilkårsresultat,
                                   val vurderinger: List<VurderingDto>) {

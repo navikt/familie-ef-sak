@@ -1,3 +1,3 @@
 package no.nav.familie.ef.sak.regler
 
-fun regelIds(vararg regelSteg: RegelSteg) = regelSteg.map { it.regelId }.toSet()
+fun regelIder(vararg regelSteg: RegelSteg) = regelSteg.map { it.regelId }.toSet()

@@ -7,12 +7,12 @@ import no.nav.familie.ef.sak.regler.SluttSvarRegel
 import no.nav.familie.ef.sak.regler.SvarId
 import no.nav.familie.ef.sak.regler.Vilkårsregel
 import no.nav.familie.ef.sak.regler.jaNeiSvarRegel
-import no.nav.familie.ef.sak.regler.regelIds
+import no.nav.familie.ef.sak.regler.regelIder
 import no.nav.familie.ef.sak.repository.domain.VilkårType
 
 class ForutgåendeMedlemskapRegel : Vilkårsregel(vilkårType = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
                                                 regler = setOf(SØKER_MEDLEM_I_FOLKETRYGDEN, MEDLEMSKAP_UNNTAK),
-                                                hovedregler = regelIds(SØKER_MEDLEM_I_FOLKETRYGDEN)) {
+                                                hovedregler = regelIder(SØKER_MEDLEM_I_FOLKETRYGDEN)) {
 
     companion object {
 

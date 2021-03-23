@@ -9,7 +9,7 @@ import no.nav.familie.ef.sak.regler.SluttSvarRegel
 import no.nav.familie.ef.sak.regler.SvarId
 import no.nav.familie.ef.sak.regler.Vilkårsregel
 import no.nav.familie.ef.sak.regler.jaNeiSvarRegel
-import no.nav.familie.ef.sak.regler.regelIds
+import no.nav.familie.ef.sak.regler.regelIder
 import no.nav.familie.ef.sak.repository.domain.VilkårType
 import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsstønad
 
@@ -19,11 +19,11 @@ class SivilstandRegel : Vilkårsregel(vilkårType = VilkårType.SIVILSTAND,
                                                     SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
                                                     SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
                                                     UNNTAK),
-                                     hovedregler = regelIds(KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE,
-                                                            KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE,
-                                                            SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
-                                                            SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
-                                                            UNNTAK)) {
+                                     hovedregler = regelIder(KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE,
+                                                             KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE,
+                                                             SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
+                                                             SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
+                                                             UNNTAK)) {
 
     override fun hovedregler(metadata: HovedregelMetadata): Set<RegelId> {
         val (søknad: SøknadsskjemaOvergangsstønad, sivilstandstype: Sivilstandstype) = metadata
@@ -39,7 +39,7 @@ class SivilstandRegel : Vilkårsregel(vilkårType = VilkårType.SIVILSTAND,
             sivilstandstype.erEnkeEllerEnkemann() -> UNNTAK
             else -> null // ikke noen spørsmål
         }
-        return hovedregel?.let { regelIds(it) } ?: emptySet()
+        return hovedregel?.let { regelIder(it) } ?: emptySet()
     }
 
     companion object {

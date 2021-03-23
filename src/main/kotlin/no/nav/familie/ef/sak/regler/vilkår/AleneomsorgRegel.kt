@@ -6,16 +6,16 @@ import no.nav.familie.ef.sak.regler.SluttSvarRegel
 import no.nav.familie.ef.sak.regler.SvarId
 import no.nav.familie.ef.sak.regler.Vilkårsregel
 import no.nav.familie.ef.sak.regler.jaNeiSvarRegel
-import no.nav.familie.ef.sak.regler.regelIds
+import no.nav.familie.ef.sak.regler.regelIder
 import no.nav.familie.ef.sak.repository.domain.VilkårType
 
 class AleneomsorgRegel : Vilkårsregel(vilkårType = VilkårType.ALENEOMSORG,
                                       regler = setOf(SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
                                                      NÆRE_BOFORHOLD,
                                                      MER_AV_DAGLIG_OMSORG),
-                                      hovedregler = regelIds(SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
-                                                             NÆRE_BOFORHOLD,
-                                                             MER_AV_DAGLIG_OMSORG)) {
+                                      hovedregler = regelIder(SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
+                                                              NÆRE_BOFORHOLD,
+                                                              MER_AV_DAGLIG_OMSORG)) {
 
     companion object {
 

@@ -34,10 +34,8 @@ class VurderingService(private val behandlingService: BehandlingService,
         val vilkårsvurdering = vilkårsvurderingRepository.findByIdOrThrow(vilkårsvurderingDto.id)
         val behandlingId = vilkårsvurdering.behandlingId
 
-        // TODO sjekk att man ikke sender inne en tom liste
-
-        validerBehandlingIdErLikIRequestOgIVilkåret(behandlingId, vilkårsvurderingDto.behandlingId)
         validerLåstForVidereRedigering(behandlingId)
+        validerBehandlingIdErLikIRequestOgIVilkåret(behandlingId, vilkårsvurderingDto.behandlingId)
 
         val nyVilkårsvurdering = OppdaterVilkår.lagNyOppdatertVilkårsvurdering(vilkårsvurdering,
                                                                                vilkårsvurderingDto.delvilkårsvurderinger)

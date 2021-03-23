@@ -6,12 +6,12 @@ import no.nav.familie.ef.sak.regler.RegelSteg
 import no.nav.familie.ef.sak.regler.SluttSvarRegel
 import no.nav.familie.ef.sak.regler.Vilkårsregel
 import no.nav.familie.ef.sak.regler.jaNeiSvarRegel
-import no.nav.familie.ef.sak.regler.regelIds
+import no.nav.familie.ef.sak.regler.regelIder
 import no.nav.familie.ef.sak.repository.domain.VilkårType
 
 class SagtOppEllerRedusertRegel : Vilkårsregel(vilkårType = VilkårType.SAGT_OPP_ELLER_REDUSERT,
                                                regler = setOf(SAGT_OPP_ELLER_REDUSERT, RIMELIG_GRUNN_SAGT_OPP),
-                                               hovedregler = regelIds(SAGT_OPP_ELLER_REDUSERT)) {
+                                               hovedregler = regelIder(SAGT_OPP_ELLER_REDUSERT)) {
 
     companion object {
 
