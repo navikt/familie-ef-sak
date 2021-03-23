@@ -21,17 +21,15 @@ fun utledDelvilkårResultat(regelId: RegelId,
         Vilkårsresultat.IKKE_TATT_STILLING_TIL
     }
 }
-/*
+
 fun validerDelvilkår(oppdatert: OppdaterVilkårsvurderingDto,
                      eksisterende: Vilkårsvurdering) {
-    val innkommendeDelvurderinger = oppdatert.delvilkårsvurderinger.map { it.rootRegelId }.toSet()
-    val lagredeDelvurderinger = eksisterende.delvilkårsvurdering.delvilkårsvurderinger.map { it.type }.toSet()
+    val innkommendeDelvurderinger = oppdatert.delvilkårsvurderinger.map { it.hovedregel() }.toSet()
+    val lagredeDelvurderinger = eksisterende.delvilkårsvurdering.delvilkårsvurderinger.map { it.hovedregel }.toSet()
 
-    //TODO vurder om man burde sjekke disse i det nye
     require(innkommendeDelvurderinger.size == lagredeDelvurderinger.size) { "Nye og eksisterende delvilkårsvurderinger har ulike antall vurderinger" }
     require(innkommendeDelvurderinger.containsAll(lagredeDelvurderinger)) { "Nye delvilkårsvurderinger mangler noen eksisterende vurderinger" }
 }
- */
 
 private fun erDelvilkårAktueltForSøknaden(regelId: RegelId,
                                           søknad: SøknadsskjemaOvergangsstønad,

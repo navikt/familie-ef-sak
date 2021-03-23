@@ -1,34 +1,24 @@
-/*
+
 package no.nav.familie.ef.sak.vurdering
 
 import no.nav.familie.ef.sak.api.dto.Sivilstandstype
 import no.nav.familie.ef.sak.mapper.SøknadsskjemaMapper
+import no.nav.familie.ef.sak.regler.RegelId.DOKUMENTERT_EKTESKAP
+import no.nav.familie.ef.sak.regler.RegelId.DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE
+import no.nav.familie.ef.sak.regler.RegelId.KRAV_SIVILSTAND
+import no.nav.familie.ef.sak.regler.RegelId.SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON
+import no.nav.familie.ef.sak.regler.RegelId.SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING
 import no.nav.familie.ef.sak.repository.domain.DelvilkårMetadata
-import no.nav.familie.ef.sak.repository.domain.DelvilkårType.*
 import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
 import no.nav.familie.kontrakter.ef.søknad.Sivilstandsdetaljer
 import no.nav.familie.kontrakter.ef.søknad.Søknadsfelt
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
+@Disabled
 internal class DelvilkårReglerTest {
-
-    @Test
-    internal fun `skal ha initiell verdi IKKE_VURDERT for delvilkår uten spesialregler`() {
-        val søknad = SøknadsskjemaMapper.tilDomene(Testsøknad.søknadOvergangsstønad)
-
-        assertThat(utledDelvilkårResultat(FEM_ÅRS_MEDLEMSKAP, søknad, delvilkårMetadata()))
-                .isEqualTo(Vilkårsresultat.IKKE_VURDERT)
-
-        assertThat(utledDelvilkårResultat(DOKUMENTERT_FLYKTNINGSTATUS, søknad, delvilkårMetadata()))
-                .isEqualTo(Vilkårsresultat.IKKE_VURDERT)
-
-        assertThat(utledDelvilkårResultat(BOR_OG_OPPHOLDER_SEG_I_NORGE,
-                                          søknad,
-                                          delvilkårMetadata()))
-                .isEqualTo(Vilkårsresultat.IKKE_VURDERT)
-    }
 
     @Test
     internal fun `skal dokumentere ekteskap hvis uformelt gift`() {
@@ -45,12 +35,12 @@ internal class DelvilkårReglerTest {
         assertThat(utledDelvilkårResultat(DOKUMENTERT_EKTESKAP,
                                           søknadUformeltgift,
                                           delvilkårMetadata(Sivilstandstype.UOPPGITT)))
-                .isEqualTo(Vilkårsresultat.IKKE_VURDERT)
+                .isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
 
         assertThat(utledDelvilkårResultat(DOKUMENTERT_EKTESKAP,
                                           søknadUformeltgift,
                                           delvilkårMetadata(Sivilstandstype.UGIFT)))
-                .isEqualTo(Vilkårsresultat.IKKE_VURDERT)
+                .isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
 
 
         assertThat(utledDelvilkårResultat(DOKUMENTERT_EKTESKAP,
@@ -85,12 +75,12 @@ internal class DelvilkårReglerTest {
         assertThat(utledDelvilkårResultat(DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE,
                                           søknadUformeltSkilt,
                                           delvilkårMetadata(Sivilstandstype.UOPPGITT)))
-                .isEqualTo(Vilkårsresultat.IKKE_VURDERT)
+                .isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
 
         assertThat(utledDelvilkårResultat(DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE,
                                           søknadUformeltSkilt,
                                           delvilkårMetadata(Sivilstandstype.UGIFT)))
-                .isEqualTo(Vilkårsresultat.IKKE_VURDERT)
+                .isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
 
 
         assertThat(utledDelvilkårResultat(DOKUMENTERT_SEPARASJON_ELLER_SKILSMISSE,
@@ -125,12 +115,12 @@ internal class DelvilkårReglerTest {
         assertThat(utledDelvilkårResultat(SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
                                           søknadSomHarSøktOmSkilsmisse,
                                           delvilkårMetadata(Sivilstandstype.GIFT)))
-                .isEqualTo(Vilkårsresultat.IKKE_VURDERT)
+                .isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
 
         assertThat(utledDelvilkårResultat(SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
                                           søknadSomHarSøktOmSkilsmisse,
                                           delvilkårMetadata(Sivilstandstype.REGISTRERT_PARTNER)))
-                .isEqualTo(Vilkårsresultat.IKKE_VURDERT)
+                .isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
 
 
         assertThat(utledDelvilkårResultat(SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
@@ -157,12 +147,12 @@ internal class DelvilkårReglerTest {
         assertThat(utledDelvilkårResultat(SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
                                           søknad,
                                           delvilkårMetadata(Sivilstandstype.SEPARERT)))
-                .isEqualTo(Vilkårsresultat.IKKE_VURDERT)
+                .isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
 
         assertThat(utledDelvilkårResultat(SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
                                           søknad,
                                           delvilkårMetadata(Sivilstandstype.SEPARERT_PARTNER)))
-                .isEqualTo(Vilkårsresultat.IKKE_VURDERT)
+                .isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
 
 
         assertThat(utledDelvilkårResultat(SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
@@ -197,7 +187,7 @@ internal class DelvilkårReglerTest {
                 else -> assertThat(utledDelvilkårResultat(KRAV_SIVILSTAND,
                                                           søknad,
                                                           delvilkårMetadata(it)))
-                        .isEqualTo(Vilkårsresultat.IKKE_VURDERT)
+                        .isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
 
 
             }
@@ -208,4 +198,4 @@ internal class DelvilkårReglerTest {
             DelvilkårMetadata(sivilstandstype = sivilstandstype)
 
 
-}*/
+}
