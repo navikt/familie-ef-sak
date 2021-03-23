@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*
 @Unprotected
 class FeatureToggleController(private val featureToggleService: FeatureToggleService) {
 
-    val funksjonsbrytere = listOf("familie.ef.soknad.feilsituasjon", "familie.ef.soknad.sprakvelger")
+    val funksjonsbrytere = listOf("familie.ef.sak.journalfoer")
 
     @GetMapping
     fun sjekkAlle(): Map<String, Boolean> {
