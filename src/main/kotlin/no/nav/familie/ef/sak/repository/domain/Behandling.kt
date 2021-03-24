@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.repository.domain
 
+import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.service.steg.StegType
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Embedded
@@ -22,7 +23,10 @@ data class Behandling(@Id
 
                       @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                       val sporbar: Sporbar = Sporbar(),
-                      val resultat: BehandlingResultat)
+                      var resultat: BehandlingResultat) {
+
+    fun kanAnnulleres(): Boolean = !status.behandlingErLåstForVidereRedigering() && type == BehandlingType.BLANKETT
+}
 
 enum class BehandlingType(val visningsnavn: String) {
     FØRSTEGANGSBEHANDLING("Førstegangsbehandling"),
@@ -35,6 +39,7 @@ enum class BehandlingType(val visningsnavn: String) {
 enum class BehandlingResultat(val displayName: String) {
     INNVILGET(displayName = "Innvilget"),
     IKKE_SATT(displayName = "Ikke satt"),
+    ANNULLERT(displayName = "Annullert"),
 }
 
 enum class BehandlingStatus {
@@ -42,7 +47,8 @@ enum class BehandlingStatus {
     UTREDES,
     FATTER_VEDTAK,
     IVERKSETTER_VEDTAK,
-    FERDIGSTILT;
+    FERDIGSTILT,
+    ;
 
     fun behandlingErLåstForVidereRedigering(): Boolean =
             setOf(FATTER_VEDTAK, IVERKSETTER_VEDTAK, FERDIGSTILT).contains(this)

@@ -45,6 +45,9 @@ enum class StegType(val rekkefølge: Int,
     BEREGNE_YTELSE(rekkefølge = 4,
                    tillattFor = BehandlerRolle.SAKSBEHANDLER,
                    gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
+    VEDTA_BLANKETT(rekkefølge = 4,
+                   tillattFor = BehandlerRolle.SAKSBEHANDLER,
+                   gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
     SEND_TIL_BESLUTTER(rekkefølge = 5,
                        tillattFor = BehandlerRolle.SAKSBEHANDLER,
                        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
@@ -105,8 +108,8 @@ enum class StegType(val rekkefølge: Int,
                 when (this) {
                     REGISTRERE_OPPLYSNINGER -> VILKÅRSVURDERE_INNGANGSVILKÅR
                     VILKÅRSVURDERE_INNGANGSVILKÅR -> VILKÅRSVURDERE_STØNAD
-                    VILKÅRSVURDERE_STØNAD -> BEREGNE_YTELSE
-                    BEREGNE_YTELSE -> SEND_TIL_BESLUTTER
+                    VILKÅRSVURDERE_STØNAD -> VEDTA_BLANKETT
+                    VEDTA_BLANKETT -> SEND_TIL_BESLUTTER
                     SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
                     BESLUTTE_VEDTAK -> JOURNALFØR_BLANKETT
                     JOURNALFØR_BLANKETT -> FERDIGSTILLE_BEHANDLING

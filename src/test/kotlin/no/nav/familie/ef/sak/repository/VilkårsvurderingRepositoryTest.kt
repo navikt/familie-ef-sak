@@ -23,7 +23,7 @@ internal class VilkårsvurderingRepositoryTest : OppslagSpringRunnerTest() {
         val behandling = behandlingRepository.insert(behandling(fagsak))
 
         val vilkårsvurdering = vilkårsvurderingRepository.insert(vilkårsvurdering(behandling.id,
-                                                                                  Vilkårsresultat.IKKE_VURDERT,
+                                                                                  Vilkårsresultat.IKKE_TATT_STILLING_TIL,
                                                                                   VilkårType.FORUTGÅENDE_MEDLEMSKAP))
 
         assertThat(vilkårsvurderingRepository.findByBehandlingId(UUID.randomUUID())).isEmpty()

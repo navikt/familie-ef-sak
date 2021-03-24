@@ -36,7 +36,7 @@
         <felles.version>1.20210208115050_88991d1</felles.version>
         <prosessering.version>1.20210302133042_76527ed</prosessering.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>2.0_20210303131341_f0cc196</kontrakter.version>
+        <kontrakter.version>2.0_20210317125829_2bee9c0</kontrakter.version>
 
         <!-- Setter disse til token-support sine versjoner, versjoner(9.x) i spring er ikke kompatibel med oauth2-oidc-sdk -->
         <nimbus-jose-jwt.version>8.20.2</nimbus-jose-jwt.version>
@@ -45,24 +45,10 @@
         <sonar.organization>navit</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <nav.security.version>1.3.3</nav.security.version>
-        <!--suppress UnresolvedMavenProperty Ligger som secret i github-->
-        <spring.cloud>3.0.1</spring.cloud>
-        <spring.cloud-contract>3.0.1</spring.cloud-contract>
+        <unleash.version>4.1.0</unleash.version>
         <!--suppress UnresolvedMavenProperty -->
         <sonar.login>${SONAR_LOGIN}</sonar.login>
     </properties>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-vault-dependencies</artifactId>
-                <version>${spring.cloud}</version>
-                <scope>import</scope>
-                <type>pom</type>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -108,15 +94,6 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-bootstrap</artifactId>
-            <version>${spring.cloud}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-vault-config-databases</artifactId>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
@@ -177,12 +154,6 @@
 
         <!-- test -->
         <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-contract-wiremock</artifactId>
-            <version>${spring.cloud-contract}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>com.github.tomakehurst</groupId>
             <artifactId>wiremock-jre8</artifactId>
             <version>2.27.2</version>
@@ -241,6 +212,13 @@
             <artifactId>fpsak-tidsserie</artifactId>
             <version>2.5.5</version>
         </dependency>
+
+        <dependency>
+            <groupId>no.finn.unleash</groupId>
+            <artifactId>unleash-client-java</artifactId>
+            <version>${unleash.version}</version>
+        </dependency>
+
     </dependencies>
 
     <profiles>
