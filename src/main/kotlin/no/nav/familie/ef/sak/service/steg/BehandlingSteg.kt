@@ -40,8 +40,11 @@ enum class StegType(val rekkefølge: Int,
                    tillattFor = BehandlerRolle.SAKSBEHANDLER,
                    gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
     SEND_TIL_BESLUTTER(rekkefølge = 3,
-                       tillattFor = BehandlerRolle.SAKSBEHANDLER,
-                       gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
+        tillattFor = BehandlerRolle.SAKSBEHANDLER,
+        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
+    VEDTA_BLANKETT(rekkefølge = 4,
+                   tillattFor = BehandlerRolle.SAKSBEHANDLER,
+                   gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
     BESLUTTE_VEDTAK(rekkefølge = 4,
                     tillattFor = BehandlerRolle.BESLUTTER,
                     gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.FATTER_VEDTAK)),
@@ -95,8 +98,8 @@ enum class StegType(val rekkefølge: Int,
                 }
             BehandlingType.BLANKETT ->
                 when (this) {
-                    VILKÅR -> BEREGNE_YTELSE
-                    BEREGNE_YTELSE -> SEND_TIL_BESLUTTER
+                    VILKÅR -> VEDTA_BLANKETT
+                    VEDTA_BLANKETT -> SEND_TIL_BESLUTTER
                     SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
                     BESLUTTE_VEDTAK -> JOURNALFØR_BLANKETT
                     JOURNALFØR_BLANKETT -> FERDIGSTILLE_BEHANDLING

@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.service.steg
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ef.sak.api.beregning.VedtakRequest
 import no.nav.familie.ef.sak.api.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
 import no.nav.familie.ef.sak.blankett.BlankettSteg
@@ -11,7 +12,20 @@ import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import no.nav.familie.ef.sak.repository.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.BehandlingshistorikkService
-import no.nav.familie.ef.sak.service.steg.StegType.*
+import no.nav.familie.ef.sak.service.steg.StegType.BEHANDLING_FERDIGSTILT
+import no.nav.familie.ef.sak.service.steg.StegType.BEREGNE_YTELSE
+import no.nav.familie.ef.sak.service.steg.StegType.BESLUTTE_VEDTAK
+import no.nav.familie.ef.sak.service.steg.StegType.DISTRIBUER_VEDTAKSBREV
+import no.nav.familie.ef.sak.service.steg.StegType.FERDIGSTILLE_BEHANDLING
+import no.nav.familie.ef.sak.service.steg.StegType.IVERKSETT_MOT_OPPDRAG
+import no.nav.familie.ef.sak.service.steg.StegType.JOURNALFØR_BLANKETT
+import no.nav.familie.ef.sak.service.steg.StegType.JOURNALFØR_VEDTAKSBREV
+import no.nav.familie.ef.sak.service.steg.StegType.REGISTRERE_OPPLYSNINGER
+import no.nav.familie.ef.sak.service.steg.StegType.SEND_TIL_BESLUTTER
+import no.nav.familie.ef.sak.service.steg.StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI
+import no.nav.familie.ef.sak.service.steg.StegType.VILKÅRSVURDERE_INNGANGSVILKÅR
+import no.nav.familie.ef.sak.service.steg.StegType.VILKÅRSVURDERE_STØNAD
+import no.nav.familie.ef.sak.service.steg.StegType.VEDTA_BLANKETT
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -43,6 +57,12 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
     fun håndterBeregnYtelseForStønad(behandling: Behandling, tilkjentYtelse: TilkjentYtelseDTO): Behandling {
         val behandlingSteg: BeregnYtelseSteg = hentBehandlingSteg(BEREGNE_YTELSE)
         return håndterSteg(behandling, behandlingSteg, tilkjentYtelse)
+    }
+
+    @Transactional
+    fun håndterVedtaBlankett(behandling: Behandling, vedtakRequest: VedtakRequest): Behandling {
+        val behandlingSteg: VedtaBlankettSteg = hentBehandlingSteg(VEDTA_BLANKETT)
+        return håndterSteg(behandling, behandlingSteg, vedtakRequest)
     }
 
     @Transactional

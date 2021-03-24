@@ -1,5 +1,7 @@
 package no.nav.familie.ef.sak.api.journalføring
 
+import no.nav.familie.ef.mottak.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.api.ApiFeil
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.service.JournalføringService
 import no.nav.familie.ef.sak.service.TilgangService
@@ -7,6 +9,7 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.journalpost.BrukerIdType
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.springframework.http.HttpStatus
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
@@ -17,7 +20,8 @@ import org.springframework.web.bind.annotation.*
 @Validated
 class JournalføringController(private val journalføringService: JournalføringService,
                               private val pdlClient: PdlClient,
-                              private val tilgangService: TilgangService) {
+                              private val tilgangService: TilgangService,
+                              private val featureToggleService: FeatureToggleService) {
 
     @GetMapping("/{journalpostId}")
     fun hentJournalPost(@PathVariable journalpostId: String): Ressurs<JournalføringResponse> {
@@ -40,7 +44,10 @@ class JournalføringController(private val journalføringService: Journalføring
         val (_, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
         tilgangService.validerTilgangTilPersonMedBarn(personIdent)
         tilgangService.validerHarSaksbehandlerrolle()
-        return Ressurs.success(journalføringService.fullførJournalpost(journalføringRequest, journalpostId))
+        if (featureToggleService.isEnabled("familie.ef.sak.journalfoer")) {
+            return Ressurs.success(journalføringService.fullførJournalpost(journalføringRequest, journalpostId))
+        }
+        throw ApiFeil("Toggelen familie.ef.sak.journalfoer er ikke aktivert", HttpStatus.BAD_REQUEST)
     }
 
     fun finnJournalpostOgPersonIdent(journalpostId: String): Pair<Journalpost, String> {
