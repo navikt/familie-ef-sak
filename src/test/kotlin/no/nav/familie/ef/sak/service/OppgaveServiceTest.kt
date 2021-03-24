@@ -1,25 +1,44 @@
 package no.nav.familie.ef.sak.service
 
-import io.mockk.*
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.runs
+import io.mockk.slot
+import io.mockk.verify
 import no.nav.familie.ef.sak.integration.OppgaveClient
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.integration.dto.familie.Arbeidsfordelingsenhet
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlIdenter
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlIdent
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlIdenter
 import no.nav.familie.ef.sak.repository.BehandlingRepository
 import no.nav.familie.ef.sak.repository.FagsakRepository
 import no.nav.familie.ef.sak.repository.OppgaveRepository
-import no.nav.familie.ef.sak.repository.domain.*
+import no.nav.familie.ef.sak.repository.domain.Behandling
+import no.nav.familie.ef.sak.repository.domain.BehandlingResultat
+import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
+import no.nav.familie.ef.sak.repository.domain.BehandlingType
+import no.nav.familie.ef.sak.repository.domain.EksternFagsakId
+import no.nav.familie.ef.sak.repository.domain.Fagsak
+import no.nav.familie.ef.sak.repository.domain.FagsakPerson
 import no.nav.familie.ef.sak.repository.domain.Oppgave
+import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.service.steg.StegType
-import no.nav.familie.kontrakter.felles.oppgave.*
+import no.nav.familie.kontrakter.felles.oppgave.Behandlingstema
+import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
+import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
+import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
+import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
+import no.nav.familie.kontrakter.felles.oppgave.Tema
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.data.repository.findByIdOrNull
 import java.net.URI
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 internal class OppgaveServiceTest {
 
@@ -144,10 +163,10 @@ internal class OppgaveServiceTest {
     }
 
     private fun lagTestFagsak(): Fagsak {
-        return Fagsak(id = FAGSAK_ID, stønadstype = Stønadstype.OVERGANGSSTØNAD, eksternId = EksternFagsakId(FAGSAK_EKSTERN_ID))
-                .also {
-                    it.søkerIdenter = setOf(FagsakPerson(ident = FNR))
-                }
+        return Fagsak(id = FAGSAK_ID,
+                      stønadstype = Stønadstype.OVERGANGSSTØNAD,
+                      eksternId = EksternFagsakId(FAGSAK_EKSTERN_ID),
+                      søkerIdenter = setOf(FagsakPerson(ident = FNR)))
     }
 
     private fun lagTestOppgave(): Oppgave {
