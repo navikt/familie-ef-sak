@@ -62,7 +62,7 @@ class VurderingController(private val vurderingService: VurderingService,
 
     @GetMapping("{behandlingId}/vilkar")
     fun getVilkår(@PathVariable behandlingId: UUID): Ressurs<VilkårDto> {
-        //tilgangService.validerTilgangTilBehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId)
         return Ressurs.success(vurderingService.hentVilkår(behandlingId))
     }
 }

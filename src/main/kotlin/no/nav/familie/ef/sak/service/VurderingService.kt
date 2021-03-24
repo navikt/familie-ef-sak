@@ -167,7 +167,7 @@ class VurderingService(private val behandlingService: BehandlingService,
     private fun behandlingErLåstForVidereRedigering(behandlingId: UUID) =
             behandlingService.hentBehandling(behandlingId).status.behandlingErLåstForVidereRedigering()
 
-    fun oppdaterStegPåBehandling(behandlingId: UUID) {
+    fun  oppdaterStegPåBehandling(behandlingId: UUID) {
         val behandling = behandlingService.hentBehandling(behandlingId)
         val vilkårUtenVurdering = hentVilkårSomManglerVurdering(behandlingId)
 
