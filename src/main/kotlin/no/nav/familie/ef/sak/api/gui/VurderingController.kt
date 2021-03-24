@@ -28,8 +28,6 @@ import java.util.UUID
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class VurderingController(private val vurderingService: VurderingService,
-                          private val stegService: StegService,
-                          private val behandlingService: BehandlingService,
                           private val tilgangService: TilgangService) {
 
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -43,11 +41,10 @@ class VurderingController(private val vurderingService: VurderingService,
     fun oppdaterVurderingVilkår(@RequestBody vilkårsvurdering: OppdaterVilkårsvurderingDto)
             : Ressurs<VilkårsvurderingDto> {
         tilgangService.validerTilgangTilBehandling(vilkårsvurdering.behandlingId)
-        vurderingService.oppdaterVilkår(vilkårsvurdering)
-        vurderingService.oppdaterStegPåBehandling(vilkårsvurdering.behandlingId)
-        return Ressurs.success(vilkårsvurdering.id)
         try {
-            return Ressurs.success(vurderingService.oppdaterVilkår(vilkårsvurdering))
+            val vilkårsvurderingDto = vurderingService.oppdaterVilkår(vilkårsvurdering)
+            vurderingService.oppdaterStegPåBehandling(vilkårsvurdering.behandlingId)
+            return Ressurs.success(vilkårsvurderingDto)
         } catch (e: Exception) {
             val delvilkårJson = objectMapper.writeValueAsString(vilkårsvurdering.delvilkårsvurderinger)
             secureLogger.warn("id=${vilkårsvurdering.id}" +
@@ -65,7 +62,7 @@ class VurderingController(private val vurderingService: VurderingService,
 
     @GetMapping("{behandlingId}/vilkar")
     fun getVilkår(@PathVariable behandlingId: UUID): Ressurs<VilkårDto> {
-        tilgangService.validerTilgangTilBehandling(behandlingId)
+        //tilgangService.validerTilgangTilBehandling(behandlingId)
         return Ressurs.success(vurderingService.hentVilkår(behandlingId))
     }
 }

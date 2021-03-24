@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.api.dto.SivilstandInngangsvilkårDto
 import no.nav.familie.ef.sak.api.dto.SivilstandRegistergrunnlagDto
 import no.nav.familie.ef.sak.api.dto.Sivilstandstype
 import no.nav.familie.ef.sak.api.dto.VilkårGrunnlagDto
+import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.api.dto.VurderingDto
 import no.nav.familie.ef.sak.blankett.BlankettRepository
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
@@ -32,6 +33,8 @@ import no.nav.familie.ef.sak.repository.domain.VilkårType
 import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
 import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
 import no.nav.familie.ef.sak.repository.domain.Vurdering
+import no.nav.familie.ef.sak.service.steg.StegService
+import no.nav.familie.ef.sak.service.steg.StegType
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import org.assertj.core.api.Assertions.assertThat
@@ -39,6 +42,7 @@ import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.data.repository.findByIdOrNull
+import java.time.LocalDateTime
 import java.util.UUID
 
 
@@ -163,26 +167,6 @@ internal class VurderingServiceTest {
                                                                         behandlingId = BEHANDLING_ID,
                                                                         delvilkårsvurderinger = listOf()))
         }).hasMessageContaining("Finner ikke Vilkårsvurdering med id")
-    }
-
-    @Test
-    fun `kan ikke oppdatere vilkårsvurderingen hvis innsendte delvurderinger ikke motsvarerer de som finnes på vilkåret`() {
-        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling(fagsak(), true, BehandlingStatus.OPPRETTET)
-        val vilkårsvurdering = vilkårsvurdering(BEHANDLING_ID,
-                                                resultat = Vilkårsresultat.IKKE_VURDERT,
-                                                type = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
-                                                delvilkårsvurdering =
-                                                listOf(Delvilkårsvurdering(DOKUMENTERT_FLYKTNINGSTATUS)))
-        every { vilkårsvurderingRepository.findByIdOrNull(vilkårsvurdering.id) } returns vilkårsvurdering
-
-        assertThat(catchThrowable {
-            vurderingService.oppdaterVilkår(VilkårsvurderingDto(id = vilkårsvurdering.id,
-                                                                behandlingId = BEHANDLING_ID,
-                                                                resultat = Vilkårsresultat.OPPFYLT,
-                                                                vilkårType = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
-                                                                endretAv = "",
-                                                                endretTid = LocalDateTime.now()))
-        }).hasMessageContaining("Nye og eksisterende delvilkårsvurderinger har ulike antall vurderinger")
     }
 
     @Test

@@ -13,12 +13,15 @@ import no.nav.familie.ef.sak.regler.alleVilkårsregler
 import no.nav.familie.ef.sak.regler.evalutation.OppdaterVilkår
 import no.nav.familie.ef.sak.regler.hentVilkårsregel
 import no.nav.familie.ef.sak.repository.VilkårsvurderingRepository
+import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.Delvilkårsvurdering
 import no.nav.familie.ef.sak.repository.domain.DelvilkårsvurderingWrapper
 import no.nav.familie.ef.sak.repository.domain.VilkårType
 import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
 import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.ef.sak.service.steg.StegService
+import no.nav.familie.ef.sak.service.steg.StegType
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.util.UUID
