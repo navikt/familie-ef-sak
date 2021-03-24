@@ -31,8 +31,8 @@ class AleneomsorgRegel : Vilkårsregel(vilkårType = VilkårType.ALENEOMSORG,
                       SvarId.SELVSTENDIGE_BOLIGER_SAMME_TOMT,
                       SvarId.NÆRMESTE_BOLIG_ELLER_REKKEHUS_I_SAMMEGATE,
                       SvarId.TILSTØTENDE_BOLIGER_ELLER_REKKEHUS_I_SAMMEGATE)
-                        .map { it to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE }
-                        .toMap() + mapOf(SvarId.NEI to SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE)
+                        .map { it to SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE }
+                        .toMap() + mapOf(SvarId.NEI to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE)
         private val NÆRE_BOFORHOLD =
                 RegelSteg(regelId = RegelId.NÆRE_BOFORHOLD,
                           svarMapping = næreBoForholdMapping)

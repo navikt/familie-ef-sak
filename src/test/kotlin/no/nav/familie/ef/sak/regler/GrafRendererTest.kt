@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.regler
 import no.nav.familie.ef.sak.api.dto.Sivilstandstype
 import no.nav.familie.ef.sak.mapper.SøknadsskjemaMapper
 import no.nav.familie.ef.sak.regler.vilkår.SivilstandRegel
+import no.nav.familie.ef.sak.repository.domain.VilkårType
 import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
 import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsstønad
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
@@ -16,7 +17,7 @@ internal class GrafRendererTest {
 
     @Test
     internal fun `print alle vilkår`() {
-        val vilkårsregler = Vilkårsregler.VILKÅRSREGLER.vilkårsregler.map {
+        val vilkårsregler = Vilkårsregler.VILKÅRSREGLER.vilkårsregler.filter { it.key != VilkårType.SIVILSTAND }.map {
             val regler = it.value.regler
             mapOf("name" to it.key,
                   "children" to it.value.hovedregler.map { mapSpørsmål(regler, it) })
@@ -26,7 +27,8 @@ internal class GrafRendererTest {
     }
 
     enum class SivilstandData(val sivilstandstype: Sivilstandstype, val søknad: SøknadsskjemaOvergangsstønad = søknadBuilder()) {
-        UGIFT__UFORMELT_GIFT__ELLER__UFORMELT_SKILT(Sivilstandstype.UGIFT, søknadBuilder { it.setSivilstandsdetaljer(erUformeltGift = true) }),
+        UGIFT__UFORMELT_GIFT__ELLER__UFORMELT_SKILT(Sivilstandstype.UGIFT,
+                                                    søknadBuilder { it.setSivilstandsdetaljer(erUformeltGift = true) }),
         UGIFT(Sivilstandstype.UGIFT),
         GIFT__SØKT_OM_SKILSMISSE(Sivilstandstype.GIFT,
                                  søknadBuilder { it.setSivilstandsdetaljer(søktOmSkilsmisseSeparasjon = true) }),
@@ -49,7 +51,6 @@ internal class GrafRendererTest {
         println(objectMapper.writeValueAsString(mapOf("name" to "vilkår",
                                                       "children" to sivilstandregler.toList())))
     }
-
 
     /**
      * Brukes kun til å rendere grafdata for d3
