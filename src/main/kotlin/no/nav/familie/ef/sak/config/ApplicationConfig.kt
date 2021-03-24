@@ -38,11 +38,11 @@ import java.time.temporal.ChronoUnit
 @ConfigurationPropertiesScan
 @ComponentScan("no.nav.familie.prosessering", "no.nav.familie.ef.sak", "no.nav.familie.sikkerhet")
 @EnableJwtTokenValidation(ignore = ["org.springframework", "springfox.documentation.swagger"])
-@Import(StsRestClient::class,
-        StsBearerTokenClientInterceptor::class,
-        ConsumerIdClientInterceptor::class,
+@Import(ConsumerIdClientInterceptor::class,
         InternLoggerInterceptor::class,
-        BearerTokenClientInterceptor::class)
+        BearerTokenClientInterceptor::class,
+        StsBearerTokenClientInterceptor::class,
+        StsRestClient::class)
 @EnableOAuth2Client(cacheEnabled = true)
 @EnableScheduling
 class ApplicationConfig {

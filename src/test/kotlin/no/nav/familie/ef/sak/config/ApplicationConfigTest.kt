@@ -12,6 +12,7 @@ import no.nav.familie.http.sts.StsRestClient
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
@@ -19,6 +20,7 @@ import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.web.client.postForEntity
 import java.time.LocalDate
 
+@Disabled
 internal class ApplicationConfigTest : OppslagSpringRunnerTest() {
 
     @Autowired
