@@ -26,14 +26,14 @@ class TilgangService(private val integrasjonerClient: FamilieIntegrasjonerClient
     }
 
     private fun harTilgangTilPersonMedBarn(personIdent: String): Boolean {
-        return harTilgang("validerTilgangTilPersonMedBarn", personIdent) {
+        return harSaksbehandlerTilgang("validerTilgangTilPersonMedBarn", personIdent) {
             val barnOgForeldre = personService.hentIdenterForBarnOgForeldre(forelderIdent = personIdent)
             integrasjonerClient.sjekkTilgangTilPersoner(barnOgForeldre).all { it.harTilgang }
         }
     }
 
     fun validerTilgangTilBehandling(behandlingId: UUID) {
-        val harTilgang = harTilgang("validerTilgangTilBehandling", behandlingId) {
+        val harTilgang = harSaksbehandlerTilgang("validerTilgangTilBehandling", behandlingId) {
             val personIdent = behandlingService.hentAktivIdent(behandlingId)
             harTilgangTilPersonMedBarn(personIdent)
         }
@@ -69,9 +69,10 @@ class TilgangService(private val integrasjonerClient: FamilieIntegrasjonerClient
      * @param cacheName navnet på cachen
      * @param verdi verdiet som man ønsket å hente cache for, eks behandlingId, eller personIdent
      */
-    private fun <T> harTilgang(cacheName: String, verdi: T, hentVerdi: () -> Boolean): Boolean {
-        return cacheManager.getCache(cacheName)!!.get(Pair(verdi, SikkerhetContext.hentSaksbehandler(true))) {
+    private fun <T> harSaksbehandlerTilgang(cacheName: String, verdi: T, hentVerdi: () -> Boolean): Boolean {
+        val cache = cacheManager.getCache(cacheName) ?: error("Finner ikke cache=$cacheName")
+        return cache.get(Pair(verdi, SikkerhetContext.hentSaksbehandler(true))) {
             hentVerdi()
-        }!!
+        } ?: error("Finner ikke verdi fra cache=$cacheName")
     }
 }
