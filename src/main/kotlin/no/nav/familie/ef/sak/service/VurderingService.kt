@@ -18,7 +18,6 @@ import no.nav.familie.ef.sak.repository.domain.DelvilkårsvurderingWrapper
 import no.nav.familie.ef.sak.repository.domain.VilkårType
 import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
 import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
-import no.nav.familie.ef.sak.repository.domain.Vurdering
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -52,11 +51,11 @@ class VurderingService(private val behandlingService: BehandlingService,
 
         blankettRepository.deleteById(behandlingId)
 
-        return oppdaterVilkårMedNyeHovedregler(behandlingId, vilkårsvurdering)
+        return nullstillVilkårMedNyeHovedregler(behandlingId, vilkårsvurdering)
     }
 
-    private fun oppdaterVilkårMedNyeHovedregler(behandlingId: UUID,
-                                                vilkårsvurdering: Vilkårsvurdering): VilkårsvurderingDto {
+    private fun nullstillVilkårMedNyeHovedregler(behandlingId: UUID,
+                                                 vilkårsvurdering: Vilkårsvurdering): VilkårsvurderingDto {
         val søknad = behandlingService.hentOvergangsstønad(behandlingId)
         val grunnlag = grunnlagsdataService.hentGrunnlag(behandlingId, søknad)
         val metadata = HovedregelMetadata(sivilstandstype = grunnlag.sivilstand.registergrunnlag.type,
@@ -144,9 +143,7 @@ class VurderingService(private val behandlingService: BehandlingService,
     }
 
     private fun lagNyeDelvilkår(vilkårsregel: Vilkårsregel, metadata: HovedregelMetadata): List<Delvilkårsvurdering> {
-        return vilkårsregel.hovedregler(metadata).map {
-            Delvilkårsvurdering(vurderinger = listOf(Vurdering(regelId = it)))
-        }
+        return vilkårsregel.initereDelvilkårsvurdering(metadata)
     }
 
 

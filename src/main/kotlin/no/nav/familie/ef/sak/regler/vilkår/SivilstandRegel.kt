@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.regler.vilkår
 
+import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.api.dto.Sivilstandstype
 import no.nav.familie.ef.sak.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.regler.NesteRegel
@@ -10,7 +11,10 @@ import no.nav.familie.ef.sak.regler.SvarId
 import no.nav.familie.ef.sak.regler.Vilkårsregel
 import no.nav.familie.ef.sak.regler.jaNeiSvarRegel
 import no.nav.familie.ef.sak.regler.regelIder
+import no.nav.familie.ef.sak.repository.domain.Delvilkårsvurdering
 import no.nav.familie.ef.sak.repository.domain.VilkårType
+import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
+import no.nav.familie.ef.sak.repository.domain.Vurdering
 import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsstønad
 
 class SivilstandRegel : Vilkårsregel(vilkårType = VilkårType.SIVILSTAND,
@@ -25,21 +29,26 @@ class SivilstandRegel : Vilkårsregel(vilkårType = VilkårType.SIVILSTAND,
                                                              SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
                                                              UNNTAK)) {
 
-    override fun hovedregler(metadata: HovedregelMetadata): Set<RegelId> {
+    override fun initereDelvilkårsvurdering(metadata: HovedregelMetadata): List<Delvilkårsvurdering> {
         val (søknad: SøknadsskjemaOvergangsstønad, sivilstandstype: Sivilstandstype) = metadata
-        val hovedregel: RegelSteg? = when {
-            sivilstandstype.erUgiftEllerUoppgitt() && søknad.sivilstand.erUformeltGift == true -> KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE
+
+        val hovedregel: RegelId = when {
+            sivilstandstype.erUgiftEllerUoppgitt() && (søknad.sivilstand.erUformeltGift == true || søknad.sivilstand.erUformeltSeparertEllerSkilt == true) -> KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE
             sivilstandstype.erUgiftEllerUoppgitt() -> KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE
 
             sivilstandstype.erGift() && søknad.sivilstand.søktOmSkilsmisseSeparasjon == true -> SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON
-            sivilstandstype.erGift() -> KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE
+            sivilstandstype.erGift() -> KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE
 
             sivilstandstype.erSeparert() -> SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING
             sivilstandstype.erSkilt() -> KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE
             sivilstandstype.erEnkeEllerEnkemann() -> UNNTAK
-            else -> null // ikke noen spørsmål
+            else -> throw Feil("Finner ikke matchende sivilstand for $sivilstandstype")
+        }.regelId
+
+        return hovedregler.map {
+            val resultat = if (it == hovedregel) Vilkårsresultat.IKKE_TATT_STILLING_TIL else Vilkårsresultat.IKKE_AKTUELL
+            Delvilkårsvurdering(resultat = resultat, listOf(Vurdering(it)))
         }
-        return hovedregel?.let { regelIder(it) } ?: emptySet()
     }
 
     companion object {

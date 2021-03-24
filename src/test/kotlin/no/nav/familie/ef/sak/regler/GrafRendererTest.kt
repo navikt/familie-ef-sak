@@ -26,7 +26,7 @@ internal class GrafRendererTest {
     }
 
     enum class SivilstandData(val sivilstandstype: Sivilstandstype, val søknad: SøknadsskjemaOvergangsstønad = søknadBuilder()) {
-        UGIFT__UFORMELT_GIFT(Sivilstandstype.UGIFT, søknadBuilder { it.setSivilstandsdetaljer(erUformeltGift = true) }),
+        UGIFT__UFORMELT_GIFT__ELLER__UFORMELT_SKILT(Sivilstandstype.UGIFT, søknadBuilder { it.setSivilstandsdetaljer(erUformeltGift = true) }),
         UGIFT(Sivilstandstype.UGIFT),
         GIFT__SØKT_OM_SKILSMISSE(Sivilstandstype.GIFT,
                                  søknadBuilder { it.setSivilstandsdetaljer(søktOmSkilsmisseSeparasjon = true) }),
@@ -40,8 +40,8 @@ internal class GrafRendererTest {
     internal fun `print sivilstand`() {
         val regel = SivilstandRegel()
         val sivilstandregler = SivilstandData.values().map {
-            val hovedregler = regel.hovedregler(HovedregelMetadata(it.søknad, it.sivilstandstype))
-                    .map { hovedregel -> mapSpørsmål(regel.regler, hovedregel) }
+            val hovedregler = regel.initereDelvilkårsvurdering(HovedregelMetadata(it.søknad, it.sivilstandstype))
+                    .map { delvilkår -> mapSpørsmål(regel.regler, delvilkår.hovedregel) }
 
             mapOf("name" to it.name,
                   "children" to hovedregler)
@@ -49,6 +49,7 @@ internal class GrafRendererTest {
         println(objectMapper.writeValueAsString(mapOf("name" to "vilkår",
                                                       "children" to sivilstandregler.toList())))
     }
+
 
     /**
      * Brukes kun til å rendere grafdata for d3

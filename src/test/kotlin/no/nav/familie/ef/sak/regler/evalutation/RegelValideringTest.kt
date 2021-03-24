@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.regler.evalutation
 
+import io.mockk.mockk
 import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.api.dto.DelvilkårsvurderingDto
 import no.nav.familie.ef.sak.api.dto.VurderingDto
@@ -18,8 +19,7 @@ internal class RegelValideringTest {
         val regel = VilkårsregelEnHovedregel()
 
         assertThat(Assertions.catchThrowable {
-            valider(regel,
-                    *emptyArray<VurderingDto>())
+            valider(regel, *emptyArray<VurderingDto>())
         })
                 .hasMessage("Savner svar for en av delvilkåren for vilkår=ALENEOMSORG")
                 .isInstanceOf(Feil::class.java)
@@ -33,7 +33,7 @@ internal class RegelValideringTest {
             valider(regel,
                     VurderingDto(RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE))
         })
-                .hasMessageStartingWith("Delvilkårsvurderinger savner svar på rotregler")
+                .hasMessageStartingWith("Delvilkårsvurderinger savner svar på hovedregler")
                 .isInstanceOf(Feil::class.java)
     }
 
@@ -109,6 +109,7 @@ internal class RegelValideringTest {
     private fun valider(regel: Vilkårsregel,
                         vararg delvilkårsvurderingDto: DelvilkårsvurderingDto) {
         RegelValidering.validerVurdering(vilkårsregel = regel,
-                                         oppdatering = delvilkårsvurderingDto.toList())
+                                         oppdatering = delvilkårsvurderingDto.toList(),
+                                         tidligereDelvilkårsvurderinger = regel.initereDelvilkårsvurdering(mockk()))
     }
 }

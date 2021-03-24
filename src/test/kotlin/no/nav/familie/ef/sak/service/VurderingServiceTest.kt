@@ -9,6 +9,9 @@ import io.mockk.verify
 import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.api.dto.DelvilkårsvurderingDto
 import no.nav.familie.ef.sak.api.dto.OppdaterVilkårsvurderingDto
+import no.nav.familie.ef.sak.api.dto.SivilstandInngangsvilkårDto
+import no.nav.familie.ef.sak.api.dto.SivilstandRegistergrunnlagDto
+import no.nav.familie.ef.sak.api.dto.Sivilstandstype
 import no.nav.familie.ef.sak.api.dto.VilkårGrunnlagDto
 import no.nav.familie.ef.sak.api.dto.VurderingDto
 import no.nav.familie.ef.sak.blankett.BlankettRepository
@@ -17,11 +20,14 @@ import no.nav.familie.ef.sak.mapper.SøknadsskjemaMapper
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.vilkårsvurdering
+import no.nav.familie.ef.sak.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.regler.RegelId
 import no.nav.familie.ef.sak.regler.SvarId
+import no.nav.familie.ef.sak.regler.vilkår.SivilstandRegel
 import no.nav.familie.ef.sak.repository.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import no.nav.familie.ef.sak.repository.domain.Delvilkårsvurdering
+import no.nav.familie.ef.sak.repository.domain.DelvilkårsvurderingWrapper
 import no.nav.familie.ef.sak.repository.domain.VilkårType
 import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
 import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
@@ -61,8 +67,11 @@ internal class VurderingServiceTest {
                                          gyldigePerioder = emptyList(),
                                          uavklartePerioder = emptyList(),
                                          avvistePerioder = emptyList()))
+        every { vilkårsvurderingRepository.insertAll(any()) } answers { firstArg() }
+        val sivilstand = SivilstandInngangsvilkårDto(mockk(relaxed = true),
+                                                     SivilstandRegistergrunnlagDto(Sivilstandstype.GIFT, null))
         every { grunnlagsdataService.hentGrunnlag(any(), any()) } returns VilkårGrunnlagDto(mockk(relaxed = true),
-                                                                                            mockk(relaxed = true),
+                                                                                            sivilstand,
                                                                                             mockk(relaxed = true),
                                                                                             mockk(relaxed = true),
                                                                                             mockk(relaxed = true),
@@ -103,6 +112,29 @@ internal class VurderingServiceTest {
 
         verify(exactly = 0) { vilkårsvurderingRepository.updateAll(any()) }
         verify(exactly = 0) { vilkårsvurderingRepository.insertAll(any()) }
+    }
+
+    @Test
+    internal fun `skal ikke returnere delvilkår som er ikke aktuelle til frontend`() {
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling(fagsak(), true, BehandlingStatus.OPPRETTET)
+        val delvilkårsvurdering =
+                SivilstandRegel().initereDelvilkårsvurdering(HovedregelMetadata(mockk(), Sivilstandstype.ENKE_ELLER_ENKEMANN))
+        every { vilkårsvurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns
+                listOf(Vilkårsvurdering(behandlingId = BEHANDLING_ID,
+                                        type = VilkårType.SIVILSTAND,
+                                        delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurdering)))
+
+        val vilkår = vurderingService.hentVilkår(BEHANDLING_ID)
+
+        assertThat(delvilkårsvurdering).hasSize(5)
+        assertThat(delvilkårsvurdering.filter { it.resultat == Vilkårsresultat.IKKE_AKTUELL }).hasSize(4)
+        assertThat(delvilkårsvurdering.filter { it.resultat == Vilkårsresultat.IKKE_TATT_STILLING_TIL }).hasSize(1)
+
+        assertThat(vilkår.vurderinger).hasSize(1)
+        val delvilkårsvurderinger = vilkår.vurderinger.first().delvilkårsvurderinger
+        assertThat(delvilkårsvurderinger).hasSize(1)
+        assertThat(delvilkårsvurderinger.first().resultat).isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
+        assertThat(delvilkårsvurderinger.first().vurderinger).hasSize(1)
     }
 
     @Test

@@ -50,7 +50,9 @@ fun Vilkårsvurdering.tilDto() =
                             barnId = this.barnId,
                             endretAv = this.sporbar.endret.endretAv,
                             endretTid = this.sporbar.endret.endretTid,
-                            delvilkårsvurderinger = this.delvilkårsvurdering.delvilkårsvurderinger.map { it.tilDto() })
+                            delvilkårsvurderinger = this.delvilkårsvurdering.delvilkårsvurderinger
+                                    .filter { it.resultat != Vilkårsresultat.IKKE_AKTUELL }
+                                    .map { it.tilDto() })
 
 fun DelvilkårsvurderingDto.svarTilDomene() = this.vurderinger.map { it.tilDomene() }
 fun VurderingDto.tilDomene() = Vurdering(this.regelId, this.svar, this.begrunnelse)
