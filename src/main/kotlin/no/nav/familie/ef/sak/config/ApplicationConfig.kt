@@ -1,21 +1,21 @@
 package no.nav.familie.ef.sak.config
 
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import no.nav.familie.http.config.RestTemplateAzure
 import no.nav.familie.http.interceptor.ApiKeyInjectingClientInterceptor
-import no.nav.familie.http.interceptor.BearerTokenClientInterceptor
 import no.nav.familie.http.interceptor.ConsumerIdClientInterceptor
-import no.nav.familie.http.interceptor.InternLoggerInterceptor
 import no.nav.familie.http.interceptor.MdcValuesPropagatingClientInterceptor
 import no.nav.familie.http.interceptor.StsBearerTokenClientInterceptor
 import no.nav.familie.http.sts.StsRestClient
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.log.filter.LogFilter
 import no.nav.familie.log.filter.RequestTimeFilter
+import no.nav.security.token.support.client.core.http.OAuth2HttpClient
+import no.nav.security.token.support.client.spring.oauth2.DefaultOAuth2HttpClient
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import no.nav.security.token.support.core.configuration.ProxyAwareResourceRetriever
 import no.nav.security.token.support.spring.api.EnableJwtTokenValidation
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.SpringBootConfiguration
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan
@@ -34,15 +34,12 @@ import java.net.URI
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 
+
 @SpringBootConfiguration
 @ConfigurationPropertiesScan
 @ComponentScan("no.nav.familie.prosessering", "no.nav.familie.ef.sak", "no.nav.familie.sikkerhet")
 @EnableJwtTokenValidation(ignore = ["org.springframework", "springfox.documentation.swagger"])
-@Import(ConsumerIdClientInterceptor::class,
-        InternLoggerInterceptor::class,
-        BearerTokenClientInterceptor::class,
-        StsBearerTokenClientInterceptor::class,
-        StsRestClient::class)
+@Import(RestTemplateAzure::class, StsBearerTokenClientInterceptor::class, StsRestClient::class)
 @EnableOAuth2Client(cacheEnabled = true)
 @EnableScheduling
 class ApplicationConfig {
@@ -72,36 +69,19 @@ class ApplicationConfig {
 
     /**
      * Overskrever felles sin som bruker proxy, som ikke skal brukes på gcp
-     * Denne brukes av token-support som ikke kan bruke den med MappingJackson2HttpMessageConverter(objectMapper) av noen grunn
      */
     @Bean
     @Primary
     fun restTemplateBuilder(): RestTemplateBuilder {
+        val jackson2HttpMessageConverter = MappingJackson2HttpMessageConverter(objectMapper)
         return RestTemplateBuilder()
                 .setConnectTimeout(Duration.of(2, ChronoUnit.SECONDS))
-                .setReadTimeout(Duration.of(120, ChronoUnit.SECONDS))
-    }
-
-    @Bean("customRestTemplate")
-    fun customRestTemplate(): RestTemplateBuilder {
-        val jackson2HttpMessageConverter = MappingJackson2HttpMessageConverter(objectMapper)
-        return restTemplateBuilder()
+                .setReadTimeout(Duration.of(30, ChronoUnit.SECONDS))
                 .additionalMessageConverters(listOf(jackson2HttpMessageConverter) + RestTemplate().messageConverters)
     }
 
-    // Overskrever felles sin då den bruker default ellers, som nå ikke har riktig objectMapper
-    @Bean("azure")
-    fun restTemplateJwtBearer(@Qualifier("customRestTemplate") restTemplateBuilder: RestTemplateBuilder,
-                              consumerIdClientInterceptor: ConsumerIdClientInterceptor,
-                              internLoggerInterceptor: InternLoggerInterceptor,
-                              bearerTokenClientInterceptor: BearerTokenClientInterceptor): RestOperations {
-        return restTemplateBuilder.additionalInterceptors(consumerIdClientInterceptor,
-                                                          bearerTokenClientInterceptor,
-                                                          MdcValuesPropagatingClientInterceptor()).build()
-    }
-
     @Bean("utenAuth")
-    fun restTemplate(@Qualifier("customRestTemplate") restTemplateBuilder: RestTemplateBuilder,
+    fun restTemplate(restTemplateBuilder: RestTemplateBuilder,
                      consumerIdClientInterceptor: ConsumerIdClientInterceptor): RestOperations {
         return restTemplateBuilder.additionalInterceptors(consumerIdClientInterceptor,
                                                           MdcValuesPropagatingClientInterceptor()).build()
@@ -115,11 +95,12 @@ class ApplicationConfig {
     }
 
     @Bean("stsMedApiKey")
-    fun restTemplateSts(@Qualifier("customRestTemplate") restTemplateBuilder: RestTemplateBuilder,
-                        stsBearerTokenClientInterceptor: StsBearerTokenClientInterceptor,
+    fun restTemplateSts(stsBearerTokenClientInterceptor: StsBearerTokenClientInterceptor,
                         consumerIdClientInterceptor: ConsumerIdClientInterceptor,
                         apiKeyInjectingClientInterceptor: ApiKeyInjectingClientInterceptor): RestOperations {
         return RestTemplateBuilder()
+                .setConnectTimeout(Duration.of(2, ChronoUnit.SECONDS))
+                .setReadTimeout(Duration.of(15, ChronoUnit.SECONDS))
                 .additionalInterceptors(consumerIdClientInterceptor,
                                         stsBearerTokenClientInterceptor,
                                         apiKeyInjectingClientInterceptor,
@@ -136,6 +117,19 @@ class ApplicationConfig {
         val proxyAwareResourceRetriever = ProxyAwareResourceRetriever(null, false)
         proxyAwareResourceRetriever.headers = mapOf(API_KEY_HEADER to listOf(stsApiKey))
         return proxyAwareResourceRetriever
+    }
+
+    /**
+     * Overskrever OAuth2HttpClient som settes opp i token-support som ikke kan få med objectMapper fra felles
+     * pga .setVisibility(PropertyAccessor.SETTER, JsonAutoDetect.Visibility.NONE)
+     * og [OAuth2AccessTokenResponse] som burde settes med setters, då feltnavn heter noe annet enn feltet i json
+     */
+    @Bean
+    @Primary
+    fun oAuth2HttpClient(): OAuth2HttpClient {
+        return DefaultOAuth2HttpClient(RestTemplateBuilder()
+                                               .setConnectTimeout(Duration.of(2, ChronoUnit.SECONDS))
+                                               .setReadTimeout(Duration.of(4, ChronoUnit.SECONDS)))
     }
 
     companion object {

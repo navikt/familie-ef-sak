@@ -17,7 +17,6 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.web.client.getForEntity
 import org.springframework.web.client.postForEntity
@@ -26,12 +25,7 @@ import java.time.LocalDate
 @Disabled
 internal class ApplicationConfigTest : OppslagSpringRunnerTest() {
 
-    @Autowired
-    private lateinit var restTemplateBuilder: RestTemplateBuilder
-
-    @Autowired
-    @Qualifier("customRestTemplate")
-    private lateinit var customRestTemplate: RestTemplateBuilder
+    @Autowired private lateinit var restTemplateBuilder: RestTemplateBuilder
 
     data class TestDto(val dato: LocalDate = LocalDate.of(2020, 1, 1))
 
@@ -39,16 +33,6 @@ internal class ApplicationConfigTest : OppslagSpringRunnerTest() {
     internal fun `default restTemplateBuilder skal sende datoer som array`() {
         wiremockServerItem.stubFor(WireMock.post(WireMock.anyUrl()).willReturn(WireMock.ok()))
         val restTemplate = restTemplateBuilder.build()
-        restTemplate.postForEntity<String>("http://localhost:${wiremockServerItem.port()}", TestDto())
-        wiremockServerItem.verify(postRequestedFor(WireMock.anyUrl())
-                                          .withRequestBody(equalToJson("""{"dato" : [ 2020, 1, 1 ]}"""))
-        )
-    }
-
-    @Test
-    internal fun `customRestTemplate skal sende datoer som string`() {
-        wiremockServerItem.stubFor(WireMock.post(WireMock.anyUrl()).willReturn(WireMock.ok()))
-        val restTemplate = customRestTemplate.build()
         restTemplate.postForEntity<String>("http://localhost:${wiremockServerItem.port()}", TestDto())
         wiremockServerItem.verify(postRequestedFor(WireMock.anyUrl())
                                           .withRequestBody(equalToJson("""{"dato" : "2020-01-01"} """))
