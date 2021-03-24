@@ -75,6 +75,7 @@ class ApplicationConfig {
      * Denne brukes av token-support som ikke kan bruke den med MappingJackson2HttpMessageConverter(objectMapper) av noen grunn
      */
     @Bean
+    @Primary
     fun restTemplateBuilder(): RestTemplateBuilder {
         return RestTemplateBuilder()
                 .setConnectTimeout(Duration.of(2, ChronoUnit.SECONDS))
