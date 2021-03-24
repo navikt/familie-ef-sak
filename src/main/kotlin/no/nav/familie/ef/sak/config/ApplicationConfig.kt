@@ -1,27 +1,35 @@
 package no.nav.familie.ef.sak.config
 
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import no.nav.familie.http.config.RestTemplateAzure
-import no.nav.familie.http.config.RestTemplateSts
 import no.nav.familie.http.interceptor.ApiKeyInjectingClientInterceptor
+import no.nav.familie.http.interceptor.BearerTokenClientInterceptor
 import no.nav.familie.http.interceptor.ConsumerIdClientInterceptor
+import no.nav.familie.http.interceptor.InternLoggerInterceptor
 import no.nav.familie.http.interceptor.MdcValuesPropagatingClientInterceptor
 import no.nav.familie.http.interceptor.StsBearerTokenClientInterceptor
 import no.nav.familie.http.sts.StsRestClient
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.log.filter.LogFilter
 import no.nav.familie.log.filter.RequestTimeFilter
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import no.nav.security.token.support.core.configuration.ProxyAwareResourceRetriever
 import no.nav.security.token.support.spring.api.EnableJwtTokenValidation
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.SpringBootConfiguration
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.boot.web.servlet.FilterRegistrationBean
-import org.springframework.context.annotation.*
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.ComponentScan
+import org.springframework.context.annotation.Import
+import org.springframework.context.annotation.Primary
+import org.springframework.context.annotation.Profile
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestTemplate
 import java.net.URI
 import java.time.Duration
 import java.time.temporal.ChronoUnit
@@ -30,7 +38,11 @@ import java.time.temporal.ChronoUnit
 @ConfigurationPropertiesScan
 @ComponentScan("no.nav.familie.prosessering", "no.nav.familie.ef.sak", "no.nav.familie.sikkerhet")
 @EnableJwtTokenValidation(ignore = ["org.springframework", "springfox.documentation.swagger"])
-@Import(RestTemplateAzure::class, RestTemplateSts::class, StsRestClient::class)
+@Import(StsRestClient::class,
+        StsBearerTokenClientInterceptor::class,
+        ConsumerIdClientInterceptor::class,
+        InternLoggerInterceptor::class,
+        BearerTokenClientInterceptor::class)
 @EnableOAuth2Client(cacheEnabled = true)
 @EnableScheduling
 class ApplicationConfig {
@@ -58,21 +70,40 @@ class ApplicationConfig {
         return filterRegistration
     }
 
-    //Overskrever felles sin som bruker proxy, som ikke skal brukes på gcp
+    /**
+     * Overskrever felles sin som bruker proxy, som ikke skal brukes på gcp
+     * Denne brukes av token-support som ikke kan bruke den med MappingJackson2HttpMessageConverter(objectMapper) av noen grunn
+     */
     @Bean
-    @Primary
     fun restTemplateBuilder(): RestTemplateBuilder {
         return RestTemplateBuilder()
                 .setConnectTimeout(Duration.of(2, ChronoUnit.SECONDS))
                 .setReadTimeout(Duration.of(120, ChronoUnit.SECONDS))
     }
 
+    @Bean("customRestTemplate")
+    fun customRestTemplate(): RestTemplateBuilder {
+        val jackson2HttpMessageConverter = MappingJackson2HttpMessageConverter(objectMapper)
+        return restTemplateBuilder()
+                .additionalMessageConverters(listOf(jackson2HttpMessageConverter) + RestTemplate().messageConverters)
+    }
+
+    // Overskrever felles sin då den bruker default ellers, som nå ikke har riktig objectMapper
+    @Bean("azure")
+    fun restTemplateJwtBearer(@Qualifier("customRestTemplate") restTemplateBuilder: RestTemplateBuilder,
+                              consumerIdClientInterceptor: ConsumerIdClientInterceptor,
+                              internLoggerInterceptor: InternLoggerInterceptor,
+                              bearerTokenClientInterceptor: BearerTokenClientInterceptor): RestOperations {
+        return restTemplateBuilder.additionalInterceptors(consumerIdClientInterceptor,
+                                                          bearerTokenClientInterceptor,
+                                                          MdcValuesPropagatingClientInterceptor()).build()
+    }
+
     @Bean("utenAuth")
-    fun restTemplate(restTemplateBuilder: RestTemplateBuilder,
+    fun restTemplate(@Qualifier("customRestTemplate") restTemplateBuilder: RestTemplateBuilder,
                      consumerIdClientInterceptor: ConsumerIdClientInterceptor): RestOperations {
-        return restTemplateBuilder
-                .additionalInterceptors(consumerIdClientInterceptor,
-                                        MdcValuesPropagatingClientInterceptor()).build()
+        return restTemplateBuilder.additionalInterceptors(consumerIdClientInterceptor,
+                                                          MdcValuesPropagatingClientInterceptor()).build()
     }
 
     @Bean
@@ -83,7 +114,8 @@ class ApplicationConfig {
     }
 
     @Bean("stsMedApiKey")
-    fun restTemplateSts(stsBearerTokenClientInterceptor: StsBearerTokenClientInterceptor,
+    fun restTemplateSts(@Qualifier("customRestTemplate") restTemplateBuilder: RestTemplateBuilder,
+                        stsBearerTokenClientInterceptor: StsBearerTokenClientInterceptor,
                         consumerIdClientInterceptor: ConsumerIdClientInterceptor,
                         apiKeyInjectingClientInterceptor: ApiKeyInjectingClientInterceptor): RestOperations {
         return RestTemplateBuilder()
