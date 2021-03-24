@@ -23,7 +23,7 @@ internal class VedtaBlankettStegTest {
     @Test
     internal fun `skal opprette nytt vedtak - innvilget`() {
         val behandling = behandling(fagsak(),
-                                    steg = StegType.VILKÅRSVURDERE_INNGANGSVILKÅR,
+                                    steg = StegType.VILKÅR,
                                     status = BehandlingStatus.UTREDES,
                                     type = BehandlingType.BLANKETT)
         val request = VedtakRequest(
@@ -51,7 +51,7 @@ internal class VedtaBlankettStegTest {
     @Test
     internal fun `skal feile hvis nytt vedtak er førstegangsbehandling`() {
         val behandling = behandling(fagsak(),
-                                    steg = StegType.VILKÅRSVURDERE_INNGANGSVILKÅR,
+                                    steg = StegType.VILKÅR,
                                     status = BehandlingStatus.UTREDES,
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING)
         val request = VedtakRequest(
@@ -78,7 +78,7 @@ internal class VedtaBlankettStegTest {
     @Test
     internal fun `skal feile hvis nytt vedtak er henlagt - ikke implementert ennå`() {
         val behandling = behandling(fagsak(),
-                                    steg = StegType.VILKÅRSVURDERE_INNGANGSVILKÅR,
+                                    steg = StegType.VILKÅR,
                                     status = BehandlingStatus.UTREDES,
                                     type = BehandlingType.BLANKETT)
         val request = VedtakRequest(
