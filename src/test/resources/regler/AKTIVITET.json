@@ -1,0 +1,18 @@
+{
+  "vilkårType" : "AKTIVITET",
+  "regler" : {
+    "FYLLER_BRUKER_AKTIVITETSPLIKT" : {
+      "regelId" : "FYLLER_BRUKER_AKTIVITETSPLIKT",
+      "svarMapping" : {
+        "JA" : {
+          "begrunnelseType" : "PÅKREVD",
+          "regelId" : "SLUTT_NODE"
+        },
+        "NEI" : {
+          "begrunnelseType" : "PÅKREVD",
+          "regelId" : "SLUTT_NODE"
+        }
+      }
+    }
+  }
+}
