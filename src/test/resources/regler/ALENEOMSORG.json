@@ -1,0 +1,64 @@
+{
+  "vilkårType" : "ALENEOMSORG",
+  "regler" : {
+    "SKRIFTLIG_AVTALE_OM_DELT_BOSTED" : {
+      "regelId" : "SKRIFTLIG_AVTALE_OM_DELT_BOSTED",
+      "svarMapping" : {
+        "JA" : {
+          "begrunnelseType" : "PÅKREVD",
+          "regelId" : "SLUTT_NODE"
+        },
+        "NEI" : {
+          "begrunnelseType" : "VALGFRI",
+          "regelId" : "SLUTT_NODE"
+        }
+      }
+    },
+    "NÆRE_BOFORHOLD" : {
+      "regelId" : "NÆRE_BOFORHOLD",
+      "svarMapping" : {
+        "SAMME_HUS_OG_FÆRRE_ENN_4_BOENHETER" : {
+          "begrunnelseType" : "PÅKREVD",
+          "regelId" : "SLUTT_NODE"
+        },
+        "SAMME_HUS_OG_FLERE_ENN_4_BOENHETER_MEN_VURDERT_NÆRT" : {
+          "begrunnelseType" : "PÅKREVD",
+          "regelId" : "SLUTT_NODE"
+        },
+        "SELVSTENDIGE_BOLIGER_SAMME_GÅRDSTUN" : {
+          "begrunnelseType" : "PÅKREVD",
+          "regelId" : "SLUTT_NODE"
+        },
+        "SELVSTENDIGE_BOLIGER_SAMME_TOMT" : {
+          "begrunnelseType" : "PÅKREVD",
+          "regelId" : "SLUTT_NODE"
+        },
+        "NÆRMESTE_BOLIG_ELLER_REKKEHUS_I_SAMMEGATE" : {
+          "begrunnelseType" : "PÅKREVD",
+          "regelId" : "SLUTT_NODE"
+        },
+        "TILSTØTENDE_BOLIGER_ELLER_REKKEHUS_I_SAMMEGATE" : {
+          "begrunnelseType" : "PÅKREVD",
+          "regelId" : "SLUTT_NODE"
+        },
+        "NEI" : {
+          "begrunnelseType" : "PÅKREVD",
+          "regelId" : "SLUTT_NODE"
+        }
+      }
+    },
+    "MER_AV_DAGLIG_OMSORG" : {
+      "regelId" : "MER_AV_DAGLIG_OMSORG",
+      "svarMapping" : {
+        "JA" : {
+          "begrunnelseType" : "PÅKREVD",
+          "regelId" : "SLUTT_NODE"
+        },
+        "NEI" : {
+          "begrunnelseType" : "PÅKREVD",
+          "regelId" : "SLUTT_NODE"
+        }
+      }
+    }
+  }
+}
