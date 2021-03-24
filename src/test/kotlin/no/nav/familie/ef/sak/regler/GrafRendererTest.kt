@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.mapper.SøknadsskjemaMapper
 import no.nav.familie.ef.sak.regler.vilkår.SivilstandRegel
 import no.nav.familie.ef.sak.repository.domain.VilkårType
 import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
+import no.nav.familie.ef.sak.repository.domain.søknad.Sivilstand
 import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsstønad
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import org.junit.jupiter.api.Disabled
@@ -28,10 +29,10 @@ internal class GrafRendererTest {
 
     enum class SivilstandData(val sivilstandstype: Sivilstandstype, val søknad: SøknadsskjemaOvergangsstønad = søknadBuilder()) {
         UGIFT__UFORMELT_GIFT__ELLER__UFORMELT_SKILT(Sivilstandstype.UGIFT,
-                                                    søknadBuilder { it.setSivilstandsdetaljer(erUformeltGift = true) }),
+                                                    søknadBuilder { it.copy(erUformeltGift = true) }),
         UGIFT(Sivilstandstype.UGIFT),
         GIFT__SØKT_OM_SKILSMISSE(Sivilstandstype.GIFT,
-                                 søknadBuilder { it.setSivilstandsdetaljer(søktOmSkilsmisseSeparasjon = true) }),
+                                 søknadBuilder { it.copy(søktOmSkilsmisseSeparasjon = true) }),
         GIFT(Sivilstandstype.GIFT),
         SEPARERT(Sivilstandstype.SEPARERT),
         SKILT(Sivilstandstype.SKILT),
@@ -42,7 +43,8 @@ internal class GrafRendererTest {
     internal fun `print sivilstand`() {
         val regel = SivilstandRegel()
         val sivilstandregler = SivilstandData.values().map {
-            val hovedregler = regel.initereDelvilkårsvurdering(HovedregelMetadata(it.søknad, it.sivilstandstype))
+            val initereDelvilkårsvurdering = regel.initereDelvilkårsvurdering(HovedregelMetadata(it.søknad, it.sivilstandstype))
+            val hovedregler = initereDelvilkårsvurdering.filter { it.resultat != Vilkårsresultat.IKKE_AKTUELL }
                     .map { delvilkår -> mapSpørsmål(regel.regler, delvilkår.hovedregel) }
 
             mapOf("name" to it.name,
@@ -91,10 +93,13 @@ internal class GrafRendererTest {
 
     companion object {
 
-        fun søknadBuilder(sivilstand: (TestsøknadBuilder.Builder) -> Unit = {}): SøknadsskjemaOvergangsstønad {
+        fun søknadBuilder(changeSivilstand: (Sivilstand) -> Sivilstand = { it }): SøknadsskjemaOvergangsstønad {
             val builder = TestsøknadBuilder.Builder()
-            sivilstand.invoke(builder)
-            return SøknadsskjemaMapper.tilDomene(builder.build().søknadOvergangsstønad)
+            builder.setSivilstandsdetaljer(erUformeltGift = false,
+                                           erUformeltSeparertEllerSkilt = false,
+                                           søktOmSkilsmisseSeparasjon = false)
+            val søknad = SøknadsskjemaMapper.tilDomene(builder.build().søknadOvergangsstønad)
+            return søknad.copy(sivilstand = changeSivilstand.invoke(søknad.sivilstand))
         }
     }
 
