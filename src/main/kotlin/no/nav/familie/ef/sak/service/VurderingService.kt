@@ -24,7 +24,6 @@ import no.nav.familie.ef.sak.service.steg.StegService
 import no.nav.familie.ef.sak.service.steg.StegType
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
@@ -34,7 +33,6 @@ class VurderingService(private val behandlingService: BehandlingService,
                        private val stegService: StegService,
                        private val blankettRepository: BlankettRepository) {
 
-    @Transactional
     fun oppdaterVilkår(vilkårsvurderingDto: OppdaterVilkårsvurderingDto): VilkårsvurderingDto {
         val vilkårsvurdering = vilkårsvurderingRepository.findByIdOrThrow(vilkårsvurderingDto.id)
         val behandlingId = vilkårsvurdering.behandlingId
@@ -50,7 +48,6 @@ class VurderingService(private val behandlingService: BehandlingService,
         return oppdatertVilkårsvurderingDto
     }
 
-    @Transactional
     fun nullstillVilkår(vilkårsvurderingDto: NullstillVilkårsvurderingDto): VilkårsvurderingDto {
         val vilkårsvurdering = vilkårsvurderingRepository.findByIdOrThrow(vilkårsvurderingDto.id)
         val behandlingId = vilkårsvurdering.behandlingId
