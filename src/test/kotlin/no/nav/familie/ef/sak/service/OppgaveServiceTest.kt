@@ -62,8 +62,7 @@ internal class OppgaveServiceTest {
     @Test
     fun `Opprett oppgave skal samle data og opprette en ny oppgave basert på fagsak, behandling, fnr og enhet`() {
         val aktørIdentFraPdl = "AKTØERIDENT"
-        every { behandlingRepository.findByIdOrNull(BEHANDLING_ID) } returns lagTestBehandling()
-        every { fagsakRepository.findByIdOrNull(FAGSAK_ID) } returns lagTestFagsak()
+        every { fagsakRepository.finnFagsakTilBehandling(BEHANDLING_ID) } returns lagTestFagsak()
         every { behandlingRepository.update(any()) } returns lagTestBehandling()
         every { oppgaveRepository.insert(any()) } returns lagTestOppgave()
         every {

@@ -2,8 +2,6 @@ package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.api.dto.BrevRequest
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
-import no.nav.familie.ef.sak.vedtaksbrev.BrevClient
-import no.nav.familie.ef.sak.vedtaksbrev.BrevType
 import no.nav.familie.ef.sak.integration.JournalpostClient
 import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
 import no.nav.familie.ef.sak.integration.dto.pdl.visningsnavn
@@ -12,12 +10,14 @@ import no.nav.familie.ef.sak.repository.domain.Fil
 import no.nav.familie.ef.sak.repository.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.vedtaksbrev.BrevClient
+import no.nav.familie.ef.sak.vedtaksbrev.BrevType
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.Dokument
 import no.nav.familie.kontrakter.felles.dokarkiv.FilType
 import org.springframework.stereotype.Service
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 @Service
 class VedtaksbrevService(private val brevClient: BrevClient,
@@ -30,9 +30,8 @@ class VedtaksbrevService(private val brevClient: BrevClient,
                          private val familieIntegrasjonerClient: FamilieIntegrasjonerClient) {
 
     fun lagBrevRequest(behandlingId: UUID): BrevRequest {
-        val behandling = behandlingService.hentBehandling(behandlingId)
-        val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
-        val person = personService.hentSøker(fagsak.hentAktivIdent())
+        val aktivIdent = behandlingService.hentAktivIdent(behandlingId)
+        val person = personService.hentSøker(aktivIdent)
         val navn = person.navn.gjeldende().visningsnavn()
         val innvilgelseFra = LocalDate.now()
         val innvilgelseTil = LocalDate.now()
@@ -40,9 +39,8 @@ class VedtaksbrevService(private val brevClient: BrevClient,
         val brevdato = LocalDate.now()
         val belopOvergangsstonad = 13943
         val signaturSaksbehandler = SikkerhetContext.hentSaksbehandlerNavn()
-
         return BrevRequest(navn = navn,
-                           ident = fagsak.hentAktivIdent(),
+                           ident = aktivIdent,
                            innvilgelseFra = innvilgelseFra,
                            innvilgelseTil = innvilgelseTil,
                            begrunnelseFomDatoInnvilgelse = begrunnelseFomDatoInnvilgelse,
@@ -79,8 +77,7 @@ class VedtaksbrevService(private val brevClient: BrevClient,
     }
 
     fun journalførVedtaksbrev(behandlingId: UUID): String? {
-        val behandling = behandlingService.hentBehandling(behandlingId)
-        val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
+        val fagsak = fagsakService.hentFaksakForBehandling(behandlingId)
         val ident = fagsak.hentAktivIdent();
         val vedtaksbrev = hentBrev(behandlingId)
         val dokumenter =

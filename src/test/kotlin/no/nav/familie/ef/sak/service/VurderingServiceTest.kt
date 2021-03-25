@@ -92,7 +92,7 @@ internal class VurderingServiceTest {
                 { it.invocation.args.first() as List<Vilkårsvurdering> }
         val vilkår = VilkårType.hentVilkår()
 
-        vurderingService.hentVilkår(BEHANDLING_ID)
+        vurderingService.hentEllerOpprettVurderinger(BEHANDLING_ID)
 
         assertThat(nyeVilkårsvurderinger.captured).hasSize(vilkår.size + 1) // 2 barn
         assertThat(nyeVilkårsvurderinger.captured.map { it.type }.distinct()).containsExactlyInAnyOrderElementsOf(vilkår)
@@ -111,7 +111,7 @@ internal class VurderingServiceTest {
                                         type = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
                                         behandlingId = BEHANDLING_ID))
 
-        vurderingService.hentVilkår(BEHANDLING_ID)
+        vurderingService.hentEllerOpprettVurderinger(BEHANDLING_ID)
 
         verify(exactly = 0) { vilkårsvurderingRepository.updateAll(any()) }
         verify(exactly = 0) { vilkårsvurderingRepository.insertAll(any()) }
@@ -127,7 +127,7 @@ internal class VurderingServiceTest {
                                         type = VilkårType.SIVILSTAND,
                                         delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurdering)))
 
-        val vilkår = vurderingService.hentVilkår(BEHANDLING_ID)
+        val vilkår = vurderingService.hentEllerOpprettVurderinger(BEHANDLING_ID)
 
         assertThat(delvilkårsvurdering).hasSize(5)
         assertThat(delvilkårsvurdering.filter { it.resultat == Vilkårsresultat.IKKE_AKTUELL }).hasSize(4)
@@ -148,7 +148,7 @@ internal class VurderingServiceTest {
                                                          behandlingId = BEHANDLING_ID))
         every { vilkårsvurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns vilkårsvurderinger
 
-        val alleVilkårsvurderinger = vurderingService.hentVilkår(BEHANDLING_ID).vurderinger
+        val alleVilkårsvurderinger = vurderingService.hentEllerOpprettVurderinger(BEHANDLING_ID).vurderinger
 
         assertThat(alleVilkårsvurderinger).hasSize(1)
         verify(exactly = 0) { vilkårsvurderingRepository.insertAll(any()) }

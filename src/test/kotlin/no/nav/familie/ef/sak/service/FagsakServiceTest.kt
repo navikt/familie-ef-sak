@@ -26,7 +26,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `skal hente fagsak med tilhørende behandlinger som ikke finnes fra før`() {
         val personIdent = "23118612345"
-        val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, Stønadstype.OVERGANGSSTØNAD)
+        val fagsak = fagsakService.hentEllerOpprettFagsakMedBehandlinger(personIdent, Stønadstype.OVERGANGSSTØNAD)
         assertThat(fagsak.behandlinger.size).isEqualTo(0)
         assertThat(fagsak.stønadstype).isEqualTo(Stønadstype.OVERGANGSSTØNAD)
         assertThat(fagsak.personIdent).isEqualTo(personIdent)
@@ -56,7 +56,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         behandlingRepository.insert(behandlingInaktiv)
         behandlingRepository.insert(behandlingAktiv)
 
-        val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, Stønadstype.BARNETILSYN)
+        val fagsak = fagsakService.hentEllerOpprettFagsakMedBehandlinger(personIdent, Stønadstype.BARNETILSYN)
         println(objectMapper.writeValueAsString(fagsak))
         assertThat(fagsak.behandlinger.size).isEqualTo(2)
         assertThat(fagsak.stønadstype).isEqualTo(fagsakRequest.stønadstype)

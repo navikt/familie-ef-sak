@@ -40,16 +40,15 @@ class PersonopplysningerController(private val personopplysningerService: Person
     @GetMapping("/behandling/{behandlingId}")
     fun personopplysninger(@PathVariable behandlingId: UUID): Ressurs<PersonopplysningerDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
-        val behandling = behandlingService.hentBehandling(behandlingId)
-        val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
-        return Ressurs.success(personopplysningerService.hentPersonopplysninger(fagsak.hentAktivIdent()))
+        val aktivIdent = behandlingService.hentAktivIdent(behandlingId)
+        return Ressurs.success(personopplysningerService.hentPersonopplysninger(aktivIdent))
     }
 
     @GetMapping("/fagsak/{fagsakId}")
     fun personopplysningerFraFagsakId(@PathVariable fagsakId: UUID): Ressurs<PersonopplysningerDto> {
         tilgangService.validerTilgangTilFagsak(fagsakId)
-        val fagsak = fagsakService.hentFagsak(fagsakId)
-        return Ressurs.success(personopplysningerService.hentPersonopplysninger(fagsak.hentAktivIdent()))
+        val aktivIdent = fagsakService.hentAktivIdent(fagsakId)
+        return Ressurs.success(personopplysningerService.hentPersonopplysninger(aktivIdent))
     }
 
 }

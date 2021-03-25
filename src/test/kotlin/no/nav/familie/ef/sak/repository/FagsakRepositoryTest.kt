@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.repository
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.repository.FagsakRepository
@@ -17,6 +18,7 @@ import java.util.UUID
 internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
 
     @Autowired private lateinit var fagsakRepository: FagsakRepository
+    @Autowired private lateinit var behandlingRepository: BehandlingRepository
 
     @Test
     internal fun findByFagsakId() {
@@ -42,12 +44,13 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(fagsak.søkerIdenter.map { it.ident }).contains("98765432109")
     }
 
-
     @Test
     internal fun `skal returnere en liste med fagsaker hvis stønadstypen ikke satt`() {
         val fagsakPerson = fagsakpersoner(setOf("12345678901"))
-        fagsakRepository.insert(fagsak(identer = fagsakPerson, stønadstype = Stønadstype.OVERGANGSSTØNAD))
-        fagsakRepository.insert(fagsak(identer = fagsakPerson, stønadstype = Stønadstype.SKOLEPENGER))
+        var fagsak1 = fagsak(identer = fagsakPerson, stønadstype = Stønadstype.OVERGANGSSTØNAD)
+        var fagsak2 = fagsak(identer = fagsakPerson, stønadstype = Stønadstype.SKOLEPENGER)
+        fagsak1 = fagsakRepository.insert(fagsak1)
+        fagsak2 = fagsakRepository.insert(fagsak2)
         val fagsaker = fagsakRepository.findBySøkerIdent("12345678901")
 
         assertThat(fagsaker.forEach { fagsak ->
@@ -55,20 +58,18 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
             assertThat(fagsak.søkerIdenter.map { it.ident }).contains("12345678901")
         })
 
-
         assertThat(fagsaker.map { it.stønadstype }).contains(Stønadstype.SKOLEPENGER)
         assertThat(fagsaker.map { it.stønadstype }).contains(Stønadstype.OVERGANGSSTØNAD)
+        assertThat(fagsaker).containsExactlyInAnyOrder(fagsak1, fagsak2)
     }
 
     @Test
     internal fun finnMedEksternId() {
         val fagsak = fagsakRepository.insert(fagsak())
-        val findByFagsakId = fagsakRepository.findById(fagsak.id)
         val findByEksternId = fagsakRepository.finnMedEksternId(fagsak.eksternId.id)
                               ?: throw error("Fagsak med ekstern id ${fagsak.eksternId} finnes ikke")
 
         assertThat(findByEksternId).isEqualTo(fagsak)
-        assertThat(findByEksternId).isEqualTo(findByFagsakId.get())
     }
 
     @Test
@@ -84,5 +85,20 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
                                   FagsakPerson(ident = "3")))
         fagsakRepository.insert(fagsak)
         assertThat(fagsakRepository.finnAktivIdent(fagsak.id)).isEqualTo("2")
+    }
+
+    @Test
+    internal fun `skal hente fagsak på behandlingId`() {
+        var fagsak = fagsak(setOf(FagsakPerson(ident = "1"),
+                                  FagsakPerson(ident = "2", sporbar = Sporbar(opprettetTid = LocalDateTime.now().plusDays(2))),
+                                  FagsakPerson(ident = "3")))
+        fagsak = fagsakRepository.insert(fagsak)
+        val behandling = behandlingRepository.insert(behandling(fagsak))
+
+        val finnFagsakTilBehandling = fagsakRepository.finnFagsakTilBehandling(behandling.id)!!
+
+        assertThat(finnFagsakTilBehandling.id).isEqualTo(fagsak.id)
+        assertThat(finnFagsakTilBehandling.søkerIdenter).hasSize(3)
+        assertThat(finnFagsakTilBehandling.eksternId).isEqualTo(fagsak.eksternId)
     }
 }

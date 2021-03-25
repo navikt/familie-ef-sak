@@ -5,7 +5,6 @@ import no.nav.familie.ef.sak.api.dto.OppdaterVilkårsvurderingDto
 import no.nav.familie.ef.sak.api.dto.VilkårDto
 import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.regler.Vilkårsregler
-import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.TilgangService
 import no.nav.familie.ef.sak.service.VurderingService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -61,6 +60,6 @@ class VurderingController(private val vurderingService: VurderingService,
     @GetMapping("{behandlingId}/vilkar")
     fun getVilkår(@PathVariable behandlingId: UUID): Ressurs<VilkårDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
-        return Ressurs.success(vurderingService.hentVilkår(behandlingId))
+        return Ressurs.success(vurderingService.hentEllerOpprettVurderinger(behandlingId))
     }
 }

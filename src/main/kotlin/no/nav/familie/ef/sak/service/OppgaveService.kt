@@ -34,10 +34,7 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
                        enhetId: String? = null,
                        tilordnetNavIdent: String? = null,
                        beskrivelse: String? = null): Long {
-        val behandling =
-                behandlingRepository.findByIdOrNull(behandlingId) ?: error("Finner ikke behandling med id=${behandlingId}")
-        val fagsak =
-                fagsakRepository.findByIdOrNull(behandling.fagsakId) ?: error("Finner ikke fagsak med id=${behandling.fagsakId}")
+        val fagsak = fagsakRepository.finnFagsakTilBehandling(behandlingId) ?: error("Finner ikke fagsak til behandlingDd=${behandlingId}")
 
         val oppgaveFinnesFraFør = oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
 
@@ -62,7 +59,7 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
             val opprettetOppgaveId = oppgaveClient.opprettOppgave(opprettOppgave)
 
             val oppgave = EfOppgave(gsakOppgaveId = opprettetOppgaveId,
-                                    behandlingId = behandling.id,
+                                    behandlingId = behandlingId,
                                     type = oppgavetype)
             oppgaveRepository.insert(oppgave)
             opprettetOppgaveId

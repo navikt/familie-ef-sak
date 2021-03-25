@@ -70,14 +70,13 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
     }
 
     private fun opprettTaskForIverksettMotOppdrag(behandling: Behandling) {
-        val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
-        taskRepository.save(IverksettMotOppdragTask.opprettTask(behandling, fagsak.hentAktivIdent()))
+        val aktivIdent = fagsakService.hentAktivIdent(behandling.fagsakId)
+        taskRepository.save(IverksettMotOppdragTask.opprettTask(behandling, aktivIdent))
     }
 
     private fun opprettTaskForJournalførBlankett(behandling: Behandling) {
-        val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
-
-        taskRepository.save(JournalførBlankettTask.opprettTask(behandling, fagsak.hentAktivIdent()))
+        val aktivIdent = fagsakService.hentAktivIdent(behandling.fagsakId)
+        taskRepository.save(JournalførBlankettTask.opprettTask(behandling, aktivIdent))
     }
 
 

@@ -40,7 +40,7 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
     @PostMapping(path = ["fagsak"], consumes = [MediaType.APPLICATION_JSON_VALUE])
     fun opprettFagsakForTestperson(@RequestBody testFagsakRequest: TestFagsakRequest): Ressurs<UUID> {
         val fagsakDto =
-                fagsakService.hentEllerOpprettFagsak(testFagsakRequest.personIdent, Stønadstype.OVERGANGSSTØNAD)
+                fagsakService.hentEllerOpprettFagsakMedBehandlinger(testFagsakRequest.personIdent, Stønadstype.OVERGANGSSTØNAD)
         val fagsak = fagsakService.hentFagsak(fagsakDto.id)
         val søknad: SøknadOvergangsstønad = lagSøknad(testFagsakRequest.personIdent)
         val behandling: Behandling =

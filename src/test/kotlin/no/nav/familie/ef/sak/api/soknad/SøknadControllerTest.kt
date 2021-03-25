@@ -51,8 +51,8 @@ internal class SøknadControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `Skal hente søknadsinformasjon gitt behandlingId`(){
         val søknad = SøknadMedVedlegg(Testsøknad.søknadOvergangsstønad, emptyList())
-        val fagsak = fagsakService.hentEllerOpprettFagsak(søknad.søknad.personalia.verdi.fødselsnummer.verdi.verdi,
-                                                          Stønadstype.OVERGANGSSTØNAD)
+        val fagsak = fagsakService.hentEllerOpprettFagsakMedBehandlinger(søknad.søknad.personalia.verdi.fødselsnummer.verdi.verdi,
+                                                                         Stønadstype.OVERGANGSSTØNAD)
         val behandling = behandlingService.opprettBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, fagsak.id)
         behandlingService.lagreSøknadForOvergangsstønad(søknad.søknad, behandling.id, fagsak.id, "1234")
         val søknadSkjema = behandlingService.hentOvergangsstønad(behandling.id)

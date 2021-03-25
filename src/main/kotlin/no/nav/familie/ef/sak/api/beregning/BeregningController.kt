@@ -29,18 +29,18 @@ class BeregningController(private val stegService: StegService,
     fun beregnYtelseForStønad(@PathVariable behandlingId: UUID, @RequestBody beregningRequest: BeregningRequest): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         val behandling = behandlingService.hentBehandling(behandlingId)
-        val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
+        val aktivIdent = fagsakService.hentAktivIdent(behandling.fagsakId)
         val beløpsperioder = beregningService.beregnFullYtelse(beregningRequest) // TODO: Tar ikke høyde for inntekt
         val tilkjentYtelse = TilkjentYtelseDTO(
-                fagsak.hentAktivIdent(),
+                aktivIdent,
                 vedtaksdato = LocalDate.now(),
-                behandlingId = behandling.id,
+                behandlingId = behandlingId,
                 andelerTilkjentYtelse = beløpsperioder.map {
                     AndelTilkjentYtelseDTO(beløp = it.beløp.toInt(),
                                            stønadFom = it.fraOgMedDato,
                                            stønadTom = it.tilDato,
-                                           kildeBehandlingId = behandling.id,
-                                           personIdent = fagsak.hentAktivIdent())
+                                           kildeBehandlingId = behandlingId,
+                                           personIdent = aktivIdent)
                 }
         )
         return Ressurs.success(stegService.håndterBeregnYtelseForStønad(behandling, tilkjentYtelse).id)

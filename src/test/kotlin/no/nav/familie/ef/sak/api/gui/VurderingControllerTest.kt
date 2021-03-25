@@ -48,7 +48,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `oppdaterVilkår - skal sjekke att behandlingId som blir sendt inn er lik den som finnes i vilkårsvurderingen`() {
         val opprettetVurdering = opprettInngangsvilkår().body.data!!
-        val fagsak = fagsakService.hentEllerOpprettFagsak("0", Stønadstype.OVERGANGSSTØNAD)
+        val fagsak = fagsakService.hentEllerOpprettFagsakMedBehandlinger("0", Stønadstype.OVERGANGSSTØNAD)
         val behandling = behandlingService.opprettBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, fagsak.id)
 
         val oppdaterVilkårsvurdering = lagOppdaterVilkårsvurdering(opprettetVurdering, VilkårType.FORUTGÅENDE_MEDLEMSKAP)
@@ -60,7 +60,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
     internal fun `nullstillVilkår - skal sjekke att behandlingId som blir sendt inn er lik den som finnes i vilkårsvurderingen`() {
         val opprettetVurdering = opprettInngangsvilkår().body.data!!
 
-        val fagsak = fagsakService.hentEllerOpprettFagsak("0", Stønadstype.OVERGANGSSTØNAD)
+        val fagsak = fagsakService.hentEllerOpprettFagsakMedBehandlinger("0", Stønadstype.OVERGANGSSTØNAD)
         val behandling = behandlingService.opprettBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, fagsak.id)
         val nullstillVurdering = NullstillVilkårsvurderingDto(opprettetVurdering.vurderinger.first().id, behandling.id)
 
@@ -109,8 +109,8 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
 
     private fun opprettInngangsvilkår(): ResponseEntity<Ressurs<VilkårDto>> {
         val søknad = SøknadMedVedlegg(Testsøknad.søknadOvergangsstønad, emptyList())
-        val fagsak = fagsakService.hentEllerOpprettFagsak(søknad.søknad.personalia.verdi.fødselsnummer.verdi.verdi,
-                                                          Stønadstype.OVERGANGSSTØNAD)
+        val fagsak = fagsakService.hentEllerOpprettFagsakMedBehandlinger(søknad.søknad.personalia.verdi.fødselsnummer.verdi.verdi,
+                                                                         Stønadstype.OVERGANGSSTØNAD)
         val behandling = behandlingService.opprettBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, fagsak.id)
         behandlingService.lagreSøknadForOvergangsstønad(søknad.søknad, behandling.id, fagsak.id, "1234")
         grunnlagsdataService.hentEndringerIRegistergrunnlag(behandling.id)
