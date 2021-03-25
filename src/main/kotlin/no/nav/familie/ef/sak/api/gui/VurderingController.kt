@@ -8,7 +8,6 @@ import no.nav.familie.ef.sak.regler.Vilkårsregler
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.TilgangService
 import no.nav.familie.ef.sak.service.VurderingService
-import no.nav.familie.ef.sak.service.steg.StegService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -29,8 +28,6 @@ import java.util.UUID
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class VurderingController(private val vurderingService: VurderingService,
-                          private val stegService: StegService,
-                          private val behandlingService: BehandlingService,
                           private val tilgangService: TilgangService) {
 
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -65,21 +62,5 @@ class VurderingController(private val vurderingService: VurderingService,
     fun getVilkår(@PathVariable behandlingId: UUID): Ressurs<VilkårDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         return Ressurs.success(vurderingService.hentVilkår(behandlingId))
-    }
-
-    @PostMapping("/{behandlingId}/vilkar/fullfor")
-    fun fullførVilkår(@PathVariable behandlingId: UUID): Ressurs<UUID> {
-        tilgangService.validerTilgangTilBehandling(behandlingId)
-        val behandling = behandlingService.hentBehandling(behandlingId)
-        // TODO; Trenger vi registrer opplysninger?
-        val oppdatertBehandling = stegService.håndterRegistrerOpplysninger(behandling, null)
-        return Ressurs.success(stegService.håndterInngangsvilkår(oppdatertBehandling).id)
-    }
-
-    @PostMapping("/{behandlingId}/overgangsstonad/fullfor")
-    fun fullførStønadsvilkår(@PathVariable behandlingId: UUID): Ressurs<UUID> {
-        tilgangService.validerTilgangTilBehandling(behandlingId)
-        val behandling = behandlingService.hentBehandling(behandlingId)
-        return Ressurs.success(stegService.håndterStønadsvilkår(behandling).id)
     }
 }

@@ -13,22 +13,28 @@ import no.nav.familie.ef.sak.regler.alleVilkårsregler
 import no.nav.familie.ef.sak.regler.evalutation.OppdaterVilkår
 import no.nav.familie.ef.sak.regler.hentVilkårsregel
 import no.nav.familie.ef.sak.repository.VilkårsvurderingRepository
+import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.Delvilkårsvurdering
 import no.nav.familie.ef.sak.repository.domain.DelvilkårsvurderingWrapper
 import no.nav.familie.ef.sak.repository.domain.VilkårType
 import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
 import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.ef.sak.service.steg.StegService
+import no.nav.familie.ef.sak.service.steg.StegType
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
 class VurderingService(private val behandlingService: BehandlingService,
                        private val vilkårsvurderingRepository: VilkårsvurderingRepository,
                        private val grunnlagsdataService: GrunnlagsdataService,
+                       private val stegService: StegService,
                        private val blankettRepository: BlankettRepository) {
 
+    @Transactional
     fun oppdaterVilkår(vilkårsvurderingDto: OppdaterVilkårsvurderingDto): VilkårsvurderingDto {
         val vilkårsvurdering = vilkårsvurderingRepository.findByIdOrThrow(vilkårsvurderingDto.id)
         val behandlingId = vilkårsvurdering.behandlingId
@@ -39,9 +45,12 @@ class VurderingService(private val behandlingService: BehandlingService,
         val nyVilkårsvurdering = OppdaterVilkår.lagNyOppdatertVilkårsvurdering(vilkårsvurdering,
                                                                                vilkårsvurderingDto.delvilkårsvurderinger)
         blankettRepository.deleteById(behandlingId)
-        return vilkårsvurderingRepository.update(nyVilkårsvurdering).tilDto()
+        val oppdatertVilkårsvurderingDto = vilkårsvurderingRepository.update(nyVilkårsvurdering).tilDto()
+        oppdaterStegPåBehandling(vilkårsvurdering.behandlingId)
+        return oppdatertVilkårsvurderingDto
     }
 
+    @Transactional
     fun nullstillVilkår(vilkårsvurderingDto: NullstillVilkårsvurderingDto): VilkårsvurderingDto {
         val vilkårsvurdering = vilkårsvurderingRepository.findByIdOrThrow(vilkårsvurderingDto.id)
         val behandlingId = vilkårsvurdering.behandlingId
@@ -51,7 +60,9 @@ class VurderingService(private val behandlingService: BehandlingService,
 
         blankettRepository.deleteById(behandlingId)
 
-        return nullstillVilkårMedNyeHovedregler(behandlingId, vilkårsvurdering)
+        val nullstillVilkårMedNyeHovedregler = nullstillVilkårMedNyeHovedregler(behandlingId, vilkårsvurdering)
+        oppdaterStegPåBehandling(behandlingId)
+        return nullstillVilkårMedNyeHovedregler
     }
 
     private fun nullstillVilkårMedNyeHovedregler(behandlingId: UUID,
@@ -162,5 +173,22 @@ class VurderingService(private val behandlingService: BehandlingService,
 
     private fun behandlingErLåstForVidereRedigering(behandlingId: UUID) =
             behandlingService.hentBehandling(behandlingId).status.behandlingErLåstForVidereRedigering()
+
+    private fun oppdaterStegPåBehandling(behandlingId: UUID) {
+        val behandling = behandlingService.hentBehandling(behandlingId)
+        val vilkårUtenVurdering = hentVilkårSomManglerVurdering(behandlingId)
+
+        if (skalFerdigstilleVilkårSteg(vilkårUtenVurdering, behandling)) {
+            stegService.håndterVilkår(behandling).id
+        } else if (skalTilbakestilleTilVilkårSteg(vilkårUtenVurdering, behandling)) {
+            stegService.resetSteg(behandling.id, StegType.VILKÅR)
+        }
+    }
+
+    private fun skalTilbakestilleTilVilkårSteg(vilkårsvurdering: List<VilkårType>, behandling: Behandling) =
+        vilkårsvurdering.isNotEmpty() && behandling.steg != StegType.VILKÅR
+
+    private fun skalFerdigstilleVilkårSteg(vilkårsvurdering: List<VilkårType>, behandling: Behandling) =
+        vilkårsvurdering.isEmpty() && behandling.steg == StegType.VILKÅR
 
 }

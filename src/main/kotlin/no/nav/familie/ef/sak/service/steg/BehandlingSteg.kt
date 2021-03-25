@@ -33,46 +33,40 @@ enum class StegType(val rekkefølge: Int,
                     val tillattFor: BehandlerRolle,
                     private val gyldigIKombinasjonMedStatus: List<BehandlingStatus>) {
 
-    REGISTRERE_OPPLYSNINGER(rekkefølge = 1,
-                            tillattFor = BehandlerRolle.SAKSBEHANDLER,
-                            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES, BehandlingStatus.OPPRETTET)),
-    VILKÅRSVURDERE_INNGANGSVILKÅR(rekkefølge = 2,
-                                  tillattFor = BehandlerRolle.SAKSBEHANDLER,
-                                  gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
-    VILKÅRSVURDERE_STØNAD(rekkefølge = 3,
-                          tillattFor = BehandlerRolle.SAKSBEHANDLER,
-                          gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
-    BEREGNE_YTELSE(rekkefølge = 4,
+    VILKÅR(rekkefølge = 1,
+        tillattFor = BehandlerRolle.SAKSBEHANDLER,
+        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.OPPRETTET, BehandlingStatus.UTREDES)),
+    BEREGNE_YTELSE(rekkefølge = 2,
                    tillattFor = BehandlerRolle.SAKSBEHANDLER,
                    gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
-    VEDTA_BLANKETT(rekkefølge = 4,
-                   tillattFor = BehandlerRolle.SAKSBEHANDLER,
-                   gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
-    SEND_TIL_BESLUTTER(rekkefølge = 5,
-                       tillattFor = BehandlerRolle.SAKSBEHANDLER,
-                       gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
-    BESLUTTE_VEDTAK(rekkefølge = 6,
+    VEDTA_BLANKETT(rekkefølge = 2,
+        tillattFor = BehandlerRolle.SAKSBEHANDLER,
+        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
+    SEND_TIL_BESLUTTER(rekkefølge = 3,
+        tillattFor = BehandlerRolle.SAKSBEHANDLER,
+        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
+    BESLUTTE_VEDTAK(rekkefølge = 4,
                     tillattFor = BehandlerRolle.BESLUTTER,
                     gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.FATTER_VEDTAK)),
-    JOURNALFØR_BLANKETT(rekkefølge = 7,
+    JOURNALFØR_BLANKETT(rekkefølge = 5,
                         tillattFor = BehandlerRolle.SYSTEM,
                         gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)),
-    IVERKSETT_MOT_OPPDRAG(rekkefølge = 7,
+    IVERKSETT_MOT_OPPDRAG(rekkefølge = 5,
                           tillattFor = BehandlerRolle.SYSTEM,
                           gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)),
-    VENTE_PÅ_STATUS_FRA_ØKONOMI(rekkefølge = 8,
+    VENTE_PÅ_STATUS_FRA_ØKONOMI(rekkefølge = 6,
                                 tillattFor = BehandlerRolle.SYSTEM,
                                 gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)),
-    JOURNALFØR_VEDTAKSBREV(rekkefølge = 9,
+    JOURNALFØR_VEDTAKSBREV(rekkefølge = 7,
                            tillattFor = BehandlerRolle.SYSTEM,
                            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)),
-    DISTRIBUER_VEDTAKSBREV(rekkefølge = 10,
+    DISTRIBUER_VEDTAKSBREV(rekkefølge = 8,
                            tillattFor = BehandlerRolle.SYSTEM,
                            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)),
-    FERDIGSTILLE_BEHANDLING(rekkefølge = 11,
+    FERDIGSTILLE_BEHANDLING(rekkefølge = 9,
                             tillattFor = BehandlerRolle.SYSTEM,
                             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)),
-    BEHANDLING_FERDIGSTILT(rekkefølge = 12,
+    BEHANDLING_FERDIGSTILT(rekkefølge = 10,
                            tillattFor = BehandlerRolle.SYSTEM,
                            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.FERDIGSTILT));
 
@@ -92,9 +86,7 @@ enum class StegType(val rekkefølge: Int,
         return when (behandlingType) {
             BehandlingType.TEKNISK_OPPHØR ->
                 when (this) {
-                    REGISTRERE_OPPLYSNINGER -> VILKÅRSVURDERE_INNGANGSVILKÅR
-                    VILKÅRSVURDERE_INNGANGSVILKÅR -> VILKÅRSVURDERE_STØNAD
-                    VILKÅRSVURDERE_STØNAD -> BEREGNE_YTELSE
+                    VILKÅR -> BEREGNE_YTELSE
                     BEREGNE_YTELSE -> SEND_TIL_BESLUTTER
                     SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
                     BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
@@ -106,9 +98,7 @@ enum class StegType(val rekkefølge: Int,
                 }
             BehandlingType.BLANKETT ->
                 when (this) {
-                    REGISTRERE_OPPLYSNINGER -> VILKÅRSVURDERE_INNGANGSVILKÅR
-                    VILKÅRSVURDERE_INNGANGSVILKÅR -> VILKÅRSVURDERE_STØNAD
-                    VILKÅRSVURDERE_STØNAD -> VEDTA_BLANKETT
+                    VILKÅR -> VEDTA_BLANKETT
                     VEDTA_BLANKETT -> SEND_TIL_BESLUTTER
                     SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
                     BESLUTTE_VEDTAK -> JOURNALFØR_BLANKETT
@@ -119,9 +109,7 @@ enum class StegType(val rekkefølge: Int,
                 }
             else ->
                 when (this) {
-                    REGISTRERE_OPPLYSNINGER -> VILKÅRSVURDERE_INNGANGSVILKÅR
-                    VILKÅRSVURDERE_INNGANGSVILKÅR -> VILKÅRSVURDERE_STØNAD
-                    VILKÅRSVURDERE_STØNAD -> BEREGNE_YTELSE
+                    VILKÅR -> BEREGNE_YTELSE
                     BEREGNE_YTELSE -> SEND_TIL_BESLUTTER
                     SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
                     BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
