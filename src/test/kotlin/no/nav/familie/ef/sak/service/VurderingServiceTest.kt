@@ -13,7 +13,6 @@ import no.nav.familie.ef.sak.api.dto.SivilstandInngangsvilkårDto
 import no.nav.familie.ef.sak.api.dto.SivilstandRegistergrunnlagDto
 import no.nav.familie.ef.sak.api.dto.Sivilstandstype
 import no.nav.familie.ef.sak.api.dto.VilkårGrunnlagDto
-import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.api.dto.VurderingDto
 import no.nav.familie.ef.sak.blankett.BlankettRepository
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
@@ -34,7 +33,6 @@ import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
 import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
 import no.nav.familie.ef.sak.repository.domain.Vurdering
 import no.nav.familie.ef.sak.service.steg.StegService
-import no.nav.familie.ef.sak.service.steg.StegType
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import org.assertj.core.api.Assertions.assertThat
@@ -42,7 +40,6 @@ import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.data.repository.findByIdOrNull
-import java.time.LocalDateTime
 import java.util.UUID
 
 
@@ -178,6 +175,7 @@ internal class VurderingServiceTest {
                                                 listOf(Delvilkårsvurdering(Vilkårsresultat.OPPFYLT,
                                                                            listOf(Vurdering(RegelId.SØKER_MEDLEM_I_FOLKETRYGDEN)))))
         every { vilkårsvurderingRepository.findByIdOrNull(vilkårsvurdering.id) } returns vilkårsvurdering
+        every { vilkårsvurderingRepository.findByBehandlingId(BEHANDLING_ID)} returns listOf(vilkårsvurdering)
         val lagretVilkårsvurdering = slot<Vilkårsvurdering>()
         every { vilkårsvurderingRepository.update(capture(lagretVilkårsvurdering)) } answers
                 { it.invocation.args.first() as Vilkårsvurdering }
@@ -249,45 +247,6 @@ internal class VurderingServiceTest {
 
         val vilkårtyper = VilkårType.hentVilkår().filterNot { it === VilkårType.FORUTGÅENDE_MEDLEMSKAP }
         assertThat(vilkårTyperUtenVurdering).containsExactlyInAnyOrderElementsOf(vilkårtyper)
-    }
-
-    @Test
-    fun `oppdater steg på behandling når alle vilkår er vurdert`() {
-        val behandling = behandling(fagsak(), true, BehandlingStatus.UTREDES)
-        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
-
-        val vilkår = VilkårType.hentVilkår()
-        val vilkårsvurderinger = mutableListOf<Vilkårsvurdering>()
-        for (vilkårType in vilkår) {
-            vilkårsvurderinger.add(vilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT,
-                type = vilkårType,
-                behandlingId = BEHANDLING_ID))
-        }
-
-        every { vilkårsvurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns vilkårsvurderinger
-        every { stegService.håndterVilkår(behandling) } returns behandling
-        vurderingService.oppdaterStegPåBehandling(BEHANDLING_ID)
-        verify(exactly = 1) { stegService.håndterVilkår(behandling) }
-
-    }
-
-    @Test
-    fun `oppdater steg på behandling når vilkårvurdering slettes etter at alle er vurdert`() {
-        val behandling = behandling(fagsak(), true, BehandlingStatus.UTREDES, StegType.BEREGNE_YTELSE)
-        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
-
-        val vilkår = VilkårType.hentVilkår()
-        val vilkårsvurderinger = mutableListOf<Vilkårsvurdering>()
-        for (vilkårType in vilkår) {
-            vilkårsvurderinger.add(vilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT,
-                type = vilkårType,
-                behandlingId = BEHANDLING_ID))
-        }
-        vilkårsvurderinger.removeAt(0)
-        every { vilkårsvurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns vilkårsvurderinger
-        every { stegService.resetSteg(any(), any()) } returns Unit
-        vurderingService.oppdaterStegPåBehandling(BEHANDLING_ID)
-        verify(exactly = 1) { stegService.resetSteg(any(), StegType.VILKÅR) }
     }
 
     companion object {
