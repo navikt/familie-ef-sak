@@ -24,6 +24,7 @@ import no.nav.familie.ef.sak.service.steg.StegService
 import no.nav.familie.ef.sak.service.steg.StegType
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
@@ -33,6 +34,7 @@ class VurderingService(private val behandlingService: BehandlingService,
                        private val stegService: StegService,
                        private val blankettRepository: BlankettRepository) {
 
+    @Transactional
     fun oppdaterVilkår(vilkårsvurderingDto: OppdaterVilkårsvurderingDto): VilkårsvurderingDto {
         val vilkårsvurdering = vilkårsvurderingRepository.findByIdOrThrow(vilkårsvurderingDto.id)
         val behandlingId = vilkårsvurdering.behandlingId
@@ -43,9 +45,12 @@ class VurderingService(private val behandlingService: BehandlingService,
         val nyVilkårsvurdering = OppdaterVilkår.lagNyOppdatertVilkårsvurdering(vilkårsvurdering,
                                                                                vilkårsvurderingDto.delvilkårsvurderinger)
         blankettRepository.deleteById(behandlingId)
-        return vilkårsvurderingRepository.update(nyVilkårsvurdering).tilDto()
+        val oppdatertVilkårsvurderingDto = vilkårsvurderingRepository.update(nyVilkårsvurdering).tilDto()
+        oppdaterStegPåBehandling(vilkårsvurdering.behandlingId)
+        return oppdatertVilkårsvurderingDto
     }
 
+    @Transactional
     fun nullstillVilkår(vilkårsvurderingDto: NullstillVilkårsvurderingDto): VilkårsvurderingDto {
         val vilkårsvurdering = vilkårsvurderingRepository.findByIdOrThrow(vilkårsvurderingDto.id)
         val behandlingId = vilkårsvurdering.behandlingId
@@ -55,7 +60,9 @@ class VurderingService(private val behandlingService: BehandlingService,
 
         blankettRepository.deleteById(behandlingId)
 
-        return nullstillVilkårMedNyeHovedregler(behandlingId, vilkårsvurdering)
+        val nullstillVilkårMedNyeHovedregler = nullstillVilkårMedNyeHovedregler(behandlingId, vilkårsvurdering)
+        oppdaterStegPåBehandling(behandlingId)
+        return nullstillVilkårMedNyeHovedregler
     }
 
     private fun nullstillVilkårMedNyeHovedregler(behandlingId: UUID,
@@ -167,7 +174,7 @@ class VurderingService(private val behandlingService: BehandlingService,
     private fun behandlingErLåstForVidereRedigering(behandlingId: UUID) =
             behandlingService.hentBehandling(behandlingId).status.behandlingErLåstForVidereRedigering()
 
-    fun  oppdaterStegPåBehandling(behandlingId: UUID) {
+    private fun oppdaterStegPåBehandling(behandlingId: UUID) {
         val behandling = behandlingService.hentBehandling(behandlingId)
         val vilkårUtenVurdering = hentVilkårSomManglerVurdering(behandlingId)
 

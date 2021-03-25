@@ -42,9 +42,7 @@ class VurderingController(private val vurderingService: VurderingService,
             : Ressurs<VilkårsvurderingDto> {
         tilgangService.validerTilgangTilBehandling(vilkårsvurdering.behandlingId)
         try {
-            val vilkårsvurderingDto = vurderingService.oppdaterVilkår(vilkårsvurdering)
-            vurderingService.oppdaterStegPåBehandling(vilkårsvurdering.behandlingId)
-            return Ressurs.success(vilkårsvurderingDto)
+            return Ressurs.success(vurderingService.oppdaterVilkår(vilkårsvurdering))
         } catch (e: Exception) {
             val delvilkårJson = objectMapper.writeValueAsString(vilkårsvurdering.delvilkårsvurderinger)
             secureLogger.warn("id=${vilkårsvurdering.id}" +
@@ -57,9 +55,7 @@ class VurderingController(private val vurderingService: VurderingService,
     @PostMapping("nullstill")
     fun nullstillVilkår(@RequestBody request: NullstillVilkårsvurderingDto): Ressurs<VilkårsvurderingDto> {
         tilgangService.validerTilgangTilBehandling(request.behandlingId)
-        val nullstillVilkår = vurderingService.nullstillVilkår(request)
-        vurderingService.oppdaterStegPåBehandling(request.behandlingId)
-        return Ressurs.success(nullstillVilkår)
+        return Ressurs.success(vurderingService.nullstillVilkår(request))
     }
 
     @GetMapping("{behandlingId}/vilkar")
