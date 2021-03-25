@@ -8,8 +8,6 @@ import java.util.*
 @Repository
 interface OppgaveRepository : RepositoryInterface<Oppgave, Long>, InsertUpdateRepository<Oppgave> {
 
-    fun findByBehandlingIdAndType(behandlingId: UUID, oppgavetype: Oppgavetype): Oppgave?
-
     fun findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId: UUID, oppgavetype: Oppgavetype): Oppgave?
 
     fun findByGsakOppgaveId(gsakOppgaveId: Long): Oppgave?
