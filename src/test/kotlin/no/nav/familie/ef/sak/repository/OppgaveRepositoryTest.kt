@@ -17,17 +17,6 @@ internal class OppgaveRepositoryTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
 
     @Test
-    internal fun findByBehandlingIdAndType() {
-        val fagsak = fagsakRepository.insert(fagsak())
-        val behandling = behandlingRepository.insert(behandling(fagsak))
-        val oppgave = oppgaveRepository.insert(oppgave(behandling))
-
-        assertThat(oppgaveRepository.findByBehandlingIdAndType(UUID.randomUUID(), Oppgavetype.BehandleSak)).isNull()
-        assertThat(oppgaveRepository.findByBehandlingIdAndType(behandling.id, Oppgavetype.BehandleSak)).isNull()
-        assertThat(oppgaveRepository.findByBehandlingIdAndType(behandling.id, oppgave.type)).isEqualTo(oppgave)
-    }
-
-    @Test
     internal fun findByBehandlingIdAndTypeAndErFerdigstiltIsFalse() {
         val fagsak = fagsakRepository.insert(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
