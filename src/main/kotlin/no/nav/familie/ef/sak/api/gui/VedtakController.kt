@@ -1,6 +1,8 @@
 package no.nav.familie.ef.sak.api.gui
 
 import no.nav.familie.ef.sak.api.ApiFeil
+import no.nav.familie.ef.sak.api.beregning.VedtakDto
+import no.nav.familie.ef.sak.api.beregning.VedtakService
 import no.nav.familie.ef.sak.api.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.api.dto.TotrinnskontrollStatusDto
 import no.nav.familie.ef.sak.service.*
@@ -23,7 +25,7 @@ class VedtakController(private val stegService: StegService,
                        private val behandlingService: BehandlingService,
                        private val totrinnskontrollService: TotrinnskontrollService,
                        private val tilgangService: TilgangService,
-                       private val vedtaksbrevService: VedtaksbrevService) {
+                       private val vedtakService: VedtakService) {
 
     @PostMapping("/{behandlingId}/send-til-beslutter")
     fun sendTilBeslutter(@PathVariable behandlingId: UUID): Ressurs<UUID> {
@@ -50,4 +52,9 @@ class VedtakController(private val stegService: StegService,
         return ResponseEntity.ok(Ressurs.success(totrinnskontroll))
     }
 
+    @GetMapping("{behandlingId}")
+    fun hentVedtak(@PathVariable behandlingId: UUID): Ressurs<VedtakDto?> {
+        tilgangService.validerTilgangTilBehandling(behandlingId)
+        return Ressurs.success(vedtakService.hentVedtakHvisEksisterer(behandlingId))
+    }
 }
