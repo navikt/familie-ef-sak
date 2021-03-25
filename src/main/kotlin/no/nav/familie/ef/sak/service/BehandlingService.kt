@@ -69,7 +69,7 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
                           journalpost: Journalpost): Behandling {
         val behandling = behandlingRepository.insert(Behandling(fagsakId = fagsakId,
                                                                 type = behandlingType,
-                                                                steg = StegType.REGISTRERE_OPPLYSNINGER,
+                                                                steg = StegType.VILKÅR,
                                                                 status = BehandlingStatus.OPPRETTET,
                                                                 resultat = BehandlingResultat.IKKE_SATT,
                                                                 journalposter = setOf(Behandlingsjournalpost(journalpost.journalpostId,
@@ -82,7 +82,7 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
     fun opprettBehandling(behandlingType: BehandlingType, fagsakId: UUID): Behandling {
         return behandlingRepository.insert(Behandling(fagsakId = fagsakId,
                                                       type = behandlingType,
-                                                      steg = StegType.REGISTRERE_OPPLYSNINGER,
+                                                      steg = StegType.VILKÅR,
                                                       status = BehandlingStatus.OPPRETTET,
                                                       resultat = BehandlingResultat.IKKE_SATT))
     }
@@ -143,9 +143,9 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
     fun annullerBehandling(behandlingId: UUID): Behandling {
         val behandling = hentBehandling(behandlingId)
         validerAtBehandlingenKanAnnulleres(behandling)
-        behandling.status = BehandlingStatus.FERDIGSTILT;
-        behandling.resultat = BehandlingResultat.ANNULLERT;
-        behandling.steg = StegType.BEHANDLING_FERDIGSTILT;
+        behandling.status = BehandlingStatus.FERDIGSTILT
+        behandling.resultat = BehandlingResultat.ANNULLERT
+        behandling.steg = StegType.BEHANDLING_FERDIGSTILT
         behandlingshistorikkService.opprettHistorikkInnslag(behandling)
         return behandlingRepository.update(behandling)
     }

@@ -50,8 +50,7 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
                     lagFørstegangsbehandling(fagsak, søknad)
                 }
 
-        behandlingshistorikkService.opprettHistorikkInnslag(Behandlingshistorikk(behandlingId = behandling.id,
-                                                                                 steg = StegType.REGISTRERE_OPPLYSNINGER))
+        behandlingshistorikkService.opprettHistorikkInnslag(Behandlingshistorikk(behandlingId = behandling.id, steg = StegType.VILKÅR))
 
         return Ressurs.success(behandling.id)
     }

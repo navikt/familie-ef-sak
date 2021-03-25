@@ -26,7 +26,7 @@ fun oppgave(behandling: Behandling, erFerdigstilt: Boolean = false): Oppgave =
 fun behandling(fagsak: Fagsak,
                aktiv: Boolean = true,
                status: BehandlingStatus = BehandlingStatus.OPPRETTET,
-               steg: StegType = StegType.REGISTRERE_OPPLYSNINGER,
+               steg: StegType = StegType.VILKÅR,
                oppdragId: UUID = UUID.randomUUID(),
                type: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING): Behandling =
         Behandling(fagsakId = fagsak.id,

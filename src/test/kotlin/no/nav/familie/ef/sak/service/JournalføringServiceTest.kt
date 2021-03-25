@@ -90,7 +90,7 @@ internal class JournalføringServiceTest {
                                     fagsakId = fagsakId,
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     status = BehandlingStatus.UTREDES,
-                                    steg = StegType.REGISTRERE_OPPLYSNINGER,
+                                    steg = StegType.VILKÅR,
                                     resultat = BehandlingResultat.IKKE_SATT))
 
         every { behandlingService.opprettBehandling(any(), any()) }
@@ -98,7 +98,7 @@ internal class JournalføringServiceTest {
                                     fagsakId = fagsakId,
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     status = BehandlingStatus.UTREDES,
-                                    steg = StegType.REGISTRERE_OPPLYSNINGER,
+                                    steg = StegType.VILKÅR,
                                     resultat = BehandlingResultat.IKKE_SATT))
 
         every { oppgaveService.ferdigstillOppgave(any()) } just runs

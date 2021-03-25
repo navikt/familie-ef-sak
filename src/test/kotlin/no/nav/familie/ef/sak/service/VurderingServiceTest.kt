@@ -32,6 +32,7 @@ import no.nav.familie.ef.sak.repository.domain.VilkårType
 import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
 import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
 import no.nav.familie.ef.sak.repository.domain.Vurdering
+import no.nav.familie.ef.sak.service.steg.StegService
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import org.assertj.core.api.Assertions.assertThat
@@ -49,10 +50,12 @@ internal class VurderingServiceTest {
     private val familieIntegrasjonerClient = mockk<FamilieIntegrasjonerClient>()
     private val blankettRepository = mockk<BlankettRepository>()
     private val grunnlagsdataService = mockk<GrunnlagsdataService>()
+    private val stegService = mockk<StegService>()
     private val vurderingService = VurderingService(behandlingService = behandlingService,
                                                     vilkårsvurderingRepository = vilkårsvurderingRepository,
                                                     grunnlagsdataService = grunnlagsdataService,
-                                                    blankettRepository = blankettRepository)
+                                                    blankettRepository = blankettRepository,
+                                                    stegService = stegService)
 
     @BeforeEach
     fun setUp() {
@@ -172,6 +175,7 @@ internal class VurderingServiceTest {
                                                 listOf(Delvilkårsvurdering(Vilkårsresultat.OPPFYLT,
                                                                            listOf(Vurdering(RegelId.SØKER_MEDLEM_I_FOLKETRYGDEN)))))
         every { vilkårsvurderingRepository.findByIdOrNull(vilkårsvurdering.id) } returns vilkårsvurdering
+        every { vilkårsvurderingRepository.findByBehandlingId(BEHANDLING_ID)} returns listOf(vilkårsvurdering)
         val lagretVilkårsvurdering = slot<Vilkårsvurdering>()
         every { vilkårsvurderingRepository.update(capture(lagretVilkårsvurdering)) } answers
                 { it.invocation.args.first() as Vilkårsvurdering }
@@ -225,7 +229,7 @@ internal class VurderingServiceTest {
 
         val vilkårTyperUtenVurdering = vurderingService.hentVilkårSomManglerVurdering(BEHANDLING_ID)
 
-        val vilkårtyper = VilkårType.hentVilkår().filterNot { it === VilkårType.LOVLIG_OPPHOLD }
+        val vilkårtyper = VilkårType.hentVilkår().filterNot { it === VilkårType.LOVLIG_OPPHOLD }.filterNot { it === VilkårType.TIDLIGERE_VEDTAKSPERIODER }
         assertThat(vilkårTyperUtenVurdering).containsExactlyInAnyOrderElementsOf(vilkårtyper)
     }
 
@@ -241,12 +245,11 @@ internal class VurderingServiceTest {
 
         val vilkårTyperUtenVurdering = vurderingService.hentVilkårSomManglerVurdering(BEHANDLING_ID)
 
-        val vilkårtyper = VilkårType.hentVilkår().filterNot { it === VilkårType.FORUTGÅENDE_MEDLEMSKAP }
+        val vilkårtyper = VilkårType.hentVilkår().filterNot { it === VilkårType.FORUTGÅENDE_MEDLEMSKAP }.filterNot { it === VilkårType.TIDLIGERE_VEDTAKSPERIODER }
         assertThat(vilkårTyperUtenVurdering).containsExactlyInAnyOrderElementsOf(vilkårtyper)
     }
 
     companion object {
-
         private val BEHANDLING_ID = UUID.randomUUID()
     }
 }

@@ -4,12 +4,13 @@ import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.api.beregning.ResultatType
 import no.nav.familie.ef.sak.api.beregning.VedtakDto
 import no.nav.familie.ef.sak.api.beregning.VedtakService
+import no.nav.familie.ef.sak.blankett.BlankettRepository
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 
 @Service
-class VedtaBlankettSteg(private val vedtakService: VedtakService) : BehandlingSteg<VedtakDto> {
+class VedtaBlankettSteg(private val vedtakService: VedtakService, private val blankettRepository: BlankettRepository) : BehandlingSteg<VedtakDto> {
 
     override fun validerSteg(behandling: Behandling) {
     }
@@ -26,6 +27,7 @@ class VedtaBlankettSteg(private val vedtakService: VedtakService) : BehandlingSt
 
         vedtakService.slettVedtakHvisFinnes(behandling.id)
         vedtakService.lagreVedtak(vedtak = data, behandlingId = behandling.id)
+        blankettRepository.deleteById(behandling.id)
 
     }
 

@@ -41,6 +41,8 @@ spec:
           - name: familie-ef-sak
             envVarPrefix: DB
             diskAutoresize: true
+            tier: db-g1-small
+            cascadingDelete: false
   accessPolicy:
     inbound:
       rules:

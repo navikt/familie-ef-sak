@@ -10,9 +10,7 @@ internal class BehandlingStegTest {
     @Test
     fun `Tester rekkefølgen på steg`() {
         val riktigRekkefølge =
-                listOf(StegType.REGISTRERE_OPPLYSNINGER,
-                       StegType.VILKÅRSVURDERE_INNGANGSVILKÅR,
-                       StegType.VILKÅRSVURDERE_STØNAD,
+                listOf(StegType.VILKÅR,
                        StegType.BEREGNE_YTELSE,
                        StegType.SEND_TIL_BESLUTTER,
                        StegType.BESLUTTE_VEDTAK,
@@ -29,9 +27,7 @@ internal class BehandlingStegTest {
     @Test
     fun `Tester rekkefølgen på steg - TEKNISK_OPPHØR`() {
         val riktigRekkefølge = listOf(
-                StegType.REGISTRERE_OPPLYSNINGER,
-                StegType.VILKÅRSVURDERE_INNGANGSVILKÅR,
-                StegType.VILKÅRSVURDERE_STØNAD,
+                StegType.VILKÅR,
                 StegType.BEREGNE_YTELSE,
                 StegType.SEND_TIL_BESLUTTER,
                 StegType.BESLUTTE_VEDTAK,
@@ -53,14 +49,12 @@ internal class BehandlingStegTest {
 
     @Test
     fun testDisplayName() {
-        assertEquals("Vilkårsvurdere stønad", StegType.VILKÅRSVURDERE_STØNAD.displayName())
+        assertEquals("Vilkår", StegType.VILKÅR.displayName())
     }
 
     @Test
     fun testErKompatibelMed() {
-        assertTrue(StegType.REGISTRERE_OPPLYSNINGER.erGyldigIKombinasjonMedStatus(BehandlingStatus.UTREDES))
-        assertTrue(StegType.VILKÅRSVURDERE_INNGANGSVILKÅR.erGyldigIKombinasjonMedStatus(BehandlingStatus.UTREDES))
-        assertTrue(StegType.VILKÅRSVURDERE_STØNAD.erGyldigIKombinasjonMedStatus(BehandlingStatus.UTREDES))
+        assertTrue(StegType.VILKÅR.erGyldigIKombinasjonMedStatus(BehandlingStatus.UTREDES))
         assertTrue(StegType.SEND_TIL_BESLUTTER.erGyldigIKombinasjonMedStatus(BehandlingStatus.UTREDES))
         assertTrue(StegType.BESLUTTE_VEDTAK.erGyldigIKombinasjonMedStatus(BehandlingStatus.FATTER_VEDTAK))
         assertTrue(StegType.IVERKSETT_MOT_OPPDRAG.erGyldigIKombinasjonMedStatus(BehandlingStatus.IVERKSETTER_VEDTAK))
@@ -69,7 +63,7 @@ internal class BehandlingStegTest {
         assertTrue(StegType.DISTRIBUER_VEDTAKSBREV.erGyldigIKombinasjonMedStatus(BehandlingStatus.IVERKSETTER_VEDTAK))
         assertTrue(StegType.FERDIGSTILLE_BEHANDLING.erGyldigIKombinasjonMedStatus(BehandlingStatus.IVERKSETTER_VEDTAK))
 
-        assertFalse(StegType.VILKÅRSVURDERE_STØNAD.erGyldigIKombinasjonMedStatus(BehandlingStatus.IVERKSETTER_VEDTAK))
+        assertFalse(StegType.VILKÅR.erGyldigIKombinasjonMedStatus(BehandlingStatus.IVERKSETTER_VEDTAK))
         assertFalse(StegType.BEHANDLING_FERDIGSTILT.erGyldigIKombinasjonMedStatus(BehandlingStatus.OPPRETTET))
     }
 

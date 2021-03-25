@@ -21,7 +21,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         val fagsak = fagsakRepository.insert(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.UTREDES))
 
-        stegService.håndterRegistrerOpplysninger(behandling, "")
+        stegService.håndterVilkår(behandling)
     }
 
     @Test
@@ -30,7 +30,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         val behandling = behandlingRepository.insert(behandling(fagsak, steg = StegType.BEHANDLING_FERDIGSTILT))
 
         assertThrows<IllegalStateException> {
-            stegService.håndterRegistrerOpplysninger(behandling, "")
+            stegService.håndterVilkår(behandling)
         }
     }
 
@@ -40,7 +40,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         val behandling = behandlingRepository.insert(behandling(fagsak, steg = StegType.BESLUTTE_VEDTAK))
 
         assertThrows<IllegalStateException> {
-            stegService.håndterRegistrerOpplysninger(behandling, "")
+            stegService.håndterVilkår(behandling)
         }
     }
 }

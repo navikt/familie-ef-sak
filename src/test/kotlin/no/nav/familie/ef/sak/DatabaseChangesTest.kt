@@ -10,7 +10,7 @@ class DatabaseChangesTest {
     companion object {
 
         //Oppdater kun når du er redo for å merge db-endringer
-        const val MERGED_VERSION = 39
+        const val MERGED_VERSION = 41
     }
 
     /**
