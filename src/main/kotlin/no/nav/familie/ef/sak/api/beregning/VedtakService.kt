@@ -37,7 +37,6 @@ class VedtakService(private val vedtakRepository: VedtakRepository) {
     }
 
     fun hentVedtakHvisEksisterer(behandlingId: UUID): VedtakDto? {
-        logger.info("-----------------HERHERHER-----------------")
         return vedtakRepository.findByIdOrNull(behandlingId)
                 ?.let { logger.info(it.toString())
                     return VedtakDto(it.resultatType, it.periodeBegrunnelse, it.inntektBegrunnelse, it.perioder.perioder) }
