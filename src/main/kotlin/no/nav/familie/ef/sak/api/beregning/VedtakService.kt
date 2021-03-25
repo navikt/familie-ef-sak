@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.repository.VedtakRepository
 import no.nav.familie.ef.sak.repository.domain.InntektWrapper
 import no.nav.familie.ef.sak.repository.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.repository.domain.Vedtak
+import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
@@ -15,13 +16,13 @@ class VedtakService(private val vedtakRepository: VedtakRepository) {
 
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-    fun lagreVedtak(vedtakRequest: VedtakRequest, behandlingId: UUID): UUID {
+    fun lagreVedtak(vedtak: VedtakDto, behandlingId: UUID): UUID {
         return vedtakRepository.insert(Vedtak(behandlingId,
-                                              vedtakRequest.resultatType,
-                                              vedtakRequest.periodeBegrunnelse,
-                                              vedtakRequest.inntektBegrunnelse,
-                                              PeriodeWrapper(vedtakRequest.perioder),
-                                              InntektWrapper(vedtakRequest.inntekter))).behandlingId
+                                              vedtak.resultatType,
+                                              vedtak.periodeBegrunnelse,
+                                              vedtak.inntektBegrunnelse,
+                                              PeriodeWrapper(vedtak.perioder),
+                                              InntektWrapper(vedtak.inntekter))).behandlingId
     }
 
     fun slettVedtakHvisFinnes(behandlingId: UUID) {
@@ -29,5 +30,9 @@ class VedtakService(private val vedtakRepository: VedtakRepository) {
             logger.info("Sletter vedtak for behandling=${behandlingId}")
             vedtakRepository.deleteById(behandlingId)
         }
+    }
+
+    fun hentVedtak(behandlingId: UUID): Vedtak {
+        return vedtakRepository.findByIdOrThrow(behandlingId)
     }
 }
