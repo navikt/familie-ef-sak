@@ -28,7 +28,7 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
         /** Pre */
         val fagsak = fagsakRepository.insert(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak,
-                                                                steg = StegType.VILKÅRSVURDERE_STØNAD,
+                                                                steg = StegType.VILKÅR,
                                                                 status = BehandlingStatus.UTREDES,
                                                                 type = BehandlingType.BLANKETT))
 
