@@ -1,0 +1,1 @@
+UPDATE behandling SET steg = 'VILKÅR' WHERE steg in ('VILKAR');
