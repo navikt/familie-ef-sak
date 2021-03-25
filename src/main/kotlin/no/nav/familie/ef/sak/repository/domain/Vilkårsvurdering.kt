@@ -65,8 +65,9 @@ enum class VilkårType(val beskrivelse: String) {
     ALENEOMSORG("§15-4 Aleneomsorg"),
     NYTT_BARN_SAMME_PARTNER("§15-4 Nytt barn samme partner"),
     SAGT_OPP_ELLER_REDUSERT("Sagt opp eller redusert stilling"),
-    AKTIVITET("Aktivitet")
-    ;
+    AKTIVITET("Aktivitet"),
+    TIDLIGERE_VEDTAKSPERIODER("Tidligere vedtaksperioder");
+
 
     companion object {
 

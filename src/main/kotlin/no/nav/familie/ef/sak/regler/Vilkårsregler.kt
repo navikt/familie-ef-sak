@@ -1,14 +1,6 @@
 package no.nav.familie.ef.sak.regler
 
-import no.nav.familie.ef.sak.regler.vilkår.AktivitetRegel
-import no.nav.familie.ef.sak.regler.vilkår.AleneomsorgRegel
-import no.nav.familie.ef.sak.regler.vilkår.ForutgåendeMedlemskapRegel
-import no.nav.familie.ef.sak.regler.vilkår.MorEllerFarRegel
-import no.nav.familie.ef.sak.regler.vilkår.NyttBarnSammePartnerRegel
-import no.nav.familie.ef.sak.regler.vilkår.OppholdINorgeRegel
-import no.nav.familie.ef.sak.regler.vilkår.SagtOppEllerRedusertRegel
-import no.nav.familie.ef.sak.regler.vilkår.SamlivRegel
-import no.nav.familie.ef.sak.regler.vilkår.SivilstandRegel
+import no.nav.familie.ef.sak.regler.vilkår.*
 import no.nav.familie.ef.sak.repository.domain.VilkårType
 
 /**
@@ -32,7 +24,8 @@ val alleVilkårsregler: List<Vilkårsregel> =
                 AleneomsorgRegel(),
                 NyttBarnSammePartnerRegel(),
                 AktivitetRegel(),
-                SagtOppEllerRedusertRegel()
+                SagtOppEllerRedusertRegel(),
+                TidligareVedtaksperioderRegel()
         )
 
 fun hentVilkårsregel(vilkårType: VilkårType): Vilkårsregel {
