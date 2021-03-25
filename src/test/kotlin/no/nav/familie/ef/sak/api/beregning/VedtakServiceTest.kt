@@ -60,4 +60,24 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
         assertThat(nyttVedtakLagret?.periodeBegrunnelse).isEqualTo(periodeBegrunnelse)
 
     }
+
+    @Test
+    fun `skal hente lagret vedtak hvis finnes`(){
+        val fagsak = fagsakRepository.insert(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak,
+                                                                steg = StegType.VILKÅR,
+                                                                status = BehandlingStatus.UTREDES,
+                                                                type = BehandlingType.BLANKETT))
+
+        val tomBegrunnelse = ""
+        val vedtakDto = VedtakDto(resultatType = ResultatType.INNVILGE,
+                                      tomBegrunnelse,
+                                      tomBegrunnelse, emptyList(), emptyList())
+
+        vedtakService.lagreVedtak(vedtakDto, behandling.id)
+
+        assertThat(vedtakService.hentVedtakHvisEksisterer(behandling.id)).usingRecursiveComparison().isEqualTo(vedtakDto)
+    }
+
+
 }
