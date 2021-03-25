@@ -89,6 +89,8 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
 
     fun hentBehandling(behandlingId: UUID): Behandling = behandlingRepository.findByIdOrThrow(behandlingId)
 
+    fun hentBehandlingStatus(behandlingId: UUID): BehandlingStatus = behandlingRepository.finnStatus(behandlingId)
+
     fun hentOvergangsstønad(behandlingId: UUID): SøknadsskjemaOvergangsstønad {
         val søknad = hentSøknad(behandlingId)
         return søknadOvergangsstønadRepository.findByIdOrThrow(søknad.soknadsskjemaId)
@@ -104,24 +106,24 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
         return søknadBarnetilsynRepository.findByIdOrThrow(søknad.soknadsskjemaId)
     }
 
-    fun oppdaterStatusPåBehandling(behandlingId: UUID, status: BehandlingStatus): Behandling {
-        val behandling = hentBehandling(behandlingId)
-        secureLogger.info("${SikkerhetContext.hentSaksbehandler()} endrer status på behandling $behandlingId " +
+    fun oppdaterStatusPåBehandling(behandling: Behandling, status: BehandlingStatus) {
+        val behandlingId = behandling.id
+        secureLogger.info("${SikkerhetContext.hentSaksbehandler()} endrer status på behandling=$behandlingId " +
                           "fra ${behandling.status} til $status")
 
-        behandling.status = status
-        return behandlingRepository.update(behandling)
+        if (!behandlingRepository.oppdaterStatus(behandlingId, status, behandling.status)) {
+            throw Feil("Fikk ikke oppdatert behandling=${behandlingId} med status=$status")
+        }
     }
 
-    fun oppdaterStegPåBehandling(behandlingId: UUID, steg: StegType): Behandling {
-        val behandling = hentBehandling(behandlingId)
-        secureLogger.info("${SikkerhetContext.hentSaksbehandler()} endrer steg på behandling $behandlingId " +
+    fun oppdaterStegPåBehandling(behandling: Behandling, steg: StegType) {
+        val behandlingId = behandling.id
+        secureLogger.info("${SikkerhetContext.hentSaksbehandler()} endrer steg på behandling=$behandlingId " +
                           "fra ${behandling.steg} til $steg")
-
-        behandling.steg = steg
-        return behandlingRepository.update(behandling)
+        if (!behandlingRepository.oppdaterSteg(behandlingId, steg, behandling.steg)) {
+            throw Feil("Fikk ikke oppdatert behandling=${behandlingId} med steg=$steg")
+        }
     }
-
 
     private fun hentSøknad(behandlingId: UUID): Søknad {
         return søknadRepository.findByBehandlingId(behandlingId)
@@ -143,11 +145,11 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
     fun annullerBehandling(behandlingId: UUID): Behandling {
         val behandling = hentBehandling(behandlingId)
         validerAtBehandlingenKanAnnulleres(behandling)
-        behandling.status = BehandlingStatus.FERDIGSTILT
-        behandling.resultat = BehandlingResultat.ANNULLERT
-        behandling.steg = StegType.BEHANDLING_FERDIGSTILT
-        behandlingshistorikkService.opprettHistorikkInnslag(behandling)
-        return behandlingRepository.update(behandling)
+        val oppdatertBehandling = behandling.copy(status = BehandlingStatus.FERDIGSTILT,
+                                                  resultat = BehandlingResultat.ANNULLERT,
+                                                  steg = StegType.BEHANDLING_FERDIGSTILT)
+        behandlingshistorikkService.opprettHistorikkInnslag(oppdatertBehandling)
+        return behandlingRepository.update(oppdatertBehandling)
     }
 
     private fun validerAtBehandlingenKanAnnulleres(behandling: Behandling) {

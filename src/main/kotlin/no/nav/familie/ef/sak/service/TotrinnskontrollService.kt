@@ -48,7 +48,7 @@ class TotrinnskontrollService(private val behandlingshistorikkService: Behandlin
                                                             utfall = utfall,
                                                             metadata = beslutteVedtak)
 
-        behandlingService.oppdaterStatusPåBehandling(behandling.id, nyStatus)
+        behandlingService.oppdaterStatusPåBehandling(behandling, nyStatus)
         return sisteBehandlingshistorikk.opprettetAv
     }
 

@@ -15,7 +15,7 @@ class FerdigstillBehandlingSteg(private val behandlingService: BehandlingService
 
     override fun utførSteg(behandling: Behandling, data: Void?) {
         logger.info("Ferdigstiller behandling [${behandling.id}]")
-        behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.FERDIGSTILT)
+        behandlingService.oppdaterStatusPåBehandling(behandling, BehandlingStatus.FERDIGSTILT)
     }
 
 

@@ -31,7 +31,8 @@ class VedtakController(private val stegService: StegService,
     fun sendTilBeslutter(@PathVariable behandlingId: UUID): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         val behandling = behandlingService.hentBehandling(behandlingId)
-        return Ressurs.success(stegService.håndterSendTilBeslutter(behandling).id)
+        stegService.håndterSendTilBeslutter(behandling)
+        return Ressurs.success(behandlingId)
     }
 
     @PostMapping("/{behandlingId}/beslutte-vedtak")
@@ -42,7 +43,8 @@ class VedtakController(private val stegService: StegService,
             throw ApiFeil("Mangler begrunnelse", HttpStatus.BAD_REQUEST)
         }
         val behandling = behandlingService.hentBehandling(behandlingId)
-        return Ressurs.success(stegService.håndterBeslutteVedtak(behandling, request).id)
+        stegService.håndterBeslutteVedtak(behandling, request)
+        return Ressurs.success(behandlingId)
     }
 
     @GetMapping("{behandlingId}/totrinnskontroll")
