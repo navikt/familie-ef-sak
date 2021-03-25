@@ -6,7 +6,7 @@ import io.mockk.just
 import io.mockk.mockk
 import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.api.beregning.ResultatType
-import no.nav.familie.ef.sak.api.beregning.VedtakRequest
+import no.nav.familie.ef.sak.api.beregning.VedtakDto
 import no.nav.familie.ef.sak.api.beregning.VedtakService
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
@@ -26,7 +26,7 @@ internal class VedtaBlankettStegTest {
                                     steg = StegType.VILKÅRSVURDERE_INNGANGSVILKÅR,
                                     status = BehandlingStatus.UTREDES,
                                     type = BehandlingType.BLANKETT)
-        val request = VedtakRequest(
+        val request = VedtakDto(
                 resultatType = ResultatType.INNVILGE,
                 "En periodebegrunnelse",
                 "En inntektBegrunnelse",
@@ -54,7 +54,7 @@ internal class VedtaBlankettStegTest {
                                     steg = StegType.VILKÅRSVURDERE_INNGANGSVILKÅR,
                                     status = BehandlingStatus.UTREDES,
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING)
-        val request = VedtakRequest(
+        val request = VedtakDto(
                 resultatType = ResultatType.INNVILGE,
                 "En periodebegrunnelse",
                 "En inntektBegrunnelse",
@@ -81,7 +81,7 @@ internal class VedtaBlankettStegTest {
                                     steg = StegType.VILKÅRSVURDERE_INNGANGSVILKÅR,
                                     status = BehandlingStatus.UTREDES,
                                     type = BehandlingType.BLANKETT)
-        val request = VedtakRequest(
+        val request = VedtakDto(
                 resultatType = ResultatType.HENLEGGE,
                 "En periodebegrunnelse",
                 "En inntektBegrunnelse",
