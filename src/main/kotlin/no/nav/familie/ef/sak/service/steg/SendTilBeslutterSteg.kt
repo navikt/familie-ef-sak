@@ -28,7 +28,7 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
     }
 
     override fun utførSteg(behandling: Behandling, data: Void?) {
-        behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.FATTER_VEDTAK)
+        behandlingService.oppdaterStatusPåBehandling(behandling, BehandlingStatus.FATTER_VEDTAK)
         opprettGodkjennVedtakOppgave(behandling)
 
         ferdigstillOppgave(behandling, Oppgavetype.BehandleSak)

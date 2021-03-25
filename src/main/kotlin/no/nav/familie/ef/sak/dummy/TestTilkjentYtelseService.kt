@@ -32,7 +32,7 @@ class TestTilkjentYtelseService(private val behandlingService: BehandlingService
         val tilkjentYtelseDTO = tilkjentYtelseTestDTO.nyTilkjentYtelse.copy(id = UUID.randomUUID(),
                                                                             behandlingId = behandling.id)
         val opprettTilkjentYtelse = tilkjentYtelseService.opprettTilkjentYtelse(tilkjentYtelseDTO)
-        behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id,
+        behandlingService.oppdaterStatusPåBehandling(behandling = behandling,
                                                      status = BehandlingStatus.FERDIGSTILT)
         return opprettTilkjentYtelse
     }

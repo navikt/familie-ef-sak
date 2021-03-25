@@ -45,77 +45,69 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
     private val stegFeiletMetrics: Map<StegType, Counter> = initStegMetrikker("feil")
 
     @Transactional
-    fun håndterVilkår(behandling: Behandling): Behandling {
+    fun håndterVilkår(behandling: Behandling) {
         val behandlingSteg: VilkårSteg = hentBehandlingSteg(StegType.VILKÅR)
-        return håndterSteg(behandling, behandlingSteg, null)
+        håndterSteg(behandling, behandlingSteg, null)
     }
 
     @Transactional
-    fun håndterBeregnYtelseForStønad(behandling: Behandling, tilkjentYtelse: TilkjentYtelseDTO): Behandling {
+    fun håndterBeregnYtelseForStønad(behandling: Behandling, tilkjentYtelse: TilkjentYtelseDTO) {
         val behandlingSteg: BeregnYtelseSteg = hentBehandlingSteg(BEREGNE_YTELSE)
-        return håndterSteg(behandling, behandlingSteg, tilkjentYtelse)
+        håndterSteg(behandling, behandlingSteg, tilkjentYtelse)
     }
 
     @Transactional
-    fun håndterVedtaBlankett(behandling: Behandling, vedtak: VedtakDto): Behandling {
+    fun håndterVedtakBlankett(behandling: Behandling, vedtak: VedtakDto) {
         val behandlingSteg: VedtaBlankettSteg = hentBehandlingSteg(VEDTA_BLANKETT)
-        return håndterSteg(behandling, behandlingSteg, vedtak)
+        håndterSteg(behandling, behandlingSteg, vedtak)
     }
 
     @Transactional
-    fun håndterSendTilBeslutter(behandling: Behandling): Behandling {
+    fun håndterSendTilBeslutter(behandling: Behandling) {
         val behandlingSteg: SendTilBeslutterSteg = hentBehandlingSteg(SEND_TIL_BESLUTTER)
-
-        return håndterSteg(behandling, behandlingSteg, null)
+        håndterSteg(behandling, behandlingSteg, null)
     }
 
     @Transactional
-    fun håndterBeslutteVedtak(behandling: Behandling, data: BeslutteVedtakDto): Behandling {
+    fun håndterBeslutteVedtak(behandling: Behandling, data: BeslutteVedtakDto) {
         val behandlingSteg: BeslutteVedtakSteg = hentBehandlingSteg(BESLUTTE_VEDTAK)
-
-        return håndterSteg(behandling, behandlingSteg, data)
+        håndterSteg(behandling, behandlingSteg, data)
     }
 
     @Transactional
-    fun håndterBlankett(behandling: Behandling): Behandling {
+    fun håndterBlankett(behandling: Behandling) {
         val behandlingSteg: BlankettSteg = hentBehandlingSteg(JOURNALFØR_BLANKETT)
-
-        return håndterSteg(behandling, behandlingSteg, null)
+        håndterSteg(behandling, behandlingSteg, null)
     }
 
     @Transactional
-    fun håndterIverksettingOppdrag(behandling: Behandling): Behandling {
+    fun håndterIverksettingOppdrag(behandling: Behandling) {
         val behandlingSteg: IverksettMotOppdragSteg = hentBehandlingSteg(IVERKSETT_MOT_OPPDRAG)
-
-        return håndterSteg(behandling, behandlingSteg, null)
+        håndterSteg(behandling, behandlingSteg, null)
     }
 
     @Transactional
-    fun håndterStatusPåOppdrag(behandling: Behandling): Behandling {
+    fun håndterStatusPåOppdrag(behandling: Behandling) {
         val behandlingSteg: VentePåStatusFraØkonomi = hentBehandlingSteg(VENTE_PÅ_STATUS_FRA_ØKONOMI)
-
-        return håndterSteg(behandling, behandlingSteg, null)
+        håndterSteg(behandling, behandlingSteg, null)
     }
 
     @Transactional
-    fun håndterJournalførVedtaksbrev(behandling: Behandling): Behandling {
+    fun håndterJournalførVedtaksbrev(behandling: Behandling) {
         val behandlingSteg: JournalførVedtaksbrevSteg = hentBehandlingSteg(JOURNALFØR_VEDTAKSBREV)
-
-        return håndterSteg(behandling, behandlingSteg, null)
+        håndterSteg(behandling, behandlingSteg, null)
     }
 
     @Transactional
-    fun håndterDistribuerVedtaksbrev(behandling: Behandling, journalpostId: String): Behandling {
+    fun håndterDistribuerVedtaksbrev(behandling: Behandling, journalpostId: String) {
         val behandlingSteg: DistribuerVedtaksbrevSteg = hentBehandlingSteg(DISTRIBUER_VEDTAKSBREV)
-
-        return håndterSteg(behandling, behandlingSteg, journalpostId)
+        håndterSteg(behandling, behandlingSteg, journalpostId)
     }
 
     @Transactional
-    fun håndterFerdigsitllBehandling(behandling: Behandling): Behandling {
+    fun håndterFerdigsitllBehandling(behandling: Behandling) {
         val behandlingSteg: FerdigstillBehandlingSteg = hentBehandlingSteg(FERDIGSTILLE_BEHANDLING)
-
-        return håndterSteg(behandling, behandlingSteg, null)
+        håndterSteg(behandling, behandlingSteg, null)
     }
 
 
@@ -130,7 +122,7 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
         }
 
         validerAtStegKanResettes(behandling, steg)
-        behandlingService.oppdaterStegPåBehandling(behandlingId, steg)
+        behandlingService.oppdaterStegPåBehandling(behandling, steg)
     }
 
     private fun validerAtStegKanResettes(behandling: Behandling,
@@ -141,24 +133,24 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
             val saksbehandler = SikkerhetContext.hentSaksbehandler()
             error("$saksbehandler kan ikke endre" +
                   " fra steg=${behandling.steg.displayName()} til steg=${steg.displayName()}" +
-                  " pga manglende rolle på behandling=$behandling.id")
+                  " pga manglende rolle på behandling=${behandling.id}")
         }
     }
 
     // Generelle stegmetoder
     private fun <T> håndterSteg(behandling: Behandling,
                                 behandlingSteg: BehandlingSteg<T>,
-                                data: T): Behandling {
+                                data: T) {
         val stegType = behandlingSteg.stegType()
         val saksbehandlerIdent = SikkerhetContext.hentSaksbehandler()
         try {
             valider(behandling, stegType, saksbehandlerIdent, behandlingSteg)
             val nesteSteg = behandlingSteg.utførOgReturnerNesteSteg(behandling, data)
             oppdaterHistorikk(behandlingSteg, behandling, saksbehandlerIdent)
-            oppdaterMetrikk(stegType, stegSuksessMetrics)
             validerNesteSteg(nesteSteg, behandling)
             logger.info("$stegType på behandling ${behandling.id} er håndtert")
-            return behandlingService.oppdaterStegPåBehandling(behandlingId = behandling.id, steg = nesteSteg)
+            behandlingService.oppdaterStegPåBehandling(behandling = behandling, steg = nesteSteg)
+            oppdaterMetrikk(stegType, stegSuksessMetrics)
         } catch (exception: Exception) {
             oppdaterMetrikk(stegType, stegFeiletMetrics)
             logger.error("Håndtering av stegtype '$stegType' feilet på behandling ${behandling.id}.")
@@ -167,7 +159,7 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
     }
 
     private fun validerNesteSteg(nesteSteg: StegType, behandling: Behandling) {
-        if (!nesteSteg.erGyldigIKombinasjonMedStatus(behandlingService.hentBehandling(behandling.id).status)) {
+        if (!nesteSteg.erGyldigIKombinasjonMedStatus(behandlingService.hentBehandlingStatus(behandling.id))) {
             error("Steg '${nesteSteg.displayName()}' kan ikke settes " +
                   "på behandling i kombinasjon med status ${behandling.status}")
         }

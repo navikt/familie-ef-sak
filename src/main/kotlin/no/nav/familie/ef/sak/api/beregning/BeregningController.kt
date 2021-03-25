@@ -43,15 +43,16 @@ class BeregningController(private val stegService: StegService,
                                            personIdent = fagsak.hentAktivIdent())
                 }
         )
-        return Ressurs.success(stegService.håndterBeregnYtelseForStønad(behandling, tilkjentYtelse).id)
+        stegService.håndterBeregnYtelseForStønad(behandling, tilkjentYtelse)
+        return Ressurs.success(behandlingId)
     }
 
     @PostMapping("/{behandlingId}/lagre-vedtak")
     fun lagreVedtak(@PathVariable behandlingId: UUID, @RequestBody vedtak: VedtakDto): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         val behandling = behandlingService.hentBehandling(behandlingId)
-
-        return Ressurs.success(stegService.håndterVedtaBlankett(behandling, vedtak).id)
+        stegService.håndterVedtakBlankett(behandling, vedtak)
+        return Ressurs.success(behandlingId)
     }
 
 }

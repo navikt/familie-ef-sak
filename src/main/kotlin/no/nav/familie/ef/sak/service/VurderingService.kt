@@ -176,7 +176,7 @@ class VurderingService(private val behandlingService: BehandlingService,
         val vilkårUtenVurdering = hentVilkårSomManglerVurdering(behandlingId)
 
         if (skalFerdigstilleVilkårSteg(vilkårUtenVurdering, behandling)) {
-            stegService.håndterVilkår(behandling).id
+            stegService.håndterVilkår(behandling)
         } else if (skalTilbakestilleTilVilkårSteg(vilkårUtenVurdering, behandling)) {
             stegService.resetSteg(behandling.id, StegType.VILKÅR)
         }

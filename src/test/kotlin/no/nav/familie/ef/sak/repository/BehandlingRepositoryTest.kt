@@ -3,15 +3,15 @@ package no.nav.familie.ef.sak.repository
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import no.nav.familie.ef.sak.repository.domain.FagsakPerson
 import no.nav.familie.ef.sak.repository.domain.Sporbar
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -77,4 +77,41 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(findByEksternId).isEqualTo(null)
     }
 
+    @Test
+    internal fun `finnStatus - skal returnere status`() {
+        val fagsak = fagsakRepository.insert(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak))
+        assertThat(behandlingRepository.finnStatus(behandling.id)).isEqualTo(behandling.status)
+    }
+
+    @Test
+    internal fun `oppdaterStatus - skal oppdatere status på behandling`() {
+        val fagsak = fagsakRepository.insert(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak))
+        val harOppdatertStatus =
+                behandlingRepository.oppdaterStatus(behandling.id, BehandlingStatus.FERDIGSTILT, behandling.status)
+
+        val oppdatertBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
+
+        assertThat(harOppdatertStatus).isTrue
+        assertThat(behandling.status).isNotEqualTo(BehandlingStatus.FERDIGSTILT)
+        assertThat(oppdatertBehandling.status).isEqualTo(BehandlingStatus.FERDIGSTILT)
+    }
+
+    @Test
+    internal fun `oppdaterStatus - skal returnere false`() {
+        val harOppdatertStatus = behandlingRepository.oppdaterStatus(behandlingId = UUID.randomUUID(),
+                                                                     status = BehandlingStatus.FERDIGSTILT,
+                                                                     tidligereStatus = BehandlingStatus.FERDIGSTILT)
+        assertThat(harOppdatertStatus).isFalse
+    }
+
+    @Test
+    internal fun `skal kaste feil hvis man prøver å oppdatere en behandling etter att man oppdatert status som oppdaterer versjon`() {
+        val fagsak = fagsakRepository.insert(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak))
+        behandlingRepository.oppdaterStatus(behandling.id, BehandlingStatus.FERDIGSTILT, behandling.status)
+        assertThat(catchThrowable { behandlingRepository.update(behandling) })
+                .hasRootCauseMessage("Optimistic lock exception on saving entity of type no.nav.familie.ef.sak.repository.domain.Behandling.")
+    }
 }

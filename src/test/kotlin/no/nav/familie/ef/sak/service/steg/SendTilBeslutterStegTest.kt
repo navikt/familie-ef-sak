@@ -75,7 +75,7 @@ internal class SendTilBeslutterStegTest {
 
         utførSteg()
 
-        verify { behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.FATTER_VEDTAK) }
+        verify { behandlingService.oppdaterStatusPåBehandling(behandling, BehandlingStatus.FATTER_VEDTAK) }
 
         assertThat(taskSlot[0].type).isEqualTo(OpprettOppgaveTask.TYPE)
         assertThat(objectMapper.readValue<OpprettOppgaveTaskData>(taskSlot[0].payload).oppgavetype)
