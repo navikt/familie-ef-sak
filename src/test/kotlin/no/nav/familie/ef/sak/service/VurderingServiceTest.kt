@@ -229,7 +229,7 @@ internal class VurderingServiceTest {
 
         val vilkårTyperUtenVurdering = vurderingService.hentVilkårSomManglerVurdering(BEHANDLING_ID)
 
-        val vilkårtyper = VilkårType.hentVilkår().filterNot { it === VilkårType.LOVLIG_OPPHOLD }
+        val vilkårtyper = VilkårType.hentVilkår().filterNot { it === VilkårType.LOVLIG_OPPHOLD }.filterNot { it === VilkårType.TIDLIGERE_VEDTAKSPERIODER }
         assertThat(vilkårTyperUtenVurdering).containsExactlyInAnyOrderElementsOf(vilkårtyper)
     }
 
@@ -245,7 +245,7 @@ internal class VurderingServiceTest {
 
         val vilkårTyperUtenVurdering = vurderingService.hentVilkårSomManglerVurdering(BEHANDLING_ID)
 
-        val vilkårtyper = VilkårType.hentVilkår().filterNot { it === VilkårType.FORUTGÅENDE_MEDLEMSKAP }
+        val vilkårtyper = VilkårType.hentVilkår().filterNot { it === VilkårType.FORUTGÅENDE_MEDLEMSKAP }.filterNot { it === VilkårType.TIDLIGERE_VEDTAKSPERIODER }
         assertThat(vilkårTyperUtenVurdering).containsExactlyInAnyOrderElementsOf(vilkårtyper)
     }
 

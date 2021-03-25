@@ -13,18 +13,14 @@ import no.nav.familie.ef.sak.regler.alleVilkårsregler
 import no.nav.familie.ef.sak.regler.evalutation.OppdaterVilkår
 import no.nav.familie.ef.sak.regler.hentVilkårsregel
 import no.nav.familie.ef.sak.repository.VilkårsvurderingRepository
-import no.nav.familie.ef.sak.repository.domain.Behandling
-import no.nav.familie.ef.sak.repository.domain.Delvilkårsvurdering
-import no.nav.familie.ef.sak.repository.domain.DelvilkårsvurderingWrapper
-import no.nav.familie.ef.sak.repository.domain.VilkårType
-import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
-import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
+import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.service.steg.StegService
 import no.nav.familie.ef.sak.service.steg.StegType
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import java.util.UUID
+import org.springframework.transaction.annotation.Transactional
+import java.util.*
 
 @Service
 class VurderingService(private val behandlingService: BehandlingService,
@@ -33,6 +29,7 @@ class VurderingService(private val behandlingService: BehandlingService,
                        private val stegService: StegService,
                        private val blankettRepository: BlankettRepository) {
 
+    @Transactional
     fun oppdaterVilkår(vilkårsvurderingDto: OppdaterVilkårsvurderingDto): VilkårsvurderingDto {
         val vilkårsvurdering = vilkårsvurderingRepository.findByIdOrThrow(vilkårsvurderingDto.id)
         val behandlingId = vilkårsvurdering.behandlingId
@@ -48,6 +45,7 @@ class VurderingService(private val behandlingService: BehandlingService,
         return oppdatertVilkårsvurderingDto
     }
 
+    @Transactional
     fun nullstillVilkår(vilkårsvurderingDto: NullstillVilkårsvurderingDto): VilkårsvurderingDto {
         val vilkårsvurdering = vilkårsvurderingRepository.findByIdOrThrow(vilkårsvurderingDto.id)
         val behandlingId = vilkårsvurdering.behandlingId
@@ -159,13 +157,15 @@ class VurderingService(private val behandlingService: BehandlingService,
         val lagredeVilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(behandlingId)
         val vilkår = VilkårType.hentVilkår()
 
-        return vilkår.filter {
-            lagredeVilkårsvurderinger.any { vurdering ->
-                vurdering.type == it
-                && vurdering.resultat == Vilkårsresultat.IKKE_TATT_STILLING_TIL
-            }
-            || lagredeVilkårsvurderinger.none { vurdering -> vurdering.type == it }
-        }
+        return vilkår
+                .filter { it != VilkårType.TIDLIGERE_VEDTAKSPERIODER } // TODO: Må håndteres senere
+                .filter {
+                    lagredeVilkårsvurderinger.any { vurdering ->
+                        vurdering.type == it
+                        && vurdering.resultat == Vilkårsresultat.IKKE_TATT_STILLING_TIL
+                    }
+                    || lagredeVilkårsvurderinger.none { vurdering -> vurdering.type == it }
+                }
     }
 
     private fun behandlingErLåstForVidereRedigering(behandlingId: UUID) =
