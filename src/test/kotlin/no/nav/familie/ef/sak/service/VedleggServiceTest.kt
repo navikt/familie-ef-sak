@@ -32,10 +32,16 @@ internal class VedleggServiceTest {
 
         every {
             behandlingService.hentBehandling(any())
-        } returns behandling(fagsak()).copy(journalposter = setOf(
-                Behandlingsjournalpost(journalpostSøknad.journalpostId, journalpostSøknad.journalposttype),
-                Behandlingsjournalpost(journalpostEttersendelse.journalpostId, journalpostEttersendelse.journalposttype)
-        ))
+        } returns behandling(fagsak())
+        every {
+            behandlingService.hentBehandlingsjournalposter(any())
+        } answers {
+            val behandlingId = firstArg<UUID>()
+            listOf(
+                    Behandlingsjournalpost(behandlingId, journalpostSøknad.journalpostId, journalpostSøknad.journalposttype),
+                    Behandlingsjournalpost(behandlingId, journalpostEttersendelse.journalpostId, journalpostEttersendelse.journalposttype)
+            )
+        }
 
     }
 
