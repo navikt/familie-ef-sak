@@ -287,7 +287,7 @@ internal class VurderingServiceTest {
         every { vilkårsvurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns vilkårsvurderinger
         every { stegService.resetSteg(any(), any()) } returns Unit
         vurderingService.oppdaterStegPåBehandling(BEHANDLING_ID)
-        verify(exactly = 1) { stegService.resetSteg(any(), StegType.BEREGNE_YTELSE) }
+        verify(exactly = 1) { stegService.resetSteg(any(), StegType.VILKÅR) }
     }
 
     companion object {

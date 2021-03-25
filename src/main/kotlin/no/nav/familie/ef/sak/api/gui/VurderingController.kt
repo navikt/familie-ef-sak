@@ -57,7 +57,9 @@ class VurderingController(private val vurderingService: VurderingService,
     @PostMapping("nullstill")
     fun nullstillVilkår(@RequestBody request: NullstillVilkårsvurderingDto): Ressurs<VilkårsvurderingDto> {
         tilgangService.validerTilgangTilBehandling(request.behandlingId)
-        return Ressurs.success(vurderingService.nullstillVilkår(request))
+        val nullstillVilkår = vurderingService.nullstillVilkår(request)
+        vurderingService.oppdaterStegPåBehandling(request.behandlingId)
+        return Ressurs.success(nullstillVilkår)
     }
 
     @GetMapping("{behandlingId}/vilkar")
