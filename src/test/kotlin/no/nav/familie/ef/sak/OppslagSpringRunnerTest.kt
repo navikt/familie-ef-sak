@@ -4,8 +4,19 @@ import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
 import com.github.tomakehurst.wiremock.WireMockServer
 import no.nav.familie.ef.sak.blankett.Blankett
+import no.nav.familie.ef.sak.config.RolleConfig
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.database.DbContainerInitializer
-import no.nav.familie.ef.sak.repository.domain.*
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.util.onBehalfOfToken
+import no.nav.familie.ef.sak.repository.domain.Behandling
+import no.nav.familie.ef.sak.repository.domain.Behandlingshistorikk
+import no.nav.familie.ef.sak.repository.domain.Fagsak
+import no.nav.familie.ef.sak.repository.domain.Oppgave
+import no.nav.familie.ef.sak.repository.domain.Registergrunnlag
+import no.nav.familie.ef.sak.repository.domain.Søknad
+import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.repository.domain.Vedtak
+import no.nav.familie.ef.sak.repository.domain.Vedtaksbrev
+import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
 import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsstønad
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.extension.ExtendWith
@@ -16,10 +27,7 @@ import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.cache.CacheManager
 import org.springframework.context.ApplicationContext
 import org.springframework.data.jdbc.core.JdbcAggregateOperations
-import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
-import org.springframework.http.ResponseEntity
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
@@ -28,7 +36,13 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @SpringBootTest(classes = [ApplicationLocal::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("integrasjonstest", "mock-oauth", "mock-pdl", "mock-integrasjoner", "mock-oppdrag", "mock-infotrygd-replika", "mock-brev")
+@ActiveProfiles("integrasjonstest",
+                "mock-oauth",
+                "mock-pdl",
+                "mock-integrasjoner",
+                "mock-oppdrag",
+                "mock-infotrygd-replika",
+                "mock-brev")
 abstract class OppslagSpringRunnerTest {
 
     protected val listAppender = initLoggingEventListAppender()
@@ -39,6 +53,7 @@ abstract class OppslagSpringRunnerTest {
     @Autowired private lateinit var jdbcAggregateOperations: JdbcAggregateOperations
     @Autowired private lateinit var applicationContext: ApplicationContext
     @Autowired private lateinit var cacheManager: CacheManager
+    @Autowired private lateinit var rolleConfig: RolleConfig
 
     @LocalServerPort
     private var port: Int? = 0
@@ -91,16 +106,8 @@ abstract class OppslagSpringRunnerTest {
 
     protected val lokalTestToken: String
         get() {
-            val cookie = restTemplate.exchange(localhost("/local/cookie"),
-                                               HttpMethod.GET,
-                                               HttpEntity.EMPTY,
-                                               String::class.java)
-            return tokenFraRespons(cookie)
+            return onBehalfOfToken(role = rolleConfig.beslutterRolle)
         }
-
-    private fun tokenFraRespons(cookie: ResponseEntity<String>): String {
-        return cookie.body!!.split("value\":\"".toRegex()).toTypedArray()[1].split("\"".toRegex()).toTypedArray()[0]
-    }
 
     companion object {
 
