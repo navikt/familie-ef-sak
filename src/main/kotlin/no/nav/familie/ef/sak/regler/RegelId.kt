@@ -38,8 +38,11 @@ enum class RegelId(val beskrivelse: String) {
 
     // Sagt opp arbeidsforhold
     SAGT_OPP_ELLER_REDUSERT("Har søker sagt opp jobben, tatt frivillig permisjon eller redusert arbeidstiden de siste 6 månedene før søknadstidspunktet?"),
-    RIMELIG_GRUNN_SAGT_OPP("Hadde søker rimelig grunn til å si opp jobben eller redusere arbeidstiden?")
+    RIMELIG_GRUNN_SAGT_OPP("Hadde søker rimelig grunn til å si opp jobben eller redusere arbeidstiden?"),
 
+    //Tidligere Stønadsperioder
+    HAR_TIDLIGERE_MOTTATT_OVERGANSSTØNAD("Har søker tidligere mottatt overgangsstønad?"),
+    HAR_TIDLIGERE_ANDRE_STØNADER_SOM_HAR_BETYDNING("Har søker tidligere mottatt andre stønader som har betydning for stønadstiden i §15-8 første og andre ledd?")
     ;
 
 }

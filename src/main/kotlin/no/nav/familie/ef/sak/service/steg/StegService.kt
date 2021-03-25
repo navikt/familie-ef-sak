@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.service.steg
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
-import no.nav.familie.ef.sak.api.beregning.VedtakRequest
+import no.nav.familie.ef.sak.api.beregning.VedtakDto
 import no.nav.familie.ef.sak.api.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
 import no.nav.familie.ef.sak.blankett.BlankettSteg
@@ -57,9 +57,9 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
     }
 
     @Transactional
-    fun håndterVedtaBlankett(behandling: Behandling, vedtakRequest: VedtakRequest): Behandling {
+    fun håndterVedtaBlankett(behandling: Behandling, vedtak: VedtakDto): Behandling {
         val behandlingSteg: VedtaBlankettSteg = hentBehandlingSteg(VEDTA_BLANKETT)
-        return håndterSteg(behandling, behandlingSteg, vedtakRequest)
+        return håndterSteg(behandling, behandlingSteg, vedtak)
     }
 
     @Transactional

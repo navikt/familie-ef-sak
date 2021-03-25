@@ -33,9 +33,9 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
                                                                 type = BehandlingType.BLANKETT))
 
         val tomBegrunnelse = ""
-        val vedtakRequest = VedtakRequest(resultatType = ResultatType.INNVILGE,
-                                          tomBegrunnelse,
-                                          tomBegrunnelse, emptyList(), emptyList())
+        val vedtakRequest = VedtakDto(resultatType = ResultatType.INNVILGE,
+                                      tomBegrunnelse,
+                                      tomBegrunnelse, emptyList(), emptyList())
 
         /** Skal ikke gjøre noe når den ikke er opprettet **/
         vedtakService.slettVedtakHvisFinnes(behandling.id)
