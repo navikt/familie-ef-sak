@@ -1,12 +1,18 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository
+package no.nav.familie.ef.sak.repository
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.repository.FagsakRepository
+import no.nav.familie.ef.sak.repository.domain.FagsakPerson
+import no.nav.familie.ef.sak.repository.domain.Sporbar
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -45,8 +51,8 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
         val fagsaker = fagsakRepository.findBySøkerIdent("12345678901")
 
         assertThat(fagsaker.forEach { fagsak ->
-                assertThat(fagsak.søkerIdenter.size).isEqualTo(1)
-                assertThat(fagsak.søkerIdenter.map { it.ident }).contains("12345678901")
+            assertThat(fagsak.søkerIdenter.size).isEqualTo(1)
+            assertThat(fagsak.søkerIdenter.map { it.ident }).contains("12345678901")
         })
 
 
@@ -71,4 +77,12 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(findByEksternId).isEqualTo(null)
     }
 
+    @Test
+    internal fun `finnAktivIdent - skal finne aktiv ident`() {
+        val fagsak = fagsak(setOf(FagsakPerson(ident = "1"),
+                                  FagsakPerson(ident = "2", sporbar = Sporbar(opprettetTid = LocalDateTime.now().plusDays(2))),
+                                  FagsakPerson(ident = "3")))
+        fagsakRepository.insert(fagsak)
+        assertThat(fagsakRepository.finnAktivIdent(fagsak.id)).isEqualTo("2")
+    }
 }

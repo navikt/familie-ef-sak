@@ -35,7 +35,7 @@ class BlankettSteg(
     override fun utførSteg(behandling: Behandling, data: Void?) {
 
         val journalpostForBehandling = journalpostClient.hentJournalpost(behandling.journalposter.first().journalpostId)
-        val personIdent = behandlingRepository.finnGjeldendeIdentForBehandling(behandling.id)
+        val personIdent = behandlingRepository.finnAktivIdent(behandling.id)
         val enhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(personIdent)
         val blankettPdf = blankettRepository.findByIdOrThrow(behandling.id).pdf.bytes
 

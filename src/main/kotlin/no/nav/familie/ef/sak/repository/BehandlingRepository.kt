@@ -31,6 +31,6 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
                     ORDER BY fp.opprettet_tid DESC 
                     LIMIT 1
                     """)
-    fun finnGjeldendeIdentForBehandling(behandlingId: UUID): String
+    fun finnAktivIdent(behandlingId: UUID): String
 
 }

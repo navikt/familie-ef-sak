@@ -36,6 +36,7 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
 
+    fun hentAktivIdent(behandlingId: UUID): String = behandlingRepository.finnAktivIdent(behandlingId)
 
     @Transactional
     fun lagreSøknadForOvergangsstønad(søknad: SøknadOvergangsstønadKontrakt,
