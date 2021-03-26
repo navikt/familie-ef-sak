@@ -21,7 +21,6 @@ import java.util.*
 @Validated
 class BeregningController(private val stegService: StegService,
                           private val behandlingService: BehandlingService,
-                          private val fagsakService: FagsakService,
                           private val beregningService: BeregningService,
                           private val tilgangService: TilgangService) {
 
@@ -29,7 +28,7 @@ class BeregningController(private val stegService: StegService,
     fun beregnYtelseForStønad(@PathVariable behandlingId: UUID, @RequestBody beregningRequest: BeregningRequest): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         val behandling = behandlingService.hentBehandling(behandlingId)
-        val aktivIdent = fagsakService.hentAktivIdent(behandling.fagsakId)
+        val aktivIdent = behandlingService.hentAktivIdent(behandling.fagsakId)
         val beløpsperioder = beregningService.beregnFullYtelse(beregningRequest) // TODO: Tar ikke høyde for inntekt
         val tilkjentYtelse = TilkjentYtelseDTO(
                 aktivIdent,
