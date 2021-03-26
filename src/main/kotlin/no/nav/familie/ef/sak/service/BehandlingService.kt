@@ -151,7 +151,7 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
         return behandlingRepository.findByFagsakId(fagsakId).map(Behandling::tilDto)
     }
 
-    fun leggTillBehandlingsjournalpost(journalpostId: String, journalposttype: Journalposttype, behandlingId: UUID) {
+    fun leggTilBehandlingsjournalpost(journalpostId: String, journalposttype: Journalposttype, behandlingId: UUID) {
         behandlingsjournalpostRepository.insert(Behandlingsjournalpost(behandlingId = behandlingId,
                                                                        journalpostId = journalpostId,
                                                                        sporbar = Sporbar(),

@@ -124,7 +124,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
     }
 
     private fun knyttJournalpostTilBehandling(journalpost: Journalpost, behandling: Behandling) {
-        behandlingService.leggTillBehandlingsjournalpost(journalpost.journalpostId, journalpost.journalposttype, behandling.id)
+        behandlingService.leggTilBehandlingsjournalpost(journalpost.journalpostId, journalpost.journalposttype, behandling.id)
     }
 
     private fun settSøknadPåBehandling(journalpostId: String, fagsak: Fagsak, behandlingId : UUID) {

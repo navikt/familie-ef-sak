@@ -103,7 +103,7 @@ internal class JournalføringServiceTest {
 
         every { oppgaveService.ferdigstillOppgave(any()) } just runs
         every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any()) } returns nyOppgaveId
-        every { behandlingService.leggTillBehandlingsjournalpost(any(), any(), any()) } just runs
+        every { behandlingService.leggTilBehandlingsjournalpost(any(), any(), any()) } just runs
         every { journalpostClient.ferdigstillJournalpost(any(), any()) } just runs
 
         every {

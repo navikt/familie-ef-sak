@@ -41,7 +41,7 @@ class BlankettSteg(
 
         val arkiverDokumentRequest = lagArkiverBlankettRequest(personIdent, blankettPdf, enhet, journalpostForBehandling.sak?.fagsakId)
         val journalpostRespons = journalpostClient.arkiverDokument(arkiverDokumentRequest)
-        behandlingService.leggTillBehandlingsjournalpost(journalpostRespons.journalpostId, Journalposttype.N, behandling.id)
+        behandlingService.leggTilBehandlingsjournalpost(journalpostRespons.journalpostId, Journalposttype.N, behandling.id)
 
         ferdigstillBehandling(behandling)
     }

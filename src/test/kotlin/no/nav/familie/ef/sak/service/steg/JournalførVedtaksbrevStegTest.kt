@@ -39,7 +39,7 @@ internal class JournalførVedtaksbrevStegTest {
         } returns Task("", "", Properties())
 
         every { vedtaksbrevService.journalførVedtaksbrev(any()) } returns journalpostId
-        every { behandlingService.leggTillBehandlingsjournalpost(any(), Journalposttype.U, behandling.id) } just Runs
+        every { behandlingService.leggTilBehandlingsjournalpost(any(), Journalposttype.U, behandling.id) } just Runs
 
         journalførVedtaksbrev.utførSteg(behandling, null)
 
@@ -52,7 +52,7 @@ internal class JournalførVedtaksbrevStegTest {
             taskRepository.save(any())
         } returns Task("", "", Properties())
         every { vedtaksbrevService.journalførVedtaksbrev(any()) } returns journalpostId
-        every { behandlingService.leggTillBehandlingsjournalpost(any(), Journalposttype.U, behandling.id) } just Runs
+        every { behandlingService.leggTilBehandlingsjournalpost(any(), Journalposttype.U, behandling.id) } just Runs
 
         journalførVedtaksbrev.utførSteg(behandling, null)
 
@@ -69,9 +69,9 @@ internal class JournalførVedtaksbrevStegTest {
         every { vedtaksbrevService.journalførVedtaksbrev(any()) } returns journalpostId
 
         every {
-            behandlingService.leggTillBehandlingsjournalpost(capture(journalpostIdSlot),
-                                                             Journalposttype.U,
-                                                             behandling.id)
+            behandlingService.leggTilBehandlingsjournalpost(capture(journalpostIdSlot),
+                                                            Journalposttype.U,
+                                                            behandling.id)
         } just Runs
 
         journalførVedtaksbrev.utførSteg(behandling, null)

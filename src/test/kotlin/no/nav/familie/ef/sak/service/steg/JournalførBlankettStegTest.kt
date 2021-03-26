@@ -109,7 +109,7 @@ class JournalførBlankettStegTest {
         } returns ArkiverDokumentResponse(journalpostId, false)
 
         every {
-            behandlingService.leggTillBehandlingsjournalpost(capture(journalpostIdSlot), any(), any())
+            behandlingService.leggTilBehandlingsjournalpost(capture(journalpostIdSlot), any(), any())
         } just Runs
 
         blankettSteg.utførSteg(behandling, null)
