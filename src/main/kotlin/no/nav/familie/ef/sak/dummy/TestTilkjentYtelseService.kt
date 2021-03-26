@@ -23,8 +23,8 @@ class TestTilkjentYtelseService(private val behandlingService: BehandlingService
 
     @Transactional
     fun lagreTilkjentYtelseOgIverksettUtbetaling(tilkjentYtelseTestDTO: TilkjentYtelseTestDTO): TilkjentYtelse {
-        val fagsak = fagsakService.hentEllerOpprettFagsak(tilkjentYtelseTestDTO.nyTilkjentYtelse.søker,
-                                                          tilkjentYtelseTestDTO.stønadstype)
+        val fagsak = fagsakService.hentEllerOpprettFagsakMedBehandlinger(tilkjentYtelseTestDTO.nyTilkjentYtelse.søker,
+                                                                         tilkjentYtelseTestDTO.stønadstype)
 
         val behandling = behandlingService.opprettBehandling(behandlingType = behandlingType(fagsak),
                                                              fagsakId = fagsak.id)

@@ -132,8 +132,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
 
 
         every { arbeidsfordelingService.hentNavEnhet(any()) } returns Arbeidsfordelingsenhet("4321", "enhetNavn")
-        every { behandlingService.hentBehandling(behandling.id) } returns behandling
-        every { fagsakService.hentFagsak(fagsak.id) } returns fagsak
+        every { fagsakService.hentFaksakForBehandling(behandling.id) } returns fagsak
         every { vedtaksbrevRepository.findById(behandling.id) } returns Optional.of(vedtaksbrev)
         every {
             journalpostClient.arkiverDokument(capture(arkiverDokumentRequestSlot))

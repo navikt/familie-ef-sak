@@ -49,8 +49,8 @@ internal class BeslutteVedtakStegTest {
     internal fun setUp() {
         taskSlot = slot()
         every {
-            fagsakService.hentFagsak(any())
-        } returns fagsak
+            fagsakService.hentAktivIdent(any())
+        } returns fagsak.hentAktivIdent()
         every {
             taskRepository.save(capture(taskSlot))
         } returns Task("", "", Properties())

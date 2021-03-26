@@ -5,8 +5,6 @@ import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import no.nav.security.token.support.core.api.Unprotected
-import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import java.util.*
@@ -20,7 +18,7 @@ class FagsakController(private val fagsakService: FagsakService, private val til
     @PostMapping
     fun hentFagsakForPerson(@RequestBody fagsakRequest: FagsakRequest): Ressurs<FagsakDto> {
         tilgangService.validerTilgangTilPersonMedBarn(fagsakRequest.personIdent)
-        return Ressurs.success(fagsakService.hentEllerOpprettFagsak(fagsakRequest.personIdent, fagsakRequest.stønadstype))
+        return Ressurs.success(fagsakService.hentFagsakMedBehandlinger(fagsakRequest.personIdent, fagsakRequest.stønadstype))
     }
 
     @GetMapping("{fagsakId}")
