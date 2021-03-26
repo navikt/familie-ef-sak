@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.no.nav.familie.ef.sak.database.DbContainerInitializ
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.util.onBehalfOfToken
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.Behandlingshistorikk
+import no.nav.familie.ef.sak.repository.domain.Behandlingsjournalpost
 import no.nav.familie.ef.sak.repository.domain.Fagsak
 import no.nav.familie.ef.sak.repository.domain.Oppgave
 import no.nav.familie.ef.sak.repository.domain.Registergrunnlag
@@ -87,6 +88,7 @@ abstract class OppslagSpringRunnerTest {
                 Vedtaksbrev::class,
                 Blankett::class,
                 Vedtak::class,
+                Behandlingsjournalpost::class,
                 Behandling::class,
                 Fagsak::class,
         ).forEach { jdbcAggregateOperations.deleteAll(it.java) }

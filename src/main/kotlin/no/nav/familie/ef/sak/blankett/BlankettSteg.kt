@@ -33,15 +33,15 @@ class BlankettSteg(
     }
 
     override fun utførSteg(behandling: Behandling, data: Void?) {
-
-        val journalpostForBehandling = journalpostClient.hentJournalpost(behandling.journalposter.first().journalpostId)
+        val journalposter = behandlingService.hentBehandlingsjournalposter(behandling.id)
+        val journalpostForBehandling = journalpostClient.hentJournalpost(journalposter.first().journalpostId)
         val personIdent = behandlingRepository.finnAktivIdent(behandling.id)
         val enhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(personIdent)
         val blankettPdf = blankettRepository.findByIdOrThrow(behandling.id).pdf.bytes
 
         val arkiverDokumentRequest = lagArkiverBlankettRequest(personIdent, blankettPdf, enhet, journalpostForBehandling.sak?.fagsakId)
         val journalpostRespons = journalpostClient.arkiverDokument(arkiverDokumentRequest)
-        behandlingService.oppdaterJournalpostIdPåBehandling(journalpostRespons.journalpostId, Journalposttype.N, behandling)
+        behandlingService.leggTilBehandlingsjournalpost(journalpostRespons.journalpostId, Journalposttype.N, behandling.id)
 
         ferdigstillBehandling(behandling)
     }

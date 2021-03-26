@@ -1,11 +1,10 @@
 package no.nav.familie.ef.sak.repository.domain
 
-import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.service.steg.StegType
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.MappedCollection
-import java.util.*
+import java.util.UUID
 
 data class Behandling(@Id
                       val id: UUID = UUID.randomUUID(),
@@ -18,8 +17,6 @@ data class Behandling(@Id
                       val type: BehandlingType,
                       var status: BehandlingStatus,
                       var steg: StegType,
-                      @MappedCollection(idColumn = "behandling_id")
-                      var journalposter: Set<Behandlingsjournalpost> = setOf(),
 
                       @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                       val sporbar: Sporbar = Sporbar(),

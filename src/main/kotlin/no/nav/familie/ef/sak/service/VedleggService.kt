@@ -13,8 +13,8 @@ class VedleggService(private val behandlingService: BehandlingService,
 
 
     fun finnVedleggForBehandling(behandlingId: UUID): List<DokumentinfoDto> {
-        val behandling = behandlingService.hentBehandling(behandlingId)
-        return behandling.journalposter
+        val journalposter = behandlingService.hentBehandlingsjournalposter(behandlingId)
+        return journalposter
                 .map { journalføringService.hentJournalpost(it.journalpostId) }
                 .flatMap { journalpost ->
                     journalpost.dokumenter?.map { tilDokumentInfoDto(it, journalpost) } ?: emptyList()

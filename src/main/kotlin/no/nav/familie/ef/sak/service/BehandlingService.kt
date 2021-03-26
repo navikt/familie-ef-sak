@@ -4,11 +4,25 @@ import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.api.dto.BehandlingDto
 import no.nav.familie.ef.sak.api.dto.tilDto
 import no.nav.familie.ef.sak.mapper.SøknadsskjemaMapper
-import no.nav.familie.ef.sak.repository.*
-import no.nav.familie.ef.sak.repository.domain.*
+import no.nav.familie.ef.sak.repository.BehandlingRepository
+import no.nav.familie.ef.sak.repository.BehandlingsjournalpostRepository
+import no.nav.familie.ef.sak.repository.SøknadBarnetilsynRepository
+import no.nav.familie.ef.sak.repository.SøknadOvergangsstønadRepository
+import no.nav.familie.ef.sak.repository.SøknadRepository
+import no.nav.familie.ef.sak.repository.SøknadSkolepengerRepository
+import no.nav.familie.ef.sak.repository.SøknadsskjemaRepository
+import no.nav.familie.ef.sak.repository.domain.Behandling
+import no.nav.familie.ef.sak.repository.domain.BehandlingResultat
+import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
+import no.nav.familie.ef.sak.repository.domain.BehandlingType
+import no.nav.familie.ef.sak.repository.domain.Behandlingsjournalpost
+import no.nav.familie.ef.sak.repository.domain.Sporbar
+import no.nav.familie.ef.sak.repository.domain.Søknad
+import no.nav.familie.ef.sak.repository.domain.SøknadMapper
 import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaBarnetilsyn
 import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsstønad
 import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaSkolepenger
+import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.service.steg.StegType
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
@@ -18,13 +32,14 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.*
+import java.util.UUID
 import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn as SøknadBarnetilsynKontrakt
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad as SøknadOvergangsstønadKontrakt
 import no.nav.familie.kontrakter.ef.søknad.SøknadSkolepenger as SøknadSkolepengerKontrakt
 
 @Service
 class BehandlingService(private val søknadRepository: SøknadRepository,
+                        private val behandlingsjournalpostRepository: BehandlingsjournalpostRepository,
                         private val søknadsskjemaRepository: SøknadsskjemaRepository,
                         private val søknadOvergangsstønadRepository: SøknadOvergangsstønadRepository,
                         private val søknadSkolepengerRepository: SøknadSkolepengerRepository,
@@ -71,12 +86,16 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
                                                                 type = behandlingType,
                                                                 steg = StegType.VILKÅR,
                                                                 status = BehandlingStatus.OPPRETTET,
-                                                                resultat = BehandlingResultat.IKKE_SATT,
-                                                                journalposter = setOf(Behandlingsjournalpost(journalpost.journalpostId,
-                                                                                                             journalpost.journalposttype))))
-
+                                                                resultat = BehandlingResultat.IKKE_SATT))
+        behandlingsjournalpostRepository.insert(Behandlingsjournalpost(behandling.id,
+                                                                       journalpost.journalpostId,
+                                                                       journalpost.journalposttype))
         lagreSøknadForOvergangsstønad(søknad, behandling.id, fagsakId, journalpost.journalpostId)
         return behandling
+    }
+
+    fun hentBehandlingsjournalposter(behandlingId: UUID): List<Behandlingsjournalpost> {
+        return behandlingsjournalpostRepository.findAllByBehandlingId(behandlingId)
     }
 
     fun opprettBehandling(behandlingType: BehandlingType, fagsakId: UUID): Behandling {
@@ -132,12 +151,11 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
         return behandlingRepository.findByFagsakId(fagsakId).map(Behandling::tilDto)
     }
 
-    fun oppdaterJournalpostIdPåBehandling(journalpostId: String, journalposttype: Journalposttype, behandling: Behandling) {
-        behandling.journalposter = behandling.journalposter +
-                                   Behandlingsjournalpost(journalpostId = journalpostId,
-                                                          sporbar = Sporbar(),
-                                                          journalpostType = journalposttype)
-        behandlingRepository.update(behandling)
+    fun leggTilBehandlingsjournalpost(journalpostId: String, journalposttype: Journalposttype, behandlingId: UUID) {
+        behandlingsjournalpostRepository.insert(Behandlingsjournalpost(behandlingId = behandlingId,
+                                                                       journalpostId = journalpostId,
+                                                                       sporbar = Sporbar(),
+                                                                       journalpostType = journalposttype))
     }
 
     fun annullerBehandling(behandlingId: UUID): Behandling {

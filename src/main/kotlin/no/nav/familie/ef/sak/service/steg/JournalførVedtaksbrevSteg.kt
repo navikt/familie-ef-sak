@@ -20,10 +20,10 @@ class JournalførVedtaksbrevSteg(private val taskRepository: TaskRepository,
 
     override fun utførSteg(behandling: Behandling, data: Void?) {
         val journalpostId = vedtaksbrevService.journalførVedtaksbrev(behandling.id)
-        behandlingService.oppdaterJournalpostIdPåBehandling(journalpostId
-                                                            ?: error("Feil ved journalføring av vedtaksbrev"),
-                                                            Journalposttype.U,
-                                                            behandling)
+        behandlingService.leggTilBehandlingsjournalpost(journalpostId
+                                                        ?: error("Feil ved journalføring av vedtaksbrev"),
+                                                        Journalposttype.U,
+                                                        behandling.id)
         logger.info("Journalfør vedtaksbrev behandling=[${behandling.id}] fullført med journalpost=[$journalpostId]")
         lagDistribuerVedtaksbrevTask(behandling, journalpostId)
     }

@@ -23,7 +23,7 @@ internal class BehandlingServiceTest {
 
     val behandlingRepository = mockk<BehandlingRepository>()
     val behandlingshistorikkService = mockk<BehandlingshistorikkService>()
-    val behandlingService = BehandlingService(mockk(), mockk(),mockk(), mockk(), mockk(), behandlingRepository, behandlingshistorikkService)
+    val behandlingService = BehandlingService(mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), behandlingRepository, behandlingshistorikkService)
 
     @Test
     internal fun `skal annullere behandling som er blankett og status utredes`() {

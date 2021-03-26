@@ -110,10 +110,11 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
 
     private fun lagFørstegangsbehandling(fagsak: Fagsak, søknad: SøknadOvergangsstønad): Behandling {
         val behandling = behandlingService.opprettBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, fagsak.id)
+        val journalposter = behandlingService.hentBehandlingsjournalposter(behandling.id)
         behandlingService.lagreSøknadForOvergangsstønad(søknad,
                                                         behandling.id,
                                                         fagsak.id,
-                                                        behandling.journalposter.firstOrNull()?.journalpostId ?: "TESTJPID")
+                                                        journalposter.firstOrNull()?.journalpostId ?: "TESTJPID")
         return behandling
     }
 
