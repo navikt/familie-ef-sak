@@ -3,7 +3,6 @@ package no.nav.familie.ef.sak.mapper
 import no.nav.familie.ef.sak.api.dto.*
 import no.nav.familie.ef.sak.api.dto.Adressebeskyttelse
 import no.nav.familie.ef.sak.api.dto.Folkeregisterpersonstatus
-import no.nav.familie.ef.sak.api.dto.Kjønn
 import no.nav.familie.ef.sak.api.dto.Sivilstandstype
 import no.nav.familie.ef.sak.domene.SøkerMedBarn
 import no.nav.familie.ef.sak.integration.dto.pdl.*
@@ -89,7 +88,7 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                 bostedsadresserForelder: List<Bostedsadresse>,
                 identNavnMap: Map<String, String>): BarnDto {
 
-        val annenForelderIdent = pdlBarn.familierelasjoner.find {
+        val annenForelderIdent = pdlBarn.forelderBarnRelasjon.find {
             it.relatertPersonsIdent != søkerIdent && it.relatertPersonsRolle != Familierelasjonsrolle.BARN
         }?.relatertPersonsIdent
         return BarnDto(

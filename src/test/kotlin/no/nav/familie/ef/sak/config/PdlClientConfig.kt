@@ -47,7 +47,7 @@ class PdlClientConfig {
                                                                         metadata = metadataGjeldende)),
                          bostedsadresse = bostedsadresse(),
                          dødsfall = listOf(),
-                         familierelasjoner = familierelasjoner(),
+                         forelderBarnRelasjon = forelderBarnRelasjoner(),
                          fødsel = listOf(),
                          folkeregisterpersonstatus = listOf(Folkeregisterpersonstatus("bosatt",
                                                                                       "bosattEtterFolkeregisterloven",
@@ -101,16 +101,16 @@ class PdlClientConfig {
                                      bostedsadresse = bostedsadresse(),
                                      deltBosted = listOf(),
                                      dødsfall = listOf(),
-                                     familierelasjoner = familierelasjonerBarn(),
+                                     forelderBarnRelasjon = familierelasjonerBarn(),
                                      fødsel = fødsel(),
                                      navn = lagNavn("Barn", null, "Barnesen")),
                   barn2Fnr to PdlBarn(adressebeskyttelse = listOf(),
-                                     bostedsadresse = bostedsadresse(),
-                                     deltBosted = listOf(),
-                                     dødsfall = listOf(),
-                                     familierelasjoner = familierelasjonerBarn(),
-                                     fødsel = fødsel(),
-                                     navn = lagNavn("Barn2", null, "Barnesen")))
+                                      bostedsadresse = bostedsadresse(),
+                                      deltBosted = listOf(),
+                                      dødsfall = listOf(),
+                                      forelderBarnRelasjon = familierelasjonerBarn(),
+                                      fødsel = fødsel(),
+                                      navn = lagNavn("Barn2", null, "Barnesen")))
 
     private fun fødsel(år: Int = 2018, måned: Int = 1, dag: Int = 1): List<Fødsel> =
             listOf(Fødsel(fødselsår = år,
@@ -134,21 +134,21 @@ class PdlClientConfig {
                             utflyttingFraNorge = emptyList(),
             )
 
-    private fun familierelasjoner(): List<Familierelasjon> =
-            listOf(Familierelasjon(relatertPersonsIdent = barnFnr,
-                                   relatertPersonsRolle = Familierelasjonsrolle.BARN,
-                                   minRolleForPerson = Familierelasjonsrolle.MOR),
-                   Familierelasjon(relatertPersonsIdent = barn2Fnr,
-                                   relatertPersonsRolle = Familierelasjonsrolle.BARN,
-                                   minRolleForPerson = Familierelasjonsrolle.MOR))
+    private fun forelderBarnRelasjoner(): List<ForelderBarnRelasjon> =
+            listOf(ForelderBarnRelasjon(relatertPersonsIdent = barnFnr,
+                                        relatertPersonsRolle = Familierelasjonsrolle.BARN,
+                                        minRolleForPerson = Familierelasjonsrolle.MOR),
+                   ForelderBarnRelasjon(relatertPersonsIdent = barn2Fnr,
+                                        relatertPersonsRolle = Familierelasjonsrolle.BARN,
+                                        minRolleForPerson = Familierelasjonsrolle.MOR))
 
-    private fun familierelasjonerBarn(): List<Familierelasjon> =
-            listOf(Familierelasjon(relatertPersonsIdent = søkerFnr,
-                                   relatertPersonsRolle = Familierelasjonsrolle.MOR,
-                                   minRolleForPerson = Familierelasjonsrolle.BARN),
-                   Familierelasjon(relatertPersonsIdent = annenForelderFnr,
-                                   relatertPersonsRolle = Familierelasjonsrolle.FAR,
-                                   minRolleForPerson = Familierelasjonsrolle.BARN))
+    private fun familierelasjonerBarn(): List<ForelderBarnRelasjon> =
+            listOf(ForelderBarnRelasjon(relatertPersonsIdent = søkerFnr,
+                                        relatertPersonsRolle = Familierelasjonsrolle.MOR,
+                                        minRolleForPerson = Familierelasjonsrolle.BARN),
+                   ForelderBarnRelasjon(relatertPersonsIdent = annenForelderFnr,
+                                        relatertPersonsRolle = Familierelasjonsrolle.FAR,
+                                        minRolleForPerson = Familierelasjonsrolle.BARN))
 
 
     private fun kontaktadresse(): List<Kontaktadresse> =
