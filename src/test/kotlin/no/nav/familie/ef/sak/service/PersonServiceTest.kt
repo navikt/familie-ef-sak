@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.domene.SøkerMedBarn
 import no.nav.familie.ef.sak.integration.PdlClient
-import no.nav.familie.ef.sak.integration.dto.pdl.Familierelasjon
+import no.nav.familie.ef.sak.integration.dto.pdl.ForelderBarnRelasjon
 import no.nav.familie.ef.sak.integration.dto.pdl.Familierelasjonsrolle
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlBarn
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.integration.dto.pdl.PdlTestdata
@@ -23,8 +23,8 @@ internal class PersonServiceTest {
                                  emptyList(),
                                  emptyList(),
                                  emptyList(),
-                                 listOf(Familierelasjon("1234", Familierelasjonsrolle.MOR, Familierelasjonsrolle.BARN),
-                                        Familierelasjon("5678", Familierelasjonsrolle.FAR, Familierelasjonsrolle.BARN)),
+                                 listOf(ForelderBarnRelasjon("1234", Familierelasjonsrolle.MOR, Familierelasjonsrolle.BARN),
+                                        ForelderBarnRelasjon("5678", Familierelasjonsrolle.FAR, Familierelasjonsrolle.BARN)),
                                  emptyList(),
                                  emptyList())
 
@@ -32,9 +32,9 @@ internal class PersonServiceTest {
                                   emptyList(),
                                   emptyList(),
                                   emptyList(),
-                                  listOf(Familierelasjon("1234", Familierelasjonsrolle.MOR, Familierelasjonsrolle.BARN),
-                                         Familierelasjon("9999", Familierelasjonsrolle.MEDMOR, Familierelasjonsrolle.BARN),
-                                         Familierelasjon("7777", Familierelasjonsrolle.BARN, Familierelasjonsrolle.MOR)),
+                                  listOf(ForelderBarnRelasjon("1234", Familierelasjonsrolle.MOR, Familierelasjonsrolle.BARN),
+                                         ForelderBarnRelasjon("9999", Familierelasjonsrolle.MEDMOR, Familierelasjonsrolle.BARN),
+                                         ForelderBarnRelasjon("7777", Familierelasjonsrolle.BARN, Familierelasjonsrolle.MOR)),
                                   emptyList(),
                                   emptyList())
 

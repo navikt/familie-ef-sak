@@ -44,7 +44,7 @@ object PdlTestdata {
 
     private val dødsfall = listOf(Dødsfall(LocalDate.now()))
 
-    private val familierelasjon = listOf(Familierelasjon("", Familierelasjonsrolle.BARN, Familierelasjonsrolle.FAR))
+    private val familierelasjon = listOf(ForelderBarnRelasjon("", Familierelasjonsrolle.BARN, Familierelasjonsrolle.FAR))
 
     private val fødsel = listOf(Fødsel(1, LocalDate.now(), "", "", "", metadataGjeldende))
 

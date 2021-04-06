@@ -65,7 +65,7 @@ object BarnMedSamværMapper {
         val alleBarn: List<MatchetBarn> = BarnMatcher.kobleSøknadsbarnOgRegisterBarn(søknad.barn, pdlBarn)
 
         return alleBarn.map { barn ->
-            val fnr = barn.pdlBarn?.familierelasjoner?.firstOrNull {
+            val fnr = barn.pdlBarn?.forelderBarnRelasjon?.firstOrNull {
                 it.relatertPersonsIdent != søknad.fødselsnummer && it.relatertPersonsRolle != Familierelasjonsrolle.BARN
             }?.relatertPersonsIdent
                       ?: barn.søknadsbarn.annenForelder?.person?.fødselsnummer

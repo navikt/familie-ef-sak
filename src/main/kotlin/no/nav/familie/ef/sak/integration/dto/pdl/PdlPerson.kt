@@ -54,7 +54,7 @@ data class PdlSøkerKort(@JsonProperty("kjoenn") val kjønn: List<Kjønn>,
 data class PdlSøker(val adressebeskyttelse: List<Adressebeskyttelse>,
                     override val bostedsadresse: List<Bostedsadresse>,
                     @JsonProperty("doedsfall") val dødsfall: List<Dødsfall>,
-                    val familierelasjoner: List<Familierelasjon>,
+                    val forelderBarnRelasjon: List<ForelderBarnRelasjon>,
                     @JsonProperty("foedsel") override val fødsel: List<Fødsel>,
                     val folkeregisterpersonstatus: List<Folkeregisterpersonstatus>,
                     val fullmakt: List<Fullmakt>,
@@ -75,7 +75,7 @@ data class PdlBarn(val adressebeskyttelse: List<Adressebeskyttelse>,
                    override val bostedsadresse: List<Bostedsadresse>,
                    val deltBosted: List<DeltBosted>,
                    @JsonProperty("doedsfall") val dødsfall: List<Dødsfall>,
-                   val familierelasjoner: List<Familierelasjon>,
+                   val forelderBarnRelasjon: List<ForelderBarnRelasjon>,
                    @JsonProperty("foedsel") override val fødsel: List<Fødsel>,
                    val navn: List<Navn>) : PdlPerson
 
@@ -185,9 +185,9 @@ data class Fødsel(@JsonProperty("foedselsaar") val fødselsår: Int?,
 
 data class Dødsfall(@JsonProperty("doedsdato") val dødsdato: LocalDate?)
 
-data class Familierelasjon(val relatertPersonsIdent: String,
-                           val relatertPersonsRolle: Familierelasjonsrolle,
-                           val minRolleForPerson: Familierelasjonsrolle?)
+data class ForelderBarnRelasjon(val relatertPersonsIdent: String,
+                                val relatertPersonsRolle: Familierelasjonsrolle,
+                                val minRolleForPerson: Familierelasjonsrolle?)
 
 enum class Familierelasjonsrolle {
     BARN,

@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.api.dto.VilkårGrunnlagDto
 import no.nav.familie.ef.sak.api.dto.MedlemskapDto
-import no.nav.familie.ef.sak.api.dto.SagtOppEllerRedusertStillingDto
 import no.nav.familie.ef.sak.api.dto.SivilstandInngangsvilkårDto
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.PdlClient
@@ -174,7 +173,7 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
                     it.annenForelder?.person?.fødselsnummer
                 }
 
-        val barneforeldre = barn.map { it.value.familierelasjoner }
+        val barneforeldre = barn.map { it.value.forelderBarnRelasjon }
                 .flatten()
                 .filter { it.relatertPersonsIdent != søknad.fødselsnummer && it.relatertPersonsRolle != Familierelasjonsrolle.BARN }
                 .map { it.relatertPersonsIdent }
@@ -185,7 +184,7 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
     }
 
     private fun hentPdlBarn(pdlSøker: PdlSøker): Map<String, PdlBarn> {
-        val barn = pdlSøker.familierelasjoner
+        val barn = pdlSøker.forelderBarnRelasjon
                 .filter { it.relatertPersonsRolle == Familierelasjonsrolle.BARN }
                 .map { it.relatertPersonsIdent }
                 .let { pdlClient.hentBarn(it) }
