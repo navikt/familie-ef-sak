@@ -44,17 +44,16 @@ class KodeverkInitializer(private val cachedKodeverkService: CachedKodeverkServi
     }
 
     private fun sync() {
+        syncKodeverk("Lantkoder", cachedKodeverkService::hentLandkoder)
+        syncKodeverk("Poststed", cachedKodeverkService::hentPoststed)
+    }
+
+    private fun syncKodeverk(navn: String, henter: () -> Unit) {
         try {
-            logger.info("Laster landkoder")
-            cachedKodeverkService.hentLandkoder()
+            logger.info("Henter $navn")
+            henter.invoke()
         } catch (e: Exception) {
-            logger.warn("Feilet henting av Landkoder ${e.message}")
-        }
-        try {
-            logger.info("Laster poststed")
-            cachedKodeverkService.hentPoststed()
-        } catch (e: Exception) {
-            logger.warn("Feilet henting av Poststed ${e.message}")
+            logger.warn("Feilet henting av $navn ${e.message}")
         }
     }
 
