@@ -6,8 +6,6 @@ import no.nav.familie.ef.sak.integration.dto.pdl.Familierelasjonsrolle
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlAnnenForelder
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlPersonKort
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker
-import no.nav.familie.kontrakter.felles.journalpost.BrukerIdType
-import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import org.springframework.stereotype.Service
 
 @Service
@@ -19,7 +17,7 @@ class PersonService(private val pdlClient: PdlClient) {
 
     fun hentPersonMedRelasjoner(ident: String): SøkerMedBarn {
         val søker = hentSøker(ident)
-        val barnIdentifikatorer = søker.familierelasjoner.filter { it.relatertPersonsRolle == Familierelasjonsrolle.BARN }
+        val barnIdentifikatorer = søker.forelderBarnRelasjon.filter { it.relatertPersonsRolle == Familierelasjonsrolle.BARN }
                 .map { it.relatertPersonsIdent }
         return SøkerMedBarn(ident, søker, pdlClient.hentBarn(barnIdentifikatorer))
     }
@@ -36,7 +34,7 @@ class PersonService(private val pdlClient: PdlClient) {
         val søkerMedBarn = hentPersonMedRelasjoner(forelderIdent)
 
         val forelderIdenter = søkerMedBarn.barn.values
-                .flatMap { it.familierelasjoner }
+                .flatMap { it.forelderBarnRelasjon }
                 .filter { it.relatertPersonsRolle != Familierelasjonsrolle.BARN }
                 .map { it.relatertPersonsIdent }
 
