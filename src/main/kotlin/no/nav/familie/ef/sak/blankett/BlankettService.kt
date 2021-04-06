@@ -75,7 +75,7 @@ class BlankettService(private val tilgangService: TilgangService,
     }
 
     private fun lagPersonopplysningerDto(behandlingId: UUID): PersonopplysningerDto {
-        val aktivIdent = fagsakService.hentAktivIdent(behandlingId)
+        val aktivIdent = behandlingService.hentAktivIdent(behandlingId)
         return PersonopplysningerDto(hentGjeldendeNavn(aktivIdent), aktivIdent)
     }
 
