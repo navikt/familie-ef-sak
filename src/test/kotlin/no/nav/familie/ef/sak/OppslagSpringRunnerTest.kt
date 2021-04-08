@@ -22,6 +22,7 @@ import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsst
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.web.server.LocalServerPort
@@ -54,6 +55,7 @@ abstract class OppslagSpringRunnerTest {
     @Autowired private lateinit var jdbcAggregateOperations: JdbcAggregateOperations
     @Autowired private lateinit var applicationContext: ApplicationContext
     @Autowired private lateinit var cacheManager: CacheManager
+    @Autowired @Qualifier("kodeverkCache") private lateinit var cacheManagerKodeverk: CacheManager
     @Autowired private lateinit var rolleConfig: RolleConfig
 
     @LocalServerPort
@@ -72,8 +74,10 @@ abstract class OppslagSpringRunnerTest {
     }
 
     private fun clearCaches() {
-        cacheManager.cacheNames.mapNotNull { cacheManager.getCache(it) }
-                .forEach { it.clear() }
+        listOf(cacheManagerKodeverk, cacheManager).forEach {
+            it.cacheNames.mapNotNull { cacheName -> it.getCache(cacheName) }
+                    .forEach { cache -> cache.clear() }
+        }
     }
 
     private fun resetDatabase() {
