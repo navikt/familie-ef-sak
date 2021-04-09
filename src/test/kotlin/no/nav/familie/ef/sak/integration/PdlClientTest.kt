@@ -173,6 +173,7 @@ class PdlClientTest {
         ))
         assertThat(response.totalHits).isEqualTo(1)
         assertThat(response.hits.first().person.navn.first().fornavn).isEqualTo("BRÅKETE")
+        assertThat(response.hits.first().person.folkeregisteridentifikator.first().identifikasjonsnummer).isEqualTo("15078817191")
     }
 
     private fun readFile(filnavn: String): String {

@@ -10,8 +10,11 @@ data class PersonSøkResultat(
 data class PersonSøkTreff(val person: PdlPersonFraSøk)
 
 data class PdlPersonFraSøk(
+        val folkeregisteridentifikator: List<Folkeregisteridentifikator>,
         val bostedsadresse: List<Bostedsadresse>,
         val navn: List<Navn>
 )
+
+data class Folkeregisteridentifikator(val identifikasjonsnummer: String)
 
 data class PersonSøk(val sokPerson: PersonSøkResultat)

@@ -5,6 +5,9 @@ query ($paging:Paging, $criteria:[Criterion]) {
         totalPages
         hits {
             person {
+                folkeregisteridentifikator {
+                    identifikasjonsnummer
+                }
                 bostedsadresse(historikk: false) {
                     angittFlyttedato
                     coAdressenavn

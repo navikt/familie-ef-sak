@@ -7,6 +7,11 @@
       "hits": [
         {
           "person": {
+            "folkeregisteridentifikator": [
+              {
+                "identifikasjonsnummer": "15078817191"
+              }
+            ],
             "bostedsadresse": [
               {
                 "angittFlyttedato": "1988-07-15",
