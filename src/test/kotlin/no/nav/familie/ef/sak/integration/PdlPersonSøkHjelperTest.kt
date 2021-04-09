@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.integration
 
+import no.nav.familie.ef.sak.api.dto.BostedsadresseDto
 import no.nav.familie.ef.sak.integration.dto.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.integration.dto.pdl.Folkeregistermetadata
 import no.nav.familie.ef.sak.integration.dto.pdl.Matrikkeladresse
@@ -14,7 +15,7 @@ internal class PdlPersonSøkHjelperTest {
     @Test
     internal fun `søker har matrikkeladresse uten bruksenhetsnummer`() {
         val matrikkelId = 123L
-        val resultat = PdlPersonSøkHjelper.lagPdlPersonSøkKriterier((lagAdresse(null, Matrikkeladresse(matrikkelId, null))))
+        val resultat = PdlPersonSøkHjelper.lagPdlPersonSøkKriterier(lagAdresse(null, Matrikkeladresse(matrikkelId, null)))
         Assertions.assertThat(resultat.size).isEqualTo(1)
         Assertions.assertThat(resultat[0].fieldName).isEqualTo("person.bostedsadresse.matrikkeladresse.matrikkelId")
         Assertions.assertThat(resultat[0].searchRule.equals).isEqualTo(matrikkelId.toString())
@@ -25,7 +26,7 @@ internal class PdlPersonSøkHjelperTest {
         val matrikkelId = 123L
         val bruksenhetsnummer = "2"
         val resultat =
-                PdlPersonSøkHjelper.lagPdlPersonSøkKriterier((lagAdresse(null, Matrikkeladresse(matrikkelId, bruksenhetsnummer))))
+                PdlPersonSøkHjelper.lagPdlPersonSøkKriterier(lagAdresse(null, Matrikkeladresse(matrikkelId, bruksenhetsnummer)))
         Assertions.assertThat(resultat.size).isEqualTo(2)
         Assertions.assertThat(resultat[0].fieldName).isEqualTo("person.bostedsadresse.matrikkeladresse.matrikkelId")
         Assertions.assertThat(resultat[0].searchRule.equals).isEqualTo(matrikkelId.toString())
@@ -45,7 +46,7 @@ internal class PdlPersonSøkHjelperTest {
                                     null,
                                     null)
 
-        val resultat = PdlPersonSøkHjelper.lagPdlPersonSøkKriterier((lagAdresse(vegadresse, null)))
+        val resultat = PdlPersonSøkHjelper.lagPdlPersonSøkKriterier(lagAdresse(vegadresse, null))
         Assertions.assertThat(resultat.size).isEqualTo(5)
         Assertions.assertThat(resultat[0].fieldName).isEqualTo("person.bostedsadresse.vegadresse.adressenavn")
         Assertions.assertThat(resultat[0].searchRule.equals).isEqualTo(vegadresse.adressenavn)
@@ -71,7 +72,7 @@ internal class PdlPersonSøkHjelperTest {
                                     null,
                                     null)
 
-        val resultat = PdlPersonSøkHjelper.lagPdlPersonSøkKriterier((lagAdresse(vegadresse, null)))
+        val resultat = PdlPersonSøkHjelper.lagPdlPersonSøkKriterier(lagAdresse(vegadresse, null))
         Assertions.assertThat(resultat.size).isEqualTo(3)
         Assertions.assertThat(resultat[0].fieldName).isEqualTo("person.bostedsadresse.vegadresse.adressenavn")
         Assertions.assertThat(resultat[0].searchRule.equals).isEqualTo(vegadresse.adressenavn)
@@ -81,19 +82,10 @@ internal class PdlPersonSøkHjelperTest {
         Assertions.assertThat(resultat[2].searchRule.equals).isEqualTo(vegadresse.postnummer)
     }
 
-
-    private fun lagAdresse(vegadresse: Vegadresse?, matrikkeladresse: Matrikkeladresse?): Bostedsadresse {
-        return Bostedsadresse(
+    private fun lagAdresse(vegadresse: Vegadresse?, matrikkeladresse: Matrikkeladresse?): BostedsadresseDto {
+        return BostedsadresseDto(
                 vegadresse = vegadresse,
-                angittFlyttedato = null,
-                coAdressenavn = null,
-                folkeregistermetadata = Folkeregistermetadata(
-                        gyldighetstidspunkt = LocalDateTime.now(),
-                        opphørstidspunkt = null),
-                utenlandskAdresse = null,
-                ukjentBosted = null,
-                matrikkeladresse = matrikkeladresse,
-                metadata = Metadata(false)
+                matrikkeladresse = matrikkeladresse
         )
     }
 }

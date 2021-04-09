@@ -1,12 +1,12 @@
 package no.nav.familie.ef.sak.integration
 
-import no.nav.familie.ef.sak.integration.dto.pdl.Bostedsadresse
+import no.nav.familie.ef.sak.api.dto.BostedsadresseDto
 import no.nav.familie.ef.sak.integration.dto.pdl.SearchRule
 import no.nav.familie.ef.sak.integration.dto.pdl.SøkeKriterier
 
 object PdlPersonSøkHjelper {
 
-    fun lagPdlPersonSøkKriterier(bostedsadresse: Bostedsadresse): List<SøkeKriterier> {
+    fun lagPdlPersonSøkKriterier(bostedsadresse: BostedsadresseDto): List<SøkeKriterier> {
         if (bostedsadresse.matrikkeladresse != null) {
             val matrikkeladresse = bostedsadresse.matrikkeladresse
             return listOfNotNull(

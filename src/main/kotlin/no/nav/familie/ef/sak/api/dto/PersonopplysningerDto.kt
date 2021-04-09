@@ -1,6 +1,8 @@
 package no.nav.familie.ef.sak.api.dto
 
+import no.nav.familie.ef.sak.integration.dto.pdl.Matrikkeladresse
 import no.nav.familie.ef.sak.integration.dto.pdl.Navn
+import no.nav.familie.ef.sak.integration.dto.pdl.Vegadresse
 import no.nav.familie.ef.sak.integration.dto.pdl.visningsnavn
 import java.time.LocalDate
 import no.nav.familie.ef.sak.integration.dto.pdl.Folkeregisterpersonstatus as PdlFolkeregisterpersonstatus
@@ -71,7 +73,11 @@ enum class Sivilstandstype {
 data class AdresseDto(val visningsadresse: String?,
                       val type: AdresseType,
                       val gyldigFraOgMed: LocalDate?,
-                      val gyldigTilOgMed: LocalDate?)
+                      val gyldigTilOgMed: LocalDate?,
+                      val bostedsadresse: BostedsadresseDto? = null)
+
+data class BostedsadresseDto(val vegadresse: Vegadresse?,
+                             val matrikkeladresse: Matrikkeladresse?)
 
 enum class AdresseType {
     BOSTEDADRESSE,

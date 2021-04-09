@@ -5,6 +5,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import no.nav.familie.ef.sak.integration.PdlClient
+import no.nav.familie.ef.sak.integration.PdlSaksbehandlerClient
 import no.nav.familie.ef.sak.integration.dto.pdl.*
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -24,8 +25,21 @@ class PdlClientConfig {
     private val barn2Fnr = "13071489536"
     private val søkerFnr = "01010172272"
     private val annenForelderFnr = "17097926735"
+    private val fnrPåAdresseSøk = "01012067050"
 
     val metadataGjeldende = Metadata(historisk = false)
+
+    @Bean
+    @Primary
+    fun pdlSaksbehandlerClient(): PdlSaksbehandlerClient {
+        val pdlSaksbehandlerClient = mockk<PdlSaksbehandlerClient>()
+        val pdlPersonFraSøk = PdlPersonFraSøk(listOf(element = Folkeregisteridentifikator(fnrPåAdresseSøk)),
+                                              bostedsadresse(),
+                                              lagNavn())
+        every { pdlSaksbehandlerClient.sokPersoner(any()) } returns
+                PersonSøkResultat(listOf(PersonSøkTreff(pdlPersonFraSøk)), 1, 1, 1)
+        return pdlSaksbehandlerClient
+    }
 
     @Bean
     @Primary
