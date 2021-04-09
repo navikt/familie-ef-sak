@@ -112,6 +112,18 @@ class PdlClient(val pdlConfig: PdlConfig,
         return feilsjekkOgReturnerData(ident, pdlResponse) { it.hentIdenter }
     }
 
+    fun sokPersoner(bostedsadresse: Bostedsadresse): PersonSøkResultat {
+        val pdlPersonSøkRequest = PdlPersonSøkRequest(variables = PdlPersonSøkRequestVariables(paging = Paging(1, 30),
+                                                                                               criteria = PdlPersonSøkHjelper.lagPdlPersonSøkCriteria(
+                                                                                                       bostedsadresse)),
+                                                      query = PdlConfig.søkPersonQuery)
+        val pdlResponse: PdlResponse<PersonSøk> = postForEntity(pdlConfig.pdlUri,
+                                                                        pdlPersonSøkRequest,
+                                                                        httpHeaders())
+        //todo feilhåndtering
+        return pdlResponse.data.sokPerson
+    }
+
     private inline fun <reified DATA : Any, reified T : Any> feilsjekkOgReturnerData(ident: String,
                                                                                      pdlResponse: PdlResponse<DATA>,
                                                                                      dataMapper: (DATA) -> T?): T {

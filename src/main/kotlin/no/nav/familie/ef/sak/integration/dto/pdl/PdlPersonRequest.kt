@@ -8,3 +8,6 @@ data class PdlPersonBolkRequest(val variables: PdlPersonBolkRequestVariables,
 
 data class PdlIdentRequest(val variables: PdlIdentRequestVariables,
                            val query: String)
+
+data class PdlPersonSøkRequest(val variables: PdlPersonSøkRequestVariables,
+                               val query: String)

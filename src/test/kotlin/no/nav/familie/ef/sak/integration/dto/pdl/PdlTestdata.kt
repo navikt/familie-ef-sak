@@ -124,4 +124,8 @@ object PdlTestdata {
                                                                                    utflyttingFraNorge))))
 
     val pdlPersonKortBolk = PersonBolk(listOf(PersonDataBolk("11111122222", "ok", PdlPersonKort(navn))))
+
+    val pdlPersonSøk = PersonSøk(
+            PersonSøkResultat(hits = listOf(PersonSøkTreff(person = PdlPersonFraSøk(bostedsadresse, navn))),
+                              totalHits = 1, pageNumber = 1, totalPages = 1))
 }

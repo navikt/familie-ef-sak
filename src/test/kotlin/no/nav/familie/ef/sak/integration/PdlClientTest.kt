@@ -7,6 +7,10 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.config.PdlConfig
 import no.nav.familie.ef.sak.exception.PdlRequestException
+import no.nav.familie.ef.sak.integration.dto.pdl.Bostedsadresse
+import no.nav.familie.ef.sak.integration.dto.pdl.Folkeregistermetadata
+import no.nav.familie.ef.sak.integration.dto.pdl.Metadata
+import no.nav.familie.ef.sak.integration.dto.pdl.Vegadresse
 import no.nav.familie.http.sts.StsRestClient
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
@@ -18,6 +22,7 @@ import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.web.client.RestOperations
 import java.net.URI
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 class PdlClientTest {
 
@@ -142,6 +147,32 @@ class PdlClientTest {
         assertThat(Assertions.catchThrowable { pdlClient.hentBarn(listOf("")) })
                 .hasMessageStartingWith("Data er null fra PDL")
                 .isInstanceOf(PdlRequestException::class.java)
+    }
+
+    @Test
+    fun `pdlClient håndterer response for person søk gitt bostedsadresse`() {
+        wiremockServerItem.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
+                                           .willReturn(okJson(readFile("person_søk.json"))))
+        val response = pdlClient.sokPersoner(Bostedsadresse(
+                vegadresse = Vegadresse(husnummer = "1",
+                                        adressenavn = "KLINGAVEGEN",
+                                        postnummer = "0358",
+                                        bruksenhetsnummer = null,
+                                        matrikkelId = 1L,
+                                        husbokstav = null,
+                                        kommunenummer = null,
+                                        tilleggsnavn = null,
+                                        koordinater = null),
+                angittFlyttedato = LocalDate.now(),
+                coAdressenavn = null,
+                folkeregistermetadata = Folkeregistermetadata(LocalDateTime.now(), null),
+                utenlandskAdresse = null,
+                ukjentBosted = null,
+                matrikkeladresse = null,
+                metadata = Metadata(false)
+        ))
+        assertThat(response.totalHits).isEqualTo(1)
+        assertThat(response.hits.first().person.navn.first().fornavn).isEqualTo("BRÅKETE")
     }
 
     private fun readFile(filnavn: String): String {
