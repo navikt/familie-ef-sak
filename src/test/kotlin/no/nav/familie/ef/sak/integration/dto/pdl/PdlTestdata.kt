@@ -21,7 +21,7 @@ object PdlTestdata {
                                                     1),
                                         1L)
 
-    private val matrikkeladresse = Matrikkeladresse(1L)
+    private val matrikkeladresse = Matrikkeladresse(1L, "")
     private val utenlandskAdresse = UtenlandskAdresse("", "", "", "", "", "", "")
 
     private val folkeregistermetadata = Folkeregistermetadata(LocalDateTime.now(), LocalDateTime.now())

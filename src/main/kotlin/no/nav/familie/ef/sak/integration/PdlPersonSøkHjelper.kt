@@ -6,11 +6,19 @@ import no.nav.familie.ef.sak.integration.dto.pdl.SøkeKriterier
 
 object PdlPersonSøkHjelper {
 
-     fun lagPdlPersonSøkCriteria(bostedsadresse: Bostedsadresse): List<SøkeKriterier> {
-        if (bostedsadresse.matrikkeladresse?.matrikkelId != null) {
-            return listOf(
-                    lagSøkeKriterier(søkefelt = "person.bostedsadresse.matrikkeladresse.matrikkelId",
-                                     søkeord = bostedsadresse.matrikkeladresse.matrikkelId.toString()))
+    fun lagPdlPersonSøkKriterier(bostedsadresse: Bostedsadresse): List<SøkeKriterier> {
+        if (bostedsadresse.matrikkeladresse != null) {
+            val matrikkeladresse = bostedsadresse.matrikkeladresse
+            return listOfNotNull(
+                    matrikkeladresse.matrikkelId?.let {
+                        lagSøkeKriterier(søkefelt = "person.bostedsadresse.matrikkeladresse.matrikkelId",
+                                         søkeord = bostedsadresse.matrikkeladresse.matrikkelId.toString())
+                    },
+                    matrikkeladresse.bruksenhetsnummer?.let {
+                        lagSøkeKriterier(søkefelt = "person.bostedsadresse.matrikkeladresse.bruksenhetsnummer",
+                                         søkeord = bostedsadresse.matrikkeladresse.bruksenhetsnummer.toString())
+                    }
+            )
 
         } else if (bostedsadresse.vegadresse != null) {
             val vegadresse = bostedsadresse.vegadresse
@@ -40,7 +48,7 @@ object PdlPersonSøkHjelper {
         return emptyList()
     }
 
-     fun lagSøkeKriterier(søkefelt: String, søkeord: String): SøkeKriterier {
+    fun lagSøkeKriterier(søkefelt: String, søkeord: String): SøkeKriterier {
         return SøkeKriterier(fieldName = søkefelt,
                              searchRule = SearchRule(equals = søkeord))
     }

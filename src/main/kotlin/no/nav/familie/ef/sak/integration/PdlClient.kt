@@ -114,17 +114,16 @@ class PdlClient(val pdlConfig: PdlConfig,
 
     fun sokPersoner(bostedsadresse: Bostedsadresse): PersonSøkResultat {
         val pdlPersonSøkRequest = PdlPersonSøkRequest(variables = PdlPersonSøkRequestVariables(paging = Paging(1, 30),
-                                                                                               criteria = PdlPersonSøkHjelper.lagPdlPersonSøkCriteria(
+                                                                                               criteria = PdlPersonSøkHjelper.lagPdlPersonSøkKriterier(
                                                                                                        bostedsadresse)),
                                                       query = PdlConfig.søkPersonQuery)
         val pdlResponse: PdlResponse<PersonSøk> = postForEntity(pdlConfig.pdlUri,
-                                                                        pdlPersonSøkRequest,
-                                                                        httpHeaders())
-        //todo feilhåndtering
-        return pdlResponse.data.sokPerson
+                                                                pdlPersonSøkRequest,
+                                                                httpHeaders())
+        return feilsjekkOgReturnerData(null, pdlResponse) { it.sokPerson }
     }
 
-    private inline fun <reified DATA : Any, reified T : Any> feilsjekkOgReturnerData(ident: String,
+    private inline fun <reified DATA : Any, reified T : Any> feilsjekkOgReturnerData(ident: String?,
                                                                                      pdlResponse: PdlResponse<DATA>,
                                                                                      dataMapper: (DATA) -> T?): T {
 
@@ -138,7 +137,8 @@ class PdlClient(val pdlConfig: PdlConfig,
 
         val data = dataMapper.invoke(pdlResponse.data)
         if (data == null) {
-            secureLogger.error("Feil ved oppslag på ident $ident. " +
+            val errorMelding = if (ident != null) "Feil ved oppslag på ident $ident. " else "Feil ved oppslag på person."
+            secureLogger.error(errorMelding +
                                "PDL rapporterte ingen feil men returnerte tomt datafelt")
             throw PdlRequestException("Manglende ${T::class} ved feilfri respons fra PDL. Se secure logg for detaljer.")
         }

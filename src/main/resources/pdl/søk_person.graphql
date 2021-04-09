@@ -39,6 +39,7 @@ query ($paging:Paging, $criteria:[Criterion]) {
                     }
                     matrikkeladresse {
                         matrikkelId
+                        bruksenhetsnummer
                     }
                     ukjentBosted {
                         bostedskommune
