@@ -65,6 +65,10 @@
           "gyldigTilOgMed" : {
             "name" : "gyldigTilOgMed",
             "type" : "LocalDate"
+          },
+          "bostedsadresse" : {
+            "name" : "bostedsadresse",
+            "type" : "BostedsadresseDto"
           }
         }
       },

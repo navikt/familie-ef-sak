@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.service
 
 import com.fasterxml.jackson.annotation.JsonInclude
+import no.nav.familie.ef.sak.api.dto.BostedsadresseDto
 import no.nav.familie.ef.sak.repository.domain.RegistergrunnlagData
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
@@ -13,6 +14,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.full.isSubclassOf
 
 internal class RegistergrunnlagTest {
+
     private val om = objectMapper.copy()
             .setSerializationInclusion(JsonInclude.Include.NON_NULL)
             .writerWithDefaultPrettyPrinter()
@@ -54,13 +56,19 @@ internal class RegistergrunnlagTest {
                                    LocalDate::class,
                                    LocalDateTime::class,
                                    YearMonth::class,
+            /**
+             * TODO vurder om det burde være 2 ulike AdresseDto for personopplysninger og grunnlagsdata,
+             * då grunnlagsdata ikke skal ha med "bostedsadresse" i grunnlaget, men personopplysninger ønsker det
+             */
+                                   BostedsadresseDto::class,
                                    Boolean::class)
 
 
     private fun getClassInfo(kClass: KClass<*>): Map<String, ObjectInfo> {
+        val className = kClass.qualifiedName
         val constructors = kClass.constructors
         if (constructors.size != 1) {
-            error("${kClass.qualifiedName} has ${constructors.size} constructors")
+            error("$className has ${constructors.size} constructors")
         }
         return constructors.first().parameters.map { parameter ->
             val name = parameter.name!!
@@ -72,7 +80,7 @@ internal class RegistergrunnlagTest {
                 classifier.isSubclassOf(Collection::class) -> {
                     val arguments = parameter.type.arguments
                     if (arguments.size != 1) {
-                        error("Cannot handle collections with more than one type argument $qualifiedName")
+                        error("$className Cannot handle collections with more than one type argument $qualifiedName")
                     }
                     val classInfo = getClassInfo(parameter.type.arguments[0].type!!.classifier as KClass<*>)
                     ObjectInfo(name, "Collection", classInfo)
@@ -80,7 +88,7 @@ internal class RegistergrunnlagTest {
                 classifier.isSubclassOf(Enum::class) ->
                     ObjectInfo(name, "Enum", null, classifier.java.enumConstants.map { it.toString() })
                 qualifiedName.startsWith("java.") || qualifiedName.startsWith("kotlin.") ->
-                    error("Class is not defined: $qualifiedName")
+                    error("$className - Class is not defined: $qualifiedName")
                 else -> ObjectInfo(name, "Object", getClassInfo(classifier))
             }
         }.map { it.name to it }.toMap()
