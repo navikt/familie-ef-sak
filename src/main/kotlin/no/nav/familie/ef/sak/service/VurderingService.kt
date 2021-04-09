@@ -1,11 +1,7 @@
 package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.api.Feil
-import no.nav.familie.ef.sak.api.dto.NullstillVilkårsvurderingDto
-import no.nav.familie.ef.sak.api.dto.OppdaterVilkårsvurderingDto
-import no.nav.familie.ef.sak.api.dto.VilkårDto
-import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
-import no.nav.familie.ef.sak.api.dto.tilDto
+import no.nav.familie.ef.sak.api.dto.*
 import no.nav.familie.ef.sak.blankett.BlankettRepository
 import no.nav.familie.ef.sak.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.regler.Vilkårsregel
@@ -60,27 +56,57 @@ class VurderingService(private val behandlingService: BehandlingService,
         return nullstillVilkårMedNyeHovedregler
     }
 
+
+    @Transactional
+    fun ikkeVurderVilkår(vilkårsvurderingDto: NullstillVilkårsvurderingDto): VilkårsvurderingDto {
+        val vilkårsvurdering = vilkårsvurderingRepository.findByIdOrThrow(vilkårsvurderingDto.id)
+        val behandlingId = vilkårsvurdering.behandlingId
+
+        validerBehandlingIdErLikIRequestOgIVilkåret(behandlingId, vilkårsvurderingDto.behandlingId)
+        validerLåstForVidereRedigering(behandlingId)
+
+        blankettRepository.deleteById(behandlingId)
+
+        val oppdatertVilkår = oppdaterVilkårsvurderingTilIkkeVurder(behandlingId, vilkårsvurdering)
+        oppdaterStegPåBehandling(behandlingId)
+        return oppdatertVilkår
+    }
+
     private fun nullstillVilkårMedNyeHovedregler(behandlingId: UUID,
                                                  vilkårsvurdering: Vilkårsvurdering): VilkårsvurderingDto {
-        val søknad = behandlingService.hentOvergangsstønad(behandlingId)
-        val grunnlag = grunnlagsdataService.hentGrunnlag(behandlingId, søknad)
-        val metadata = HovedregelMetadata(sivilstandstype = grunnlag.sivilstand.registergrunnlag.type,
-                                          søknad = søknad)
+        val metadata = hentHovedregelMetadata(behandlingId)
         val nyeDelvilkår = lagNyeDelvilkår(hentVilkårsregel(vilkårsvurdering.type), metadata)
         val delvilkårsvurdering = DelvilkårsvurderingWrapper(nyeDelvilkår)
         return vilkårsvurderingRepository.update(vilkårsvurdering.copy(resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
                                                                        delvilkårsvurdering = delvilkårsvurdering)).tilDto()
     }
 
+    private fun oppdaterVilkårsvurderingTilIkkeVurder(behandlingId: UUID,
+                                                 vilkårsvurdering: Vilkårsvurdering): VilkårsvurderingDto {
+        val metadata = hentHovedregelMetadata(behandlingId)
+        val nyeDelvilkår = hentVilkårsregel(vilkårsvurdering.type).initereDelvilkårsvurderingMedVilkårsresultat(metadata, Vilkårsresultat.SKAL_IKKE_VURDERES)
+        val delvilkårsvurdering = DelvilkårsvurderingWrapper(nyeDelvilkår)
+        return vilkårsvurderingRepository.update(vilkårsvurdering.copy(resultat = Vilkårsresultat.SKAL_IKKE_VURDERES,
+                                                                       delvilkårsvurdering = delvilkårsvurdering)).tilDto()
+    }
+
+
     @Transactional
     fun hentEllerOpprettVurderinger(behandlingId: UUID): VilkårDto {
+        val (grunnlag, metadata) = hentGrunnlagOgMetadata(behandlingId)
+        val vurderinger = hentEllerOpprettVurderinger(behandlingId, metadata)
+        return VilkårDto(vurderinger = vurderinger, grunnlag = grunnlag)
+    }
+
+    private fun hentGrunnlagOgMetadata(behandlingId: UUID): Pair<VilkårGrunnlagDto, HovedregelMetadata> {
         val søknad = behandlingService.hentOvergangsstønad(behandlingId)
         val grunnlag = grunnlagsdataService.hentGrunnlag(behandlingId, søknad)
         val metadata = HovedregelMetadata(sivilstandstype = grunnlag.sivilstand.registergrunnlag.type,
                                           søknad = søknad)
-        val vurderinger = hentEllerOpprettVurderinger(behandlingId, metadata)
-        return VilkårDto(vurderinger = vurderinger, grunnlag = grunnlag)
+        return Pair(grunnlag, metadata)
     }
+
+    private fun hentHovedregelMetadata (behandlingId: UUID) = hentGrunnlagOgMetadata(behandlingId).second
 
     private fun validerLåstForVidereRedigering(behandlingId: UUID) {
         if (behandlingErLåstForVidereRedigering(behandlingId)) {
@@ -150,24 +176,31 @@ class VurderingService(private val behandlingService: BehandlingService,
     }
 
     private fun lagNyeDelvilkår(vilkårsregel: Vilkårsregel, metadata: HovedregelMetadata): List<Delvilkårsvurdering> {
-        return vilkårsregel.initereDelvilkårsvurdering(metadata)
+        return vilkårsregel.initereDelvilkårsvurderingMedVilkårsresultat(metadata, resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL)
     }
 
 
     fun hentVilkårSomManglerVurdering(behandlingId: UUID): List<VilkårType> {
         val lagredeVilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(behandlingId)
-        val vilkår = VilkårType.hentVilkår()
 
-        return vilkår
+        return VilkårType.hentVilkår()
                 .filter { it != VilkårType.TIDLIGERE_VEDTAKSPERIODER } // TODO: Må håndteres senere
-                .filter {
-                    lagredeVilkårsvurderinger.any { vurdering ->
-                        vurdering.type == it
-                        && vurdering.resultat == Vilkårsresultat.IKKE_TATT_STILLING_TIL
-                    }
-                    || lagredeVilkårsvurderinger.none { vurdering -> vurdering.type == it }
-                }
+                .filter { erAktuellVilkårType(lagredeVilkårsvurderinger, it)}
+                .filter { harIkkeTattStillingTilVilkåret(lagredeVilkårsvurderinger, it)}
     }
+
+
+    /* Hantering av bakåtkompatibilitet.*/
+    private fun erAktuellVilkårType(lagredeVilkårsvurderinger: List<Vilkårsvurdering>,
+                                    it: VilkårType) =
+            lagredeVilkårsvurderinger.none { vurdering -> vurdering.type == it }
+
+    private fun harIkkeTattStillingTilVilkåret(lagredeVilkårsvurderinger: List<Vilkårsvurdering>,
+                                               vilkårType: VilkårType) =
+            lagredeVilkårsvurderinger.any { vurdering ->
+                vurdering.type == vilkårType
+                && vurdering.resultat == Vilkårsresultat.IKKE_TATT_STILLING_TIL
+            }
 
     private fun behandlingErLåstForVidereRedigering(behandlingId: UUID) =
             behandlingService.hentBehandling(behandlingId).status.behandlingErLåstForVidereRedigering()

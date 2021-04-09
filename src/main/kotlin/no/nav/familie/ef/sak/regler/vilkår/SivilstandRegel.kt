@@ -29,7 +29,7 @@ class SivilstandRegel : Vilkårsregel(vilkårType = VilkårType.SIVILSTAND,
                                                              SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
                                                              UNNTAK)) {
 
-    override fun initereDelvilkårsvurdering(metadata: HovedregelMetadata): List<Delvilkårsvurdering> {
+    override fun initereDelvilkårsvurderingMedVilkårsresultat(metadata: HovedregelMetadata, resultat: Vilkårsresultat): List<Delvilkårsvurdering> {
         val (søknad: SøknadsskjemaOvergangsstønad, sivilstandstype: Sivilstandstype) = metadata
 
         val hovedregel: RegelId = when {
@@ -46,7 +46,7 @@ class SivilstandRegel : Vilkårsregel(vilkårType = VilkårType.SIVILSTAND,
         }.regelId
 
         return hovedregler.map {
-            val resultat = if (it == hovedregel) Vilkårsresultat.IKKE_TATT_STILLING_TIL else Vilkårsresultat.IKKE_AKTUELL
+            val resultat = if (it == hovedregel) resultat else Vilkårsresultat.IKKE_AKTUELL
             Delvilkårsvurdering(resultat = resultat, listOf(Vurdering(it)))
         }
     }

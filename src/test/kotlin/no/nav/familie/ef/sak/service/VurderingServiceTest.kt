@@ -121,7 +121,7 @@ internal class VurderingServiceTest {
     internal fun `skal ikke returnere delvilkår som er ikke aktuelle til frontend`() {
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling(fagsak(), true, BehandlingStatus.OPPRETTET)
         val delvilkårsvurdering =
-                SivilstandRegel().initereDelvilkårsvurdering(HovedregelMetadata(mockk(), Sivilstandstype.ENKE_ELLER_ENKEMANN))
+                SivilstandRegel().initereDelvilkårsvurderingMedVilkårsresultat(HovedregelMetadata(mockk(), Sivilstandstype.ENKE_ELLER_ENKEMANN))
         every { vilkårsvurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns
                 listOf(Vilkårsvurdering(behandlingId = BEHANDLING_ID,
                                         type = VilkårType.SIVILSTAND,
