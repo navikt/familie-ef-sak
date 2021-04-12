@@ -50,7 +50,7 @@ enum class Vilkårsresultat(val beskrivelse: String) {
     IKKE_TATT_STILLING_TIL("Init state, eller att brukeren ikke svaret på hele delvilkåret"),
     SKAL_IKKE_VURDERES("Saksbehandleren kan sette att ett delvilkår ikke skal vurderes");
 
-    fun oppfyltEllerIkkeOppfyltEllerSkalIkkeVurderes() = this == OPPFYLT || this == IKKE_OPPFYLT || this == SKAL_IKKE_VURDERES
+    fun oppfyltEllerIkkeOppfylt() = this == OPPFYLT || this == IKKE_OPPFYLT
 }
 
 enum class VilkårType(val beskrivelse: String) {

@@ -38,7 +38,7 @@ object OppdaterVilkår {
      * Når man legger til funksjonalitet for SKAL_IKKE_VURDERES, hva skal resultatet være?
      */
     private fun validerAttResultatErOppfyltEllerIkkeOppfylt(vilkårsresultat: RegelResultat) {
-        if (!vilkårsresultat.vilkår.oppfyltEllerIkkeOppfyltEllerSkalIkkeVurderes()) {
+        if (!vilkårsresultat.vilkår.oppfyltEllerIkkeOppfylt()) {
             val message = "Støtter ikke mellomlagring ennå, må håndtere ${vilkårsresultat.vilkår}. " +
                           "Ett resultat på vurderingen må bli oppfylt eller ikke oppfylt"
             throw Feil(message = message, frontendFeilmelding = message)
@@ -56,14 +56,14 @@ object OppdaterVilkår {
                                   oppdatering: List<DelvilkårsvurderingDto>): DelvilkårsvurderingWrapper {
         val vurderingerPåType = oppdatering.associateBy { it.vurderinger.first().regelId }
         val delvilkårsvurderinger = vilkårsvurdering.delvilkårsvurdering.delvilkårsvurderinger.map {
-            if (it.resultat == Vilkårsresultat.IKKE_AKTUELL || it.resultat === Vilkårsresultat.SKAL_IKKE_VURDERES) {
+            if (it.resultat == Vilkårsresultat.IKKE_AKTUELL) {
                 it
             } else {
                 val hovedregel = it.hovedregel
                 val resultat = vilkårsresultat.resultatHovedregel(hovedregel)
                 val svar = vurderingerPåType[hovedregel] ?: throw Feil("Savner svar for hovedregel=$hovedregel")
 
-                if (resultat.oppfyltEllerIkkeOppfyltEllerSkalIkkeVurderes()) {
+                if (resultat.oppfyltEllerIkkeOppfylt()) {
                     it.copy(resultat = resultat,
                             vurderinger = svar.svarTilDomene())
                 } else {
