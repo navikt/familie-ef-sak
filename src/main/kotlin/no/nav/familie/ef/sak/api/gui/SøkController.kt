@@ -3,7 +3,7 @@ package no.nav.familie.ef.sak.api.gui
 import no.nav.familie.ef.sak.api.dto.BostedsadresseDto
 import no.nav.familie.ef.sak.api.dto.PersonIdentDto
 import no.nav.familie.ef.sak.api.dto.Søkeresultat
-import no.nav.familie.ef.sak.integration.dto.pdl.PersonSøkResultat
+import no.nav.familie.ef.sak.api.dto.SøkeresultatPerson
 import no.nav.familie.ef.sak.service.SøkService
 import no.nav.familie.ef.sak.service.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -27,7 +27,7 @@ class SøkController(private val søkService: SøkService, private val tilgangSe
     }
 
     @PostMapping("person/adresse")
-    fun søkPerson(@RequestBody bostedsadresseDto: BostedsadresseDto): Ressurs<PersonSøkResultat> {
+    fun søkPerson(@RequestBody bostedsadresseDto: BostedsadresseDto): Ressurs<SøkeresultatPerson> {
         return Ressurs.success(søkService.søkPerson(bostedsadresseDto))
     }
 }
