@@ -225,9 +225,10 @@ internal class VurderingServiceTest {
         val vurdertVilkår = vilkårsvurdering(BEHANDLING_ID,
                                              resultat = Vilkårsresultat.OPPFYLT,
                                              VilkårType.LOVLIG_OPPHOLD)
-        every { vilkårsvurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns listOf(ikkeVurdertVilkår, vurdertVilkår)
+        val vilkårsvurderinger = listOf(ikkeVurdertVilkår, vurdertVilkår);
+        every { vilkårsvurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns vilkårsvurderinger
 
-        val vilkårTyperUtenVurdering = vurderingService.hentVilkårSomManglerVurdering(BEHANDLING_ID)
+        val vilkårTyperUtenVurdering = vurderingService.hentVilkåMedResultattypen(BEHANDLING_ID, vilkårsvurderinger ,Vilkårsresultat.IKKE_TATT_STILLING_TIL)
 
         val vilkårtyper = VilkårType.hentVilkår().filterNot { it === VilkårType.LOVLIG_OPPHOLD }.filterNot { it === VilkårType.TIDLIGERE_VEDTAKSPERIODER }
         assertThat(vilkårTyperUtenVurdering).containsExactlyInAnyOrderElementsOf(vilkårtyper)
@@ -243,7 +244,7 @@ internal class VurderingServiceTest {
 
         every { vilkårsvurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns listOf(vurdertVilkår)
 
-        val vilkårTyperUtenVurdering = vurderingService.hentVilkårSomManglerVurdering(BEHANDLING_ID)
+        val vilkårTyperUtenVurdering = vurderingService.hentVilkåMedResultattypen(BEHANDLING_ID, listOf(vurdertVilkår), Vilkårsresultat.IKKE_TATT_STILLING_TIL)
 
         val vilkårtyper = VilkårType.hentVilkår().filterNot { it === VilkårType.FORUTGÅENDE_MEDLEMSKAP }.filterNot { it === VilkårType.TIDLIGERE_VEDTAKSPERIODER }
         assertThat(vilkårTyperUtenVurdering).containsExactlyInAnyOrderElementsOf(vilkårtyper)
