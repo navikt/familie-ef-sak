@@ -82,6 +82,7 @@ class VurderingService(private val behandlingService: BehandlingService,
     fun oppdaterStegPåBehandling(behandlingId: UUID) {
         val behandling = behandlingService.hentBehandling(behandlingId)
         val lagredeVilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(behandlingId)
+                .filter { it.type != VilkårType.TIDLIGERE_VEDTAKSPERIODER } // TODO: Må håndteres senere
         val vilkårstyper = VilkårType.hentVilkår().minus(VilkårType.TIDLIGERE_VEDTAKSPERIODER)
         val vilkårUtenVurdering =
                 filtereVilkårMedResultat(behandlingId,
@@ -200,7 +201,9 @@ class VurderingService(private val behandlingService: BehandlingService,
         Ellers -> true?
     */
 
-    private fun erAlleVilkårVurdert(behandling: Behandling, lagredeVilkårsvurderinger: List<Vilkårsvurdering>, vilkårstyper:  List<VilkårType>): Boolean {
+    private fun erAlleVilkårVurdert(behandling: Behandling,
+                                    lagredeVilkårsvurderinger: List<Vilkårsvurdering>,
+                                    vilkårstyper: List<VilkårType>): Boolean {
 
         if (behandling.steg == StegType.VILKÅR) {
             val harNoenVurderingIkkeTattStillingTil = filtereVilkårMedResultat(behandling.id,
@@ -236,7 +239,6 @@ class VurderingService(private val behandlingService: BehandlingService,
                                  vilkårstyper: List<VilkårType>,
                                  resultat: Vilkårsresultat): List<Vilkårsvurdering> {
         val aktuelleVilkår = lagredeVilkårsvurderinger
-                .filter { it.type != VilkårType.TIDLIGERE_VEDTAKSPERIODER } // TODO: Må håndteres senere
                 .filter { erAktuelltVilkårType(it) }
 
         val antallVilkårstyper = aktuelleVilkår.map { v -> v.type }.distinct().size
@@ -252,7 +254,6 @@ class VurderingService(private val behandlingService: BehandlingService,
                                                     lagredeVilkårsvurderinger: List<Vilkårsvurdering>): Boolean {
 
         return lagredeVilkårsvurderinger
-                .filter { it.type != VilkårType.TIDLIGERE_VEDTAKSPERIODER }
                 .filter { erAktuelltVilkårType(it) }
                 .filter { it.resultat != Vilkårsresultat.SKAL_IKKE_VURDERES }
                 .all { it.resultat == Vilkårsresultat.OPPFYLT }
