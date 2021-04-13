@@ -42,14 +42,14 @@ class SøkService(private val fagsakRepository: FagsakRepository,
     fun søkPerson(bostedsadresse: BostedsadresseDto): SøkeresultatPerson {
         val personSøkResultat = pdlSaksbehandlerClient.sokPersoner(bostedsadresse = bostedsadresse)
 
-        return SøkeresultatPerson(hits = personSøkResultat.hits.map { mapHits(it.person) },
+        return SøkeresultatPerson(hits = personSøkResultat.hits.map { tilPersonFraSøk(it.person) },
                                   totalHits = personSøkResultat.totalHits,
                                   pageNumber = personSøkResultat.pageNumber,
                                   totalPages = personSøkResultat.totalPages
         )
     }
 
-    private fun mapHits(person: PdlPersonFraSøk): PersonFraSøk {
+    private fun tilPersonFraSøk(person: PdlPersonFraSøk): PersonFraSøk {
         return PersonFraSøk(personIdent = person.folkeregisteridentifikator.gjeldende().identifikasjonsnummer,
                             visningsadresse = person.bostedsadresse.gjeldende()
                                     ?.let { adresseMapper.tilAdresse(it).visningsadresse },
