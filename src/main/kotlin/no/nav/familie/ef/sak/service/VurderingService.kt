@@ -79,7 +79,7 @@ class VurderingService(private val behandlingService: BehandlingService,
         return VilkårDto(vurderinger = vurderinger, grunnlag = grunnlag)
     }
 
-    fun oppdaterStegPåBehandling(behandlingId: UUID) {
+    private fun oppdaterStegPåBehandling(behandlingId: UUID) {
         val behandling = behandlingService.hentBehandling(behandlingId)
         val lagredeVilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(behandlingId)
                 .filter { it.type != VilkårType.TIDLIGERE_VEDTAKSPERIODER } // TODO: Må håndteres senere
@@ -204,9 +204,9 @@ class VurderingService(private val behandlingService: BehandlingService,
         Ellers -> true?
     */
 
-    private fun erAlleVilkårVurdert(behandling: Behandling,
-                                    lagredeVilkårsvurderinger: List<Vilkårsvurdering>,
-                                    vilkårstyper: List<VilkårType>): Boolean {
+    fun erAlleVilkårVurdert(behandling: Behandling,
+                            lagredeVilkårsvurderinger: List<Vilkårsvurdering>,
+                            vilkårstyper: List<VilkårType>): Boolean {
 
         if (behandling.steg == StegType.VILKÅR) {
             val harNoenVurderingIkkeTattStillingTil = filtereVilkårMedResultat(behandling.id,

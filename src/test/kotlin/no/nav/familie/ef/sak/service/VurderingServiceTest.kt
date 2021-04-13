@@ -63,6 +63,7 @@ internal class VurderingServiceTest {
             TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "01012067050")
     )).build().søknadOvergangsstønad)
     private val behandling = behandling(fagsak(), true, BehandlingStatus.OPPRETTET)
+    private val BEHANDLING_ID = UUID.randomUUID()
 
     @BeforeEach
     fun setUp() {
@@ -208,23 +209,6 @@ internal class VurderingServiceTest {
         assertThat(delvilkårsvurdering.vurderinger.first().begrunnelse).isNull()
     }
 
-    private fun initiererVurderinger(lagretVilkårsvurdering: CapturingSlot<Vilkårsvurdering>): Vilkårsvurdering {
-        val vilkårsvurdering = vilkårsvurdering(BEHANDLING_ID,
-                                                Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-                                                VilkårType.FORUTGÅENDE_MEDLEMSKAP,
-                                                listOf(Delvilkårsvurdering(Vilkårsresultat.OPPFYLT,
-                                                                           listOf(Vurdering(RegelId.SØKER_MEDLEM_I_FOLKETRYGDEN)))))
-        val vilkårsvurderinger =
-                vurderingService.opprettNyeVilkårsvurderinger(BEHANDLING_ID, HovedregelMetadata(søknad, Sivilstandstype.UGIFT))
-                        .map { if (it.type == vilkårsvurdering.type) vilkårsvurdering else it }
-
-        every { vilkårsvurderingRepository.findByIdOrNull(vilkårsvurdering.id) } returns vilkårsvurdering
-        every { vilkårsvurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns vilkårsvurderinger
-        every { vilkårsvurderingRepository.update(capture(lagretVilkårsvurdering)) } answers
-                { it.invocation.args.first() as Vilkårsvurdering }
-        return vilkårsvurdering
-    }
-
     @Test
     internal fun `skal ikke oppdatere vilkårsvurdering hvis behandlingen er låst for videre behandling`() {
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling(fagsak(), true, BehandlingStatus.FERDIGSTILT)
@@ -243,32 +227,42 @@ internal class VurderingServiceTest {
     }
 
     @Test
-    fun `skal kun hente resultat`() {
-        val ikkeVurdertVilkår = vilkårsvurdering(BEHANDLING_ID,
-                                                 resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-                                                 VilkårType.FORUTGÅENDE_MEDLEMSKAP)
-        val vurdertVilkår = vilkårsvurdering(BEHANDLING_ID,
-                                             resultat = Vilkårsresultat.OPPFYLT,
-                                             VilkårType.LOVLIG_OPPHOLD)
-        val vilkårsvurderinger = listOf(ikkeVurdertVilkår, vurdertVilkår)
+    fun `skal returnere false hvis ikke alle vilkår er vurdert `() {
+        val vilkårsvurderinger = vurderingService.opprettNyeVilkårsvurderinger(BEHANDLING_ID, HovedregelMetadata(søknad, Sivilstandstype.UGIFT))
+        val skallIkkeVurderes = vilkårsvurderinger.last().copy(resultat = Vilkårsresultat.SKAL_IKKE_VURDERES)
+        val alleMenIkkeSisteErOppfyllt = vilkårsvurderinger.dropLast(1).map {it.copy(resultat = Vilkårsresultat.OPPFYLT)}
 
-        val behandlingId = slot<UUID>()
-        val status = slot<BehandlingStatus>()
-        every { behandlingService.oppdaterStatusPåBehandling(capture(behandlingId), capture(status)) } returns behandling
-        every { vilkårsvurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns vilkårsvurderinger
 
-        val vilkårTyperUtenVurdering = vurderingService.filtereVilkårMedResultat(BEHANDLING_ID,
-                                                                                 vilkårsvurderinger,
-                                                                                 listOf(VilkårType.FORUTGÅENDE_MEDLEMSKAP,
-                                                                                        VilkårType.LOVLIG_OPPHOLD),
-                                                                                 Vilkårsresultat.IKKE_TATT_STILLING_TIL)
+        assertThat(vurderingService.erAlleVilkårVurdert(behandling, alleMenIkkeSisteErOppfyllt.plus(skallIkkeVurderes), VilkårType.hentVilkår())).isFalse
 
-        assertThat(vilkårTyperUtenVurdering).containsExactlyInAnyOrderElementsOf(listOf(ikkeVurdertVilkår))
     }
 
+    @Test
+    fun `skal returnere true til neste steg hvis alle vilkår er vurdert`() {
+        val vilkårsvurderinger = vurderingService.opprettNyeVilkårsvurderinger(BEHANDLING_ID, HovedregelMetadata(søknad, Sivilstandstype.UGIFT))
+        val ikkeOppfyllt = vilkårsvurderinger.last().copy(resultat = Vilkårsresultat.IKKE_OPPFYLT)
+        val alleMenIkkeSisteErIkkeVurdert = vilkårsvurderinger.dropLast(1).map {it.copy(resultat = Vilkårsresultat.SKAL_IKKE_VURDERES)}
 
-    companion object {
 
-        private val BEHANDLING_ID = UUID.randomUUID()
+        assertThat(vurderingService.erAlleVilkårVurdert(behandling, alleMenIkkeSisteErIkkeVurdert.plus(ikkeOppfyllt), VilkårType.hentVilkår())).isTrue
+
+    }
+
+    //KUN FOR Å TESTE OPPDATERSTEG
+    private fun initiererVurderinger(lagretVilkårsvurdering: CapturingSlot<Vilkårsvurdering>): Vilkårsvurdering {
+        val vilkårsvurdering = vilkårsvurdering(BEHANDLING_ID,
+                                                Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+                                                VilkårType.FORUTGÅENDE_MEDLEMSKAP,
+                                                listOf(Delvilkårsvurdering(Vilkårsresultat.OPPFYLT,
+                                                                           listOf(Vurdering(RegelId.SØKER_MEDLEM_I_FOLKETRYGDEN)))))
+        val vilkårsvurderinger =
+                vurderingService.opprettNyeVilkårsvurderinger(BEHANDLING_ID, HovedregelMetadata(søknad, Sivilstandstype.UGIFT))
+                        .map { if (it.type == vilkårsvurdering.type) vilkårsvurdering else it }
+
+        every { vilkårsvurderingRepository.findByIdOrNull(vilkårsvurdering.id) } returns vilkårsvurdering
+        every { vilkårsvurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns vilkårsvurderinger
+        every { vilkårsvurderingRepository.update(capture(lagretVilkårsvurdering)) } answers
+                { it.invocation.args.first() as Vilkårsvurdering }
+        return vilkårsvurdering
     }
 }
