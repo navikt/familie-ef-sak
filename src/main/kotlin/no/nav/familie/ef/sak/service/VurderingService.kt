@@ -157,26 +157,29 @@ class VurderingService(private val behandlingService: BehandlingService,
 
         return when {
             behandlingErLåstForVidereRedigering(behandlingId) -> lagredeVilkårsvurderinger
-            lagredeVilkårsvurderinger.isEmpty() -> opprettNyeVilkårsvurderinger(behandlingId, metadata)
+            lagredeVilkårsvurderinger.isEmpty() -> lagreNyeVilkårsvurderinger(behandlingId, metadata)
             else -> lagredeVilkårsvurderinger
         }
     }
 
-    private fun opprettNyeVilkårsvurderinger(behandlingId: UUID,
-                                             metadata: HovedregelMetadata): List<Vilkårsvurdering> {
-        val søknad = metadata.søknad
-        val nyeVilkårsvurderinger: List<Vilkårsvurdering> = alleVilkårsregler
+    private fun lagreNyeVilkårsvurderinger(behandlingId: UUID,
+                                           metadata: HovedregelMetadata): List<Vilkårsvurdering> {
+        val nyeVilkårsvurderinger: List<Vilkårsvurdering> = opprettNyeVilkårsvurderinger(behandlingId, metadata)
+        return vilkårsvurderingRepository.insertAll(nyeVilkårsvurderinger)
+    }
+
+    fun opprettNyeVilkårsvurderinger(behandlingId: UUID,
+                                     metadata: HovedregelMetadata): List<Vilkårsvurdering> {
+        return alleVilkårsregler
                 .flatMap { vilkårsregel ->
                     if (vilkårsregel.vilkårType == VilkårType.ALENEOMSORG) {
-                        søknad.barn.map {
+                        metadata.søknad.barn.map {
                             lagNyVilkårsvurdering(vilkårsregel, metadata, behandlingId, it.id)
                         }
                     } else {
                         listOf(lagNyVilkårsvurdering(vilkårsregel, metadata, behandlingId))
                     }
                 }
-
-        return vilkårsvurderingRepository.insertAll(nyeVilkårsvurderinger)
     }
 
     private fun lagNyVilkårsvurdering(vilkårsregel: Vilkårsregel,
