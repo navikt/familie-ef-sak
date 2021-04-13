@@ -19,11 +19,11 @@ data class VilkårsvurderingDto(val id: UUID,
                                val endretTid: LocalDateTime,
                                val delvilkårsvurderinger: List<DelvilkårsvurderingDto> = emptyList())
 
-data class NullstillVilkårsvurderingDto(val id: UUID, val behandlingId: UUID)
+data class OppdaterVilkårsvurderingDto(val id: UUID, val behandlingId: UUID)
 
-data class OppdaterVilkårsvurderingDto(val id: UUID,
-                                       val behandlingId: UUID,
-                                       val delvilkårsvurderinger: List<DelvilkårsvurderingDto>)
+data class SvarPåVurderingerDto(val id: UUID,
+                                val behandlingId: UUID,
+                                val delvilkårsvurderinger: List<DelvilkårsvurderingDto>)
 
 data class DelvilkårsvurderingDto(val resultat: Vilkårsresultat,
                                   val vurderinger: List<VurderingDto>) {

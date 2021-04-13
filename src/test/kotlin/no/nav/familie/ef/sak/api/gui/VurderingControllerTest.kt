@@ -1,8 +1,8 @@
 package no.nav.familie.ef.sak.api.gui
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.api.dto.NullstillVilkårsvurderingDto
 import no.nav.familie.ef.sak.api.dto.OppdaterVilkårsvurderingDto
+import no.nav.familie.ef.sak.api.dto.SvarPåVurderingerDto
 import no.nav.familie.ef.sak.api.dto.VilkårDto
 import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.regler.SvarId
@@ -62,7 +62,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
 
         val fagsak = fagsakService.hentEllerOpprettFagsakMedBehandlinger("0", Stønadstype.OVERGANGSSTØNAD)
         val behandling = behandlingService.opprettBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, fagsak.id)
-        val nullstillVurdering = NullstillVilkårsvurderingDto(opprettetVurdering.vurderinger.first().id, behandling.id)
+        val nullstillVurdering = OppdaterVilkårsvurderingDto(opprettetVurdering.vurderinger.first().id, behandling.id)
 
         validerSjekkPåBehandlingId(nullstillVurdering, "nullstill")
     }
@@ -91,14 +91,14 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
         assertThat(respons.body.data?.id).isEqualTo(oppdatertVilkårsvarMedJa.id)
     }
 
-    private fun lagOppdaterVilkårsvurdering(opprettetVurdering: VilkårDto, vilkårType: VilkårType): OppdaterVilkårsvurderingDto {
+    private fun lagOppdaterVilkårsvurdering(opprettetVurdering: VilkårDto, vilkårType: VilkårType): SvarPåVurderingerDto {
         return opprettetVurdering.vurderinger.first { it.vilkårType == vilkårType }.let {
             lagOppdaterVilkårsvurderingMedSvarJa(it)
         }
     }
 
     private fun lagOppdaterVilkårsvurderingMedSvarJa(it: VilkårsvurderingDto) =
-            OppdaterVilkårsvurderingDto(id = it.id,
+            SvarPåVurderingerDto(id = it.id,
                                         behandlingId = it.behandlingId,
                                         delvilkårsvurderinger = it.delvilkårsvurderinger.map {
                                             it.copy(vurderinger = it.vurderinger.map { vurderingDto ->

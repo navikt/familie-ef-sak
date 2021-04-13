@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.repository.domain
 import no.nav.familie.ef.sak.api.dto.Sivilstandstype
 import no.nav.familie.ef.sak.regler.RegelId
 import no.nav.familie.ef.sak.regler.SvarId
+import no.nav.familie.ef.sak.regler.Vilkårsregel
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded

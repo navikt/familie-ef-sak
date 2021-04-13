@@ -26,7 +26,7 @@ class VurderingService(private val behandlingService: BehandlingService,
                        private val blankettRepository: BlankettRepository) {
 
     @Transactional
-    fun oppdaterVilkår(vilkårsvurderingDto: OppdaterVilkårsvurderingDto): VilkårsvurderingDto {
+    fun oppdaterVilkår(vilkårsvurderingDto: SvarPåVurderingerDto): VilkårsvurderingDto {
         val vilkårsvurdering = vilkårsvurderingRepository.findByIdOrThrow(vilkårsvurderingDto.id)
         val behandlingId = vilkårsvurdering.behandlingId
 
@@ -42,7 +42,7 @@ class VurderingService(private val behandlingService: BehandlingService,
     }
 
     @Transactional
-    fun nullstillVilkår(vilkårsvurderingDto: NullstillVilkårsvurderingDto): VilkårsvurderingDto {
+    fun nullstillVilkår(vilkårsvurderingDto: OppdaterVilkårsvurderingDto): VilkårsvurderingDto {
         val vilkårsvurdering = vilkårsvurderingRepository.findByIdOrThrow(vilkårsvurderingDto.id)
         val behandlingId = vilkårsvurdering.behandlingId
 
@@ -58,7 +58,7 @@ class VurderingService(private val behandlingService: BehandlingService,
 
 
     @Transactional
-    fun ikkeVurderVilkår(vilkårsvurderingDto: NullstillVilkårsvurderingDto): VilkårsvurderingDto {
+    fun ikkeVurderVilkår(vilkårsvurderingDto: OppdaterVilkårsvurderingDto): VilkårsvurderingDto {
         val vilkårsvurdering = vilkårsvurderingRepository.findByIdOrThrow(vilkårsvurderingDto.id)
         val behandlingId = vilkårsvurdering.behandlingId
 
@@ -77,6 +77,23 @@ class VurderingService(private val behandlingService: BehandlingService,
         val (grunnlag, metadata) = hentGrunnlagOgMetadata(behandlingId)
         val vurderinger = hentEllerOpprettVurderinger(behandlingId, metadata)
         return VilkårDto(vurderinger = vurderinger, grunnlag = grunnlag)
+    }
+
+    fun oppdaterStegPåBehandling(behandlingId: UUID) {
+        val behandling = behandlingService.hentBehandling(behandlingId)
+        val lagredeVilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(behandlingId)
+        val vilkårstyper = VilkårType.hentVilkår().minus(VilkårType.TIDLIGERE_VEDTAKSPERIODER)
+        val vilkårUtenVurdering =
+                filtereVilkårMedResultat(behandlingId,
+                                         lagredeVilkårsvurderinger,
+                                         vilkårstyper,
+                                         Vilkårsresultat.IKKE_TATT_STILLING_TIL)
+
+        if (erAlleVilkårVurdert(behandling, lagredeVilkårsvurderinger, vilkårstyper)) {
+            stegService.håndterVilkår(behandling).id
+        } else if (vilkårUtenVurdering.isNotEmpty() && behandling.steg != StegType.VILKÅR) {
+            stegService.resetSteg(behandling.id, StegType.VILKÅR)
+        }
     }
 
     private fun nullstillVilkårMedNyeHovedregler(behandlingId: UUID,
@@ -137,14 +154,10 @@ class VurderingService(private val behandlingService: BehandlingService,
                                                      metadata: HovedregelMetadata): List<Vilkårsvurdering> {
         val lagredeVilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(behandlingId)
 
-        if (behandlingErLåstForVidereRedigering(behandlingId)) {
-            return lagredeVilkårsvurderinger
-        }
-
-        if (lagredeVilkårsvurderinger.isEmpty()) {
-            return opprettNyeVilkårsvurderinger(behandlingId, metadata)
-        } else {
-            return lagredeVilkårsvurderinger
+        return when {
+            behandlingErLåstForVidereRedigering(behandlingId) -> lagredeVilkårsvurderinger
+            lagredeVilkårsvurderinger.isEmpty() -> opprettNyeVilkårsvurderinger(behandlingId, metadata)
+            else -> lagredeVilkårsvurderinger
         }
     }
 
@@ -169,50 +182,16 @@ class VurderingService(private val behandlingService: BehandlingService,
                                       metadata: HovedregelMetadata,
                                       behandlingId: UUID,
                                       barnId: UUID? = null): Vilkårsvurdering {
-        val delvilkårsvrdering = lagNyeDelvilkår(vilkårsregel, metadata)
+        val delvilkårsvurdering = lagNyeDelvilkår(vilkårsregel, metadata)
         return Vilkårsvurdering(behandlingId = behandlingId,
                                 type = vilkårsregel.vilkårType,
                                 barnId = barnId,
-                                delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvrdering))
+                                delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurdering))
     }
 
     private fun lagNyeDelvilkår(vilkårsregel: Vilkårsregel, metadata: HovedregelMetadata): List<Delvilkårsvurdering> {
         return vilkårsregel.initereDelvilkårsvurderingMedVilkårsresultat(metadata,
                                                                          resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL)
-    }
-
-
-    fun hentVilkåMedResultattypen(behandlingId: UUID,
-                                  lagredeVilkårsvurderinger: List<Vilkårsvurdering>,
-                                  resultat: Vilkårsresultat): List<VilkårType> {
-        return VilkårType.hentVilkår()
-                .filter { it != VilkårType.TIDLIGERE_VEDTAKSPERIODER } // TODO: Må håndteres senere
-                .filter { erAktuellVilkårType(lagredeVilkårsvurderinger, it) }
-                .filter { finnesEttVilkårMedResultat(lagredeVilkårsvurderinger, it, resultat) }
-
-    }
-
-    fun harNoenSomSkalIkkeVurderesOgRestenErOppfylt(behandlingId: UUID,
-                                                    lagredeVilkårsvurderinger: List<Vilkårsvurdering>): Boolean {
-        val tr = VilkårType.hentVilkår();
-        return lagredeVilkårsvurderinger
-                .filter { it.type != VilkårType.TIDLIGERE_VEDTAKSPERIODER }
-                .filter { it.resultat != Vilkårsresultat.SKAL_IKKE_VURDERES }
-                .filter { tr.contains(it.type) }
-                .all { it.resultat == Vilkårsresultat.SKAL_IKKE_VURDERES }
-    }
-
-    private fun oppdaterStegPåBehandling(behandlingId: UUID) {
-        val behandling = behandlingService.hentBehandling(behandlingId)
-        val lagredeVilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(behandlingId)
-        val vilkårUtenVurdering =
-                hentVilkåMedResultattypen(behandlingId, lagredeVilkårsvurderinger, Vilkårsresultat.IKKE_TATT_STILLING_TIL)
-
-        if (erAlleVilkårVurdert(behandling, lagredeVilkårsvurderinger)) {
-            stegService.håndterVilkår(behandling).id
-        } else if (vilkårUtenVurdering.isNotEmpty() && behandling.steg != StegType.VILKÅR) {
-            stegService.resetSteg(behandling.id, StegType.VILKÅR)
-        }
     }
 
     /* erAlleVilkårVurdert må vi sjekke;
@@ -221,44 +200,63 @@ class VurderingService(private val behandlingService: BehandlingService,
         Ellers -> true?
     */
 
-    private fun erAlleVilkårVurdert(behandling: Behandling, lagredeVilkårsvurderinger: List<Vilkårsvurdering>): Boolean {
+    private fun erAlleVilkårVurdert(behandling: Behandling, lagredeVilkårsvurderinger: List<Vilkårsvurdering>, vilkårstyper:  List<VilkårType>): Boolean {
 
         if (behandling.steg == StegType.VILKÅR) {
-            val harNoenVurderingIkkeTattStillingTil = hentVilkåMedResultattypen(behandling.id,
-                                                                                lagredeVilkårsvurderinger,
-                                                                                Vilkårsresultat.IKKE_TATT_STILLING_TIL).isNotEmpty()
+            val harNoenVurderingIkkeTattStillingTil = filtereVilkårMedResultat(behandling.id,
+                                                                               lagredeVilkårsvurderinger,
+                                                                               vilkårstyper,
+                                                                               Vilkårsresultat.IKKE_TATT_STILLING_TIL).isNotEmpty()
             val harNoenVurderingSkallIkkeVurderes =
-                    hentVilkåMedResultattypen(behandling.id,
-                                              lagredeVilkårsvurderinger,
-                                              Vilkårsresultat.SKAL_IKKE_VURDERES).isNotEmpty()
+                    filtereVilkårMedResultat(behandling.id,
+                                             lagredeVilkårsvurderinger,
+                                             vilkårstyper,
+                                             Vilkårsresultat.SKAL_IKKE_VURDERES).isNotEmpty()
 
-            if (harNoenVurderingIkkeTattStillingTil) {
-                return false
+            return when {
+                harNoenVurderingIkkeTattStillingTil -> false
+                harNoenVurderingSkallIkkeVurderes -> !harNoenSomSkalIkkeVurderesOgRestenErOppfylt(behandling.id,
+                                                                                                  lagredeVilkårsvurderinger)
+                else -> true
             }
-
-            if (harNoenVurderingSkallIkkeVurderes) {
-                return !harNoenSomSkalIkkeVurderesOgRestenErOppfylt(behandling.id, lagredeVilkårsvurderinger)
-            }
-            return true;
         }
-
-
         return false
     }
 
 
     /* Hantering av bakåtkompatibilitet.*/
-    private fun erAktuellVilkårType(lagredeVilkårsvurderinger: List<Vilkårsvurdering>,
-                                    it: VilkårType) =
-            lagredeVilkårsvurderinger.none { vurdering -> vurdering.type == it }
+    private fun erAktuelltVilkårType(vilkårsvurdering: Vilkårsvurdering) = VilkårType.hentVilkår().contains(vilkårsvurdering.type)
 
-    private fun finnesEttVilkårMedResultat(lagredeVilkårsvurderinger: List<Vilkårsvurdering>,
-                                           vilkårType: VilkårType, resultat: Vilkårsresultat) =
-            lagredeVilkårsvurderinger.any { vurdering ->
-                vurdering.type == vilkårType
-                && vurdering.resultat == resultat
-            }
 
     private fun behandlingErLåstForVidereRedigering(behandlingId: UUID) =
             behandlingService.hentBehandling(behandlingId).status.behandlingErLåstForVidereRedigering()
+
+    fun filtereVilkårMedResultat(behandlingId: UUID,
+                                 lagredeVilkårsvurderinger: List<Vilkårsvurdering>,
+                                 vilkårstyper: List<VilkårType>,
+                                 resultat: Vilkårsresultat): List<Vilkårsvurdering> {
+        val aktuelleVilkår = lagredeVilkårsvurderinger
+                .filter { it.type != VilkårType.TIDLIGERE_VEDTAKSPERIODER } // TODO: Må håndteres senere
+                .filter { erAktuelltVilkårType(it) }
+
+        val antallVilkårstyper = aktuelleVilkår.map { v -> v.type }.distinct().size
+
+        require(antallVilkårstyper == vilkårstyper.size)
+        { "Forventer att det er like mange vilkår som finnes definert" }
+
+        return aktuelleVilkår.filter { it.resultat == resultat }
+
+    }
+
+    fun harNoenSomSkalIkkeVurderesOgRestenErOppfylt(behandlingId: UUID,
+                                                    lagredeVilkårsvurderinger: List<Vilkårsvurdering>): Boolean {
+
+        return lagredeVilkårsvurderinger
+                .filter { it.type != VilkårType.TIDLIGERE_VEDTAKSPERIODER }
+                .filter { erAktuelltVilkårType(it) }
+                .filter { it.resultat != Vilkårsresultat.SKAL_IKKE_VURDERES }
+                .all { it.resultat == Vilkårsresultat.OPPFYLT }
+    }
+
+
 }
