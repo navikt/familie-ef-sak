@@ -100,7 +100,6 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
     private fun opprettSaksbehandlingsoppgave(behandling: Behandling, navIdent: String): Long {
         return oppgaveService.opprettOppgave(behandlingId = behandling.id,
                                              oppgavetype = Oppgavetype.BehandleSak,
-                                             fristForFerdigstillelse = LocalDate.now().plusDays(2),
                                              tilordnetNavIdent = navIdent)
     }
 

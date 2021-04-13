@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.net.URI
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -30,7 +31,6 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
 
     fun opprettOppgave(behandlingId: UUID,
                        oppgavetype: Oppgavetype,
-                       fristForFerdigstillelse: LocalDate,
                        enhetId: String? = null,
                        tilordnetNavIdent: String? = null,
                        beskrivelse: String? = null): Long {
@@ -49,7 +49,7 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
                                           saksId = fagsak.eksternId.id.toString(),
                                           tema = Tema.ENF,
                                           oppgavetype = oppgavetype,
-                                          fristFerdigstillelse = fristForFerdigstillelse,
+                                          fristFerdigstillelse = lagFristForOppgave(LocalDateTime.now()),
                                           beskrivelse = lagOppgaveTekst(beskrivelse),
                                           enhetsnummer = enhetId ?: enhetsnummer?.enhetId,
                                           behandlingstema = finnBehandlingstema(fagsak.stønadstype).value,
@@ -118,6 +118,36 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
             Stønadstype.OVERGANGSSTØNAD -> Behandlingstema.Overgangsstønad
             Stønadstype.BARNETILSYN -> Behandlingstema.Barnetilsyn
             Stønadstype.SKOLEPENGER -> Behandlingstema.Skolepenger
+        }
+    }
+
+    /**
+     * Frist skal være 1 dag hvis den opprettes før kl. 12
+     * og 2 dager hvis den opprettes etter kl. 12
+     *
+     * Helgedager må ekskluderes
+     *
+     */
+    fun lagFristForOppgave(gjeldendeTid: LocalDateTime): LocalDate {
+        val frist = when (gjeldendeTid.dayOfWeek) {
+            DayOfWeek.FRIDAY -> fristBasertPåKlokkeslett(gjeldendeTid.plusDays(2))
+            DayOfWeek.SATURDAY -> fristBasertPåKlokkeslett(gjeldendeTid.plusDays(2).withHour(8))
+            DayOfWeek.SUNDAY -> fristBasertPåKlokkeslett(gjeldendeTid.plusDays(1).withHour(8))
+            else -> fristBasertPåKlokkeslett(gjeldendeTid)
+        }
+
+        return when (frist.dayOfWeek) {
+            DayOfWeek.SATURDAY -> frist.plusDays(2)
+            DayOfWeek.SUNDAY -> frist.plusDays(1)
+            else -> frist
+        }
+    }
+
+    private fun fristBasertPåKlokkeslett(gjeldendeTid: LocalDateTime): LocalDate {
+        return if (gjeldendeTid.hour >= 12) {
+            return gjeldendeTid.plusDays(2).toLocalDate()
+        } else {
+            gjeldendeTid.plusDays(1).toLocalDate()
         }
     }
 

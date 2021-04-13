@@ -24,7 +24,6 @@ class OpprettOppgaveTask(private val oppgaveService: OppgaveService) : AsyncTask
      */
     data class OpprettOppgaveTaskData(val behandlingId: UUID,
                                       val oppgavetype: Oppgavetype,
-                                      val fristForFerdigstillelse: LocalDate,
                                       val tilordnetNavIdent: String? = null,
                                       val beskrivelse: String? = null,
                                       val unik: LocalDateTime? = LocalDateTime.now())
@@ -33,7 +32,6 @@ class OpprettOppgaveTask(private val oppgaveService: OppgaveService) : AsyncTask
         val data = objectMapper.readValue<OpprettOppgaveTaskData>(task.payload)
         val oppgaveId = oppgaveService.opprettOppgave(behandlingId = data.behandlingId,
                                                       oppgavetype = data.oppgavetype,
-                                                      fristForFerdigstillelse = data.fristForFerdigstillelse,
                                                       tilordnetNavIdent = data.tilordnetNavIdent,
                                                       beskrivelse = data.beskrivelse)
         task.metadata.setProperty("oppgaveId", oppgaveId.toString())

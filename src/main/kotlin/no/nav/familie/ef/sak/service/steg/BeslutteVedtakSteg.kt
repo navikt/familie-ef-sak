@@ -65,7 +65,6 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
         taskRepository.save(OpprettOppgaveTask.opprettTask(
                 OpprettOppgaveTaskData(behandlingId = behandling.id,
                                        oppgavetype = Oppgavetype.BehandleUnderkjentVedtak,
-                                       fristForFerdigstillelse = LocalDate.now(),
                                        tilordnetNavIdent = navIdent)))
     }
 

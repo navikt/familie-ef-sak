@@ -47,8 +47,7 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
     private fun opprettGodkjennVedtakOppgave(behandling: Behandling) {
         taskRepository.save(OpprettOppgaveTask.opprettTask(
                 OpprettOppgaveTaskData(behandlingId = behandling.id,
-                                       oppgavetype = Oppgavetype.GodkjenneVedtak,
-                                       fristForFerdigstillelse = LocalDate.now())))
+                                       oppgavetype = Oppgavetype.GodkjenneVedtak)))
     }
 
     override fun stegType(): StegType {
