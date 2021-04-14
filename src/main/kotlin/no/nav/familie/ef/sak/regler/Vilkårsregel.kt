@@ -33,4 +33,9 @@ abstract class Vilkårsregel(val vilkårType: VilkårType,
     fun regel(regelId: RegelId): RegelSteg {
         return regler[regelId] ?: throw Feil("Finner ikke regelId=$regelId for vilkårType=$vilkårType")
     }
+
+    fun lagNyeDelvilkår(metadata: HovedregelMetadata): List<Delvilkårsvurdering> {
+        return this.initereDelvilkårsvurderingMedVilkårsresultat(metadata,
+                                                                         resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL)
+    }
 }

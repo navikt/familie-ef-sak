@@ -25,6 +25,9 @@ import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.vilkårsvurdering
 import no.nav.familie.ef.sak.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.regler.RegelId
 import no.nav.familie.ef.sak.regler.SvarId
+import no.nav.familie.ef.sak.regler.evalutation.OppdaterVilkår
+import no.nav.familie.ef.sak.regler.evalutation.OppdaterVilkår.erAlleVilkårVurdert
+import no.nav.familie.ef.sak.regler.evalutation.OppdaterVilkår.opprettNyeVilkårsvurderinger
 import no.nav.familie.ef.sak.regler.vilkår.SivilstandRegel
 import no.nav.familie.ef.sak.repository.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
@@ -196,8 +199,8 @@ internal class VurderingServiceTest {
         val oppdatertVurdering = slot<Vilkårsvurdering>()
         val vilkårsvurdering = initiererVurderinger(oppdatertVurdering)
 
-        vurderingService.ikkeVurderVilkår(OppdaterVilkårsvurderingDto(id = vilkårsvurdering.id,
-                                                                      behandlingId = BEHANDLING_ID))
+        vurderingService.settVilkårTilSkalIkkeVurderes(OppdaterVilkårsvurderingDto(id = vilkårsvurdering.id,
+                                                                                   behandlingId = BEHANDLING_ID))
 
         assertThat(oppdatertVurdering.captured.resultat).isEqualTo(Vilkårsresultat.SKAL_IKKE_VURDERES)
         assertThat(oppdatertVurdering.captured.type).isEqualTo(vilkårsvurdering.type)
@@ -228,23 +231,23 @@ internal class VurderingServiceTest {
 
     @Test
     fun `skal returnere false hvis ikke alle vilkår er vurdert `() {
-        val vilkårsvurderinger = vurderingService.opprettNyeVilkårsvurderinger(BEHANDLING_ID, HovedregelMetadata(søknad, Sivilstandstype.UGIFT))
+        val vilkårsvurderinger = opprettNyeVilkårsvurderinger(BEHANDLING_ID, HovedregelMetadata(søknad, Sivilstandstype.UGIFT))
         val skallIkkeVurderes = vilkårsvurderinger.last().copy(resultat = Vilkårsresultat.SKAL_IKKE_VURDERES)
         val alleMenIkkeSisteErOppfyllt = vilkårsvurderinger.dropLast(1).map {it.copy(resultat = Vilkårsresultat.OPPFYLT)}
 
 
-        assertThat(vurderingService.erAlleVilkårVurdert(behandling, alleMenIkkeSisteErOppfyllt.plus(skallIkkeVurderes), VilkårType.hentVilkår())).isFalse
+        assertThat(erAlleVilkårVurdert(behandling, alleMenIkkeSisteErOppfyllt.plus(skallIkkeVurderes), VilkårType.hentVilkår())).isFalse
 
     }
 
     @Test
     fun `skal returnere true til neste steg hvis alle vilkår er vurdert`() {
-        val vilkårsvurderinger = vurderingService.opprettNyeVilkårsvurderinger(BEHANDLING_ID, HovedregelMetadata(søknad, Sivilstandstype.UGIFT))
+        val vilkårsvurderinger = opprettNyeVilkårsvurderinger(BEHANDLING_ID, HovedregelMetadata(søknad, Sivilstandstype.UGIFT))
         val ikkeOppfyllt = vilkårsvurderinger.last().copy(resultat = Vilkårsresultat.IKKE_OPPFYLT)
         val alleMenIkkeSisteErIkkeVurdert = vilkårsvurderinger.dropLast(1).map {it.copy(resultat = Vilkårsresultat.SKAL_IKKE_VURDERES)}
 
 
-        assertThat(vurderingService.erAlleVilkårVurdert(behandling, alleMenIkkeSisteErIkkeVurdert.plus(ikkeOppfyllt), VilkårType.hentVilkår())).isTrue
+        assertThat(erAlleVilkårVurdert(behandling, alleMenIkkeSisteErIkkeVurdert.plus(ikkeOppfyllt), VilkårType.hentVilkår())).isTrue
 
     }
 
@@ -256,7 +259,7 @@ internal class VurderingServiceTest {
                                                 listOf(Delvilkårsvurdering(Vilkårsresultat.OPPFYLT,
                                                                            listOf(Vurdering(RegelId.SØKER_MEDLEM_I_FOLKETRYGDEN)))))
         val vilkårsvurderinger =
-                vurderingService.opprettNyeVilkårsvurderinger(BEHANDLING_ID, HovedregelMetadata(søknad, Sivilstandstype.UGIFT))
+                opprettNyeVilkårsvurderinger(BEHANDLING_ID, HovedregelMetadata(søknad, Sivilstandstype.UGIFT))
                         .map { if (it.type == vilkårsvurdering.type) vilkårsvurdering else it }
 
         every { vilkårsvurderingRepository.findByIdOrNull(vilkårsvurdering.id) } returns vilkårsvurdering

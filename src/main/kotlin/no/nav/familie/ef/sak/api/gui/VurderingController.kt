@@ -58,9 +58,9 @@ class VurderingController(private val vurderingService: VurderingService,
     }
 
     @PostMapping("ikkevurder")
-    fun ikkeVurderVilkår(@RequestBody request: OppdaterVilkårsvurderingDto): Ressurs<VilkårsvurderingDto> {
+    fun settVilkårTilSkalIkkeVurderes(@RequestBody request: OppdaterVilkårsvurderingDto): Ressurs<VilkårsvurderingDto> {
         tilgangService.validerTilgangTilBehandling(request.behandlingId)
-        return Ressurs.success(vurderingService.ikkeVurderVilkår(request))
+        return Ressurs.success(vurderingService.settVilkårTilSkalIkkeVurderes(request))
     }
 
     @GetMapping("{behandlingId}/vilkar")
