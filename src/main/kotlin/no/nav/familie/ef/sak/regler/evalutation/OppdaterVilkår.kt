@@ -3,14 +3,15 @@ package no.nav.familie.ef.sak.regler.evalutation
 import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.api.dto.DelvilkårsvurderingDto
 import no.nav.familie.ef.sak.api.dto.svarTilDomene
+import no.nav.familie.ef.sak.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.regler.Vilkårsregel
 import no.nav.familie.ef.sak.regler.Vilkårsregler.Companion.VILKÅRSREGLER
+import no.nav.familie.ef.sak.regler.alleVilkårsregler
 import no.nav.familie.ef.sak.regler.evalutation.RegelEvaluering.utledResultat
 import no.nav.familie.ef.sak.regler.evalutation.RegelValidering.validerVurdering
-import no.nav.familie.ef.sak.repository.domain.DelvilkårsvurderingWrapper
-import no.nav.familie.ef.sak.repository.domain.VilkårType
-import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
-import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
+import no.nav.familie.ef.sak.repository.domain.*
+import no.nav.familie.ef.sak.service.steg.StegType
+import java.util.*
 
 object OppdaterVilkår {
 
@@ -73,6 +74,88 @@ object OppdaterVilkår {
             }
         }.toList()
         return vilkårsvurdering.delvilkårsvurdering.copy(delvilkårsvurderinger = delvilkårsvurderinger)
+    }
+
+
+
+    fun filtereVilkårMedResultat(behandlingId: UUID,
+                                 lagredeVilkårsvurderinger: List<Vilkårsvurdering>,
+                                 vilkårstyper: List<VilkårType>,
+                                 resultat: Vilkårsresultat): List<Vilkårsvurdering> {
+        val aktuelleVilkår = lagredeVilkårsvurderinger
+                .filter { erAktuelltVilkårType(it) }
+
+        val antallVilkårstyper = aktuelleVilkår.map { v -> v.type }.distinct().size
+
+        require(antallVilkårstyper == vilkårstyper.size)
+        { "Forventer att det er like mange vilkår som finnes definert" }
+
+        return aktuelleVilkår.filter { it.resultat == resultat }
+
+    }
+
+    fun harNoenSomSkalIkkeVurderesOgRestenErOppfylt(behandlingId: UUID,
+                                                    lagredeVilkårsvurderinger: List<Vilkårsvurdering>): Boolean {
+
+        return lagredeVilkårsvurderinger
+                .filter { erAktuelltVilkårType(it) }
+                .filter { it.resultat != Vilkårsresultat.SKAL_IKKE_VURDERES }
+                .all { it.resultat == Vilkårsresultat.OPPFYLT }
+    }
+
+    /* Hantering av bakåtkompatibilitet.*/
+    private fun erAktuelltVilkårType(vilkårsvurdering: Vilkårsvurdering) = VilkårType.hentVilkår().contains(vilkårsvurdering.type)
+
+
+    fun erAlleVilkårVurdert(behandling: Behandling,
+                            lagredeVilkårsvurderinger: List<Vilkårsvurdering>,
+                            vilkårstyper: List<VilkårType>): Boolean {
+
+        if (behandling.steg == StegType.VILKÅR) {
+            val harNoenVurderingIkkeTattStillingTil = filtereVilkårMedResultat(behandling.id,
+                                                                               lagredeVilkårsvurderinger,
+                                                                               vilkårstyper,
+                                                                               Vilkårsresultat.IKKE_TATT_STILLING_TIL).isNotEmpty()
+            val harNoenVurderingSkalIkkeVurderes =
+                    filtereVilkårMedResultat(behandling.id,
+                                             lagredeVilkårsvurderinger,
+                                             vilkårstyper,
+                                             Vilkårsresultat.SKAL_IKKE_VURDERES).isNotEmpty()
+
+            return when {
+                harNoenVurderingIkkeTattStillingTil -> false
+                harNoenVurderingSkalIkkeVurderes -> !harNoenSomSkalIkkeVurderesOgRestenErOppfylt(behandling.id,
+                                                                                                 lagredeVilkårsvurderinger)
+                else -> true
+            }
+        }
+        return false
+    }
+
+
+    fun opprettNyeVilkårsvurderinger(behandlingId: UUID,
+                                     metadata: HovedregelMetadata): List<Vilkårsvurdering> {
+        return alleVilkårsregler
+                .flatMap { vilkårsregel ->
+                    if (vilkårsregel.vilkårType == VilkårType.ALENEOMSORG) {
+                        metadata.søknad.barn.map {
+                            lagNyVilkårsvurdering(vilkårsregel, metadata, behandlingId, it.id)
+                        }
+                    } else {
+                        listOf(lagNyVilkårsvurdering(vilkårsregel, metadata, behandlingId))
+                    }
+                }
+    }
+
+    private fun lagNyVilkårsvurdering(vilkårsregel: Vilkårsregel,
+                                      metadata: HovedregelMetadata,
+                                      behandlingId: UUID,
+                                      barnId: UUID? = null): Vilkårsvurdering {
+        val delvilkårsvurdering = vilkårsregel.lagNyeDelvilkår(metadata)
+        return Vilkårsvurdering(behandlingId = behandlingId,
+                                type = vilkårsregel.vilkårType,
+                                barnId = barnId,
+                                delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurdering))
     }
 
 }

@@ -40,8 +40,8 @@ object RegelEvaluering {
             delvilkårResultat.values.all { it == Vilkårsresultat.OPPFYLT } -> Vilkårsresultat.OPPFYLT
             delvilkårResultat.values.all { it == Vilkårsresultat.OPPFYLT || it == Vilkårsresultat.IKKE_OPPFYLT } ->
                 Vilkårsresultat.IKKE_OPPFYLT
+            delvilkårResultat.values.any { it == Vilkårsresultat.SKAL_IKKE_VURDERES } -> Vilkårsresultat.SKAL_IKKE_VURDERES
             delvilkårResultat.values.any { it == Vilkårsresultat.IKKE_TATT_STILLING_TIL } -> Vilkårsresultat.IKKE_TATT_STILLING_TIL
-            delvilkårResultat.values.any { it == Vilkårsresultat.SKAL_IKKE_VURDERES } -> Vilkårsresultat.SKAL_IKKE_VURDERES //TODO?
             else -> error("Håndterer ikke situasjonen med resultat=${delvilkårResultat.values}")
         }
     }
@@ -51,6 +51,7 @@ object RegelEvaluering {
      */
     private fun utledResultatForDelvilkår(vilkårsregel: Vilkårsregel,
                                           vurdering: DelvilkårsvurderingDto): Vilkårsresultat {
+
         vurdering.vurderinger.forEach { svar ->
             val regel = vilkårsregel.regel(svar.regelId)
             val svarId = svar.svar ?: return Vilkårsresultat.IKKE_TATT_STILLING_TIL

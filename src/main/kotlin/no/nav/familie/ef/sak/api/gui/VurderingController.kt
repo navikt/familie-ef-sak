@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.api.gui
 
-import no.nav.familie.ef.sak.api.dto.NullstillVilkårsvurderingDto
 import no.nav.familie.ef.sak.api.dto.OppdaterVilkårsvurderingDto
+import no.nav.familie.ef.sak.api.dto.SvarPåVurderingerDto
 import no.nav.familie.ef.sak.api.dto.VilkårDto
 import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.regler.Vilkårsregler
@@ -37,7 +37,7 @@ class VurderingController(private val vurderingService: VurderingService,
     }
 
     @PostMapping("vilkar")
-    fun oppdaterVurderingVilkår(@RequestBody vilkårsvurdering: OppdaterVilkårsvurderingDto)
+    fun oppdaterVurderingVilkår(@RequestBody vilkårsvurdering: SvarPåVurderingerDto)
             : Ressurs<VilkårsvurderingDto> {
         tilgangService.validerTilgangTilBehandling(vilkårsvurdering.behandlingId)
         try {
@@ -52,9 +52,15 @@ class VurderingController(private val vurderingService: VurderingService,
     }
 
     @PostMapping("nullstill")
-    fun nullstillVilkår(@RequestBody request: NullstillVilkårsvurderingDto): Ressurs<VilkårsvurderingDto> {
+    fun nullstillVilkår(@RequestBody request: OppdaterVilkårsvurderingDto): Ressurs<VilkårsvurderingDto> {
         tilgangService.validerTilgangTilBehandling(request.behandlingId)
         return Ressurs.success(vurderingService.nullstillVilkår(request))
+    }
+
+    @PostMapping("ikkevurder")
+    fun settVilkårTilSkalIkkeVurderes(@RequestBody request: OppdaterVilkårsvurderingDto): Ressurs<VilkårsvurderingDto> {
+        tilgangService.validerTilgangTilBehandling(request.behandlingId)
+        return Ressurs.success(vurderingService.settVilkårTilSkalIkkeVurderes(request))
     }
 
     @GetMapping("{behandlingId}/vilkar")

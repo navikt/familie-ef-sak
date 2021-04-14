@@ -9,12 +9,7 @@ import no.nav.familie.ef.sak.regler.RegelId
 import no.nav.familie.ef.sak.regler.SvarId
 import no.nav.familie.ef.sak.regler.Vilkårsregel
 import no.nav.familie.ef.sak.regler.vilkår.SivilstandRegel
-import no.nav.familie.ef.sak.repository.domain.Delvilkårsvurdering
-import no.nav.familie.ef.sak.repository.domain.DelvilkårsvurderingWrapper
-import no.nav.familie.ef.sak.repository.domain.VilkårType
-import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
-import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
-import no.nav.familie.ef.sak.repository.domain.Vurdering
+import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
@@ -114,7 +109,7 @@ class OppdaterVilkårTest {
     internal fun `sivilstand - trenger ikke å svare på hovedvilkår som ikke er aktuelle`() {
         val søknad = SøknadsskjemaMapper.tilDomene(TestsøknadBuilder.Builder().build().søknadOvergangsstønad)
         val regel = SivilstandRegel()
-        val initDelvilkår = regel.initereDelvilkårsvurdering(HovedregelMetadata(søknad, Sivilstandstype.SKILT))
+        val initDelvilkår = regel.initereDelvilkårsvurderingMedVilkårsresultat(HovedregelMetadata(søknad, Sivilstandstype.SKILT, ))
         val aktuelleDelvilkår = initDelvilkår.filter { it.resultat == Vilkårsresultat.IKKE_TATT_STILLING_TIL }
         assertThat(initDelvilkår).hasSize(5)
         assertThat(initDelvilkår.filter { it.resultat == Vilkårsresultat.IKKE_AKTUELL }).hasSize(4)
@@ -135,7 +130,7 @@ class OppdaterVilkårTest {
     internal fun `sivilstand - sender inn svar på en annen regel enn det som man skal svare på`() {
         val søknad = SøknadsskjemaMapper.tilDomene(TestsøknadBuilder.Builder().build().søknadOvergangsstønad)
         val regel = SivilstandRegel()
-        val initDelvilkår = regel.initereDelvilkårsvurdering(HovedregelMetadata(søknad, Sivilstandstype.SKILT))
+        val initDelvilkår = regel.initereDelvilkårsvurderingMedVilkårsresultat(HovedregelMetadata(søknad, Sivilstandstype.SKILT))
 
         val vilkårsvurdering = Vilkårsvurdering(behandlingId = UUID.randomUUID(),
                                                 resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
