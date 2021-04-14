@@ -9,9 +9,13 @@ import no.nav.familie.ef.sak.regler.Vilkårsregler.Companion.VILKÅRSREGLER
 import no.nav.familie.ef.sak.regler.alleVilkårsregler
 import no.nav.familie.ef.sak.regler.evalutation.RegelEvaluering.utledResultat
 import no.nav.familie.ef.sak.regler.evalutation.RegelValidering.validerVurdering
-import no.nav.familie.ef.sak.repository.domain.*
+import no.nav.familie.ef.sak.repository.domain.Behandling
+import no.nav.familie.ef.sak.repository.domain.DelvilkårsvurderingWrapper
+import no.nav.familie.ef.sak.repository.domain.VilkårType
+import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
+import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
 import no.nav.familie.ef.sak.service.steg.StegType
-import java.util.*
+import java.util.UUID
 
 object OppdaterVilkår {
 
@@ -77,13 +81,10 @@ object OppdaterVilkår {
     }
 
 
-
-    fun filtereVilkårMedResultat(behandlingId: UUID,
-                                 lagredeVilkårsvurderinger: List<Vilkårsvurdering>,
+    fun filtereVilkårMedResultat(lagredeVilkårsvurderinger: List<Vilkårsvurdering>,
                                  vilkårstyper: List<VilkårType>,
                                  resultat: Vilkårsresultat): List<Vilkårsvurdering> {
-        val aktuelleVilkår = lagredeVilkårsvurderinger
-                .filter { erAktuelltVilkårType(it) }
+        val aktuelleVilkår = lagredeVilkårsvurderinger.filter { erAktuelltVilkårType(it) }
 
         val antallVilkårstyper = aktuelleVilkår.map { v -> v.type }.distinct().size
 
@@ -94,9 +95,7 @@ object OppdaterVilkår {
 
     }
 
-    fun harNoenSomSkalIkkeVurderesOgRestenErOppfylt(behandlingId: UUID,
-                                                    lagredeVilkårsvurderinger: List<Vilkårsvurdering>): Boolean {
-
+    private fun harNoenSomSkalIkkeVurderesOgRestenErOppfylt(lagredeVilkårsvurderinger: List<Vilkårsvurdering>): Boolean {
         return lagredeVilkårsvurderinger
                 .filter { erAktuelltVilkårType(it) }
                 .filter { it.resultat != Vilkårsresultat.SKAL_IKKE_VURDERES }
@@ -112,20 +111,16 @@ object OppdaterVilkår {
                             vilkårstyper: List<VilkårType>): Boolean {
 
         if (behandling.steg == StegType.VILKÅR) {
-            val harNoenVurderingIkkeTattStillingTil = filtereVilkårMedResultat(behandling.id,
-                                                                               lagredeVilkårsvurderinger,
+            val harNoenVurderingIkkeTattStillingTil = filtereVilkårMedResultat(lagredeVilkårsvurderinger,
                                                                                vilkårstyper,
                                                                                Vilkårsresultat.IKKE_TATT_STILLING_TIL).isNotEmpty()
-            val harNoenVurderingSkalIkkeVurderes =
-                    filtereVilkårMedResultat(behandling.id,
-                                             lagredeVilkårsvurderinger,
-                                             vilkårstyper,
-                                             Vilkårsresultat.SKAL_IKKE_VURDERES).isNotEmpty()
+            val harNoenVurderingSkalIkkeVurderes = filtereVilkårMedResultat(lagredeVilkårsvurderinger,
+                                                                            vilkårstyper,
+                                                                            Vilkårsresultat.SKAL_IKKE_VURDERES).isNotEmpty()
 
             return when {
                 harNoenVurderingIkkeTattStillingTil -> false
-                harNoenVurderingSkalIkkeVurderes -> !harNoenSomSkalIkkeVurderesOgRestenErOppfylt(behandling.id,
-                                                                                                 lagredeVilkårsvurderinger)
+                harNoenVurderingSkalIkkeVurderes -> !harNoenSomSkalIkkeVurderesOgRestenErOppfylt(lagredeVilkårsvurderinger)
                 else -> true
             }
         }
