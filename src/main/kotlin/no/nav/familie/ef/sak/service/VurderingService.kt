@@ -204,7 +204,18 @@ class VurderingService(private val behandlingService: BehandlingService,
         Ellers -> true?
     */
 
-    fun erAlleVilkårVurdert(behandling: Behandling,
+  fun erAlleVilkårVurdert(behandling: Behandling,
+                            lagredeVilkårsvurderinger: List<Vilkårsvurdering>,
+                            vilkårstyper: List<VilkårType>): Boolean {
+        if (behandling.steg == StegType.VILKÅR) {
+            return when {
+                herNoenVurderingerIkkeTattStillingTil(behandling, lagredeVilkårsvurderinger, vilkårstyper) -> false
+                harMiksAvSkalIkkeVurderesOgOppfylt(behandling, lagredeVilkårsvurderinger, vilkårstyper) -> false
+                else -> true
+            }
+        }
+        return false
+    }
                             lagredeVilkårsvurderinger: List<Vilkårsvurdering>,
                             vilkårstyper: List<VilkårType>): Boolean {
 
