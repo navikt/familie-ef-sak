@@ -23,14 +23,12 @@ import kotlin.test.assertFailsWith
 internal class TilgangServiceTest {
 
 
-    private val personService: PersonService = mockk()
     private val familieIntegrasjonerClient: FamilieIntegrasjonerClient = mockk()
     private val behandlingService: BehandlingService = mockk()
     private val fagsakService: FagsakService = mockk()
     private val cacheManager = ConcurrentMapCacheManager()
     private val tilgangService =
             TilgangService(integrasjonerClient = familieIntegrasjonerClient,
-                           personService = personService,
                            behandlingService = behandlingService,
                            fagsakService = fagsakService,
                            rolleConfig = RolleConfig("", "", ""),
@@ -41,12 +39,10 @@ internal class TilgangServiceTest {
     private  val behandling: Behandling = behandling(fagsak)
     private val olaIdent = "4567"
     private val kariIdent = "98765"
-    private val barn: Map<String, PdlBarn> = mapOf(Pair(olaIdent, mockk()), Pair(kariIdent, mockk()))
 
     @BeforeEach
     internal fun setUp() {
         mockBrukerContext("A")
-        every { personService.hentIdenterForBarnOgForeldre(any()) } returns listOf(mocketPersonIdent, olaIdent, kariIdent)
         every { behandlingService.hentAktivIdent(behandling.id) } returns fagsak.hentAktivIdent()
         every { fagsakService.hentAktivIdent(fagsak.id) } returns fagsak.hentAktivIdent()
     }
@@ -58,54 +54,47 @@ internal class TilgangServiceTest {
 
     @Test
     internal fun `skal kaste ManglerTilgang dersom saksbehandler ikke har tilgang til person eller dets barn`() {
-        val tilganger = listOf(Tilgang(true), Tilgang(true), Tilgang(false))
-        every { familieIntegrasjonerClient.sjekkTilgangTilPersoner(any()) } returns tilganger
+        every { familieIntegrasjonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns Tilgang(false)
 
         assertFailsWith<ManglerTilgang> { tilgangService.validerTilgangTilPersonMedBarn(mocketPersonIdent) }
     }
 
     @Test
     internal fun `skal ikke feile når saksbehandler har tilgang til person og dets barn`() {
-        every { personService.hentIdenterForBarnOgForeldre(any()) } returns listOf(mocketPersonIdent, olaIdent, kariIdent)
-
-        val tilganger = listOf(Tilgang(true), Tilgang(true), Tilgang(true))
-        every { familieIntegrasjonerClient.sjekkTilgangTilPersoner(any()) } returns tilganger
+        every { familieIntegrasjonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns Tilgang(true)
 
         tilgangService.validerTilgangTilPersonMedBarn(mocketPersonIdent)
     }
 
     @Test
     internal fun `skal kaste ManglerTilgang dersom saksbehandler ikke har tilgang til behandling`() {
-        val tilganger = listOf(Tilgang(true), Tilgang(true), Tilgang(false))
-        every { familieIntegrasjonerClient.sjekkTilgangTilPersoner(any()) } returns tilganger
+        every { familieIntegrasjonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns Tilgang(false)
 
         assertFailsWith<ManglerTilgang> { tilgangService.validerTilgangTilBehandling(behandling.id) }
     }
 
     @Test
     internal fun `skal ikke feile når saksbehandler har tilgang til behandling`() {
-        val tilganger = listOf(Tilgang(true), Tilgang(true), Tilgang(true))
-        every { familieIntegrasjonerClient.sjekkTilgangTilPersoner(any()) } returns tilganger
+        every { familieIntegrasjonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns Tilgang(true)
 
         tilgangService.validerTilgangTilBehandling(behandling.id)
     }
 
     @Test
     internal fun `validerTilgangTilPersonMedBarn - hvis samme saksbehandler kaller skal den ha cachet`() {
-        every { familieIntegrasjonerClient.sjekkTilgangTilPersoner(any()) } returns listOf(Tilgang(true))
+        every { familieIntegrasjonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns Tilgang(true)
 
         mockBrukerContext("A")
         tilgangService.validerTilgangTilPersonMedBarn(olaIdent)
         tilgangService.validerTilgangTilPersonMedBarn(olaIdent)
         verify(exactly = 1) {
-            personService.hentIdenterForBarnOgForeldre(any())
-            familieIntegrasjonerClient.sjekkTilgangTilPersoner(any())
+            familieIntegrasjonerClient.sjekkTilgangTilPersonMedRelasjoner(any())
         }
     }
 
     @Test
     internal fun `validerTilgangTilPersonMedBarn - hvis to ulike saksbehandler kaller skal den sjekke tilgang på nytt`() {
-        every { familieIntegrasjonerClient.sjekkTilgangTilPersoner(any()) } returns listOf(Tilgang(true))
+        every { familieIntegrasjonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns Tilgang(true)
 
         mockBrukerContext("A")
         tilgangService.validerTilgangTilPersonMedBarn(olaIdent)
@@ -113,14 +102,13 @@ internal class TilgangServiceTest {
         tilgangService.validerTilgangTilPersonMedBarn(olaIdent)
 
         verify(exactly = 2) {
-            personService.hentIdenterForBarnOgForeldre(any())
-            familieIntegrasjonerClient.sjekkTilgangTilPersoner(any())
+            familieIntegrasjonerClient.sjekkTilgangTilPersonMedRelasjoner(any())
         }
     }
 
     @Test
     internal fun `validerTilgangTilBehandling - hvis to ulike saksbehandler kaller skal den sjekke tilgang på nytt`() {
-        every { familieIntegrasjonerClient.sjekkTilgangTilPersoner(any()) } returns listOf(Tilgang(true))
+        every { familieIntegrasjonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns Tilgang(true)
 
         mockBrukerContext("A")
 
@@ -129,14 +117,13 @@ internal class TilgangServiceTest {
 
         verify(exactly = 1) {
             behandlingService.hentAktivIdent(behandling.id)
-            personService.hentIdenterForBarnOgForeldre(any())
-            familieIntegrasjonerClient.sjekkTilgangTilPersoner(any())
+            familieIntegrasjonerClient.sjekkTilgangTilPersonMedRelasjoner(any())
         }
     }
 
     @Test
     internal fun `validerTilgangTilBehandling - hvis samme saksbehandler kaller skal den ha cachet`() {
-        every { familieIntegrasjonerClient.sjekkTilgangTilPersoner(any()) } returns listOf(Tilgang(true))
+        every { familieIntegrasjonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns Tilgang(true)
 
         mockBrukerContext("A")
         tilgangService.validerTilgangTilBehandling(behandling.id)
@@ -145,8 +132,7 @@ internal class TilgangServiceTest {
 
         verify(exactly = 2) {
             behandlingService.hentAktivIdent(behandling.id)
-            personService.hentIdenterForBarnOgForeldre(any())
-            familieIntegrasjonerClient.sjekkTilgangTilPersoner(any())
+            familieIntegrasjonerClient.sjekkTilgangTilPersonMedRelasjoner(any())
         }
     }
 

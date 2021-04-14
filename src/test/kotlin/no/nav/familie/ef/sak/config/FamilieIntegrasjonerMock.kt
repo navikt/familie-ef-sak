@@ -34,16 +34,16 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                             .willReturn(WireMock.aResponse().withStatus(200)),
                     WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.egenAnsattUri.path))
                             .willReturn(WireMock.okJson(objectMapper.writeValueAsString(egenAnsatt))),
-                    WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.tilgangUri.path))
+                    WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.tilgangRelasjonerUri.path))
                             .withRequestBody(WireMock.matching(".*ikkeTilgang.*"))
                             .atPriority(1)
                             .willReturn(WireMock.okJson(objectMapper
-                                                                .writeValueAsString(listOf(Tilgang(false,
-                                                                                                   "Mock sier: Du har " +
-                                                                                                   "ikke tilgang " +
-                                                                                                   "til person ikkeTilgang"))))),
-                    WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.tilgangUri.path))
-                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(listOf(Tilgang(true, null))))),
+                                                                .writeValueAsString(Tilgang(false,
+                                                                                            "Mock sier: Du har " +
+                                                                                            "ikke tilgang " +
+                                                                                            "til person ikkeTilgang")))),
+                    WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.tilgangRelasjonerUri.path))
+                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(Tilgang(true, null)))),
                     WireMock.get(WireMock.urlEqualTo(integrasjonerConfig.kodeverkPoststedUri.path))
                             .willReturn(WireMock.okJson(objectMapper.writeValueAsString(kodeverkPoststed))),
                     WireMock.get(WireMock.urlEqualTo(integrasjonerConfig.kodeverkLandkoderUri.path))
