@@ -16,6 +16,7 @@ import no.nav.familie.ef.sak.api.dto.Sivilstandstype
 import no.nav.familie.ef.sak.api.dto.SvarPåVurderingerDto
 import no.nav.familie.ef.sak.api.dto.VilkårGrunnlagDto
 import no.nav.familie.ef.sak.api.dto.VurderingDto
+import no.nav.familie.ef.sak.api.dto.tilDto
 import no.nav.familie.ef.sak.blankett.BlankettRepository
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.mapper.SøknadsskjemaMapper
@@ -25,7 +26,6 @@ import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.vilkårsvurdering
 import no.nav.familie.ef.sak.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.regler.RegelId
 import no.nav.familie.ef.sak.regler.SvarId
-import no.nav.familie.ef.sak.regler.evalutation.OppdaterVilkår
 import no.nav.familie.ef.sak.regler.evalutation.OppdaterVilkår.erAlleVilkårVurdert
 import no.nav.familie.ef.sak.regler.evalutation.OppdaterVilkår.opprettNyeVilkårsvurderinger
 import no.nav.familie.ef.sak.regler.vilkår.SivilstandRegel
@@ -38,6 +38,7 @@ import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
 import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
 import no.nav.familie.ef.sak.repository.domain.Vurdering
 import no.nav.familie.ef.sak.service.steg.StegService
+import no.nav.familie.ef.sak.service.steg.StegType
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import org.assertj.core.api.Assertions.assertThat
@@ -126,8 +127,8 @@ internal class VurderingServiceTest {
     @Test
     internal fun `skal ikke returnere delvilkår som er ikke aktuelle til frontend`() {
         val delvilkårsvurdering =
-                SivilstandRegel().initereDelvilkårsvurderingMedVilkårsresultat(HovedregelMetadata(mockk(),
-                                                                                                  Sivilstandstype.ENKE_ELLER_ENKEMANN))
+                SivilstandRegel().initereDelvilkårsvurdering(HovedregelMetadata(mockk(),
+                                                                                Sivilstandstype.ENKE_ELLER_ENKEMANN))
         every { vilkårsvurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns
                 listOf(Vilkårsvurdering(behandlingId = BEHANDLING_ID,
                                         type = VilkårType.SIVILSTAND,
@@ -237,7 +238,6 @@ internal class VurderingServiceTest {
 
 
         assertThat(erAlleVilkårVurdert(behandling, alleMenIkkeSisteErOppfyllt.plus(skallIkkeVurderes), VilkårType.hentVilkår())).isFalse
-
     }
 
     @Test
@@ -248,7 +248,6 @@ internal class VurderingServiceTest {
 
 
         assertThat(erAlleVilkårVurdert(behandling, alleMenIkkeSisteErIkkeVurdert.plus(ikkeOppfyllt), VilkårType.hentVilkår())).isTrue
-
     }
 
     //KUN FOR Å TESTE OPPDATERSTEG

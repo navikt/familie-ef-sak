@@ -100,17 +100,17 @@ class VurderingService(private val behandlingService: BehandlingService,
     private fun nullstillVilkårMedNyeHovedregler(behandlingId: UUID,
                                                  vilkårsvurdering: Vilkårsvurdering): VilkårsvurderingDto {
         val metadata = hentHovedregelMetadata(behandlingId)
-        val nyeDelvilkår = hentVilkårsregel(vilkårsvurdering.type).lagNyeDelvilkår(metadata)
+        val nyeDelvilkår = hentVilkårsregel(vilkårsvurdering.type).initereDelvilkårsvurdering(metadata)
         val delvilkårsvurdering = DelvilkårsvurderingWrapper(nyeDelvilkår)
         return vilkårsvurderingRepository.update(vilkårsvurdering.copy(resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
                                                                        delvilkårsvurdering = delvilkårsvurdering)).tilDto()
     }
 
     private fun oppdaterVilkårsvurderingTilSkalIkkeVurderes(behandlingId: UUID,
-                                                      vilkårsvurdering: Vilkårsvurdering): VilkårsvurderingDto {
+                                                            vilkårsvurdering: Vilkårsvurdering): VilkårsvurderingDto {
         val metadata = hentHovedregelMetadata(behandlingId)
-        val nyeDelvilkår = hentVilkårsregel(vilkårsvurdering.type).initereDelvilkårsvurderingMedVilkårsresultat(metadata,
-                                                                                                                Vilkårsresultat.SKAL_IKKE_VURDERES)
+        val nyeDelvilkår = hentVilkårsregel(vilkårsvurdering.type).initereDelvilkårsvurdering(metadata,
+                                                                                              Vilkårsresultat.SKAL_IKKE_VURDERES)
         val delvilkårsvurdering = DelvilkårsvurderingWrapper(nyeDelvilkår)
         return vilkårsvurderingRepository.update(vilkårsvurdering.copy(resultat = Vilkårsresultat.SKAL_IKKE_VURDERES,
                                                                        delvilkårsvurdering = delvilkårsvurdering)).tilDto()

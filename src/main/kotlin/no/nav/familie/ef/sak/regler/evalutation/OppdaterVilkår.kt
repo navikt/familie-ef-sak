@@ -146,7 +146,7 @@ object OppdaterVilkår {
                                       metadata: HovedregelMetadata,
                                       behandlingId: UUID,
                                       barnId: UUID? = null): Vilkårsvurdering {
-        val delvilkårsvurdering = vilkårsregel.lagNyeDelvilkår(metadata)
+        val delvilkårsvurdering = vilkårsregel.initereDelvilkårsvurdering(metadata)
         return Vilkårsvurdering(behandlingId = behandlingId,
                                 type = vilkårsregel.vilkårType,
                                 barnId = barnId,

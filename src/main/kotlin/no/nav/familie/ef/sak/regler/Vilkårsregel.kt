@@ -20,7 +20,8 @@ abstract class Vilkårsregel(val vilkårType: VilkårType,
                             @JsonIgnore
                             val hovedregler: Set<RegelId>) {
 
-    open fun initereDelvilkårsvurderingMedVilkårsresultat(metadata: HovedregelMetadata, resultat: Vilkårsresultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL): List<Delvilkårsvurdering> {
+    open fun initereDelvilkårsvurdering(metadata: HovedregelMetadata,
+                                        resultat: Vilkårsresultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL): List<Delvilkårsvurdering> {
         return hovedregler.map {
             Delvilkårsvurdering(resultat,
                                 vurderinger = listOf(Vurdering(it)))
@@ -34,8 +35,4 @@ abstract class Vilkårsregel(val vilkårType: VilkårType,
         return regler[regelId] ?: throw Feil("Finner ikke regelId=$regelId for vilkårType=$vilkårType")
     }
 
-    fun lagNyeDelvilkår(metadata: HovedregelMetadata): List<Delvilkårsvurdering> {
-        return this.initereDelvilkårsvurderingMedVilkårsresultat(metadata,
-                                                                         resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL)
-    }
 }
