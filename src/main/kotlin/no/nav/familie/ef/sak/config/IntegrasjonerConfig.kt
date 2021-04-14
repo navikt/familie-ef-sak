@@ -10,7 +10,7 @@ class IntegrasjonerConfig(@Value("\${FAMILIE_INTEGRASJONER_URL}") private val in
 
     val pingUri: URI = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_PING).build().toUri()
 
-    val tilgangUri: URI = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_TILGANGER).build().toUri()
+    val tilgangRelasjonerUri: URI = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_TILGANG_RELASJONER).build().toUri()
 
     val personopplysningerUri: URI =
             UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_PERSONOPPLYSNING).build().toUri()
@@ -49,7 +49,7 @@ class IntegrasjonerConfig(@Value("\${FAMILIE_INTEGRASJONER_URL}") private val in
         private const val PATH_PING = "api/ping"
         private const val PATH_KODEVERK_LANDKODER = "api/kodeverk/landkoder"
         private const val PATH_KODEVERK_POSTSTED = "api/kodeverk/poststed"
-        private const val PATH_TILGANGER = "api/tilgang/personer"
+        private const val PATH_TILGANG_RELASJONER = "api/tilgang/person-med-relasjoner"
         private const val PATH_PERSONOPPLYSNING = "api/personopplysning/v2/info"
         private const val PATH_PERSONHISTORIKK = "api/personopplysning/v2/historikk"
         private const val PATH_EGEN_ANSATT = "api/egenansatt"

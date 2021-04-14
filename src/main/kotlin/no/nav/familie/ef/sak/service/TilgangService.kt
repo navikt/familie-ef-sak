@@ -11,31 +11,29 @@ import java.util.UUID
 
 @Service
 class TilgangService(private val integrasjonerClient: FamilieIntegrasjonerClient,
-                     private val personService: PersonService,
                      private val behandlingService: BehandlingService,
                      private val fagsakService: FagsakService,
                      private val rolleConfig: RolleConfig,
                      private val cacheManager: CacheManager) {
 
     fun validerTilgangTilPersonMedBarn(personIdent: String) {
-        val harTilgang = harTilgangTilPersonMedBarn(personIdent)
+        val harTilgang = harTilgangTilPersonMedRelasjoner(personIdent)
         if (!harTilgang) {
             throw ManglerTilgang("Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
                                  "har ikke tilgang til $personIdent eller dets barn")
         }
     }
 
-    private fun harTilgangTilPersonMedBarn(personIdent: String): Boolean {
+    private fun harTilgangTilPersonMedRelasjoner(personIdent: String): Boolean {
         return harSaksbehandlerTilgang("validerTilgangTilPersonMedBarn", personIdent) {
-            val barnOgForeldre = personService.hentIdenterForBarnOgForeldre(forelderIdent = personIdent)
-            integrasjonerClient.sjekkTilgangTilPersoner(barnOgForeldre).all { it.harTilgang }
+            integrasjonerClient.sjekkTilgangTilPersonMedRelasjoner(personIdent).harTilgang
         }
     }
 
     fun validerTilgangTilBehandling(behandlingId: UUID) {
         val harTilgang = harSaksbehandlerTilgang("validerTilgangTilBehandling", behandlingId) {
             val personIdent = behandlingService.hentAktivIdent(behandlingId)
-            harTilgangTilPersonMedBarn(personIdent)
+            harTilgangTilPersonMedRelasjoner(personIdent)
         }
         if (!harTilgang) {
             throw ManglerTilgang("Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +

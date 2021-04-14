@@ -32,8 +32,10 @@ class FamilieIntegrasjonerClient(@Qualifier("azure") restOperations: RestOperati
     override val pingUri: URI = integrasjonerConfig.pingUri
     val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun sjekkTilgangTilPersoner(identer: List<String>): List<Tilgang> {
-        return postForEntity(integrasjonerConfig.tilgangUri, identer)
+    fun sjekkTilgangTilPersonMedRelasjoner(personIdent: String): Tilgang {
+        return postForEntity(integrasjonerConfig.tilgangRelasjonerUri, PersonIdent(personIdent), HttpHeaders().also {
+            it.set("Nav-Tema", "ENF")
+        })
     }
 
     fun hentMedlemskapsinfo(ident: String): Medlemskapsinfo {
