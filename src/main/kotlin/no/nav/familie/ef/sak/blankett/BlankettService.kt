@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.blankett
 
 import no.nav.familie.ef.sak.api.beregning.VedtakDto
 import no.nav.familie.ef.sak.api.beregning.VedtakService
+import no.nav.familie.ef.sak.api.beregning.VedtaksperiodeDto
 import no.nav.familie.ef.sak.api.dto.SøknadDatoerDto
 import no.nav.familie.ef.sak.repository.OppgaveRepository
 import no.nav.familie.ef.sak.repository.domain.*
@@ -85,7 +86,7 @@ class BlankettService(private val tilgangService: TilgangService,
                     VedtakDto(it.resultatType,
                               it.periodeBegrunnelse,
                               it.inntektBegrunnelse,
-                              it.perioder.perioder,
+                              VedtaksperiodeDto.fraDomene(it.perioder.perioder),
                               it.inntekter.inntekter)
                 }
     }

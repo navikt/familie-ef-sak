@@ -71,8 +71,8 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
 
         val tomBegrunnelse = ""
         val vedtakDto = VedtakDto(resultatType = ResultatType.INNVILGE,
-                                      tomBegrunnelse,
-                                      tomBegrunnelse, emptyList(), emptyList())
+                                  tomBegrunnelse,
+                                  tomBegrunnelse, emptyList(), emptyList())
 
         vedtakService.lagreVedtak(vedtakDto, behandling.id)
 
