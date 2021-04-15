@@ -37,9 +37,7 @@ object BarnMedSamværMapper {
         return BarnMedSamværSøknadsgrunnlagDto(
                 id = søknadsbarn.id,
                 navn = søknadsbarn.navn,
-                fødselsnummer = søknadsbarn.fødselsnummer,
                 fødselTermindato = søknadsbarn.fødselTermindato,
-                erBarnetFødt = søknadsbarn.erBarnetFødt,
                 harSammeAdresse = søknadsbarn.harSkalHaSammeAdresse,
                 skalBoBorHosSøker = søknadsbarn.skalBoHosSøker,
                 forelder = søknadsbarn.annenForelder?.let { tilAnnenForelderDto(it) },
