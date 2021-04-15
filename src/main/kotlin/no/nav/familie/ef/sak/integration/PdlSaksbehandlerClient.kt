@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.integration
 
 import no.nav.familie.ef.sak.api.dto.BostedsadresseDto
+import no.nav.familie.ef.sak.api.feilHvis
 import no.nav.familie.ef.sak.config.PdlConfig
 import no.nav.familie.ef.sak.integration.dto.pdl.Paging
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlPersonSøkRequest
@@ -25,9 +26,12 @@ class PdlSaksbehandlerClient(val pdlConfig: PdlConfig,
     : AbstractRestClient(restTemplate, "pdl.personinfo") {
 
     fun sokPersoner(bostedsadresse: BostedsadresseDto): PersonSøkResultat {
+        val criteria = PdlPersonSøkHjelper.lagPdlPersonSøkKriterier(bostedsadresse)
+        feilHvis(criteria.isEmpty()) {
+            "Prøvde å kalle på søkPersoner uten å matche noen kriterier"
+        }
         val pdlPersonSøkRequest = PdlPersonSøkRequest(variables = PdlPersonSøkRequestVariables(paging = Paging(1, 30),
-                                                                                               criteria = PdlPersonSøkHjelper.lagPdlPersonSøkKriterier(
-                                                                                                       bostedsadresse)),
+                                                                                               criteria = criteria),
                                                       query = PdlConfig.søkPersonQuery)
         val pdlResponse: PdlResponse<PersonSøk> = postForEntity(pdlConfig.pdlUri,
                                                                 pdlPersonSøkRequest,

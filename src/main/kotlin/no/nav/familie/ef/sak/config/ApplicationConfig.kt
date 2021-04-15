@@ -100,7 +100,7 @@ class ApplicationConfig {
     fun restTemplateSts(stsBearerTokenClientInterceptor: StsBearerTokenClientInterceptor,
                         consumerIdClientInterceptor: ConsumerIdClientInterceptor,
                         apiKeyInjectingClientInterceptor: ApiKeyInjectingClientInterceptor): RestOperations {
-        return RestTemplateBuilder() // TODO burde denne bruke bean restTemplate?
+        return RestTemplateBuilder()
                 .setConnectTimeout(Duration.of(2, ChronoUnit.SECONDS))
                 .setReadTimeout(Duration.of(15, ChronoUnit.SECONDS))
                 .additionalInterceptors(consumerIdClientInterceptor,
