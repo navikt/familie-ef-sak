@@ -110,6 +110,6 @@ internal class RegelValideringTest {
                         vararg delvilkårsvurderingDto: DelvilkårsvurderingDto) {
         RegelValidering.validerVurdering(vilkårsregel = regel,
                                          oppdatering = delvilkårsvurderingDto.toList(),
-                                         tidligereDelvilkårsvurderinger = regel.initereDelvilkårsvurderingMedVilkårsresultat(mockk()))
+                                         tidligereDelvilkårsvurderinger = regel.initereDelvilkårsvurdering(mockk()))
     }
 }

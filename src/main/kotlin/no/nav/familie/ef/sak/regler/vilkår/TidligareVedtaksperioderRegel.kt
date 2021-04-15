@@ -12,8 +12,8 @@ class TidligareVedtaksperioderRegel : Vilkårsregel(vilkårType = VilkårType.TI
                                                    hovedregler = regelIder(HAR_TIDLIGERE_MOTTATT_OVERGANSSTØNAD,
                                                                            LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD)) {
 
-    override fun initereDelvilkårsvurderingMedVilkårsresultat(metadata: HovedregelMetadata,
-                                                              resultat: Vilkårsresultat): List<Delvilkårsvurdering> {
+    override fun initereDelvilkårsvurdering(metadata: HovedregelMetadata,
+                                            resultat: Vilkårsresultat): List<Delvilkårsvurdering> {
         return listOf(Delvilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT,
                                           listOf(Vurdering(regelId = RegelId.HAR_TIDLIGERE_MOTTATT_OVERGANSSTØNAD,
                                                            svar = SvarId.NEI))),
