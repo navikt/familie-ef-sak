@@ -90,7 +90,7 @@ class VurderingService(private val behandlingService: BehandlingService,
                                                                           vilkårstyper,
                                                                           Vilkårsresultat.IKKE_TATT_STILLING_TIL)
 
-        if (OppdaterVilkår.erAlleVilkårVurdert(behandling, lagredeVilkårsvurderinger, vilkårstyper)) {
+        if (behandling.steg == StegType.VILKÅR && OppdaterVilkår.erAlleVilkårVurdert(lagredeVilkårsvurderinger)) {
             stegService.håndterVilkår(behandling).id
         } else if (vilkårUtenVurdering.isNotEmpty() && behandling.steg != StegType.VILKÅR) {
             stegService.resetSteg(behandling.id, StegType.VILKÅR)

@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.regler.RegelId
 import no.nav.familie.ef.sak.regler.SvarId
 import no.nav.familie.ef.sak.regler.Vilkårsregel
+import no.nav.familie.ef.sak.regler.evalutation.OppdaterVilkår.erAlleVilkårVurdert
 import no.nav.familie.ef.sak.regler.vilkår.SivilstandRegel
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
@@ -142,6 +143,67 @@ class OppdaterVilkårTest {
         assertThat(catchThrowable { OppdaterVilkår.lagNyOppdatertVilkårsvurdering(vilkårsvurdering, oppdatering) })
                 .hasMessage("Delvilkårsvurderinger savner svar på hovedregler - hovedregler=[KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE] delvilkår=[SIVILSTAND_UNNTAK]")
     }
+
+    @Test
+    internal fun `erAlleVilkårVurdert - alle vilkåren er OPPFYLT`() {
+        assertThat(erAlleVilkårVurdert(listOf(vilkårsvurdering(VilkårType.SIVILSTAND, Vilkårsresultat.OPPFYLT))))
+                .isTrue
+    }
+
+    @Test
+    internal fun `erAlleVilkårVurdert - kan ikke ha en kombinasjon av OPPFYLT og SKAL_IKKE_VURDERES`() {
+        assertThat(erAlleVilkårVurdert(listOf(vilkårsvurdering(VilkårType.SIVILSTAND, Vilkårsresultat.OPPFYLT),
+                                              vilkårsvurdering(VilkårType.SIVILSTAND, Vilkårsresultat.SKAL_IKKE_VURDERES))))
+                .isFalse
+    }
+
+    @Test
+    internal fun `erAlleVilkårVurdert - ett vilkår er IKKE_OPPFYLT og resten er gyldig`() {
+        assertThat(erAlleVilkårVurdert(listOf(vilkårsvurdering(VilkårType.SIVILSTAND, Vilkårsresultat.IKKE_OPPFYLT),
+                                              vilkårsvurdering(VilkårType.SIVILSTAND, Vilkårsresultat.OPPFYLT))))
+                .isTrue
+        assertThat(erAlleVilkårVurdert(listOf(vilkårsvurdering(VilkårType.SIVILSTAND, Vilkårsresultat.IKKE_OPPFYLT),
+                                              vilkårsvurdering(VilkårType.SIVILSTAND, Vilkårsresultat.SKAL_IKKE_VURDERES))))
+                .isTrue
+        assertThat(erAlleVilkårVurdert(listOf(vilkårsvurdering(VilkårType.SIVILSTAND, Vilkårsresultat.IKKE_OPPFYLT),
+                                              vilkårsvurdering(VilkårType.SIVILSTAND, Vilkårsresultat.IKKE_OPPFYLT))))
+                .isTrue
+    }
+
+    @Test
+    internal fun `erAlleVilkårVurdert - IKKE_TATT_STILLING_TIL skal gi false`() {
+        assertThat(erAlleVilkårVurdert(listOf(vilkårsvurdering(VilkårType.SIVILSTAND, Vilkårsresultat.IKKE_OPPFYLT),
+                                              vilkårsvurdering(VilkårType.SIVILSTAND, Vilkårsresultat.IKKE_TATT_STILLING_TIL))))
+                .isFalse
+        assertThat(erAlleVilkårVurdert(listOf(vilkårsvurdering(VilkårType.SIVILSTAND, Vilkårsresultat.OPPFYLT),
+                                              vilkårsvurdering(VilkårType.SIVILSTAND, Vilkårsresultat.IKKE_TATT_STILLING_TIL))))
+                .isFalse
+        assertThat(erAlleVilkårVurdert(listOf(vilkårsvurdering(VilkårType.SIVILSTAND, Vilkårsresultat.SKAL_IKKE_VURDERES),
+                                              vilkårsvurdering(VilkårType.SIVILSTAND, Vilkårsresultat.IKKE_TATT_STILLING_TIL))))
+                .isFalse
+    }
+
+    @Test
+    internal fun `erAlleVilkårVurdert - SKAL_IKKE_VURDERES må være i en kombinasjon med IKKE_OPPFYLT`() {
+        assertThat(erAlleVilkårVurdert(listOf(vilkårsvurdering(VilkårType.SIVILSTAND, Vilkårsresultat.SKAL_IKKE_VURDERES),
+                                              vilkårsvurdering(VilkårType.SIVILSTAND, Vilkårsresultat.IKKE_OPPFYLT))))
+                .isTrue
+
+        assertThat(erAlleVilkårVurdert(listOf(vilkårsvurdering(VilkårType.SIVILSTAND, Vilkårsresultat.SKAL_IKKE_VURDERES),
+                                              vilkårsvurdering(VilkårType.SIVILSTAND, Vilkårsresultat.SKAL_IKKE_VURDERES))))
+                .withFailMessage("Minimum ett vilkår må være satt til IKKE_OPPFYLT hvis man har SKAL_IKKE_VURDERES")
+                .isFalse
+        assertThat(erAlleVilkårVurdert(listOf(vilkårsvurdering(VilkårType.SIVILSTAND, Vilkårsresultat.SKAL_IKKE_VURDERES),
+                                              vilkårsvurdering(VilkårType.SIVILSTAND, Vilkårsresultat.OPPFYLT))))
+                .withFailMessage("Minimum ett vilkår må være satt til IKKE_OPPFYLT hvis man har SKAL_IKKE_VURDERES")
+                .isFalse
+    }
+
+    private fun vilkårsvurdering(type: VilkårType, vilkårsresultat: Vilkårsresultat) =
+            Vilkårsvurdering(behandlingId = UUID.randomUUID(),
+                             resultat = vilkårsresultat,
+                             type = type,
+                             delvilkårsvurdering = DelvilkårsvurderingWrapper(emptyList()))
 
     private fun Vilkårsvurdering.delvilkår(regelId: RegelId) =
             this.delvilkårsvurdering.delvilkårsvurderinger.singleOrNull { it.hovedregel == regelId }

@@ -9,12 +9,10 @@ import no.nav.familie.ef.sak.regler.Vilkårsregler.Companion.VILKÅRSREGLER
 import no.nav.familie.ef.sak.regler.alleVilkårsregler
 import no.nav.familie.ef.sak.regler.evalutation.RegelEvaluering.utledResultat
 import no.nav.familie.ef.sak.regler.evalutation.RegelValidering.validerVurdering
-import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.DelvilkårsvurderingWrapper
 import no.nav.familie.ef.sak.repository.domain.VilkårType
 import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
 import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
-import no.nav.familie.ef.sak.service.steg.StegType
 import java.util.UUID
 
 object OppdaterVilkår {
@@ -80,53 +78,34 @@ object OppdaterVilkår {
         return vilkårsvurdering.delvilkårsvurdering.copy(delvilkårsvurderinger = delvilkårsvurderinger)
     }
 
-
     fun filtereVilkårMedResultat(lagredeVilkårsvurderinger: List<Vilkårsvurdering>,
                                  vilkårstyper: List<VilkårType>,
                                  resultat: Vilkårsresultat): List<Vilkårsvurdering> {
-        val aktuelleVilkår = lagredeVilkårsvurderinger.filter { erAktuelltVilkårType(it) }
-
-        val antallVilkårstyper = aktuelleVilkår.map { v -> v.type }.distinct().size
+        val antallVilkårstyper = lagredeVilkårsvurderinger.map { v -> v.type }.distinct().size
 
         require(antallVilkårstyper == vilkårstyper.size)
         { "Forventer att det er like mange vilkår som finnes definert" }
 
-        return aktuelleVilkår.filter { it.resultat == resultat }
-
+        return lagredeVilkårsvurderinger.filter { it.resultat == resultat }
     }
 
-    private fun harNoenSomSkalIkkeVurderesOgRestenErOppfylt(lagredeVilkårsvurderinger: List<Vilkårsvurdering>): Boolean {
-        return lagredeVilkårsvurderinger
-                .filter { erAktuelltVilkårType(it) }
-                .filter { it.resultat != Vilkårsresultat.SKAL_IKKE_VURDERES }
-                .all { it.resultat == Vilkårsresultat.OPPFYLT }
-    }
-
-    /* Hantering av bakåtkompatibilitet.*/
-    private fun erAktuelltVilkårType(vilkårsvurdering: Vilkårsvurdering) = VilkårType.hentVilkår().contains(vilkårsvurdering.type)
-
-
-    fun erAlleVilkårVurdert(behandling: Behandling,
-                            lagredeVilkårsvurderinger: List<Vilkårsvurdering>,
-                            vilkårstyper: List<VilkårType>): Boolean {
-
-        if (behandling.steg == StegType.VILKÅR) {
-            val harNoenVurderingIkkeTattStillingTil = filtereVilkårMedResultat(lagredeVilkårsvurderinger,
-                                                                               vilkårstyper,
-                                                                               Vilkårsresultat.IKKE_TATT_STILLING_TIL).isNotEmpty()
-            val harNoenVurderingSkalIkkeVurderes = filtereVilkårMedResultat(lagredeVilkårsvurderinger,
-                                                                            vilkårstyper,
-                                                                            Vilkårsresultat.SKAL_IKKE_VURDERES).isNotEmpty()
-
-            return when {
-                harNoenVurderingIkkeTattStillingTil -> false
-                harNoenVurderingSkalIkkeVurderes -> !harNoenSomSkalIkkeVurderesOgRestenErOppfylt(lagredeVilkårsvurderinger)
-                else -> true
-            }
+    fun erAlleVilkårVurdert(lagredeVilkårsvurderinger: List<Vilkårsvurdering>): Boolean {
+        return if(lagredeVilkårsvurderinger.all { it.resultat == Vilkårsresultat.OPPFYLT }) {
+            true
+        } else {
+            harNoenIkkeOppfyltOgRestenIkkeOppfyltEllerOppfyltEllerSkalIkkevurderes(lagredeVilkårsvurderinger)
         }
-        return false
     }
 
+    /**
+     * [Vilkårsresultat.IKKE_OPPFYLT] er gyldig i kombinasjon med andre som er
+     * [Vilkårsresultat.IKKE_OPPFYLT], [Vilkårsresultat.OPPFYLT] og [Vilkårsresultat.SKAL_IKKE_VURDERES]
+     */
+    private fun harNoenIkkeOppfyltOgRestenIkkeOppfyltEllerOppfyltEllerSkalIkkevurderes(lagredeVilkårsvurderinger: List<Vilkårsvurdering>) =
+            lagredeVilkårsvurderinger.any { it.resultat == Vilkårsresultat.IKKE_OPPFYLT } &&
+            lagredeVilkårsvurderinger.all { it.resultat == Vilkårsresultat.OPPFYLT ||
+                                            it.resultat == Vilkårsresultat.IKKE_OPPFYLT ||
+                                            it.resultat == Vilkårsresultat.SKAL_IKKE_VURDERES }
 
     fun opprettNyeVilkårsvurderinger(behandlingId: UUID,
                                      metadata: HovedregelMetadata): List<Vilkårsvurdering> {

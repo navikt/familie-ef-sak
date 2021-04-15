@@ -236,8 +236,7 @@ internal class VurderingServiceTest {
         val skallIkkeVurderes = vilkårsvurderinger.last().copy(resultat = Vilkårsresultat.SKAL_IKKE_VURDERES)
         val alleMenIkkeSisteErOppfyllt = vilkårsvurderinger.dropLast(1).map {it.copy(resultat = Vilkårsresultat.OPPFYLT)}
 
-
-        assertThat(erAlleVilkårVurdert(behandling, alleMenIkkeSisteErOppfyllt.plus(skallIkkeVurderes), VilkårType.hentVilkår())).isFalse
+        assertThat(erAlleVilkårVurdert(alleMenIkkeSisteErOppfyllt.plus(skallIkkeVurderes))).isFalse
     }
 
     @Test
@@ -247,7 +246,7 @@ internal class VurderingServiceTest {
         val alleMenIkkeSisteErIkkeVurdert = vilkårsvurderinger.dropLast(1).map {it.copy(resultat = Vilkårsresultat.SKAL_IKKE_VURDERES)}
 
 
-        assertThat(erAlleVilkårVurdert(behandling, alleMenIkkeSisteErIkkeVurdert.plus(ikkeOppfyllt), VilkårType.hentVilkår())).isTrue
+        assertThat(erAlleVilkårVurdert(alleMenIkkeSisteErIkkeVurdert.plus(ikkeOppfyllt))).isTrue
     }
 
     //KUN FOR Å TESTE OPPDATERSTEG
