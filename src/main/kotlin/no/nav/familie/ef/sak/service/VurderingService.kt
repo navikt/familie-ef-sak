@@ -1,11 +1,17 @@
 package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.api.Feil
-import no.nav.familie.ef.sak.api.dto.*
+import no.nav.familie.ef.sak.api.dto.OppdaterVilkårsvurderingDto
+import no.nav.familie.ef.sak.api.dto.SvarPåVurderingerDto
+import no.nav.familie.ef.sak.api.dto.VilkårDto
+import no.nav.familie.ef.sak.api.dto.VilkårGrunnlagDto
+import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
+import no.nav.familie.ef.sak.api.dto.tilDto
 import no.nav.familie.ef.sak.blankett.BlankettRepository
 import no.nav.familie.ef.sak.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.regler.evalutation.OppdaterVilkår
 import no.nav.familie.ef.sak.regler.evalutation.OppdaterVilkår.opprettNyeVilkårsvurderinger
+import no.nav.familie.ef.sak.regler.evalutation.OppdaterVilkår.utledResultatForAleneomsorg
 import no.nav.familie.ef.sak.regler.hentVilkårsregel
 import no.nav.familie.ef.sak.repository.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.repository.domain.DelvilkårsvurderingWrapper
@@ -85,14 +91,17 @@ class VurderingService(private val behandlingService: BehandlingService,
         val behandling = behandlingService.hentBehandling(behandlingId)
         val lagredeVilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(behandlingId)
                 .filter { it.type != VilkårType.TIDLIGERE_VEDTAKSPERIODER } // TODO: Må håndteres senere
-        val vilkårstyper = VilkårType.hentVilkår().minus(VilkårType.TIDLIGERE_VEDTAKSPERIODER)
-        val vilkårUtenVurdering = OppdaterVilkår.filtereVilkårMedResultat(lagredeVilkårsvurderinger,
-                                                                          vilkårstyper,
-                                                                          Vilkårsresultat.IKKE_TATT_STILLING_TIL)
+        val vilkårsresultat = lagredeVilkårsvurderinger.groupBy { it.type }.map {
+            if (it.key == VilkårType.ALENEOMSORG) {
+                utledResultatForAleneomsorg(it.value)
+            } else {
+                it.value.single().resultat
+            }
+        }
 
-        if (behandling.steg == StegType.VILKÅR && OppdaterVilkår.erAlleVilkårVurdert(lagredeVilkårsvurderinger)) {
+        if (behandling.steg == StegType.VILKÅR && OppdaterVilkår.erAlleVilkårVurdert(vilkårsresultat)) {
             stegService.håndterVilkår(behandling).id
-        } else if (vilkårUtenVurdering.isNotEmpty() && behandling.steg != StegType.VILKÅR) {
+        } else if (behandling.steg != StegType.VILKÅR && vilkårsresultat.any { it == Vilkårsresultat.IKKE_TATT_STILLING_TIL }) {
             stegService.resetSteg(behandling.id, StegType.VILKÅR)
         }
     }
