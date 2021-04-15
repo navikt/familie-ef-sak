@@ -26,7 +26,7 @@ class SøkController(private val søkService: SøkService, private val tilgangSe
         return Ressurs.success(søkService.søkPerson(personIdentRequest.personIdent))
     }
 
-    @PostMapping("person/adresse")
+    @PostMapping("person/samme-adresse")
     fun søkPerson(@RequestBody bostedsadresseDto: BostedsadresseDto): Ressurs<SøkeresultatPerson> {
         return Ressurs.success(søkService.søkPerson(bostedsadresseDto))
     }
