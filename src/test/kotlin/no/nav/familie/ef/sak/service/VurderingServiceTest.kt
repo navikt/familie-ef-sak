@@ -16,7 +16,6 @@ import no.nav.familie.ef.sak.api.dto.Sivilstandstype
 import no.nav.familie.ef.sak.api.dto.SvarPåVurderingerDto
 import no.nav.familie.ef.sak.api.dto.VilkårGrunnlagDto
 import no.nav.familie.ef.sak.api.dto.VurderingDto
-import no.nav.familie.ef.sak.api.dto.tilDto
 import no.nav.familie.ef.sak.blankett.BlankettRepository
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.mapper.SøknadsskjemaMapper
@@ -26,7 +25,6 @@ import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.vilkårsvurdering
 import no.nav.familie.ef.sak.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.regler.RegelId
 import no.nav.familie.ef.sak.regler.SvarId
-import no.nav.familie.ef.sak.regler.evalutation.OppdaterVilkår.erAlleVilkårVurdert
 import no.nav.familie.ef.sak.regler.evalutation.OppdaterVilkår.opprettNyeVilkårsvurderinger
 import no.nav.familie.ef.sak.regler.vilkår.SivilstandRegel
 import no.nav.familie.ef.sak.repository.VilkårsvurderingRepository
@@ -38,7 +36,6 @@ import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
 import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
 import no.nav.familie.ef.sak.repository.domain.Vurdering
 import no.nav.familie.ef.sak.service.steg.StegService
-import no.nav.familie.ef.sak.service.steg.StegType
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import org.assertj.core.api.Assertions.assertThat
@@ -228,25 +225,6 @@ internal class VurderingServiceTest {
         }).isInstanceOf(Feil::class.java)
                 .hasMessageContaining("er låst for videre redigering")
         verify(exactly = 0) { vilkårsvurderingRepository.insertAll(any()) }
-    }
-
-    @Test
-    fun `skal returnere false hvis ikke alle vilkår er vurdert `() {
-        val vilkårsvurderinger = opprettNyeVilkårsvurderinger(BEHANDLING_ID, HovedregelMetadata(søknad, Sivilstandstype.UGIFT))
-        val skallIkkeVurderes = vilkårsvurderinger.last().copy(resultat = Vilkårsresultat.SKAL_IKKE_VURDERES)
-        val alleMenIkkeSisteErOppfyllt = vilkårsvurderinger.dropLast(1).map {it.copy(resultat = Vilkårsresultat.OPPFYLT)}
-
-        assertThat(erAlleVilkårVurdert(alleMenIkkeSisteErOppfyllt.plus(skallIkkeVurderes))).isFalse
-    }
-
-    @Test
-    fun `skal returnere true til neste steg hvis alle vilkår er vurdert`() {
-        val vilkårsvurderinger = opprettNyeVilkårsvurderinger(BEHANDLING_ID, HovedregelMetadata(søknad, Sivilstandstype.UGIFT))
-        val ikkeOppfyllt = vilkårsvurderinger.last().copy(resultat = Vilkårsresultat.IKKE_OPPFYLT)
-        val alleMenIkkeSisteErIkkeVurdert = vilkårsvurderinger.dropLast(1).map {it.copy(resultat = Vilkårsresultat.SKAL_IKKE_VURDERES)}
-
-
-        assertThat(erAlleVilkårVurdert(alleMenIkkeSisteErIkkeVurdert.plus(ikkeOppfyllt))).isTrue
     }
 
     //KUN FOR Å TESTE OPPDATERSTEG

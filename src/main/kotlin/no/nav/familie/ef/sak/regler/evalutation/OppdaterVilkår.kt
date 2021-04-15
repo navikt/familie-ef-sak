@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.regler.evalutation
 import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.api.dto.DelvilkårsvurderingDto
 import no.nav.familie.ef.sak.api.dto.svarTilDomene
+import no.nav.familie.ef.sak.api.feilHvis
 import no.nav.familie.ef.sak.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.regler.Vilkårsregel
 import no.nav.familie.ef.sak.regler.Vilkårsregler.Companion.VILKÅRSREGLER
@@ -78,22 +79,25 @@ object OppdaterVilkår {
         return vilkårsvurdering.delvilkårsvurdering.copy(delvilkårsvurderinger = delvilkårsvurderinger)
     }
 
-    fun filtereVilkårMedResultat(lagredeVilkårsvurderinger: List<Vilkårsvurdering>,
-                                 vilkårstyper: List<VilkårType>,
-                                 resultat: Vilkårsresultat): List<Vilkårsvurdering> {
-        val antallVilkårstyper = lagredeVilkårsvurderinger.map { v -> v.type }.distinct().size
-
-        require(antallVilkårstyper == vilkårstyper.size)
-        { "Forventer att det er like mange vilkår som finnes definert" }
-
-        return lagredeVilkårsvurderinger.filter { it.resultat == resultat }
-    }
-
-    fun erAlleVilkårVurdert(lagredeVilkårsvurderinger: List<Vilkårsvurdering>): Boolean {
-        return if(lagredeVilkårsvurderinger.all { it.resultat == Vilkårsresultat.OPPFYLT }) {
+    fun erAlleVilkårVurdert(vilkårsresultat: List<Vilkårsresultat>): Boolean {
+        return if (vilkårsresultat.all { it == Vilkårsresultat.OPPFYLT }) {
             true
         } else {
-            harNoenIkkeOppfyltOgRestenIkkeOppfyltEllerOppfyltEllerSkalIkkevurderes(lagredeVilkårsvurderinger)
+            harNoenIkkeOppfyltOgRestenIkkeOppfyltEllerOppfyltEllerSkalIkkevurderes(vilkårsresultat)
+        }
+    }
+
+    fun utledResultatForAleneomsorg(value: List<Vilkårsvurdering>): Vilkårsresultat {
+        feilHvis(value.any { it.type != VilkårType.ALENEOMSORG }) {
+            "Denne metoden kan kun kalles med vilkår for Aleneomsorg"
+        }
+        return when {
+            value.any { it.resultat == Vilkårsresultat.OPPFYLT } -> Vilkårsresultat.OPPFYLT
+            value.any { it.resultat == Vilkårsresultat.IKKE_TATT_STILLING_TIL } -> Vilkårsresultat.IKKE_TATT_STILLING_TIL
+            value.all { it.resultat == Vilkårsresultat.SKAL_IKKE_VURDERES } -> Vilkårsresultat.SKAL_IKKE_VURDERES
+            value.any { it.resultat == Vilkårsresultat.IKKE_OPPFYLT } &&
+            value.all { it.resultat == Vilkårsresultat.IKKE_OPPFYLT || it.resultat == Vilkårsresultat.SKAL_IKKE_VURDERES } -> Vilkårsresultat.IKKE_OPPFYLT
+            else -> throw Feil("Utled resultat for aleneomsorg - kombinasjon av resultat er ikke behandlet: ${value.map { it.resultat }}")
         }
     }
 
@@ -101,11 +105,13 @@ object OppdaterVilkår {
      * [Vilkårsresultat.IKKE_OPPFYLT] er gyldig i kombinasjon med andre som er
      * [Vilkårsresultat.IKKE_OPPFYLT], [Vilkårsresultat.OPPFYLT] og [Vilkårsresultat.SKAL_IKKE_VURDERES]
      */
-    private fun harNoenIkkeOppfyltOgRestenIkkeOppfyltEllerOppfyltEllerSkalIkkevurderes(lagredeVilkårsvurderinger: List<Vilkårsvurdering>) =
-            lagredeVilkårsvurderinger.any { it.resultat == Vilkårsresultat.IKKE_OPPFYLT } &&
-            lagredeVilkårsvurderinger.all { it.resultat == Vilkårsresultat.OPPFYLT ||
-                                            it.resultat == Vilkårsresultat.IKKE_OPPFYLT ||
-                                            it.resultat == Vilkårsresultat.SKAL_IKKE_VURDERES }
+    private fun harNoenIkkeOppfyltOgRestenIkkeOppfyltEllerOppfyltEllerSkalIkkevurderes(vilkårsresultat: List<Vilkårsresultat>) =
+            vilkårsresultat.any { it == Vilkårsresultat.IKKE_OPPFYLT } &&
+            vilkårsresultat.all {
+                it == Vilkårsresultat.OPPFYLT ||
+                it == Vilkårsresultat.IKKE_OPPFYLT ||
+                it == Vilkårsresultat.SKAL_IKKE_VURDERES
+            }
 
     fun opprettNyeVilkårsvurderinger(behandlingId: UUID,
                                      metadata: HovedregelMetadata): List<Vilkårsvurdering> {
