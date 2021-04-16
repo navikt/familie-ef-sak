@@ -7,7 +7,7 @@ no.nav.security.jwt:
       discoveryurl: ${STS_DISCOVERY_URL}
       accepted_audience: ${GYLDIGE_SERVICE_BRUKERE}
 
-PDL_SCOPE: dev-fss:pdl:pdl-api
+PDL_SCOPE: api://dev-fss:pdl:pdl-api/.default
 
 ON_PREM_URL_ENV: dev
 GATEWAY_PREFIX: api-gw-q1
