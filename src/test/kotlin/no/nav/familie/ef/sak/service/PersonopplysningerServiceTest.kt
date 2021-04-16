@@ -78,27 +78,12 @@ internal class PersonopplysningerServiceTest {
     "visningsadresse" : "c/o CONAVN, Charlies vei 13 b, 0575 Oslo",
     "type" : "BOSTEDADRESSE",
     "gyldigFraOgMed" : "2020-01-01",
-    "gyldigTilOgMed" : "2020-01-01",
-    "bostedsadresse" : {
-      "vegadresse" : {
-        "husnummer" : "13",
-        "husbokstav" : "b",
-        "bruksenhetsnummer" : "",
-        "adressenavn" : "Charlies vei",
-        "kommunenummer" : "0301",
-        "tilleggsnavn" : null,
-        "postnummer" : "0575",
-        "koordinater" : null,
-        "matrikkelId" : 0
-      },
-      "matrikkeladresse" : null
-    }
+    "gyldigTilOgMed" : "2020-01-01"
   }, {
     "visningsadresse" : "c/o co, Charlies vei 13 b, 0575 Oslo",
     "type" : "KONTAKTADRESSE",
     "gyldigFraOgMed" : "2020-01-01",
-    "gyldigTilOgMed" : "2021-01-01",
-    "bostedsadresse" : null
+    "gyldigTilOgMed" : "2021-01-01"
   } ],
   "fullmakt" : [ {
     "gyldigFraOgMed" : "2021-01-01",
@@ -119,8 +104,7 @@ internal class PersonopplysningerServiceTest {
       "visningsadresse" : "c/o CONAVN, Charlies vei 13 b, 0575 Oslo",
       "type" : "BOSTEDADRESSE",
       "gyldigFraOgMed" : "2020-01-01",
-      "gyldigTilOgMed" : "2020-01-01",
-      "bostedsadresse" : null
+      "gyldigTilOgMed" : "2020-01-01"
     } ],
     "borHosSøker" : true,
     "fødselsdato" : "2018-01-01"
@@ -135,8 +119,7 @@ internal class PersonopplysningerServiceTest {
       "visningsadresse" : "c/o CONAVN, Charlies vei 13 b, 0575 Oslo",
       "type" : "BOSTEDADRESSE",
       "gyldigFraOgMed" : "2020-01-01",
-      "gyldigTilOgMed" : "2020-01-01",
-      "bostedsadresse" : null
+      "gyldigTilOgMed" : "2020-01-01"
     } ],
     "borHosSøker" : true,
     "fødselsdato" : "2018-01-01"

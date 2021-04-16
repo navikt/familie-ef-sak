@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.service
 
 import com.fasterxml.jackson.annotation.JsonInclude
-import no.nav.familie.ef.sak.api.dto.BostedsadresseDto
 import no.nav.familie.ef.sak.repository.domain.RegistergrunnlagData
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
@@ -56,11 +55,6 @@ internal class RegistergrunnlagTest {
                                    LocalDate::class,
                                    LocalDateTime::class,
                                    YearMonth::class,
-            /**
-             * TODO vurder om det burde være 2 ulike AdresseDto for personopplysninger og grunnlagsdata,
-             * då grunnlagsdata ikke skal ha med "bostedsadresse" i grunnlaget, men personopplysninger ønsker det
-             */
-                                   BostedsadresseDto::class,
                                    Boolean::class)
 
 

@@ -1,7 +1,5 @@
 package no.nav.familie.ef.sak.integration
 
-import no.nav.familie.ef.sak.api.dto.BostedsadresseDto
-import no.nav.familie.ef.sak.api.feilHvis
 import no.nav.familie.ef.sak.config.PdlConfig
 import no.nav.familie.ef.sak.integration.dto.pdl.Paging
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlPersonSøkRequest
@@ -9,6 +7,7 @@ import no.nav.familie.ef.sak.integration.dto.pdl.PdlPersonSøkRequestVariables
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlResponse
 import no.nav.familie.ef.sak.integration.dto.pdl.PersonSøk
 import no.nav.familie.ef.sak.integration.dto.pdl.PersonSøkResultat
+import no.nav.familie.ef.sak.integration.dto.pdl.SøkeKriterier
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.http.sts.StsRestClient
 import org.springframework.beans.factory.annotation.Qualifier
@@ -25,13 +24,9 @@ class PdlSaksbehandlerClient(val pdlConfig: PdlConfig,
                              val stsRestClient: StsRestClient)
     : AbstractRestClient(restTemplate, "pdl.personinfo") {
 
-    fun sokPersoner(bostedsadresse: BostedsadresseDto): PersonSøkResultat {
-        val criteria = PdlPersonSøkHjelper.lagPdlPersonSøkKriterier(bostedsadresse)
-        feilHvis(criteria.isEmpty()) {
-            "Prøvde å kalle på søkPersoner uten å matche noen kriterier"
-        }
+    fun søkPersonerMedSammeAdresse(søkeKriterier: List<SøkeKriterier>): PersonSøkResultat {
         val pdlPersonSøkRequest = PdlPersonSøkRequest(variables = PdlPersonSøkRequestVariables(paging = Paging(1, 30),
-                                                                                               criteria = criteria),
+                                                                                               criteria = søkeKriterier),
                                                       query = PdlConfig.søkPersonQuery)
         val pdlResponse: PdlResponse<PersonSøk> = postForEntity(pdlConfig.pdlUri,
                                                                 pdlPersonSøkRequest,

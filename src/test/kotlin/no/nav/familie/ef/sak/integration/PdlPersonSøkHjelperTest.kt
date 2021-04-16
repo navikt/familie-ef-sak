@@ -1,7 +1,9 @@
 package no.nav.familie.ef.sak.integration
 
-import no.nav.familie.ef.sak.api.dto.BostedsadresseDto
+import no.nav.familie.ef.sak.integration.dto.pdl.Bostedsadresse
+import no.nav.familie.ef.sak.integration.dto.pdl.Folkeregistermetadata
 import no.nav.familie.ef.sak.integration.dto.pdl.Matrikkeladresse
+import no.nav.familie.ef.sak.integration.dto.pdl.Metadata
 import no.nav.familie.ef.sak.integration.dto.pdl.Vegadresse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -78,10 +80,16 @@ internal class PdlPersonSøkHjelperTest {
         assertThat(resultat[2].searchRule.equals).isEqualTo(vegadresse.postnummer)
     }
 
-    private fun lagAdresse(vegadresse: Vegadresse?, matrikkeladresse: Matrikkeladresse?): BostedsadresseDto {
-        return BostedsadresseDto(
+    private fun lagAdresse(vegadresse: Vegadresse?, matrikkeladresse: Matrikkeladresse?): Bostedsadresse {
+        return Bostedsadresse(
                 vegadresse = vegadresse,
-                matrikkeladresse = matrikkeladresse
+                matrikkeladresse = matrikkeladresse,
+                angittFlyttedato = null,
+                coAdressenavn = null,
+                folkeregistermetadata = Folkeregistermetadata(null, null),
+                utenlandskAdresse = null,
+                ukjentBosted = null,
+                metadata = Metadata(false)
         )
     }
 }

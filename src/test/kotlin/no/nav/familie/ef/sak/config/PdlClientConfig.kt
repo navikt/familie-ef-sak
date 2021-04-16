@@ -36,7 +36,7 @@ class PdlClientConfig {
         val pdlPersonFraSøk = PdlPersonFraSøk(listOf(element = Folkeregisteridentifikator(fnrPåAdresseSøk)),
                                               bostedsadresse(),
                                               lagNavn())
-        every { pdlSaksbehandlerClient.sokPersoner(any()) } returns
+        every { pdlSaksbehandlerClient.søkPersonerMedSammeAdresse(any()) } returns
                 PersonSøkResultat(listOf(PersonSøkTreff(pdlPersonFraSøk)), 1, 1, 1)
         return pdlSaksbehandlerClient
     }

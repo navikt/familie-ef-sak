@@ -75,7 +75,7 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
 
     fun tilAdresser(søker: PdlSøker): List<AdresseDto> {
         val adresser =
-                søker.bostedsadresse.map{adresseMapper.tilAdresse(it, true)} +
+                søker.bostedsadresse.map(adresseMapper::tilAdresse) +
                 søker.kontaktadresse.map(adresseMapper::tilAdresse) +
                 søker.oppholdsadresse.map(adresseMapper::tilAdresse)
 
