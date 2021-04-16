@@ -1,26 +1,16 @@
 package no.nav.familie.ef.sak.api.gui
 
 import no.nav.familie.ef.sak.api.dto.*
-import no.nav.familie.ef.sak.api.dto.Adressebeskyttelse
-import no.nav.familie.ef.sak.api.dto.Folkeregisterpersonstatus
-import no.nav.familie.ef.sak.api.dto.Kjønn
-import no.nav.familie.ef.sak.api.dto.Sivilstandstype
-import no.nav.familie.ef.sak.integration.dto.pdl.*
-import no.nav.familie.ef.sak.repository.domain.EksternBehandlingId
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.PersonopplysningerService
 import no.nav.familie.ef.sak.service.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.arbeidsfordeling.Enhet
 import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.Month
 import java.util.*
 
 
