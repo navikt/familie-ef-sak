@@ -12,6 +12,8 @@ import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.PersonopplysningerService
 import no.nav.familie.ef.sak.service.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.arbeidsfordeling.Enhet
+import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.validation.annotation.Validated
@@ -49,6 +51,13 @@ class PersonopplysningerController(private val personopplysningerService: Person
         tilgangService.validerTilgangTilFagsak(fagsakId)
         val aktivIdent = fagsakService.hentAktivIdent(fagsakId)
         return Ressurs.success(personopplysningerService.hentPersonopplysninger(aktivIdent))
+    }
+
+    @GetMapping("/nav-kontor/behandling/{behandlingId}")
+    fun hentNavKontor(@PathVariable behandlingId: UUID): Ressurs<NavKontorEnhet> {
+        tilgangService.validerTilgangTilBehandling(behandlingId)
+        val aktivIdent = behandlingService.hentAktivIdent(behandlingId)
+        return Ressurs.success(personopplysningerService.hentNavKontor(aktivIdent))
     }
 
 }

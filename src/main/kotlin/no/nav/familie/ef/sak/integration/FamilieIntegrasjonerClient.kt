@@ -16,6 +16,7 @@ import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
 import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
+import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
@@ -25,9 +26,10 @@ import org.springframework.web.client.RestOperations
 import java.net.URI
 
 @Component
-class FamilieIntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
-                                 private val integrasjonerConfig: IntegrasjonerConfig)
-    : AbstractPingableRestClient(restOperations, "familie.integrasjoner") {
+class FamilieIntegrasjonerClient(
+    @Qualifier("azure") restOperations: RestOperations,
+    private val integrasjonerConfig: IntegrasjonerConfig
+) : AbstractPingableRestClient(restOperations, "familie.integrasjoner") {
 
     override val pingUri: URI = integrasjonerConfig.pingUri
     val logger = LoggerFactory.getLogger(this::class.java)
@@ -61,25 +63,35 @@ class FamilieIntegrasjonerClient(@Qualifier("azure") restOperations: RestOperati
     }
 
     fun egenAnsatt(ident: String): Boolean {
-        return postForEntity<Ressurs<EgenAnsattResponse>>(integrasjonerConfig.egenAnsattUri,
-                                                          EgenAnsattRequest(ident)).data!!.erEgenAnsatt
+        return postForEntity<Ressurs<EgenAnsattResponse>>(
+            integrasjonerConfig.egenAnsattUri,
+            EgenAnsattRequest(ident)
+        ).data!!.erEgenAnsatt
     }
 
     fun hentInfotrygdPerioder(request: PerioderOvergangsstønadRequest): PerioderOvergangsstønadResponse {
         return postForEntity<Ressurs<PerioderOvergangsstønadResponse>>(integrasjonerConfig.infotrygdVedtaksperioder, request)
-                .getDataOrThrow()
+            .getDataOrThrow()
     }
 
     fun distribuerBrev(journalpostId: String): String {
         logger.info("Kaller dokdist-tjeneste for journalpost=$journalpostId")
 
-        val journalpostRequest = DistribuerJournalpostRequest(journalpostId = journalpostId,
-                                                              bestillendeFagsystem = "EF",
-                                                              dokumentProdApp = "FAMILIE_EF_SAK")
+        val journalpostRequest = DistribuerJournalpostRequest(
+            journalpostId = journalpostId,
+            bestillendeFagsystem = "EF",
+            dokumentProdApp = "FAMILIE_EF_SAK"
+        )
 
-        return postForEntity<Ressurs<String>>(integrasjonerConfig.distribuerDokumentUri,
-                                              journalpostRequest,
-                                              HttpHeaders().medContentTypeJsonUTF8()).getDataOrThrow()
+        return postForEntity<Ressurs<String>>(
+            integrasjonerConfig.distribuerDokumentUri,
+            journalpostRequest,
+            HttpHeaders().medContentTypeJsonUTF8()
+        ).getDataOrThrow()
+    }
+
+    fun hentNavKontor(ident: String): NavKontorEnhet {
+        return postForEntity<Ressurs<NavKontorEnhet>>(integrasjonerConfig.navKontorUri, PersonIdent(ident)).getDataOrThrow()
     }
 
 }
