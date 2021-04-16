@@ -13,9 +13,7 @@ data class BarnMedSamværDto(
 data class BarnMedSamværSøknadsgrunnlagDto(
         val id: UUID,
         val navn: String?,
-        val fødselsnummer: String?,
         val fødselTermindato: LocalDate?,
-        val erBarnetFødt: Boolean,
         val harSammeAdresse: Boolean?,
         val skalBoBorHosSøker: String?,
         val forelder: AnnenForelderDto?,
