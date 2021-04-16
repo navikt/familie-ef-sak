@@ -201,7 +201,7 @@ class PdlClientConfig {
     private fun bostedsadresse(): List<Bostedsadresse> =
             listOf(Bostedsadresse(angittFlyttedato = startdato,
                                   folkeregistermetadata = Folkeregistermetadata(gyldighetstidspunkt = LocalDateTime.now(),
-                                                                                opphørstidspunkt = startdato.atStartOfDay()),
+                                                                                opphørstidspunkt = LocalDate.of(2199, 1, 1).atStartOfDay()),
                                   utenlandskAdresse = null,
                                   coAdressenavn = "CONAVN",
                                   vegadresse = vegadresse(),
