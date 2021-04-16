@@ -43,6 +43,7 @@ query($ident: ID!){
             }
             matrikkeladresse {
                 matrikkelId
+                bruksenhetsnummer
             }
             ukjentBosted {
                 bostedskommune

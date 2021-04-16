@@ -1,9 +1,22 @@
 package no.nav.familie.ef.sak.integration
 
 import no.nav.familie.ef.sak.config.PdlConfig
-import no.nav.familie.ef.sak.exception.PdlNotFoundException
-import no.nav.familie.ef.sak.exception.PdlRequestException
-import no.nav.familie.ef.sak.integration.dto.pdl.*
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlAnnenForelder
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlBarn
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlBolkResponse
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlHentIdenter
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlIdentRequest
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlIdentRequestVariables
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlIdenter
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlPersonBolkRequest
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlPersonBolkRequestVariables
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlPersonKort
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlPersonRequest
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlPersonRequestVariables
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlResponse
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøkerData
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøkerKort
 import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.http.sts.StsRestClient
 import org.springframework.beans.factory.annotation.Qualifier
@@ -110,41 +123,6 @@ class PdlClient(val pdlConfig: PdlConfig,
                                                                      pdlPersonRequest,
                                                                      httpHeaders())
         return feilsjekkOgReturnerData(ident, pdlResponse) { it.hentIdenter }
-    }
-
-    private inline fun <reified DATA : Any, reified T : Any> feilsjekkOgReturnerData(ident: String,
-                                                                                     pdlResponse: PdlResponse<DATA>,
-                                                                                     dataMapper: (DATA) -> T?): T {
-
-        if (pdlResponse.harFeil()) {
-            if (pdlResponse.errors?.any { it.extensions?.notFound() == true } == true) {
-                throw PdlNotFoundException()
-            }
-            secureLogger.error("Feil ved henting av ${T::class} fra PDL: ${pdlResponse.errorMessages()}")
-            throw PdlRequestException("Feil ved henting av ${T::class} fra PDL. Se secure logg for detaljer.")
-        }
-
-        val data = dataMapper.invoke(pdlResponse.data)
-        if (data == null) {
-            secureLogger.error("Feil ved oppslag på ident $ident. " +
-                               "PDL rapporterte ingen feil men returnerte tomt datafelt")
-            throw PdlRequestException("Manglende ${T::class} ved feilfri respons fra PDL. Se secure logg for detaljer.")
-        }
-        return data
-    }
-
-    private inline fun <reified T : Any> feilsjekkOgReturnerData(pdlResponse: PdlBolkResponse<T>): Map<String, T> {
-        if (pdlResponse.data == null) {
-            secureLogger.error("Data fra pdl er null ved bolkoppslag av ${T::class} fra PDL: ${pdlResponse.errorMessages()}")
-            throw PdlRequestException("Data er null fra PDL -  ${T::class}. Se secure logg for detaljer.")
-        }
-
-        val feil = pdlResponse.data.personBolk.filter { it.code != "ok" }.map { it.ident to it.code }.toMap()
-        if (feil.isNotEmpty()) {
-            secureLogger.error("Feil ved henting av ${T::class} fra PDL: $feil")
-            throw PdlRequestException("Feil ved henting av ${T::class} fra PDL. Se secure logg for detaljer.")
-        }
-        return pdlResponse.data.personBolk.associateBy({ it.ident }, { it.person!! })
     }
 
     private fun httpHeaders(): HttpHeaders {

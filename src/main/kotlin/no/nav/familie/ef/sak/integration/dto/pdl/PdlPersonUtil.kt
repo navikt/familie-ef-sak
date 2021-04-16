@@ -15,3 +15,4 @@ fun List<DeltBosted>.gjeldende(): DeltBosted? = this.find { !it.metadata.histori
 fun List<Folkeregisterpersonstatus>.gjeldende(): Folkeregisterpersonstatus? = this.find { !it.metadata.historisk }
 fun List<Dødsfall>.gjeldende(): Dødsfall? = this.firstOrNull()
 fun List<Adressebeskyttelse>.gjeldende(): Adressebeskyttelse? = this.find { !it.metadata.historisk }
+fun List<Folkeregisteridentifikator>.gjeldende(): Folkeregisteridentifikator = this.single()

@@ -1,0 +1,57 @@
+{
+  "data": {
+    "sokPerson": {
+      "pageNumber": 1,
+      "totalHits": 1,
+      "totalPages": 1,
+      "hits": [
+        {
+          "person": {
+            "folkeregisteridentifikator": [
+              {
+                "identifikasjonsnummer": "15078817191"
+              }
+            ],
+            "bostedsadresse": [
+              {
+                "angittFlyttedato": "1988-07-15",
+                "coAdressenavn": null,
+                "folkeregistermetadata": {
+                  "gyldighetstidspunkt": "1988-07-15T00:00",
+                  "opphoerstidspunkt": null
+                },
+                "utenlandskAdresse": null,
+                "vegadresse": {
+                  "husnummer": "1",
+                  "husbokstav": null,
+                  "bruksenhetsnummer": null,
+                  "adressenavn": "KLINGAVEGEN",
+                  "kommunenummer": "0301",
+                  "tilleggsnavn": null,
+                  "postnummer": "0358",
+                  "koordinater": null,
+                  "matrikkelId": null
+                },
+                "matrikkeladresse": null,
+                "ukjentBosted": null,
+                "metadata": {
+                  "historisk": false
+                }
+              }
+            ],
+            "navn": [
+              {
+                "fornavn": "BRÅKETE",
+                "etternavn": "MASKIN",
+                "mellomnavn": null,
+                "metadata": {
+                  "historisk": false
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

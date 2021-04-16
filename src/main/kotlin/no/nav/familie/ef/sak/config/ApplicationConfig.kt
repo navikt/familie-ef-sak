@@ -3,7 +3,9 @@ package no.nav.familie.ef.sak.config
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import no.nav.familie.http.config.RestTemplateAzure
 import no.nav.familie.http.interceptor.ApiKeyInjectingClientInterceptor
+import no.nav.familie.http.interceptor.BearerTokenClientInterceptor
 import no.nav.familie.http.interceptor.ConsumerIdClientInterceptor
+import no.nav.familie.http.interceptor.InternLoggerInterceptor
 import no.nav.familie.http.interceptor.MdcValuesPropagatingClientInterceptor
 import no.nav.familie.http.interceptor.StsBearerTokenClientInterceptor
 import no.nav.familie.http.sts.StsRestClient
@@ -106,6 +108,21 @@ class ApplicationConfig {
                                         apiKeyInjectingClientInterceptor,
                                         MdcValuesPropagatingClientInterceptor()
                 ).build()
+    }
+
+    @Bean("azureMedApiKey")
+    fun restTemplateJwtBearer(restTemplateBuilder: RestTemplateBuilder,
+                              consumerIdClientInterceptor: ConsumerIdClientInterceptor,
+                              internLoggerInterceptor: InternLoggerInterceptor,
+                              apiKeyInjectingClientInterceptor: ApiKeyInjectingClientInterceptor,
+                              bearerTokenClientInterceptor: BearerTokenClientInterceptor): RestOperations {
+        return restTemplateBuilder
+                .setConnectTimeout(Duration.of(2, ChronoUnit.SECONDS))
+                .setReadTimeout(Duration.of(15, ChronoUnit.SECONDS))
+                .additionalInterceptors(consumerIdClientInterceptor,
+                                        bearerTokenClientInterceptor,
+                                        apiKeyInjectingClientInterceptor,
+                                        MdcValuesPropagatingClientInterceptor()).build()
     }
 
     // Brukes for sts issuer som brukes for sts validering. ApiKey blir lagt til når man henter metadata for STS_DISCOVERY_URL

@@ -16,7 +16,7 @@ internal class AdresseHjelperTest {
     fun adresseTromsø() = Vegadresse("1", "ABC", "123", "Tromsøygata", "01", null, "9099", null, null)
     fun adresseTromsøMatrikkel() = Vegadresse("1", "ABC", "123", "Tromsøygata", "01", null, "9099", null, matrikkelId = 123L)
     fun adresseBergen() = Vegadresse("1", "ABC", "123", "Bergensgata", "01", null, "5020", null, null)
-    fun matrikkeladresse(matrikkelId: Long? = 123L) = Matrikkeladresse(matrikkelId)
+    fun matrikkeladresse(matrikkelId: Long? = 123L) = Matrikkeladresse(matrikkelId, null)
 
     private val metadataGjeldende = Metadata(false)
     private val metadataHistorisk = Metadata(true)

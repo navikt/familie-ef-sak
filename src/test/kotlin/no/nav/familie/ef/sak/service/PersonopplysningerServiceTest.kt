@@ -78,7 +78,7 @@ internal class PersonopplysningerServiceTest {
     "visningsadresse" : "c/o CONAVN, Charlies vei 13 b, 0575 Oslo",
     "type" : "BOSTEDADRESSE",
     "gyldigFraOgMed" : "2020-01-01",
-    "gyldigTilOgMed" : "2020-01-01"
+    "gyldigTilOgMed" : "2199-01-01"
   }, {
     "visningsadresse" : "c/o co, Charlies vei 13 b, 0575 Oslo",
     "type" : "KONTAKTADRESSE",
@@ -104,12 +104,11 @@ internal class PersonopplysningerServiceTest {
       "visningsadresse" : "c/o CONAVN, Charlies vei 13 b, 0575 Oslo",
       "type" : "BOSTEDADRESSE",
       "gyldigFraOgMed" : "2020-01-01",
-      "gyldigTilOgMed" : "2020-01-01"
+      "gyldigTilOgMed" : "2199-01-01"
     } ],
     "borHosSøker" : true,
     "fødselsdato" : "2018-01-01"
-  },
-  {
+  }, {
     "personIdent" : "13071489536",
     "navn" : "Barn2 Barnesen",
     "annenForelder" : {
@@ -120,12 +119,12 @@ internal class PersonopplysningerServiceTest {
       "visningsadresse" : "c/o CONAVN, Charlies vei 13 b, 0575 Oslo",
       "type" : "BOSTEDADRESSE",
       "gyldigFraOgMed" : "2020-01-01",
-      "gyldigTilOgMed" : "2020-01-01"
+      "gyldigTilOgMed" : "2199-01-01"
     } ],
     "borHosSøker" : true,
     "fødselsdato" : "2018-01-01"
-  }],
-   "innflyttingTilNorge" : [ {
+  } ],
+  "innflyttingTilNorge" : [ {
     "fraflyttingsland" : "Sverige",
     "dato" : null,
     "fraflyttingssted" : "Stockholm"

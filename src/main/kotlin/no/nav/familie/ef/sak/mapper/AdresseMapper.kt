@@ -2,7 +2,15 @@ package no.nav.familie.ef.sak.mapper
 
 import no.nav.familie.ef.sak.api.dto.AdresseDto
 import no.nav.familie.ef.sak.api.dto.AdresseType
-import no.nav.familie.ef.sak.integration.dto.pdl.*
+import no.nav.familie.ef.sak.integration.dto.pdl.Bostedsadresse
+import no.nav.familie.ef.sak.integration.dto.pdl.Kontaktadresse
+import no.nav.familie.ef.sak.integration.dto.pdl.KontaktadresseType
+import no.nav.familie.ef.sak.integration.dto.pdl.Oppholdsadresse
+import no.nav.familie.ef.sak.integration.dto.pdl.PostadresseIFrittFormat
+import no.nav.familie.ef.sak.integration.dto.pdl.Postboksadresse
+import no.nav.familie.ef.sak.integration.dto.pdl.UtenlandskAdresse
+import no.nav.familie.ef.sak.integration.dto.pdl.UtenlandskAdresseIFrittFormat
+import no.nav.familie.ef.sak.integration.dto.pdl.Vegadresse
 import no.nav.familie.ef.sak.service.KodeverkService
 import no.nav.familie.ef.sak.util.datoEllerIdag
 import org.springframework.stereotype.Component

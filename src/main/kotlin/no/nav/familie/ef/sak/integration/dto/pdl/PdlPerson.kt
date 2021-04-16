@@ -25,7 +25,9 @@ data class PdlBolkResponse<T>(val data: PersonBolk<T>?, val errors: List<PdlErro
 
 data class PdlError(val message: String,
                     val extensions: PdlExtensions?)
+
 data class PdlExtensions(val code: String?) {
+
     fun notFound() = code == "not_found"
 }
 
@@ -287,7 +289,9 @@ data class UtenlandskAdresse(val adressenavnNummer: String?,
                              val postkode: String?,
                              val regionDistriktOmraade: String?)
 
-data class Matrikkeladresse(val matrikkelId: Long?)
+data class Matrikkeladresse(val matrikkelId: Long?,
+                            val bruksenhetsnummer: String?
+)
 
 data class UtenlandskAdresseIFrittFormat(val adresselinje1: String?,
                                          val adresselinje2: String?,
