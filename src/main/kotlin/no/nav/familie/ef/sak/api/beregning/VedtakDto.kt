@@ -16,39 +16,29 @@ data class VedtakDto(val resultatType: ResultatType,
                      val inntekter: List<Inntektsperiode> = emptyList())
 
 data class VedtaksperiodeDto(
-        val månedFra: Int,
-        val årFra: Int,
-        val månedTil: Int,
-        val årTil: Int,
+        val årMånedFra: YearMonth,
+        val årMånedTil: YearMonth,
         val aktivitet: String,
         val periodeType: String
-) {
+)
 
-    companion object {
 
-        fun fraDomene(perioder: List<Vedtaksperiode>): List<VedtaksperiodeDto> {
-            return perioder.map {
-                VedtaksperiodeDto(
-                        månedFra = it.datoFra.monthValue,
-                        årFra = it.datoFra.year,
-                        månedTil = it.datoTil.monthValue,
-                        årTil = it.datoTil.year,
-                        aktivitet = it.aktivitet,
-                        periodeType = it.periodeType,
-                )
-            }
+fun List<Vedtaksperiode>.fraDomene(): List<VedtaksperiodeDto> =
+        this.map {
+            VedtaksperiodeDto(
+                    årMånedFra = YearMonth.from(it.datoFra),
+                    årMånedTil = YearMonth.from(it.datoTil),
+                    aktivitet = it.aktivitet,
+                    periodeType = it.periodeType,
+            )
         }
 
-        fun tilDomene(perioder: List<VedtaksperiodeDto>): List<Vedtaksperiode> {
-            return perioder.map {
-                Vedtaksperiode(
-                        datoFra = YearMonth.of(it.årFra, it.månedFra).atDay(1),
-                        datoTil = YearMonth.of(it.årTil, it.månedTil).atEndOfMonth(),
-                        aktivitet = it.aktivitet,
-                        periodeType = it.periodeType,
-                )
-            }
+fun List<VedtaksperiodeDto>.tilDomene(): List<Vedtaksperiode> =
+        this.map {
+            Vedtaksperiode(
+                    datoFra = it.årMånedFra.atDay(1),
+                    datoTil = it.årMånedTil.atEndOfMonth(),
+                    aktivitet = it.aktivitet,
+                    periodeType = it.periodeType,
+            )
         }
-
-    }
-}
