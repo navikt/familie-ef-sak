@@ -26,9 +26,8 @@ import org.springframework.web.client.RestOperations
 import java.net.URI
 
 @Component
-class FamilieIntegrasjonerClient(
-        @Qualifier("azure") restOperations: RestOperations,
-        private val integrasjonerConfig: IntegrasjonerConfig
+class FamilieIntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
+                                 private val integrasjonerConfig: IntegrasjonerConfig
 ) : AbstractPingableRestClient(restOperations, "familie.integrasjoner") {
 
     override val pingUri: URI = integrasjonerConfig.pingUri
@@ -63,10 +62,8 @@ class FamilieIntegrasjonerClient(
     }
 
     fun egenAnsatt(ident: String): Boolean {
-        return postForEntity<Ressurs<EgenAnsattResponse>>(
-                integrasjonerConfig.egenAnsattUri,
-                EgenAnsattRequest(ident)
-        ).data!!.erEgenAnsatt
+        return postForEntity<Ressurs<EgenAnsattResponse>>(integrasjonerConfig.egenAnsattUri,
+                                                          EgenAnsattRequest(ident)).data!!.erEgenAnsatt
     }
 
     fun hentInfotrygdPerioder(request: PerioderOvergangsstønadRequest): PerioderOvergangsstønadResponse {
@@ -77,17 +74,13 @@ class FamilieIntegrasjonerClient(
     fun distribuerBrev(journalpostId: String): String {
         logger.info("Kaller dokdist-tjeneste for journalpost=$journalpostId")
 
-        val journalpostRequest = DistribuerJournalpostRequest(
-                journalpostId = journalpostId,
-                bestillendeFagsystem = "EF",
-                dokumentProdApp = "FAMILIE_EF_SAK"
-        )
+        val journalpostRequest = DistribuerJournalpostRequest(journalpostId = journalpostId,
+                                                              bestillendeFagsystem = "EF",
+                                                              dokumentProdApp = "FAMILIE_EF_SAK")
 
-        return postForEntity<Ressurs<String>>(
-                integrasjonerConfig.distribuerDokumentUri,
-                journalpostRequest,
-                HttpHeaders().medContentTypeJsonUTF8()
-        ).getDataOrThrow()
+        return postForEntity<Ressurs<String>>(integrasjonerConfig.distribuerDokumentUri,
+                                              journalpostRequest,
+                                              HttpHeaders().medContentTypeJsonUTF8()).getDataOrThrow()
     }
 
     fun hentNavKontor(ident: String): NavKontorEnhet {
