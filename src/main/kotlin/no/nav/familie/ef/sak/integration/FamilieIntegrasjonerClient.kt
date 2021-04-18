@@ -27,8 +27,8 @@ import java.net.URI
 
 @Component
 class FamilieIntegrasjonerClient(
-    @Qualifier("azure") restOperations: RestOperations,
-    private val integrasjonerConfig: IntegrasjonerConfig
+        @Qualifier("azure") restOperations: RestOperations,
+        private val integrasjonerConfig: IntegrasjonerConfig
 ) : AbstractPingableRestClient(restOperations, "familie.integrasjoner") {
 
     override val pingUri: URI = integrasjonerConfig.pingUri
@@ -64,29 +64,29 @@ class FamilieIntegrasjonerClient(
 
     fun egenAnsatt(ident: String): Boolean {
         return postForEntity<Ressurs<EgenAnsattResponse>>(
-            integrasjonerConfig.egenAnsattUri,
-            EgenAnsattRequest(ident)
+                integrasjonerConfig.egenAnsattUri,
+                EgenAnsattRequest(ident)
         ).data!!.erEgenAnsatt
     }
 
     fun hentInfotrygdPerioder(request: PerioderOvergangsstønadRequest): PerioderOvergangsstønadResponse {
         return postForEntity<Ressurs<PerioderOvergangsstønadResponse>>(integrasjonerConfig.infotrygdVedtaksperioder, request)
-            .getDataOrThrow()
+                .getDataOrThrow()
     }
 
     fun distribuerBrev(journalpostId: String): String {
         logger.info("Kaller dokdist-tjeneste for journalpost=$journalpostId")
 
         val journalpostRequest = DistribuerJournalpostRequest(
-            journalpostId = journalpostId,
-            bestillendeFagsystem = "EF",
-            dokumentProdApp = "FAMILIE_EF_SAK"
+                journalpostId = journalpostId,
+                bestillendeFagsystem = "EF",
+                dokumentProdApp = "FAMILIE_EF_SAK"
         )
 
         return postForEntity<Ressurs<String>>(
-            integrasjonerConfig.distribuerDokumentUri,
-            journalpostRequest,
-            HttpHeaders().medContentTypeJsonUTF8()
+                integrasjonerConfig.distribuerDokumentUri,
+                journalpostRequest,
+                HttpHeaders().medContentTypeJsonUTF8()
         ).getDataOrThrow()
     }
 
