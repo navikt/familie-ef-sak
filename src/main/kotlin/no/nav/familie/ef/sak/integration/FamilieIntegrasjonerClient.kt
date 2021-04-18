@@ -27,8 +27,8 @@ import java.net.URI
 
 @Component
 class FamilieIntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
-                                 private val integrasjonerConfig: IntegrasjonerConfig
-) : AbstractPingableRestClient(restOperations, "familie.integrasjoner") {
+                                 private val integrasjonerConfig: IntegrasjonerConfig)
+    : AbstractPingableRestClient(restOperations, "familie.integrasjoner") {
 
     override val pingUri: URI = integrasjonerConfig.pingUri
     val logger = LoggerFactory.getLogger(this::class.java)
