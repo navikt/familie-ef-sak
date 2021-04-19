@@ -1,4 +1,4 @@
-# familie-ef-sak
+# familie-ef-sak 2
 App for saksbehandling av stønadene for enslige forsørgere.
 
 ## Swagger
