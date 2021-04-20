@@ -80,7 +80,7 @@ private fun Oppgave.tilDto(): OppgaveEfDto {
                         opprettetAvEnhetsnr,
                         journalpostId,
                         journalpostkilde,
-                        behandlesAvApplikasjon,
+                        behandlesAvApplikasjon?: "",
                         saksreferanse,
                         bnr,
                         samhandlernr,

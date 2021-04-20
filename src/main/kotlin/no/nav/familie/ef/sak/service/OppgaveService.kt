@@ -53,7 +53,8 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
                                           beskrivelse = lagOppgaveTekst(beskrivelse),
                                           enhetsnummer = enhetId ?: enhetsnummer?.enhetId,
                                           behandlingstema = finnBehandlingstema(fagsak.stønadstype).value,
-                                          tilordnetRessurs = tilordnetNavIdent
+                                          tilordnetRessurs = tilordnetNavIdent,
+                                          behandlesAvApplikasjon = "familie-ef-sak"
                     )
 
             val opprettetOppgaveId = oppgaveClient.opprettOppgave(opprettOppgave)
