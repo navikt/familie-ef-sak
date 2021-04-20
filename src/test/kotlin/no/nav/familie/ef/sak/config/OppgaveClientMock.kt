@@ -1,15 +1,22 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.config
 
-import io.mockk.Runs
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
 import no.nav.familie.ef.sak.integration.OppgaveClient
-import no.nav.familie.kontrakter.felles.oppgave.*
+import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
+import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
+import no.nav.familie.kontrakter.felles.oppgave.Oppgave
+import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
+import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
+import no.nav.familie.kontrakter.felles.oppgave.StatusEnum
+import no.nav.familie.kontrakter.felles.oppgave.Tema
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 
 @Configuration
@@ -20,20 +27,55 @@ class OppgaveClientMock {
     fun oppgaveClient(): OppgaveClient {
         val oppgaveClient: OppgaveClient = mockk()
 
+        val oppgaver: MutableMap<Long, Oppgave> = listOf(oppgave1, oppgave2, oppgave3).associateBy { it.id!! }.toMutableMap()
+        var maxId: Long = oppgaver.values.maxOf { it.id!! }
         every {
             oppgaveClient.hentOppgaver(any())
-        } returns FinnOppgaveResponseDto(3, listOf(oppgave1, oppgave2, oppgave3))
+        } answers {
+            FinnOppgaveResponseDto(oppgaver.size.toLong(), oppgaver.values.toList())
+        }
 
-        every { oppgaveClient.finnOppgaveMedId(11) } returns oppgaveUtenJournalpost
-        every { oppgaveClient.finnOppgaveMedId(1) } returns oppgave1
-        every { oppgaveClient.finnOppgaveMedId(2) } returns oppgave2
-        every { oppgaveClient.finnOppgaveMedId(3) } returns oppgave3
+        every { oppgaveClient.finnOppgaveMedId(any()) } answers {
+            val oppgaveId = firstArg<Long>()
+            oppgaver[oppgaveId] ?: error("Finner ikke oppgave med oppgaveId=$oppgaveId")
+        }
 
-        every { oppgaveClient.opprettOppgave(any()) } returns 2L
+        every { oppgaveClient.opprettOppgave(any()) } answers {
+            val arg = firstArg<OpprettOppgaveRequest>()
+            val nyOppgaveId = ++maxId
+            val oppgave = Oppgave(
+                    id = nyOppgaveId,
+                    identer = arg.ident?.let { listOf(it) },
+                    saksreferanse = arg.saksId,
+                    tema = arg.tema,
+                    oppgavetype = arg.oppgavetype.value,
+                    fristFerdigstillelse = arg.fristFerdigstillelse.format(DateTimeFormatter.ISO_DATE),
+                    beskrivelse = arg.beskrivelse,
+                    tildeltEnhetsnr = arg.enhetsnummer,
+                    behandlingstema = arg.behandlingstema,
+                    journalpostId = arg.journalpostId,
+                    tilordnetRessurs = arg.tilordnetRessurs,
+                    status = StatusEnum.OPPRETTET,
+                    opprettetTidspunkt = LocalDate.now().toString(),
+                    prioritet = OppgavePrioritet.NORM
+            )
+            oppgaver[nyOppgaveId] = oppgave
+            nyOppgaveId
+        }
 
-        every { oppgaveClient.fordelOppgave(any(), any()) } returns 12345678L
+        every { oppgaveClient.fordelOppgave(any(), any()) } answers {
+            val oppgaveId = firstArg<Long>()
+            val saksbehandler = secondArg<String?>()
+            val oppgave = oppgaver[oppgaveId] ?: error("Finner ikke oppgave med $oppgaveId")
+            oppgaver[oppgaveId] = oppgave.copy(tilordnetRessurs = saksbehandler,
+                                               status = saksbehandler?.let { StatusEnum.UNDER_BEHANDLING }
+                                                        ?: StatusEnum.OPPRETTET)
+            oppgaveId
+        }
 
-        every { oppgaveClient.ferdigstillOppgave(any()) } just Runs
+        every { oppgaveClient.ferdigstillOppgave(any()) } answers {
+            oppgaver.remove(firstArg())
+        }
 
         return oppgaveClient
     }
@@ -41,16 +83,13 @@ class OppgaveClientMock {
     private val oppgave1 = lagOppgave(1L, Oppgavetype.Journalføring, "Z999999")
     private val oppgave2 = lagOppgave(2L, Oppgavetype.BehandleSak, "Z999999")
     private val oppgave3 = lagOppgave(3L, Oppgavetype.Journalføring, beskivelse = "")
-    private val oppgaveUtenJournalpost = lagOppgave(4L, Oppgavetype.Journalføring, journalpostId = null)
-
 
     private fun lagOppgave(oppgaveId: Long,
                            oppgavetype: Oppgavetype,
                            tildeltRessurs: String? = null,
                            beskivelse: String? = "Beskrivelse av oppgaven. " +
                                                  "Denne teksten kan jo være lang, kort eller ikke inneholde noenting. ",
-                            journalpostId: String? = "1234")
-            : Oppgave {
+                           journalpostId: String? = "1234"): Oppgave {
         return Oppgave(id = oppgaveId,
                        aktoerId = "1234",
                        identer = listOf(OppgaveIdentV2("11111111111", IdentGruppe.FOLKEREGISTERIDENT)),

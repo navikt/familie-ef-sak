@@ -37,6 +37,7 @@ class PdlSaksbehandlerClient(val pdlConfig: PdlConfig,
     private fun httpHeaders(): HttpHeaders {
 
         return HttpHeaders().apply {
+            // TODO mulig man kan slette Nav-Consumer-Token innen kort
             add("Nav-Consumer-Token", "Bearer ${stsRestClient.systemOIDCToken}")
             add("Tema", "ENF")
         }
