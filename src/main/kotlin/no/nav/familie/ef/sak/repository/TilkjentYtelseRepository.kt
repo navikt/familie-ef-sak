@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.repository
 
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
-import no.nav.familie.kontrakter.felles.oppdrag.OppdragIdForFagsystem
 import org.springframework.data.jdbc.repository.query.Query
 import java.time.LocalDate
 import java.util.*
