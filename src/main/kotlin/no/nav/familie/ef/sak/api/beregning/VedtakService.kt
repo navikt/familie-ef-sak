@@ -21,8 +21,8 @@ class VedtakService(private val vedtakRepository: VedtakRepository) {
                                               vedtak.resultatType,
                                               vedtak.periodeBegrunnelse,
                                               vedtak.inntektBegrunnelse,
-                                              PeriodeWrapper(vedtak.perioder.tilDomene()),
-                                              InntektWrapper(vedtak.inntekter))).behandlingId
+                                              PeriodeWrapper(vedtak.perioder.map{ it.tilDomene() }),
+                                              InntektWrapper(vedtak.inntekter.map { it.tilDomene() }))).behandlingId
     }
 
     fun slettVedtakHvisFinnes(behandlingId: UUID) {
@@ -38,7 +38,13 @@ class VedtakService(private val vedtakRepository: VedtakRepository) {
 
     fun hentVedtakHvisEksisterer(behandlingId: UUID): VedtakDto? {
         return vedtakRepository.findByIdOrNull(behandlingId)
-                ?.let { logger.info(it.toString())
-                    return VedtakDto(it.resultatType, it.periodeBegrunnelse, it.inntektBegrunnelse, it.perioder.perioder.fraDomene()) }
+                ?.let { vedtak ->
+                    return VedtakDto(
+                            resultatType = vedtak.resultatType,
+                            periodeBegrunnelse = vedtak.periodeBegrunnelse,
+                            inntektBegrunnelse = vedtak.inntektBegrunnelse,
+                            perioder = vedtak.perioder.perioder.map { it.fraDomene() },
+                            inntekter = vedtak.inntekter.inntekter.map { it.fraDomene() }
+                    ) }
     }
 }

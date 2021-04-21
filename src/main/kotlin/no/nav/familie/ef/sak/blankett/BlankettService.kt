@@ -82,12 +82,12 @@ class BlankettService(private val tilgangService: TilgangService,
 
     private fun lagVedtakDto(behandlingId: UUID): VedtakDto {
         return vedtakService.hentVedtak(behandlingId)
-                .let {
-                    VedtakDto(it.resultatType,
-                              it.periodeBegrunnelse,
-                              it.inntektBegrunnelse,
-                              it.perioder.perioder.fraDomene(),
-                              it.inntekter.inntekter)
+                .let { vedtak ->
+                    VedtakDto(vedtak.resultatType,
+                              vedtak.periodeBegrunnelse,
+                              vedtak.inntektBegrunnelse,
+                              vedtak.perioder.perioder.map { it.fraDomene() },
+                              vedtak.inntekter.inntekter.map { it.fraDomene() })
                 }
     }
 

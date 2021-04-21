@@ -29,7 +29,7 @@ internal class VedtakRepositoryTest : OppslagSpringRunnerTest() {
                             periodeBegrunnelse = "begrunnelse for periode",
                             inntektBegrunnelse = "begrunnelse for inntekt",
                             perioder = PeriodeWrapper(listOf(Vedtaksperiode(LocalDate.now(), LocalDate.now(), "aktivitet", "periodeType"))),
-                            inntekter = InntektWrapper(listOf(Inntektsperiode(LocalDate.now(), LocalDate.now(), inntekt = BigDecimal(100)))))
+                            inntekter = InntektWrapper(listOf(Inntektsperiode(LocalDate.now(), inntekt = BigDecimal(100)))))
 
         vedtakRepository.insert(vedtak)
 
