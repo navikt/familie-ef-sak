@@ -16,6 +16,7 @@ import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
 import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
+import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
@@ -80,6 +81,10 @@ class FamilieIntegrasjonerClient(@Qualifier("azure") restOperations: RestOperati
         return postForEntity<Ressurs<String>>(integrasjonerConfig.distribuerDokumentUri,
                                               journalpostRequest,
                                               HttpHeaders().medContentTypeJsonUTF8()).getDataOrThrow()
+    }
+
+    fun hentNavKontor(ident: String): NavKontorEnhet {
+        return postForEntity<Ressurs<NavKontorEnhet>>(integrasjonerConfig.navKontorUri, PersonIdent(ident)).getDataOrThrow()
     }
 
 }
