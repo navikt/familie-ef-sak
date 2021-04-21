@@ -192,7 +192,8 @@ internal class GrunnlagsdataServiceTest {
 
     @Test
     internal fun `skal ikke hente navn til relatertVedSivilstand fra sivilstand når det ikke finnes sivilstand`() {
-        every { pdlClient.hentSøker(any()) } returns PdlClientConfig.opprettPdlSøker().copy(sivilstand = listOf())
+        val sivilstand = Sivilstand(SivilstandstypePdl.UOPPGITT, null, null, null, Metadata(false))
+        every { pdlClient.hentSøker(any()) } returns PdlClientConfig.opprettPdlSøker().copy(sivilstand = listOf(sivilstand))
         every { registergrunnlagRepository.findByIdOrNull(behandlingId) } returns null
         service.hentEndringerIRegistergrunnlag(behandlingId)
         verify(exactly = 0) { pdlClient.hentPersonKortBolk(any()) }
