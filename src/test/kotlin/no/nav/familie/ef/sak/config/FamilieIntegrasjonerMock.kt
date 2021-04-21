@@ -17,6 +17,7 @@ import no.nav.familie.kontrakter.felles.kodeverk.BeskrivelseDto
 import no.nav.familie.kontrakter.felles.kodeverk.BetydningDto
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
+import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Profile
@@ -68,8 +69,10 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                             .willReturn(WireMock.okJson(objectMapper.writeValueAsString(arkiverDokumentResponse))),
                     WireMock.post(WireMock.urlPathEqualTo(integrasjonerConfig.medlemskapUri.path))
                             .willReturn(WireMock.okJson(objectMapper.writeValueAsString(medl))),
+                    WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.navKontorUri.path))
+                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(navKontorEnhet)))
 
-                    )
+            )
 
     @Bean("mock-integrasjoner")
     @Profile("mock-integrasjoner")
@@ -155,5 +158,10 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                                                                 brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
                                                                 dokumentvarianter =
                                                                 listOf(Dokumentvariant(variantformat = "ARKIV"))))))
+
+        private val navKontorEnhet = Ressurs.success(NavKontorEnhet(enhetId = 100000194,
+                                                                    navn = "NAV Kristiansand",
+                                                                    enhetNr = "1001",
+                                                                    status = "Aktiv"))
     }
 }
