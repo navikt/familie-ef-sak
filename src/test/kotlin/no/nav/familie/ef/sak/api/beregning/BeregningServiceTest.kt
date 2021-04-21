@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.util.Periode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
+import java.math.RoundingMode
 import java.time.LocalDate
 
 internal class BeregningServiceTest {
@@ -12,7 +13,13 @@ internal class BeregningServiceTest {
 
     @Test
     internal fun `skal beregne full ytelse når det ikke foreligger inntekt`() {
-        val beregningsgrunnlag = Beregningsgrunnlag(samordningsfradrag = BigDecimal(0), inntekt = BigDecimal(0), grunnbeløp = 101351.toBigDecimal())
+        val beregningsgrunnlagG2018 =
+                Beregningsgrunnlag(samordningsfradrag = BigDecimal(0), inntekt = BigDecimal(0), grunnbeløp = 96883.toBigDecimal())
+        val beregningsgrunnlagG2019 =
+                Beregningsgrunnlag(samordningsfradrag = BigDecimal(0), inntekt = BigDecimal(0), grunnbeløp = 99858.toBigDecimal())
+        val beregningsgrunnlagG2020 = Beregningsgrunnlag(samordningsfradrag = BigDecimal(0),
+                                                         inntekt = BigDecimal(0),
+                                                         grunnbeløp = 101351.toBigDecimal())
         val fullYtelse = beregningService.beregnYtelse(BeregningRequest(
                 listOf(Inntektsperiode(LocalDate.parse("2019-04-30"),
                                        LocalDate.parse("2022-04-30"),
@@ -23,16 +30,99 @@ internal class BeregningServiceTest {
         assertThat(fullYtelse.size).isEqualTo(3)
         assertThat(fullYtelse[0]).isEqualTo(Beløpsperiode(LocalDate.parse("2019-04-30"),
                                                           LocalDate.parse("2019-05-01"),
-                                                          beregningsgrunnlag.copy(grunnbeløp = 96883.toBigDecimal()),
+                                                          beregningsgrunnlagG2018,
                                                           18166.toBigDecimal()))
         assertThat(fullYtelse[1]).isEqualTo(Beløpsperiode(LocalDate.parse("2019-05-01"),
                                                           LocalDate.parse("2020-05-01"),
-                                                          beregningsgrunnlag.copy(grunnbeløp = 99858.toBigDecimal()),
+                                                          beregningsgrunnlagG2019,
                                                           18723.toBigDecimal()))
         assertThat(fullYtelse[2]).isEqualTo(Beløpsperiode(LocalDate.parse("2020-05-01"),
                                                           LocalDate.parse("2022-04-30"),
-                                                          beregningsgrunnlag,
+                                                          beregningsgrunnlagG2020,
                                                           19003.toBigDecimal()))
+    }
+
+    @Test
+    internal fun `skal beregne periodebeløp når det foreligger inntekt`() {
+        val grunnbeløp = 99858.toBigDecimal()
+        val inntekt = BigDecimal(240_000)
+        val beregningsgrunnlagG2019 = Beregningsgrunnlag(samordningsfradrag = BigDecimal(0),
+                                                         inntekt = inntekt,
+                                                         grunnbeløp = grunnbeløp)
+        val fullYtelse = beregningService.beregnYtelse(BeregningRequest(
+                listOf(Inntektsperiode(startDato = LocalDate.parse("2019-06-01"),
+                                       sluttDato = LocalDate.parse("2020-04-30"),
+                                       inntekt = inntekt, samordningsfradrag = BigDecimal(0))),
+                listOf(Periode(LocalDate.parse("2019-06-01"),
+                               LocalDate.parse("2020-04-30")))
+        ))
+
+        val fullOvergangsstønad = grunnbeløp.multiply(BigDecimal(2.25)).divide(BigDecimal(12))
+
+        val avkortning = inntekt.subtract(grunnbeløp.multiply(BigDecimal(0.5))).multiply(BigDecimal(0.45)).divide(BigDecimal(12))
+        val beløpTilUtbetalning = fullOvergangsstønad.subtract(avkortning).setScale(0, RoundingMode.HALF_UP)
+
+        assertThat(fullYtelse.size).isEqualTo(1)
+        assertThat(fullYtelse[0]).isEqualTo(Beløpsperiode(LocalDate.parse("2019-06-01"),
+                                                          LocalDate.parse("2020-04-30"),
+                                                          beregningsgrunnlagG2019,
+                                                          beløpTilUtbetalning))
+
+    }
+
+    @Test
+    internal fun `skal beregne periodebeløp når det foreligger inntekt i begynnelsen av vedtaksperiode`() {
+        val grunnbeløp2019 = 99858.toBigDecimal()
+        val grunnbeløp2018 = 96883.toBigDecimal()
+
+        val inntekt = BigDecimal(240_000)
+        val beregningsgrunnlagIFørstePerioden = Beregningsgrunnlag(samordningsfradrag = BigDecimal(0),
+                                                                   inntekt = inntekt,
+                                                                   grunnbeløp = grunnbeløp2018)
+
+        val beregningsgrunnlagIAndrePerioden = Beregningsgrunnlag(samordningsfradrag = BigDecimal(0),
+                                                                  inntekt = BigDecimal(0),
+                                                                  grunnbeløp = grunnbeløp2019)
+
+
+        val fullOvergangsstønad2018 = grunnbeløp2018.multiply(BigDecimal(2.25)).divide(BigDecimal(12))
+        val avkortning = inntekt.subtract(grunnbeløp2018.multiply(BigDecimal(0.5)))
+                .multiply(BigDecimal(0.45))
+                .setScale(0, RoundingMode.UP)
+                .divide(BigDecimal(12))
+        val beløpTilUtbetalningIFørstePerioden = fullOvergangsstønad2018.subtract(avkortning).setScale(0, RoundingMode.HALF_UP)
+
+
+        val fullOvergangsstønad2019 = grunnbeløp2019.multiply(BigDecimal(2.25)).divide(BigDecimal(12))
+        val beløpTilUtbetalningIAndraPerioden = fullOvergangsstønad2019.setScale(0, RoundingMode.HALF_UP)
+
+
+        val fullYtelse = beregningService.beregnYtelse(BeregningRequest(
+                listOf(Inntektsperiode(startDato = LocalDate.parse("2019-01-01"),
+                                       sluttDato = LocalDate.parse("2019-02-28"),
+                                       inntekt = inntekt,
+                                       samordningsfradrag = BigDecimal(0)),
+                       Inntektsperiode(startDato = LocalDate.parse("2019-03-01"),
+                                       sluttDato = LocalDate.parse("2026-06-30"),
+                                       inntekt = BigDecimal(0),
+                                       samordningsfradrag = BigDecimal(0))
+                ),
+                listOf(Periode(LocalDate.parse("2019-01-01"),
+                               LocalDate.parse("2019-02-28")),
+                       Periode(LocalDate.parse("2019-06-01"),
+                               LocalDate.parse("2020-04-30")))
+        ))
+        assertThat(fullYtelse.size).isEqualTo(2)
+        assertThat(fullYtelse[0]).isEqualTo(Beløpsperiode(LocalDate.parse("2019-01-01"),
+                                                          LocalDate.parse("2019-02-28"),
+                                                          beregningsgrunnlagIFørstePerioden,
+                                                          beløpTilUtbetalningIFørstePerioden))
+
+        assertThat(fullYtelse[1]).isEqualTo(Beløpsperiode(LocalDate.parse("2019-06-01"),
+                                                          LocalDate.parse("2020-04-30"),
+                                                          beregningsgrunnlagIAndrePerioden,
+                                                          beløpTilUtbetalningIAndraPerioden))
+
     }
 
 }
