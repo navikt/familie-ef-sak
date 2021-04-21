@@ -12,6 +12,7 @@ internal class BeregningServiceTest {
 
     @Test
     internal fun `skal beregne full ytelse når det ikke foreligger inntekt`() {
+        val beregningsgrunnlag = Beregningsgrunnlag(samordningsfradrag = BigDecimal(0), inntekt = BigDecimal(0), grunnbeløp = 101351.toBigDecimal())
         val fullYtelse = beregningService.beregnYtelse(BeregningRequest(
                 listOf(Inntektsperiode(LocalDate.parse("2019-04-30"),
                                        LocalDate.parse("2022-04-30"),
@@ -22,29 +23,16 @@ internal class BeregningServiceTest {
         assertThat(fullYtelse.size).isEqualTo(3)
         assertThat(fullYtelse[0]).isEqualTo(Beløpsperiode(LocalDate.parse("2019-04-30"),
                                                           LocalDate.parse("2019-05-01"),
+                                                          beregningsgrunnlag.copy(grunnbeløp = 96883.toBigDecimal()),
                                                           18166.toBigDecimal()))
         assertThat(fullYtelse[1]).isEqualTo(Beløpsperiode(LocalDate.parse("2019-05-01"),
                                                           LocalDate.parse("2020-05-01"),
+                                                          beregningsgrunnlag.copy(grunnbeløp = 99858.toBigDecimal()),
                                                           18723.toBigDecimal()))
         assertThat(fullYtelse[2]).isEqualTo(Beløpsperiode(LocalDate.parse("2020-05-01"),
                                                           LocalDate.parse("2022-04-30"),
+                                                          beregningsgrunnlag,
                                                           19003.toBigDecimal()))
-    }
-
-    @Test
-    fun test() {
-        val fullYtelse = beregningService.beregnYtelse(BeregningRequest(
-                listOf(Inntektsperiode(LocalDate.parse("2019-06-01"),
-                                       LocalDate.parse("2019-07-01"),
-                                       BigDecimal(0), BigDecimal(0)),
-                       Inntektsperiode(LocalDate.parse("2019-10-01"),
-                                       LocalDate.parse("2019-12-01"),
-                                       BigDecimal(0), BigDecimal(0))),
-                listOf(Periode(LocalDate.parse("2019-04-30"),
-                               LocalDate.parse("2022-04-30")))
-        ))
-
-        println(fullYtelse)
     }
 
 }

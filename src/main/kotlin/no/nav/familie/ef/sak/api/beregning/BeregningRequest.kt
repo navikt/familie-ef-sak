@@ -4,6 +4,6 @@ import no.nav.familie.ef.sak.util.Periode
 import java.math.BigDecimal
 import java.time.LocalDate
 
-data class BeregningRequest(val inntektsPerioder: List<Inntektsperiode>, val vedtaksperiode: List<Periode>)
+data class BeregningRequest(val inntektsperioder: List<Inntektsperiode>, val vedtaksperiode: List<Periode>)
 
-data class Inntektsperiode(val startDato: LocalDate, val sluttDato: LocalDate, val inntekt: BigDecimal, val samordningFradrag: BigDecimal)
+data class Inntektsperiode(val startDato: LocalDate, val sluttDato: LocalDate, val inntekt: BigDecimal, val samordningsfradrag: BigDecimal)

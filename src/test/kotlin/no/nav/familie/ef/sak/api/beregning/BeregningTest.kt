@@ -4,12 +4,14 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.TestFactory
+import java.math.BigDecimal
 import java.time.LocalDate
 
 internal class BeregningTest {
 
     @TestFactory
     fun `skal finne grunnbeløp mellom perioder`(): List<DynamicTest> {
+        val beregningsgrunnlag = Beregningsgrunnlag(samordningsfradrag = BigDecimal(0), inntekt = BigDecimal(0), grunnbeløp = 101351.toBigDecimal())
         val testData = listOf(
                 Pair("2000-01-01", "2005-01-01") to listOf(Triple("2000-01-01", "2000-05-01", 46950),
                                                            Triple("2000-05-01", "2001-05-01", 49090),
@@ -37,6 +39,7 @@ internal class BeregningTest {
                                 .isEqualTo(fasit.map {
                                     Beløpsperiode(LocalDate.parse(it.first),
                                                   LocalDate.parse(it.second),
+                                                  beregningsgrunnlag.copy(grunnbeløp = it.third.toBigDecimal()),
                                                   it.third.toBigDecimal())
                                 })
                     }

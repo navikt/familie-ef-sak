@@ -5,7 +5,12 @@ import java.time.LocalDate
 
 data class Beløpsperiode(val fraOgMedDato: LocalDate,
                          val tilDato: LocalDate,
+                         val beregningsgrunnlag: Beregningsgrunnlag? = null,
                          val beløp: BigDecimal)
+
+data class Beregningsgrunnlag(val inntekt: BigDecimal,
+                              val samordningsfradrag: BigDecimal,
+                              val grunnbeløp: BigDecimal)
 
 data class Grunnbeløp(val fraOgMedDato: LocalDate,
                       val tilDato: LocalDate,
@@ -16,14 +21,15 @@ data class Grunnbeløp(val fraOgMedDato: LocalDate,
 fun finnGrunnbeløpsPerioder(fraOgMedDato: LocalDate, tilDato: LocalDate): List<Beløpsperiode> {
     return grunnbeløpsperioder
             .filter { overlapper(it, fraOgMedDato, tilDato) }
-            .map { Beløpsperiode(maxOf(it.fraOgMedDato, fraOgMedDato), minOf(it.tilDato, tilDato), it.grunnbeløp) }
+            .map { Beløpsperiode(maxOf(it.fraOgMedDato, fraOgMedDato), minOf(it.tilDato, tilDato),  beløp = it.grunnbeløp) }
             .sortedBy { it.fraOgMedDato }
 }
 
 private fun overlapper(grunnbeløpsperiode: Grunnbeløp,
                        fraOgMedDato: LocalDate,
                        tilDato: LocalDate) =
-        grunnbeløpsperiode.fraOgMedDato in fraOgMedDato..tilDato || fraOgMedDato in grunnbeløpsperiode.fraOgMedDato..grunnbeløpsperiode.tilDato.minusDays(1)
+        grunnbeløpsperiode.fraOgMedDato in fraOgMedDato..tilDato || fraOgMedDato in grunnbeløpsperiode.fraOgMedDato..grunnbeløpsperiode.tilDato.minusDays(
+                1)
 
 // TODO: Kopiert inn fra https://github.com/navikt/g - kan kanskje kalle tjenesten på sikt hvis den er tenkt å være oppdatert?
 val grunnbeløpsperioder: List<Grunnbeløp> =
