@@ -16,4 +16,5 @@ data class SivilstandSøknadsgrunnlagDto(val samlivsbruddsdato: LocalDate?,
                                         val tidligereSamboer: PersonMinimumDto?)
 
 data class SivilstandRegistergrunnlagDto(val type: Sivilstandstype,
+                                         val navn: String?,
                                          val gyldigFraOgMed: LocalDate?)
