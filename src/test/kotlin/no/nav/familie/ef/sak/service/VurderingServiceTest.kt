@@ -78,7 +78,7 @@ internal class VurderingServiceTest {
                                          avvistePerioder = emptyList()))
         every { vilkårsvurderingRepository.insertAll(any()) } answers { firstArg() }
         val sivilstand = SivilstandInngangsvilkårDto(mockk(relaxed = true),
-                                                     SivilstandRegistergrunnlagDto(Sivilstandstype.GIFT, null))
+                                                     SivilstandRegistergrunnlagDto(Sivilstandstype.GIFT, "Navn", null))
         every { grunnlagsdataService.hentGrunnlag(any(), any()) } returns VilkårGrunnlagDto(mockk(relaxed = true),
                                                                                             sivilstand,
                                                                                             mockk(relaxed = true),

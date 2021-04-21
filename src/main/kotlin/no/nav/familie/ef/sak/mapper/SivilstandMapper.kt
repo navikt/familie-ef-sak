@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.mapper
 
-import no.nav.familie.ef.sak.api.dto.SivilstandInngangsvilkårDto
 import no.nav.familie.ef.sak.api.dto.SivilstandRegistergrunnlagDto
 import no.nav.familie.ef.sak.api.dto.SivilstandSøknadsgrunnlagDto
 import no.nav.familie.ef.sak.api.dto.Sivilstandstype
@@ -10,14 +9,10 @@ import no.nav.familie.ef.sak.repository.domain.søknad.Sivilstand
 
 object SivilstandMapper {
 
-    fun tilDto(sivilstandsdetaljer: Sivilstand, pdlSøker: PdlSøker): SivilstandInngangsvilkårDto {
-        return SivilstandInngangsvilkårDto(søknadsgrunnlag = mapSøknadsgrunnlag(sivilstandsdetaljer),
-                                           registergrunnlag = mapRegistergrunnlag(pdlSøker))
-    }
-
-    fun mapRegistergrunnlag(pdlSøker: PdlSøker): SivilstandRegistergrunnlagDto {
+    fun mapRegistergrunnlag(pdlSøker: PdlSøker, navnForRelatertVedSivilstand: String?): SivilstandRegistergrunnlagDto {
         val sivilstand = pdlSøker.sivilstand.gjeldende()
         return SivilstandRegistergrunnlagDto(type = Sivilstandstype.valueOf(sivilstand.type.name),
+                                             navn = navnForRelatertVedSivilstand,
                                              gyldigFraOgMed = sivilstand.gyldigFraOgMed)
     }
 

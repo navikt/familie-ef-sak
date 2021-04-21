@@ -11,6 +11,8 @@ import no.nav.familie.ef.sak.api.dto.MedlemskapRegistergrunnlagDto
 import no.nav.familie.ef.sak.api.dto.SivilstandRegistergrunnlagDto
 import no.nav.familie.ef.sak.api.dto.Sivilstandstype
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
+import no.nav.familie.ef.sak.integration.dto.pdl.Metadata
+import no.nav.familie.ef.sak.integration.dto.pdl.Sivilstand
 import no.nav.familie.ef.sak.mapper.MedlemskapMapper
 import no.nav.familie.ef.sak.mapper.SøknadsskjemaMapper
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.config.PdlClientConfig
@@ -21,7 +23,6 @@ import no.nav.familie.ef.sak.repository.domain.Endret
 import no.nav.familie.ef.sak.repository.domain.Registergrunnlag
 import no.nav.familie.ef.sak.repository.domain.RegistergrunnlagData
 import no.nav.familie.ef.sak.repository.domain.Sporbar
-import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import org.assertj.core.api.Assertions.assertThat
@@ -31,6 +32,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.data.repository.findByIdOrNull
 import java.time.LocalDate
 import java.time.LocalDateTime
+import no.nav.familie.ef.sak.integration.dto.pdl.Sivilstandstype as SivilstandstypePdl
 
 internal class GrunnlagsdataServiceTest {
 
@@ -177,6 +179,25 @@ internal class GrunnlagsdataServiceTest {
         assertThat(grunnlag.barnMedSamvær.get(1).søknadsgrunnlag.navn).isEqualTo("Navn1 navnesen")
     }
 
+    @Test
+    internal fun `skal hente navn til relatertVedSivilstand fra sivilstand når personen har sivilstand`() {
+        val sivilstand = Sivilstand(SivilstandstypePdl.GIFT, null, "11111122222", null, Metadata(false))
+        every { pdlClient.hentSøker(any()) } returns PdlClientConfig.opprettPdlSøker().copy(sivilstand = listOf(sivilstand))
+        every { registergrunnlagRepository.findByIdOrNull(behandlingId) } returns null
+
+        service.hentEndringerIRegistergrunnlag(behandlingId)
+
+        verify(exactly = 1) { pdlClient.hentPersonKortBolk(listOf(sivilstand.relatertVedSivilstand!!)) }
+    }
+
+    @Test
+    internal fun `skal ikke hente navn til relatertVedSivilstand fra sivilstand når det ikke finnes sivilstand`() {
+        every { pdlClient.hentSøker(any()) } returns PdlClientConfig.opprettPdlSøker().copy(sivilstand = listOf())
+        every { registergrunnlagRepository.findByIdOrNull(behandlingId) } returns null
+        service.hentEndringerIRegistergrunnlag(behandlingId)
+        verify(exactly = 0) { pdlClient.hentPersonKortBolk(any()) }
+    }
+
     private fun registergrunnlag(medEndringer: Boolean = false,
                                  endretTid: LocalDateTime = LocalDateTime.now()): Registergrunnlag {
         return Registergrunnlag(behandlingId = behandlingId,
@@ -197,6 +218,7 @@ internal class GrunnlagsdataServiceTest {
                         folkeregisterpersonstatus = if (medEndringer) null else Folkeregisterpersonstatus.BOSATT,
                         medlUnntak = MedlUnntakDto(emptyList())),
                 SivilstandRegistergrunnlagDto(type = if (medEndringer) Sivilstandstype.GIFT else Sivilstandstype.UGIFT,
+                                              navn = "navn",
                                               gyldigFraOgMed = null),
                 søknad.barn.map {
                     BarnMedSamværRegistergrunnlagDto(id = it.id,
