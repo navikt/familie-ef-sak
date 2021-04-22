@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.api.beregning
 
+import no.nav.familie.ef.sak.api.feilHvis
 import no.nav.familie.ef.sak.util.isEqualOrAfter
 import no.nav.familie.ef.sak.util.isEqualOrBefore
 import org.springframework.stereotype.Service
@@ -11,6 +12,21 @@ import java.time.LocalDate
 class BeregningService {
 
     fun beregnYtelse(beregningRequest: BeregningRequest): List<Beløpsperiode> {
+
+        val sorterteIntekter = beregningRequest.inntektsperioder.sortedBy { it.startDato }
+        val sorterteVedtaksperioder = beregningRequest.vedtaksperiode.sortedBy { it.fradato }
+
+        sorterteIntekter.forEachIndexed { index, inntektsperiode ->
+            if(index === sorterteIntekter.lastIndex){
+                feilHvis(!inntektsperiode.sluttDato.isEqual(sorterteVedtaksperioder.last().tildato)){
+                    "Inntektsperioder ${beregningRequest.inntektsperioder} dekker ikke alle vedtaksperioder "
+                }
+            }
+
+            inntektsperiode.sluttDato.isEqual(sorterteIntekter.get(index+1))
+        }
+
+
         val vedtaksperioder = beregningRequest.vedtaksperiode
         val beløpForInnteksperioder = beregningRequest.inntektsperioder.map { beregnBeløpPeriode(it) }.flatten()
 
@@ -27,12 +43,13 @@ class BeregningService {
                 it
             } else if (beløpsperiodeStarterFørVedtaksperiodeOgOverlapper(it, vedtaksperiodeFraOgmedDato, vedtaksperiodeTilDato)) {
                 it.copy(fraOgMedDato = vedtaksperiodeFraOgmedDato)
-            } else if (beløpsperiodeStarterEtterVedtaksperiodeOgOverlapper(it, vedtaksperiodeFraOgmedDato, vedtaksperiodeTilDato)) {
+            } else if (beløpsperiodeStarterEtterVedtaksperiodeOgOverlapper(it,
+                                                                           vedtaksperiodeFraOgmedDato,
+                                                                           vedtaksperiodeTilDato)) {
                 it.copy(tilDato = vedtaksperiodeTilDato)
             } else if (it.fraOgMedDato.isBefore(vedtaksperiodeFraOgmedDato) && it.tilDato.isAfter(vedtaksperiodeTilDato)) {
                 it.copy(tilDato = vedtaksperiodeTilDato, fraOgMedDato = vedtaksperiodeFraOgmedDato)
-            }
-            else {
+            } else {
                 null
             }
         }

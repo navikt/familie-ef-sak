@@ -3,6 +3,8 @@ package no.nav.familie.ef.sak.api.beregning
 import no.nav.familie.ef.sak.util.Periode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import java.lang.IllegalArgumentException
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.LocalDate
@@ -124,5 +126,27 @@ internal class BeregningServiceTest {
                                                           beløpTilUtbetalningIAndraPerioden))
 
     }
+
+    @Test
+    internal fun `skal feile hvis inntektsperioder ikke dekker vedtaksperioder`() {
+        val grunnbeløp2019 = 99858.toBigDecimal()
+        val inntekt = BigDecimal(240_000)
+        val beregningsgrunnlagIAndrePerioden = Beregningsgrunnlag(samordningsfradrag = BigDecimal(0),
+                                                                  inntekt = inntekt,
+                                                                  grunnbeløp = grunnbeløp2019)
+
+        val vedtakperiode = Periode(LocalDate.parse("2019-01-01"),
+                                    LocalDate.parse("2019-04-28"))
+        val inntektsperiode = Inntektsperiode(startDato = LocalDate.parse("2019-01-01"),
+                                              sluttDato = LocalDate.parse("2019-02-28"),
+                                              inntekt = inntekt,
+                                              samordningsfradrag = 0.toBigDecimal())
+
+        val request = BeregningRequest(inntektsperioder = listOf(inntektsperiode), vedtaksperiode = listOf(vedtakperiode))
+
+        assertThrows<IllegalArgumentException> { (beregningService.beregnYtelse(request)) }
+    }
+
+    //TODO: Test at det feiler ved overlappende inntektsperioder
 
 }
