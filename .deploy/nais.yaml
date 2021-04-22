@@ -60,6 +60,7 @@ spec:
       rules:
         - application: familie-brev
         - application: familie-ef-blankett
+        - application: familie-ef-iverksett
       external:
         {{#each externalHosts as |host|}}
         - host: {{host}}
