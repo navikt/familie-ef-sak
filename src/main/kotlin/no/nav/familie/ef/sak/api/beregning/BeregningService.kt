@@ -36,9 +36,7 @@ class BeregningService {
             val fullOvergangsStønad =
                     it.beløp.multiply(BigDecimal(2.25))
 
-            val utbetaling = fullOvergangsStønad.subtract(avkortning)
-                    .subtract(samordningsfradrag)
-                    .divide(BigDecimal(12))
+            val utbetaling = fullOvergangsStønad.subtract(avkortning).divide(BigDecimal(12)).subtract(samordningsfradrag)
                     .setScale(0, RoundingMode.HALF_UP)
 
             Beløpsperiode(fraOgMedDato = it.fraOgMedDato,
