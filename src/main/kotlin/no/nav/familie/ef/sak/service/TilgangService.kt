@@ -7,7 +7,7 @@ import no.nav.familie.ef.sak.service.steg.BehandlerRolle
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import org.springframework.cache.CacheManager
 import org.springframework.stereotype.Service
-import java.util.UUID
+import java.util.*
 
 @Service
 class TilgangService(private val integrasjonerClient: FamilieIntegrasjonerClient,
@@ -72,5 +72,9 @@ class TilgangService(private val integrasjonerClient: FamilieIntegrasjonerClient
         return cache.get(Pair(verdi, SikkerhetContext.hentSaksbehandler(true))) {
             hentVerdi()
         } ?: error("Finner ikke verdi fra cache=$cacheName")
+    }
+
+    fun validerSaksbehandler(saksbehandler: String): Boolean {
+        return SikkerhetContext.hentSaksbehandler().equals(saksbehandler)
     }
 }

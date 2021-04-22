@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.service
 
-import no.nav.familie.ef.sak.api.ApiFeil
 import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.api.dto.FagsakDto
 import no.nav.familie.ef.sak.api.dto.tilDto
@@ -9,20 +8,12 @@ import no.nav.familie.ef.sak.repository.domain.Fagsak
 import no.nav.familie.ef.sak.repository.domain.FagsakPerson
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
 class FagsakService(private val fagsakRepository: FagsakRepository,
                     private val behandlingService: BehandlingService) {
-
-    fun hentFagsakMedBehandlinger(personIdent: String, stønadstype: Stønadstype): FagsakDto {
-        val fagsak = fagsakRepository.findBySøkerIdent(personIdent, stønadstype)
-                     ?: throw ApiFeil("Finner ikke fagsak for person", HttpStatus.BAD_REQUEST)
-        val behandlinger = behandlingService.hentBehandlinger(fagsak.id)
-        return fagsak.tilDto(behandlinger)
-    }
 
     fun hentEllerOpprettFagsakMedBehandlinger(personIdent: String, stønadstype: Stønadstype): FagsakDto {
         val fagsak = hentEllerOpprettFagsak(personIdent, stønadstype)
