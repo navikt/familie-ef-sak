@@ -17,15 +17,30 @@ class BeregningService {
         val sorterteVedtaksperioder = beregningRequest.vedtaksperiode.sortedBy { it.fradato }
 
         sorterteIntekter.forEachIndexed { index, inntektsperiode ->
-            if(index === sorterteIntekter.lastIndex){
-                feilHvis(!inntektsperiode.sluttDato.isEqual(sorterteVedtaksperioder.last().tildato)){
-                    "Inntektsperioder ${beregningRequest.inntektsperioder} dekker ikke alle vedtaksperioder "
+            if (index === 0) {
+                feilHvis(!inntektsperiode.startDato.isEqualOrBefore(sorterteVedtaksperioder.first().fradato)) {
+                    "Inntektsperioder ${beregningRequest.inntektsperioder} begynner etter vedtaksperioder ${beregningRequest.vedtaksperiode}"
                 }
             }
-
-            inntektsperiode.sluttDato.isEqual(sorterteIntekter.get(index+1))
+            if (index === sorterteIntekter.lastIndex) {
+                feilHvis(!inntektsperiode.sluttDato.isEqualOrAfter(sorterteVedtaksperioder.last().tildato)) {
+                    "Inntektsperioder ${beregningRequest.inntektsperioder} slutter før vedtaksperioder ${beregningRequest.vedtaksperiode} "
+                }
+            }
+            if (sorterteIntekter.size > 1 && index < sorterteIntekter.lastIndex) {
+                feilHvis(!inntektsperiode.sluttDato.isEqual(sorterteIntekter.get(index + 1).startDato.minusDays(1))) {
+                    "Inntektsperioder ${beregningRequest.inntektsperioder} overlapper eller er ikke sammenhengde for vedtaksperioder ${beregningRequest.vedtaksperiode}"
+                }
+            }
         }
 
+        sorterteVedtaksperioder.forEachIndexed { index, periode ->
+            if(sorterteVedtaksperioder.size > 1 && index < sorterteVedtaksperioder.lastIndex){
+                feilHvis(periode.tildato.isEqualOrAfter(sorterteVedtaksperioder.get(index + 1).fradato)){
+                    "Vedtaksperioder ${beregningRequest.vedtaksperiode} overlapper"
+                }
+            }
+        }
 
         val vedtaksperioder = beregningRequest.vedtaksperiode
         val beløpForInnteksperioder = beregningRequest.inntektsperioder.map { beregnBeløpPeriode(it) }.flatten()
