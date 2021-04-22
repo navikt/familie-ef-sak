@@ -25,21 +25,4 @@ class PersonService(private val pdlClient: PdlClient) {
     fun hentPdlPersonKort(identer: List<String>): Map<String, PdlPersonKort> {
         return identer.distinct().chunked(100).map { pdlClient.hentPersonKortBolk(it) }.reduce { acc, it -> acc + it }
     }
-
-    fun hentAndreForeldre(identer: List<String>): Map<String, PdlAnnenForelder> {
-        return pdlClient.hentAndreForeldre(identer)
-    }
-
-    fun hentIdenterForBarnOgForeldre(forelderIdent: String): List<String>{
-        val søkerMedBarn = hentPersonMedRelasjoner(forelderIdent)
-
-        val forelderIdenter = søkerMedBarn.barn.values
-                .flatMap { it.forelderBarnRelasjon }
-                .filter { it.relatertPersonsRolle != Familierelasjonsrolle.BARN }
-                .map { it.relatertPersonsIdent }
-
-        val barnIdenter = søkerMedBarn.barn.keys
-
-        return (forelderIdenter + barnIdenter + forelderIdent).distinct()
-    }
 }
