@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.api.beregning
 
 import no.nav.familie.ef.sak.api.feilHvis
-import no.nav.familie.ef.sak.util.Periode
 import no.nav.familie.ef.sak.util.isEqualOrAfter
 import no.nav.familie.ef.sak.util.isEqualOrBefore
 import org.springframework.stereotype.Service
@@ -28,10 +27,8 @@ class BeregningService {
 
 
     private fun beregnBeløpPeriode(inntektsperiode: Inntektsperiode): List<Beløpsperiode> {
-        return finnGrunnbeløpsPerioder(inntektsperiode.startDato, inntektsperiode.sluttDato).map {
-            val samordningsfradrag = inntektsperiode.samordningsfradrag
-            val inntekt = inntektsperiode.inntekt
-
+        val (startDato, sluttDato, inntekt, samordningsfradrag) = inntektsperiode
+        return finnGrunnbeløpsPerioder(startDato, sluttDato).map {
             val avkortning = avkortningPerMåned(it.beløp, inntekt)
             val fullOvergangsStønad =
                     it.beløp.multiply(BigDecimal(2.25))
@@ -61,19 +58,21 @@ class BeregningService {
         return beløpForInnteksperioder.mapNotNull {
             if (it.fraOgMedDato.isEqualOrAfter(vedtaksperiodeFraOgmedDato) && it.tilDato.isEqualOrBefore(vedtaksperiodeTilDato)) {
                 it
-            } else if (it.beløpsperiodeStarterFørVedtaksperiodeOgOverlapper(vedtaksperiodeFraOgmedDato, vedtaksperiodeTilDato)) {
+            } else if (it.starterFørVedtaksperiodeOgOverlapper(vedtaksperiodeFraOgmedDato, vedtaksperiodeTilDato)) {
                 it.copy(fraOgMedDato = vedtaksperiodeFraOgmedDato)
-            } else if (it.beløpsperiodeStarterEtterVedtaksperiodeOgOverlapper(
+            } else if (it.starterEtterVedtaksperiodeOgOverlapper(
                             vedtaksperiodeFraOgmedDato,
                             vedtaksperiodeTilDato)) {
                 it.copy(tilDato = vedtaksperiodeTilDato)
-            } else if (it.fraOgMedDato.isBefore(vedtaksperiodeFraOgmedDato) && it.tilDato.isAfter(vedtaksperiodeTilDato)) {
+            } else if (it.starterFørOgSlutterEtterVedtaksperiode(vedtaksperiodeFraOgmedDato,
+                                                                              vedtaksperiodeTilDato)) {
                 it.copy(tilDato = vedtaksperiodeTilDato, fraOgMedDato = vedtaksperiodeFraOgmedDato)
             } else {
                 null
             }
         }
     }
+
 
     private fun validerVedtaksperioder(beregningRequest: BeregningRequest) {
         val sorterteVedtaksperioder = beregningRequest.vedtaksperiode.sortedBy { it.fradato }

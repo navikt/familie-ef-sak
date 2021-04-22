@@ -8,16 +8,21 @@ data class Beløpsperiode(val fraOgMedDato: LocalDate,
                          val beregningsgrunnlag: Beregningsgrunnlag? = null,
                          val beløp: BigDecimal) {
 
-    fun beløpsperiodeStarterEtterVedtaksperiodeOgOverlapper(
+    fun starterEtterVedtaksperiodeOgOverlapper(
             vedtaksperiodeFraOgmedDato: LocalDate,
             vedtaksperiodeTilDato: LocalDate) =
             this.fraOgMedDato.isAfter(vedtaksperiodeFraOgmedDato) && this.fraOgMedDato.isBefore(
                     vedtaksperiodeTilDato)
 
-    fun beløpsperiodeStarterFørVedtaksperiodeOgOverlapper(
+    fun starterFørVedtaksperiodeOgOverlapper(
             vedtaksperiodeFraOgmedDato: LocalDate,
             vedtaksperiodeTilDato: LocalDate) =
             this.tilDato.isBefore(vedtaksperiodeTilDato) && this.tilDato.isAfter(vedtaksperiodeFraOgmedDato)
+
+    fun starterFørOgSlutterEtterVedtaksperiode(
+          vedtaksperiodeFraOgmedDato: LocalDate,
+          vedtaksperiodeTilDato: LocalDate) =
+            this.fraOgMedDato.isBefore(vedtaksperiodeFraOgmedDato) && this.tilDato.isAfter(vedtaksperiodeTilDato)
 }
 
 data class Beregningsgrunnlag(val inntekt: BigDecimal,
