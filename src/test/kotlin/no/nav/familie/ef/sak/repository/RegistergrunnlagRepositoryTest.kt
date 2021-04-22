@@ -1,7 +1,9 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
+import no.nav.familie.ef.sak.api.dto.SivilstandInngangsvilkårDto
 import no.nav.familie.ef.sak.integration.PdlClient
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker
 import no.nav.familie.ef.sak.mapper.MedlemskapMapper
 import no.nav.familie.ef.sak.mapper.SivilstandMapper
 import no.nav.familie.ef.sak.mapper.SøknadsskjemaMapper
@@ -10,6 +12,7 @@ import no.nav.familie.ef.sak.repository.FagsakRepository
 import no.nav.familie.ef.sak.repository.RegistergrunnlagRepository
 import no.nav.familie.ef.sak.repository.domain.Registergrunnlag
 import no.nav.familie.ef.sak.repository.domain.RegistergrunnlagData
+import no.nav.familie.ef.sak.repository.domain.søknad.Sivilstand
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
@@ -64,8 +67,17 @@ internal class RegistergrunnlagRepositoryTest : OppslagSpringRunnerTest() {
                                                  medlUnntak = Medlemskapsinfo("", emptyList(), emptyList(), emptyList()),
                                                  pdlSøker = pdlSøker)
 
-        val sivilstand = SivilstandMapper.tilDto(sivilstandsdetaljer = søknad.sivilstand,
-                                                 pdlSøker = pdlSøker)
+        val sivilstand = tilDto(sivilstandsdetaljer = søknad.sivilstand,
+                                pdlSøker = pdlSøker)
         return RegistergrunnlagData(medlemskap.registergrunnlag, sivilstand.registergrunnlag, emptyList())
+    }
+
+    fun tilDto(sivilstandsdetaljer: Sivilstand,
+               pdlSøker: PdlSøker,
+               navnForRelatertVedSivilstand: String? = null): SivilstandInngangsvilkårDto {
+        val søknadsgrunnlag = SivilstandMapper.mapSøknadsgrunnlag(sivilstandsdetaljer)
+        val registergrunnlag = SivilstandMapper.mapRegistergrunnlag(pdlSøker, navnForRelatertVedSivilstand)
+        return SivilstandInngangsvilkårDto(søknadsgrunnlag = søknadsgrunnlag,
+                                           registergrunnlag = registergrunnlag)
     }
 }

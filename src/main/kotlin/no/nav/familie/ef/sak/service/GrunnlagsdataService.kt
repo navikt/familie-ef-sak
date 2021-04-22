@@ -1,8 +1,8 @@
 package no.nav.familie.ef.sak.service
 
-import no.nav.familie.ef.sak.api.dto.VilkårGrunnlagDto
 import no.nav.familie.ef.sak.api.dto.MedlemskapDto
 import no.nav.familie.ef.sak.api.dto.SivilstandInngangsvilkårDto
+import no.nav.familie.ef.sak.api.dto.VilkårGrunnlagDto
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.integration.dto.pdl.Familierelasjonsrolle
@@ -10,7 +10,14 @@ import no.nav.familie.ef.sak.integration.dto.pdl.PdlAnnenForelder
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlBarn
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker
 import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
-import no.nav.familie.ef.sak.mapper.*
+import no.nav.familie.ef.sak.integration.dto.pdl.visningsnavn
+import no.nav.familie.ef.sak.mapper.AktivitetMapper
+import no.nav.familie.ef.sak.mapper.BarnMedSamværMapper
+import no.nav.familie.ef.sak.mapper.BosituasjonMapper
+import no.nav.familie.ef.sak.mapper.MedlemskapMapper
+import no.nav.familie.ef.sak.mapper.SagtOppEllerRedusertStillingMapper
+import no.nav.familie.ef.sak.mapper.SivilstandMapper
+import no.nav.familie.ef.sak.mapper.SivilstandsplanerMapper
 import no.nav.familie.ef.sak.repository.RegistergrunnlagRepository
 import no.nav.familie.ef.sak.repository.domain.Registergrunnlag
 import no.nav.familie.ef.sak.repository.domain.RegistergrunnlagData
@@ -67,7 +74,7 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
 
         val sagtOppEllerRedusertStilling = SagtOppEllerRedusertStillingMapper.tilDto(situasjon = søknad.situasjon)
 
-        val aktivitet = AktivitetMapper.tilDto(aktivitet = søknad.aktivitet, situasjon = søknad.situasjon, barn = søknad.barn )
+        val aktivitet = AktivitetMapper.tilDto(aktivitet = søknad.aktivitet, situasjon = søknad.situasjon, barn = søknad.barn)
         return VilkårGrunnlagDto(medlemskap = medlemskap,
                                  sivilstand = sivilstand,
                                  bosituasjon = BosituasjonMapper.tilDto(søknad.bosituasjon),
@@ -156,14 +163,22 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
         val personIdent = søknad.fødselsnummer
 
         val pdlSøker = pdlClient.hentSøker(personIdent)
+        val navnForRelatertVedSivilstand = hentNavnForRelatertVedSivilstand(pdlSøker)
         val pdlBarn = hentPdlBarn(pdlSøker)
         val barneForeldre = hentPdlBarneForeldre(søknad, pdlBarn)
         val medlUnntak = familieIntegrasjonerClient.hentMedlemskapsinfo(ident = personIdent)
 
         val barnMedSamvær = BarnMedSamværMapper.mapRegistergrunnlag(pdlBarn, barneForeldre, søknad, pdlSøker.bostedsadresse)
         return RegistergrunnlagData(medlemskap = medlemskapMapper.mapRegistergrunnlag(pdlSøker, medlUnntak),
-                                    sivilstand = SivilstandMapper.mapRegistergrunnlag(pdlSøker),
+                                    sivilstand = SivilstandMapper.mapRegistergrunnlag(pdlSøker, navnForRelatertVedSivilstand),
                                     barnMedSamvær = barnMedSamvær)
+    }
+
+    private fun hentNavnForRelatertVedSivilstand(pdlSøker: PdlSøker): String? {
+        return pdlSøker.sivilstand.gjeldende().relatertVedSivilstand?.let {
+            val person = pdlClient.hentPersonKortBolk(listOf(it))[it]
+            person?.navn?.gjeldende()?.visningsnavn()
+        }
     }
 
     private fun hentPdlBarneForeldre(søknad: SøknadsskjemaOvergangsstønad,
