@@ -6,7 +6,19 @@ import java.time.LocalDate
 data class Beløpsperiode(val fraOgMedDato: LocalDate,
                          val tilDato: LocalDate,
                          val beregningsgrunnlag: Beregningsgrunnlag? = null,
-                         val beløp: BigDecimal)
+                         val beløp: BigDecimal) {
+
+    fun beløpsperiodeStarterEtterVedtaksperiodeOgOverlapper(
+            vedtaksperiodeFraOgmedDato: LocalDate,
+            vedtaksperiodeTilDato: LocalDate) =
+            this.fraOgMedDato.isAfter(vedtaksperiodeFraOgmedDato) && this.fraOgMedDato.isBefore(
+                    vedtaksperiodeTilDato)
+
+    fun beløpsperiodeStarterFørVedtaksperiodeOgOverlapper(
+            vedtaksperiodeFraOgmedDato: LocalDate,
+            vedtaksperiodeTilDato: LocalDate) =
+            this.tilDato.isBefore(vedtaksperiodeTilDato) && this.tilDato.isAfter(vedtaksperiodeFraOgmedDato)
+}
 
 data class Beregningsgrunnlag(val inntekt: BigDecimal,
                               val samordningsfradrag: BigDecimal,
@@ -21,7 +33,7 @@ data class Grunnbeløp(val fraOgMedDato: LocalDate,
 fun finnGrunnbeløpsPerioder(fraOgMedDato: LocalDate, tilDato: LocalDate): List<Beløpsperiode> {
     return grunnbeløpsperioder
             .filter { overlapper(it, fraOgMedDato, tilDato) }
-            .map { Beløpsperiode(maxOf(it.fraOgMedDato, fraOgMedDato), minOf(it.tilDato, tilDato),  beløp = it.grunnbeløp) }
+            .map { Beløpsperiode(maxOf(it.fraOgMedDato, fraOgMedDato), minOf(it.tilDato, tilDato), beløp = it.grunnbeløp) }
             .sortedBy { it.fraOgMedDato }
 }
 

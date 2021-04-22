@@ -33,7 +33,7 @@ class BeregningController(private val stegService: StegService,
         tilgangService.validerTilgangTilBehandling(behandlingId)
         val behandling = behandlingService.hentBehandling(behandlingId)
         val aktivIdent = behandlingService.hentAktivIdent(behandling.fagsakId)
-        val beløpsperioder = beregningService.beregnYtelse(beregningRequest) // TODO: Tar ikke høyde for inntekt
+        val beløpsperioder = beregningService.beregnYtelse(beregningRequest)
         val tilkjentYtelse = TilkjentYtelseDTO(
                 aktivIdent,
                 vedtaksdato = LocalDate.now(),
