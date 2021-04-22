@@ -16,9 +16,9 @@ import java.util.*
 class FagsakController(private val fagsakService: FagsakService, private val tilgangService: TilgangService) {
 
     @PostMapping
-    fun hentFagsakForPerson(@RequestBody fagsakRequest: FagsakRequest): Ressurs<FagsakDto> {
+    fun hentEllerOpprettFagsakForPerson(@RequestBody fagsakRequest: FagsakRequest): Ressurs<FagsakDto> {
         tilgangService.validerTilgangTilPersonMedBarn(fagsakRequest.personIdent)
-        return Ressurs.success(fagsakService.hentFagsakMedBehandlinger(fagsakRequest.personIdent, fagsakRequest.stønadstype))
+        return Ressurs.success(fagsakService.hentEllerOpprettFagsakMedBehandlinger(fagsakRequest.personIdent, fagsakRequest.stønadstype))
     }
 
     @GetMapping("{fagsakId}")
