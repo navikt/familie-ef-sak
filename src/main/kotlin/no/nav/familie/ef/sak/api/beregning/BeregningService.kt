@@ -28,7 +28,7 @@ class BeregningService {
                 }
             }
             if (sorterteIntekter.size > 1 && index < sorterteIntekter.lastIndex) {
-                feilHvis(!inntektsperiode.sluttDato.isEqual(sorterteIntekter.get(index + 1).startDato.minusDays(1))) {
+                feilHvis(!inntektsperiode.sluttDato.isEqual(sorterteIntekter[index + 1].startDato.minusDays(1))) {
                     "Inntektsperioder ${beregningRequest.inntektsperioder} overlapper eller er ikke sammenhengde for vedtaksperioder ${beregningRequest.vedtaksperiode}"
                 }
             }
@@ -36,7 +36,7 @@ class BeregningService {
 
         sorterteVedtaksperioder.forEachIndexed { index, periode ->
             if(sorterteVedtaksperioder.size > 1 && index < sorterteVedtaksperioder.lastIndex){
-                feilHvis(periode.tildato.isEqualOrAfter(sorterteVedtaksperioder.get(index + 1).fradato)){
+                feilHvis(periode.tildato.isEqualOrAfter(sorterteVedtaksperioder[index + 1].fradato)){
                     "Vedtaksperioder ${beregningRequest.vedtaksperiode} overlapper"
                 }
             }
