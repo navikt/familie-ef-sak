@@ -70,8 +70,6 @@ no.nav.security.jwt:
           client-auth-method: client_secret_basic
 PDL_SCOPE: api://prod-fss:pdl:pdl-api/.default
 
-remove: ok
-
 spring:
   autoconfigure.exclude: org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration
   data:
