@@ -107,7 +107,7 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
             ""
         } +
                "----- Opprettet av familie-ef-sak ${LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)} --- \n" +
-               "${frontendOppgaveUrl}"
+               "${frontendOppgaveUrl}" + "\n----- Oppgave må behandles i ny løsning"
     }
 
     fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto {
