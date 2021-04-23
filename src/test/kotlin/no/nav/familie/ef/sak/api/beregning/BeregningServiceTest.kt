@@ -18,11 +18,21 @@ internal class BeregningServiceTest {
     @Test
     internal fun `skal beregne full ytelse når det ikke foreligger inntekt`() {
         val beregningsgrunnlagG2018 =
-                Beregningsgrunnlag(samordningsfradrag = BigDecimal(0), inntekt = BigDecimal(0), grunnbeløp = 96883.toBigDecimal())
+                Beregningsgrunnlag(samordningsfradrag = BigDecimal.ZERO,
+                                   inntekt = BigDecimal.ZERO,
+                                   avkortningPerMåned = BigDecimal.ZERO,
+                                   fullOvergangsStønadPerMåned = BigDecimal(18_166),
+                                   grunnbeløp = 96883.toBigDecimal())
         val beregningsgrunnlagG2019 =
-                Beregningsgrunnlag(samordningsfradrag = BigDecimal(0), inntekt = BigDecimal(0), grunnbeløp = 99858.toBigDecimal())
-        val beregningsgrunnlagG2020 = Beregningsgrunnlag(samordningsfradrag = BigDecimal(0),
-                                                         inntekt = BigDecimal(0),
+                Beregningsgrunnlag(samordningsfradrag = BigDecimal.ZERO,
+                                   inntekt = BigDecimal.ZERO,
+                                   avkortningPerMåned = BigDecimal.ZERO,
+                                   fullOvergangsStønadPerMåned = BigDecimal(18_723),
+                                   grunnbeløp = 99858.toBigDecimal())
+        val beregningsgrunnlagG2020 = Beregningsgrunnlag(samordningsfradrag = BigDecimal.ZERO,
+                                                         inntekt = BigDecimal.ZERO,
+                                                         avkortningPerMåned = BigDecimal.ZERO,
+                                                         fullOvergangsStønadPerMåned = BigDecimal(19_003),
                                                          grunnbeløp = 101351.toBigDecimal())
         val fullYtelse = beregningService.beregnYtelse(inntektsperioder = listOf(Inntektsperiode(LocalDate.parse("2019-04-30"),
                                                                                                  LocalDate.parse("2022-04-30"),
@@ -50,9 +60,21 @@ internal class BeregningServiceTest {
     internal fun `skal beregne periodebeløp når det foreligger inntekt`() {
         val grunnbeløp = 99858.toBigDecimal()
         val inntekt = BigDecimal(240_000)
+        val fullOvergangsstønad = grunnbeløp.multiply(BigDecimal(2.25)).divide(BigDecimal(12))
+
+        val avkortning = inntekt.subtract(grunnbeløp.multiply(BigDecimal(0.5)))
+                .multiply(BigDecimal(0.45))
+                .divide(BigDecimal(12))
+                .setScale(0, RoundingMode.HALF_DOWN)
+        val beløpTilUtbetalning = fullOvergangsstønad.subtract(avkortning).setScale(0, RoundingMode.HALF_UP)
+
+
         val beregningsgrunnlagG2019 = Beregningsgrunnlag(samordningsfradrag = BigDecimal(0),
                                                          inntekt = inntekt,
-                                                         grunnbeløp = grunnbeløp)
+                                                         avkortningPerMåned = avkortning,
+                                                         grunnbeløp = grunnbeløp,
+                                                         fullOvergangsStønadPerMåned = fullOvergangsstønad.setScale(0,
+                                                                                                                    RoundingMode.HALF_DOWN))
         val fullYtelse = beregningService.beregnYtelse(inntektsperioder =
                                                        listOf(Inntektsperiode(startDato = LocalDate.parse("2019-06-01"),
                                                                               sluttDato = LocalDate.parse("2020-04-30"),
@@ -62,10 +84,7 @@ internal class BeregningServiceTest {
                                                                                         LocalDate.parse("2020-04-30")))
         )
 
-        val fullOvergangsstønad = grunnbeløp.multiply(BigDecimal(2.25)).divide(BigDecimal(12))
 
-        val avkortning = inntekt.subtract(grunnbeløp.multiply(BigDecimal(0.5))).multiply(BigDecimal(0.45)).divide(BigDecimal(12))
-        val beløpTilUtbetalning = fullOvergangsstønad.subtract(avkortning).setScale(0, RoundingMode.HALF_UP)
 
         assertThat(fullYtelse.size).isEqualTo(1)
         assertThat(fullYtelse[0]).isEqualTo(Beløpsperiode(LocalDate.parse("2019-06-01"),
@@ -81,25 +100,35 @@ internal class BeregningServiceTest {
         val grunnbeløp2018 = 96883.toBigDecimal()
 
         val inntekt = BigDecimal(240_000)
-        val beregningsgrunnlagIFørstePerioden = Beregningsgrunnlag(samordningsfradrag = BigDecimal(0),
+        val fullOvergangsstønad2018PerMåned =
+                grunnbeløp2018.multiply(BigDecimal(2.25)).divide(BigDecimal(12)).setScale(0, RoundingMode.HALF_UP)
+        val avkortningPerMåned = inntekt.subtract(grunnbeløp2018.multiply(BigDecimal(0.5)))
+                .multiply(BigDecimal(0.45))
+                .setScale(5, RoundingMode.HALF_DOWN)
+                .divide(BigDecimal(12))
+                .setScale(0, RoundingMode.HALF_DOWN)
+
+
+        val beløpTilUtbetalningIFørstePerioden =
+                fullOvergangsstønad2018PerMåned.subtract(avkortningPerMåned).setScale(0, RoundingMode.HALF_UP)
+
+
+        val fullOvergangsstønad2019 =
+                grunnbeløp2019.multiply(BigDecimal(2.25)).divide(BigDecimal(12)).setScale(0, RoundingMode.HALF_UP)
+        val beløpTilUtbetalningIAndraPerioden = fullOvergangsstønad2019
+
+
+        val beregningsgrunnlagIFørstePerioden = Beregningsgrunnlag(samordningsfradrag = BigDecimal.ZERO,
                                                                    inntekt = inntekt,
+                                                                   avkortningPerMåned = avkortningPerMåned,
+                                                                   fullOvergangsStønadPerMåned = fullOvergangsstønad2018PerMåned,
                                                                    grunnbeløp = grunnbeløp2018)
 
-        val beregningsgrunnlagIAndrePerioden = Beregningsgrunnlag(samordningsfradrag = BigDecimal(0),
-                                                                  inntekt = BigDecimal(0),
+        val beregningsgrunnlagIAndrePerioden = Beregningsgrunnlag(samordningsfradrag = BigDecimal.ZERO,
+                                                                  inntekt = BigDecimal.ZERO,
+                                                                  avkortningPerMåned = BigDecimal.ZERO,
+                                                                  fullOvergangsStønadPerMåned = fullOvergangsstønad2019,
                                                                   grunnbeløp = grunnbeløp2019)
-
-
-        val fullOvergangsstønad2018 = grunnbeløp2018.multiply(BigDecimal(2.25)).divide(BigDecimal(12))
-        val avkortning = inntekt.subtract(grunnbeløp2018.multiply(BigDecimal(0.5)))
-                .multiply(BigDecimal(0.45))
-                .setScale(0, RoundingMode.UP)
-                .divide(BigDecimal(12))
-        val beløpTilUtbetalningIFørstePerioden = fullOvergangsstønad2018.subtract(avkortning).setScale(0, RoundingMode.HALF_UP)
-
-
-        val fullOvergangsstønad2019 = grunnbeløp2019.multiply(BigDecimal(2.25)).divide(BigDecimal(12))
-        val beløpTilUtbetalningIAndraPerioden = fullOvergangsstønad2019.setScale(0, RoundingMode.HALF_UP)
 
 
         val fullYtelse = beregningService.beregnYtelse(

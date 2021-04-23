@@ -12,7 +12,7 @@ import java.time.LocalDate
 @Service
 class BeregningService {
 
-    fun beregnYtelse(vedtaksperioder:List<Periode>,  inntektsperioder: List<Inntektsperiode>): List<Beløpsperiode> {
+    fun beregnYtelse(vedtaksperioder: List<Periode>, inntektsperioder: List<Inntektsperiode>): List<Beløpsperiode> {
 
         validerInnteksperioder(inntektsperioder, vedtaksperioder)
         validerVedtaksperioder(vedtaksperioder)
@@ -29,25 +29,30 @@ class BeregningService {
     private fun beregnBeløpForInntekt(inntektsperiode: Inntektsperiode): List<Beløpsperiode> {
         val (startDato, sluttDato, inntekt, samordningsfradrag) = inntektsperiode
         return finnGrunnbeløpsPerioder(startDato, sluttDato).map {
-            val absInntekt = inntekt.abs()
-            val absSamordningsfradrag = samordningsfradrag.abs();
-            val avkortning = avkortningPerMåned(it.beløp, absInntekt)
-            val fullOvergangsStønad =
-                    it.beløp.multiply(BigDecimal(2.25))
+            val avkortningPerMåned = beregnAvkortning(it.beløp, inntekt).divide(BigDecimal(12))
+                    .setScale(0, RoundingMode.HALF_DOWN)
 
-            val utbetaling = fullOvergangsStønad.subtract(avkortning).divide(BigDecimal(12)).subtract(absSamordningsfradrag)
-                    .setScale(0, RoundingMode.HALF_UP)
+            val fullOvergangsStønadPerMåned =
+                    it.beløp.multiply(BigDecimal(2.25)).divide(BigDecimal(12)).setScale(0, RoundingMode.HALF_EVEN)
+
+            val beløpFørSamordning =
+                    fullOvergangsStønadPerMåned.subtract(avkortningPerMåned).setScale(0, RoundingMode.HALF_UP)
+
+            val utbetaling = beløpFørSamordning.subtract(samordningsfradrag).setScale(0, RoundingMode.HALF_UP)
+
 
             Beløpsperiode(fraOgMedDato = it.fraOgMedDato,
                           tilDato = it.tilDato,
                           beløp = utbetaling,
                           beregningsgrunnlag = Beregningsgrunnlag(samordningsfradrag = samordningsfradrag,
-                                                                  inntekt = absInntekt,
+                                                                  avkortningPerMåned = avkortningPerMåned,
+                                                                  fullOvergangsStønadPerMåned = fullOvergangsStønadPerMåned,
+                                                                  inntekt = inntekt,
                                                                   grunnbeløp = it.beløp))
         }
     }
 
-    private fun avkortningPerMåned(grunnbeløp: BigDecimal, inntekt: BigDecimal): BigDecimal {
+    private fun beregnAvkortning(grunnbeløp: BigDecimal, inntekt: BigDecimal): BigDecimal {
         val inntektOverHalveGrunnbeløp = inntekt.subtract(grunnbeløp.multiply(BigDecimal(0.5)))
         return if (inntektOverHalveGrunnbeløp > BigDecimal(0))
             inntektOverHalveGrunnbeløp.multiply(BigDecimal(0.45)).setScale(5, RoundingMode.HALF_DOWN) else BigDecimal(0)
@@ -113,7 +118,14 @@ class BeregningService {
                     "Inntektsperioder ${inntektsperioder} overlapper eller er ikke sammenhengde for vedtaksperioder ${vedtaksperiode}"
                 }
             }
+
+            feilHvis(inntektsperiode.inntekt < BigDecimal.ZERO) {
+                "Inntekten kan ikke vara mindre en null:  ${inntektsperiode.inntekt}"
+            }
+
+            feilHvis(inntektsperiode.samordningsfradrag < BigDecimal.ZERO) {
+                "Samordningsfradraget kan ikke vara mindre en null: ${inntektsperiode.samordningsfradrag}"
+            }
         }
     }
-
 }
