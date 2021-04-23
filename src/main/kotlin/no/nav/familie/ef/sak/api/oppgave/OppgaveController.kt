@@ -85,7 +85,7 @@ private fun Oppgave.tilDto(): OppgaveEfDto {
                         opprettetAvEnhetsnr,
                         journalpostId,
                         journalpostkilde,
-                        behandlesAvApplikasjon?: "",
+                        behandlesAvApplikasjon ?: "",
                         saksreferanse,
                         bnr,
                         samhandlernr,
@@ -108,8 +108,7 @@ private fun Oppgave.tilDto(): OppgaveEfDto {
                         ferdigstiltTidspunkt,
                         endretTidspunkt,
                         prioritet,
-                        status,
-                        behandlesAvApplikasjon == "familie-ef-sak-blankett"
+                        status
     )
 }
 
