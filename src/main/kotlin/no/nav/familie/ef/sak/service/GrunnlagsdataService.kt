@@ -183,29 +183,24 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
 
     private fun hentPdlBarneForeldre(søknad: SøknadsskjemaOvergangsstønad,
                                      barn: Map<String, PdlBarn>): Map<String, PdlAnnenForelder> {
-        val barneforeldreFraSøknad =
-                søknad.barn.mapNotNull {
-                    it.annenForelder?.person?.fødselsnummer
-                }
+        val barneforeldreFraSøknad = søknad.barn.mapNotNull { it.annenForelder?.person?.fødselsnummer }
 
-        val barneforeldre = barn.map { it.value.forelderBarnRelasjon }
+        return barn.map { it.value.forelderBarnRelasjon }
                 .flatten()
                 .filter { it.relatertPersonsIdent != søknad.fødselsnummer && it.relatertPersonsRolle != Familierelasjonsrolle.BARN }
                 .map { it.relatertPersonsIdent }
                 .plus(barneforeldreFraSøknad)
                 .distinct()
                 .let { pdlClient.hentAndreForeldre(it) }
-        return barneforeldre
     }
 
     private fun hentPdlBarn(pdlSøker: PdlSøker): Map<String, PdlBarn> {
-        val barn = pdlSøker.forelderBarnRelasjon
+        return pdlSøker.forelderBarnRelasjon
                 .filter { it.relatertPersonsRolle == Familierelasjonsrolle.BARN }
                 .map { it.relatertPersonsIdent }
                 .let { pdlClient.hentBarn(it) }
                 .filter { it.value.fødsel.gjeldende()?.fødselsdato != null }
                 .filter { it.value.fødsel.first().fødselsdato!!.plusYears(18).isAfter(LocalDate.now()) }
-        return barn
     }
 
     private fun finnEndringerIRegistergrunnlag(registergrunnlag: Registergrunnlag): Registergrunnlagsendringer {

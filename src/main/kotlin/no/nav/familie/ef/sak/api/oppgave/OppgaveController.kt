@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.api.oppgave
 
+import no.nav.familie.ef.sak.api.ApiFeil
 import no.nav.familie.ef.sak.api.oppgave.dto.OppgaveEfDto
 import no.nav.familie.ef.sak.api.oppgave.dto.OppgaveResponseDto
 import no.nav.familie.ef.sak.integration.PdlClient
@@ -10,6 +11,7 @@ import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
@@ -41,6 +43,9 @@ class OppgaveController(private val oppgaveService: OppgaveService,
     fun fordelOppgave(@PathVariable(name = "gsakOppgaveId") gsakOppgaveId: Long,
                       @RequestParam("saksbehandler") saksbehandler: String): Ressurs<Long> {
         tilgangService.validerHarSaksbehandlerrolle()
+        if (!tilgangService.validerSaksbehandler(saksbehandler)) {
+            throw ApiFeil("Kunne ikke validere saksbehandler : ${saksbehandler}", HttpStatus.BAD_REQUEST)
+        }
         return Ressurs.success(oppgaveService.fordelOppgave(gsakOppgaveId, saksbehandler))
     }
 
