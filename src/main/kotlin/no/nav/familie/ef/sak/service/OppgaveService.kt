@@ -53,7 +53,8 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
                                           beskrivelse = lagOppgaveTekst(beskrivelse),
                                           enhetsnummer = enhetId ?: enhetsnummer?.enhetId,
                                           behandlingstema = finnBehandlingstema(fagsak.stønadstype).value,
-                                          tilordnetRessurs = tilordnetNavIdent
+                                          tilordnetRessurs = tilordnetNavIdent,
+                                          behandlesAvApplikasjon = "familie-ef-sak"
                     )
 
             val opprettetOppgaveId = oppgaveClient.opprettOppgave(opprettOppgave)
@@ -106,7 +107,7 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
             ""
         } +
                "----- Opprettet av familie-ef-sak ${LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)} --- \n" +
-               "${frontendOppgaveUrl}"
+               "${frontendOppgaveUrl}" + "\n----- Oppgave må behandles i ny løsning"
     }
 
     fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto {
