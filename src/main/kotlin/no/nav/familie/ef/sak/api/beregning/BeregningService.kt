@@ -46,6 +46,7 @@ class BeregningService {
             Beløpsperiode(fraOgMedDato = it.fraOgMedDato,
                           tilDato = it.tilDato,
                           beløp = beløpTilUtbetalning,
+                          beløpFørSamordning = beløpFørSamordning,
                           beregningsgrunnlag = Beregningsgrunnlag(samordningsfradrag = samordningsfradrag,
                                                                   avkortningPerMåned = avkortningPerMåned,
                                                                   fullOvergangsStønadPerMåned = fullOvergangsStønadPerMåned,

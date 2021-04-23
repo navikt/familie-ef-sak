@@ -39,6 +39,7 @@ internal class BeregningTest {
                                     Beløpsperiode(LocalDate.parse(it.first),
                                                   LocalDate.parse(it.second),
                                                 null,
+                                                  it.third.toBigDecimal(),
                                                   it.third.toBigDecimal())
                                 })
                     }

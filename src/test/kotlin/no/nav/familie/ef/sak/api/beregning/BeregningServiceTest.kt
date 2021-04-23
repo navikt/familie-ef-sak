@@ -45,14 +45,17 @@ internal class BeregningServiceTest {
         assertThat(fullYtelse[0]).isEqualTo(Beløpsperiode(LocalDate.parse("2019-04-30"),
                                                           LocalDate.parse("2019-05-01"),
                                                           beregningsgrunnlagG2018,
+                                                          18166.toBigDecimal(),
                                                           18166.toBigDecimal()))
         assertThat(fullYtelse[1]).isEqualTo(Beløpsperiode(LocalDate.parse("2019-05-01"),
                                                           LocalDate.parse("2020-05-01"),
                                                           beregningsgrunnlagG2019,
+                                                          18723.toBigDecimal(),
                                                           18723.toBigDecimal()))
         assertThat(fullYtelse[2]).isEqualTo(Beløpsperiode(LocalDate.parse("2020-05-01"),
                                                           LocalDate.parse("2022-04-30"),
                                                           beregningsgrunnlagG2020,
+                                                          19003.toBigDecimal(),
                                                           19003.toBigDecimal()))
     }
 
@@ -90,6 +93,7 @@ internal class BeregningServiceTest {
         assertThat(fullYtelse[0]).isEqualTo(Beløpsperiode(LocalDate.parse("2019-06-01"),
                                                           LocalDate.parse("2020-04-30"),
                                                           beregningsgrunnlagG2019,
+                                                          beløpTilUtbetalning,
                                                           beløpTilUtbetalning))
 
     }
@@ -150,11 +154,13 @@ internal class BeregningServiceTest {
         assertThat(fullYtelse[0]).isEqualTo(Beløpsperiode(LocalDate.parse("2019-01-01"),
                                                           LocalDate.parse("2019-02-28"),
                                                           beregningsgrunnlagIFørstePerioden,
+                                                          beløpTilUtbetalningIFørstePerioden,
                                                           beløpTilUtbetalningIFørstePerioden))
 
         assertThat(fullYtelse[1]).isEqualTo(Beløpsperiode(LocalDate.parse("2019-06-01"),
                                                           LocalDate.parse("2020-04-30"),
                                                           beregningsgrunnlagIAndrePerioden,
+                                                          beløpTilUtbetalningIAndraPerioden,
                                                           beløpTilUtbetalningIAndraPerioden))
 
     }

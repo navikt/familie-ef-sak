@@ -14,7 +14,7 @@ data class VedtakDto(val resultatType: ResultatType,
                      val periodeBegrunnelse: String,
                      val inntektBegrunnelse: String,
                      val perioder: List<VedtaksperiodeDto> = emptyList(),
-                     val inntekter: List<Inntektsperiode> = emptyList())
+                     val inntekter: List<Inntekt> = emptyList())
 
 data class VedtaksperiodeDto(
         val årMånedFra: YearMonth,
