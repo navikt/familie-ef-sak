@@ -108,8 +108,7 @@ private fun Oppgave.tilDto(): OppgaveEfDto {
                         ferdigstiltTidspunkt,
                         endretTidspunkt,
                         prioritet,
-                        status,
-                        behandlesAvApplikasjon == "familie-ef-sak-blankett"
+                        status
     )
 }
 
