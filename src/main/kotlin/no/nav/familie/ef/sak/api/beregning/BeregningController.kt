@@ -25,7 +25,9 @@ class BeregningController(private val stegService: StegService,
 
     @PostMapping
     fun beregnYtelserForRequest(@RequestBody beregningRequest: BeregningRequest): Ressurs<List<Beløpsperiode>> {
-        return Ressurs.success(beregningService.beregnYtelse(beregningRequest))
+        val vedtaksperioder = beregningRequest.vedtaksperioder.tilPerioder()
+        val inntektsperioder = beregningRequest.inntekt.tilInntektsperioder()
+        return Ressurs.success(beregningService.beregnYtelse(vedtaksperioder, inntektsperioder))
     }
 
     @PostMapping("/{behandlingId}/fullfor")
@@ -33,7 +35,9 @@ class BeregningController(private val stegService: StegService,
         tilgangService.validerTilgangTilBehandling(behandlingId)
         val behandling = behandlingService.hentBehandling(behandlingId)
         val aktivIdent = behandlingService.hentAktivIdent(behandling.fagsakId)
-        val beløpsperioder = beregningService.beregnYtelse(beregningRequest)
+        val vedtaksperioder = beregningRequest.vedtaksperioder.tilPerioder()
+        val inntektsperioder = beregningRequest.inntekt.tilInntektsperioder()
+        val beløpsperioder = beregningService.beregnYtelse(vedtaksperioder, inntektsperioder)
         val tilkjentYtelse = TilkjentYtelseDTO(
                 aktivIdent,
                 vedtaksdato = LocalDate.now(),

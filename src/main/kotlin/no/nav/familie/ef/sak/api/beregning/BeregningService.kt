@@ -12,56 +12,37 @@ import java.time.LocalDate
 @Service
 class BeregningService {
 
-    fun beregnYtelse(beregningRequest: BeregningRequest): List<Beløpsperiode> {
-        val vedtaksperioder = beregningRequest.vedtaksperiode
-        val vedtaksperiodeTilDato = beregningRequest.vedtaksperiode.maxOf { it.tildato }
+    fun beregnYtelse(vedtaksperioder:List<Periode>,  inntektsperioder: List<Inntektsperiode>): List<Beløpsperiode> {
 
-        val mapTilInntektMedPeriode: List<Inntektsperiode> = beregningRequest.inntektsperioder
-                .mapIndexed { index, inntektsperiode ->
-                    if (index < beregningRequest.inntektsperioder.lastIndex && beregningRequest.inntektsperioder.size > 1) {
-                        Inntektsperiode(inntekt = inntektsperiode.inntekt,
-                                        samordningsfradrag = inntektsperiode.samordningsfradrag,
-                                        startDato = inntektsperiode.startDato,
-                                        sluttDato = beregningRequest.inntektsperioder[index + 1].startDato.minusDays(
-                                               1))
-                    } else {
-                        Inntektsperiode(inntekt = inntektsperiode.inntekt,
-                                        samordningsfradrag = inntektsperiode.samordningsfradrag,
-                                        startDato = inntektsperiode.startDato,
-                                        sluttDato = vedtaksperiodeTilDato)
-
-                    }
-
-                }
-
-        validerInnteksperioder(mapTilInntektMedPeriode, vedtaksperioder)
-
+        validerInnteksperioder(inntektsperioder, vedtaksperioder)
         validerVedtaksperioder(vedtaksperioder)
 
 
-        val beløpForInnteksperioder = mapTilInntektMedPeriode.flatMap { beregnBeløpPeriode(it) }
+        val beløpForInnteksperioder = inntektsperioder.flatMap { beregnBeløpForInntekt(it) }
 
         return vedtaksperioder.flatMap {
-            finnGjeldeneBeløpsperiode(beløpForInnteksperioder, it.fradato, it.tildato)
+            finnStartDatoOgSluttDatoForBeløpsperiode(beløpForInnteksperioder, it.fradato, it.tildato)
         }
     }
 
 
-    private fun beregnBeløpPeriode(inntektsperiode: Inntektsperiode): List<Beløpsperiode> {
+    private fun beregnBeløpForInntekt(inntektsperiode: Inntektsperiode): List<Beløpsperiode> {
         val (startDato, sluttDato, inntekt, samordningsfradrag) = inntektsperiode
         return finnGrunnbeløpsPerioder(startDato, sluttDato).map {
-            val avkortning = avkortningPerMåned(it.beløp, inntekt)
+            val absInntekt = inntekt.abs()
+            val absSamordningsfradrag = samordningsfradrag.abs();
+            val avkortning = avkortningPerMåned(it.beløp, absInntekt)
             val fullOvergangsStønad =
                     it.beløp.multiply(BigDecimal(2.25))
 
-            val utbetaling = fullOvergangsStønad.subtract(avkortning).divide(BigDecimal(12)).subtract(samordningsfradrag)
+            val utbetaling = fullOvergangsStønad.subtract(avkortning).divide(BigDecimal(12)).subtract(absSamordningsfradrag)
                     .setScale(0, RoundingMode.HALF_UP)
 
             Beløpsperiode(fraOgMedDato = it.fraOgMedDato,
                           tilDato = it.tilDato,
                           beløp = utbetaling,
                           beregningsgrunnlag = Beregningsgrunnlag(samordningsfradrag = samordningsfradrag,
-                                                                  inntekt = inntekt,
+                                                                  inntekt = absInntekt,
                                                                   grunnbeløp = it.beløp))
         }
     }
@@ -73,9 +54,9 @@ class BeregningService {
     }
 
 
-    private fun finnGjeldeneBeløpsperiode(beløpForInnteksperioder: List<Beløpsperiode>,
-                                          vedtaksperiodeFraOgmedDato: LocalDate,
-                                          vedtaksperiodeTilDato: LocalDate): List<Beløpsperiode> {
+    private fun finnStartDatoOgSluttDatoForBeløpsperiode(beløpForInnteksperioder: List<Beløpsperiode>,
+                                                         vedtaksperiodeFraOgmedDato: LocalDate,
+                                                         vedtaksperiodeTilDato: LocalDate): List<Beløpsperiode> {
         return beløpForInnteksperioder.mapNotNull {
             if (it.fraOgMedDato.isEqualOrAfter(vedtaksperiodeFraOgmedDato) && it.tilDato.isEqualOrBefore(vedtaksperiodeTilDato)) {
                 it
