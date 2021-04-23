@@ -5,7 +5,6 @@ import no.nav.familie.ef.sak.util.Periode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.lang.IllegalArgumentException
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.LocalDate
@@ -24,9 +23,8 @@ internal class BeregningServiceTest {
                                                          inntekt = BigDecimal(0),
                                                          grunnbeløp = 101351.toBigDecimal())
         val fullYtelse = beregningService.beregnYtelse(BeregningRequest(
-                listOf(Inntektsperiode(LocalDate.parse("2019-04-30"),
-                                       LocalDate.parse("2022-04-30"),
-                                       BigDecimal(0), BigDecimal(0))), listOf(Periode(LocalDate.parse("2019-04-30"),
+                listOf(Inntekt(LocalDate.parse("2019-04-30"),
+                               BigDecimal(0), BigDecimal(0))), listOf(Periode(LocalDate.parse("2019-04-30"),
                                                                                       LocalDate.parse("2022-04-30")))
         ))
 
@@ -53,9 +51,8 @@ internal class BeregningServiceTest {
                                                          inntekt = inntekt,
                                                          grunnbeløp = grunnbeløp)
         val fullYtelse = beregningService.beregnYtelse(BeregningRequest(
-                listOf(Inntektsperiode(startDato = LocalDate.parse("2019-06-01"),
-                                       sluttDato = LocalDate.parse("2020-04-30"),
-                                       inntekt = inntekt, samordningsfradrag = BigDecimal(0))),
+                listOf(Inntekt(startDato = LocalDate.parse("2019-06-01"),
+                               inntekt = inntekt, samordningsfradrag = BigDecimal(0))),
                 listOf(Periode(LocalDate.parse("2019-06-01"),
                                LocalDate.parse("2020-04-30")))
         ))
@@ -101,14 +98,12 @@ internal class BeregningServiceTest {
 
 
         val fullYtelse = beregningService.beregnYtelse(BeregningRequest(
-                listOf(Inntektsperiode(startDato = LocalDate.parse("2019-01-01"),
-                                       sluttDato = LocalDate.parse("2019-02-28"),
-                                       inntekt = inntekt,
-                                       samordningsfradrag = BigDecimal(0)),
-                       Inntektsperiode(startDato = LocalDate.parse("2019-03-01"),
-                                       sluttDato = LocalDate.parse("2026-06-30"),
-                                       inntekt = BigDecimal(0),
-                                       samordningsfradrag = BigDecimal(0))
+                listOf(Inntekt(startDato = LocalDate.parse("2019-01-01"),
+                               inntekt = inntekt,
+                               samordningsfradrag = BigDecimal(0)),
+                       Inntekt(startDato = LocalDate.parse("2019-03-01"),
+                               inntekt = BigDecimal(0),
+                               samordningsfradrag = BigDecimal(0))
                 ),
                 listOf(Periode(LocalDate.parse("2019-01-01"),
                                LocalDate.parse("2019-02-28")),
@@ -134,10 +129,9 @@ internal class BeregningServiceTest {
 
         val vedtakperiode = Periode(LocalDate.parse("2019-01-01"),
                                     LocalDate.parse("2019-04-28"))
-        val inntektsperiode = Inntektsperiode(startDato = LocalDate.parse("2019-01-01"),
-                                              sluttDato = LocalDate.parse("2019-02-28"),
-                                              inntekt = inntekt,
-                                              samordningsfradrag = 0.toBigDecimal())
+        val inntektsperiode = Inntekt(startDato = LocalDate.parse("2019-05-01"),
+                                      inntekt = inntekt,
+                                      samordningsfradrag = 0.toBigDecimal())
 
         val request = BeregningRequest(inntektsperioder = listOf(inntektsperiode), vedtaksperiode = listOf(vedtakperiode))
 
@@ -150,14 +144,12 @@ internal class BeregningServiceTest {
 
         val vedtakperiode = Periode(LocalDate.parse("2019-01-01"),
                                     LocalDate.parse("2019-04-28"))
-        val inntektsperioder = listOf(Inntektsperiode(startDato = LocalDate.parse("2019-01-01"),
-                                                      sluttDato = LocalDate.parse("2019-02-28"),
-                                                      inntekt = inntekt,
-                                                      samordningsfradrag = 0.toBigDecimal()),
-                                      Inntektsperiode(startDato = LocalDate.parse("2019-01-01"),
-                                                      sluttDato = LocalDate.parse("2019-04-28"),
-                                                      inntekt = inntekt,
-                                                      samordningsfradrag = 0.toBigDecimal()))
+        val inntektsperioder = listOf(Inntekt(startDato = LocalDate.parse("2019-01-01"),
+                                              inntekt = inntekt,
+                                              samordningsfradrag = 0.toBigDecimal()),
+                                      Inntekt(startDato = LocalDate.parse("2019-01-01"),
+                                              inntekt = inntekt,
+                                              samordningsfradrag = 0.toBigDecimal()))
 
         val request = BeregningRequest(inntektsperioder = inntektsperioder, vedtaksperiode = listOf(vedtakperiode))
 
@@ -172,10 +164,9 @@ internal class BeregningServiceTest {
                                             LocalDate.parse("2019-04-28")),
                                     Periode(LocalDate.parse("2019-03-01"),
                                             LocalDate.parse("2019-06-28")))
-        val inntektsperioder = listOf(Inntektsperiode(startDato = LocalDate.parse("2019-01-01"),
-                                                      sluttDato = LocalDate.parse("2019-06-28"),
-                                                      inntekt = inntekt,
-                                                      samordningsfradrag = 0.toBigDecimal()))
+        val inntektsperioder = listOf(Inntekt(startDato = LocalDate.parse("2019-01-01"),
+                                              inntekt = inntekt,
+                                              samordningsfradrag = 0.toBigDecimal()))
 
         val request = BeregningRequest(inntektsperioder = inntektsperioder, vedtaksperiode = vedtakperioder)
 

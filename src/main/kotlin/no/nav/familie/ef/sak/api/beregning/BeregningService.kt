@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.api.beregning
 
 import no.nav.familie.ef.sak.api.feilHvis
+import no.nav.familie.ef.sak.util.Periode
 import no.nav.familie.ef.sak.util.isEqualOrAfter
 import no.nav.familie.ef.sak.util.isEqualOrBefore
 import org.springframework.stereotype.Service
@@ -12,13 +13,33 @@ import java.time.LocalDate
 class BeregningService {
 
     fun beregnYtelse(beregningRequest: BeregningRequest): List<Beløpsperiode> {
-
-        validerInnteksperioder(beregningRequest)
-
-        validerVedtaksperioder(beregningRequest)
-
         val vedtaksperioder = beregningRequest.vedtaksperiode
-        val beløpForInnteksperioder = beregningRequest.inntektsperioder.map { beregnBeløpPeriode(it) }.flatten()
+        val vedtaksperiodeTilDato = beregningRequest.vedtaksperiode.maxOf { it.tildato }
+
+        val mapTilInntektMedPeriode: List<Inntektsperiode> = beregningRequest.inntektsperioder
+                .mapIndexed { index, inntektsperiode ->
+                    if (index < beregningRequest.inntektsperioder.lastIndex && beregningRequest.inntektsperioder.size > 1) {
+                        Inntektsperiode(inntekt = inntektsperiode.inntekt,
+                                        samordningsfradrag = inntektsperiode.samordningsfradrag,
+                                        startDato = inntektsperiode.startDato,
+                                        sluttDato = beregningRequest.inntektsperioder[index + 1].startDato.minusDays(
+                                               1))
+                    } else {
+                        Inntektsperiode(inntekt = inntektsperiode.inntekt,
+                                        samordningsfradrag = inntektsperiode.samordningsfradrag,
+                                        startDato = inntektsperiode.startDato,
+                                        sluttDato = vedtaksperiodeTilDato)
+
+                    }
+
+                }
+
+        validerInnteksperioder(mapTilInntektMedPeriode, vedtaksperioder)
+
+        validerVedtaksperioder(vedtaksperioder)
+
+
+        val beløpForInnteksperioder = mapTilInntektMedPeriode.flatMap { beregnBeløpPeriode(it) }
 
         return vedtaksperioder.flatMap {
             finnGjeldeneBeløpsperiode(beløpForInnteksperioder, it.fradato, it.tildato)
@@ -65,7 +86,7 @@ class BeregningService {
                             vedtaksperiodeTilDato)) {
                 it.copy(tilDato = vedtaksperiodeTilDato)
             } else if (it.starterFørOgSlutterEtterVedtaksperiode(vedtaksperiodeFraOgmedDato,
-                                                                              vedtaksperiodeTilDato)) {
+                                                                 vedtaksperiodeTilDato)) {
                 it.copy(tilDato = vedtaksperiodeTilDato, fraOgMedDato = vedtaksperiodeFraOgmedDato)
             } else {
                 null
@@ -74,41 +95,41 @@ class BeregningService {
     }
 
 
-    private fun validerVedtaksperioder(beregningRequest: BeregningRequest) {
-        val sorterteVedtaksperioder = beregningRequest.vedtaksperiode.sortedBy { it.fradato }
+    private fun validerVedtaksperioder(vedtaksperiode: List<Periode>) {
+        val sorterteVedtaksperioder = vedtaksperiode.sortedBy { it.fradato }
 
         sorterteVedtaksperioder.forEachIndexed { index, periode ->
             if (sorterteVedtaksperioder.size > 1 && index < sorterteVedtaksperioder.lastIndex) {
                 feilHvis(periode.tildato.isEqualOrAfter(sorterteVedtaksperioder[index + 1].fradato)) {
-                    "Vedtaksperioder ${beregningRequest.vedtaksperiode} overlapper"
+                    "Vedtaksperioder ${vedtaksperiode} overlapper"
                 }
             }
         }
     }
 
-    private fun validerInnteksperioder(beregningRequest: BeregningRequest) {
-        feilHvis(beregningRequest.inntektsperioder.isEmpty()) {
+    private fun validerInnteksperioder(inntektsperioder: List<Inntektsperiode>, vedtaksperiode: List<Periode>) {
+        feilHvis(inntektsperioder.isEmpty()) {
             "Inntektsperioder kan ikke være tom liste"
         }
 
-        val sorterteIntekter = beregningRequest.inntektsperioder.sortedBy { it.startDato }
-        val sorterteVedtaksperioder = beregningRequest.vedtaksperiode.sortedBy { it.fradato }
+        val sorterteIntekter = inntektsperioder.sortedBy { it.startDato }
+        val sorterteVedtaksperioder = vedtaksperiode.sortedBy { it.fradato }
 
 
         sorterteIntekter.forEachIndexed { index, inntektsperiode ->
             if (index === 0) {
                 feilHvis(!inntektsperiode.startDato.isEqualOrBefore(sorterteVedtaksperioder.first().fradato)) {
-                    "Inntektsperioder ${beregningRequest.inntektsperioder} begynner etter vedtaksperioder ${beregningRequest.vedtaksperiode}"
+                    "Inntektsperioder ${inntektsperioder} begynner etter vedtaksperioder ${vedtaksperiode}"
                 }
             }
             if (index === sorterteIntekter.lastIndex) {
                 feilHvis(!inntektsperiode.sluttDato.isEqualOrAfter(sorterteVedtaksperioder.last().tildato)) {
-                    "Inntektsperioder ${beregningRequest.inntektsperioder} slutter før vedtaksperioder ${beregningRequest.vedtaksperiode} "
+                    "Inntektsperioder ${inntektsperioder} slutter før vedtaksperioder ${vedtaksperiode} "
                 }
             }
             if (sorterteIntekter.size > 1 && index < sorterteIntekter.lastIndex) {
-                feilHvis(!inntektsperiode.sluttDato.isEqual(sorterteIntekter[index + 1].startDato.minusDays(1))) {
-                    "Inntektsperioder ${beregningRequest.inntektsperioder} overlapper eller er ikke sammenhengde for vedtaksperioder ${beregningRequest.vedtaksperiode}"
+                feilHvis(inntektsperiode.startDato.isEqual(sorterteIntekter[index + 1].startDato)) {
+                    "Inntektsperioder ${inntektsperioder} overlapper eller er ikke sammenhengde for vedtaksperioder ${vedtaksperiode}"
                 }
             }
         }
