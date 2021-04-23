@@ -159,6 +159,25 @@ internal class BeregningServiceTest {
 
     }
 
+
+    @Test
+    internal fun `skal beregne periodebeløp til 0 når det foreligger inntekt større enn 5,5G `() {
+        val grunnbeløp2017 = 101351.toBigDecimal()
+        val inntekt = grunnbeløp2017.multiply(BigDecimal(5.51))
+
+        val vedtakperioder = listOf(Periode(LocalDate.parse("2020-05-01"),
+                                            LocalDate.parse("2023-04-30")))
+
+        val inntektsperioder = listOf(Inntektsperiode(startDato = LocalDate.parse("2019-01-01"),
+                                                      sluttDato = LocalDate.parse("2024-04-30"),
+                                                      inntekt = inntekt,
+                                                      samordningsfradrag = BigDecimal.ZERO))
+
+
+        val ytelseTilUtbetalning = beregningService.beregnYtelse(inntektsperioder = inntektsperioder, vedtaksperioder = vedtakperioder)
+        assertThat(ytelseTilUtbetalning[0].beløp).isEqualTo(BigDecimal.ZERO)
+    }
+
     @Test
     internal fun `skal feile hvis inntektsperioder ikke dekker vedtaksperioder`() {
         val inntekt = BigDecimal(240_000)

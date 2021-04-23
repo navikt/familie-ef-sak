@@ -41,9 +41,11 @@ class BeregningService {
             val utbetaling = beløpFørSamordning.subtract(samordningsfradrag).setScale(0, RoundingMode.HALF_UP)
 
 
+            val beløpTilUtbetalning = if(utbetaling <= BigDecimal.ZERO) BigDecimal.ZERO else utbetaling
+
             Beløpsperiode(fraOgMedDato = it.fraOgMedDato,
                           tilDato = it.tilDato,
-                          beløp = utbetaling,
+                          beløp = beløpTilUtbetalning,
                           beregningsgrunnlag = Beregningsgrunnlag(samordningsfradrag = samordningsfradrag,
                                                                   avkortningPerMåned = avkortningPerMåned,
                                                                   fullOvergangsStønadPerMåned = fullOvergangsStønadPerMåned,

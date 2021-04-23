@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.api.beregning
 
+import no.nav.familie.ef.sak.util.isEqualOrAfter
 import no.nav.familie.ef.sak.util.isEqualOrBefore
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -12,7 +13,7 @@ data class Beløpsperiode(val fraOgMedDato: LocalDate,
     fun starterEtterVedtaksperiodeOgOverlapper(
             vedtaksperiodeFraOgmedDato: LocalDate,
             vedtaksperiodeTilDato: LocalDate) =
-            this.fraOgMedDato.isAfter(vedtaksperiodeFraOgmedDato) && this.fraOgMedDato.isBefore(
+            this.fraOgMedDato.isEqualOrAfter(vedtaksperiodeFraOgmedDato) && this.fraOgMedDato.isBefore(
                     vedtaksperiodeTilDato)
 
     fun starterFørVedtaksperiodeOgOverlapper(
