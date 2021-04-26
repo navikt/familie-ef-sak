@@ -12,6 +12,8 @@ import java.time.LocalDate
 @Service
 class BeregningService {
 
+    private val REDUKSJONSFAKTOR = BigDecimal(0.45)
+
     fun beregnYtelse(vedtaksperioder: List<Periode>, inntektsperioder: List<Inntektsperiode>): List<Beløpsperiode> {
 
         validerInnteksperioder(inntektsperioder, vedtaksperioder)
@@ -41,7 +43,7 @@ class BeregningService {
             val utbetaling = beløpFørSamordning.subtract(samordningsfradrag).setScale(0, RoundingMode.HALF_UP)
 
 
-            val beløpTilUtbetalning = if(utbetaling <= BigDecimal.ZERO) BigDecimal.ZERO else utbetaling
+            val beløpTilUtbetalning = if (utbetaling <= BigDecimal.ZERO) BigDecimal.ZERO else utbetaling
 
             Beløpsperiode(fraOgMedDato = it.fraOgMedDato,
                           tilDato = it.tilDato,
@@ -55,10 +57,11 @@ class BeregningService {
         }
     }
 
+
     private fun beregnAvkortning(grunnbeløp: BigDecimal, inntekt: BigDecimal): BigDecimal {
         val inntektOverHalveGrunnbeløp = inntekt.subtract(grunnbeløp.multiply(BigDecimal(0.5)))
-        return if (inntektOverHalveGrunnbeløp > BigDecimal(0))
-            inntektOverHalveGrunnbeløp.multiply(BigDecimal(0.45)).setScale(5, RoundingMode.HALF_DOWN) else BigDecimal(0)
+        return if (inntektOverHalveGrunnbeløp > BigDecimal.ZERO)
+            inntektOverHalveGrunnbeløp.multiply(REDUKSJONSFAKTOR).setScale(5, RoundingMode.HALF_DOWN) else BigDecimal.ZERO
     }
 
 
@@ -84,51 +87,33 @@ class BeregningService {
     }
 
 
-    private fun validerVedtaksperioder(vedtaksperiode: List<Periode>) {
-        val sorterteVedtaksperioder = vedtaksperiode.sortedBy { it.fradato }
-
-        sorterteVedtaksperioder.forEachIndexed { index, periode ->
-            if (sorterteVedtaksperioder.size > 1 && index < sorterteVedtaksperioder.lastIndex) {
-                feilHvis(periode.tildato.isEqualOrAfter(sorterteVedtaksperioder[index + 1].fradato)) {
-                    "Vedtaksperioder ${vedtaksperiode} overlapper"
-                }
-            }
-        }
+    private fun validerVedtaksperioder(vedtaksperioder: List<Periode>) {
+        feilHvis(vedtaksperioder.zipWithNext { a, b -> a.tildato.isEqualOrAfter(b.fradato) }
+                         .any { it }) { "Vedtaksperioder ${vedtaksperioder} overlapper" }
     }
 
-    private fun validerInnteksperioder(inntektsperioder: List<Inntektsperiode>, vedtaksperiode: List<Periode>) {
+    private fun validerInnteksperioder(inntektsperioder: List<Inntektsperiode>, vedtaksperioder: List<Periode>) {
         feilHvis(inntektsperioder.isEmpty()) {
             "Inntektsperioder kan ikke være tom liste"
         }
 
-        val sorterteIntekter = inntektsperioder.sortedBy { it.startDato }
-        val sorterteVedtaksperioder = vedtaksperiode.sortedBy { it.fradato }
+        feilHvis(inntektsperioder.zipWithNext { a, b -> a.startDato.isBefore(b.startDato) && a.sluttDato.isBefore(b.sluttDato) }
+                         .any { !it }) { "Inntektsperioder må være sortert" }
+        feilHvis(vedtaksperioder.zipWithNext { a, b -> a.fradato.isBefore(b.fradato) && a.tildato.isBefore(b.tildato) }
+                         .any { !it }) { "Vedtaksperioder må være sortert" }
 
-
-        sorterteIntekter.forEachIndexed { index, inntektsperiode ->
-            if (index === 0) {
-                feilHvis(!inntektsperiode.startDato.isEqualOrBefore(sorterteVedtaksperioder.first().fradato)) {
-                    "Inntektsperioder ${inntektsperioder} begynner etter vedtaksperioder ${vedtaksperiode}"
-                }
-            }
-            if (index === sorterteIntekter.lastIndex) {
-                feilHvis(!inntektsperiode.sluttDato.isEqualOrAfter(sorterteVedtaksperioder.last().tildato)) {
-                    "Inntektsperioder ${inntektsperioder} slutter før vedtaksperioder ${vedtaksperiode} "
-                }
-            }
-            if (sorterteIntekter.size > 1 && index < sorterteIntekter.lastIndex) {
-                feilHvis(inntektsperiode.startDato.isEqual(sorterteIntekter[index + 1].startDato)) {
-                    "Inntektsperioder ${inntektsperioder} overlapper eller er ikke sammenhengde for vedtaksperioder ${vedtaksperiode}"
-                }
-            }
-
-            feilHvis(inntektsperiode.inntekt < BigDecimal.ZERO) {
-                "Inntekten kan ikke vara mindre en null:  ${inntektsperiode.inntekt}"
-            }
-
-            feilHvis(inntektsperiode.samordningsfradrag < BigDecimal.ZERO) {
-                "Samordningsfradraget kan ikke vara mindre en null: ${inntektsperiode.samordningsfradrag}"
-            }
+        feilHvis(!inntektsperioder.first().startDato.isEqualOrBefore(vedtaksperioder.first().fradato)) {
+            "Inntektsperioder $inntektsperioder begynner etter vedtaksperioder $vedtaksperioder"
         }
+
+        feilHvis(!inntektsperioder.last().sluttDato.isEqualOrAfter(vedtaksperioder.last().tildato)) {
+            "Inntektsperioder $inntektsperioder slutter før vedtaksperioder $vedtaksperioder "
+        }
+
+        feilHvis(inntektsperioder.any { it.inntekt < BigDecimal.ZERO }) { "Inntekten kan ikke være negativt" }
+        feilHvis(inntektsperioder.any { it.samordningsfradrag < BigDecimal.ZERO }) { "Samordningsfradraget kan ikke være negativt" }
+
+        feilHvis(inntektsperioder.zipWithNext { a, b -> a.sluttDato.isEqual(b.startDato.minusDays(1)) }
+                         .any { !it }) { "Inntektsperioder ${inntektsperioder} overlapper eller er ikke sammenhengde" }
     }
 }
