@@ -3,7 +3,6 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.api.beregning.Inntektsperiode
 import no.nav.familie.ef.sak.api.beregning.ResultatType
-import no.nav.familie.ef.sak.api.dto.BrevRequest
 import no.nav.familie.ef.sak.repository.*
 import no.nav.familie.ef.sak.repository.domain.*
 import org.assertj.core.api.Assertions.assertThat
@@ -11,7 +10,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.util.*
 
 internal class VedtakRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -28,8 +26,14 @@ internal class VedtakRepositoryTest : OppslagSpringRunnerTest() {
                             resultatType = ResultatType.INNVILGE,
                             periodeBegrunnelse = "begrunnelse for periode",
                             inntektBegrunnelse = "begrunnelse for inntekt",
-                            perioder = PeriodeWrapper(listOf(Vedtaksperiode(LocalDate.now(), LocalDate.now(), "aktivitet", "periodeType"))),
-                            inntekter = InntektWrapper(listOf(Inntektsperiode(LocalDate.now(), LocalDate.now(), inntekt = BigDecimal(100)))))
+                            perioder = PeriodeWrapper(listOf(Vedtaksperiode(LocalDate.now(),
+                                                                            LocalDate.now(),
+                                                                            "aktivitet",
+                                                                            "periodeType"))),
+                            inntekter = InntektWrapper(listOf(Inntektsperiode(LocalDate.now(),
+                                                                              LocalDate.now(),
+                                                                              inntekt = BigDecimal(100),
+                                                                              samordningsfradrag = BigDecimal(0)))))
 
         vedtakRepository.insert(vedtak)
 

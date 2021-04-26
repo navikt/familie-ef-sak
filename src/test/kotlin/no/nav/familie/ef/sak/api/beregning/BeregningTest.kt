@@ -4,6 +4,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.TestFactory
+import java.math.BigDecimal
 import java.time.LocalDate
 
 internal class BeregningTest {
@@ -37,6 +38,8 @@ internal class BeregningTest {
                                 .isEqualTo(fasit.map {
                                     Beløpsperiode(LocalDate.parse(it.first),
                                                   LocalDate.parse(it.second),
+                                                null,
+                                                  it.third.toBigDecimal(),
                                                   it.third.toBigDecimal())
                                 })
                     }

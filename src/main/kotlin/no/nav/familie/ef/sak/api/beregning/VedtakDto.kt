@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.api.beregning
 
 import no.nav.familie.ef.sak.repository.domain.Vedtaksperiode
+import no.nav.familie.ef.sak.util.Periode
 import java.time.YearMonth
 
 enum class ResultatType {
@@ -13,7 +14,7 @@ data class VedtakDto(val resultatType: ResultatType,
                      val periodeBegrunnelse: String,
                      val inntektBegrunnelse: String,
                      val perioder: List<VedtaksperiodeDto> = emptyList(),
-                     val inntekter: List<Inntektsperiode> = emptyList())
+                     val inntekter: List<Inntekt> = emptyList())
 
 data class VedtaksperiodeDto(
         val årMånedFra: YearMonth,
@@ -40,5 +41,13 @@ fun List<VedtaksperiodeDto>.tilDomene(): List<Vedtaksperiode> =
                     datoTil = it.årMånedTil.atEndOfMonth(),
                     aktivitet = it.aktivitet,
                     periodeType = it.periodeType,
+            )
+        }
+
+fun List<VedtaksperiodeDto>.tilPerioder(): List<Periode> =
+        this.map {
+            Periode(
+                    fradato = it.årMånedFra.atDay(1),
+                    tildato = it.årMånedTil.atEndOfMonth(),
             )
         }

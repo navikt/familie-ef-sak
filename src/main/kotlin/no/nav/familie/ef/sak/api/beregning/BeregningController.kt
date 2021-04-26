@@ -3,7 +3,6 @@ package no.nav.familie.ef.sak.api.beregning
 import no.nav.familie.ef.sak.api.dto.AndelTilkjentYtelseDTO
 import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
 import no.nav.familie.ef.sak.service.BehandlingService
-import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.TilgangService
 import no.nav.familie.ef.sak.service.steg.StegService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -24,25 +23,18 @@ class BeregningController(private val stegService: StegService,
                           private val beregningService: BeregningService,
                           private val tilgangService: TilgangService) {
 
+    @PostMapping
+    fun beregnYtelserForRequest(@RequestBody beregningRequest: BeregningRequest): Ressurs<List<Beløpsperiode>> {
+        val vedtaksperioder = beregningRequest.vedtaksperioder.tilPerioder()
+        val inntektsperioder = beregningRequest.inntekt.tilInntektsperioder()
+        return Ressurs.success(beregningService.beregnYtelse(vedtaksperioder, inntektsperioder))
+    }
+
     @PostMapping("/{behandlingId}/fullfor")
-    fun beregnYtelseForStønad(@PathVariable behandlingId: UUID, @RequestBody beregningRequest: BeregningRequest): Ressurs<UUID> {
+    fun beregnYtelseForStønad(@PathVariable behandlingId: UUID, @RequestBody vedtak: VedtakDto): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         val behandling = behandlingService.hentBehandling(behandlingId)
-        val aktivIdent = behandlingService.hentAktivIdent(behandling.fagsakId)
-        val beløpsperioder = beregningService.beregnFullYtelse(beregningRequest) // TODO: Tar ikke høyde for inntekt
-        val tilkjentYtelse = TilkjentYtelseDTO(
-                aktivIdent,
-                vedtaksdato = LocalDate.now(),
-                behandlingId = behandlingId,
-                andelerTilkjentYtelse = beløpsperioder.map {
-                    AndelTilkjentYtelseDTO(beløp = it.beløp.toInt(),
-                                           stønadFom = it.fraOgMedDato,
-                                           stønadTom = it.tilDato,
-                                           kildeBehandlingId = behandlingId,
-                                           personIdent = aktivIdent)
-                }
-        )
-        return Ressurs.success(stegService.håndterBeregnYtelseForStønad(behandling, tilkjentYtelse).id)
+        return Ressurs.success(stegService.håndterBeregnYtelseForStønad(behandling, vedtak).id)
     }
 
     @PostMapping("/{behandlingId}/lagre-vedtak")

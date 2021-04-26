@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.integration.dto.pdl.PdlPerson
 import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
 import no.nav.familie.ef.sak.nare.evaluations.Evaluering
 import no.nav.familie.ef.sak.nare.specifications.Regel
+import no.nav.familie.ef.sak.util.Periode
 import no.nav.familie.ef.sak.vurdering.antallÅrOpphold
 import no.nav.familie.ef.sak.vurdering.landkoderEøs
 import no.nav.familie.ef.sak.vurdering.landkoderNorden

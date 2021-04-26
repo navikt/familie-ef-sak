@@ -2,9 +2,9 @@ package no.nav.familie.ef.sak.vurdering.medlemskap
 
 import no.nav.familie.ef.sak.integration.dto.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlPerson
+import no.nav.familie.ef.sak.util.Periode
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import java.time.LocalDate
-import java.time.Period
 
 class Medlemskapshistorikk(pdlPerson: PdlPerson, medlemskapsinfo: Medlemskapsinfo) {
 
@@ -150,19 +150,3 @@ class Medlemskapshistorikk(pdlPerson: PdlPerson, medlemskapsinfo: Medlemskapsinf
 
 }
 
-data class Periode(val fradato: LocalDate, val tildato: LocalDate, val gyldig: Boolean?) {
-
-    fun inneholder(date: LocalDate): Boolean {
-        return (!date.isBefore(fradato) && !date.isAfter(tildato))
-    }
-
-    fun inneholder(periode: Periode): Boolean {
-        return (periode.fradato.isAfter(this.fradato) && periode.tildato.isBefore(this.tildato))
-    }
-
-    fun omsluttesAv(periode: Periode): Boolean {
-        return (!periode.fradato.isAfter(this.fradato) && !periode.tildato.isBefore(this.tildato))
-    }
-
-    val lengde: Period = Period.between(fradato, tildato)
-}

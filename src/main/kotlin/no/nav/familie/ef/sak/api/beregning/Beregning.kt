@@ -1,11 +1,38 @@
 package no.nav.familie.ef.sak.api.beregning
 
+import no.nav.familie.ef.sak.util.isEqualOrAfter
+import no.nav.familie.ef.sak.util.isEqualOrBefore
 import java.math.BigDecimal
 import java.time.LocalDate
 
 data class Beløpsperiode(val fraOgMedDato: LocalDate,
                          val tilDato: LocalDate,
-                         val beløp: BigDecimal)
+                         val beregningsgrunnlag: Beregningsgrunnlag? = null,
+                         val beløp: BigDecimal,
+                         val beløpFørSamordning: BigDecimal) {
+
+    fun starterEtterVedtaksperiodeOgOverlapper(
+            vedtaksperiodeFraOgmedDato: LocalDate,
+            vedtaksperiodeTilDato: LocalDate) =
+            this.fraOgMedDato.isEqualOrAfter(vedtaksperiodeFraOgmedDato) && this.fraOgMedDato.isBefore(
+                    vedtaksperiodeTilDato)
+
+    fun starterFørVedtaksperiodeOgOverlapper(
+            vedtaksperiodeFraOgmedDato: LocalDate,
+            vedtaksperiodeTilDato: LocalDate) =
+            this.tilDato.isEqualOrBefore(vedtaksperiodeTilDato) && this.tilDato.isAfter(vedtaksperiodeFraOgmedDato)
+
+    fun starterFørOgSlutterEtterVedtaksperiode(
+          vedtaksperiodeFraOgmedDato: LocalDate,
+          vedtaksperiodeTilDato: LocalDate) =
+            this.fraOgMedDato.isBefore(vedtaksperiodeFraOgmedDato) && this.tilDato.isAfter(vedtaksperiodeTilDato)
+}
+
+data class Beregningsgrunnlag(val inntekt: BigDecimal,
+                              val samordningsfradrag: BigDecimal,
+                              val avkortningPerMåned: BigDecimal,
+                              val fullOvergangsStønadPerMåned: BigDecimal,
+                              val grunnbeløp: BigDecimal)
 
 data class Grunnbeløp(val fraOgMedDato: LocalDate,
                       val tilDato: LocalDate,
@@ -16,14 +43,15 @@ data class Grunnbeløp(val fraOgMedDato: LocalDate,
 fun finnGrunnbeløpsPerioder(fraOgMedDato: LocalDate, tilDato: LocalDate): List<Beløpsperiode> {
     return grunnbeløpsperioder
             .filter { overlapper(it, fraOgMedDato, tilDato) }
-            .map { Beløpsperiode(maxOf(it.fraOgMedDato, fraOgMedDato), minOf(it.tilDato, tilDato), it.grunnbeløp) }
+            .map { Beløpsperiode(maxOf(it.fraOgMedDato, fraOgMedDato), minOf(it.tilDato, tilDato), beløp = it.grunnbeløp, beløpFørSamordning = it.grunnbeløp) }
             .sortedBy { it.fraOgMedDato }
 }
 
 private fun overlapper(grunnbeløpsperiode: Grunnbeløp,
                        fraOgMedDato: LocalDate,
                        tilDato: LocalDate) =
-        grunnbeløpsperiode.fraOgMedDato in fraOgMedDato..tilDato || fraOgMedDato in grunnbeløpsperiode.fraOgMedDato..grunnbeløpsperiode.tilDato.minusDays(1)
+        grunnbeløpsperiode.fraOgMedDato in fraOgMedDato..tilDato || fraOgMedDato in grunnbeløpsperiode.fraOgMedDato..grunnbeløpsperiode.tilDato.minusDays(
+                1)
 
 // TODO: Kopiert inn fra https://github.com/navikt/g - kan kanskje kalle tjenesten på sikt hvis den er tenkt å være oppdatert?
 val grunnbeløpsperioder: List<Grunnbeløp> =
