@@ -51,9 +51,9 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
     }
 
     @Transactional
-    fun håndterBeregnYtelseForStønad(behandling: Behandling, tilkjentYtelse: TilkjentYtelseDTO): Behandling {
+    fun håndterBeregnYtelseForStønad(behandling: Behandling, vedtak: VedtakDto): Behandling {
         val behandlingSteg: BeregnYtelseSteg = hentBehandlingSteg(BEREGNE_YTELSE)
-        return håndterSteg(behandling, behandlingSteg, tilkjentYtelse)
+        return håndterSteg(behandling, behandlingSteg, vedtak)
     }
 
     @Transactional

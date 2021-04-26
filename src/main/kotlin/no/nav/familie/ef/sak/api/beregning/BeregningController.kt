@@ -31,26 +31,10 @@ class BeregningController(private val stegService: StegService,
     }
 
     @PostMapping("/{behandlingId}/fullfor")
-    fun beregnYtelseForStønad(@PathVariable behandlingId: UUID, @RequestBody beregningRequest: BeregningRequest): Ressurs<UUID> {
+    fun beregnYtelseForStønad(@PathVariable behandlingId: UUID, @RequestBody vedtak: VedtakDto): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         val behandling = behandlingService.hentBehandling(behandlingId)
-        val aktivIdent = behandlingService.hentAktivIdent(behandling.fagsakId)
-        val vedtaksperioder = beregningRequest.vedtaksperioder.tilPerioder()
-        val inntektsperioder = beregningRequest.inntekt.tilInntektsperioder()
-        val beløpsperioder = beregningService.beregnYtelse(vedtaksperioder, inntektsperioder)
-        val tilkjentYtelse = TilkjentYtelseDTO(
-                aktivIdent,
-                vedtaksdato = LocalDate.now(),
-                behandlingId = behandlingId,
-                andelerTilkjentYtelse = beløpsperioder.map {
-                    AndelTilkjentYtelseDTO(beløp = it.beløp.toInt(),
-                                           stønadFom = it.fraOgMedDato,
-                                           stønadTom = it.tilDato,
-                                           kildeBehandlingId = behandlingId,
-                                           personIdent = aktivIdent)
-                }
-        )
-        return Ressurs.success(stegService.håndterBeregnYtelseForStønad(behandling, tilkjentYtelse).id)
+        return Ressurs.success(stegService.håndterBeregnYtelseForStønad(behandling, vedtak).id)
     }
 
     @PostMapping("/{behandlingId}/lagre-vedtak")
