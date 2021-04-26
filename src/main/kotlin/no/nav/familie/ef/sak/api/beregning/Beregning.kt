@@ -1,32 +1,13 @@
 package no.nav.familie.ef.sak.api.beregning
 
-import no.nav.familie.ef.sak.util.isEqualOrAfter
-import no.nav.familie.ef.sak.util.isEqualOrBefore
+import no.nav.familie.ef.sak.util.Periode
 import java.math.BigDecimal
 import java.time.LocalDate
 
-data class Beløpsperiode(val fraOgMedDato: LocalDate,
-                         val tilDato: LocalDate,
+data class Beløpsperiode(val periode: Periode,
                          val beregningsgrunnlag: Beregningsgrunnlag? = null,
                          val beløp: BigDecimal,
-                         val beløpFørSamordning: BigDecimal) {
-
-    fun starterEtterVedtaksperiodeOgOverlapper(
-            vedtaksperiodeFraOgmedDato: LocalDate,
-            vedtaksperiodeTilDato: LocalDate) =
-            this.fraOgMedDato.isEqualOrAfter(vedtaksperiodeFraOgmedDato) && this.fraOgMedDato.isBefore(
-                    vedtaksperiodeTilDato)
-
-    fun starterFørVedtaksperiodeOgOverlapper(
-            vedtaksperiodeFraOgmedDato: LocalDate,
-            vedtaksperiodeTilDato: LocalDate) =
-            this.tilDato.isEqualOrBefore(vedtaksperiodeTilDato) && this.tilDato.isAfter(vedtaksperiodeFraOgmedDato)
-
-    fun starterFørOgSlutterEtterVedtaksperiode(
-          vedtaksperiodeFraOgmedDato: LocalDate,
-          vedtaksperiodeTilDato: LocalDate) =
-            this.fraOgMedDato.isBefore(vedtaksperiodeFraOgmedDato) && this.tilDato.isAfter(vedtaksperiodeTilDato)
-}
+                         val beløpFørSamordning: BigDecimal)
 
 data class Beregningsgrunnlag(val inntekt: BigDecimal,
                               val samordningsfradrag: BigDecimal,
@@ -43,8 +24,8 @@ data class Grunnbeløp(val fraOgMedDato: LocalDate,
 fun finnGrunnbeløpsPerioder(fraOgMedDato: LocalDate, tilDato: LocalDate): List<Beløpsperiode> {
     return grunnbeløpsperioder
             .filter { overlapper(it, fraOgMedDato, tilDato) }
-            .map { Beløpsperiode(maxOf(it.fraOgMedDato, fraOgMedDato), minOf(it.tilDato, tilDato), beløp = it.grunnbeløp, beløpFørSamordning = it.grunnbeløp) }
-            .sortedBy { it.fraOgMedDato }
+            .map { Beløpsperiode(periode = Periode(fradato = maxOf(it.fraOgMedDato, fraOgMedDato), tildato = minOf(it.tilDato, tilDato)), beløp = it.grunnbeløp, beløpFørSamordning = it.grunnbeløp) }
+            .sortedBy { it.periode.fradato }
 }
 
 private fun overlapper(grunnbeløpsperiode: Grunnbeløp,

@@ -37,8 +37,8 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                 behandlingId = behandling.id,
                 andelerTilkjentYtelse = beløpsperioder.map {
                     AndelTilkjentYtelseDTO(beløp = it.beløp.toInt(),
-                                           stønadFom = it.fraOgMedDato,
-                                           stønadTom = it.tilDato,
+                                           stønadFom = it.periode.fradato,
+                                           stønadTom = it.periode.tildato,
                                            kildeBehandlingId = behandling.id,
                                            personIdent = aktivIdent)
                 }

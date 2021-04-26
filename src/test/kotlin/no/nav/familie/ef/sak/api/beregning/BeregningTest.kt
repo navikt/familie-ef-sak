@@ -1,10 +1,10 @@
 package no.nav.familie.ef.sak.api.beregning
 
+import no.nav.familie.ef.sak.util.Periode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.TestFactory
-import java.math.BigDecimal
 import java.time.LocalDate
 
 internal class BeregningTest {
@@ -36,9 +36,9 @@ internal class BeregningTest {
                         assertThat(finnGrunnbeløpsPerioder(LocalDate.parse(periode.first),
                                                                       LocalDate.parse(periode.second)))
                                 .isEqualTo(fasit.map {
-                                    Beløpsperiode(LocalDate.parse(it.first),
-                                                  LocalDate.parse(it.second),
-                                                null,
+                                    Beløpsperiode(Periode(LocalDate.parse(it.first),
+                                                          LocalDate.parse(it.second)),
+                                                  null,
                                                   it.third.toBigDecimal(),
                                                   it.third.toBigDecimal())
                                 })
