@@ -67,7 +67,7 @@ internal class AdresseMapperTest {
 
         assertThat(mapper.tilAdresse(oppholdsadresse.copy(utenlandskAdresse = utenlandskAdresse())).visningsadresse)
                 .withFailMessage("Skal skrive ut utenlandskAdresse når vegadresse er null")
-                .isEqualTo("a 1, 001 bysted, region, Norge")
+                .isEqualTo("Vei 1, 19800 Svenskt sted, region, Sverige")
     }
 
     @Test
@@ -75,7 +75,7 @@ internal class AdresseMapperTest {
         val kontaktadresse = kontaktadresse(KontaktadresseType.UTLAND)
 
         assertThat(mapper.tilAdresse(kontaktadresse.copy(utenlandskAdresse = utenlandskAdresse())).visningsadresse)
-                .isEqualTo("a 1, 001 bysted, region, Norge")
+                .isEqualTo("Vei 1, 19800 Svenskt sted, region, Sverige")
 
         assertThat(mapper.tilAdresse(kontaktadresse.copy(coAdressenavn = "co")).visningsadresse)
                 .withFailMessage("Skal skrive ut co adressen")
