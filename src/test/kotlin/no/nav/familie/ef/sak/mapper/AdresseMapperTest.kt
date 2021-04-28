@@ -23,20 +23,27 @@ internal class AdresseMapperTest {
                                folkeregistermetadata = Folkeregistermetadata(gyldighetstidspunkt = LocalDateTime.now(),
                                                                              opphørstidspunkt = startdato.plusDays(1)
                                                                                      .atStartOfDay()),
-                               utenlandskAdresse(),
+                               utenlandskAdresse = utenlandskAdresse(),
                                vegadresse = vegadresse(),
                                ukjentBosted = UkjentBosted(bostedskommune = "ukjentBostedKommune"),
-                               null,
+                               matrikkeladresse = Matrikkeladresse(null, "bruksenhet", "tilleggsnavn", ""),
                                metadata = metadataGjeldende
                 )
         assertThat(mapper.tilAdresse(bostedsadresse).visningsadresse)
-                .isEqualTo("Charlies vei 13 b, 0575 Oslo")
+                .isEqualTo("Charlies vei 13 b, tilleggsnavn, 0575 Oslo")
 
         assertThat(mapper.tilAdresse(bostedsadresse.copy(coAdressenavn = "co")).visningsadresse)
-                .withFailMessage("Skal skrive ut co adressen")
-                .isEqualTo("c/o co, Charlies vei 13 b, 0575 Oslo")
+                .isEqualTo("c/o co, Charlies vei 13 b, tilleggsnavn, 0575 Oslo")
 
         assertThat(mapper.tilAdresse(bostedsadresse.copy(vegadresse = null)).visningsadresse)
+                .withFailMessage("Skal skrive ut matrikkeladresse når vegadresse er null")
+                .isEqualTo("tilleggsnavn, bruksenhet, Oslo")
+
+        assertThat(mapper.tilAdresse(bostedsadresse.copy(vegadresse = null, matrikkeladresse = null)).visningsadresse)
+                .withFailMessage("Skal skrive ut utenlands adresse når vegadresse er null")
+                .isEqualTo("Vei 1, 19800 Svenskt sted, region, Sverige")
+
+        assertThat(mapper.tilAdresse(bostedsadresse.copy(vegadresse = null, matrikkeladresse = null, utenlandskAdresse = null)).visningsadresse)
                 .withFailMessage("Skal skrive ut ukjentBosted når vegadresse er null")
                 .isEqualTo("ukjentBostedKommune")
     }
@@ -86,7 +93,7 @@ internal class AdresseMapperTest {
         val kontaktadresse = kontaktadresse(KontaktadresseType.INNLAND)
 
         assertThat(mapper.tilAdresse(kontaktadresse.copy(vegadresse = vegadresse())).visningsadresse)
-                .isEqualTo("Charlies vei 13 b, 0575 Oslo")
+                .isEqualTo("Charlies vei 13 b, tilleggsnavn, 0575 Oslo")
 
         assertThat(mapper.tilAdresse(kontaktadresse.copy(coAdressenavn = "co")).visningsadresse)
                 .withFailMessage("Skal skrive ut co adressen")
@@ -145,12 +152,12 @@ internal class AdresseMapperTest {
                        matrikkelId = null)
 
     private fun utenlandskAdresse(): UtenlandskAdresse =
-            UtenlandskAdresse(adressenavnNummer = "a 1",
-                              bySted = "bysted",
+            UtenlandskAdresse(adressenavnNummer = "Vei 1",
+                              bySted = "Svenskt sted",
                               bygningEtasjeLeilighet = "etasje",
-                              landkode = "NOR",
+                              landkode = "SWE",
                               postboksNummerNavn = "000",
-                              postkode = "001",
+                              postkode = "19800",
                               regionDistriktOmraade = "region")
 
     private fun tomVegadresse(): Vegadresse =
