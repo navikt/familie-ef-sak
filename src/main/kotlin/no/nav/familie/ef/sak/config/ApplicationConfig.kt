@@ -1,6 +1,9 @@
 package no.nav.familie.ef.sak.config
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import no.nav.familie.ef.sak.api.beregning.VedtakDtoModule
+import no.nav.familie.ef.sak.util.ObjectMapperProvider
 import no.nav.familie.http.config.RestTemplateAzure
 import no.nav.familie.http.interceptor.ApiKeyInjectingClientInterceptor
 import no.nav.familie.http.interceptor.BearerTokenClientInterceptor
@@ -9,7 +12,6 @@ import no.nav.familie.http.interceptor.InternLoggerInterceptor
 import no.nav.familie.http.interceptor.MdcValuesPropagatingClientInterceptor
 import no.nav.familie.http.interceptor.StsBearerTokenClientInterceptor
 import no.nav.familie.http.sts.StsRestClient
-import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.log.filter.LogFilter
 import no.nav.familie.log.filter.RequestTimeFilter
 import no.nav.security.token.support.client.core.http.OAuth2HttpClient
@@ -52,6 +54,9 @@ class ApplicationConfig {
     fun kotlinModule(): KotlinModule = KotlinModule()
 
     @Bean
+    @Primary fun objectMapper() = ObjectMapperProvider.objectMapper
+
+    @Bean
     fun logFilter(): FilterRegistrationBean<LogFilter> {
         logger.info("Registering LogFilter filter")
         val filterRegistration = FilterRegistrationBean<LogFilter>()
@@ -74,7 +79,7 @@ class ApplicationConfig {
      */
     @Bean
     @Primary
-    fun restTemplateBuilder(): RestTemplateBuilder {
+    fun restTemplateBuilder(objectMapper: ObjectMapper): RestTemplateBuilder {
         val jackson2HttpMessageConverter = MappingJackson2HttpMessageConverter(objectMapper)
         return RestTemplateBuilder()
                 .setConnectTimeout(Duration.of(2, ChronoUnit.SECONDS))

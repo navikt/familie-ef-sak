@@ -1,53 +1,83 @@
 package no.nav.familie.ef.sak.api.beregning
 
-import no.nav.familie.ef.sak.repository.domain.Vedtaksperiode
-import no.nav.familie.ef.sak.util.Periode
-import java.time.YearMonth
+import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.databind.DeserializationContext
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer
+import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.familie.ef.sak.api.Feil
+import no.nav.familie.ef.sak.repository.domain.InntektWrapper
+import no.nav.familie.ef.sak.repository.domain.PeriodeWrapper
+import no.nav.familie.ef.sak.repository.domain.Vedtak
+import org.springframework.http.HttpStatus
+import java.util.*
 
 enum class ResultatType {
     INNVILGE,
     AVSLÅ,
     HENLEGGE
 }
+sealed class VedtakDto
+class Henlegge(val resultatType: ResultatType = ResultatType.HENLEGGE) : VedtakDto()
+class Innvilget(val resultatType: ResultatType = ResultatType.INNVILGE,
+                val periodeBegrunnelse: String,
+                val inntektBegrunnelse: String,
+                val perioder: List<VedtaksperiodeDto> = emptyList(),
+                val inntekter: List<Inntekt> = emptyList()) : VedtakDto()
 
-data class VedtakDto(val resultatType: ResultatType,
-                     val periodeBegrunnelse: String,
-                     val inntektBegrunnelse: String,
-                     val perioder: List<VedtaksperiodeDto> = emptyList(),
-                     val inntekter: List<Inntekt> = emptyList())
+class Avslå(val resultatType: ResultatType = ResultatType.AVSLÅ,
+            val avslåBegrunnelse: String) : VedtakDto()
 
-data class VedtaksperiodeDto(
-        val årMånedFra: YearMonth,
-        val årMånedTil: YearMonth,
-        val aktivitet: String,
-        val periodeType: String
-)
+fun VedtakDto.tilVedtak(behandlingId: UUID): Vedtak = when (this) {
+    is Avslå -> Vedtak(behandlingId = behandlingId,
+                       avslåBegrunnelse = this.avslåBegrunnelse,
+                       resultatType = ResultatType.AVSLÅ)
+    is Innvilget -> Vedtak(
+            behandlingId = behandlingId,
+            periodeBegrunnelse = this.periodeBegrunnelse,
+            inntektBegrunnelse = this.inntektBegrunnelse,
+            resultatType = ResultatType.INNVILGE,
+            perioder = PeriodeWrapper(perioder = this.perioder.tilDomene()),
+            inntekter = InntektWrapper(inntekter = this.inntekter.tilInntektsperioder()))
+    is Henlegge -> throw Feil("Kan ikke sette vedtak $this då det har feil type", "Kan ikke sette vedtak $this då det har feil type", HttpStatus.BAD_REQUEST)
+}
+
+fun Vedtak.tilVedtakDto(): VedtakDto =
+    when (this.resultatType) {
+        ResultatType.INNVILGE -> Innvilget(
+                resultatType = this.resultatType,
+                periodeBegrunnelse = this.periodeBegrunnelse ?: "",
+                inntektBegrunnelse = this.inntektBegrunnelse ?: "",
+                perioder = (this.perioder ?: PeriodeWrapper(emptyList())).perioder.fraDomene(),
+                inntekter = (this.inntekter ?: InntektWrapper(emptyList())).inntekter.tilInntekt())
+        ResultatType.AVSLÅ -> Avslå(
+                resultatType = this.resultatType,
+                avslåBegrunnelse = this.avslåBegrunnelse ?: ""
+        )
+        else -> throw Feil("Kan ikke sette vedtaksresultat som $this - ikke implementert")
+
+}
 
 
-fun List<Vedtaksperiode>.fraDomene(): List<VedtaksperiodeDto> =
-        this.map {
-            VedtaksperiodeDto(
-                    årMånedFra = YearMonth.from(it.datoFra),
-                    årMånedTil = YearMonth.from(it.datoTil),
-                    aktivitet = it.aktivitet,
-                    periodeType = it.periodeType,
-            )
+private class VedtakDtoDeserializer : StdDeserializer<VedtakDto>(VedtakDto::class.java) {
+
+    override fun deserialize(p: JsonParser, ctxt: DeserializationContext?): VedtakDto {
+        val mapper = p.codec as ObjectMapper
+        val node: JsonNode = mapper.readTree(p)
+        val resultatTypeNode = node.get("resultatType")
+        return when (mapper.readValue<ResultatType>(resultatTypeNode.toString())) {
+            ResultatType.INNVILGE -> mapper.readValue<Innvilget>(node.toString())
+            ResultatType.AVSLÅ -> mapper.readValue<Avslå>(node.toString())
+            else -> throw Feil("Kunde ikke deserialisera vedtakdto")
         }
+    }
+}
 
-fun List<VedtaksperiodeDto>.tilDomene(): List<Vedtaksperiode> =
-        this.map {
-            Vedtaksperiode(
-                    datoFra = it.årMånedFra.atDay(1),
-                    datoTil = it.årMånedTil.atEndOfMonth(),
-                    aktivitet = it.aktivitet,
-                    periodeType = it.periodeType,
-            )
-        }
+class VedtakDtoModule : com.fasterxml.jackson.databind.module.SimpleModule() {
 
-fun List<VedtaksperiodeDto>.tilPerioder(): List<Periode> =
-        this.map {
-            Periode(
-                    fradato = it.årMånedFra.atDay(1),
-                    tildato = it.årMånedTil.atEndOfMonth(),
-            )
-        }
+    init {
+        addDeserializer(VedtakDto::class.java, VedtakDtoDeserializer())
+    }
+}
+
