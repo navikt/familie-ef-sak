@@ -290,8 +290,9 @@ data class UtenlandskAdresse(val adressenavnNummer: String?,
                              val regionDistriktOmraade: String?)
 
 data class Matrikkeladresse(val matrikkelId: Long?,
-                            val bruksenhetsnummer: String?
-)
+                            val bruksenhetsnummer: String?,
+                            val tilleggsnavn: String?,
+                            val postnummer: String?)
 
 data class UtenlandskAdresseIFrittFormat(val adresselinje1: String?,
                                          val adresselinje2: String?,

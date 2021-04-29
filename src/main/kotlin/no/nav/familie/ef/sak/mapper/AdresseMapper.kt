@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.api.dto.AdresseType
 import no.nav.familie.ef.sak.integration.dto.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.integration.dto.pdl.Kontaktadresse
 import no.nav.familie.ef.sak.integration.dto.pdl.KontaktadresseType
+import no.nav.familie.ef.sak.integration.dto.pdl.Matrikkeladresse
 import no.nav.familie.ef.sak.integration.dto.pdl.Oppholdsadresse
 import no.nav.familie.ef.sak.integration.dto.pdl.PostadresseIFrittFormat
 import no.nav.familie.ef.sak.integration.dto.pdl.Postboksadresse
@@ -46,9 +47,14 @@ class AdresseMapper(private val kodeverkService: KodeverkService) {
     }
 
     private fun tilFormatertAdresse(bostedsadresse: Bostedsadresse, gjeldendeDato: LocalDate): String? {
-        val adresse = bostedsadresse.vegadresse?.let { tilFormatertAdresse(it, gjeldendeDato) }
-                      ?: bostedsadresse.ukjentBosted?.bostedskommune
-        return join(coAdresse(bostedsadresse.coAdressenavn), adresse)
+        val (_, coAdressenavn, _, utenlandskAdresse, vegadresse, ukjentBosted, matrikkeladresse, _) = bostedsadresse
+        val formattertAdresse: String? = when {
+            vegadresse != null -> tilFormatertAdresse(vegadresse, gjeldendeDato)
+            matrikkeladresse != null -> tilFormatertAdresse(matrikkeladresse, gjeldendeDato)
+            utenlandskAdresse != null -> tilFormatertAdresse(utenlandskAdresse, gjeldendeDato)
+            else -> ukjentBosted?.bostedskommune
+        }
+        return join(coAdresse(coAdressenavn), formattertAdresse)
     }
 
     private fun tilFormatertAdresse(oppholdsadresse: Oppholdsadresse, gjeldendeDato: LocalDate): String? {
@@ -80,6 +86,11 @@ class AdresseMapper(private val kodeverkService: KodeverkService) {
                  postboksadresse.postboks,
                  space(postboksadresse.postnummer, poststed(postboksadresse.postnummer, gjeldendeDato)))
 
+    private fun tilFormatertAdresse(matrikkeladresse: Matrikkeladresse, gjeldendeDato: LocalDate): String? =
+            join(matrikkeladresse.tilleggsnavn,
+                 matrikkeladresse.bruksenhetsnummer,
+                 space(matrikkeladresse.postnummer, poststed(matrikkeladresse.postnummer, gjeldendeDato)))
+
     private fun tilFormatertAdresse(postadresseIFrittFormat: PostadresseIFrittFormat, gjeldendeDato: LocalDate): String? =
             join(postadresseIFrittFormat.adresselinje1,
                  postadresseIFrittFormat.adresselinje2,
@@ -105,6 +116,7 @@ class AdresseMapper(private val kodeverkService: KodeverkService) {
 
     private fun tilFormatertAdresse(vegadresse: Vegadresse, gjeldendeDato: LocalDate): String? {
         return join(space(vegadresse.adressenavn, vegadresse.husnummer, vegadresse.husbokstav),
+                    vegadresse.tilleggsnavn,
                     vegadresse.bruksenhetsnummer,
                     space(vegadresse.postnummer, poststed(vegadresse.postnummer, gjeldendeDato)))
     }
