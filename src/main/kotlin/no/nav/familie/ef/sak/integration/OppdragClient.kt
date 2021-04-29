@@ -13,6 +13,7 @@ import java.net.URI
 
 
 @Service
+@Deprecated("Denne er flyttet til EF-sak")
 class OppdragClient(@Value("\${FAMILIE_OPPDRAG_API_URL}")
                     private val familieOppdragUri: URI,
                     @Qualifier("azure")

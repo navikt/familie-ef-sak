@@ -14,6 +14,7 @@ import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import java.time.LocalDate
 import java.util.*
 
+@Deprecated("Denne er flyttet til EF-sak")
 object UtbetalingsoppdragGenerator {
 
     /**

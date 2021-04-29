@@ -18,6 +18,7 @@ import java.util.*
 private const val behandlingEksternId = 0L
 private const val fagsakEksternId = 1L
 
+@Deprecated("Denne er flyttet til EF-sak")
 enum class TestOppdragType {
     Input,
     Output,
@@ -30,6 +31,7 @@ enum class TestOppdragType {
  *  * På output er oppdragId som sjekker att andelTilkjentYtelse har fått riktig output
  *  * På oppdrag trengs den ikke
  */
+@Deprecated("Denne er flyttet til EF-sak")
 data class TestOppdrag(val type: TestOppdragType,
                        val fnr: String,
                        val oppdragId: UUID?,
@@ -81,6 +83,7 @@ data class TestOppdrag(val type: TestOppdragType,
     }
 }
 
+@Deprecated("Denne er flyttet til EF-sak")
 class TestOppdragGroup {
 
     private val andelerTilkjentYtelseInn: MutableList<AndelTilkjentYtelse> = mutableListOf()
@@ -137,7 +140,7 @@ class TestOppdragGroup {
 
     }
 }
-
+@Deprecated("Denne er flyttet til EF-sak")
 object TestOppdragParser {
 
     private const val KEY_TYPE = "Type"
@@ -237,6 +240,7 @@ object TestOppdragParser {
 
 }
 
+@Deprecated("Denne er flyttet til EF-sak")
 object TestOppdragRunner {
 
     fun run(url: URL) {

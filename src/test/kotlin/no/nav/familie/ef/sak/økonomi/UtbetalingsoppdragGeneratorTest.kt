@@ -10,6 +10,7 @@ import org.opentest4j.ValueWrapper
 import java.time.LocalDate
 import java.util.*
 
+@Deprecated("Denne er flyttet til EF-sak")
 internal class UtbetalingsoppdragGeneratorTest {
 
     @Test

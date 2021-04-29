@@ -15,6 +15,7 @@ import java.time.LocalDate
  * @param[erEndringPåEksisterendePeriode] ved true vil oppdrag sette asksjonskode ENDR på linje og ikke referere bakover
  * @return mal med tilpasset lagPeriodeFraAndel
  */
+@Deprecated("Denne er flyttet til EF-sak")
 data class UtbetalingsperiodeMal(val tilkjentYtelse: TilkjentYtelse,
                                  val erEndringPåEksisterendePeriode: Boolean = false) {
 

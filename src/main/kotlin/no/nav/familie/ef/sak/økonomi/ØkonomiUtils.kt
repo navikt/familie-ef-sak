@@ -8,14 +8,17 @@ import java.util.*
 
 data class KjedeId(val klassifisering: String, val personIdent: String)
 
+@Deprecated("Denne er flyttet til EF-sak")
 data class PeriodeId(val gjeldende: Long?,
                      val forrige: Long? = null)
 
+@Deprecated("Denne er flyttet til EF-sak")
 fun AndelTilkjentYtelse.tilPeriodeId(): PeriodeId = PeriodeId(this.periodeId, this.forrigePeriodeId)
 
 @Deprecated("Bør erstattes med å gjøre 'stønadFom' og  'stønadTom'  nullable")
 val NULL_DATO: LocalDate = LocalDate.MIN
 
+@Deprecated("Denne er flyttet til EF-sak")
 fun nullAndelTilkjentYtelse(behandlingId: UUID, personIdent: String, periodeId: PeriodeId?): AndelTilkjentYtelse =
         AndelTilkjentYtelse(beløp = 0,
                             stønadFom = NULL_DATO,
@@ -25,6 +28,7 @@ fun nullAndelTilkjentYtelse(behandlingId: UUID, personIdent: String, periodeId: 
                             kildeBehandlingId = behandlingId,
                             forrigePeriodeId = periodeId?.forrige)
 
+@Deprecated("Denne er flyttet til EF-sak")
 object ØkonomiUtils {
 
     /**
