@@ -6,8 +6,7 @@ import no.nav.familie.ef.sak.integration.dto.pdl.*
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalDateTime.now
+import java.time.LocalDate.now
 
 internal class AdresseHjelperTest {
 
@@ -155,17 +154,15 @@ internal class AdresseHjelperTest {
     }
 
     private fun lagAdresse(vegadresse: Vegadresse?,
-                           gyldighetstidspunkt: LocalDateTime? = null,
-                           opphørstidspunkt: LocalDateTime? = null,
+                           gyldighetstidspunkt: LocalDate? = null,
+                           opphørstidspunkt: LocalDate? = null,
                            matrikkeladresse: Matrikkeladresse? = null,
                            metadata: Metadata? = null): Bostedsadresse {
         return Bostedsadresse(
                 vegadresse = vegadresse,
-                angittFlyttedato = null,
+                gyldigFraOgMed = gyldighetstidspunkt,
+                gyldigTilOgMed = opphørstidspunkt,
                 coAdressenavn = null,
-                folkeregistermetadata = Folkeregistermetadata(
-                        gyldighetstidspunkt = gyldighetstidspunkt,
-                        opphørstidspunkt = opphørstidspunkt),
                 utenlandskAdresse = null,
                 ukjentBosted = null,
                 matrikkeladresse = matrikkeladresse,

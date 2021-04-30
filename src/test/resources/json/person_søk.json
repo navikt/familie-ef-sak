@@ -14,12 +14,9 @@
             ],
             "bostedsadresse": [
               {
-                "angittFlyttedato": "1988-07-15",
+                "gyldigFraOgMed": "1988-07-15",
+                "gyldigTilOgMed": null,
                 "coAdressenavn": null,
-                "folkeregistermetadata": {
-                  "gyldighetstidspunkt": "1988-07-15T00:00",
-                  "opphoerstidspunkt": null
-                },
                 "utenlandskAdresse": null,
                 "vegadresse": {
                   "husnummer": "1",

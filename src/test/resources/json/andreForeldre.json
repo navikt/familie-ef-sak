@@ -18,12 +18,9 @@
               "metadata":  {
                 "historisk": false
               },
-              "angittFlyttedato": "1966-11-18",
+              "gyldigFraOgMed": "1966-11-18",
+              "gyldigTilOgMed": null,
               "coAdressenavn": null,
-              "folkeregistermetadata": {
-                "gyldighetstidspunkt": "2020-05-29T12:09:02",
-                "opphoerstidspunkt": null
-              },
               "vegadresse": {
                 "husnummer": "77",
                 "husbokstav": null,

@@ -104,9 +104,9 @@ data class DeltBosted(val startdatoForKontrakt: LocalDate,
 data class Folkeregistermetadata(val gyldighetstidspunkt: LocalDateTime?,
                                  @JsonProperty("opphoerstidspunkt") val opphørstidspunkt: LocalDateTime?)
 
-data class Bostedsadresse(val angittFlyttedato: LocalDate?,
+data class Bostedsadresse(val gyldigFraOgMed: LocalDate?,
+                          val gyldigTilOgMed: LocalDate?,
                           val coAdressenavn: String?,
-                          val folkeregistermetadata: Folkeregistermetadata,
                           val utenlandskAdresse: UtenlandskAdresse?,
                           val vegadresse: Vegadresse?,
                           val ukjentBosted: UkjentBosted?,

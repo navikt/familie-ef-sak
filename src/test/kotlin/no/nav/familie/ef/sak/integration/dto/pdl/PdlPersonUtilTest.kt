@@ -68,7 +68,7 @@ internal class PdlPersonUtilTest {
         return Bostedsadresse(
                 null,
                 null,
-                Folkeregistermetadata(null, null),
+                null,
                 null,
                 Vegadresse(nr, null, null, gate, null, null, null, null, null),
                 null,

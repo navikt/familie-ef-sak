@@ -34,8 +34,8 @@ object PdlTestdata {
     private val adressebeskyttelse = listOf(Adressebeskyttelse(AdressebeskyttelseGradering.FORTROLIG, metadataGjeldende))
 
     private val bostedsadresse = listOf(Bostedsadresse(LocalDate.now(),
+                                                       LocalDate.now(),
                                                        "",
-                                                       folkeregistermetadata,
                                                        utenlandskAdresse,
                                                        vegadresse,
                                                        UkjentBosted(""),

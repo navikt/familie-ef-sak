@@ -202,10 +202,8 @@ class PdlClientConfig {
                                 omraader = listOf()))
 
         private fun bostedsadresse(): List<Bostedsadresse> =
-                listOf(Bostedsadresse(angittFlyttedato = startdato,
-                                      folkeregistermetadata = Folkeregistermetadata(gyldighetstidspunkt = LocalDateTime.now(),
-                                                                                    opphørstidspunkt = LocalDate.of(2199, 1, 1)
-                                                                                            .atStartOfDay()),
+                listOf(Bostedsadresse(gyldigFraOgMed = startdato,
+                                      gyldigTilOgMed = LocalDate.of(2199, 1, 1),
                                       utenlandskAdresse = null,
                                       coAdressenavn = "CONAVN",
                                       vegadresse = vegadresse(),

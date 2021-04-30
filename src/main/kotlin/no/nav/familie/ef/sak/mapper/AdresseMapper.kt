@@ -40,14 +40,14 @@ class AdresseMapper(private val kodeverkService: KodeverkService) {
     }
 
     fun tilAdresse(adresse: Bostedsadresse): AdresseDto {
-        return AdresseDto(visningsadresse = tilFormatertAdresse(adresse, datoEllerIdag(adresse.angittFlyttedato)),
+        return AdresseDto(visningsadresse = tilFormatertAdresse(adresse, datoEllerIdag(adresse.gyldigFraOgMed)),
                           type = AdresseType.BOSTEDADRESSE,
-                          gyldigFraOgMed = adresse.angittFlyttedato,
-                          gyldigTilOgMed = adresse.folkeregistermetadata.opphørstidspunkt?.toLocalDate())
+                          gyldigFraOgMed = adresse.gyldigFraOgMed,
+                          gyldigTilOgMed = adresse.gyldigTilOgMed)
     }
 
     private fun tilFormatertAdresse(bostedsadresse: Bostedsadresse, gjeldendeDato: LocalDate): String? {
-        val (_, coAdressenavn, _, utenlandskAdresse, vegadresse, ukjentBosted, matrikkeladresse, _) = bostedsadresse
+        val (_, _, coAdressenavn, utenlandskAdresse, vegadresse, ukjentBosted, matrikkeladresse, _) = bostedsadresse
         val formattertAdresse: String? = when {
             vegadresse != null -> tilFormatertAdresse(vegadresse, gjeldendeDato)
             matrikkeladresse != null -> tilFormatertAdresse(matrikkeladresse, gjeldendeDato)

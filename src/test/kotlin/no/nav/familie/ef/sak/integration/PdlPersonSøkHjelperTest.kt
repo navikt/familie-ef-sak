@@ -82,11 +82,11 @@ internal class PdlPersonSøkHjelperTest {
 
     private fun lagAdresse(vegadresse: Vegadresse?, matrikkeladresse: Matrikkeladresse?): Bostedsadresse {
         return Bostedsadresse(
+                gyldigFraOgMed = null,
+                gyldigTilOgMed = null,
                 vegadresse = vegadresse,
                 matrikkeladresse = matrikkeladresse,
-                angittFlyttedato = null,
                 coAdressenavn = null,
-                folkeregistermetadata = Folkeregistermetadata(null, null),
                 utenlandskAdresse = null,
                 ukjentBosted = null,
                 metadata = Metadata(false)

@@ -9,12 +9,9 @@ query ($paging:Paging, $criteria:[Criterion]) {
                     identifikasjonsnummer
                 }
                 bostedsadresse(historikk: false) {
-                    angittFlyttedato
+                    gyldigFraOgMed
+                    gyldigTilOgMed
                     coAdressenavn
-                    folkeregistermetadata {
-                        gyldighetstidspunkt
-                        opphoerstidspunkt
-                    }
                     utenlandskAdresse {
                         adressenavnNummer
                         bySted
