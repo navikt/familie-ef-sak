@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.repository.domain.InntektWrapper
 import no.nav.familie.ef.sak.repository.domain.PeriodeWrapper
@@ -21,8 +20,8 @@ enum class ResultatType {
 sealed class VedtakDto
 class Henlegge(val resultatType: ResultatType = ResultatType.HENLEGGE) : VedtakDto()
 class Innvilget(val resultatType: ResultatType = ResultatType.INNVILGE,
-                val periodeBegrunnelse: String,
-                val inntektBegrunnelse: String,
+                val periodeBegrunnelse: String?,
+                val inntektBegrunnelse: String?,
                 val perioder: List<VedtaksperiodeDto> = emptyList(),
                 val inntekter: List<Inntekt> = emptyList()) : VedtakDto()
 
@@ -47,8 +46,8 @@ fun Vedtak.tilVedtakDto(): VedtakDto =
     when (this.resultatType) {
         ResultatType.INNVILGE -> Innvilget(
                 resultatType = this.resultatType,
-                periodeBegrunnelse = this.periodeBegrunnelse ?: "",
-                inntektBegrunnelse = this.inntektBegrunnelse ?: "",
+                periodeBegrunnelse = this.periodeBegrunnelse,
+                inntektBegrunnelse = this.inntektBegrunnelse,
                 perioder = (this.perioder ?: PeriodeWrapper(emptyList())).perioder.fraDomene(),
                 inntekter = (this.inntekter ?: InntektWrapper(emptyList())).inntekter.tilInntekt())
         ResultatType.AVSLÅ -> Avslå(
