@@ -26,7 +26,7 @@ class Innvilget(val resultatType: ResultatType = ResultatType.INNVILGE,
                 val inntekter: List<Inntekt> = emptyList()) : VedtakDto()
 
 class Avslå(val resultatType: ResultatType = ResultatType.AVSLÅ,
-            val avslåBegrunnelse: String) : VedtakDto()
+            val avslåBegrunnelse: String?) : VedtakDto()
 
 fun VedtakDto.tilVedtak(behandlingId: UUID): Vedtak = when (this) {
     is Avslå -> Vedtak(behandlingId = behandlingId,
@@ -52,7 +52,7 @@ fun Vedtak.tilVedtakDto(): VedtakDto =
                 inntekter = (this.inntekter ?: InntektWrapper(emptyList())).inntekter.tilInntekt())
         ResultatType.AVSLÅ -> Avslå(
                 resultatType = this.resultatType,
-                avslåBegrunnelse = this.avslåBegrunnelse ?: ""
+                avslåBegrunnelse = this.avslåBegrunnelse
         )
         else -> throw Feil("Kan ikke sette vedtaksresultat som $this - ikke implementert")
 
