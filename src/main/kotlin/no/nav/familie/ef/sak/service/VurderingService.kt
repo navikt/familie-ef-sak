@@ -26,6 +26,17 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
+sealed class A()
+class Aa(val a: String): A()
+class Aa2(val a: String): A()
+
+fun A.yolo() {
+    when(this) {
+        is Aa -> println(this.a)
+        is Aa2 -> println(this.a)
+    }
+}
+
 @Service
 class VurderingService(private val behandlingService: BehandlingService,
                        private val vilkårsvurderingRepository: VilkårsvurderingRepository,

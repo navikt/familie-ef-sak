@@ -1,18 +1,10 @@
 package no.nav.familie.ef.sak.api.beregning
 
+import no.nav.familie.ef.sak.service.A
+import no.nav.familie.ef.sak.service.Aa
+import no.nav.familie.ef.sak.service.yolo
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-
-sealed class A()
-class Aa(val a: String): A()
-class Aa2(val a: String): A()
-
-fun A.yolo() {
-    when(this) {
-        is Aa -> println(this.a)
-        is Aa2 -> println(this.a)
-    }
-}
 
 internal class VedtaksperiodeDtoTest {
 
