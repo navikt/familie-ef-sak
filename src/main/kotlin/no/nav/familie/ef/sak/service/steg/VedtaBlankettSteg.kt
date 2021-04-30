@@ -8,7 +8,8 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 
 @Service
-class VedtaBlankettSteg(private val vedtakService: VedtakService, private val blankettRepository: BlankettRepository) : BehandlingSteg<VedtakDto> {
+class VedtaBlankettSteg(private val vedtakService: VedtakService, private val blankettRepository: BlankettRepository) :
+        BehandlingSteg<VedtakDto> {
 
     override fun validerSteg(behandling: Behandling) {
     }
@@ -18,17 +19,13 @@ class VedtaBlankettSteg(private val vedtakService: VedtakService, private val bl
     }
 
     override fun utførSteg(behandling: Behandling, data: VedtakDto) {
-        when(data) {
-            is Avslå -> {
+        when (data) {
+            is Innvilget, is Avslå -> {
                 vedtakService.slettVedtakHvisFinnes(behandling.id)
                 vedtakService.lagreVedtak(vedtakDto = data, behandlingId = behandling.id)
                 blankettRepository.deleteById(behandling.id)
             }
-            is Innvilget -> {
-                vedtakService.slettVedtakHvisFinnes(behandling.id)
-                vedtakService.lagreVedtak(vedtakDto = data, behandlingId = behandling.id)
-                blankettRepository.deleteById(behandling.id)
-            } else -> {
+            else -> {
                 val feilmelding = "Kan ikke sette vedtaksresultat som $data - ikke implementert"
                 throw Feil(feilmelding, feilmelding, HttpStatus.BAD_REQUEST)
             }

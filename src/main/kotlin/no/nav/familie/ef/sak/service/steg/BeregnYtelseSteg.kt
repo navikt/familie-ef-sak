@@ -39,16 +39,14 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
             }
             else -> emptyList()
         }
-
-        val tilkjentYtelse = if (beløpsperioder.isNotEmpty()) TilkjentYtelseDTO(
-                aktivIdent,
-                vedtaksdato = LocalDate.now(),
-                behandlingId = behandling.id,
-                andelerTilkjentYtelse = beløpsperioder) else null
-
+        
         tilkjentYtelseService.slettTilkjentYtelseForBehandling(behandling.id)
-        if (tilkjentYtelse != null) {
-            tilkjentYtelseService.opprettTilkjentYtelse(tilkjentYtelse)
+        if (beløpsperioder.isNotEmpty()) {
+            tilkjentYtelseService.opprettTilkjentYtelse(TilkjentYtelseDTO(
+                    aktivIdent,
+                    vedtaksdato = LocalDate.now(),
+                    behandlingId = behandling.id,
+                    andelerTilkjentYtelse = beløpsperioder))
         }
         vedtakService.slettVedtakHvisFinnes(behandling.id)
         vedtakService.lagreVedtak(vedtakDto = vedtak, behandlingId = behandling.id)

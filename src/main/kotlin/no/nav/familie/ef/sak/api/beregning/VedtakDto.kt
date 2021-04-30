@@ -65,10 +65,9 @@ private class VedtakDtoDeserializer : StdDeserializer<VedtakDto>(VedtakDto::clas
     override fun deserialize(p: JsonParser, ctxt: DeserializationContext?): VedtakDto {
         val mapper = p.codec as ObjectMapper
         val node: JsonNode = mapper.readTree(p)
-        val resultatTypeNode = node.get("resultatType")
-        return when (mapper.readValue<ResultatType>(resultatTypeNode.toString())) {
-            ResultatType.INNVILGE -> mapper.readValue<Innvilget>(node.toString())
-            ResultatType.AVSLÅ -> mapper.readValue<Avslå>(node.toString())
+        return when (ResultatType.valueOf(node.get("resultatType").asText())) {
+            ResultatType.INNVILGE -> mapper.treeToValue(node, Innvilget::class.java)
+            ResultatType.AVSLÅ -> mapper.treeToValue(node, Avslå::class.java)
             else -> throw Feil("Kunde ikke deserialisera vedtakdto")
         }
     }
