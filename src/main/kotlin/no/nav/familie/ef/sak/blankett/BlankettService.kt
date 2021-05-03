@@ -2,8 +2,7 @@ package no.nav.familie.ef.sak.blankett
 
 import no.nav.familie.ef.sak.api.beregning.VedtakDto
 import no.nav.familie.ef.sak.api.beregning.VedtakService
-import no.nav.familie.ef.sak.api.beregning.fraDomene
-import no.nav.familie.ef.sak.api.beregning.tilInntekt
+import no.nav.familie.ef.sak.api.beregning.tilVedtakDto
 import no.nav.familie.ef.sak.api.dto.SøknadDatoerDto
 import no.nav.familie.ef.sak.repository.OppgaveRepository
 import no.nav.familie.ef.sak.repository.domain.*
@@ -49,7 +48,7 @@ class BlankettService(private val tilgangService: TilgangService,
     fun lagBlankett(behandlingId: UUID): ByteArray {
         val blankettPdfRequest = BlankettPdfRequest(lagPersonopplysningerDto(behandlingId),
                                                     hentVilkårDto(behandlingId),
-                                                    lagVedtakDto(behandlingId),
+                                                    hentVedtak(behandlingId),
                                                     lagSøknadsdatoer(behandlingId)
         )
         val blankettPdfAsByteArray = blankettClient.genererBlankett(blankettPdfRequest)
@@ -81,15 +80,9 @@ class BlankettService(private val tilgangService: TilgangService,
         return PersonopplysningerDto(hentGjeldendeNavn(aktivIdent), aktivIdent)
     }
 
-    private fun lagVedtakDto(behandlingId: UUID): VedtakDto {
+    private fun hentVedtak(behandlingId: UUID): VedtakDto {
         return vedtakService.hentVedtak(behandlingId)
-                .let {
-                    VedtakDto(it.resultatType,
-                              it.periodeBegrunnelse,
-                              it.inntektBegrunnelse,
-                              it.perioder.perioder.fraDomene(),
-                              it.inntekter.inntekter.tilInntekt())
-                }
+                .let { it.tilVedtakDto() }
     }
 
     private fun hentGjeldendeNavn(hentAktivIdent: String): String {

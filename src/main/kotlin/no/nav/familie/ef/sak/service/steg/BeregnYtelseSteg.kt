@@ -1,10 +1,6 @@
 package no.nav.familie.ef.sak.service.steg
 
-import no.nav.familie.ef.sak.api.beregning.BeregningService
-import no.nav.familie.ef.sak.api.beregning.VedtakDto
-import no.nav.familie.ef.sak.api.beregning.VedtakService
-import no.nav.familie.ef.sak.api.beregning.tilInntektsperioder
-import no.nav.familie.ef.sak.api.beregning.tilPerioder
+import no.nav.familie.ef.sak.api.beregning.*
 import no.nav.familie.ef.sak.api.dto.AndelTilkjentYtelseDTO
 import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
 import no.nav.familie.ef.sak.repository.domain.Behandling
@@ -29,25 +25,31 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
 
     override fun utførSteg(behandling: Behandling, vedtak: VedtakDto) {
         val aktivIdent = behandlingService.hentAktivIdent(behandling.id)
-        val beløpsperioder = beregningService.beregnYtelse(vedtak.perioder.tilPerioder(),
-                                                           vedtak.inntekter.tilInntektsperioder())
-        val tilkjentYtelse = TilkjentYtelseDTO(
-                aktivIdent,
-                vedtaksdato = LocalDate.now(),
-                behandlingId = behandling.id,
-                andelerTilkjentYtelse = beløpsperioder.map {
-                    AndelTilkjentYtelseDTO(beløp = it.beløp.toInt(),
-                                           stønadFom = it.fraOgMedDato,
-                                           stønadTom = it.tilDato,
-                                           kildeBehandlingId = behandling.id,
-                                           personIdent = aktivIdent)
-                }
-        )
-
+        val beløpsperioder = when (vedtak) {
+            is Innvilget -> {
+                beregningService.beregnYtelse(vedtak.perioder.tilPerioder(),
+                                              vedtak.inntekter.tilInntektsperioder())
+                        .map {
+                            AndelTilkjentYtelseDTO(beløp = it.beløp.toInt(),
+                                                   stønadFom = it.fraOgMedDato,
+                                                   stønadTom = it.tilDato,
+                                                   kildeBehandlingId = behandling.id,
+                                                   personIdent = aktivIdent)
+                        }
+            }
+            else -> emptyList()
+        }
+        
         tilkjentYtelseService.slettTilkjentYtelseForBehandling(behandling.id)
-        tilkjentYtelseService.opprettTilkjentYtelse(tilkjentYtelse)
+        if (beløpsperioder.isNotEmpty()) {
+            tilkjentYtelseService.opprettTilkjentYtelse(TilkjentYtelseDTO(
+                    aktivIdent,
+                    vedtaksdato = LocalDate.now(),
+                    behandlingId = behandling.id,
+                    andelerTilkjentYtelse = beløpsperioder))
+        }
         vedtakService.slettVedtakHvisFinnes(behandling.id)
-        vedtakService.lagreVedtak(vedtak = vedtak, behandlingId = behandling.id)
+        vedtakService.lagreVedtak(vedtakDto = vedtak, behandlingId = behandling.id)
     }
 
 }
