@@ -160,6 +160,7 @@ internal class AdresseHjelperTest {
                            metadata: Metadata? = null): Bostedsadresse {
         return Bostedsadresse(
                 vegadresse = vegadresse,
+                angittFlyttedato = null,
                 gyldigFraOgMed = gyldighetstidspunkt,
                 gyldigTilOgMed = opphørstidspunkt,
                 coAdressenavn = null,

@@ -70,6 +70,7 @@ internal class PdlPersonUtilTest {
                 null,
                 null,
                 null,
+                null,
                 Vegadresse(nr, null, null, gate, null, null, null, null, null),
                 null,
                 null,

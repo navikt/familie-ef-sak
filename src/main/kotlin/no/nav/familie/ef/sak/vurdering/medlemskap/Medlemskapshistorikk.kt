@@ -146,7 +146,7 @@ class Medlemskapshistorikk(pdlPerson: PdlPerson, medlemskapsinfo: Medlemskapsinf
 
     private fun tildato(it: Bostedsadresse) = it.gyldigTilOgMed ?: LocalDate.MAX
 
-    private fun fradato(it: Bostedsadresse) = it.gyldigFraOgMed ?: LocalDate.MIN
+    private fun fradato(it: Bostedsadresse) = it.gyldigFraOgMed ?: it.angittFlyttedato ?: LocalDate.MIN
 
 }
 
