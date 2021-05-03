@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.økonomi
 
+import no.nav.familie.ef.sak.dummy.FLYTTET_TIL_EF_IVERKSETT
 import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
@@ -15,7 +16,7 @@ import java.time.LocalDate
  * @param[erEndringPåEksisterendePeriode] ved true vil oppdrag sette asksjonskode ENDR på linje og ikke referere bakover
  * @return mal med tilpasset lagPeriodeFraAndel
  */
-@Deprecated("Denne er flyttet til EF-sak")
+@Deprecated(FLYTTET_TIL_EF_IVERKSETT)
 data class UtbetalingsperiodeMal(val tilkjentYtelse: TilkjentYtelse,
                                  val erEndringPåEksisterendePeriode: Boolean = false) {
 

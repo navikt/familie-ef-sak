@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.økonomi
 
+import no.nav.familie.ef.sak.dummy.FLYTTET_TIL_EF_IVERKSETT
 import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse.Companion.disjunkteAndeler
 import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse.Companion.snittAndeler
@@ -8,17 +9,17 @@ import java.util.*
 
 data class KjedeId(val klassifisering: String, val personIdent: String)
 
-@Deprecated("Denne er flyttet til EF-sak")
+@Deprecated(FLYTTET_TIL_EF_IVERKSETT)
 data class PeriodeId(val gjeldende: Long?,
                      val forrige: Long? = null)
 
-@Deprecated("Denne er flyttet til EF-sak")
+@Deprecated(FLYTTET_TIL_EF_IVERKSETT)
 fun AndelTilkjentYtelse.tilPeriodeId(): PeriodeId = PeriodeId(this.periodeId, this.forrigePeriodeId)
 
 @Deprecated("Bør erstattes med å gjøre 'stønadFom' og  'stønadTom'  nullable")
 val NULL_DATO: LocalDate = LocalDate.MIN
 
-@Deprecated("Denne er flyttet til EF-sak")
+@Deprecated(FLYTTET_TIL_EF_IVERKSETT)
 fun nullAndelTilkjentYtelse(behandlingId: UUID, personIdent: String, periodeId: PeriodeId?): AndelTilkjentYtelse =
         AndelTilkjentYtelse(beløp = 0,
                             stønadFom = NULL_DATO,
@@ -28,7 +29,7 @@ fun nullAndelTilkjentYtelse(behandlingId: UUID, personIdent: String, periodeId: 
                             kildeBehandlingId = behandlingId,
                             forrigePeriodeId = periodeId?.forrige)
 
-@Deprecated("Denne er flyttet til EF-sak")
+@Deprecated(FLYTTET_TIL_EF_IVERKSETT)
 object ØkonomiUtils {
 
     /**
