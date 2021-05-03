@@ -48,7 +48,7 @@ class BlankettService(private val tilgangService: TilgangService,
     fun lagBlankett(behandlingId: UUID): ByteArray {
         val blankettPdfRequest = BlankettPdfRequest(lagPersonopplysningerDto(behandlingId),
                                                     hentVilkårDto(behandlingId),
-                                                    lagVedtakDto(behandlingId),
+                                                    hentVedtak(behandlingId),
                                                     lagSøknadsdatoer(behandlingId)
         )
         val blankettPdfAsByteArray = blankettClient.genererBlankett(blankettPdfRequest)
@@ -80,7 +80,7 @@ class BlankettService(private val tilgangService: TilgangService,
         return PersonopplysningerDto(hentGjeldendeNavn(aktivIdent), aktivIdent)
     }
 
-    private fun lagVedtakDto(behandlingId: UUID): VedtakDto {
+    private fun hentVedtak(behandlingId: UUID): VedtakDto {
         return vedtakService.hentVedtak(behandlingId)
                 .let { it.tilVedtakDto() }
     }
