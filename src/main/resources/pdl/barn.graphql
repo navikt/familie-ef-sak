@@ -47,6 +47,8 @@ query($identer: [ID!]!){
                 matrikkeladresse {
                     matrikkelId
                     bruksenhetsnummer
+                    tilleggsnavn
+                    postnummer
                 }
                 ukjentBosted {
                     bostedskommune

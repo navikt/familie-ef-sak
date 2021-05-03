@@ -2,9 +2,7 @@ package no.nav.familie.ef.sak.service.steg
 
 import io.mockk.*
 import no.nav.familie.ef.sak.api.Feil
-import no.nav.familie.ef.sak.api.beregning.ResultatType
-import no.nav.familie.ef.sak.api.beregning.VedtakDto
-import no.nav.familie.ef.sak.api.beregning.VedtakService
+import no.nav.familie.ef.sak.api.beregning.*
 import no.nav.familie.ef.sak.blankett.BlankettRepository
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
@@ -25,7 +23,7 @@ internal class VedtaBlankettStegTest {
                                     steg = StegType.VILKÅR,
                                     status = BehandlingStatus.UTREDES,
                                     type = BehandlingType.BLANKETT)
-        val request = VedtakDto(
+        val request = Innvilget(
                 resultatType = ResultatType.INNVILGE,
                 "En periodebegrunnelse",
                 "En inntektBegrunnelse",
@@ -57,7 +55,7 @@ internal class VedtaBlankettStegTest {
                                     steg = StegType.VILKÅR,
                                     status = BehandlingStatus.UTREDES,
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING)
-        val request = VedtakDto(
+        val request = Innvilget(
                 resultatType = ResultatType.INNVILGE,
                 "En periodebegrunnelse",
                 "En inntektBegrunnelse",
@@ -88,13 +86,8 @@ internal class VedtaBlankettStegTest {
                                     steg = StegType.VILKÅR,
                                     status = BehandlingStatus.UTREDES,
                                     type = BehandlingType.BLANKETT)
-        val request = VedtakDto(
-                resultatType = ResultatType.HENLEGGE,
-                "En periodebegrunnelse",
-                "En inntektBegrunnelse",
-                emptyList(),
-                emptyList()
-
+        val request = Henlegge(
+                resultatType = ResultatType.HENLEGGE
         )
 
         assertThrows<Feil> { vedtaBlankettSteg.utførOgReturnerNesteSteg(behandling, request) }
@@ -107,7 +100,7 @@ internal class VedtaBlankettStegTest {
                                     steg = StegType.VILKÅR,
                                     status = BehandlingStatus.UTREDES,
                                     type = BehandlingType.BLANKETT)
-        val request = VedtakDto(
+        val request = Innvilget(
                 resultatType = ResultatType.INNVILGE,
                 "En periodebegrunnelse",
                 "En inntektBegrunnelse",
