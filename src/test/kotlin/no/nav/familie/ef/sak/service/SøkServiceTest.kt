@@ -49,8 +49,8 @@ internal class SøkServiceTest {
                                     1L)
 
         val bostedsadresseFraPdl = listOf(Bostedsadresse(LocalDate.now(),
+                                                         LocalDate.now(),
                                                          null,
-                                                         Folkeregistermetadata(LocalDateTime.now(), LocalDateTime.now()),
                                                          null,
                                                          vegadresse,
                                                          UkjentBosted(""),

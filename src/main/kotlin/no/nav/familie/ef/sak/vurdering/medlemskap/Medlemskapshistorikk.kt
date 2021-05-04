@@ -101,8 +101,8 @@ class Medlemskapshistorikk(pdlPerson: PdlPerson, medlemskapsinfo: Medlemskapsinf
 
     private fun mapTilBosattperioder(bostedsadresser: List<Bostedsadresse>): List<Periode> {
         val bosattAdresser = bostedsadresser
-                .filter { it.angittFlyttedato != null || it.folkeregistermetadata.gyldighetstidspunkt != null }
-                .sortedBy { it.angittFlyttedato ?: it.folkeregistermetadata.gyldighetstidspunkt!!.toLocalDate() }
+                .filter { it.gyldigFraOgMed != null }
+                .sortedBy { it.gyldigFraOgMed ?: it.gyldigFraOgMed }
 
 
         var periode: Periode? = null
@@ -144,9 +144,9 @@ class Medlemskapshistorikk(pdlPerson: PdlPerson, medlemskapsinfo: Medlemskapsinf
         return bosattperioder.toList()
     }
 
-    private fun tildato(it: Bostedsadresse) = it.folkeregistermetadata.opphørstidspunkt?.toLocalDate() ?: LocalDate.MAX
+    private fun tildato(it: Bostedsadresse) = it.gyldigTilOgMed ?: LocalDate.MAX
 
-    private fun fradato(it: Bostedsadresse) = it.angittFlyttedato ?: it.folkeregistermetadata.gyldighetstidspunkt!!.toLocalDate()
+    private fun fradato(it: Bostedsadresse) = it.gyldigFraOgMed ?: LocalDate.MIN
 
 }
 

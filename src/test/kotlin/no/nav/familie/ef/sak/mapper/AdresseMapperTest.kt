@@ -1,11 +1,21 @@
 package no.nav.familie.ef.sak.mapper
 
-import no.nav.familie.ef.sak.integration.dto.pdl.*
+import no.nav.familie.ef.sak.integration.dto.pdl.Bostedsadresse
+import no.nav.familie.ef.sak.integration.dto.pdl.Kontaktadresse
+import no.nav.familie.ef.sak.integration.dto.pdl.KontaktadresseType
+import no.nav.familie.ef.sak.integration.dto.pdl.Matrikkeladresse
+import no.nav.familie.ef.sak.integration.dto.pdl.Metadata
+import no.nav.familie.ef.sak.integration.dto.pdl.Oppholdsadresse
+import no.nav.familie.ef.sak.integration.dto.pdl.PostadresseIFrittFormat
+import no.nav.familie.ef.sak.integration.dto.pdl.Postboksadresse
+import no.nav.familie.ef.sak.integration.dto.pdl.UkjentBosted
+import no.nav.familie.ef.sak.integration.dto.pdl.UtenlandskAdresse
+import no.nav.familie.ef.sak.integration.dto.pdl.UtenlandskAdresseIFrittFormat
+import no.nav.familie.ef.sak.integration.dto.pdl.Vegadresse
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.config.KodeverkServiceMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 internal class AdresseMapperTest {
 
@@ -18,11 +28,9 @@ internal class AdresseMapperTest {
     @Test
     internal fun `Bostedsadresse formatert adresse`() {
         val bostedsadresse =
-                Bostedsadresse(angittFlyttedato = startdato,
+                Bostedsadresse(gyldigFraOgMed = startdato,
+                               gyldigTilOgMed = startdato.plusDays(1),
                                coAdressenavn = null,
-                               folkeregistermetadata = Folkeregistermetadata(gyldighetstidspunkt = LocalDateTime.now(),
-                                                                             opphørstidspunkt = startdato.plusDays(1)
-                                                                                     .atStartOfDay()),
                                utenlandskAdresse = utenlandskAdresse(),
                                vegadresse = vegadresse(),
                                ukjentBosted = UkjentBosted(bostedskommune = "ukjentBostedKommune"),

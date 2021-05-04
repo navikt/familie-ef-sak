@@ -1,7 +1,11 @@
 package no.nav.familie.ef.sak.vurdering.medlemskap
 
 import io.mockk.mockk
-import no.nav.familie.ef.sak.integration.dto.pdl.*
+import no.nav.familie.ef.sak.integration.dto.pdl.Bostedsadresse
+import no.nav.familie.ef.sak.integration.dto.pdl.Folkeregisterpersonstatus
+import no.nav.familie.ef.sak.integration.dto.pdl.Fødsel
+import no.nav.familie.ef.sak.integration.dto.pdl.Metadata
+import no.nav.familie.ef.sak.integration.dto.pdl.Statsborgerskap
 import no.nav.familie.ef.sak.nare.evaluations.Resultat
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vurdering.medlemskap.pdlSøker
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vurdering.medlemskap.søknad
@@ -12,7 +16,6 @@ import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.Month
 
 internal class MedlemskapRegelsettTest {
@@ -54,10 +57,9 @@ internal class MedlemskapRegelsettTest {
         val medlemskapsinfoUtenUnntak = Medlemskapsinfo("3213213", emptyList(), emptyList(), emptyList())
         val pdlSøker = pdlSøker(fødsel = listOf(Fødsel(null, LocalDate.of(1999, 4, 5), null, null, null, metadataGjeldende)),
                                 folkeregisterpersonstatus = listOf(Folkeregisterpersonstatus("bosatt", "bo", metadataGjeldende)),
-                                bostedsadresse = listOf(Bostedsadresse(null,
+                                bostedsadresse = listOf(Bostedsadresse(LocalDate.of(1999, 4, 5),
                                                                        null,
-                                                                       Folkeregistermetadata(LocalDateTime.of(1999, 4, 5, 0, 0),
-                                                                                             null),
+                                                                       null,
                                                                        null,
                                                                        null,
                                                                        null,
@@ -94,10 +96,9 @@ internal class MedlemskapRegelsettTest {
         val medlemskapsinfoUtenUnntak = Medlemskapsinfo("3213213", emptyList(), emptyList(), emptyList())
         val pdlSøker = pdlSøker(fødsel = listOf(Fødsel(null, LocalDate.of(1999, 4, 5), null, null, null, metadataGjeldende)),
                                 folkeregisterpersonstatus = listOf(Folkeregisterpersonstatus("bosatt", "bo", metadataGjeldende)),
-                                bostedsadresse = listOf(Bostedsadresse(null,
+                                bostedsadresse = listOf(Bostedsadresse(LocalDate.of(1999, 4, 5),
                                                                        null,
-                                                                       Folkeregistermetadata(LocalDateTime.of(1999, 4, 5, 0, 0),
-                                                                                             null),
+                                                                       null,
                                                                        null,
                                                                        null,
                                                                        null,

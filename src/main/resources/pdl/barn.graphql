@@ -10,14 +10,11 @@ query($identer: [ID!]!){
                 }
             }
             bostedsadresse {
-                angittFlyttedato
+                gyldigFraOgMed
+                gyldigTilOgMed
                 coAdressenavn
                 metadata {
                     historisk
-                }
-                folkeregistermetadata {
-                    gyldighetstidspunkt
-                    opphoerstidspunkt
                 }
                 utenlandskAdresse {
                     adressenavnNummer
