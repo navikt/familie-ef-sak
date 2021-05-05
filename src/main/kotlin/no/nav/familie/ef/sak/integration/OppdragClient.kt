@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.integration
 
+import no.nav.familie.ef.sak.dummy.FLYTTET_TIL_EF_IVERKSETT
 import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.getDataOrThrow
@@ -13,6 +14,7 @@ import java.net.URI
 
 
 @Service
+@Deprecated(FLYTTET_TIL_EF_IVERKSETT)
 class OppdragClient(@Value("\${FAMILIE_OPPDRAG_API_URL}")
                     private val familieOppdragUri: URI,
                     @Qualifier("azure")

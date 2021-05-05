@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.økonomi
 
+import no.nav.familie.ef.sak.dummy.FLYTTET_TIL_EF_IVERKSETT
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.økonomi.UtbetalingsoppdragGenerator.lagTilkjentYtelseMedUtbetalingsoppdrag
 import org.assertj.core.api.Assertions.assertThat
@@ -10,6 +11,7 @@ import org.opentest4j.ValueWrapper
 import java.time.LocalDate
 import java.util.*
 
+@Deprecated(FLYTTET_TIL_EF_IVERKSETT)
 internal class UtbetalingsoppdragGeneratorTest {
 
     @Test

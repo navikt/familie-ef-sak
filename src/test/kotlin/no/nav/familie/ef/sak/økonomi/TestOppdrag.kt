@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.økonomi
 
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
+import no.nav.familie.ef.sak.dummy.FLYTTET_TIL_EF_IVERKSETT
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Opphør
@@ -18,6 +19,7 @@ import java.util.*
 private const val behandlingEksternId = 0L
 private const val fagsakEksternId = 1L
 
+@Deprecated(FLYTTET_TIL_EF_IVERKSETT)
 enum class TestOppdragType {
     Input,
     Output,
@@ -30,6 +32,7 @@ enum class TestOppdragType {
  *  * På output er oppdragId som sjekker att andelTilkjentYtelse har fått riktig output
  *  * På oppdrag trengs den ikke
  */
+@Deprecated(FLYTTET_TIL_EF_IVERKSETT)
 data class TestOppdrag(val type: TestOppdragType,
                        val fnr: String,
                        val oppdragId: UUID?,
@@ -81,6 +84,7 @@ data class TestOppdrag(val type: TestOppdragType,
     }
 }
 
+@Deprecated(FLYTTET_TIL_EF_IVERKSETT)
 class TestOppdragGroup {
 
     private val andelerTilkjentYtelseInn: MutableList<AndelTilkjentYtelse> = mutableListOf()
@@ -137,7 +141,7 @@ class TestOppdragGroup {
 
     }
 }
-
+@Deprecated(FLYTTET_TIL_EF_IVERKSETT)
 object TestOppdragParser {
 
     private const val KEY_TYPE = "Type"
@@ -237,6 +241,7 @@ object TestOppdragParser {
 
 }
 
+@Deprecated(FLYTTET_TIL_EF_IVERKSETT)
 object TestOppdragRunner {
 
     fun run(url: URL) {
