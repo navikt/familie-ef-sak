@@ -18,7 +18,6 @@ import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøkerData
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøkerKort
 import no.nav.familie.http.client.AbstractPingableRestClient
-import no.nav.familie.http.sts.StsRestClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Service
@@ -27,8 +26,7 @@ import java.net.URI
 
 @Service
 class PdlClient(val pdlConfig: PdlConfig,
-                @Qualifier("stsMedApiKey") restTemplate: RestOperations,
-                val stsRestClient: StsRestClient)
+                @Qualifier("azure") restTemplate: RestOperations)
     : AbstractPingableRestClient(restTemplate, "pdl.personinfo") {
 
     override val pingUri: URI
@@ -128,7 +126,6 @@ class PdlClient(val pdlConfig: PdlConfig,
     private fun httpHeaders(): HttpHeaders {
 
         return HttpHeaders().apply {
-            add("Nav-Consumer-Token", "Bearer ${stsRestClient.systemOIDCToken}")
             add("Tema", "ENF")
         }
     }
