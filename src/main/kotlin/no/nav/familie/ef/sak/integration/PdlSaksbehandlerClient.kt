@@ -22,7 +22,7 @@ import org.springframework.web.client.RestOperations
 class PdlSaksbehandlerClient(val pdlConfig: PdlConfig,
                              @Qualifier("azureMedApiKey") restTemplate: RestOperations,
                              val stsRestClient: StsRestClient)
-    : AbstractRestClient(restTemplate, "pdl.personinfo") {
+    : AbstractRestClient(restTemplate, "pdl.personinfo.saksbehandler") {
 
     fun søkPersonerMedSammeAdresse(søkeKriterier: List<SøkeKriterier>): PersonSøkResultat {
         val pdlPersonSøkRequest = PdlPersonSøkRequest(variables = PdlPersonSøkRequestVariables(paging = Paging(1, 30),
@@ -37,8 +37,6 @@ class PdlSaksbehandlerClient(val pdlConfig: PdlConfig,
     private fun httpHeaders(): HttpHeaders {
 
         return HttpHeaders().apply {
-            // TODO mulig man kan slette Nav-Consumer-Token innen kort
-            add("Nav-Consumer-Token", "Bearer ${stsRestClient.systemOIDCToken}")
             add("Tema", "ENF")
         }
     }
