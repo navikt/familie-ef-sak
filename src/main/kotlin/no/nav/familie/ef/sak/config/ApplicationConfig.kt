@@ -5,10 +5,15 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import no.nav.familie.ef.sak.util.ObjectMapperProvider
 import no.nav.familie.http.config.RestTemplateAzure
 import no.nav.familie.http.interceptor.ConsumerIdClientInterceptor
+import no.nav.familie.http.interceptor.InternLoggerInterceptor
 import no.nav.familie.http.interceptor.MdcValuesPropagatingClientInterceptor
 import no.nav.familie.log.filter.LogFilter
 import no.nav.familie.log.filter.RequestTimeFilter
+import no.nav.security.token.support.client.core.OAuth2GrantType
 import no.nav.security.token.support.client.core.http.OAuth2HttpClient
+import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenResponse
+import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService
+import no.nav.security.token.support.client.spring.ClientConfigurationProperties
 import no.nav.security.token.support.client.spring.oauth2.DefaultOAuth2HttpClient
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import no.nav.security.token.support.spring.api.EnableJwtTokenValidation
@@ -21,8 +26,13 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Primary
+import org.springframework.http.HttpRequest
+import org.springframework.http.client.ClientHttpRequestExecution
+import org.springframework.http.client.ClientHttpRequestInterceptor
+import org.springframework.http.client.ClientHttpResponse
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 import org.springframework.scheduling.annotation.EnableScheduling
+import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
 import org.springframework.web.client.RestTemplate
 import java.time.Duration
@@ -84,6 +94,16 @@ class ApplicationConfig {
                                                           MdcValuesPropagatingClientInterceptor()).build()
     }
 
+    @Bean("azureClientCredentials")
+    fun restTemplateJwtBearer(restTemplateBuilder: RestTemplateBuilder,
+                              consumerIdClientInterceptor: ConsumerIdClientInterceptor,
+                              internLoggerInterceptor: InternLoggerInterceptor,
+                              bearerTokenClientInterceptor: AzureClientCredentialsClientInterceptor): RestOperations {
+        return restTemplateBuilder.additionalInterceptors(consumerIdClientInterceptor,
+                                                          bearerTokenClientInterceptor,
+                                                          MdcValuesPropagatingClientInterceptor()).build()
+    }
+
     /**
      * Overskrever OAuth2HttpClient som settes opp i token-support som ikke kan få med objectMapper fra felles
      * pga .setVisibility(PropertyAccessor.SETTER, JsonAutoDetect.Visibility.NONE)
@@ -97,4 +117,23 @@ class ApplicationConfig {
                                                .setReadTimeout(Duration.of(4, ChronoUnit.SECONDS)))
     }
 
+}
+
+@Component
+class AzureClientCredentialsClientInterceptor(private val oAuth2AccessTokenService: OAuth2AccessTokenService,
+                                              private val clientConfigurationProperties: ClientConfigurationProperties) :
+        ClientHttpRequestInterceptor {
+
+
+    override fun intercept(request: HttpRequest, body: ByteArray, execution: ClientHttpRequestExecution): ClientHttpResponse {
+        val uri = request.uri
+        val grantType = OAuth2GrantType.CLIENT_CREDENTIALS
+        val clientProperties = clientConfigurationProperties.registration.values
+                                       .filter { uri.toString().startsWith(it.resourceUrl.toString()) }
+                                       .firstOrNull { it.grantType == grantType }
+                               ?: error("could not find oauth client config for uri=$uri and grantType=$grantType")
+        val response: OAuth2AccessTokenResponse = oAuth2AccessTokenService.getAccessToken(clientProperties)
+        request.headers.setBearerAuth(response.accessToken)
+        return execution.execute(request, body)
+    }
 }
