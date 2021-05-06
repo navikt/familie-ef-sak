@@ -4,13 +4,13 @@ import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.TilkjentYtelseService
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.ef.sak.vedtaksbrev.SimuleringClient
+import no.nav.familie.ef.sak.vedtaksbrev.IverksettClient
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
-class SimuleringService(private val simuleringClient: SimuleringClient,
+class SimuleringService(private val iverksettClient: IverksettClient,
                         private val behandlingService: BehandlingService,
                         private val fagsakService: FagsakService,
                         private val tilkjentYtelseService: TilkjentYtelseService) {
@@ -30,7 +30,7 @@ class SimuleringService(private val simuleringClient: SimuleringClient,
                 )
         val forrigeTilkjentYtelse = tilkjentYtelseService.finnSisteTilkjentYtelse(fagsakId = behandling.fagsakId)?.tilIverksett()
 
-        return simuleringClient.simuler(SimuleringDto(
+        return iverksettClient.simuler(SimuleringDto(
                 nyTilkjentYtelseMedMetaData = tilkjentYtelseMedMedtadata,
                 forrigeTilkjentYtelse = forrigeTilkjentYtelse
 

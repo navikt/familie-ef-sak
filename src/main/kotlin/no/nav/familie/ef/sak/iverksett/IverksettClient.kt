@@ -14,19 +14,19 @@ import java.net.URI
 
 
 @Component
-class SimuleringClient(@Value("\${FAMILIE_EF_SIMULERING_API_URL}")
-                       private val familieEfSimuleringUri: String,
-                       @Qualifier("azure")
-                       private val restOperations: RestOperations) : AbstractPingableRestClient(restOperations, "familie.brev") {
+class IverksettClient(@Value("\${FAMILIE_EF_IVERKSETT_URL}")
+                      private val familieEfIverksettUri: String,
+                      @Qualifier("azure")
+                      private val restOperations: RestOperations) : AbstractPingableRestClient(restOperations, "familie.brev") {
 
-    override val pingUri: URI = URI.create("$familieEfSimuleringUri/api/status")
+    override val pingUri: URI = URI.create("$familieEfIverksettUri/api/status")
 
     override fun ping() {
         operations.optionsForAllow(pingUri)
     }
 
     fun simuler(simuleringRequest: SimuleringDto): DetaljertSimuleringResultat {
-        val url = URI.create("$familieEfSimuleringUri/api/simulering")
+        val url = URI.create("$familieEfIverksettUri/api/simulering")
 
         return postForEntity<Ressurs<DetaljertSimuleringResultat>>(url,
                                                                    simuleringRequest,

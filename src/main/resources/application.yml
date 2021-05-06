@@ -114,7 +114,7 @@ PDL_URL: https://${GATEWAY_PREFIX}.oera.no/pdl-api
 
 FAMILIE_BREV_API_URL: http://familie-brev
 FAMILIE_BLANKETT_API_URL: http://familie-ef-blankett
-FAMILIE_EF_SIMULERING_API_URL: http://familie-ef-iverksett
+FAMILIE_EF_IVERKSETT_URL: http://familie-ef-iverksett
 
 FAMILIE_OPPDRAG_API_URL: https://familie-oppdrag.${ON_PREM_URL_ENV}-fss-pub.nais.io
 FAMILIE_INTEGRASJONER_URL: https://familie-integrasjoner.${ON_PREM_URL_ENV}-fss-pub.nais.io

@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.config
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ef.sak.vedtaksbrev.SimuleringClient
+import no.nav.familie.ef.sak.vedtaksbrev.IverksettClient
 import no.nav.familie.kontrakter.felles.simulering.BetalingType
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import no.nav.familie.kontrakter.felles.simulering.FagOmrådeKode
@@ -18,13 +18,13 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 @Configuration
-@Profile("mock-simulering")
-class SimuleringClientMock {
+@Profile("mock-iverksett")
+class IverksettClientMock {
 
     @Bean
     @Primary
-    fun simuleringClient(): SimuleringClient {
-        val simuleringClient = mockk<SimuleringClient>()
+    fun iverksettClient(): IverksettClient {
+        val iverksettClient = mockk<IverksettClient>()
 
         val simulertPostering = SimulertPostering(fagOmrådeKode = FagOmrådeKode.ENSLIG_FORSØRGER,
                                                   fom = LocalDate.of(2021, 1, 1),
@@ -35,11 +35,11 @@ class SimuleringClientMock {
                                                   forfallsdato = LocalDate.of(2021, 1, 15),
                                                   utenInntrekk = false)
 
-        every { simuleringClient.simuler(any()) } returns DetaljertSimuleringResultat(simuleringMottaker = listOf(
+        every { iverksettClient.simuler(any()) } returns DetaljertSimuleringResultat(simuleringMottaker = listOf(
                 SimuleringMottaker(simulertPostering = listOf(simulertPostering),
                                    mottakerNummer = "123",
                                    mottakerType = MottakerType.BRUKER)))
 
-        return simuleringClient
+        return iverksettClient
     }
 }
