@@ -1,0 +1,1 @@
+ALTER TABLE tilkjent_ytelse ADD COLUMN opphorsdato DATE;

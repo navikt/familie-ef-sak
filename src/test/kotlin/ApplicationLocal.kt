@@ -20,6 +20,7 @@ fun main(args: Array<String>) {
                       "mock-infotrygd-replika",
                       "mock-kodeverk",
                       "mock-blankett",
+                      "mock-simulering",
                       "mock-brev")
             .run(*args)
 }
