@@ -55,6 +55,13 @@ class VedtaksbrevService(private val brevClient: BrevClient,
                                       brevRequest)
     }
 
+    fun lagPdf(brevRequest: String): ByteArray {
+        return brevClient.genererBrev("bokmaal",
+                                      "innvilgetVedtakMVP",
+                                      brevRequest)
+    }
+
+
     fun lagreBrevUtkast(behandlingId: UUID): Vedtaksbrev {
         val request = lagBrevRequest(behandlingId)
         val pdf = lagPdf(request)
@@ -69,8 +76,13 @@ class VedtaksbrevService(private val brevClient: BrevClient,
     }
 
     fun forhåndsvisBrev(behandlingId: UUID): ByteArray{
-        return  lagPdf(lagBrevRequest(behandlingId))
+        return lagPdf(lagBrevRequest(behandlingId))
     }
+
+    fun forhåndsvisBrev(behandlingId: UUID, brevRequest: String): ByteArray{
+        return lagPdf(brevRequest)
+    }
+
 
     fun hentBrev(behandlingId: UUID): Vedtaksbrev {
         return brevRepository.findByIdOrThrow(behandlingId)
