@@ -40,13 +40,11 @@ class AdresseMapper(private val kodeverkService: KodeverkService) {
     }
 
     fun tilAdresse(adresse: Bostedsadresse): AdresseDto {
-        val angittFlyttedato = adresse.angittFlyttedato?.let { if (it != DATE_NULL) it else null }
-        val gjeldendeDato = datoEllerIdag(adresse.gyldigFraOgMed ?: angittFlyttedato)
+        val gjeldendeDato = datoEllerIdag(adresse.gyldigFraOgMed)
         return AdresseDto(visningsadresse = tilFormatertAdresse(adresse, gjeldendeDato),
                           type = AdresseType.BOSTEDADRESSE,
                           gyldigFraOgMed = adresse.gyldigFraOgMed,
-                          gyldigTilOgMed = adresse.gyldigTilOgMed,
-                          angittFlyttedato = angittFlyttedato)
+                          gyldigTilOgMed = adresse.gyldigTilOgMed)
     }
 
     private fun tilFormatertAdresse(bostedsadresse: Bostedsadresse, gjeldendeDato: LocalDate): String? {
@@ -143,7 +141,4 @@ class AdresseMapper(private val kodeverkService: KodeverkService) {
         } else filterNotNull.joinToString(separator)
     }
 
-    companion object {
-        private val DATE_NULL = LocalDate.of(1, 1, 1) // Dato i FREG er satt til 0001-01-01 når den egentlige er null
-    }
 }

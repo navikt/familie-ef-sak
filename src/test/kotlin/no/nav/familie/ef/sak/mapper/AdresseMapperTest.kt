@@ -71,20 +71,6 @@ internal class AdresseMapperTest {
     }
 
     @Test
-    internal fun `Skal kalle på hentPoststed med angittFlyttedato når gyldigFraOgMed er null`() {
-        val bostedsadresse = bostedsadresse.copy(gyldigFraOgMed = null)
-        mapper.tilAdresse(bostedsadresse)
-        verify { kodeverkService.hentPoststed(any(), bostedsadresse.angittFlyttedato!!) }
-    }
-
-    @Test
-    internal fun `Skal kalle på hentPoststed med dagens dato når angittFlyttedato er null eller MIN`() {
-        mapper.tilAdresse(this.bostedsadresse.copy(gyldigFraOgMed = null, angittFlyttedato = null))
-        mapper.tilAdresse(this.bostedsadresse.copy(gyldigFraOgMed = null, angittFlyttedato = LocalDate.of(1,1,1)))
-        verify(exactly = 2) { kodeverkService.hentPoststed(any(), LocalDate.now()) }
-    }
-
-    @Test
     internal fun `Oppholdsadresse formatert adresse`() {
         val oppholdsadresse = Oppholdsadresse(gyldigFraOgMed = null,
                                               coAdressenavn = null,

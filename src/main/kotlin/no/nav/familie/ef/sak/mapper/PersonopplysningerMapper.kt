@@ -42,12 +42,13 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                               egenAnsatt: Boolean,
                               identNavn: Map<String, String>): PersonopplysningerDto {
         val søker = personMedRelasjoner.søker
-        if (ident.startsWith("1507")) {
-            val datoer = søker.bostedsadresse.joinToString(",") {
-                "angittFlyttedato=${it.angittFlyttedato} gyldigFraOgMed=${it.gyldigFraOgMed}"
-            }
-            secureLogger.info(datoer)
+        val datoer =
+                søker.bostedsadresse.filter { it.angittFlyttedato != null && it.angittFlyttedato != LocalDate.of(1, 1, 1) }
+                        .map { "angittFlyttedato=${it.angittFlyttedato} gyldigFraOgMed=${it.gyldigFraOgMed}" }
+        if (datoer.isNotEmpty()) {
+            secureLogger.info("Forskjell i datoer: $datoer")
         }
+
         return PersonopplysningerDto(
                 adressebeskyttelse = søker.adressebeskyttelse.gjeldende()
                         ?.let { Adressebeskyttelse.valueOf(it.gradering.name) },

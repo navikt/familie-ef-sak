@@ -73,8 +73,7 @@ enum class Sivilstandstype {
 data class AdresseDto(val visningsadresse: String?,
                       val type: AdresseType,
                       val gyldigFraOgMed: LocalDate?,
-                      val gyldigTilOgMed: LocalDate?,
-                      val angittFlyttedato: LocalDate? = null)
+                      val gyldigTilOgMed: LocalDate?)
 
 enum class AdresseType {
     BOSTEDADRESSE,
