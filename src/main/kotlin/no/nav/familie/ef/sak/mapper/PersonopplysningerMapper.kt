@@ -1,13 +1,30 @@
 package no.nav.familie.ef.sak.mapper
 
-import no.nav.familie.ef.sak.api.dto.*
+import no.nav.familie.ef.sak.api.dto.AdresseDto
 import no.nav.familie.ef.sak.api.dto.Adressebeskyttelse
+import no.nav.familie.ef.sak.api.dto.AnnenForelderMinimumDto
+import no.nav.familie.ef.sak.api.dto.BarnDto
 import no.nav.familie.ef.sak.api.dto.Folkeregisterpersonstatus
+import no.nav.familie.ef.sak.api.dto.FullmaktDto
+import no.nav.familie.ef.sak.api.dto.InnflyttingDto
+import no.nav.familie.ef.sak.api.dto.NavnDto
+import no.nav.familie.ef.sak.api.dto.PersonopplysningerDto
+import no.nav.familie.ef.sak.api.dto.SivilstandDto
 import no.nav.familie.ef.sak.api.dto.Sivilstandstype
+import no.nav.familie.ef.sak.api.dto.TelefonnummerDto
+import no.nav.familie.ef.sak.api.dto.UtflyttingDto
 import no.nav.familie.ef.sak.domene.SøkerMedBarn
-import no.nav.familie.ef.sak.integration.dto.pdl.*
+import no.nav.familie.ef.sak.integration.dto.pdl.Bostedsadresse
+import no.nav.familie.ef.sak.integration.dto.pdl.Familierelasjonsrolle
+import no.nav.familie.ef.sak.integration.dto.pdl.Fullmakt
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlBarn
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker
+import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
+import no.nav.familie.ef.sak.integration.dto.pdl.visningsnavn
 import no.nav.familie.ef.sak.service.ArbeidsfordelingService
 import no.nav.familie.ef.sak.service.KodeverkService
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 
@@ -17,12 +34,20 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                                private val arbeidsfordelingService: ArbeidsfordelingService,
                                private val kodeverkService: KodeverkService) {
 
+    private val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
+
     fun tilPersonopplysninger(personMedRelasjoner: SøkerMedBarn,
                               ident: String,
                               fullmakter: List<Fullmakt>,
                               egenAnsatt: Boolean,
                               identNavn: Map<String, String>): PersonopplysningerDto {
         val søker = personMedRelasjoner.søker
+        if (ident.startsWith("1507")) {
+            val datoer = søker.bostedsadresse.joinToString(",") {
+                "angittFlyttedato=${it.angittFlyttedato} gyldigFraOgMed=${it.gyldigFraOgMed}"
+            }
+            secureLogger.info(datoer)
+        }
         return PersonopplysningerDto(
                 adressebeskyttelse = søker.adressebeskyttelse.gjeldende()
                         ?.let { Adressebeskyttelse.valueOf(it.gradering.name) },
