@@ -17,7 +17,7 @@ import java.net.URI
 class IverksettClient(@Value("\${FAMILIE_EF_IVERKSETT_URL}")
                       private val familieEfIverksettUri: String,
                       @Qualifier("azure")
-                      private val restOperations: RestOperations) : AbstractPingableRestClient(restOperations, "familie.brev") {
+                      private val restOperations: RestOperations) : AbstractPingableRestClient(restOperations, "familie.ef.iverksett") {
 
     override val pingUri: URI = URI.create("$familieEfIverksettUri/api/status")
 

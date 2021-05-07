@@ -175,7 +175,6 @@ internal class PlukkBehandlingTilKonsistensavstemmingTest : OppslagSpringRunnerT
                                                                       LocalDate.now(),
                                                                       UUID.randomUUID(),
                                                                       behandling.id,
-                                                                      null,
                                                                       andelerTilkjentYtelse))
         tilkjentYtelseService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(behandling)
         behandlingRepository.update(behandling.copy(status = BehandlingStatus.FERDIGSTILT))

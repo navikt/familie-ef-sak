@@ -57,8 +57,8 @@ internal class SimuleringControllerTest : OppslagSpringRunnerTest() {
                                                                                                                        31),
                                                                                                           personIdent,
                                                                                                           periodeId = 1L,
-                                                                                                          kildeBehandlingId = behandling.id)),
-                                                       opphørsdato = null))
+                                                                                                          kildeBehandlingId = behandling.id))
+                                                       ))
 
         val respons: ResponseEntity<Ressurs<DetaljertSimuleringResultat>> = simulerForBehandling(behandling.id)
 

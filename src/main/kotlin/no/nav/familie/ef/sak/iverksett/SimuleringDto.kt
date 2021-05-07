@@ -5,9 +5,6 @@ import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseType
-import no.nav.familie.ef.sak.repository.domain.stønadFom
-import no.nav.familie.ef.sak.repository.domain.stønadTom
-import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import java.time.LocalDate
 import java.util.UUID
 
@@ -28,10 +25,6 @@ data class TilkjentYtelseForIverksett(
         val id: UUID = UUID.randomUUID(),
         val behandlingId: UUID,
         val personident: String,
-        val stønadFom: LocalDate? = null,
-        val stønadTom: LocalDate? = null,
-        val opphørFom: LocalDate? = null,
-        val utbetalingsoppdrag: Utbetalingsoppdrag? = null,
         val vedtaksdato: LocalDate? = null,
         val status: TilkjentYtelseStatus,
         val type: TilkjentYtelseType,
@@ -78,10 +71,6 @@ fun TilkjentYtelse.tilIverksett(): TilkjentYtelseForIverksett {
                                       behandlingId = this.behandlingId,
                                       andelerTilkjentYtelse = this.andelerTilkjentYtelse.map { it.tilIverksett() },
                                       personident = this.personident,
-                                      stønadFom = this.stønadFom(),
-                                      stønadTom = this.stønadTom(),
-                                      opphørFom = this.opphørsdato,
-                                      utbetalingsoppdrag = null,
                                       vedtaksdato = this.vedtaksdato,
                                       status = this.status,
                                       type = this.type)

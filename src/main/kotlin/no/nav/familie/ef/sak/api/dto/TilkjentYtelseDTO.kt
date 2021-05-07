@@ -9,7 +9,6 @@ data class TilkjentYtelseDTO(val søker: String,
         // Hvis frontend sender inn andeler kanskje id kan være optional og att backend oppretter id
                              val id: UUID = UUID.randomUUID(),
                              val behandlingId: UUID,
-                             val opphørFom: LocalDate? = null,
                              val andelerTilkjentYtelse: List<AndelTilkjentYtelseDTO>) {
 
     fun valider() {
