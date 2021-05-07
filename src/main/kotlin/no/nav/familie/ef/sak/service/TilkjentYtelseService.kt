@@ -35,6 +35,10 @@ class TilkjentYtelseService(private val oppdragClient: OppdragClient,
         return oppdragClient.hentStatus(oppdragId)
     }
 
+    fun hentForBehandling(behandlingId: UUID): TilkjentYtelse {
+        return hentTilkjentYtelseFraBehandlingId(behandlingId)
+    }
+
     fun hentTilkjentYtelseDto(tilkjentYtelseId: UUID): TilkjentYtelseDTO {
         val tilkjentYtelse = hentTilkjentYtelse(tilkjentYtelseId)
         return tilkjentYtelse.tilDto()
@@ -44,6 +48,10 @@ class TilkjentYtelseService(private val oppdragClient: OppdragClient,
         val nyTilkjentYtelse = tilkjentYtelseDTO.tilTilkjentYtelse()
         val andelerMedGodtykkligKildeId = nyTilkjentYtelse.andelerTilkjentYtelse.map { it.copy(kildeBehandlingId = nyTilkjentYtelse.behandlingId) }
         return tilkjentYtelseRepository.insert(nyTilkjentYtelse.copy(andelerTilkjentYtelse = andelerMedGodtykkligKildeId))
+    }
+
+    fun finnSisteTilkjentYtelse(fagsakId: UUID): TilkjentYtelse? {
+        return tilkjentYtelseRepository.finnSisteTilkjentYtelse(fagsakId)
     }
 
     @Transactional
