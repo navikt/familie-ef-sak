@@ -59,6 +59,24 @@ no.nav.security.jwt:
           client-id: ${AZURE_APP_CLIENT_ID}
           client-secret: ${AZURE_APP_CLIENT_SECRET}
           client-auth-method: client_secret_basic
+      familie-ef-iverksett-clientcredentials:
+        resource-url: ${FAMILIE_EF_IVERKSETT_URL}
+        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
+        grant-type: client_credentials
+        scope: ${EF_IVERKSETT_SCOPE}
+        authentication:
+          client-id: ${AZURE_APP_CLIENT_ID}
+          client-secret: ${AZURE_APP_CLIENT_SECRET}
+          client-auth-method: client_secret_basic
+      familie-ef-iverksett:
+        resource-url: ${FAMILIE_EF_IVERKSETT_URL}
+        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
+        grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+        scope: ${EF_IVERKSETT_SCOPE}
+        authentication:
+          client-id: ${AZURE_APP_CLIENT_ID}
+          client-secret: ${AZURE_APP_CLIENT_SECRET}
+          client-auth-method: client_secret_basic
       pdl:
         resource-url: ${PDL_URL}
         token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
@@ -69,6 +87,8 @@ no.nav.security.jwt:
           client-secret: ${AZURE_APP_CLIENT_SECRET}
           client-auth-method: client_secret_basic
 PDL_SCOPE: api://prod-fss.pdl.pdl-api/.default
+IVERKSETT_SCOPE: api://prod-gcp.teamfamilie.familie-ef-iverksett/.default
+
 
 spring:
   autoconfigure.exclude: org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration
