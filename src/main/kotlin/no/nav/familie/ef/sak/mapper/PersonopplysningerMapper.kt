@@ -42,12 +42,7 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                               egenAnsatt: Boolean,
                               identNavn: Map<String, String>): PersonopplysningerDto {
         val søker = personMedRelasjoner.søker
-        val datoer =
-                søker.bostedsadresse.filter { it.angittFlyttedato != null && it.angittFlyttedato != LocalDate.of(1, 1, 1) }
-                        .map { "angittFlyttedato=${it.angittFlyttedato} gyldigFraOgMed=${it.gyldigFraOgMed}" }
-        if (datoer.isNotEmpty()) {
-            secureLogger.info("Forskjell i datoer: $datoer")
-        }
+        loggDatoDiff(søker)
 
         return PersonopplysningerDto(
                 adressebeskyttelse = søker.adressebeskyttelse.gjeldende()
@@ -97,6 +92,15 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                 },
                 oppholdstillatelse = OppholdstillatelseMapper.map(søker.opphold)
         )
+    }
+
+    private fun loggDatoDiff(søker: PdlSøker) {
+        val datoer = søker.bostedsadresse
+                .filter { it.angittFlyttedato != null && it.angittFlyttedato != LocalDate.of(1, 1, 1) }
+                .map { "angittFlyttedato=${it.angittFlyttedato} gyldigFraOgMed=${it.gyldigFraOgMed}" }
+        if (datoer.isNotEmpty()) {
+            secureLogger.info("Forskjell i datoer: $datoer")
+        }
     }
 
     fun tilAdresser(søker: PdlSøker): List<AdresseDto> {
