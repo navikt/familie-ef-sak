@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.service
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.familie.ef.sak.api.dto.BrevRequest
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.JournalpostClient
@@ -55,7 +56,7 @@ class VedtaksbrevService(private val brevClient: BrevClient,
                                       brevRequest)
     }
 
-    fun lagPdf(brevRequest: String, brevMal: String): ByteArray {
+    fun lagPdf(brevRequest: JsonNode, brevMal: String = "innvilgetVedtakMVP"): ByteArray {
         return brevClient.genererBrev("bokmaal",
                                       brevMal,
                                       brevRequest)
@@ -79,7 +80,7 @@ class VedtaksbrevService(private val brevClient: BrevClient,
         return lagPdf(lagBrevRequest(behandlingId))
     }
 
-    fun forhåndsvisBrev(behandlingId: UUID, brevRequest: String, brevMal: String): ByteArray{
+    fun forhåndsvisBrev(behandlingId: UUID, brevRequest: JsonNode, brevMal: String): ByteArray{
         return lagPdf(brevRequest, brevMal)
     }
 

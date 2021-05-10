@@ -26,6 +26,11 @@ internal class BehandlingServiceTest {
     val behandlingService = BehandlingService(mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), behandlingRepository, behandlingshistorikkService)
 
     @Test
+    internal fun `fail til opprettBehandling starter på steg vilkår`(){
+        throw Exception()
+    }
+
+    @Test
     internal fun `skal annullere behandling som er blankett og status utredes`() {
         val behandling = behandling(fagsak(), type = BehandlingType.BLANKETT, status = BehandlingStatus.UTREDES)
         annullerOgForventOk(behandling)
