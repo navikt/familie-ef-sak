@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.integration.dto.familie.EgenAnsattResponse
 import no.nav.familie.ef.sak.integration.dto.familie.Tilgang
 import no.nav.familie.ef.sak.util.medContentTypeJsonUTF8
 import no.nav.familie.http.client.AbstractPingableRestClient
+import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.dokdist.DistribuerJournalpostRequest
@@ -75,7 +76,7 @@ class FamilieIntegrasjonerClient(@Qualifier("azure") restOperations: RestOperati
         logger.info("Kaller dokdist-tjeneste for journalpost=$journalpostId")
 
         val journalpostRequest = DistribuerJournalpostRequest(journalpostId = journalpostId,
-                                                              bestillendeFagsystem = "EF",
+                                                              bestillendeFagsystem = Fagsystem.EF,
                                                               dokumentProdApp = "FAMILIE_EF_SAK")
 
         return postForEntity<Ressurs<String>>(integrasjonerConfig.distribuerDokumentUri,

@@ -24,14 +24,14 @@ import no.nav.familie.ef.sak.repository.domain.FagsakPerson
 import no.nav.familie.ef.sak.repository.domain.Oppgave
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.service.steg.StegType
-import no.nav.familie.kontrakter.felles.oppgave.Behandlingstema
+import no.nav.familie.kontrakter.felles.Behandlingstema
+import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
-import no.nav.familie.kontrakter.felles.oppgave.Tema
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

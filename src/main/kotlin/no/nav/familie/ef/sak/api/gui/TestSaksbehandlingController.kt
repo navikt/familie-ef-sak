@@ -13,9 +13,10 @@ import no.nav.familie.ef.sak.service.PersonService
 import no.nav.familie.ef.sak.service.steg.StegType
 import no.nav.familie.kontrakter.ef.søknad.*
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentRequest
-import no.nav.familie.kontrakter.felles.dokarkiv.Dokument
-import no.nav.familie.kontrakter.felles.dokarkiv.FilType
+import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
+import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
+import no.nav.familie.kontrakter.felles.dokarkiv.v2.Dokument
+import no.nav.familie.kontrakter.felles.dokarkiv.v2.Filtype
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.context.annotation.Profile
 import org.springframework.http.MediaType
@@ -122,8 +123,8 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
         val arkiverDokumentRequest = ArkiverDokumentRequest(fnr,
                                                             false,
                                                             listOf(Dokument("TEST".toByteArray(),
-                                                                            FilType.PDFA, null, null,
-                                                                            "OVERGANGSSTØNAD_SØKNAD")),
+                                                                            Filtype.PDFA, null, null,
+                                                                            Dokumenttype.OVERGANGSSTØNAD_SØKNAD)),
                                                             emptyList())
 
         val dokumentResponse = journalpostClient.arkiverDokument(arkiverDokumentRequest)

@@ -85,14 +85,14 @@ internal class VedleggServiceTest {
                                        tittel = "Søknad om overgangsstønad - dokument 1",
                                        brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
                                        dokumentvarianter = listOf(Dokumentvariant(filnavn = "FilnavnDok1",
-                                                                                  variantformat = "ARKIV"),
-                                                                  Dokumentvariant(variantformat = "ORIGINAL")
+                                                                                  variantformat = Dokumentvariantformat.ARKIV),
+                                                                  Dokumentvariant(variantformat = Dokumentvariantformat.ORIGINAL)
                                        ))
 
     val syktBarnDokument = DokumentInfo(dokumentInfoId = "222",
                                         tittel = "Sykt barn",
                                         dokumentvarianter = listOf(Dokumentvariant(filnavn = "FilnavnDok2",
-                                                                                   variantformat = "ARKIV")))
+                                                                                   variantformat = Dokumentvariantformat.ARKIV)))
 
     val ukjentDokument = DokumentInfo(dokumentInfoId = "404",
                                       tittel = "Ukjent tittel",
@@ -102,11 +102,11 @@ internal class VedleggServiceTest {
                                        tittel = "Samboerkontrakt",
                                        brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
                                        dokumentvarianter = listOf(Dokumentvariant(filnavn = "FilnavnDok3",
-                                                                                  variantformat = "ARKIV")))
+                                                                                  variantformat = Dokumentvariantformat.ARKIV)))
     val skilsmissedokument = DokumentInfo(dokumentInfoId = "444",
                                           tittel = "Skilsmissepapirer",
                                           dokumentvarianter = listOf(Dokumentvariant(filnavn = "FilnavnDok4",
-                                                                                     variantformat = "ARKIV")))
+                                                                                     variantformat = Dokumentvariantformat.ARKIV)))
 
     val journalpostSøknad = Journalpost(journalpostId = "1",
                                         journalposttype = Journalposttype.I,

@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.integration.dto.pdl.PdlIdenter
 import no.nav.familie.ef.sak.service.JournalføringService
 import no.nav.familie.ef.sak.service.TilgangService
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
+import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.journalpost.*
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
@@ -143,7 +144,7 @@ internal class JournalføringControllerTest {
                         listOf(DokumentInfo(dokumentInfoId = "12345",
                                             tittel = "Tittel",
                                             brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
-                                            dokumentvarianter = listOf(Dokumentvariant(variantformat = "ARKIV"))))
+                                            dokumentvarianter = listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV))))
             )
 
     private val journalpostMedFødselsnummer =

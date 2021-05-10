@@ -10,9 +10,10 @@ import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.steg.BehandlingSteg
 import no.nav.familie.ef.sak.service.steg.StegType
 import no.nav.familie.ef.sak.task.FerdigstillBehandlingTask
-import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentRequest
-import no.nav.familie.kontrakter.felles.dokarkiv.Dokument
-import no.nav.familie.kontrakter.felles.dokarkiv.FilType
+import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
+import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
+import no.nav.familie.kontrakter.felles.dokarkiv.v2.Dokument
+import no.nav.familie.kontrakter.felles.dokarkiv.v2.Filtype
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
@@ -54,10 +55,10 @@ class BlankettSteg(
                 fnr = personIdent,
                 forsøkFerdigstill = true,
                 hoveddokumentvarianter = listOf(Dokument(pdf,
-                                                         FilType.PDFA,
+                                                         Filtype.PDFA,
                                                          null,
                                                          "Blankett for overgangsstønad",
-                                                         "OVERGANGSSTØNAD_BLANKETT")),
+                                                         Dokumenttype.OVERGANGSSTØNAD_BLANKETT)),
                 vedleggsdokumenter = listOf(),
                 fagsakId = fagsakId,
                 journalførendeEnhet = enhet)
