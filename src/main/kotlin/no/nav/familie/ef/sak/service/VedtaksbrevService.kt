@@ -49,15 +49,15 @@ class VedtaksbrevService(private val brevClient: BrevClient,
                            signaturSaksbehandler = signaturSaksbehandler)
     }
 
-    fun lagPdf(brevRequest: BrevRequest): ByteArray {
+    fun lagPdf(brevRequest: BrevRequest, brevMal: String = "innvilgetVedtakMVP"): ByteArray {
         return brevClient.genererBrev("bokmaal",
-                                      "innvilgetVedtakMVP",
+                                      brevMal,
                                       brevRequest)
     }
 
-    fun lagPdf(brevRequest: String): ByteArray {
+    fun lagPdf(brevRequest: String, brevMal: String): ByteArray {
         return brevClient.genererBrev("bokmaal",
-                                      "innvilgetVedtakMVP",
+                                      brevMal,
                                       brevRequest)
     }
 
@@ -79,8 +79,8 @@ class VedtaksbrevService(private val brevClient: BrevClient,
         return lagPdf(lagBrevRequest(behandlingId))
     }
 
-    fun forhåndsvisBrev(behandlingId: UUID, brevRequest: String): ByteArray{
-        return lagPdf(brevRequest)
+    fun forhåndsvisBrev(behandlingId: UUID, brevRequest: String, brevMal: String): ByteArray{
+        return lagPdf(brevRequest, brevMal)
     }
 
 

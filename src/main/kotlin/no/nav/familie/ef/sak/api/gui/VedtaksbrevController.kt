@@ -23,10 +23,10 @@ class VedtaksbrevController(private val brevService: VedtaksbrevService,
         return Ressurs.success(respons)
     }
 
-    @PostMapping()
-    fun forhåndsvisBrevV2(@PathVariable behandlingId: UUID, @RequestBody utfylltBrev: String): Ressurs<ByteArray> {
+    @PostMapping("/{behandlingId}/{brevMal}")
+    fun forhåndsvisBrevV2(@PathVariable behandlingId: UUID, @PathVariable brevMal: String, @RequestBody utfylltBrev: String): Ressurs<ByteArray> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
-        val respons = brevService.forhåndsvisBrev(behandlingId, utfylltBrev)
+        val respons = brevService.forhåndsvisBrev(behandlingId, utfylltBrev, brevMal)
 
         return Ressurs.success(respons)
     }
