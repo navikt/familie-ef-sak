@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.økonomi
 
+import no.nav.familie.ef.sak.dummy.FLYTTET_TIL_EF_IVERKSETT
 import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
@@ -14,6 +15,7 @@ import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import java.time.LocalDate
 import java.util.*
 
+@Deprecated(FLYTTET_TIL_EF_IVERKSETT)
 object UtbetalingsoppdragGenerator {
 
     /**
