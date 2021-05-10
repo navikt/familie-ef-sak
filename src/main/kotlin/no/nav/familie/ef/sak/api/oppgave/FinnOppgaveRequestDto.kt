@@ -1,5 +1,7 @@
 package no.nav.familie.ef.sak.api.oppgave
 
+import no.nav.familie.kontrakter.felles.Behandlingstema
+import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.*
 import java.time.LocalDate
 
