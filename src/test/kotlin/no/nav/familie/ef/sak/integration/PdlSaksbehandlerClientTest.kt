@@ -65,6 +65,7 @@ internal class PdlSaksbehandlerClientTest {
                                                                     tilleggsnavn = null,
                                                                     koordinater = null),
                                             matrikkeladresse = null,
+                                            angittFlyttedato = null,
                                             gyldigFraOgMed = null,
                                             gyldigTilOgMed = null,
                                             coAdressenavn = null,

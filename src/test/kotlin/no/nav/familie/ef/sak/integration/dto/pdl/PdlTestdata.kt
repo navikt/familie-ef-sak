@@ -33,7 +33,8 @@ object PdlTestdata {
 
     private val adressebeskyttelse = listOf(Adressebeskyttelse(AdressebeskyttelseGradering.FORTROLIG, metadataGjeldende))
 
-    private val bostedsadresse = listOf(Bostedsadresse(LocalDate.now(),
+    private val bostedsadresse = listOf(Bostedsadresse(LocalDate.now().minusDays(10),
+                                                       LocalDate.now(),
                                                        LocalDate.now(),
                                                        "",
                                                        utenlandskAdresse,

@@ -23,6 +23,7 @@
               "metadata":  {
                 "historisk": false
               },
+              "angittFlyttedato": null,
               "gyldigFraOgMed": "1966-11-18",
               "gyldigTilOgMed": null,
               "coAdressenavn": null,
