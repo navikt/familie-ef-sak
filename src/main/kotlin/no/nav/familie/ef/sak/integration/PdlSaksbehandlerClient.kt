@@ -19,7 +19,7 @@ import org.springframework.web.client.RestOperations
  */
 @Service
 class PdlSaksbehandlerClient(val pdlConfig: PdlConfig,
-                             @Qualifier("azure") restTemplate: RestOperations)
+                             @Qualifier("azureOnBehalfOf") restTemplate: RestOperations)
     : AbstractRestClient(restTemplate, "pdl.personinfo.saksbehandler") {
 
     fun søkPersonerMedSammeAdresse(søkeKriterier: List<SøkeKriterier>): PersonSøkResultat {

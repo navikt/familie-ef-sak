@@ -94,16 +94,6 @@ class ApplicationConfig {
                                                           MdcValuesPropagatingClientInterceptor()).build()
     }
 
-    @Bean("azureClientCredentials")
-    fun restTemplateJwtBearer(restTemplateBuilder: RestTemplateBuilder,
-                              consumerIdClientInterceptor: ConsumerIdClientInterceptor,
-                              internLoggerInterceptor: InternLoggerInterceptor,
-                              bearerTokenClientInterceptor: AzureClientCredentialsClientInterceptor): RestOperations {
-        return restTemplateBuilder.additionalInterceptors(consumerIdClientInterceptor,
-                                                          bearerTokenClientInterceptor,
-                                                          MdcValuesPropagatingClientInterceptor()).build()
-    }
-
     /**
      * Overskrever OAuth2HttpClient som settes opp i token-support som ikke kan få med objectMapper fra felles
      * pga .setVisibility(PropertyAccessor.SETTER, JsonAutoDetect.Visibility.NONE)
@@ -117,23 +107,4 @@ class ApplicationConfig {
                                                .setReadTimeout(Duration.of(4, ChronoUnit.SECONDS)))
     }
 
-}
-
-@Component
-class AzureClientCredentialsClientInterceptor(private val oAuth2AccessTokenService: OAuth2AccessTokenService,
-                                              private val clientConfigurationProperties: ClientConfigurationProperties) :
-        ClientHttpRequestInterceptor {
-
-
-    override fun intercept(request: HttpRequest, body: ByteArray, execution: ClientHttpRequestExecution): ClientHttpResponse {
-        val uri = request.uri
-        val grantType = OAuth2GrantType.CLIENT_CREDENTIALS
-        val clientProperties = clientConfigurationProperties.registration.values
-                                       .filter { uri.toString().startsWith(it.resourceUrl.toString()) }
-                                       .firstOrNull { it.grantType == grantType }
-                               ?: error("could not find oauth client config for uri=$uri and grantType=$grantType")
-        val response: OAuth2AccessTokenResponse = oAuth2AccessTokenService.getAccessToken(clientProperties)
-        request.headers.setBearerAuth(response.accessToken)
-        return execution.execute(request, body)
-    }
 }
