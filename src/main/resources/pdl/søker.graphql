@@ -114,7 +114,7 @@ query($ident: ID!){
                 omfangetErInnenPersonligOmraade
             }
         }
-        kontaktadresse{
+        kontaktadresse(historikk: true){
             coAdressenavn
             gyldigFraOgMed
             gyldigTilOgMed
@@ -204,7 +204,7 @@ query($ident: ID!){
             relatertVedSivilstand
             bekreftelsesdato
             metadata {
-              historisk
+                historisk
             }
         }
         statsborgerskap {
