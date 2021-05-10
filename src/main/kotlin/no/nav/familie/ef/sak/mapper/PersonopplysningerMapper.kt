@@ -97,6 +97,7 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
     private fun loggDatoDiff(søker: PdlSøker) {
         val datoer = søker.bostedsadresse
                 .filter { it.angittFlyttedato != null && it.angittFlyttedato != LocalDate.of(1, 1, 1) }
+                .filter { it.angittFlyttedato != it.gyldigFraOgMed }
                 .map { "angittFlyttedato=${it.angittFlyttedato} gyldigFraOgMed=${it.gyldigFraOgMed}" }
         if (datoer.isNotEmpty()) {
             secureLogger.info("Forskjell i datoer: $datoer")
