@@ -23,8 +23,8 @@ data class PersonopplysningerDto(val personIdent: String,
                                  val sivilstand: List<SivilstandDto>,
                                  val adresse: List<AdresseDto>,
                                  val fullmakt: List<FullmaktDto>,
-                                 val egenAnsatt: Boolean, //HYPOTES : DETTE ER IKKE RELEVANT FOR GRUNNLAGSDATA
-                                 val navEnhet: String, //HYPOTES : DETTE ER IKKE RELEVANT FOR GRUNNLAGSDATA
+                                 val egenAnsatt: Boolean,
+                                 val navEnhet: String,
                                  val barn: List<BarnDto>,
                                  val innflyttingTilNorge: List<InnflyttingDto>,
                                  val utflyttingFraNorge: List<UtflyttingDto>,
