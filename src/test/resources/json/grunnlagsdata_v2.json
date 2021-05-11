@@ -32,6 +32,11 @@
         "name" : "bostedsadresse",
         "type" : "Collection",
         "fields" : {
+          "angittFlyttedato" : {
+            "name" : "angittFlyttedato",
+            "type" : "LocalDate",
+            "nullable" : false
+          },
           "gyldigFraOgMed" : {
             "name" : "gyldigFraOgMed",
             "type" : "LocalDate",
@@ -355,15 +360,8 @@
       },
       "kjønn" : {
         "name" : "kjønn",
-        "type" : "Object",
-        "fields" : {
-          "kjønn" : {
-            "name" : "kjønn",
-            "type" : "Enum",
-            "values" : [ "KVINNE", "MANN", "UKJENT" ],
-            "nullable" : false
-          }
-        },
+        "type" : "Enum",
+        "values" : [ "KVINNE", "MANN", "UKJENT" ],
         "nullable" : false
       },
       "kontaktadresse" : {
@@ -1110,6 +1108,11 @@
         "name" : "bostedsadresse",
         "type" : "Collection",
         "fields" : {
+          "angittFlyttedato" : {
+            "name" : "angittFlyttedato",
+            "type" : "LocalDate",
+            "nullable" : false
+          },
           "gyldigFraOgMed" : {
             "name" : "gyldigFraOgMed",
             "type" : "LocalDate",
@@ -1838,6 +1841,11 @@
         "name" : "bostedsadresse",
         "type" : "Collection",
         "fields" : {
+          "angittFlyttedato" : {
+            "name" : "angittFlyttedato",
+            "type" : "LocalDate",
+            "nullable" : false
+          },
           "gyldigFraOgMed" : {
             "name" : "gyldigFraOgMed",
             "type" : "LocalDate",
