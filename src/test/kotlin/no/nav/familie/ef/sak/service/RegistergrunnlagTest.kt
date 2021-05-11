@@ -46,7 +46,8 @@ internal class RegistergrunnlagTest {
     private data class ObjectInfo(val name: String,
                                   val type: String,
                                   val fields: Map<String, ObjectInfo>? = null,
-                                  val values: List<String>? = null)
+                                  val values: List<String>? = null,
+                                  val nullable: Boolean)
 
     private val endClasses = setOf(String::class,
                                    UUID::class,
@@ -69,21 +70,22 @@ internal class RegistergrunnlagTest {
             val classifier = parameter.type.classifier as KClass<*>
             val simpleName = classifier.simpleName!!
             val qualifiedName = classifier.qualifiedName!!
+            val nullable = parameter.isOptional
             when {
-                classifier in endClasses -> ObjectInfo(name, simpleName)
+                classifier in endClasses -> ObjectInfo(name, simpleName, nullable = nullable)
                 classifier.isSubclassOf(Collection::class) -> {
                     val arguments = parameter.type.arguments
                     if (arguments.size != 1) {
                         error("$className Cannot handle collections with more than one type argument $qualifiedName")
                     }
                     val classInfo = getClassInfo(parameter.type.arguments[0].type!!.classifier as KClass<*>)
-                    ObjectInfo(name, "Collection", classInfo)
+                    ObjectInfo(name, "Collection", classInfo, nullable = nullable)
                 }
                 classifier.isSubclassOf(Enum::class) ->
-                    ObjectInfo(name, "Enum", null, classifier.java.enumConstants.map { it.toString() })
+                    ObjectInfo(name, "Enum", null, classifier.java.enumConstants.map { it.toString() }, nullable)
                 qualifiedName.startsWith("java.") || qualifiedName.startsWith("kotlin.") ->
                     error("$className - Class is not defined: $qualifiedName")
-                else -> ObjectInfo(name, "Object", getClassInfo(classifier))
+                else -> ObjectInfo(name, "Object", getClassInfo(classifier), nullable = nullable)
             }
         }.map { it.name to it }.toMap()
     }
