@@ -258,7 +258,6 @@ data class Sivilstand(val type: Sivilstandstype,
                       val gyldigFraOgMed: LocalDate?,
                       val relatertVedSivilstand: String?,
                       val bekreftelsesdato: String?,
-                      val navn: String?,
                       val metadata: Metadata)
 
 enum class Sivilstandstype {
