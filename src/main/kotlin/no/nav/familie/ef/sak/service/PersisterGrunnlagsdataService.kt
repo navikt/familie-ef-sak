@@ -110,17 +110,17 @@ class PersisterGrunnlagsdataService(private val pdlClient: PdlClient,
 
 
     private fun hentNavnForRelatertVedSivilstand(pdlSøker: PdlSøker): List<SivilstandMedNavn> {
-        return pdlSøker.sivilstand.map { it ->
-            val navn = it.relatertVedSivilstand?.let {
-                val person = pdlClient.hentPersonKortBolk(listOf(it))[it]
-                person?.navn?.gjeldende()?.visningsnavn()
-            }
+        val mapPersonIdentTilNavn = pdlSøker.sivilstand.mapNotNull { it.relatertVedSivilstand }
+                .distinct()
+                .let { pdlClient.hentPersonKortBolk(it) }
+
+        return pdlSøker.sivilstand.map {
             SivilstandMedNavn(type = Sivilstandstype.valueOf(it.type.name),
                               gyldigFraOgMed = it.gyldigFraOgMed,
                               relatertVedSivilstand = it.relatertVedSivilstand,
                               bekreftelsesdato = it.bekreftelsesdato,
                               metadata = it.metadata,
-                              navn = navn)
+                              navn = mapPersonIdentTilNavn[it.relatertVedSivilstand]?.navn?.gjeldende()?.visningsnavn())
         }
     }
 
