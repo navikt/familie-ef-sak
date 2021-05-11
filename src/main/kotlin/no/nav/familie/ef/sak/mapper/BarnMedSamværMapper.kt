@@ -55,12 +55,12 @@ object BarnMedSamværMapper {
         )
     }
 
-    fun mapRegistergrunnlag(barn: List<BarnMedIdent>,
+    fun mapRegistergrunnlag(barnMedIdent: List<BarnMedIdent>,
                             barneforeldre: List<AnnenForelderMedIdent>,
                             søknad: SøknadsskjemaOvergangsstønad,
                             søkerAdresse: List<Bostedsadresse>): List<BarnMedSamværRegistergrunnlagDto> {
 
-        val alleBarn: List<MatchetBarn> = BarnMatcher.kobleSøknadsbarnOgRegisterBarn(søknad.barn, barn)
+        val alleBarn: List<MatchetBarn> = BarnMatcher.kobleSøknadsbarnOgRegisterBarn(søknad.barn, barnMedIdent)
         val forelderMap = barneforeldre.associateBy { it.personIdent }
 
         return alleBarn.map { barn ->
