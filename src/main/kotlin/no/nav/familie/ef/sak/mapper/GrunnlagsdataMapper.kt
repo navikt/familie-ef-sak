@@ -16,20 +16,19 @@ import no.nav.familie.ef.sak.integration.dto.pdl.visningsnavn
 
 object GrunnlagsdataMapper {
 
-    fun mapBarn(pdlBarn: Map<String, PdlBarn>) =
-            pdlBarn.map {
-                mapBarn(it)
-            }
+    fun mapBarn(pdlBarn: Map<String, PdlBarn>) = pdlBarn.map {
+        mapBarn(it.value, it.key)
+    }
 
-    fun mapBarn(it: Map.Entry<String, PdlBarn>) =
-            BarnMedIdent(fødsel = it.value.fødsel,
-                         adressebeskyttelse = it.value.adressebeskyttelse,
-                         navn = it.value.navn,
-                         bostedsadresse = it.value.bostedsadresse,
-                         dødsfall = it.value.dødsfall,
-                         deltBosted = it.value.deltBosted,
-                         forelderBarnRelasjon = it.value.forelderBarnRelasjon,
-                         personIdent = it.key)
+    fun mapBarn(pdlBarn: PdlBarn, personIdent: String) =
+            BarnMedIdent(fødsel = pdlBarn.fødsel,
+                         adressebeskyttelse = pdlBarn.adressebeskyttelse,
+                         navn = pdlBarn.navn,
+                         bostedsadresse = pdlBarn.bostedsadresse,
+                         dødsfall = pdlBarn.dødsfall,
+                         deltBosted = pdlBarn.deltBosted,
+                         forelderBarnRelasjon = pdlBarn.forelderBarnRelasjon,
+                         personIdent = personIdent)
 
     fun mapAnnenForelder(barneForeldre: Map<String, PdlAnnenForelder>) =
             barneForeldre.map {
@@ -67,7 +66,7 @@ object GrunnlagsdataMapper {
             telefonnummer = pdlSøker.telefonnummer,
             tilrettelagtKommunikasjon = pdlSøker.tilrettelagtKommunikasjon,
             utflyttingFraNorge = pdlSøker.utflyttingFraNorge,
-            vergemaalEllerFremtidsfullmakt = pdlSøker.vergemaalEllerFremtidsfullmakt // TODO trenger vi denne? Eller trenger vi kun fullmakt? Spør funksjonell
+            vergemaalEllerFremtidsfullmakt = pdlSøker.vergemaalEllerFremtidsfullmakt
     )
 
     private fun mapSivivilstand(pdlSøker: PdlSøker, andrePersoner: Map<String, PdlPersonKort>): List<SivilstandMedNavn> {

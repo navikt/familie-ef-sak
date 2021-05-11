@@ -123,13 +123,12 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
         val annenForelderIdent = pdlBarn.forelderBarnRelasjon.find {
             it.relatertPersonsIdent != søkerIdent && it.relatertPersonsRolle != Familierelasjonsrolle.BARN
         }?.relatertPersonsIdent
-        val barn = AbstractMap.SimpleEntry(personIdent, pdlBarn)
         return BarnDto(
                 personIdent = personIdent,
                 navn = pdlBarn.navn.gjeldende().visningsnavn(),
                 annenForelder = annenForelderIdent?.let { AnnenForelderMinimumDto(it, identNavnMap[it] ?: "Finner ikke navn") },
                 adresse = pdlBarn.bostedsadresse.map(adresseMapper::tilAdresse),
-                borHosSøker = AdresseHjelper.borPåSammeAdresse(GrunnlagsdataMapper.mapBarn(barn), bostedsadresserForelder),
+                borHosSøker = AdresseHjelper.borPåSammeAdresse(GrunnlagsdataMapper.mapBarn(pdlBarn, personIdent), bostedsadresserForelder),
                 fødselsdato = pdlBarn.fødsel.gjeldende()?.fødselsdato
         )
     }
