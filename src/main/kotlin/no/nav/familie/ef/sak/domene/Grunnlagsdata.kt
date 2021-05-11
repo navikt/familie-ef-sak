@@ -9,7 +9,7 @@ import no.nav.familie.ef.sak.integration.dto.pdl.Folkeregisterpersonstatus
 import no.nav.familie.ef.sak.integration.dto.pdl.ForelderBarnRelasjon
 import no.nav.familie.ef.sak.integration.dto.pdl.Fødsel
 import no.nav.familie.ef.sak.integration.dto.pdl.InnflyttingTilNorge
-import no.nav.familie.ef.sak.integration.dto.pdl.Kjønn
+import no.nav.familie.ef.sak.integration.dto.pdl.KjønnType
 import no.nav.familie.ef.sak.integration.dto.pdl.Kontaktadresse
 import no.nav.familie.ef.sak.integration.dto.pdl.Metadata
 import no.nav.familie.ef.sak.integration.dto.pdl.Navn
@@ -29,14 +29,14 @@ data class Grunnlagsdata(val søker: Søker,
                          val barn: List<BarnMedIdent>
 )
 
-data class Søker(val adressebeskyttelse: Adressebeskyttelse, //Er en liste i PDLSøker
+data class Søker(val adressebeskyttelse: Adressebeskyttelse?, //Er en liste i PDLSøker
                  val bostedsadresse: List<Bostedsadresse>,
                  val dødsfall: Dødsfall?, //Er en liste i PDLSøker
                  val forelderBarnRelasjon: List<ForelderBarnRelasjon>,
                  val fødsel: Fødsel, //Er en liste i PDLSøker
                  val folkeregisterpersonstatus: List<Folkeregisterpersonstatus>,
                  val fullmakt: List<FullmaktMedNavn>,
-                 val kjønn: Kjønn,
+                 val kjønn: KjønnType,
                  val kontaktadresse: List<Kontaktadresse>,
                  val navn: List<Navn>,
                  val opphold: List<Opphold>,

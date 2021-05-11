@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.domene.BarnMedIdent
 import no.nav.familie.ef.sak.domene.FullmaktMedNavn
 import no.nav.familie.ef.sak.domene.SivilstandMedNavn
 import no.nav.familie.ef.sak.domene.Søker
+import no.nav.familie.ef.sak.integration.dto.pdl.KjønnType
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlAnnenForelder
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlBarn
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlPersonKort
@@ -49,7 +50,7 @@ object GrunnlagsdataMapper {
 
     fun mapSøker(pdlSøker: PdlSøker, andrePersoner: Map<String, PdlPersonKort>) = Søker(
             sivilstand = mapSivivilstand(pdlSøker, andrePersoner),
-            adressebeskyttelse = pdlSøker.adressebeskyttelse.first(),
+            adressebeskyttelse = pdlSøker.adressebeskyttelse.gjeldende(),
             bostedsadresse = pdlSøker.bostedsadresse,
             dødsfall = pdlSøker.dødsfall.firstOrNull(),
             forelderBarnRelasjon = pdlSøker.forelderBarnRelasjon,
@@ -57,7 +58,7 @@ object GrunnlagsdataMapper {
             fødsel = pdlSøker.fødsel.first(),
             folkeregisterpersonstatus = pdlSøker.folkeregisterpersonstatus,
             innflyttingTilNorge = pdlSøker.innflyttingTilNorge,
-            kjønn = pdlSøker.kjønn.first(),
+            kjønn = pdlSøker.kjønn.firstOrNull()?.kjønn ?: KjønnType.UKJENT,
             kontaktadresse = pdlSøker.kontaktadresse,
             navn = pdlSøker.navn,
             opphold = pdlSøker.opphold,
