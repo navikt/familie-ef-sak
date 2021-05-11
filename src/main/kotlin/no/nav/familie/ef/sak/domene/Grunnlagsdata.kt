@@ -8,7 +8,6 @@ import no.nav.familie.ef.sak.integration.dto.pdl.DeltBosted
 import no.nav.familie.ef.sak.integration.dto.pdl.Dødsfall
 import no.nav.familie.ef.sak.integration.dto.pdl.Folkeregisterpersonstatus
 import no.nav.familie.ef.sak.integration.dto.pdl.ForelderBarnRelasjon
-import no.nav.familie.ef.sak.integration.dto.pdl.Fullmakt
 import no.nav.familie.ef.sak.integration.dto.pdl.Fødsel
 import no.nav.familie.ef.sak.integration.dto.pdl.InnflyttingTilNorge
 import no.nav.familie.ef.sak.integration.dto.pdl.Kjønn
@@ -39,7 +38,7 @@ data class Søker(val adressebeskyttelse: Adressebeskyttelse, //Er en liste i PD
                  val forelderBarnRelasjon: List<ForelderBarnRelasjon>,
                  val fødsel: Fødsel, //Er en liste i PDLSøker
                  val folkeregisterpersonstatus: List<Folkeregisterpersonstatus>,
-                 val fullmakt: List<Fullmakt>,
+                 val fullmakt: List<FullmaktMedNavn>,
                  val kjønn: Kjønn,
                  val kontaktadresse: List<Kontaktadresse>,
                  val navn: List<Navn>,
@@ -86,6 +85,11 @@ data class SivilstandMedNavn(val type: Sivilstandstype,
                              val bekreftelsesdato: String?,
                              val navn: String?,
                              val metadata: Metadata)
+
+data class FullmaktMedNavn(val gyldigFraOgMed: LocalDate,
+                           val gyldigTilOgMed: LocalDate,
+                           val motpartsPersonident: String,
+                           val navn: String?)
 
 
 fun AnnenForelderMedIdent.tilPdlAnnenForelder(): PdlAnnenForelder = PdlAnnenForelder(

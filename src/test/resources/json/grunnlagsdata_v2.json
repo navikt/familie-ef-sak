@@ -1,0 +1,2263 @@
+{
+  "søker" : {
+    "name" : "søker",
+    "type" : "Object",
+    "fields" : {
+      "adressebeskyttelse" : {
+        "name" : "adressebeskyttelse",
+        "type" : "Object",
+        "fields" : {
+          "gradering" : {
+            "name" : "gradering",
+            "type" : "Enum",
+            "values" : [ "STRENGT_FORTROLIG", "STRENGT_FORTROLIG_UTLAND", "FORTROLIG", "UGRADERT" ],
+            "nullable" : false
+          },
+          "metadata" : {
+            "name" : "metadata",
+            "type" : "Object",
+            "fields" : {
+              "historisk" : {
+                "name" : "historisk",
+                "type" : "Boolean",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          }
+        },
+        "nullable" : false
+      },
+      "bostedsadresse" : {
+        "name" : "bostedsadresse",
+        "type" : "Collection",
+        "fields" : {
+          "gyldigFraOgMed" : {
+            "name" : "gyldigFraOgMed",
+            "type" : "LocalDate",
+            "nullable" : false
+          },
+          "gyldigTilOgMed" : {
+            "name" : "gyldigTilOgMed",
+            "type" : "LocalDate",
+            "nullable" : false
+          },
+          "coAdressenavn" : {
+            "name" : "coAdressenavn",
+            "type" : "String",
+            "nullable" : false
+          },
+          "utenlandskAdresse" : {
+            "name" : "utenlandskAdresse",
+            "type" : "Object",
+            "fields" : {
+              "adressenavnNummer" : {
+                "name" : "adressenavnNummer",
+                "type" : "String",
+                "nullable" : false
+              },
+              "bySted" : {
+                "name" : "bySted",
+                "type" : "String",
+                "nullable" : false
+              },
+              "bygningEtasjeLeilighet" : {
+                "name" : "bygningEtasjeLeilighet",
+                "type" : "String",
+                "nullable" : false
+              },
+              "landkode" : {
+                "name" : "landkode",
+                "type" : "String",
+                "nullable" : false
+              },
+              "postboksNummerNavn" : {
+                "name" : "postboksNummerNavn",
+                "type" : "String",
+                "nullable" : false
+              },
+              "postkode" : {
+                "name" : "postkode",
+                "type" : "String",
+                "nullable" : false
+              },
+              "regionDistriktOmraade" : {
+                "name" : "regionDistriktOmraade",
+                "type" : "String",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          },
+          "vegadresse" : {
+            "name" : "vegadresse",
+            "type" : "Object",
+            "fields" : {
+              "husnummer" : {
+                "name" : "husnummer",
+                "type" : "String",
+                "nullable" : false
+              },
+              "husbokstav" : {
+                "name" : "husbokstav",
+                "type" : "String",
+                "nullable" : false
+              },
+              "bruksenhetsnummer" : {
+                "name" : "bruksenhetsnummer",
+                "type" : "String",
+                "nullable" : false
+              },
+              "adressenavn" : {
+                "name" : "adressenavn",
+                "type" : "String",
+                "nullable" : false
+              },
+              "kommunenummer" : {
+                "name" : "kommunenummer",
+                "type" : "String",
+                "nullable" : false
+              },
+              "tilleggsnavn" : {
+                "name" : "tilleggsnavn",
+                "type" : "String",
+                "nullable" : false
+              },
+              "postnummer" : {
+                "name" : "postnummer",
+                "type" : "String",
+                "nullable" : false
+              },
+              "koordinater" : {
+                "name" : "koordinater",
+                "type" : "Object",
+                "fields" : {
+                  "x" : {
+                    "name" : "x",
+                    "type" : "Float",
+                    "nullable" : false
+                  },
+                  "y" : {
+                    "name" : "y",
+                    "type" : "Float",
+                    "nullable" : false
+                  },
+                  "z" : {
+                    "name" : "z",
+                    "type" : "Float",
+                    "nullable" : false
+                  },
+                  "kvalitet" : {
+                    "name" : "kvalitet",
+                    "type" : "Int",
+                    "nullable" : false
+                  }
+                },
+                "nullable" : false
+              },
+              "matrikkelId" : {
+                "name" : "matrikkelId",
+                "type" : "Long",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          },
+          "ukjentBosted" : {
+            "name" : "ukjentBosted",
+            "type" : "Object",
+            "fields" : {
+              "bostedskommune" : {
+                "name" : "bostedskommune",
+                "type" : "String",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          },
+          "matrikkeladresse" : {
+            "name" : "matrikkeladresse",
+            "type" : "Object",
+            "fields" : {
+              "matrikkelId" : {
+                "name" : "matrikkelId",
+                "type" : "Long",
+                "nullable" : false
+              },
+              "bruksenhetsnummer" : {
+                "name" : "bruksenhetsnummer",
+                "type" : "String",
+                "nullable" : false
+              },
+              "tilleggsnavn" : {
+                "name" : "tilleggsnavn",
+                "type" : "String",
+                "nullable" : false
+              },
+              "postnummer" : {
+                "name" : "postnummer",
+                "type" : "String",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          },
+          "metadata" : {
+            "name" : "metadata",
+            "type" : "Object",
+            "fields" : {
+              "historisk" : {
+                "name" : "historisk",
+                "type" : "Boolean",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          }
+        },
+        "nullable" : false
+      },
+      "dødsfall" : {
+        "name" : "dødsfall",
+        "type" : "Object",
+        "fields" : {
+          "dødsdato" : {
+            "name" : "dødsdato",
+            "type" : "LocalDate",
+            "nullable" : false
+          }
+        },
+        "nullable" : false
+      },
+      "forelderBarnRelasjon" : {
+        "name" : "forelderBarnRelasjon",
+        "type" : "Collection",
+        "fields" : {
+          "relatertPersonsIdent" : {
+            "name" : "relatertPersonsIdent",
+            "type" : "String",
+            "nullable" : false
+          },
+          "relatertPersonsRolle" : {
+            "name" : "relatertPersonsRolle",
+            "type" : "Enum",
+            "values" : [ "BARN", "MOR", "FAR", "MEDMOR" ],
+            "nullable" : false
+          },
+          "minRolleForPerson" : {
+            "name" : "minRolleForPerson",
+            "type" : "Enum",
+            "values" : [ "BARN", "MOR", "FAR", "MEDMOR" ],
+            "nullable" : false
+          }
+        },
+        "nullable" : false
+      },
+      "fødsel" : {
+        "name" : "fødsel",
+        "type" : "Object",
+        "fields" : {
+          "fødselsår" : {
+            "name" : "fødselsår",
+            "type" : "Int",
+            "nullable" : false
+          },
+          "fødselsdato" : {
+            "name" : "fødselsdato",
+            "type" : "LocalDate",
+            "nullable" : false
+          },
+          "fødeland" : {
+            "name" : "fødeland",
+            "type" : "String",
+            "nullable" : false
+          },
+          "fødested" : {
+            "name" : "fødested",
+            "type" : "String",
+            "nullable" : false
+          },
+          "fødekommune" : {
+            "name" : "fødekommune",
+            "type" : "String",
+            "nullable" : false
+          },
+          "metadata" : {
+            "name" : "metadata",
+            "type" : "Object",
+            "fields" : {
+              "historisk" : {
+                "name" : "historisk",
+                "type" : "Boolean",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          }
+        },
+        "nullable" : false
+      },
+      "folkeregisterpersonstatus" : {
+        "name" : "folkeregisterpersonstatus",
+        "type" : "Collection",
+        "fields" : {
+          "status" : {
+            "name" : "status",
+            "type" : "String",
+            "nullable" : false
+          },
+          "forenkletStatus" : {
+            "name" : "forenkletStatus",
+            "type" : "String",
+            "nullable" : false
+          },
+          "metadata" : {
+            "name" : "metadata",
+            "type" : "Object",
+            "fields" : {
+              "historisk" : {
+                "name" : "historisk",
+                "type" : "Boolean",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          }
+        },
+        "nullable" : false
+      },
+      "fullmakt" : {
+        "name" : "fullmakt",
+        "type" : "Collection",
+        "fields" : {
+          "gyldigFraOgMed" : {
+            "name" : "gyldigFraOgMed",
+            "type" : "LocalDate",
+            "nullable" : false
+          },
+          "gyldigTilOgMed" : {
+            "name" : "gyldigTilOgMed",
+            "type" : "LocalDate",
+            "nullable" : false
+          },
+          "motpartsPersonident" : {
+            "name" : "motpartsPersonident",
+            "type" : "String",
+            "nullable" : false
+          },
+          "navn" : {
+            "name" : "navn",
+            "type" : "String",
+            "nullable" : false
+          }
+        },
+        "nullable" : false
+      },
+      "kjønn" : {
+        "name" : "kjønn",
+        "type" : "Object",
+        "fields" : {
+          "kjønn" : {
+            "name" : "kjønn",
+            "type" : "Enum",
+            "values" : [ "KVINNE", "MANN", "UKJENT" ],
+            "nullable" : false
+          }
+        },
+        "nullable" : false
+      },
+      "kontaktadresse" : {
+        "name" : "kontaktadresse",
+        "type" : "Collection",
+        "fields" : {
+          "coAdressenavn" : {
+            "name" : "coAdressenavn",
+            "type" : "String",
+            "nullable" : false
+          },
+          "gyldigFraOgMed" : {
+            "name" : "gyldigFraOgMed",
+            "type" : "LocalDate",
+            "nullable" : false
+          },
+          "gyldigTilOgMed" : {
+            "name" : "gyldigTilOgMed",
+            "type" : "LocalDate",
+            "nullable" : false
+          },
+          "postadresseIFrittFormat" : {
+            "name" : "postadresseIFrittFormat",
+            "type" : "Object",
+            "fields" : {
+              "adresselinje1" : {
+                "name" : "adresselinje1",
+                "type" : "String",
+                "nullable" : false
+              },
+              "adresselinje2" : {
+                "name" : "adresselinje2",
+                "type" : "String",
+                "nullable" : false
+              },
+              "adresselinje3" : {
+                "name" : "adresselinje3",
+                "type" : "String",
+                "nullable" : false
+              },
+              "postnummer" : {
+                "name" : "postnummer",
+                "type" : "String",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          },
+          "postboksadresse" : {
+            "name" : "postboksadresse",
+            "type" : "Object",
+            "fields" : {
+              "postboks" : {
+                "name" : "postboks",
+                "type" : "String",
+                "nullable" : false
+              },
+              "postbokseier" : {
+                "name" : "postbokseier",
+                "type" : "String",
+                "nullable" : false
+              },
+              "postnummer" : {
+                "name" : "postnummer",
+                "type" : "String",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          },
+          "type" : {
+            "name" : "type",
+            "type" : "Enum",
+            "values" : [ "INNLAND", "UTLAND" ],
+            "nullable" : false
+          },
+          "utenlandskAdresse" : {
+            "name" : "utenlandskAdresse",
+            "type" : "Object",
+            "fields" : {
+              "adressenavnNummer" : {
+                "name" : "adressenavnNummer",
+                "type" : "String",
+                "nullable" : false
+              },
+              "bySted" : {
+                "name" : "bySted",
+                "type" : "String",
+                "nullable" : false
+              },
+              "bygningEtasjeLeilighet" : {
+                "name" : "bygningEtasjeLeilighet",
+                "type" : "String",
+                "nullable" : false
+              },
+              "landkode" : {
+                "name" : "landkode",
+                "type" : "String",
+                "nullable" : false
+              },
+              "postboksNummerNavn" : {
+                "name" : "postboksNummerNavn",
+                "type" : "String",
+                "nullable" : false
+              },
+              "postkode" : {
+                "name" : "postkode",
+                "type" : "String",
+                "nullable" : false
+              },
+              "regionDistriktOmraade" : {
+                "name" : "regionDistriktOmraade",
+                "type" : "String",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          },
+          "utenlandskAdresseIFrittFormat" : {
+            "name" : "utenlandskAdresseIFrittFormat",
+            "type" : "Object",
+            "fields" : {
+              "adresselinje1" : {
+                "name" : "adresselinje1",
+                "type" : "String",
+                "nullable" : false
+              },
+              "adresselinje2" : {
+                "name" : "adresselinje2",
+                "type" : "String",
+                "nullable" : false
+              },
+              "adresselinje3" : {
+                "name" : "adresselinje3",
+                "type" : "String",
+                "nullable" : false
+              },
+              "byEllerStedsnavn" : {
+                "name" : "byEllerStedsnavn",
+                "type" : "String",
+                "nullable" : false
+              },
+              "landkode" : {
+                "name" : "landkode",
+                "type" : "String",
+                "nullable" : false
+              },
+              "postkode" : {
+                "name" : "postkode",
+                "type" : "String",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          },
+          "vegadresse" : {
+            "name" : "vegadresse",
+            "type" : "Object",
+            "fields" : {
+              "husnummer" : {
+                "name" : "husnummer",
+                "type" : "String",
+                "nullable" : false
+              },
+              "husbokstav" : {
+                "name" : "husbokstav",
+                "type" : "String",
+                "nullable" : false
+              },
+              "bruksenhetsnummer" : {
+                "name" : "bruksenhetsnummer",
+                "type" : "String",
+                "nullable" : false
+              },
+              "adressenavn" : {
+                "name" : "adressenavn",
+                "type" : "String",
+                "nullable" : false
+              },
+              "kommunenummer" : {
+                "name" : "kommunenummer",
+                "type" : "String",
+                "nullable" : false
+              },
+              "tilleggsnavn" : {
+                "name" : "tilleggsnavn",
+                "type" : "String",
+                "nullable" : false
+              },
+              "postnummer" : {
+                "name" : "postnummer",
+                "type" : "String",
+                "nullable" : false
+              },
+              "koordinater" : {
+                "name" : "koordinater",
+                "type" : "Object",
+                "fields" : {
+                  "x" : {
+                    "name" : "x",
+                    "type" : "Float",
+                    "nullable" : false
+                  },
+                  "y" : {
+                    "name" : "y",
+                    "type" : "Float",
+                    "nullable" : false
+                  },
+                  "z" : {
+                    "name" : "z",
+                    "type" : "Float",
+                    "nullable" : false
+                  },
+                  "kvalitet" : {
+                    "name" : "kvalitet",
+                    "type" : "Int",
+                    "nullable" : false
+                  }
+                },
+                "nullable" : false
+              },
+              "matrikkelId" : {
+                "name" : "matrikkelId",
+                "type" : "Long",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          }
+        },
+        "nullable" : false
+      },
+      "navn" : {
+        "name" : "navn",
+        "type" : "Collection",
+        "fields" : {
+          "fornavn" : {
+            "name" : "fornavn",
+            "type" : "String",
+            "nullable" : false
+          },
+          "mellomnavn" : {
+            "name" : "mellomnavn",
+            "type" : "String",
+            "nullable" : false
+          },
+          "etternavn" : {
+            "name" : "etternavn",
+            "type" : "String",
+            "nullable" : false
+          },
+          "metadata" : {
+            "name" : "metadata",
+            "type" : "Object",
+            "fields" : {
+              "historisk" : {
+                "name" : "historisk",
+                "type" : "Boolean",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          }
+        },
+        "nullable" : false
+      },
+      "opphold" : {
+        "name" : "opphold",
+        "type" : "Collection",
+        "fields" : {
+          "type" : {
+            "name" : "type",
+            "type" : "Enum",
+            "values" : [ "MIDLERTIDIG", "PERMANENT", "OPPLYSNING_MANGLER" ],
+            "nullable" : false
+          },
+          "oppholdFra" : {
+            "name" : "oppholdFra",
+            "type" : "LocalDate",
+            "nullable" : false
+          },
+          "oppholdTil" : {
+            "name" : "oppholdTil",
+            "type" : "LocalDate",
+            "nullable" : false
+          }
+        },
+        "nullable" : false
+      },
+      "oppholdsadresse" : {
+        "name" : "oppholdsadresse",
+        "type" : "Collection",
+        "fields" : {
+          "gyldigFraOgMed" : {
+            "name" : "gyldigFraOgMed",
+            "type" : "LocalDate",
+            "nullable" : false
+          },
+          "gyldigTilOgMed" : {
+            "name" : "gyldigTilOgMed",
+            "type" : "LocalDate",
+            "nullable" : true
+          },
+          "coAdressenavn" : {
+            "name" : "coAdressenavn",
+            "type" : "String",
+            "nullable" : false
+          },
+          "utenlandskAdresse" : {
+            "name" : "utenlandskAdresse",
+            "type" : "Object",
+            "fields" : {
+              "adressenavnNummer" : {
+                "name" : "adressenavnNummer",
+                "type" : "String",
+                "nullable" : false
+              },
+              "bySted" : {
+                "name" : "bySted",
+                "type" : "String",
+                "nullable" : false
+              },
+              "bygningEtasjeLeilighet" : {
+                "name" : "bygningEtasjeLeilighet",
+                "type" : "String",
+                "nullable" : false
+              },
+              "landkode" : {
+                "name" : "landkode",
+                "type" : "String",
+                "nullable" : false
+              },
+              "postboksNummerNavn" : {
+                "name" : "postboksNummerNavn",
+                "type" : "String",
+                "nullable" : false
+              },
+              "postkode" : {
+                "name" : "postkode",
+                "type" : "String",
+                "nullable" : false
+              },
+              "regionDistriktOmraade" : {
+                "name" : "regionDistriktOmraade",
+                "type" : "String",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          },
+          "vegadresse" : {
+            "name" : "vegadresse",
+            "type" : "Object",
+            "fields" : {
+              "husnummer" : {
+                "name" : "husnummer",
+                "type" : "String",
+                "nullable" : false
+              },
+              "husbokstav" : {
+                "name" : "husbokstav",
+                "type" : "String",
+                "nullable" : false
+              },
+              "bruksenhetsnummer" : {
+                "name" : "bruksenhetsnummer",
+                "type" : "String",
+                "nullable" : false
+              },
+              "adressenavn" : {
+                "name" : "adressenavn",
+                "type" : "String",
+                "nullable" : false
+              },
+              "kommunenummer" : {
+                "name" : "kommunenummer",
+                "type" : "String",
+                "nullable" : false
+              },
+              "tilleggsnavn" : {
+                "name" : "tilleggsnavn",
+                "type" : "String",
+                "nullable" : false
+              },
+              "postnummer" : {
+                "name" : "postnummer",
+                "type" : "String",
+                "nullable" : false
+              },
+              "koordinater" : {
+                "name" : "koordinater",
+                "type" : "Object",
+                "fields" : {
+                  "x" : {
+                    "name" : "x",
+                    "type" : "Float",
+                    "nullable" : false
+                  },
+                  "y" : {
+                    "name" : "y",
+                    "type" : "Float",
+                    "nullable" : false
+                  },
+                  "z" : {
+                    "name" : "z",
+                    "type" : "Float",
+                    "nullable" : false
+                  },
+                  "kvalitet" : {
+                    "name" : "kvalitet",
+                    "type" : "Int",
+                    "nullable" : false
+                  }
+                },
+                "nullable" : false
+              },
+              "matrikkelId" : {
+                "name" : "matrikkelId",
+                "type" : "Long",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          },
+          "oppholdAnnetSted" : {
+            "name" : "oppholdAnnetSted",
+            "type" : "String",
+            "nullable" : false
+          },
+          "metadata" : {
+            "name" : "metadata",
+            "type" : "Object",
+            "fields" : {
+              "historisk" : {
+                "name" : "historisk",
+                "type" : "Boolean",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          }
+        },
+        "nullable" : false
+      },
+      "sivilstand" : {
+        "name" : "sivilstand",
+        "type" : "Collection",
+        "fields" : {
+          "type" : {
+            "name" : "type",
+            "type" : "Enum",
+            "values" : [ "UOPPGITT", "UGIFT", "GIFT", "ENKE_ELLER_ENKEMANN", "SKILT", "SEPARERT", "REGISTRERT_PARTNER", "SEPARERT_PARTNER", "SKILT_PARTNER", "GJENLEVENDE_PARTNER" ],
+            "nullable" : false
+          },
+          "gyldigFraOgMed" : {
+            "name" : "gyldigFraOgMed",
+            "type" : "LocalDate",
+            "nullable" : false
+          },
+          "relatertVedSivilstand" : {
+            "name" : "relatertVedSivilstand",
+            "type" : "String",
+            "nullable" : false
+          },
+          "bekreftelsesdato" : {
+            "name" : "bekreftelsesdato",
+            "type" : "String",
+            "nullable" : false
+          },
+          "navn" : {
+            "name" : "navn",
+            "type" : "String",
+            "nullable" : false
+          },
+          "metadata" : {
+            "name" : "metadata",
+            "type" : "Object",
+            "fields" : {
+              "historisk" : {
+                "name" : "historisk",
+                "type" : "Boolean",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          }
+        },
+        "nullable" : false
+      },
+      "statsborgerskap" : {
+        "name" : "statsborgerskap",
+        "type" : "Collection",
+        "fields" : {
+          "land" : {
+            "name" : "land",
+            "type" : "String",
+            "nullable" : false
+          },
+          "gyldigFraOgMed" : {
+            "name" : "gyldigFraOgMed",
+            "type" : "LocalDate",
+            "nullable" : false
+          },
+          "gyldigTilOgMed" : {
+            "name" : "gyldigTilOgMed",
+            "type" : "LocalDate",
+            "nullable" : false
+          }
+        },
+        "nullable" : false
+      },
+      "telefonnummer" : {
+        "name" : "telefonnummer",
+        "type" : "Collection",
+        "fields" : {
+          "landskode" : {
+            "name" : "landskode",
+            "type" : "String",
+            "nullable" : false
+          },
+          "nummer" : {
+            "name" : "nummer",
+            "type" : "String",
+            "nullable" : false
+          },
+          "prioritet" : {
+            "name" : "prioritet",
+            "type" : "Int",
+            "nullable" : false
+          }
+        },
+        "nullable" : false
+      },
+      "tilrettelagtKommunikasjon" : {
+        "name" : "tilrettelagtKommunikasjon",
+        "type" : "Collection",
+        "fields" : {
+          "talespråktolk" : {
+            "name" : "talespråktolk",
+            "type" : "Object",
+            "fields" : {
+              "språk" : {
+                "name" : "språk",
+                "type" : "String",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          },
+          "tegnspråktolk" : {
+            "name" : "tegnspråktolk",
+            "type" : "Object",
+            "fields" : {
+              "språk" : {
+                "name" : "språk",
+                "type" : "String",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          }
+        },
+        "nullable" : false
+      },
+      "innflyttingTilNorge" : {
+        "name" : "innflyttingTilNorge",
+        "type" : "Collection",
+        "fields" : {
+          "fraflyttingsland" : {
+            "name" : "fraflyttingsland",
+            "type" : "String",
+            "nullable" : false
+          },
+          "fraflyttingsstedIUtlandet" : {
+            "name" : "fraflyttingsstedIUtlandet",
+            "type" : "String",
+            "nullable" : false
+          },
+          "folkeregistermetadata" : {
+            "name" : "folkeregistermetadata",
+            "type" : "Object",
+            "fields" : {
+              "gyldighetstidspunkt" : {
+                "name" : "gyldighetstidspunkt",
+                "type" : "LocalDateTime",
+                "nullable" : false
+              },
+              "opphørstidspunkt" : {
+                "name" : "opphørstidspunkt",
+                "type" : "LocalDateTime",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          }
+        },
+        "nullable" : false
+      },
+      "utflyttingFraNorge" : {
+        "name" : "utflyttingFraNorge",
+        "type" : "Collection",
+        "fields" : {
+          "tilflyttingsland" : {
+            "name" : "tilflyttingsland",
+            "type" : "String",
+            "nullable" : false
+          },
+          "tilflyttingsstedIUtlandet" : {
+            "name" : "tilflyttingsstedIUtlandet",
+            "type" : "String",
+            "nullable" : false
+          },
+          "folkeregistermetadata" : {
+            "name" : "folkeregistermetadata",
+            "type" : "Object",
+            "fields" : {
+              "gyldighetstidspunkt" : {
+                "name" : "gyldighetstidspunkt",
+                "type" : "LocalDateTime",
+                "nullable" : false
+              },
+              "opphørstidspunkt" : {
+                "name" : "opphørstidspunkt",
+                "type" : "LocalDateTime",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          }
+        },
+        "nullable" : false
+      },
+      "vergemaalEllerFremtidsfullmakt" : {
+        "name" : "vergemaalEllerFremtidsfullmakt",
+        "type" : "Collection",
+        "fields" : {
+          "embete" : {
+            "name" : "embete",
+            "type" : "String",
+            "nullable" : false
+          },
+          "folkeregistermetadata" : {
+            "name" : "folkeregistermetadata",
+            "type" : "Object",
+            "fields" : {
+              "gyldighetstidspunkt" : {
+                "name" : "gyldighetstidspunkt",
+                "type" : "LocalDateTime",
+                "nullable" : false
+              },
+              "opphørstidspunkt" : {
+                "name" : "opphørstidspunkt",
+                "type" : "LocalDateTime",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          },
+          "type" : {
+            "name" : "type",
+            "type" : "String",
+            "nullable" : false
+          },
+          "vergeEllerFullmektig" : {
+            "name" : "vergeEllerFullmektig",
+            "type" : "Object",
+            "fields" : {
+              "motpartsPersonident" : {
+                "name" : "motpartsPersonident",
+                "type" : "String",
+                "nullable" : false
+              },
+              "navn" : {
+                "name" : "navn",
+                "type" : "Object",
+                "fields" : {
+                  "etternavn" : {
+                    "name" : "etternavn",
+                    "type" : "String",
+                    "nullable" : false
+                  },
+                  "fornavn" : {
+                    "name" : "fornavn",
+                    "type" : "String",
+                    "nullable" : false
+                  },
+                  "mellomnavn" : {
+                    "name" : "mellomnavn",
+                    "type" : "String",
+                    "nullable" : false
+                  }
+                },
+                "nullable" : false
+              },
+              "omfang" : {
+                "name" : "omfang",
+                "type" : "String",
+                "nullable" : false
+              },
+              "omfangetErInnenPersonligOmraade" : {
+                "name" : "omfangetErInnenPersonligOmraade",
+                "type" : "Boolean",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          }
+        },
+        "nullable" : false
+      }
+    },
+    "nullable" : false
+  },
+  "annenForelder" : {
+    "name" : "annenForelder",
+    "type" : "Collection",
+    "fields" : {
+      "adressebeskyttelse" : {
+        "name" : "adressebeskyttelse",
+        "type" : "Collection",
+        "fields" : {
+          "gradering" : {
+            "name" : "gradering",
+            "type" : "Enum",
+            "values" : [ "STRENGT_FORTROLIG", "STRENGT_FORTROLIG_UTLAND", "FORTROLIG", "UGRADERT" ],
+            "nullable" : false
+          },
+          "metadata" : {
+            "name" : "metadata",
+            "type" : "Object",
+            "fields" : {
+              "historisk" : {
+                "name" : "historisk",
+                "type" : "Boolean",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          }
+        },
+        "nullable" : false
+      },
+      "bostedsadresse" : {
+        "name" : "bostedsadresse",
+        "type" : "Collection",
+        "fields" : {
+          "gyldigFraOgMed" : {
+            "name" : "gyldigFraOgMed",
+            "type" : "LocalDate",
+            "nullable" : false
+          },
+          "gyldigTilOgMed" : {
+            "name" : "gyldigTilOgMed",
+            "type" : "LocalDate",
+            "nullable" : false
+          },
+          "coAdressenavn" : {
+            "name" : "coAdressenavn",
+            "type" : "String",
+            "nullable" : false
+          },
+          "utenlandskAdresse" : {
+            "name" : "utenlandskAdresse",
+            "type" : "Object",
+            "fields" : {
+              "adressenavnNummer" : {
+                "name" : "adressenavnNummer",
+                "type" : "String",
+                "nullable" : false
+              },
+              "bySted" : {
+                "name" : "bySted",
+                "type" : "String",
+                "nullable" : false
+              },
+              "bygningEtasjeLeilighet" : {
+                "name" : "bygningEtasjeLeilighet",
+                "type" : "String",
+                "nullable" : false
+              },
+              "landkode" : {
+                "name" : "landkode",
+                "type" : "String",
+                "nullable" : false
+              },
+              "postboksNummerNavn" : {
+                "name" : "postboksNummerNavn",
+                "type" : "String",
+                "nullable" : false
+              },
+              "postkode" : {
+                "name" : "postkode",
+                "type" : "String",
+                "nullable" : false
+              },
+              "regionDistriktOmraade" : {
+                "name" : "regionDistriktOmraade",
+                "type" : "String",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          },
+          "vegadresse" : {
+            "name" : "vegadresse",
+            "type" : "Object",
+            "fields" : {
+              "husnummer" : {
+                "name" : "husnummer",
+                "type" : "String",
+                "nullable" : false
+              },
+              "husbokstav" : {
+                "name" : "husbokstav",
+                "type" : "String",
+                "nullable" : false
+              },
+              "bruksenhetsnummer" : {
+                "name" : "bruksenhetsnummer",
+                "type" : "String",
+                "nullable" : false
+              },
+              "adressenavn" : {
+                "name" : "adressenavn",
+                "type" : "String",
+                "nullable" : false
+              },
+              "kommunenummer" : {
+                "name" : "kommunenummer",
+                "type" : "String",
+                "nullable" : false
+              },
+              "tilleggsnavn" : {
+                "name" : "tilleggsnavn",
+                "type" : "String",
+                "nullable" : false
+              },
+              "postnummer" : {
+                "name" : "postnummer",
+                "type" : "String",
+                "nullable" : false
+              },
+              "koordinater" : {
+                "name" : "koordinater",
+                "type" : "Object",
+                "fields" : {
+                  "x" : {
+                    "name" : "x",
+                    "type" : "Float",
+                    "nullable" : false
+                  },
+                  "y" : {
+                    "name" : "y",
+                    "type" : "Float",
+                    "nullable" : false
+                  },
+                  "z" : {
+                    "name" : "z",
+                    "type" : "Float",
+                    "nullable" : false
+                  },
+                  "kvalitet" : {
+                    "name" : "kvalitet",
+                    "type" : "Int",
+                    "nullable" : false
+                  }
+                },
+                "nullable" : false
+              },
+              "matrikkelId" : {
+                "name" : "matrikkelId",
+                "type" : "Long",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          },
+          "ukjentBosted" : {
+            "name" : "ukjentBosted",
+            "type" : "Object",
+            "fields" : {
+              "bostedskommune" : {
+                "name" : "bostedskommune",
+                "type" : "String",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          },
+          "matrikkeladresse" : {
+            "name" : "matrikkeladresse",
+            "type" : "Object",
+            "fields" : {
+              "matrikkelId" : {
+                "name" : "matrikkelId",
+                "type" : "Long",
+                "nullable" : false
+              },
+              "bruksenhetsnummer" : {
+                "name" : "bruksenhetsnummer",
+                "type" : "String",
+                "nullable" : false
+              },
+              "tilleggsnavn" : {
+                "name" : "tilleggsnavn",
+                "type" : "String",
+                "nullable" : false
+              },
+              "postnummer" : {
+                "name" : "postnummer",
+                "type" : "String",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          },
+          "metadata" : {
+            "name" : "metadata",
+            "type" : "Object",
+            "fields" : {
+              "historisk" : {
+                "name" : "historisk",
+                "type" : "Boolean",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          }
+        },
+        "nullable" : false
+      },
+      "dødsfall" : {
+        "name" : "dødsfall",
+        "type" : "Collection",
+        "fields" : {
+          "dødsdato" : {
+            "name" : "dødsdato",
+            "type" : "LocalDate",
+            "nullable" : false
+          }
+        },
+        "nullable" : false
+      },
+      "fødsel" : {
+        "name" : "fødsel",
+        "type" : "Collection",
+        "fields" : {
+          "fødselsår" : {
+            "name" : "fødselsår",
+            "type" : "Int",
+            "nullable" : false
+          },
+          "fødselsdato" : {
+            "name" : "fødselsdato",
+            "type" : "LocalDate",
+            "nullable" : false
+          },
+          "fødeland" : {
+            "name" : "fødeland",
+            "type" : "String",
+            "nullable" : false
+          },
+          "fødested" : {
+            "name" : "fødested",
+            "type" : "String",
+            "nullable" : false
+          },
+          "fødekommune" : {
+            "name" : "fødekommune",
+            "type" : "String",
+            "nullable" : false
+          },
+          "metadata" : {
+            "name" : "metadata",
+            "type" : "Object",
+            "fields" : {
+              "historisk" : {
+                "name" : "historisk",
+                "type" : "Boolean",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          }
+        },
+        "nullable" : false
+      },
+      "navn" : {
+        "name" : "navn",
+        "type" : "Collection",
+        "fields" : {
+          "fornavn" : {
+            "name" : "fornavn",
+            "type" : "String",
+            "nullable" : false
+          },
+          "mellomnavn" : {
+            "name" : "mellomnavn",
+            "type" : "String",
+            "nullable" : false
+          },
+          "etternavn" : {
+            "name" : "etternavn",
+            "type" : "String",
+            "nullable" : false
+          },
+          "metadata" : {
+            "name" : "metadata",
+            "type" : "Object",
+            "fields" : {
+              "historisk" : {
+                "name" : "historisk",
+                "type" : "Boolean",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          }
+        },
+        "nullable" : false
+      },
+      "opphold" : {
+        "name" : "opphold",
+        "type" : "Collection",
+        "fields" : {
+          "type" : {
+            "name" : "type",
+            "type" : "Enum",
+            "values" : [ "MIDLERTIDIG", "PERMANENT", "OPPLYSNING_MANGLER" ],
+            "nullable" : false
+          },
+          "oppholdFra" : {
+            "name" : "oppholdFra",
+            "type" : "LocalDate",
+            "nullable" : false
+          },
+          "oppholdTil" : {
+            "name" : "oppholdTil",
+            "type" : "LocalDate",
+            "nullable" : false
+          }
+        },
+        "nullable" : false
+      },
+      "oppholdsadresse" : {
+        "name" : "oppholdsadresse",
+        "type" : "Collection",
+        "fields" : {
+          "gyldigFraOgMed" : {
+            "name" : "gyldigFraOgMed",
+            "type" : "LocalDate",
+            "nullable" : false
+          },
+          "gyldigTilOgMed" : {
+            "name" : "gyldigTilOgMed",
+            "type" : "LocalDate",
+            "nullable" : true
+          },
+          "coAdressenavn" : {
+            "name" : "coAdressenavn",
+            "type" : "String",
+            "nullable" : false
+          },
+          "utenlandskAdresse" : {
+            "name" : "utenlandskAdresse",
+            "type" : "Object",
+            "fields" : {
+              "adressenavnNummer" : {
+                "name" : "adressenavnNummer",
+                "type" : "String",
+                "nullable" : false
+              },
+              "bySted" : {
+                "name" : "bySted",
+                "type" : "String",
+                "nullable" : false
+              },
+              "bygningEtasjeLeilighet" : {
+                "name" : "bygningEtasjeLeilighet",
+                "type" : "String",
+                "nullable" : false
+              },
+              "landkode" : {
+                "name" : "landkode",
+                "type" : "String",
+                "nullable" : false
+              },
+              "postboksNummerNavn" : {
+                "name" : "postboksNummerNavn",
+                "type" : "String",
+                "nullable" : false
+              },
+              "postkode" : {
+                "name" : "postkode",
+                "type" : "String",
+                "nullable" : false
+              },
+              "regionDistriktOmraade" : {
+                "name" : "regionDistriktOmraade",
+                "type" : "String",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          },
+          "vegadresse" : {
+            "name" : "vegadresse",
+            "type" : "Object",
+            "fields" : {
+              "husnummer" : {
+                "name" : "husnummer",
+                "type" : "String",
+                "nullable" : false
+              },
+              "husbokstav" : {
+                "name" : "husbokstav",
+                "type" : "String",
+                "nullable" : false
+              },
+              "bruksenhetsnummer" : {
+                "name" : "bruksenhetsnummer",
+                "type" : "String",
+                "nullable" : false
+              },
+              "adressenavn" : {
+                "name" : "adressenavn",
+                "type" : "String",
+                "nullable" : false
+              },
+              "kommunenummer" : {
+                "name" : "kommunenummer",
+                "type" : "String",
+                "nullable" : false
+              },
+              "tilleggsnavn" : {
+                "name" : "tilleggsnavn",
+                "type" : "String",
+                "nullable" : false
+              },
+              "postnummer" : {
+                "name" : "postnummer",
+                "type" : "String",
+                "nullable" : false
+              },
+              "koordinater" : {
+                "name" : "koordinater",
+                "type" : "Object",
+                "fields" : {
+                  "x" : {
+                    "name" : "x",
+                    "type" : "Float",
+                    "nullable" : false
+                  },
+                  "y" : {
+                    "name" : "y",
+                    "type" : "Float",
+                    "nullable" : false
+                  },
+                  "z" : {
+                    "name" : "z",
+                    "type" : "Float",
+                    "nullable" : false
+                  },
+                  "kvalitet" : {
+                    "name" : "kvalitet",
+                    "type" : "Int",
+                    "nullable" : false
+                  }
+                },
+                "nullable" : false
+              },
+              "matrikkelId" : {
+                "name" : "matrikkelId",
+                "type" : "Long",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          },
+          "oppholdAnnetSted" : {
+            "name" : "oppholdAnnetSted",
+            "type" : "String",
+            "nullable" : false
+          },
+          "metadata" : {
+            "name" : "metadata",
+            "type" : "Object",
+            "fields" : {
+              "historisk" : {
+                "name" : "historisk",
+                "type" : "Boolean",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          }
+        },
+        "nullable" : false
+      },
+      "statsborgerskap" : {
+        "name" : "statsborgerskap",
+        "type" : "Collection",
+        "fields" : {
+          "land" : {
+            "name" : "land",
+            "type" : "String",
+            "nullable" : false
+          },
+          "gyldigFraOgMed" : {
+            "name" : "gyldigFraOgMed",
+            "type" : "LocalDate",
+            "nullable" : false
+          },
+          "gyldigTilOgMed" : {
+            "name" : "gyldigTilOgMed",
+            "type" : "LocalDate",
+            "nullable" : false
+          }
+        },
+        "nullable" : false
+      },
+      "innflyttingTilNorge" : {
+        "name" : "innflyttingTilNorge",
+        "type" : "Collection",
+        "fields" : {
+          "fraflyttingsland" : {
+            "name" : "fraflyttingsland",
+            "type" : "String",
+            "nullable" : false
+          },
+          "fraflyttingsstedIUtlandet" : {
+            "name" : "fraflyttingsstedIUtlandet",
+            "type" : "String",
+            "nullable" : false
+          },
+          "folkeregistermetadata" : {
+            "name" : "folkeregistermetadata",
+            "type" : "Object",
+            "fields" : {
+              "gyldighetstidspunkt" : {
+                "name" : "gyldighetstidspunkt",
+                "type" : "LocalDateTime",
+                "nullable" : false
+              },
+              "opphørstidspunkt" : {
+                "name" : "opphørstidspunkt",
+                "type" : "LocalDateTime",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          }
+        },
+        "nullable" : false
+      },
+      "utflyttingFraNorge" : {
+        "name" : "utflyttingFraNorge",
+        "type" : "Collection",
+        "fields" : {
+          "tilflyttingsland" : {
+            "name" : "tilflyttingsland",
+            "type" : "String",
+            "nullable" : false
+          },
+          "tilflyttingsstedIUtlandet" : {
+            "name" : "tilflyttingsstedIUtlandet",
+            "type" : "String",
+            "nullable" : false
+          },
+          "folkeregistermetadata" : {
+            "name" : "folkeregistermetadata",
+            "type" : "Object",
+            "fields" : {
+              "gyldighetstidspunkt" : {
+                "name" : "gyldighetstidspunkt",
+                "type" : "LocalDateTime",
+                "nullable" : false
+              },
+              "opphørstidspunkt" : {
+                "name" : "opphørstidspunkt",
+                "type" : "LocalDateTime",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          }
+        },
+        "nullable" : false
+      },
+      "personIdent" : {
+        "name" : "personIdent",
+        "type" : "String",
+        "nullable" : false
+      }
+    },
+    "nullable" : false
+  },
+  "medlUnntak" : {
+    "name" : "medlUnntak",
+    "type" : "Object",
+    "fields" : {
+      "personIdent" : {
+        "name" : "personIdent",
+        "type" : "String",
+        "nullable" : false
+      },
+      "gyldigePerioder" : {
+        "name" : "gyldigePerioder",
+        "type" : "Collection",
+        "fields" : {
+          "periodeStatus" : {
+            "name" : "periodeStatus",
+            "type" : "Enum",
+            "values" : [ "AVST", "GYLD", "UAVK" ],
+            "nullable" : false
+          },
+          "periodeStatusÅrsak" : {
+            "name" : "periodeStatusÅrsak",
+            "type" : "Enum",
+            "values" : [ "Avvist", "Feilregistrert", "Migrert", "Opphort" ],
+            "nullable" : true
+          },
+          "fom" : {
+            "name" : "fom",
+            "type" : "LocalDate",
+            "nullable" : false
+          },
+          "tom" : {
+            "name" : "tom",
+            "type" : "LocalDate",
+            "nullable" : false
+          },
+          "gjelderMedlemskapIFolketrygden" : {
+            "name" : "gjelderMedlemskapIFolketrygden",
+            "type" : "Boolean",
+            "nullable" : false
+          },
+          "grunnlag" : {
+            "name" : "grunnlag",
+            "type" : "String",
+            "nullable" : false
+          },
+          "dekning" : {
+            "name" : "dekning",
+            "type" : "String",
+            "nullable" : true
+          }
+        },
+        "nullable" : false
+      },
+      "avvistePerioder" : {
+        "name" : "avvistePerioder",
+        "type" : "Collection",
+        "fields" : {
+          "periodeStatus" : {
+            "name" : "periodeStatus",
+            "type" : "Enum",
+            "values" : [ "AVST", "GYLD", "UAVK" ],
+            "nullable" : false
+          },
+          "periodeStatusÅrsak" : {
+            "name" : "periodeStatusÅrsak",
+            "type" : "Enum",
+            "values" : [ "Avvist", "Feilregistrert", "Migrert", "Opphort" ],
+            "nullable" : true
+          },
+          "fom" : {
+            "name" : "fom",
+            "type" : "LocalDate",
+            "nullable" : false
+          },
+          "tom" : {
+            "name" : "tom",
+            "type" : "LocalDate",
+            "nullable" : false
+          },
+          "gjelderMedlemskapIFolketrygden" : {
+            "name" : "gjelderMedlemskapIFolketrygden",
+            "type" : "Boolean",
+            "nullable" : false
+          },
+          "grunnlag" : {
+            "name" : "grunnlag",
+            "type" : "String",
+            "nullable" : false
+          },
+          "dekning" : {
+            "name" : "dekning",
+            "type" : "String",
+            "nullable" : true
+          }
+        },
+        "nullable" : false
+      },
+      "uavklartePerioder" : {
+        "name" : "uavklartePerioder",
+        "type" : "Collection",
+        "fields" : {
+          "periodeStatus" : {
+            "name" : "periodeStatus",
+            "type" : "Enum",
+            "values" : [ "AVST", "GYLD", "UAVK" ],
+            "nullable" : false
+          },
+          "periodeStatusÅrsak" : {
+            "name" : "periodeStatusÅrsak",
+            "type" : "Enum",
+            "values" : [ "Avvist", "Feilregistrert", "Migrert", "Opphort" ],
+            "nullable" : true
+          },
+          "fom" : {
+            "name" : "fom",
+            "type" : "LocalDate",
+            "nullable" : false
+          },
+          "tom" : {
+            "name" : "tom",
+            "type" : "LocalDate",
+            "nullable" : false
+          },
+          "gjelderMedlemskapIFolketrygden" : {
+            "name" : "gjelderMedlemskapIFolketrygden",
+            "type" : "Boolean",
+            "nullable" : false
+          },
+          "grunnlag" : {
+            "name" : "grunnlag",
+            "type" : "String",
+            "nullable" : false
+          },
+          "dekning" : {
+            "name" : "dekning",
+            "type" : "String",
+            "nullable" : true
+          }
+        },
+        "nullable" : false
+      }
+    },
+    "nullable" : false
+  },
+  "barn" : {
+    "name" : "barn",
+    "type" : "Collection",
+    "fields" : {
+      "adressebeskyttelse" : {
+        "name" : "adressebeskyttelse",
+        "type" : "Collection",
+        "fields" : {
+          "gradering" : {
+            "name" : "gradering",
+            "type" : "Enum",
+            "values" : [ "STRENGT_FORTROLIG", "STRENGT_FORTROLIG_UTLAND", "FORTROLIG", "UGRADERT" ],
+            "nullable" : false
+          },
+          "metadata" : {
+            "name" : "metadata",
+            "type" : "Object",
+            "fields" : {
+              "historisk" : {
+                "name" : "historisk",
+                "type" : "Boolean",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          }
+        },
+        "nullable" : false
+      },
+      "bostedsadresse" : {
+        "name" : "bostedsadresse",
+        "type" : "Collection",
+        "fields" : {
+          "gyldigFraOgMed" : {
+            "name" : "gyldigFraOgMed",
+            "type" : "LocalDate",
+            "nullable" : false
+          },
+          "gyldigTilOgMed" : {
+            "name" : "gyldigTilOgMed",
+            "type" : "LocalDate",
+            "nullable" : false
+          },
+          "coAdressenavn" : {
+            "name" : "coAdressenavn",
+            "type" : "String",
+            "nullable" : false
+          },
+          "utenlandskAdresse" : {
+            "name" : "utenlandskAdresse",
+            "type" : "Object",
+            "fields" : {
+              "adressenavnNummer" : {
+                "name" : "adressenavnNummer",
+                "type" : "String",
+                "nullable" : false
+              },
+              "bySted" : {
+                "name" : "bySted",
+                "type" : "String",
+                "nullable" : false
+              },
+              "bygningEtasjeLeilighet" : {
+                "name" : "bygningEtasjeLeilighet",
+                "type" : "String",
+                "nullable" : false
+              },
+              "landkode" : {
+                "name" : "landkode",
+                "type" : "String",
+                "nullable" : false
+              },
+              "postboksNummerNavn" : {
+                "name" : "postboksNummerNavn",
+                "type" : "String",
+                "nullable" : false
+              },
+              "postkode" : {
+                "name" : "postkode",
+                "type" : "String",
+                "nullable" : false
+              },
+              "regionDistriktOmraade" : {
+                "name" : "regionDistriktOmraade",
+                "type" : "String",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          },
+          "vegadresse" : {
+            "name" : "vegadresse",
+            "type" : "Object",
+            "fields" : {
+              "husnummer" : {
+                "name" : "husnummer",
+                "type" : "String",
+                "nullable" : false
+              },
+              "husbokstav" : {
+                "name" : "husbokstav",
+                "type" : "String",
+                "nullable" : false
+              },
+              "bruksenhetsnummer" : {
+                "name" : "bruksenhetsnummer",
+                "type" : "String",
+                "nullable" : false
+              },
+              "adressenavn" : {
+                "name" : "adressenavn",
+                "type" : "String",
+                "nullable" : false
+              },
+              "kommunenummer" : {
+                "name" : "kommunenummer",
+                "type" : "String",
+                "nullable" : false
+              },
+              "tilleggsnavn" : {
+                "name" : "tilleggsnavn",
+                "type" : "String",
+                "nullable" : false
+              },
+              "postnummer" : {
+                "name" : "postnummer",
+                "type" : "String",
+                "nullable" : false
+              },
+              "koordinater" : {
+                "name" : "koordinater",
+                "type" : "Object",
+                "fields" : {
+                  "x" : {
+                    "name" : "x",
+                    "type" : "Float",
+                    "nullable" : false
+                  },
+                  "y" : {
+                    "name" : "y",
+                    "type" : "Float",
+                    "nullable" : false
+                  },
+                  "z" : {
+                    "name" : "z",
+                    "type" : "Float",
+                    "nullable" : false
+                  },
+                  "kvalitet" : {
+                    "name" : "kvalitet",
+                    "type" : "Int",
+                    "nullable" : false
+                  }
+                },
+                "nullable" : false
+              },
+              "matrikkelId" : {
+                "name" : "matrikkelId",
+                "type" : "Long",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          },
+          "ukjentBosted" : {
+            "name" : "ukjentBosted",
+            "type" : "Object",
+            "fields" : {
+              "bostedskommune" : {
+                "name" : "bostedskommune",
+                "type" : "String",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          },
+          "matrikkeladresse" : {
+            "name" : "matrikkeladresse",
+            "type" : "Object",
+            "fields" : {
+              "matrikkelId" : {
+                "name" : "matrikkelId",
+                "type" : "Long",
+                "nullable" : false
+              },
+              "bruksenhetsnummer" : {
+                "name" : "bruksenhetsnummer",
+                "type" : "String",
+                "nullable" : false
+              },
+              "tilleggsnavn" : {
+                "name" : "tilleggsnavn",
+                "type" : "String",
+                "nullable" : false
+              },
+              "postnummer" : {
+                "name" : "postnummer",
+                "type" : "String",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          },
+          "metadata" : {
+            "name" : "metadata",
+            "type" : "Object",
+            "fields" : {
+              "historisk" : {
+                "name" : "historisk",
+                "type" : "Boolean",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          }
+        },
+        "nullable" : false
+      },
+      "deltBosted" : {
+        "name" : "deltBosted",
+        "type" : "Collection",
+        "fields" : {
+          "startdatoForKontrakt" : {
+            "name" : "startdatoForKontrakt",
+            "type" : "LocalDate",
+            "nullable" : false
+          },
+          "sluttdatoForKontrakt" : {
+            "name" : "sluttdatoForKontrakt",
+            "type" : "LocalDate",
+            "nullable" : false
+          },
+          "vegadresse" : {
+            "name" : "vegadresse",
+            "type" : "Object",
+            "fields" : {
+              "husnummer" : {
+                "name" : "husnummer",
+                "type" : "String",
+                "nullable" : false
+              },
+              "husbokstav" : {
+                "name" : "husbokstav",
+                "type" : "String",
+                "nullable" : false
+              },
+              "bruksenhetsnummer" : {
+                "name" : "bruksenhetsnummer",
+                "type" : "String",
+                "nullable" : false
+              },
+              "adressenavn" : {
+                "name" : "adressenavn",
+                "type" : "String",
+                "nullable" : false
+              },
+              "kommunenummer" : {
+                "name" : "kommunenummer",
+                "type" : "String",
+                "nullable" : false
+              },
+              "tilleggsnavn" : {
+                "name" : "tilleggsnavn",
+                "type" : "String",
+                "nullable" : false
+              },
+              "postnummer" : {
+                "name" : "postnummer",
+                "type" : "String",
+                "nullable" : false
+              },
+              "koordinater" : {
+                "name" : "koordinater",
+                "type" : "Object",
+                "fields" : {
+                  "x" : {
+                    "name" : "x",
+                    "type" : "Float",
+                    "nullable" : false
+                  },
+                  "y" : {
+                    "name" : "y",
+                    "type" : "Float",
+                    "nullable" : false
+                  },
+                  "z" : {
+                    "name" : "z",
+                    "type" : "Float",
+                    "nullable" : false
+                  },
+                  "kvalitet" : {
+                    "name" : "kvalitet",
+                    "type" : "Int",
+                    "nullable" : false
+                  }
+                },
+                "nullable" : false
+              },
+              "matrikkelId" : {
+                "name" : "matrikkelId",
+                "type" : "Long",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          },
+          "ukjentBosted" : {
+            "name" : "ukjentBosted",
+            "type" : "Object",
+            "fields" : {
+              "bostedskommune" : {
+                "name" : "bostedskommune",
+                "type" : "String",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          },
+          "metadata" : {
+            "name" : "metadata",
+            "type" : "Object",
+            "fields" : {
+              "historisk" : {
+                "name" : "historisk",
+                "type" : "Boolean",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          }
+        },
+        "nullable" : false
+      },
+      "dødsfall" : {
+        "name" : "dødsfall",
+        "type" : "Collection",
+        "fields" : {
+          "dødsdato" : {
+            "name" : "dødsdato",
+            "type" : "LocalDate",
+            "nullable" : false
+          }
+        },
+        "nullable" : false
+      },
+      "forelderBarnRelasjon" : {
+        "name" : "forelderBarnRelasjon",
+        "type" : "Collection",
+        "fields" : {
+          "relatertPersonsIdent" : {
+            "name" : "relatertPersonsIdent",
+            "type" : "String",
+            "nullable" : false
+          },
+          "relatertPersonsRolle" : {
+            "name" : "relatertPersonsRolle",
+            "type" : "Enum",
+            "values" : [ "BARN", "MOR", "FAR", "MEDMOR" ],
+            "nullable" : false
+          },
+          "minRolleForPerson" : {
+            "name" : "minRolleForPerson",
+            "type" : "Enum",
+            "values" : [ "BARN", "MOR", "FAR", "MEDMOR" ],
+            "nullable" : false
+          }
+        },
+        "nullable" : false
+      },
+      "fødsel" : {
+        "name" : "fødsel",
+        "type" : "Collection",
+        "fields" : {
+          "fødselsår" : {
+            "name" : "fødselsår",
+            "type" : "Int",
+            "nullable" : false
+          },
+          "fødselsdato" : {
+            "name" : "fødselsdato",
+            "type" : "LocalDate",
+            "nullable" : false
+          },
+          "fødeland" : {
+            "name" : "fødeland",
+            "type" : "String",
+            "nullable" : false
+          },
+          "fødested" : {
+            "name" : "fødested",
+            "type" : "String",
+            "nullable" : false
+          },
+          "fødekommune" : {
+            "name" : "fødekommune",
+            "type" : "String",
+            "nullable" : false
+          },
+          "metadata" : {
+            "name" : "metadata",
+            "type" : "Object",
+            "fields" : {
+              "historisk" : {
+                "name" : "historisk",
+                "type" : "Boolean",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          }
+        },
+        "nullable" : false
+      },
+      "navn" : {
+        "name" : "navn",
+        "type" : "Collection",
+        "fields" : {
+          "fornavn" : {
+            "name" : "fornavn",
+            "type" : "String",
+            "nullable" : false
+          },
+          "mellomnavn" : {
+            "name" : "mellomnavn",
+            "type" : "String",
+            "nullable" : false
+          },
+          "etternavn" : {
+            "name" : "etternavn",
+            "type" : "String",
+            "nullable" : false
+          },
+          "metadata" : {
+            "name" : "metadata",
+            "type" : "Object",
+            "fields" : {
+              "historisk" : {
+                "name" : "historisk",
+                "type" : "Boolean",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          }
+        },
+        "nullable" : false
+      },
+      "personIdent" : {
+        "name" : "personIdent",
+        "type" : "String",
+        "nullable" : false
+      }
+    },
+    "nullable" : false
+  }
+}

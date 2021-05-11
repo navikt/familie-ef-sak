@@ -1,15 +1,9 @@
 package no.nav.familie.ef.sak.service
 
-import no.nav.familie.ef.sak.api.dto.MedlemskapDto
 import no.nav.familie.ef.sak.api.dto.SivilstandInngangsvilkårDto
 import no.nav.familie.ef.sak.api.dto.SivilstandRegistergrunnlagDto
-import no.nav.familie.ef.sak.api.dto.Sivilstandstype
 import no.nav.familie.ef.sak.api.dto.VilkårGrunnlagDto
-import no.nav.familie.ef.sak.domene.AnnenForelderMedIdent
-import no.nav.familie.ef.sak.domene.Barn
 import no.nav.familie.ef.sak.domene.Grunnlagsdata
-import no.nav.familie.ef.sak.domene.SivilstandMedNavn
-import no.nav.familie.ef.sak.domene.Søker
 import no.nav.familie.ef.sak.domene.tilPdlAnnenForelder
 import no.nav.familie.ef.sak.domene.tilPdlBarn
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
@@ -17,12 +11,15 @@ import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.integration.dto.pdl.Familierelasjonsrolle
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlAnnenForelder
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlBarn
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlPersonKort
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker
 import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
-import no.nav.familie.ef.sak.integration.dto.pdl.visningsnavn
 import no.nav.familie.ef.sak.mapper.AktivitetMapper
 import no.nav.familie.ef.sak.mapper.BarnMedSamværMapper
 import no.nav.familie.ef.sak.mapper.BosituasjonMapper
+import no.nav.familie.ef.sak.mapper.GrunnlagsdataMapper.mapAnnenForelder
+import no.nav.familie.ef.sak.mapper.GrunnlagsdataMapper.mapBarn
+import no.nav.familie.ef.sak.mapper.GrunnlagsdataMapper.mapSøker
 import no.nav.familie.ef.sak.mapper.MedlemskapMapper
 import no.nav.familie.ef.sak.mapper.SagtOppEllerRedusertStillingMapper
 import no.nav.familie.ef.sak.mapper.SivilstandMapper
@@ -47,18 +44,10 @@ class PersisterGrunnlagsdataService(private val pdlClient: PdlClient,
 
         val søknad = behandlingService.hentOvergangsstønad(behandlingId)
 
-        val medlemskapRegistergrunnlag =
-                medlemskapMapper.mapRegistergrunnlag(søker = grunnlagsdata.søker, medlUnntak = grunnlagsdata.medlUnntak)
-        val medlemskapSøknadsgrunnlag = medlemskapMapper.mapSøknadsgrunnlag(medlemskapsdetaljer = søknad.medlemskap)
-        val medlemskap = MedlemskapDto(søknadsgrunnlag = medlemskapSøknadsgrunnlag,
-                                       registergrunnlag = medlemskapRegistergrunnlag)
-
-        val sivilstandSøknadsgrunnlag = SivilstandMapper.mapSøknadsgrunnlag(sivilstandsdetaljer = søknad.sivilstand)
-        val gjeldendeSivilstandMedNavn = grunnlagsdata.søker.sivilstand.gjeldende()
-        val sivilstand = SivilstandInngangsvilkårDto(søknadsgrunnlag = sivilstandSøknadsgrunnlag,
-                                                     registergrunnlag = SivilstandRegistergrunnlagDto(type = gjeldendeSivilstandMedNavn.type,
-                                                                                                      navn = gjeldendeSivilstandMedNavn.navn,
-                                                                                                      gyldigFraOgMed = gjeldendeSivilstandMedNavn.gyldigFraOgMed))
+        val medlemskap = medlemskapMapper.tilDto(medlemskapsdetaljer = søknad.medlemskap,
+                                                 medlUnntak = grunnlagsdata.medlUnntak,
+                                                 pdlSøker = grunnlagsdata.søker)
+        val sivilstand = SivilstandMapper.tilDto(grunnlagsdata, søknad)
         val sivilstandsplaner = SivilstandsplanerMapper.tilDto(sivilstandsplaner = søknad.sivilstandsplaner)
 
         val pdlBarn = grunnlagsdata.barn.associate { it.personIdent to it.tilPdlBarn() }
@@ -89,58 +78,16 @@ class PersisterGrunnlagsdataService(private val pdlClient: PdlClient,
         val pdlSøker = pdlClient.hentSøker(personIdent)
         val pdlBarn = hentPdlBarn(pdlSøker)
         val barneForeldre = hentPdlBarneForeldre(søknad, pdlBarn)
+        val dataTilAndreIdenter = hentDataTilAndreIdenter(pdlSøker)
 
         /*TODO VAD SKA VI BRUKE FRA MEDL ?? */
         val medlUnntak = familieIntegrasjonerClient.hentMedlemskapsinfo(ident = personIdent)
 
         return Grunnlagsdata(
-                søker = Søker(
-                        sivilstand = hentNavnForRelatertVedSivilstand(pdlSøker),
-                        adressebeskyttelse = pdlSøker.adressebeskyttelse.first(),
-                        bostedsadresse = pdlSøker.bostedsadresse,
-                        dødsfall = pdlSøker.dødsfall.first(),
-                        forelderBarnRelasjon = pdlSøker.forelderBarnRelasjon,
-                        fullmakt = pdlSøker.fullmakt,
-                        fødsel = pdlSøker.fødsel.first(),
-                        folkeregisterpersonstatus = pdlSøker.folkeregisterpersonstatus,
-                        innflyttingTilNorge = pdlSøker.innflyttingTilNorge,
-                        kjønn = pdlSøker.kjønn.first(),
-                        kontaktadresse = pdlSøker.kontaktadresse,
-                        navn = pdlSøker.navn,
-                        opphold = pdlSøker.opphold,
-                        oppholdsadresse = pdlSøker.oppholdsadresse,
-                        statsborgerskap = pdlSøker.statsborgerskap,
-                        telefonnummer = pdlSøker.telefonnummer,
-                        tilrettelagtKommunikasjon = pdlSøker.tilrettelagtKommunikasjon,
-                        utflyttingFraNorge = pdlSøker.utflyttingFraNorge,
-                        vergemaalEllerFremtidsfullmakt = pdlSøker.vergemaalEllerFremtidsfullmakt
-                ),
-                annenForelder = barneForeldre.map {
-                    AnnenForelderMedIdent(
-                            adressebeskyttelse = it.value.adressebeskyttelse,
-                            personIdent = it.key,
-                            fødsel = it.value.fødsel,
-                            bostedsadresse = it.value.bostedsadresse,
-                            dødsfall = it.value.dødsfall,
-                            innflyttingTilNorge = it.value.innflyttingTilNorge,
-                            navn = it.value.navn,
-                            opphold = it.value.opphold,
-                            oppholdsadresse = it.value.oppholdsadresse,
-                            statsborgerskap = it.value.statsborgerskap,
-                            utflyttingFraNorge = it.value.utflyttingFraNorge
-                    )
-                },
+                søker = mapSøker(pdlSøker, dataTilAndreIdenter),
+                annenForelder = mapAnnenForelder(barneForeldre),
                 medlUnntak = medlUnntak,
-                barn = pdlBarn.map {
-                    Barn(fødsel = it.value.fødsel,
-                         adressebeskyttelse = it.value.adressebeskyttelse,
-                         navn = it.value.navn,
-                         bostedsadresse = it.value.bostedsadresse,
-                         dødsfall = it.value.dødsfall,
-                         deltBosted = it.value.deltBosted,
-                         forelderBarnRelasjon = it.value.forelderBarnRelasjon,
-                         personIdent = it.key)
-                }
+                barn = mapBarn(pdlBarn)
         )
 
     }
@@ -165,20 +112,11 @@ class PersisterGrunnlagsdataService(private val pdlClient: PdlClient,
                 .let { pdlClient.hentAndreForeldre(it) }
     }
 
-
-    private fun hentNavnForRelatertVedSivilstand(pdlSøker: PdlSøker): List<SivilstandMedNavn> {
-        val mapPersonIdentTilNavn = pdlSøker.sivilstand.mapNotNull { it.relatertVedSivilstand }
-                .distinct()
-                .let { pdlClient.hentPersonKortBolk(it) }
-
-        return pdlSøker.sivilstand.map {
-            SivilstandMedNavn(type = Sivilstandstype.valueOf(it.type.name),
-                              gyldigFraOgMed = it.gyldigFraOgMed,
-                              relatertVedSivilstand = it.relatertVedSivilstand,
-                              bekreftelsesdato = it.bekreftelsesdato,
-                              metadata = it.metadata,
-                              navn = mapPersonIdentTilNavn[it.relatertVedSivilstand]?.navn?.gjeldende()?.visningsnavn())
-        }
+    private fun hentDataTilAndreIdenter(pdlSøker: PdlSøker): Map<String, PdlPersonKort> {
+        val andreIdenter = pdlSøker.sivilstand.mapNotNull { it.relatertVedSivilstand } +
+                           pdlSøker.fullmakt.map { it.motpartsPersonident }
+        if (andreIdenter.isEmpty()) return emptyMap()
+        return pdlClient.hentPersonKortBolk(andreIdenter)
     }
 
 

@@ -18,6 +18,14 @@ class MedlemskapMapper(private val statsborgerskapMapper: StatsborgerskapMapper,
 
     fun tilDto(medlemskapsdetaljer: Medlemskap,
                medlUnntak: Medlemskapsinfo,
+               pdlSøker: Søker): MedlemskapDto {
+
+        return MedlemskapDto(søknadsgrunnlag = mapSøknadsgrunnlag(medlemskapsdetaljer),
+                             registergrunnlag = mapRegistergrunnlag(pdlSøker, medlUnntak))
+    }
+
+    fun tilDto(medlemskapsdetaljer: Medlemskap,
+               medlUnntak: Medlemskapsinfo,
                pdlSøker: PdlSøker): MedlemskapDto {
 
         return MedlemskapDto(søknadsgrunnlag = mapSøknadsgrunnlag(medlemskapsdetaljer),
