@@ -1,5 +1,7 @@
 package no.nav.familie.ef.sak.integration.dto.pdl
 
+import no.nav.familie.ef.sak.domene.SivilstandMedNavn
+
 
 fun Navn.visningsnavn(): String {
     return if (mellomnavn == null) "$fornavn $etternavn"
@@ -16,3 +18,7 @@ fun List<Folkeregisterpersonstatus>.gjeldende(): Folkeregisterpersonstatus? = th
 fun List<Dødsfall>.gjeldende(): Dødsfall? = this.firstOrNull()
 fun List<Adressebeskyttelse>.gjeldende(): Adressebeskyttelse? = this.find { !it.metadata.historisk }
 fun List<Folkeregisteridentifikator>.gjeldende(): Folkeregisteridentifikator = this.single()
+
+
+
+fun List<SivilstandMedNavn>.gjeldende(): SivilstandMedNavn = this.find { !it.metadata.historisk } ?: this.first()

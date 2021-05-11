@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.mapper
 
 import no.nav.familie.ef.sak.api.dto.*
 import no.nav.familie.ef.sak.api.dto.Folkeregisterpersonstatus
+import no.nav.familie.ef.sak.domene.Søker
 import no.nav.familie.ef.sak.integration.dto.pdl.*
 import no.nav.familie.ef.sak.repository.domain.søknad.Medlemskap
 import no.nav.familie.ef.sak.service.KodeverkService
@@ -45,6 +46,22 @@ class MedlemskapMapper(private val statsborgerskapMapper: StatsborgerskapMapper,
                                              innflytting = mapInnflytting(pdlSøker.innflyttingTilNorge),
                                              utflytting = mapUtflytting(pdlSøker.utflyttingFraNorge),
                                              folkeregisterpersonstatus = pdlSøker.folkeregisterpersonstatus.gjeldende()
+                                                     ?.let(Folkeregisterpersonstatus::fraPdl),
+                                             medlUnntak = medlUnntak.tilDto())
+    }
+
+    fun mapRegistergrunnlag(søker: Søker,
+                            medlUnntak: Medlemskapsinfo): MedlemskapRegistergrunnlagDto {
+        val statsborgerskap = statsborgerskapMapper.map(søker.statsborgerskap)
+        return MedlemskapRegistergrunnlagDto(nåværendeStatsborgerskap =
+                                             statsborgerskap.filter { it.gyldigTilOgMedDato == null }
+                                                     .map { it.land },
+                                             statsborgerskap = statsborgerskap,
+                                             oppholdstatus = OppholdstillatelseMapper.map(søker.opphold),
+                                             bostedsadresse = søker.bostedsadresse.map(adresseMapper::tilAdresse),
+                                             innflytting = mapInnflytting(søker.innflyttingTilNorge),
+                                             utflytting = mapUtflytting(søker.utflyttingFraNorge),
+                                             folkeregisterpersonstatus = søker.folkeregisterpersonstatus.gjeldende()
                                                      ?.let(Folkeregisterpersonstatus::fraPdl),
                                              medlUnntak = medlUnntak.tilDto())
     }
