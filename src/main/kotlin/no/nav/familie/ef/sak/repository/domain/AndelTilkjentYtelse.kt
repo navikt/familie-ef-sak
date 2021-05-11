@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.repository.domain
 
 import org.springframework.data.relational.core.mapping.Column
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 /**
  * kildeBehandlingId er kun nullable her og ikke i databasen fordi når man mapper DTO til andel,

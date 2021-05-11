@@ -48,7 +48,8 @@ internal class SøkServiceTest {
                                     null,
                                     1L)
 
-        val bostedsadresseFraPdl = listOf(Bostedsadresse(LocalDate.now(),
+        val bostedsadresseFraPdl = listOf(Bostedsadresse(null,
+                                                         LocalDate.now(),
                                                          LocalDate.now(),
                                                          null,
                                                          null,

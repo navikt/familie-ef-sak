@@ -44,6 +44,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
                 "mock-integrasjoner",
                 "mock-oppdrag",
                 "mock-infotrygd-replika",
+                "mock-iverksett",
                 "mock-brev")
 abstract class OppslagSpringRunnerTest {
 

@@ -9,7 +9,6 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ef.sak.api.journalføring.JournalføringBehandling
 import no.nav.familie.ef.sak.api.journalføring.JournalføringRequest
-import no.nav.familie.ef.sak.domene.DokumentVariantformat
 import no.nav.familie.ef.sak.integration.JournalpostClient
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
@@ -23,10 +22,12 @@ import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.service.steg.StegType
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
+import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostResponse
 import no.nav.familie.kontrakter.felles.journalpost.DokumentInfo
 import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariant
+import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariantformat
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
@@ -68,13 +69,13 @@ internal class JournalføringServiceTest {
                                                          "Vedlegg1",
                                                          brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
                                                          dokumentvarianter =
-                                                         listOf(Dokumentvariant(DokumentVariantformat.ORIGINAL.toString()),
-                                                                Dokumentvariant(DokumentVariantformat.ARKIV.toString()))),
+                                                         listOf(Dokumentvariant(Dokumentvariantformat.ORIGINAL),
+                                                                Dokumentvariant(Dokumentvariantformat.ARKIV))),
                                             DokumentInfo("99999",
                                                          "Vedlegg2",
                                                          brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
                                                          dokumentvarianter =
-                                                         listOf(Dokumentvariant(DokumentVariantformat.ARKIV.toString()))),
+                                                         listOf(Dokumentvariant(Dokumentvariantformat.ARKIV))),
                                             DokumentInfo("23456",
                                                          "Vedlegg3",
                                                          brevkode = "XYZ"),
@@ -143,7 +144,7 @@ internal class JournalføringServiceTest {
         assertThat(behandleSakOppgaveId).isEqualTo(nyOppgaveId)
         assertThat(slotJournalpost.captured.sak?.fagsakId).isEqualTo(fagsakEksternId.toString())
         assertThat(slotJournalpost.captured.sak?.sakstype).isEqualTo("FAGSAK")
-        assertThat(slotJournalpost.captured.sak?.fagsaksystem).isEqualTo("EF")
+        assertThat(slotJournalpost.captured.sak?.fagsaksystem).isEqualTo(Fagsystem.EF)
         dokumentTitler.forEach { (dokumentId, nyTittel) ->
             val oppdatertDokument =
                     slotJournalpost.captured.dokumenter?.find { dokument -> dokument.dokumentInfoId === dokumentId }
@@ -183,7 +184,7 @@ internal class JournalføringServiceTest {
         assertThat(behandleSakOppgaveId).isEqualTo(nyOppgaveId)
         assertThat(slot.captured.sak?.fagsakId).isEqualTo(fagsakEksternId.toString())
         assertThat(slot.captured.sak?.sakstype).isEqualTo("FAGSAK")
-        assertThat(slot.captured.sak?.fagsaksystem).isEqualTo("EF")
+        assertThat(slot.captured.sak?.fagsaksystem).isEqualTo(Fagsystem.EF)
         dokumentTitler.forEach { (dokumentId, nyTittel) ->
             val oppdatertDokument = slot.captured.dokumenter?.find { dokument -> dokument.dokumentInfoId === dokumentId }
             assertThat(oppdatertDokument?.tittel).isEqualTo(nyTittel)

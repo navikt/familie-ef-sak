@@ -59,6 +59,24 @@ no.nav.security.jwt:
           client-id: ${AZURE_APP_CLIENT_ID}
           client-secret: ${AZURE_APP_CLIENT_SECRET}
           client-auth-method: client_secret_basic
+      familie-ef-iverksett-clientcredentials:
+        resource-url: ${FAMILIE_EF_IVERKSETT_URL}
+        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
+        grant-type: client_credentials
+        scope: ${EF_IVERKSETT_SCOPE}
+        authentication:
+          client-id: ${AZURE_APP_CLIENT_ID}
+          client-secret: ${AZURE_APP_CLIENT_SECRET}
+          client-auth-method: client_secret_basic
+      familie-ef-iverksett:
+        resource-url: ${FAMILIE_EF_IVERKSETT_URL}
+        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
+        grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+        scope: ${EF_IVERKSETT_SCOPE}
+        authentication:
+          client-id: ${AZURE_APP_CLIENT_ID}
+          client-secret: ${AZURE_APP_CLIENT_SECRET}
+          client-auth-method: client_secret_basic
       pdl:
         resource-url: ${PDL_URL}
         token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
@@ -68,7 +86,19 @@ no.nav.security.jwt:
           client-id: ${AZURE_APP_CLIENT_ID}
           client-secret: ${AZURE_APP_CLIENT_SECRET}
           client-auth-method: client_secret_basic
+      pdl-clientcredentials:
+        resource-url: ${PDL_URL}
+        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
+        grant-type: client_credentials
+        scope: ${PDL_SCOPE}
+        authentication:
+          client-id: ${AZURE_APP_CLIENT_ID}
+          client-secret: ${AZURE_APP_CLIENT_SECRET}
+          client-auth-method: client_secret_basic
+
 PDL_SCOPE: api://prod-fss.pdl.pdl-api/.default
+IVERKSETT_SCOPE: api://prod-gcp.teamfamilie.familie-ef-iverksett/.default
+
 
 spring:
   autoconfigure.exclude: org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration
@@ -106,19 +136,15 @@ GATEWAY_PREFIX: api-gw
 
 AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/oauth2/v2.0/token
 
-STS_PREFIX: https://${GATEWAY_PREFIX}.oera.no/legacy-sts
-STS_URL: ${STS_PREFIX}/rest/v1/sts/token?grant_type=client_credentials&scope=openid
-STS_DISCOVERY_URL: ${STS_PREFIX}/rest/v1/sts/.well-known/openid-configuration
-
-PDL_URL: https://${GATEWAY_PREFIX}.oera.no/pdl-api
-
 FAMILIE_BREV_API_URL: http://familie-brev
 FAMILIE_BLANKETT_API_URL: http://familie-ef-blankett
+FAMILIE_EF_IVERKSETT_URL: http://familie-ef-iverksett
 
 FAMILIE_OPPDRAG_API_URL: https://familie-oppdrag.${ON_PREM_URL_ENV}-fss-pub.nais.io
 FAMILIE_INTEGRASJONER_URL: https://familie-integrasjoner.${ON_PREM_URL_ENV}-fss-pub.nais.io
 INFOTRYGD_FEED_API_URL: https://familie-ef-infotrygd-feed.${ON_PREM_URL_ENV}-fss-pub.nais.io
 INFOTRYGD_REPLIKA_API_URL: https://infotrygd-enslig-forsoerger.${ON_PREM_URL_ENV}-fss-pub.nais.io
+PDL_URL: https://pdl-api.${ON_PREM_URL_ENV}-fss-pub.nais.io
 
 FRONTEND_OPPGAVE_URL: https://ensligmorellerfar.dev.intern.nav.no/oppgavebenk
 

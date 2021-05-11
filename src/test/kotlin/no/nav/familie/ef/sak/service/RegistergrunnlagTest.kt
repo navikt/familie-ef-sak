@@ -6,7 +6,6 @@ import no.nav.familie.ef.sak.repository.domain.RegistergrunnlagData
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.nio.file.Files
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -98,7 +97,7 @@ internal class RegistergrunnlagTest {
                     ObjectInfo(name, "Collection", classInfo, nullable = nullable)
                 }
                 classifier.isSubclassOf(Enum::class) ->
-                    ObjectInfo(name, "Enum", null, classifier.java.enumConstants.map { it.toString() }, nullable = nullable)
+                    ObjectInfo(name, "Enum", null, classifier.java.enumConstants.map { it.toString() }, nullable)
                 qualifiedName.startsWith("java.") || qualifiedName.startsWith("kotlin.") ->
                     error("$className - Class is not defined: $qualifiedName")
                 else -> ObjectInfo(name, "Object", getClassInfo(classifier), nullable = nullable)

@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.integration.dto.familie.EgenAnsattResponse
 import no.nav.familie.ef.sak.integration.dto.familie.Tilgang
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
+import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostResponse
@@ -131,33 +132,33 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                                                                 tittel = "Søknad om overgangsstønad - dokument 1",
                                                                 brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
                                                                 dokumentvarianter =
-                                                                listOf(Dokumentvariant(variantformat = "ARKIV"),
-                                                                       Dokumentvariant(variantformat = "ORIGINAL"))),
+                                                                listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV),
+                                                                       Dokumentvariant(variantformat = Dokumentvariantformat.ORIGINAL))),
                                                    DokumentInfo(dokumentInfoId = "12345",
                                                                 tittel = "Søknad om barnetilsyn - dokument 1",
                                                                 brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
                                                                 dokumentvarianter =
-                                                                listOf(Dokumentvariant(variantformat = "ARKIV"))),
+                                                                listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV))),
                                                    DokumentInfo(dokumentInfoId = "12345",
                                                                 tittel = "Samboeravtale",
                                                                 brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
                                                                 dokumentvarianter =
-                                                                listOf(Dokumentvariant(variantformat = "ARKIV"))),
+                                                                listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV))),
                                                    DokumentInfo(dokumentInfoId = "12345",
                                                                 tittel = "EtFrykteligLangtDokumentNavnSomTroligIkkeBrekkerOgØdeleggerGUI",
                                                                 brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
                                                                 dokumentvarianter =
-                                                                listOf(Dokumentvariant(variantformat = "ARKIV"))),
+                                                                listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV))),
                                                    DokumentInfo(dokumentInfoId = "12345",
                                                                 tittel = "Søknad om overgangsstønad - dokument 2",
                                                                 brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
                                                                 dokumentvarianter =
-                                                                listOf(Dokumentvariant(variantformat = "ARKIV"))),
+                                                                listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV))),
                                                    DokumentInfo(dokumentInfoId = "12345",
                                                                 tittel = "Søknad om overgangsstønad - dokument 3",
                                                                 brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
                                                                 dokumentvarianter =
-                                                                listOf(Dokumentvariant(variantformat = "ARKIV"))))))
+                                                                listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV))))))
 
         private val navKontorEnhet = Ressurs.success(NavKontorEnhet(enhetId = 100000194,
                                                                     navn = "NAV Kristiansand",

@@ -12,16 +12,22 @@ import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
 import no.nav.familie.kontrakter.ef.søknad.SøknadSkolepenger
-import no.nav.familie.kontrakter.felles.dokarkiv.*
-import no.nav.familie.kontrakter.felles.journalpost.BrukerIdType
+import no.nav.familie.kontrakter.felles.Behandlingstema
+import no.nav.familie.kontrakter.felles.BrukerIdType
+import no.nav.familie.kontrakter.felles.Fagsystem
+import no.nav.familie.kontrakter.felles.Tema
+import no.nav.familie.kontrakter.felles.dokarkiv.DokarkivBruker
+import no.nav.familie.kontrakter.felles.dokarkiv.DokumentInfo
+import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostRequest
+import no.nav.familie.kontrakter.felles.dokarkiv.Sak
 import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariant
+import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariantformat
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 @Service
 class JournalføringService(private val journalpostClient: JournalpostClient,
@@ -60,17 +66,17 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
 
     }
 
-    fun hentSøknadFraJournalpostForOvergangsstønad(journalpostId: String) : SøknadOvergangsstønad {
+    fun hentSøknadFraJournalpostForOvergangsstønad(journalpostId: String): SøknadOvergangsstønad {
         val dokumentinfo = hentOriginaldokument(journalpostId, DokumentBrevkode.OVERGANGSSTØNAD)
         return journalpostClient.hentOvergangsstønadSøknad(journalpostId, dokumentinfo.dokumentInfoId)
     }
 
-    fun hentSøknadFraJournalpostForBarnetilsyn(journalpostId: String) : SøknadBarnetilsyn {
+    fun hentSøknadFraJournalpostForBarnetilsyn(journalpostId: String): SøknadBarnetilsyn {
         val dokumentinfo = hentOriginaldokument(journalpostId, DokumentBrevkode.BARNETILSYN)
         return journalpostClient.hentBarnetilsynSøknad(journalpostId, dokumentinfo.dokumentInfoId)
     }
 
-    fun hentSøknadFraJournalpostForSkolepenger(journalpostId: String) : SøknadSkolepenger {
+    fun hentSøknadFraJournalpostForSkolepenger(journalpostId: String): SøknadSkolepenger {
         val dokumentinfo = hentOriginaldokument(journalpostId, DokumentBrevkode.SKOLEPENGER)
         return journalpostClient.hentSkolepengerSøknad(journalpostId, dokumentinfo.dokumentInfoId)
     }
@@ -85,12 +91,13 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         } ?: error("Kan ikke hente journalpost=${journalpost.journalpostId} uten bruker")
     }
 
-    private fun hentOriginaldokument(journalpostId: String, dokumentBrevkode: DokumentBrevkode): no.nav.familie.kontrakter.felles.journalpost.DokumentInfo {
+    private fun hentOriginaldokument(journalpostId: String,
+                                     dokumentBrevkode: DokumentBrevkode): no.nav.familie.kontrakter.felles.journalpost.DokumentInfo {
         return hentJournalpost(journalpostId).dokumenter
-                        ?.first {
-                            dokumentBrevkode == DokumentBrevkode.fraBrevkode(it.brevkode.toString()) && harOriginalDokument(
-                                    it)
-                        } ?: error("Fant ingen søknad")
+                       ?.first {
+                           dokumentBrevkode == DokumentBrevkode.fraBrevkode(it.brevkode.toString()) && harOriginalDokument(
+                                   it)
+                       } ?: error("Fant ingen søknad")
     }
 
     private fun ferdigstillJournalføring(journalpostId: String, journalførendeEnhet: String) {
@@ -126,7 +133,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         behandlingService.leggTilBehandlingsjournalpost(journalpost.journalpostId, journalpost.journalposttype, behandling.id)
     }
 
-    private fun settSøknadPåBehandling(journalpostId: String, fagsak: Fagsak, behandlingId : UUID) {
+    private fun settSøknadPåBehandling(journalpostId: String, fagsak: Fagsak, behandlingId: UUID) {
         when (fagsak.stønadstype) {
             Stønadstype.OVERGANGSSTØNAD -> {
                 val søknad = hentSøknadFraJournalpostForOvergangsstønad(journalpostId)
@@ -144,20 +151,20 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
     }
 
     private fun harOriginalDokument(dokument: no.nav.familie.kontrakter.felles.journalpost.DokumentInfo): Boolean =
-            dokument.dokumentvarianter?.contains(Dokumentvariant(variantformat = DokumentVariantformat.ORIGINAL.toString()))
+            dokument.dokumentvarianter?.contains(Dokumentvariant(variantformat = Dokumentvariantformat.ORIGINAL))
             ?: false
 
     private fun oppdaterJournalpost(journalpost: Journalpost, dokumenttitler: Map<String, String>?, eksternFagsakId: Long) {
         val oppdatertJournalpost =
                 OppdaterJournalpostRequest(bruker = journalpost.bruker?.let {
-                    DokarkivBruker(idType = IdType.valueOf(it.type.toString()), id = it.id)
+                    DokarkivBruker(idType = BrukerIdType.valueOf(it.type.toString()), id = it.id)
                 },
-                                           tema = journalpost.tema,
-                                           behandlingstema = journalpost.behandlingstema,
+                                           tema = journalpost.tema?.let { Tema.valueOf(it) }, // TODO: Funker dette?
+                                           behandlingstema = journalpost.behandlingstema?.let { Behandlingstema.fromValue(it) },// TODO: Funker dette?
                                            tittel = journalpost.tittel,
                                            journalfoerendeEnhet = journalpost.journalforendeEnhet,
                                            sak = Sak(fagsakId = eksternFagsakId.toString(),
-                                                     fagsaksystem = "EF",
+                                                     fagsaksystem = Fagsystem.EF,
                                                      sakstype = "FAGSAK"),
                                            dokumenter = dokumenttitler?.let {
                                                journalpost.dokumenter?.map { dokumentInfo ->

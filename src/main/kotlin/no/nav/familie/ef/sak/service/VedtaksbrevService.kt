@@ -11,10 +11,10 @@ import no.nav.familie.ef.sak.repository.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.vedtaksbrev.BrevClient
-import no.nav.familie.ef.sak.vedtaksbrev.BrevType
-import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentRequest
-import no.nav.familie.kontrakter.felles.dokarkiv.Dokument
-import no.nav.familie.kontrakter.felles.dokarkiv.FilType
+import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
+import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
+import no.nav.familie.kontrakter.felles.dokarkiv.v2.Dokument
+import no.nav.familie.kontrakter.felles.dokarkiv.v2.Filtype
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.UUID
@@ -81,7 +81,7 @@ class VedtaksbrevService(private val brevClient: BrevClient,
         val ident = fagsak.hentAktivIdent();
         val vedtaksbrev = hentBrev(behandlingId)
         val dokumenter =
-                listOf(Dokument(vedtaksbrev.pdf?.bytes ?: error("Mangler pdf ved journalføring av brev for bedhandling=$behandlingId"), FilType.PDFA, dokumentType = BrevType.VEDTAKSBREV.arkivMetadataType))
+                listOf(Dokument(vedtaksbrev.pdf?.bytes ?: error("Mangler pdf ved journalføring av brev for bedhandling=$behandlingId"), Filtype.PDFA, dokumenttype = Dokumenttype.VEDTAKSBREV_OVERGANGSSTØNAD))
         val journalførendeEnhet = arbeidsfordelingService.hentNavEnhet(ident)
 
         return journalpostClient.arkiverDokument(ArkiverDokumentRequest(
@@ -89,7 +89,8 @@ class VedtaksbrevService(private val brevClient: BrevClient,
                 forsøkFerdigstill = true,
                 hoveddokumentvarianter = dokumenter,
                 fagsakId = fagsak.eksternId.id.toString(),
-                journalførendeEnhet = journalførendeEnhet?.enhetId
+                journalførendeEnhet = journalførendeEnhet?.enhetId,
+                vedleggsdokumenter = emptyList()
         )).journalpostId
     }
 

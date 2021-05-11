@@ -9,7 +9,6 @@ import no.nav.familie.ef.sak.integration.dto.pdl.PersonSøk
 import no.nav.familie.ef.sak.integration.dto.pdl.PersonSøkResultat
 import no.nav.familie.ef.sak.integration.dto.pdl.SøkeKriterier
 import no.nav.familie.http.client.AbstractRestClient
-import no.nav.familie.http.sts.StsRestClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Service
@@ -20,8 +19,7 @@ import org.springframework.web.client.RestOperations
  */
 @Service
 class PdlSaksbehandlerClient(val pdlConfig: PdlConfig,
-                             @Qualifier("azureMedApiKey") restTemplate: RestOperations,
-                             val stsRestClient: StsRestClient)
+                             @Qualifier("azureOnBehalfOf") restTemplate: RestOperations)
     : AbstractRestClient(restTemplate, "pdl.personinfo.saksbehandler") {
 
     fun søkPersonerMedSammeAdresse(søkeKriterier: List<SøkeKriterier>): PersonSøkResultat {

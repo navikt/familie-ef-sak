@@ -10,6 +10,7 @@ query($identer: [ID!]!){
                 }
             }
             bostedsadresse(historikk: true) {
+                angittFlyttedato
                 gyldigFraOgMed
                 gyldigTilOgMed
                 coAdressenavn

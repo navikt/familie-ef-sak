@@ -5,7 +5,6 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.http.sts.StsRestClient
 import no.nav.familie.kontrakter.ef.infotrygd.OpprettPeriodeHendelseDto
 import no.nav.familie.kontrakter.ef.infotrygd.OpprettStartBehandlingHendelseDto
 import no.nav.familie.kontrakter.ef.infotrygd.OpprettVedtakHendelseDto
@@ -32,8 +31,6 @@ internal class InfotrygdFeedClientTest {
         fun initClass() {
             wiremockServerItem = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
             wiremockServerItem.start()
-            val stsRestClient = mockk<StsRestClient>()
-            every { stsRestClient.systemOIDCToken } returns "token"
             client = InfotrygdFeedClient(URI.create(wiremockServerItem.baseUrl()), restOperations)
 
         }

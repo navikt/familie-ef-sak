@@ -57,7 +57,8 @@ internal class MedlemskapRegelsettTest {
         val medlemskapsinfoUtenUnntak = Medlemskapsinfo("3213213", emptyList(), emptyList(), emptyList())
         val pdlSøker = pdlSøker(fødsel = listOf(Fødsel(null, LocalDate.of(1999, 4, 5), null, null, null, metadataGjeldende)),
                                 folkeregisterpersonstatus = listOf(Folkeregisterpersonstatus("bosatt", "bo", metadataGjeldende)),
-                                bostedsadresse = listOf(Bostedsadresse(LocalDate.of(1999, 4, 5),
+                                bostedsadresse = listOf(Bostedsadresse(null,
+                                                                       LocalDate.of(1999, 4, 5),
                                                                        null,
                                                                        null,
                                                                        null,
@@ -96,7 +97,8 @@ internal class MedlemskapRegelsettTest {
         val medlemskapsinfoUtenUnntak = Medlemskapsinfo("3213213", emptyList(), emptyList(), emptyList())
         val pdlSøker = pdlSøker(fødsel = listOf(Fødsel(null, LocalDate.of(1999, 4, 5), null, null, null, metadataGjeldende)),
                                 folkeregisterpersonstatus = listOf(Folkeregisterpersonstatus("bosatt", "bo", metadataGjeldende)),
-                                bostedsadresse = listOf(Bostedsadresse(LocalDate.of(1999, 4, 5),
+                                bostedsadresse = listOf(Bostedsadresse(null,
+                                                                       LocalDate.of(1999, 4, 5),
                                                                        null,
                                                                        null,
                                                                        null,

@@ -23,6 +23,8 @@ import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
 import no.nav.familie.ef.sak.integration.dto.pdl.visningsnavn
 import no.nav.familie.ef.sak.service.ArbeidsfordelingService
 import no.nav.familie.ef.sak.service.KodeverkService
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.util.AbstractMap
@@ -33,12 +35,16 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                                private val arbeidsfordelingService: ArbeidsfordelingService,
                                private val kodeverkService: KodeverkService) {
 
+    private val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
+
     fun tilPersonopplysninger(personMedRelasjoner: SøkerMedBarn,
                               ident: String,
                               fullmakter: List<Fullmakt>,
                               egenAnsatt: Boolean,
                               identNavn: Map<String, String>): PersonopplysningerDto {
         val søker = personMedRelasjoner.søker
+        loggDatoDiff(søker)
+
         return PersonopplysningerDto(
                 adressebeskyttelse = søker.adressebeskyttelse.gjeldende()
                         ?.let { Adressebeskyttelse.valueOf(it.gradering.name) },
@@ -87,6 +93,16 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                 },
                 oppholdstillatelse = OppholdstillatelseMapper.map(søker.opphold)
         )
+    }
+
+    private fun loggDatoDiff(søker: PdlSøker) {
+        val datoer = søker.bostedsadresse
+                .filter { it.angittFlyttedato != null && it.angittFlyttedato != LocalDate.of(1, 1, 1) }
+                .filter { it.angittFlyttedato != it.gyldigFraOgMed }
+                .map { "angittFlyttedato=${it.angittFlyttedato} gyldigFraOgMed=${it.gyldigFraOgMed}" }
+        if (datoer.isNotEmpty()) {
+            secureLogger.info("Forskjell i datoer: $datoer")
+        }
     }
 
     fun tilAdresser(søker: PdlSøker): List<AdresseDto> {
