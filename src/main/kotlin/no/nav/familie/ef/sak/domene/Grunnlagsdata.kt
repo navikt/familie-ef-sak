@@ -27,33 +27,31 @@ import no.nav.familie.ef.sak.integration.dto.pdl.VergemaalEllerFremtidsfullmakt
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import java.time.LocalDate
 
-data class Grunnlagsdata(
-        val søker: Søker,
-        val annenForelder: List<AnnenForelderMedIdent>,
-        val medlUnntak: Medlemskapsinfo,
-        val barn: List<Barn>
+data class Grunnlagsdata(val søker: Søker,
+                         val annenForelder: List<AnnenForelderMedIdent>,
+                         val medlUnntak: Medlemskapsinfo,
+                         val barn: List<Barn>
 )
 
-data class Søker(
-        val adressebeskyttelse: Adressebeskyttelse, //Er en liste i PDLSøker
-        val bostedsadresse: List<Bostedsadresse>,
-        val dødsfall: Dødsfall, //Er en liste i PDLSøker
-        val forelderBarnRelasjon: List<ForelderBarnRelasjon>,
-        val fødsel: Fødsel, //Er en liste i PDLSøker
-        val folkeregisterpersonstatus: List<Folkeregisterpersonstatus>,
-        val fullmakt: List<Fullmakt>,
-        val kjønn: Kjønn,
-        val kontaktadresse: List<Kontaktadresse>,
-        val navn: List<Navn>,
-        val opphold: List<Opphold>,
-        val oppholdsadresse: List<Oppholdsadresse>,
-        val sivilstand: List<SivilstandMedNavn>,
-        val statsborgerskap: List<Statsborgerskap>,
-        val telefonnummer: List<Telefonnummer>,
-        val tilrettelagtKommunikasjon: List<TilrettelagtKommunikasjon>,
-        val innflyttingTilNorge: List<InnflyttingTilNorge>,
-        val utflyttingFraNorge: List<UtflyttingFraNorge>,
-        val vergemaalEllerFremtidsfullmakt: List<VergemaalEllerFremtidsfullmakt>,
+data class Søker(val adressebeskyttelse: Adressebeskyttelse, //Er en liste i PDLSøker
+                 val bostedsadresse: List<Bostedsadresse>,
+                 val dødsfall: Dødsfall, //Er en liste i PDLSøker
+                 val forelderBarnRelasjon: List<ForelderBarnRelasjon>,
+                 val fødsel: Fødsel, //Er en liste i PDLSøker
+                 val folkeregisterpersonstatus: List<Folkeregisterpersonstatus>,
+                 val fullmakt: List<Fullmakt>,
+                 val kjønn: Kjønn,
+                 val kontaktadresse: List<Kontaktadresse>,
+                 val navn: List<Navn>,
+                 val opphold: List<Opphold>,
+                 val oppholdsadresse: List<Oppholdsadresse>,
+                 val sivilstand: List<SivilstandMedNavn>,
+                 val statsborgerskap: List<Statsborgerskap>,
+                 val telefonnummer: List<Telefonnummer>,
+                 val tilrettelagtKommunikasjon: List<TilrettelagtKommunikasjon>,
+                 val innflyttingTilNorge: List<InnflyttingTilNorge>,
+                 val utflyttingFraNorge: List<UtflyttingFraNorge>,
+                 val vergemaalEllerFremtidsfullmakt: List<VergemaalEllerFremtidsfullmakt>
 )
 
 
@@ -90,9 +88,9 @@ data class SivilstandMedNavn(val type: Sivilstandstype,
                              val metadata: Metadata)
 
 
-fun AnnenForelderMedIdent.tilPdlAnnenForelder(): PdlAnnenForelder  = PdlAnnenForelder(
+fun AnnenForelderMedIdent.tilPdlAnnenForelder(): PdlAnnenForelder = PdlAnnenForelder(
         adressebeskyttelse = this.adressebeskyttelse,
-        bostedsadresse =this.bostedsadresse,
+        bostedsadresse = this.bostedsadresse,
         dødsfall = this.dødsfall,
         fødsel = this.fødsel,
         navn = this.navn,
@@ -108,8 +106,11 @@ fun Barn.tilPdlBarn(): PdlBarn = PdlBarn(
         bostedsadresse = this.bostedsadresse,
         deltBosted = this.deltBosted,
         dødsfall = this.dødsfall,
-        forelderBarnRelasjon  = this.forelderBarnRelasjon,
+        forelderBarnRelasjon = this.forelderBarnRelasjon,
         fødsel = this.fødsel,
         navn = this.navn
 )
-fun SivilstandMedNavn.tilSivilstandRegistergrunnlagDto(): SivilstandRegistergrunnlagDto = SivilstandRegistergrunnlagDto(this.type, gyldigFraOgMed = this.gyldigFraOgMed, navn = this.navn)
+
+fun SivilstandMedNavn.tilSivilstandRegistergrunnlagDto(): SivilstandRegistergrunnlagDto = SivilstandRegistergrunnlagDto(this.type,
+                                                                                                                        gyldigFraOgMed = this.gyldigFraOgMed,
+                                                                                                                        navn = this.navn)
