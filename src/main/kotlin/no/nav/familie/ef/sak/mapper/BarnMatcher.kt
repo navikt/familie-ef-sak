@@ -1,28 +1,27 @@
 package no.nav.familie.ef.sak.mapper
 
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlBarn
+import no.nav.familie.ef.sak.domene.BarnMedIdent
 import no.nav.familie.ef.sak.repository.domain.søknad.Barn
 import no.nav.familie.kontrakter.ef.søknad.Fødselsnummer
 import kotlin.math.abs
 
 object BarnMatcher {
 
-    fun kobleSøknadsbarnOgRegisterBarn(søknadsbarn: Set<Barn>, pdlBarnMap: Map<String, PdlBarn>): List<MatchetBarn> {
-
+    fun kobleSøknadsbarnOgRegisterBarn(søknadsbarn: Set<Barn>, barn: List<BarnMedIdent>): List<MatchetBarn> {
+        val barnMap = barn.associateBy { it.personIdent }
         val søknadsbarnMedFnrMatchetTilPdlBarn =
                 søknadsbarn.map {
-                    val firstOrNull = pdlBarnMap.entries.firstOrNull { entry -> it.fødselsnummer == entry.key }
+                    val firstOrNull = barnMap.entries.firstOrNull { entry -> it.fødselsnummer == entry.key }
                     MatchetBarn(firstOrNull?.key, firstOrNull?.value, it)
                 }
 
         val pdlBarnIkkeISøknad =
-                pdlBarnMap.filter { entry ->
+                barnMap.filter { entry ->
                     søknadsbarn.firstOrNull { it.fødselsnummer == entry.key } == null
                 }.toMutableMap()
 
-
         return søknadsbarnMedFnrMatchetTilPdlBarn.map {
-            if (it.pdlBarn != null) {
+            if (it.barn != null) {
                 it
             } else {
                 val barnForsøktMatchetPåFødselsdato = forsøkMatchPåFødselsdato(it, pdlBarnIkkeISøknad)
@@ -35,7 +34,7 @@ object BarnMatcher {
     }
 
     private fun forsøkMatchPåFødselsdato(barn: MatchetBarn,
-                                         pdlBarnIkkeISøknad: Map<String, PdlBarn>): MatchetBarn {
+                                         pdlBarnIkkeISøknad: Map<String, BarnMedIdent>): MatchetBarn {
 
         val fødselTermindato = barn.søknadsbarn.fødselTermindato ?: return barn
         val uke20 = fødselTermindato.minusWeeks(20)
@@ -51,10 +50,10 @@ object BarnMatcher {
             abs(epochDayForFødsel - epochDayTermindato)
         } ?: return barn
 
-        return barn.copy(fødselsnummer = nærmesteMatch.key, pdlBarn = nærmesteMatch.value)
+        return barn.copy(fødselsnummer = nærmesteMatch.key, barn = nærmesteMatch.value)
 
     }
 
 }
 
-data class MatchetBarn(val fødselsnummer: String?, val pdlBarn: PdlBarn?, val søknadsbarn: Barn)
+data class MatchetBarn(val fødselsnummer: String?, val barn: BarnMedIdent?, val søknadsbarn: Barn)

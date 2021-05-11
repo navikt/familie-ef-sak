@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.mapper
 
 import no.nav.familie.ef.sak.api.dto.Sivilstandstype
 import no.nav.familie.ef.sak.domene.AnnenForelderMedIdent
-import no.nav.familie.ef.sak.domene.Barn
+import no.nav.familie.ef.sak.domene.BarnMedIdent
 import no.nav.familie.ef.sak.domene.FullmaktMedNavn
 import no.nav.familie.ef.sak.domene.SivilstandMedNavn
 import no.nav.familie.ef.sak.domene.Søker
@@ -17,15 +17,18 @@ object GrunnlagsdataMapper {
 
     fun mapBarn(pdlBarn: Map<String, PdlBarn>) =
             pdlBarn.map {
-                Barn(fødsel = it.value.fødsel,
-                     adressebeskyttelse = it.value.adressebeskyttelse,
-                     navn = it.value.navn,
-                     bostedsadresse = it.value.bostedsadresse,
-                     dødsfall = it.value.dødsfall,
-                     deltBosted = it.value.deltBosted,
-                     forelderBarnRelasjon = it.value.forelderBarnRelasjon,
-                     personIdent = it.key)
+                mapBarn(it)
             }
+
+    fun mapBarn(it: Map.Entry<String, PdlBarn>) =
+            BarnMedIdent(fødsel = it.value.fødsel,
+                         adressebeskyttelse = it.value.adressebeskyttelse,
+                         navn = it.value.navn,
+                         bostedsadresse = it.value.bostedsadresse,
+                         dødsfall = it.value.dødsfall,
+                         deltBosted = it.value.deltBosted,
+                         forelderBarnRelasjon = it.value.forelderBarnRelasjon,
+                         personIdent = it.key)
 
     fun mapAnnenForelder(barneForeldre: Map<String, PdlAnnenForelder>) =
             barneForeldre.map {
@@ -48,7 +51,7 @@ object GrunnlagsdataMapper {
             sivilstand = mapSivivilstand(pdlSøker, andrePersoner),
             adressebeskyttelse = pdlSøker.adressebeskyttelse.first(),
             bostedsadresse = pdlSøker.bostedsadresse,
-            dødsfall = pdlSøker.dødsfall.first(),
+            dødsfall = pdlSøker.dødsfall.firstOrNull(),
             forelderBarnRelasjon = pdlSøker.forelderBarnRelasjon,
             fullmakt = mapFullmakt(pdlSøker, andrePersoner),
             fødsel = pdlSøker.fødsel.first(),

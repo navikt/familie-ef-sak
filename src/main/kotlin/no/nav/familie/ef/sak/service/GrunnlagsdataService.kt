@@ -5,12 +5,6 @@ import no.nav.familie.ef.sak.api.dto.SivilstandInngangsvilkårDto
 import no.nav.familie.ef.sak.api.dto.VilkårGrunnlagDto
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.PdlClient
-import no.nav.familie.ef.sak.integration.dto.pdl.Familierelasjonsrolle
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlAnnenForelder
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlBarn
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker
-import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
-import no.nav.familie.ef.sak.integration.dto.pdl.visningsnavn
 import no.nav.familie.ef.sak.mapper.AktivitetMapper
 import no.nav.familie.ef.sak.mapper.BarnMedSamværMapper
 import no.nav.familie.ef.sak.mapper.BosituasjonMapper
@@ -29,7 +23,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.reflect.KClass
@@ -49,7 +42,8 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
                            private val pdlClient: PdlClient,
                            private val familieIntegrasjonerClient: FamilieIntegrasjonerClient,
                            private val medlemskapMapper: MedlemskapMapper,
-                           private val behandlingService: BehandlingService) {
+                           private val behandlingService: BehandlingService,
+                           private val persisterGrunnlagsdataService: PersisterGrunnlagsdataService) {
 
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
@@ -160,47 +154,13 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
 
     private fun hentRegistergrunnlag(behandlingId: UUID): RegistergrunnlagData {
         val søknad = behandlingService.hentOvergangsstønad(behandlingId)
-        val personIdent = søknad.fødselsnummer
+        val grunnlagsdata = persisterGrunnlagsdataService.hentGrunnlagsdata(behandlingId, søknad)
 
-        val pdlSøker = pdlClient.hentSøker(personIdent)
-        val navnForRelatertVedSivilstand = hentNavnForRelatertVedSivilstand(pdlSøker)
-        val pdlBarn = hentPdlBarn(pdlSøker)
-        val barneForeldre = hentPdlBarneForeldre(søknad, pdlBarn)
-        val medlUnntak = familieIntegrasjonerClient.hentMedlemskapsinfo(ident = personIdent)
-
-        val barnMedSamvær = BarnMedSamværMapper.mapRegistergrunnlag(pdlBarn, barneForeldre, søknad, pdlSøker.bostedsadresse)
-        return RegistergrunnlagData(medlemskap = medlemskapMapper.mapRegistergrunnlag(pdlSøker, medlUnntak),
-                                    sivilstand = SivilstandMapper.mapRegistergrunnlag(pdlSøker, navnForRelatertVedSivilstand),
+        val søker = grunnlagsdata.søker
+        val barnMedSamvær = BarnMedSamværMapper.mapRegistergrunnlag(grunnlagsdata.barn, grunnlagsdata.annenForelder, søknad, søker.bostedsadresse)
+        return RegistergrunnlagData(medlemskap = medlemskapMapper.mapRegistergrunnlag(søker, grunnlagsdata.medlUnntak),
+                                    sivilstand = SivilstandMapper.mapRegistergrunnlag(søker),
                                     barnMedSamvær = barnMedSamvær)
-    }
-
-    private fun hentNavnForRelatertVedSivilstand(pdlSøker: PdlSøker): String? {
-        return pdlSøker.sivilstand.gjeldende().relatertVedSivilstand?.let {
-            val person = pdlClient.hentPersonKortBolk(listOf(it))[it]
-            person?.navn?.gjeldende()?.visningsnavn()
-        }
-    }
-
-    private fun hentPdlBarneForeldre(søknad: SøknadsskjemaOvergangsstønad,
-                                     barn: Map<String, PdlBarn>): Map<String, PdlAnnenForelder> {
-        val barneforeldreFraSøknad = søknad.barn.mapNotNull { it.annenForelder?.person?.fødselsnummer }
-
-        return barn.map { it.value.forelderBarnRelasjon }
-                .flatten()
-                .filter { it.relatertPersonsIdent != søknad.fødselsnummer && it.relatertPersonsRolle != Familierelasjonsrolle.BARN }
-                .map { it.relatertPersonsIdent }
-                .plus(barneforeldreFraSøknad)
-                .distinct()
-                .let { pdlClient.hentAndreForeldre(it) }
-    }
-
-    private fun hentPdlBarn(pdlSøker: PdlSøker): Map<String, PdlBarn> {
-        return pdlSøker.forelderBarnRelasjon
-                .filter { it.relatertPersonsRolle == Familierelasjonsrolle.BARN }
-                .map { it.relatertPersonsIdent }
-                .let { pdlClient.hentBarn(it) }
-                .filter { it.value.fødsel.gjeldende()?.fødselsdato != null }
-                .filter { it.value.fødsel.first().fødselsdato!!.plusYears(18).isAfter(LocalDate.now()) }
     }
 
     private fun finnEndringerIRegistergrunnlag(registergrunnlag: Registergrunnlag): Registergrunnlagsendringer {

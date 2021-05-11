@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.mapper
 
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlBarn
+import no.nav.familie.ef.sak.domene.BarnMedIdent
 import no.nav.familie.ef.sak.repository.domain.søknad.Barn
 import no.nav.familie.util.FnrGenerator
 import org.assertj.core.api.Assertions.assertThat
@@ -19,12 +19,12 @@ internal class BarnMatcherTest {
                                 søknadsbarn(fnr = fnrBarn2),
                                 søknadsbarn(fnr = fnrBarn3),
                                 søknadsbarn(LocalDate.of(2018, 5, 4)))
-        val pdlBarnMap: Map<String, PdlBarn> = mapOf(pdlBarn(fnrBarn1),
-                                                     pdlBarn(fnrBarn2),
-                                                     pdlBarn(fnrBarn3),
-                                                     pdlBarn(fnrBarn4))
+        val barnGrunnlag = listOf(pdlBarn(fnrBarn1),
+                                  pdlBarn(fnrBarn2),
+                                  pdlBarn(fnrBarn3),
+                                  pdlBarn(fnrBarn4))
 
-        val barn = BarnMatcher.kobleSøknadsbarnOgRegisterBarn(søknadsbarn, pdlBarnMap)
+        val barn = BarnMatcher.kobleSøknadsbarnOgRegisterBarn(søknadsbarn, barnGrunnlag)
 
         assertThat(barn).hasSize(4)
         assertThat(barn.first { it.fødselsnummer == fnrBarn1 }.søknadsbarn.fødselsnummer).isEqualTo(fnrBarn1)
@@ -44,12 +44,12 @@ internal class BarnMatcherTest {
                                 søknadsbarn(fnr = fnrBarn2),
                                 søknadsbarn(fnr = fnrBarn3),
                                 søknadsbarn(LocalDate.of(2018, 9, 4)))
-        val pdlBarnMap: Map<String, PdlBarn> = mapOf(pdlBarn(fnrBarn1),
-                                                     pdlBarn(fnrBarn2),
-                                                     pdlBarn(fnrBarn3),
-                                                     pdlBarn(fnrBarn4))
+        val barnGrunnlag = listOf(pdlBarn(fnrBarn1),
+                                  pdlBarn(fnrBarn2),
+                                  pdlBarn(fnrBarn3),
+                                  pdlBarn(fnrBarn4))
 
-        val barn = BarnMatcher.kobleSøknadsbarnOgRegisterBarn(søknadsbarn, pdlBarnMap)
+        val barn = BarnMatcher.kobleSøknadsbarnOgRegisterBarn(søknadsbarn, barnGrunnlag)
 
         assertThat(barn).hasSize(4)
         assertThat(barn.first { it.fødselsnummer == fnrBarn1 }.søknadsbarn.fødselsnummer).isEqualTo(fnrBarn1)
@@ -69,12 +69,12 @@ internal class BarnMatcherTest {
                                 søknadsbarn(fnr = fnrBarn2),
                                 søknadsbarn(fnr = fnrBarn3),
                                 søknadsbarn(LocalDate.of(2018, 5, 4)))
-        val pdlBarnMap: Map<String, PdlBarn> = mapOf(pdlBarn(fnrBarn1),
-                                                     pdlBarn(fnrBarn2),
-                                                     pdlBarn(fnrBarn3),
-                                                     pdlBarn(fnrBarn4))
+        val barnGrunnlag = listOf(pdlBarn(fnrBarn1),
+                                  pdlBarn(fnrBarn2),
+                                  pdlBarn(fnrBarn3),
+                                  pdlBarn(fnrBarn4))
 
-        val barn = BarnMatcher.kobleSøknadsbarnOgRegisterBarn(søknadsbarn, pdlBarnMap)
+        val barn = BarnMatcher.kobleSøknadsbarnOgRegisterBarn(søknadsbarn, barnGrunnlag)
 
         assertThat(barn).hasSize(4)
         assertThat(barn.first { it.fødselsnummer == fnrBarn1 }.søknadsbarn.fødselsnummer).isEqualTo(fnrBarn1)
@@ -94,12 +94,12 @@ internal class BarnMatcherTest {
                                 søknadsbarn(fnr = fnrBarn2),
                                 søknadsbarn(LocalDate.of(2018, 5, 4)),
                                 søknadsbarn(LocalDate.of(2018, 5, 4)))
-        val pdlBarnMap: Map<String, PdlBarn> = mapOf(pdlBarn(fnrBarn1),
-                                                     pdlBarn(fnrBarn2),
-                                                     pdlBarn(fnrBarn3),
-                                                     pdlBarn(fnrBarn4))
+        val barnGrunnlag = listOf(pdlBarn(fnrBarn1),
+                                  pdlBarn(fnrBarn2),
+                                  pdlBarn(fnrBarn3),
+                                  pdlBarn(fnrBarn4))
 
-        val barn = BarnMatcher.kobleSøknadsbarnOgRegisterBarn(søknadsbarn, pdlBarnMap)
+        val barn = BarnMatcher.kobleSøknadsbarnOgRegisterBarn(søknadsbarn, barnGrunnlag)
 
         assertThat(barn).hasSize(4)
         assertThat(barn.first { it.fødselsnummer == fnrBarn1 }.søknadsbarn.fødselsnummer).isEqualTo(fnrBarn1)
@@ -119,12 +119,12 @@ internal class BarnMatcherTest {
         val søknadsbarn = setOf(søknadsbarn(fnr = fnrBarn1),
                                 søknadsbarn(fnr = fnrBarn2),
                                 søknadsbarn(LocalDate.of(2018, 5, 4)))
-        val pdlBarnMap: Map<String, PdlBarn> = mapOf(pdlBarn(fnrBarn1),
-                                                     pdlBarn(fnrBarn2),
-                                                     pdlBarn(fnrBarn3),
-                                                     pdlBarn(fnrBarn4))
+        val barnGrunnlag = listOf(pdlBarn(fnrBarn1),
+                                  pdlBarn(fnrBarn2),
+                                  pdlBarn(fnrBarn3),
+                                  pdlBarn(fnrBarn4))
 
-        val barn = BarnMatcher.kobleSøknadsbarnOgRegisterBarn(søknadsbarn, pdlBarnMap)
+        val barn = BarnMatcher.kobleSøknadsbarnOgRegisterBarn(søknadsbarn, barnGrunnlag)
 
         assertThat(barn).hasSize(3)
         assertThat(barn.first { it.fødselsnummer == fnrBarn1 }.søknadsbarn.fødselsnummer).isEqualTo(fnrBarn1)
@@ -144,6 +144,6 @@ internal class BarnMatcherTest {
                  lagtTilManuelt = false)
 
     private fun pdlBarn(fnr: String) =
-            fnr to PdlBarn(emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList())
+            BarnMedIdent(emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), fnr)
 
 }

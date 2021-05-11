@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.domene
 
-import no.nav.familie.ef.sak.api.dto.SivilstandRegistergrunnlagDto
 import no.nav.familie.ef.sak.api.dto.Sivilstandstype
 import no.nav.familie.ef.sak.integration.dto.pdl.Adressebeskyttelse
 import no.nav.familie.ef.sak.integration.dto.pdl.Bostedsadresse
@@ -16,8 +15,6 @@ import no.nav.familie.ef.sak.integration.dto.pdl.Metadata
 import no.nav.familie.ef.sak.integration.dto.pdl.Navn
 import no.nav.familie.ef.sak.integration.dto.pdl.Opphold
 import no.nav.familie.ef.sak.integration.dto.pdl.Oppholdsadresse
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlAnnenForelder
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlBarn
 import no.nav.familie.ef.sak.integration.dto.pdl.Statsborgerskap
 import no.nav.familie.ef.sak.integration.dto.pdl.Telefonnummer
 import no.nav.familie.ef.sak.integration.dto.pdl.TilrettelagtKommunikasjon
@@ -29,12 +26,12 @@ import java.time.LocalDate
 data class Grunnlagsdata(val søker: Søker,
                          val annenForelder: List<AnnenForelderMedIdent>,
                          val medlUnntak: Medlemskapsinfo,
-                         val barn: List<Barn>
+                         val barn: List<BarnMedIdent>
 )
 
 data class Søker(val adressebeskyttelse: Adressebeskyttelse, //Er en liste i PDLSøker
                  val bostedsadresse: List<Bostedsadresse>,
-                 val dødsfall: Dødsfall, //Er en liste i PDLSøker
+                 val dødsfall: Dødsfall?, //Er en liste i PDLSøker
                  val forelderBarnRelasjon: List<ForelderBarnRelasjon>,
                  val fødsel: Fødsel, //Er en liste i PDLSøker
                  val folkeregisterpersonstatus: List<Folkeregisterpersonstatus>,
@@ -53,7 +50,6 @@ data class Søker(val adressebeskyttelse: Adressebeskyttelse, //Er en liste i PD
                  val vergemaalEllerFremtidsfullmakt: List<VergemaalEllerFremtidsfullmakt>
 )
 
-
 data class AnnenForelderMedIdent(
         val adressebeskyttelse: List<Adressebeskyttelse>,
         val bostedsadresse: List<Bostedsadresse>,
@@ -68,7 +64,7 @@ data class AnnenForelderMedIdent(
         val personIdent: String
 )
 
-data class Barn(
+data class BarnMedIdent(
         val adressebeskyttelse: List<Adressebeskyttelse>,
         val bostedsadresse: List<Bostedsadresse>,
         val deltBosted: List<DeltBosted>,
@@ -90,31 +86,3 @@ data class FullmaktMedNavn(val gyldigFraOgMed: LocalDate,
                            val gyldigTilOgMed: LocalDate,
                            val motpartsPersonident: String,
                            val navn: String?)
-
-
-fun AnnenForelderMedIdent.tilPdlAnnenForelder(): PdlAnnenForelder = PdlAnnenForelder(
-        adressebeskyttelse = this.adressebeskyttelse,
-        bostedsadresse = this.bostedsadresse,
-        dødsfall = this.dødsfall,
-        fødsel = this.fødsel,
-        navn = this.navn,
-        opphold = this.opphold,
-        oppholdsadresse = this.oppholdsadresse,
-        statsborgerskap = this.statsborgerskap,
-        innflyttingTilNorge = this.innflyttingTilNorge,
-        utflyttingFraNorge = this.utflyttingFraNorge
-)
-
-fun Barn.tilPdlBarn(): PdlBarn = PdlBarn(
-        adressebeskyttelse = this.adressebeskyttelse,
-        bostedsadresse = this.bostedsadresse,
-        deltBosted = this.deltBosted,
-        dødsfall = this.dødsfall,
-        forelderBarnRelasjon = this.forelderBarnRelasjon,
-        fødsel = this.fødsel,
-        navn = this.navn
-)
-
-fun SivilstandMedNavn.tilSivilstandRegistergrunnlagDto(): SivilstandRegistergrunnlagDto = SivilstandRegistergrunnlagDto(this.type,
-                                                                                                                        gyldigFraOgMed = this.gyldigFraOgMed,
-                                                                                                                        navn = this.navn)

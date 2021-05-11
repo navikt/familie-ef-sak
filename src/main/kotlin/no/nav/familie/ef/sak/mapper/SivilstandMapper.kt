@@ -6,7 +6,6 @@ import no.nav.familie.ef.sak.api.dto.SivilstandSøknadsgrunnlagDto
 import no.nav.familie.ef.sak.api.dto.Sivilstandstype
 import no.nav.familie.ef.sak.domene.Grunnlagsdata
 import no.nav.familie.ef.sak.domene.Søker
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker
 import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
 import no.nav.familie.ef.sak.repository.domain.søknad.Sivilstand
 import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsstønad
@@ -20,8 +19,8 @@ object SivilstandMapper {
 
     }
 
-    fun mapRegistergrunnlag(pdlSøker: Søker): SivilstandRegistergrunnlagDto {
-        val sivilstand = pdlSøker.sivilstand.gjeldende()
+    fun mapRegistergrunnlag(søker: Søker): SivilstandRegistergrunnlagDto {
+        val sivilstand = søker.sivilstand.gjeldende()
         return SivilstandRegistergrunnlagDto(type = Sivilstandstype.valueOf(sivilstand.type.name),
                                              navn = sivilstand.navn,
                                              gyldigFraOgMed = sivilstand.gyldigFraOgMed)
