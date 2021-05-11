@@ -1,12 +1,6 @@
 spring:
   autoconfigure.exclude: org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration
 
-no.nav.security.jwt:
-  issuer:
-    sts:
-      discoveryurl: ${STS_DISCOVERY_URL}
-      accepted_audience: ${GYLDIGE_SERVICE_BRUKERE}
-
 PDL_SCOPE: api://dev-fss.pdl.pdl-api/.default
 
 ON_PREM_URL_ENV: dev

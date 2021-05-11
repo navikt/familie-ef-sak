@@ -5,11 +5,8 @@ import com.github.tomakehurst.wiremock.client.WireMock.okJson
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
-import io.mockk.every
-import io.mockk.mockk
 import no.nav.familie.ef.sak.config.PdlConfig
 import no.nav.familie.ef.sak.exception.PdlRequestException
-import no.nav.familie.http.sts.StsRestClient
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
@@ -34,9 +31,7 @@ class PdlClientTest {
         fun initClass() {
             wiremockServerItem = WireMockServer(wireMockConfig().dynamicPort())
             wiremockServerItem.start()
-            val stsRestClient = mockk<StsRestClient>()
-            every { stsRestClient.systemOIDCToken } returns "token"
-            pdlClient = PdlClient(PdlConfig(URI.create(wiremockServerItem.baseUrl())), restOperations, stsRestClient)
+            pdlClient = PdlClient(PdlConfig(URI.create(wiremockServerItem.baseUrl())), restOperations)
 
         }
 

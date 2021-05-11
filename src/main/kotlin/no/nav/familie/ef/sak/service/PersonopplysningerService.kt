@@ -1,9 +1,7 @@
 package no.nav.familie.ef.sak.service
 
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import no.nav.familie.ef.sak.api.dto.PersonopplysningerDto
 import no.nav.familie.ef.sak.domene.SøkerMedBarn
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
@@ -26,7 +24,7 @@ class PersonopplysningerService(private val personService: PersonService,
     fun hentPersonopplysninger(ident: String): PersonopplysningerDto {
         return runBlocking {
             val egenAnsattDeferred = async { familieIntegrasjonerClient.egenAnsatt(ident) }
-            val personMedRelasjoner = withContext(Dispatchers.Default) { personService.hentPersonMedRelasjoner(ident) }
+            val personMedRelasjoner = personService.hentPersonMedRelasjoner(ident)
 
             val fullmakter = personMedRelasjoner.søker.fullmakt.filter { it.motpartsRolle == MotpartsRolle.FULLMEKTIG }
 
