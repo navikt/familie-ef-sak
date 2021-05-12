@@ -237,7 +237,7 @@ class PdlClientConfig {
                                 omraader = listOf()))
 
         private fun bostedsadresse(): List<Bostedsadresse> =
-                listOf(Bostedsadresse(angittFlyttedato = null,
+                listOf(Bostedsadresse(angittFlyttedato = startdato.plusDays(1),
                                       gyldigFraOgMed = startdato,
                                       gyldigTilOgMed = LocalDate.of(2199, 1, 1),
                                       utenlandskAdresse = null,

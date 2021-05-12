@@ -78,6 +78,11 @@
             "name" : "gyldigTilOgMed",
             "type" : "LocalDate",
             "nullable" : false
+          },
+          "angittFlyttedato" : {
+            "name" : "angittFlyttedato",
+            "type" : "LocalDate",
+            "nullable" : true
           }
         },
         "nullable" : false

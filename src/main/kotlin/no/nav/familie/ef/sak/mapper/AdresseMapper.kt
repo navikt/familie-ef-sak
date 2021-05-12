@@ -44,7 +44,8 @@ class AdresseMapper(private val kodeverkService: KodeverkService) {
         return AdresseDto(visningsadresse = tilFormatertAdresse(adresse, gjeldendeDato),
                           type = AdresseType.BOSTEDADRESSE,
                           gyldigFraOgMed = adresse.gyldigFraOgMed,
-                          gyldigTilOgMed = adresse.gyldigTilOgMed)
+                          gyldigTilOgMed = adresse.gyldigTilOgMed,
+                          angittFlyttedato = adresse.angittFlyttedato)
     }
 
     private fun tilFormatertAdresse(bostedsadresse: Bostedsadresse, gjeldendeDato: LocalDate): String? {
