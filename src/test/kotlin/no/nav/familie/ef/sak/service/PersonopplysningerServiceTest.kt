@@ -49,14 +49,14 @@ internal class PersonopplysningerServiceTest {
     }
 
     @Test
-    internal fun `mapper pdlsøker til PersonopplysningerDto`() {
+    internal fun `mapper grunnlagsdata til PersonopplysningerDto`() {
         every { familieIntegrasjonerClient.egenAnsatt(any()) } returns true
-        every { familieIntegrasjonerClient.hentMedlemskapsinfo(any()) } returns Medlemskapsinfo("11111122222", emptyList(), emptyList(), emptyList())
+        every { familieIntegrasjonerClient.hentMedlemskapsinfo(any()) } returns Medlemskapsinfo("01010172272", emptyList(), emptyList(), emptyList())
         every { arbeidsfordelingService.hentNavEnhet(any()) } returns Arbeidsfordelingsenhet("1", "Enhet")
-        val søker = personopplysningerService.hentPersonopplysninger("11111122222")
+        val søker = personopplysningerService.hentPersonopplysninger("01010172272")
         assertThat(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(søker))
                 .isEqualToIgnoringWhitespace("""{
-  "personIdent" : "11111122222",
+  "personIdent" : "01010172272",
   "navn" : {
     "fornavn" : "Fornavn",
     "mellomnavn" : "mellomnavn",
@@ -109,8 +109,8 @@ internal class PersonopplysningerServiceTest {
     "personIdent" : "01012067050",
     "navn" : "Barn Barnesen",
     "annenForelder" : {
-      "personIdent" : "01010172272",
-      "navn" : "01010172272 mellomnavn Etternavn"
+      "personIdent" : "17097926735",
+      "navn" : "Bob  Burger"
     },
     "adresse" : [ {
       "visningsadresse" : "c/o CONAVN, Charlies vei 13 b, 0575 Oslo",
@@ -124,8 +124,8 @@ internal class PersonopplysningerServiceTest {
     "personIdent" : "13071489536",
     "navn" : "Barn2 Barnesen",
     "annenForelder" : {
-      "personIdent" : "01010172272",
-      "navn" : "01010172272 mellomnavn Etternavn"
+     "personIdent" : "17097926735",
+      "navn" : "Bob  Burger"
     },
     "adresse" : [ {
       "visningsadresse" : "c/o CONAVN, Charlies vei 13 b, 0575 Oslo",
