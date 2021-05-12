@@ -16,21 +16,14 @@ import no.nav.familie.ef.sak.api.dto.UtflyttingDto
 import no.nav.familie.ef.sak.domene.BarnMedIdent
 import no.nav.familie.ef.sak.domene.Grunnlagsdata
 import no.nav.familie.ef.sak.domene.Søker
-import no.nav.familie.ef.sak.domene.SøkerMedBarn
 import no.nav.familie.ef.sak.integration.dto.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.integration.dto.pdl.Familierelasjonsrolle
-import no.nav.familie.ef.sak.integration.dto.pdl.Fullmakt
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlBarn
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker
 import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
 import no.nav.familie.ef.sak.integration.dto.pdl.visningsnavn
 import no.nav.familie.ef.sak.service.ArbeidsfordelingService
 import no.nav.familie.ef.sak.service.KodeverkService
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.time.LocalDate
-import java.util.AbstractMap
 
 @Component
 class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,

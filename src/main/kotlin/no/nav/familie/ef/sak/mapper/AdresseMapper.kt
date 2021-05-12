@@ -44,7 +44,14 @@ class AdresseMapper(private val kodeverkService: KodeverkService) {
         return AdresseDto(visningsadresse = tilFormatertAdresse(adresse, gjeldendeDato),
                           type = AdresseType.BOSTEDADRESSE,
                           gyldigFraOgMed = adresse.gyldigFraOgMed,
-                          gyldigTilOgMed = adresse.gyldigTilOgMed)
+                          gyldigTilOgMed = adresse.gyldigTilOgMed,
+                          angittFlyttedato = angittFlyttedato(adresse.angittFlyttedato))
+    }
+
+    private fun angittFlyttedato(localDate: LocalDate?): LocalDate? {
+        return if (localDate == LocalDate.of(1, 1, 1)) {
+            null
+        } else localDate
     }
 
     private fun tilFormatertAdresse(bostedsadresse: Bostedsadresse, gjeldendeDato: LocalDate): String? {

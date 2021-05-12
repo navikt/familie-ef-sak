@@ -71,6 +71,12 @@ internal class AdresseMapperTest {
     }
 
     @Test
+    internal fun `skal håndtere feilregistrert dato som null`() {
+        val adresse = mapper.tilAdresse(bostedsadresse.copy(angittFlyttedato = LocalDate.of(1,1,1)))
+        assertThat(adresse.angittFlyttedato).isNull()
+    }
+
+    @Test
     internal fun `Oppholdsadresse formatert adresse`() {
         val oppholdsadresse = Oppholdsadresse(gyldigFraOgMed = null,
                                               coAdressenavn = null,
