@@ -8,11 +8,11 @@ fun Navn.visningsnavn(): String {
     else "$fornavn $mellomnavn $etternavn"
 }
 
-fun List<Navn>.gjeldende(): Navn = this.find { !it.metadata.historisk } ?: this.first()
+fun List<Navn>.gjeldende(): Navn = this.single()
 fun List<Bostedsadresse>.gjeldende(): Bostedsadresse? = this.find { !it.metadata.historisk }
 fun List<Oppholdsadresse>.gjeldende(): Oppholdsadresse? = this.find { !it.metadata.historisk }
 fun List<Sivilstand>.gjeldende(): Sivilstand = this.find { !it.metadata.historisk } ?: this.first()
-fun List<Fødsel>.gjeldende(): Fødsel? = this.find { !it.metadata.historisk } ?: this.firstOrNull()
+fun List<Fødsel>.gjeldende(): Fødsel = this.first()
 fun List<DeltBosted>.gjeldende(): DeltBosted? = this.find { !it.metadata.historisk }
 fun List<Folkeregisterpersonstatus>.gjeldende(): Folkeregisterpersonstatus? = this.find { !it.metadata.historisk }
 fun List<Dødsfall>.gjeldende(): Dødsfall? = this.firstOrNull()

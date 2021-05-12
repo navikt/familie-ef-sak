@@ -35,7 +35,7 @@ class SøkService(private val fagsakRepository: FagsakRepository,
         val person = personService.hentSøker(personIdent)
 
         return Søkeresultat(personIdent = personIdent,
-                            kjønn = KjønnMapper.tilKjønn(person),
+                            kjønn = KjønnMapper.tilKjønn(person.kjønn.first().kjønn),
                             visningsnavn = NavnDto.fraNavn(person.navn.gjeldende()).visningsnavn,
                             fagsaker = fagsaker.map { FagsakForSøkeresultat(fagsakId = it.id, stønadstype = it.stønadstype) }
         )

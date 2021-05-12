@@ -13,6 +13,9 @@ import no.nav.familie.ef.sak.api.dto.SivilstandDto
 import no.nav.familie.ef.sak.api.dto.Sivilstandstype
 import no.nav.familie.ef.sak.api.dto.TelefonnummerDto
 import no.nav.familie.ef.sak.api.dto.UtflyttingDto
+import no.nav.familie.ef.sak.domene.BarnMedIdent
+import no.nav.familie.ef.sak.domene.Grunnlagsdata
+import no.nav.familie.ef.sak.domene.Søker
 import no.nav.familie.ef.sak.domene.SøkerMedBarn
 import no.nav.familie.ef.sak.integration.dto.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.integration.dto.pdl.Familierelasjonsrolle
@@ -35,24 +38,20 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                                private val arbeidsfordelingService: ArbeidsfordelingService,
                                private val kodeverkService: KodeverkService) {
 
-    private val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
-
-    fun tilPersonopplysninger(personMedRelasjoner: SøkerMedBarn,
-                              ident: String,
-                              fullmakter: List<Fullmakt>,
+    fun tilPersonopplysninger(grunnlagsdata: Grunnlagsdata,
                               egenAnsatt: Boolean,
-                              identNavn: Map<String, String>): PersonopplysningerDto {
-        val søker = personMedRelasjoner.søker
-        loggDatoDiff(søker)
+                              ident: String): PersonopplysningerDto {
+        val søker = grunnlagsdata.søker
+        val identNavn = grunnlagsdata.annenForelder.associate { it.personIdent to it.navn.visningsnavn() }
 
         return PersonopplysningerDto(
-                adressebeskyttelse = søker.adressebeskyttelse.gjeldende()
+                adressebeskyttelse = søker.adressebeskyttelse
                         ?.let { Adressebeskyttelse.valueOf(it.gradering.name) },
                 folkeregisterpersonstatus = søker.folkeregisterpersonstatus.gjeldende()
                         ?.let { Folkeregisterpersonstatus.fraPdl(it) },
-                dødsdato = søker.dødsfall.gjeldende()?.dødsdato,
-                navn = NavnDto.fraNavn(søker.navn.gjeldende()),
-                kjønn = KjønnMapper.tilKjønn(søker),
+                dødsdato = søker.dødsfall?.dødsdato,
+                navn = NavnDto.fraNavn(søker.navn),
+                kjønn = KjønnMapper.tilKjønn(søker.kjønn),
                 personIdent = ident,
                 telefonnummer = søker.telefonnummer.find { it.prioritet == 1 }
                         ?.let { TelefonnummerDto(it.landskode, it.nummer) },
@@ -61,24 +60,22 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                     SivilstandDto(type = Sivilstandstype.valueOf(it.type.name),
                                   gyldigFraOgMed = it.gyldigFraOgMed?.toString() ?: it.bekreftelsesdato,
                                   relatertVedSivilstand = it.relatertVedSivilstand,
-                                  navn = identNavn[it.relatertVedSivilstand])
+                                  navn = it.navn)
                 },
                 adresse = tilAdresser(søker),
-                fullmakt = fullmakter.map {
+                fullmakt = søker.fullmakt.map {
                     FullmaktDto(gyldigFraOgMed = it.gyldigFraOgMed,
                                 gyldigTilOgMed = it.gyldigTilOgMed,
                                 motpartsPersonident = it.motpartsPersonident,
-                                navn = identNavn[it.motpartsPersonident])
+                                navn = it.navn)
                 },
                 egenAnsatt = egenAnsatt,
                 navEnhet = arbeidsfordelingService.hentNavEnhet(ident)
                                    ?.let { it.enhetId + " - " + it.enhetNavn } ?: "Ikke funnet",
-                barn = personMedRelasjoner.barn.map {
-                    mapBarn(
-                            it.key,
-                            it.value,
-                            personMedRelasjoner.søkerIdent,
-                            personMedRelasjoner.søker.bostedsadresse,
+                barn = grunnlagsdata.barn.map {
+                    mapBarn(it,
+                            ident,
+                            søker.bostedsadresse,
                             identNavn)
                 },
                 innflyttingTilNorge = søker.innflyttingTilNorge.map {
@@ -95,17 +92,7 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
         )
     }
 
-    private fun loggDatoDiff(søker: PdlSøker) {
-        val datoer = søker.bostedsadresse
-                .filter { it.angittFlyttedato != null && it.angittFlyttedato != LocalDate.of(1, 1, 1) }
-                .filter { it.angittFlyttedato != it.gyldigFraOgMed }
-                .map { "angittFlyttedato=${it.angittFlyttedato} gyldigFraOgMed=${it.gyldigFraOgMed}" }
-        if (datoer.isNotEmpty()) {
-            secureLogger.info("Forskjell i datoer: $datoer")
-        }
-    }
-
-    fun tilAdresser(søker: PdlSøker): List<AdresseDto> {
+    fun tilAdresser(søker: Søker): List<AdresseDto> {
         val adresser =
                 søker.bostedsadresse.map(adresseMapper::tilAdresse) +
                 søker.kontaktadresse.map(adresseMapper::tilAdresse) +
@@ -114,22 +101,21 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
         return AdresseHjelper.sorterAdresser(adresser)
     }
 
-    fun mapBarn(personIdent: String,
-                pdlBarn: PdlBarn,
+    fun mapBarn(barn: BarnMedIdent,
                 søkerIdent: String,
                 bostedsadresserForelder: List<Bostedsadresse>,
                 identNavnMap: Map<String, String>): BarnDto {
 
-        val annenForelderIdent = pdlBarn.forelderBarnRelasjon.find {
+        val annenForelderIdent = barn.forelderBarnRelasjon.find {
             it.relatertPersonsIdent != søkerIdent && it.relatertPersonsRolle != Familierelasjonsrolle.BARN
         }?.relatertPersonsIdent
         return BarnDto(
-                personIdent = personIdent,
-                navn = pdlBarn.navn.gjeldende().visningsnavn(),
+                personIdent = barn.personIdent,
+                navn = barn.navn.visningsnavn(),
                 annenForelder = annenForelderIdent?.let { AnnenForelderMinimumDto(it, identNavnMap[it] ?: "Finner ikke navn") },
-                adresse = pdlBarn.bostedsadresse.map(adresseMapper::tilAdresse),
-                borHosSøker = AdresseHjelper.borPåSammeAdresse(GrunnlagsdataMapper.mapBarn(pdlBarn, personIdent), bostedsadresserForelder),
-                fødselsdato = pdlBarn.fødsel.gjeldende()?.fødselsdato
+                adresse = barn.bostedsadresse.map(adresseMapper::tilAdresse),
+                borHosSøker = AdresseHjelper.borPåSammeAdresse(barn, bostedsadresserForelder),
+                fødselsdato = barn.fødsel.gjeldende().fødselsdato
         )
     }
 }

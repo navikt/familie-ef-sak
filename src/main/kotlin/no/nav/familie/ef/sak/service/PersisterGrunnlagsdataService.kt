@@ -22,9 +22,15 @@ class PersisterGrunnlagsdataService(private val pdlClient: PdlClient,
 
     fun hentGrunnlagsdata(behandlingId: UUID, søknad: SøknadsskjemaOvergangsstønad): Grunnlagsdata {
         val personIdent = søknad.fødselsnummer
+        val barneforeldreFraSøknad = søknad.barn.mapNotNull { it.annenForelder?.person?.fødselsnummer }
+        return hentGrunnlagsdata(personIdent, barneforeldreFraSøknad)
+    }
+
+    fun hentGrunnlagsdata(personIdent: String,
+                          barneforeldreFraSøknad: List<String>): Grunnlagsdata {
         val pdlSøker = pdlClient.hentSøker(personIdent)
         val pdlBarn = hentPdlBarn(pdlSøker)
-        val barneForeldre = hentPdlBarneForeldre(søknad, pdlBarn)
+        val barneForeldre = hentPdlBarneForeldre(pdlBarn, personIdent, barneforeldreFraSøknad)
         val dataTilAndreIdenter = hentDataTilAndreIdenter(pdlSøker)
 
         /*TODO VAD SKA VI BRUKE FRA MEDL ?? */
@@ -36,7 +42,6 @@ class PersisterGrunnlagsdataService(private val pdlClient: PdlClient,
                 medlUnntak = medlUnntak,
                 barn = mapBarn(pdlBarn)
         )
-
     }
 
     private fun hentPdlBarn(pdlSøker: PdlSøker): Map<String, PdlBarn> {
@@ -46,14 +51,13 @@ class PersisterGrunnlagsdataService(private val pdlClient: PdlClient,
                 .let { pdlClient.hentBarn(it) }
     }
 
-    private fun hentPdlBarneForeldre(søknad: SøknadsskjemaOvergangsstønad,
-                                     barn: Map<String, PdlBarn>): Map<String, PdlAnnenForelder> {
-        val barneforeldreFraSøknad = søknad.barn.mapNotNull { it.annenForelder?.person?.fødselsnummer }
-
+    private fun hentPdlBarneForeldre(barn: Map<String, PdlBarn>,
+                                     personIdent: String,
+                                     barneforeldrePersonIdentFraSøknad: List<String>): Map<String, PdlAnnenForelder> {
         return barn.flatMap { it.value.forelderBarnRelasjon }
-                .filter { it.relatertPersonsIdent != søknad.fødselsnummer && it.relatertPersonsRolle != Familierelasjonsrolle.BARN }
+                .filter { it.relatertPersonsIdent != personIdent && it.relatertPersonsRolle != Familierelasjonsrolle.BARN }
                 .map { it.relatertPersonsIdent }
-                .plus(barneforeldreFraSøknad)
+                .plus(barneforeldrePersonIdentFraSøknad)
                 .distinct()
                 .let { pdlClient.hentAndreForeldre(it) }
     }

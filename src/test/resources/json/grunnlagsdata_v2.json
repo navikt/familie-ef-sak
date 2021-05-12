@@ -260,7 +260,7 @@
       },
       "fødsel" : {
         "name" : "fødsel",
-        "type" : "Object",
+        "type" : "Collection",
         "fields" : {
           "fødselsår" : {
             "name" : "fødselsår",
@@ -596,7 +596,7 @@
       },
       "navn" : {
         "name" : "navn",
-        "type" : "Collection",
+        "type" : "Object",
         "fields" : {
           "fornavn" : {
             "name" : "fornavn",
@@ -1356,7 +1356,7 @@
       },
       "navn" : {
         "name" : "navn",
-        "type" : "Collection",
+        "type" : "Object",
         "fields" : {
           "fornavn" : {
             "name" : "fornavn",
@@ -2228,7 +2228,7 @@
       },
       "navn" : {
         "name" : "navn",
-        "type" : "Collection",
+        "type" : "Object",
         "fields" : {
           "fornavn" : {
             "name" : "fornavn",

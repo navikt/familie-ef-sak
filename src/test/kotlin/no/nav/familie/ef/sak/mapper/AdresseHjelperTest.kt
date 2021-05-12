@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.integration.dto.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.integration.dto.pdl.DeltBosted
 import no.nav.familie.ef.sak.integration.dto.pdl.Matrikkeladresse
 import no.nav.familie.ef.sak.integration.dto.pdl.Metadata
+import no.nav.familie.ef.sak.integration.dto.pdl.Navn
 import no.nav.familie.ef.sak.integration.dto.pdl.Vegadresse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -39,7 +40,7 @@ internal class AdresseHjelperTest {
                 lagAdresse(adresseTromsø(), now().minusDays(1), null, null, metadataGjeldende)
         )
 
-        val barn = BarnMedIdent(emptyList(), barnAdresser, emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), "")
+        val barn = BarnMedIdent(emptyList(), barnAdresser, emptyList(), emptyList(), emptyList(), emptyList(), Navn("", "", "", Metadata(false)), "")
         assertThat(AdresseHjelper.borPåSammeAdresse(barn, forelderAdresser)).isTrue
     }
 
@@ -53,7 +54,7 @@ internal class AdresseHjelperTest {
                 lagAdresse(adresseTromsøMatrikkel(), now().minusDays(1))
         )
 
-        val barn = BarnMedIdent(emptyList(), barnAdresser, emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), "")
+        val barn = BarnMedIdent(emptyList(), barnAdresser, emptyList(), emptyList(), emptyList(), emptyList(),  Navn("", "", "", Metadata(false)), "")
         assertThat(AdresseHjelper.borPåSammeAdresse(barn, forelderAdresser)).isTrue
     }
 
@@ -63,7 +64,7 @@ internal class AdresseHjelperTest {
         val barnAdresser = listOf(lagAdresse(adresseBergen(), now().minusDays(1), null, matrikkeladresse()))
         val forelderAdresser = listOf(lagAdresse(null, now().minusDays(1), null, matrikkeladresse()))
 
-        val barn = BarnMedIdent(emptyList(), barnAdresser, emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), "")
+        val barn = BarnMedIdent(emptyList(), barnAdresser, emptyList(), emptyList(), emptyList(), emptyList(),  Navn("", "", "", Metadata(false)), "")
         assertThat(AdresseHjelper.borPåSammeAdresse(barn, forelderAdresser)).isTrue
     }
 
@@ -73,7 +74,7 @@ internal class AdresseHjelperTest {
         val barnAdresser = listOf(lagAdresse(adresseBergen(), now().minusDays(1), null, matrikkeladresse()))
         val forelderAdresser = listOf(lagAdresse(null, now().minusDays(1), null, matrikkeladresse(999L)))
 
-        val barn = BarnMedIdent(emptyList(), barnAdresser, emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), "")
+        val barn = BarnMedIdent(emptyList(), barnAdresser, emptyList(), emptyList(), emptyList(), emptyList(),  Navn("", "", "", Metadata(false)), "")
         assertThat(AdresseHjelper.borPåSammeAdresse(barn, forelderAdresser)).isFalse
     }
 
@@ -100,11 +101,11 @@ internal class AdresseHjelperTest {
         )
 
 
-        val barn1 = BarnMedIdent(emptyList(), barn1Adresser, emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), "")
-        val barn2 = BarnMedIdent(emptyList(), barn2Adresser, emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), "")
+        val barn1 = BarnMedIdent(emptyList(), barn1Adresser, emptyList(), emptyList(), emptyList(), emptyList(), Navn("", "", "", Metadata(false)), "")
+        val barn2 = BarnMedIdent(emptyList(), barn2Adresser, emptyList(), emptyList(), emptyList(), emptyList(),  Navn("", "", "", Metadata(false)), "")
         val barn3 =
-                BarnMedIdent(emptyList(), ugyldigeAdresser, emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), "")
-        val barn4 = BarnMedIdent(emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), listOf(), "")
+                BarnMedIdent(emptyList(), ugyldigeAdresser, emptyList(), emptyList(), emptyList(), emptyList(), Navn("", "", "", Metadata(false)), "")
+        val barn4 = BarnMedIdent(emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(),  Navn("", "", "", Metadata(false)), "")
 
         assertThat(AdresseHjelper.borPåSammeAdresse(barn1, forelderAdresser)).isFalse
         assertThat(AdresseHjelper.borPåSammeAdresse(barn2, forelderAdresser)).isFalse
@@ -122,7 +123,7 @@ internal class AdresseHjelperTest {
                                              emptyList(),
                                              emptyList(),
                                              emptyList(),
-                                             emptyList(),
+                                             Navn("", "", "", Metadata(false)),
                                              "")
         val forelderAdresser = listOf(lagAdresse(adresseOslo(), now().minusDays(1000), null))
 
@@ -139,7 +140,7 @@ internal class AdresseHjelperTest {
                 lagAdresse(adresseBergen(), now().minusDays(100), now().minusDays(1), null, metadataHistorisk),
                 lagAdresse(adresseTromsø(), now().minusDays(1), null, null, metadataGjeldende)
         )
-        val barn = BarnMedIdent(emptyList(), barnAdresser, emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), "")
+        val barn = BarnMedIdent(emptyList(), barnAdresser, emptyList(), emptyList(), emptyList(), emptyList(),  Navn("", "", "", Metadata(false)), "")
 
         assertThat(AdresseHjelper.borPåSammeAdresse(barn, forelderAdresser)).isTrue
     }

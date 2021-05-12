@@ -1,6 +1,8 @@
 package no.nav.familie.ef.sak.mapper
 
 import no.nav.familie.ef.sak.domene.BarnMedIdent
+import no.nav.familie.ef.sak.integration.dto.pdl.Metadata
+import no.nav.familie.ef.sak.integration.dto.pdl.Navn
 import no.nav.familie.ef.sak.repository.domain.søknad.Barn
 import no.nav.familie.util.FnrGenerator
 import org.assertj.core.api.Assertions.assertThat
@@ -144,6 +146,6 @@ internal class BarnMatcherTest {
                  lagtTilManuelt = false)
 
     private fun pdlBarn(fnr: String) =
-            BarnMedIdent(emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), fnr)
+            BarnMedIdent(emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), Navn("", "", "", Metadata(false)), fnr)
 
 }

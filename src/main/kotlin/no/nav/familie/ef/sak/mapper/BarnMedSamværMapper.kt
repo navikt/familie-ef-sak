@@ -80,7 +80,7 @@ object BarnMedSamværMapper {
                                     annenForelderFnr: String?): BarnMedSamværRegistergrunnlagDto {
         return BarnMedSamværRegistergrunnlagDto(
                 id = matchetBarn.søknadsbarn.id,
-                navn = matchetBarn.barn?.navn?.gjeldende()?.visningsnavn(),
+                navn = matchetBarn.barn?.navn?.visningsnavn(),
                 fødselsnummer = matchetBarn.fødselsnummer,
                 harSammeAdresse = matchetBarn.barn?.let {
                     AdresseHjelper.borPåSammeAdresse(it, søkerAdresse)
@@ -102,7 +102,7 @@ object BarnMedSamværMapper {
 
     private fun tilAnnenForelderDto(pdlAnnenForelder: AnnenForelderMedIdent, annenForelderFnr: String?): AnnenForelderDto {
         return AnnenForelderDto(
-                navn = pdlAnnenForelder.navn.gjeldende().visningsnavn(),
+                navn = pdlAnnenForelder.navn.visningsnavn(),
                 fødselsnummer = annenForelderFnr,
                 fødselsdato = pdlAnnenForelder.fødsel.gjeldende()?.fødselsdato,
                 bosattINorge = pdlAnnenForelder.bostedsadresse.gjeldende()?.utenlandskAdresse?.let { false } ?: true,

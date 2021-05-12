@@ -33,12 +33,12 @@ data class Søker(val adressebeskyttelse: Adressebeskyttelse?, //Er en liste i P
                  val bostedsadresse: List<Bostedsadresse>,
                  val dødsfall: Dødsfall?, //Er en liste i PDLSøker
                  val forelderBarnRelasjon: List<ForelderBarnRelasjon>,
-                 val fødsel: Fødsel, //Er en liste i PDLSøker
+                 val fødsel: List<Fødsel>, //Er en liste i PDLSøker
                  val folkeregisterpersonstatus: List<Folkeregisterpersonstatus>,
                  val fullmakt: List<FullmaktMedNavn>,
                  val kjønn: KjønnType,
                  val kontaktadresse: List<Kontaktadresse>,
-                 val navn: List<Navn>,
+                 val navn: Navn,
                  val opphold: List<Opphold>,
                  val oppholdsadresse: List<Oppholdsadresse>,
                  val sivilstand: List<SivilstandMedNavn>,
@@ -55,7 +55,7 @@ data class AnnenForelderMedIdent(
         val bostedsadresse: List<Bostedsadresse>,
         val dødsfall: List<Dødsfall>,
         val fødsel: List<Fødsel>,
-        val navn: List<Navn>,
+        val navn: Navn,
         val opphold: List<Opphold>,
         val oppholdsadresse: List<Oppholdsadresse>,
         val statsborgerskap: List<Statsborgerskap>,
@@ -71,7 +71,7 @@ data class BarnMedIdent(
         val dødsfall: List<Dødsfall>,
         val forelderBarnRelasjon: List<ForelderBarnRelasjon>,
         val fødsel: List<Fødsel>,
-        val navn: List<Navn>,
+        val navn: Navn,
         val personIdent: String,
 )
 
