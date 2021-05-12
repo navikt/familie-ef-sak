@@ -8,10 +8,10 @@ import java.time.LocalDate
 class KodeverkService(private val cachedKodeverkService: CachedKodeverkService) {
 
     fun hentLand(landkode: String, gjeldendeDato: LocalDate): String? {
-        return cachedKodeverkService.hentLandkoder().hentGjeldende(landkode, gjeldendeDato)
+        return cachedKodeverkService.hentLandkoder().hentGjeldende(landkode, gjeldendeDato, sisteGjeldende = true)
     }
 
     fun hentPoststed(postnummer: String, gjeldendeDato: LocalDate): String? {
-        return cachedKodeverkService.hentPoststed().hentGjeldende(postnummer, gjeldendeDato)
+        return cachedKodeverkService.hentPoststed().hentGjeldende(postnummer, gjeldendeDato, sisteGjeldende = true)
     }
 }
