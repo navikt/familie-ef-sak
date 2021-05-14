@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository
 
+import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.BehandlingResultat
 import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
@@ -10,11 +11,13 @@ import no.nav.familie.ef.sak.repository.domain.Fagsak
 import no.nav.familie.ef.sak.repository.domain.FagsakPerson
 import no.nav.familie.ef.sak.repository.domain.Oppgave
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
+import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.VilkårType
 import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
 import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
 import no.nav.familie.ef.sak.service.steg.StegType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import java.time.LocalDate
 import java.util.UUID
 
 fun oppgave(behandling: Behandling, erFerdigstilt: Boolean = false): Oppgave =
@@ -53,3 +56,12 @@ fun vilkårsvurdering(behandlingId: UUID,
 fun fagsakpersoner(identer: Set<String>): Set<FagsakPerson> = identer.map {
     FagsakPerson(ident = it)
 }.toSet()
+
+fun tilkjentYtelse(behandlingId: UUID, personIdent: String): TilkjentYtelse = TilkjentYtelse(
+        behandlingId = behandlingId, personident = personIdent, vedtaksdato = LocalDate.now(), andelerTilkjentYtelse = listOf(
+        AndelTilkjentYtelse(beløp = 9500,
+                            stønadFom = LocalDate.of(2021, 1,1),
+                            stønadTom = LocalDate.of(2021, 12, 31),
+                            personIdent = personIdent,
+                            kildeBehandlingId = behandlingId))
+)
