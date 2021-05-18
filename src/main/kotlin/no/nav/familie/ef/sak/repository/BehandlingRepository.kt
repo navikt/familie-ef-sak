@@ -2,9 +2,11 @@ package no.nav.familie.ef.sak.repository
 
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
+import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import org.springframework.data.jdbc.repository.query.Query
+import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
-import java.util.*
+import java.util.UUID
 
 @Repository
 interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUpdateRepository<Behandling> {
@@ -32,5 +34,18 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
                     LIMIT 1
                     """)
     fun finnAktivIdent(behandlingId: UUID): String
+
+    // language=PostgreSQL
+    @Query("""
+        SELECT b.*, be.id aseksternid_id
+        FROM behandling b
+        JOIN behandling_ekstern be ON b.id = be.behandling_id
+        JOIN fagsak f ON f.id = b.fagsak_id
+        JOIN fagsak_person fp ON b.fagsak_id = fp.fagsak_id
+        WHERE fp.ident IN (:personidenter) AND f.stonadstype = :stonadstype 
+        ORDER BY b.opprettet_tid DESC
+        LIMIT 1
+    """)
+    fun finnSisteBehandling(@Param("stonadstype") stønadstype: Stønadstype, personidenter: Set<String>): Behandling?
 
 }

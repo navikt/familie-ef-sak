@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.exception.PdlNotFoundException
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.InfotrygdReplikaClient
 import no.nav.familie.ef.sak.integration.PdlClient
+import no.nav.familie.ef.sak.integration.dto.pdl.identer
 import no.nav.familie.ef.sak.util.isEqualOrAfter
 import no.nav.familie.ef.sak.util.isEqualOrBefore
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeOvergangsstønad
@@ -131,7 +132,7 @@ class StønadsperioderService(private val infotrygdReplikaClient: InfotrygdRepli
 
     private fun hentPersonIdenter(request: PerioderOvergangsstønadRequest): Set<String> {
         return try {
-            pdlClient.hentPersonidenter(request.personIdent, true).identer.map { it.ident }.toSet()
+            pdlClient.hentPersonidenter(request.personIdent, true).identer()
         } catch (e: PdlNotFoundException) {
             logger.warn("Finner ikke person, returnerer personIdent i request")
             setOf(request.personIdent)

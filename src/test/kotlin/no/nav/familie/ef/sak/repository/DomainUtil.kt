@@ -31,14 +31,15 @@ fun behandling(fagsak: Fagsak,
                status: BehandlingStatus = BehandlingStatus.OPPRETTET,
                steg: StegType = StegType.VILKÅR,
                oppdragId: UUID = UUID.randomUUID(),
-               type: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING): Behandling =
+               type: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+               resultat: BehandlingResultat = BehandlingResultat.IKKE_SATT): Behandling =
         Behandling(fagsakId = fagsak.id,
                    id = oppdragId,
                    type = type,
                    status = status,
                    steg = steg,
                    aktiv = aktiv,
-                   resultat = BehandlingResultat.IKKE_SATT)
+                   resultat = resultat)
 
 
 fun fagsak(identer: Set<FagsakPerson> = setOf(), stønadstype: Stønadstype = Stønadstype.OVERGANGSSTØNAD) =
@@ -60,7 +61,7 @@ fun fagsakpersoner(identer: Set<String>): Set<FagsakPerson> = identer.map {
 fun tilkjentYtelse(behandlingId: UUID, personIdent: String): TilkjentYtelse = TilkjentYtelse(
         behandlingId = behandlingId, personident = personIdent, vedtaksdato = LocalDate.now(), andelerTilkjentYtelse = listOf(
         AndelTilkjentYtelse(beløp = 9500,
-                            stønadFom = LocalDate.of(2021, 1,1),
+                            stønadFom = LocalDate.of(2021, 1, 1),
                             stønadTom = LocalDate.of(2021, 12, 31),
                             personIdent = personIdent,
                             kildeBehandlingId = behandlingId))
