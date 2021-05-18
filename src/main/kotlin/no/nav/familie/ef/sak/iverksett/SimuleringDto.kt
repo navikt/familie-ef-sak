@@ -36,7 +36,7 @@ data class AndelTilkjentYtelseForIverksett(val periodebeløp: PeriodebeløpDto,
                                            val forrigePeriodeId: Long? = null,
                                            val kildeBehandlingId: UUID? = null)
 
-data class PeriodebeløpDto(val utbetaltPerPeriode: Int,
+data class PeriodebeløpDto(val beløp: Int,
                            var periodetype: Periodetype,
                            val fraOgMed: LocalDate,
                            val tilOgMed: LocalDate)
@@ -59,7 +59,7 @@ fun TilkjentYtelseForIverksett.tilAndelerTilkjentYtelse(): List<AndelTilkjentYte
 
     return this.andelerTilkjentYtelse
             .map {
-                AndelTilkjentYtelse(beløp = it.periodebeløp.utbetaltPerPeriode,
+                AndelTilkjentYtelse(beløp = it.periodebeløp.beløp,
                                     stønadFom = it.periodebeløp.fraOgMed,
                                     stønadTom = it.periodebeløp.tilOgMed,
                                     personIdent = it.personIdent)
@@ -91,7 +91,7 @@ fun AndelTilkjentYtelse.tilIverksett(): AndelTilkjentYtelseForIverksett {
     return AndelTilkjentYtelseForIverksett(kildeBehandlingId = this.kildeBehandlingId
                                                                ?: error("Savner kildeBehandlingId på andel med periodeId=${this.periodeId}"),
                                            personIdent = this.personIdent,
-                                           periodebeløp = PeriodebeløpDto(utbetaltPerPeriode = this.beløp,
+                                           periodebeløp = PeriodebeløpDto(beløp = this.beløp,
                                                                           periodetype = Periodetype.MÅNED,
                                                                           fraOgMed = this.stønadFom,
                                                                           tilOgMed = this.stønadTom),

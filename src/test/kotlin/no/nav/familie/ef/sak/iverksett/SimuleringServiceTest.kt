@@ -72,7 +72,7 @@ internal class SimuleringServiceTest {
         simuleringService.simulerForBehandling(behandling.id)
 
         assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.behandlingId).isEqualTo(tilkjentYtelse.behandlingId)
-        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().periodebeløp.utbetaltPerPeriode).isEqualTo(tilkjentYtelse.andelerTilkjentYtelse.first().beløp)
+        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().periodebeløp.beløp).isEqualTo(tilkjentYtelse.andelerTilkjentYtelse.first().beløp)
         assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().periodebeløp.fraOgMed).isEqualTo(tilkjentYtelse.andelerTilkjentYtelse.first().stønadFom)
         assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().periodebeløp.tilOgMed).isEqualTo(tilkjentYtelse.andelerTilkjentYtelse.first().stønadTom)
 
@@ -113,7 +113,7 @@ internal class SimuleringServiceTest {
 
         assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().periodebeløp.fraOgMed).isEqualTo(årMånedFraStart.atDay(1))
         assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().periodebeløp.tilOgMed).isEqualTo(årMånedFraSlutt.atEndOfMonth())
-        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().periodebeløp.utbetaltPerPeriode).isGreaterThan(0)
+        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().periodebeløp.beløp).isGreaterThan(0)
 
     }
 
