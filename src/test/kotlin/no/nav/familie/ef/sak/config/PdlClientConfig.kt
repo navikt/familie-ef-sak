@@ -113,7 +113,7 @@ class PdlClientConfig {
                          bostedsadresse = bostedsadresse(),
                          dødsfall = listOf(),
                          forelderBarnRelasjon = forelderBarnRelasjoner(),
-                         fødsel = listOf(),
+                         fødsel = fødsel(),
                          folkeregisterpersonstatus = listOf(Folkeregisterpersonstatus("bosatt",
                                                                                       "bosattEtterFolkeregisterloven",
                                                                                       metadataGjeldende)),
