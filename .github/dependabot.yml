@@ -11,4 +11,4 @@ updates:
   ignore:
   - dependency-name: org.jetbrains.kotlinx:kotlinx-coroutines-core
     versions:
-    - "*-native-mt"
+    - 1.5.0-native-mt
