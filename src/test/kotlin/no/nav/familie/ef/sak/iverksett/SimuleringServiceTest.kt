@@ -71,7 +71,7 @@ internal class SimuleringServiceTest {
         } returns DetaljertSimuleringResultat(simuleringMottaker = emptyList())
         simuleringService.simulerForBehandling(behandling.id)
 
-        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.behandlingId).isEqualTo(tilkjentYtelse.behandlingId)
+        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.behandlingId).isEqualTo(tilkjentYtelse.behandlingId)
         assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().periodebeløp.beløp).isEqualTo(tilkjentYtelse.andelerTilkjentYtelse.first().beløp)
         assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().periodebeløp.fraOgMed).isEqualTo(tilkjentYtelse.andelerTilkjentYtelse.first().stønadFom)
         assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().periodebeløp.tilOgMed).isEqualTo(tilkjentYtelse.andelerTilkjentYtelse.first().stønadTom)

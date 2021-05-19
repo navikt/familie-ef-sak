@@ -1,10 +1,13 @@
 package no.nav.familie.ef.sak.iverksett
 
 import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
+import no.nav.familie.ef.sak.repository.domain.Endret
+import no.nav.familie.ef.sak.repository.domain.Sporbar
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseType
+import no.nav.familie.kontrakter.ef.felles.StønadType
 import java.time.LocalDate
 import java.util.UUID
 
@@ -19,19 +22,18 @@ data class TilkjentYtelseForIverksettMedMetadata(val tilkjentYtelse: TilkjentYte
                                                  val saksbehandlerId: String,
                                                  val eksternBehandlingId: Long,
                                                  val stønadstype: Stønadstype,
-                                                 val eksternFagsakId: Long)
+                                                 val eksternFagsakId: Long,
+                                                 val personIdent: String,
+                                                 val behandlingId: UUID,
+                                                 val vedtaksdato: LocalDate)
 
 data class TilkjentYtelseForIverksett(
         val id: UUID = UUID.randomUUID(),
-        val behandlingId: UUID,
-        val personident: String,
         val vedtaksdato: LocalDate? = null,
         val status: TilkjentYtelseStatus,
-        val type: TilkjentYtelseType,
         val andelerTilkjentYtelse: List<AndelTilkjentYtelseForIverksett>)
 
 data class AndelTilkjentYtelseForIverksett(val periodebeløp: PeriodebeløpDto,
-                                           val personIdent: String,
                                            val periodeId: Long? = null,
                                            val forrigePeriodeId: Long? = null,
                                            val kildeBehandlingId: UUID? = null)
@@ -46,34 +48,35 @@ enum class Periodetype {
 }
 
 
-fun TilkjentYtelseForIverksett.tilTilkjentYtelse(status: TilkjentYtelseStatus = TilkjentYtelseStatus.OPPRETTET): TilkjentYtelse {
+fun TilkjentYtelseForIverksettMedMetadata.tilTilkjentYtelse(status: TilkjentYtelseStatus = TilkjentYtelseStatus.OPPRETTET): TilkjentYtelse {
 
-    return TilkjentYtelse(behandlingId = behandlingId,
-                          personident = personident,
-                          vedtaksdato = vedtaksdato,
+    return TilkjentYtelse(vedtaksdato = vedtaksdato,
                           status = status,
-                          andelerTilkjentYtelse = tilAndelerTilkjentYtelse())
+                          andelerTilkjentYtelse = this.tilAndelerTilkjentYtelse(),
+                          id = this.tilkjentYtelse.id,
+                          behandlingId = this.behandlingId,
+                          personident = this.personIdent,
+                          utbetalingsoppdrag = null)
+
 }
 
-fun TilkjentYtelseForIverksett.tilAndelerTilkjentYtelse(): List<AndelTilkjentYtelse> {
+fun TilkjentYtelseForIverksettMedMetadata.tilAndelerTilkjentYtelse(): List<AndelTilkjentYtelse> {
 
-    return this.andelerTilkjentYtelse
+    return this.tilkjentYtelse.andelerTilkjentYtelse
             .map {
                 AndelTilkjentYtelse(beløp = it.periodebeløp.beløp,
                                     stønadFom = it.periodebeløp.fraOgMed,
                                     stønadTom = it.periodebeløp.tilOgMed,
-                                    personIdent = it.personIdent)
+                                    personIdent = this.personIdent,
+                )
             }
 }
 
 fun TilkjentYtelse.tilIverksett(): TilkjentYtelseForIverksett {
     return TilkjentYtelseForIverksett(id = this.id,
-                                      behandlingId = this.behandlingId,
                                       andelerTilkjentYtelse = this.andelerTilkjentYtelse.map { it.tilIverksett() },
-                                      personident = this.personident,
                                       vedtaksdato = this.vedtaksdato,
-                                      status = this.status,
-                                      type = this.type)
+                                      status = this.status)
 }
 
 fun TilkjentYtelse.tilIverksettMedMetaData(saksbehandlerId: String,
@@ -84,13 +87,15 @@ fun TilkjentYtelse.tilIverksettMedMetaData(saksbehandlerId: String,
                                                  saksbehandlerId = saksbehandlerId,
                                                  eksternBehandlingId = eksternBehandlingId,
                                                  stønadstype = stønadstype,
-                                                 eksternFagsakId = eksternFagsakId)
+                                                 eksternFagsakId = eksternFagsakId,
+                                                 personIdent = this.personident,
+                                                 behandlingId = this.behandlingId,
+                                                 vedtaksdato = this.vedtaksdato ?: LocalDate.now())
 }
 
 fun AndelTilkjentYtelse.tilIverksett(): AndelTilkjentYtelseForIverksett {
     return AndelTilkjentYtelseForIverksett(kildeBehandlingId = this.kildeBehandlingId
                                                                ?: error("Savner kildeBehandlingId på andel med periodeId=${this.periodeId}"),
-                                           personIdent = this.personIdent,
                                            periodebeløp = PeriodebeløpDto(beløp = this.beløp,
                                                                           periodetype = Periodetype.MÅNED,
                                                                           fraOgMed = this.stønadFom,
