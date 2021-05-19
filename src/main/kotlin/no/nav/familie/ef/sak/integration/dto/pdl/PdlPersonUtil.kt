@@ -22,3 +22,5 @@ fun List<Folkeregisteridentifikator>.gjeldende(): Folkeregisteridentifikator = t
 
 
 fun List<SivilstandMedNavn>.gjeldende(): SivilstandMedNavn = this.find { !it.metadata.historisk } ?: this.first()
+
+fun PdlIdenter.identer(): Set<String> = this.identer.map { it.ident }.toSet()
