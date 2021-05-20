@@ -38,14 +38,15 @@ import java.util.UUID
 
 internal class JournalføringServiceTest {
 
-    private val journalpostClient: JournalpostClient = mockk()
-    private val behandlingService: BehandlingService = mockk()
-    private val oppgaveService: OppgaveService = mockk()
-    private val fagsakService: FagsakService = mockk()
-    private val pdlClient: PdlClient = mockk()
+    private val journalpostClient = mockk<JournalpostClient>()
+    private val behandlingService = mockk<BehandlingService>()
+    private val søknadService = mockk<SøknadService>()
+    private val oppgaveService = mockk<OppgaveService>()
+    private val fagsakService = mockk<FagsakService>()
+    private val pdlClient = mockk<PdlClient>()
 
     private val journalføringService =
-            JournalføringService(journalpostClient, behandlingService, fagsakService, pdlClient, oppgaveService)
+            JournalføringService(journalpostClient, behandlingService, søknadService, fagsakService, pdlClient, oppgaveService)
 
     private val fagsakId: UUID = UUID.randomUUID()
     private val fagsakEksternId = 12345L
@@ -108,7 +109,7 @@ internal class JournalføringServiceTest {
         every { journalpostClient.ferdigstillJournalpost(any(), any()) } just runs
 
         every {
-            behandlingService.lagreSøknadForOvergangsstønad(any(), any(), any(), any())
+            søknadService.lagreSøknadForOvergangsstønad(any(), any(), any(), any())
         } just Runs
 
     }
@@ -152,7 +153,7 @@ internal class JournalføringServiceTest {
         }
         assertThat(slotDokumentInfoIder[0]).isEqualTo(dokumentInfoIdMedJsonVerdi)
         assertThat(slotDokumentInfoIder.size).isEqualTo(1)
-        verify(exactly = 1) { behandlingService.lagreSøknadForOvergangsstønad(any(), any(), any(), any()) }
+        verify(exactly = 1) { søknadService.lagreSøknadForOvergangsstønad(any(), any(), any(), any()) }
     }
 
     @Test

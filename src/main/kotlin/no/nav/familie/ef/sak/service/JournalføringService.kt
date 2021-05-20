@@ -24,7 +24,6 @@ import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariant
 import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariantformat
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -32,12 +31,10 @@ import java.util.UUID
 @Service
 class JournalføringService(private val journalpostClient: JournalpostClient,
                            private val behandlingService: BehandlingService,
+                           private val søknadService: SøknadService,
                            private val fagsakService: FagsakService,
                            private val pdlClient: PdlClient,
                            private val oppgaveService: OppgaveService) {
-
-    private val logger = LoggerFactory.getLogger(this::class.java)
-    private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     fun hentJournalpost(journalpostId: String): Journalpost {
         return journalpostClient.hentJournalpost(journalpostId)
@@ -137,15 +134,15 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         when (fagsak.stønadstype) {
             Stønadstype.OVERGANGSSTØNAD -> {
                 val søknad = hentSøknadFraJournalpostForOvergangsstønad(journalpostId)
-                behandlingService.lagreSøknadForOvergangsstønad(søknad, behandlingId, fagsak.id, journalpostId)
+                søknadService.lagreSøknadForOvergangsstønad(søknad, behandlingId, fagsak.id, journalpostId)
             }
             Stønadstype.BARNETILSYN -> {
                 val søknad = hentSøknadFraJournalpostForBarnetilsyn(journalpostId)
-                behandlingService.lagreSøknadForBarnetilsyn(søknad, behandlingId, fagsak.id, journalpostId)
+                søknadService.lagreSøknadForBarnetilsyn(søknad, behandlingId, fagsak.id, journalpostId)
             }
             Stønadstype.SKOLEPENGER -> {
                 val søknad = hentSøknadFraJournalpostForSkolepenger(journalpostId)
-                behandlingService.lagreSøknadForSkolepenger(søknad, behandlingId, fagsak.id, journalpostId)
+                søknadService.lagreSøknadForSkolepenger(søknad, behandlingId, fagsak.id, journalpostId)
             }
         }
     }
