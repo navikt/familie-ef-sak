@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.api.dto
 
+import no.nav.familie.ef.sak.integration.dto.pdl.Dødsfall
 import java.time.LocalDate
 import java.util.UUID
 
@@ -44,4 +45,5 @@ data class AnnenForelderDto(
         val fødselsdato: LocalDate?,
         val bosattINorge: Boolean?,
         val land: String?,
+        val dødsfall: LocalDate? = null,
 )

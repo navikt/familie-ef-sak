@@ -42,6 +42,7 @@ import no.nav.familie.ef.sak.integration.dto.pdl.Statsborgerskap
 import no.nav.familie.ef.sak.integration.dto.pdl.Telefonnummer
 import no.nav.familie.ef.sak.integration.dto.pdl.UtflyttingFraNorge
 import no.nav.familie.ef.sak.integration.dto.pdl.Vegadresse
+import no.nav.familie.ef.sak.integration.dto.pdl.Dødsfall
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
@@ -176,7 +177,7 @@ class PdlClientConfig {
                 PdlAnnenForelder(
                         adressebeskyttelse = emptyList(),
                         bostedsadresse = bostedsadresse(),
-                        dødsfall = emptyList(),
+                        dødsfall = listOf(Dødsfall(LocalDate.now())),
                         fødsel = fødsel(1994, 11, 1),
                         navn = listOf(Navn("Bob", "", "Burger", metadataGjeldende)),
                         opphold = emptyList(),

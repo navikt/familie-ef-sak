@@ -97,7 +97,6 @@ object BarnMedSamværMapper {
                 bosattINorge = annenForelder.bosattNorge,
                 land = annenForelder.land
         )
-
     }
 
     private fun tilAnnenForelderDto(pdlAnnenForelder: AnnenForelderMedIdent, annenForelderFnr: String?): AnnenForelderDto {
@@ -105,6 +104,7 @@ object BarnMedSamværMapper {
                 navn = pdlAnnenForelder.navn.visningsnavn(),
                 fødselsnummer = annenForelderFnr,
                 fødselsdato = pdlAnnenForelder.fødsel.gjeldende()?.fødselsdato,
+                dødsfall = pdlAnnenForelder.dødsfall.gjeldende()?.dødsdato,
                 bosattINorge = pdlAnnenForelder.bostedsadresse.gjeldende()?.utenlandskAdresse?.let { false } ?: true,
                 land = pdlAnnenForelder.bostedsadresse.gjeldende()?.utenlandskAdresse?.landkode
         )

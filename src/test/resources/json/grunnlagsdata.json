@@ -244,6 +244,11 @@
             "name" : "land",
             "type" : "String",
             "nullable" : false
+          },
+          "dødsfall" : {
+            "name" : "dødsfall",
+            "type" : "LocalDate",
+            "nullable" : true
           }
         },
         "nullable" : false
