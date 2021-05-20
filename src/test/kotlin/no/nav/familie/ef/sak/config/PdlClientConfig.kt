@@ -16,7 +16,6 @@ import no.nav.familie.ef.sak.integration.dto.pdl.Folkeregisterpersonstatus
 import no.nav.familie.ef.sak.integration.dto.pdl.ForelderBarnRelasjon
 import no.nav.familie.ef.sak.integration.dto.pdl.Fullmakt
 import no.nav.familie.ef.sak.integration.dto.pdl.Fødsel
-import no.nav.familie.ef.sak.integration.dto.pdl.Dødsfall
 import no.nav.familie.ef.sak.integration.dto.pdl.InnflyttingTilNorge
 import no.nav.familie.ef.sak.integration.dto.pdl.Kjønn
 import no.nav.familie.ef.sak.integration.dto.pdl.KjønnType
@@ -43,6 +42,7 @@ import no.nav.familie.ef.sak.integration.dto.pdl.Statsborgerskap
 import no.nav.familie.ef.sak.integration.dto.pdl.Telefonnummer
 import no.nav.familie.ef.sak.integration.dto.pdl.UtflyttingFraNorge
 import no.nav.familie.ef.sak.integration.dto.pdl.Vegadresse
+import no.nav.familie.ef.sak.integration.dto.pdl.Dødsfall
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
