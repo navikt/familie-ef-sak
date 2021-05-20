@@ -6,42 +6,7 @@ import io.mockk.mockk
 import io.mockk.runs
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.integration.PdlSaksbehandlerClient
-import no.nav.familie.ef.sak.integration.dto.pdl.Adressebeskyttelse
-import no.nav.familie.ef.sak.integration.dto.pdl.AdressebeskyttelseGradering
-import no.nav.familie.ef.sak.integration.dto.pdl.Bostedsadresse
-import no.nav.familie.ef.sak.integration.dto.pdl.Familierelasjonsrolle
-import no.nav.familie.ef.sak.integration.dto.pdl.Folkeregisteridentifikator
-import no.nav.familie.ef.sak.integration.dto.pdl.Folkeregistermetadata
-import no.nav.familie.ef.sak.integration.dto.pdl.Folkeregisterpersonstatus
-import no.nav.familie.ef.sak.integration.dto.pdl.ForelderBarnRelasjon
-import no.nav.familie.ef.sak.integration.dto.pdl.Fullmakt
-import no.nav.familie.ef.sak.integration.dto.pdl.Fødsel
-import no.nav.familie.ef.sak.integration.dto.pdl.InnflyttingTilNorge
-import no.nav.familie.ef.sak.integration.dto.pdl.Kjønn
-import no.nav.familie.ef.sak.integration.dto.pdl.KjønnType
-import no.nav.familie.ef.sak.integration.dto.pdl.Kontaktadresse
-import no.nav.familie.ef.sak.integration.dto.pdl.KontaktadresseType
-import no.nav.familie.ef.sak.integration.dto.pdl.Metadata
-import no.nav.familie.ef.sak.integration.dto.pdl.MotpartsRolle
-import no.nav.familie.ef.sak.integration.dto.pdl.Navn
-import no.nav.familie.ef.sak.integration.dto.pdl.Opphold
-import no.nav.familie.ef.sak.integration.dto.pdl.Oppholdstillatelse
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlAnnenForelder
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlBarn
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlIdent
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlIdenter
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlPersonFraSøk
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlPersonKort
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøkerKort
-import no.nav.familie.ef.sak.integration.dto.pdl.PersonSøkResultat
-import no.nav.familie.ef.sak.integration.dto.pdl.PersonSøkTreff
-import no.nav.familie.ef.sak.integration.dto.pdl.Sivilstand
-import no.nav.familie.ef.sak.integration.dto.pdl.Sivilstandstype
-import no.nav.familie.ef.sak.integration.dto.pdl.Statsborgerskap
-import no.nav.familie.ef.sak.integration.dto.pdl.Telefonnummer
-import no.nav.familie.ef.sak.integration.dto.pdl.UtflyttingFraNorge
-import no.nav.familie.ef.sak.integration.dto.pdl.Vegadresse
+import no.nav.familie.ef.sak.integration.dto.pdl.*
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
@@ -176,7 +141,7 @@ class PdlClientConfig {
                 PdlAnnenForelder(
                         adressebeskyttelse = emptyList(),
                         bostedsadresse = bostedsadresse(),
-                        dødsfall = emptyList(),
+                        dødsfall = listOf(Dødsfall(LocalDate.now())),
                         fødsel = fødsel(1994, 11, 1),
                         navn = listOf(Navn("Bob", "", "Burger", metadataGjeldende)),
                         opphold = emptyList(),
