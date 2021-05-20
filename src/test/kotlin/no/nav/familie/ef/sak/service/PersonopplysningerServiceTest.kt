@@ -2,8 +2,6 @@ package no.nav.familie.ef.sak.service
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ef.sak.domene.Grunnlagsdata
-import no.nav.familie.ef.sak.domene.Søker
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.dto.familie.Arbeidsfordelingsenhet
 import no.nav.familie.ef.sak.mapper.AdresseMapper
@@ -16,7 +14,6 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 
 internal class PersonopplysningerServiceTest {
 
@@ -27,14 +24,14 @@ internal class PersonopplysningerServiceTest {
     private lateinit var adresseMapper: AdresseMapper
     private lateinit var arbeidsfordelingService: ArbeidsfordelingService
     private lateinit var persisterGrunnlagsdataService: PersisterGrunnlagsdataService
-    private lateinit var behandlingService: BehandlingService
+    private lateinit var søknadService: SøknadService
 
     @BeforeEach
     internal fun setUp() {
         familieIntegrasjonerClient = mockk()
         adresseMapper = AdresseMapper(kodeverkService)
         arbeidsfordelingService = mockk()
-        behandlingService = mockk()
+        søknadService = mockk()
 
         val pdlClient = PdlClientConfig().pdlClient()
         persisterGrunnlagsdataService = PersisterGrunnlagsdataService(pdlClient, familieIntegrasjonerClient)
@@ -42,7 +39,7 @@ internal class PersonopplysningerServiceTest {
                 PersonopplysningerMapper(adresseMapper, StatsborgerskapMapper(kodeverkService), arbeidsfordelingService, kodeverkService)
         val personService = PersonService(pdlClient)
         personopplysningerService = PersonopplysningerService(personService,
-                                                              behandlingService,
+                                                              søknadService,
                                                               familieIntegrasjonerClient,
                                                               persisterGrunnlagsdataService,
                                                               personopplysningerMapper)

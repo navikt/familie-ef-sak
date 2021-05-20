@@ -42,7 +42,7 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
                            private val pdlClient: PdlClient,
                            private val familieIntegrasjonerClient: FamilieIntegrasjonerClient,
                            private val medlemskapMapper: MedlemskapMapper,
-                           private val behandlingService: BehandlingService,
+                           private val søknadService: SøknadService,
                            private val persisterGrunnlagsdataService: PersisterGrunnlagsdataService) {
 
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
@@ -153,7 +153,7 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
     }
 
     private fun hentRegistergrunnlag(behandlingId: UUID): RegistergrunnlagData {
-        val søknad = behandlingService.hentOvergangsstønad(behandlingId)
+        val søknad = søknadService.hentOvergangsstønad(behandlingId)
         val grunnlagsdata = persisterGrunnlagsdataService.hentGrunnlagsdata(behandlingId, søknad)
 
         val søker = grunnlagsdata.søker

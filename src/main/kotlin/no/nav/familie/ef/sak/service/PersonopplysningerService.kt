@@ -1,12 +1,7 @@
 package no.nav.familie.ef.sak.service
 
-import kotlinx.coroutines.async
-import kotlinx.coroutines.runBlocking
 import no.nav.familie.ef.sak.api.dto.PersonopplysningerDto
-import no.nav.familie.ef.sak.domene.SøkerMedBarn
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
-import no.nav.familie.ef.sak.integration.dto.pdl.Familierelasjonsrolle
-import no.nav.familie.ef.sak.integration.dto.pdl.MotpartsRolle
 import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
 import no.nav.familie.ef.sak.integration.dto.pdl.visningsnavn
 import no.nav.familie.ef.sak.mapper.PersonopplysningerMapper
@@ -17,7 +12,7 @@ import java.util.UUID
 
 @Service
 class PersonopplysningerService(private val personService: PersonService,
-                                private val behandlingService: BehandlingService,
+                                private val søknadService: SøknadService,
                                 private val familieIntegrasjonerClient: FamilieIntegrasjonerClient,
                                 private val persisterGrunnlagsdataService: PersisterGrunnlagsdataService,
                                 private val personopplysningerMapper: PersonopplysningerMapper) {
@@ -25,7 +20,7 @@ class PersonopplysningerService(private val personService: PersonService,
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun hentPersonopplysninger(behandlingId: UUID): PersonopplysningerDto {
-        val søknad = behandlingService.hentOvergangsstønad(behandlingId)
+        val søknad = søknadService.hentOvergangsstønad(behandlingId)
         val personIdent = søknad.fødselsnummer
         val grunnlagsdata = persisterGrunnlagsdataService.hentGrunnlagsdata(behandlingId, søknad)
         val egenAnsatt =  familieIntegrasjonerClient.egenAnsatt(personIdent)

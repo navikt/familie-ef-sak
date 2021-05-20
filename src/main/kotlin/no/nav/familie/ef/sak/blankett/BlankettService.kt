@@ -20,6 +20,7 @@ class BlankettService(private val tilgangService: TilgangService,
                       private val blankettRepository: BlankettRepository,
                       private val journalføringService: JournalføringService,
                       private val behandlingService: BehandlingService,
+                      private val søknadService: SøknadService,
                       private val fagsakService: FagsakService,
                       private val personopplysningerService: PersonopplysningerService,
                       private val oppgaveRepository: OppgaveRepository,
@@ -67,7 +68,7 @@ class BlankettService(private val tilgangService: TilgangService,
     private fun hentVilkårDto(behandlingId: UUID) = vurderingService.hentEllerOpprettVurderinger(behandlingId)
 
     private fun lagSøknadsdatoer(behandlingId: UUID) : SøknadDatoerDto {
-        val overgangsstønad = behandlingService.hentOvergangsstønad(behandlingId)
+        val overgangsstønad = søknadService.hentOvergangsstønad(behandlingId)
         return SøknadDatoerDto(
                 søknadsdato = overgangsstønad.datoMottatt,
                 søkerStønadFra = overgangsstønad.søkerFra

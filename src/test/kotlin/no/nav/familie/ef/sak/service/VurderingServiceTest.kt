@@ -49,12 +49,14 @@ import java.util.UUID
 internal class VurderingServiceTest {
 
     private val behandlingService = mockk<BehandlingService>()
+    private val søknadService = mockk<SøknadService>()
     private val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
     private val familieIntegrasjonerClient = mockk<FamilieIntegrasjonerClient>()
     private val blankettRepository = mockk<BlankettRepository>()
     private val grunnlagsdataService = mockk<GrunnlagsdataService>()
     private val stegService = mockk<StegService>()
     private val vurderingService = VurderingService(behandlingService = behandlingService,
+                                                    søknadService = søknadService,
                                                     vilkårsvurderingRepository = vilkårsvurderingRepository,
                                                     grunnlagsdataService = grunnlagsdataService,
                                                     blankettRepository = blankettRepository,
@@ -69,7 +71,7 @@ internal class VurderingServiceTest {
     @BeforeEach
     fun setUp() {
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
-        every { behandlingService.hentOvergangsstønad(any()) }.returns(søknad)
+        every { søknadService.hentOvergangsstønad(any()) }.returns(søknad)
         every { blankettRepository.deleteById(any()) } just runs
         every { familieIntegrasjonerClient.hentMedlemskapsinfo(any()) }
                 .returns(Medlemskapsinfo(personIdent = søknad.fødselsnummer,

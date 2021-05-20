@@ -1,8 +1,11 @@
 package no.nav.familie.ef.sak.service
 
-import io.mockk.*
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.runs
+import io.mockk.slot
 import no.nav.familie.ef.sak.api.Feil
-import no.nav.familie.ef.sak.api.ManglerTilgang
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.BehandlingRepository
@@ -12,9 +15,7 @@ import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.service.steg.StegType
-import org.assertj.core.api.Assertions
-import org.assertj.core.api.Assertions.*
-import org.junit.jupiter.api.Assertions.*
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpStatus
@@ -23,7 +24,7 @@ internal class BehandlingServiceTest {
 
     val behandlingRepository = mockk<BehandlingRepository>()
     val behandlingshistorikkService = mockk<BehandlingshistorikkService>()
-    val behandlingService = BehandlingService(mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), behandlingRepository, behandlingshistorikkService)
+    val behandlingService = BehandlingService(mockk(), behandlingRepository, behandlingshistorikkService, mockk())
 
     @Test
     internal fun `skal annullere behandling som er blankett og status utredes`() {

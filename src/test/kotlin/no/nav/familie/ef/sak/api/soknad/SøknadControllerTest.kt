@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.repository.domain.FagsakPerson
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.FagsakService
+import no.nav.familie.ef.sak.service.SøknadService
 import no.nav.familie.kontrakter.ef.søknad.SøknadMedVedlegg
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -31,6 +32,7 @@ internal class SøknadControllerTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
     @Autowired lateinit var behandlingService: BehandlingService
     @Autowired lateinit var fagsakService: FagsakService
+    @Autowired lateinit var søknadService: SøknadService
 
     @BeforeEach
     fun setUp() {
@@ -54,8 +56,8 @@ internal class SøknadControllerTest : OppslagSpringRunnerTest() {
         val fagsak = fagsakService.hentEllerOpprettFagsakMedBehandlinger(søknad.søknad.personalia.verdi.fødselsnummer.verdi.verdi,
                                                                          Stønadstype.OVERGANGSSTØNAD)
         val behandling = behandlingService.opprettBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, fagsak.id)
-        behandlingService.lagreSøknadForOvergangsstønad(søknad.søknad, behandling.id, fagsak.id, "1234")
-        val søknadSkjema = behandlingService.hentOvergangsstønad(behandling.id)
+        søknadService.lagreSøknadForOvergangsstønad(søknad.søknad, behandling.id, fagsak.id, "1234")
+        val søknadSkjema = søknadService.hentOvergangsstønad(behandling.id)
         val respons: ResponseEntity<Ressurs<SøknadDatoerDto>> = hentSøknadData(behandling.id)
 
         Assertions.assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
