@@ -101,7 +101,7 @@ class BehandlingService(private val søknadRepository: SøknadRepository,
     fun opprettBehandling(behandlingType: BehandlingType, fagsakId: UUID): Behandling {
         return behandlingRepository.insert(Behandling(fagsakId = fagsakId,
                                                       type = behandlingType,
-                                                      steg = StegType.VILKÅR,
+                                                      steg = StegType.SEND_TIL_BESLUTTER, // TODO
                                                       status = BehandlingStatus.OPPRETTET,
                                                       resultat = BehandlingResultat.IKKE_SATT))
     }
