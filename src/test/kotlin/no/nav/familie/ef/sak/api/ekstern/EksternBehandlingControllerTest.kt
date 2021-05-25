@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.repository.domain.BehandlingResultat
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.kontrakter.felles.PersonIdent
+import no.nav.familie.kontrakter.felles.Ressurs
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -25,6 +26,15 @@ internal class EksternBehandlingControllerTest {
     @BeforeEach
     internal fun setUp() {
         every { pdlClient.hentPersonidenter("1", true) } returns PdlIdenter(listOf(PdlIdent("1", true), PdlIdent("2", false)))
+    }
+
+    @Test
+    internal fun `skal feile når den ikke finner identer til personen`() {
+        every { pdlClient.hentPersonidenter("1", true) } returns PdlIdenter(emptyList())
+        val finnesBehandlingForPerson =
+                eksternBehandlingController.finnesBehandlingForPerson(Stønadstype.OVERGANGSSTØNAD, PersonIdent("1"))
+        assertThat(finnesBehandlingForPerson.status)
+                .isEqualTo(Ressurs.Status.FEILET)
     }
 
     @Test
