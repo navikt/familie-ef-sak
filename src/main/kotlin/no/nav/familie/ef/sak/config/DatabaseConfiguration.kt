@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.config
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.api.dto.BrevRequest
+import no.nav.familie.ef.sak.domene.Grunnlagsdata
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.repository.domain.søknad.Arbeidssituasjon
 import no.nav.familie.ef.sak.repository.domain.søknad.Dokumentasjon
@@ -79,10 +80,11 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
                                             FilTilBytearrayConverter(),
                                             BytearrayTilFilConverter(),
                                             PGobjectTilGrunnlagsdataConverter(),
-                                            GrunnlagsdataTilPGobjectConverter(),
+                                            RegisterdataTilPGobjectConverter(),
                                             PGobjectTilVedtaksperioder(),
                                             VedtaksperiodeTilPGobjectConverter(),
                                             PGobjectTilInntektsperiode(),
+                                            GrunnlagsdataTilPGobjectConverter(),
                                             InntektsperiodeTilPGobjectConverter()
         ))
     }
@@ -243,9 +245,19 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
     }
 
     @WritingConverter
-    class GrunnlagsdataTilPGobjectConverter : Converter<RegistergrunnlagData, PGobject> {
+    class RegisterdataTilPGobjectConverter : Converter<RegistergrunnlagData, PGobject> {
 
         override fun convert(data: RegistergrunnlagData): PGobject =
+                PGobject().apply {
+                    type = "json"
+                    value = objectMapper.writeValueAsString(data)
+                }
+    }
+
+    @WritingConverter
+    class GrunnlagsdataTilPGobjectConverter : Converter<Grunnlagsdata, PGobject> {
+
+        override fun convert(data: Grunnlagsdata): PGobject =
                 PGobject().apply {
                     type = "json"
                     value = objectMapper.writeValueAsString(data)

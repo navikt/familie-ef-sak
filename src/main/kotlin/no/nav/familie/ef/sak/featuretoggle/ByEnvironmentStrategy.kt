@@ -1,4 +1,4 @@
-package no.nav.familie.ef.mottak.featuretoggle
+package no.nav.familie.ef.sak.featuretoggle
 
 import no.finn.unleash.UnleashContext
 import no.finn.unleash.strategy.Strategy

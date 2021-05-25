@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.api.dto.MedlUnntakDto
 import no.nav.familie.ef.sak.api.dto.MedlemskapRegistergrunnlagDto
 import no.nav.familie.ef.sak.api.dto.SivilstandRegistergrunnlagDto
 import no.nav.familie.ef.sak.api.dto.Sivilstandstype
+import no.nav.familie.ef.sak.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.dto.pdl.Metadata
 import no.nav.familie.ef.sak.integration.dto.pdl.Sivilstand
@@ -18,6 +19,7 @@ import no.nav.familie.ef.sak.mapper.SøknadsskjemaMapper
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.config.PdlClientConfig
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.repository.GrunnlagsdataRepository
 import no.nav.familie.ef.sak.repository.RegistergrunnlagRepository
 import no.nav.familie.ef.sak.repository.domain.Endret
 import no.nav.familie.ef.sak.repository.domain.Registergrunnlag
@@ -37,17 +39,21 @@ import no.nav.familie.ef.sak.integration.dto.pdl.Sivilstandstype as Sivilstandst
 internal class GrunnlagsdataServiceTest {
 
     private val registergrunnlagRepository = mockk<RegistergrunnlagRepository>()
+    private val grunnlagsdataRepository = mockk<GrunnlagsdataRepository>()
     private val pdlClient = PdlClientConfig().pdlClient()
     private val familieIntegrasjonerClient = mockk<FamilieIntegrasjonerClient>()
     private val søknadService = mockk<SøknadService>()
+    private val featureToggleService = mockk<FeatureToggleService>()
     private val medlemskapMapper = MedlemskapMapper(mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true))
 
     private val persisterGrunnlagsdataService = PersisterGrunnlagsdataService(pdlClient,
+                                                                              grunnlagsdataRepository,
+                                                                              søknadService,
+                                                                              featureToggleService,
                                                                               familieIntegrasjonerClient)
 
     private val service = GrunnlagsdataService(registergrunnlagRepository,
-                                               pdlClient,
-                                               familieIntegrasjonerClient,
+                                               featureToggleService,
                                                medlemskapMapper,
                                                søknadService,
                                                persisterGrunnlagsdataService)
@@ -66,6 +72,7 @@ internal class GrunnlagsdataServiceTest {
     internal fun setUp() {
         every { søknadService.hentOvergangsstønad(behandlingId) } returns søknad
         every { familieIntegrasjonerClient.hentMedlemskapsinfo(any()) } returns medlemskapsinfo
+        every { featureToggleService.isEnabled(any(), any()) } returns false
         every { registergrunnlagRepository.insert(capture(insertSlot)) } answers { firstArg() }
         every { registergrunnlagRepository.update(capture(updateSlot)) } answers { firstArg() }
     }
@@ -111,7 +118,7 @@ internal class GrunnlagsdataServiceTest {
         every { registergrunnlagRepository.findByIdOrNull(behandlingId) } returns null
         service.hentEndringerIRegistergrunnlag(behandlingId)
 
-        verify(exactly = 1) { søknadService.hentOvergangsstønad(any()) }
+        verify(exactly = 2) { søknadService.hentOvergangsstønad(any()) }
         verify(exactly = 1) { registergrunnlagRepository.insert(any()) }
         verify(exactly = 0) { registergrunnlagRepository.update(any()) }
     }
@@ -143,7 +150,7 @@ internal class GrunnlagsdataServiceTest {
         service.hentEndringerIRegistergrunnlag(behandlingId)
 
         assertThat(updateSlot.captured.endringer).isNotNull
-        verify(exactly = 1) { søknadService.hentOvergangsstønad(any()) }
+        verify(exactly = 2) { søknadService.hentOvergangsstønad(any()) }
         verify(exactly = 1) { registergrunnlagRepository.update(any()) }
     }
 

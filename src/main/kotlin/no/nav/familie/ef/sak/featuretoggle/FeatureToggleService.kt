@@ -1,4 +1,4 @@
-package no.nav.familie.ef.mottak.featuretoggle
+package no.nav.familie.ef.sak.featuretoggle
 
 interface FeatureToggleService {
 

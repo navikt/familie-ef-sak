@@ -1,10 +1,10 @@
 package no.nav.familie.ef.sak.service
 
+import no.nav.familie.ef.sak.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.api.dto.MedlemskapDto
 import no.nav.familie.ef.sak.api.dto.SivilstandInngangsvilkårDto
 import no.nav.familie.ef.sak.api.dto.VilkårGrunnlagDto
-import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
-import no.nav.familie.ef.sak.integration.PdlClient
+import no.nav.familie.ef.sak.domene.Grunnlagsdata
 import no.nav.familie.ef.sak.mapper.AktivitetMapper
 import no.nav.familie.ef.sak.mapper.BarnMedSamværMapper
 import no.nav.familie.ef.sak.mapper.BosituasjonMapper
@@ -39,8 +39,7 @@ import kotlin.reflect.full.memberProperties
  */
 @Service
 class GrunnlagsdataService(private val registergrunnlagRepository: RegistergrunnlagRepository,
-                           private val pdlClient: PdlClient,
-                           private val familieIntegrasjonerClient: FamilieIntegrasjonerClient,
+                           private val featureToggleService: FeatureToggleService,
                            private val medlemskapMapper: MedlemskapMapper,
                            private val søknadService: SøknadService,
                            private val persisterGrunnlagsdataService: PersisterGrunnlagsdataService) {
@@ -50,7 +49,11 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
     fun hentGrunnlag(behandlingId: UUID,
                      søknad: SøknadsskjemaOvergangsstønad): VilkårGrunnlagDto {
         val registergrunnlag = registergrunnlagRepository.findByIdOrThrow(behandlingId)
-        val registergrunnlagData = registergrunnlag.endringer ?: registergrunnlag.data
+        val registergrunnlagData =
+                when (featureToggleService.isEnabled(PersisterGrunnlagsdataService.BRUK_NY_DATAMODELL_TOGGLE, false)) {
+                    true -> persisterGrunnlagsdataService.hentGrunnlagsdata(behandlingId).let { mapTilRegistergrunnlagData(it, søknad) }
+                    else -> registergrunnlag.endringer ?: registergrunnlag.data
+                }
 
         val medlemskapSøknadsgrunnlag = medlemskapMapper.mapSøknadsgrunnlag(medlemskapsdetaljer = søknad.medlemskap)
         val medlemskap = MedlemskapDto(søknadsgrunnlag = medlemskapSøknadsgrunnlag,
@@ -154,10 +157,18 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
 
     private fun hentRegistergrunnlag(behandlingId: UUID): RegistergrunnlagData {
         val søknad = søknadService.hentOvergangsstønad(behandlingId)
-        val grunnlagsdata = persisterGrunnlagsdataService.hentGrunnlagsdata(behandlingId, søknad)
+        val grunnlagsdata = persisterGrunnlagsdataService.hentGrunnlagsdata(behandlingId)
+        return mapTilRegistergrunnlagData(grunnlagsdata, søknad)
+    }
 
+    private fun mapTilRegistergrunnlagData(grunnlagsdata: Grunnlagsdata,
+                     søknad: SøknadsskjemaOvergangsstønad): RegistergrunnlagData {
         val søker = grunnlagsdata.søker
-        val barnMedSamvær = BarnMedSamværMapper.mapRegistergrunnlag(grunnlagsdata.barn, grunnlagsdata.annenForelder, søknad, søker.bostedsadresse)
+        val barnMedSamvær = BarnMedSamværMapper.mapRegistergrunnlag(grunnlagsdata.barn,
+                                                                    grunnlagsdata.annenForelder,
+                                                                    søknad,
+                                                                    søker.bostedsadresse)
+
         return RegistergrunnlagData(medlemskap = medlemskapMapper.mapRegistergrunnlag(søker, grunnlagsdata.medlUnntak),
                                     sivilstand = SivilstandMapper.mapRegistergrunnlag(søker),
                                     barnMedSamvær = barnMedSamvær)

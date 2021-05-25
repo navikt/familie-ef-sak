@@ -1,5 +1,7 @@
 package no.nav.familie.ef.sak.service
 
+import kotlinx.coroutines.runBlocking
+import no.nav.familie.ef.sak.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.domene.Grunnlagsdata
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.PdlClient
@@ -11,19 +13,48 @@ import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker
 import no.nav.familie.ef.sak.mapper.GrunnlagsdataMapper.mapAnnenForelder
 import no.nav.familie.ef.sak.mapper.GrunnlagsdataMapper.mapBarn
 import no.nav.familie.ef.sak.mapper.GrunnlagsdataMapper.mapSøker
-import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsstønad
+import no.nav.familie.ef.sak.repository.GrunnlagsdataRepository
+import no.nav.familie.ef.sak.repository.domain.Grunnlagdata
+import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import org.springframework.stereotype.Service
 import java.util.UUID
 
 
 @Service
 class PersisterGrunnlagsdataService(private val pdlClient: PdlClient,
+                                    private val grunnlagsdataRepository: GrunnlagsdataRepository,
+                                    private val søknadService: SøknadService,
+                                    private val featureToggleService: FeatureToggleService,
                                     private val familieIntegrasjonerClient: FamilieIntegrasjonerClient) {
+    /*TODO HVOR MANGE BEHANDLINGER FINNES DET? BORDE VI BRUKERE CHUNK og bygge pdlquery for varje chunk*/
+    fun populerGrunnlagsdataTabell() {
+        runBlocking {
+            grunnlagsdataRepository
+                    .finnBehandlingerSomManglerGrunnlagsdata()
+                    .forEach { lagreGrunnlagsdata(it)}
+        }
 
-    fun hentGrunnlagsdata(behandlingId: UUID, søknad: SøknadsskjemaOvergangsstønad): Grunnlagsdata {
+    }
+
+    fun lagreGrunnlagsdata(behandlingId: UUID) {
+        val søknad = søknadService.hentOvergangsstønad(behandlingId)
         val personIdent = søknad.fødselsnummer
         val barneforeldreFraSøknad = søknad.barn.mapNotNull { it.annenForelder?.person?.fødselsnummer }
-        return hentGrunnlagsdata(personIdent, barneforeldreFraSøknad)
+        val grunnlagsdata = hentGrunnlagsdata(personIdent, barneforeldreFraSøknad)
+        grunnlagsdataRepository.insert(Grunnlagdata(behandlingId = behandlingId, data = grunnlagsdata))
+    }
+
+    fun hentGrunnlagsdata(behandlingId: UUID): Grunnlagsdata {
+        return when (featureToggleService.isEnabled(BRUK_NY_DATAMODELL_TOGGLE, false)) {
+            true -> grunnlagsdataRepository.findByIdOrThrow(behandlingId).data
+            false -> {
+                val søknad = søknadService.hentOvergangsstønad(behandlingId)
+                val personIdent = søknad.fødselsnummer
+                val barneforeldreFraSøknad = søknad.barn.mapNotNull { it.annenForelder?.person?.fødselsnummer }
+                hentGrunnlagsdata(personIdent, barneforeldreFraSøknad)
+            }
+        }
+
     }
 
     fun hentGrunnlagsdata(personIdent: String,
@@ -67,6 +98,12 @@ class PersisterGrunnlagsdataService(private val pdlClient: PdlClient,
                            pdlSøker.fullmakt.map { it.motpartsPersonident }
         if (andreIdenter.isEmpty()) return emptyMap()
         return pdlClient.hentPersonKortBolk(andreIdenter)
+    }
+
+    companion object {
+
+        const val BRUK_NY_DATAMODELL_TOGGLE = "familie.ef.sak.grunnlagsdataV2"
+
     }
 
 

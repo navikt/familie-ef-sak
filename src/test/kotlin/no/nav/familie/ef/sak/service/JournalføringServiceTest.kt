@@ -46,7 +46,7 @@ internal class JournalføringServiceTest {
     private val pdlClient = mockk<PdlClient>()
 
     private val journalføringService =
-            JournalføringService(journalpostClient, behandlingService, søknadService, fagsakService, pdlClient, oppgaveService)
+            JournalføringService(journalpostClient, behandlingService, søknadService, fagsakService, pdlClient, mockk(), oppgaveService)
 
     private val fagsakId: UUID = UUID.randomUUID()
     private val fagsakEksternId = 12345L

@@ -22,7 +22,7 @@ class PersonopplysningerService(private val personService: PersonService,
     fun hentPersonopplysninger(behandlingId: UUID): PersonopplysningerDto {
         val søknad = søknadService.hentOvergangsstønad(behandlingId)
         val personIdent = søknad.fødselsnummer
-        val grunnlagsdata = persisterGrunnlagsdataService.hentGrunnlagsdata(behandlingId, søknad)
+        val grunnlagsdata = persisterGrunnlagsdataService.hentGrunnlagsdata(behandlingId)
         val egenAnsatt =  familieIntegrasjonerClient.egenAnsatt(personIdent)
 
 

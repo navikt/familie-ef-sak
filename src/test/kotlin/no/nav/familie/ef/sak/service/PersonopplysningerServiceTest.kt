@@ -34,7 +34,7 @@ internal class PersonopplysningerServiceTest {
         søknadService = mockk()
 
         val pdlClient = PdlClientConfig().pdlClient()
-        persisterGrunnlagsdataService = PersisterGrunnlagsdataService(pdlClient, familieIntegrasjonerClient)
+        persisterGrunnlagsdataService = PersisterGrunnlagsdataService(pdlClient, mockk(), søknadService, mockk(), familieIntegrasjonerClient)
         val personopplysningerMapper =
                 PersonopplysningerMapper(adresseMapper, StatsborgerskapMapper(kodeverkService), arbeidsfordelingService, kodeverkService)
         val personService = PersonService(pdlClient)

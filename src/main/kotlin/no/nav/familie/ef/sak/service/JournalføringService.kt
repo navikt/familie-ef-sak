@@ -34,6 +34,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
                            private val søknadService: SøknadService,
                            private val fagsakService: FagsakService,
                            private val pdlClient: PdlClient,
+                           private val persisterGrunnlagsdataService: PersisterGrunnlagsdataService,
                            private val oppgaveService: OppgaveService) {
 
     fun hentJournalpost(journalpostId: String): Journalpost {
@@ -54,7 +55,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
 
         settSøknadPåBehandling(journalpostId, fagsak, behandling.id)
         knyttJournalpostTilBehandling(journalpost, behandling)
-
+        persisterGrunnlagsdataService.lagreGrunnlagsdata(behandling.id)
         oppdaterJournalpost(journalpost, journalføringRequest.dokumentTitler, fagsak.eksternId.id)
         ferdigstillJournalføring(journalpostId, journalføringRequest.journalførendeEnhet)
         ferdigstillJournalføringsoppgave(journalføringRequest)
