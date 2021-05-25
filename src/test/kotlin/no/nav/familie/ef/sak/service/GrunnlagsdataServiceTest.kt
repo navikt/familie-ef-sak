@@ -47,6 +47,7 @@ internal class GrunnlagsdataServiceTest {
     private val medlemskapMapper = MedlemskapMapper(mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true))
 
     private val persisterGrunnlagsdataService = PersisterGrunnlagsdataService(pdlClient,
+                                                                              mockk(),
                                                                               grunnlagsdataRepository,
                                                                               søknadService,
                                                                               featureToggleService,

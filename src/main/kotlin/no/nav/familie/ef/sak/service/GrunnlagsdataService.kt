@@ -4,7 +4,7 @@ import no.nav.familie.ef.sak.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.api.dto.MedlemskapDto
 import no.nav.familie.ef.sak.api.dto.SivilstandInngangsvilkårDto
 import no.nav.familie.ef.sak.api.dto.VilkårGrunnlagDto
-import no.nav.familie.ef.sak.domene.Grunnlagsdata
+import no.nav.familie.ef.sak.domene.GrunnlagsdataDomene
 import no.nav.familie.ef.sak.mapper.AktivitetMapper
 import no.nav.familie.ef.sak.mapper.BarnMedSamværMapper
 import no.nav.familie.ef.sak.mapper.BosituasjonMapper
@@ -161,8 +161,8 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
         return mapTilRegistergrunnlagData(grunnlagsdata, søknad)
     }
 
-    private fun mapTilRegistergrunnlagData(grunnlagsdata: Grunnlagsdata,
-                     søknad: SøknadsskjemaOvergangsstønad): RegistergrunnlagData {
+    private fun mapTilRegistergrunnlagData(grunnlagsdata: GrunnlagsdataDomene,
+                                           søknad: SøknadsskjemaOvergangsstønad): RegistergrunnlagData {
         val søker = grunnlagsdata.søker
         val barnMedSamvær = BarnMedSamværMapper.mapRegistergrunnlag(grunnlagsdata.barn,
                                                                     grunnlagsdata.annenForelder,

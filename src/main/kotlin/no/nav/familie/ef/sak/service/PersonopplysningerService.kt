@@ -34,7 +34,7 @@ class PersonopplysningerService(private val personService: PersonService,
     }
 
     fun hentPersonopplysninger(personIdent: String): PersonopplysningerDto {
-        val grunnlagsdata = persisterGrunnlagsdataService.hentGrunnlagsdata(personIdent, emptyList())
+        val grunnlagsdata = persisterGrunnlagsdataService.hentGrunnlagsdataFraRegister(personIdent, emptyList())
         val egenAnsatt =  familieIntegrasjonerClient.egenAnsatt(personIdent)
 
 
