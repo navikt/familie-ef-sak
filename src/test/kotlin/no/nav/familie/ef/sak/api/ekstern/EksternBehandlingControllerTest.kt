@@ -57,4 +57,19 @@ internal class EksternBehandlingControllerTest {
         assertThat(eksternBehandlingController.finnesBehandlingForPerson(Stønadstype.OVERGANGSSTØNAD, PersonIdent("1")).data)
                 .isEqualTo(true)
     }
+
+    @Test
+    internal fun `uten stønadstype - skal returnere false når det ikke finnes noen behandling`() {
+        every { behandlingRepository.finnSisteBehandling(any(), setOf("1", "2")) } returns null
+        assertThat(eksternBehandlingController.finnesBehandlingForPerson(null, PersonIdent("1")).data)
+                .isEqualTo(false)
+    }
+
+    @Test
+    internal fun `uten stønadstype - skal returnere true når det minimum en behandling`() {
+        every { behandlingRepository.finnSisteBehandling(any(), setOf("1", "2")) } returns
+                behandling(fagsak(), type = BehandlingType.FØRSTEGANGSBEHANDLING, resultat = BehandlingResultat.IKKE_SATT)
+        assertThat(eksternBehandlingController.finnesBehandlingForPerson(null, PersonIdent("1")).data)
+                .isEqualTo(true)
+    }
 }

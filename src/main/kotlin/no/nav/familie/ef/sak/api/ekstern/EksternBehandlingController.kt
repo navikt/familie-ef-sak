@@ -29,20 +29,28 @@ class EksternBehandlingController(private val pdlClient: PdlClient,
      * Blir brukt av mottak for å sjekke om en perosn allerede har en behandling i ef-sak
      * Kunde ha flyttet ut funksjonaliteten i en egen service,
      * men for å unngå att andre bruker den (med kall mot pdl) så ble alt her
+     *
+     * Hvis man ikke sender type blir alle typer sjekket om det finnes noen.
      */
     @PostMapping("finnes")
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
-    fun finnesBehandlingForPerson(@RequestParam("type") stønadstype: Stønadstype,
+    fun finnesBehandlingForPerson(@RequestParam("type") stønadstype: Stønadstype?,
                                   @RequestBody request: PersonIdent): Ressurs<Boolean> {
         val personidenter = pdlClient.hentPersonidenter(request.ident, historikk = true).identer()
-        val behandling = behandlingRepository.finnSisteBehandling(stønadstype, personidenter)
-        return if (behandling == null ||
-                   behandling.resultat == BehandlingResultat.ANNULLERT ||
-                   behandling.type == BehandlingType.BLANKETT) {
-            Ressurs.success(false)
+
+        return if (stønadstype != null) {
+            Ressurs.success(finnesAktivBehandling(stønadstype, personidenter))
         } else {
-            Ressurs.success(true)
+            Ressurs.success(Stønadstype.values().any { finnesAktivBehandling(it, personidenter) })
         }
+    }
+
+    private fun finnesAktivBehandling(stønadstype: Stønadstype,
+                                      personidenter: Set<String>): Boolean {
+        val behandling = behandlingRepository.finnSisteBehandling(stønadstype, personidenter)
+        return !(behandling == null ||
+                 behandling.resultat == BehandlingResultat.ANNULLERT ||
+                 behandling.type == BehandlingType.BLANKETT)
     }
 
 }
