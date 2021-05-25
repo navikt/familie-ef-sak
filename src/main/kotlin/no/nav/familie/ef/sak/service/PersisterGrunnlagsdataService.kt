@@ -16,6 +16,8 @@ import no.nav.familie.ef.sak.mapper.GrunnlagsdataMapper.mapSøker
 import no.nav.familie.ef.sak.repository.GrunnlagsdataRepository
 import no.nav.familie.ef.sak.repository.domain.Grunnlagdata
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import org.slf4j.LoggerFactory
+import org.slf4j.MDC
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -26,14 +28,20 @@ class PersisterGrunnlagsdataService(private val pdlClient: PdlClient,
                                     private val søknadService: SøknadService,
                                     private val featureToggleService: FeatureToggleService,
                                     private val familieIntegrasjonerClient: FamilieIntegrasjonerClient) {
-    /*TODO HVOR MANGE BEHANDLINGER FINNES DET? BORDE VI BRUKERE CHUNK og bygge pdlquery for varje chunk*/
+
+    val logger = LoggerFactory.getLogger(this.javaClass)
+
     fun populerGrunnlagsdataTabell() {
-        runBlocking {
+        val context = MDC.getCopyOfContextMap()
+        Thread().runCatching {
+            MDC.setContextMap(context)
             grunnlagsdataRepository
                     .finnBehandlingerSomManglerGrunnlagsdata()
-                    .forEach { lagreGrunnlagsdata(it)}
-        }
-
+                    .forEach {
+                        logger.info("Lagrer grunnlagsdata for $it")
+                        lagreGrunnlagsdata(it)
+                    }
+        }.also { MDC.clear() }
     }
 
     fun lagreGrunnlagsdata(behandlingId: UUID) {
