@@ -36,7 +36,7 @@ class BlankettService(private val tilgangService: TilgangService,
         val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, Stønadstype.OVERGANGSSTØNAD)
         val behandling = behandlingService.opprettBehandling(BehandlingType.BLANKETT, fagsak.id, søknad, journalpost)
         opprettEfOppgave(behandling.id, oppgaveId)
-        persisterGrunnlagsdataService.lagreGrunnlagsdata(behandling.id)
+        persisterGrunnlagsdataService.opprettGrunnlagsdata(behandling.id)
 
         return behandling
     }

@@ -42,7 +42,7 @@ class PersisterGrunnlagsdataService(private val pdlClient: PdlClient,
                     .forEach {
                         logger.info("Lagrer grunnlagsdata for $it")
                         try {
-                            lagreGrunnlagsdata(it)
+                            opprettGrunnlagsdata(it)
                         } catch (e: Exception) {
                             logger.warn("Feilet $it")
                             secureLogger.warn("Feilet $it", e)
@@ -54,7 +54,7 @@ class PersisterGrunnlagsdataService(private val pdlClient: PdlClient,
         }
     }
 
-    fun lagreGrunnlagsdata(behandlingId: UUID) {
+    fun opprettGrunnlagsdata(behandlingId: UUID) {
         val grunnlagsdata = hentGrunnlagsdataFraRegister(behandlingId)
         grunnlagsdataRepository.insert(Grunnlagsdata(behandlingId = behandlingId, data = grunnlagsdata))
     }

@@ -55,7 +55,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
 
         settSøknadPåBehandling(journalpostId, fagsak, behandling.id)
         knyttJournalpostTilBehandling(journalpost, behandling)
-        persisterGrunnlagsdataService.lagreGrunnlagsdata(behandling.id)
+        persisterGrunnlagsdataService.opprettGrunnlagsdata(behandling.id)
         oppdaterJournalpost(journalpost, journalføringRequest.dokumentTitler, fagsak.eksternId.id)
         ferdigstillJournalføring(journalpostId, journalføringRequest.journalførendeEnhet)
         ferdigstillJournalføringsoppgave(journalføringRequest)
