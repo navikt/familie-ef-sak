@@ -11,9 +11,10 @@ import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.service.ArbeidsfordelingService
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
-import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentRequest
+import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
-import no.nav.familie.kontrakter.felles.dokarkiv.FilType
+import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
+import no.nav.familie.kontrakter.felles.dokarkiv.v2.Filtype
 import no.nav.familie.kontrakter.felles.journalpost.*
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -41,20 +42,20 @@ class JournalførBlankettStegTest {
 
     private val journalpost =
         Journalpost(journalpostId = "1234",
-            journalposttype = Journalposttype.I,
-            journalstatus = Journalstatus.MOTTATT,
-            tema = "ENF",
-            behandlingstema = "ab0071",
-            tittel = "abrakadabra",
-            bruker = Bruker(type = BrukerIdType.FNR, id = fnr),
-            journalforendeEnhet = "4817",
-            kanal = "SKAN_IM",
-            sak = Sak("1234", "arkivsaksystem", fagsak.id.toString()),
-            dokumenter =
+                    journalposttype = Journalposttype.I,
+                    journalstatus = Journalstatus.MOTTATT,
+                    tema = "ENF",
+                    behandlingstema = "ab0071",
+                    tittel = "abrakadabra",
+                    bruker = Bruker(type = BrukerIdType.FNR, id = fnr),
+                    journalforendeEnhet = "4817",
+                    kanal = "SKAN_IM",
+                    sak = Sak("1234", "arkivsaksystem", fagsak.id.toString()),
+                    dokumenter =
             listOf(DokumentInfo(dokumentInfoId = "12345",
                 tittel = "Tittel",
                 brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
-                dokumentvarianter = listOf(Dokumentvariant(variantformat = "ARKIV"))))
+                dokumentvarianter = listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV))))
         )
 
     private val behandling = Behandling(fagsakId = fagsak.id,
@@ -117,7 +118,7 @@ class JournalførBlankettStegTest {
         assertThat(arkiverDokumentRequestSlot.captured.fnr).isEqualTo(fnr)
         assertThat(arkiverDokumentRequestSlot.captured.fagsakId).isEqualTo(fagsak.id.toString())
         assertThat(arkiverDokumentRequestSlot.captured.hoveddokumentvarianter.first().dokument).isEqualTo(pdf)
-        assertThat(arkiverDokumentRequestSlot.captured.hoveddokumentvarianter.first().filType).isEqualTo(FilType.PDFA)
+        assertThat(arkiverDokumentRequestSlot.captured.hoveddokumentvarianter.first().filtype).isEqualTo(Filtype.PDFA)
         assertThat(journalpostIdSlot.captured).isEqualTo(journalpostId)
     }
 

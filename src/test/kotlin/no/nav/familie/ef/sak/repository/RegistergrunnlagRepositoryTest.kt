@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.api.dto.SivilstandInngangsvilkårDto
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker
+import no.nav.familie.ef.sak.mapper.GrunnlagsdataMapper
 import no.nav.familie.ef.sak.mapper.MedlemskapMapper
 import no.nav.familie.ef.sak.mapper.SivilstandMapper
 import no.nav.familie.ef.sak.mapper.SøknadsskjemaMapper
@@ -75,8 +76,9 @@ internal class RegistergrunnlagRepositoryTest : OppslagSpringRunnerTest() {
     fun tilDto(sivilstandsdetaljer: Sivilstand,
                pdlSøker: PdlSøker,
                navnForRelatertVedSivilstand: String? = null): SivilstandInngangsvilkårDto {
+        val søker = GrunnlagsdataMapper.mapSøker(pdlSøker, emptyMap())
         val søknadsgrunnlag = SivilstandMapper.mapSøknadsgrunnlag(sivilstandsdetaljer)
-        val registergrunnlag = SivilstandMapper.mapRegistergrunnlag(pdlSøker, navnForRelatertVedSivilstand)
+        val registergrunnlag = SivilstandMapper.mapRegistergrunnlag(søker)
         return SivilstandInngangsvilkårDto(søknadsgrunnlag = søknadsgrunnlag,
                                            registergrunnlag = registergrunnlag)
     }

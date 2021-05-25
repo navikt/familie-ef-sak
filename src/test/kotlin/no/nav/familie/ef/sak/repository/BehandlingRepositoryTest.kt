@@ -3,10 +3,11 @@ package no.nav.familie.ef.sak.repository
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import no.nav.familie.ef.sak.repository.domain.FagsakPerson
 import no.nav.familie.ef.sak.repository.domain.Sporbar
+import no.nav.familie.ef.sak.repository.domain.Stønadstype.OVERGANGSSTØNAD
+import no.nav.familie.ef.sak.repository.domain.Stønadstype.SKOLEPENGER
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -77,4 +78,25 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(findByEksternId).isEqualTo(null)
     }
 
+    @Test
+    internal fun `hent siste behandling for personidenter`() {
+        val personidenter = setOf("1", "2")
+
+        val fagsak = fagsakRepository.insert(fagsak(setOf(FagsakPerson("1"))))
+        val behandling = behandlingRepository.insert(behandling(fagsak).copy(sporbar = Sporbar(opprettetTid = LocalDateTime.now().minusDays(3))))
+
+        assertThat(behandlingRepository.finnSisteBehandling(OVERGANGSSTØNAD, personidenter)?.id).isEqualTo(behandling.id)
+
+        val sisteBehandling = behandlingRepository.insert(behandling(fagsak))
+        assertThat(behandlingRepository.finnSisteBehandling(OVERGANGSSTØNAD, personidenter)?.id).isEqualTo(sisteBehandling.id)
+    }
+
+    @Test
+    internal fun `hent siste behandling for personidenter skal returnere null hvis den ikke har match`() {
+        val fagsak = fagsakRepository.insert(fagsak(setOf(FagsakPerson("1"))))
+        behandlingRepository.insert(behandling(fagsak).copy(sporbar = Sporbar(opprettetTid = LocalDateTime.now().minusDays(3))))
+
+        assertThat(behandlingRepository.finnSisteBehandling(SKOLEPENGER, setOf("1"))?.id).isNull()
+        assertThat(behandlingRepository.finnSisteBehandling(OVERGANGSSTØNAD, setOf("2"))?.id).isNull()
+    }
 }

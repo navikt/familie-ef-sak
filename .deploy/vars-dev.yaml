@@ -9,6 +9,9 @@ inboundApplicationsExternal:
   - application: familie-ef-proxy-test
     namespace: teamfamilie
     cluster: dev-fss
+  - application: familie-ef-mottak
+    namespace: teamfamilie
+    cluster: dev-fss
 externalHosts:
   - api-gw-q1.oera.no
   - unleash.nais.io

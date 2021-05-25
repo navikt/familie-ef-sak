@@ -5,17 +5,27 @@ import no.nav.familie.ef.sak.domene.SøkerMedBarn
 import no.nav.familie.ef.sak.integration.JournalpostClient
 import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
 import no.nav.familie.ef.sak.integration.dto.pdl.visningsnavn
-import no.nav.familie.ef.sak.repository.domain.*
+import no.nav.familie.ef.sak.repository.domain.Behandling
+import no.nav.familie.ef.sak.repository.domain.BehandlingType
+import no.nav.familie.ef.sak.repository.domain.Behandlingshistorikk
+import no.nav.familie.ef.sak.repository.domain.Fagsak
+import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.BehandlingshistorikkService
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.PersonService
+import no.nav.familie.ef.sak.service.SøknadService
 import no.nav.familie.ef.sak.service.steg.StegType
-import no.nav.familie.kontrakter.ef.søknad.*
+import no.nav.familie.kontrakter.ef.søknad.Barn
+import no.nav.familie.kontrakter.ef.søknad.EnumTekstverdiMedSvarId
+import no.nav.familie.kontrakter.ef.søknad.Fødselsnummer
+import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
+import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentRequest
-import no.nav.familie.kontrakter.felles.dokarkiv.Dokument
-import no.nav.familie.kontrakter.felles.dokarkiv.FilType
+import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
+import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
+import no.nav.familie.kontrakter.felles.dokarkiv.v2.Dokument
+import no.nav.familie.kontrakter.felles.dokarkiv.v2.Filtype
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.context.annotation.Profile
 import org.springframework.http.MediaType
@@ -24,7 +34,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 @RestController
 @RequestMapping("/api/test")
@@ -33,6 +43,7 @@ import java.util.*
 class TestSaksbehandlingController(private val fagsakService: FagsakService,
                                    private val behandlingshistorikkService: BehandlingshistorikkService,
                                    private val behandlingService: BehandlingService,
+                                   private val søknadService: SøknadService,
                                    private val personService: PersonService,
                                    private val blankettService: BlankettService,
                                    private val journalpostClient: JournalpostClient) {
@@ -50,7 +61,8 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
                     lagFørstegangsbehandling(fagsak, søknad)
                 }
 
-        behandlingshistorikkService.opprettHistorikkInnslag(Behandlingshistorikk(behandlingId = behandling.id, steg = StegType.VILKÅR))
+        behandlingshistorikkService.opprettHistorikkInnslag(Behandlingshistorikk(behandlingId = behandling.id,
+                                                                                 steg = StegType.VILKÅR))
 
         return Ressurs.success(behandling.id)
     }
@@ -111,10 +123,10 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
     private fun lagFørstegangsbehandling(fagsak: Fagsak, søknad: SøknadOvergangsstønad): Behandling {
         val behandling = behandlingService.opprettBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, fagsak.id)
         val journalposter = behandlingService.hentBehandlingsjournalposter(behandling.id)
-        behandlingService.lagreSøknadForOvergangsstønad(søknad,
-                                                        behandling.id,
-                                                        fagsak.id,
-                                                        journalposter.firstOrNull()?.journalpostId ?: "TESTJPID")
+        søknadService.lagreSøknadForOvergangsstønad(søknad,
+                                                    behandling.id,
+                                                    fagsak.id,
+                                                    journalposter.firstOrNull()?.journalpostId ?: "TESTJPID")
         return behandling
     }
 
@@ -122,8 +134,8 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
         val arkiverDokumentRequest = ArkiverDokumentRequest(fnr,
                                                             false,
                                                             listOf(Dokument("TEST".toByteArray(),
-                                                                            FilType.PDFA, null, null,
-                                                                            "OVERGANGSSTØNAD_SØKNAD")),
+                                                                            Filtype.PDFA, null, null,
+                                                                            Dokumenttype.OVERGANGSSTØNAD_SØKNAD)),
                                                             emptyList())
 
         val dokumentResponse = journalpostClient.arkiverDokument(arkiverDokumentRequest)

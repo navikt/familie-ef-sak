@@ -4,10 +4,8 @@ import no.nav.familie.ef.sak.exception.PdlNotFoundException
 import no.nav.familie.ef.sak.exception.PdlRequestException
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlBolkResponse
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlResponse
-import no.nav.familie.http.sts.StsRestClient
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.http.HttpHeaders
 
 val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
 

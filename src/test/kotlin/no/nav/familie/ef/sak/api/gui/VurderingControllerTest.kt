@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.repository.domain.VilkårType
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.GrunnlagsdataService
+import no.nav.familie.ef.sak.service.SøknadService
 import no.nav.familie.kontrakter.ef.søknad.SøknadMedVedlegg
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -30,6 +31,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
     @Autowired lateinit var behandlingService: BehandlingService
     @Autowired lateinit var fagsakService: FagsakService
     @Autowired lateinit var grunnlagsdataService: GrunnlagsdataService
+    @Autowired lateinit var søknadService: SøknadService
 
     @BeforeEach
     fun setUp() {
@@ -112,7 +114,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
         val fagsak = fagsakService.hentEllerOpprettFagsakMedBehandlinger(søknad.søknad.personalia.verdi.fødselsnummer.verdi.verdi,
                                                                          Stønadstype.OVERGANGSSTØNAD)
         val behandling = behandlingService.opprettBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, fagsak.id)
-        behandlingService.lagreSøknadForOvergangsstønad(søknad.søknad, behandling.id, fagsak.id, "1234")
+        søknadService.lagreSøknadForOvergangsstønad(søknad.søknad, behandling.id, fagsak.id, "1234")
         grunnlagsdataService.hentEndringerIRegistergrunnlag(behandling.id)
 
         return restTemplate.exchange(localhost("/api/vurdering/${behandling.id}/vilkar"),

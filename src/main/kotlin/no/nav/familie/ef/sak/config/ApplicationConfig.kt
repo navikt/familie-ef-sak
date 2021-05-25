@@ -2,25 +2,22 @@ package no.nav.familie.ef.sak.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import no.nav.familie.ef.sak.api.beregning.VedtakDtoModule
 import no.nav.familie.ef.sak.util.ObjectMapperProvider
 import no.nav.familie.http.config.RestTemplateAzure
-import no.nav.familie.http.interceptor.ApiKeyInjectingClientInterceptor
-import no.nav.familie.http.interceptor.BearerTokenClientInterceptor
 import no.nav.familie.http.interceptor.ConsumerIdClientInterceptor
 import no.nav.familie.http.interceptor.InternLoggerInterceptor
 import no.nav.familie.http.interceptor.MdcValuesPropagatingClientInterceptor
-import no.nav.familie.http.interceptor.StsBearerTokenClientInterceptor
-import no.nav.familie.http.sts.StsRestClient
 import no.nav.familie.log.filter.LogFilter
 import no.nav.familie.log.filter.RequestTimeFilter
+import no.nav.security.token.support.client.core.OAuth2GrantType
 import no.nav.security.token.support.client.core.http.OAuth2HttpClient
+import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenResponse
+import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService
+import no.nav.security.token.support.client.spring.ClientConfigurationProperties
 import no.nav.security.token.support.client.spring.oauth2.DefaultOAuth2HttpClient
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
-import no.nav.security.token.support.core.configuration.ProxyAwareResourceRetriever
 import no.nav.security.token.support.spring.api.EnableJwtTokenValidation
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.SpringBootConfiguration
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan
 import org.springframework.boot.web.client.RestTemplateBuilder
@@ -29,12 +26,15 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Primary
-import org.springframework.context.annotation.Profile
+import org.springframework.http.HttpRequest
+import org.springframework.http.client.ClientHttpRequestExecution
+import org.springframework.http.client.ClientHttpRequestInterceptor
+import org.springframework.http.client.ClientHttpResponse
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 import org.springframework.scheduling.annotation.EnableScheduling
+import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
 import org.springframework.web.client.RestTemplate
-import java.net.URI
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 
@@ -43,7 +43,7 @@ import java.time.temporal.ChronoUnit
 @ConfigurationPropertiesScan
 @ComponentScan("no.nav.familie.prosessering", "no.nav.familie.ef.sak", "no.nav.familie.sikkerhet")
 @EnableJwtTokenValidation(ignore = ["org.springframework", "springfox.documentation.swagger"])
-@Import(RestTemplateAzure::class, StsBearerTokenClientInterceptor::class, StsRestClient::class)
+@Import(RestTemplateAzure::class)
 @EnableOAuth2Client(cacheEnabled = true)
 @EnableScheduling
 class ApplicationConfig {
@@ -103,53 +103,6 @@ class ApplicationConfig {
                                                           MdcValuesPropagatingClientInterceptor()).build()
     }
 
-    @Bean
-    fun apiKeyInjectingClientInterceptor(@Value("\${PDL_APIKEY}") pdlApiKey: String,
-                                         @Value("\${PDL_URL}") pdlBaseUrl: String): ApiKeyInjectingClientInterceptor {
-        val map = mapOf(Pair(URI.create(pdlBaseUrl), Pair(API_KEY_HEADER, pdlApiKey)))
-        return ApiKeyInjectingClientInterceptor(map)
-    }
-
-    @Bean("stsMedApiKey")
-    fun restTemplateSts(stsBearerTokenClientInterceptor: StsBearerTokenClientInterceptor,
-                        consumerIdClientInterceptor: ConsumerIdClientInterceptor,
-                        apiKeyInjectingClientInterceptor: ApiKeyInjectingClientInterceptor): RestOperations {
-        return RestTemplateBuilder()
-                .setConnectTimeout(Duration.of(2, ChronoUnit.SECONDS))
-                .setReadTimeout(Duration.of(15, ChronoUnit.SECONDS))
-                .additionalInterceptors(consumerIdClientInterceptor,
-                                        stsBearerTokenClientInterceptor,
-                                        apiKeyInjectingClientInterceptor,
-                                        MdcValuesPropagatingClientInterceptor()
-                ).build()
-    }
-
-    @Bean("azureMedApiKey")
-    fun restTemplateJwtBearer(restTemplateBuilder: RestTemplateBuilder,
-                              consumerIdClientInterceptor: ConsumerIdClientInterceptor,
-                              internLoggerInterceptor: InternLoggerInterceptor,
-                              apiKeyInjectingClientInterceptor: ApiKeyInjectingClientInterceptor,
-                              bearerTokenClientInterceptor: BearerTokenClientInterceptor): RestOperations {
-        return restTemplateBuilder
-                .setConnectTimeout(Duration.of(2, ChronoUnit.SECONDS))
-                .setReadTimeout(Duration.of(15, ChronoUnit.SECONDS))
-                .additionalInterceptors(consumerIdClientInterceptor,
-                                        bearerTokenClientInterceptor,
-                                        apiKeyInjectingClientInterceptor,
-                                        MdcValuesPropagatingClientInterceptor()).build()
-    }
-
-    // Brukes for sts issuer som brukes for sts validering. ApiKey blir lagt til når man henter metadata for STS_DISCOVERY_URL
-    // trenger override pga token-support-test som allerede overridear denne i test scope
-    @Bean
-    @Primary
-    @Profile("!integrasjonstest && !local")
-    fun oidcResourceRetriever(@Value("\${STS_APIKEY}") stsApiKey: String): ProxyAwareResourceRetriever {
-        val proxyAwareResourceRetriever = ProxyAwareResourceRetriever(null, false)
-        proxyAwareResourceRetriever.headers = mapOf(API_KEY_HEADER to listOf(stsApiKey))
-        return proxyAwareResourceRetriever
-    }
-
     /**
      * Overskrever OAuth2HttpClient som settes opp i token-support som ikke kan få med objectMapper fra felles
      * pga .setVisibility(PropertyAccessor.SETTER, JsonAutoDetect.Visibility.NONE)
@@ -163,8 +116,4 @@ class ApplicationConfig {
                                                .setReadTimeout(Duration.of(4, ChronoUnit.SECONDS)))
     }
 
-    companion object {
-
-        private const val API_KEY_HEADER = "x-nav-apiKey"
-    }
 }

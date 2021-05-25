@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.mapper
 
+import io.mockk.verify
 import no.nav.familie.ef.sak.integration.dto.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.integration.dto.pdl.Kontaktadresse
 import no.nav.familie.ef.sak.integration.dto.pdl.KontaktadresseType
@@ -25,18 +26,23 @@ internal class AdresseMapperTest {
     private val kodeverkService = KodeverkServiceMock().kodeverkService()
     private val mapper = AdresseMapper(kodeverkService)
     private val metadataGjeldende = Metadata(historisk = false)
+    private val matrikkeladresse = Matrikkeladresse(matrikkelId = null,
+                                                    bruksenhetsnummer = "bruksenhet",
+                                                    tilleggsnavn = "tilleggsnavn",
+                                                    postnummer = "")
+    private val bostedsadresse = Bostedsadresse(angittFlyttedato = startdato.plusDays(1),
+                                                gyldigFraOgMed = startdato,
+                                                gyldigTilOgMed = startdato.plusDays(1),
+                                                coAdressenavn = null,
+                                                utenlandskAdresse = utenlandskAdresse(),
+                                                vegadresse = vegadresse(),
+                                                ukjentBosted = UkjentBosted(bostedskommune = "ukjentBostedKommune"),
+                                                matrikkeladresse = matrikkeladresse,
+                                                metadata = metadataGjeldende
+    )
+
     @Test
     internal fun `Bostedsadresse formatert adresse`() {
-        val bostedsadresse =
-                Bostedsadresse(gyldigFraOgMed = startdato,
-                               gyldigTilOgMed = startdato.plusDays(1),
-                               coAdressenavn = null,
-                               utenlandskAdresse = utenlandskAdresse(),
-                               vegadresse = vegadresse(),
-                               ukjentBosted = UkjentBosted(bostedskommune = "ukjentBostedKommune"),
-                               matrikkeladresse = Matrikkeladresse(null, "bruksenhet", "tilleggsnavn", ""),
-                               metadata = metadataGjeldende
-                )
         assertThat(mapper.tilAdresse(bostedsadresse).visningsadresse)
                 .isEqualTo("Charlies vei 13 b, tilleggsnavn, 0575 Oslo")
 
@@ -51,9 +57,23 @@ internal class AdresseMapperTest {
                 .withFailMessage("Skal skrive ut utenlands adresse når vegadresse er null")
                 .isEqualTo("Vei 1, 19800 Svenskt sted, region, Sverige")
 
-        assertThat(mapper.tilAdresse(bostedsadresse.copy(vegadresse = null, matrikkeladresse = null, utenlandskAdresse = null)).visningsadresse)
+        assertThat(mapper.tilAdresse(bostedsadresse.copy(vegadresse = null,
+                                                         matrikkeladresse = null,
+                                                         utenlandskAdresse = null)).visningsadresse)
                 .withFailMessage("Skal skrive ut ukjentBosted når vegadresse er null")
                 .isEqualTo("ukjentBostedKommune")
+    }
+
+    @Test
+    internal fun `Skal kalle på hentPoststed med gyldigFraOgMed når gyldigFraOgMed finnes`() {
+        mapper.tilAdresse(bostedsadresse)
+        verify { kodeverkService.hentPoststed(any(), bostedsadresse.gyldigFraOgMed!!) }
+    }
+
+    @Test
+    internal fun `skal håndtere feilregistrert dato som null`() {
+        val adresse = mapper.tilAdresse(bostedsadresse.copy(angittFlyttedato = LocalDate.of(1,1,1)))
+        assertThat(adresse.angittFlyttedato).isNull()
     }
 
     @Test

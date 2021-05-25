@@ -8,7 +8,6 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.http.sts.StsRestClient
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.AfterAll
@@ -60,9 +59,6 @@ internal class ApplicationConfigTest : OppslagSpringRunnerTest() {
         fun initClass() {
             wiremockServerItem = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
             wiremockServerItem.start()
-            val stsRestClient = mockk<StsRestClient>()
-            every { stsRestClient.systemOIDCToken } returns "token"
-
         }
 
         @AfterAll

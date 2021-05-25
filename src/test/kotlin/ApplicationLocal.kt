@@ -19,7 +19,8 @@ fun main(args: Array<String>) {
                       "mock-oppdrag",
                       "mock-infotrygd-replika",
                       "mock-kodeverk",
-                      "mock-blankett")
-                      //"mock-brev")
+                      "mock-blankett",
+                      "mock-iverksett",
+                      "mock-brev")
             .run(*args)
 }

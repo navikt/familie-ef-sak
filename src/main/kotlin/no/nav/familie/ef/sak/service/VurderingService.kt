@@ -28,6 +28,7 @@ import java.util.UUID
 
 @Service
 class VurderingService(private val behandlingService: BehandlingService,
+                       private val søknadService: SøknadService,
                        private val vilkårsvurderingRepository: VilkårsvurderingRepository,
                        private val grunnlagsdataService: GrunnlagsdataService,
                        private val stegService: StegService,
@@ -127,7 +128,7 @@ class VurderingService(private val behandlingService: BehandlingService,
 
 
     private fun hentGrunnlagOgMetadata(behandlingId: UUID): Pair<VilkårGrunnlagDto, HovedregelMetadata> {
-        val søknad = behandlingService.hentOvergangsstønad(behandlingId)
+        val søknad = søknadService.hentOvergangsstønad(behandlingId)
         val grunnlag = grunnlagsdataService.hentGrunnlag(behandlingId, søknad)
         val metadata = HovedregelMetadata(sivilstandstype = grunnlag.sivilstand.registergrunnlag.type,
                                           søknad = søknad)

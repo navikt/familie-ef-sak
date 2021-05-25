@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.integration.InfotrygdReplikaClient
 import no.nav.familie.ef.sak.integration.PdlClient
+import no.nav.familie.ef.sak.integration.dto.pdl.identer
 import no.nav.familie.ef.sak.repository.domain.SøknadType
 import no.nav.familie.kontrakter.ef.felles.StønadType
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSøkRequest
@@ -16,7 +17,7 @@ class InfotrygdService(private val infotrygdReplikaClient: InfotrygdReplikaClien
      */
     fun eksisterer(personIdent: String, søknadTyper: Set<SøknadType> = SøknadType.values().toSet()): Boolean {
         require(søknadTyper.isNotEmpty()) { "Forventer att søknadstyper ikke er empty" }
-        val identer = pdlClient.hentPersonidenter(personIdent, true).identer.map { it.ident }.toSet()
+        val identer = pdlClient.hentPersonidenter(personIdent, true).identer()
         val stønadTyper = søknadTyper.map { it.tilStønadType() }.toSet()
         val response = infotrygdReplikaClient.hentInslagHosInfotrygd(InfotrygdSøkRequest(identer))
         val harVedtak = response.vedtak.any { stønadTyper.contains(it.stønadType) }

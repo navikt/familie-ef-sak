@@ -82,6 +82,7 @@ internal class PdlPersonSøkHjelperTest {
 
     private fun lagAdresse(vegadresse: Vegadresse?, matrikkeladresse: Matrikkeladresse?): Bostedsadresse {
         return Bostedsadresse(
+                angittFlyttedato = null,
                 gyldigFraOgMed = null,
                 gyldigTilOgMed = null,
                 vegadresse = vegadresse,

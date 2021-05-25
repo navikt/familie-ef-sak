@@ -6,7 +6,8 @@
       "nåværendeStatsborgerskap" : {
         "name" : "nåværendeStatsborgerskap",
         "type" : "Collection",
-        "fields" : { }
+        "fields" : { },
+        "nullable" : false
       },
       "statsborgerskap" : {
         "name" : "statsborgerskap",
@@ -14,17 +15,21 @@
         "fields" : {
           "land" : {
             "name" : "land",
-            "type" : "String"
+            "type" : "String",
+            "nullable" : false
           },
           "gyldigFraOgMedDato" : {
             "name" : "gyldigFraOgMedDato",
-            "type" : "LocalDate"
+            "type" : "LocalDate",
+            "nullable" : false
           },
           "gyldigTilOgMedDato" : {
             "name" : "gyldigTilOgMedDato",
-            "type" : "LocalDate"
+            "type" : "LocalDate",
+            "nullable" : false
           }
-        }
+        },
+        "nullable" : false
       },
       "oppholdstatus" : {
         "name" : "oppholdstatus",
@@ -33,17 +38,21 @@
           "oppholdstillatelse" : {
             "name" : "oppholdstillatelse",
             "type" : "Enum",
-            "values" : [ "PERMANENT", "MIDLERTIDIG", "UKJENT" ]
+            "values" : [ "PERMANENT", "MIDLERTIDIG", "UKJENT" ],
+            "nullable" : false
           },
           "fraDato" : {
             "name" : "fraDato",
-            "type" : "LocalDate"
+            "type" : "LocalDate",
+            "nullable" : false
           },
           "tilDato" : {
             "name" : "tilDato",
-            "type" : "LocalDate"
+            "type" : "LocalDate",
+            "nullable" : false
           }
-        }
+        },
+        "nullable" : false
       },
       "bostedsadresse" : {
         "name" : "bostedsadresse",
@@ -51,22 +60,32 @@
         "fields" : {
           "visningsadresse" : {
             "name" : "visningsadresse",
-            "type" : "String"
+            "type" : "String",
+            "nullable" : false
           },
           "type" : {
             "name" : "type",
             "type" : "Enum",
-            "values" : [ "BOSTEDADRESSE", "KONTAKTADRESSE", "KONTAKTADRESSE_UTLAND", "OPPHOLDSADRESSE" ]
+            "values" : [ "BOSTEDADRESSE", "KONTAKTADRESSE", "KONTAKTADRESSE_UTLAND", "OPPHOLDSADRESSE" ],
+            "nullable" : false
           },
           "gyldigFraOgMed" : {
             "name" : "gyldigFraOgMed",
-            "type" : "LocalDate"
+            "type" : "LocalDate",
+            "nullable" : false
           },
           "gyldigTilOgMed" : {
             "name" : "gyldigTilOgMed",
-            "type" : "LocalDate"
+            "type" : "LocalDate",
+            "nullable" : false
+          },
+          "angittFlyttedato" : {
+            "name" : "angittFlyttedato",
+            "type" : "LocalDate",
+            "nullable" : true
           }
-        }
+        },
+        "nullable" : false
       },
       "innflytting" : {
         "name" : "innflytting",
@@ -74,17 +93,21 @@
         "fields" : {
           "fraflyttingsland" : {
             "name" : "fraflyttingsland",
-            "type" : "String"
+            "type" : "String",
+            "nullable" : false
           },
           "dato" : {
             "name" : "dato",
-            "type" : "LocalDate"
+            "type" : "LocalDate",
+            "nullable" : false
           },
           "fraflyttingssted" : {
             "name" : "fraflyttingssted",
-            "type" : "String"
+            "type" : "String",
+            "nullable" : true
           }
-        }
+        },
+        "nullable" : false
       },
       "utflytting" : {
         "name" : "utflytting",
@@ -92,22 +115,27 @@
         "fields" : {
           "tilflyttingsland" : {
             "name" : "tilflyttingsland",
-            "type" : "String"
+            "type" : "String",
+            "nullable" : false
           },
           "dato" : {
             "name" : "dato",
-            "type" : "LocalDate"
+            "type" : "LocalDate",
+            "nullable" : false
           },
           "tilflyttingssted" : {
             "name" : "tilflyttingssted",
-            "type" : "String"
+            "type" : "String",
+            "nullable" : true
           }
-        }
+        },
+        "nullable" : false
       },
       "folkeregisterpersonstatus" : {
         "name" : "folkeregisterpersonstatus",
         "type" : "Enum",
-        "values" : [ "BOSATT", "UTFLYTTET", "FORSVUNNET", "DØD", "OPPHØRT", "FØDSELSREGISTRERT", "MIDLERTIDIG", "INAKTIV", "UKJENT" ]
+        "values" : [ "BOSATT", "UTFLYTTET", "FORSVUNNET", "DØD", "OPPHØRT", "FØDSELSREGISTRERT", "MIDLERTIDIG", "INAKTIV", "UKJENT" ],
+        "nullable" : false
       },
       "medlUnntak" : {
         "name" : "medlUnntak",
@@ -119,21 +147,27 @@
             "fields" : {
               "fraogmedDato" : {
                 "name" : "fraogmedDato",
-                "type" : "LocalDate"
+                "type" : "LocalDate",
+                "nullable" : false
               },
               "tilogmedDato" : {
                 "name" : "tilogmedDato",
-                "type" : "LocalDate"
+                "type" : "LocalDate",
+                "nullable" : false
               },
               "erMedlemIFolketrygden" : {
                 "name" : "erMedlemIFolketrygden",
-                "type" : "Boolean"
+                "type" : "Boolean",
+                "nullable" : false
               }
-            }
+            },
+            "nullable" : false
           }
-        }
+        },
+        "nullable" : false
       }
-    }
+    },
+    "nullable" : false
   },
   "sivilstand" : {
     "name" : "sivilstand",
@@ -142,17 +176,21 @@
       "type" : {
         "name" : "type",
         "type" : "Enum",
-        "values" : [ "UOPPGITT", "UGIFT", "GIFT", "ENKE_ELLER_ENKEMANN", "SKILT", "SEPARERT", "REGISTRERT_PARTNER", "SEPARERT_PARTNER", "SKILT_PARTNER", "GJENLEVENDE_PARTNER" ]
+        "values" : [ "UOPPGITT", "UGIFT", "GIFT", "ENKE_ELLER_ENKEMANN", "SKILT", "SEPARERT", "REGISTRERT_PARTNER", "SEPARERT_PARTNER", "SKILT_PARTNER", "GJENLEVENDE_PARTNER" ],
+        "nullable" : false
       },
       "navn" : {
         "name" : "navn",
-        "type" : "String"
+        "type" : "String",
+        "nullable" : false
       },
       "gyldigFraOgMed" : {
         "name" : "gyldigFraOgMed",
-        "type" : "LocalDate"
+        "type" : "LocalDate",
+        "nullable" : false
       }
-    }
+    },
+    "nullable" : false
   },
   "barnMedSamvær" : {
     "name" : "barnMedSamvær",
@@ -160,19 +198,23 @@
     "fields" : {
       "id" : {
         "name" : "id",
-        "type" : "UUID"
+        "type" : "UUID",
+        "nullable" : false
       },
       "navn" : {
         "name" : "navn",
-        "type" : "String"
+        "type" : "String",
+        "nullable" : false
       },
       "fødselsnummer" : {
         "name" : "fødselsnummer",
-        "type" : "String"
+        "type" : "String",
+        "nullable" : false
       },
       "harSammeAdresse" : {
         "name" : "harSammeAdresse",
-        "type" : "Boolean"
+        "type" : "Boolean",
+        "nullable" : false
       },
       "forelder" : {
         "name" : "forelder",
@@ -180,26 +222,38 @@
         "fields" : {
           "navn" : {
             "name" : "navn",
-            "type" : "String"
+            "type" : "String",
+            "nullable" : false
           },
           "fødselsnummer" : {
             "name" : "fødselsnummer",
-            "type" : "String"
+            "type" : "String",
+            "nullable" : false
           },
           "fødselsdato" : {
             "name" : "fødselsdato",
-            "type" : "LocalDate"
+            "type" : "LocalDate",
+            "nullable" : false
           },
           "bosattINorge" : {
             "name" : "bosattINorge",
-            "type" : "Boolean"
+            "type" : "Boolean",
+            "nullable" : false
           },
           "land" : {
             "name" : "land",
-            "type" : "String"
+            "type" : "String",
+            "nullable" : false
+          },
+          "dødsfall" : {
+            "name" : "dødsfall",
+            "type" : "LocalDate",
+            "nullable" : true
           }
-        }
+        },
+        "nullable" : false
       }
-    }
+    },
+    "nullable" : false
   }
 }

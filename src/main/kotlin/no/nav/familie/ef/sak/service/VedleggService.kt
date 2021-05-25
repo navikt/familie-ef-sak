@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.service
 import no.nav.familie.ef.sak.api.dto.DokumentinfoDto
 import no.nav.familie.ef.sak.domene.DokumentVariantformat
 import no.nav.familie.kontrakter.felles.journalpost.DokumentInfo
+import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariantformat
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import org.springframework.stereotype.Service
 import java.util.*
@@ -25,7 +26,7 @@ class VedleggService(private val behandlingService: BehandlingService,
                                    journalpost: Journalpost): DokumentinfoDto {
         return DokumentinfoDto(
                 dokumentinfoId = dokumentInfo.dokumentInfoId,
-                filnavn = dokumentInfo.dokumentvarianter?.find { it.variantformat == DokumentVariantformat.ARKIV.toString() }?.filnavn,
+                filnavn = dokumentInfo.dokumentvarianter?.find { it.variantformat == Dokumentvariantformat.ARKIV }?.filnavn,
                 tittel = dokumentInfo.tittel ?: "Tittel mangler",
                 journalpostId = journalpost.journalpostId,
                 dato = journalpost.datoMottatt?.toLocalDate(),

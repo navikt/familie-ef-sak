@@ -17,10 +17,7 @@ internal class PdlPersonUtilTest {
 
     @Test
     internal fun `gjeldende navn skal hente navnet som ble sist registrert`() {
-        val gjeldendeNavn = listOf(Navn("a", null, "a", metadata = Metadata(historisk = true)),
-                                   Navn("b", null, "b", metadata = Metadata(historisk = false)),
-                                   Navn("c", null, "c", metadata = Metadata(historisk = true)))
-                .gjeldende().fornavn
+        val gjeldendeNavn = listOf(Navn("b", null, "b", metadata = Metadata(historisk = false))).gjeldende().fornavn
         assertThat(gjeldendeNavn).isEqualTo("b")
     }
 
@@ -66,6 +63,7 @@ internal class PdlPersonUtilTest {
 
     private fun vegadresse(gate: String, nr: String, historisk: Boolean): Bostedsadresse {
         return Bostedsadresse(
+                null,
                 null,
                 null,
                 null,

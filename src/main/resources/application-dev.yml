@@ -1,18 +1,13 @@
 spring:
   autoconfigure.exclude: org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration
 
-no.nav.security.jwt:
-  issuer:
-    sts:
-      discoveryurl: ${STS_DISCOVERY_URL}
-      accepted_audience: ${GYLDIGE_SERVICE_BRUKERE}
-
 PDL_SCOPE: api://dev-fss.pdl.pdl-api/.default
 
 ON_PREM_URL_ENV: dev
 GATEWAY_PREFIX: api-gw-q1
 
 FRONTEND_OPPGAVE_URL: https://ensligmorellerfar.dev.intern.nav.no/oppgavebenk
+IVERKSETT_SCOPE: api://dev-gcp.teamfamilie.familie-ef-iverksett/.default
 
 rolle:
   veileder: "19dcbfde-4cdb-4c64-a1ea-ac9802b03339"

@@ -9,6 +9,7 @@ query ($paging:Paging, $criteria:[Criterion]) {
                     identifikasjonsnummer
                 }
                 bostedsadresse(historikk: false) {
+                    angittFlyttedato
                     gyldigFraOgMed
                     gyldigTilOgMed
                     coAdressenavn

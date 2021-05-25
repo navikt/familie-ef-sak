@@ -3,14 +3,10 @@ package no.nav.familie.ef.sak.integration
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import io.mockk.every
-import io.mockk.mockk
 import no.nav.familie.ef.sak.config.PdlConfig
 import no.nav.familie.ef.sak.integration.dto.pdl.Bostedsadresse
-import no.nav.familie.ef.sak.integration.dto.pdl.Folkeregistermetadata
 import no.nav.familie.ef.sak.integration.dto.pdl.Metadata
 import no.nav.familie.ef.sak.integration.dto.pdl.Vegadresse
-import no.nav.familie.http.sts.StsRestClient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -33,10 +29,7 @@ internal class PdlSaksbehandlerClientTest {
         fun initClass() {
             wiremockServerItem = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
             wiremockServerItem.start()
-            val stsRestClient = mockk<StsRestClient>()
-            every { stsRestClient.systemOIDCToken } returns "token"
-            pdlClient = PdlSaksbehandlerClient(PdlConfig(URI.create(wiremockServerItem.baseUrl())), restOperations, stsRestClient)
-
+            pdlClient = PdlSaksbehandlerClient(PdlConfig(URI.create(wiremockServerItem.baseUrl())), restOperations)
         }
 
         @AfterAll
@@ -65,6 +58,7 @@ internal class PdlSaksbehandlerClientTest {
                                                                     tilleggsnavn = null,
                                                                     koordinater = null),
                                             matrikkeladresse = null,
+                                            angittFlyttedato = null,
                                             gyldigFraOgMed = null,
                                             gyldigTilOgMed = null,
                                             coAdressenavn = null,

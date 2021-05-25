@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.mapper.PersonopplysningerMapper
 import no.nav.familie.ef.sak.mapper.StatsborgerskapMapper
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.config.KodeverkServiceMock
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.config.PdlClientConfig
+import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -22,29 +23,37 @@ internal class PersonopplysningerServiceTest {
     private lateinit var familieIntegrasjonerClient: FamilieIntegrasjonerClient
     private lateinit var adresseMapper: AdresseMapper
     private lateinit var arbeidsfordelingService: ArbeidsfordelingService
+    private lateinit var persisterGrunnlagsdataService: PersisterGrunnlagsdataService
+    private lateinit var søknadService: SøknadService
 
     @BeforeEach
     internal fun setUp() {
         familieIntegrasjonerClient = mockk()
         adresseMapper = AdresseMapper(kodeverkService)
         arbeidsfordelingService = mockk()
+        søknadService = mockk()
 
+        val pdlClient = PdlClientConfig().pdlClient()
+        persisterGrunnlagsdataService = PersisterGrunnlagsdataService(pdlClient, familieIntegrasjonerClient)
         val personopplysningerMapper =
                 PersonopplysningerMapper(adresseMapper, StatsborgerskapMapper(kodeverkService), arbeidsfordelingService, kodeverkService)
-        val personService = PersonService(PdlClientConfig().pdlClient())
+        val personService = PersonService(pdlClient)
         personopplysningerService = PersonopplysningerService(personService,
+                                                              søknadService,
                                                               familieIntegrasjonerClient,
+                                                              persisterGrunnlagsdataService,
                                                               personopplysningerMapper)
     }
 
     @Test
-    internal fun `mapper pdlsøker til PersonopplysningerDto`() {
+    internal fun `mapper grunnlagsdata til PersonopplysningerDto`() {
         every { familieIntegrasjonerClient.egenAnsatt(any()) } returns true
+        every { familieIntegrasjonerClient.hentMedlemskapsinfo(any()) } returns Medlemskapsinfo("01010172272", emptyList(), emptyList(), emptyList())
         every { arbeidsfordelingService.hentNavEnhet(any()) } returns Arbeidsfordelingsenhet("1", "Enhet")
-        val søker = personopplysningerService.hentPersonopplysninger("11111122222")
+        val søker = personopplysningerService.hentPersonopplysninger("01010172272")
         assertThat(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(søker))
                 .isEqualToIgnoringWhitespace("""{
-  "personIdent" : "11111122222",
+  "personIdent" : "01010172272",
   "navn" : {
     "fornavn" : "Fornavn",
     "mellomnavn" : "mellomnavn",
@@ -78,12 +87,14 @@ internal class PersonopplysningerServiceTest {
     "visningsadresse" : "c/o CONAVN, Charlies vei 13 b, 0575 Oslo",
     "type" : "BOSTEDADRESSE",
     "gyldigFraOgMed" : "2020-01-01",
-    "gyldigTilOgMed" : "2199-01-01"
+    "gyldigTilOgMed" : "2199-01-01",
+    "angittFlyttedato" : "2020-01-02"
   }, {
     "visningsadresse" : "c/o co, Charlies vei 13 b, 0575 Oslo",
     "type" : "KONTAKTADRESSE",
     "gyldigFraOgMed" : "2020-01-01",
-    "gyldigTilOgMed" : "2021-01-01"
+    "gyldigTilOgMed" : "2021-01-01",
+    "angittFlyttedato" : null
   } ],
   "fullmakt" : [ {
     "gyldigFraOgMed" : "2021-01-01",
@@ -97,14 +108,15 @@ internal class PersonopplysningerServiceTest {
     "personIdent" : "01012067050",
     "navn" : "Barn Barnesen",
     "annenForelder" : {
-      "personIdent" : "01010172272",
-      "navn" : "01010172272 mellomnavn Etternavn"
+      "personIdent" : "17097926735",
+      "navn" : "Bob  Burger"
     },
     "adresse" : [ {
       "visningsadresse" : "c/o CONAVN, Charlies vei 13 b, 0575 Oslo",
       "type" : "BOSTEDADRESSE",
       "gyldigFraOgMed" : "2020-01-01",
-      "gyldigTilOgMed" : "2199-01-01"
+      "gyldigTilOgMed" : "2199-01-01",
+      "angittFlyttedato" : "2020-01-02"
     } ],
     "borHosSøker" : true,
     "fødselsdato" : "2018-01-01"
@@ -112,14 +124,15 @@ internal class PersonopplysningerServiceTest {
     "personIdent" : "13071489536",
     "navn" : "Barn2 Barnesen",
     "annenForelder" : {
-      "personIdent" : "01010172272",
-      "navn" : "01010172272 mellomnavn Etternavn"
+     "personIdent" : "17097926735",
+      "navn" : "Bob  Burger"
     },
     "adresse" : [ {
       "visningsadresse" : "c/o CONAVN, Charlies vei 13 b, 0575 Oslo",
       "type" : "BOSTEDADRESSE",
       "gyldigFraOgMed" : "2020-01-01",
-      "gyldigTilOgMed" : "2199-01-01"
+      "gyldigTilOgMed" : "2199-01-01",
+      "angittFlyttedato" : "2020-01-02"
     } ],
     "borHosSøker" : true,
     "fødselsdato" : "2018-01-01"
