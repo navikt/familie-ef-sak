@@ -6,6 +6,8 @@ import no.nav.familie.kontrakter.felles.journalpost.DokumentInfo
 import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariantformat
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import org.springframework.stereotype.Service
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 @Service
@@ -29,7 +31,7 @@ class VedleggService(private val behandlingService: BehandlingService,
                 filnavn = dokumentInfo.dokumentvarianter?.find { it.variantformat == Dokumentvariantformat.ARKIV }?.filnavn,
                 tittel = dokumentInfo.tittel ?: "Tittel mangler",
                 journalpostId = journalpost.journalpostId,
-                dato = journalpost.datoMottatt?.toLocalDate(),
+                dato = journalpost.datoMottatt,
                 journalposttype = journalpost.journalposttype
         )
     }
