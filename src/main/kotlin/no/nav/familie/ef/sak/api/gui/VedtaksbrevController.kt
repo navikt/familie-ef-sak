@@ -19,7 +19,7 @@ import java.util.*
 class VedtaksbrevController(private val brevService: VedtaksbrevService,
                             private val tilgangService: TilgangService) {
 
-    @PostMapping("/{behandlingId}/{brevMal}/")
+    @PostMapping("/{behandlingId}/{brevMal}")
     fun forhåndsvisBrevV2(@PathVariable behandlingId: UUID, @PathVariable brevMal: String, @RequestBody utfylltBrev: String): Ressurs<ByteArray> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         val respons = brevService.forhåndsvisBrev(behandlingId, objectMapper.readTree(utfylltBrev), brevMal)
