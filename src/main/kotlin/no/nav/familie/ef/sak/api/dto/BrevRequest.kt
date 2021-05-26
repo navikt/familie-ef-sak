@@ -17,7 +17,7 @@ data class BrevRequest(val navn: String,
             {
               "flettefelter": {
                 "navn": [
-                  "$navn", "annetNavn"
+                  "$navn"
                 ],
                 "fodselsnummer": [
                   "$ident"

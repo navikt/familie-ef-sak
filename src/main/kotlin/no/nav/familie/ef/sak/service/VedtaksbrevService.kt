@@ -50,18 +50,19 @@ class VedtaksbrevService(private val brevClient: BrevClient,
                            signaturSaksbehandler = signaturSaksbehandler)
     }
 
+    // TODO: Slett denne
+    @Deprecated("Skal slettes snart")
     fun lagPdf(brevRequest: BrevRequest, brevMal: String = "innvilgetVedtakMVP"): ByteArray {
         return brevClient.genererBrev("bokmaal",
                                       brevMal,
                                       brevRequest)
     }
 
-    fun lagPdf(brevRequest: JsonNode, brevMal: String = "innvilgetVedtakMVP"): ByteArray {
+    fun lagPdf(brevRequest: JsonNode, brevMal: String): ByteArray {
         return brevClient.genererBrev("bokmaal",
                                       brevMal,
                                       brevRequest)
     }
-
 
     fun lagreBrevUtkast(behandlingId: UUID): Vedtaksbrev {
         val request = lagBrevRequest(behandlingId)
@@ -76,14 +77,9 @@ class VedtaksbrevService(private val brevClient: BrevClient,
         return brevRepository.update(vedtaksbrev.copy(pdf = Fil(lagPdf(endeligRequest)), brevRequest = endeligRequest))
     }
 
-    fun forhåndsvisBrev(behandlingId: UUID): ByteArray{
-        return lagPdf(lagBrevRequest(behandlingId))
-    }
-
     fun forhåndsvisBrev(behandlingId: UUID, brevRequest: JsonNode, brevMal: String): ByteArray{
         return lagPdf(brevRequest, brevMal)
     }
-
 
     fun hentBrev(behandlingId: UUID): Vedtaksbrev {
         return brevRepository.findByIdOrThrow(behandlingId)
