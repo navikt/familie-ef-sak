@@ -1,9 +1,9 @@
 package no.nav.familie.ef.sak.api.gui
 
-import no.nav.familie.ef.sak.service.VedtaksbrevService
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.familie.ef.sak.service.TilgangService
+import no.nav.familie.ef.sak.service.VedtaksbrevService
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
@@ -17,9 +17,12 @@ class VedtaksbrevController(private val brevService: VedtaksbrevService,
                             private val tilgangService: TilgangService) {
 
     @PostMapping("/{behandlingId}/{brevMal}")
-    fun forhåndsvisBrevV2(@PathVariable behandlingId: UUID, @PathVariable brevMal: String, @RequestBody utfylltBrev: String): Ressurs<ByteArray> {
+    fun forhåndsvisBrevV2(@PathVariable behandlingId: UUID,
+                          @PathVariable brevMal: String,
+                          @RequestBody brevRequest: JsonNode): Ressurs<ByteArray> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
-        val respons = brevService.forhåndsvisBrev(behandlingId, objectMapper.readTree(utfylltBrev), brevMal)
+
+        val respons = brevService.forhåndsvisBrev(behandlingId, brevRequest, brevMal)
 
         return Ressurs.success(respons)
     }
