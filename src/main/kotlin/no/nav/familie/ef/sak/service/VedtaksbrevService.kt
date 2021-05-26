@@ -30,26 +30,6 @@ class VedtaksbrevService(private val brevClient: BrevClient,
                          private val arbeidsfordelingService: ArbeidsfordelingService,
                          private val familieIntegrasjonerClient: FamilieIntegrasjonerClient) {
 
-    fun lagBrevRequest(behandlingId: UUID): BrevRequest {
-        val aktivIdent = behandlingService.hentAktivIdent(behandlingId)
-        val person = personService.hentSøker(aktivIdent)
-        val navn = person.navn.gjeldende().visningsnavn()
-        val innvilgelseFra = LocalDate.now()
-        val innvilgelseTil = LocalDate.now()
-        val begrunnelseFomDatoInnvilgelse = "den måneden du ble separert"
-        val brevdato = LocalDate.now()
-        val belopOvergangsstonad = 13943
-        val signaturSaksbehandler = SikkerhetContext.hentSaksbehandlerNavn()
-        return BrevRequest(navn = navn,
-                           ident = aktivIdent,
-                           innvilgelseFra = innvilgelseFra,
-                           innvilgelseTil = innvilgelseTil,
-                           begrunnelseFomDatoInnvilgelse = begrunnelseFomDatoInnvilgelse,
-                           brevdato = brevdato,
-                           belopOvergangsstonad = belopOvergangsstonad,
-                           signaturSaksbehandler = signaturSaksbehandler)
-    }
-
     fun lagPdf(brevRequest: BrevRequest, brevMal: String = "innvilgetVedtakMVP"): ByteArray {
         return brevClient.genererBrev("bokmaal",
                                       brevMal,
@@ -62,28 +42,9 @@ class VedtaksbrevService(private val brevClient: BrevClient,
                                       brevRequest)
     }
 
-
-    fun lagreBrevUtkast(behandlingId: UUID): Vedtaksbrev {
-        val request = lagBrevRequest(behandlingId)
-        val pdf = lagPdf(request)
-        val brev = Vedtaksbrev(behandlingId, request, null, Fil(pdf), null)
-        return brevRepository.insert(brev)
-    }
-
-    fun lagreEndeligBrev(behandlingId: UUID): Vedtaksbrev {
-        val vedtaksbrev = brevRepository.findByIdOrThrow(behandlingId)
-        val endeligRequest = vedtaksbrev.utkastBrevRequest.copy(signaturBeslutter = SikkerhetContext.hentSaksbehandlerNavn())
-        return brevRepository.update(vedtaksbrev.copy(pdf = Fil(lagPdf(endeligRequest)), brevRequest = endeligRequest))
-    }
-
-    fun forhåndsvisBrev(behandlingId: UUID): ByteArray{
-        return lagPdf(lagBrevRequest(behandlingId))
-    }
-
     fun forhåndsvisBrev(behandlingId: UUID, brevRequest: JsonNode, brevMal: String): ByteArray{
         return lagPdf(brevRequest, brevMal)
     }
-
 
     fun hentBrev(behandlingId: UUID): Vedtaksbrev {
         return brevRepository.findByIdOrThrow(behandlingId)

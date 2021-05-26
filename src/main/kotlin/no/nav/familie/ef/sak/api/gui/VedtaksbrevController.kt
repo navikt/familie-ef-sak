@@ -19,17 +19,9 @@ import java.util.*
 class VedtaksbrevController(private val brevService: VedtaksbrevService,
                             private val tilgangService: TilgangService) {
 
-    @PostMapping("/{behandlingId}")
-    fun forhåndsvisBrev(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
-        tilgangService.validerTilgangTilBehandling(behandlingId)
-        val respons = brevService.forhåndsvisBrev(behandlingId)
-
-        return Ressurs.success(respons)
-    }
-
-    @PostMapping("/{behandlingId}/{brevMal}/v2")
+    @PostMapping("/{behandlingId}/{brevMal}")
     fun forhåndsvisBrevV2(@PathVariable behandlingId: UUID, @PathVariable brevMal: String, @RequestBody utfylltBrev: String): Ressurs<ByteArray> {
-        //tilgangService.validerTilgangTilBehandling(behandlingId) Todo
+        tilgangService.validerTilgangTilBehandling(behandlingId)
         val respons = brevService.forhåndsvisBrev(behandlingId, objectMapper.readTree(utfylltBrev), brevMal)
 
         return Ressurs.success(respons)

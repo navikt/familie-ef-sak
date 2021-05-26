@@ -34,7 +34,7 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
         ferdigstillOppgave(behandling, Oppgavetype.BehandleSak)
         ferdigstillOppgave(behandling, Oppgavetype.BehandleUnderkjentVedtak)
         if(behandling.type !== BehandlingType.BLANKETT) {
-            vedtaksbrevService.lagreBrevUtkast(behandling.id)
+            // vedtaksbrevService.lagreBrevUtkast(behandling.id) TODO: Implementer totrinns brev
         }
     }
 

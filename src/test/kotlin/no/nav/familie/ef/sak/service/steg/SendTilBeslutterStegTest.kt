@@ -49,8 +49,6 @@ internal class SendTilBeslutterStegTest {
             taskRepository.save(capture(taskSlot))
         } returns Task("", "", Properties())
         every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(any(), any()) } returns null
-
-        every { vedtaksbrevService.lagreBrevUtkast(any()) } returns mockk()
     }
 
     @Test
@@ -61,13 +59,6 @@ internal class SendTilBeslutterStegTest {
     @Test
     internal fun `Skal avslutte oppgave BehandleUnderkjentVedtak hvis den finnes`() {
         utførOgVerifiserKall(Oppgavetype.BehandleUnderkjentVedtak)
-    }
-
-    @Test
-    internal fun `Skal lagre brev`(){
-        utførSteg()
-
-        verify { vedtaksbrevService.lagreBrevUtkast(behandling.id) }
     }
 
     private fun utførOgVerifiserKall(oppgavetype: Oppgavetype) {
