@@ -28,9 +28,9 @@ class BrevClient(@Value("\${FAMILIE_BREV_API_URL}")
     fun genererBrev(målform: String, malnavn: String, request: BrevRequest): ByteArray {
         val url = URI.create("$familieBrevUri/api/${ef}/avansert-dokument/$målform/$malnavn/pdf")
 
-        val streng = objectMapper.readTree(request.lagBody())
+        val requestSomJson = objectMapper.readTree(request.lagBody())
 
-        return postForEntity(url, streng, HttpHeaders().medContentTypeJsonUTF8())
+        return postForEntity(url, requestSomJson, HttpHeaders().medContentTypeJsonUTF8())
     }
 
     fun genererBrev(målform: String? = "bokmaal" , malnavn: String? = "innvilgetVedtakMVP", request: JsonNode): ByteArray {
