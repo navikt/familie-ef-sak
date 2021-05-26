@@ -87,19 +87,10 @@ class ApplicationConfig {
                 .additionalMessageConverters(listOf(jackson2HttpMessageConverter) + RestTemplate().messageConverters)
     }
 
-    @Bean
-    fun brevBuilder(): RestTemplateBuilder {
-        val jackson2HttpMessageConverter = MappingJackson2HttpMessageConverter(no.nav.familie.kontrakter.felles.objectMapper)
-        return RestTemplateBuilder()
-                .setConnectTimeout(Duration.of(2, ChronoUnit.SECONDS))
-                .setReadTimeout(Duration.of(30, ChronoUnit.SECONDS))
-                .additionalMessageConverters(listOf(jackson2HttpMessageConverter) + RestTemplate().messageConverters)
-    }
-
     @Bean("utenAuth")
-    fun restTemplate(brevBuilder: RestTemplateBuilder,
+    fun restTemplate(restTemplateBuilder: RestTemplateBuilder,
                      consumerIdClientInterceptor: ConsumerIdClientInterceptor): RestOperations {
-        return brevBuilder.additionalInterceptors(consumerIdClientInterceptor,
+        return restTemplateBuilder.additionalInterceptors(consumerIdClientInterceptor,
                                                           MdcValuesPropagatingClientInterceptor()).build()
     }
 
