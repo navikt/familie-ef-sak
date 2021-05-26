@@ -204,13 +204,6 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Nav-interne avhengigheter -->
-        <dependency>
-            <groupId>no.nav.fpsak.tidsserie</groupId>
-            <artifactId>fpsak-tidsserie</artifactId>
-            <version>2.5.7</version>
-        </dependency>
-
         <dependency>
             <groupId>no.finn.unleash</groupId>
             <artifactId>unleash-client-java</artifactId>

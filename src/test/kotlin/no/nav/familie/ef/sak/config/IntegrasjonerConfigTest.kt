@@ -18,15 +18,4 @@ internal class IntegrasjonerConfigTest {
         assertThat(integrasjonerConfig.tilgangRelasjonerUri).isEqualTo(URI("http://familie-integrasjoner/api/tilgang/person-med-relasjoner"))
     }
 
-    @Test
-    fun getPersonopplysninger() {
-        assertThat(integrasjonerConfig.personopplysningerUri)
-                .isEqualTo(URI("http://familie-integrasjoner/api/personopplysning/v2/info"))
-    }
-
-    @Test
-    fun getPersonhistorikk() {
-        assertThat(integrasjonerConfig.personhistorikkUri)
-                .isEqualTo(URI("http://familie-integrasjoner/api/personopplysning/v2/historikk"))
-    }
 }
