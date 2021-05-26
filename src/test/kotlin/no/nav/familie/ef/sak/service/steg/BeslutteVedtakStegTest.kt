@@ -56,6 +56,7 @@ internal class BeslutteVedtakStegTest {
         } returns Task("", "", Properties())
         every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(any(), any()) } returns mockk()
         every { vedtaksbrevRepository.deleteById(any()) } just Runs
+        every { vedtaksbrevService.lagreEndeligBrev(any()) } returns mockk()
     }
 
     @Test
@@ -75,6 +76,13 @@ internal class BeslutteVedtakStegTest {
         assertThat(nesteSteg).isEqualTo(StegType.SEND_TIL_BESLUTTER)
         assertThat(taskSlot.captured.type).isEqualTo(OpprettOppgaveTask.TYPE)
         assertThat(deserializedPayload.oppgavetype).isEqualTo(Oppgavetype.BehandleUnderkjentVedtak)
+    }
+
+    @Test
+    internal fun `Skal lagre brev`() {
+        utførTotrinnskontroll(true)
+
+        verify { vedtaksbrevService.lagreEndeligBrev(behandlingId) }
     }
 
     private fun utførTotrinnskontroll(godkjent: Boolean): StegType {

@@ -64,6 +64,49 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    fun `skal ikke kunne lage endelig brev hvis utkast ikke finnes`() {
+        assertThrows<IllegalStateException> { vedtaksbrevService.lagreEndeligBrev(behandlingId = behandling.id) }
+    }
+
+    @Test
+    fun `skal lage endelig brev basert på utkast`() {
+        val utkast = vedtaksbrevService.lagreBrevUtkast(behandlingId = behandling.id)
+        val endelig = vedtaksbrevService.lagreEndeligBrev(behandlingId = behandling.id)
+
+        assertThat(utkast).usingRecursiveComparison().ignoringFields("brevRequest", "pdf").isEqualTo(endelig)
+        assertThat(utkast.utkastBrevRequest).usingRecursiveComparison()
+                .ignoringFields("signaturBeslutter")
+                .isEqualTo(endelig.brevRequest)
+    }
+
+    @Test
+    fun `utkast skal lagres i databasen`() {
+        val utkast = vedtaksbrevService.lagreBrevUtkast(behandlingId = behandling.id)
+        val forventetRequest = vedtaksbrevService.lagBrevRequest(behandlingId = behandling.id)
+
+        assertThat(utkast).isEqualTo(vedtaksbrevRepository.findByIdOrThrow(behandling.id))
+        assertThat(forventetRequest).isEqualTo(vedtaksbrevRepository.findByIdOrThrow(behandling.id).utkastBrevRequest)
+        assertThat(vedtaksbrevRepository.findByIdOrThrow(behandling.id).utkastPdf).isNotNull
+    }
+
+    @Test
+    fun `endelig brev skal lagres i databasen`() {
+        vedtaksbrevService.lagreBrevUtkast(behandlingId = behandling.id)
+        val endelig = vedtaksbrevService.lagreEndeligBrev(behandlingId = behandling.id)
+
+        assertThat(endelig).isEqualTo(vedtaksbrevRepository.findByIdOrThrow(behandling.id))
+        assertThat(vedtaksbrevRepository.findByIdOrThrow(behandling.id).pdf).isNotNull
+    }
+
+    @Test
+    fun `endelig brev skal ikke lagres ved generering av utkast`() {
+        vedtaksbrevService.lagreBrevUtkast(behandlingId = behandling.id)
+
+        assertThat(vedtaksbrevRepository.findByIdOrThrow(behandling.id).brevRequest).isNull()
+        assertThat(vedtaksbrevRepository.findByIdOrThrow(behandling.id).pdf).isNull()
+    }
+
+    @Test
     internal fun `skal journalføre vedtaksbrev`() {
         val brevClient = mockk<BrevClient>()
         val behandlingService = mockk<BehandlingService>()
