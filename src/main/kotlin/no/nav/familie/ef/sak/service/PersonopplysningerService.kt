@@ -1,10 +1,12 @@
 package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.api.dto.PersonopplysningerDto
+import no.nav.familie.ef.sak.domene.GrunnlagsdataMedType
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
 import no.nav.familie.ef.sak.integration.dto.pdl.visningsnavn
 import no.nav.familie.ef.sak.mapper.PersonopplysningerMapper
+import no.nav.familie.ef.sak.repository.domain.GrunnlagsdataType
 import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -23,23 +25,23 @@ class PersonopplysningerService(private val personService: PersonService,
         val søknad = søknadService.hentOvergangsstønad(behandlingId)
         val personIdent = søknad.fødselsnummer
         val grunnlagsdata = persisterGrunnlagsdataService.hentGrunnlagsdata(behandlingId)
-        val egenAnsatt =  familieIntegrasjonerClient.egenAnsatt(personIdent)
-
-
-         return personopplysningerMapper.tilPersonopplysninger(
-                 grunnlagsdata,
-                 egenAnsatt,
-                 personIdent
-            )
-    }
-
-    fun hentPersonopplysninger(personIdent: String): PersonopplysningerDto {
-        val grunnlagsdata = persisterGrunnlagsdataService.hentGrunnlagsdataFraRegister(personIdent, emptyList())
-        val egenAnsatt =  familieIntegrasjonerClient.egenAnsatt(personIdent)
+        val egenAnsatt = familieIntegrasjonerClient.egenAnsatt(personIdent)
 
 
         return personopplysningerMapper.tilPersonopplysninger(
                 grunnlagsdata,
+                egenAnsatt,
+                personIdent
+        )
+    }
+
+    fun hentPersonopplysninger(personIdent: String): PersonopplysningerDto {
+        val grunnlagsdata = persisterGrunnlagsdataService.hentGrunnlagsdataFraRegister(personIdent, emptyList())
+        val egenAnsatt = familieIntegrasjonerClient.egenAnsatt(personIdent)
+
+
+        return personopplysningerMapper.tilPersonopplysninger(
+                GrunnlagsdataMedType(grunnlagsdata, GrunnlagsdataType.V1),
                 egenAnsatt,
                 personIdent
         )

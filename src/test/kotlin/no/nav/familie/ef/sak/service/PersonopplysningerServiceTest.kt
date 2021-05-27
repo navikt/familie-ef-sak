@@ -158,7 +158,8 @@ internal class PersonopplysningerServiceTest {
     "oppholdstillatelse" : "PERMANENT",
     "fraDato" : "2020-01-01",
     "tilDato" : null
-  } ]
+  } ],
+  "grunnlagsdataType" : "V1"
 }""")
     }
 }

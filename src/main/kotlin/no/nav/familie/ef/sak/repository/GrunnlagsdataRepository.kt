@@ -10,10 +10,10 @@ interface GrunnlagsdataRepository : RepositoryInterface<Grunnlagsdata, UUID>, In
 
     // language=PostgreSQL
     @Query("""
-        SELECT b.id
+        SELECT b.id AS first, b.status AS second
             FROM behandling b
             LEFT JOIN grunnlagsdata g ON b.id = g.behandling_id
             WHERE g.data IS NULL
             """)
-    fun finnBehandlingerSomManglerGrunnlagsdata(): List<UUID>
+    fun finnBehandlingerSomManglerGrunnlagsdata(): List<Pair<UUID, String>>
 }

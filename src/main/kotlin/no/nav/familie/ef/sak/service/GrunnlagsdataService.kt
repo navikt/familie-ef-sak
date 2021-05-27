@@ -1,10 +1,10 @@
 package no.nav.familie.ef.sak.service
 
-import no.nav.familie.ef.sak.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.api.dto.MedlemskapDto
 import no.nav.familie.ef.sak.api.dto.SivilstandInngangsvilkårDto
 import no.nav.familie.ef.sak.api.dto.VilkårGrunnlagDto
-import no.nav.familie.ef.sak.domene.GrunnlagsdataDomene
+import no.nav.familie.ef.sak.domene.GrunnlagsdataMedType
+import no.nav.familie.ef.sak.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.mapper.AktivitetMapper
 import no.nav.familie.ef.sak.mapper.BarnMedSamværMapper
 import no.nav.familie.ef.sak.mapper.BosituasjonMapper
@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.mapper.SagtOppEllerRedusertStillingMapper
 import no.nav.familie.ef.sak.mapper.SivilstandMapper
 import no.nav.familie.ef.sak.mapper.SivilstandsplanerMapper
 import no.nav.familie.ef.sak.repository.RegistergrunnlagRepository
+import no.nav.familie.ef.sak.repository.domain.GrunnlagsdataType
 import no.nav.familie.ef.sak.repository.domain.Registergrunnlag
 import no.nav.familie.ef.sak.repository.domain.RegistergrunnlagData
 import no.nav.familie.ef.sak.repository.domain.Registergrunnlagsendringer
@@ -48,11 +49,13 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
 
     fun hentGrunnlag(behandlingId: UUID,
                      søknad: SøknadsskjemaOvergangsstønad): VilkårGrunnlagDto {
-        val registergrunnlag = registergrunnlagRepository.findByIdOrThrow(behandlingId)
         val registergrunnlagData =
                 when (featureToggleService.isEnabled(PersisterGrunnlagsdataService.BRUK_NY_DATAMODELL_TOGGLE, false)) {
-                    true -> persisterGrunnlagsdataService.hentGrunnlagsdata(behandlingId).let { mapTilRegistergrunnlagData(it, søknad) }
-                    else -> registergrunnlag.endringer ?: registergrunnlag.data
+                    true -> mapTilRegistergrunnlagData(persisterGrunnlagsdataService.hentGrunnlagsdata(behandlingId), søknad)
+                    else -> {
+                        val registergrunnlag = registergrunnlagRepository.findByIdOrThrow(behandlingId)
+                        registergrunnlag.endringer ?: registergrunnlag.data
+                    }
                 }
 
         val medlemskapSøknadsgrunnlag = medlemskapMapper.mapSøknadsgrunnlag(medlemskapsdetaljer = søknad.medlemskap)
@@ -78,7 +81,8 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
                                  barnMedSamvær = barnMedSamvær,
                                  sivilstandsplaner = sivilstandsplaner,
                                  aktivitet = aktivitet,
-                                 sagtOppEllerRedusertStilling = sagtOppEllerRedusertStilling)
+                                 sagtOppEllerRedusertStilling = sagtOppEllerRedusertStilling,
+                                 grunnlagsdataType =  GrunnlagsdataType.BLANKETT_ETTER_FERDIGSTILLING) // TODO oppdater denne til vid opprydding og sett til den som hentes fra grunnlagsdata
     }
 
     fun godkjennEndringerIRegistergrunnlag(behandlingId: UUID) {
@@ -161,8 +165,9 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
         return mapTilRegistergrunnlagData(grunnlagsdata, søknad)
     }
 
-    private fun mapTilRegistergrunnlagData(grunnlagsdata: GrunnlagsdataDomene,
+    private fun mapTilRegistergrunnlagData(grunnlagsdataMedType: GrunnlagsdataMedType,
                                            søknad: SøknadsskjemaOvergangsstønad): RegistergrunnlagData {
+        val grunnlagsdata = grunnlagsdataMedType.grunnlagsdata
         val søker = grunnlagsdata.søker
         val barnMedSamvær = BarnMedSamværMapper.mapRegistergrunnlag(grunnlagsdata.barn,
                                                                     grunnlagsdata.annenForelder,
@@ -171,7 +176,8 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
 
         return RegistergrunnlagData(medlemskap = medlemskapMapper.mapRegistergrunnlag(søker, grunnlagsdata.medlUnntak),
                                     sivilstand = SivilstandMapper.mapRegistergrunnlag(søker),
-                                    barnMedSamvær = barnMedSamvær)
+                                    barnMedSamvær = barnMedSamvær,
+                                    grunnlagsdataType = grunnlagsdataMedType.type)
     }
 
     private fun finnEndringerIRegistergrunnlag(registergrunnlag: Registergrunnlag): Registergrunnlagsendringer {

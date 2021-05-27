@@ -20,8 +20,12 @@ import no.nav.familie.ef.sak.integration.dto.pdl.Telefonnummer
 import no.nav.familie.ef.sak.integration.dto.pdl.TilrettelagtKommunikasjon
 import no.nav.familie.ef.sak.integration.dto.pdl.UtflyttingFraNorge
 import no.nav.familie.ef.sak.integration.dto.pdl.VergemaalEllerFremtidsfullmakt
+import no.nav.familie.ef.sak.repository.domain.GrunnlagsdataType
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import java.time.LocalDate
+
+data class GrunnlagsdataMedType(val grunnlagsdata: GrunnlagsdataDomene,
+                                val type: GrunnlagsdataType)
 
 data class GrunnlagsdataDomene(val søker: Søker,
                                val annenForelder: List<AnnenForelderMedIdent>,

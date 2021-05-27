@@ -140,7 +140,8 @@ internal class GrunnlagsdataServiceTest {
         val endringer = service.hentEndringerIRegistergrunnlag(behandlingId)
         assertThat(endringer).isEqualTo(mapOf("medlemskap" to listOf("folkeregisterpersonstatus"),
                                               "sivilstand" to listOf("type"),
-                                              "barnMedSamvær" to emptyList()))
+                                              "barnMedSamvær" to emptyList(),
+                                              "grunnlagsdataType" to emptyList()))
     }
 
     @Test

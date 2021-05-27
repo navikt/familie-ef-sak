@@ -255,5 +255,11 @@
       }
     },
     "nullable" : false
+  },
+  "grunnlagsdataType" : {
+    "name" : "grunnlagsdataType",
+    "type" : "Enum",
+    "values" : [ "BLANKETT_ETTER_FERDIGSTILLING", "V1" ],
+    "nullable" : true
   }
 }
