@@ -15,6 +15,7 @@ import no.nav.familie.ef.sak.mapper.GrunnlagsdataMapper.mapSøker
 import no.nav.familie.ef.sak.repository.GrunnlagsdataRepository
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.domain.Grunnlagsdata
+import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.data.repository.findByIdOrNull
@@ -67,13 +68,7 @@ class PersisterGrunnlagsdataService(private val pdlClient: PdlClient,
     }
 
     private fun hentLagretGrunnlagsdata(behandlingId: UUID): GrunnlagsdataDomene {
-        val grunnlagsdata = grunnlagsdataRepository.findByIdOrNull(behandlingId)
-        return when {
-            grunnlagsdata?.data != null -> grunnlagsdata.data
-            behandlingService.hentBehandling(behandlingId).type != BehandlingType.BLANKETT ->
-                error("Behandlingen mangler grunnlagsdata, her har noe gått veldig galt. Ring Alexandra")
-            else -> hentGrunnlagsdataFraRegister(behandlingId) // når det er en blankettbehandling som savner grunnlagsdata
-        }
+        return grunnlagsdataRepository.findByIdOrThrow(behandlingId).data
     }
 
     private fun hentGrunnlagsdataFraRegister(behandlingId: UUID): GrunnlagsdataDomene {

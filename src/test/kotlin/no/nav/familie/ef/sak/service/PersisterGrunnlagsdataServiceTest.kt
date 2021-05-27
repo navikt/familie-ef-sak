@@ -51,7 +51,7 @@ internal class PersisterGrunnlagsdataServiceTest {
     }
 
     @Test
-    internal fun `skal kaste feil hvis behandlingen ikke er blanket og savner grunnlagsdata`() {
+    internal fun `skal kaste feil hvis behandlingen savner grunnlagsdata`() {
         val behandling = behandling(fagsak(),
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING)
         val behandlingId = behandling.id
@@ -65,7 +65,7 @@ internal class PersisterGrunnlagsdataServiceTest {
     }
 
     @Test
-    internal fun `skal ikke kaste feil hvis behandlingen er blanket og savner grunnlagsdata`() {
+    internal fun `skal kaste feil hvis behandlingen er blanket og savner grunnlagsdata`() {
         val behandling = behandling(fagsak(), type = BehandlingType.BLANKETT)
         val behandlingId = behandling.id
 
@@ -73,8 +73,8 @@ internal class PersisterGrunnlagsdataServiceTest {
         every { grunnlagsdataRepository.findByIdOrNull(behandlingId) } returns null
         every { behandlingService.hentBehandling(behandlingId) } returns behandling
 
-        service.hentGrunnlagsdata(behandlingId)
+        assertThat(catchThrowable { service.hentGrunnlagsdata(behandlingId) })
 
-        verify(exactly = 1) { pdlClient.hentSøker(any()) }
+        verify(exactly = 0) { pdlClient.hentSøker(any()) }
     }
 }

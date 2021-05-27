@@ -38,12 +38,18 @@ internal class GrunnlagsdataRepositoryTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `finnBehandlingerSomManglerGrunnlagsdata skal finne behandlinger som har status OPPRETTET`() {
         val fagsak = fagsakRepository.insert(fagsak())
-        val behandling = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.OPPRETTET, type = BehandlingType.BLANKETT))
-        val behandling2 = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.UTREDES, type = BehandlingType.FØRSTEGANGSBEHANDLING))
-        behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.FERDIGSTILT, type = BehandlingType.BLANKETT))
+        val behandling = behandlingRepository.insert(behandling(fagsak,
+                                                                status = BehandlingStatus.OPPRETTET,
+                                                                type = BehandlingType.BLANKETT))
+        val behandling2 = behandlingRepository.insert(behandling(fagsak,
+                                                                 status = BehandlingStatus.UTREDES,
+                                                                 type = BehandlingType.FØRSTEGANGSBEHANDLING))
+        val behandling3 = behandlingRepository.insert(behandling(fagsak,
+                                                                 status = BehandlingStatus.FERDIGSTILT,
+                                                                 type = BehandlingType.BLANKETT))
 
         assertThat(grunnlagsdataRepository.finnBehandlingerSomManglerGrunnlagsdata())
-                .containsExactlyInAnyOrder(behandling.id, behandling2.id)
+                .containsExactlyInAnyOrder(behandling.id, behandling2.id, behandling3.id)
     }
 
     private fun opprettGrunnlagsdata() = GrunnlagsdataDomene(Søker(adressebeskyttelse = null,

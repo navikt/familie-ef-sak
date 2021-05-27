@@ -7,13 +7,13 @@ import java.util.UUID
 
 @Repository
 interface GrunnlagsdataRepository : RepositoryInterface<Grunnlagsdata, UUID>, InsertUpdateRepository<Grunnlagsdata> {
-    // language=PostgreSQL
 
+    // language=PostgreSQL
     @Query("""
         SELECT b.id
             FROM behandling b
             LEFT JOIN grunnlagsdata g ON b.id = g.behandling_id
-            WHERE b.status IN ('OPPRETTET', 'UTREDES') and g.data IS NULL
+            WHERE g.data IS NULL
             """)
     fun finnBehandlingerSomManglerGrunnlagsdata(): List<UUID>
 }
