@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.api.dto
 
 import no.nav.familie.ef.sak.integration.dto.pdl.Navn
 import no.nav.familie.ef.sak.integration.dto.pdl.visningsnavn
-import no.nav.familie.ef.sak.repository.domain.GrunnlagsdataType
 import java.time.LocalDate
 import no.nav.familie.ef.sak.integration.dto.pdl.Folkeregisterpersonstatus as PdlFolkeregisterpersonstatus
 
@@ -28,7 +27,7 @@ data class PersonopplysningerDto(val personIdent: String,
                                  val innflyttingTilNorge: List<InnflyttingDto>,
                                  val utflyttingFraNorge: List<UtflyttingDto>,
                                  val oppholdstillatelse: List<OppholdstillatelseDto>,
-                                 val grunnlagsdataType: GrunnlagsdataType)
+                                 val lagtTilEtterFerdigstilling: Boolean)
 
 data class BarnDto(val personIdent: String,
                    val navn: String,

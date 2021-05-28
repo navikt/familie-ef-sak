@@ -159,7 +159,7 @@ internal class PersonopplysningerServiceTest {
     "fraDato" : "2020-01-01",
     "tilDato" : null
   } ],
-  "grunnlagsdataType" : "V1"
+  "lagtTilEtterFerdigstilling" : false
 }""")
     }
 }

@@ -256,10 +256,9 @@
     },
     "nullable" : false
   },
-  "grunnlagsdataType" : {
-    "name" : "grunnlagsdataType",
-    "type" : "Enum",
-    "values" : [ "BLANKETT_ETTER_FERDIGSTILLING", "V1" ],
+  "lagtTilEtterFerdigstilling" : {
+    "name" : "lagtTilEtterFerdigstilling",
+    "type" : "Boolean",
     "nullable" : true
   }
 }

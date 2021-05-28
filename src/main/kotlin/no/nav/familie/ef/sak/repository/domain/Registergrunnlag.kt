@@ -20,8 +20,7 @@ data class Registergrunnlag(@Id
 data class RegistergrunnlagData(val medlemskap: MedlemskapRegistergrunnlagDto,
                                 val sivilstand: SivilstandRegistergrunnlagDto,
                                 val barnMedSamvær: List<BarnMedSamværRegistergrunnlagDto>,
-                                val grunnlagsdataType: GrunnlagsdataType = GrunnlagsdataType.BLANKETT_ETTER_FERDIGSTILLING
-)
+                                val lagtTilEtterFerdigstilling: Boolean = false)
 
 /**
  * Typ som definierer felt som har endringer i [RegistergrunnlagData], eks returnerer den

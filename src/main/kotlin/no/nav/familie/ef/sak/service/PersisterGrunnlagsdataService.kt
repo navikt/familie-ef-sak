@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.domene.GrunnlagsdataDomene
-import no.nav.familie.ef.sak.domene.GrunnlagsdataMedType
+import no.nav.familie.ef.sak.domene.GrunnlagsdataMedMetadata
 import no.nav.familie.ef.sak.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.PdlClient
@@ -16,7 +16,6 @@ import no.nav.familie.ef.sak.mapper.GrunnlagsdataMapper.mapSøker
 import no.nav.familie.ef.sak.repository.GrunnlagsdataRepository
 import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import no.nav.familie.ef.sak.repository.domain.Grunnlagsdata
-import no.nav.familie.ef.sak.repository.domain.GrunnlagsdataType
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
@@ -45,12 +44,11 @@ class PersisterGrunnlagsdataService(private val pdlClient: PdlClient,
                         logger.info("Lagrer grunnlagsdata for $behandlingId")
                         try {
                             val grunnlagsdata = hentGrunnlagsdataFraRegister(behandlingId)
-                            val type = if (BehandlingStatus.valueOf(status).behandlingErLåstForVidereRedigering())
-                                GrunnlagsdataType.BLANKETT_ETTER_FERDIGSTILLING else GrunnlagsdataType.V1
-
+                            val lagtTilEtterFerdigstilling =
+                                    BehandlingStatus.valueOf(status).behandlingErLåstForVidereRedigering()
                             grunnlagsdataRepository.insert(Grunnlagsdata(behandlingId = behandlingId,
                                                                          data = grunnlagsdata,
-                                                                         type = type))
+                                                                         lagtTilEtterFerdigstilling = lagtTilEtterFerdigstilling))
                         } catch (e: Exception) {
                             logger.warn("Feilet $behandlingId")
                             secureLogger.warn("Feilet $behandlingId", e)
@@ -67,13 +65,13 @@ class PersisterGrunnlagsdataService(private val pdlClient: PdlClient,
         grunnlagsdataRepository.insert(Grunnlagsdata(behandlingId = behandlingId, data = grunnlagsdata))
     }
 
-    fun hentGrunnlagsdata(behandlingId: UUID): GrunnlagsdataMedType {
+    fun hentGrunnlagsdata(behandlingId: UUID): GrunnlagsdataMedMetadata {
         return when (featureToggleService.isEnabled(BRUK_NY_DATAMODELL_TOGGLE, false)) {
             true -> {
                 val grunnlagsdata = hentLagretGrunnlagsdata(behandlingId)
-                GrunnlagsdataMedType(grunnlagsdata.data, grunnlagsdata.type)
+                GrunnlagsdataMedMetadata(grunnlagsdata.data, false)
             }
-            false -> GrunnlagsdataMedType(hentGrunnlagsdataFraRegister(behandlingId), GrunnlagsdataType.V1)
+            false -> GrunnlagsdataMedMetadata(hentGrunnlagsdataFraRegister(behandlingId), false)
         }
     }
 

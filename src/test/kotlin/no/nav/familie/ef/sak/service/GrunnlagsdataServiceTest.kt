@@ -141,7 +141,7 @@ internal class GrunnlagsdataServiceTest {
         assertThat(endringer).isEqualTo(mapOf("medlemskap" to listOf("folkeregisterpersonstatus"),
                                               "sivilstand" to listOf("type"),
                                               "barnMedSamvær" to emptyList(),
-                                              "grunnlagsdataType" to emptyList()))
+                                              "lagtTilEtterFerdigstilling" to emptyList()))
     }
 
     @Test

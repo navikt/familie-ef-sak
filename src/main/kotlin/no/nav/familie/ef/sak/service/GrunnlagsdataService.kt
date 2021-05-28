@@ -3,7 +3,7 @@ package no.nav.familie.ef.sak.service
 import no.nav.familie.ef.sak.api.dto.MedlemskapDto
 import no.nav.familie.ef.sak.api.dto.SivilstandInngangsvilkårDto
 import no.nav.familie.ef.sak.api.dto.VilkårGrunnlagDto
-import no.nav.familie.ef.sak.domene.GrunnlagsdataMedType
+import no.nav.familie.ef.sak.domene.GrunnlagsdataMedMetadata
 import no.nav.familie.ef.sak.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.mapper.AktivitetMapper
 import no.nav.familie.ef.sak.mapper.BarnMedSamværMapper
@@ -13,7 +13,6 @@ import no.nav.familie.ef.sak.mapper.SagtOppEllerRedusertStillingMapper
 import no.nav.familie.ef.sak.mapper.SivilstandMapper
 import no.nav.familie.ef.sak.mapper.SivilstandsplanerMapper
 import no.nav.familie.ef.sak.repository.RegistergrunnlagRepository
-import no.nav.familie.ef.sak.repository.domain.GrunnlagsdataType
 import no.nav.familie.ef.sak.repository.domain.Registergrunnlag
 import no.nav.familie.ef.sak.repository.domain.RegistergrunnlagData
 import no.nav.familie.ef.sak.repository.domain.Registergrunnlagsendringer
@@ -82,7 +81,7 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
                                  sivilstandsplaner = sivilstandsplaner,
                                  aktivitet = aktivitet,
                                  sagtOppEllerRedusertStilling = sagtOppEllerRedusertStilling,
-                                 grunnlagsdataType =  GrunnlagsdataType.BLANKETT_ETTER_FERDIGSTILLING) // TODO oppdater denne til vid opprydding og sett til den som hentes fra grunnlagsdata
+                                 lagtTilEtterFerdigstilling =  false) // TODO oppdater denne til vid opprydding og sett til den som hentes fra grunnlagsdata
     }
 
     fun godkjennEndringerIRegistergrunnlag(behandlingId: UUID) {
@@ -165,9 +164,9 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
         return mapTilRegistergrunnlagData(grunnlagsdata, søknad)
     }
 
-    private fun mapTilRegistergrunnlagData(grunnlagsdataMedType: GrunnlagsdataMedType,
+    private fun mapTilRegistergrunnlagData(grunnlagsdataMedMetadata: GrunnlagsdataMedMetadata,
                                            søknad: SøknadsskjemaOvergangsstønad): RegistergrunnlagData {
-        val grunnlagsdata = grunnlagsdataMedType.grunnlagsdata
+        val grunnlagsdata = grunnlagsdataMedMetadata.grunnlagsdata
         val søker = grunnlagsdata.søker
         val barnMedSamvær = BarnMedSamværMapper.mapRegistergrunnlag(grunnlagsdata.barn,
                                                                     grunnlagsdata.annenForelder,
@@ -177,7 +176,7 @@ class GrunnlagsdataService(private val registergrunnlagRepository: Registergrunn
         return RegistergrunnlagData(medlemskap = medlemskapMapper.mapRegistergrunnlag(søker, grunnlagsdata.medlUnntak),
                                     sivilstand = SivilstandMapper.mapRegistergrunnlag(søker),
                                     barnMedSamvær = barnMedSamvær,
-                                    grunnlagsdataType = grunnlagsdataMedType.type)
+                                    lagtTilEtterFerdigstilling = grunnlagsdataMedMetadata.lagtTilEtterFerdigstilling)
     }
 
     private fun finnEndringerIRegistergrunnlag(registergrunnlag: Registergrunnlag): Registergrunnlagsendringer {

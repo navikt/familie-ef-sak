@@ -14,7 +14,7 @@ import no.nav.familie.ef.sak.api.dto.Sivilstandstype
 import no.nav.familie.ef.sak.api.dto.TelefonnummerDto
 import no.nav.familie.ef.sak.api.dto.UtflyttingDto
 import no.nav.familie.ef.sak.domene.BarnMedIdent
-import no.nav.familie.ef.sak.domene.GrunnlagsdataMedType
+import no.nav.familie.ef.sak.domene.GrunnlagsdataMedMetadata
 import no.nav.familie.ef.sak.domene.Søker
 import no.nav.familie.ef.sak.integration.dto.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.integration.dto.pdl.Familierelasjonsrolle
@@ -31,15 +31,15 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                                private val arbeidsfordelingService: ArbeidsfordelingService,
                                private val kodeverkService: KodeverkService) {
 
-    fun tilPersonopplysninger(grunnlagsdataMedType: GrunnlagsdataMedType,
+    fun tilPersonopplysninger(grunnlagsdataMedMetadata: GrunnlagsdataMedMetadata,
                               egenAnsatt: Boolean,
                               ident: String): PersonopplysningerDto {
-        val grunnlagsdata = grunnlagsdataMedType.grunnlagsdata
+        val grunnlagsdata = grunnlagsdataMedMetadata.grunnlagsdata
         val søker = grunnlagsdata.søker
         val identNavn = grunnlagsdata.annenForelder.associate { it.personIdent to it.navn.visningsnavn() }
 
         return PersonopplysningerDto(
-                grunnlagsdataType = grunnlagsdataMedType.type,
+                lagtTilEtterFerdigstilling = grunnlagsdataMedMetadata.lagtTilEtterFerdigstilling,
                 adressebeskyttelse = søker.adressebeskyttelse
                         ?.let { Adressebeskyttelse.valueOf(it.gradering.name) },
                 folkeregisterpersonstatus = søker.folkeregisterpersonstatus.gjeldende()

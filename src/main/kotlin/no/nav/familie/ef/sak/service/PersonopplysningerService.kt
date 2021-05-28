@@ -1,12 +1,11 @@
 package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.api.dto.PersonopplysningerDto
-import no.nav.familie.ef.sak.domene.GrunnlagsdataMedType
+import no.nav.familie.ef.sak.domene.GrunnlagsdataMedMetadata
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
 import no.nav.familie.ef.sak.integration.dto.pdl.visningsnavn
 import no.nav.familie.ef.sak.mapper.PersonopplysningerMapper
-import no.nav.familie.ef.sak.repository.domain.GrunnlagsdataType
 import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -41,7 +40,7 @@ class PersonopplysningerService(private val personService: PersonService,
 
 
         return personopplysningerMapper.tilPersonopplysninger(
-                GrunnlagsdataMedType(grunnlagsdata, GrunnlagsdataType.V1),
+                GrunnlagsdataMedMetadata(grunnlagsdata, lagtTilEtterFerdigstilling = false),
                 egenAnsatt,
                 personIdent
         )
