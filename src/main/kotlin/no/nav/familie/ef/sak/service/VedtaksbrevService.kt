@@ -16,6 +16,7 @@ import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Dokument
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Filtype
+import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.*
@@ -50,13 +51,13 @@ class VedtaksbrevService(private val brevClient: BrevClient,
                            signaturSaksbehandler = signaturSaksbehandler)
     }
 
-    // TODO: Slett denne
-    @Deprecated("Skal slettes snart")
-    fun lagPdf(brevRequest: BrevRequest, brevMal: String = "innvilgetVedtakMVP"): ByteArray {
-        return brevClient.genererBrev("bokmaal",
-                                      brevMal,
-                                      brevRequest)
-    }
+//    // TODO: Slett denne
+//    @Deprecated("Skal slettes snart")
+//    fun lagPdf(brevRequest: BrevRequest, brevMal: String = "innvilgetVedtakMVP"): ByteArray {
+//        return brevClient.genererBrev("bokmaal",
+//                                      brevMal,
+//                                      brevRequest)
+//    }
 
     fun lagPdf(brevRequest: JsonNode, brevMal: String): ByteArray {
         return brevClient.genererBrev("bokmaal",
@@ -64,17 +65,32 @@ class VedtaksbrevService(private val brevClient: BrevClient,
                                       brevRequest)
     }
 
-    fun lagreBrevUtkast(behandlingId: UUID): Vedtaksbrev {
-        val request = lagBrevRequest(behandlingId)
-        val pdf = lagPdf(request)
-        val brev = Vedtaksbrev(behandlingId, request, null, Fil(pdf), null)
-        return brevRepository.insert(brev)
+    fun lagBeslutterPdf(brevRequest: JsonNode, brevMal: String, beslutterSignatur: String): ByteArray {
+        return brevClient.genererBeslutterbrev("bokmaal",
+                                               brevMal,
+                                               brevRequest,
+                                               beslutterSignatur)
     }
+
+//    fun lagreBrevUtkast(behandlingId: UUID): Vedtaksbrev {
+//        val request = lagBrevRequest(behandlingId)
+//        val pdf = lagPdf(request)
+//        val brev = Vedtaksbrev(behandlingId, request, null, Fil(pdf), null)
+//        return brevRepository.insert(brev)
+//    }
 
     fun lagreEndeligBrev(behandlingId: UUID): Vedtaksbrev {
         val vedtaksbrev = brevRepository.findByIdOrThrow(behandlingId)
-        val endeligRequest = vedtaksbrev.utkastBrevRequest.copy(signaturBeslutter = SikkerhetContext.hentSaksbehandlerNavn())
-        return brevRepository.update(vedtaksbrev.copy(pdf = Fil(lagPdf(endeligRequest)), brevRequest = endeligRequest))
+        val besluttersignatur = SikkerhetContext.hentSaksbehandlerNavn()
+        val besluttervedtaksbrev = vedtaksbrev.copy(beslutterPdf = Fil(lagBeslutterbrev(vedtaksbrev, besluttersignatur)),
+                                                    besluttersignatur = besluttersignatur)
+        return brevRepository.update(besluttervedtaksbrev)
+    }
+
+    private fun lagBeslutterbrev(vedtaksBrev: Vedtaksbrev, besluttersignatur: String): ByteArray {
+        val brevRequest = objectMapper.readTree(vedtaksBrev.saksbehandlerEnBrevRequest)
+
+        return lagBeslutterPdf(brevRequest, vedtaksBrev.brevmal, besluttersignatur)
     }
 
     fun lagBrev(behandlingId: UUID, brevRequest: JsonNode, brevMal: String): ByteArray {
@@ -90,7 +106,10 @@ class VedtaksbrevService(private val brevClient: BrevClient,
         val ident = fagsak.hentAktivIdent();
         val vedtaksbrev = hentBrev(behandlingId)
         val dokumenter =
-                listOf(Dokument(vedtaksbrev.pdf?.bytes ?: error("Mangler pdf ved journalføring av brev for bedhandling=$behandlingId"), Filtype.PDFA, dokumenttype = Dokumenttype.VEDTAKSBREV_OVERGANGSSTØNAD))
+                listOf(Dokument(vedtaksbrev.beslutterPdf?.bytes
+                                ?: error("Mangler pdf ved journalføring av brev for bedhandling=$behandlingId"),
+                                Filtype.PDFA,
+                                dokumenttype = Dokumenttype.VEDTAKSBREV_OVERGANGSSTØNAD))
         val journalførendeEnhet = arbeidsfordelingService.hentNavEnhet(ident)
 
         return journalpostClient.arkiverDokument(ArkiverDokumentRequest(

@@ -39,7 +39,12 @@ class BrevClient(@Value("\${FAMILIE_BREV_API_URL}")
         return postForEntity(url, request, HttpHeaders().medContentTypeJsonUTF8())
     }
 
+    fun genererBeslutterbrev(målform: String, brevMal: String, brevrequest: JsonNode, besluttersignatur: String): ByteArray {
+        TODO("Not yet implemented")
+    }
+
     companion object {
+
         val ef = "ef-brev"
         val test = "testdata"
     }
