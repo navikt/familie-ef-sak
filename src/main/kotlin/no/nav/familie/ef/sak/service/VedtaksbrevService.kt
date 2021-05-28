@@ -16,7 +16,6 @@ import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Dokument
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Filtype
-import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.*
@@ -65,7 +64,7 @@ class VedtaksbrevService(private val brevClient: BrevClient,
                                       brevRequest)
     }
 
-    fun lagBeslutterPdf(brevRequest: JsonNode, brevMal: String, beslutterSignatur: String): ByteArray {
+    fun lagBeslutterPdf(brevRequest: String, brevMal: String, beslutterSignatur: String): ByteArray {
         return brevClient.genererBeslutterbrev("bokmaal",
                                                brevMal,
                                                brevRequest,
@@ -79,18 +78,14 @@ class VedtaksbrevService(private val brevClient: BrevClient,
 //        return brevRepository.insert(brev)
 //    }
 
-    fun lagreEndeligBrev(behandlingId: UUID): Vedtaksbrev {
+    fun lagBeslutterBrev(behandlingId: UUID): Vedtaksbrev {
         val vedtaksbrev = brevRepository.findByIdOrThrow(behandlingId)
         val besluttersignatur = SikkerhetContext.hentSaksbehandlerNavn()
-        val besluttervedtaksbrev = vedtaksbrev.copy(beslutterPdf = Fil(lagBeslutterbrev(vedtaksbrev, besluttersignatur)),
+        val besluttervedtaksbrev = vedtaksbrev.copy(beslutterPdf = Fil(lagBeslutterPdf(vedtaksbrev.saksbehandlerBrevrequest,
+                                                                                       vedtaksbrev.brevmal,
+                                                                                       besluttersignatur)),
                                                     besluttersignatur = besluttersignatur)
         return brevRepository.update(besluttervedtaksbrev)
-    }
-
-    private fun lagBeslutterbrev(vedtaksBrev: Vedtaksbrev, besluttersignatur: String): ByteArray {
-        val brevRequest = objectMapper.readTree(vedtaksBrev.saksbehandlerEnBrevRequest)
-
-        return lagBeslutterPdf(brevRequest, vedtaksBrev.brevmal, besluttersignatur)
     }
 
     fun lagBrev(behandlingId: UUID, brevRequest: JsonNode, brevMal: String): ByteArray {
@@ -127,6 +122,10 @@ class VedtaksbrevService(private val brevClient: BrevClient,
     }
 
     fun lagreBrevrequest(behandlingId: UUID, brevrequest: JsonNode, brevmal: String, pdf: Fil?) {
-        brevRepository.insert(Vedtaksbrev(behandlingId, brevrequest.toString(), brevmal, pdf))
+        val saksbehandlersignatur = SikkerhetContext.hentSaksbehandlerNavn()
+        when (brevRepository.existsById(behandlingId)) {
+            true -> brevRepository.update(Vedtaksbrev(behandlingId, brevrequest.toString(), brevmal, pdf, saksbehandlersignatur))
+            false -> brevRepository.insert(Vedtaksbrev(behandlingId, brevrequest.toString(), brevmal, pdf, saksbehandlersignatur))
+        }
     }
 }

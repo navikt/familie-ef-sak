@@ -6,7 +6,8 @@ import java.util.*
 
 data class Vedtaksbrev(@Id
                        val behandlingId: UUID,
-                       val saksbehandlerEnBrevRequest: String,
+                       val saksbehandlerBrevrequest: String,
                        val brevmal: String,
                        val beslutterPdf: Fil? = null,
-                       val besluttersignatur: String?)
+                       val saksbehandlersignatur: String,
+                       val besluttersignatur: String? = null)

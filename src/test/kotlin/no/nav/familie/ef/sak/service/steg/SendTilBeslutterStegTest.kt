@@ -26,9 +26,8 @@ internal class SendTilBeslutterStegTest {
     private val fagsakService = mockk<FagsakService>()
     private val oppgaveService = mockk<OppgaveService>()
     private val behandlingService = mockk<BehandlingService>(relaxed = true)
-    private val vedtaksbrevService = mockk<VedtaksbrevService>()
 
-    private val beslutteVedtakSteg = SendTilBeslutterSteg(taskRepository, oppgaveService, behandlingService, vedtaksbrevService)
+    private val beslutteVedtakSteg = SendTilBeslutterSteg(taskRepository, oppgaveService, behandlingService)
     private val fagsak = Fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD,
                                 søkerIdenter = setOf(FagsakPerson(ident = "12345678901")))
 
@@ -50,7 +49,6 @@ internal class SendTilBeslutterStegTest {
         } returns Task("", "", Properties())
         every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(any(), any()) } returns null
 
-        every { vedtaksbrevService.lagreBrevUtkast(any()) } returns mockk()
     }
 
     @Test
@@ -63,12 +61,6 @@ internal class SendTilBeslutterStegTest {
         utførOgVerifiserKall(Oppgavetype.BehandleUnderkjentVedtak)
     }
 
-    @Test
-    internal fun `Skal lagre brev`(){
-        utførSteg()
-
-        verify { vedtaksbrevService.lagreBrevUtkast(behandling.id) }
-    }
 
     private fun utførOgVerifiserKall(oppgavetype: Oppgavetype) {
         every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype, any()) } returns mockk()

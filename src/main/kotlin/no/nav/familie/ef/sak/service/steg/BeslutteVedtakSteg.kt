@@ -17,7 +17,6 @@ import no.nav.familie.ef.sak.task.OpprettOppgaveTask.OpprettOppgaveTaskData
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 
 @Service
 class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
@@ -40,7 +39,7 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
 
         return if (data.godkjent) {
             if (behandling.type != BehandlingType.BLANKETT) {
-                vedtaksbrevService.lagreEndeligBrev(behandling.id)
+                vedtaksbrevService.lagBeslutterBrev(behandling.id)
                 opprettTaskForIverksettMotOppdrag(behandling)
             } else {
                 opprettTaskForJournalførBlankett(behandling)

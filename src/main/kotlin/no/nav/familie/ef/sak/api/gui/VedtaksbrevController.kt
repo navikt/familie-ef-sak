@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.familie.ef.sak.service.TilgangService
 import no.nav.familie.ef.sak.service.VedtaksbrevService
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
@@ -30,8 +29,6 @@ class VedtaksbrevController(private val brevService: VedtaksbrevService,
     @GetMapping("/{behandlingId}")
     fun hentBrev(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
-        val vedtaksBrev = brevService.hentBrev(behandlingId)
-        val brevRequest = objectMapper.readTree(vedtaksBrev.saksbehandlerEnBrevRequest)
-        return Ressurs.success(brevService.lagBrev(vedtaksBrev.behandlingId, brevRequest, vedtaksBrev.brevmal))
+        return Ressurs.success(brevService.lagBeslutterBrev(behandlingId).beslutterPdf!!.bytes)
     }
 }

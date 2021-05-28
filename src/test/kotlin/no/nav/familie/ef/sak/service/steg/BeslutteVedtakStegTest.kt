@@ -3,8 +3,6 @@ package no.nav.familie.ef.sak.service.steg
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.*
 import no.nav.familie.ef.sak.api.dto.BeslutteVedtakDto
-import no.nav.familie.ef.sak.api.dto.BrevRequest
-import no.nav.familie.ef.sak.api.dto.TotrinnskontrollDto
 import no.nav.familie.ef.sak.repository.VedtaksbrevRepository
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.service.FagsakService
@@ -56,7 +54,7 @@ internal class BeslutteVedtakStegTest {
         } returns Task("", "", Properties())
         every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(any(), any()) } returns mockk()
         every { vedtaksbrevRepository.deleteById(any()) } just Runs
-        every { vedtaksbrevService.lagreEndeligBrev(any()) } returns mockk()
+        every { vedtaksbrevService.lagBeslutterBrev(any()) } returns mockk()
     }
 
     @Test
@@ -82,7 +80,7 @@ internal class BeslutteVedtakStegTest {
     internal fun `Skal lagre brev`() {
         utførTotrinnskontroll(true)
 
-        verify { vedtaksbrevService.lagreEndeligBrev(behandlingId) }
+        verify { vedtaksbrevService.lagBeslutterBrev(behandlingId) }
     }
 
     private fun utførTotrinnskontroll(godkjent: Boolean): StegType {

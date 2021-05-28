@@ -39,8 +39,10 @@ class BrevClient(@Value("\${FAMILIE_BREV_API_URL}")
         return postForEntity(url, request, HttpHeaders().medContentTypeJsonUTF8())
     }
 
-    fun genererBeslutterbrev(målform: String, brevMal: String, brevrequest: JsonNode, besluttersignatur: String): ByteArray {
-        TODO("Not yet implemented")
+    fun genererBeslutterbrev(målform: String, brevMal: String, brevrequest: String, besluttersignatur: String): ByteArray {
+        val url = URI.create("$familieBrevUri/api/ef-brev/avansert-dokument/$målform/$brevMal/beslutter-pdf")
+
+        return postForEntity(url, BrevRequestMedBeslutter(objectMapper.readTree(brevrequest), besluttersignatur), HttpHeaders().medContentTypeJsonUTF8())
     }
 
     companion object {
@@ -49,4 +51,6 @@ class BrevClient(@Value("\${FAMILIE_BREV_API_URL}")
         val test = "testdata"
     }
 }
+
+data class BrevRequestMedBeslutter(val brevFraSaksbehandler: JsonNode, val besluttersignatur: String)
 
