@@ -17,14 +17,13 @@ class VedtaksbrevController(private val brevService: VedtaksbrevService,
                             private val tilgangService: TilgangService) {
 
     @PostMapping("/{behandlingId}/{brevMal}")
-    fun forhåndsvisBrevV2(@PathVariable behandlingId: UUID,
-                          @PathVariable brevMal: String,
-                          @RequestBody brevRequest: JsonNode): Ressurs<ByteArray> {
+    fun lagBrev(@PathVariable behandlingId: UUID,
+                @PathVariable brevMal: String,
+                @RequestBody brevRequest: JsonNode): Ressurs<ByteArray> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
-
-        val respons = brevService.forhåndsvisBrev(behandlingId, brevRequest, brevMal)
-
-        return Ressurs.success(respons)
+        val data = brevService.lagBrev(behandlingId, brevRequest, brevMal)
+        brevService.lagreBrevrequest(behandlingId, brevRequest, brevMal)
+        return Ressurs.success(data)
     }
 
     @GetMapping("/{behandlingId}")

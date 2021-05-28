@@ -18,7 +18,7 @@ import no.nav.familie.kontrakter.felles.dokarkiv.v2.Dokument
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Filtype
 import org.springframework.stereotype.Service
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 @Service
 class VedtaksbrevService(private val brevClient: BrevClient,
@@ -77,7 +77,7 @@ class VedtaksbrevService(private val brevClient: BrevClient,
         return brevRepository.update(vedtaksbrev.copy(pdf = Fil(lagPdf(endeligRequest)), brevRequest = endeligRequest))
     }
 
-    fun forhåndsvisBrev(behandlingId: UUID, brevRequest: JsonNode, brevMal: String): ByteArray{
+    fun lagBrev(behandlingId: UUID, brevRequest: JsonNode, brevMal: String): ByteArray {
         return lagPdf(brevRequest, brevMal)
     }
 
@@ -103,7 +103,11 @@ class VedtaksbrevService(private val brevClient: BrevClient,
         )).journalpostId
     }
 
-    fun distribuerVedtaksbrev(behandlingId: UUID, journpostId: String): String{
+    fun distribuerVedtaksbrev(behandlingId: UUID, journpostId: String): String {
         return familieIntegrasjonerClient.distribuerBrev(journpostId)
+    }
+
+    fun lagreBrevrequest(behandlingId: UUID, brevrequest: JsonNode, brevmal: String, pdf: Fil?) {
+        brevRepository.insert(Vedtaksbrev(behandlingId, brevrequest.toString(), brevmal, pdf))
     }
 }
