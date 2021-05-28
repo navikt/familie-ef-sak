@@ -3,7 +3,7 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.service.steg
 import io.mockk.*
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.service.BehandlingService
-import no.nav.familie.ef.sak.service.VedtaksbrevService
+import no.nav.familie.ef.sak.service.VedtaksbrevIverksettingService
 import no.nav.familie.ef.sak.service.steg.JournalførVedtaksbrevSteg
 import no.nav.familie.ef.sak.task.DistribuerVedtaksbrevTask
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
@@ -17,7 +17,7 @@ internal class JournalførVedtaksbrevStegTest {
 
 
     private val taskRepository = mockk<TaskRepository>()
-    private val vedtaksbrevService = mockk<VedtaksbrevService>()
+    private val vedtaksbrevService = mockk<VedtaksbrevIverksettingService>()
     private val behandlingService = mockk<BehandlingService>()
     val journalførVedtaksbrev = JournalførVedtaksbrevSteg(taskRepository, vedtaksbrevService, behandlingService)
 

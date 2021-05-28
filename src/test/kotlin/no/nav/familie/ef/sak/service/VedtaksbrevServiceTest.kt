@@ -1,32 +1,18 @@
 package no.nav.familie.ef.sak.service
 
-import io.mockk.every
 import io.mockk.mockk
-import io.mockk.slot
-import io.mockk.verify
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.JournalpostClient
-import no.nav.familie.ef.sak.integration.dto.familie.Arbeidsfordelingsenhet
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.BehandlingRepository
 import no.nav.familie.ef.sak.repository.FagsakRepository
 import no.nav.familie.ef.sak.repository.VedtaksbrevRepository
 import no.nav.familie.ef.sak.repository.domain.FagsakPerson
-import no.nav.familie.ef.sak.repository.domain.Fil
-import no.nav.familie.ef.sak.repository.domain.Vedtaksbrev
-import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.vedtaksbrev.BrevClient
-import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
-import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
-import java.lang.IllegalStateException
-import java.util.*
 
 internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
 
@@ -48,14 +34,10 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
     private val fagsak = fagsak(setOf(FagsakPerson("")))
     private val behandling = behandling(fagsak)
 
-    internal fun lagServiceMedMocker() = VedtaksbrevService(brevClientMock,
-                                                            vedtaksbrevRepositoryMock,
-                                                            behandlingServiceMock,
-                                                            fagsakServiceMock,
-                                                            personServiceMock,
-                                                            journalpostClientMock,
-                                                            arbeidsfordelingServiceMock,
-                                                            familieIntegrasjonerClientMock)
+    internal fun lagServiceMedMocker() = VedtaksbrevService(
+            brevClientMock,
+            vedtaksbrevRepositoryMock,
+    )
 
     @BeforeEach
     internal fun setUp() {

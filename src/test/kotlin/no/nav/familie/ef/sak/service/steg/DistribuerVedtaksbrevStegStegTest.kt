@@ -5,7 +5,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ef.sak.repository.domain.*
-import no.nav.familie.ef.sak.service.VedtaksbrevService
+import no.nav.familie.ef.sak.service.VedtaksbrevIverksettingService
 import no.nav.familie.ef.sak.service.steg.DistribuerVedtaksbrevSteg
 import no.nav.familie.ef.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.prosessering.domene.Task
@@ -18,7 +18,7 @@ internal class DistribuerVedtaksbrevStegStegTest {
 
 
     private val taskRepository = mockk<TaskRepository>()
-    private val vedtaksbrevService = mockk<VedtaksbrevService>()
+    private val vedtaksbrevService = mockk<VedtaksbrevIverksettingService>()
     val distribuerVedtaksbrev = DistribuerVedtaksbrevSteg(taskRepository, vedtaksbrevService)
     val fnr = "12345678901"
     val fagsak = Fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD,

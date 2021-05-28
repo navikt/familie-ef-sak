@@ -1,12 +1,14 @@
 package no.nav.familie.ef.sak.service.steg
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.mockk.*
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
+import no.nav.familie.ef.sak.repository.VedtaksbrevRepository
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.OppgaveService
-import no.nav.familie.ef.sak.service.VedtaksbrevService
 import no.nav.familie.ef.sak.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.task.FerdigstillOppgaveTask.FerdigstillOppgaveTaskData
 import no.nav.familie.ef.sak.task.OpprettOppgaveTask
@@ -26,8 +28,10 @@ internal class SendTilBeslutterStegTest {
     private val fagsakService = mockk<FagsakService>()
     private val oppgaveService = mockk<OppgaveService>()
     private val behandlingService = mockk<BehandlingService>(relaxed = true)
+    private val vedtaksbrevRepository = mockk<VedtaksbrevRepository>(relaxed = true)
 
-    private val beslutteVedtakSteg = SendTilBeslutterSteg(taskRepository, oppgaveService, behandlingService)
+    private val beslutteVedtakSteg =
+            SendTilBeslutterSteg(taskRepository, oppgaveService, behandlingService, vedtaksbrevRepository)
     private val fagsak = Fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD,
                                 søkerIdenter = setOf(FagsakPerson(ident = "12345678901")))
 

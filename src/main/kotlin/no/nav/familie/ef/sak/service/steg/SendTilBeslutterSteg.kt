@@ -8,7 +8,6 @@ import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.OppgaveService
-import no.nav.familie.ef.sak.service.VedtaksbrevService
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.task.OpprettOppgaveTask
@@ -16,13 +15,13 @@ import no.nav.familie.ef.sak.task.OpprettOppgaveTask.OpprettOppgaveTaskData
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 
 @Service
 class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
                            private val oppgaveService: OppgaveService,
                            private val behandlingService: BehandlingService,
-                           private val vedtaksbrevRepository: VedtaksbrevRepository) : BehandlingSteg<Void?> {
+                           private val vedtaksbrevRepository: VedtaksbrevRepository
+) : BehandlingSteg<Void?> {
 
     override fun validerSteg(behandling: Behandling) {
         if (behandling.steg != stegType()) {
@@ -36,9 +35,10 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
 
         ferdigstillOppgave(behandling, Oppgavetype.BehandleSak)
         ferdigstillOppgave(behandling, Oppgavetype.BehandleUnderkjentVedtak)
-        if(behandling.type !== BehandlingType.BLANKETT){
+        if (behandling.type !== BehandlingType.BLANKETT) {
             val vedtaksbrev = vedtaksbrevRepository.findByIdOrThrow(behandling.id)
-            val brevMedSaksbehandlerEnSignatur = vedtaksbrev.copy(saksbehandlerEnSignatur = SikkerhetContext.hentSaksbehandlerNavn())
+            val brevMedSaksbehandlerEnSignatur =
+                    vedtaksbrev.copy(saksbehandlersignatur = SikkerhetContext.hentSaksbehandlerNavn())
             vedtaksbrevRepository.update(brevMedSaksbehandlerEnSignatur)
         }
     }

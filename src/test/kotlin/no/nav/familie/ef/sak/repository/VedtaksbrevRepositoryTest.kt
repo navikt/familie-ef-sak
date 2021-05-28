@@ -23,7 +23,8 @@ internal class VedtaksbrevRepositoryTest : OppslagSpringRunnerTest() {
                                       saksbehandlerBrevrequest = "testhallo",
                                       brevmal = "brevmalnavn",
                                       beslutterPdf = null,
-                                      besluttersignatur = null)
+                                      saksbehandlersignatur = "Sakliga Behandlersen",
+                                      besluttersignatur = "")
 
         vedtaksbrevRepository.insert(vedtaksbrev)
 
