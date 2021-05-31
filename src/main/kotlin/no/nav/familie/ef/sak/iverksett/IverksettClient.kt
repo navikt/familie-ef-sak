@@ -39,7 +39,7 @@ class IverksettClient(@Value("\${FAMILIE_EF_IVERKSETT_URL}")
     }
 
     fun iverksett(iverksettDto: IverksettDto, fil: Fil) {
-        val url = URI.create("$familieEfIverksettUri/api/iverksett/start")
+        val url = URI.create("$familieEfIverksettUri/api/iverksett")
         val request = MultipartBuilder()
                 .withJson("data", iverksettDto)
                 .withByteArray("fil", "vedtak", fil.bytes)

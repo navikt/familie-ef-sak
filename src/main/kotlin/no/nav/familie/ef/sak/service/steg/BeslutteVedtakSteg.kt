@@ -1,62 +1,27 @@
 package no.nav.familie.ef.sak.service.steg
 
-import no.nav.familie.ef.iverksett.infrastruktur.json.BarnDto
 import no.nav.familie.ef.mottak.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.api.Feil
-import no.nav.familie.ef.sak.api.beregning.VedtakService
-import no.nav.familie.ef.sak.api.beregning.tilVedtaksresultat
 import no.nav.familie.ef.sak.api.dto.BeslutteVedtakDto
-import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.blankett.JournalførBlankettTask
-import no.nav.familie.ef.sak.integration.dto.pdl.Adressebeskyttelse
-import no.nav.familie.ef.sak.integration.dto.pdl.AdressebeskyttelseGradering
 import no.nav.familie.ef.sak.iverksett.IverksettClient
-import no.nav.familie.ef.sak.mapper.BarnMatcher
-import no.nav.familie.ef.sak.mapper.MatchetBarn
-import no.nav.familie.ef.sak.nare.specifications.Regel
-import no.nav.familie.ef.sak.regler.RegelId
-import no.nav.familie.ef.sak.regler.SvarId
+import no.nav.familie.ef.sak.mapper.IverksettingDtoMapper
 import no.nav.familie.ef.sak.repository.VedtaksbrevRepository
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
-import no.nav.familie.ef.sak.repository.domain.VilkårType
-import no.nav.familie.ef.sak.service.ArbeidsfordelingService
-import no.nav.familie.ef.sak.service.BehandlingshistorikkService
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.OppgaveService
-import no.nav.familie.ef.sak.service.PersisterGrunnlagsdataService
-import no.nav.familie.ef.sak.service.SøknadService
-import no.nav.familie.ef.sak.service.TilkjentYtelseService
 import no.nav.familie.ef.sak.service.TotrinnskontrollService
 import no.nav.familie.ef.sak.service.VedtaksbrevService
-import no.nav.familie.ef.sak.service.VurderingService
-import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ef.sak.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.task.OpprettOppgaveTask.OpprettOppgaveTaskData
 import no.nav.familie.ef.sak.task.PollStatusFraIverksettTask
-import no.nav.familie.kontrakter.ef.felles.BehandlingResultat
-import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
-import no.nav.familie.kontrakter.ef.felles.StønadType
-import no.nav.familie.kontrakter.ef.iverksett.AktivitetskravDto
-import no.nav.familie.kontrakter.ef.iverksett.AndelTilkjentYtelseDto
-import no.nav.familie.kontrakter.ef.iverksett.BehandlingsdetaljerDto
-import no.nav.familie.kontrakter.ef.iverksett.FagsakdetaljerDto
-import no.nav.familie.kontrakter.ef.iverksett.InntektDto
-import no.nav.familie.kontrakter.ef.iverksett.InntektsType
-import no.nav.familie.kontrakter.ef.iverksett.IverksettDto
-import no.nav.familie.kontrakter.ef.iverksett.PeriodebeløpDto
-import no.nav.familie.kontrakter.ef.iverksett.Periodetype
-import no.nav.familie.kontrakter.ef.iverksett.SøkerDto
-import no.nav.familie.kontrakter.ef.iverksett.TilkjentYtelseDto
-import no.nav.familie.kontrakter.ef.iverksett.VedtaksdetaljerDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 import java.util.UUID
-import no.nav.familie.kontrakter.ef.felles.BehandlingType as BehandlingTypeKontakter
 
 @Service
 class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
@@ -64,13 +29,7 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
                          private val oppgaveService: OppgaveService,
                          private val featureToggleService: FeatureToggleService,
                          private val iverksettClient: IverksettClient,
-                         private val arbeidsfordelingService: ArbeidsfordelingService,
-                         private val vurderingService: VurderingService,
-                         private val søknadService: SøknadService,
-                         private val vedtakService: VedtakService,
-                         private val behandlinghistorikkService: BehandlingshistorikkService,
-                         private val tilkjentYtelseService: TilkjentYtelseService,
-                         private val persisterGrunnlagsdataService: PersisterGrunnlagsdataService,
+                         private val iverksettingDtoMapper: IverksettingDtoMapper,
                          private val totrinnskontrollService: TotrinnskontrollService,
                          private val vedtaksbrevRepository: VedtaksbrevRepository,
                          private val vedtaksbrevService: VedtaksbrevService) : BehandlingSteg<BeslutteVedtakDto> {
@@ -91,88 +50,7 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
                 val fil = vedtaksbrevService.lagreEndeligBrev(behandling.id).pdf
                 require(fil != null) { "For å iverksette må det finnes en pdf" }
                 if (featureToggleService.isEnabled("familie.ef.sak.brukEFIverksett")) {
-
-                    //TODO Hardkodet tillsvidare verdier for behandlingResultat og behandlingÅrsak
-                    val behandlingsdetaljer = BehandlingsdetaljerDto(behandlingId = behandling.id,
-                                                                     behandlingType = BehandlingTypeKontakter.valueOf(behandling.type.name),
-                                                                     behandlingResultat = BehandlingResultat.FERDIGSTILT,
-                                                                     behandlingÅrsak = BehandlingÅrsak.SØKNAD,
-                                                                     eksternId = behandling.eksternId.id)
-
-                    val fagsak = fagsakService.hentFaksakForBehandling(behandling.id)
-                    val fagsakdetaljerDto = FagsakdetaljerDto(fagsakId = fagsak.id,
-                                                              eksternId = fagsak.eksternId.id,
-                                                              stønadstype = StønadType.OVERGANGSSTØNAD)
-
-
-                    val søknad = søknadService.hentOvergangsstønad(behandling.id)
-                    val grunnlagsdata = persisterGrunnlagsdataService.hentGrunnlagsdata(behandling.id, søknad)
-                    val alleBarn = BarnMatcher.kobleSøknadsbarnOgRegisterBarn(søknad.barn, grunnlagsdata.barn)
-                    val navEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(søknad.fødselsnummer)
-                    val harSagtOpp = vurderingService.hentEllerOpprettVurderinger(behandling.id).vurderinger
-                                             .find { it.vilkårType === VilkårType.SAGT_OPP_ELLER_REDUSERT }
-                                             ?.let { vilkårsvurderingDto ->
-                                                 vilkårsvurderingDto.delvilkårsvurderinger
-                                                         .any { delvilkår ->
-                                                             val vurdering =
-                                                                     delvilkår.vurderinger.find { vurdering -> vurdering.regelId == RegelId.SAGT_OPP_ELLER_REDUSERT }
-                                                             vurdering?.svar?.let {
-                                                                 when (it) {
-                                                                     SvarId.JA -> true
-                                                                     SvarId.NEI -> false
-                                                                     else -> error("Jajaj")
-
-                                                                 }
-                                                             } ?: error("detta var inte så bra")
-                                                         }
-                                             } ?: error("detta var inte så bra")
-
-                    val søkerDto = SøkerDto(kode6eller7 = grunnlagsdata.søker.adressebeskyttelse?.let {
-                        listOf(AdressebeskyttelseGradering.STRENGT_FORTROLIG,
-                               AdressebeskyttelseGradering.FORTROLIG).contains(it.gradering)
-                    }
-                                                          ?: false,
-                                            personIdent = fagsak.hentAktivIdent(),
-                                            barn = alleBarn.map {
-                                                BarnDto(personIdent = it.fødselsnummer,
-                                                        termindato = it.søknadsbarn.fødselTermindato)
-                                            },
-                                            aktivitetskrav = AktivitetskravDto(
-                                                    aktivitetspliktInntrefferDato = LocalDate.now(),
-                                                    harSagtOppArbeidsforhold = harSagtOpp),
-                                            tilhørendeEnhet = navEnhet)
-
-                    val vedtak = vedtakService.hentVedtak(behandling.id)
-
-
-                    val saksbehandler = behandlinghistorikkService.finnSisteBehandlingshistorikk(behandling.id, StegType.SEND_TIL_BESLUTTER)?.opprettetAv ?: error("Kan ikke finne saksbehandler på behandlingen")
-                    val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(behandling.id)
-                    val vedtakDto = VedtaksdetaljerDto(vedtaksresultat = vedtak.resultatType.tilVedtaksresultat(),
-                                                       vedtaksdato = LocalDate.now(), // TODO: Er dette når første saksbehandler fullfører eller når beslutter godkjenner
-                                                       opphørÅrsak = null, // TODO: Revurdering
-                                                       saksbehandlerId = saksbehandler,
-                                                       beslutterId = beslutter,
-                                                       tilkjentYtelse = TilkjentYtelseDto(
-                                                               andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.map { andel ->
-                                                                   AndelTilkjentYtelseDto(periodebeløp = PeriodebeløpDto(beløp = andel.beløp,
-                                                                                                                         periodetype = Periodetype.MÅNED,
-                                                                                                                         fraOgMed = andel.stønadFom,
-                                                                                                                         tilOgMed = andel.stønadTom),
-                                                                                          kildeBehandlingId = andel.kildeBehandlingId)
-                                                               }
-
-                                                       ),
-                                                       inntekter = vedtak.inntekter?.inntekter?.map {
-                                                           InntektDto(periodebeløp =  PeriodebeløpDto(beløp = it.inntekt.intValueExact(),
-                                                                                                      periodetype = Periodetype.MÅNED,
-                                                                                                      fraOgMed = it.startDato,
-                                                                                                      tilOgMed = it.sluttDato),
-                                                                      inntektstype = InntektsType.ARBEIDINNTEKT) // TODO: Hva er inntektstype?
-                                                       } ?: emptyList()
-                    )
-
-                    val iverksettDto =
-                            IverksettDto(behandling = behandlingsdetaljer, fagsak = fagsakdetaljerDto, søker = søkerDto, vedtak = vedtakDto)
+                    val iverksettDto = iverksettingDtoMapper.tilDto(behandling, beslutter)
                     iverksettClient.iverksett(iverksettDto, fil)
                     opprettPollForStatusOppgave(behandling.id)
                     StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT

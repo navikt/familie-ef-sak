@@ -5,7 +5,9 @@ import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.kontrakter.ef.iverksett.IverksettStatus
 import no.nav.familie.prosessering.domene.TaskRepository
+import org.springframework.stereotype.Service
 
+@Service
 class VentePåStatusFraIverksett(private val iverksettClient: IverksettClient, private val taskRepository: TaskRepository): BehandlingSteg<Void?> {
 
     override fun utførOgReturnerNesteSteg(behandling: Behandling, data: Void?): StegType {
