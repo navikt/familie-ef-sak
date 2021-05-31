@@ -28,24 +28,11 @@ class BrevClient(@Value("\${FAMILIE_BREV_API_URL}")
     fun genererBrev(vedtaksbrev: Vedtaksbrev): ByteArray {
         val url = URI.create("$familieBrevUri/api/ef-brev/avansert-dokument/bokmaal/${vedtaksbrev.brevmal}/pdf")
         return postForEntity(url,
-                             BrevRequestMedBeslutter(objectMapper.readTree(vedtaksbrev.saksbehandlerBrevrequest),
-                                                     vedtaksbrev.saksbehandlersignatur,
-                                                     vedtaksbrev.besluttersignatur),
+                             BrevRequestMedSignaturer(objectMapper.readTree(vedtaksbrev.saksbehandlerBrevrequest),
+                                                      vedtaksbrev.saksbehandlersignatur,
+                                                      vedtaksbrev.besluttersignatur),
                              HttpHeaders().medContentTypeJsonUTF8())
     }
-
-
-//    fun genererBrev(målform: String? = "bokmaal", malnavn: String? = "innvilgetVedtakMVP", request: JsonNode): ByteArray {
-//        val url = URI.create("$familieBrevUri/api/ef-brev/avansert-dokument/$målform/$malnavn/pdf")
-//
-//        return postForEntity(url, request, HttpHeaders().medContentTypeJsonUTF8())
-//    }
-//
-//    fun genererBeslutterbrev(målform: String, brevMal: String, brevrequest: String, besluttersignatur: String): ByteArray {
-//        val url = URI.create("$familieBrevUri/api/ef-brev/avansert-dokument/$målform/$brevMal/beslutter-pdf")
-//
-//        return postForEntity(url, BrevRequestMedBeslutter(objectMapper.readTree(brevrequest),  besluttersignatur), HttpHeaders().medContentTypeJsonUTF8())
-//    }
 
     companion object {
 
@@ -54,7 +41,7 @@ class BrevClient(@Value("\${FAMILIE_BREV_API_URL}")
     }
 }
 
-data class BrevRequestMedBeslutter(val brevFraSaksbehandler: JsonNode,
-                                   val saksbehandlersignatur: String,
-                                   val besluttersignatur: String?)
+data class BrevRequestMedSignaturer(val brevFraSaksbehandler: JsonNode,
+                                    val saksbehandlersignatur: String,
+                                    val besluttersignatur: String?)
 
