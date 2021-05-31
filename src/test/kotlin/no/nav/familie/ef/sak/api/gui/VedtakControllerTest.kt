@@ -14,8 +14,10 @@ import no.nav.familie.ef.sak.repository.FagsakRepository
 import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import no.nav.familie.ef.sak.repository.domain.FagsakPerson
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.ef.sak.service.VedtaksbrevService
 import no.nav.familie.ef.sak.service.steg.StegType
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.security.token.support.test.JwkGenerator
 import no.nav.security.token.support.test.JwtTokenGenerator
 import org.assertj.core.api.Assertions.assertThat
@@ -34,6 +36,8 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var fagsakRepository: FagsakRepository
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
     @Autowired private lateinit var rolleConfig: RolleConfig
+    @Autowired private lateinit var vedtaksbrevService: VedtaksbrevService
+
 
     private val fagsak = fagsak(setOf(FagsakPerson("")))
     private val behandling = behandling(fagsak)
@@ -52,13 +56,14 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `totrinn er uaktuell når behandlingen ikke er klar for totrinn`() {
         opprettBehandling(steg = StegType.VILKÅR)
+        lagBrev()
         validerTotrinnskontrollUaktuelt(BESLUTTER)
     }
 
     @Test
     internal fun `skal sette behandling til fatter vedtak når man sendt til beslutter`() {
         opprettBehandling()
-
+        lagBrev()
         sendTilBeslutter(SAKSBEHANDLER)
         validerBehandlingFatterVedtak()
     }
@@ -66,7 +71,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `skal sette behandling til iverksett når man godkjent totrinnskontroll`() {
         opprettBehandling()
-
+        lagBrev()
         sendTilBeslutter(SAKSBEHANDLER)
         godkjennTotrinnskontroll(BESLUTTER)
         validerBehandlingIverksetter()
@@ -75,7 +80,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `hvis man underkjenner den så skal man få ut det som status`() {
         opprettBehandling()
-
+        lagBrev()
         sendTilBeslutter(SAKSBEHANDLER)
         underkjennTotrinnskontroll(BESLUTTER)
         validerTotrinnskontrollUnderkjent(SAKSBEHANDLER)
@@ -86,7 +91,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `en annen beslutter enn den som sendte til beslutter må godkjenne behandlingen`() {
         opprettBehandling()
-
+        lagBrev()
         sendTilBeslutter(BESLUTTER)
         validerTotrinnskontrollIkkeAutorisert(SAKSBEHANDLER)
         validerTotrinnskontrollIkkeAutorisert(BESLUTTER)
@@ -100,7 +105,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `skal gi totrinnskontroll uaktuelt hvis totrinnskontrollen er godkjent`() {
         opprettBehandling()
-
+        lagBrev()
         sendTilBeslutter(SAKSBEHANDLER)
         godkjennTotrinnskontroll(BESLUTTER)
 
@@ -109,17 +114,23 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         validerTotrinnskontrollUaktuelt(BESLUTTER_2)
     }
 
+    private fun lagBrev() {
+        val brevRequest = objectMapper.readTree("123")
+        //val lagBrev = vedtaksbrevService.lagBrev(behandlingId = behandling.id, brevRequest = brevRequest, brevMal = "brevMal")
+        vedtaksbrevService.lagSaksbehandlerBrev(behandling.id, brevRequest, "brevMal")
+    }
+
     @Test
     internal fun `hvis man underkjenner behandlingen må man sende den til beslutter på nytt og sen godkjenne den`() {
         opprettBehandling()
+        lagBrev()
         sendTilBeslutter(SAKSBEHANDLER)
         underkjennTotrinnskontroll(BESLUTTER)
-
+        lagBrev() //TODO hvorfor trenger vi disse?
         sendTilBeslutter(SAKSBEHANDLER)
         underkjennTotrinnskontroll(BESLUTTER)
-
         validerBehandlingUtredes()
-
+        lagBrev()//TODO hvorfor trenger vi disse?
         sendTilBeslutter(SAKSBEHANDLER)
         godkjennTotrinnskontroll(BESLUTTER)
     }
@@ -127,6 +138,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `en annen beslutter enn den som sendte behandlingen til beslutter må godkjenne behandlingen`() {
         opprettBehandling()
+        lagBrev()
         sendTilBeslutter(BESLUTTER)
         validerTotrinnskontrollIkkeAutorisert(SAKSBEHANDLER)
         validerTotrinnskontrollIkkeAutorisert(BESLUTTER)
@@ -140,6 +152,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `kan ikke godkjenne totrinnskontroll når behandling utredes`() {
         opprettBehandling()
+        lagBrev()
         godkjennTotrinnskontroll(BESLUTTER) {
             assertThat(it.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
         }
@@ -148,6 +161,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `kan ikke sende til besluttning før behandling er i riktig steg`() {
         opprettBehandling(steg = StegType.VILKÅR)
+        lagBrev()
         godkjennTotrinnskontroll(BESLUTTER) {
             assertThat(it.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
         }

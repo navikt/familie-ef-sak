@@ -16,31 +16,31 @@ class VedtaksbrevService(private val brevClient: BrevClient,
 
 
     fun lagBeslutterBrev(behandlingId: UUID): Vedtaksbrev {
+        // TODO validere at behandlig har rett status/steg?
         val vedtaksbrev = brevRepository.findByIdOrThrow(behandlingId)
-        val besluttersignatur = SikkerhetContext.hentSaksbehandlerNavn()
-        val beslutterPdf = Fil(brevClient.genererBeslutterbrev("bokmaal",
-                                                               vedtaksbrev.brevmal,
-                                                               vedtaksbrev.saksbehandlerBrevrequest,
-                                                               besluttersignatur))
-        val besluttervedtaksbrev = vedtaksbrev.copy(beslutterPdf = beslutterPdf,
-                                                    besluttersignatur = besluttersignatur)
-        return brevRepository.update(besluttervedtaksbrev)
+        val besluttervedtaksbrev = vedtaksbrev.copy(besluttersignatur = SikkerhetContext.hentSaksbehandlerNavn())
+        val beslutterPdf = Fil(brevClient.genererBrev(besluttervedtaksbrev))
+        val besluttervedtaksbrevMedPdf = besluttervedtaksbrev.copy(beslutterPdf = beslutterPdf)
+        return brevRepository.update(besluttervedtaksbrevMedPdf)
     }
 
-    fun lagBrev(behandlingId: UUID, brevRequest: JsonNode, brevMal: String): ByteArray {
-        return brevClient.genererBrev("bokmaal",
-                                      brevMal,
-                                      brevRequest)
-    }
-
-
-
-    fun lagreBrevrequest(behandlingId: UUID, brevrequest: JsonNode, brevmal: String, pdf: Fil?) {
-        // TODO validere at dette ikke er totrinn?
+    fun lagSaksbehandlerBrev(behandlingId: UUID, brevrequest: JsonNode, brevmal: String): ByteArray {
+        // TODO validere at behandlig har rett status/steg?
         val saksbehandlersignatur = SikkerhetContext.hentSaksbehandlerNavn()
-        when (brevRepository.existsById(behandlingId)) {
-            true -> brevRepository.update(Vedtaksbrev(behandlingId, brevrequest.toString(), brevmal, pdf, saksbehandlersignatur))
-            false -> brevRepository.insert(Vedtaksbrev(behandlingId, brevrequest.toString(), brevmal, pdf, saksbehandlersignatur))
+        val vedtaksbrev = when (brevRepository.existsById(behandlingId)) {
+            true -> brevRepository.update(Vedtaksbrev(behandlingId,
+                                                      brevrequest.toString(),
+                                                      brevmal,
+                                                      saksbehandlersignatur,
+                                                      beslutterPdf = null))
+            false -> brevRepository.insert(Vedtaksbrev(behandlingId,
+                                                       brevrequest.toString(),
+                                                       brevmal,
+                                                       saksbehandlersignatur,
+                                                       beslutterPdf = null))
         }
+
+        return brevClient.genererBrev(vedtaksbrev)
     }
+
 }

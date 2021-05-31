@@ -22,9 +22,9 @@ internal class VedtaksbrevRepositoryTest : OppslagSpringRunnerTest() {
         val vedtaksbrev = Vedtaksbrev(behandlingId = behandling.id,
                                       saksbehandlerBrevrequest = "testhallo",
                                       brevmal = "brevmalnavn",
-                                      beslutterPdf = null,
                                       saksbehandlersignatur = "Sakliga Behandlersen",
-                                      besluttersignatur = "")
+                                      besluttersignatur = "",
+                                      beslutterPdf = null)
 
         vedtaksbrevRepository.insert(vedtaksbrev)
 

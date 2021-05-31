@@ -12,7 +12,7 @@ import no.nav.familie.kontrakter.felles.dokarkiv.v2.Filtype
 import org.springframework.stereotype.Service
 import java.util.*
 
-@Deprecated("Vet ikke om dette skal/har blitt flyttet ti iverksetting")
+@Deprecated("Vet ikke om dette skal/har blitt flyttet til iverksetting")
 @Service
 class VedtaksbrevIverksettingService(
         private val brevRepository: VedtaksbrevRepository,

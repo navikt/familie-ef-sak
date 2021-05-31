@@ -6,6 +6,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ef.sak.repository.VedtaksbrevRepository
 import no.nav.familie.ef.sak.repository.domain.*
+import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.OppgaveService
@@ -28,12 +29,18 @@ internal class SendTilBeslutterStegTest {
     private val fagsakService = mockk<FagsakService>()
     private val oppgaveService = mockk<OppgaveService>()
     private val behandlingService = mockk<BehandlingService>(relaxed = true)
-    private val vedtaksbrevRepository = mockk<VedtaksbrevRepository>(relaxed = true)
+    private val vedtaksbrevRepository = mockk<VedtaksbrevRepository>()
 
     private val beslutteVedtakSteg =
             SendTilBeslutterSteg(taskRepository, oppgaveService, behandlingService, vedtaksbrevRepository)
     private val fagsak = Fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD,
                                 søkerIdenter = setOf(FagsakPerson(ident = "12345678901")))
+    private val vedtaksbrev = Vedtaksbrev(behandlingId = UUID.randomUUID(),
+                                          saksbehandlerBrevrequest = "",
+                                          brevmal = "",
+                                          "",
+                                          "",
+                                          null)
 
     private val behandling = Behandling(fagsakId = fagsak.id,
                                         type = BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -52,6 +59,10 @@ internal class SendTilBeslutterStegTest {
             taskRepository.save(capture(taskSlot))
         } returns Task("", "", Properties())
         every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(any(), any()) } returns null
+
+        every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev
+        every { vedtaksbrevRepository.update(any()) } returns vedtaksbrev
+
 
     }
 

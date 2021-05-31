@@ -21,8 +21,7 @@ class VedtaksbrevController(private val brevService: VedtaksbrevService,
                 @PathVariable brevMal: String,
                 @RequestBody brevRequest: JsonNode): Ressurs<ByteArray> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
-        val data = brevService.lagBrev(behandlingId, brevRequest, brevMal)
-        brevService.lagreBrevrequest(behandlingId, brevRequest, brevMal, null)
+        val data = brevService.lagSaksbehandlerBrev(behandlingId, brevRequest, brevMal)
         return Ressurs.success(data)
     }
 

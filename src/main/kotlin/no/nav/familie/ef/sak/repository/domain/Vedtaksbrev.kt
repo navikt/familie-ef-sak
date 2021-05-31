@@ -8,6 +8,6 @@ data class Vedtaksbrev(@Id
                        val behandlingId: UUID,
                        val saksbehandlerBrevrequest: String,
                        val brevmal: String,
-                       val beslutterPdf: Fil? = null,
                        val saksbehandlersignatur: String,
-                       val besluttersignatur: String? = null)
+                       val besluttersignatur: String? = null,
+                       val beslutterPdf: Fil? = null)
