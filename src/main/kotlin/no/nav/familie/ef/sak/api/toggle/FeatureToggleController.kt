@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.api.toggle
 
-import no.nav.familie.ef.mottak.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.featuretoggle.FeatureToggleService
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*

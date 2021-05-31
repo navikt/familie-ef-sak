@@ -2,7 +2,15 @@ package no.nav.familie.ef.sak.config
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.api.dto.BrevRequest
-import no.nav.familie.ef.sak.repository.domain.*
+import no.nav.familie.ef.sak.domene.GrunnlagsdataDomene
+import no.nav.familie.ef.sak.repository.domain.DelvilkårsvurderingWrapper
+import no.nav.familie.ef.sak.repository.domain.Endret
+import no.nav.familie.ef.sak.repository.domain.Fil
+import no.nav.familie.ef.sak.repository.domain.InntektWrapper
+import no.nav.familie.ef.sak.repository.domain.JsonWrapper
+import no.nav.familie.ef.sak.repository.domain.PeriodeWrapper
+import no.nav.familie.ef.sak.repository.domain.RegistergrunnlagData
+import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus
 import no.nav.familie.ef.sak.repository.domain.søknad.Arbeidssituasjon
 import no.nav.familie.ef.sak.repository.domain.søknad.Dokumentasjon
 import no.nav.familie.ef.sak.repository.domain.søknad.GjelderDeg
@@ -79,10 +87,12 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
                                             FilTilBytearrayConverter(),
                                             BytearrayTilFilConverter(),
                                             PGobjectTilGrunnlagsdataConverter(),
-                                            GrunnlagsdataTilPGobjectConverter(),
+                                            RegisterdataTilPGobjectConverter(),
                                             PGobjectTilVedtaksperioder(),
                                             VedtaksperiodeTilPGobjectConverter(),
                                             PGobjectTilInntektsperiode(),
+                                            GrunnlagsdataTilPGobjectConverter(),
+                                            PGobjectTilGrunnlagsdata(),
                                             InntektsperiodeTilPGobjectConverter()
         ))
     }
@@ -243,13 +253,31 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
     }
 
     @WritingConverter
-    class GrunnlagsdataTilPGobjectConverter : Converter<RegistergrunnlagData, PGobject> {
+    class RegisterdataTilPGobjectConverter : Converter<RegistergrunnlagData, PGobject> {
 
         override fun convert(data: RegistergrunnlagData): PGobject =
                 PGobject().apply {
                     type = "json"
                     value = objectMapper.writeValueAsString(data)
                 }
+    }
+
+    @WritingConverter
+    class GrunnlagsdataTilPGobjectConverter : Converter<GrunnlagsdataDomene, PGobject> {
+
+        override fun convert(data: GrunnlagsdataDomene): PGobject =
+                PGobject().apply {
+                    type = "json"
+                    value = objectMapper.writeValueAsString(data)
+                }
+    }
+
+    @ReadingConverter
+    class PGobjectTilGrunnlagsdata : Converter<PGobject, GrunnlagsdataDomene> {
+
+        override fun convert(pGobject: PGobject): GrunnlagsdataDomene {
+            return objectMapper.readValue(pGobject.value!!)
+        }
     }
 
     @WritingConverter

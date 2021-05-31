@@ -23,10 +23,13 @@ import no.nav.familie.ef.sak.integration.dto.pdl.VergemaalEllerFremtidsfullmakt
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import java.time.LocalDate
 
-data class Grunnlagsdata(val søker: Søker,
-                         val annenForelder: List<AnnenForelderMedIdent>,
-                         val medlUnntak: Medlemskapsinfo,
-                         val barn: List<BarnMedIdent>
+data class GrunnlagsdataMedMetadata(val grunnlagsdata: GrunnlagsdataDomene,
+                                    val lagtTilEtterFerdigstilling: Boolean)
+
+data class GrunnlagsdataDomene(val søker: Søker,
+                               val annenForelder: List<AnnenForelderMedIdent>,
+                               val medlUnntak: Medlemskapsinfo,
+                               val barn: List<BarnMedIdent>
 )
 
 data class Søker(val adressebeskyttelse: Adressebeskyttelse?, //Er en liste i PDLSøker

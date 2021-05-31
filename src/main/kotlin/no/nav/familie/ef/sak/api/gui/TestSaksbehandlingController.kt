@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.BehandlingshistorikkService
 import no.nav.familie.ef.sak.service.FagsakService
+import no.nav.familie.ef.sak.service.PersisterGrunnlagsdataService
 import no.nav.familie.ef.sak.service.PersonService
 import no.nav.familie.ef.sak.service.SøknadService
 import no.nav.familie.ef.sak.service.steg.StegType
@@ -45,6 +46,7 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
                                    private val behandlingService: BehandlingService,
                                    private val søknadService: SøknadService,
                                    private val personService: PersonService,
+                                   private val persisterGrunnlagsdataService: PersisterGrunnlagsdataService,
                                    private val blankettService: BlankettService,
                                    private val journalpostClient: JournalpostClient) {
 
@@ -61,6 +63,7 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
                     lagFørstegangsbehandling(fagsak, søknad)
                 }
 
+        persisterGrunnlagsdataService.opprettGrunnlagsdata(behandling.id)
         behandlingshistorikkService.opprettHistorikkInnslag(Behandlingshistorikk(behandlingId = behandling.id,
                                                                                  steg = StegType.VILKÅR))
 
