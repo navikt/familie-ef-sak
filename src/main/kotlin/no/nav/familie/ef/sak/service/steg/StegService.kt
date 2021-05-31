@@ -4,7 +4,6 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ef.sak.api.beregning.VedtakDto
 import no.nav.familie.ef.sak.api.dto.BeslutteVedtakDto
-import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
 import no.nav.familie.ef.sak.blankett.BlankettSteg
 import no.nav.familie.ef.sak.config.RolleConfig
 import no.nav.familie.ef.sak.repository.domain.Behandling
@@ -23,6 +22,7 @@ import no.nav.familie.ef.sak.service.steg.StegType.JOURNALFØR_VEDTAKSBREV
 import no.nav.familie.ef.sak.service.steg.StegType.SEND_TIL_BESLUTTER
 import no.nav.familie.ef.sak.service.steg.StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI
 import no.nav.familie.ef.sak.service.steg.StegType.VEDTA_BLANKETT
+import no.nav.familie.ef.sak.service.steg.StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -93,6 +93,13 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
     @Transactional
     fun håndterStatusPåOppdrag(behandling: Behandling): Behandling {
         val behandlingSteg: VentePåStatusFraØkonomi = hentBehandlingSteg(VENTE_PÅ_STATUS_FRA_ØKONOMI)
+
+        return håndterSteg(behandling, behandlingSteg, null)
+    }
+
+    @Transactional
+    fun håndterPollStatusFraIverksett(behandling: Behandling): Behandling {
+        val behandlingSteg: VentePåStatusFraIverksett = hentBehandlingSteg(VENTE_PÅ_STATUS_FRA_IVERKSETT)
 
         return håndterSteg(behandling, behandlingSteg, null)
     }

@@ -17,6 +17,11 @@ enum class ResultatType {
     AVSLÅ,
     HENLEGGE
 }
+
+fun ResultatType.tilVedtak(): no.nav.familie.kontrakter.ef.felles.Vedtak = when(this) {
+    ResultatType.INNVILGE -> Ve
+}
+
 sealed class VedtakDto
 class Henlegge(val resultatType: ResultatType = ResultatType.HENLEGGE) : VedtakDto()
 class Innvilget(val resultatType: ResultatType = ResultatType.INNVILGE,

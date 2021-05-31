@@ -1,8 +1,11 @@
-package no.nav.familie.ef.sak.vedtaksbrev
+package no.nav.familie.ef.sak.iverksett
 
-import no.nav.familie.ef.sak.iverksett.SimuleringDto
+import no.nav.familie.ef.sak.repository.domain.Fil
 import no.nav.familie.ef.sak.util.medContentTypeJsonUTF8
 import no.nav.familie.http.client.AbstractPingableRestClient
+import no.nav.familie.http.client.MultipartBuilder
+import no.nav.familie.kontrakter.ef.iverksett.IverksettDto
+import no.nav.familie.kontrakter.ef.iverksett.IverksettStatus
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import org.springframework.beans.factory.annotation.Qualifier
@@ -11,13 +14,15 @@ import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
 import java.net.URI
+import java.util.UUID
 
 
 @Component
 class IverksettClient(@Value("\${FAMILIE_EF_IVERKSETT_URL}")
                       private val familieEfIverksettUri: String,
                       @Qualifier("azure")
-                      private val restOperations: RestOperations) : AbstractPingableRestClient(restOperations, "familie.ef.iverksett") {
+                      private val restOperations: RestOperations) : AbstractPingableRestClient(restOperations,
+                                                                                               "familie.ef.iverksett") {
 
     override val pingUri: URI = URI.create("$familieEfIverksettUri/api/status")
 
@@ -31,6 +36,23 @@ class IverksettClient(@Value("\${FAMILIE_EF_IVERKSETT_URL}")
         return postForEntity<Ressurs<DetaljertSimuleringResultat>>(url,
                                                                    simuleringRequest,
                                                                    HttpHeaders().medContentTypeJsonUTF8()).data!!
+    }
+
+    fun iverksett(iverksettDto: IverksettDto, fil: Fil) {
+        val url = URI.create("$familieEfIverksettUri/api/iverksett/start")
+        val request = MultipartBuilder()
+                .withJson("data", iverksettDto)
+                .withByteArray("fil", "vedtak", fil.bytes)
+                .build()
+        val headers = HttpHeaders().apply { this.add("Content-Type", "multipart/form-data") }
+        postForEntity<Ressurs<DetaljertSimuleringResultat>>(url,
+                                                            request,
+                                                            headers)
+    }
+
+    fun hentStatus(behandlingId: UUID): IverksettStatus {
+        val url = URI.create("$familieEfIverksettUri/api/iverksett/status/$behandlingId")
+        return getForEntity(url, HttpHeaders().medContentTypeJsonUTF8())
     }
 }
 

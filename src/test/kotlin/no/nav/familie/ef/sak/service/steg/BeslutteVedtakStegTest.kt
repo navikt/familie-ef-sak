@@ -2,9 +2,11 @@ package no.nav.familie.ef.sak.service.steg
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.*
+import no.nav.familie.ef.mottak.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.api.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.api.dto.BrevRequest
 import no.nav.familie.ef.sak.api.dto.TotrinnskontrollDto
+import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.repository.VedtaksbrevRepository
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.service.FagsakService
@@ -31,10 +33,14 @@ internal class BeslutteVedtakStegTest {
     private val oppgaveService = mockk<OppgaveService>()
     private val vedtaksbrevRepository = mockk<VedtaksbrevRepository>()
     private val vedtaksbrevService = mockk<VedtaksbrevService>()
+    private val featureToggleService = mockk<FeatureToggleService>()
+    private val iverksett = mockk<IverksettClient>()
 
     private val beslutteVedtakSteg = BeslutteVedtakSteg(taskRepository,
                                                         fagsakService,
                                                         oppgaveService,
+                                                        featureToggleService,
+                                                        iverksett,
                                                         totrinnskontrollService,
                                                         vedtaksbrevRepository,
                                                         vedtaksbrevService)
@@ -57,6 +63,7 @@ internal class BeslutteVedtakStegTest {
         every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(any(), any()) } returns mockk()
         every { vedtaksbrevRepository.deleteById(any()) } just Runs
         every { vedtaksbrevService.lagreEndeligBrev(any()) } returns mockk()
+        every { featureToggleService.isEnabled(any()) } returns false
     }
 
     @Test
