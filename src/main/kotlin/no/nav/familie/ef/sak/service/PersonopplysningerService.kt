@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.api.dto.PersonopplysningerDto
+import no.nav.familie.ef.sak.domene.GrunnlagsdataMedMetadata
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
 import no.nav.familie.ef.sak.integration.dto.pdl.visningsnavn
@@ -23,23 +24,23 @@ class PersonopplysningerService(private val personService: PersonService,
         val søknad = søknadService.hentOvergangsstønad(behandlingId)
         val personIdent = søknad.fødselsnummer
         val grunnlagsdata = persisterGrunnlagsdataService.hentGrunnlagsdata(behandlingId)
-        val egenAnsatt =  familieIntegrasjonerClient.egenAnsatt(personIdent)
-
-
-         return personopplysningerMapper.tilPersonopplysninger(
-                 grunnlagsdata,
-                 egenAnsatt,
-                 personIdent
-            )
-    }
-
-    fun hentPersonopplysninger(personIdent: String): PersonopplysningerDto {
-        val grunnlagsdata = persisterGrunnlagsdataService.hentGrunnlagsdataFraRegister(personIdent, emptyList())
-        val egenAnsatt =  familieIntegrasjonerClient.egenAnsatt(personIdent)
+        val egenAnsatt = familieIntegrasjonerClient.egenAnsatt(personIdent)
 
 
         return personopplysningerMapper.tilPersonopplysninger(
                 grunnlagsdata,
+                egenAnsatt,
+                personIdent
+        )
+    }
+
+    fun hentPersonopplysninger(personIdent: String): PersonopplysningerDto {
+        val grunnlagsdata = persisterGrunnlagsdataService.hentGrunnlagsdataFraRegister(personIdent, emptyList())
+        val egenAnsatt = familieIntegrasjonerClient.egenAnsatt(personIdent)
+
+
+        return personopplysningerMapper.tilPersonopplysninger(
+                GrunnlagsdataMedMetadata(grunnlagsdata, lagtTilEtterFerdigstilling = false),
                 egenAnsatt,
                 personIdent
         )

@@ -48,8 +48,10 @@ internal class GrunnlagsdataRepositoryTest : OppslagSpringRunnerTest() {
                                                                  status = BehandlingStatus.FERDIGSTILT,
                                                                  type = BehandlingType.BLANKETT))
 
-        assertThat(grunnlagsdataRepository.finnBehandlingerSomManglerGrunnlagsdata())
-                .containsExactlyInAnyOrder(behandling.id, behandling2.id, behandling3.id)
+        val behandlinger = grunnlagsdataRepository.finnBehandlingerSomManglerGrunnlagsdata()
+        assertThat(behandlinger.map { it.first }).containsExactlyInAnyOrder(behandling.id, behandling2.id, behandling3.id)
+        assertThat(behandlinger.find { it.first == behandling.id }!!.second.let { BehandlingStatus.valueOf(it) })
+                .isEqualTo(BehandlingStatus.OPPRETTET)
     }
 
     private fun opprettGrunnlagsdata() = GrunnlagsdataDomene(Søker(adressebeskyttelse = null,

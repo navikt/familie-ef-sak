@@ -8,5 +8,6 @@ import java.util.UUID
 data class Grunnlagsdata(@Id
                          val behandlingId: UUID,
                          val data: GrunnlagsdataDomene,
+                         val lagtTilEtterFerdigstilling: Boolean = false,
                          @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                          val sporbar: Sporbar = Sporbar())

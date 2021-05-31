@@ -23,6 +23,9 @@ import no.nav.familie.ef.sak.integration.dto.pdl.VergemaalEllerFremtidsfullmakt
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import java.time.LocalDate
 
+data class GrunnlagsdataMedMetadata(val grunnlagsdata: GrunnlagsdataDomene,
+                                    val lagtTilEtterFerdigstilling: Boolean)
+
 data class GrunnlagsdataDomene(val søker: Søker,
                                val annenForelder: List<AnnenForelderMedIdent>,
                                val medlUnntak: Medlemskapsinfo,

@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.domene.GrunnlagsdataDomene
+import no.nav.familie.ef.sak.domene.GrunnlagsdataMedMetadata
 import no.nav.familie.ef.sak.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.PdlClient
@@ -13,12 +14,11 @@ import no.nav.familie.ef.sak.mapper.GrunnlagsdataMapper.mapAnnenForelder
 import no.nav.familie.ef.sak.mapper.GrunnlagsdataMapper.mapBarn
 import no.nav.familie.ef.sak.mapper.GrunnlagsdataMapper.mapSøker
 import no.nav.familie.ef.sak.repository.GrunnlagsdataRepository
-import no.nav.familie.ef.sak.repository.domain.BehandlingType
+import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import no.nav.familie.ef.sak.repository.domain.Grunnlagsdata
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -40,13 +40,18 @@ class PersisterGrunnlagsdataService(private val pdlClient: PdlClient,
             MDC.setContextMap(context)
             grunnlagsdataRepository
                     .finnBehandlingerSomManglerGrunnlagsdata()
-                    .forEach {
-                        logger.info("Lagrer grunnlagsdata for $it")
+                    .forEach { (behandlingId, status) ->
+                        logger.info("Lagrer grunnlagsdata for $behandlingId")
                         try {
-                            opprettGrunnlagsdata(it)
+                            val grunnlagsdata = hentGrunnlagsdataFraRegister(behandlingId)
+                            val lagtTilEtterFerdigstilling =
+                                    BehandlingStatus.valueOf(status).behandlingErLåstForVidereRedigering()
+                            grunnlagsdataRepository.insert(Grunnlagsdata(behandlingId = behandlingId,
+                                                                         data = grunnlagsdata,
+                                                                         lagtTilEtterFerdigstilling = lagtTilEtterFerdigstilling))
                         } catch (e: Exception) {
-                            logger.warn("Feilet $it")
-                            secureLogger.warn("Feilet $it", e)
+                            logger.warn("Feilet $behandlingId")
+                            secureLogger.warn("Feilet $behandlingId", e)
                         }
                     }
         }.also {
@@ -60,15 +65,18 @@ class PersisterGrunnlagsdataService(private val pdlClient: PdlClient,
         grunnlagsdataRepository.insert(Grunnlagsdata(behandlingId = behandlingId, data = grunnlagsdata))
     }
 
-    fun hentGrunnlagsdata(behandlingId: UUID): GrunnlagsdataDomene {
+    fun hentGrunnlagsdata(behandlingId: UUID): GrunnlagsdataMedMetadata {
         return when (featureToggleService.isEnabled(BRUK_NY_DATAMODELL_TOGGLE, false)) {
-            true -> hentLagretGrunnlagsdata(behandlingId)
-            false -> hentGrunnlagsdataFraRegister(behandlingId)
+            true -> {
+                val grunnlagsdata = hentLagretGrunnlagsdata(behandlingId)
+                GrunnlagsdataMedMetadata(grunnlagsdata.data, false)
+            }
+            false -> GrunnlagsdataMedMetadata(hentGrunnlagsdataFraRegister(behandlingId), false)
         }
     }
 
-    private fun hentLagretGrunnlagsdata(behandlingId: UUID): GrunnlagsdataDomene {
-        return grunnlagsdataRepository.findByIdOrThrow(behandlingId).data
+    private fun hentLagretGrunnlagsdata(behandlingId: UUID): Grunnlagsdata {
+        return grunnlagsdataRepository.findByIdOrThrow(behandlingId)
     }
 
     private fun hentGrunnlagsdataFraRegister(behandlingId: UUID): GrunnlagsdataDomene {
