@@ -16,7 +16,6 @@ externalHosts:
   - api-gw-q1.oera.no
   - unleash.nais.io
   - familie-oppdrag.dev-fss-pub.nais.io
-  - familie-ef-infotrygd-feed.dev-fss-pub.nais.io
   - familie-integrasjoner.dev-fss-pub.nais.io
   - infotrygd-enslig-forsoerger.dev-fss-pub.nais.io
 

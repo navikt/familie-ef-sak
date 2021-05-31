@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.api.journalføring.JournalføringRequest
 import no.nav.familie.ef.sak.domene.DokumentVariantformat
 import no.nav.familie.ef.sak.integration.JournalpostClient
 import no.nav.familie.ef.sak.integration.PdlClient
+import no.nav.familie.ef.sak.iverksett.IverksettService
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.domain.Fagsak
@@ -35,6 +36,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
                            private val fagsakService: FagsakService,
                            private val pdlClient: PdlClient,
                            private val persisterGrunnlagsdataService: PersisterGrunnlagsdataService,
+                           private val iverksettService: IverksettService,
                            private val oppgaveService: OppgaveService) {
 
     fun hentJournalpost(journalpostId: String): Journalpost {
@@ -53,6 +55,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         val journalpost = hentJournalpost(journalpostId)
         val fagsak = fagsakService.hentFagsak(journalføringRequest.fagsakId)
 
+        iverksettService.startBehandling(fagsak)
         settSøknadPåBehandling(journalpostId, fagsak, behandling.id)
         knyttJournalpostTilBehandling(journalpost, behandling)
         persisterGrunnlagsdataService.opprettGrunnlagsdata(behandling.id)

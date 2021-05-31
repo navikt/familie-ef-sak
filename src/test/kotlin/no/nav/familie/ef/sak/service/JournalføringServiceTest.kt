@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.api.journalføring.JournalføringBehandling
 import no.nav.familie.ef.sak.api.journalføring.JournalføringRequest
 import no.nav.familie.ef.sak.integration.JournalpostClient
 import no.nav.familie.ef.sak.integration.PdlClient
+import no.nav.familie.ef.sak.iverksett.IverksettService
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.BehandlingResultat
@@ -44,9 +45,17 @@ internal class JournalføringServiceTest {
     private val oppgaveService = mockk<OppgaveService>()
     private val fagsakService = mockk<FagsakService>()
     private val pdlClient = mockk<PdlClient>()
+    private val iverksettService = mockk<IverksettService>(relaxed = true)
 
     private val journalføringService =
-            JournalføringService(journalpostClient, behandlingService, søknadService, fagsakService, pdlClient, mockk(relaxed = true), oppgaveService)
+            JournalføringService(journalpostClient = journalpostClient,
+                                 behandlingService = behandlingService,
+                                 søknadService = søknadService,
+                                 fagsakService = fagsakService,
+                                 pdlClient = pdlClient,
+                                 persisterGrunnlagsdataService = mockk(relaxed = true),
+                                 iverksettService = iverksettService,
+                                 oppgaveService = oppgaveService)
 
     private val fagsakId: UUID = UUID.randomUUID()
     private val fagsakEksternId = 12345L
@@ -154,6 +163,7 @@ internal class JournalføringServiceTest {
         assertThat(slotDokumentInfoIder[0]).isEqualTo(dokumentInfoIdMedJsonVerdi)
         assertThat(slotDokumentInfoIder.size).isEqualTo(1)
         verify(exactly = 1) { søknadService.lagreSøknadForOvergangsstønad(any(), any(), any(), any()) }
+        verify(exactly = 1) { iverksettService.startBehandling(any()) }
     }
 
     @Test
