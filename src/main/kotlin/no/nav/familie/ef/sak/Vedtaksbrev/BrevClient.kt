@@ -35,7 +35,6 @@ class BrevClient(@Value("\${FAMILIE_BREV_API_URL}")
     }
 
     companion object {
-
         val ef = "ef-brev"
         val test = "testdata"
     }
