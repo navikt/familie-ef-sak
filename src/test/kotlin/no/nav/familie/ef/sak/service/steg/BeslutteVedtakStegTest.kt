@@ -3,16 +3,24 @@ package no.nav.familie.ef.sak.service.steg
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.*
 import no.nav.familie.ef.mottak.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.api.beregning.VedtakService
 import no.nav.familie.ef.sak.api.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.api.dto.BrevRequest
 import no.nav.familie.ef.sak.api.dto.TotrinnskontrollDto
 import no.nav.familie.ef.sak.iverksett.IverksettClient
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.tilkjentYtelse
 import no.nav.familie.ef.sak.repository.VedtaksbrevRepository
 import no.nav.familie.ef.sak.repository.domain.*
+import no.nav.familie.ef.sak.service.ArbeidsfordelingService
+import no.nav.familie.ef.sak.service.BehandlingshistorikkService
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.OppgaveService
+import no.nav.familie.ef.sak.service.PersisterGrunnlagsdataService
+import no.nav.familie.ef.sak.service.SøknadService
+import no.nav.familie.ef.sak.service.TilkjentYtelseService
 import no.nav.familie.ef.sak.service.TotrinnskontrollService
 import no.nav.familie.ef.sak.service.VedtaksbrevService
+import no.nav.familie.ef.sak.service.VurderingService
 import no.nav.familie.ef.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ef.sak.task.OpprettOppgaveTask
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -34,13 +42,27 @@ internal class BeslutteVedtakStegTest {
     private val vedtaksbrevRepository = mockk<VedtaksbrevRepository>()
     private val vedtaksbrevService = mockk<VedtaksbrevService>()
     private val featureToggleService = mockk<FeatureToggleService>()
+    private val behandlingshistorikkService = mockk<BehandlingshistorikkService>()
+    private val arbeidsfordelingService = mockk<ArbeidsfordelingService>()
+    private val vurderingService = mockk<VurderingService>()
+    private val søknadService = mockk<SøknadService>()
     private val iverksett = mockk<IverksettClient>()
+    private val vedtakService = mockk<VedtakService>()
+    private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
+    private val persisterGrunnlagsdataService = mockk<PersisterGrunnlagsdataService>()
 
     private val beslutteVedtakSteg = BeslutteVedtakSteg(taskRepository,
                                                         fagsakService,
                                                         oppgaveService,
                                                         featureToggleService,
                                                         iverksett,
+                                                        arbeidsfordelingService,
+                                                        vurderingService,
+                                                        søknadService,
+                                                        vedtakService,
+                                                        behandlingshistorikkService,
+                                                        tilkjentYtelseService,
+                                                        persisterGrunnlagsdataService,
                                                         totrinnskontrollService,
                                                         vedtaksbrevRepository,
                                                         vedtaksbrevService)

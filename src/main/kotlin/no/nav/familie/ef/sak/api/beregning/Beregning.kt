@@ -35,6 +35,7 @@ private fun overlapper(grunnbeløpsperiode: Grunnbeløp,
                 1)
 
 // TODO: Kopiert inn fra https://github.com/navikt/g - kan kanskje kalle tjenesten på sikt hvis den er tenkt å være oppdatert?
+// TODO: tilDato må være siste dag i måneden
 val grunnbeløpsperioder: List<Grunnbeløp> =
         listOf(
                 Grunnbeløp(

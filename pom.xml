@@ -36,7 +36,7 @@
         <felles.version>1.20210510092430_d9bfcd5</felles.version>
         <prosessering.version>1.20210510122226_422ab5c</prosessering.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>2.0_20210527154920_5ef5178</kontrakter.version>
+        <kontrakter.version>2.0_20210531124016_8285804</kontrakter.version>
 
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>

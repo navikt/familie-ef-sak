@@ -4,6 +4,7 @@ import no.nav.familie.ef.iverksett.infrastruktur.json.BarnDto
 import no.nav.familie.ef.mottak.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.api.beregning.VedtakService
+import no.nav.familie.ef.sak.api.beregning.tilVedtaksresultat
 import no.nav.familie.ef.sak.api.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.blankett.JournalførBlankettTask
@@ -20,13 +21,16 @@ import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.domain.VilkårType
 import no.nav.familie.ef.sak.service.ArbeidsfordelingService
+import no.nav.familie.ef.sak.service.BehandlingshistorikkService
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.OppgaveService
 import no.nav.familie.ef.sak.service.PersisterGrunnlagsdataService
 import no.nav.familie.ef.sak.service.SøknadService
+import no.nav.familie.ef.sak.service.TilkjentYtelseService
 import no.nav.familie.ef.sak.service.TotrinnskontrollService
 import no.nav.familie.ef.sak.service.VedtaksbrevService
 import no.nav.familie.ef.sak.service.VurderingService
+import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ef.sak.task.OpprettOppgaveTask
@@ -35,12 +39,17 @@ import no.nav.familie.ef.sak.task.PollStatusFraIverksettTask
 import no.nav.familie.kontrakter.ef.felles.BehandlingResultat
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.felles.StønadType
-import no.nav.familie.kontrakter.ef.felles.Vedtak
 import no.nav.familie.kontrakter.ef.iverksett.AktivitetskravDto
+import no.nav.familie.kontrakter.ef.iverksett.AndelTilkjentYtelseDto
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingsdetaljerDto
 import no.nav.familie.kontrakter.ef.iverksett.FagsakdetaljerDto
+import no.nav.familie.kontrakter.ef.iverksett.InntektDto
+import no.nav.familie.kontrakter.ef.iverksett.InntektsType
 import no.nav.familie.kontrakter.ef.iverksett.IverksettDto
+import no.nav.familie.kontrakter.ef.iverksett.PeriodebeløpDto
+import no.nav.familie.kontrakter.ef.iverksett.Periodetype
 import no.nav.familie.kontrakter.ef.iverksett.SøkerDto
+import no.nav.familie.kontrakter.ef.iverksett.TilkjentYtelseDto
 import no.nav.familie.kontrakter.ef.iverksett.VedtaksdetaljerDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -59,6 +68,8 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
                          private val vurderingService: VurderingService,
                          private val søknadService: SøknadService,
                          private val vedtakService: VedtakService,
+                         private val behandlinghistorikkService: BehandlingshistorikkService,
+                         private val tilkjentYtelseService: TilkjentYtelseService,
                          private val persisterGrunnlagsdataService: PersisterGrunnlagsdataService,
                          private val totrinnskontrollService: TotrinnskontrollService,
                          private val vedtaksbrevRepository: VedtaksbrevRepository,
@@ -71,7 +82,7 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
     }
 
     override fun utførOgReturnerNesteSteg(behandling: Behandling, data: BeslutteVedtakDto): StegType {
-        val saksbehandler = totrinnskontrollService.lagreTotrinnskontrollOgReturnerBehandler(behandling, data)
+        val beslutter = totrinnskontrollService.lagreTotrinnskontrollOgReturnerBehandler(behandling, data)
 
         ferdigstillOppgave(behandling)
 
@@ -132,16 +143,36 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
                                             tilhørendeEnhet = navEnhet)
 
                     val vedtak = vedtakService.hentVedtak(behandling.id)
-                    val vedtakDto = VedtaksdetaljerDto(vedtak = Vedtak.valueOf(vedtak.resultatType.name),
-                                                       vedtaksdato =,
-                                                       opphørÅrsak = null,
-                                                       saksbehandlerId = "",
-                                                       beslutterId = "",
-                                                       tilkjentYtelse =,
-                                                       inntekter = listOf())
+
+
+                    val saksbehandler = behandlinghistorikkService.finnSisteBehandlingshistorikk(behandling.id, StegType.SEND_TIL_BESLUTTER)?.opprettetAv ?: error("Kan ikke finne saksbehandler på behandlingen")
+                    val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(behandling.id)
+                    val vedtakDto = VedtaksdetaljerDto(vedtaksresultat = vedtak.resultatType.tilVedtaksresultat(),
+                                                       vedtaksdato = LocalDate.now(), // TODO: Er dette når første saksbehandler fullfører eller når beslutter godkjenner
+                                                       opphørÅrsak = null, // TODO: Revurdering
+                                                       saksbehandlerId = saksbehandler,
+                                                       beslutterId = beslutter,
+                                                       tilkjentYtelse = TilkjentYtelseDto(
+                                                               andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.map { andel ->
+                                                                   AndelTilkjentYtelseDto(periodebeløp = PeriodebeløpDto(beløp = andel.beløp,
+                                                                                                                         periodetype = Periodetype.MÅNED,
+                                                                                                                         fraOgMed = andel.stønadFom,
+                                                                                                                         tilOgMed = andel.stønadTom),
+                                                                                          kildeBehandlingId = andel.kildeBehandlingId)
+                                                               }
+
+                                                       ),
+                                                       inntekter = vedtak.inntekter?.inntekter?.map {
+                                                           InntektDto(periodebeløp =  PeriodebeløpDto(beløp = it.inntekt.intValueExact(),
+                                                                                                      periodetype = Periodetype.MÅNED,
+                                                                                                      fraOgMed = it.startDato,
+                                                                                                      tilOgMed = it.sluttDato),
+                                                                      inntektstype = InntektsType.ARBEIDINNTEKT) // TODO: Hva er inntektstype?
+                                                       } ?: emptyList()
+                    )
 
                     val iverksettDto =
-                            IverksettDto(behandling = behandlingsdetaljer, fagsak = fagsakdetaljerDto, søker = søkerDto)
+                            IverksettDto(behandling = behandlingsdetaljer, fagsak = fagsakdetaljerDto, søker = søkerDto, vedtak = vedtakDto)
                     iverksettClient.iverksett(iverksettDto, fil)
                     opprettPollForStatusOppgave(behandling.id)
                     StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT
@@ -155,7 +186,7 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
             }
         } else {
             vedtaksbrevRepository.deleteById(behandling.id)
-            opprettBehandleUnderkjentVedtakOppgave(behandling, saksbehandler)
+            opprettBehandleUnderkjentVedtakOppgave(behandling, beslutter)
             StegType.SEND_TIL_BESLUTTER
         }
     }

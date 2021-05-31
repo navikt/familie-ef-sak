@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.repository.domain.InntektWrapper
 import no.nav.familie.ef.sak.repository.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.repository.domain.Vedtak
+import no.nav.familie.kontrakter.ef.felles.Vedtaksresultat
 import org.springframework.http.HttpStatus
 import java.util.*
 
@@ -18,8 +19,10 @@ enum class ResultatType {
     HENLEGGE
 }
 
-fun ResultatType.tilVedtak(): no.nav.familie.kontrakter.ef.felles.Vedtak = when(this) {
-    ResultatType.INNVILGE -> Ve
+fun ResultatType.tilVedtaksresultat(): Vedtaksresultat = when(this) {
+    ResultatType.INNVILGE -> Vedtaksresultat.INNVILGET // TODO: Når skal vi ha delvis innvilget og opphørt
+    ResultatType.HENLEGGE -> error("Vedtaksresultat kan ikke være henlegge")
+    ResultatType.AVSLÅ -> Vedtaksresultat.AVSLÅTT
 }
 
 sealed class VedtakDto
