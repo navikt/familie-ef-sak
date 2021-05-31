@@ -255,5 +255,10 @@
       }
     },
     "nullable" : false
+  },
+  "lagtTilEtterFerdigstilling" : {
+    "name" : "lagtTilEtterFerdigstilling",
+    "type" : "Boolean",
+    "nullable" : true
   }
 }

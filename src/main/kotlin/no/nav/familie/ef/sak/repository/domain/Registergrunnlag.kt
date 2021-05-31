@@ -19,7 +19,8 @@ data class Registergrunnlag(@Id
 
 data class RegistergrunnlagData(val medlemskap: MedlemskapRegistergrunnlagDto,
                                 val sivilstand: SivilstandRegistergrunnlagDto,
-                                val barnMedSamvær: List<BarnMedSamværRegistergrunnlagDto>)
+                                val barnMedSamvær: List<BarnMedSamværRegistergrunnlagDto>,
+                                val lagtTilEtterFerdigstilling: Boolean = false)
 
 /**
  * Typ som definierer felt som har endringer i [RegistergrunnlagData], eks returnerer den

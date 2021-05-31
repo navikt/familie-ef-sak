@@ -87,7 +87,8 @@ internal class VurderingServiceTest {
                                                                                             mockk(relaxed = true),
                                                                                             mockk(relaxed = true),
                                                                                             mockk(relaxed = true),
-                                                                                            mockk(relaxed = true))
+                                                                                            mockk(relaxed = true),
+                                                                                            false)
     }
 
     @Test

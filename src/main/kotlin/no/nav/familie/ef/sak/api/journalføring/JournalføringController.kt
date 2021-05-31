@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.api.journalføring
 
-import no.nav.familie.ef.mottak.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.api.ApiFeil
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.service.JournalføringService
