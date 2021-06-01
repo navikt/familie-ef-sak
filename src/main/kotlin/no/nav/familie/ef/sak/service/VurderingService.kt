@@ -30,7 +30,7 @@ import java.util.UUID
 class VurderingService(private val behandlingService: BehandlingService,
                        private val søknadService: SøknadService,
                        private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-                       private val vilkårGrunnlagService: GrunnlagsdataService,
+                       private val vilkårGrunnlagService: VilkårGrunnlagService,
                        private val stegService: StegService,
                        private val blankettRepository: BlankettRepository) {
 

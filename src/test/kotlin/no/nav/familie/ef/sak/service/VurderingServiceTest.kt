@@ -53,7 +53,7 @@ internal class VurderingServiceTest {
     private val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
     private val familieIntegrasjonerClient = mockk<FamilieIntegrasjonerClient>()
     private val blankettRepository = mockk<BlankettRepository>()
-    private val vilkårGrunnlagService = mockk<GrunnlagsdataService>()
+    private val vilkårGrunnlagService = mockk<VilkårGrunnlagService>()
     private val stegService = mockk<StegService>()
     private val vurderingService = VurderingService(behandlingService = behandlingService,
                                                     søknadService = søknadService,

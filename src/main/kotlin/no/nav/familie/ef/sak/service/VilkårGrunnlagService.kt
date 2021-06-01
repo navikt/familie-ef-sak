@@ -19,8 +19,8 @@ import java.util.UUID
  * Denne klassen håndterer henting av VilkårGrunnlagDto
  */
 @Service
-class GrunnlagsdataService(private val medlemskapMapper: MedlemskapMapper,
-                           private val grunnlagsdataService: PersisterGrunnlagsdataService) {
+class VilkårGrunnlagService(private val medlemskapMapper: MedlemskapMapper,
+                            private val grunnlagsdataService: PersisterGrunnlagsdataService) {
 
 
     fun hentGrunnlag(behandlingId: UUID,
