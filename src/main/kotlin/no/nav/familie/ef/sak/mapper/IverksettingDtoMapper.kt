@@ -154,12 +154,12 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
                                                when (it) {
                                                    SvarId.JA -> true
                                                    SvarId.NEI -> false
-                                                   else -> error("Jajaj")
+                                                   else -> error("Sagt opp eller redusert har bara ja eller nej som svarslaternativ $it")
 
                                                }
-                                           } ?: error("detta var inte så bra")
+                                           } ?: error("Finner ikke delvilkårsvurderingen for sagt opp eller reducert")
                                        }
                            }
-                       } ?: error("detta var inte så bra")
+                       } ?: error("Finner ikke vurderingen for sagt opp eller redusert")
     }
 }
