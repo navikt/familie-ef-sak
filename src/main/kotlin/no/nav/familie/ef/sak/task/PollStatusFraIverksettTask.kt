@@ -30,7 +30,7 @@ class PollStatusFraIverksettTask(private val stegService: StegService,
         fun opprettTask(behandlingId: UUID): Task =
                 Task(type = TYPE,
                      payload = behandlingId.toString(),
-                     triggerTid = LocalDateTime.now().plusMinutes(15))
+                     triggerTid = LocalDateTime.now().plusMinutes(18))
 
 
         const val TYPE = "pollerStatusFraIverksett"
