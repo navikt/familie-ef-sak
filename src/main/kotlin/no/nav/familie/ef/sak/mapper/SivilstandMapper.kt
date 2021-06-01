@@ -8,15 +8,12 @@ import no.nav.familie.ef.sak.domene.GrunnlagsdataDomene
 import no.nav.familie.ef.sak.domene.Søker
 import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
 import no.nav.familie.ef.sak.repository.domain.søknad.Sivilstand
-import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsstønad
 
 object SivilstandMapper {
 
-    fun tilDto(grunnlagsdata: GrunnlagsdataDomene, søknad: SøknadsskjemaOvergangsstønad): SivilstandInngangsvilkårDto {
-        val sivilstandSøknadsgrunnlag = mapSøknadsgrunnlag(sivilstandsdetaljer = søknad.sivilstand)
-        return SivilstandInngangsvilkårDto(søknadsgrunnlag = sivilstandSøknadsgrunnlag,
+    fun tilDto(grunnlagsdata: GrunnlagsdataDomene, sivilstand: Sivilstand): SivilstandInngangsvilkårDto {
+        return SivilstandInngangsvilkårDto(søknadsgrunnlag = mapSøknadsgrunnlag(sivilstand),
                                            registergrunnlag = mapRegistergrunnlag(grunnlagsdata.søker))
-
     }
 
     fun mapRegistergrunnlag(søker: Søker): SivilstandRegistergrunnlagDto {

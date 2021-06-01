@@ -24,7 +24,7 @@ class BlankettService(private val tilgangService: TilgangService,
                       private val fagsakService: FagsakService,
                       private val personopplysningerService: PersonopplysningerService,
                       private val oppgaveRepository: OppgaveRepository,
-                      private val persisterGrunnlagsdataService: PersisterGrunnlagsdataService,
+                      private val grunnlagsdataService: PersisterGrunnlagsdataService,
                       private val vedtakService: VedtakService) {
 
     @Transactional
@@ -36,7 +36,7 @@ class BlankettService(private val tilgangService: TilgangService,
         val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, Stønadstype.OVERGANGSSTØNAD)
         val behandling = behandlingService.opprettBehandling(BehandlingType.BLANKETT, fagsak.id, søknad, journalpost)
         opprettEfOppgave(behandling.id, oppgaveId)
-        persisterGrunnlagsdataService.opprettGrunnlagsdata(behandling.id)
+        grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
 
         return behandling
     }

@@ -53,14 +53,14 @@ internal class VurderingServiceTest {
     private val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
     private val familieIntegrasjonerClient = mockk<FamilieIntegrasjonerClient>()
     private val blankettRepository = mockk<BlankettRepository>()
-    private val grunnlagsdataService = mockk<GrunnlagsdataService>()
+    private val vilkårGrunnlagService = mockk<GrunnlagsdataService>()
     private val stegService = mockk<StegService>()
     private val vurderingService = VurderingService(behandlingService = behandlingService,
                                                     søknadService = søknadService,
                                                     vilkårsvurderingRepository = vilkårsvurderingRepository,
-                                                    grunnlagsdataService = grunnlagsdataService,
                                                     blankettRepository = blankettRepository,
-                                                    stegService = stegService)
+                                                    stegService = stegService,
+                                                    vilkårGrunnlagService = vilkårGrunnlagService)
     private val søknad = SøknadsskjemaMapper.tilDomene(TestsøknadBuilder.Builder().setBarn(listOf(
             TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "13071489536"),
             TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "01012067050")
@@ -81,14 +81,14 @@ internal class VurderingServiceTest {
         every { vilkårsvurderingRepository.insertAll(any()) } answers { firstArg() }
         val sivilstand = SivilstandInngangsvilkårDto(mockk(relaxed = true),
                                                      SivilstandRegistergrunnlagDto(Sivilstandstype.GIFT, "Navn", null))
-        every { grunnlagsdataService.hentGrunnlag(any(), any()) } returns VilkårGrunnlagDto(mockk(relaxed = true),
-                                                                                            sivilstand,
-                                                                                            mockk(relaxed = true),
-                                                                                            mockk(relaxed = true),
-                                                                                            mockk(relaxed = true),
-                                                                                            mockk(relaxed = true),
-                                                                                            mockk(relaxed = true),
-                                                                                            false)
+        every { vilkårGrunnlagService.hentGrunnlag(any(), any()) } returns VilkårGrunnlagDto(mockk(relaxed = true),
+                                                                                             sivilstand,
+                                                                                             mockk(relaxed = true),
+                                                                                             mockk(relaxed = true),
+                                                                                             mockk(relaxed = true),
+                                                                                             mockk(relaxed = true),
+                                                                                             mockk(relaxed = true),
+                                                                                             false)
     }
 
     @Test

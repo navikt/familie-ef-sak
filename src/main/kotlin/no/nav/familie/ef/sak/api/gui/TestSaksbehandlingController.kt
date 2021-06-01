@@ -46,7 +46,7 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
                                    private val behandlingService: BehandlingService,
                                    private val søknadService: SøknadService,
                                    private val personService: PersonService,
-                                   private val persisterGrunnlagsdataService: PersisterGrunnlagsdataService,
+                                   private val grunnlagsdataService: PersisterGrunnlagsdataService,
                                    private val blankettService: BlankettService,
                                    private val journalpostClient: JournalpostClient) {
 
@@ -63,7 +63,7 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
                     lagFørstegangsbehandling(fagsak, søknad)
                 }
 
-        persisterGrunnlagsdataService.opprettGrunnlagsdata(behandling.id)
+        grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
         behandlingshistorikkService.opprettHistorikkInnslag(Behandlingshistorikk(behandlingId = behandling.id,
                                                                                  steg = StegType.VILKÅR))
 

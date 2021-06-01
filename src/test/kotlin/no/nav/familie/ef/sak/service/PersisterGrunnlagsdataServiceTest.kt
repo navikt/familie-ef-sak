@@ -5,6 +5,9 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ef.sak.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
+import no.nav.familie.ef.sak.integration.dto.pdl.Metadata
+import no.nav.familie.ef.sak.integration.dto.pdl.Sivilstand
+import no.nav.familie.ef.sak.integration.dto.pdl.Sivilstandstype
 import no.nav.familie.ef.sak.mapper.SøknadsskjemaMapper
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.config.PdlClientConfig
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
@@ -35,12 +38,9 @@ internal class PersisterGrunnlagsdataServiceTest {
             TestsøknadBuilder.Builder().defaultBarn("Navn2 navnesen", fødselTermindato = LocalDate.now().plusMonths(6))
     )).build().søknadOvergangsstønad)
 
-
     private val service = PersisterGrunnlagsdataService(pdlClient = pdlClient,
-                                                        behandlingService = behandlingService,
                                                         grunnlagsdataRepository = grunnlagsdataRepository,
                                                         søknadService = søknadService,
-                                                        featureToggleService = featureToggleService,
                                                         familieIntegrasjonerClient = familieIntegrasjonerClient)
 
     @BeforeEach
@@ -77,4 +77,28 @@ internal class PersisterGrunnlagsdataServiceTest {
 
         verify(exactly = 0) { pdlClient.hentSøker(any()) }
     }
+
+    @Test
+    internal fun `skal hente navn til relatertVedSivilstand fra sivilstand når personen har sivilstand`() {
+        val sivilstand = Sivilstand(Sivilstandstype.GIFT, null, "11111122222", null, Metadata(false))
+        val pdlSøker = PdlClientConfig.opprettPdlSøker().copy(sivilstand = listOf(sivilstand))
+        val fullmakt = pdlSøker.fullmakt.map { it.motpartsPersonident }
+        every { pdlClient.hentSøker(any()) } returns pdlSøker
+
+        service.hentGrunnlagsdataFraRegister("1", emptyList())
+
+        verify(exactly = 1) { pdlClient.hentPersonKortBolk(listOf(sivilstand.relatertVedSivilstand!!) + fullmakt) }
+    }
+
+    @Test
+    internal fun `skal ikke hente navn til relatertVedSivilstand fra sivilstand når det ikke finnes sivilstand`() {
+        val sivilstand = Sivilstand(Sivilstandstype.UOPPGITT, null, null, null, Metadata(false))
+        every { pdlClient.hentSøker(any()) } returns PdlClientConfig.opprettPdlSøker()
+                .copy(sivilstand = listOf(sivilstand), fullmakt = emptyList())
+
+        service.hentGrunnlagsdataFraRegister("1", emptyList())
+
+        verify(exactly = 0) { pdlClient.hentPersonKortBolk(any()) }
+    }
+
 }
