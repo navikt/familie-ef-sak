@@ -11,7 +11,7 @@ import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.domain.VilkårType
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.FagsakService
-import no.nav.familie.ef.sak.service.PersisterGrunnlagsdataService
+import no.nav.familie.ef.sak.service.GrunnlagsdataService
 import no.nav.familie.ef.sak.service.SøknadService
 import no.nav.familie.kontrakter.ef.søknad.SøknadMedVedlegg
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
@@ -30,7 +30,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
 
     @Autowired lateinit var behandlingService: BehandlingService
     @Autowired lateinit var fagsakService: FagsakService
-    @Autowired lateinit var grunnlagsdataService: PersisterGrunnlagsdataService
+    @Autowired lateinit var grunnlagsdataService: GrunnlagsdataService
     @Autowired lateinit var søknadService: SøknadService
 
     @BeforeEach

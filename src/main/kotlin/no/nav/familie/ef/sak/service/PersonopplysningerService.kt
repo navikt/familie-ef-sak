@@ -15,7 +15,7 @@ import java.util.UUID
 class PersonopplysningerService(private val personService: PersonService,
                                 private val søknadService: SøknadService,
                                 private val familieIntegrasjonerClient: FamilieIntegrasjonerClient,
-                                private val grunnlagsdataService: PersisterGrunnlagsdataService,
+                                private val grunnlagsdataService: GrunnlagsdataService,
                                 private val personopplysningerMapper: PersonopplysningerMapper) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)

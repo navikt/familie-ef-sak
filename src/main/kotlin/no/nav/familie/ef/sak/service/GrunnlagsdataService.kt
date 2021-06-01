@@ -21,10 +21,10 @@ import java.util.UUID
 
 
 @Service
-class PersisterGrunnlagsdataService(private val pdlClient: PdlClient,
-                                    private val grunnlagsdataRepository: GrunnlagsdataRepository,
-                                    private val søknadService: SøknadService,
-                                    private val familieIntegrasjonerClient: FamilieIntegrasjonerClient) {
+class GrunnlagsdataService(private val pdlClient: PdlClient,
+                           private val grunnlagsdataRepository: GrunnlagsdataRepository,
+                           private val søknadService: SøknadService,
+                           private val familieIntegrasjonerClient: FamilieIntegrasjonerClient) {
 
     val logger = LoggerFactory.getLogger(this.javaClass)
     val secureLogger = LoggerFactory.getLogger("secureLogger")

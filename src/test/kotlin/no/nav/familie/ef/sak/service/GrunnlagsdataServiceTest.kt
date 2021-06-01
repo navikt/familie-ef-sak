@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.data.repository.findByIdOrNull
 import java.time.LocalDate
 
-internal class PersisterGrunnlagsdataServiceTest {
+internal class GrunnlagsdataServiceTest {
 
 
     private val featureToggleService = mockk<FeatureToggleService>()
@@ -38,10 +38,10 @@ internal class PersisterGrunnlagsdataServiceTest {
             TestsøknadBuilder.Builder().defaultBarn("Navn2 navnesen", fødselTermindato = LocalDate.now().plusMonths(6))
     )).build().søknadOvergangsstønad)
 
-    private val service = PersisterGrunnlagsdataService(pdlClient = pdlClient,
-                                                        grunnlagsdataRepository = grunnlagsdataRepository,
-                                                        søknadService = søknadService,
-                                                        familieIntegrasjonerClient = familieIntegrasjonerClient)
+    private val service = GrunnlagsdataService(pdlClient = pdlClient,
+                                               grunnlagsdataRepository = grunnlagsdataRepository,
+                                               søknadService = søknadService,
+                                               familieIntegrasjonerClient = familieIntegrasjonerClient)
 
     @BeforeEach
     internal fun setUp() {

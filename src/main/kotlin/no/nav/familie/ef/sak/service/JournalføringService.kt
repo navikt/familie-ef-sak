@@ -34,7 +34,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
                            private val søknadService: SøknadService,
                            private val fagsakService: FagsakService,
                            private val pdlClient: PdlClient,
-                           private val grunnlagsdataService: PersisterGrunnlagsdataService,
+                           private val grunnlagsdataService: GrunnlagsdataService,
                            private val oppgaveService: OppgaveService) {
 
     fun hentJournalpost(journalpostId: String): Journalpost {

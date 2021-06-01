@@ -20,7 +20,7 @@ import java.util.UUID
  */
 @Service
 class VilkårGrunnlagService(private val medlemskapMapper: MedlemskapMapper,
-                            private val grunnlagsdataService: PersisterGrunnlagsdataService) {
+                            private val grunnlagsdataService: GrunnlagsdataService) {
 
 
     fun hentGrunnlag(behandlingId: UUID,

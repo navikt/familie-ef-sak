@@ -24,7 +24,7 @@ class BlankettService(private val tilgangService: TilgangService,
                       private val fagsakService: FagsakService,
                       private val personopplysningerService: PersonopplysningerService,
                       private val oppgaveRepository: OppgaveRepository,
-                      private val grunnlagsdataService: PersisterGrunnlagsdataService,
+                      private val grunnlagsdataService: GrunnlagsdataService,
                       private val vedtakService: VedtakService) {
 
     @Transactional

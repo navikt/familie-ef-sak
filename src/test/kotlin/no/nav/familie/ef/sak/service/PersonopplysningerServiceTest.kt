@@ -23,7 +23,7 @@ internal class PersonopplysningerServiceTest {
     private lateinit var familieIntegrasjonerClient: FamilieIntegrasjonerClient
     private lateinit var adresseMapper: AdresseMapper
     private lateinit var arbeidsfordelingService: ArbeidsfordelingService
-    private lateinit var grunnlagsdataService: PersisterGrunnlagsdataService
+    private lateinit var grunnlagsdataService: GrunnlagsdataService
     private lateinit var søknadService: SøknadService
 
     @BeforeEach
@@ -34,7 +34,7 @@ internal class PersonopplysningerServiceTest {
         søknadService = mockk()
 
         val pdlClient = PdlClientConfig().pdlClient()
-        grunnlagsdataService = PersisterGrunnlagsdataService(pdlClient, mockk(), søknadService, familieIntegrasjonerClient)
+        grunnlagsdataService = GrunnlagsdataService(pdlClient, mockk(), søknadService, familieIntegrasjonerClient)
         val personopplysningerMapper =
                 PersonopplysningerMapper(adresseMapper,
                                          StatsborgerskapMapper(kodeverkService),
