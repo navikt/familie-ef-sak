@@ -29,12 +29,12 @@
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <jvmTarget>11</jvmTarget>
-        <kotlin.version>1.5.0</kotlin.version>
+        <kotlin.version>1.5.10</kotlin.version>
         <kotlin-coroutines.version>1.5.0</kotlin-coroutines.version>
         <springfox.version>3.0.0</springfox.version>
         <mockk.version>1.11.0</mockk.version>
         <felles.version>1.20210510092430_d9bfcd5</felles.version>
-        <prosessering.version>1.20210510122226_422ab5c</prosessering.version>
+        <prosessering.version>1.20210526202511_26fea29</prosessering.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
         <kontrakter.version>2.0_20210531191818_19d2487</kontrakter.version>
 

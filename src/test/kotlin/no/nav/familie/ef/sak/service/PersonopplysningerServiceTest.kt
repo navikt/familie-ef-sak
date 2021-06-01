@@ -34,9 +34,13 @@ internal class PersonopplysningerServiceTest {
         søknadService = mockk()
 
         val pdlClient = PdlClientConfig().pdlClient()
-        persisterGrunnlagsdataService = PersisterGrunnlagsdataService(pdlClient, familieIntegrasjonerClient)
+        persisterGrunnlagsdataService =
+                PersisterGrunnlagsdataService(pdlClient, mockk(), mockk(), søknadService, mockk(), familieIntegrasjonerClient)
         val personopplysningerMapper =
-                PersonopplysningerMapper(adresseMapper, StatsborgerskapMapper(kodeverkService), arbeidsfordelingService, kodeverkService)
+                PersonopplysningerMapper(adresseMapper,
+                                         StatsborgerskapMapper(kodeverkService),
+                                         arbeidsfordelingService,
+                                         kodeverkService)
         val personService = PersonService(pdlClient)
         personopplysningerService = PersonopplysningerService(personService,
                                                               søknadService,
@@ -48,7 +52,10 @@ internal class PersonopplysningerServiceTest {
     @Test
     internal fun `mapper grunnlagsdata til PersonopplysningerDto`() {
         every { familieIntegrasjonerClient.egenAnsatt(any()) } returns true
-        every { familieIntegrasjonerClient.hentMedlemskapsinfo(any()) } returns Medlemskapsinfo("01010172272", emptyList(), emptyList(), emptyList())
+        every { familieIntegrasjonerClient.hentMedlemskapsinfo(any()) } returns Medlemskapsinfo("01010172272",
+                                                                                                emptyList(),
+                                                                                                emptyList(),
+                                                                                                emptyList())
         every { arbeidsfordelingService.hentNavEnhet(any()) } returns Arbeidsfordelingsenhet("1", "Enhet")
         val søker = personopplysningerService.hentPersonopplysninger("01010172272")
         assertThat(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(søker))
@@ -151,7 +158,8 @@ internal class PersonopplysningerServiceTest {
     "oppholdstillatelse" : "PERMANENT",
     "fraDato" : "2020-01-01",
     "tilDato" : null
-  } ]
+  } ],
+  "lagtTilEtterFerdigstilling" : false
 }""")
     }
 }

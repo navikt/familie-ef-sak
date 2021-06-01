@@ -83,6 +83,7 @@ internal class SimuleringServiceTest {
         val behandling = behandling(fagsak = fagsak, type = BehandlingType.BLANKETT)
 
         val årMånedFraStart = YearMonth.of(2021, 1)
+        val årMånedGEndring = YearMonth.of(2021, 5)
         val årMånedFraSlutt = YearMonth.of(2021, 12)
         val vedtak = Innvilget(resultatType = ResultatType.INNVILGE,
                                periodeBegrunnelse = "Ok",
@@ -111,8 +112,12 @@ internal class SimuleringServiceTest {
         simuleringService.simulerForBehandling(behandling.id)
 
         assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().periodebeløp.fraOgMed).isEqualTo(årMånedFraStart.atDay(1))
-        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().periodebeløp.tilOgMed).isEqualTo(årMånedFraSlutt.atEndOfMonth())
+        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().periodebeløp.tilOgMed).isEqualTo(årMånedGEndring.atDay(1))
         assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().periodebeløp.beløp).isGreaterThan(0)
+
+        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.last().periodebeløp.fraOgMed).isEqualTo(årMånedGEndring.atDay(1))
+        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.last().periodebeløp.tilOgMed).isEqualTo(årMånedFraSlutt.atEndOfMonth())
+        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.last().periodebeløp.beløp).isGreaterThan(0)
 
     }
 

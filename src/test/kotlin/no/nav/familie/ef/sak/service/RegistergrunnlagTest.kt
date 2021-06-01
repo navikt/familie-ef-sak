@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.service
 
 import com.fasterxml.jackson.annotation.JsonInclude
-import no.nav.familie.ef.sak.domene.Grunnlagsdata
+import no.nav.familie.ef.sak.domene.GrunnlagsdataDomene
 import no.nav.familie.ef.sak.repository.domain.RegistergrunnlagData
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
@@ -41,7 +41,7 @@ internal class RegistergrunnlagTest {
     @Test
     internal fun `diff av grunnlagsdata v2`() {
         val tidligereDefinisjon = this::class.java.getResource("/json/grunnlagsdata_v2.json").readText()
-        val nyDefinisjon = om.writeValueAsString(getClassInfo(Grunnlagsdata::class))
+        val nyDefinisjon = om.writeValueAsString(getClassInfo(GrunnlagsdataDomene::class))
         assertThat(nyDefinisjon).isEqualTo(tidligereDefinisjon)
     }
 

@@ -33,6 +33,12 @@ internal class BeregningServiceTest {
                                                          avkortningPerMåned = BigDecimal.ZERO,
                                                          fullOvergangsStønadPerMåned = BigDecimal(19_003),
                                                          grunnbeløp = 101351.toBigDecimal())
+
+        val beregningsgrunnlagG2021 = Beregningsgrunnlag(samordningsfradrag = BigDecimal.ZERO,
+                                                         inntekt = BigDecimal.ZERO,
+                                                         avkortningPerMåned = BigDecimal.ZERO,
+                                                         fullOvergangsStønadPerMåned = BigDecimal(19_950),
+                                                         grunnbeløp = 106399.toBigDecimal())
         val fullYtelse = beregningService.beregnYtelse(inntektsperioder = listOf(Inntektsperiode(LocalDate.parse("2019-04-30"),
                                                                                                  LocalDate.parse("2022-04-30"),
                                                                                                  BigDecimal(0),
@@ -40,7 +46,7 @@ internal class BeregningServiceTest {
                                                        vedtaksperioder = listOf(Periode(LocalDate.parse("2019-04-30"),
                                                                                         LocalDate.parse("2022-04-30"))))
 
-        assertThat(fullYtelse.size).isEqualTo(3)
+        assertThat(fullYtelse.size).isEqualTo(4)
         assertThat(fullYtelse[0]).isEqualTo(Beløpsperiode(Periode(LocalDate.parse("2019-04-30"),
                                                           LocalDate.parse("2019-05-01")),
                                                           beregningsgrunnlagG2018,
@@ -52,10 +58,15 @@ internal class BeregningServiceTest {
                                                           18723.toBigDecimal(),
                                                           18723.toBigDecimal()))
         assertThat(fullYtelse[2]).isEqualTo(Beløpsperiode(Periode(LocalDate.parse("2020-05-01"),
-                                                          LocalDate.parse("2022-04-30")),
+                                                          LocalDate.parse("2021-05-01")),
                                                           beregningsgrunnlagG2020,
                                                           19003.toBigDecimal(),
                                                           19003.toBigDecimal()))
+        assertThat(fullYtelse[3]).isEqualTo(Beløpsperiode(Periode(LocalDate.parse("2021-05-01"),
+                                                          LocalDate.parse("2022-04-30")),
+                                                          beregningsgrunnlagG2021,
+                                                          19950.toBigDecimal(),
+                                                          19950.toBigDecimal()))
     }
 
     @Test

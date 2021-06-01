@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.service
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.familie.ef.sak.api.dto.BrevRequest
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.JournalpostClient
@@ -49,9 +50,17 @@ class VedtaksbrevService(private val brevClient: BrevClient,
                            signaturSaksbehandler = signaturSaksbehandler)
     }
 
-    fun lagPdf(brevRequest: BrevRequest): ByteArray {
+    // TODO: Slett denne
+    @Deprecated("Skal slettes snart")
+    fun lagPdf(brevRequest: BrevRequest, brevMal: String = "innvilgetVedtakMVP"): ByteArray {
         return brevClient.genererBrev("bokmaal",
-                                      "innvilgetVedtakMVP",
+                                      brevMal,
+                                      brevRequest)
+    }
+
+    fun lagPdf(brevRequest: JsonNode, brevMal: String): ByteArray {
+        return brevClient.genererBrev("bokmaal",
+                                      brevMal,
                                       brevRequest)
     }
 
@@ -68,8 +77,8 @@ class VedtaksbrevService(private val brevClient: BrevClient,
         return brevRepository.update(vedtaksbrev.copy(pdf = Fil(lagPdf(endeligRequest)), brevRequest = endeligRequest))
     }
 
-    fun forhåndsvisBrev(behandlingId: UUID): ByteArray{
-        return  lagPdf(lagBrevRequest(behandlingId))
+    fun forhåndsvisBrev(behandlingId: UUID, brevRequest: JsonNode, brevMal: String): ByteArray{
+        return lagPdf(brevRequest, brevMal)
     }
 
     fun hentBrev(behandlingId: UUID): Vedtaksbrev {
