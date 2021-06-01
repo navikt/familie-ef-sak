@@ -117,7 +117,7 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
 
     private fun mapSøkerDto(fagsak: Fagsak, behandling: Behandling): SøkerDto {
         val søknad = søknadService.hentOvergangsstønad(behandling.id)
-        val grunnlagsdata = persisterGrunnlagsdataService.hentGrunnlagsdata(behandling.id, søknad)
+        val ( grunnlagsdata )  = persisterGrunnlagsdataService.hentGrunnlagsdata(behandling.id)
         val alleBarn = BarnMatcher.kobleSøknadsbarnOgRegisterBarn(søknad.barn, grunnlagsdata.barn)
         val navEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(søknad.fødselsnummer)
         val harSagtOpp = hentHarSagtOppEllerRedusertFraVurderinger(behandling)

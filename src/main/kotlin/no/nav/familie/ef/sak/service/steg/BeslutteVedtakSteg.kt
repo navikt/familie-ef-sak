@@ -1,9 +1,9 @@
 package no.nav.familie.ef.sak.service.steg
 
-import no.nav.familie.ef.mottak.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.api.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.blankett.JournalførBlankettTask
+import no.nav.familie.ef.sak.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.mapper.IverksettingDtoMapper
 import no.nav.familie.ef.sak.repository.VedtaksbrevRepository
