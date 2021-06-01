@@ -36,6 +36,8 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
 
     fun hentAktivIdent(behandlingId: UUID): String = behandlingRepository.finnAktivIdent(behandlingId)
 
+    fun hentEksterneIder(behandlingIder: Set<UUID>) = behandlingRepository.finnEksterneIder(behandlingIder)
+
     @Transactional
     fun opprettBehandling(behandlingType: BehandlingType,
                           fagsakId: UUID,

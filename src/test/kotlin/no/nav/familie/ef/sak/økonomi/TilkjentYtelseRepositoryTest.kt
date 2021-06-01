@@ -6,14 +6,16 @@ import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.BehandlingRepository
 import no.nav.familie.ef.sak.repository.FagsakRepository
 import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseMedMetaData
 import no.nav.familie.ef.sak.repository.domain.Behandling
+import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
+import no.nav.familie.ef.sak.repository.domain.BehandlingType
+import no.nav.familie.ef.sak.repository.domain.Stønadstype
+import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseMedMetaData
 import no.nav.familie.ef.sak.økonomi.UtbetalingsoppdragGenerator.lagTilkjentYtelseMedUtbetalingsoppdrag
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
-import java.time.LocalDate
 
 
 internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
@@ -85,35 +87,73 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
         val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(behandling)
         val lagretTilkjentYtelse = tilkjentYtelseRepository.insert(tilkjentYtelse)
 
-        val hentetTilkjentYtelse =
-                tilkjentYtelseRepository.findByBehandlingId(behandling.id)
+        val hentetTilkjentYtelse = tilkjentYtelseRepository.findByBehandlingId(behandling.id)
 
         assertThat(hentetTilkjentYtelse).isEqualTo(lagretTilkjentYtelse)
     }
 
     @Test
-    internal fun `finn periodeIdn for behandlinger`() {
+    internal fun `finnTilkjentYtelserTilKonsistensAvstemming`() {
         val fagsak = fagsakRepository.insert(fagsak())
-        val behandling = behandlingRepository.insert(behandling(fagsak))
-        var tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(behandling)
-        val nyeAndeler =
-                tilkjentYtelse.andelerTilkjentYtelse.map { it.copy(stønadTom = LocalDate.now().plusYears(1),
-                                                                   periodeId = 1) }
-        tilkjentYtelse = tilkjentYtelse.copy(andelerTilkjentYtelse = nyeAndeler)
-        tilkjentYtelseRepository.insert(tilkjentYtelse)
-        val finnKildeBehandlingIdFraAndelTilkjentYtelse2 =
-                tilkjentYtelseRepository.finnKildeBehandlingIdFraAndelTilkjentYtelse(LocalDate.now(), listOf(behandling.id))
-        assertThat(finnKildeBehandlingIdFraAndelTilkjentYtelse2).hasSize(1)
-        assertThat(finnKildeBehandlingIdFraAndelTilkjentYtelse2[0].first).isEqualTo(behandling.eksternId.id)
-        assertThat(finnKildeBehandlingIdFraAndelTilkjentYtelse2[0].second)
-                .isEqualTo(tilkjentYtelse.andelerTilkjentYtelse[0].periodeId)
+        val behandling = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.FERDIGSTILT))
 
+        var tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(behandling)
+        val stønadFom = tilkjentYtelse.andelerTilkjentYtelse.minOf { it.stønadFom }
+
+        tilkjentYtelseRepository.insert(tilkjentYtelse)
+
+        assertThat(tilkjentYtelseRepository.finnTilkjentYtelserTilKonsistensavstemming(Stønadstype.OVERGANGSSTØNAD,
+                                                                                       stønadFom.minusDays(1)))
+                .hasSize(1)
+        assertThat(tilkjentYtelseRepository.finnTilkjentYtelserTilKonsistensavstemming(Stønadstype.OVERGANGSSTØNAD,
+                                                                                       stønadFom))
+                .hasSize(1)
+
+        assertThat(tilkjentYtelseRepository.finnTilkjentYtelserTilKonsistensavstemming(Stønadstype.OVERGANGSSTØNAD,
+                                                                                       stønadFom.plusDays(1)))
+                .isEmpty()
+
+        assertThat(tilkjentYtelseRepository.finnTilkjentYtelserTilKonsistensavstemming(Stønadstype.BARNETILSYN,
+                                                                                       stønadFom))
+                .withFailMessage("Må matche stønadstype")
+                .isEmpty()
     }
 
-    private fun opprettBehandling() : Behandling {
+    @Test
+    internal fun `finnTilkjentYtelserTilKonsistensAvstemming - Skal ikke finne når status ikke er ferdigstillt`() {
         val fagsak = fagsakRepository.insert(fagsak())
-        val behandling = behandlingRepository.insert(behandling(fagsak))
+        val behandling = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.UTREDES))
 
-        return behandling;
+        val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(behandling)
+        val stønadFom = tilkjentYtelse.andelerTilkjentYtelse.minOf { it.stønadFom }
+
+        tilkjentYtelseRepository.insert(tilkjentYtelse)
+
+        assertThat(tilkjentYtelseRepository.finnTilkjentYtelserTilKonsistensavstemming(Stønadstype.OVERGANGSSTØNAD,
+                                                                                       stønadFom.minusDays(1)))
+                .isEmpty()
+    }
+
+    @Test
+    internal fun `finnTilkjentYtelserTilKonsistensAvstemming - Skal ikke finne når type er feil`() {
+        val fagsak = fagsakRepository.insert(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak,
+                                                                status = BehandlingStatus.FERDIGSTILT,
+                                                                type = BehandlingType.BLANKETT))
+
+        val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(behandling)
+        val stønadFom = tilkjentYtelse.andelerTilkjentYtelse.minOf { it.stønadFom }
+
+        tilkjentYtelseRepository.insert(tilkjentYtelse)
+
+        assertThat(tilkjentYtelseRepository.finnTilkjentYtelserTilKonsistensavstemming(Stønadstype.OVERGANGSSTØNAD,
+                                                                                       stønadFom.minusDays(1)))
+                .isEmpty()
+    }
+
+    private fun opprettBehandling(): Behandling {
+        val fagsak = fagsakRepository.insert(fagsak())
+
+        return behandlingRepository.insert(behandling(fagsak))
     }
 }

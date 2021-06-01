@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.repository
 
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
+import no.nav.familie.ef.sak.repository.domain.EksternId
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.data.repository.query.Param
@@ -48,4 +49,12 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
     """)
     fun finnSisteBehandling(@Param("stonadstype") stønadstype: Stønadstype, personidenter: Set<String>): Behandling?
 
+    // language=PostgreSQL
+    @Query("""
+        SELECT b.id behandling_id, be.id ekstern_behandling_id, fe.id ekstern_fagsak_id
+        FROM behandling b
+            JOIN behandling_ekstern be ON b.id = be.behandling_id
+            JOIN fagsak_ekstern fe ON b.fagsak_id = fe.fagsak_id
+        """)
+    fun finnEksterneIder(behandlingId: Set<UUID>): Set<EksternId>
 }

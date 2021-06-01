@@ -99,4 +99,21 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(behandlingRepository.finnSisteBehandling(SKOLEPENGER, setOf("1"))?.id).isNull()
         assertThat(behandlingRepository.finnSisteBehandling(OVERGANGSSTØNAD, setOf("2"))?.id).isNull()
     }
+
+    @Test
+    internal fun `finnEksterneIder - skal hente eksterne ider`() {
+        val fagsak = fagsakRepository.insert(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak))
+
+        val eksterneIder = behandlingRepository.finnEksterneIder(setOf(behandling.id))
+
+        assertThat(fagsak.eksternId.id).isNotEqualTo(0L)
+        assertThat(behandling.eksternId.id).isNotEqualTo(0L)
+
+        assertThat(eksterneIder).hasSize(1)
+        val first = eksterneIder.first()
+        assertThat(first.behandlingId).isEqualTo(behandling.id)
+        assertThat(first.eksternBehandlingId).isEqualTo(behandling.eksternId.id)
+        assertThat(first.eksternFagsakId).isEqualTo(fagsak.eksternId.id)
+    }
 }

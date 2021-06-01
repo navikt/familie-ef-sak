@@ -5,18 +5,28 @@ import no.nav.familie.ef.sak.integration.OppdragClient
 import no.nav.familie.ef.sak.mapper.tilDto
 import no.nav.familie.ef.sak.mapper.tilTilkjentYtelse
 import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
-import no.nav.familie.ef.sak.repository.domain.*
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus.*
+import no.nav.familie.ef.sak.repository.domain.Behandling
+import no.nav.familie.ef.sak.repository.domain.Stønadstype
+import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseMedMetaData
+import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus.AKTIV
+import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus.AVSLUTTET
+import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus.IKKE_KLAR
+import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus.OPPRETTET
+import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus.SENDT_TIL_IVERKSETTING
+import no.nav.familie.ef.sak.util.isEqualOrAfter
 import no.nav.familie.ef.sak.økonomi.UtbetalingsoppdragGenerator
 import no.nav.familie.ef.sak.økonomi.tilKlassifisering
+import no.nav.familie.kontrakter.ef.iverksett.KonsistensavstemmingTilkjentYtelseDto
+import no.nav.familie.kontrakter.ef.iverksett.PeriodebeløpDto
+import no.nav.familie.kontrakter.ef.iverksett.Periodetype
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
-import no.nav.familie.kontrakter.felles.oppdrag.PerioderForBehandling
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 @Service
 class TilkjentYtelseService(private val oppdragClient: OppdragClient,
@@ -46,7 +56,8 @@ class TilkjentYtelseService(private val oppdragClient: OppdragClient,
 
     fun opprettTilkjentYtelse(tilkjentYtelseDTO: TilkjentYtelseDTO): TilkjentYtelse {
         val nyTilkjentYtelse = tilkjentYtelseDTO.tilTilkjentYtelse()
-        val andelerMedGodtykkligKildeId = nyTilkjentYtelse.andelerTilkjentYtelse.map { it.copy(kildeBehandlingId = nyTilkjentYtelse.behandlingId) }
+        val andelerMedGodtykkligKildeId =
+                nyTilkjentYtelse.andelerTilkjentYtelse.map { it.copy(kildeBehandlingId = nyTilkjentYtelse.behandlingId) }
         return tilkjentYtelseRepository.insert(nyTilkjentYtelse.copy(andelerTilkjentYtelse = andelerMedGodtykkligKildeId))
     }
 
@@ -78,16 +89,32 @@ class TilkjentYtelseService(private val oppdragClient: OppdragClient,
                 }
     }
 
-    fun finnLøpendeUtbetalninger(stønadstype: Stønadstype, datoForAvstemming: LocalDate): List<PerioderForBehandling> {
-        return tilkjentYtelseRepository.finnSisteBehandlingForFagsak(stønadstype = stønadstype)
-                .chunked(1000)
-                .flatMap { sisteBehandlinger ->
-                    val finnKildeBehandlingIdFraAndelTilkjentYtelse =
-                            tilkjentYtelseRepository.finnKildeBehandlingIdFraAndelTilkjentYtelse(datoForAvstemming = datoForAvstemming,
-                                                                                                 sisteBehandlinger = sisteBehandlinger)
-                    return finnKildeBehandlingIdFraAndelTilkjentYtelse.groupBy({ it.first }, { it.second })
-                            .map { PerioderForBehandling(it.key.toString(), it.value.toSet()) }
-                }
+    fun finnTilkjentYtelserTilKonsistensavstemming(stønadstype: Stønadstype,
+                                                   datoForAvstemming: LocalDate): List<KonsistensavstemmingTilkjentYtelseDto> {
+        //TODO kan bare stemme av de som har riktig status fra iverksett
+        val tilkjentYtelser = tilkjentYtelseRepository.finnTilkjentYtelserTilKonsistensavstemming(stønadstype, datoForAvstemming)
+
+        val behandlingIder = tilkjentYtelser.map { it.behandlingId }.toSet()
+        val eksterneIder = behandlingService.hentEksterneIder(behandlingIder)
+                .associateBy { it.behandlingId }
+
+        return tilkjentYtelser.map { tilkjentYtelse ->
+            val eksternId = eksterneIder[tilkjentYtelse.behandlingId]
+                            ?: error("Finner ikke eksterne id'er til behandling=${tilkjentYtelse.behandlingId}")
+            val andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse
+                    .filter { it.stønadFom.isEqualOrAfter(datoForAvstemming) }
+                    .map {
+                        PeriodebeløpDto(it.beløp,
+                                        Periodetype.MÅNED,
+                                        it.stønadFom,
+                                        it.stønadTom)
+                    }
+            KonsistensavstemmingTilkjentYtelseDto(behandlingId = tilkjentYtelse.behandlingId,
+                                                  eksternBehandlingId = eksternId.eksternBehandlingId,
+                                                  eksternFagsakId = eksternId.eksternFagsakId,
+                                                  personIdent = tilkjentYtelse.personident,
+                                                  andelerTilkjentYtelse = andelerTilkjentYtelse)
+        }
     }
 
     fun slettTilkjentYtelseForBehandling(behandlingId: UUID) {

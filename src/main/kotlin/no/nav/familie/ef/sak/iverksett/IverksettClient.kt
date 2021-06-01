@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.vedtaksbrev
 import no.nav.familie.ef.sak.iverksett.SimuleringDto
 import no.nav.familie.ef.sak.util.medContentTypeJsonUTF8
 import no.nav.familie.http.client.AbstractPingableRestClient
+import no.nav.familie.kontrakter.ef.iverksett.KonsistensavstemmingDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import org.springframework.beans.factory.annotation.Qualifier
@@ -17,7 +18,8 @@ import java.net.URI
 class IverksettClient(@Value("\${FAMILIE_EF_IVERKSETT_URL}")
                       private val familieEfIverksettUri: String,
                       @Qualifier("azure")
-                      private val restOperations: RestOperations) : AbstractPingableRestClient(restOperations, "familie.ef.iverksett") {
+                      private val restOperations: RestOperations)
+    : AbstractPingableRestClient(restOperations, "familie.ef.iverksett") {
 
     override val pingUri: URI = URI.create("$familieEfIverksettUri/api/status")
 
@@ -32,5 +34,14 @@ class IverksettClient(@Value("\${FAMILIE_EF_IVERKSETT_URL}")
                                                                    simuleringRequest,
                                                                    HttpHeaders().medContentTypeJsonUTF8()).data!!
     }
+
+    fun konsistensavstemming(request: KonsistensavstemmingDto) {
+        val url = URI.create("$familieEfIverksettUri/api/konsistensavstemming")
+        val response = postForEntity<Ressurs<String>>(url, request)
+        if (response.status != Ressurs.Status.SUKSESS) {
+            error("Feilet kall mot konsistensavstemming message=${response.melding}")
+        }
+    }
+
 }
 
