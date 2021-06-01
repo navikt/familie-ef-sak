@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.service
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import no.nav.familie.ef.sak.domene.GrunnlagsdataDomene
-import no.nav.familie.ef.sak.repository.domain.RegistergrunnlagData
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -26,35 +25,10 @@ internal class RegistergrunnlagTest {
      * Eks hvis ett felt slettes.
      */
     @Test
-    internal fun `diff av grunnlagsdata`() {
-        val tidligereDefinisjon = this::class.java.getResource("/json/grunnlagsdata.json").readText()
-        val nyDefinisjon = om.writeValueAsString(getClassInfo(RegistergrunnlagData::class))
-        assertThat(nyDefinisjon).isEqualTo(tidligereDefinisjon)
-    }
-
-    /**
-     * For å få med seg breaking changes i Grunnlagsdata. Hvis noe faktiskt er breaking change får man vurdere om man skal
-     * gjøre noe annen diffing, eks att man lage en diff av Map i stedet for GrunnlagsdataData.
-     * Ellers kan man oppdatere grunnlagsdata.json med den nye diffen
-     * Eks hvis ett felt slettes.
-     */
-    @Test
     internal fun `diff av grunnlagsdata v2`() {
         val tidligereDefinisjon = this::class.java.getResource("/json/grunnlagsdata_v2.json").readText()
         val nyDefinisjon = om.writeValueAsString(getClassInfo(GrunnlagsdataDomene::class))
         assertThat(nyDefinisjon).isEqualTo(tidligereDefinisjon)
-    }
-
-    /**
-     * Hvis GrunnlagsdataData har nullable felt, så må diff i GrunnlagsdataService endres, då den forventer seg att alle felt
-     * på rootnivå er not nullable
-     */
-    @Test
-    internal fun `GrunnlagsdataData kan ikke ha nullable felt`() {
-        val nullableFeltIRootGrunnlagsdata = RegistergrunnlagData::class.constructors.first().parameters.filter {
-            it.type.isMarkedNullable
-        }.map { it.name }
-        assertThat(nullableFeltIRootGrunnlagsdata).isEmpty()
     }
 
     private data class ObjectInfo(val name: String,
