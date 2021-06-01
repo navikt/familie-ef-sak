@@ -32,7 +32,7 @@ internal class SendTilBeslutterStegTest {
     private val vedtaksbrevRepository = mockk<VedtaksbrevRepository>()
 
     private val beslutteVedtakSteg =
-            SendTilBeslutterSteg(taskRepository, oppgaveService, behandlingService, vedtaksbrevRepository)
+            SendTilBeslutterSteg(taskRepository, oppgaveService, behandlingService)
     private val fagsak = Fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD,
                                 søkerIdenter = setOf(FagsakPerson(ident = "12345678901")))
     private val vedtaksbrev = Vedtaksbrev(behandlingId = UUID.randomUUID(),

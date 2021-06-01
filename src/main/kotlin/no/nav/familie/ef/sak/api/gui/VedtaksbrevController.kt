@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.service.TilgangService
 import no.nav.familie.ef.sak.service.VedtaksbrevService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.slf4j.LoggerFactory
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import java.util.*
@@ -16,6 +17,7 @@ import java.util.*
 class VedtaksbrevController(private val brevService: VedtaksbrevService,
                             private val tilgangService: TilgangService) {
 
+    private val logger = LoggerFactory.getLogger(this.javaClass)
     @PostMapping("/{behandlingId}/{brevMal}")
     fun lagBrev(@PathVariable behandlingId: UUID,
                 @PathVariable brevMal: String,
@@ -28,6 +30,12 @@ class VedtaksbrevController(private val brevService: VedtaksbrevService,
     @GetMapping("/{behandlingId}")
     fun hentBrev(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
-        return Ressurs.success(brevService.lagBeslutterBrev(behandlingId).beslutterPdf!!.bytes)
+        val lagBeslutterBrev = brevService.lagBeslutterBrev(behandlingId)
+        return  try {
+            Ressurs.success(lagBeslutterBrev.beslutterPdf!!.bytes)
+        } catch (e: NullPointerException){
+            logger.error("Pdf finnes ikke for behandling=$behandlingId.")
+            Ressurs.failure("Pdf for beslutter kunne ikke genereres")
+        }
     }
 }

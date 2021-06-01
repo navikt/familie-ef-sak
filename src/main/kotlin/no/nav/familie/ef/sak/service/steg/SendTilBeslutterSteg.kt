@@ -1,14 +1,10 @@
 package no.nav.familie.ef.sak.service.steg
 
 import no.nav.familie.ef.sak.api.Feil
-import no.nav.familie.ef.sak.repository.VedtaksbrevRepository
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
-import no.nav.familie.ef.sak.repository.domain.BehandlingType
-import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.OppgaveService
-import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.task.OpprettOppgaveTask.OpprettOppgaveTaskData
@@ -19,9 +15,7 @@ import org.springframework.stereotype.Service
 @Service
 class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
                            private val oppgaveService: OppgaveService,
-                           private val behandlingService: BehandlingService,
-                           private val vedtaksbrevRepository: VedtaksbrevRepository
-) : BehandlingSteg<Void?> {
+                           private val behandlingService: BehandlingService) : BehandlingSteg<Void?> {
 
     override fun validerSteg(behandling: Behandling) {
         if (behandling.steg != stegType()) {
@@ -35,12 +29,6 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
 
         ferdigstillOppgave(behandling, Oppgavetype.BehandleSak)
         ferdigstillOppgave(behandling, Oppgavetype.BehandleUnderkjentVedtak)
-        if (behandling.type !== BehandlingType.BLANKETT) {
-            val vedtaksbrev = vedtaksbrevRepository.findByIdOrThrow(behandling.id)
-            val brevMedSaksbehandlerEnSignatur =
-                    vedtaksbrev.copy(saksbehandlersignatur = SikkerhetContext.hentSaksbehandlerNavn())
-            vedtaksbrevRepository.update(brevMedSaksbehandlerEnSignatur)
-        }
     }
 
     private fun ferdigstillOppgave(behandling: Behandling, oppgavetype: Oppgavetype) {

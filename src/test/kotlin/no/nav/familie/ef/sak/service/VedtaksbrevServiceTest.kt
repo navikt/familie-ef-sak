@@ -1,6 +1,8 @@
 package no.nav.familie.ef.sak.service
 
+import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.integration.JournalpostClient
@@ -10,39 +12,51 @@ import no.nav.familie.ef.sak.repository.BehandlingRepository
 import no.nav.familie.ef.sak.repository.FagsakRepository
 import no.nav.familie.ef.sak.repository.VedtaksbrevRepository
 import no.nav.familie.ef.sak.repository.domain.FagsakPerson
+import no.nav.familie.ef.sak.repository.domain.Vedtaksbrev
+import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.vedtaksbrev.BrevClient
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
+internal class VedtaksbrevServiceTest {
 
-
-    @Autowired lateinit var vedtaksbrevService: VedtaksbrevService
-    @Autowired private lateinit var fagsakRepository: FagsakRepository
-    @Autowired private lateinit var behandlingRepository: BehandlingRepository
-    @Autowired private lateinit var vedtaksbrevRepository: VedtaksbrevRepository
-
-    val brevClientMock = mockk<BrevClient>()
-    val behandlingServiceMock = mockk<BehandlingService>()
-    val fagsakServiceMock = mockk<FagsakService>()
-    val personServiceMock = mockk<PersonService>()
-    val journalpostClientMock = mockk<JournalpostClient>()
-    val arbeidsfordelingServiceMock = mockk<ArbeidsfordelingService>()
-    val vedtaksbrevRepositoryMock = mockk<VedtaksbrevRepository>()
-    val familieIntegrasjonerClientMock = mockk<FamilieIntegrasjonerClient>()
 
     private val fagsak = fagsak(setOf(FagsakPerson("")))
     private val behandling = behandling(fagsak)
 
-    internal fun lagServiceMedMocker() = VedtaksbrevService(
-            brevClientMock,
-            vedtaksbrevRepositoryMock,
-    )
+    val brevClient = mockk<BrevClient>()
+    val vedtaksbrevRepository = mockk<VedtaksbrevRepository>()
+    val vedtaksbrevService = VedtaksbrevService(brevClient, vedtaksbrevRepository)
 
-    @BeforeEach
-    internal fun setUp() {
-        fagsakRepository.insert(fagsak)
-        behandlingRepository.insert(behandling)
+    val vedtaksbrev = Vedtaksbrev(behandling.id,
+                                  "123",
+                                  "malnavn",
+                                  "Saksbehandler Signatur",
+                                  null,
+                                  null)
+
+
+    @Test
+    internal fun `skal legge på signatur og lage pdf ved lagBeslutterBrev`() {
+
+        val vedtaksbrevSlot = slot<Vedtaksbrev>()
+
+        every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev
+        every { brevClient.genererBrev(any()) } returns "123".toByteArray()
+        every { vedtaksbrevRepository.update(capture(vedtaksbrevSlot)) } returns vedtaksbrev
+
+        // TODO: Sjekke at signatur er null her?
+
+        vedtaksbrevService.lagBeslutterBrev(behandling.id)
+        Assertions.assertThat(vedtaksbrevSlot.captured.besluttersignatur).isNotBlank()
+
+
+
+
+
+
     }
 
 

@@ -11,13 +11,13 @@ import org.springframework.stereotype.Service
 
 @Service
 class DistribuerVedtaksbrevSteg(private val taskRepository: TaskRepository,
-                                private val vedtaksbrevServiceService: VedtaksbrevIverksettingService) : BehandlingSteg<String> {
+                                private val vedtaksbrevService: VedtaksbrevIverksettingService) : BehandlingSteg<String> {
 
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     override fun utførSteg(behandling: Behandling, jourpostId: String) {
         logger.info("Distribuer vedtaksbrev journalpost=[$jourpostId] for behandling=[${behandling.id}]")
-        val bestillingId = vedtaksbrevServiceService.distribuerVedtaksbrev(behandling.id, jourpostId)
+        val bestillingId = vedtaksbrevService.distribuerVedtaksbrev(behandling.id, jourpostId)
         logger.info("Distribuer vedtaksbrev journalpost=[$jourpostId] for behandling=[${behandling.id}] med bestillingId=[$bestillingId]")
         ferdigstillBehandling(behandling)
     }
