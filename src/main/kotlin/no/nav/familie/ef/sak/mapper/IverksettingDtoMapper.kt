@@ -38,6 +38,7 @@ import no.nav.familie.kontrakter.ef.iverksett.TilkjentYtelseDto
 import no.nav.familie.kontrakter.ef.iverksett.VedtaksdetaljerDto
 import org.springframework.stereotype.Component
 import java.time.LocalDate
+import no.nav.familie.ef.sak.repository.domain.BehandlingType as BehandlingTypeSak
 
 @Component
 class IverksettingDtoMapper(private val arbeidsfordelingService: ArbeidsfordelingService,
@@ -53,7 +54,7 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
 
         //TODO Hardkodet tillsvidare verdier for behandlingResultat og behandlingÅrsak
         val behandlingsdetaljer = BehandlingsdetaljerDto(behandlingId = behandling.id,
-                                                         behandlingType = BehandlingType.valueOf(behandling.type.name),
+                                                         behandlingType = mapBehandlingType(behandling.type),
                                                          behandlingResultat = BehandlingResultat.FERDIGSTILT,
                                                          behandlingÅrsak = BehandlingÅrsak.SØKNAD,
                                                          eksternId = behandling.eksternId.id)
@@ -74,6 +75,16 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
         val vedtakDto = mapVedtaksdetaljerDto(vedtak, saksbehandler, beslutter, tilkjentYtelse)
 
         return IverksettDto(behandling = behandlingsdetaljer, fagsak = fagsakdetaljerDto, søker = søkerDto, vedtak = vedtakDto)
+    }
+
+    private fun mapBehandlingType(type: BehandlingTypeSak): BehandlingType {
+        return when(type) {
+            BehandlingTypeSak.BLANKETT -> BehandlingType.SAKSBEHANDLINGSBLANKETT
+            BehandlingTypeSak.FØRSTEGANGSBEHANDLING -> BehandlingType.FØRSTEGANGSBEHANDLING
+            BehandlingTypeSak.REVURDERING -> BehandlingType.REVURDERING
+            BehandlingTypeSak.KLAGE -> BehandlingType.KLAGE
+            BehandlingTypeSak.TEKNISK_OPPHØR -> BehandlingType.TILBAKEFØRING_TIL_INFOTRYGD
+        }
     }
 
     private fun mapVedtaksdetaljerDto(vedtak: Vedtak,
@@ -113,6 +124,7 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
 
         return SøkerDto(kode6eller7 = grunnlagsdata.søker.adressebeskyttelse?.let {
             listOf(AdressebeskyttelseGradering.STRENGT_FORTROLIG,
+                   AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND,
                    AdressebeskyttelseGradering.FORTROLIG).contains(it.gradering)
         }
                                       ?: false,
