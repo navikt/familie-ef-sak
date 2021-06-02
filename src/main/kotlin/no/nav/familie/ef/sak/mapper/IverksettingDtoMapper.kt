@@ -117,15 +117,13 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
         val alleBarn = BarnMatcher.kobleSøknadsbarnOgRegisterBarn(søknad.barn, grunnlagsdata.barn)
         val navEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(søknad.fødselsnummer)
 
-
         return SøkerDto(adressebeskyttelse = grunnlagsdata.søker.adressebeskyttelse?.let { AdressebeskyttelseGradering.valueOf(it.gradering.name) },
                         personIdent = fagsak.hentAktivIdent(),
                         barn = alleBarn.map {
                             BarnDto(personIdent = it.fødselsnummer,
                                     termindato = it.søknadsbarn.fødselTermindato)
                         },
-                        tilhørendeEnhet = navEnhet,
-                        allePersonIdenter = fagsak.hentAlleIdenter()
+                        tilhørendeEnhet = navEnhet
         )
     }
 }
