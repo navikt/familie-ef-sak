@@ -10,9 +10,11 @@ import no.nav.familie.ef.sak.repository.domain.InntektWrapper
 import no.nav.familie.ef.sak.repository.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.repository.domain.Vedtak
 import no.nav.familie.kontrakter.ef.felles.Vedtaksresultat
+import no.nav.familie.kontrakter.felles.annotasjoner.Improvement
 import org.springframework.http.HttpStatus
 import java.util.*
 
+@Improvement("Bytt til Innvilget, Avslått og Henlagt")
 enum class ResultatType {
     INNVILGE,
     AVSLÅ,

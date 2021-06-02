@@ -10,14 +10,10 @@ import org.springframework.stereotype.Service
 @Service
 class VentePåStatusFraIverksett(private val iverksettClient: IverksettClient, private val taskRepository: TaskRepository): BehandlingSteg<Void?> {
 
-    override fun utførOgReturnerNesteSteg(behandling: Behandling, data: Void?): StegType {
+    override fun utførSteg(behandling: Behandling, data: Void?) {
        return iverksettClient.hentStatus(behandling.id).let {
             when (it) {
-                IverksettStatus.OK -> {
-                    opprettFerdigstillOppgave(behandling)
-                    StegType.FERDIGSTILLE_BEHANDLING
-
-                }
+                IverksettStatus.OK -> opprettFerdigstillOppgave(behandling)
                 else -> throw error("Mottok status '$it' fra iverksett for behandlingId " + behandling.id)
             }
         }
@@ -31,7 +27,4 @@ class VentePåStatusFraIverksett(private val iverksettClient: IverksettClient, p
         return StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT
     }
 
-    override fun utførSteg(behandling: Behandling, data: Void?) {
-        error("Bruker utførOgReturnerNesteSteg")
-    }
 }
