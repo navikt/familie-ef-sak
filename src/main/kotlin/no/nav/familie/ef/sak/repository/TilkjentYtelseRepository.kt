@@ -24,12 +24,37 @@ interface TilkjentYtelseRepository : RepositoryInterface<TilkjentYtelse, UUID>, 
 
     // language=PostgreSQL
     @Query("""
+        SELECT behandling_id FROM (
+            SELECT b.id as behandling_id, row_number() over (PARTITION BY b.fagsak_id ORDER BY ty.opprettet_tid DESC) rn
+                FROM behandling b
+                    JOIN fagsak f on b.fagsak_id = f.id
+                    JOIN tilkjent_ytelse ty on b.id = ty.behandling_id -- att man har en tilkjent_ytelse
+                WHERE b.status = 'FERDIGSTILT' AND f.stonadstype = :stønadstype
+        ) q WHERE rn=1
+        """)
+    fun finnSisteBehandlingForFagsak(stønadstype: Stønadstype): List<UUID>
+
+    // language=PostgreSQL
+    @Query("""
+        SELECT DISTINCT be.id as first, aty.periode_id as second
+        FROM andel_tilkjent_ytelse aty
+            JOIN tilkjent_ytelse t on t.id = aty.tilkjent_ytelse
+            JOIN behandling b on b.id = t.behandling_id
+            JOIN behandling_ekstern be ON be.behandling_id = aty.kilde_behandling_id
+        WHERE t.behandling_id IN (:sisteBehandlinger)
+            AND aty.stonad_tom >= :datoForAvstemming
+    """)
+    fun finnKildeBehandlingIdFraAndelTilkjentYtelse(datoForAvstemming: LocalDate, sisteBehandlinger: List<UUID>): List<Pair<Long, Long>>
+
+    // language=PostgreSQL
+    @Query("""
         SELECT ty.*
         FROM tilkjent_ytelse ty 
-            JOIN andel_tilkjent_ytelse aty ON ty.id = aty.tilkjent_ytelse
             JOIN behandling b ON b.id = ty.behandling_id
             JOIN fagsak f ON b.fagsak_id = f.id
-        WHERE f.stonadstype = :stønadstype  AND b.status = 'FERDIGSTILT' AND b.type IN ('FØRSTEGANGSBEHANDLING', 'REVURDERING') AND aty.stonad_fom >= :datoForAvstemming
+        WHERE f.stonadstype = :stønadstype  AND b.status = 'FERDIGSTILT' AND b.type IN ('FØRSTEGANGSBEHANDLING', 'REVURDERING')
+         AND EXISTS (SELECT 1 FROM andel_tilkjent_ytelse aty
+                        WHERE ty.id = aty.tilkjent_ytelse AND aty.stonad_tom >= :datoForAvstemming) 
           """)
     fun finnTilkjentYtelserTilKonsistensavstemming(stønadstype: Stønadstype, datoForAvstemming: LocalDate): List<TilkjentYtelse>
 

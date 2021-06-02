@@ -97,7 +97,7 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
         val fagsak = fagsakRepository.insert(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.FERDIGSTILT))
 
-        var tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(behandling)
+        val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(behandling)
         val stønadFom = tilkjentYtelse.andelerTilkjentYtelse.minOf { it.stønadFom }
 
         tilkjentYtelseRepository.insert(tilkjentYtelse)

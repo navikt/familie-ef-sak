@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.økonomi.tilKlassifisering
 import no.nav.familie.kontrakter.ef.felles.StønadType
 import no.nav.familie.kontrakter.ef.iverksett.KonsistensavstemmingDto
 import no.nav.familie.kontrakter.felles.oppdrag.GrensesnittavstemmingRequest
+import no.nav.familie.kontrakter.felles.oppdrag.KonsistensavstemmingRequestV2
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -26,8 +27,8 @@ class AvstemmingService(private val oppdragClient: OppdragClient,
                     .let { it.tilTask() }
                     .let { taskRepository.save(it) }
 
-    fun opprettKonsistenavstemmingTasker(avstemmingTaskDtoOpprett: List<OpprettKonsistensavstemmingTaskDto>) =
-            avstemmingTaskDtoOpprett
+    fun opprettKonsistenavstemmingTasker(avstemmingDto: List<OpprettKonsistensavstemmingTaskDto>) =
+            avstemmingDto
                     .map { it.tilTask() }
                     .let { taskRepository.saveAll(it) }
                     .let { it.toList() }
@@ -39,8 +40,16 @@ class AvstemmingService(private val oppdragClient: OppdragClient,
         oppdragClient.grensesnittavstemming(grensesnittavstemmingRequest)
     }
 
-    fun konsistensavstemOppdrag(stønadstype: Stønadstype) {
-        val datoForAvstemming = LocalDate.now()
+    fun konsistensavstemOppdragOld(stønadstype: Stønadstype) {
+        val oppdragIdListe =
+                tilkjentYtelseService.finnLøpendeUtbetalninger(datoForAvstemming = LocalDate.now(), stønadstype = stønadstype)
+        val konsistensavstemmingRequest = KonsistensavstemmingRequestV2(fagsystem = stønadstype.tilKlassifisering(),
+                                                                        perioderForBehandlinger = oppdragIdListe,
+                                                                        avstemmingstidspunkt = LocalDateTime.now())
+        oppdragClient.konsistensavstemming(konsistensavstemmingRequest)
+    }
+
+    fun konsistensavstemOppdrag(stønadstype: Stønadstype, datoForAvstemming: LocalDate) {
         val tilkjenteYtelser = tilkjentYtelseService
                 .finnTilkjentYtelserTilKonsistensavstemming(datoForAvstemming = datoForAvstemming, stønadstype = stønadstype)
         iverksettClient.konsistensavstemming(KonsistensavstemmingDto(StønadType.valueOf(stønadstype.name), tilkjenteYtelser))

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDate
 import java.util.UUID
 
 @RestController
@@ -37,7 +38,7 @@ class TestTilkjentYtelseController(private val testTilkjentYtelseService: TestTi
 
     @PostMapping("/konsistensavstemming/{stønadstype}")
     fun konsistensavstemming(@PathVariable stønadstype: Stønadstype): Ressurs<String> {
-        avstemmingService.konsistensavstemOppdrag(stønadstype)
+        avstemmingService.konsistensavstemOppdrag(stønadstype, LocalDate.now())
         return Ressurs.success("ok")
     }
 

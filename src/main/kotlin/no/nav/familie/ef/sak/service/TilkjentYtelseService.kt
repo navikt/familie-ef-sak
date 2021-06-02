@@ -22,6 +22,7 @@ import no.nav.familie.kontrakter.ef.iverksett.PeriodebeløpDto
 import no.nav.familie.kontrakter.ef.iverksett.Periodetype
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
+import no.nav.familie.kontrakter.felles.oppdrag.PerioderForBehandling
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -89,14 +90,25 @@ class TilkjentYtelseService(private val oppdragClient: OppdragClient,
                 }
     }
 
+    fun finnLøpendeUtbetalninger(stønadstype: Stønadstype, datoForAvstemming: LocalDate): List<PerioderForBehandling> {
+        return tilkjentYtelseRepository.finnSisteBehandlingForFagsak(stønadstype = stønadstype)
+                .chunked(1000)
+                .flatMap { sisteBehandlinger ->
+                    val finnKildeBehandlingIdFraAndelTilkjentYtelse =
+                            tilkjentYtelseRepository.finnKildeBehandlingIdFraAndelTilkjentYtelse(datoForAvstemming = datoForAvstemming,
+                                                                                                 sisteBehandlinger = sisteBehandlinger)
+                    return finnKildeBehandlingIdFraAndelTilkjentYtelse.groupBy({ it.first }, { it.second })
+                            .map { PerioderForBehandling(it.key.toString(), it.value.toSet()) }
+                }
+    }
+
     fun finnTilkjentYtelserTilKonsistensavstemming(stønadstype: Stønadstype,
                                                    datoForAvstemming: LocalDate): List<KonsistensavstemmingTilkjentYtelseDto> {
         //TODO kan bare stemme av de som har riktig status fra iverksett
         val tilkjentYtelser = tilkjentYtelseRepository.finnTilkjentYtelserTilKonsistensavstemming(stønadstype, datoForAvstemming)
 
         val behandlingIder = tilkjentYtelser.map { it.behandlingId }.toSet()
-        val eksterneIder = behandlingService.hentEksterneIder(behandlingIder)
-                .associateBy { it.behandlingId }
+        val eksterneIder = behandlingService.hentEksterneIder(behandlingIder).associateBy { it.behandlingId }
 
         return tilkjentYtelser.map { tilkjentYtelse ->
             val eksternId = eksterneIder[tilkjentYtelse.behandlingId]
