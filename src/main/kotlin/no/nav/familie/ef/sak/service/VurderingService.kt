@@ -30,7 +30,7 @@ import java.util.UUID
 class VurderingService(private val behandlingService: BehandlingService,
                        private val søknadService: SøknadService,
                        private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-                       private val grunnlagsdataService: GrunnlagsdataService,
+                       private val vilkårGrunnlagService: VilkårGrunnlagService,
                        private val stegService: StegService,
                        private val blankettRepository: BlankettRepository) {
 
@@ -129,7 +129,7 @@ class VurderingService(private val behandlingService: BehandlingService,
 
     private fun hentGrunnlagOgMetadata(behandlingId: UUID): Pair<VilkårGrunnlagDto, HovedregelMetadata> {
         val søknad = søknadService.hentOvergangsstønad(behandlingId)
-        val grunnlag = grunnlagsdataService.hentGrunnlag(behandlingId, søknad)
+        val grunnlag = vilkårGrunnlagService.hentGrunnlag(behandlingId, søknad)
         val metadata = HovedregelMetadata(sivilstandstype = grunnlag.sivilstand.registergrunnlag.type,
                                           søknad = søknad)
         return Pair(grunnlag, metadata)

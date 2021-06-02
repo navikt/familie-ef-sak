@@ -9,7 +9,6 @@ import no.nav.familie.ef.sak.repository.domain.Fil
 import no.nav.familie.ef.sak.repository.domain.InntektWrapper
 import no.nav.familie.ef.sak.repository.domain.JsonWrapper
 import no.nav.familie.ef.sak.repository.domain.PeriodeWrapper
-import no.nav.familie.ef.sak.repository.domain.RegistergrunnlagData
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus
 import no.nav.familie.ef.sak.repository.domain.søknad.Arbeidssituasjon
 import no.nav.familie.ef.sak.repository.domain.søknad.Dokumentasjon
@@ -86,8 +85,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
                                             StringTilBrevRequestConverter(),
                                             FilTilBytearrayConverter(),
                                             BytearrayTilFilConverter(),
-                                            PGobjectTilGrunnlagsdataConverter(),
-                                            RegisterdataTilPGobjectConverter(),
                                             PGobjectTilVedtaksperioder(),
                                             VedtaksperiodeTilPGobjectConverter(),
                                             PGobjectTilInntektsperiode(),
@@ -241,24 +238,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
                 PGobject().apply {
                     type = "json"
                     value = jsonWrapper?.let { it.json }
-                }
-    }
-
-    @ReadingConverter
-    class PGobjectTilGrunnlagsdataConverter : Converter<PGobject, RegistergrunnlagData> {
-
-        override fun convert(pGobject: PGobject): RegistergrunnlagData {
-            return objectMapper.readValue(pGobject.value!!)
-        }
-    }
-
-    @WritingConverter
-    class RegisterdataTilPGobjectConverter : Converter<RegistergrunnlagData, PGobject> {
-
-        override fun convert(data: RegistergrunnlagData): PGobject =
-                PGobject().apply {
-                    type = "json"
-                    value = objectMapper.writeValueAsString(data)
                 }
     }
 
