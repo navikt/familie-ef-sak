@@ -9,6 +9,8 @@ import no.nav.familie.ef.sak.api.gui.VedtakControllerTest.Saksbehandler.*
 import no.nav.familie.ef.sak.config.RolleConfig
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.util.BrukerContextUtil.clearBrukerContext
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.repository.BehandlingRepository
 import no.nav.familie.ef.sak.repository.FagsakRepository
 import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
@@ -56,14 +58,12 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `totrinn er uaktuell når behandlingen ikke er klar for totrinn`() {
         opprettBehandling(steg = StegType.VILKÅR)
-        lagBrev()
         validerTotrinnskontrollUaktuelt(BESLUTTER)
     }
 
     @Test
     internal fun `skal sette behandling til fatter vedtak når man sendt til beslutter`() {
         opprettBehandling()
-        lagBrev()
         sendTilBeslutter(SAKSBEHANDLER)
         validerBehandlingFatterVedtak()
     }
@@ -71,7 +71,6 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `skal sette behandling til iverksett når man godkjent totrinnskontroll`() {
         opprettBehandling()
-        lagBrev()
         sendTilBeslutter(SAKSBEHANDLER)
         godkjennTotrinnskontroll(BESLUTTER)
         validerBehandlingIverksetter()
@@ -80,7 +79,6 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `hvis man underkjenner den så skal man få ut det som status`() {
         opprettBehandling()
-        lagBrev()
         sendTilBeslutter(SAKSBEHANDLER)
         underkjennTotrinnskontroll(BESLUTTER)
         validerTotrinnskontrollUnderkjent(SAKSBEHANDLER)
@@ -91,7 +89,6 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `en annen beslutter enn den som sendte til beslutter må godkjenne behandlingen`() {
         opprettBehandling()
-        lagBrev()
         sendTilBeslutter(BESLUTTER)
         validerTotrinnskontrollIkkeAutorisert(SAKSBEHANDLER)
         validerTotrinnskontrollIkkeAutorisert(BESLUTTER)
@@ -105,32 +102,22 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `skal gi totrinnskontroll uaktuelt hvis totrinnskontrollen er godkjent`() {
         opprettBehandling()
-        lagBrev()
         sendTilBeslutter(SAKSBEHANDLER)
         godkjennTotrinnskontroll(BESLUTTER)
-
         validerTotrinnskontrollUaktuelt(SAKSBEHANDLER)
         validerTotrinnskontrollUaktuelt(BESLUTTER)
         validerTotrinnskontrollUaktuelt(BESLUTTER_2)
     }
 
-    private fun lagBrev() {
-        val brevRequest = objectMapper.readTree("123")
-        //val lagBrev = vedtaksbrevService.lagBrev(behandlingId = behandling.id, brevRequest = brevRequest, brevMal = "brevMal")
-        vedtaksbrevService.lagSaksbehandlerBrev(behandling.id, brevRequest, "brevMal")
-    }
 
     @Test
     internal fun `hvis man underkjenner behandlingen må man sende den til beslutter på nytt og sen godkjenne den`() {
         opprettBehandling()
-        lagBrev()
         sendTilBeslutter(SAKSBEHANDLER)
         underkjennTotrinnskontroll(BESLUTTER)
-        lagBrev() //TODO hvorfor trenger vi disse?
         sendTilBeslutter(SAKSBEHANDLER)
         underkjennTotrinnskontroll(BESLUTTER)
         validerBehandlingUtredes()
-        lagBrev()//TODO hvorfor trenger vi disse?
         sendTilBeslutter(SAKSBEHANDLER)
         godkjennTotrinnskontroll(BESLUTTER)
     }
@@ -138,7 +125,6 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `en annen beslutter enn den som sendte behandlingen til beslutter må godkjenne behandlingen`() {
         opprettBehandling()
-        lagBrev()
         sendTilBeslutter(BESLUTTER)
         validerTotrinnskontrollIkkeAutorisert(SAKSBEHANDLER)
         validerTotrinnskontrollIkkeAutorisert(BESLUTTER)
@@ -152,7 +138,6 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `kan ikke godkjenne totrinnskontroll når behandling utredes`() {
         opprettBehandling()
-        lagBrev()
         godkjennTotrinnskontroll(BESLUTTER) {
             assertThat(it.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
         }
@@ -161,7 +146,6 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `kan ikke sende til besluttning før behandling er i riktig steg`() {
         opprettBehandling(steg = StegType.VILKÅR)
-        lagBrev()
         godkjennTotrinnskontroll(BESLUTTER) {
             assertThat(it.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
         }
@@ -185,10 +169,12 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     private fun sendTilBeslutter(saksbehandler: Saksbehandler,
                                  validator: (ResponseEntity<Ressurs<UUID>>) -> Unit = responseOK()) {
         headers.setBearerAuth(token(saksbehandler))
+        lagSaksbehandlerBrev()
         val response = restTemplate.exchange<Ressurs<UUID>>(localhost("/api/vedtak/${behandling.id}/send-til-beslutter"),
                                                             HttpMethod.POST,
                                                             HttpEntity<Any>(headers))
         validator.invoke(response)
+        lagBeslutterBrev()
     }
 
     private fun godkjennTotrinnskontroll(saksbehandler: Saksbehandler,
@@ -266,6 +252,19 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
                 .build()
         val createSignedJWT = JwtTokenGenerator.createSignedJWT(JwkGenerator.getDefaultRSAKey(), claimsSet)
         return createSignedJWT.serialize()
+    }
+
+    private fun lagSaksbehandlerBrev() {
+        val brevRequest = objectMapper.readTree("123")
+        mockBrukerContext("saksbehandlernavn")
+        vedtaksbrevService.lagSaksbehandlerBrev(behandling.id, brevRequest, "brevMal")
+        clearBrukerContext()
+    }
+
+    private fun lagBeslutterBrev() {
+        mockBrukerContext("saksbehandlernavn")
+        vedtaksbrevService.lagBeslutterBrev(behandling.id)
+        clearBrukerContext()
     }
 
 }

@@ -3,22 +3,19 @@ package no.nav.familie.ef.sak.service
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
-import no.nav.familie.ef.sak.integration.JournalpostClient
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
-import no.nav.familie.ef.sak.repository.BehandlingRepository
-import no.nav.familie.ef.sak.repository.FagsakRepository
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.util.BrukerContextUtil.clearBrukerContext
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.repository.VedtaksbrevRepository
 import no.nav.familie.ef.sak.repository.domain.FagsakPerson
 import no.nav.familie.ef.sak.repository.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.vedtaksbrev.BrevClient
-import org.assertj.core.api.Assertions
-import org.junit.jupiter.api.BeforeEach
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
+import org.junit.jupiter.api.assertThrows
+import java.lang.IllegalStateException
 
 internal class VedtaksbrevServiceTest {
 
@@ -43,21 +40,25 @@ internal class VedtaksbrevServiceTest {
 
         val vedtaksbrevSlot = slot<Vedtaksbrev>()
 
+        val saksbehandlerNavn = "Saksbehandler Saksbehandlersen"
+        mockBrukerContext(saksbehandlerNavn)
         every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev
         every { brevClient.genererBrev(any()) } returns "123".toByteArray()
         every { vedtaksbrevRepository.update(capture(vedtaksbrevSlot)) } returns vedtaksbrev
 
-        // TODO: Sjekke at signatur er null her?
-
         vedtaksbrevService.lagBeslutterBrev(behandling.id)
-        Assertions.assertThat(vedtaksbrevSlot.captured.besluttersignatur).isNotBlank()
+        assertThat(vedtaksbrevSlot.captured.besluttersignatur).isEqualTo(saksbehandlerNavn)
+        assertThat(vedtaksbrevSlot.captured).usingRecursiveComparison().ignoringFields("besluttersignatur", "beslutterPdf").isEqualTo(vedtaksbrev)
 
-
-
-
-
-
+        clearBrukerContext()
     }
 
+    @Test
+    internal fun `skal feile når signatur ikke finnes`() {
+        every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev
+        every { vedtaksbrevRepository.update(any()) } returns vedtaksbrev
+
+        assertThrows<IllegalStateException> { vedtaksbrevService.lagBeslutterBrev(behandling.id) }
+    }
 
 }

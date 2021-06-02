@@ -76,13 +76,6 @@ internal class BeslutteVedtakStegTest {
         assertThat(deserializedPayload.oppgavetype).isEqualTo(Oppgavetype.BehandleUnderkjentVedtak)
     }
 
-    @Test
-    internal fun `Skal lagre brev`() {
-        utførTotrinnskontroll(true)
-
-        verify { vedtaksbrevService.lagBeslutterBrev(behandlingId) }
-    }
-
     private fun utførTotrinnskontroll(godkjent: Boolean): StegType {
         val nesteSteg = beslutteVedtakSteg.utførOgReturnerNesteSteg(Behandling(id = behandlingId,
                                                                                fagsakId = fagsak.id,

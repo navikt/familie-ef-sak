@@ -18,7 +18,7 @@ class VedtaksbrevService(private val brevClient: BrevClient,
     fun lagBeslutterBrev(behandlingId: UUID): Vedtaksbrev {
         // TODO validere at behandlig har rett status/steg?
         val vedtaksbrev = brevRepository.findByIdOrThrow(behandlingId)
-        val besluttervedtaksbrev = vedtaksbrev.copy(besluttersignatur = SikkerhetContext.hentSaksbehandlerNavn())
+        val besluttervedtaksbrev = vedtaksbrev.copy(besluttersignatur = SikkerhetContext.hentSaksbehandlerNavn(strict = true))
         val beslutterPdf = Fil(brevClient.genererBrev(besluttervedtaksbrev))
         val besluttervedtaksbrevMedPdf = besluttervedtaksbrev.copy(beslutterPdf = beslutterPdf)
         return brevRepository.update(besluttervedtaksbrevMedPdf)
@@ -26,7 +26,7 @@ class VedtaksbrevService(private val brevClient: BrevClient,
 
     fun lagSaksbehandlerBrev(behandlingId: UUID, brevrequest: JsonNode, brevmal: String): ByteArray {
         // TODO validere at behandlig har rett status/steg?
-        val saksbehandlersignatur = SikkerhetContext.hentSaksbehandlerNavn()
+        val saksbehandlersignatur = SikkerhetContext.hentSaksbehandlerNavn(strict = true)
         val vedtaksbrev = when (brevRepository.existsById(behandlingId)) {
             true -> brevRepository.update(Vedtaksbrev(behandlingId,
                                                       brevrequest.toString(),

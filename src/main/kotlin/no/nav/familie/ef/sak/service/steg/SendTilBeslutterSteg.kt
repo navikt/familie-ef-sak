@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.service.steg
 
 import no.nav.familie.ef.sak.api.Feil
+import no.nav.familie.ef.sak.repository.VedtaksbrevRepository
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import no.nav.familie.ef.sak.service.BehandlingService
@@ -15,11 +16,16 @@ import org.springframework.stereotype.Service
 @Service
 class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
                            private val oppgaveService: OppgaveService,
-                           private val behandlingService: BehandlingService) : BehandlingSteg<Void?> {
+                           private val behandlingService: BehandlingService,
+                           private val vedtaksbrevRepository: VedtaksbrevRepository) : BehandlingSteg<Void?> {
 
     override fun validerSteg(behandling: Behandling) {
         if (behandling.steg != stegType()) {
             throw Feil("Behandling er i feil steg=${behandling.steg}")
+        }
+
+        if (!vedtaksbrevRepository.existsById(behandling.id)){
+            throw Feil("Brev mangler for behandling=${behandling.id}")
         }
     }
 

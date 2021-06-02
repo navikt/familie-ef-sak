@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.blankett.JournalførBlankettTask
 import no.nav.familie.ef.sak.repository.VedtaksbrevRepository
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
+import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.OppgaveService
 import no.nav.familie.ef.sak.service.TotrinnskontrollService
@@ -30,6 +31,12 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
         if (behandling.steg != stegType()) {
             throw Feil("Behandling er i feil steg=${behandling.steg}")
         }
+
+        val vedtaksbrev = vedtaksbrevRepository.findByIdOrThrow(behandling.id)
+        if (vedtaksbrev.beslutterPdf === null || vedtaksbrev.besluttersignatur === null){
+            throw Feil("Behandling=${behandling.id} mangler gyldig vedtaksbrev")
+        }
+
     }
 
     override fun utførOgReturnerNesteSteg(behandling: Behandling, data: BeslutteVedtakDto): StegType {
@@ -39,7 +46,6 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
 
         return if (data.godkjent) {
             if (behandling.type != BehandlingType.BLANKETT) {
-                vedtaksbrevService.lagBeslutterBrev(behandling.id)
                 opprettTaskForIverksettMotOppdrag(behandling)
             } else {
                 opprettTaskForJournalførBlankett(behandling)

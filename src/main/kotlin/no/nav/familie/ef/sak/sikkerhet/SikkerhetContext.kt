@@ -32,10 +32,13 @@ object SikkerhetContext {
                       onFailure = { SYSTEM_FORKORTELSE })
     }
 
-    fun hentSaksbehandlerNavn(): String {
+    fun hentSaksbehandlerNavn(strict: Boolean = false): String {
         return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
-                .fold(onSuccess = { it.getClaims("azuread")?.get("name")?.toString() ?: SYSTEM_NAVN },
-                      onFailure = { SYSTEM_NAVN })
+                .fold(onSuccess = {
+                    it.getClaims("azuread")?.get("name")?.toString()
+                    ?: if (strict) error("Finner ikke navn i azuread token") else SYSTEM_NAVN
+                },
+                      onFailure = { if (strict) error("Finner ikke navn på innlogget bruker") else SYSTEM_NAVN })
     }
 
     private fun hentGruppeFraToken(): List<String> {
