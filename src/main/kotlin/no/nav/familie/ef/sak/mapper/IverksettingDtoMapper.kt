@@ -61,7 +61,7 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
 
         val fagsak = fagsakService.hentFaksakForBehandling(behandling.id)
         val vedtak = vedtakService.hentVedtak(behandling.id)
-        val forrigeBehandlingId = behandlingRepository.finnSisteIverksatteBehandling(fagsak.stønadstype, fagsak.hentAlleIdenter().toSet())?.id
+        val forrigeBehandlingId = behandlingRepository.finnSisteIverksatteBehandling(behandling.id)
         val saksbehandler =
                 behandlinghistorikkService.finnSisteBehandlingshistorikk(behandling.id, StegType.SEND_TIL_BESLUTTER)?.opprettetAv
                 ?: error("Kan ikke finne saksbehandler på behandlingen")

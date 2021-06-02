@@ -50,16 +50,15 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
 
     // language=PostgreSQL
     @Query("""
-        SELECT b.*, be.id as eksternid_id
+        SELECT b.id
         FROM behandling b
-        JOIN behandling_ekstern be ON b.id = be.behandling_id
         JOIN fagsak f ON f.id = b.fagsak_id
-        JOIN fagsak_person fp ON b.fagsak_id = fp.fagsak_id
-        WHERE fp.ident IN (:personidenter) AND f.stonadstype = :stonadstype 
-          AND b.type != 'BLANKETT' AND b.resultat != 'ANNULLERT' AND b.status = 'FERDIGSTILT'
+        JOIN behandling b2 ON b2.fagsak_id = f.id
+        WHERE b.type != 'BLANKETT' AND b.resultat != 'ANNULLERT' AND b.status = 'FERDIGSTILT'
+        AND b2.id = :behandlingId
         ORDER BY b.opprettet_tid DESC
         LIMIT 1
     """)
-    fun finnSisteIverksatteBehandling(@Param("stonadstype") stønadstype: Stønadstype, personidenter: Set<String>): Behandling?
+    fun finnSisteIverksatteBehandling(behandlingId: UUID): UUID?
 
 }
