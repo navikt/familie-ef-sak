@@ -8,7 +8,7 @@ import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.vedtaksbrev.BrevClient
 import org.springframework.stereotype.Service
-import java.util.*
+import java.util.UUID
 
 @Service
 class VedtaksbrevService(private val brevClient: BrevClient,
