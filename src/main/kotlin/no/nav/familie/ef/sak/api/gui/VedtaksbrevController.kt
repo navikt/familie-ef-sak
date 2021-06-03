@@ -28,6 +28,19 @@ class VedtaksbrevController(private val brevService: VedtaksbrevService,
     }
 
     @GetMapping("/{behandlingId}")
+    @Deprecated("Denne skal slettes - bruk post")
+    fun lagBeslutterbrev_deprecated(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
+        tilgangService.validerTilgangTilBehandling(behandlingId)
+        val beslutterPdf = brevService.lagBeslutterBrev(behandlingId).beslutterPdf
+        return if (beslutterPdf != null) {
+            Ressurs.success(beslutterPdf.bytes)
+        } else {
+            logger.error("Pdf finnes ikke for behandling=$behandlingId.")
+            Ressurs.failure("Pdf for beslutter kunne ikke genereres")
+        }
+    }
+
+    @PostMapping("/{behandlingId}")
     fun lagBeslutterbrev(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         val beslutterPdf = brevService.lagBeslutterBrev(behandlingId).beslutterPdf
