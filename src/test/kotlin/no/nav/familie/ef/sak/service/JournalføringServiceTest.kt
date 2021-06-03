@@ -53,7 +53,7 @@ internal class JournalføringServiceTest {
                                  søknadService = søknadService,
                                  fagsakService = fagsakService,
                                  pdlClient = pdlClient,
-                                 persisterGrunnlagsdataService = mockk(relaxed = true),
+                                 grunnlagsdataService = mockk(relaxed = true),
                                  iverksettService = iverksettService,
                                  oppgaveService = oppgaveService)
 

@@ -15,7 +15,7 @@ import java.util.UUID
 class PersonopplysningerService(private val personService: PersonService,
                                 private val søknadService: SøknadService,
                                 private val familieIntegrasjonerClient: FamilieIntegrasjonerClient,
-                                private val persisterGrunnlagsdataService: PersisterGrunnlagsdataService,
+                                private val grunnlagsdataService: GrunnlagsdataService,
                                 private val personopplysningerMapper: PersonopplysningerMapper) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -23,7 +23,7 @@ class PersonopplysningerService(private val personService: PersonService,
     fun hentPersonopplysninger(behandlingId: UUID): PersonopplysningerDto {
         val søknad = søknadService.hentOvergangsstønad(behandlingId)
         val personIdent = søknad.fødselsnummer
-        val grunnlagsdata = persisterGrunnlagsdataService.hentGrunnlagsdata(behandlingId)
+        val grunnlagsdata = grunnlagsdataService.hentGrunnlagsdata(behandlingId)
         val egenAnsatt = familieIntegrasjonerClient.egenAnsatt(personIdent)
 
 
@@ -35,7 +35,7 @@ class PersonopplysningerService(private val personService: PersonService,
     }
 
     fun hentPersonopplysninger(personIdent: String): PersonopplysningerDto {
-        val grunnlagsdata = persisterGrunnlagsdataService.hentGrunnlagsdataFraRegister(personIdent, emptyList())
+        val grunnlagsdata = grunnlagsdataService.hentGrunnlagsdataFraRegister(personIdent, emptyList())
         val egenAnsatt = familieIntegrasjonerClient.egenAnsatt(personIdent)
 
 

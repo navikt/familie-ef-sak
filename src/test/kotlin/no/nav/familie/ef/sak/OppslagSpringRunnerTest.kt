@@ -13,7 +13,6 @@ import no.nav.familie.ef.sak.repository.domain.Behandlingsjournalpost
 import no.nav.familie.ef.sak.repository.domain.Fagsak
 import no.nav.familie.ef.sak.repository.domain.Grunnlagsdata
 import no.nav.familie.ef.sak.repository.domain.Oppgave
-import no.nav.familie.ef.sak.repository.domain.Registergrunnlag
 import no.nav.familie.ef.sak.repository.domain.Søknad
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.Vedtak
@@ -90,7 +89,6 @@ abstract class OppslagSpringRunnerTest {
                 Oppgave::class,
                 Vilkårsvurdering::class,
                 Behandlingshistorikk::class,
-                Registergrunnlag::class,
                 Vedtaksbrev::class,
                 Blankett::class,
                 Vedtak::class,
