@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.iverksett
 import no.nav.familie.ef.sak.repository.domain.Fil
 import no.nav.familie.ef.sak.util.medContentTypeJsonUTF8
 import no.nav.familie.http.client.AbstractPingableRestClient
+import no.nav.familie.kontrakter.ef.infotrygd.OpprettStartBehandlingHendelseDto
 import no.nav.familie.http.client.MultipartBuilder
 import no.nav.familie.kontrakter.ef.iverksett.IverksettDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettStatus
@@ -21,8 +22,8 @@ import java.util.UUID
 class IverksettClient(@Value("\${FAMILIE_EF_IVERKSETT_URL}")
                       private val familieEfIverksettUri: String,
                       @Qualifier("azure")
-                      private val restOperations: RestOperations) : AbstractPingableRestClient(restOperations,
-                                                                                               "familie.ef.iverksett") {
+                      private val restOperations: RestOperations)
+    : AbstractPingableRestClient(restOperations, "familie.ef.iverksett") {
 
     override val pingUri: URI = URI.create("$familieEfIverksettUri/api/status")
 
@@ -37,6 +38,11 @@ class IverksettClient(@Value("\${FAMILIE_EF_IVERKSETT_URL}")
                                                                    simuleringRequest,
                                                                    HttpHeaders().medContentTypeJsonUTF8()).data!!
     }
+
+    fun startBehandling(request: OpprettStartBehandlingHendelseDto) {
+        postForEntity<Any>(URI.create("$familieEfIverksettUri/api/start-behandling"), request)
+    }
+
 
     fun iverksett(iverksettDto: IverksettDto, fil: Fil) {
         val url = URI.create("$familieEfIverksettUri/api/iverksett")

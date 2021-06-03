@@ -15,16 +15,16 @@ import java.net.URI
 
 @Service
 class InfotrygdReplikaClient(@Value("\${INFOTRYGD_REPLIKA_API_URL}")
-                             private val infotrygdFeedUri: URI,
+                             private val infotrygdReplikaUri: URI,
                              @Qualifier("azure")
                              restOperations: RestOperations)
     : AbstractPingableRestClient(restOperations, "infotrygd.replika") {
 
     private val perioderOvergangsstønadUri: URI =
-            UriComponentsBuilder.fromUri(infotrygdFeedUri).pathSegment("api/perioder/overgangsstonad").build().toUri()
+            UriComponentsBuilder.fromUri(infotrygdReplikaUri).pathSegment("api/perioder/overgangsstonad").build().toUri()
 
     private val eksistererUri: URI =
-            UriComponentsBuilder.fromUri(infotrygdFeedUri).pathSegment("api/stonad/eksisterer").build().toUri()
+            UriComponentsBuilder.fromUri(infotrygdReplikaUri).pathSegment("api/stonad/eksisterer").build().toUri()
 
     fun hentPerioderOvergangsstønad(request: InfotrygdPerioderOvergangsstønadRequest): InfotrygdPerioderOvergangsstønadResponse {
         return postForEntity(perioderOvergangsstønadUri, request)
@@ -39,6 +39,6 @@ class InfotrygdReplikaClient(@Value("\${INFOTRYGD_REPLIKA_API_URL}")
     }
 
     override val pingUri: URI
-        get() = UriComponentsBuilder.fromUri(infotrygdFeedUri).pathSegment("api/ping").build().toUri()
+        get() = UriComponentsBuilder.fromUri(infotrygdReplikaUri).pathSegment("api/ping").build().toUri()
 
 }
