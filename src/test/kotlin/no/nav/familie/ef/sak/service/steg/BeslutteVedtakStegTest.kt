@@ -33,7 +33,7 @@ import java.util.Properties
 import java.util.UUID
 
 internal class BeslutteVedtakStegTest {
-    
+
     private val taskRepository = mockk<TaskRepository>()
     private val fagsakService = mockk<FagsakService>()
     private val totrinnskontrollService = mockk<TotrinnskontrollService>(relaxed = true)
@@ -65,7 +65,7 @@ internal class BeslutteVedtakStegTest {
         } returns Task("", "", Properties())
         every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(any(), any()) } returns mockk()
         every { vedtaksbrevRepository.deleteById(any()) } just Runs
-        every { vedtaksbrevService.lagBeslutterBrev(any()) } returns mockk()
+        every { vedtaksbrevService.lagBeslutterBrev(any()) } returns "mockk()".toByteArray()
     }
 
     @Test
