@@ -57,4 +57,18 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
             JOIN fagsak_ekstern fe ON b.fagsak_id = fe.fagsak_id
         """)
     fun finnEksterneIder(behandlingId: Set<UUID>): Set<EksternId>
+
+    // language=PostgreSQL
+    @Query("""
+        SELECT id FROM (
+            SELECT b.id, b.type, ROW_NUMBER() OVER (PARTITION BY b.fagsak_id ORDER BY b.opprettet_tid DESC) rn
+            FROM behandling b
+            JOIN fagsak f ON b.fagsak_id = f.id
+                WHERE f.stonadstype = :stønadstype
+                 AND b.status = 'FERDIGSTILT'
+                 AND b.type IN ('FØRSTEGANGSBEHANDLING', 'REVURDERING', 'TEKNISK_OPPHØR')
+         ) q WHERE rn = 1 AND type IN ('FØRSTEGANGSBEHANDLING', 'REVURDERING')
+        """)
+    fun finnSisteAktiveBehandlinger(stønadstype: Stønadstype): Set<UUID>
+
 }

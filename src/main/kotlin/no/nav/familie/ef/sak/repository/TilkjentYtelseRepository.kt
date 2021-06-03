@@ -51,18 +51,10 @@ interface TilkjentYtelseRepository : RepositoryInterface<TilkjentYtelse, UUID>, 
         SELECT ty.*
         FROM tilkjent_ytelse ty 
             JOIN behandling b ON b.id = ty.behandling_id
-        WHERE ty.behandling_id IN (
-            SELECT id FROM (
-                SELECT b.id, ROW_NUMBER() OVER (PARTITION BY b.fagsak_id ORDER BY b.opprettet_tid DESC) rn
-                FROM behandling b
-                JOIN fagsak f ON b.fagsak_id = f.id
-                    WHERE f.stonadstype = :stønadstype
-                     AND b.status = 'FERDIGSTILT'
-                     AND b.type IN ('FØRSTEGANGSBEHANDLING', 'REVURDERING')
-         ) q WHERE rn = 1) 
+        WHERE ty.behandling_id IN (:behandlingIder) 
          AND EXISTS (SELECT 1 FROM andel_tilkjent_ytelse aty 
                         WHERE ty.id = aty.tilkjent_ytelse AND aty.stonad_tom >= :datoForAvstemming)
           """)
-    fun finnTilkjentYtelserTilKonsistensavstemming(stønadstype: Stønadstype, datoForAvstemming: LocalDate): List<TilkjentYtelse>
+    fun finnTilkjentYtelserTilKonsistensavstemming(behandlingIder: Set<UUID>, datoForAvstemming: LocalDate): List<TilkjentYtelse>
 
 }
