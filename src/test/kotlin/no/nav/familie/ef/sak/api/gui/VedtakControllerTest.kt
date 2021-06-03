@@ -5,17 +5,23 @@ import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.api.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.api.dto.TotrinnkontrollStatus
 import no.nav.familie.ef.sak.api.dto.TotrinnskontrollStatusDto
-import no.nav.familie.ef.sak.api.gui.VedtakControllerTest.Saksbehandler.*
+import no.nav.familie.ef.sak.api.gui.VedtakControllerTest.Saksbehandler.BESLUTTER
+import no.nav.familie.ef.sak.api.gui.VedtakControllerTest.Saksbehandler.BESLUTTER_2
+import no.nav.familie.ef.sak.api.gui.VedtakControllerTest.Saksbehandler.SAKSBEHANDLER
 import no.nav.familie.ef.sak.config.RolleConfig
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.util.BrukerContextUtil.clearBrukerContext
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.repository.BehandlingRepository
 import no.nav.familie.ef.sak.repository.FagsakRepository
 import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import no.nav.familie.ef.sak.repository.domain.FagsakPerson
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.ef.sak.service.VedtaksbrevService
 import no.nav.familie.ef.sak.service.steg.StegType
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.security.token.support.test.JwkGenerator
 import no.nav.security.token.support.test.JwtTokenGenerator
 import org.assertj.core.api.Assertions.assertThat
@@ -27,13 +33,15 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import java.util.*
+import java.util.UUID
 
 internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
     @Autowired private lateinit var fagsakRepository: FagsakRepository
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
     @Autowired private lateinit var rolleConfig: RolleConfig
+    @Autowired private lateinit var vedtaksbrevService: VedtaksbrevService
+
 
     private val fagsak = fagsak(setOf(FagsakPerson("")))
     private val behandling = behandling(fagsak)
@@ -109,6 +117,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         validerTotrinnskontrollUaktuelt(BESLUTTER_2)
     }
 
+
     @Test
     internal fun `hvis man underkjenner behandlingen må man sende den til beslutter på nytt og sen godkjenne den`() {
         opprettBehandling()
@@ -171,10 +180,12 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     private fun sendTilBeslutter(saksbehandler: Saksbehandler,
                                  validator: (ResponseEntity<Ressurs<UUID>>) -> Unit = responseOK()) {
         headers.setBearerAuth(token(saksbehandler))
+        lagSaksbehandlerBrev()
         val response = restTemplate.exchange<Ressurs<UUID>>(localhost("/api/vedtak/${behandling.id}/send-til-beslutter"),
                                                             HttpMethod.POST,
                                                             HttpEntity<Any>(headers))
         validator.invoke(response)
+        lagBeslutterBrev()
     }
 
     private fun godkjennTotrinnskontroll(saksbehandler: Saksbehandler,
@@ -252,6 +263,19 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
                 .build()
         val createSignedJWT = JwtTokenGenerator.createSignedJWT(JwkGenerator.getDefaultRSAKey(), claimsSet)
         return createSignedJWT.serialize()
+    }
+
+    private fun lagSaksbehandlerBrev() {
+        val brevRequest = objectMapper.readTree("123")
+        mockBrukerContext("saksbehandlernavn")
+        vedtaksbrevService.lagSaksbehandlerBrev(behandling.id, brevRequest, "brevMal")
+        clearBrukerContext()
+    }
+
+    private fun lagBeslutterBrev() {
+        mockBrukerContext("saksbehandlernavn")
+        vedtaksbrevService.lagBeslutterBrev(behandling.id)
+        clearBrukerContext()
     }
 
 }

@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.service.steg
 
 import no.nav.familie.ef.sak.repository.domain.Behandling
-import no.nav.familie.ef.sak.service.VedtaksbrevService
+import no.nav.familie.ef.sak.service.VedtaksbrevIverksettingService
 import no.nav.familie.ef.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.Logger
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class DistribuerVedtaksbrevSteg(private val taskRepository: TaskRepository,
-                                private val vedtaksbrevService: VedtaksbrevService) : BehandlingSteg<String> {
+                                private val vedtaksbrevService: VedtaksbrevIverksettingService) : BehandlingSteg<String> {
 
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 

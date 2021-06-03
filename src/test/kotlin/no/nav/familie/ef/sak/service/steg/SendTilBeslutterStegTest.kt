@@ -1,12 +1,22 @@
 package no.nav.familie.ef.sak.service.steg
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.mockk.*
-import no.nav.familie.ef.sak.repository.domain.*
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
+import no.nav.familie.ef.sak.repository.VedtaksbrevRepository
+import no.nav.familie.ef.sak.repository.domain.Behandling
+import no.nav.familie.ef.sak.repository.domain.BehandlingResultat
+import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
+import no.nav.familie.ef.sak.repository.domain.BehandlingType
+import no.nav.familie.ef.sak.repository.domain.Fagsak
+import no.nav.familie.ef.sak.repository.domain.FagsakPerson
+import no.nav.familie.ef.sak.repository.domain.Stønadstype
+import no.nav.familie.ef.sak.repository.domain.Vedtaksbrev
+import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.OppgaveService
-import no.nav.familie.ef.sak.service.VedtaksbrevService
 import no.nav.familie.ef.sak.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.task.FerdigstillOppgaveTask.FerdigstillOppgaveTaskData
 import no.nav.familie.ef.sak.task.OpprettOppgaveTask
@@ -18,7 +28,8 @@ import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.*
+import java.util.Properties
+import java.util.UUID
 
 internal class SendTilBeslutterStegTest {
 
@@ -26,11 +37,19 @@ internal class SendTilBeslutterStegTest {
     private val fagsakService = mockk<FagsakService>()
     private val oppgaveService = mockk<OppgaveService>()
     private val behandlingService = mockk<BehandlingService>(relaxed = true)
-    private val vedtaksbrevService = mockk<VedtaksbrevService>()
+    private val vedtaksbrevRepository = mockk<VedtaksbrevRepository>()
 
-    private val beslutteVedtakSteg = SendTilBeslutterSteg(taskRepository, oppgaveService, behandlingService, vedtaksbrevService)
+
+    private val beslutteVedtakSteg =
+            SendTilBeslutterSteg(taskRepository, oppgaveService, behandlingService, vedtaksbrevRepository)
     private val fagsak = Fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD,
                                 søkerIdenter = setOf(FagsakPerson(ident = "12345678901")))
+    private val vedtaksbrev = Vedtaksbrev(behandlingId = UUID.randomUUID(),
+                                          saksbehandlerBrevrequest = "",
+                                          brevmal = "",
+                                          "",
+                                          "",
+                                          null)
 
     private val behandling = Behandling(fagsakId = fagsak.id,
                                         type = BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -50,7 +69,9 @@ internal class SendTilBeslutterStegTest {
         } returns Task("", "", Properties())
         every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(any(), any()) } returns null
 
-        every { vedtaksbrevService.lagreBrevUtkast(any()) } returns mockk()
+        every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev
+        every { vedtaksbrevRepository.update(any()) } returns vedtaksbrev
+
     }
 
     @Test
@@ -63,12 +84,6 @@ internal class SendTilBeslutterStegTest {
         utførOgVerifiserKall(Oppgavetype.BehandleUnderkjentVedtak)
     }
 
-    @Test
-    internal fun `Skal lagre brev`(){
-        utførSteg()
-
-        verify { vedtaksbrevService.lagreBrevUtkast(behandling.id) }
-    }
 
     private fun utførOgVerifiserKall(oppgavetype: Oppgavetype) {
         every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype, any()) } returns mockk()

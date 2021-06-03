@@ -9,10 +9,10 @@ import no.nav.familie.ef.sak.mapper.IverksettingDtoMapper
 import no.nav.familie.ef.sak.repository.VedtaksbrevRepository
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
+import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.OppgaveService
 import no.nav.familie.ef.sak.service.TotrinnskontrollService
-import no.nav.familie.ef.sak.service.VedtaksbrevService
 import no.nav.familie.ef.sak.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ef.sak.task.OpprettOppgaveTask
@@ -31,13 +31,18 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
                          private val iverksettClient: IverksettClient,
                          private val iverksettingDtoMapper: IverksettingDtoMapper,
                          private val totrinnskontrollService: TotrinnskontrollService,
-                         private val vedtaksbrevRepository: VedtaksbrevRepository,
-                         private val vedtaksbrevService: VedtaksbrevService) : BehandlingSteg<BeslutteVedtakDto> {
+                         private val vedtaksbrevRepository: VedtaksbrevRepository) : BehandlingSteg<BeslutteVedtakDto> {
 
     override fun validerSteg(behandling: Behandling) {
         if (behandling.steg != stegType()) {
             throw Feil("Behandling er i feil steg=${behandling.steg}")
         }
+
+        val vedtaksbrev = vedtaksbrevRepository.findByIdOrThrow(behandling.id)
+        if (vedtaksbrev.beslutterPdf === null || vedtaksbrev.besluttersignatur === null) {
+            throw Feil("Behandling=${behandling.id} mangler gyldig vedtaksbrev")
+        }
+
     }
 
     override fun utførOgReturnerNesteSteg(behandling: Behandling, data: BeslutteVedtakDto): StegType {
@@ -47,7 +52,7 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
 
         return if (data.godkjent) {
             if (behandling.type != BehandlingType.BLANKETT) {
-                val fil = vedtaksbrevService.lagreEndeligBrev(behandling.id).pdf
+                val fil = vedtaksbrevRepository.findByIdOrThrow(behandling.id).beslutterPdf
                 require(fil != null) { "For å iverksette må det finnes en pdf" }
                 if (featureToggleService.isEnabled("familie.ef.sak.brukEFIverksett")) {
                     val iverksettDto = iverksettingDtoMapper.tilDto(behandling, beslutter)

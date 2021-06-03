@@ -1,29 +1,31 @@
 package no.nav.familie.ef.sak.service.steg
 
 import no.nav.familie.ef.sak.api.Feil
+import no.nav.familie.ef.sak.repository.VedtaksbrevRepository
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
-import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.OppgaveService
-import no.nav.familie.ef.sak.service.VedtaksbrevService
 import no.nav.familie.ef.sak.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.task.OpprettOppgaveTask.OpprettOppgaveTaskData
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 
 @Service
 class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
                            private val oppgaveService: OppgaveService,
                            private val behandlingService: BehandlingService,
-                           private val vedtaksbrevService: VedtaksbrevService) : BehandlingSteg<Void?> {
+                           private val vedtaksbrevRepository: VedtaksbrevRepository) : BehandlingSteg<Void?> {
 
     override fun validerSteg(behandling: Behandling) {
         if (behandling.steg != stegType()) {
             throw Feil("Behandling er i feil steg=${behandling.steg}")
+        }
+
+        if (!vedtaksbrevRepository.existsById(behandling.id)) {
+            throw Feil("Brev mangler for behandling=${behandling.id}")
         }
     }
 
@@ -33,9 +35,6 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
 
         ferdigstillOppgave(behandling, Oppgavetype.BehandleSak)
         ferdigstillOppgave(behandling, Oppgavetype.BehandleUnderkjentVedtak)
-        if(behandling.type !== BehandlingType.BLANKETT) {
-            vedtaksbrevService.lagreBrevUtkast(behandling.id)
-        }
     }
 
     private fun ferdigstillOppgave(behandling: Behandling, oppgavetype: Oppgavetype) {

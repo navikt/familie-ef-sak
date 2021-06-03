@@ -1,109 +1,47 @@
 package no.nav.familie.ef.sak.service
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.familie.ef.sak.api.dto.BrevRequest
-import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
-import no.nav.familie.ef.sak.integration.JournalpostClient
-import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
-import no.nav.familie.ef.sak.integration.dto.pdl.visningsnavn
 import no.nav.familie.ef.sak.repository.VedtaksbrevRepository
 import no.nav.familie.ef.sak.repository.domain.Fil
 import no.nav.familie.ef.sak.repository.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.vedtaksbrev.BrevClient
-import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
-import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
-import no.nav.familie.kontrakter.felles.dokarkiv.v2.Dokument
-import no.nav.familie.kontrakter.felles.dokarkiv.v2.Filtype
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 import java.util.UUID
 
 @Service
 class VedtaksbrevService(private val brevClient: BrevClient,
-                         private val brevRepository: VedtaksbrevRepository,
-                         private val behandlingService: BehandlingService,
-                         private val fagsakService: FagsakService,
-                         private val personService: PersonService,
-                         private val journalpostClient: JournalpostClient,
-                         private val arbeidsfordelingService: ArbeidsfordelingService,
-                         private val familieIntegrasjonerClient: FamilieIntegrasjonerClient) {
+                         private val brevRepository: VedtaksbrevRepository) {
 
-    fun lagBrevRequest(behandlingId: UUID): BrevRequest {
-        val aktivIdent = behandlingService.hentAktivIdent(behandlingId)
-        val person = personService.hentSøker(aktivIdent)
-        val navn = person.navn.gjeldende().visningsnavn()
-        val innvilgelseFra = LocalDate.now()
-        val innvilgelseTil = LocalDate.now()
-        val begrunnelseFomDatoInnvilgelse = "den måneden du ble separert"
-        val brevdato = LocalDate.now()
-        val belopOvergangsstonad = 13943
-        val signaturSaksbehandler = SikkerhetContext.hentSaksbehandlerNavn()
-        return BrevRequest(navn = navn,
-                           ident = aktivIdent,
-                           innvilgelseFra = innvilgelseFra,
-                           innvilgelseTil = innvilgelseTil,
-                           begrunnelseFomDatoInnvilgelse = begrunnelseFomDatoInnvilgelse,
-                           brevdato = brevdato,
-                           belopOvergangsstonad = belopOvergangsstonad,
-                           signaturSaksbehandler = signaturSaksbehandler)
-    }
 
-    // TODO: Slett denne
-    @Deprecated("Skal slettes snart")
-    fun lagPdf(brevRequest: BrevRequest, brevMal: String = "innvilgetVedtakMVP"): ByteArray {
-        return brevClient.genererBrev("bokmaal",
-                                      brevMal,
-                                      brevRequest)
-    }
-
-    fun lagPdf(brevRequest: JsonNode, brevMal: String): ByteArray {
-        return brevClient.genererBrev("bokmaal",
-                                      brevMal,
-                                      brevRequest)
-    }
-
-    fun lagreBrevUtkast(behandlingId: UUID): Vedtaksbrev {
-        val request = lagBrevRequest(behandlingId)
-        val pdf = lagPdf(request)
-        val brev = Vedtaksbrev(behandlingId, request, null, Fil(pdf), null)
-        return brevRepository.insert(brev)
-    }
-
-    fun lagreEndeligBrev(behandlingId: UUID): Vedtaksbrev {
+    fun lagBeslutterBrev(behandlingId: UUID): ByteArray {
+        // TODO validere at behandlig har rett status/steg?
         val vedtaksbrev = brevRepository.findByIdOrThrow(behandlingId)
-        val endeligRequest = vedtaksbrev.utkastBrevRequest.copy(signaturBeslutter = SikkerhetContext.hentSaksbehandlerNavn())
-        return brevRepository.update(vedtaksbrev.copy(pdf = Fil(lagPdf(endeligRequest)), brevRequest = endeligRequest))
+        val besluttervedtaksbrev = vedtaksbrev.copy(besluttersignatur = SikkerhetContext.hentSaksbehandlerNavn(strict = true))
+        val beslutterPdf = Fil(brevClient.genererBrev(besluttervedtaksbrev))
+        val besluttervedtaksbrevMedPdf = besluttervedtaksbrev.copy(beslutterPdf = beslutterPdf)
+        brevRepository.update(besluttervedtaksbrevMedPdf)
+        return beslutterPdf.bytes
     }
 
-    fun forhåndsvisBrev(behandlingId: UUID, brevRequest: JsonNode, brevMal: String): ByteArray{
-        return lagPdf(brevRequest, brevMal)
+    fun lagSaksbehandlerBrev(behandlingId: UUID, brevrequest: JsonNode, brevmal: String): ByteArray {
+        // TODO validere at behandlig har rett status/steg?
+        val saksbehandlersignatur = SikkerhetContext.hentSaksbehandlerNavn(strict = true)
+        val vedtaksbrev = when (brevRepository.existsById(behandlingId)) {
+            true -> brevRepository.update(Vedtaksbrev(behandlingId,
+                                                      brevrequest.toString(),
+                                                      brevmal,
+                                                      saksbehandlersignatur,
+                                                      beslutterPdf = null))
+            false -> brevRepository.insert(Vedtaksbrev(behandlingId,
+                                                       brevrequest.toString(),
+                                                       brevmal,
+                                                       saksbehandlersignatur,
+                                                       beslutterPdf = null))
+        }
+
+        return brevClient.genererBrev(vedtaksbrev)
     }
 
-    fun hentBrev(behandlingId: UUID): Vedtaksbrev {
-        return brevRepository.findByIdOrThrow(behandlingId)
-    }
-
-    fun journalførVedtaksbrev(behandlingId: UUID): String? {
-        val fagsak = fagsakService.hentFaksakForBehandling(behandlingId)
-        val ident = fagsak.hentAktivIdent();
-        val vedtaksbrev = hentBrev(behandlingId)
-        val dokumenter =
-                listOf(Dokument(vedtaksbrev.pdf?.bytes ?: error("Mangler pdf ved journalføring av brev for bedhandling=$behandlingId"), Filtype.PDFA, dokumenttype = Dokumenttype.VEDTAKSBREV_OVERGANGSSTØNAD))
-        val journalførendeEnhet = arbeidsfordelingService.hentNavEnhet(ident)
-
-        return journalpostClient.arkiverDokument(ArkiverDokumentRequest(
-                fnr = ident,
-                forsøkFerdigstill = true,
-                hoveddokumentvarianter = dokumenter,
-                fagsakId = fagsak.eksternId.id.toString(),
-                journalførendeEnhet = journalførendeEnhet?.enhetId,
-                vedleggsdokumenter = emptyList()
-        )).journalpostId
-    }
-
-    fun distribuerVedtaksbrev(behandlingId: UUID, journpostId: String): String{
-        return familieIntegrasjonerClient.distribuerBrev(journpostId)
-    }
 }
