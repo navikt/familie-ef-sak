@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.config
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ef.sak.vedtaksbrev.IverksettClient
+import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.kontrakter.felles.simulering.BetalingType
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import no.nav.familie.kontrakter.felles.simulering.FagOmrådeKode
