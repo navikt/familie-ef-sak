@@ -24,7 +24,7 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
             throw Feil("Behandling er i feil steg=${behandling.steg}")
         }
 
-        if (!vedtaksbrevRepository.existsById(behandling.id)){
+        if (!vedtaksbrevRepository.existsById(behandling.id)) {
             throw Feil("Brev mangler for behandling=${behandling.id}")
         }
     }

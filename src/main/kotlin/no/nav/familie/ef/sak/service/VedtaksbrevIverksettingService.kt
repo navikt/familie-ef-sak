@@ -10,7 +10,7 @@ import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Dokument
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Filtype
 import org.springframework.stereotype.Service
-import java.util.*
+import java.util.UUID
 
 @Deprecated("Vet ikke om dette skal/har blitt flyttet til iverksetting")
 @Service
@@ -28,7 +28,7 @@ class VedtaksbrevIverksettingService(
 
     fun journalførVedtaksbrev(behandlingId: UUID): String? {
         val fagsak = fagsakService.hentFaksakForBehandling(behandlingId)
-        val ident = fagsak.hentAktivIdent();
+        val ident = fagsak.hentAktivIdent()
         val vedtaksbrev = hentBrev(behandlingId)
         val dokumenter =
                 listOf(Dokument(vedtaksbrev.beslutterPdf?.bytes

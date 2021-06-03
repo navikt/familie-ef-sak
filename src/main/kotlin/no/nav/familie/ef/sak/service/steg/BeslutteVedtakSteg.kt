@@ -33,7 +33,7 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
         }
 
         val vedtaksbrev = vedtaksbrevRepository.findByIdOrThrow(behandling.id)
-        if (vedtaksbrev.beslutterPdf === null || vedtaksbrev.besluttersignatur === null){
+        if (vedtaksbrev.beslutterPdf === null || vedtaksbrev.besluttersignatur === null) {
             throw Feil("Behandling=${behandling.id} mangler gyldig vedtaksbrev")
         }
 

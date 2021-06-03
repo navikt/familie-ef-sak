@@ -48,7 +48,9 @@ internal class VedtaksbrevServiceTest {
 
         vedtaksbrevService.lagBeslutterBrev(behandling.id)
         assertThat(vedtaksbrevSlot.captured.besluttersignatur).isEqualTo(saksbehandlerNavn)
-        assertThat(vedtaksbrevSlot.captured).usingRecursiveComparison().ignoringFields("besluttersignatur", "beslutterPdf").isEqualTo(vedtaksbrev)
+        assertThat(vedtaksbrevSlot.captured).usingRecursiveComparison()
+                .ignoringFields("besluttersignatur", "beslutterPdf")
+                .isEqualTo(vedtaksbrev)
 
         clearBrukerContext()
     }
