@@ -64,6 +64,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `skal sette behandling til fatter vedtak når man sendt til beslutter`() {
         opprettBehandling()
+
         sendTilBeslutter(SAKSBEHANDLER)
         validerBehandlingFatterVedtak()
     }
@@ -71,6 +72,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `skal sette behandling til iverksett når man godkjent totrinnskontroll`() {
         opprettBehandling()
+
         sendTilBeslutter(SAKSBEHANDLER)
         godkjennTotrinnskontroll(BESLUTTER)
         validerBehandlingIverksetter()
@@ -79,6 +81,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `hvis man underkjenner den så skal man få ut det som status`() {
         opprettBehandling()
+
         sendTilBeslutter(SAKSBEHANDLER)
         underkjennTotrinnskontroll(BESLUTTER)
         validerTotrinnskontrollUnderkjent(SAKSBEHANDLER)
@@ -89,6 +92,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `en annen beslutter enn den som sendte til beslutter må godkjenne behandlingen`() {
         opprettBehandling()
+
         sendTilBeslutter(BESLUTTER)
         validerTotrinnskontrollIkkeAutorisert(SAKSBEHANDLER)
         validerTotrinnskontrollIkkeAutorisert(BESLUTTER)
@@ -102,8 +106,10 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `skal gi totrinnskontroll uaktuelt hvis totrinnskontrollen er godkjent`() {
         opprettBehandling()
+
         sendTilBeslutter(SAKSBEHANDLER)
         godkjennTotrinnskontroll(BESLUTTER)
+
         validerTotrinnskontrollUaktuelt(SAKSBEHANDLER)
         validerTotrinnskontrollUaktuelt(BESLUTTER)
         validerTotrinnskontrollUaktuelt(BESLUTTER_2)
@@ -115,9 +121,12 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         opprettBehandling()
         sendTilBeslutter(SAKSBEHANDLER)
         underkjennTotrinnskontroll(BESLUTTER)
+
         sendTilBeslutter(SAKSBEHANDLER)
         underkjennTotrinnskontroll(BESLUTTER)
+
         validerBehandlingUtredes()
+
         sendTilBeslutter(SAKSBEHANDLER)
         godkjennTotrinnskontroll(BESLUTTER)
     }
