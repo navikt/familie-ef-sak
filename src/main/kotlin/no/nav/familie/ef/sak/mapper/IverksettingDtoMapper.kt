@@ -16,7 +16,7 @@ import no.nav.familie.ef.sak.repository.domain.Vurdering
 import no.nav.familie.ef.sak.service.ArbeidsfordelingService
 import no.nav.familie.ef.sak.service.BehandlingshistorikkService
 import no.nav.familie.ef.sak.service.FagsakService
-import no.nav.familie.ef.sak.service.PersisterGrunnlagsdataService
+import no.nav.familie.ef.sak.service.GrunnlagsdataService
 import no.nav.familie.ef.sak.service.SøknadService
 import no.nav.familie.ef.sak.service.TilkjentYtelseService
 import no.nav.familie.ef.sak.service.steg.StegType
@@ -55,7 +55,7 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
                             private val behandlinghistorikkService: BehandlingshistorikkService,
                             private val tilkjentYtelseService: TilkjentYtelseService,
                             private val fagsakService: FagsakService,
-                            private val persisterGrunnlagsdataService: PersisterGrunnlagsdataService) {
+                            private val grunnlagsdataService: GrunnlagsdataService) {
 
     fun tilDto(behandling: Behandling, beslutter: String): IverksettDto {
 
@@ -113,7 +113,7 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
 
     private fun mapSøkerDto(fagsak: Fagsak, behandling: Behandling): SøkerDto {
         val søknad = søknadService.hentOvergangsstønad(behandling.id)
-        val (grunnlagsdata) = persisterGrunnlagsdataService.hentGrunnlagsdata(behandling.id)
+        val (grunnlagsdata) = grunnlagsdataService.hentGrunnlagsdata(behandling.id)
         val alleBarn = BarnMatcher.kobleSøknadsbarnOgRegisterBarn(søknad.barn, grunnlagsdata.barn)
         val navEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(søknad.fødselsnummer)
 
