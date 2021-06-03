@@ -38,7 +38,7 @@ rolle:
   beslutter: "01166863-22f1-4e16-9785-d7a05a22df74"
 
 funksjonsbrytere:
-  enabled: false
+  enabled: true
   unleash:
     uri: http://localhost:4242/api
     environment: local

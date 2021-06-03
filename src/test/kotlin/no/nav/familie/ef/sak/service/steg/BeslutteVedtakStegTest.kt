@@ -4,7 +4,9 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.*
 import no.nav.familie.ef.sak.api.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.api.dto.BrevRequest
-import no.nav.familie.ef.sak.api.dto.TotrinnskontrollDto
+import no.nav.familie.ef.sak.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.iverksett.IverksettClient
+import no.nav.familie.ef.sak.mapper.IverksettingDtoMapper
 import no.nav.familie.ef.sak.repository.VedtaksbrevRepository
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.service.FagsakService
@@ -20,6 +22,7 @@ import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.util.*
 
 internal class BeslutteVedtakStegTest {
@@ -31,16 +34,35 @@ internal class BeslutteVedtakStegTest {
     private val oppgaveService = mockk<OppgaveService>()
     private val vedtaksbrevRepository = mockk<VedtaksbrevRepository>()
     private val vedtaksbrevService = mockk<VedtaksbrevService>()
+    private val featureToggleService = mockk<FeatureToggleService>()
+    private val iverksettingDtoMapper = mockk<IverksettingDtoMapper>()
+    private val iverksett = mockk<IverksettClient>()
 
     private val beslutteVedtakSteg = BeslutteVedtakSteg(taskRepository,
                                                         fagsakService,
                                                         oppgaveService,
+                                                        featureToggleService,
+                                                        iverksett,
+                                                        iverksettingDtoMapper,
                                                         totrinnskontrollService,
                                                         vedtaksbrevRepository,
                                                         vedtaksbrevService)
     private val fagsak = Fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD,
                                 søkerIdenter = setOf(FagsakPerson(ident = "12345678901")))
     private val behandlingId = UUID.randomUUID()
+
+    private val vedtaksbrev = Vedtaksbrev(behandlingId = behandlingId,
+                                          utkastBrevRequest = BrevRequest("Olav Olavssen",
+                                                                          "12345678910",
+                                                                          LocalDate.now(),
+                                                                          LocalDate.now(),
+                                                                          "fordi jepp",
+                                                                          LocalDate.now(),
+                                                                          1300,
+                                                                          "Saksbehandler Saksbehandlersen"),
+                                          utkastPdf = Fil(ByteArray(123)),
+                                          pdf = Fil(ByteArray(123)))
+
 
     private lateinit var taskSlot: CapturingSlot<Task>
 
@@ -56,7 +78,8 @@ internal class BeslutteVedtakStegTest {
         } returns Task("", "", Properties())
         every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(any(), any()) } returns mockk()
         every { vedtaksbrevRepository.deleteById(any()) } just Runs
-        every { vedtaksbrevService.lagreEndeligBrev(any()) } returns mockk()
+        every { vedtaksbrevService.lagreEndeligBrev(any()) } returns vedtaksbrev
+        every { featureToggleService.isEnabled(any()) } returns false
     }
 
     @Test

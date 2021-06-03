@@ -45,6 +45,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
             else -> emptyList()
         }
 
+        // TODO: Hent tilkjentYtelse fra forrige behandling og gjør diff med ny og ta vare på kildeBehandlingId
         tilkjentYtelseService.slettTilkjentYtelseForBehandling(behandling.id)
         if (beløpsperioder.isNotEmpty()) {
             tilkjentYtelseService.opprettTilkjentYtelse(TilkjentYtelseDTO(
