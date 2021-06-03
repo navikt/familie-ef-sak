@@ -12,10 +12,10 @@ import no.nav.familie.ef.sak.repository.domain.FagsakPerson
 import no.nav.familie.ef.sak.repository.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.vedtaksbrev.BrevClient
+import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.lang.IllegalStateException
 
 internal class VedtaksbrevServiceTest {
 
@@ -59,6 +59,12 @@ internal class VedtaksbrevServiceTest {
         every { vedtaksbrevRepository.update(any()) } returns vedtaksbrev
 
         assertThrows<IllegalStateException> { vedtaksbrevService.lagBeslutterBrev(behandling.id) }
+    }
+
+    @Test
+    internal fun `JsonNode toString fungerer som forventet`() {
+        val json = """{"name":"John"}"""
+        assertThat(objectMapper.readTree(json).toString()).isEqualTo(json)
     }
 
 }

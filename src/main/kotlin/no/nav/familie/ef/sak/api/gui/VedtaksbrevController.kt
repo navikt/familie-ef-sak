@@ -19,21 +19,21 @@ class VedtaksbrevController(private val brevService: VedtaksbrevService,
 
     private val logger = LoggerFactory.getLogger(this.javaClass)
     @PostMapping("/{behandlingId}/{brevMal}")
-    fun lagBrev(@PathVariable behandlingId: UUID,
-                @PathVariable brevMal: String,
-                @RequestBody brevRequest: JsonNode): Ressurs<ByteArray> {
+    fun lagSaksbehandlerbrev(@PathVariable behandlingId: UUID,
+                             @PathVariable brevMal: String,
+                             @RequestBody brevRequest: JsonNode): Ressurs<ByteArray> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         val data = brevService.lagSaksbehandlerBrev(behandlingId, brevRequest, brevMal)
         return Ressurs.success(data)
     }
 
     @GetMapping("/{behandlingId}")
-    fun hentBrev(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
+    fun lagBeslutterbrev(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
-        val lagBeslutterBrev = brevService.lagBeslutterBrev(behandlingId)
-        return  try {
-            Ressurs.success(lagBeslutterBrev.beslutterPdf!!.bytes)
-        } catch (e: NullPointerException){
+        val beslutterPdf = brevService.lagBeslutterBrev(behandlingId).beslutterPdf
+        return if (beslutterPdf != null) {
+            Ressurs.success(beslutterPdf.bytes)
+        } else {
             logger.error("Pdf finnes ikke for behandling=$behandlingId.")
             Ressurs.failure("Pdf for beslutter kunne ikke genereres")
         }
