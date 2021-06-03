@@ -113,7 +113,7 @@ internal class SimuleringServiceTest {
         simuleringService.simulerForBehandling(behandling.id)
 
         assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().periodebeløp.fraOgMed).isEqualTo(årMånedFraStart.atDay(1))
-        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().periodebeløp.tilOgMed).isEqualTo(årMånedGEndring.atDay(1))
+        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().periodebeløp.tilOgMed).isEqualTo(årMånedGEndring.atDay(1).minusDays(1))
         assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().periodebeløp.beløp).isGreaterThan(0)
 
         assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.last().periodebeløp.fraOgMed).isEqualTo(årMånedGEndring.atDay(1))
