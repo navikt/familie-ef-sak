@@ -82,6 +82,6 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
                  AND b.type != 'BLANKETT'
          ) q WHERE rn = 1 AND type != 'TEKNISK_OPPHØR'
         """)
-    fun finnSisteAktiveBehandlinger(stønadstype: Stønadstype): Set<UUID>
+    fun finnSisteIverksatteBehandlinger(stønadstype: Stønadstype): Set<UUID>
 
 }

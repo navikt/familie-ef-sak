@@ -10,7 +10,6 @@ import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.domain.Sporbar
-import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseMedMetaData
 import no.nav.familie.ef.sak.økonomi.UtbetalingsoppdragGenerator.lagTilkjentYtelseMedUtbetalingsoppdrag
 import org.assertj.core.api.Assertions.assertThat
@@ -104,63 +103,27 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
 
         repository.insert(tilkjentYtelse)
 
-        assertThat(repository.finnTilkjentYtelserTilKonsistensavstemming(Stønadstype.OVERGANGSSTØNAD, stønadFom.minusDays(1)))
+        assertThat(repository.finnTilkjentYtelserTilKonsistensavstemming(setOf(behandling.id), stønadFom.minusDays(1)))
                 .hasSize(1)
-        assertThat(repository.finnTilkjentYtelserTilKonsistensavstemming(Stønadstype.OVERGANGSSTØNAD, stønadFom))
+        assertThat(repository.finnTilkjentYtelserTilKonsistensavstemming(setOf(behandling.id), stønadFom))
                 .hasSize(1)
 
-        assertThat(repository.finnTilkjentYtelserTilKonsistensavstemming(Stønadstype.OVERGANGSSTØNAD, stønadFom.plusDays(1)))
-                .isEmpty()
-
-        assertThat(repository.finnTilkjentYtelserTilKonsistensavstemming(Stønadstype.BARNETILSYN, stønadFom))
-                .withFailMessage("Må matche stønadstype")
+        assertThat(repository.finnTilkjentYtelserTilKonsistensavstemming(setOf(behandling.id), stønadFom.plusDays(1)))
                 .isEmpty()
     }
 
     @Test
     internal fun `skal kun finne siste behandlingen sin tilkjenteytelse`() {
         val fagsak = fagsakRepository.insert(fagsak())
-        val behandling = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.FERDIGSTILT)
-                                                             .copy(sporbar = Sporbar(opprettetTid = LocalDate.of(2021, 1, 1)
-                                                                     .atStartOfDay())))
-        val behandling2 = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.FERDIGSTILT))
+        val behandling = behandlingRepository.insert(behandling(fagsak, opprettetTid = LocalDate.of(2021, 1, 1).atStartOfDay()))
+        val behandling2 = behandlingRepository.insert(behandling(fagsak))
         repository.insert(DataGenerator.tilfeldigTilkjentYtelse(behandling))
         repository.insert(DataGenerator.tilfeldigTilkjentYtelse(behandling2))
 
         assertThat(repository.findAll().map { it.behandlingId }).containsExactlyInAnyOrder(behandling.id, behandling2.id)
 
-        val result = repository.finnTilkjentYtelserTilKonsistensavstemming(Stønadstype.OVERGANGSSTØNAD, LocalDate.now())
+        val result = repository.finnTilkjentYtelserTilKonsistensavstemming(setOf(behandling2.id), LocalDate.now())
         assertThat(result.map { it.behandlingId }).containsExactly(behandling2.id)
-    }
-
-    @Test
-    internal fun `finnTilkjentYtelserTilKonsistensAvstemming - Skal ikke finne når status ikke er ferdigstillt`() {
-        val fagsak = fagsakRepository.insert(fagsak())
-        val behandling = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.UTREDES))
-
-        val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(behandling)
-        val stønadFom = tilkjentYtelse.andelerTilkjentYtelse.minOf { it.stønadFom }
-
-        repository.insert(tilkjentYtelse)
-
-        assertThat(repository.finnTilkjentYtelserTilKonsistensavstemming(Stønadstype.OVERGANGSSTØNAD, stønadFom.minusDays(1)))
-                .isEmpty()
-    }
-
-    @Test
-    internal fun `finnTilkjentYtelserTilKonsistensAvstemming - Skal ikke finne når type er feil`() {
-        val fagsak = fagsakRepository.insert(fagsak())
-        val behandling = behandlingRepository.insert(behandling(fagsak,
-                                                                status = BehandlingStatus.FERDIGSTILT,
-                                                                type = BehandlingType.BLANKETT))
-
-        val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(behandling)
-        val stønadFom = tilkjentYtelse.andelerTilkjentYtelse.minOf { it.stønadFom }
-
-        repository.insert(tilkjentYtelse)
-
-        assertThat(repository.finnTilkjentYtelserTilKonsistensavstemming(Stønadstype.OVERGANGSSTØNAD, stønadFom.minusDays(1)))
-                .isEmpty()
     }
 
     private fun opprettBehandling(): Behandling {

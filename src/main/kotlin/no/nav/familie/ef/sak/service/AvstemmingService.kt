@@ -4,8 +4,8 @@ import no.nav.familie.ef.sak.api.avstemming.GrensesnittavstemmingDto
 import no.nav.familie.ef.sak.api.avstemming.OpprettKonsistensavstemmingTaskDto
 import no.nav.familie.ef.sak.api.avstemming.tilTask
 import no.nav.familie.ef.sak.integration.OppdragClient
+import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
-import no.nav.familie.ef.sak.vedtaksbrev.IverksettClient
 import no.nav.familie.ef.sak.økonomi.tilKlassifisering
 import no.nav.familie.kontrakter.ef.felles.StønadType
 import no.nav.familie.kontrakter.ef.iverksett.KonsistensavstemmingDto

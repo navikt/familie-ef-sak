@@ -105,11 +105,18 @@ class TilkjentYtelseService(private val oppdragClient: OppdragClient,
     fun finnTilkjentYtelserTilKonsistensavstemming(stønadstype: Stønadstype,
                                                    datoForAvstemming: LocalDate): List<KonsistensavstemmingTilkjentYtelseDto> {
         //TODO kan bare stemme av de som har riktig status fra iverksett
-        val tilkjentYtelser = tilkjentYtelseRepository.finnTilkjentYtelserTilKonsistensavstemming(stønadstype, datoForAvstemming)
+        return behandlingService.finnSisteIverksatteBehandlinger(stønadstype)
+                .chunked(1000)
+                .map(List<UUID>::toSet)
+                .flatMap { behandlingIder -> finnTilkjentYtelserTilKonsistensavstemming(behandlingIder, datoForAvstemming) }
+    }
 
-        val behandlingIder = tilkjentYtelser.map { it.behandlingId }.toSet()
-        val eksterneIder = behandlingService.hentEksterneIder(behandlingIder).associateBy { it.behandlingId }
-
+    private fun finnTilkjentYtelserTilKonsistensavstemming(behandlingIder: Set<UUID>,
+                                                           datoForAvstemming: LocalDate): List<KonsistensavstemmingTilkjentYtelseDto> {
+        val tilkjentYtelser =
+                tilkjentYtelseRepository.finnTilkjentYtelserTilKonsistensavstemming(behandlingIder, datoForAvstemming)
+        val eksterneIder = behandlingService.hentEksterneIder(tilkjentYtelser.map { it.behandlingId }.toSet())
+                .associateBy { it.behandlingId }
         return tilkjentYtelser.map { tilkjentYtelse ->
             val eksternId = eksterneIder[tilkjentYtelse.behandlingId]
                             ?: error("Finner ikke eksterne id'er til behandling=${tilkjentYtelse.behandlingId}")
@@ -138,6 +145,7 @@ class TilkjentYtelseService(private val oppdragClient: OppdragClient,
             }
         }
     }
+
 
     private fun hentTilkjentYtelse(tilkjentYtelseId: UUID) =
             tilkjentYtelseRepository.findByIdOrNull(tilkjentYtelseId)

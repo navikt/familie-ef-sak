@@ -10,6 +10,8 @@ import no.nav.familie.ef.sak.repository.domain.DelvilkårsvurderingWrapper
 import no.nav.familie.ef.sak.repository.domain.Fagsak
 import no.nav.familie.ef.sak.repository.domain.FagsakPerson
 import no.nav.familie.ef.sak.repository.domain.Oppgave
+import no.nav.familie.ef.sak.repository.domain.Sporbar
+import no.nav.familie.ef.sak.repository.domain.SporbarUtils
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.VilkårType
@@ -18,6 +20,7 @@ import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
 import no.nav.familie.ef.sak.service.steg.StegType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 fun oppgave(behandling: Behandling, erFerdigstilt: Boolean = false): Oppgave =
@@ -32,14 +35,16 @@ fun behandling(fagsak: Fagsak,
                steg: StegType = StegType.VILKÅR,
                oppdragId: UUID = UUID.randomUUID(),
                type: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-               resultat: BehandlingResultat = BehandlingResultat.IKKE_SATT): Behandling =
+               resultat: BehandlingResultat = BehandlingResultat.IKKE_SATT,
+               opprettetTid: LocalDateTime = SporbarUtils.now()): Behandling =
         Behandling(fagsakId = fagsak.id,
                    id = oppdragId,
                    type = type,
                    status = status,
                    steg = steg,
                    aktiv = aktiv,
-                   resultat = resultat)
+                   resultat = resultat,
+                   sporbar = Sporbar(opprettetTid = opprettetTid))
 
 
 fun fagsak(identer: Set<FagsakPerson> = setOf(), stønadstype: Stønadstype = Stønadstype.OVERGANGSSTØNAD) =

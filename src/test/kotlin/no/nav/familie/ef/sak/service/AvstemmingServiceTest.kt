@@ -6,6 +6,7 @@ import io.mockk.slot
 import no.nav.familie.ef.sak.api.avstemming.GrensesnittavstemmingDto
 import no.nav.familie.ef.sak.api.avstemming.OpprettKonsistensavstemmingTaskDto
 import no.nav.familie.ef.sak.integration.OppdragClient
+import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.service.AvstemmingService
 import no.nav.familie.ef.sak.service.TilkjentYtelseService
@@ -13,7 +14,6 @@ import no.nav.familie.ef.sak.task.GrensesnittavstemmingPayload
 import no.nav.familie.ef.sak.task.GrensesnittavstemmingTask
 import no.nav.familie.ef.sak.task.KonsistensavstemmingPayload
 import no.nav.familie.ef.sak.task.KonsistensavstemmingTask
-import no.nav.familie.ef.sak.vedtaksbrev.IverksettClient
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
