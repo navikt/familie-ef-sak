@@ -38,11 +38,6 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
             throw Feil("Behandling er i feil steg=${behandling.steg}")
         }
 
-        val vedtaksbrev = vedtaksbrevRepository.findByIdOrThrow(behandling.id)
-        if (vedtaksbrev.beslutterPdf === null || vedtaksbrev.besluttersignatur === null) {
-            throw Feil("Behandling=${behandling.id} mangler gyldig vedtaksbrev")
-        }
-
     }
 
     override fun utførOgReturnerNesteSteg(behandling: Behandling, data: BeslutteVedtakDto): StegType {
