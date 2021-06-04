@@ -80,6 +80,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
                 WHERE f.stonadstype = :stønadstype
                  AND b.status = 'FERDIGSTILT'
                  AND b.type != 'BLANKETT'
+                 AND b.resultat != 'ANNULLERT'
          ) q WHERE rn = 1 AND type != 'TEKNISK_OPPHØR'
         """)
     fun finnSisteIverksatteBehandlinger(stønadstype: Stønadstype): Set<UUID>

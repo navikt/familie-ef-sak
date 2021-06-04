@@ -197,4 +197,14 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
                                                status = FERDIGSTILT))
         assertThat(behandlingRepository.finnSisteIverksatteBehandlinger(OVERGANGSSTØNAD)).containsExactly(behandling.id)
     }
+
+    @Test
+    internal fun `finnSisteIverksatteBehandlinger - skal filtrere vekk annulerte behandlinger før den henter siste behandling`() {
+        val fagsak = fagsakRepository.insert(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak,
+                                                                status = FERDIGSTILT,
+                                                                opprettetTid = LocalDateTime.now().minusDays(2)))
+        behandlingRepository.insert(behandling(fagsak, type = BehandlingType.BLANKETT, status = FERDIGSTILT))
+        assertThat(behandlingRepository.finnSisteIverksatteBehandlinger(OVERGANGSSTØNAD)).containsExactly(behandling.id)
+    }
 }
