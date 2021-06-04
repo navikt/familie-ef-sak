@@ -104,7 +104,6 @@ class TilkjentYtelseService(private val oppdragClient: OppdragClient,
 
     fun finnTilkjentYtelserTilKonsistensavstemming(stønadstype: Stønadstype,
                                                    datoForAvstemming: LocalDate): List<KonsistensavstemmingTilkjentYtelseDto> {
-        //TODO kan bare stemme av de som har riktig status fra iverksett
         return behandlingService.finnSisteIverksatteBehandlinger(stønadstype)
                 .chunked(1000)
                 .map(List<UUID>::toSet)
