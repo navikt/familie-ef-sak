@@ -11,4 +11,8 @@ class IverksettService(private val taskRepository: TaskRepository) {
     fun startBehandling(fagsak: Fagsak) {
         taskRepository.save(StartBehandlingTask.opprettTask(fagsakId = fagsak.id))
     }
+
+    fun teknisktOpphor(fagsak: Fagsak) {
+        taskRepository.save(StartBehandlingTask.opprettTask(fagsakId = fagsak.id))
+    }
 }
