@@ -66,8 +66,8 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
             JOIN fagsak f ON b.fagsak_id = f.id
                 WHERE f.stonadstype = :stønadstype
                  AND b.status = 'FERDIGSTILT'
-                 AND b.type IN ('FØRSTEGANGSBEHANDLING', 'REVURDERING', 'TEKNISK_OPPHØR')
-         ) q WHERE rn = 1 AND type IN ('FØRSTEGANGSBEHANDLING', 'REVURDERING')
+                 AND b.type != 'BLANKETT'
+         ) q WHERE rn = 1 AND type != 'TEKNISK_OPPHØR'
         """)
     fun finnSisteAktiveBehandlinger(stønadstype: Stønadstype): Set<UUID>
 
