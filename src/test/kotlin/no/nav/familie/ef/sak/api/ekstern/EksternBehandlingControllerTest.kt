@@ -2,14 +2,11 @@ package no.nav.familie.ef.sak.api.ekstern
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlIdent
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlIdenter
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.BehandlingRepository
-import no.nav.familie.ef.sak.repository.domain.BehandlingResultat
-import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -39,47 +36,35 @@ internal class EksternBehandlingControllerTest {
 
     @Test
     internal fun `skal returnere false når det ikke finnes en behandling`() {
-        every { behandlingRepository.finnSisteBehandling(Stønadstype.OVERGANGSSTØNAD, setOf("1", "2")) } returns null
-        assertThat(eksternBehandlingController.finnesBehandlingForPerson(Stønadstype.OVERGANGSSTØNAD, PersonIdent("1")).data)
-                .isEqualTo(false)
-    }
-
-    @Test
-    internal fun `skal returnere false når behandlingen er av type blankett`() {
-        every { behandlingRepository.finnSisteBehandling(Stønadstype.OVERGANGSSTØNAD, setOf("1", "2")) } returns
-                behandling(fagsak(), type = BehandlingType.BLANKETT)
-        assertThat(eksternBehandlingController.finnesBehandlingForPerson(Stønadstype.OVERGANGSSTØNAD, PersonIdent("1")).data)
-                .isEqualTo(false)
-    }
-
-    @Test
-    internal fun `skal returnere false når resultat er annulert`() {
-        every { behandlingRepository.finnSisteBehandling(Stønadstype.OVERGANGSSTØNAD, setOf("1", "2")) } returns
-                behandling(fagsak(), resultat = BehandlingResultat.ANNULLERT)
+        every {
+            behandlingRepository.eksistererBehandlingSomIkkeErBlankett(Stønadstype.OVERGANGSSTØNAD, setOf("1", "2"))
+        } returns false
         assertThat(eksternBehandlingController.finnesBehandlingForPerson(Stønadstype.OVERGANGSSTØNAD, PersonIdent("1")).data)
                 .isEqualTo(false)
     }
 
     @Test
     internal fun `skal returnere true når behandling finnes`() {
-        every { behandlingRepository.finnSisteBehandling(Stønadstype.OVERGANGSSTØNAD, setOf("1", "2")) } returns
-                behandling(fagsak(), type = BehandlingType.FØRSTEGANGSBEHANDLING, resultat = BehandlingResultat.IKKE_SATT)
+        every {
+            behandlingRepository.eksistererBehandlingSomIkkeErBlankett(Stønadstype.OVERGANGSSTØNAD, setOf("1", "2"))
+        } returns true
         assertThat(eksternBehandlingController.finnesBehandlingForPerson(Stønadstype.OVERGANGSSTØNAD, PersonIdent("1")).data)
                 .isEqualTo(true)
     }
 
     @Test
     internal fun `uten stønadstype - skal returnere false når det ikke finnes noen behandling`() {
-        every { behandlingRepository.finnSisteBehandling(any(), setOf("1", "2")) } returns null
+        every { behandlingRepository.eksistererBehandlingSomIkkeErBlankett(any(), setOf("1", "2")) } returns false
         assertThat(eksternBehandlingController.finnesBehandlingForPerson(null, PersonIdent("1")).data)
                 .isEqualTo(false)
     }
 
     @Test
     internal fun `uten stønadstype - skal returnere true når det minimum en behandling`() {
-        every { behandlingRepository.finnSisteBehandling(any(), setOf("1", "2")) } returns
-                behandling(fagsak(), type = BehandlingType.FØRSTEGANGSBEHANDLING, resultat = BehandlingResultat.IKKE_SATT)
+        var counter = 0
+        every { behandlingRepository.eksistererBehandlingSomIkkeErBlankett(any(), setOf("1", "2")) } answers { counter++ == 1 }
         assertThat(eksternBehandlingController.finnesBehandlingForPerson(null, PersonIdent("1")).data)
                 .isEqualTo(true)
+        verify(exactly = 2) { behandlingRepository.eksistererBehandlingSomIkkeErBlankett(any(), any()) }
     }
 }

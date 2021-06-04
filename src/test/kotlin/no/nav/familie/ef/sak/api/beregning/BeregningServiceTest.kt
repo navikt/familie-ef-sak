@@ -48,17 +48,17 @@ internal class BeregningServiceTest {
 
         assertThat(fullYtelse.size).isEqualTo(4)
         assertThat(fullYtelse[0]).isEqualTo(Beløpsperiode(Periode(LocalDate.parse("2019-04-30"),
-                                                          LocalDate.parse("2019-05-01")),
+                                                          LocalDate.parse("2019-04-30")),
                                                           beregningsgrunnlagG2018,
                                                           18166.toBigDecimal(),
                                                           18166.toBigDecimal()))
         assertThat(fullYtelse[1]).isEqualTo(Beløpsperiode(Periode(LocalDate.parse("2019-05-01"),
-                                                          LocalDate.parse("2020-05-01")),
+                                                          LocalDate.parse("2020-04-30")),
                                                           beregningsgrunnlagG2019,
                                                           18723.toBigDecimal(),
                                                           18723.toBigDecimal()))
         assertThat(fullYtelse[2]).isEqualTo(Beløpsperiode(Periode(LocalDate.parse("2020-05-01"),
-                                                          LocalDate.parse("2021-05-01")),
+                                                          LocalDate.parse("2021-04-30")),
                                                           beregningsgrunnlagG2020,
                                                           19003.toBigDecimal(),
                                                           19003.toBigDecimal()))

@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.repository.VedtaksbrevRepository
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
+import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.OppgaveService
 import no.nav.familie.ef.sak.task.FerdigstillOppgaveTask
@@ -24,7 +25,7 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
             throw Feil("Behandling er i feil steg=${behandling.steg}")
         }
 
-        if (!vedtaksbrevRepository.existsById(behandling.id)) {
+        if (behandling.type !== BehandlingType.BLANKETT && !vedtaksbrevRepository.existsById(behandling.id) ) {
             throw Feil("Brev mangler for behandling=${behandling.id}")
         }
     }
