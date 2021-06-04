@@ -6,9 +6,6 @@ import no.nav.familie.ef.sak.api.beregning.VedtakDto
 import no.nav.familie.ef.sak.api.beregning.VedtakService
 import no.nav.familie.ef.sak.api.beregning.tilInntektsperioder
 import no.nav.familie.ef.sak.api.beregning.tilPerioder
-import no.nav.familie.ef.sak.api.dto.AndelTilkjentYtelseDTO
-import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
-import no.nav.familie.ef.sak.mapper.tilTilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
@@ -19,7 +16,6 @@ import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.TilkjentYtelseService
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.ef.sak.vedtaksbrev.IverksettClient
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import org.springframework.stereotype.Service
 import java.time.LocalDate

@@ -26,5 +26,6 @@ object BrukerContextUtil {
         every { tokenValidationContext.getClaims("azuread") } returns jwtTokenClaims
         every { jwtTokenClaims.get("preferred_username") } returns preferredUsername
         every { jwtTokenClaims.get("NAVident") } returns preferredUsername
+        every { jwtTokenClaims.get("name") } returns preferredUsername
     }
 }

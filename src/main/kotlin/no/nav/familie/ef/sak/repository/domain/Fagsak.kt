@@ -20,6 +20,10 @@ data class Fagsak(@Id
     fun hentAktivIdent(): String {
         return søkerIdenter.maxByOrNull { it.sporbar.opprettetTid }?.ident ?: error("Fant ingen ident på fagsak $id")
     }
+
+    fun hentAlleIdenter(): List<String> {
+        return søkerIdenter.map { it.ident }
+    }
 }
 
 enum class Stønadstype {

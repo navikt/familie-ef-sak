@@ -1,9 +1,20 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.service.steg
 
-import io.mockk.*
-import no.nav.familie.ef.sak.repository.domain.*
+import io.mockk.Runs
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
+import no.nav.familie.ef.sak.repository.domain.Behandling
+import no.nav.familie.ef.sak.repository.domain.BehandlingResultat
+import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
+import no.nav.familie.ef.sak.repository.domain.BehandlingType
+import no.nav.familie.ef.sak.repository.domain.Fagsak
+import no.nav.familie.ef.sak.repository.domain.FagsakPerson
+import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.service.BehandlingService
-import no.nav.familie.ef.sak.service.VedtaksbrevService
+import no.nav.familie.ef.sak.service.VedtaksbrevIverksettingService
 import no.nav.familie.ef.sak.service.steg.JournalførVedtaksbrevSteg
 import no.nav.familie.ef.sak.task.DistribuerVedtaksbrevTask
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
@@ -11,13 +22,12 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.util.*
+import java.util.Properties
 
 internal class JournalførVedtaksbrevStegTest {
 
-
     private val taskRepository = mockk<TaskRepository>()
-    private val vedtaksbrevService = mockk<VedtaksbrevService>()
+    private val vedtaksbrevService = mockk<VedtaksbrevIverksettingService>()
     private val behandlingService = mockk<BehandlingService>()
     val journalførVedtaksbrev = JournalførVedtaksbrevSteg(taskRepository, vedtaksbrevService, behandlingService)
 

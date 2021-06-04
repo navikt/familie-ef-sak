@@ -3,7 +3,9 @@ package no.nav.familie.ef.sak.repository
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.repository.domain.BehandlingResultat
 import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
+import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.domain.FagsakPerson
 import no.nav.familie.ef.sak.repository.domain.Sporbar
 import no.nav.familie.ef.sak.repository.domain.Stønadstype.OVERGANGSSTØNAD
@@ -98,6 +100,32 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
 
         assertThat(behandlingRepository.finnSisteBehandling(SKOLEPENGER, setOf("1"))?.id).isNull()
         assertThat(behandlingRepository.finnSisteBehandling(OVERGANGSSTØNAD, setOf("2"))?.id).isNull()
+    }
+
+    @Test
+    internal fun `skal finne nyeste behandlingId`() {
+        val fagsak = fagsakRepository.insert(fagsak(setOf(FagsakPerson("1"))))
+        val annullertFørstegangsbehandling = behandling(fagsak).copy(type = BehandlingType.FØRSTEGANGSBEHANDLING, status = BehandlingStatus.FERDIGSTILT, resultat = BehandlingResultat.ANNULLERT, sporbar = Sporbar(opprettetTid = LocalDateTime.now().minusDays(4)))
+        val førstegangsbehandling = behandling(fagsak).copy(type = BehandlingType.FØRSTEGANGSBEHANDLING, status = BehandlingStatus.FERDIGSTILT, resultat = BehandlingResultat.INNVILGET, sporbar = Sporbar(opprettetTid = LocalDateTime.now().minusDays(3)))
+        val blankett = behandling(fagsak).copy(type = BehandlingType.BLANKETT, status = BehandlingStatus.FERDIGSTILT, resultat = BehandlingResultat.INNVILGET, sporbar = Sporbar(opprettetTid = LocalDateTime.now().minusDays(2)))
+        val annullertRevurdering = behandling(fagsak).copy(type = BehandlingType.REVURDERING, status = BehandlingStatus.FERDIGSTILT,resultat = BehandlingResultat.ANNULLERT, sporbar = Sporbar(opprettetTid = LocalDateTime.now().minusDays(1)))
+        val revurderingUnderArbeid = behandling(fagsak).copy(type = BehandlingType.REVURDERING,status = BehandlingStatus.IVERKSETTER_VEDTAK, resultat = BehandlingResultat.INNVILGET)
+        behandlingRepository.insert(annullertFørstegangsbehandling)
+        behandlingRepository.insert(førstegangsbehandling)
+        behandlingRepository.insert(blankett)
+        behandlingRepository.insert(annullertRevurdering)
+        behandlingRepository.insert(revurderingUnderArbeid)
+        val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(revurderingUnderArbeid.id)
+        assertThat(sisteIverksatteBehandling).isEqualTo(førstegangsbehandling.id)
+    }
+
+    @Test
+    internal fun `skal ikke finnes noen siste iverksatte behandlingId når en førstegangsbehandling iverksettes`() {
+        val fagsak = fagsakRepository.insert(fagsak(setOf(FagsakPerson("1"))))
+        val førstegangsbehandling = behandling(fagsak).copy(type = BehandlingType.FØRSTEGANGSBEHANDLING, status = BehandlingStatus.IVERKSETTER_VEDTAK, resultat = BehandlingResultat.INNVILGET)
+        behandlingRepository.insert(førstegangsbehandling)
+        val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(førstegangsbehandling.id)
+        assertThat(sisteIverksatteBehandling).isNull()
     }
 
     @Test
