@@ -1,9 +1,11 @@
 package no.nav.familie.ef.sak.api.gui
 
 import no.nav.familie.ef.sak.iverksett.IverksettService
+import no.nav.familie.ef.sak.service.TeknisktOpphørService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -11,10 +13,10 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/tekniskopphor") // "/internal/tekniskopphor ``"
 @ProtectedWithClaims(issuer = "azuread")
 
-class TekniskOpphørController(private val iverksettService: IverksettService) {
+class TekniskOpphørController(private val teknisktOpphørService: TeknisktOpphørService) {
 
-    @PostMapping("{behandlingId}")
-    fun iverksettTekniskopphor(@PathVariable behandlingId: String) {
-            iverksettService.teknisktOpphor(behandlingId)
+    @PostMapping
+    fun iverksettTekniskopphor(@RequestBody personIdent: String) {
+        teknisktOpphørService.håndterTeknisktOpphør(personIdent)
     }
 }
