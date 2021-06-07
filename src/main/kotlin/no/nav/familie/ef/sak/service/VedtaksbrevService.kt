@@ -31,11 +31,23 @@ class VedtaksbrevService(private val brevClient: BrevClient,
         }
 
         val vedtaksbrev = brevRepository.findByIdOrThrow(behandlingId)
-        val besluttervedtaksbrev = vedtaksbrev.copy(besluttersignatur = SikkerhetContext.hentSaksbehandlerNavn(strict = true))
+        val besluttersignatur = SikkerhetContext.hentSaksbehandlerNavn(strict = true)
+        val besluttervedtaksbrev = vedtaksbrev.copy(besluttersignatur = besluttersignatur)
+
+        validerBeslutterIkkeErLikSaksbehandler(vedtaksbrev, besluttersignatur)
+
         val beslutterPdf = Fil(brevClient.genererBrev(besluttervedtaksbrev))
         val besluttervedtaksbrevMedPdf = besluttervedtaksbrev.copy(beslutterPdf = beslutterPdf)
         brevRepository.update(besluttervedtaksbrevMedPdf)
         return beslutterPdf.bytes
+    }
+
+    private fun validerBeslutterIkkeErLikSaksbehandler(vedtaksbrev: Vedtaksbrev,
+                                                       besluttersignatur: String) {
+        if (vedtaksbrev.saksbehandlersignatur == besluttersignatur) {
+            throw Feil(message = "Beslutter er lik behandler",
+                       frontendFeilmelding = "Beslutter kan ikke behandle en behandling som den selv har sendt til beslutter")
+        }
     }
 
     fun lagSaksbehandlerBrev(behandlingId: UUID, brevrequest: JsonNode, brevmal: String): ByteArray {

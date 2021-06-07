@@ -38,6 +38,7 @@ class VedtaksbrevController(private val brevService: VedtaksbrevService,
     @PostMapping("/{behandlingId}")
     fun lagBeslutterbrev(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
+        tilgangService.validerHarBeslutterrolle()
         return Ressurs.success(brevService.lagBeslutterBrev(behandlingId))
     }
 }

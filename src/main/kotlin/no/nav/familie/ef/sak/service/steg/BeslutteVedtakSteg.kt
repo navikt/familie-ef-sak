@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.OppgaveService
 import no.nav.familie.ef.sak.service.TotrinnskontrollService
+import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ef.sak.task.OpprettOppgaveTask
@@ -47,8 +48,13 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
 
         return if (data.godkjent) {
             if (behandling.type != BehandlingType.BLANKETT) {
-                val fil = vedtaksbrevRepository.findByIdOrThrow(behandling.id).beslutterPdf
+                val vedtaksbrev = vedtaksbrevRepository.findByIdOrThrow(behandling.id)
+                val fil = vedtaksbrev.beslutterPdf
                 require(fil != null) { "For å iverksette må det finnes en pdf" }
+                require(vedtaksbrev.besluttersignatur == SikkerhetContext.hentSaksbehandlerNavn(strict = true)) {
+                    "En annen saksbehandler har signert vedtaksbrevet"
+                }
+
                 if (featureToggleService.isEnabled("familie.ef.sak.brukEFIverksett")) {
                     val iverksettDto = iverksettingDtoMapper.tilDto(behandling, beslutter)
                     iverksettClient.iverksett(iverksettDto, fil)
