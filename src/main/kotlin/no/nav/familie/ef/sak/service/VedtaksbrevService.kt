@@ -21,7 +21,7 @@ class VedtaksbrevService(private val brevClient: BrevClient,
 
     fun hentBrev(behandlingId: UUID) =
             brevRepository.findByIdOrThrow(behandlingId).beslutterPdf?.bytes
-            ?: error("Savner beslutterPdf for behandling=$behandlingId")
+            ?: error("Mangler beslutterPdf for behandling=$behandlingId")
 
     fun lagBeslutterBrev(behandlingId: UUID): ByteArray {
         val behandling = behandlingService.hentBehandling(behandlingId)
