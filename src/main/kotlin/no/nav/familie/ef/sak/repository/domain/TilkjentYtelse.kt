@@ -10,8 +10,10 @@ data class TilkjentYtelse(@Id
                           val id: UUID = UUID.randomUUID(),
                           val behandlingId: UUID,
                           val personident: String,
+                          //TODO borde vi droppe denna kolonnen eller borde ventepåsvarfraiverksett returnere utbetalingsoppdrag?
                           val utbetalingsoppdrag: Utbetalingsoppdrag? = null,
                           val vedtaksdato: LocalDate? = null,
+                          //TODO droppe ? TilkjentYtelseStatus
                           val status: TilkjentYtelseStatus = TilkjentYtelseStatus.IKKE_KLAR,
                           val type: TilkjentYtelseType = TilkjentYtelseType.FØRSTEGANGSBEHANDLING,
                           val andelerTilkjentYtelse: List<AndelTilkjentYtelse>,

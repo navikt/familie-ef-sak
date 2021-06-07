@@ -89,12 +89,9 @@ enum class StegType(val rekkefølge: Int,
         return when (behandlingType) {
             BehandlingType.TEKNISK_OPPHØR ->
                 when (this) {
-                    VILKÅR -> BEREGNE_YTELSE
-                    BEREGNE_YTELSE -> SEND_TIL_BESLUTTER
-                    SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
-                    BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
-                    IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
-                    VENTE_PÅ_STATUS_FRA_ØKONOMI -> FERDIGSTILLE_BEHANDLING
+                    VILKÅR -> IVERKSETT_MOT_OPPDRAG
+                    IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_IVERKSETT
+                    VENTE_PÅ_STATUS_FRA_IVERKSETT -> FERDIGSTILLE_BEHANDLING
                     FERDIGSTILLE_BEHANDLING -> BEHANDLING_FERDIGSTILT
                     BEHANDLING_FERDIGSTILT -> BEHANDLING_FERDIGSTILT
                     else -> throw IllegalStateException("StegType ${displayName()} ugyldig ved ${behandlingType.visningsnavn}")
