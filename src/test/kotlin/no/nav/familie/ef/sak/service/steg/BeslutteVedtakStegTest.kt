@@ -76,7 +76,7 @@ internal class BeslutteVedtakStegTest {
 
     @BeforeEach
     internal fun setUp() {
-        mockBrukerContext("beslutter")
+        mockBrukerContext("sign2")
         taskSlot = slot()
         every {
             fagsakService.hentAktivIdent(any())
