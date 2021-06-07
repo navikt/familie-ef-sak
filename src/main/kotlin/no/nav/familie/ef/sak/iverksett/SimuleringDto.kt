@@ -41,6 +41,9 @@ data class AndelTilkjentYtelseForIverksett(val periodebeløp: PeriodebeløpDto,
 data class PeriodebeløpDto(val beløp: Int,
                            var periodetype: Periodetype,
                            val fraOgMed: LocalDate,
+                           val inntekt: Int,
+                           val inntektsreduksjon: Int,
+                           val samordningsfradrag: Int,
                            val tilOgMed: LocalDate)
 
 enum class Periodetype {
@@ -68,6 +71,9 @@ fun TilkjentYtelseForIverksettMedMetadata.tilAndelerTilkjentYtelse(): List<Andel
                                     stønadFom = it.periodebeløp.fraOgMed,
                                     stønadTom = it.periodebeløp.tilOgMed,
                                     personIdent = this.personIdent,
+                                    samordningsfradrag = it.periodebeløp.samordningsfradrag,
+                                    inntektsreduksjon = it.periodebeløp.inntektsreduksjon,
+                                    inntekt = it.periodebeløp.inntekt
                 )
             }
 }
@@ -99,6 +105,9 @@ fun AndelTilkjentYtelse.tilIverksett(): AndelTilkjentYtelseForIverksett {
                                            periodebeløp = PeriodebeløpDto(beløp = this.beløp,
                                                                           periodetype = Periodetype.MÅNED,
                                                                           fraOgMed = this.stønadFom,
+                                                                          inntektsreduksjon = this.inntektsreduksjon,
+                                                                          samordningsfradrag = this.samordningsfradrag,
+                                                                          inntekt = this.inntekt,
                                                                           tilOgMed = this.stønadTom),
                                            periodeId = null,
                                            forrigePeriodeId = null)

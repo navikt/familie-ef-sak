@@ -16,8 +16,10 @@ import java.util.*
 @RequestMapping(path = ["/api/test/"])
 @ProtectedWithClaims(issuer = "azuread")
 @Profile("!prod")
-class TestTilkjentYtelseController(private val testTilkjentYtelseService: TestTilkjentYtelseService,
-                                   private val avstemmingService: AvstemmingService) {
+class TestTilkjentYtelseController(
+    private val testTilkjentYtelseService: TestTilkjentYtelseService,
+    private val avstemmingService: AvstemmingService
+) {
 
     @PostMapping("/send-til-oppdrag")
     fun testMotOppdrag(@RequestBody tilkjentYtelseTestDTO: TilkjentYtelseTestDTO): Ressurs<TilkjentYtelse> {
@@ -44,6 +46,9 @@ class TestTilkjentYtelseController(private val testTilkjentYtelseService: TestTi
                                                             beløp = dummyDTO.beløp,
                                                             stønadFom = dummyDTO.stønadFom,
                                                             kildeBehandlingId = UUID.randomUUID(),
+                                                            inntektsreduksjon = 0,
+                                                            samordningsfradrag = 0,
+                                                            inntekt = 0,
                                                             stønadTom = dummyDTO.stønadTom)
         val tilkjentYtelseDto = TilkjentYtelseDTO(søker = søker,
                                                   behandlingId = UUID.randomUUID(),

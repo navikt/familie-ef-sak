@@ -8,7 +8,6 @@ import no.nav.familie.ef.sak.repository.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.Delvilkårsvurdering
 import no.nav.familie.ef.sak.repository.domain.Fagsak
-import no.nav.familie.ef.sak.repository.domain.InntektWrapper
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.Vedtak
 import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
@@ -28,10 +27,7 @@ import no.nav.familie.kontrakter.ef.iverksett.AndelTilkjentYtelseDto
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingsdetaljerDto
 import no.nav.familie.kontrakter.ef.iverksett.DelvilkårsvurderingDto
 import no.nav.familie.kontrakter.ef.iverksett.FagsakdetaljerDto
-import no.nav.familie.kontrakter.ef.iverksett.InntektDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettDto
-import no.nav.familie.kontrakter.ef.iverksett.PeriodebeløpDto
-import no.nav.familie.kontrakter.ef.iverksett.Periodetype
 import no.nav.familie.kontrakter.ef.iverksett.SøkerDto
 import no.nav.familie.kontrakter.ef.iverksett.TilkjentYtelseDto
 import no.nav.familie.kontrakter.ef.iverksett.VedtaksdetaljerDto
@@ -107,8 +103,7 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
                                opphørÅrsak = null,
                                saksbehandlerId = saksbehandler,
                                beslutterId = beslutter,
-                               tilkjentYtelse = tilkjentYtelse.tilIverksettDto(),
-                               inntekter = vedtak.inntekter?.tilIverksettDto() ?: emptyList()
+                               tilkjentYtelse = tilkjentYtelse.tilIverksettDto()
             )
 
     private fun mapSøkerDto(fagsak: Fagsak, behandling: Behandling): SøkerDto {
@@ -130,22 +125,16 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
 
 fun TilkjentYtelse.tilIverksettDto(): TilkjentYtelseDto = TilkjentYtelseDto(
         andelerTilkjentYtelse = andelerTilkjentYtelse.map { andel ->
-            AndelTilkjentYtelseDto(periodebeløp = PeriodebeløpDto(beløp = andel.beløp,
-                                                                  // TODO: Legg til utbetalingsgrad her
-                                                                  periodetype = Periodetype.MÅNED,
-                                                                  fraOgMed = andel.stønadFom,
-                                                                  tilOgMed = andel.stønadTom),
+            AndelTilkjentYtelseDto(beløp = andel.beløp,
+                                   fraOgMed = andel.stønadFom,
+                                   tilOgMed = andel.stønadTom,
+                                   inntekt = andel.inntekt,
+                                   samordningsfradrag = andel.samordningsfradrag,
+                                   inntektsreduksjon = andel.inntektsreduksjon,
                                    kildeBehandlingId = andel.kildeBehandlingId)
         }
 )
 
-fun InntektWrapper.tilIverksettDto(): List<InntektDto> = this.inntekter.map {
-    InntektDto(beløp = it.inntekt.intValueExact(),
-               periodetype = Periodetype.MÅNED,
-               fraOgMed = it.startDato,
-               tilOgMed = it.sluttDato,
-               samordningsfradrag = it.samordningsfradrag.intValueExact())
-}
 
 fun Vurdering.tilIverksettDto(): VurderingDto = VurderingDto(
         regelId = RegelIdIverksett.valueOf(this.regelId.name),
