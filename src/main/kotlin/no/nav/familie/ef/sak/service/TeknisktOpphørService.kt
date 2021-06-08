@@ -15,17 +15,24 @@ import java.util.UUID
 class TeknisktOpphørService(val behandlingService: BehandlingService,
                             val behandlingRepository: BehandlingRepository,
                             val vedtakRepository: VedtakRepository,
+                            val fagsakService: FagsakService,
+                            val tilkjentYtelseService: TilkjentYtelseService,
                             val vilkårsvurderingRepository: VilkårsvurderingRepository) {
 
     fun håndterTeknisktOpphør(personIdent: PersonIdent) {
         val sisteBehandling = behandlingRepository.finnSisteBehandling(Stønadstype.OVERGANGSSTØNAD, setOf(personIdent.ident))
         require(sisteBehandling != null) { throw Feil("Finner ikke behandling med stønadstype overgangsstønad for personen") }
         val fagsakId = sisteBehandling.fagsakId
-
-        val nyBehandlingId = opprettBehandlingTekniskOpphør(fagsakId)
+        val fagsakEksternFagsakId = fagsakService.hentEksternId(fagsakId)
+        val aktivIdent = fagsakService.hentAktivIdent(fagsakId)
+        val nyBehandling = opprettBehandlingTekniskOpphør(fagsakId)
+        val nyBehandlingId = nyBehandling.id
         opprettVurderinger(sisteBehandling.id, nyBehandlingId)
         opprettVedtak(nyBehandlingId)
-        //opprettTilkjentYtelse()
+        opprettTilkjentYtelse(eksternBehandlingId = nyBehandling.eksternId.id,
+                              behandlingId = nyBehandlingId,
+                              personIdent = aktivIdent,
+                              eksternFagsakId = fagsakEksternFagsakId)
     }
 
     private fun opprettTilkjentYtelse(eksternFagsakId: Long, behandlingId: UUID, personIdent: String, eksternBehandlingId: Long) {
@@ -35,14 +42,14 @@ class TeknisktOpphørService(val behandlingService: BehandlingService,
                                                                   vedtaksdato = LocalDate.now(),
                                                                   status = TilkjentYtelseStatus.OPPRETTET,
                                                                   type = TilkjentYtelseType.OPPHØR,
-                                                                  andelerTilkjentYtelse = listOf()),
+                                                                  andelerTilkjentYtelse = emptyList()),
                                   eksternBehandlingId = eksternBehandlingId,
                                   stønadstype = Stønadstype.OVERGANGSSTØNAD,
                                   eksternFagsakId = eksternFagsakId)
     }
 
-    private fun opprettBehandlingTekniskOpphør(fagsakId: UUID): UUID {
-        return behandlingService.opprettBehandling(behandlingType = BehandlingType.TEKNISK_OPPHØR, fagsakId = fagsakId).id
+    private fun opprettBehandlingTekniskOpphør(fagsakId: UUID): Behandling {
+        return behandlingService.opprettBehandling(behandlingType = BehandlingType.TEKNISK_OPPHØR, fagsakId = fagsakId)
     }
 
     private fun opprettVedtak(nyBehandlingId: UUID) {
