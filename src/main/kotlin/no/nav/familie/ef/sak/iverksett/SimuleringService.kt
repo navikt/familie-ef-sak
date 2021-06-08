@@ -83,10 +83,13 @@ class SimuleringService(private val iverksettClient: IverksettClient,
                                               vedtak.inntekter.tilInntektsperioder())
                         .map {
                             AndelTilkjentYtelse(beløp = it.beløp.toInt(),
-                                                     stønadFom = it.periode.fradato,
-                                                     stønadTom = it.periode.tildato,
-                                                     kildeBehandlingId = behandling.id,
-                                                     personIdent = fagsak.hentAktivIdent())
+                                                stønadFom = it.periode.fradato,
+                                                stønadTom = it.periode.tildato,
+                                                kildeBehandlingId = behandling.id,
+                                                personIdent = fagsak.hentAktivIdent(),
+                                                inntekt = it.beregningsgrunnlag?.inntekt?.toInt() ?:0,
+                                                inntektsreduksjon = it.beregningsgrunnlag?.avkortningPerMåned?.toInt() ?:0,
+                                                samordningsfradrag = it.beregningsgrunnlag?.samordningsfradrag?.toInt() ?:0)
                         }
             }
             else -> emptyList()

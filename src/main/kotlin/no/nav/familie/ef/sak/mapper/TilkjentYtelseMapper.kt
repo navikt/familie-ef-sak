@@ -22,7 +22,10 @@ fun TilkjentYtelseDTO.tilAndelerTilkjentYtelse(): List<AndelTilkjentYtelse> {
                 AndelTilkjentYtelse(beløp = it.beløp,
                                     stønadFom = it.stønadFom,
                                     stønadTom = it.stønadTom,
-                                    personIdent = it.personIdent)
+                                    personIdent = it.personIdent,
+                                    inntekt = it.inntekt,
+                                    inntektsreduksjon = it.inntektsreduksjon,
+                                    samordningsfradrag = it.samordningsfradrag)
             }
 }
 
@@ -39,5 +42,8 @@ fun AndelTilkjentYtelse.tilDto(): AndelTilkjentYtelseDTO {
                                   stønadTom = this.stønadTom,
                                   kildeBehandlingId = this.kildeBehandlingId
                                                       ?: error("Savner kildeBehandlingId på andel med periodeId=${this.periodeId}"),
-                                  personIdent = this.personIdent)
+                                  personIdent = this.personIdent,
+                                  inntekt = this.inntekt,
+                                  samordningsfradrag = this.samordningsfradrag,
+                                  inntektsreduksjon = this.inntektsreduksjon)
 }

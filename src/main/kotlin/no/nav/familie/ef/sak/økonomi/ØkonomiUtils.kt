@@ -27,7 +27,10 @@ fun nullAndelTilkjentYtelse(behandlingId: UUID, personIdent: String, periodeId: 
                             personIdent = personIdent,
                             periodeId = periodeId?.gjeldende,
                             kildeBehandlingId = behandlingId,
-                            forrigePeriodeId = periodeId?.forrige)
+                            forrigePeriodeId = periodeId?.forrige,
+                            inntekt = 0,
+                            inntektsreduksjon = 0,
+                            samordningsfradrag = 0)
 
 @Deprecated(FLYTTET_TIL_EF_IVERKSETT)
 object ØkonomiUtils {

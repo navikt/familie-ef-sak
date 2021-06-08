@@ -39,7 +39,10 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                                                    stønadFom = it.periode.fradato,
                                                    stønadTom = it.periode.tildato,
                                                    kildeBehandlingId = behandling.id,
-                                                   personIdent = aktivIdent)
+                                                   personIdent = aktivIdent,
+                                                   inntekt = it.beregningsgrunnlag?.inntekt?.toInt() ?: 0,
+                                                   samordningsfradrag = it.beregningsgrunnlag?.samordningsfradrag?.toInt() ?:0,
+                                                   inntektsreduksjon = it.beregningsgrunnlag?.avkortningPerMåned?.toInt() ?:0)
                         }
             }
             else -> emptyList()

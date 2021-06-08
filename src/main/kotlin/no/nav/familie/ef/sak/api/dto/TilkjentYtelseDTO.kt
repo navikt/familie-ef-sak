@@ -29,6 +29,9 @@ data class TilkjentYtelseDTO(val søker: String,
 data class AndelTilkjentYtelseDTO(val beløp: Int,
                                   val stønadFom: LocalDate,
                                   val stønadTom: LocalDate,
+                                  val inntekt: Int,
+                                  val samordningsfradrag: Int,
+                                  val inntektsreduksjon: Int,
                                   val kildeBehandlingId: UUID?,
                                   val personIdent: String)
 

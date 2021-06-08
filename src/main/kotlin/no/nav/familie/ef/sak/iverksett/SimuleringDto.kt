@@ -1,13 +1,9 @@
 package no.nav.familie.ef.sak.iverksett
 
 import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
-import no.nav.familie.ef.sak.repository.domain.Endret
-import no.nav.familie.ef.sak.repository.domain.Sporbar
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseType
-import no.nav.familie.kontrakter.ef.felles.StønadType
 import java.time.LocalDate
 import java.util.UUID
 
@@ -40,6 +36,9 @@ data class AndelTilkjentYtelseForIverksett(val periodebeløp: PeriodebeløpDto,
 
 data class PeriodebeløpDto(val beløp: Int,
                            var periodetype: Periodetype,
+                           val inntekt: Int,
+                           val innteksreduksjon: Int,
+                           val samordningsfradrag: Int,
                            val fraOgMed: LocalDate,
                            val tilOgMed: LocalDate)
 
@@ -68,6 +67,9 @@ fun TilkjentYtelseForIverksettMedMetadata.tilAndelerTilkjentYtelse(): List<Andel
                                     stønadFom = it.periodebeløp.fraOgMed,
                                     stønadTom = it.periodebeløp.tilOgMed,
                                     personIdent = this.personIdent,
+                                    samordningsfradrag = it.periodebeløp.samordningsfradrag,
+                                    inntektsreduksjon = it.periodebeløp.innteksreduksjon,
+                                    inntekt = it.periodebeløp.inntekt
                 )
             }
 }
@@ -99,7 +101,10 @@ fun AndelTilkjentYtelse.tilIverksett(): AndelTilkjentYtelseForIverksett {
                                            periodebeløp = PeriodebeløpDto(beløp = this.beløp,
                                                                           periodetype = Periodetype.MÅNED,
                                                                           fraOgMed = this.stønadFom,
-                                                                          tilOgMed = this.stønadTom),
+                                                                          tilOgMed = this.stønadTom,
+                                                                          inntekt = this.inntekt,
+                                                                          innteksreduksjon = this.inntektsreduksjon,
+                                                                          samordningsfradrag = this.samordningsfradrag),
                                            periodeId = null,
                                            forrigePeriodeId = null)
 }

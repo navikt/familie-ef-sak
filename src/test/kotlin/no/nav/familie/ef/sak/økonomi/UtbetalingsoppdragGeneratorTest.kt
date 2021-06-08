@@ -165,7 +165,10 @@ internal class UtbetalingsoppdragGeneratorTest {
                                 personIdent = "1",
                                 periodeId = 100, // overskreves
                                 forrigePeriodeId = 100, // overskreves
-                                kildeBehandlingId = UUID.randomUUID()) // overskreves
+                                kildeBehandlingId = UUID.randomUUID(),
+                                inntekt = 0,
+                                inntektsreduksjon = 0,
+                                samordningsfradrag = 0) // overskreves
 
     private fun opprettTilkjentYtelseMedMetadata(behandlingId: UUID,
                                                  vararg andelTilkjentYtelse: AndelTilkjentYtelse) =

@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.mapper
 
-import no.nav.familie.ef.iverksett.infrastruktur.json.BarnDto
 import no.nav.familie.ef.sak.api.beregning.VedtakService
 import no.nav.familie.ef.sak.api.beregning.tilVedtaksresultat
 import no.nav.familie.ef.sak.repository.BehandlingRepository
@@ -23,20 +22,7 @@ import no.nav.familie.ef.sak.service.steg.StegType
 import no.nav.familie.kontrakter.ef.felles.BehandlingType
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.felles.StønadType
-import no.nav.familie.kontrakter.ef.iverksett.AdressebeskyttelseGradering
-import no.nav.familie.kontrakter.ef.iverksett.AndelTilkjentYtelseDto
-import no.nav.familie.kontrakter.ef.iverksett.BehandlingsdetaljerDto
-import no.nav.familie.kontrakter.ef.iverksett.DelvilkårsvurderingDto
-import no.nav.familie.kontrakter.ef.iverksett.FagsakdetaljerDto
-import no.nav.familie.kontrakter.ef.iverksett.InntektDto
-import no.nav.familie.kontrakter.ef.iverksett.IverksettDto
-import no.nav.familie.kontrakter.ef.iverksett.PeriodebeløpDto
-import no.nav.familie.kontrakter.ef.iverksett.Periodetype
-import no.nav.familie.kontrakter.ef.iverksett.SøkerDto
-import no.nav.familie.kontrakter.ef.iverksett.TilkjentYtelseDto
-import no.nav.familie.kontrakter.ef.iverksett.VedtaksdetaljerDto
-import no.nav.familie.kontrakter.ef.iverksett.VilkårsvurderingDto
-import no.nav.familie.kontrakter.ef.iverksett.VurderingDto
+import no.nav.familie.kontrakter.ef.iverksett.*
 import no.nav.familie.kontrakter.felles.annotasjoner.Improvement
 import org.springframework.stereotype.Component
 import java.time.LocalDate
@@ -131,7 +117,9 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
 fun TilkjentYtelse.tilIverksettDto(): TilkjentYtelseDto = TilkjentYtelseDto(
         andelerTilkjentYtelse = andelerTilkjentYtelse.map { andel ->
             AndelTilkjentYtelseDto(periodebeløp = PeriodebeløpDto(beløp = andel.beløp,
-                                                                  // TODO: Legg til utbetalingsgrad her
+                                                                  inntekt = andel.inntekt,
+                                                                  inntektsreduksjon = andel.inntektsreduksjon,
+                                                                  samordningsfradrag = andel.samordningsfradrag,
                                                                   periodetype = Periodetype.MÅNED,
                                                                   fraOgMed = andel.stønadFom,
                                                                   tilOgMed = andel.stønadTom),

@@ -21,6 +21,7 @@ private const val fagsakEksternId = 1L
 
 @Deprecated(FLYTTET_TIL_EF_IVERKSETT)
 enum class TestOppdragType {
+
     Input,
     Output,
     Oppdrag
@@ -55,7 +56,10 @@ data class TestOppdrag(val type: TestOppdragType,
                                 personIdent = fnr,
                                 periodeId = linjeId,
                                 kildeBehandlingId = if (TestOppdragType.Output == type) oppdragId else null,
-                                forrigePeriodeId = forrigeLinjeId)
+                                forrigePeriodeId = forrigeLinjeId,
+                                inntekt = 0,
+                                inntektsreduksjon = 0,
+                                samordningsfradrag = 0)
         else if (TestOppdragType.Output == type && beløp == null && startPeriode == null && sluttPeriode == null)
             nullAndelTilkjentYtelse(behandlingId = oppdragId ?: error("Må ha satt OppdragId på Output"),
                                     personIdent = fnr,
@@ -141,6 +145,7 @@ class TestOppdragGroup {
 
     }
 }
+
 @Deprecated(FLYTTET_TIL_EF_IVERKSETT)
 object TestOppdragParser {
 

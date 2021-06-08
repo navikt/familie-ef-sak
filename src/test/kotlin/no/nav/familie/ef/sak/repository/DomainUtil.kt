@@ -64,5 +64,8 @@ fun tilkjentYtelse(behandlingId: UUID, personIdent: String): TilkjentYtelse = Ti
                             stønadFom = LocalDate.of(2021, 1, 1),
                             stønadTom = LocalDate.of(2021, 12, 31),
                             personIdent = personIdent,
-                            kildeBehandlingId = behandlingId))
+                            kildeBehandlingId = behandlingId,
+                            inntekt = 0,
+                            inntektsreduksjon = 0,
+                            samordningsfradrag = 0))
 )

@@ -44,6 +44,9 @@ class TestTilkjentYtelseController(private val testTilkjentYtelseService: TestTi
                                                             beløp = dummyDTO.beløp,
                                                             stønadFom = dummyDTO.stønadFom,
                                                             kildeBehandlingId = UUID.randomUUID(),
+                                                            inntekt = 0,
+                                                            inntektsreduksjon = 0,
+                                                            samordningsfradrag = 0,
                                                             stønadTom = dummyDTO.stønadTom)
         val tilkjentYtelseDto = TilkjentYtelseDTO(søker = søker,
                                                   behandlingId = UUID.randomUUID(),

@@ -22,7 +22,10 @@ object DataGenerator {
                                 stønadFom = stønadFom,
                                 stønadTom = stønadTom,
                                 kildeBehandlingId = behandlingId,
-                                personIdent = personIdent)
+                                personIdent = personIdent,
+                                inntekt = 0,
+                                inntektsreduksjon = 0,
+                                samordningsfradrag = 0)
 
     fun tilfeldigTilkjentYtelse(behandling: Behandling = behandling(fagsak()), antallAndelerTilkjentYtelse: Int = 1) =
             TilkjentYtelse(personident = tilfeldigFødselsnummer(),
