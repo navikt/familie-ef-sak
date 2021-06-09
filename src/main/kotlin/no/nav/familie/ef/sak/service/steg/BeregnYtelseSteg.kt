@@ -18,8 +18,7 @@ import java.time.LocalDate
 class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                        private val behandlingService: BehandlingService,
                        private val beregningService: BeregningService,
-                       private val vedtakService: VedtakService
-) : BehandlingSteg<VedtakDto> {
+                       private val vedtakService: VedtakService) : BehandlingSteg<VedtakDto> {
 
     override fun validerSteg(behandling: Behandling) {
 
