@@ -15,11 +15,10 @@ import org.springframework.stereotype.Service
 import java.time.LocalDate
 
 @Service
-class BeregnYtelseSteg(
-    private val tilkjentYtelseService: TilkjentYtelseService,
-    private val behandlingService: BehandlingService,
-    private val beregningService: BeregningService,
-    private val vedtakService: VedtakService
+class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
+                       private val behandlingService: BehandlingService,
+                       private val beregningService: BeregningService,
+                       private val vedtakService: VedtakService
 ) : BehandlingSteg<VedtakDto> {
 
     override fun validerSteg(behandling: Behandling) {
@@ -35,21 +34,21 @@ class BeregnYtelseSteg(
         val beløpsperioder = when (vedtak) {
             is Innvilget -> {
                 beregningService.beregnYtelse(
-                    vedtak.perioder.tilPerioder(),
-                    vedtak.inntekter.tilInntektsperioder()
+                        vedtak.perioder.tilPerioder(),
+                        vedtak.inntekter.tilInntektsperioder()
                 )
-                    .map { beløpsperiode ->
-                        AndelTilkjentYtelseDTO(
-                            beløp = beløpsperiode.beløp.toInt(),
-                            stønadFom = beløpsperiode.periode.fradato,
-                            stønadTom = beløpsperiode.periode.tildato,
-                            kildeBehandlingId = behandling.id,
-                            personIdent = aktivIdent,
-                            samordningsfradrag = beløpsperiode.beregningsgrunnlag?.samordningsfradrag?.toInt() ?: 0,
-                            inntekt = beløpsperiode.beregningsgrunnlag?.inntekt?.toInt() ?: 0,
-                            inntektsreduksjon = beløpsperiode.beregningsgrunnlag?.avkortningPerMåned?.toInt() ?: 0,
-                        )
-                    }
+                        .map { beløpsperiode ->
+                            AndelTilkjentYtelseDTO(
+                                    beløp = beløpsperiode.beløp.toInt(),
+                                    stønadFom = beløpsperiode.periode.fradato,
+                                    stønadTom = beløpsperiode.periode.tildato,
+                                    kildeBehandlingId = behandling.id,
+                                    personIdent = aktivIdent,
+                                    samordningsfradrag = beløpsperiode.beregningsgrunnlag?.samordningsfradrag?.toInt() ?: 0,
+                                    inntekt = beløpsperiode.beregningsgrunnlag?.inntekt?.toInt() ?: 0,
+                                    inntektsreduksjon = beløpsperiode.beregningsgrunnlag?.avkortningPerMåned?.toInt() ?: 0,
+                            )
+                        }
             }
             else -> emptyList()
         }
@@ -58,12 +57,12 @@ class BeregnYtelseSteg(
         tilkjentYtelseService.slettTilkjentYtelseForBehandling(behandling.id)
         if (beløpsperioder.isNotEmpty()) {
             tilkjentYtelseService.opprettTilkjentYtelse(
-                TilkjentYtelseDTO(
-                    aktivIdent,
-                    vedtaksdato = LocalDate.now(),
-                    behandlingId = behandling.id,
-                    andelerTilkjentYtelse = beløpsperioder
-                )
+                    TilkjentYtelseDTO(
+                            aktivIdent,
+                            vedtaksdato = LocalDate.now(),
+                            behandlingId = behandling.id,
+                            andelerTilkjentYtelse = beløpsperioder
+                    )
             )
         }
         vedtakService.slettVedtakHvisFinnes(behandling.id)

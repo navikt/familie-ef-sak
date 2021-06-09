@@ -35,16 +35,16 @@ internal class SimuleringServiceTest {
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
 
     private val simuleringService = SimuleringService(iverksettClient = iverksettClient,
-                                              behandlingService = behandlingService,
-                                              fagsakService = fagsakService,
-                                              vedtakService = vedtakService,
-                                              beregningService = beregningService,
-                                              tilkjentYtelseService = tilkjentYtelseService)
+                                                      behandlingService = behandlingService,
+                                                      fagsakService = fagsakService,
+                                                      vedtakService = vedtakService,
+                                                      beregningService = beregningService,
+                                                      tilkjentYtelseService = tilkjentYtelseService)
 
 
     private val personIdent = "12345678901"
     private val fagsak = fagsak(fagsakpersoner(setOf(personIdent)), Stønadstype.OVERGANGSSTØNAD)
-    
+
     @BeforeEach
     internal fun setUp() {
         every { fagsakService.hentFagsak(any()) } returns fagsak
@@ -71,9 +71,12 @@ internal class SimuleringServiceTest {
         simuleringService.simulerForBehandling(behandling.id)
 
         assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.behandlingId).isEqualTo(tilkjentYtelse.behandlingId)
-        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().beløp).isEqualTo(tilkjentYtelse.andelerTilkjentYtelse.first().beløp)
-        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().fraOgMed).isEqualTo(tilkjentYtelse.andelerTilkjentYtelse.first().stønadFom)
-        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().tilOgMed).isEqualTo(tilkjentYtelse.andelerTilkjentYtelse.first().stønadTom)
+        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().beløp).isEqualTo(
+                tilkjentYtelse.andelerTilkjentYtelse.first().beløp)
+        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().fraOgMed).isEqualTo(
+                tilkjentYtelse.andelerTilkjentYtelse.first().stønadFom)
+        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().tilOgMed).isEqualTo(
+                tilkjentYtelse.andelerTilkjentYtelse.first().stønadTom)
 
     }
 
@@ -111,13 +114,19 @@ internal class SimuleringServiceTest {
         } returns DetaljertSimuleringResultat(simuleringMottaker = emptyList())
         simuleringService.simulerForBehandling(behandling.id)
 
-        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().fraOgMed).isEqualTo(årMånedFraStart.atDay(1))
-        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().tilOgMed).isEqualTo(årMånedGEndring.atDay(1).minusDays(1))
-        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().beløp).isGreaterThan(0)
+        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().fraOgMed).isEqualTo(
+                årMånedFraStart.atDay(1))
+        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().tilOgMed).isEqualTo(
+                årMånedGEndring.atDay(1).minusDays(1))
+        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().beløp).isGreaterThan(
+                0)
 
-        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.last().fraOgMed).isEqualTo(årMånedGEndring.atDay(1))
-        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.last().tilOgMed).isEqualTo(årMånedFraSlutt.atEndOfMonth())
-        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.last().beløp).isGreaterThan(0)
+        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.last().fraOgMed).isEqualTo(
+                årMånedGEndring.atDay(1))
+        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.last().tilOgMed).isEqualTo(
+                årMånedFraSlutt.atEndOfMonth())
+        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.last().beløp).isGreaterThan(
+                0)
 
     }
 
