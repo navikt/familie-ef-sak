@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository
 
 import no.nav.familie.ef.sak.api.beregning.Inntektsperiode
 import no.nav.familie.ef.sak.api.beregning.ResultatType
+import no.nav.familie.ef.sak.repository.domain.AktivitetType
 import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.BehandlingResultat
@@ -18,6 +19,7 @@ import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.Vedtak
 import no.nav.familie.ef.sak.repository.domain.Vedtaksperiode
+import no.nav.familie.ef.sak.repository.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.repository.domain.VilkårType
 import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
 import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
@@ -85,8 +87,8 @@ fun vedtak(behandlingId: UUID): Vedtak =
                avslåBegrunnelse = null,
                perioder = PeriodeWrapper(listOf(Vedtaksperiode(datoFra = LocalDate.of(2021, 1, 1),
                                                                datoTil = LocalDate.of(2021, 12, 31),
-                                                               aktivitet = "Hjemme med barn",
-                                                               periodeType = "Hjemme med barn"))),
+                                                               aktivitet = AktivitetType.BARN_UNDER_ETT_ÅR,
+                                                               periodeType = VedtaksperiodeType.HOVEDPERIODE))),
                inntekter = InntektWrapper(listOf(Inntektsperiode(startDato = LocalDate.of(2021, 1, 1),
                                                                  sluttDato = LocalDate.of(2021, 12, 1),
                                                                  inntekt = BigDecimal.valueOf(100000),
