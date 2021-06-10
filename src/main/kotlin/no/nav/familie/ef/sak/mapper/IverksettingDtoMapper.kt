@@ -11,7 +11,7 @@ import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.Vedtak
 import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
 import no.nav.familie.ef.sak.repository.domain.Vurdering
-import no.nav.familie.ef.sak.repository.domain.InntektWrapper
+import no.nav.familie.ef.sak.repository.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.service.ArbeidsfordelingService
 import no.nav.familie.ef.sak.service.BehandlingshistorikkService
 import no.nav.familie.ef.sak.service.FagsakService
@@ -34,8 +34,8 @@ import no.nav.familie.kontrakter.ef.iverksett.VedtaksdetaljerDto
 import no.nav.familie.kontrakter.ef.iverksett.VilkårsvurderingDto
 import no.nav.familie.kontrakter.ef.iverksett.VurderingDto
 import no.nav.familie.kontrakter.ef.iverksett.BarnDto
-import no.nav.familie.kontrakter.ef.iverksett.InntektDto
 import no.nav.familie.kontrakter.ef.iverksett.Periodetype
+import no.nav.familie.kontrakter.ef.iverksett.VedtaksperiodeDto
 import no.nav.familie.kontrakter.felles.annotasjoner.Improvement
 import org.springframework.stereotype.Component
 import java.time.LocalDate
@@ -107,7 +107,7 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
                                saksbehandlerId = saksbehandler,
                                beslutterId = beslutter,
                                tilkjentYtelse = tilkjentYtelse.tilIverksettDto(),
-                               inntekter = vedtak.inntekter?.tilIverksettDto() ?: emptyList()
+                               vedtaksperioder = vedtak.perioder?.tilIverksettDto() ?: emptyList()
             )
 
     private fun mapSøkerDto(fagsak: Fagsak, behandling: Behandling): SøkerDto {
@@ -140,12 +140,13 @@ fun TilkjentYtelse.tilIverksettDto(): TilkjentYtelseDto = TilkjentYtelseDto(
         }
 )
 
-fun InntektWrapper.tilIverksettDto(): List<InntektDto> = this.inntekter.map {
-    InntektDto(beløp = it.inntekt.intValueExact(),
-               periodetype = Periodetype.MÅNED,
-               fraOgMed = it.startDato,
-               tilOgMed = it.sluttDato,
-               samordningsfradrag = it.samordningsfradrag.intValueExact())
+fun PeriodeWrapper.tilIverksettDto(): List<VedtaksperiodeDto> = this.perioder.map {
+    VedtaksperiodeDto(
+            fraOgMed = it.datoFra,
+            tilOgMed = it.datoTil,
+            aktivitet = it.aktivitet,
+            periodeType = it.periodeType
+    )
 }
 
 fun Vurdering.tilIverksettDto(): VurderingDto = VurderingDto(
