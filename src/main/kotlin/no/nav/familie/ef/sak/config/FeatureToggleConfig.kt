@@ -5,6 +5,7 @@ import no.finn.unleash.UnleashContext
 import no.finn.unleash.UnleashContextProvider
 import no.finn.unleash.util.UnleashConfig
 import no.nav.familie.ef.sak.featuretoggle.ByEnvironmentStrategy
+import no.nav.familie.ef.sak.featuretoggle.ByUserIdStrategy
 import no.nav.familie.ef.sak.featuretoggle.FeatureToggleService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -40,7 +41,7 @@ class FeatureToggleConfig(private val enabled: Boolean,
                                              .appName(unleash.applicationName)
                                              .unleashAPI(unleash.uri)
                                              .unleashContextProvider(lagUnleashContextProvider())
-                                             .build(), ByEnvironmentStrategy())
+                                             .build(), ByEnvironmentStrategy(), ByUserIdStrategy())
 
         return object : FeatureToggleService {
             override fun isEnabled(toggleId: String, defaultValue: Boolean): Boolean {

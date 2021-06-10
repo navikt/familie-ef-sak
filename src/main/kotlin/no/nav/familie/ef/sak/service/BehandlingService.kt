@@ -65,6 +65,15 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
                                                       resultat = BehandlingResultat.IKKE_SATT))
     }
 
+    fun opprettBehandling(behandlingType: BehandlingType, fagsakId: UUID, status: BehandlingStatus): Behandling {
+        return behandlingRepository.insert(Behandling(fagsakId = fagsakId,
+                                                      type = behandlingType,
+                                                      steg = StegType.VILKÅR,
+                                                      status = BehandlingStatus.IVERKSETTER_VEDTAK,
+                                                      resultat = BehandlingResultat.IKKE_SATT))
+    }
+
+
     fun hentBehandling(behandlingId: UUID): Behandling = behandlingRepository.findByIdOrThrow(behandlingId)
 
     fun oppdaterStatusPåBehandling(behandlingId: UUID, status: BehandlingStatus): Behandling {

@@ -1,18 +1,20 @@
 package no.nav.familie.ef.sak.service
 
-import no.nav.familie.ef.sak.api.ApiFeil
+import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.repository.BehandlingRepository
 import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.repository.domain.*
-import no.nav.familie.ef.sak.service.steg.VentePåStatusFraIverksett
-import no.nav.familie.ef.sak.task.PollStatusFraIverksettTask
+import no.nav.familie.ef.sak.task.PollTekniskOpphørStatusTask
+import no.nav.familie.kontrakter.ef.felles.StønadType
+import no.nav.familie.kontrakter.ef.iverksett.TekniskOpphørDto
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.familie.kontrakter.ef.iverksett.TilkjentYtelseMedMetaData as TilkjentYtelseMedMetaDataKontrakter
 
 @Service
 class TeknisktOpphørService(val behandlingService: BehandlingService,
@@ -25,7 +27,7 @@ class TeknisktOpphørService(val behandlingService: BehandlingService,
     @Transactional
     fun håndterTeknisktOpphør(personIdent: PersonIdent) {
         val sisteBehandling = behandlingRepository.finnSisteBehandling(Stønadstype.OVERGANGSSTØNAD, setOf(personIdent.ident))
-        require(sisteBehandling != null) { throw ApiFeil("Finner ikke behandling med stønadstype overgangsstønad for personen") }
+        require(sisteBehandling != null) { throw Feil("Finner ikke behandling med stønadstype overgangsstønad") }
         val fagsakId = sisteBehandling.fagsakId
         val aktivIdent = fagsakService.hentAktivIdent(fagsakId)
         val eksternFagsakId = fagsakService.hentEksternId(fagsakId)
@@ -33,12 +35,17 @@ class TeknisktOpphørService(val behandlingService: BehandlingService,
         val tilkjentYtelseTilOpphør = opprettTilkjentYtelse(behandlingId = nyBehandling.id,
                                                             personIdent = aktivIdent)
 
-        iverksettClient.iverksettTekniskOpphør(TilkjentYtelseMedMetaData(tilkjentYtelse = tilkjentYtelseTilOpphør,
-                                                                         eksternBehandlingId = nyBehandling.eksternId.id,
-                                                                         stønadstype = Stønadstype.OVERGANGSSTØNAD,
-                                                                         eksternFagsakId = eksternFagsakId))
+        taskRepository.save(PollTekniskOpphørStatusTask.opprettTask(nyBehandling.id))
 
-        taskRepository.save(PollStatusFraIverksettTask.opprettTask(nyBehandling.id))
+        iverksettClient.iverksettTekniskOpphør(TekniskOpphørDto(forrigeBehandlingId = sisteBehandling.id,
+                                                                tilkjentYtelseMedMetaData = TilkjentYtelseMedMetaDataKontrakter(
+                                                                        saksbehandlerId = tilkjentYtelseTilOpphør.sporbar.opprettetAv,
+                                                                        eksternBehandlingId = nyBehandling.eksternId.id,
+                                                                        stønadstype = StønadType.OVERGANGSSTØNAD,
+                                                                        eksternFagsakId = eksternFagsakId,
+                                                                        personIdent = aktivIdent,
+                                                                        behandlingId = nyBehandling.id,
+                                                                        vedtaksdato = LocalDate.now())))
 
     }
 
@@ -53,6 +60,8 @@ class TeknisktOpphørService(val behandlingService: BehandlingService,
     }
 
     private fun opprettBehandlingTekniskOpphør(fagsakId: UUID): Behandling {
-        return behandlingService.opprettBehandling(behandlingType = BehandlingType.TEKNISK_OPPHØR, fagsakId = fagsakId)
+        return behandlingService.opprettBehandling(behandlingType = BehandlingType.TEKNISK_OPPHØR,
+                                                   fagsakId = fagsakId,
+                                                   status = BehandlingStatus.IVERKSETTER_VEDTAK)
     }
 }
