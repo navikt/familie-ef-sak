@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.task
+package no.nav.familie.ef.sak.no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
@@ -8,12 +8,13 @@ import no.nav.familie.ef.sak.repository.FagsakRepository
 import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import no.nav.familie.ef.sak.repository.domain.FagsakPerson
 import no.nav.familie.ef.sak.service.TekniskOpphørService
+import no.nav.familie.ef.sak.task.PollStatusFraIverksettTask
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-internal class PollStatusFraIverksettTaskTest : OppslagSpringRunnerTest() {
+internal class TekniskOpphørTest : OppslagSpringRunnerTest() {
 
     @Autowired lateinit var tekniskOpphørService: TekniskOpphørService
     @Autowired lateinit var fagsakRepository: FagsakRepository
