@@ -29,6 +29,7 @@ import no.nav.familie.ef.sak.service.OppgaveService
 import no.nav.familie.ef.sak.service.TotrinnskontrollService
 import no.nav.familie.ef.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ef.sak.task.OpprettOppgaveTask
+import no.nav.familie.ef.sak.task.PollStatusFraIverksettTask
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.Task
@@ -87,6 +88,8 @@ internal class BeslutteVedtakStegTest {
         every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(any(), any()) } returns mockk()
         every { vedtaksbrevRepository.deleteById(any()) } just Runs
         every { featureToggleService.isEnabled(any()) } returns false
+        every { iverksettingDtoMapper.tilDto(any(), any()) } returns mockk()
+        every { iverksett.iverksett(any(), any()) } just Runs
     }
 
     @AfterEach
@@ -98,8 +101,8 @@ internal class BeslutteVedtakStegTest {
     internal fun `skal opprette iverksettMotOppdragTask etter beslutte vedtak hvis godkjent`() {
         every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev
         val nesteSteg = utførTotrinnskontroll(godkjent = true)
-        assertThat(nesteSteg).isEqualTo(StegType.IVERKSETT_MOT_OPPDRAG)
-        assertThat(taskSlot.captured.type).isEqualTo(IverksettMotOppdragTask.TYPE)
+        assertThat(nesteSteg).isEqualTo(StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT)
+        assertThat(taskSlot.captured.type).isEqualTo(PollStatusFraIverksettTask.TYPE)
     }
 
     @Test
