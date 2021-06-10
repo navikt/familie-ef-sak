@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.domain.FagsakPerson
 import no.nav.familie.ef.sak.repository.domain.Sporbar
+import no.nav.familie.ef.sak.repository.domain.Stønadstype.BARNETILSYN
 import no.nav.familie.ef.sak.repository.domain.Stønadstype.OVERGANGSSTØNAD
 import no.nav.familie.ef.sak.repository.domain.Stønadstype.SKOLEPENGER
 import org.assertj.core.api.Assertions.assertThat
@@ -81,25 +82,23 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `hent siste behandling for personidenter`() {
+    internal fun `eksistererBehandlingSomIkkeErBlankett`() {
         val personidenter = setOf("1", "2")
-
         val fagsak = fagsakRepository.insert(fagsak(setOf(FagsakPerson("1"))))
-        val behandling = behandlingRepository.insert(behandling(fagsak).copy(sporbar = Sporbar(opprettetTid = LocalDateTime.now().minusDays(3))))
+        behandlingRepository.insert(behandling(fagsak))
 
-        assertThat(behandlingRepository.finnSisteBehandling(OVERGANGSSTØNAD, personidenter)?.id).isEqualTo(behandling.id)
-
-        val sisteBehandling = behandlingRepository.insert(behandling(fagsak))
-        assertThat(behandlingRepository.finnSisteBehandling(OVERGANGSSTØNAD, personidenter)?.id).isEqualTo(sisteBehandling.id)
+        assertThat(behandlingRepository.eksistererBehandlingSomIkkeErBlankett(OVERGANGSSTØNAD, personidenter)).isTrue
+        assertThat(behandlingRepository.eksistererBehandlingSomIkkeErBlankett(OVERGANGSSTØNAD, setOf("3"))).isFalse
+        assertThat(behandlingRepository.eksistererBehandlingSomIkkeErBlankett(BARNETILSYN, personidenter)).isFalse
     }
 
     @Test
-    internal fun `hent siste behandling for personidenter skal returnere null hvis den ikke har match`() {
+    internal fun `skal ikke returnere behandling hvis det er blankett`() {
+        val personidenter = setOf("1", "2")
         val fagsak = fagsakRepository.insert(fagsak(setOf(FagsakPerson("1"))))
-        behandlingRepository.insert(behandling(fagsak).copy(sporbar = Sporbar(opprettetTid = LocalDateTime.now().minusDays(3))))
+        behandlingRepository.insert(behandling(fagsak, type = BehandlingType.BLANKETT))
 
-        assertThat(behandlingRepository.finnSisteBehandling(SKOLEPENGER, setOf("1"))?.id).isNull()
-        assertThat(behandlingRepository.finnSisteBehandling(OVERGANGSSTØNAD, setOf("2"))?.id).isNull()
+        assertThat(behandlingRepository.eksistererBehandlingSomIkkeErBlankett(OVERGANGSSTØNAD, personidenter)).isFalse
     }
 
     @Test

@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.api.gui
 
 import com.nimbusds.jwt.JWTClaimsSet
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
+import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.api.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.api.dto.TotrinnkontrollStatus
 import no.nav.familie.ef.sak.api.dto.TotrinnskontrollStatusDto
@@ -185,7 +186,6 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
                                                             HttpMethod.POST,
                                                             HttpEntity<Any>(headers))
         validator.invoke(response)
-        lagBeslutterBrev()
     }
 
     private fun godkjennTotrinnskontroll(saksbehandler: Saksbehandler,
@@ -200,6 +200,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
     private fun beslutteVedtak(saksbehandler: Saksbehandler, beslutteVedtak: BeslutteVedtakDto,
                                validator: (ResponseEntity<Ressurs<UUID>>) -> Unit) {
+        lagBeslutterBrev(saksbehandler.name)
         headers.setBearerAuth(token(saksbehandler))
         val response = restTemplate.exchange<Ressurs<UUID>>(localhost("/api/vedtak/${behandling.id}/beslutte-vedtak"),
                                                             HttpMethod.POST,
@@ -258,8 +259,9 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         val rolle = if (saksbehandler.beslutter) rolleConfig.beslutterRolle else rolleConfig.saksbehandlerRolle
         var claimsSet = JwtTokenGenerator.createSignedJWT("subject").jwtClaimsSet
         claimsSet = JWTClaimsSet.Builder(claimsSet)
-                .claim("NAVident", saksbehandler)
+                .claim("NAVident", saksbehandler.name)
                 .claim("groups", listOf(rolle))
+                .claim("name", saksbehandler.name)
                 .build()
         val createSignedJWT = JwtTokenGenerator.createSignedJWT(JwkGenerator.getDefaultRSAKey(), claimsSet)
         return createSignedJWT.serialize()
@@ -272,9 +274,13 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         clearBrukerContext()
     }
 
-    private fun lagBeslutterBrev() {
-        mockBrukerContext("saksbehandlernavn")
-        vedtaksbrevService.lagBeslutterBrev(behandling.id)
+    private fun lagBeslutterBrev(beslutter: String) {
+        mockBrukerContext(beslutter)
+        try {
+            vedtaksbrevService.lagBeslutterBrev(behandling.id)
+        } catch (e: Feil) {
+            // Ønsker ikke å kaste feil fra denne hvis det eks er "feil steg", feil steg ønsker vi å teste i beslutteVedtak
+        }
         clearBrukerContext()
     }
 

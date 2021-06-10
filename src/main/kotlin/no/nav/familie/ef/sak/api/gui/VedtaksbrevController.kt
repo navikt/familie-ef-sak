@@ -5,8 +5,8 @@ import no.nav.familie.ef.sak.service.TilgangService
 import no.nav.familie.ef.sak.service.VedtaksbrevService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import org.slf4j.LoggerFactory
 import org.springframework.validation.annotation.Validated
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -21,20 +21,24 @@ import java.util.UUID
 class VedtaksbrevController(private val brevService: VedtaksbrevService,
                             private val tilgangService: TilgangService) {
 
-    private val logger = LoggerFactory.getLogger(this.javaClass)
+    @GetMapping("/{behandlingId}")
+    fun hentBrev(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
+        tilgangService.validerTilgangTilBehandling(behandlingId)
+        return Ressurs.success(brevService.hentBrev(behandlingId))
+    }
 
     @PostMapping("/{behandlingId}/{brevMal}")
     fun lagSaksbehandlerbrev(@PathVariable behandlingId: UUID,
                              @PathVariable brevMal: String,
                              @RequestBody brevRequest: JsonNode): Ressurs<ByteArray> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
-        val data = brevService.lagSaksbehandlerBrev(behandlingId, brevRequest, brevMal)
-        return Ressurs.success(data)
+        return Ressurs.success(brevService.lagSaksbehandlerBrev(behandlingId, brevRequest, brevMal))
     }
 
     @PostMapping("/{behandlingId}")
     fun lagBeslutterbrev(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
+        tilgangService.validerHarBeslutterrolle()
         return Ressurs.success(brevService.lagBeslutterBrev(behandlingId))
     }
 }

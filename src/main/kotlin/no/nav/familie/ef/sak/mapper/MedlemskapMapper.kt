@@ -64,7 +64,7 @@ class MedlemskapMapper(private val statsborgerskapMapper: StatsborgerskapMapper,
                 InnflyttingDto(fraflyttingsland = innflytting.fraflyttingsland?.let {
                     kodeverkService.hentLand(it, LocalDate.now()) ?: it
                 },
-                               dato = finnMinDatoRegistrert(innflytting.folkeregistermetadata)?.toLocalDate())
+                               dato = null)
             }
 
     private fun mapUtflytting(utflyttingFraNorge: List<UtflyttingFraNorge>): List<UtflyttingDto> =
@@ -72,10 +72,7 @@ class MedlemskapMapper(private val statsborgerskapMapper: StatsborgerskapMapper,
                 UtflyttingDto(tilflyttingsland = utflytting.tilflyttingsland?.let {
                     kodeverkService.hentLand(it, LocalDate.now()) ?: it
                 },
-                              dato = finnMinDatoRegistrert(utflytting.folkeregistermetadata)?.toLocalDate())
+                              dato = null)
             }
-
-    private fun finnMinDatoRegistrert(folkeregistermetadata: Folkeregistermetadata) =
-            min(folkeregistermetadata.gyldighetstidspunkt, folkeregistermetadata.opphørstidspunkt)
 
 }

@@ -142,6 +142,9 @@ class KonsistensavstemmingOpprettPostmanRequester {
                                    stønadFom = fom.atDay(1),
                                    stønadTom = tom.atEndOfMonth(),
                                    personIdent = personident,
+                                   inntektsreduksjon = 0,
+                                   inntekt = 0,
+                                   samordningsfradrag = 0,
                                    kildeBehandlingId = null)
 
     companion object {

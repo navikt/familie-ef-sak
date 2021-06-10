@@ -32,14 +32,21 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
         val aktivIdent = behandlingService.hentAktivIdent(behandling.id)
         val beløpsperioder = when (vedtak) {
             is Innvilget -> {
-                beregningService.beregnYtelse(vedtak.perioder.tilPerioder(),
-                                              vedtak.inntekter.tilInntektsperioder())
-                        .map {
-                            AndelTilkjentYtelseDTO(beløp = it.beløp.toInt(),
-                                                   stønadFom = it.periode.fradato,
-                                                   stønadTom = it.periode.tildato,
-                                                   kildeBehandlingId = behandling.id,
-                                                   personIdent = aktivIdent)
+                beregningService.beregnYtelse(
+                        vedtak.perioder.tilPerioder(),
+                        vedtak.inntekter.tilInntektsperioder()
+                )
+                        .map { beløpsperiode ->
+                            AndelTilkjentYtelseDTO(
+                                    beløp = beløpsperiode.beløp.toInt(),
+                                    stønadFom = beløpsperiode.periode.fradato,
+                                    stønadTom = beløpsperiode.periode.tildato,
+                                    kildeBehandlingId = behandling.id,
+                                    personIdent = aktivIdent,
+                                    samordningsfradrag = beløpsperiode.beregningsgrunnlag?.samordningsfradrag?.toInt() ?: 0,
+                                    inntekt = beløpsperiode.beregningsgrunnlag?.inntekt?.toInt() ?: 0,
+                                    inntektsreduksjon = beløpsperiode.beregningsgrunnlag?.avkortningPerMåned?.toInt() ?: 0,
+                            )
                         }
             }
             else -> emptyList()
@@ -48,11 +55,14 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
         // TODO: Hent tilkjentYtelse fra forrige behandling og gjør diff med ny og ta vare på kildeBehandlingId
         tilkjentYtelseService.slettTilkjentYtelseForBehandling(behandling.id)
         if (beløpsperioder.isNotEmpty()) {
-            tilkjentYtelseService.opprettTilkjentYtelse(TilkjentYtelseDTO(
-                    aktivIdent,
-                    vedtaksdato = LocalDate.now(),
-                    behandlingId = behandling.id,
-                    andelerTilkjentYtelse = beløpsperioder))
+            tilkjentYtelseService.opprettTilkjentYtelse(
+                    TilkjentYtelseDTO(
+                            aktivIdent,
+                            vedtaksdato = LocalDate.now(),
+                            behandlingId = behandling.id,
+                            andelerTilkjentYtelse = beløpsperioder
+                    )
+            )
         }
         vedtakService.slettVedtakHvisFinnes(behandling.id)
         vedtakService.lagreVedtak(vedtakDto = vedtak, behandlingId = behandling.id)

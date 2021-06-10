@@ -4,8 +4,6 @@ import no.nav.familie.ef.sak.api.ApiExceptionHandler
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.integration.dto.pdl.identer
 import no.nav.familie.ef.sak.repository.BehandlingRepository
-import no.nav.familie.ef.sak.repository.domain.BehandlingResultat
-import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -44,18 +42,15 @@ class EksternBehandlingController(private val pdlClient: PdlClient,
             return Ressurs.failure("Finner ikke identer til personen")
         }
         return if (stønadstype != null) {
-            Ressurs.success(finnesAktivBehandling(stønadstype, personidenter))
+            Ressurs.success(eksistererBehandlingSomIkkeErBlankett(stønadstype, personidenter))
         } else {
-            Ressurs.success(Stønadstype.values().any { finnesAktivBehandling(it, personidenter) })
+            Ressurs.success(Stønadstype.values().any { eksistererBehandlingSomIkkeErBlankett(it, personidenter) })
         }
     }
 
-    private fun finnesAktivBehandling(stønadstype: Stønadstype,
-                                      personidenter: Set<String>): Boolean {
-        val behandling = behandlingRepository.finnSisteBehandling(stønadstype, personidenter)
-        return !(behandling == null ||
-                 behandling.resultat == BehandlingResultat.ANNULLERT ||
-                 behandling.type == BehandlingType.BLANKETT)
+    private fun eksistererBehandlingSomIkkeErBlankett(stønadstype: Stønadstype,
+                                                      personidenter: Set<String>): Boolean {
+        return behandlingRepository.eksistererBehandlingSomIkkeErBlankett(stønadstype, personidenter)
     }
 
 }

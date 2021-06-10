@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.mapper
 
-import no.nav.familie.ef.iverksett.infrastruktur.json.BarnDto
 import no.nav.familie.ef.sak.api.beregning.VedtakService
 import no.nav.familie.ef.sak.api.beregning.tilVedtaksresultat
 import no.nav.familie.ef.sak.repository.BehandlingRepository
@@ -8,11 +7,11 @@ import no.nav.familie.ef.sak.repository.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.Delvilkårsvurdering
 import no.nav.familie.ef.sak.repository.domain.Fagsak
-import no.nav.familie.ef.sak.repository.domain.InntektWrapper
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.Vedtak
 import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
 import no.nav.familie.ef.sak.repository.domain.Vurdering
+import no.nav.familie.ef.sak.repository.domain.InntektWrapper
 import no.nav.familie.ef.sak.service.ArbeidsfordelingService
 import no.nav.familie.ef.sak.service.BehandlingshistorikkService
 import no.nav.familie.ef.sak.service.FagsakService
@@ -28,15 +27,15 @@ import no.nav.familie.kontrakter.ef.iverksett.AndelTilkjentYtelseDto
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingsdetaljerDto
 import no.nav.familie.kontrakter.ef.iverksett.DelvilkårsvurderingDto
 import no.nav.familie.kontrakter.ef.iverksett.FagsakdetaljerDto
-import no.nav.familie.kontrakter.ef.iverksett.InntektDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettDto
-import no.nav.familie.kontrakter.ef.iverksett.PeriodebeløpDto
-import no.nav.familie.kontrakter.ef.iverksett.Periodetype
 import no.nav.familie.kontrakter.ef.iverksett.SøkerDto
 import no.nav.familie.kontrakter.ef.iverksett.TilkjentYtelseDto
 import no.nav.familie.kontrakter.ef.iverksett.VedtaksdetaljerDto
 import no.nav.familie.kontrakter.ef.iverksett.VilkårsvurderingDto
 import no.nav.familie.kontrakter.ef.iverksett.VurderingDto
+import no.nav.familie.kontrakter.ef.iverksett.BarnDto
+import no.nav.familie.kontrakter.ef.iverksett.InntektDto
+import no.nav.familie.kontrakter.ef.iverksett.Periodetype
 import no.nav.familie.kontrakter.felles.annotasjoner.Improvement
 import org.springframework.stereotype.Component
 import java.time.LocalDate
@@ -130,12 +129,14 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
 
 fun TilkjentYtelse.tilIverksettDto(): TilkjentYtelseDto = TilkjentYtelseDto(
         andelerTilkjentYtelse = andelerTilkjentYtelse.map { andel ->
-            AndelTilkjentYtelseDto(periodebeløp = PeriodebeløpDto(beløp = andel.beløp,
-                                                                  // TODO: Legg til utbetalingsgrad her
-                                                                  periodetype = Periodetype.MÅNED,
-                                                                  fraOgMed = andel.stønadFom,
-                                                                  tilOgMed = andel.stønadTom),
-                                   kildeBehandlingId = andel.kildeBehandlingId)
+            AndelTilkjentYtelseDto(beløp = andel.beløp,
+                                   fraOgMed = andel.stønadFom,
+                                   tilOgMed = andel.stønadTom,
+                                   inntekt = andel.inntekt,
+                                   samordningsfradrag = andel.samordningsfradrag,
+                                   inntektsreduksjon = andel.inntektsreduksjon,
+                                   kildeBehandlingId = andel.kildeBehandlingId,
+                                   periodetype = Periodetype.MÅNED)
         }
 )
 
