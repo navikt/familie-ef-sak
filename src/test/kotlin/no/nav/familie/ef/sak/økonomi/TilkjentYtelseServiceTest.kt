@@ -7,6 +7,7 @@ import io.mockk.verify
 import no.nav.familie.ef.sak.integration.OppdragClient
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.EksternId
@@ -75,9 +76,9 @@ class TilkjentYtelseServiceTest {
         val datoForAvstemming = LocalDate.of(2021, 2, 1)
         val stønadstype = Stønadstype.OVERGANGSSTØNAD
         val behandling = behandling(fagsak())
-        val andelTilkjentYtelse = AndelTilkjentYtelse(1, LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 31), "123")
-        val andelTilkjentYtelse2 = AndelTilkjentYtelse(2, LocalDate.of(2021, 2, 1), LocalDate.of(2021, 2, 28), "123")
-        val andelTilkjentYtelse3 = AndelTilkjentYtelse(3, LocalDate.of(2021, 3, 1), LocalDate.of(2021, 3, 31), "123")
+        val andelTilkjentYtelse = lagAndelTilkjentYtelse(1, LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 31))
+        val andelTilkjentYtelse2 = lagAndelTilkjentYtelse(2, LocalDate.of(2021, 2, 1), LocalDate.of(2021, 2, 28))
+        val andelTilkjentYtelse3 = lagAndelTilkjentYtelse(3, LocalDate.of(2021, 3, 1), LocalDate.of(2021, 3, 31))
         val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(behandling)
                 .copy(andelerTilkjentYtelse = listOf(andelTilkjentYtelse, andelTilkjentYtelse2, andelTilkjentYtelse3))
 
@@ -97,7 +98,7 @@ class TilkjentYtelseServiceTest {
     internal fun `konsistensavstemming - skal kaste feil hvis den ikke finner eksterneIder til behandling`() {
         val datoForAvstemming = LocalDate.of(2021, 2, 1)
         val behandling = behandling(fagsak())
-        val andelTilkjentYtelse = AndelTilkjentYtelse(1, LocalDate.of(2021, 1, 1), LocalDate.of(2023, 1, 31), "123")
+        val andelTilkjentYtelse = lagAndelTilkjentYtelse(1, LocalDate.of(2021, 1, 1), LocalDate.of(2023, 1, 31))
         val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(behandling)
                 .copy(andelerTilkjentYtelse = listOf(andelTilkjentYtelse))
 

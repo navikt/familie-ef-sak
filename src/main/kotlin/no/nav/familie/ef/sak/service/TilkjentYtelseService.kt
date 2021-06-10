@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
 import no.nav.familie.ef.sak.integration.OppdragClient
+import no.nav.familie.ef.sak.iverksett.tilIverksettDto
 import no.nav.familie.ef.sak.mapper.tilDto
 import no.nav.familie.ef.sak.mapper.tilTilkjentYtelse
 import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
@@ -18,8 +19,6 @@ import no.nav.familie.ef.sak.util.isEqualOrAfter
 import no.nav.familie.ef.sak.økonomi.UtbetalingsoppdragGenerator
 import no.nav.familie.ef.sak.økonomi.tilKlassifisering
 import no.nav.familie.kontrakter.ef.iverksett.KonsistensavstemmingTilkjentYtelseDto
-import no.nav.familie.kontrakter.ef.iverksett.PeriodebeløpDto
-import no.nav.familie.kontrakter.ef.iverksett.Periodetype
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import no.nav.familie.kontrakter.felles.oppdrag.PerioderForBehandling
@@ -116,17 +115,13 @@ class TilkjentYtelseService(private val oppdragClient: OppdragClient,
                 tilkjentYtelseRepository.finnTilkjentYtelserTilKonsistensavstemming(behandlingIder, datoForAvstemming)
         val eksterneIder = behandlingService.hentEksterneIder(tilkjentYtelser.map { it.behandlingId }.toSet())
                 .associateBy { it.behandlingId }
+        
         return tilkjentYtelser.map { tilkjentYtelse ->
             val eksternId = eksterneIder[tilkjentYtelse.behandlingId]
                             ?: error("Finner ikke eksterne id'er til behandling=${tilkjentYtelse.behandlingId}")
             val andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse
                     .filter { it.stønadFom.isEqualOrAfter(datoForAvstemming) }
-                    .map {
-                        PeriodebeløpDto(it.beløp,
-                                        Periodetype.MÅNED,
-                                        it.stønadFom,
-                                        it.stønadTom)
-                    }
+                    .map { it.tilIverksettDto() }
             KonsistensavstemmingTilkjentYtelseDto(behandlingId = tilkjentYtelse.behandlingId,
                                                   eksternBehandlingId = eksternId.eksternBehandlingId,
                                                   eksternFagsakId = eksternId.eksternFagsakId,
