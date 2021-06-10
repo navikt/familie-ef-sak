@@ -54,6 +54,9 @@ data class TestOppdrag(val type: TestOppdragType,
                                 stønadTom = sluttPeriode,
                                 personIdent = fnr,
                                 periodeId = linjeId,
+                                inntekt = 0,
+                                inntektsreduksjon = 0,
+                                samordningsfradrag = 0,
                                 kildeBehandlingId = if (TestOppdragType.Output == type) oppdragId else null,
                                 forrigePeriodeId = forrigeLinjeId)
         else if (TestOppdragType.Output == type && beløp == null && startPeriode == null && sluttPeriode == null)

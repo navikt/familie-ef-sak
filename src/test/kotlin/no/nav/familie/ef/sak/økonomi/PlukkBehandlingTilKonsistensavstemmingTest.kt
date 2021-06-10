@@ -169,6 +169,9 @@ internal class PlukkBehandlingTilKonsistensavstemmingTest : OppslagSpringRunnerT
                                    stønadFom = it.stønadFom,
                                    stønadTom = it.stønadTom,
                                    personIdent = "1",
+                                   inntektsreduksjon = 0,
+                                   inntekt = 0,
+                                   samordningsfradrag = 0,
                                    kildeBehandlingId = it.kildeBehandlingId)
         }
         tilkjentYtelseService.opprettTilkjentYtelse(TilkjentYtelseDTO("1",

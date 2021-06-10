@@ -57,6 +57,9 @@ internal class SimuleringControllerTest : OppslagSpringRunnerTest() {
                                                                                                                        31),
                                                                                                           personIdent,
                                                                                                           periodeId = 1L,
+                                                                                                          inntekt = 0,
+                                                                                                          inntektsreduksjon = 0,
+                                                                                                          samordningsfradrag = 0,
                                                                                                           kildeBehandlingId = behandling.id))
                                                        ))
 

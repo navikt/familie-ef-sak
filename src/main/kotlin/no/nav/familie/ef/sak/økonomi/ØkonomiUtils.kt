@@ -27,6 +27,9 @@ fun nullAndelTilkjentYtelse(behandlingId: UUID, personIdent: String, periodeId: 
                             personIdent = personIdent,
                             periodeId = periodeId?.gjeldende,
                             kildeBehandlingId = behandlingId,
+                            inntekt = 0,
+                            inntektsreduksjon = 0,
+                            samordningsfradrag = 0,
                             forrigePeriodeId = periodeId?.forrige)
 
 @Deprecated(FLYTTET_TIL_EF_IVERKSETT)
