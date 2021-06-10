@@ -11,6 +11,8 @@ import no.nav.familie.ef.sak.api.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.mapper.IverksettingDtoMapper
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.util.BrukerContextUtil.clearBrukerContext
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.repository.VedtaksbrevRepository
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.BehandlingResultat
@@ -27,11 +29,13 @@ import no.nav.familie.ef.sak.service.OppgaveService
 import no.nav.familie.ef.sak.service.TotrinnskontrollService
 import no.nav.familie.ef.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ef.sak.task.OpprettOppgaveTask
+import no.nav.familie.ef.sak.task.PollStatusFraIverksettTask
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.Properties
@@ -73,6 +77,7 @@ internal class BeslutteVedtakStegTest {
 
     @BeforeEach
     internal fun setUp() {
+        mockBrukerContext("sign2")
         taskSlot = slot()
         every {
             fagsakService.hentAktivIdent(any())
@@ -83,14 +88,21 @@ internal class BeslutteVedtakStegTest {
         every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(any(), any()) } returns mockk()
         every { vedtaksbrevRepository.deleteById(any()) } just Runs
         every { featureToggleService.isEnabled(any()) } returns false
+        every { iverksettingDtoMapper.tilDto(any(), any()) } returns mockk()
+        every { iverksett.iverksett(any(), any()) } just Runs
+    }
+
+    @AfterEach
+    internal fun tearDown() {
+        clearBrukerContext()
     }
 
     @Test
     internal fun `skal opprette iverksettMotOppdragTask etter beslutte vedtak hvis godkjent`() {
         every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev
         val nesteSteg = utførTotrinnskontroll(godkjent = true)
-        assertThat(nesteSteg).isEqualTo(StegType.IVERKSETT_MOT_OPPDRAG)
-        assertThat(taskSlot.captured.type).isEqualTo(IverksettMotOppdragTask.TYPE)
+        assertThat(nesteSteg).isEqualTo(StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT)
+        assertThat(taskSlot.captured.type).isEqualTo(PollStatusFraIverksettTask.TYPE)
     }
 
     @Test

@@ -26,7 +26,7 @@ class BrevClient(@Value("\${FAMILIE_BREV_API_URL}")
     }
 
     fun genererBrev(vedtaksbrev: Vedtaksbrev): ByteArray {
-        val url = URI.create("$familieBrevUri/api/ef-brev/avansert-dokument/bokmaal/${vedtaksbrev.brevmal}/pdf")
+        val url = URI.create("$familieBrevUri/api/testdata/avansert-dokument/bokmaal/${vedtaksbrev.brevmal}/pdf")
         return postForEntity(url,
                              BrevRequestMedSignaturer(objectMapper.readTree(vedtaksbrev.saksbehandlerBrevrequest),
                                                       vedtaksbrev.saksbehandlersignatur,

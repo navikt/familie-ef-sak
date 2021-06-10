@@ -1,5 +1,7 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository
 
+import no.nav.familie.ef.sak.api.beregning.Inntektsperiode
+import no.nav.familie.ef.sak.api.beregning.ResultatType
 import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.BehandlingResultat
@@ -9,16 +11,21 @@ import no.nav.familie.ef.sak.repository.domain.Delvilkårsvurdering
 import no.nav.familie.ef.sak.repository.domain.DelvilkårsvurderingWrapper
 import no.nav.familie.ef.sak.repository.domain.Fagsak
 import no.nav.familie.ef.sak.repository.domain.FagsakPerson
+import no.nav.familie.ef.sak.repository.domain.InntektWrapper
 import no.nav.familie.ef.sak.repository.domain.Oppgave
 import no.nav.familie.ef.sak.repository.domain.Sporbar
 import no.nav.familie.ef.sak.repository.domain.SporbarUtils
+import no.nav.familie.ef.sak.repository.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.repository.domain.Vedtak
+import no.nav.familie.ef.sak.repository.domain.Vedtaksperiode
 import no.nav.familie.ef.sak.repository.domain.VilkårType
 import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
 import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
 import no.nav.familie.ef.sak.service.steg.StegType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -69,5 +76,23 @@ fun tilkjentYtelse(behandlingId: UUID, personIdent: String): TilkjentYtelse = Ti
                             stønadFom = LocalDate.of(2021, 1, 1),
                             stønadTom = LocalDate.of(2021, 12, 31),
                             personIdent = personIdent,
+                            inntektsreduksjon = 0,
+                            inntekt = 0,
+                            samordningsfradrag = 0,
                             kildeBehandlingId = behandlingId))
 )
+
+fun vedtak(behandlingId: UUID): Vedtak =
+        Vedtak(behandlingId = behandlingId,
+               resultatType = ResultatType.INNVILGE,
+               periodeBegrunnelse = "OK",
+               inntektBegrunnelse = "OK",
+               avslåBegrunnelse = null,
+               perioder = PeriodeWrapper(listOf(Vedtaksperiode(datoFra = LocalDate.of(2021, 1, 1),
+                                                               datoTil = LocalDate.of(2021, 12, 31),
+                                                               aktivitet = "Hjemme med barn",
+                                                               periodeType = "Hjemme med barn"))),
+               inntekter = InntektWrapper(listOf(Inntektsperiode(startDato = LocalDate.of(2021, 1, 1),
+                                                                 sluttDato = LocalDate.of(2021, 12, 1),
+                                                                 inntekt = BigDecimal.valueOf(100000),
+                                                                 samordningsfradrag = BigDecimal.valueOf(500)))))

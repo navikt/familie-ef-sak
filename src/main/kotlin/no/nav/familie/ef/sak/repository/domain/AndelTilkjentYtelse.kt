@@ -17,6 +17,9 @@ data class AndelTilkjentYtelse(@Column("belop")
                                val stønadTom: LocalDate, /// TODO  Gjør nullable
                                val personIdent: String,
                                val periodeId: Long? = null,
+                               val inntekt: Int,
+                               val inntektsreduksjon: Int,
+                               val samordningsfradrag: Int,
                                val forrigePeriodeId: Long? = null,
                                val kildeBehandlingId: UUID? = null) {
 

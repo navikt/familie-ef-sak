@@ -50,6 +50,10 @@ class TilgangService(private val integrasjonerClient: FamilieIntegrasjonerClient
         validerTilgangTilRolle(BehandlerRolle.SAKSBEHANDLER)
     }
 
+    fun validerHarBeslutterrolle() {
+        validerTilgangTilRolle(BehandlerRolle.BESLUTTER)
+    }
+
     fun validerTilgangTilRolle(minimumsrolle: BehandlerRolle) {
         if (!harTilgangTilRolle(minimumsrolle)) {
             throw ManglerTilgang("Saksbehandler ${SikkerhetContext.hentSaksbehandler()} har ikke tilgang " +

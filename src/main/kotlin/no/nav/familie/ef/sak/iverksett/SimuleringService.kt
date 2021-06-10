@@ -86,6 +86,9 @@ class SimuleringService(private val iverksettClient: IverksettClient,
                                                      stønadFom = it.periode.fradato,
                                                      stønadTom = it.periode.tildato,
                                                      kildeBehandlingId = behandling.id,
+                                                     inntektsreduksjon = it.beregningsgrunnlag?.avkortningPerMåned?.toInt() ?: 0,
+                                                     inntekt = it.beregningsgrunnlag?.inntekt?.toInt() ?:0,
+                                                     samordningsfradrag = it.beregningsgrunnlag?.samordningsfradrag?.toInt() ?: 0,
                                                      personIdent = fagsak.hentAktivIdent())
                         }
             }
