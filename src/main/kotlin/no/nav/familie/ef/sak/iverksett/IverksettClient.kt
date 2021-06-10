@@ -1,12 +1,15 @@
 package no.nav.familie.ef.sak.iverksett
 
 import no.nav.familie.ef.sak.repository.domain.Fil
+import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseMedMetaData
 import no.nav.familie.ef.sak.util.medContentTypeJsonUTF8
 import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.kontrakter.ef.infotrygd.OpprettStartBehandlingHendelseDto
 import no.nav.familie.http.client.MultipartBuilder
 import no.nav.familie.kontrakter.ef.iverksett.IverksettDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettStatus
+import no.nav.familie.kontrakter.ef.iverksett.TilkjentYtelseDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import org.springframework.beans.factory.annotation.Qualifier
@@ -51,9 +54,13 @@ class IverksettClient(@Value("\${FAMILIE_EF_IVERKSETT_URL}")
                 .withByteArray("fil", "vedtak", fil.bytes)
                 .build()
         val headers = HttpHeaders().apply { this.add("Content-Type", "multipart/form-data") }
-        postForEntity<Ressurs<DetaljertSimuleringResultat>>(url,
-                                                            request,
-                                                            headers)
+        postForEntity<Any>(url, request, headers)
+    }
+
+    fun iverksettTekniskOpphør(tilkjentYtelse: TilkjentYtelseMedMetaData) {
+        val url = URI.create("$familieEfIverksettUri/api/tekniskopphor")
+        val headers = HttpHeaders().apply { this.add("Content-Type", "multipart/form-data") }
+        postForEntity<Any>(url, tilkjentYtelse, headers)
     }
 
     fun hentStatus(behandlingId: UUID): IverksettStatus {
