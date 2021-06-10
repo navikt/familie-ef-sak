@@ -69,7 +69,7 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
         return behandlingRepository.insert(Behandling(fagsakId = fagsakId,
                                                       type = behandlingType,
                                                       steg = StegType.VILKÅR,
-                                                      status = BehandlingStatus.IVERKSETTER_VEDTAK,
+                                                      status = status,
                                                       resultat = BehandlingResultat.IKKE_SATT))
     }
 
