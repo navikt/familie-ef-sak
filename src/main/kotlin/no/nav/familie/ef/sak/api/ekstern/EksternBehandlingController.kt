@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.api.ekstern
 
-import no.nav.familie.ef.sak.api.ApiExceptionHandler
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.integration.dto.pdl.identer
 import no.nav.familie.ef.sak.repository.BehandlingRepository
@@ -8,7 +7,6 @@ import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.PostMapping

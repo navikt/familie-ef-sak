@@ -27,7 +27,6 @@ internal class BehandlingStegTest {
     @Test
     fun `Tester rekkefølgen på steg - TEKNISK_OPPHØR`() {
         val riktigRekkefølge = listOf(
-                StegType.VILKÅR,
                 StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT,
                 StegType.FERDIGSTILLE_BEHANDLING,
                 StegType.BEHANDLING_FERDIGSTILT)

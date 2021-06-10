@@ -89,7 +89,6 @@ enum class StegType(val rekkefølge: Int,
         return when (behandlingType) {
             BehandlingType.TEKNISK_OPPHØR ->
                 when (this) {
-                    VILKÅR -> VENTE_PÅ_STATUS_FRA_IVERKSETT
                     VENTE_PÅ_STATUS_FRA_IVERKSETT -> FERDIGSTILLE_BEHANDLING
                     FERDIGSTILLE_BEHANDLING -> BEHANDLING_FERDIGSTILT
                     BEHANDLING_FERDIGSTILT -> BEHANDLING_FERDIGSTILT

@@ -5,7 +5,8 @@ import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.repository.BehandlingRepository
 import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.repository.domain.*
-import no.nav.familie.ef.sak.task.PollTekniskOpphørStatusTask
+import no.nav.familie.ef.sak.service.steg.StegType
+import no.nav.familie.ef.sak.task.PollStatusFraIverksettTask
 import no.nav.familie.kontrakter.ef.felles.StønadType
 import no.nav.familie.kontrakter.ef.iverksett.TekniskOpphørDto
 import no.nav.familie.kontrakter.felles.PersonIdent
@@ -17,12 +18,12 @@ import java.util.UUID
 import no.nav.familie.kontrakter.ef.iverksett.TilkjentYtelseMedMetaData as TilkjentYtelseMedMetaDataKontrakter
 
 @Service
-class TeknisktOpphørService(val behandlingService: BehandlingService,
-                            val behandlingRepository: BehandlingRepository,
-                            val fagsakService: FagsakService,
-                            val tilkjentYtelseRepository: TilkjentYtelseRepository,
-                            val iverksettClient: IverksettClient,
-                            val taskRepository: TaskRepository) {
+class TekniskOpphørService(val behandlingService: BehandlingService,
+                           val behandlingRepository: BehandlingRepository,
+                           val fagsakService: FagsakService,
+                           val tilkjentYtelseRepository: TilkjentYtelseRepository,
+                           val iverksettClient: IverksettClient,
+                           val taskRepository: TaskRepository) {
 
     @Transactional
     fun håndterTeknisktOpphør(personIdent: PersonIdent) {
@@ -35,7 +36,7 @@ class TeknisktOpphørService(val behandlingService: BehandlingService,
         val tilkjentYtelseTilOpphør = opprettTilkjentYtelse(behandlingId = nyBehandling.id,
                                                             personIdent = aktivIdent)
 
-        taskRepository.save(PollTekniskOpphørStatusTask.opprettTask(nyBehandling.id))
+        taskRepository.save(PollStatusFraIverksettTask.opprettTask(nyBehandling.id))
 
         iverksettClient.iverksettTekniskOpphør(TekniskOpphørDto(forrigeBehandlingId = sisteBehandling.id,
                                                                 tilkjentYtelseMedMetaData = TilkjentYtelseMedMetaDataKontrakter(
@@ -62,6 +63,7 @@ class TeknisktOpphørService(val behandlingService: BehandlingService,
     private fun opprettBehandlingTekniskOpphør(fagsakId: UUID): Behandling {
         return behandlingService.opprettBehandling(behandlingType = BehandlingType.TEKNISK_OPPHØR,
                                                    fagsakId = fagsakId,
-                                                   status = BehandlingStatus.IVERKSETTER_VEDTAK)
+                                                   status = BehandlingStatus.IVERKSETTER_VEDTAK,
+                                                   stegType = StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT)
     }
 }

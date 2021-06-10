@@ -1,0 +1,36 @@
+package no.nav.familie.ef.sak.task
+
+import no.nav.familie.ef.sak.OppslagSpringRunnerTest
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.repository.BehandlingRepository
+import no.nav.familie.ef.sak.repository.FagsakRepository
+import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
+import no.nav.familie.ef.sak.repository.domain.FagsakPerson
+import no.nav.familie.ef.sak.service.TekniskOpphørService
+import no.nav.familie.kontrakter.felles.PersonIdent
+import no.nav.familie.prosessering.domene.TaskRepository
+import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+
+internal class PollStatusFraIverksettTaskTest : OppslagSpringRunnerTest() {
+
+    @Autowired lateinit var tekniskOpphørService: TekniskOpphørService
+    @Autowired lateinit var fagsakRepository: FagsakRepository
+    @Autowired lateinit var behandlingRepository: BehandlingRepository
+    @Autowired lateinit var taskRepository : TaskRepository
+    @Autowired lateinit var pollStatusFraIverksettTask: PollStatusFraIverksettTask
+
+    @Test
+    internal fun `skal iverksette teknisk opphør og vente på status uten å kasta exceptions`() {
+        val ident = "1234"
+        val fagsak = fagsakRepository.insert(fagsak(identer = setOf(FagsakPerson(ident = ident))))
+        behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.UTREDES))
+
+        tekniskOpphørService.håndterTeknisktOpphør(PersonIdent(ident))
+        taskRepository.findAll().first().let { pollStatusFraIverksettTask.doTask(it)}
+
+    }
+
+
+}
