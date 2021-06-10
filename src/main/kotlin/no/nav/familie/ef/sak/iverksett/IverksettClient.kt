@@ -5,10 +5,11 @@ import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseMedMetaData
 import no.nav.familie.ef.sak.util.medContentTypeJsonUTF8
 import no.nav.familie.http.client.AbstractPingableRestClient
-import no.nav.familie.kontrakter.ef.infotrygd.OpprettStartBehandlingHendelseDto
 import no.nav.familie.http.client.MultipartBuilder
+import no.nav.familie.kontrakter.ef.infotrygd.OpprettStartBehandlingHendelseDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettStatus
+import no.nav.familie.kontrakter.ef.iverksett.KonsistensavstemmingDto
 import no.nav.familie.kontrakter.ef.iverksett.TekniskOpphørDto
 import no.nav.familie.kontrakter.ef.iverksett.TilkjentYtelseDto
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -66,6 +67,14 @@ class IverksettClient(@Value("\${FAMILIE_EF_IVERKSETT_URL}")
     fun hentStatus(behandlingId: UUID): IverksettStatus {
         val url = URI.create("$familieEfIverksettUri/api/iverksett/status/$behandlingId")
         return getForEntity(url, HttpHeaders().medContentTypeJsonUTF8())
+    }
+
+    fun konsistensavstemming(request: KonsistensavstemmingDto) {
+        val url = URI.create("$familieEfIverksettUri/api/konsistensavstemming")
+        val response = postForEntity<Ressurs<String>>(url, request)
+        if (response.status != Ressurs.Status.SUKSESS) {
+            error("Feilet kall mot konsistensavstemming message=${response.melding}")
+        }
     }
 }
 

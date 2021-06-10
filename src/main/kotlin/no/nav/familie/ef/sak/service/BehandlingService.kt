@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.domain.Behandlingsjournalpost
 import no.nav.familie.ef.sak.repository.domain.Sporbar
+import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.service.steg.StegType
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
@@ -35,6 +36,11 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
 
 
     fun hentAktivIdent(behandlingId: UUID): String = behandlingRepository.finnAktivIdent(behandlingId)
+
+    fun hentEksterneIder(behandlingIder: Set<UUID>) = behandlingRepository.finnEksterneIder(behandlingIder)
+
+    fun finnSisteIverksatteBehandlinger(stønadstype: Stønadstype) =
+            behandlingRepository.finnSisteIverksatteBehandlinger(stønadstype)
 
     @Transactional
     fun opprettBehandling(behandlingType: BehandlingType,
