@@ -4,8 +4,9 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ef.sak.api.avstemming.GrensesnittavstemmingDto
-import no.nav.familie.ef.sak.api.avstemming.KonsistensavstemmingDto
+import no.nav.familie.ef.sak.api.avstemming.OpprettKonsistensavstemmingTaskDto
 import no.nav.familie.ef.sak.integration.OppdragClient
+import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.service.AvstemmingService
 import no.nav.familie.ef.sak.service.TilkjentYtelseService
@@ -22,12 +23,13 @@ import java.time.LocalDate
 
 internal class AvstemmingServiceTest {
 
-    private val oppdragClient: OppdragClient = mockk()
-    private val taskRepository: TaskRepository = mockk()
-    private val tilkjentYtelseService: TilkjentYtelseService = mockk()
+    private val oppdragClient = mockk<OppdragClient>()
+    private val iverksettClient = mockk<IverksettClient>()
+    private val taskRepository = mockk<TaskRepository>()
+    private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
 
     private val avstemmingService: AvstemmingService =
-            AvstemmingService(oppdragClient, taskRepository, tilkjentYtelseService)
+            AvstemmingService(oppdragClient, iverksettClient, taskRepository, tilkjentYtelseService)
 
 
     @Test
@@ -42,13 +44,13 @@ internal class AvstemmingServiceTest {
         }
 
         every {
-            tilkjentYtelseService.finnLøpendeUtbetalninger(any(), any())
+            tilkjentYtelseService.finnTilkjentYtelserTilKonsistensavstemming(any(), any())
         } answers {
             emptyList()
         }
 
-        avstemmingService.opprettKonsistenavstemmingTasker(listOf(KonsistensavstemmingDto(datoForAvstemming,
-                                                                                   stønadstype = Stønadstype.OVERGANGSSTØNAD)))
+        avstemmingService.opprettKonsistenavstemmingTasker(listOf(OpprettKonsistensavstemmingTaskDto(datoForAvstemming,
+                                                                                                     stønadstype = Stønadstype.OVERGANGSSTØNAD)))
 
         val payload = KonsistensavstemmingPayload(stønadstype = Stønadstype.OVERGANGSSTØNAD,
                                                   triggerTid = datoForAvstemming.atTime(8, 0))
