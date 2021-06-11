@@ -23,6 +23,7 @@ import no.nav.familie.kontrakter.ef.felles.BehandlingType
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.felles.StønadType
 import no.nav.familie.kontrakter.ef.iverksett.AdressebeskyttelseGradering
+import no.nav.familie.kontrakter.ef.iverksett.AktivitetType
 import no.nav.familie.kontrakter.ef.iverksett.AndelTilkjentYtelseDto
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingsdetaljerDto
 import no.nav.familie.kontrakter.ef.iverksett.DelvilkårsvurderingDto
@@ -36,6 +37,7 @@ import no.nav.familie.kontrakter.ef.iverksett.VurderingDto
 import no.nav.familie.kontrakter.ef.iverksett.BarnDto
 import no.nav.familie.kontrakter.ef.iverksett.Periodetype
 import no.nav.familie.kontrakter.ef.iverksett.VedtaksperiodeDto
+import no.nav.familie.kontrakter.ef.iverksett.VedtaksperiodeType
 import no.nav.familie.kontrakter.felles.annotasjoner.Improvement
 import org.springframework.stereotype.Component
 import java.time.LocalDate
@@ -141,11 +143,10 @@ fun TilkjentYtelse.tilIverksettDto(): TilkjentYtelseDto = TilkjentYtelseDto(
 )
 
 fun PeriodeWrapper.tilIverksettDto(): List<VedtaksperiodeDto> = this.perioder.map {
-    VedtaksperiodeDto(
-            fraOgMed = it.datoFra,
-            tilOgMed = it.datoTil,
-            aktivitet = it.aktivitet,
-            periodeType = it.periodeType
+    VedtaksperiodeDto(fraOgMed = it.datoFra,
+                      tilOgMed = it.datoTil,
+                      aktivitet = AktivitetType.valueOf(it.aktivitet.name),
+                      periodeType = VedtaksperiodeType.valueOf(it.periodeType.name)
     )
 }
 
