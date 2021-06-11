@@ -13,8 +13,10 @@ import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.tilkjentYtelse
+import no.nav.familie.ef.sak.repository.domain.AktivitetType
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
+import no.nav.familie.ef.sak.repository.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.TilkjentYtelseService
@@ -93,8 +95,8 @@ internal class SimuleringServiceTest {
                                inntektBegrunnelse = "ok",
                                perioder = listOf(VedtaksperiodeDto(årMånedFra = årMånedFraStart,
                                                                    årMånedTil = årMånedFraSlutt,
-                                                                   aktivitet = "Ok",
-                                                                   periodeType = "Hovedperiode")),
+                                                                   aktivitet = AktivitetType.BARN_UNDER_ETT_ÅR,
+                                                                   periodeType = VedtaksperiodeType.HOVEDPERIODE)),
                                inntekter = listOf(Inntekt(årMånedFra = årMånedFraStart,
                                                           forventetInntekt = BigDecimal(300000),
                                                           samordningsfradrag = BigDecimal(300)))
