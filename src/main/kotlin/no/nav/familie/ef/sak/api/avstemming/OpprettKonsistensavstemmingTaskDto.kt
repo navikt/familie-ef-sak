@@ -13,6 +13,6 @@ data class OpprettKonsistensavstemmingTaskDto(val datoForAvstemming: LocalDate, 
 fun OpprettKonsistensavstemmingTaskDto.tilTask(): Task {
     val triggerTid = this.datoForAvstemming.atTime(8, 0)
     val payload = objectMapper.writeValueAsString(KonsistensavstemmingPayload(stønadstype = this.stønadstype,
-                                                                                  triggerTid = triggerTid))
+                                                                              triggerTid = triggerTid))
     return Task(type = KonsistensavstemmingTask.TYPE, payload = payload, triggerTid = triggerTid)
 }

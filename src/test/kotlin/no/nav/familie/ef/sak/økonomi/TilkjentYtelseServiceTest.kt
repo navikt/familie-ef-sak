@@ -1,22 +1,16 @@
 package no.nav.familie.ef.sak.økonomi
 
-import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.familie.ef.sak.integration.OppdragClient
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
-import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.EksternId
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.service.BehandlingService
-import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.TilkjentYtelseService
-import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
-import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Test
@@ -26,13 +20,9 @@ import java.time.LocalDate
 class TilkjentYtelseServiceTest {
 
     private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
-    private val økonomiKlient = mockk<OppdragClient>()
     private val behandlingService = mockk<BehandlingService>()
-    private val fagsakService = mockk<FagsakService>()
 
-    private val tilkjentYtelseService = TilkjentYtelseService(oppdragClient = økonomiKlient,
-                                                              behandlingService = behandlingService,
-                                                              fagsakService = fagsakService,
+    private val tilkjentYtelseService = TilkjentYtelseService(behandlingService = behandlingService,
                                                               tilkjentYtelseRepository = tilkjentYtelseRepository)
 
     @Test
@@ -41,7 +31,6 @@ class TilkjentYtelseServiceTest {
         val id = tilkjentYtelse.id
         every { tilkjentYtelseRepository.findByIdOrNull(id) } returns tilkjentYtelse
         every { behandlingService.hentBehandling(any()) } returns behandling
-        every { fagsakService.hentFagsak(any()) } returns fagsak
         val dto = tilkjentYtelseService.hentTilkjentYtelseDto(id)
 
         assertThat(dto.id).isEqualTo(id)
@@ -50,25 +39,6 @@ class TilkjentYtelseServiceTest {
             assertThat(dto.andelerTilkjentYtelse[it].beløp).isEqualTo(tilkjentYtelse.andelerTilkjentYtelse[it].beløp)
         }
         verify { tilkjentYtelseRepository.findByIdOrNull(id) }
-        confirmVerified(økonomiKlient, tilkjentYtelseRepository)
-    }
-
-    @Test
-    fun `hent status fra oppdragstjenesten`() {
-        val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse()
-        val oppdragId = OppdragId("EFOG",
-                                  tilkjentYtelse.personident,
-                                  behandling.eksternId.id.toString())
-        every { tilkjentYtelseRepository.findByBehandlingId(behandling.id) } returns tilkjentYtelse
-        every { behandlingService.hentBehandling(any()) } returns behandling
-        every { fagsakService.hentFagsak(any()) } returns fagsak
-        every { økonomiKlient.hentStatus(oppdragId) } returns OppdragStatus.KVITTERT_OK
-
-        tilkjentYtelseService.hentStatus(behandling)
-
-        verify { økonomiKlient.hentStatus(oppdragId) }
-        verify { tilkjentYtelseRepository.findByBehandlingId(behandling.id) }
-        confirmVerified(økonomiKlient, tilkjentYtelseRepository)
     }
 
     @Test
@@ -82,7 +52,7 @@ class TilkjentYtelseServiceTest {
         val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(behandling)
                 .copy(andelerTilkjentYtelse = listOf(andelTilkjentYtelse, andelTilkjentYtelse2, andelTilkjentYtelse3))
 
-        every {behandlingService.finnSisteIverksatteBehandlinger(any())} returns setOf(behandling.id)
+        every { behandlingService.finnSisteIverksatteBehandlinger(any()) } returns setOf(behandling.id)
         every { behandlingService.hentEksterneIder(setOf(behandling.id)) } returns setOf(EksternId(behandling.id, 1, 1))
         every {
             tilkjentYtelseRepository.finnTilkjentYtelserTilKonsistensavstemming(setOf(behandling.id), any())
@@ -102,7 +72,7 @@ class TilkjentYtelseServiceTest {
         val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(behandling)
                 .copy(andelerTilkjentYtelse = listOf(andelTilkjentYtelse))
 
-        every {behandlingService.finnSisteIverksatteBehandlinger(any())} returns setOf(behandling.id)
+        every { behandlingService.finnSisteIverksatteBehandlinger(any()) } returns setOf(behandling.id)
         every { behandlingService.hentEksterneIder(any()) } returns emptySet()
         every {
             tilkjentYtelseRepository.finnTilkjentYtelserTilKonsistensavstemming(setOf(behandling.id), any())

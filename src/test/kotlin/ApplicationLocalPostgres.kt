@@ -19,7 +19,6 @@ fun main(args: Array<String>) {
             .profiles("local",
                       "mock-integrasjoner",
                       "mock-pdl",
-                      "mock-oppdrag",
                       "mock-infotrygd-replika",
                       "mock-kodeverk",
                       "mock-blankett",
