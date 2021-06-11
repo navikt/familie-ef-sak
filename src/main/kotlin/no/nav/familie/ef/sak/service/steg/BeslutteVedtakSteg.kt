@@ -9,6 +9,8 @@ import no.nav.familie.ef.sak.mapper.IverksettingDtoMapper
 import no.nav.familie.ef.sak.repository.VedtaksbrevRepository
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
+import no.nav.familie.ef.sak.repository.domain.Fil
+import no.nav.familie.ef.sak.repository.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.OppgaveService
@@ -49,21 +51,11 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
         return if (data.godkjent) {
             if (behandling.type != BehandlingType.BLANKETT) {
                 val vedtaksbrev = vedtaksbrevRepository.findByIdOrThrow(behandling.id)
-                val fil = vedtaksbrev.beslutterPdf
-                require(fil != null) { "For å iverksette må det finnes en pdf" }
-                require(vedtaksbrev.besluttersignatur == SikkerhetContext.hentSaksbehandlerNavn(strict = true)) {
-                    "En annen saksbehandler har signert vedtaksbrevet"
-                }
-
-                if (featureToggleService.isEnabled("familie.ef.sak.brukEFIverksett")) {
-                    val iverksettDto = iverksettingDtoMapper.tilDto(behandling, beslutter)
-                    iverksettClient.iverksett(iverksettDto, fil)
-                    opprettPollForStatusOppgave(behandling.id)
-                    StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT
-                } else {
-                    opprettTaskForIverksettMotOppdrag(behandling)
-                    stegType().hentNesteSteg(behandling.type)
-                }
+                val fil = utledVedtaksbrev(vedtaksbrev)
+                val iverksettDto = iverksettingDtoMapper.tilDto(behandling, beslutter)
+                iverksettClient.iverksett(iverksettDto, fil)
+                opprettPollForStatusOppgave(behandling.id)
+                StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT
             } else {
                 opprettTaskForJournalførBlankett(behandling)
                 stegType().hentNesteSteg(behandling.type)
@@ -73,6 +65,14 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
             opprettBehandleUnderkjentVedtakOppgave(behandling, beslutter)
             StegType.SEND_TIL_BESLUTTER
         }
+    }
+
+    private fun utledVedtaksbrev(vedtaksbrev: Vedtaksbrev): Fil {
+        require(vedtaksbrev.beslutterPdf != null) { "For å iverksette må det finnes en pdf" }
+        require(vedtaksbrev.besluttersignatur == SikkerhetContext.hentSaksbehandlerNavn(strict = true)) {
+            "En annen saksbehandler har signert vedtaksbrevet"
+        }
+        return vedtaksbrev.beslutterPdf
     }
 
     private fun ferdigstillOppgave(behandling: Behandling) {

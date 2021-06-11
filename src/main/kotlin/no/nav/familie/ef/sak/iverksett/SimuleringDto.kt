@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.iverksett
 
+import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus
@@ -33,16 +34,7 @@ data class TilkjentYtelseForIverksett(
 
 fun TilkjentYtelse.tilIverksett(): TilkjentYtelseForIverksett {
     return TilkjentYtelseForIverksett(id = this.id,
-                                      andelerTilkjentYtelse = this.andelerTilkjentYtelse.map {
-                                          AndelTilkjentYtelseDto(beløp = it.beløp,
-                                                                 periodetype = Periodetype.MÅNED,
-                                                                 inntekt = it.inntekt,
-                                                                 inntektsreduksjon = it.inntektsreduksjon,
-                                                                 samordningsfradrag = it.samordningsfradrag,
-                                                                 fraOgMed = it.stønadFom,
-                                                                 tilOgMed = it.stønadTom,
-                                                                 kildeBehandlingId = it.kildeBehandlingId)
-                                      },
+                                      andelerTilkjentYtelse = this.andelerTilkjentYtelse.map { it.tilIverksettDto() },
                                       vedtaksdato = this.vedtaksdato,
                                       status = this.status)
 }

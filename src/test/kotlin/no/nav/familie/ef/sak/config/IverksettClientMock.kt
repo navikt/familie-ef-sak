@@ -1,6 +1,8 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.config
 
+import io.mockk.Runs
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.kontrakter.felles.simulering.BetalingType
@@ -39,6 +41,8 @@ class IverksettClientMock {
                 SimuleringMottaker(simulertPostering = listOf(simulertPostering),
                                    mottakerNummer = "123",
                                    mottakerType = MottakerType.BRUKER)))
+
+        every { iverksettClient.iverksett(any(), any()) } just Runs
 
         return iverksettClient
     }
