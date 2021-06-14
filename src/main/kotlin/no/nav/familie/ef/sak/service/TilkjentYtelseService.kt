@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.service
 
+import no.nav.familie.ef.sak.api.tilkjentytelse.mergeAndeler
 import no.nav.familie.ef.sak.iverksett.tilIverksettDto
 import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
@@ -25,10 +26,13 @@ class TilkjentYtelseService(private val behandlingService: BehandlingService,
                ?: error("Fant ikke tilkjent ytelse med behandlingsid $behandlingId")
     }
 
-    fun opprettTilkjentYtelse(nyTilkjentYtelse: TilkjentYtelse): TilkjentYtelse {
-        val andelerMedGodtykkligKildeId =
-                nyTilkjentYtelse.andelerTilkjentYtelse.map { it.copy(kildeBehandlingId = nyTilkjentYtelse.behandlingId) }
-        return tilkjentYtelseRepository.insert(nyTilkjentYtelse.copy(andelerTilkjentYtelse = andelerMedGodtykkligKildeId))
+    fun opprettTilkjentYtelse(nyTilkjentYtelse: TilkjentYtelse, fagsakId: UUID): TilkjentYtelse {
+        val forrigeTilkjentYtelse = behandlingService.finnSisteIverksatteBehandlingForFagsak(fagsakId)?.let {
+            tilkjentYtelseRepository.findByBehandlingId(it)
+        }
+        val tilkjentYtelse = forrigeTilkjentYtelse?.let { mergeAndeler(nyTilkjentYtelse, it) } ?: nyTilkjentYtelse
+
+        return tilkjentYtelseRepository.insert(tilkjentYtelse)
     }
 
     fun finnSisteTilkjentYtelse(fagsakId: UUID): TilkjentYtelse? {

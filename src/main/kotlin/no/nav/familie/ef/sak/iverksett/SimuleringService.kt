@@ -54,12 +54,16 @@ class SimuleringService(private val iverksettClient: IverksettClient,
                                                        eksternFagsakId = fagsak.eksternId.id
 
                 )
-        val forrigeTilkjentYtelse = tilkjentYtelseService.finnSisteTilkjentYtelse(fagsakId = behandling.fagsakId)?.tilIverksett()
+
+        val sisteIverksatteBehandling = behandlingService.finnSisteIverksatteBehandlingForFagsak(behandling.fagsakId)
+        // TODO endre simulering-api til å sende med forrigeBehandlingId og ikke. Denne feiler nå hvis det er teknisk opphør ?
+        val forrigeTilkjentYtelse = sisteIverksatteBehandling?.let {
+            tilkjentYtelseService.hentForBehandling(sisteIverksatteBehandling).tilIverksett()
+        }
 
         return iverksettClient.simuler(SimuleringDto(
                 nyTilkjentYtelseMedMetaData = tilkjentYtelseMedMedtadata,
                 forrigeTilkjentYtelse = forrigeTilkjentYtelse
-
         ))
     }
 

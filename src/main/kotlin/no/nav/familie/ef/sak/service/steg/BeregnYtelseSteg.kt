@@ -52,17 +52,14 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
             else -> emptyList()
         }
 
-        // TODO: Hent tilkjentYtelse fra forrige behandling og gjør diff med ny og ta vare på kildeBehandlingId
         tilkjentYtelseService.slettTilkjentYtelseForBehandling(behandling.id)
         if (beløpsperioder.isNotEmpty()) {
-            tilkjentYtelseService.opprettTilkjentYtelse(
-                    TilkjentYtelse(
-                            personident = aktivIdent,
-                            vedtaksdato = LocalDate.now(),
-                            behandlingId = behandling.id,
-                            andelerTilkjentYtelse = beløpsperioder
-                    )
-            )
+            tilkjentYtelseService.opprettTilkjentYtelse(TilkjentYtelse(
+                    personident = aktivIdent,
+                    vedtaksdato = LocalDate.now(),
+                    behandlingId = behandling.id,
+                    andelerTilkjentYtelse = beløpsperioder
+            ), behandling.fagsakId)
         }
         vedtakService.slettVedtakHvisFinnes(behandling.id)
         vedtakService.lagreVedtak(vedtakDto = vedtak, behandlingId = behandling.id)
