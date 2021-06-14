@@ -1,11 +1,8 @@
 package no.nav.familie.ef.sak.iverksett
 
-import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus
 import no.nav.familie.kontrakter.ef.iverksett.AndelTilkjentYtelseDto
-import no.nav.familie.kontrakter.ef.iverksett.Periodetype
 import java.time.LocalDate
 import java.util.UUID
 
@@ -28,15 +25,13 @@ data class TilkjentYtelseForIverksettMedMetadata(val tilkjentYtelse: TilkjentYte
 data class TilkjentYtelseForIverksett(
         val id: UUID = UUID.randomUUID(),
         val vedtaksdato: LocalDate? = null,
-        val status: TilkjentYtelseStatus,
         val andelerTilkjentYtelse: List<AndelTilkjentYtelseDto>)
 
 
 fun TilkjentYtelse.tilIverksett(): TilkjentYtelseForIverksett {
     return TilkjentYtelseForIverksett(id = this.id,
                                       andelerTilkjentYtelse = this.andelerTilkjentYtelse.map { it.tilIverksettDto() },
-                                      vedtaksdato = this.vedtaksdato,
-                                      status = this.status)
+                                      vedtaksdato = this.vedtaksdato)
 }
 
 fun TilkjentYtelse.tilIverksettMedMetaData(saksbehandlerId: String,

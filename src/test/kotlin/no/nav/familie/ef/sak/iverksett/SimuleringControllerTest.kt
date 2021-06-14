@@ -10,7 +10,6 @@ import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.FagsakPerson
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseType
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
@@ -44,9 +43,7 @@ internal class SimuleringControllerTest : OppslagSpringRunnerTest() {
         val behandling = behandlingRepository.insert(behandling(fagsak, aktiv = true))
         tilkjentYtelseRepository.insert(TilkjentYtelse(behandlingId = behandling.id,
                                                        personident = personIdent,
-                                                       utbetalingsoppdrag = null,
                                                        vedtaksdato = LocalDate.of(2020, 5, 5),
-                                                       status = TilkjentYtelseStatus.OPPRETTET,
                                                        type = TilkjentYtelseType.FØRSTEGANGSBEHANDLING,
                                                        andelerTilkjentYtelse = listOf(AndelTilkjentYtelse(15000,
                                                                                                           LocalDate.of(2021,

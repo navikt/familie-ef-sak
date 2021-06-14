@@ -4,14 +4,12 @@ import no.nav.familie.ef.sak.api.dto.AndelTilkjentYtelseDTO
 import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
 import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus
 
-fun TilkjentYtelseDTO.tilTilkjentYtelse(status: TilkjentYtelseStatus = TilkjentYtelseStatus.OPPRETTET): TilkjentYtelse {
+fun TilkjentYtelseDTO.tilTilkjentYtelse(): TilkjentYtelse {
 
     return TilkjentYtelse(behandlingId = behandlingId,
                           personident = søker,
                           vedtaksdato = vedtaksdato,
-                          status = status,
                           andelerTilkjentYtelse = tilAndelerTilkjentYtelse())
 }
 
