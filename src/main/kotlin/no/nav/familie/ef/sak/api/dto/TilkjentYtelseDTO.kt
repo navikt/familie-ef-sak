@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.api.dto
 import java.time.LocalDate
 import java.util.*
 
+@Deprecated("Skal ryddes vekk. Ikke i bruk for frontend eller integrasjoner.")
 data class TilkjentYtelseDTO(val søker: String,
                              val vedtaksdato: LocalDate = LocalDate.now(),
         // Skal man opprette andeler som frontend godkjenner eller skal frontend sende inn andeler.

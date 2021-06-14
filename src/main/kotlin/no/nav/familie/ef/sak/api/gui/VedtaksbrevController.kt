@@ -42,23 +42,4 @@ class VedtaksbrevController(private val brevService: VedtaksbrevService,
         tilgangService.validerHarBeslutterrolle()
         return Ressurs.success(brevService.lagBeslutterBrev(behandlingId))
     }
-
-    @GetMapping("/{behandlingId}/tilkjent-ytelse")
-    fun hentTilkjenteAndeler(@PathVariable behandlingId: UUID): Ressurs<TilkjentYtelseDto> {
-        tilgangService.validerTilgangTilBehandling(behandlingId)
-
-        val andel1 = Andel(1000, LocalDate.now().minusMonths(4), LocalDate.now().minusMonths(2), 500)
-        val andel2 = Andel(2001, LocalDate.now().minusMonths(2), LocalDate.now().minusMonths(1), 200)
-        val andel3 = Andel(3000, LocalDate.now().minusMonths(1), LocalDate.now(), 100)
-        val tilkjentYtelseDto = TilkjentYtelseDto(andeler = listOf(andel1, andel2, andel3))
-        return Ressurs.success(tilkjentYtelseDto)
-    }
-
-
 }
-
-data class TilkjentYtelseDto(val andeler: List<Andel>)
-data class Andel(val beløp: Int,
-                 val fraDato: LocalDate,
-                 val tilDato: LocalDate,
-                 val inntekt: Int)
