@@ -5,7 +5,6 @@ import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import no.nav.familie.ef.sak.repository.domain.EksternId
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import org.springframework.data.jdbc.repository.query.Query
-import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
 import java.util.UUID
 
@@ -42,11 +41,13 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         FROM behandling b
         JOIN fagsak f ON f.id = b.fagsak_id
         JOIN fagsak_person fp ON b.fagsak_id = fp.fagsak_id
-        WHERE fp.ident IN (:personidenter) AND f.stonadstype = :stonadstype AND b.type != 'BLANKETT'
+        WHERE fp.ident IN (:personidenter) AND f.stonadstype = :stønadstype AND b.type != 'BLANKETT'
         ORDER BY b.opprettet_tid DESC
         LIMIT 1)
     """)
-    fun eksistererBehandlingSomIkkeErBlankett(@Param("stonadstype") stønadstype: Stønadstype, personidenter: Set<String>): Boolean
+    fun eksistererBehandlingSomIkkeErBlankett(stønadstype: Stønadstype, personidenter: Set<String>): Boolean
+
+    // language=PostgreSQL
     @Query("""
         SELECT b.*, be.id as eksternid_id
         FROM behandling b
@@ -54,14 +55,14 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         JOIN fagsak f ON f.id = b.fagsak_id
         JOIN fagsak_person fp ON b.fagsak_id = fp.fagsak_id
         WHERE fp.ident IN (:personidenter)
-         AND f.stonadstype = :stonadstype
+         AND f.stonadstype = :stønadstype
          AND b.type != 'BLANKETT'
          AND b.resultat != 'ANNULERT'
          AND b.status = 'FERDIGSTILT'
         ORDER BY b.opprettet_tid DESC
         LIMIT 1
     """)
-    fun finnSisteFerdigstilteBehandling(@Param("stonadstype") stønadstype: Stønadstype, personidenter: Set<String>): Behandling?
+    fun finnSisteIverksatteBehandling(stønadstype: Stønadstype, personidenter: Set<String>): Behandling?
 
     // language=PostgreSQL
     @Query("""
@@ -97,6 +98,6 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
                  AND b.resultat != 'ANNULLERT'
          ) q WHERE rn = 1 AND type != 'TEKNISK_OPPHØR'
         """)
-    fun finnSisteIverksatteBehandlinger(stønadstype: Stønadstype): Set<UUID>
+    fun finnSisteIverksatteBehandlingerSomIkkeErTekniskOpphør(stønadstype: Stønadstype): Set<UUID>
 
 }
