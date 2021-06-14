@@ -53,11 +53,11 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         JOIN behandling_ekstern be ON b.id = be.behandling_id
         JOIN fagsak f ON f.id = b.fagsak_id
         JOIN fagsak_person fp ON b.fagsak_id = fp.fagsak_id
-        WHERE fp.ident IN (:personidenter) AND f.stonadstype = :stonadstype AND b.type NOT IN ('BLANKETT', 'TEKNISK_OPPHØR')
+        WHERE fp.ident IN (:personidenter) AND f.stonadstype = :stonadstype AND b.type NOT IN ('BLANKETT', 'TEKNISK_OPPHØR') AND b.status = 'FERDIGSTILT'
         ORDER BY b.opprettet_tid DESC
         LIMIT 1
     """)
-    fun finnSisteBehandling(@Param("stonadstype") stønadstype: Stønadstype, personidenter: Set<String>): Behandling?
+    fun finnSisteFerdigstilteBehandling(@Param("stonadstype") stønadstype: Stønadstype, personidenter: Set<String>): Behandling?
 
     // language=PostgreSQL
     @Query("""

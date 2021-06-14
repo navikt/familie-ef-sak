@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.familie.kontrakter.ef.iverksett.TilkjentYtelseMedMetaData as TilkjentYtelseMedMetaDataKontrakter
 
 @Service
 class TekniskOpphørService(val behandlingService: BehandlingService,
@@ -27,7 +26,7 @@ class TekniskOpphørService(val behandlingService: BehandlingService,
 
     @Transactional
     fun håndterTeknisktOpphør(personIdent: PersonIdent) {
-        val sisteBehandling = behandlingRepository.finnSisteBehandling(Stønadstype.OVERGANGSSTØNAD, setOf(personIdent.ident))
+        val sisteBehandling = behandlingRepository.finnSisteFerdigstilteBehandling(Stønadstype.OVERGANGSSTØNAD, setOf(personIdent.ident))
         require(sisteBehandling != null) { throw Feil("Finner ikke behandling med stønadstype overgangsstønad") }
         val fagsakId = sisteBehandling.fagsakId
         val aktivIdent = fagsakService.hentAktivIdent(fagsakId)
@@ -39,14 +38,13 @@ class TekniskOpphørService(val behandlingService: BehandlingService,
         taskRepository.save(PollStatusFraIverksettTask.opprettTask(nyBehandling.id))
 
         iverksettClient.iverksettTekniskOpphør(TekniskOpphørDto(forrigeBehandlingId = sisteBehandling.id,
-                                                                tilkjentYtelseMedMetaData = TilkjentYtelseMedMetaDataKontrakter(
-                                                                        saksbehandlerId = tilkjentYtelseTilOpphør.sporbar.opprettetAv,
-                                                                        eksternBehandlingId = nyBehandling.eksternId.id,
-                                                                        stønadstype = StønadType.OVERGANGSSTØNAD,
-                                                                        eksternFagsakId = eksternFagsakId,
-                                                                        personIdent = aktivIdent,
-                                                                        behandlingId = nyBehandling.id,
-                                                                        vedtaksdato = LocalDate.now())))
+                                                                saksbehandlerId = tilkjentYtelseTilOpphør.sporbar.opprettetAv,
+                                                                eksternBehandlingId = nyBehandling.eksternId.id,
+                                                                stønadstype = StønadType.OVERGANGSSTØNAD,
+                                                                eksternFagsakId = eksternFagsakId,
+                                                                personIdent = aktivIdent,
+                                                                behandlingId = nyBehandling.id,
+                                                                vedtaksdato = LocalDate.now()))
 
     }
 
