@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.repository.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.Delvilkårsvurdering
 import no.nav.familie.ef.sak.repository.domain.Fagsak
+import no.nav.familie.ef.sak.repository.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.Vedtak
 import no.nav.familie.ef.sak.repository.domain.Vedtaksperiode
@@ -109,7 +110,7 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
                                saksbehandlerId = saksbehandler,
                                beslutterId = beslutter,
                                tilkjentYtelse = tilkjentYtelse.tilIverksettDto(),
-                               vedtaksperioder = mapToVedtaksperioder(vedtak.perioder!!.perioder)
+                               vedtaksperioder = vedtak.perioder?.tilIverksettDto() ?: emptyList()
             )
 
     private fun mapSøkerDto(fagsak: Fagsak, behandling: Behandling): SøkerDto {
@@ -126,15 +127,6 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
                         },
                         tilhørendeEnhet = navEnhet
         )
-    }
-
-    private fun mapToVedtaksperioder(vedtaksperioder: List<Vedtaksperiode>): List<VedtaksperiodeDto> {
-        return vedtaksperioder.map {
-            VedtaksperiodeDto(fraOgMed = it.datoFra,
-                              tilOgMed = it.datoTil,
-                              aktivitet = AktivitetType.valueOf(it.aktivitet.name),
-                              periodeType = VedtaksperiodeType.valueOf(it.periodeType.name))
-        }
     }
 }
 
@@ -170,3 +162,11 @@ fun Vilkårsvurdering.tilIverksettDto(): VilkårsvurderingDto = Vilkårsvurderin
             delvilkårsvurdering.tilIverksettDto()
         }
 )
+
+fun PeriodeWrapper.tilIverksettDto(): List<VedtaksperiodeDto> = this.perioder.map {
+    VedtaksperiodeDto(fraOgMed = it.datoFra,
+                      tilOgMed = it.datoTil,
+                      aktivitet = AktivitetType.valueOf(it.aktivitet.name),
+                      periodeType = VedtaksperiodeType.valueOf(it.periodeType.name)
+    )
+}
