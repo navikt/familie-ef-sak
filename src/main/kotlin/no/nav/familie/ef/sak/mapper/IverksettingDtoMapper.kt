@@ -132,8 +132,8 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
         return vedtaksperioder.map {
             VedtaksperiodeDto(fraOgMed = it.datoFra,
                               tilOgMed = it.datoTil,
-                              aktivitet = AktivitetType.valueOf(it.aktivitet),
-                              periodeType = VedtaksperiodeType.valueOf(it.periodeType))
+                              aktivitet = AktivitetType.valueOf(it.aktivitet.name),
+                              periodeType = VedtaksperiodeType.valueOf(it.periodeType.name))
         }
     }
 }
