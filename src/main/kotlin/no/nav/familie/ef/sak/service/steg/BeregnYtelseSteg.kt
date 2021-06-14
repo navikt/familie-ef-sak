@@ -6,8 +6,8 @@ import no.nav.familie.ef.sak.api.beregning.VedtakDto
 import no.nav.familie.ef.sak.api.beregning.VedtakService
 import no.nav.familie.ef.sak.api.beregning.tilInntektsperioder
 import no.nav.familie.ef.sak.api.beregning.tilPerioder
-import no.nav.familie.ef.sak.api.dto.AndelTilkjentYtelseDTO
-import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
+import no.nav.familie.ef.sak.api.dto.OldAndelTilkjentYtelseDTO
+import no.nav.familie.ef.sak.api.dto.OldTilkjentYtelseDTO
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.TilkjentYtelseService
@@ -37,7 +37,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                         vedtak.inntekter.tilInntektsperioder()
                 )
                         .map { beløpsperiode ->
-                            AndelTilkjentYtelseDTO(
+                            OldAndelTilkjentYtelseDTO(
                                     beløp = beløpsperiode.beløp.toInt(),
                                     stønadFom = beløpsperiode.periode.fradato,
                                     stønadTom = beløpsperiode.periode.tildato,
@@ -56,7 +56,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
         tilkjentYtelseService.slettTilkjentYtelseForBehandling(behandling.id)
         if (beløpsperioder.isNotEmpty()) {
             tilkjentYtelseService.opprettTilkjentYtelse(
-                    TilkjentYtelseDTO(
+                    OldTilkjentYtelseDTO(
                             aktivIdent,
                             vedtaksdato = LocalDate.now(),
                             behandlingId = behandling.id,

@@ -3,14 +3,15 @@ package no.nav.familie.ef.sak.api.dto
 import java.time.LocalDate
 import java.util.*
 
+
 @Deprecated("Skal ryddes vekk. Ikke i bruk for frontend eller integrasjoner.")
-data class TilkjentYtelseDTO(val søker: String,
-                             val vedtaksdato: LocalDate = LocalDate.now(),
+data class OldTilkjentYtelseDTO(val søker: String,
+                                val vedtaksdato: LocalDate = LocalDate.now(),
         // Skal man opprette andeler som frontend godkjenner eller skal frontend sende inn andeler.
         // Hvis frontend sender inn andeler kanskje id kan være optional og att backend oppretter id
-                             val id: UUID = UUID.randomUUID(),
-                             val behandlingId: UUID,
-                             val andelerTilkjentYtelse: List<AndelTilkjentYtelseDTO>) {
+                                val id: UUID = UUID.randomUUID(),
+                                val behandlingId: UUID,
+                                val andelerTilkjentYtelse: List<OldAndelTilkjentYtelseDTO>) {
 
     fun valider() {
         if (andelerTilkjentYtelse.isEmpty()) {
@@ -27,12 +28,13 @@ data class TilkjentYtelseDTO(val søker: String,
     }
 }
 
-data class AndelTilkjentYtelseDTO(val beløp: Int,
-                                  val stønadFom: LocalDate,
-                                  val stønadTom: LocalDate,
-                                  val kildeBehandlingId: UUID?,
-                                  val inntekt: Int,
-                                  val samordningsfradrag: Int,
-                                  val inntektsreduksjon: Int,
-                                  val personIdent: String)
+@Deprecated("Skal ryddes vekk. Ikke i bruk for frontend eller integrasjoner")
+data class OldAndelTilkjentYtelseDTO(val beløp: Int,
+                                     val stønadFom: LocalDate,
+                                     val stønadTom: LocalDate,
+                                     val kildeBehandlingId: UUID?,
+                                     val inntekt: Int,
+                                     val samordningsfradrag: Int,
+                                     val inntektsreduksjon: Int,
+                                     val personIdent: String)
 

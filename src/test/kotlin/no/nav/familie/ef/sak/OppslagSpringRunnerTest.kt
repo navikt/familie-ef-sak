@@ -42,7 +42,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
                 "mock-oauth",
                 "mock-pdl",
                 "mock-integrasjoner",
-                "mock-oppdrag",
                 "mock-infotrygd-replika",
                 "mock-iverksett",
                 "mock-brev")

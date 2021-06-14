@@ -3,14 +3,11 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.service
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import no.nav.familie.ef.sak.api.avstemming.GrensesnittavstemmingDto
-import no.nav.familie.ef.sak.api.avstemming.KonsistensavstemmingDto
-import no.nav.familie.ef.sak.integration.OppdragClient
+import no.nav.familie.ef.sak.api.avstemming.OpprettKonsistensavstemmingTaskDto
+import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.service.AvstemmingService
 import no.nav.familie.ef.sak.service.TilkjentYtelseService
-import no.nav.familie.ef.sak.task.GrensesnittavstemmingPayload
-import no.nav.familie.ef.sak.task.GrensesnittavstemmingTask
 import no.nav.familie.ef.sak.task.KonsistensavstemmingPayload
 import no.nav.familie.ef.sak.task.KonsistensavstemmingTask
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -22,12 +19,12 @@ import java.time.LocalDate
 
 internal class AvstemmingServiceTest {
 
-    private val oppdragClient: OppdragClient = mockk()
-    private val taskRepository: TaskRepository = mockk()
-    private val tilkjentYtelseService: TilkjentYtelseService = mockk()
+    private val iverksettClient = mockk<IverksettClient>()
+    private val taskRepository = mockk<TaskRepository>()
+    private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
 
     private val avstemmingService: AvstemmingService =
-            AvstemmingService(oppdragClient, taskRepository, tilkjentYtelseService)
+            AvstemmingService(iverksettClient, taskRepository, tilkjentYtelseService)
 
 
     @Test
@@ -42,13 +39,13 @@ internal class AvstemmingServiceTest {
         }
 
         every {
-            tilkjentYtelseService.finnLøpendeUtbetalninger(any(), any())
+            tilkjentYtelseService.finnTilkjentYtelserTilKonsistensavstemming(any(), any())
         } answers {
             emptyList()
         }
 
-        avstemmingService.opprettKonsistenavstemmingTasker(listOf(KonsistensavstemmingDto(datoForAvstemming,
-                                                                                   stønadstype = Stønadstype.OVERGANGSSTØNAD)))
+        avstemmingService.opprettKonsistenavstemmingTasker(listOf(OpprettKonsistensavstemmingTaskDto(datoForAvstemming,
+                                                                                                     stønadstype = Stønadstype.OVERGANGSSTØNAD)))
 
         val payload = KonsistensavstemmingPayload(stønadstype = Stønadstype.OVERGANGSSTØNAD,
                                                   triggerTid = datoForAvstemming.atTime(8, 0))
@@ -62,29 +59,6 @@ internal class AvstemmingServiceTest {
                                                                    "payload",
                                                                    "triggerTid")
 
-    }
-
-    @Test
-    fun `opprettGrensesnittavstemmingTask skal kalle taskRepository med task som argument`() {
-        val taskSlot = slot<Task>()
-        every {
-            taskRepository.save(capture(taskSlot))
-        } answers {
-            taskSlot.captured
-        }
-
-        avstemmingService.opprettGrensesnittavstemmingTask(GrensesnittavstemmingDto(stønadstype = Stønadstype.OVERGANGSSTØNAD,
-                                                                                    fraDato = LocalDate.of(2020, 11, 24)))
-
-        val payload = GrensesnittavstemmingPayload(stønadstype = Stønadstype.OVERGANGSSTØNAD,
-                                                   fraDato = LocalDate.of(2020, 11, 24))
-        assertThat(taskSlot.captured).isEqualToComparingOnlyGivenFields(Task(type = GrensesnittavstemmingTask.TYPE,
-                                                                             payload = objectMapper.writeValueAsString(payload),
-                                                                             triggerTid = LocalDate.of(2020, 11, 25)
-                                                                                     .atTime(8, 0)),
-                                                                        "type",
-                                                                        "payload",
-                                                                        "triggerTid")
     }
 
 }
