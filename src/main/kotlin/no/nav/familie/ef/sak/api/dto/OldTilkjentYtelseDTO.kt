@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.api.dto
 
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 
 @Deprecated("Skal ryddes vekk. Ikke i bruk for frontend eller integrasjoner.")
