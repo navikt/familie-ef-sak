@@ -7,7 +7,6 @@ import no.nav.familie.ef.sak.repository.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.Delvilkårsvurdering
 import no.nav.familie.ef.sak.repository.domain.Fagsak
-import no.nav.familie.ef.sak.repository.domain.InntektWrapper
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.Vedtak
 import no.nav.familie.ef.sak.repository.domain.Vedtaksperiode
@@ -30,7 +29,6 @@ import no.nav.familie.kontrakter.ef.iverksett.BarnDto
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingsdetaljerDto
 import no.nav.familie.kontrakter.ef.iverksett.DelvilkårsvurderingDto
 import no.nav.familie.kontrakter.ef.iverksett.FagsakdetaljerDto
-import no.nav.familie.kontrakter.ef.iverksett.InntektDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettDto
 import no.nav.familie.kontrakter.ef.iverksett.Periodetype
 import no.nav.familie.kontrakter.ef.iverksett.SøkerDto
@@ -132,10 +130,10 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
 
     private fun mapToVedtaksperioder(vedtaksperioder: List<Vedtaksperiode>): List<VedtaksperiodeDto> {
         return vedtaksperioder.map {
-            VedtaksperiodeDto(it.datoFra,
-                              it.datoTil,
-                              AktivitetType.valueOf(it.aktivitet),
-                              VedtaksperiodeType.valueOf(it.periodeType))
+            VedtaksperiodeDto(fraOgMed = it.datoFra,
+                              tilOgMed = it.datoTil,
+                              aktivitet = AktivitetType.valueOf(it.aktivitet),
+                              periodeType = VedtaksperiodeType.valueOf(it.periodeType))
         }
     }
 }
@@ -152,14 +150,6 @@ fun TilkjentYtelse.tilIverksettDto(): TilkjentYtelseDto = TilkjentYtelseDto(
                                    periodetype = Periodetype.MÅNED)
         }
 )
-
-fun InntektWrapper.tilIverksettDto(): List<InntektDto> = this.inntekter.map {
-    InntektDto(beløp = it.inntekt.intValueExact(),
-               periodetype = Periodetype.MÅNED,
-               fraOgMed = it.startDato,
-               tilOgMed = it.sluttDato,
-               samordningsfradrag = it.samordningsfradrag.intValueExact())
-}
 
 fun Vurdering.tilIverksettDto(): VurderingDto = VurderingDto(
         regelId = RegelIdIverksett.valueOf(this.regelId.name),
