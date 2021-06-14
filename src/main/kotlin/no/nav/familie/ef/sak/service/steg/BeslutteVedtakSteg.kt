@@ -17,7 +17,6 @@ import no.nav.familie.ef.sak.service.OppgaveService
 import no.nav.familie.ef.sak.service.TotrinnskontrollService
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.task.FerdigstillOppgaveTask
-import no.nav.familie.ef.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ef.sak.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.task.OpprettOppgaveTask.OpprettOppgaveTaskData
 import no.nav.familie.ef.sak.task.PollStatusFraIverksettTask
@@ -87,11 +86,6 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
                 OpprettOppgaveTaskData(behandlingId = behandling.id,
                                        oppgavetype = Oppgavetype.BehandleUnderkjentVedtak,
                                        tilordnetNavIdent = navIdent)))
-    }
-
-    private fun opprettTaskForIverksettMotOppdrag(behandling: Behandling) {
-        val aktivIdent = fagsakService.hentAktivIdent(behandling.fagsakId)
-        taskRepository.save(IverksettMotOppdragTask.opprettTask(behandling, aktivIdent))
     }
 
     private fun opprettTaskForJournalførBlankett(behandling: Behandling) {

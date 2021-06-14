@@ -11,13 +11,8 @@ import org.springframework.web.bind.annotation.*
 @ProtectedWithClaims(issuer = "azuread")
 class AvstemmingController(private val avstemmingService: AvstemmingService) {
 
-    @PostMapping("/grensesnittavstemming")
-    fun opprettGrensesnittAvstemming(@RequestBody grensesnittavstemmingDto: GrensesnittavstemmingDto): Ressurs<Task?> {
-        return Ressurs.success(avstemmingService.opprettGrensesnittavstemmingTask(grensesnittavstemmingDto))
-    }
-
     @PostMapping("/konsistensavstemming")
-    fun opprettKonsistensAvstemming(@RequestBody avstemmingDto: List<KonsistensavstemmingDto>): Ressurs<List<Task>> {
-        return Ressurs.success(avstemmingService.opprettKonsistenavstemmingTasker(avstemmingDto))
+    fun opprettKonsistensAvstemming(@RequestBody avstemmingTaskDtoOpprett: List<OpprettKonsistensavstemmingTaskDto>): Ressurs<List<Task>> {
+        return Ressurs.success(avstemmingService.opprettKonsistenavstemmingTasker(avstemmingTaskDtoOpprett))
     }
 }

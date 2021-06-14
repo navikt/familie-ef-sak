@@ -7,12 +7,12 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
 import java.time.LocalDate
 
-data class KonsistensavstemmingDto(val datoForAvstemming: LocalDate, val stønadstype: Stønadstype)
+data class OpprettKonsistensavstemmingTaskDto(val datoForAvstemming: LocalDate, val stønadstype: Stønadstype)
 
 
-fun KonsistensavstemmingDto.tilTask(): Task {
+fun OpprettKonsistensavstemmingTaskDto.tilTask(): Task {
     val triggerTid = this.datoForAvstemming.atTime(8, 0)
     val payload = objectMapper.writeValueAsString(KonsistensavstemmingPayload(stønadstype = this.stønadstype,
-                                                                                  triggerTid = triggerTid))
+                                                                              triggerTid = triggerTid))
     return Task(type = KonsistensavstemmingTask.TYPE, payload = payload, triggerTid = triggerTid)
 }
