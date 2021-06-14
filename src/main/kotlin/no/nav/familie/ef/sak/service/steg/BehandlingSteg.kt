@@ -54,12 +54,6 @@ enum class StegType(val rekkefølge: Int,
     JOURNALFØR_BLANKETT(rekkefølge = 5,
                         tillattFor = BehandlerRolle.SYSTEM,
                         gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)),
-    IVERKSETT_MOT_OPPDRAG(rekkefølge = 5,
-                          tillattFor = BehandlerRolle.SYSTEM,
-                          gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)),
-    VENTE_PÅ_STATUS_FRA_ØKONOMI(rekkefølge = 6,
-                                tillattFor = BehandlerRolle.SYSTEM,
-                                gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)),
     JOURNALFØR_VEDTAKSBREV(rekkefølge = 7,
                            tillattFor = BehandlerRolle.SYSTEM,
                            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)),
@@ -92,9 +86,7 @@ enum class StegType(val rekkefølge: Int,
                     VILKÅR -> BEREGNE_YTELSE
                     BEREGNE_YTELSE -> SEND_TIL_BESLUTTER
                     SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
-                    BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
-                    IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
-                    VENTE_PÅ_STATUS_FRA_ØKONOMI -> FERDIGSTILLE_BEHANDLING
+                    BESLUTTE_VEDTAK -> FERDIGSTILLE_BEHANDLING
                     FERDIGSTILLE_BEHANDLING -> BEHANDLING_FERDIGSTILT
                     BEHANDLING_FERDIGSTILT -> BEHANDLING_FERDIGSTILT
                     else -> throw IllegalStateException("StegType ${displayName()} ugyldig ved ${behandlingType.visningsnavn}")
@@ -115,9 +107,7 @@ enum class StegType(val rekkefølge: Int,
                     VILKÅR -> BEREGNE_YTELSE
                     BEREGNE_YTELSE -> SEND_TIL_BESLUTTER
                     SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
-                    BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
-                    IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
-                    VENTE_PÅ_STATUS_FRA_ØKONOMI -> JOURNALFØR_VEDTAKSBREV
+                    BESLUTTE_VEDTAK -> JOURNALFØR_VEDTAKSBREV
                     JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
                     DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
                     FERDIGSTILLE_BEHANDLING -> BEHANDLING_FERDIGSTILT

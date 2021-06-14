@@ -27,7 +27,6 @@ import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.OppgaveService
 import no.nav.familie.ef.sak.service.TotrinnskontrollService
-import no.nav.familie.ef.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ef.sak.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.task.PollStatusFraIverksettTask
 import no.nav.familie.kontrakter.felles.objectMapper

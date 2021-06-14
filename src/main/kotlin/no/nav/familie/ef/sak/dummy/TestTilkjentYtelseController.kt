@@ -1,9 +1,6 @@
 package no.nav.familie.ef.sak.dummy
 
-import no.nav.familie.ef.sak.api.dto.AndelTilkjentYtelseDTO
-import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.service.AvstemmingService
 import no.nav.familie.kontrakter.ef.iverksett.KonsistensavstemmingDto
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -12,11 +9,9 @@ import org.springframework.context.annotation.Profile
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
-import java.util.UUID
 
 @RestController
 @RequestMapping(path = ["/api/test/"])
@@ -25,12 +20,6 @@ import java.util.UUID
 class TestTilkjentYtelseController(private val testTilkjentYtelseService: TestTilkjentYtelseService,
                                    private val avstemmingService: AvstemmingService
 ) {
-
-    @PostMapping("/send-til-oppdrag")
-    fun testMotOppdrag(@RequestBody tilkjentYtelseTestDTO: TilkjentYtelseTestDTO): Ressurs<TilkjentYtelse> {
-
-        return Ressurs.success(testTilkjentYtelseService.lagreTilkjentYtelseOgIverksettUtbetaling(tilkjentYtelseTestDTO))
-    }
 
     @GetMapping("/konsistensavstemming/{stønadstype}")
     fun getKonsistensavstemming(@PathVariable stønadstype: Stønadstype): Ressurs<KonsistensavstemmingDto> {
@@ -41,24 +30,6 @@ class TestTilkjentYtelseController(private val testTilkjentYtelseService: TestTi
     fun konsistensavstemming(@PathVariable stønadstype: Stønadstype): Ressurs<String> {
         avstemmingService.konsistensavstemOppdrag(stønadstype, LocalDate.now())
         return Ressurs.success("ok")
-    }
-
-    @PostMapping("/dummy")
-    fun dummyTilkjentYtelse(@RequestBody dummyIverksettingDTO: DummyIverksettingDTO?): Ressurs<TilkjentYtelseDTO> {
-        val dummyDTO = dummyIverksettingDTO ?: DummyIverksettingDTO()
-        val søker = dummyDTO.personIdent
-        val andelTilkjentYtelseDto = AndelTilkjentYtelseDTO(personIdent = søker,
-                                                            beløp = dummyDTO.beløp,
-                                                            stønadFom = dummyDTO.stønadFom,
-                                                            kildeBehandlingId = UUID.randomUUID(),
-                                                            inntektsreduksjon = 0,
-                                                            samordningsfradrag = 0,
-                                                            inntekt = 0,
-                                                            stønadTom = dummyDTO.stønadTom)
-        val tilkjentYtelseDto = TilkjentYtelseDTO(søker = søker,
-                                                  behandlingId = UUID.randomUUID(),
-                                                  andelerTilkjentYtelse = listOf(andelTilkjentYtelseDto, andelTilkjentYtelseDto))
-        return Ressurs.success(tilkjentYtelseDto)
     }
 
 }
