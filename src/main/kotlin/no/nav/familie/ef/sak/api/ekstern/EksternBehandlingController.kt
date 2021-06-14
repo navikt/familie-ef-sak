@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.api.ekstern
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.integration.dto.pdl.identer
 import no.nav.familie.ef.sak.repository.BehandlingRepository
+import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -35,7 +36,7 @@ class EksternBehandlingController(private val pdlClient: PdlClient,
     fun finnesBehandlingForPerson(@RequestParam("type") stønadstype: Stønadstype?,
                                   @RequestBody request: PersonIdent): Ressurs<Boolean> {
         val personidenter = pdlClient.hentPersonidenter(request.ident, historikk = true).identer()
-        if(personidenter.isEmpty()) {
+        if (personidenter.isEmpty()) {
             return Ressurs.failure("Finner ikke identer til personen")
         }
         return if (stønadstype != null) {
@@ -45,9 +46,15 @@ class EksternBehandlingController(private val pdlClient: PdlClient,
         }
     }
 
+    /**
+     * Hvis siste behandling er teknisk opphør, skal vi returnere false,
+     * hvis ikke så skal vi returnere true hvis det finnes en behandling
+     */
     private fun eksistererBehandlingSomIkkeErBlankett(stønadstype: Stønadstype,
                                                       personidenter: Set<String>): Boolean {
-        return behandlingRepository.eksistererBehandlingSomIkkeErBlankett(stønadstype, personidenter)
+        return behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(stønadstype, personidenter)?.let {
+            it.type != BehandlingType.TEKNISK_OPPHØR
+        } ?: false
     }
 
 }
