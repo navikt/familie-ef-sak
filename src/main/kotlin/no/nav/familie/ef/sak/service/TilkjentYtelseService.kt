@@ -1,8 +1,8 @@
 package no.nav.familie.ef.sak.service
 
-import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
+import no.nav.familie.ef.sak.api.dto.OldTilkjentYtelseDTO
 import no.nav.familie.ef.sak.iverksett.tilIverksettDto
-import no.nav.familie.ef.sak.mapper.tilDto
+import no.nav.familie.ef.sak.mapper.tilOldDto
 import no.nav.familie.ef.sak.mapper.tilTilkjentYtelse
 import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
@@ -27,12 +27,12 @@ class TilkjentYtelseService(private val behandlingService: BehandlingService,
         return hentTilkjentYtelseFraBehandlingId(behandlingId)
     }
 
-    fun hentTilkjentYtelseDto(tilkjentYtelseId: UUID): TilkjentYtelseDTO {
+    fun hentTilkjentYtelseDto(tilkjentYtelseId: UUID): OldTilkjentYtelseDTO {
         val tilkjentYtelse = hentTilkjentYtelse(tilkjentYtelseId)
-        return tilkjentYtelse.tilDto()
+        return tilkjentYtelse.tilOldDto()
     }
 
-    fun opprettTilkjentYtelse(tilkjentYtelseDTO: TilkjentYtelseDTO): TilkjentYtelse {
+    fun opprettTilkjentYtelse(tilkjentYtelseDTO: OldTilkjentYtelseDTO): TilkjentYtelse {
         val nyTilkjentYtelse = tilkjentYtelseDTO.tilTilkjentYtelse()
         val andelerMedGodtykkligKildeId =
                 nyTilkjentYtelse.andelerTilkjentYtelse.map { it.copy(kildeBehandlingId = nyTilkjentYtelse.behandlingId) }
