@@ -8,10 +8,6 @@ import no.nav.familie.ef.sak.repository.FagsakRepository
 import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
-import no.nav.familie.ef.sak.repository.domain.BehandlingType
-import no.nav.familie.ef.sak.repository.domain.Sporbar
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseMedMetaData
-import no.nav.familie.ef.sak.økonomi.UtbetalingsoppdragGenerator.lagTilkjentYtelseMedUtbetalingsoppdrag
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -53,23 +49,6 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(hentetTilkjentYtelse.andelerTilkjentYtelse.size).isEqualTo(2)
     }
 
-    @Test
-    fun `Lagre utbetalingsoppdrag`() {
-        val fagsak = fagsakRepository.insert(fagsak())
-        val behandling = behandlingRepository.insert(behandling(fagsak = fagsak))
-        val lagretTilkjentYtelse =
-                repository.insert(DataGenerator.tilfeldigTilkjentYtelse(opprettBehandling(), 2))
-        val utbetalingsoppdrag =
-                lagTilkjentYtelseMedUtbetalingsoppdrag(TilkjentYtelseMedMetaData(lagretTilkjentYtelse,
-                                                                                 behandling.eksternId.id,
-                                                                                 fagsak.stønadstype,
-                                                                                 fagsak.eksternId.id)).utbetalingsoppdrag!!
-
-        repository.update(lagretTilkjentYtelse.copy(utbetalingsoppdrag = utbetalingsoppdrag))
-
-        val oppdatertTilkjentYtelse = repository.findByIdOrNull(lagretTilkjentYtelse.id)!!
-        assertThat(oppdatertTilkjentYtelse.utbetalingsoppdrag).isEqualTo(utbetalingsoppdrag)
-    }
 
     @Test
     fun `Finn tilkjent ytelse på personident`() {

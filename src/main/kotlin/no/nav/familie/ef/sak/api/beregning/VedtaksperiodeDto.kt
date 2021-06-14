@@ -1,14 +1,16 @@
 package no.nav.familie.ef.sak.api.beregning
 
+import no.nav.familie.ef.sak.repository.domain.AktivitetType
 import no.nav.familie.ef.sak.repository.domain.Vedtaksperiode
+import no.nav.familie.ef.sak.repository.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.util.Periode
 import java.time.YearMonth
 
 data class VedtaksperiodeDto(
         val årMånedFra: YearMonth,
         val årMånedTil: YearMonth,
-        val aktivitet: String,
-        val periodeType: String
+        val aktivitet: AktivitetType,
+        val periodeType: VedtaksperiodeType
 )
 
 fun List<VedtaksperiodeDto>.tilPerioder(): List<Periode> =

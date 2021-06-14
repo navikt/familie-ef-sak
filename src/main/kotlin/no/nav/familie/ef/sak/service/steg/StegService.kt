@@ -16,11 +16,9 @@ import no.nav.familie.ef.sak.service.steg.StegType.BEREGNE_YTELSE
 import no.nav.familie.ef.sak.service.steg.StegType.BESLUTTE_VEDTAK
 import no.nav.familie.ef.sak.service.steg.StegType.DISTRIBUER_VEDTAKSBREV
 import no.nav.familie.ef.sak.service.steg.StegType.FERDIGSTILLE_BEHANDLING
-import no.nav.familie.ef.sak.service.steg.StegType.IVERKSETT_MOT_OPPDRAG
 import no.nav.familie.ef.sak.service.steg.StegType.JOURNALFØR_BLANKETT
 import no.nav.familie.ef.sak.service.steg.StegType.JOURNALFØR_VEDTAKSBREV
 import no.nav.familie.ef.sak.service.steg.StegType.SEND_TIL_BESLUTTER
-import no.nav.familie.ef.sak.service.steg.StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI
 import no.nav.familie.ef.sak.service.steg.StegType.VEDTA_BLANKETT
 import no.nav.familie.ef.sak.service.steg.StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
@@ -79,20 +77,6 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
     @Transactional
     fun håndterBlankett(behandling: Behandling): Behandling {
         val behandlingSteg: BlankettSteg = hentBehandlingSteg(JOURNALFØR_BLANKETT)
-
-        return håndterSteg(behandling, behandlingSteg, null)
-    }
-
-    @Transactional
-    fun håndterIverksettingOppdrag(behandling: Behandling): Behandling {
-        val behandlingSteg: IverksettMotOppdragSteg = hentBehandlingSteg(IVERKSETT_MOT_OPPDRAG)
-
-        return håndterSteg(behandling, behandlingSteg, null)
-    }
-
-    @Transactional
-    fun håndterStatusPåOppdrag(behandling: Behandling): Behandling {
-        val behandlingSteg: VentePåStatusFraØkonomi = hentBehandlingSteg(VENTE_PÅ_STATUS_FRA_ØKONOMI)
 
         return håndterSteg(behandling, behandlingSteg, null)
     }
