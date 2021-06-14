@@ -53,7 +53,11 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         JOIN behandling_ekstern be ON b.id = be.behandling_id
         JOIN fagsak f ON f.id = b.fagsak_id
         JOIN fagsak_person fp ON b.fagsak_id = fp.fagsak_id
-        WHERE fp.ident IN (:personidenter) AND f.stonadstype = :stonadstype AND b.type NOT IN ('BLANKETT', 'TEKNISK_OPPHØR') AND b.status = 'FERDIGSTILT'
+        WHERE fp.ident IN (:personidenter)
+         AND f.stonadstype = :stønadstype
+         AND b.type != 'BLANKETT'
+         AND b.resultat != 'ANNULERT'
+         AND b.status = 'FERDIGSTILT'
         ORDER BY b.opprettet_tid DESC
         LIMIT 1
     """)
