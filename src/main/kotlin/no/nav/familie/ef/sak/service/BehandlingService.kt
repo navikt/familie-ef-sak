@@ -64,12 +64,12 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
     }
 
     fun opprettBehandling(behandlingType: BehandlingType,
-                          fagsakId: UUID, status:
-                          BehandlingStatus = BehandlingStatus.OPPRETTET,
+                          fagsakId: UUID,
+                          status: BehandlingStatus = BehandlingStatus.OPPRETTET,
                           stegType: StegType = StegType.VILKÅR): Behandling {
         return behandlingRepository.insert(Behandling(fagsakId = fagsakId,
                                                       type = behandlingType,
-                                                      steg = StegType.VILKÅR,
+                                                      steg = stegType,
                                                       status = status,
                                                       resultat = BehandlingResultat.IKKE_SATT))
     }

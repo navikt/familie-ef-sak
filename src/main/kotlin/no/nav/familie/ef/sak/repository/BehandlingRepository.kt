@@ -54,7 +54,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         JOIN fagsak f ON f.id = b.fagsak_id
         JOIN fagsak_person fp ON b.fagsak_id = fp.fagsak_id
         WHERE fp.ident IN (:personidenter)
-         AND f.stonadstype = :stønadstype
+         AND f.stonadstype = :stonadstype
          AND b.type != 'BLANKETT'
          AND b.resultat != 'ANNULERT'
          AND b.status = 'FERDIGSTILT'

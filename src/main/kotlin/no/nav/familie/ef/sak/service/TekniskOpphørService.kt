@@ -26,9 +26,15 @@ class TekniskOpphørService(val behandlingService: BehandlingService,
 
     @Transactional
     fun håndterTeknisktOpphør(personIdent: PersonIdent) {
-        val sisteBehandling = behandlingRepository.finnSisteFerdigstilteBehandling(Stønadstype.OVERGANGSSTØNAD, setOf(personIdent.ident))
-        require(sisteBehandling != null) { throw Feil("Finner ikke behandling med stønadstype overgangsstønad") }
-        val fagsakId = sisteBehandling.fagsakId
+        val sisteFerdigstilteBehandling =
+                behandlingRepository.finnSisteFerdigstilteBehandling(stønadstype = Stønadstype.OVERGANGSSTØNAD, personidenter = setOf(personIdent.ident))
+        require(sisteFerdigstilteBehandling != null) { throw Feil("Finner ikke behandling med stønadstype overgangsstønad") }
+        val fagsakId = sisteFerdigstilteBehandling.fagsakId
+        val sisteBehandling = behandlingService.hentBehandlinger(fagsakId)
+                .maxByOrNull { it.opprettet }!!
+
+        require(sisteBehandling.id == sisteFerdigstilteBehandling.id) { throw Feil("Kan ikke utføre teknisk opphør på en aktiv behandling") }
+
         val aktivIdent = fagsakService.hentAktivIdent(fagsakId)
         val eksternFagsakId = fagsakService.hentEksternId(fagsakId)
         val nyBehandling = opprettBehandlingTekniskOpphør(fagsakId)
@@ -37,7 +43,7 @@ class TekniskOpphørService(val behandlingService: BehandlingService,
 
         taskRepository.save(PollStatusFraIverksettTask.opprettTask(nyBehandling.id))
 
-        iverksettClient.iverksettTekniskOpphør(TekniskOpphørDto(forrigeBehandlingId = sisteBehandling.id,
+        iverksettClient.iverksettTekniskOpphør(TekniskOpphørDto(forrigeBehandlingId = sisteFerdigstilteBehandling.id,
                                                                 saksbehandlerId = tilkjentYtelseTilOpphør.sporbar.opprettetAv,
                                                                 eksternBehandlingId = nyBehandling.eksternId.id,
                                                                 stønadstype = StønadType.OVERGANGSSTØNAD,

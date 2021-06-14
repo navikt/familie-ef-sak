@@ -1,8 +1,6 @@
 package no.nav.familie.ef.sak.iverksett
 
 import no.nav.familie.ef.sak.repository.domain.Fil
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseMedMetaData
 import no.nav.familie.ef.sak.util.medContentTypeJsonUTF8
 import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.http.client.MultipartBuilder
@@ -11,7 +9,6 @@ import no.nav.familie.kontrakter.ef.iverksett.IverksettDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettStatus
 import no.nav.familie.kontrakter.ef.iverksett.KonsistensavstemmingDto
 import no.nav.familie.kontrakter.ef.iverksett.TekniskOpphørDto
-import no.nav.familie.kontrakter.ef.iverksett.TilkjentYtelseDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import org.springframework.beans.factory.annotation.Qualifier

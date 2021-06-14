@@ -26,7 +26,7 @@ internal class TekniskOpphørTest : OppslagSpringRunnerTest() {
     internal fun `skal iverksette teknisk opphør og vente på status uten å kasta exceptions`() {
         val ident = "1234"
         val fagsak = fagsakRepository.insert(fagsak(identer = setOf(FagsakPerson(ident = ident))))
-        behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.UTREDES))
+        behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.FERDIGSTILT))
 
         tekniskOpphørService.håndterTeknisktOpphør(PersonIdent(ident))
         taskRepository.findAll().first().let { pollStatusFraIverksettTask.doTask(it)}
