@@ -27,7 +27,7 @@ class TekniskOpphørService(val behandlingService: BehandlingService,
     @Transactional
     fun håndterTeknisktOpphør(personIdent: PersonIdent) {
         val sisteFerdigstilteBehandling =
-                behandlingRepository.finnSisteFerdigstilteBehandling(stønadstype = Stønadstype.OVERGANGSSTØNAD, personidenter = setOf(personIdent.ident))
+                behandlingRepository.finnSisteIverksatteBehandling(stønadstype = Stønadstype.OVERGANGSSTØNAD, personidenter = setOf(personIdent.ident))
         require(sisteFerdigstilteBehandling != null) { throw Feil("Finner ikke behandling med stønadstype overgangsstønad") }
         val fagsakId = sisteFerdigstilteBehandling.fagsakId
         val sisteBehandling = behandlingService.hentBehandlinger(fagsakId)

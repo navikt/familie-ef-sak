@@ -10,7 +10,6 @@ import no.nav.familie.ef.sak.repository.domain.Fagsak
 import no.nav.familie.ef.sak.repository.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.Vedtak
-import no.nav.familie.ef.sak.repository.domain.Vedtaksperiode
 import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
 import no.nav.familie.ef.sak.repository.domain.Vurdering
 import no.nav.familie.ef.sak.service.ArbeidsfordelingService
