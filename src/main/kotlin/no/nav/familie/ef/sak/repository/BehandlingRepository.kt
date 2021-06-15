@@ -58,7 +58,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         WHERE fp.ident IN (:personidenter)
          AND f.stonadstype = :stønadstype
          AND b.type != 'BLANKETT'
-         AND b.resultat != 'ANNULERT'
+         AND b.resultat != 'ANNULLERT'
          AND b.status = 'FERDIGSTILT'
         ORDER BY b.opprettet_tid DESC
         LIMIT 1
@@ -69,14 +69,14 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
     @Query("""
         SELECT b.id
         FROM behandling b
-        JOIN fagsak f ON f.id = b.fagsak_id
-        JOIN behandling b2 ON b2.fagsak_id = f.id
-        WHERE b.type != 'BLANKETT' AND b.resultat != 'ANNULLERT' AND b.status = 'FERDIGSTILT'
-        AND b2.id = :behandlingId
+        WHERE b.fagsak_id = :fagsakId
+         AND b.type != 'BLANKETT'
+         AND b.resultat != 'ANNULLERT'
+         AND b.status = 'FERDIGSTILT'
         ORDER BY b.opprettet_tid DESC
         LIMIT 1
     """)
-    fun finnSisteIverksatteBehandling(behandlingId: UUID): UUID?
+    fun finnSisteIverksatteBehandling(fagsakId: UUID): UUID?
 
     // language=PostgreSQL
     @Query("""
