@@ -46,7 +46,7 @@ class IverksettClient(@Value("\${FAMILIE_EF_IVERKSETT_URL}")
     }
 
     fun publiserVedtakshendelse(behandlingId: UUID) {
-        postForEntity<Any>(URI.create("$familieEfIverksettUri/api/vedtakshendelse/${behandlingId}"), "")
+        postForEntity<Any>(URI.create("$familieEfIverksettUri/api/iverksett/vedtakshendelse/${behandlingId}"), "")
     }
 
 
@@ -78,4 +78,3 @@ class IverksettClient(@Value("\${FAMILIE_EF_IVERKSETT_URL}")
         }
     }
 }
-
