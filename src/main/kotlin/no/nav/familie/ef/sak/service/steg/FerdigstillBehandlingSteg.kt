@@ -21,7 +21,7 @@ class FerdigstillBehandlingSteg(private val behandlingService: BehandlingService
         logger.info("Ferdigstiller behandling [${behandling.id}]")
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.FERDIGSTILT)
 
-        if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING || behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) {
+        if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING || behandling.type == BehandlingType.REVURDERING) {
             taskRepository.save(PubliserVedtakshendelseTask.opprettTask(behandling.id))
         } else if (behandling.type == BehandlingType.BLANKETT) {
             //ignore
