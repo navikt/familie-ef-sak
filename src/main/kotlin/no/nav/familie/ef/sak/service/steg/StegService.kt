@@ -19,6 +19,7 @@ import no.nav.familie.ef.sak.service.steg.StegType.FERDIGSTILLE_BEHANDLING
 import no.nav.familie.ef.sak.service.steg.StegType.JOURNALFØR_BLANKETT
 import no.nav.familie.ef.sak.service.steg.StegType.JOURNALFØR_VEDTAKSBREV
 import no.nav.familie.ef.sak.service.steg.StegType.LAG_SAKSBEHANDLINGSBLANKETT
+import no.nav.familie.ef.sak.service.steg.StegType.PUBLISER_VEDTAKSHENDELSE
 import no.nav.familie.ef.sak.service.steg.StegType.SEND_TIL_BESLUTTER
 import no.nav.familie.ef.sak.service.steg.StegType.VEDTA_BLANKETT
 import no.nav.familie.ef.sak.service.steg.StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT
@@ -108,6 +109,14 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
         val behandlingSteg: DistribuerVedtaksbrevSteg = hentBehandlingSteg(DISTRIBUER_VEDTAKSBREV)
 
         return håndterSteg(behandling, behandlingSteg, journalpostId)
+    }
+
+    @Transactional
+    fun publiserVedtakshendelse(behandlingId: UUID): Behandling {
+        val behandling = behandlingService.hentBehandling(behandlingId)
+        val behandlingSteg: PubliserVedtakshendelseSteg = hentBehandlingSteg(PUBLISER_VEDTAKSHENDELSE)
+
+        return håndterSteg(behandling, behandlingSteg, null)
     }
 
     @Transactional
