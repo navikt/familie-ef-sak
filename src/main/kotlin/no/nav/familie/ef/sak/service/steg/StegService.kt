@@ -18,6 +18,7 @@ import no.nav.familie.ef.sak.service.steg.StegType.DISTRIBUER_VEDTAKSBREV
 import no.nav.familie.ef.sak.service.steg.StegType.FERDIGSTILLE_BEHANDLING
 import no.nav.familie.ef.sak.service.steg.StegType.JOURNALFØR_BLANKETT
 import no.nav.familie.ef.sak.service.steg.StegType.JOURNALFØR_VEDTAKSBREV
+import no.nav.familie.ef.sak.service.steg.StegType.LAG_SAKSBEHANDLINGSBLANKETT
 import no.nav.familie.ef.sak.service.steg.StegType.SEND_TIL_BESLUTTER
 import no.nav.familie.ef.sak.service.steg.StegType.VEDTA_BLANKETT
 import no.nav.familie.ef.sak.service.steg.StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT
@@ -80,6 +81,13 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
 
         return håndterSteg(behandling, behandlingSteg, null)
     }
+
+    @Transactional
+    fun håndterLagSaksbehandlingsblankett(behandling: Behandling): Behandling {
+        val behandlingSteg: SaksbehandlingsblankettSteg = hentBehandlingSteg(LAG_SAKSBEHANDLINGSBLANKETT)
+        return håndterSteg(behandling, behandlingSteg, null)
+    }
+
 
     @Transactional
     fun håndterPollStatusFraIverksett(behandling: Behandling): Behandling {

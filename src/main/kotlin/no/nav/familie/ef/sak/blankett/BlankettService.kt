@@ -5,13 +5,24 @@ import no.nav.familie.ef.sak.api.beregning.VedtakService
 import no.nav.familie.ef.sak.api.beregning.tilVedtakDto
 import no.nav.familie.ef.sak.api.dto.SøknadDatoerDto
 import no.nav.familie.ef.sak.repository.OppgaveRepository
-import no.nav.familie.ef.sak.repository.domain.*
-import no.nav.familie.ef.sak.service.*
+import no.nav.familie.ef.sak.repository.domain.Behandling
+import no.nav.familie.ef.sak.repository.domain.BehandlingType
+import no.nav.familie.ef.sak.repository.domain.Fil
+import no.nav.familie.ef.sak.repository.domain.Oppgave
+import no.nav.familie.ef.sak.repository.domain.Stønadstype
+import no.nav.familie.ef.sak.service.BehandlingService
+import no.nav.familie.ef.sak.service.FagsakService
+import no.nav.familie.ef.sak.service.GrunnlagsdataService
+import no.nav.familie.ef.sak.service.JournalføringService
+import no.nav.familie.ef.sak.service.PersonopplysningerService
+import no.nav.familie.ef.sak.service.SøknadService
+import no.nav.familie.ef.sak.service.TilgangService
+import no.nav.familie.ef.sak.service.VurderingService
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.*
+import java.util.UUID
 
 @Service
 class BlankettService(private val tilgangService: TilgangService,
@@ -55,11 +66,11 @@ class BlankettService(private val tilgangService: TilgangService,
                                                     lagSøknadsdatoer(behandlingId)
         )
         val blankettPdfAsByteArray = blankettClient.genererBlankett(blankettPdfRequest)
-        oppdaterBlankett(behandlingId, blankettPdfAsByteArray)
+        oppdaterEllerOpprettBlankett(behandlingId, blankettPdfAsByteArray)
         return blankettPdfAsByteArray
     }
 
-    fun oppdaterBlankett(behandlingId: UUID, pdf: ByteArray): Blankett {
+    fun oppdaterEllerOpprettBlankett(behandlingId: UUID, pdf: ByteArray): Blankett {
         val blankett = Blankett(behandlingId, Fil(pdf))
         if (blankettRepository.existsById(behandlingId)) {
             return blankettRepository.update(blankett)
@@ -84,8 +95,7 @@ class BlankettService(private val tilgangService: TilgangService,
     }
 
     private fun hentVedtak(behandlingId: UUID): VedtakDto {
-        return vedtakService.hentVedtak(behandlingId)
-                .let { it.tilVedtakDto() }
+        return vedtakService.hentVedtak(behandlingId).tilVedtakDto()
     }
 
     private fun hentGjeldendeNavn(hentAktivIdent: String): String {
