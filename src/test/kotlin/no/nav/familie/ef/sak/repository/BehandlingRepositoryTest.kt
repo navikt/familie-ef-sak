@@ -87,14 +87,25 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `eksistererBehandlingSomIkkeErBlankett`() {
+    internal fun `finnSisteBehandlingSomIkkeErBlankett`() {
         val personidenter = setOf("1", "2")
         val fagsak = fagsakRepository.insert(fagsak(setOf(FagsakPerson("1"))))
-        behandlingRepository.insert(behandling(fagsak))
+        val behandling = behandlingRepository.insert(behandling(fagsak))
 
-        assertThat(behandlingRepository.eksistererBehandlingSomIkkeErBlankett(OVERGANGSSTØNAD, personidenter)).isTrue
-        assertThat(behandlingRepository.eksistererBehandlingSomIkkeErBlankett(OVERGANGSSTØNAD, setOf("3"))).isFalse
-        assertThat(behandlingRepository.eksistererBehandlingSomIkkeErBlankett(BARNETILSYN, personidenter)).isFalse
+        assertThat(behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(OVERGANGSSTØNAD, personidenter))
+                .isEqualTo(behandling)
+        assertThat(behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(OVERGANGSSTØNAD, setOf("3"))).isNull()
+        assertThat(behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(BARNETILSYN, personidenter)).isNull()
+    }
+
+    @Test
+    internal fun `finnSisteBehandlingSomIkkeErBlankett - skal returnere teknisk opphør`() {
+        val personidenter = setOf("1", "2")
+        val fagsak = fagsakRepository.insert(fagsak(setOf(FagsakPerson("1"))))
+        val behandling = behandlingRepository.insert(behandling(fagsak, type = BehandlingType.TEKNISK_OPPHØR))
+
+        assertThat(behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(OVERGANGSSTØNAD, personidenter))
+                .isEqualTo(behandling)
     }
 
     @Test
@@ -103,7 +114,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         val fagsak = fagsakRepository.insert(fagsak(setOf(FagsakPerson("1"))))
         behandlingRepository.insert(behandling(fagsak, type = BehandlingType.BLANKETT))
 
-        assertThat(behandlingRepository.eksistererBehandlingSomIkkeErBlankett(OVERGANGSSTØNAD, personidenter)).isFalse
+        assertThat(behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(OVERGANGSSTØNAD, personidenter)).isNull()
     }
 
     @Test
