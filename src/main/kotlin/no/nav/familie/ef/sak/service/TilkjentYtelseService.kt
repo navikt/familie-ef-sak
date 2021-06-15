@@ -3,8 +3,6 @@ package no.nav.familie.ef.sak.service
 import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDTO
 import no.nav.familie.ef.sak.api.feilHvis
 import no.nav.familie.ef.sak.iverksett.tilIverksettDto
-import no.nav.familie.ef.sak.mapper.tilDto
-import no.nav.familie.ef.sak.mapper.tilTilkjentYtelse
 import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
@@ -20,16 +18,11 @@ class TilkjentYtelseService(private val behandlingService: BehandlingService,
                             private val tilkjentYtelseRepository: TilkjentYtelseRepository) {
 
     fun hentForBehandling(behandlingId: UUID): TilkjentYtelse {
-        return hentTilkjentYtelseFraBehandlingId(behandlingId)
+        return tilkjentYtelseRepository.findByBehandlingId(behandlingId)
+               ?: error("Fant ikke tilkjent ytelse med behandlingsid $behandlingId")
     }
 
-    fun hentTilkjentYtelseDto(tilkjentYtelseId: UUID): TilkjentYtelseDTO {
-        val tilkjentYtelse = hentTilkjentYtelse(tilkjentYtelseId)
-        return tilkjentYtelse.tilDto()
-    }
-
-    fun opprettTilkjentYtelse(tilkjentYtelseDTO: TilkjentYtelseDTO): TilkjentYtelse {
-        val nyTilkjentYtelse = tilkjentYtelseDTO.tilTilkjentYtelse()
+    fun opprettTilkjentYtelse(nyTilkjentYtelse: TilkjentYtelse): TilkjentYtelse {
         val andelerMedGodtykkligKildeId =
                 nyTilkjentYtelse.andelerTilkjentYtelse.map { it.copy(kildeBehandlingId = nyTilkjentYtelse.behandlingId) }
         return tilkjentYtelseRepository.insert(nyTilkjentYtelse.copy(andelerTilkjentYtelse = andelerMedGodtykkligKildeId))
@@ -78,9 +71,5 @@ class TilkjentYtelseService(private val behandlingService: BehandlingService,
             tilkjentYtelseRepository.findByIdOrNull(tilkjentYtelseId)
             ?: error("Fant ikke tilkjent ytelse med id $tilkjentYtelseId")
 
-
-    private fun hentTilkjentYtelseFraBehandlingId(behandlingId: UUID) =
-            tilkjentYtelseRepository.findByBehandlingId(behandlingId)
-            ?: error("Fant ikke tilkjent ytelse med behandlingsid $behandlingId")
 
 }

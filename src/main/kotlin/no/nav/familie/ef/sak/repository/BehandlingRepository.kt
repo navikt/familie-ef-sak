@@ -38,28 +38,46 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
 
     // language=PostgreSQL
     @Query("""
-        SELECT EXISTS(SELECT b.id as eksternid_id
+        SELECT b.*, be.id as eksternid_id
         FROM behandling b
+        JOIN behandling_ekstern be ON b.id = be.behandling_id
         JOIN fagsak f ON f.id = b.fagsak_id
         JOIN fagsak_person fp ON b.fagsak_id = fp.fagsak_id
-        WHERE fp.ident IN (:personidenter) AND f.stonadstype = :stonadstype AND b.type != 'BLANKETT'
+        WHERE fp.ident IN (:personidenter) AND f.stonadstype = :stønadstype AND b.type != 'BLANKETT'
         ORDER BY b.opprettet_tid DESC
-        LIMIT 1)
+        LIMIT 1
     """)
-    fun eksistererBehandlingSomIkkeErBlankett(@Param("stonadstype") stønadstype: Stønadstype, personidenter: Set<String>): Boolean
+    fun finnSisteBehandlingSomIkkeErBlankett(stønadstype: Stønadstype, personidenter: Set<String>): Behandling?
+
+    // language=PostgreSQL
+    @Query("""
+        SELECT b.*, be.id as eksternid_id
+        FROM behandling b
+        JOIN behandling_ekstern be ON b.id = be.behandling_id
+        JOIN fagsak f ON f.id = b.fagsak_id
+        JOIN fagsak_person fp ON b.fagsak_id = fp.fagsak_id
+        WHERE fp.ident IN (:personidenter)
+         AND f.stonadstype = :stønadstype
+         AND b.type != 'BLANKETT'
+         AND b.resultat != 'ANNULLERT'
+         AND b.status = 'FERDIGSTILT'
+        ORDER BY b.opprettet_tid DESC
+        LIMIT 1
+    """)
+    fun finnSisteIverksatteBehandling(stønadstype: Stønadstype, personidenter: Set<String>): Behandling?
 
     // language=PostgreSQL
     @Query("""
         SELECT b.id
         FROM behandling b
-        JOIN fagsak f ON f.id = b.fagsak_id
-        JOIN behandling b2 ON b2.fagsak_id = f.id
-        WHERE b.type != 'BLANKETT' AND b.resultat != 'ANNULLERT' AND b.status = 'FERDIGSTILT'
-        AND b2.id = :behandlingId
+        WHERE b.fagsak_id = :fagsakId
+         AND b.type != 'BLANKETT'
+         AND b.resultat != 'ANNULLERT'
+         AND b.status = 'FERDIGSTILT'
         ORDER BY b.opprettet_tid DESC
         LIMIT 1
     """)
-    fun finnSisteIverksatteBehandling(behandlingId: UUID): UUID?
+    fun finnSisteIverksatteBehandling(fagsakId: UUID): UUID?
 
     // language=PostgreSQL
     @Query("""
@@ -82,6 +100,6 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
                  AND b.resultat != 'ANNULLERT'
          ) q WHERE rn = 1 AND type != 'TEKNISK_OPPHØR'
         """)
-    fun finnSisteIverksatteBehandlinger(stønadstype: Stønadstype): Set<UUID>
+    fun finnSisteIverksatteBehandlingerSomIkkeErTekniskOpphør(stønadstype: Stønadstype): Set<UUID>
 
 }
