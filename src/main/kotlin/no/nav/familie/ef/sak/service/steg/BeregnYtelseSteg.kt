@@ -6,9 +6,9 @@ import no.nav.familie.ef.sak.api.beregning.VedtakDto
 import no.nav.familie.ef.sak.api.beregning.VedtakService
 import no.nav.familie.ef.sak.api.beregning.tilInntektsperioder
 import no.nav.familie.ef.sak.api.beregning.tilPerioder
-import no.nav.familie.ef.sak.api.dto.OldAndelTilkjentYtelseDTO
-import no.nav.familie.ef.sak.api.dto.OldTilkjentYtelseDTO
+import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.Behandling
+import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.TilkjentYtelseService
 import org.springframework.stereotype.Service
@@ -37,7 +37,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                         vedtak.inntekter.tilInntektsperioder()
                 )
                         .map { beløpsperiode ->
-                            OldAndelTilkjentYtelseDTO(
+                            AndelTilkjentYtelse(
                                     beløp = beløpsperiode.beløp.toInt(),
                                     stønadFom = beløpsperiode.periode.fradato,
                                     stønadTom = beløpsperiode.periode.tildato,
@@ -56,8 +56,8 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
         tilkjentYtelseService.slettTilkjentYtelseForBehandling(behandling.id)
         if (beløpsperioder.isNotEmpty()) {
             tilkjentYtelseService.opprettTilkjentYtelse(
-                    OldTilkjentYtelseDTO(
-                            aktivIdent,
+                    TilkjentYtelse(
+                            personident = aktivIdent,
                             vedtaksdato = LocalDate.now(),
                             behandlingId = behandling.id,
                             andelerTilkjentYtelse = beløpsperioder

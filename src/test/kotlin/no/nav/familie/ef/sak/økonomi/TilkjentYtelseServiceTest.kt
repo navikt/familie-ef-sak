@@ -26,22 +26,6 @@ class TilkjentYtelseServiceTest {
                                                               tilkjentYtelseRepository = tilkjentYtelseRepository)
 
     @Test
-    fun `hent tilkjent-ytelse-dto`() {
-        val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(antallAndelerTilkjentYtelse = 3)
-        val id = tilkjentYtelse.id
-        every { tilkjentYtelseRepository.findByIdOrNull(id) } returns tilkjentYtelse
-        every { behandlingService.hentBehandling(any()) } returns behandling
-        val dto = tilkjentYtelseService.hentTilkjentYtelseDto(id)
-
-        assertThat(dto.id).isEqualTo(id)
-        assertThat(dto.andelerTilkjentYtelse.size).isEqualTo(3)
-        (0..2).forEach {
-            assertThat(dto.andelerTilkjentYtelse[it].beløp).isEqualTo(tilkjentYtelse.andelerTilkjentYtelse[it].beløp)
-        }
-        verify { tilkjentYtelseRepository.findByIdOrNull(id) }
-    }
-
-    @Test
     internal fun `konsistensavstemming - filtrer andeler har tom dato som er etter`() {
         val datoForAvstemming = LocalDate.of(2021, 2, 1)
         val stønadstype = Stønadstype.OVERGANGSSTØNAD
