@@ -111,7 +111,7 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
     }
 
     @Transactional
-    fun håndterFerdigsitllBehandling(behandling: Behandling): Behandling {
+    fun håndterFerdigstillBehandling(behandling: Behandling): Behandling {
         val behandlingSteg: FerdigstillBehandlingSteg = hentBehandlingSteg(FERDIGSTILLE_BEHANDLING)
 
         return håndterSteg(behandling, behandlingSteg, null)

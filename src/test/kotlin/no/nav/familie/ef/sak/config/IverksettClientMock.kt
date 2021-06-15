@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import no.nav.familie.ef.sak.iverksett.IverksettClient
+import no.nav.familie.kontrakter.ef.iverksett.IverksettStatus
 import no.nav.familie.kontrakter.felles.simulering.BetalingType
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import no.nav.familie.kontrakter.felles.simulering.FagOmrådeKode
@@ -43,6 +44,8 @@ class IverksettClientMock {
                                    mottakerType = MottakerType.BRUKER)))
 
         every { iverksettClient.iverksett(any(), any()) } just Runs
+        every { iverksettClient.iverksettTekniskOpphør(any()) } just Runs
+        every { iverksettClient.hentStatus(any()) } returns IverksettStatus.OK
 
         return iverksettClient
     }

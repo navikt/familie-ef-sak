@@ -19,6 +19,8 @@ import no.nav.familie.ef.sak.repository.domain.Vedtak
 import no.nav.familie.ef.sak.repository.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
 import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsstønad
+import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.prosessering.domene.TaskLogg
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -95,6 +97,8 @@ abstract class OppslagSpringRunnerTest {
                 Grunnlagsdata::class,
                 Behandling::class,
                 Fagsak::class,
+                TaskLogg::class,
+                Task::class
         ).forEach { jdbcAggregateOperations.deleteAll(it.java) }
     }
 

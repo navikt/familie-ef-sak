@@ -8,6 +8,7 @@ import no.nav.familie.kontrakter.ef.infotrygd.OpprettStartBehandlingHendelseDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettStatus
 import no.nav.familie.kontrakter.ef.iverksett.KonsistensavstemmingDto
+import no.nav.familie.kontrakter.ef.iverksett.TekniskOpphørDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import org.springframework.beans.factory.annotation.Qualifier
@@ -52,9 +53,12 @@ class IverksettClient(@Value("\${FAMILIE_EF_IVERKSETT_URL}")
                 .withByteArray("fil", "vedtak", fil.bytes)
                 .build()
         val headers = HttpHeaders().apply { this.add("Content-Type", "multipart/form-data") }
-        postForEntity<Ressurs<DetaljertSimuleringResultat>>(url,
-                                                            request,
-                                                            headers)
+        postForEntity<Any>(url, request, headers)
+    }
+
+    fun iverksettTekniskOpphør(tekniskOpphørDto: TekniskOpphørDto) {
+        val url = URI.create("$familieEfIverksettUri/api/tekniskopphor")
+        postForEntity<Any>(url, tekniskOpphørDto, HttpHeaders().medContentTypeJsonUTF8())
     }
 
     fun hentStatus(behandlingId: UUID): IverksettStatus {

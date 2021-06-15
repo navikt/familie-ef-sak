@@ -23,7 +23,7 @@ class FerdigstillBehandlingTask(private val stegService: StegService,
     override fun doTask(task: Task) {
         val behandlingId = UUID.fromString(task.payload)
         val behandling = behandlingService.hentBehandling(behandlingId)
-        stegService.håndterFerdigsitllBehandling(behandling)
+        stegService.håndterFerdigstillBehandling(behandling)
     }
 
     companion object {

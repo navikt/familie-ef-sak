@@ -63,13 +63,17 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
         return behandlingsjournalpostRepository.findAllByBehandlingId(behandlingId)
     }
 
-    fun opprettBehandling(behandlingType: BehandlingType, fagsakId: UUID): Behandling {
+    fun opprettBehandling(behandlingType: BehandlingType,
+                          fagsakId: UUID,
+                          status: BehandlingStatus = BehandlingStatus.OPPRETTET,
+                          stegType: StegType = StegType.VILKÅR): Behandling {
         return behandlingRepository.insert(Behandling(fagsakId = fagsakId,
                                                       type = behandlingType,
-                                                      steg = StegType.VILKÅR,
-                                                      status = BehandlingStatus.OPPRETTET,
+                                                      steg = stegType,
+                                                      status = status,
                                                       resultat = BehandlingResultat.IKKE_SATT))
     }
+
 
     fun hentBehandling(behandlingId: UUID): Behandling = behandlingRepository.findByIdOrThrow(behandlingId)
 

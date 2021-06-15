@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController
 class EksternBehandlingController(private val pdlClient: PdlClient,
                                   private val behandlingRepository: BehandlingRepository) {
 
+
     /**
      * Blir brukt av mottak for å sjekke om en perosn allerede har en behandling i ef-sak
      * Kunde ha flyttet ut funksjonaliteten i en egen service,
