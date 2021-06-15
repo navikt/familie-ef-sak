@@ -40,11 +40,11 @@ enum class StegType(val rekkefølge: Int,
                    tillattFor = BehandlerRolle.SAKSBEHANDLER,
                    gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
     VEDTA_BLANKETT(rekkefølge = 2,
-        tillattFor = BehandlerRolle.SAKSBEHANDLER,
-        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
+                   tillattFor = BehandlerRolle.SAKSBEHANDLER,
+                   gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
     SEND_TIL_BESLUTTER(rekkefølge = 3,
-        tillattFor = BehandlerRolle.SAKSBEHANDLER,
-        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
+                       tillattFor = BehandlerRolle.SAKSBEHANDLER,
+                       gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
     BESLUTTE_VEDTAK(rekkefølge = 4,
                     tillattFor = BehandlerRolle.BESLUTTER,
                     gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.FATTER_VEDTAK)),
@@ -54,6 +54,9 @@ enum class StegType(val rekkefølge: Int,
     JOURNALFØR_BLANKETT(rekkefølge = 5,
                         tillattFor = BehandlerRolle.SYSTEM,
                         gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)),
+    LAG_SAKSBEHANDLINGSBLANKETT(rekkefølge = 6,
+                                tillattFor = BehandlerRolle.SYSTEM,
+                                gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)),
     JOURNALFØR_VEDTAKSBREV(rekkefølge = 7,
                            tillattFor = BehandlerRolle.SYSTEM,
                            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)),
@@ -68,7 +71,7 @@ enum class StegType(val rekkefølge: Int,
                            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.FERDIGSTILT));
 
     fun displayName(): String {
-        return this.name.replace('_', ' ').toLowerCase().capitalize()
+        return this.name.replace('_', ' ').lowercase().capitalize()
     }
 
     fun kommerEtter(steg: StegType, behandlingType: BehandlingType): Boolean {
@@ -107,9 +110,9 @@ enum class StegType(val rekkefølge: Int,
                     VILKÅR -> BEREGNE_YTELSE
                     BEREGNE_YTELSE -> SEND_TIL_BESLUTTER
                     SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
-                    BESLUTTE_VEDTAK -> JOURNALFØR_VEDTAKSBREV
-                    JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
-                    DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
+                    BESLUTTE_VEDTAK -> VENTE_PÅ_STATUS_FRA_IVERKSETT
+                    VENTE_PÅ_STATUS_FRA_IVERKSETT -> LAG_SAKSBEHANDLINGSBLANKETT
+                    LAG_SAKSBEHANDLINGSBLANKETT -> FERDIGSTILLE_BEHANDLING
                     FERDIGSTILLE_BEHANDLING -> BEHANDLING_FERDIGSTILT
                     BEHANDLING_FERDIGSTILT -> BEHANDLING_FERDIGSTILT
                     else -> throw IllegalStateException("StegType ${displayName()} ugyldig ved ${behandlingType.visningsnavn}")

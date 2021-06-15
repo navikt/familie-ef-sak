@@ -2,7 +2,9 @@ package no.nav.familie.ef.sak.service.steg
 
 import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class BehandlingStegTest {
@@ -14,8 +16,8 @@ internal class BehandlingStegTest {
                        StegType.BEREGNE_YTELSE,
                        StegType.SEND_TIL_BESLUTTER,
                        StegType.BESLUTTE_VEDTAK,
-                       StegType.JOURNALFØR_VEDTAKSBREV,
-                       StegType.DISTRIBUER_VEDTAKSBREV,
+                       StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT,
+                       StegType.LAG_SAKSBEHANDLINGSBLANKETT,
                        StegType.FERDIGSTILLE_BEHANDLING,
                        StegType.BEHANDLING_FERDIGSTILT)
 

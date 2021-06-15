@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.regler.Vilkårsregler
 import no.nav.familie.ef.sak.service.TilgangService
 import no.nav.familie.ef.sak.service.VurderingService
+import no.nav.familie.ef.sak.service.VurderingStegService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -27,6 +28,7 @@ import java.util.UUID
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class VurderingController(private val vurderingService: VurderingService,
+                          private val vurderingStegService: VurderingStegService,
                           private val tilgangService: TilgangService) {
 
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -41,7 +43,7 @@ class VurderingController(private val vurderingService: VurderingService,
             : Ressurs<VilkårsvurderingDto> {
         tilgangService.validerTilgangTilBehandling(vilkårsvurdering.behandlingId)
         try {
-            return Ressurs.success(vurderingService.oppdaterVilkår(vilkårsvurdering))
+            return Ressurs.success(vurderingStegService.oppdaterVilkår(vilkårsvurdering))
         } catch (e: Exception) {
             val delvilkårJson = objectMapper.writeValueAsString(vilkårsvurdering.delvilkårsvurderinger)
             secureLogger.warn("id=${vilkårsvurdering.id}" +
@@ -54,13 +56,13 @@ class VurderingController(private val vurderingService: VurderingService,
     @PostMapping("nullstill")
     fun nullstillVilkår(@RequestBody request: OppdaterVilkårsvurderingDto): Ressurs<VilkårsvurderingDto> {
         tilgangService.validerTilgangTilBehandling(request.behandlingId)
-        return Ressurs.success(vurderingService.nullstillVilkår(request))
+        return Ressurs.success(vurderingStegService.nullstillVilkår(request))
     }
 
     @PostMapping("ikkevurder")
     fun settVilkårTilSkalIkkeVurderes(@RequestBody request: OppdaterVilkårsvurderingDto): Ressurs<VilkårsvurderingDto> {
         tilgangService.validerTilgangTilBehandling(request.behandlingId)
-        return Ressurs.success(vurderingService.settVilkårTilSkalIkkeVurderes(request))
+        return Ressurs.success(vurderingStegService.settVilkårTilSkalIkkeVurderes(request))
     }
 
     @GetMapping("{behandlingId}/vilkar")
