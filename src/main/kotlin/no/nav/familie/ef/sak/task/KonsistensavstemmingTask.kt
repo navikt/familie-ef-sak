@@ -26,6 +26,12 @@ class KonsistensavstemmingTask(
     companion object {
 
         const val TYPE = "utførKonsistensavstemming"
+
+        fun opprettTask(payload: KonsistensavstemmingPayload): Task {
+            return Task(type = TYPE,
+                        payload = objectMapper.writeValueAsString(payload),
+                        triggerTid = payload.triggerTid)
+        }
     }
 
 
