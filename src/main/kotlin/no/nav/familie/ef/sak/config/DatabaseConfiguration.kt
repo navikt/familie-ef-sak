@@ -9,7 +9,6 @@ import no.nav.familie.ef.sak.repository.domain.Fil
 import no.nav.familie.ef.sak.repository.domain.InntektWrapper
 import no.nav.familie.ef.sak.repository.domain.JsonWrapper
 import no.nav.familie.ef.sak.repository.domain.PeriodeWrapper
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus
 import no.nav.familie.ef.sak.repository.domain.søknad.Arbeidssituasjon
 import no.nav.familie.ef.sak.repository.domain.søknad.Dokumentasjon
 import no.nav.familie.ef.sak.repository.domain.søknad.GjelderDeg
@@ -70,7 +69,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
                                             StringTilDokumentConverter(),
                                             YearMonthTilLocalDateConverter(),
                                             LocalDateTilYearMonthConverter(),
-                                            TilkjentYtelseStatusTilStringConverter(),
                                             PropertiesWrapperTilStringConverter(),
                                             StringTilPropertiesWrapperConverter(),
                                             PGobjectTilDelvilkårConverter(),
@@ -148,11 +146,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
     }
 
 
-    @WritingConverter
-    class TilkjentYtelseStatusTilStringConverter : Converter<TilkjentYtelseStatus, String> {
-
-        override fun convert(tilkjentYtelseStatus: TilkjentYtelseStatus) = tilkjentYtelseStatus.name
-    }
 
     @ReadingConverter
     class PGobjectTilDelvilkårConverter : Converter<PGobject, DelvilkårsvurderingWrapper> {

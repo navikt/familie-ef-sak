@@ -1,17 +1,12 @@
 package no.nav.familie.ef.sak.service
 
+import no.nav.familie.ef.sak.api.feilHvis
 import no.nav.familie.ef.sak.iverksett.tilIverksettDto
 import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus.AKTIV
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus.AVSLUTTET
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus.IKKE_KLAR
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus.OPPRETTET
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseStatus.SENDT_TIL_IVERKSETTING
 import no.nav.familie.ef.sak.util.isEqualOrAfter
 import no.nav.familie.kontrakter.ef.iverksett.KonsistensavstemmingTilkjentYtelseDto
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.UUID
@@ -65,19 +60,9 @@ class TilkjentYtelseService(private val behandlingService: BehandlingService,
     }
 
     fun slettTilkjentYtelseForBehandling(behandlingId: UUID) {
-        val eksisterendeTilkjentYtelse = tilkjentYtelseRepository.findByBehandlingId(behandlingId)
-        eksisterendeTilkjentYtelse?.let {
-            when (it.status) {
-                IKKE_KLAR, OPPRETTET -> tilkjentYtelseRepository.deleteById(it.id)
-                SENDT_TIL_IVERKSETTING, AVSLUTTET, AKTIV -> error("Kan ikke reberegne tilkjent ytelse som er ${it.status}")
-            }
-        }
+        feilHvis(behandlingService.hentBehandling(behandlingId).status.behandlingErLåstForVidereRedigering()) { "Kan ikke reberegne tilkjent ytelse for en behandling som er låst for videre redigering" }
+        tilkjentYtelseRepository.findByBehandlingId(behandlingId)?.let { tilkjentYtelseRepository.deleteById(it.id) }
     }
-
-
-    private fun hentTilkjentYtelse(tilkjentYtelseId: UUID) =
-            tilkjentYtelseRepository.findByIdOrNull(tilkjentYtelseId)
-            ?: error("Fant ikke tilkjent ytelse med id $tilkjentYtelseId")
 
 
 }
