@@ -5,7 +5,6 @@ import no.nav.familie.ef.sak.service.steg.StegService
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.util.UUID
@@ -20,11 +19,8 @@ import java.util.UUID
 class PollStatusFraIverksettTask(private val stegService: StegService,
                                  private val behandlingService: BehandlingService) : AsyncTaskStep {
 
-    private val logger = LoggerFactory.getLogger(PollStatusFraIverksettTask::class.java)
-
     override fun doTask(task: Task) {
         val behandlingId = UUID.fromString(task.payload)
-        logger.error("Hva blir id:en " + task.payload)
         val behandling = behandlingService.hentBehandling(behandlingId)
         stegService.håndterPollStatusFraIverksett(behandling)
     }

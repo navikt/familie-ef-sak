@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.service.TekniskOpphørService
 import no.nav.familie.ef.sak.task.PollStatusFraIverksettTask
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.prosessering.domene.TaskRepository
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -29,7 +30,9 @@ internal class TekniskOpphørTest : OppslagSpringRunnerTest() {
         behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.FERDIGSTILT))
 
         tekniskOpphørService.håndterTeknisktOpphør(PersonIdent(ident))
-        taskRepository.findAll().first().let { pollStatusFraIverksettTask.doTask(it)}
+        val task = taskRepository.findAll().first()
+        assertThat(task.type).isEqualTo(PollStatusFraIverksettTask.TYPE)
+        task.let { pollStatusFraIverksettTask.doTask(it)}
 
     }
 
