@@ -87,14 +87,25 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `eksistererBehandlingSomIkkeErBlankett`() {
+    internal fun `finnSisteBehandlingSomIkkeErBlankett`() {
         val personidenter = setOf("1", "2")
         val fagsak = fagsakRepository.insert(fagsak(setOf(FagsakPerson("1"))))
-        behandlingRepository.insert(behandling(fagsak))
+        val behandling = behandlingRepository.insert(behandling(fagsak))
 
-        assertThat(behandlingRepository.eksistererBehandlingSomIkkeErBlankett(OVERGANGSSTØNAD, personidenter)).isTrue
-        assertThat(behandlingRepository.eksistererBehandlingSomIkkeErBlankett(OVERGANGSSTØNAD, setOf("3"))).isFalse
-        assertThat(behandlingRepository.eksistererBehandlingSomIkkeErBlankett(BARNETILSYN, personidenter)).isFalse
+        assertThat(behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(OVERGANGSSTØNAD, personidenter))
+                .isEqualTo(behandling)
+        assertThat(behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(OVERGANGSSTØNAD, setOf("3"))).isNull()
+        assertThat(behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(BARNETILSYN, personidenter)).isNull()
+    }
+
+    @Test
+    internal fun `finnSisteBehandlingSomIkkeErBlankett - skal returnere teknisk opphør`() {
+        val personidenter = setOf("1", "2")
+        val fagsak = fagsakRepository.insert(fagsak(setOf(FagsakPerson("1"))))
+        val behandling = behandlingRepository.insert(behandling(fagsak, type = BehandlingType.TEKNISK_OPPHØR))
+
+        assertThat(behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(OVERGANGSSTØNAD, personidenter))
+                .isEqualTo(behandling)
     }
 
     @Test
@@ -103,7 +114,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         val fagsak = fagsakRepository.insert(fagsak(setOf(FagsakPerson("1"))))
         behandlingRepository.insert(behandling(fagsak, type = BehandlingType.BLANKETT))
 
-        assertThat(behandlingRepository.eksistererBehandlingSomIkkeErBlankett(OVERGANGSSTØNAD, personidenter)).isFalse
+        assertThat(behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(OVERGANGSSTØNAD, personidenter)).isNull()
     }
 
     @Test
@@ -138,7 +149,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `skal finne nyeste behandlingId`() {
+    internal fun `finnSisteIverksatteBehandling skal finne id til siste behandling som er ferdigstilt, ikke annulert eller blankett`() {
         val fagsak = fagsakRepository.insert(fagsak(setOf(FagsakPerson("1"))))
         val annullertFørstegangsbehandling = behandling(fagsak).copy(type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                                                      status = FERDIGSTILT,
@@ -165,8 +176,9 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         behandlingRepository.insert(blankett)
         behandlingRepository.insert(annullertRevurdering)
         behandlingRepository.insert(revurderingUnderArbeid)
-        val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(revurderingUnderArbeid.id)
-        assertThat(sisteIverksatteBehandling).isEqualTo(førstegangsbehandling.id)
+        assertThat(behandlingRepository.finnSisteIverksatteBehandling(fagsak.id)).isEqualTo(førstegangsbehandling.id)
+        assertThat(behandlingRepository.finnSisteIverksatteBehandling(OVERGANGSSTØNAD, setOf("1"))?.id)
+                .isEqualTo(førstegangsbehandling.id)
     }
 
     @Test
@@ -176,7 +188,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
                                                             status = BehandlingStatus.IVERKSETTER_VEDTAK,
                                                             resultat = BehandlingResultat.INNVILGET)
         behandlingRepository.insert(førstegangsbehandling)
-        val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(førstegangsbehandling.id)
+        val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(førstegangsbehandling.fagsakId)
         assertThat(sisteIverksatteBehandling).isNull()
     }
 
