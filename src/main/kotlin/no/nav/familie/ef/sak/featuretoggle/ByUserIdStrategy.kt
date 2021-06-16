@@ -13,11 +13,15 @@ class ByUserIdStrategy : Strategy {
     }
 
     override fun isEnabled(map: MutableMap<String, String>): Boolean {
-        secureLogger.info("map values " +  map.values)
-        secureLogger.info("map keys " +  map.keys)
+        secureLogger.info("map values " + map.values)
+        secureLogger.info("map keys " + map.keys)
         return map["user"]
                        ?.split(',')
-                       ?.any { SikkerhetContext.hentSaksbehandler(strict = true) === it }
+                       ?.any {
+                           secureLogger.info("vad er it $it")
+                           secureLogger.info("vad er hentSaksbehandler " + SikkerhetContext.hentSaksbehandler(strict = true))
+                           SikkerhetContext.hentSaksbehandler(strict = true) == it
+                       }
                ?: false
     }
 }
