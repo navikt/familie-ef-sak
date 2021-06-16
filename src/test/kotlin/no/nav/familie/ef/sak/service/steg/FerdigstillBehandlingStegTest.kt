@@ -28,19 +28,19 @@ internal class FerdigstillBehandlingStegTest {
     }
 
     @Test
-    internal fun `skal opprette task for å hvis behandlingen er førstegångsbehandling`() {
+    internal fun `skal opprette publiseringstask hvis behandlingen er førstegagsbehandling`() {
         task.utførSteg(behandling(fagsak, type = BehandlingType.FØRSTEGANGSBEHANDLING), null)
         verify(exactly = 1) { taskRepository.save(any()) }
     }
 
     @Test
-    internal fun `skal opprette task for å hvis behandlingen er revurdering`() {
+    internal fun `skal opprette publiseringstask hvis behandlingen er revurdering`() {
         task.utførSteg(behandling(fagsak, type = BehandlingType.REVURDERING), null)
         verify(exactly = 1) { taskRepository.save(any()) }
     }
 
     @Test
-    internal fun `skal ikke opprette task for å hvis behandlingen er type blankett`() {
+    internal fun `skal ikke opprette publiseringstask hvis behandlingen er type blankett`() {
         task.utførSteg(behandling(fagsak, type = BehandlingType.BLANKETT), null)
         verify(exactly = 0) { taskRepository.save(any()) }
     }
