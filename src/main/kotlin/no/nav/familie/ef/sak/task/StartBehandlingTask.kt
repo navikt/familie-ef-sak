@@ -3,12 +3,14 @@ package no.nav.familie.ef.sak.task
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.service.FagsakService
+import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.ef.felles.StønadType
 import no.nav.familie.kontrakter.ef.infotrygd.OpprettStartBehandlingHendelseDto
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.springframework.stereotype.Service
+import java.util.Properties
 import java.util.UUID
 
 @Service
@@ -30,9 +32,14 @@ class StartBehandlingTask(private val iverksettClient: IverksettClient,
 
     companion object {
 
-        fun opprettTask(fagsakId: UUID): Task =
+        fun opprettTask(fagsakId: UUID, personIdent: String): Task =
                 Task(type = TYPE,
-                     payload = fagsakId.toString())
+                     payload = fagsakId.toString(),
+                     properties = Properties().apply {
+                         this["saksbehandler"] = SikkerhetContext.hentSaksbehandler()
+                         this["fagsakId"] = fagsakId.toString()
+                         this["personIdent"] = personIdent
+                     })
 
 
         const val TYPE = "startBehandlingTask"

@@ -76,8 +76,9 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
 
     private fun ferdigstillOppgave(behandling: Behandling) {
         val oppgavetype = Oppgavetype.GodkjenneVedtak
+        val aktivIdent = fagsakService.hentAktivIdent(behandling.fagsakId)
         oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype, behandling)?.let {
-            taskRepository.save(FerdigstillOppgaveTask.opprettTask(behandlingId = behandling.id, oppgavetype))
+            taskRepository.save(FerdigstillOppgaveTask.opprettTask(behandlingId = behandling.id, oppgavetype, it.gsakOppgaveId, aktivIdent))
         }
     }
 

@@ -44,6 +44,8 @@ class OpprettOppgaveTask(private val oppgaveService: OppgaveService) : AsyncTask
                         payload = objectMapper.writeValueAsString(data),
                         properties = Properties().apply {
                             this["saksbehandler"] = SikkerhetContext.hentSaksbehandler()
+                            this["behandlingId"] = data.behandlingId.toString()
+                            this["oppgavetype"] = data.oppgavetype.name
                         })
 
         }

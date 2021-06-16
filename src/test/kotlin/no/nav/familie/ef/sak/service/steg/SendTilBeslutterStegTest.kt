@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.domain.Fagsak
 import no.nav.familie.ef.sak.repository.domain.FagsakPerson
+import no.nav.familie.ef.sak.repository.domain.Oppgave
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
@@ -41,7 +42,7 @@ internal class SendTilBeslutterStegTest {
 
 
     private val beslutteVedtakSteg =
-            SendTilBeslutterSteg(taskRepository, oppgaveService, behandlingService, vedtaksbrevRepository)
+            SendTilBeslutterSteg(taskRepository, oppgaveService, fagsakService, behandlingService, vedtaksbrevRepository)
     private val fagsak = Fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD,
                                 søkerIdenter = setOf(FagsakPerson(ident = "12345678901")))
     private val vedtaksbrev = Vedtaksbrev(behandlingId = UUID.randomUUID(),
@@ -65,6 +66,9 @@ internal class SendTilBeslutterStegTest {
             fagsakService.hentFagsak(any())
         } returns fagsak
         every {
+            fagsakService.hentAktivIdent(any())
+        } returns "12345678901"
+        every {
             taskRepository.save(capture(taskSlot))
         } returns Task("", "", Properties())
         every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(any(), any()) } returns null
@@ -86,7 +90,11 @@ internal class SendTilBeslutterStegTest {
 
 
     private fun utførOgVerifiserKall(oppgavetype: Oppgavetype) {
-        every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype, any()) } returns mockk()
+        every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype, any()) } returns Oppgave(id = UUID.randomUUID(),
+                                                                                                     behandlingId = behandling.id,
+                                                                                                     gsakOppgaveId = 123L,
+                                                                                                     type = Oppgavetype.BehandleSak,
+                                                                                                     erFerdigstilt = false)
 
         utførSteg()
 

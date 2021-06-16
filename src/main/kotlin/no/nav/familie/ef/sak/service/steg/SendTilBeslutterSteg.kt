@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.service.BehandlingService
+import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.OppgaveService
 import no.nav.familie.ef.sak.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.task.OpprettOppgaveTask
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service
 @Service
 class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
                            private val oppgaveService: OppgaveService,
+                           private val fagsakService: FagsakService,
                            private val behandlingService: BehandlingService,
                            private val vedtaksbrevRepository: VedtaksbrevRepository) : BehandlingSteg<Void?> {
 
@@ -39,8 +41,9 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
     }
 
     private fun ferdigstillOppgave(behandling: Behandling, oppgavetype: Oppgavetype) {
+        val aktivIdent = fagsakService.hentAktivIdent(behandling.fagsakId)
         oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype, behandling)?.let {
-            taskRepository.save(FerdigstillOppgaveTask.opprettTask(behandlingId = behandling.id, oppgavetype))
+            taskRepository.save(FerdigstillOppgaveTask.opprettTask(behandlingId = behandling.id, oppgavetype, it.gsakOppgaveId, aktivIdent))
         }
     }
 
