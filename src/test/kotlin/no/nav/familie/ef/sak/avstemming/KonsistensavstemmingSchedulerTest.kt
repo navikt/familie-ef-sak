@@ -37,7 +37,7 @@ internal class KonsistensavstemmingSchedulerTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `skal ikke oppdatere jobb som er satt til en tre dager frem i tid`() {
+    internal fun `skal ikke oppdatere jobb som er satt til tre dager frem i tid`() {
         repository.insert(KonsistensavstemmingJobb(triggerdato = LocalDate.now().plusDays(3)))
 
         konsistensavstemmingScheduler.opprettTasks()
