@@ -43,7 +43,8 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
     }
 
     override fun utførOgReturnerNesteSteg(behandling: Behandling, data: BeslutteVedtakDto): StegType {
-        val beslutter = totrinnskontrollService.lagreTotrinnskontrollOgReturnerBehandler(behandling, data)
+        val saksbehandler = totrinnskontrollService.lagreTotrinnskontrollOgReturnerBehandler(behandling, data)
+        val beslutter = SikkerhetContext.hentSaksbehandler()
 
         ferdigstillOppgave(behandling)
 
@@ -61,7 +62,7 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
             }
         } else {
             vedtaksbrevRepository.deleteById(behandling.id)
-            opprettBehandleUnderkjentVedtakOppgave(behandling, beslutter)
+            opprettBehandleUnderkjentVedtakOppgave(behandling, saksbehandler)
             StegType.SEND_TIL_BESLUTTER
         }
     }
