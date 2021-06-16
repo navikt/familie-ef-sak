@@ -34,7 +34,7 @@ class PollStatusFraIverksettTask(private val stegService: StegService,
                      payload = behandlingId.toString(),
                      properties = Properties().apply {
                          this["behandlingId"] = behandlingId.toString()
-                     }).copy(triggerTid = LocalDateTime.now().plusMinutes(18))
+                     }).copy(triggerTid = LocalDateTime.now().plusMinutes(5))
 
 
 
