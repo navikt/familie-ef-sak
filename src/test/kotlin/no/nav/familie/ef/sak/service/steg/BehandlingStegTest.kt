@@ -19,6 +19,7 @@ internal class BehandlingStegTest {
                        StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT,
                        StegType.LAG_SAKSBEHANDLINGSBLANKETT,
                        StegType.FERDIGSTILLE_BEHANDLING,
+                       StegType.PUBLISER_VEDTAKSHENDELSE,
                        StegType.BEHANDLING_FERDIGSTILT)
 
         validerSteg(riktigRekkefølge, BehandlingType.FØRSTEGANGSBEHANDLING)

@@ -2,11 +2,13 @@ package no.nav.familie.ef.sak.task
 
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.steg.StegService
+import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
+import java.util.Properties
 import java.util.UUID
 
 @Service
@@ -30,7 +32,10 @@ class PollStatusFraIverksettTask(private val stegService: StegService,
         fun opprettTask(behandlingId: UUID): Task =
                 Task(type = TYPE,
                      payload = behandlingId.toString(),
-                     triggerTid = LocalDateTime.now().plusMinutes(18))
+                     properties = Properties().apply {
+                         this["behandlingId"] = behandlingId.toString()
+                     }).copy(triggerTid = LocalDateTime.now().plusMinutes(18))
+
 
 
         const val TYPE = "pollerStatusFraIverksett"

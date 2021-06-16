@@ -34,8 +34,8 @@ enum class StegType(val rekkefølge: Int,
                     private val gyldigIKombinasjonMedStatus: List<BehandlingStatus>) {
 
     VILKÅR(rekkefølge = 1,
-        tillattFor = BehandlerRolle.SAKSBEHANDLER,
-        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.OPPRETTET, BehandlingStatus.UTREDES)),
+           tillattFor = BehandlerRolle.SAKSBEHANDLER,
+           gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.OPPRETTET, BehandlingStatus.UTREDES)),
     BEREGNE_YTELSE(rekkefølge = 2,
                    tillattFor = BehandlerRolle.SAKSBEHANDLER,
                    gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
@@ -66,7 +66,10 @@ enum class StegType(val rekkefølge: Int,
     FERDIGSTILLE_BEHANDLING(rekkefølge = 9,
                             tillattFor = BehandlerRolle.SYSTEM,
                             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)),
-    BEHANDLING_FERDIGSTILT(rekkefølge = 10,
+    PUBLISER_VEDTAKSHENDELSE(rekkefølge = 10,
+                             tillattFor = BehandlerRolle.SYSTEM,
+                             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.FERDIGSTILT)),
+    BEHANDLING_FERDIGSTILT(rekkefølge = 11,
                            tillattFor = BehandlerRolle.SYSTEM,
                            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.FERDIGSTILT));
 
@@ -110,7 +113,8 @@ enum class StegType(val rekkefølge: Int,
                     BESLUTTE_VEDTAK -> VENTE_PÅ_STATUS_FRA_IVERKSETT
                     VENTE_PÅ_STATUS_FRA_IVERKSETT -> LAG_SAKSBEHANDLINGSBLANKETT
                     LAG_SAKSBEHANDLINGSBLANKETT -> FERDIGSTILLE_BEHANDLING
-                    FERDIGSTILLE_BEHANDLING -> BEHANDLING_FERDIGSTILT
+                    FERDIGSTILLE_BEHANDLING -> PUBLISER_VEDTAKSHENDELSE
+                    PUBLISER_VEDTAKSHENDELSE -> BEHANDLING_FERDIGSTILT
                     BEHANDLING_FERDIGSTILT -> BEHANDLING_FERDIGSTILT
                     else -> throw IllegalStateException("StegType ${displayName()} ugyldig ved ${behandlingType.visningsnavn}")
                 }
