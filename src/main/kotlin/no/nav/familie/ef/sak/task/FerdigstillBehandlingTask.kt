@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.task
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.steg.StegService
+import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -30,7 +31,9 @@ class FerdigstillBehandlingTask(private val stegService: StegService,
         fun opprettTask(behandling: Behandling): Task =
                 Task(type = TYPE,
                      payload = behandling.id.toString(),
-                     triggerTid = LocalDateTime.now().plusMinutes(15))
+                     properties = Properties().apply {
+                         this["behandlingId"] = behandling.id.toString()
+                     })
 
         const val TYPE = "ferdigstillBehandling"
     }
