@@ -9,6 +9,6 @@ import org.springframework.stereotype.Service
 class IverksettService(private val taskRepository: TaskRepository) {
 
     fun startBehandling(fagsak: Fagsak) {
-        taskRepository.save(StartBehandlingTask.opprettTask(fagsakId = fagsak.id))
+        taskRepository.save(StartBehandlingTask.opprettTask(fagsakId = fagsak.id, personIdent = fagsak.hentAktivIdent() ))
     }
 }

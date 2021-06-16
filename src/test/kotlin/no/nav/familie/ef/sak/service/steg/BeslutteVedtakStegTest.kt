@@ -21,6 +21,7 @@ import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.domain.Fagsak
 import no.nav.familie.ef.sak.repository.domain.FagsakPerson
 import no.nav.familie.ef.sak.repository.domain.Fil
+import no.nav.familie.ef.sak.repository.domain.Oppgave
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
@@ -71,6 +72,7 @@ internal class BeslutteVedtakStegTest {
                                 søkerIdenter = setOf(FagsakPerson(ident = "12345678901")))
     private val behandlingId = UUID.randomUUID()
 
+    private val oppgave = Oppgave(id = UUID.randomUUID(), behandlingId = behandlingId, gsakOppgaveId = 123L, type = Oppgavetype.BehandleSak, erFerdigstilt = false)
     private lateinit var taskSlot: CapturingSlot<Task>
 
 
@@ -84,7 +86,7 @@ internal class BeslutteVedtakStegTest {
         every {
             taskRepository.save(capture(taskSlot))
         } returns Task("", "", Properties())
-        every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(any(), any()) } returns mockk()
+        every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(any(), any()) } returns oppgave
         every { vedtaksbrevRepository.deleteById(any()) } just Runs
         every { featureToggleService.isEnabled(any()) } returns false
         every { iverksettingDtoMapper.tilDto(any(), any()) } returns mockk()

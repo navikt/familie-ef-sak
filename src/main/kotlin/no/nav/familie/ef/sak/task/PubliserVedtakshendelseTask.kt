@@ -5,6 +5,7 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.springframework.stereotype.Service
+import java.util.Properties
 import java.util.UUID
 
 @Service
@@ -21,7 +22,10 @@ class PubliserVedtakshendelseTask(private val stegService: StegService) : AsyncT
 
         fun opprettTask(behandlingId: UUID): Task =
                 Task(type = TYPE,
-                     payload = behandlingId.toString())
+                     payload = behandlingId.toString(),
+                     properties = Properties().apply {
+                         this["behandlingId"] = behandlingId.toString()
+                     })
 
         const val TYPE = "publiserVedtakshendelse"
     }
