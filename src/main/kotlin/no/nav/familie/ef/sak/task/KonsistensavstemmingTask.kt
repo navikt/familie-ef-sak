@@ -32,7 +32,7 @@ class KonsistensavstemmingTask(
             return Task(type = TYPE,
                         payload = objectMapper.writeValueAsString(payload),
                         properties = Properties().apply {
-                            this["stønadstype"] = payload.stønadstype
+                            this["stønadstype"] = payload.stønadstype.name
                         }).copy(triggerTid = payload.triggerTid)
         }
     }
