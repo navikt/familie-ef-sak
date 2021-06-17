@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
 import com.github.tomakehurst.wiremock.WireMockServer
+import no.nav.familie.ef.sak.avstemming.KonsistensavstemmingJobb
 import no.nav.familie.ef.sak.blankett.Blankett
 import no.nav.familie.ef.sak.config.RolleConfig
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.database.DbContainerInitializer
@@ -83,22 +84,22 @@ abstract class OppslagSpringRunnerTest {
     }
 
     private fun resetDatabase() {
-        listOf(
-                Søknad::class,
-                SøknadsskjemaOvergangsstønad::class,
-                TilkjentYtelse::class,
-                Oppgave::class,
-                Vilkårsvurdering::class,
-                Behandlingshistorikk::class,
-                Vedtaksbrev::class,
-                Blankett::class,
-                Vedtak::class,
-                Behandlingsjournalpost::class,
-                Grunnlagsdata::class,
-                Behandling::class,
-                Fagsak::class,
-                TaskLogg::class,
-                Task::class
+        listOf(KonsistensavstemmingJobb::class,
+               Søknad::class,
+               SøknadsskjemaOvergangsstønad::class,
+               TilkjentYtelse::class,
+               Oppgave::class,
+               Vilkårsvurdering::class,
+               Behandlingshistorikk::class,
+               Vedtaksbrev::class,
+               Blankett::class,
+               Vedtak::class,
+               Behandlingsjournalpost::class,
+               Grunnlagsdata::class,
+               Behandling::class,
+               Fagsak::class,
+               TaskLogg::class,
+               Task::class
         ).forEach { jdbcAggregateOperations.deleteAll(it.java) }
     }
 
