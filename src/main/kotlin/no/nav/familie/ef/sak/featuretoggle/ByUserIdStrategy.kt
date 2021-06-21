@@ -12,7 +12,7 @@ class ByUserIdStrategy : Strategy {
     override fun isEnabled(map: MutableMap<String, String>): Boolean {
         return map["user"]
                        ?.split(',')
-                       ?.any { SikkerhetContext.hentSaksbehandler(strict = true) === it }
+                       ?.any { SikkerhetContext.hentSaksbehandler(strict = true) == it }
                ?: false
     }
 }

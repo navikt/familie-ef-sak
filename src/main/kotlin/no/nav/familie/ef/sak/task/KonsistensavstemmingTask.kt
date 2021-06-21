@@ -9,6 +9,7 @@ import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
+import java.util.Properties
 
 data class KonsistensavstemmingPayload(val stønadstype: Stønadstype, val triggerTid: LocalDateTime)
 
@@ -26,6 +27,14 @@ class KonsistensavstemmingTask(
     companion object {
 
         const val TYPE = "utførKonsistensavstemming"
+
+        fun opprettTask(payload: KonsistensavstemmingPayload): Task {
+            return Task(type = TYPE,
+                        payload = objectMapper.writeValueAsString(payload),
+                        properties = Properties().apply {
+                            this["stønadstype"] = payload.stønadstype.name
+                        }).copy(triggerTid = payload.triggerTid)
+        }
     }
 
 
