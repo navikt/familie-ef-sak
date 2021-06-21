@@ -7,6 +7,7 @@ import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
+import java.util.Properties
 import java.util.UUID
 
 @Service
