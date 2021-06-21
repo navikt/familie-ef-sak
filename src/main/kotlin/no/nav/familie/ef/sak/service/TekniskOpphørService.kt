@@ -6,7 +6,7 @@ import no.nav.familie.ef.sak.repository.BehandlingRepository
 import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.service.steg.StegType
-import no.nav.familie.ef.sak.task.PollStatusFraIverksettTask
+import no.nav.familie.ef.sak.task.PollStatusTekniskOpphør
 import no.nav.familie.kontrakter.ef.felles.StønadType
 import no.nav.familie.kontrakter.ef.iverksett.TekniskOpphørDto
 import no.nav.familie.kontrakter.felles.PersonIdent
@@ -41,7 +41,7 @@ class TekniskOpphørService(val behandlingService: BehandlingService,
         val tilkjentYtelseTilOpphør = opprettTilkjentYtelse(behandlingId = nyBehandling.id,
                                                             personIdent = aktivIdent)
 
-        taskRepository.save(PollStatusFraIverksettTask.opprettTask(nyBehandling.id))
+        taskRepository.save(PollStatusTekniskOpphør.opprettTask(nyBehandling.id))
 
         iverksettClient.iverksettTekniskOpphør(TekniskOpphørDto(forrigeBehandlingId = sisteFerdigstilteBehandling.id,
                                                                 saksbehandlerId = tilkjentYtelseTilOpphør.sporbar.opprettetAv,
