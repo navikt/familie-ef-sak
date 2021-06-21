@@ -49,6 +49,9 @@ internal class AdresseMapperTest {
         assertThat(mapper.tilAdresse(bostedsadresse.copy(coAdressenavn = "co")).visningsadresse)
                 .isEqualTo("c/o co, Charlies vei 13 b, tilleggsnavn, 0575 Oslo")
 
+        assertThat(mapper.tilAdresse(bostedsadresse.copy(coAdressenavn = "")).visningsadresse)
+                .isEqualTo("Charlies vei 13 b, tilleggsnavn, 0575 Oslo")
+
         assertThat(mapper.tilAdresse(bostedsadresse.copy(vegadresse = null)).visningsadresse)
                 .withFailMessage("Skal skrive ut matrikkeladresse når vegadresse er null")
                 .isEqualTo("tilleggsnavn, bruksenhet, Oslo")

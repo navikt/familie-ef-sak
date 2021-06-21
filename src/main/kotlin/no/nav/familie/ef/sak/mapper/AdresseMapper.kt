@@ -86,7 +86,10 @@ class AdresseMapper(private val kodeverkService: KodeverkService) {
         return join(coAdresse(kontaktadresse.coAdressenavn), adresse)
     }
 
-    private fun coAdresse(coAdressenavn: String?): String? = coAdressenavn?.let { "c/o $it" }
+    private fun coAdresse(coAdressenavn: String?): String? {
+        if (coAdressenavn.isNullOrBlank()) return null
+        return "c/o $coAdressenavn"
+    }
 
     //må feltet "postboks" ha med "postboks" i strengen? "postboks ${postboks}" ?
     private fun tilFormatertAdresse(postboksadresse: Postboksadresse, gjeldendeDato: LocalDate): String? =
