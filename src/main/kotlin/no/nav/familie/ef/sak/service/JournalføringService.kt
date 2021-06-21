@@ -63,6 +63,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         ferdigstillJournalføring(journalpostId, journalføringRequest.journalførendeEnhet)
         ferdigstillJournalføringsoppgave(journalføringRequest)
 
+        // TODO:  opprett Task(type=behandlingsstatistikk, behandlingId, gjeldendeTidspunkt, hendelse=mottatt, gjeldendeSaksbehandler)
         return opprettSaksbehandlingsoppgave(behandling, journalføringRequest.navIdent)
 
     }

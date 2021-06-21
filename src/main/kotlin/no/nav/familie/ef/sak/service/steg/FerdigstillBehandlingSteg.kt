@@ -23,6 +23,7 @@ class FerdigstillBehandlingSteg(private val behandlingService: BehandlingService
 
         if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING || behandling.type == BehandlingType.REVURDERING) {
             taskRepository.save(PubliserVedtakshendelseTask.opprettTask(behandling.id))
+            // TODO: opprette Task for behandlingsstatistikk "FERDIG"
         } else if (behandling.type == BehandlingType.BLANKETT) {
             //ignore
         } else {

@@ -55,6 +55,7 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
                 val iverksettDto = iverksettingDtoMapper.tilDto(behandling, beslutter)
                 iverksettClient.iverksett(iverksettDto, fil)
                 opprettPollForStatusOppgave(behandling.id)
+                // TODO: opprette Task for behandlingsstatistikk - både hendelse vedtatt og hendelse besluttet
                 StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT
             } else {
                 opprettTaskForJournalførBlankett(behandling)
