@@ -87,8 +87,19 @@ class AdresseMapper(private val kodeverkService: KodeverkService) {
     }
 
     private fun coAdresse(coAdressenavn: String?): String? {
-        if (coAdressenavn.isNullOrBlank()) return null
+        if (coAdressenavn.isNullOrBlank()) {
+            return null
+        } else if (harPrefiks(coAdressenavn)) {
+            return coAdressenavn
+        }
         return "c/o $coAdressenavn"
+    }
+
+    private fun harPrefiks(coAdressenavn: String): Boolean {
+        return coAdressenavn.startsWith("c/o", true)
+               || coAdressenavn.startsWith("V/", true)
+               || coAdressenavn.startsWith("DBO v/", true)
+               || coAdressenavn.startsWith("v/DBO", true)
     }
 
     //må feltet "postboks" ha med "postboks" i strengen? "postboks ${postboks}" ?

@@ -68,6 +68,24 @@ internal class AdresseMapperTest {
     }
 
     @Test
+    internal fun `Skal ikke endre format på coAdresse hvis prefiks finnes fra før`() {
+        assertThat(mapper.tilAdresse(bostedsadresse.copy(coAdressenavn = "c/o co")).visningsadresse)
+                .isEqualTo("c/o co, Charlies vei 13 b, tilleggsnavn, 0575 Oslo")
+
+        assertThat(mapper.tilAdresse(bostedsadresse.copy(coAdressenavn = "C/O co")).visningsadresse)
+                .isEqualTo("C/O co, Charlies vei 13 b, tilleggsnavn, 0575 Oslo")
+
+        assertThat(mapper.tilAdresse(bostedsadresse.copy(coAdressenavn = "V/ co")).visningsadresse)
+                .isEqualTo("V/ co, Charlies vei 13 b, tilleggsnavn, 0575 Oslo")
+
+        assertThat(mapper.tilAdresse(bostedsadresse.copy(coAdressenavn = "v/DBO co")).visningsadresse)
+                .isEqualTo("v/DBO co, Charlies vei 13 b, tilleggsnavn, 0575 Oslo")
+
+        assertThat(mapper.tilAdresse(bostedsadresse.copy(coAdressenavn = "DBO v/ co")).visningsadresse)
+                .isEqualTo("DBO v/ co, Charlies vei 13 b, tilleggsnavn, 0575 Oslo")
+    }
+
+    @Test
     internal fun `Skal kalle på hentPoststed med gyldigFraOgMed når gyldigFraOgMed finnes`() {
         mapper.tilAdresse(bostedsadresse)
         verify { kodeverkService.hentPoststed(any(), bostedsadresse.gyldigFraOgMed!!) }
@@ -75,7 +93,7 @@ internal class AdresseMapperTest {
 
     @Test
     internal fun `skal håndtere feilregistrert dato som null`() {
-        val adresse = mapper.tilAdresse(bostedsadresse.copy(angittFlyttedato = LocalDate.of(1,1,1)))
+        val adresse = mapper.tilAdresse(bostedsadresse.copy(angittFlyttedato = LocalDate.of(1, 1, 1)))
         assertThat(adresse.angittFlyttedato).isNull()
     }
 
