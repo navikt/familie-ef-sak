@@ -21,6 +21,13 @@ fun List<VedtaksperiodeDto>.tilPerioder(): List<Periode> =
             )
         }
 
+fun ÅrMånedPeriode.tilPerioder(): Periode =
+        Periode(
+                fradato = this.årMånedFra.atDay(1),
+                tildato = this.årMånedTil.atEndOfMonth(),
+        )
+
+
 fun List<VedtaksperiodeDto>.tilDomene(): List<Vedtaksperiode> =
         this.map {
             Vedtaksperiode(
