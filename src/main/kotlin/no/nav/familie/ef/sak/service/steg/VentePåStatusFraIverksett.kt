@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.task.LagSaksbehandlingsblankettTask
 import no.nav.familie.kontrakter.ef.iverksett.IverksettStatus
 import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.error.TaskExceptionUtenStackTrace
 import org.springframework.stereotype.Service
 
 @Service
@@ -14,7 +15,7 @@ class VentePåStatusFraIverksett(private val iverksettClient: IverksettClient, p
         return iverksettClient.hentStatus(behandling.id).let {
             when (it) {
                 IverksettStatus.OK -> opprettLagSaksbehandlingsblankettTask(behandling)
-                else -> throw error("Mottok status $it fra iverksett for behandlingId=${behandling.id}")
+                else -> throw TaskExceptionUtenStackTrace("Mottok status $it fra iverksett for behandlingId=${behandling.id}")
             }
         }
     }
