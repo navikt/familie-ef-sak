@@ -7,7 +7,7 @@ import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 @Service
 @TaskStepBeskrivelse(taskStepType = PollStatusTekniskOpphør.TYPE,
