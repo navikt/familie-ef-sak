@@ -51,6 +51,9 @@ enum class StegType(val rekkefølge: Int,
     VENTE_PÅ_STATUS_FRA_IVERKSETT(rekkefølge = 5,
                                   tillattFor = BehandlerRolle.SYSTEM,
                                   gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)),
+    VENTE_PÅ_TEKNISK_OPPHØR_STATUS(rekkefølge = 5,
+                                  tillattFor = BehandlerRolle.SYSTEM,
+                                  gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)),
     JOURNALFØR_BLANKETT(rekkefølge = 5,
                         tillattFor = BehandlerRolle.SYSTEM,
                         gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)),
@@ -89,7 +92,7 @@ enum class StegType(val rekkefølge: Int,
         return when (behandlingType) {
             BehandlingType.TEKNISK_OPPHØR ->
                 when (this) {
-                    VENTE_PÅ_STATUS_FRA_IVERKSETT -> FERDIGSTILLE_BEHANDLING
+                    VENTE_PÅ_TEKNISK_OPPHØR_STATUS-> FERDIGSTILLE_BEHANDLING
                     FERDIGSTILLE_BEHANDLING -> BEHANDLING_FERDIGSTILT
                     BEHANDLING_FERDIGSTILT -> BEHANDLING_FERDIGSTILT
                     else -> throw IllegalStateException("StegType ${displayName()} ugyldig ved ${behandlingType.visningsnavn}")

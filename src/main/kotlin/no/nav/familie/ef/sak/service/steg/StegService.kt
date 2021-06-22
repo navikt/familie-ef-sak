@@ -23,6 +23,7 @@ import no.nav.familie.ef.sak.service.steg.StegType.PUBLISER_VEDTAKSHENDELSE
 import no.nav.familie.ef.sak.service.steg.StegType.SEND_TIL_BESLUTTER
 import no.nav.familie.ef.sak.service.steg.StegType.VEDTA_BLANKETT
 import no.nav.familie.ef.sak.service.steg.StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT
+import no.nav.familie.ef.sak.service.steg.StegType.VENTE_PÅ_TEKNISK_OPPHØR_STATUS
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -93,6 +94,13 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
     @Transactional
     fun håndterPollStatusFraIverksett(behandling: Behandling): Behandling {
         val behandlingSteg: VentePåStatusFraIverksett = hentBehandlingSteg(VENTE_PÅ_STATUS_FRA_IVERKSETT)
+
+        return håndterSteg(behandling, behandlingSteg, null)
+    }
+
+    @Transactional
+    fun håndterPollStatusTekniskOpphør(behandling: Behandling): Behandling {
+        val behandlingSteg: VentePåTekniskOpphørStatus = hentBehandlingSteg(VENTE_PÅ_TEKNISK_OPPHØR_STATUS)
 
         return håndterSteg(behandling, behandlingSteg, null)
     }
