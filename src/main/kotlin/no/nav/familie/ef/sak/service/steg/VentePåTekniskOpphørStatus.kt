@@ -14,13 +14,13 @@ class VentePåTekniskOpphørStatus(private val iverksettClient: IverksettClient,
     override fun utførSteg(behandling: Behandling, data: Void?) {
         return iverksettClient.hentStatus(behandling.id).let {
             when (it) {
-                IverksettStatus.OK_MOT_OPPDRAG -> opprettLagSaksbehandlingsblankettTask(behandling)
+                IverksettStatus.OK_MOT_OPPDRAG -> opprettFerdigstillOppgave(behandling)
                 else -> throw error("Mottok status $it fra iverksett for behandlingId=${behandling.id}")
             }
         }
     }
 
-    fun opprettLagSaksbehandlingsblankettTask(behandling: Behandling) {
+    fun opprettFerdigstillOppgave(behandling: Behandling) {
         taskRepository.save(FerdigstillBehandlingTask.opprettTask(behandling))
     }
 
