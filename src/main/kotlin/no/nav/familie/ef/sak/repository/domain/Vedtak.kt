@@ -16,7 +16,9 @@ data class Vedtak(@Id
                   @Column("avsla_begrunnelse")
                   val avslåBegrunnelse: String? = null,
                   val perioder: PeriodeWrapper? = null,
-                  val inntekter: InntektWrapper? = null)
+                  val inntekter: InntektWrapper? = null,
+                  val saksbehandlerIdent: String? = null,
+                  val beslutterIdent: String? = null)
 
 data class Vedtaksperiode(
         val datoFra: LocalDate,
