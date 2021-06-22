@@ -35,7 +35,8 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
                        enhetId: String? = null,
                        tilordnetNavIdent: String? = null,
                        beskrivelse: String? = null): Long {
-        val fagsak = fagsakRepository.finnFagsakTilBehandling(behandlingId) ?: error("Finner ikke fagsak til behandlingDd=${behandlingId}")
+        val fagsak = fagsakRepository.finnFagsakTilBehandling(behandlingId)
+                     ?: error("Finner ikke fagsak til behandlingDd=${behandlingId}")
 
         val oppgaveFinnesFraFør = oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
 
@@ -99,6 +100,10 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
 
     fun ferdigstillOppgave(gsakOppgaveId: Long) {
         oppgaveClient.ferdigstillOppgave(gsakOppgaveId)
+    }
+
+    fun finnSisteOppgaveForBehandling(behandlingId: UUID): EfOppgave {
+        return oppgaveRepository.findTopByBehandlingIdOrderByOpprettetTidDesc(behandlingId)
     }
 
     fun lagOppgaveTekst(beskrivelse: String? = null): String {
