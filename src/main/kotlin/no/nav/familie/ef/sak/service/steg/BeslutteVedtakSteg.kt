@@ -52,7 +52,7 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
 
         return if (data.godkjent) {
             if (behandling.type != BehandlingType.BLANKETT) {
-                vedtakService.oppdaterBeslutter(behandling.id, SikkerhetContext.hentSaksbehandler())
+                vedtakService.oppdaterBeslutter(behandling.id, SikkerhetContext.hentSaksbehandler(strict = true))
                 val vedtaksbrev = vedtaksbrevRepository.findByIdOrThrow(behandling.id)
                 val fil = utledVedtaksbrev(vedtaksbrev)
                 val iverksettDto = iverksettingDtoMapper.tilDto(behandling, beslutter)
