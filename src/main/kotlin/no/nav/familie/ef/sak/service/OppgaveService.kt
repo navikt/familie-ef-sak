@@ -103,7 +103,7 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
     }
 
     fun finnSisteOppgaveForBehandling(behandlingId: UUID): EfOppgave {
-        return oppgaveRepository.findTopByBehandlingIdOrderByOpprettetTidDesc(behandlingId)
+        return oppgaveRepository.findTopByBehandlingIdOrderBySporbarOpprettetTidDesc(behandlingId)
     }
 
     fun lagOppgaveTekst(beskrivelse: String? = null): String {

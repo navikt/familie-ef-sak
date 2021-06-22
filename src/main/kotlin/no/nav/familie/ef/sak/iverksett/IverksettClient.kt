@@ -5,7 +5,7 @@ import no.nav.familie.ef.sak.util.medContentTypeJsonUTF8
 import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.http.client.MultipartBuilder
 import no.nav.familie.kontrakter.ef.infotrygd.OpprettStartBehandlingHendelseDto
-import no.nav.familie.kontrakter.ef.iverksett.BehandlingStatistikkDto
+import no.nav.familie.kontrakter.ef.iverksett.BehandlingsstatistikkDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettStatus
 import no.nav.familie.kontrakter.ef.iverksett.KonsistensavstemmingDto
@@ -46,7 +46,7 @@ class IverksettClient(@Value("\${FAMILIE_EF_IVERKSETT_URL}")
         postForEntity<Any>(URI.create("$familieEfIverksettUri/api/start-behandling"), request)
     }
 
-    fun sendBehandlingsstatistikk(request: BehandlingStatistikkDto) {
+    fun sendBehandlingsstatistikk(request: BehandlingsstatistikkDto) {
         postForEntity<Any>(URI.create("$familieEfIverksettUri/api/statistikk/behandlingsstatistikk"), request)
     }
 

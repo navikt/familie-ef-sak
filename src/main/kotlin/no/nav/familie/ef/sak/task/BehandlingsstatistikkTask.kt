@@ -34,10 +34,10 @@ import java.util.UUID
 class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
                                 private val behandlingService: BehandlingService,
                                 private val fagsakService: FagsakService,
-                                val søknadService: SøknadService,
-                                val vedtakService: VedtakService,
-                                val oppgaveService: OppgaveService,
-                                val personService: PersonService
+                                private val søknadService: SøknadService,
+                                private val vedtakService: VedtakService,
+                                private val oppgaveService: OppgaveService,
+                                private val personService: PersonService
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {

@@ -11,5 +11,5 @@ interface OppgaveRepository : RepositoryInterface<Oppgave, Long>, InsertUpdateRe
     fun findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId: UUID, oppgavetype: Oppgavetype): Oppgave?
 
     fun findByGsakOppgaveId(gsakOppgaveId: Long): Oppgave?
-    fun findTopByBehandlingIdOrderByOpprettetTidDesc(behandlingId: UUID): Oppgave
+    fun findTopByBehandlingIdOrderBySporbarOpprettetTidDesc(behandlingId: UUID): Oppgave
 }

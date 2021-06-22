@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.task
 
 import io.mockk.slot
-import no.nav.familie.kontrakter.ef.iverksett.BehandlingStatistikkDto
+import no.nav.familie.kontrakter.ef.iverksett.BehandlingsstatistikkDto
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import org.junit.jupiter.api.Test
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -12,26 +12,32 @@ import io.mockk.just
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
 import io.mockk.Runs
+import no.nav.familie.ef.sak.api.beregning.VedtakService
+import no.nav.familie.ef.sak.service.BehandlingService
+import no.nav.familie.ef.sak.service.FagsakService
+import no.nav.familie.ef.sak.service.OppgaveService
+import no.nav.familie.ef.sak.service.PersonService
+import no.nav.familie.ef.sak.service.SøknadService
 import no.nav.familie.kontrakter.ef.felles.BehandlingType
 import no.nav.familie.kontrakter.ef.felles.StønadType
 import no.nav.familie.kontrakter.ef.iverksett.Hendelse
 import java.time.ZonedDateTime
 
 data class BehandlingStatistikkDto(
-    val behandlingId: UUID,
-    val personIdent: String,
-    val gjeldendeSaksbehandlerId: String,
-    val saksnummer: String,
-    val hendelseTidspunkt: ZonedDateTime,
-    val søknadstidspunkt: ZonedDateTime? = null,
-    val hendelse: Hendelse,
-    val behandlingResultat: String? = null,
-    val resultatBegrunnelse: String? = null,
-    val opprettetEnhet: String,
-    val ansvarligEnhet: String,
-    val strengtFortroligAdresse: Boolean,
-    val stønadstype: StønadType,
-    val behandlingstype: BehandlingType
+        val behandlingId: UUID,
+        val personIdent: String,
+        val gjeldendeSaksbehandlerId: String,
+        val saksnummer: String,
+        val hendelseTidspunkt: ZonedDateTime,
+        val søknadstidspunkt: ZonedDateTime? = null,
+        val hendelse: Hendelse,
+        val behandlingResultat: String? = null,
+        val resultatBegrunnelse: String? = null,
+        val opprettetEnhet: String,
+        val ansvarligEnhet: String,
+        val strengtFortroligAdresse: Boolean,
+        val stønadstype: StønadType,
+        val behandlingstype: BehandlingType
 )
 
 internal class BehandlingsstatistikkTaskTest {
@@ -39,26 +45,38 @@ internal class BehandlingsstatistikkTaskTest {
     @Test
     internal fun `skal sende behandlingsstatistikk`() {
 
-        val behandlingsstatistikkSlot = slot<BehandlingStatistikkDto>();
+        val behandlingsstatistikkSlot = slot<BehandlingsstatistikkDto>();
 
         val behandlingsstatistikk = BehandlingStatistikkDto(
-            behandlingId = UUID.randomUUID(),
-            personIdent = "123456789012",
-            gjeldendeSaksbehandlerId = "389221",
-            saksnummer = "392423",
-            hendelseTidspunkt = ZonedDateTime.now(),
-            søknadstidspunkt = ZonedDateTime.now(),
-            hendelse = Hendelse.BESLUTTET,
-            opprettetEnhet = "A",
-            ansvarligEnhet = "A",
-            strengtFortroligAdresse = false,
-            stønadstype = StønadType.OVERGANGSSTØNAD,
-            behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING
+                behandlingId = UUID.randomUUID(),
+                personIdent = "123456789012",
+                gjeldendeSaksbehandlerId = "389221",
+                saksnummer = "392423",
+                hendelseTidspunkt = ZonedDateTime.now(),
+                søknadstidspunkt = ZonedDateTime.now(),
+                hendelse = Hendelse.BESLUTTET,
+                opprettetEnhet = "A",
+                ansvarligEnhet = "A",
+                strengtFortroligAdresse = false,
+                stønadstype = StønadType.OVERGANGSSTØNAD,
+                behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING
         )
 
         val iverksettClient = mockk<IverksettClient>()
+        val behandlingService = mockk<BehandlingService>()
+        val søknadService = mockk<SøknadService>()
+        val fagsakService = mockk<FagsakService>()
+        val personService = mockk<PersonService>()
+        val vedtakService = mockk<VedtakService>()
+        val oppgaveService = mockk<OppgaveService>()
 
-        val behandlingsstatistikkTask = BehandlingsstatistikkTask(iverksettClient)
+        val behandlingsstatistikkTask = BehandlingsstatistikkTask(iverksettClient = iverksettClient,
+                                                                  behandlingService = behandlingService,
+                                                                  fagsakService = fagsakService,
+                                                                  søknadService = søknadService,
+                                                                  vedtakService = vedtakService,
+                                                                  oppgaveService = oppgaveService,
+                                                                  personService = personService)
 
         val task = Task(type = "behandlingsstatistikkTask", payload = objectMapper.writeValueAsString(behandlingsstatistikk))
 
@@ -71,7 +89,6 @@ internal class BehandlingsstatistikkTaskTest {
         assertThat(behandlingsstatistikk.behandlingId).isEqualTo(behandlingsstatistikkSlot.captured.behandlingId)
         assertThat(behandlingsstatistikk.personIdent).isEqualTo(behandlingsstatistikkSlot.captured.personIdent)
         assertThat(behandlingsstatistikk.gjeldendeSaksbehandlerId).isEqualTo(behandlingsstatistikkSlot.captured.gjeldendeSaksbehandlerId)
-        assertThat(behandlingsstatistikk.saksnummer).isEqualTo(behandlingsstatistikkSlot.captured.saksnummer)
         assertThat(behandlingsstatistikk.hendelseTidspunkt).isEqualTo(behandlingsstatistikkSlot.captured.hendelseTidspunkt)
         assertThat(behandlingsstatistikk.søknadstidspunkt).isEqualTo(behandlingsstatistikkSlot.captured.søknadstidspunkt)
         assertThat(behandlingsstatistikk.hendelse).isEqualTo(behandlingsstatistikkSlot.captured.hendelse)
