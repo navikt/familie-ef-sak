@@ -23,7 +23,7 @@ class FerdigstillBehandlingSteg(private val behandlingService: BehandlingService
 
         if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING || behandling.type == BehandlingType.REVURDERING) {
             taskRepository.save(PubliserVedtakshendelseTask.opprettTask(behandling.id))
-        } else if (behandling.type == BehandlingType.BLANKETT) {
+        } else if (behandling.type == BehandlingType.BLANKETT || behandling.type == BehandlingType.TEKNISK_OPPHØR) {
             //ignore
         } else {
             error("Har ikke lagt inn håndtering av type=${behandling.type} i ferdigstilling")

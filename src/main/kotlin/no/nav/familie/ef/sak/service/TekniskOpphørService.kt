@@ -41,7 +41,7 @@ class TekniskOpphørService(val behandlingService: BehandlingService,
         val tilkjentYtelseTilOpphør = opprettTilkjentYtelse(behandlingId = nyBehandling.id,
                                                             personIdent = aktivIdent)
 
-        taskRepository.save(PollStatusTekniskOpphør.opprettTask(nyBehandling.id))
+        taskRepository.save(PollStatusTekniskOpphør.opprettTask(nyBehandling.id, aktivIdent))
 
         iverksettClient.iverksettTekniskOpphør(TekniskOpphørDto(forrigeBehandlingId = sisteFerdigstilteBehandling.id,
                                                                 saksbehandlerId = tilkjentYtelseTilOpphør.sporbar.opprettetAv,
