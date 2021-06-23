@@ -71,10 +71,6 @@ class IverksettClient(@Value("\${FAMILIE_EF_IVERKSETT_URL}")
     }
 
     fun konsistensavstemming(request: KonsistensavstemmingDto) {
-        val url = URI.create("$familieEfIverksettUri/api/konsistensavstemming")
-        val response = postForEntity<Ressurs<String>>(url, request)
-        if (response.status != Ressurs.Status.SUKSESS) {
-            error("Feilet kall mot konsistensavstemming message=${response.melding}")
-        }
+        postForEntity<Any>(URI.create("$familieEfIverksettUri/api/konsistensavstemming"), request)
     }
 }
