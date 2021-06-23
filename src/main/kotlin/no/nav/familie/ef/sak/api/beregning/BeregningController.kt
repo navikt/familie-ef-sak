@@ -1,7 +1,9 @@
 package no.nav.familie.ef.sak.api.beregning
 
+import no.nav.familie.ef.sak.mapper.tilBeløpsperiode
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.TilgangService
+import no.nav.familie.ef.sak.service.TilkjentYtelseService
 import no.nav.familie.ef.sak.service.steg.StegService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -18,6 +20,7 @@ import java.util.UUID
 class BeregningController(private val stegService: StegService,
                           private val behandlingService: BehandlingService,
                           private val beregningService: BeregningService,
+                          private val tilkjentYtelseService: TilkjentYtelseService,
                           private val tilgangService: TilgangService) {
 
     @PostMapping
@@ -40,6 +43,12 @@ class BeregningController(private val stegService: StegService,
         val behandling = behandlingService.hentBehandling(behandlingId)
 
         return Ressurs.success(stegService.håndterVedtaBlankett(behandling, vedtak).id)
+    }
+
+    @GetMapping("/{behandlingId}")
+    fun hentBeregnetBeløp(@PathVariable behandlingId: UUID): Ressurs<List<Beløpsperiode>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId)
+        return Ressurs.success(tilkjentYtelseService.hentForBehandling(behandlingId).tilBeløpsperiode())
     }
 
 }
