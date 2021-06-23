@@ -33,12 +33,11 @@ import java.util.UUID
 class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
                          private val fagsakService: FagsakService,
                          private val oppgaveService: OppgaveService,
-                         private val featureToggleService: FeatureToggleService,
                          private val iverksettClient: IverksettClient,
                          private val iverksettingDtoMapper: IverksettingDtoMapper,
                          private val totrinnskontrollService: TotrinnskontrollService,
-                         private val vedtakService: VedtakService,
-                         private val vedtaksbrevRepository: VedtaksbrevRepository) : BehandlingSteg<BeslutteVedtakDto> {
+                         private val vedtaksbrevRepository: VedtaksbrevRepository,
+                         private val vedtakService: VedtakService) : BehandlingSteg<BeslutteVedtakDto> {
 
     override fun validerSteg(behandling: Behandling) {
         if (behandling.steg != stegType()) {
@@ -54,6 +53,7 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
         val oppgaveId = ferdigstillOppgave(behandling)
 
         return if (data.godkjent) {
+            vedtakService.oppdaterBeslutter(behandling.id, SikkerhetContext.hentSaksbehandler(strict = true))
             if (behandling.type != BehandlingType.BLANKETT) {
                 val vedtaksbrev = vedtaksbrevRepository.findByIdOrThrow(behandling.id)
                 val fil = utledVedtaksbrev(vedtaksbrev)
@@ -79,13 +79,13 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
         taskRepository.save(BehandlingsstatistikkTask.opprettTask(behandlingId = behandlingId,
                                                                   hendelse = Hendelse.VEDTATT,
                                                                   hendelseTidspunkt = vedtak.opprettetTid, // Kan hente ut fra behandlingsstatistikken
-                                                                  gjeldendeSaksbehandler = vedtak.saksbehandlerId, // Hent fra vedtaket
+                                                                  gjeldendeSaksbehandler = vedtak.saksbehandlerIdent ?: error("Mangler saksbehandlerIdent på vedtaket"),
                                                                   oppgaveId = oppgaveId
         ))
         taskRepository.save(BehandlingsstatistikkTask.opprettTask(behandlingId = behandlingId,
                                                                   hendelse = Hendelse.BESLUTTET,
                                                                   hendelseTidspunkt = LocalDateTime.now(),
-                                                                  gjeldendeSaksbehandler = vedtak.beslutterId, // Hent fra vedtaket
+                                                                  gjeldendeSaksbehandler = vedtak.beslutterIdent ?: error("Mangler beslutterIdent på vedtaket"),
                                                                   oppgaveId = oppgaveId
 
         ))
@@ -104,7 +104,10 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
         val oppgavetype = Oppgavetype.GodkjenneVedtak
         val aktivIdent = fagsakService.hentAktivIdent(behandling.fagsakId)
         return oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype, behandling)?.let {
-            taskRepository.save(FerdigstillOppgaveTask.opprettTask(behandlingId = behandling.id, oppgavetype, it.gsakOppgaveId, aktivIdent))
+            taskRepository.save(FerdigstillOppgaveTask.opprettTask(behandlingId = behandling.id,
+                                                                   oppgavetype = oppgavetype,
+                                                                   oppgaveId = it.gsakOppgaveId,
+                                                                   personIdent = aktivIdent))
             return it.gsakOppgaveId
         }
     }

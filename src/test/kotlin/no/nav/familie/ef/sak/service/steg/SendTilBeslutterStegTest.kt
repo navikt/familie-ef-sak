@@ -1,9 +1,14 @@
 package no.nav.familie.ef.sak.service.steg
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.mockk.Runs
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.familie.ef.sak.api.beregning.VedtakService
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.util.BrukerContextUtil.clearBrukerContext
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.repository.VedtaksbrevRepository
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.BehandlingResultat
@@ -39,10 +44,11 @@ internal class SendTilBeslutterStegTest {
     private val oppgaveService = mockk<OppgaveService>()
     private val behandlingService = mockk<BehandlingService>(relaxed = true)
     private val vedtaksbrevRepository = mockk<VedtaksbrevRepository>()
+    private val vedtakService = mockk<VedtakService>()
 
 
     private val beslutteVedtakSteg =
-            SendTilBeslutterSteg(taskRepository, oppgaveService, fagsakService, behandlingService, vedtaksbrevRepository)
+            SendTilBeslutterSteg(taskRepository, oppgaveService, fagsakService, behandlingService, vedtaksbrevRepository, vedtakService)
     private val fagsak = Fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD,
                                 søkerIdenter = setOf(FagsakPerson(ident = "12345678901")))
     private val vedtaksbrev = Vedtaksbrev(behandlingId = UUID.randomUUID(),
@@ -96,7 +102,11 @@ internal class SendTilBeslutterStegTest {
                                                                                                      type = Oppgavetype.BehandleSak,
                                                                                                      erFerdigstilt = false)
 
+        every { vedtakService.oppdaterSaksbehandler(any(), any()) } just Runs
+        mockBrukerContext("saksbehandlernavn")
+
         utførSteg()
+        clearBrukerContext()
 
         verify { behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.FATTER_VEDTAK) }
 

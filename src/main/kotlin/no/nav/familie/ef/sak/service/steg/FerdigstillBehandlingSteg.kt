@@ -32,7 +32,7 @@ class FerdigstillBehandlingSteg(private val behandlingService: BehandlingService
                                                                       gjeldendeSaksbehandler = null,
 
             ))
-        } else if (behandling.type == BehandlingType.BLANKETT) {
+        } else if (behandling.type == BehandlingType.BLANKETT || behandling.type == BehandlingType.TEKNISK_OPPHØR) {
             //ignore
         } else {
             error("Har ikke lagt inn håndtering av type=${behandling.type} i ferdigstilling")

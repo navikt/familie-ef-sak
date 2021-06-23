@@ -49,7 +49,7 @@ class TilkjentYtelseService(private val behandlingService: BehandlingService,
             val eksternId = eksterneIder[tilkjentYtelse.behandlingId]
                             ?: error("Finner ikke eksterne id'er til behandling=${tilkjentYtelse.behandlingId}")
             val andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse
-                    .filter { it.stønadFom.isEqualOrAfter(datoForAvstemming) }
+                    .filter { it.stønadTom.isEqualOrAfter(datoForAvstemming) }
                     .map { it.tilIverksettDto() }
             KonsistensavstemmingTilkjentYtelseDto(behandlingId = tilkjentYtelse.behandlingId,
                                                   eksternBehandlingId = eksternId.eksternBehandlingId,
