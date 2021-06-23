@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.api.beregning.VedtakService
 import no.nav.familie.ef.sak.integration.dto.pdl.AdressebeskyttelseGradering
 import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
 import no.nav.familie.ef.sak.iverksett.IverksettClient
+import no.nav.familie.ef.sak.repository.domain.Fagsak
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.FagsakService
@@ -18,11 +19,13 @@ import no.nav.familie.kontrakter.ef.felles.BehandlingType
 import no.nav.familie.kontrakter.ef.felles.StønadType
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingsstatistikkDto
 import no.nav.familie.kontrakter.ef.iverksett.Hendelse
+import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.springframework.stereotype.Service
 import java.time.ZoneId
+import java.util.Properties
 import java.util.UUID
 
 @Service
@@ -39,46 +42,29 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
                                 private val oppgaveService: OppgaveService,
                                 private val personService: PersonService
 ) : AsyncTaskStep {
+    private val zoneIdOslo = ZoneId.of("Europe/Oslo")
 
     override fun doTask(task: Task) {
-        val (behandlingId, hendelse, hendelseTidspunkt, gjeldendeSaksbehandler) = objectMapper.readValue<BehandlingsstatistikkTaskPayload>(
+        val (behandlingId, hendelse, hendelseTidspunkt, gjeldendeSaksbehandler, oppgaveId) = objectMapper.readValue<BehandlingsstatistikkTaskPayload>(
                 task.payload
         )
 
         val personIdent = behandlingService.hentAktivIdent(behandlingId)
-
         val behandling = behandlingService.hentBehandling(behandlingId)
-
         val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
 
-
-        val søknadstidspunkt = when (fagsak.stønadstype) {
-            Stønadstype.OVERGANGSSTØNAD -> søknadService.hentOvergangsstønad(behandlingId).datoMottatt
-            Stønadstype.BARNETILSYN -> søknadService.hentBarnetilsyn(behandlingId).datoMottatt
-            Stønadstype.SKOLEPENGER -> søknadService.hentSkolepenger(behandlingId).datoMottatt
-        }
-
-        val vedtak = vedtakService.hentVedtak(behandlingId)
-
-        val gsakOppgaveId = oppgaveService.finnSisteOppgaveForBehandling(behandlingId).gsakOppgaveId
-
-        val sisteOppgaveForBehandling = oppgaveService.hentOppgave(gsakOppgaveId)
-
-        val resultatBegrunnelse = when (vedtak.resultatType) {
-            ResultatType.INNVILGE -> vedtak.periodeBegrunnelse
-            ResultatType.AVSLÅ -> vedtak.avslåBegrunnelse
-            ResultatType.HENLEGGE -> error("Ikke implementert")
-        }
-
+        val sisteOppgaveForBehandling = finnSisteOppgaveForBehandlingen(behandlingId, oppgaveId)
+        val resultatBegrunnelse = finnResultatBegrunnelse(behandlingId)
         val søker = personService.hentSøker(personIdent);
+        val søknadstidspunkt = finnSøknadstidspunkt(fagsak, behandlingId)
 
         val behandlingsstatistikkDto = BehandlingsstatistikkDto(
                 behandlingId = behandlingId,
                 personIdent = personIdent,
                 gjeldendeSaksbehandlerId = gjeldendeSaksbehandler,
                 eksternFagsakId = fagsak.eksternId.id.toString(),
-                hendelseTidspunkt = hendelseTidspunkt.atZone(ZoneId.of("Europe/Oslo")),
-                søknadstidspunkt = søknadstidspunkt.atZone(ZoneId.of("Europe/Oslo")),
+                hendelseTidspunkt = hendelseTidspunkt.atZone(zoneIdOslo),
+                søknadstidspunkt = søknadstidspunkt.atZone(zoneIdOslo),
                 hendelse = hendelse,
                 behandlingResultat = behandling.resultat.name,
                 resultatBegrunnelse = resultatBegrunnelse,
@@ -92,8 +78,31 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
         iverksettClient.sendBehandlingsstatistikk(behandlingsstatistikkDto);
     }
 
+    private fun finnSisteOppgaveForBehandlingen(behandlingId: UUID, oppgaveId: Long?): Oppgave {
+        val gsakOppgaveId = oppgaveId ?: oppgaveService.finnSisteOppgaveForBehandling(behandlingId).gsakOppgaveId
 
-    // TODO:  opprett Task(type=behandlingsstatistikk, behandlingId, gjeldendeTidspunkt, hendelse=mottatt, gjeldendeSaksbehandler)
+        return oppgaveService.hentOppgave(gsakOppgaveId)
+    }
+
+    private fun finnResultatBegrunnelse(behandlingId: UUID): String? {
+        val vedtak = vedtakService.hentVedtak(behandlingId)
+        return when (vedtak.resultatType) {
+            ResultatType.INNVILGE -> vedtak.periodeBegrunnelse
+            ResultatType.AVSLÅ -> vedtak.avslåBegrunnelse
+            ResultatType.HENLEGGE -> error("Ikke implementert")
+        }
+    }
+
+    private fun finnSøknadstidspunkt(fagsak: Fagsak,
+                                     behandlingId: UUID): LocalDateTime {
+        return when (fagsak.stønadstype) {
+            Stønadstype.OVERGANGSSTØNAD -> søknadService.hentOvergangsstønad(behandlingId).datoMottatt
+            Stønadstype.BARNETILSYN -> søknadService.hentBarnetilsyn(behandlingId).datoMottatt
+            Stønadstype.SKOLEPENGER -> søknadService.hentSkolepenger(behandlingId).datoMottatt
+        }
+    }
+
+
     companion object {
 
         fun opprettTask(
@@ -101,7 +110,7 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
                 hendelse: Hendelse,
                 hendelseTidspunkt: LocalDateTime,
                 gjeldendeSaksbehandler: String,
-                oppgaveId: String
+                oppgaveId: Long? = null
         ): Task =
                 Task(
                         type = TYPE,
@@ -113,8 +122,13 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
                                         gjeldendeSaksbehandler,
                                         oppgaveId
                                 )
-                        )
-                )
+                        ),
+                        properties = Properties().apply {
+                            this["saksbehandler"] = gjeldendeSaksbehandler
+                            this["behandlingId"] = behandlingId.toString()
+                            this["hendelse"] = hendelse
+                        })
+
 
         const val TYPE = "behandlingsstatistikkTask"
     }
@@ -126,5 +140,5 @@ data class BehandlingsstatistikkTaskPayload(
         val hendelse: Hendelse,
         val hendelseTidspunkt: LocalDateTime,
         val gjeldendeSaksbehandler: String,
-        val oppgaveId: String
+        val oppgaveId: Long?
 )

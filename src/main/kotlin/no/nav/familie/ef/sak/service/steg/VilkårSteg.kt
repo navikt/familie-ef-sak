@@ -14,7 +14,6 @@ class VilkårSteg(private val behandlingService: BehandlingService) : Behandling
     }
 
     override fun utførSteg(behandling: Behandling, data: String?) {
-        // TODO: Søknad og behandling kan kobles sammen her
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.UTREDES)
     }
 

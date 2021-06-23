@@ -4,11 +4,14 @@ import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.service.BehandlingService
+import no.nav.familie.ef.sak.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.task.PubliserVedtakshendelseTask
+import no.nav.familie.kontrakter.ef.iverksett.Hendelse
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 
 
 @Service
@@ -23,7 +26,12 @@ class FerdigstillBehandlingSteg(private val behandlingService: BehandlingService
 
         if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING || behandling.type == BehandlingType.REVURDERING) {
             taskRepository.save(PubliserVedtakshendelseTask.opprettTask(behandling.id))
-            // TODO: opprette Task for behandlingsstatistikk "FERDIG"
+            taskRepository.save(BehandlingsstatistikkTask.opprettTask(behandlingId = behandling.id,
+                                                                      hendelse = Hendelse.FERDIG,
+                                                                      hendelseTidspunkt = LocalDateTime.now(),
+                                                                      gjeldendeSaksbehandler = null,
+
+            ))
         } else if (behandling.type == BehandlingType.BLANKETT) {
             //ignore
         } else {
