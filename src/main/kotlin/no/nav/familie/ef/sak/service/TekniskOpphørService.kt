@@ -42,7 +42,7 @@ class TekniskOpphørService(val behandlingService: BehandlingService,
             throw Feil("Finner ikke behandling med stønadstype overgangsstønad")
         }
         val fagsakId = sisteFerdigstilteBehandling.fagsakId
-        val sisteBehandling = behandlingService.hentBehandlinger(fagsakId).maxByOrNull { it.opprettet }!!
+        val sisteBehandling = behandlingService.hentBehandlinger(fagsakId).maxByOrNull { it.sporbar.opprettetTid }!!
 
 
         require(sisteBehandling.id == sisteFerdigstilteBehandling.id) {
