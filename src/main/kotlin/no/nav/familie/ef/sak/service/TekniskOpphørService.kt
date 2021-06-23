@@ -67,7 +67,6 @@ class TekniskOpphørService(val behandlingService: BehandlingService,
                                                                 personIdent = aktivIdent,
                                                                 behandlingId = nyBehandling.id,
                                                                 vedtaksdato = LocalDate.now()))
-
     }
 
     private fun opprettTilkjentYtelse(behandlingId: UUID, personIdent: String): TilkjentYtelse {
