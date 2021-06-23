@@ -1,19 +1,26 @@
 package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.api.feilHvis
+import no.nav.familie.ef.sak.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.iverksett.tilIverksettDto
 import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.util.isEqualOrAfter
+import no.nav.familie.kontrakter.ef.iverksett.AndelTilkjentYtelseDto
 import no.nav.familie.kontrakter.ef.iverksett.KonsistensavstemmingTilkjentYtelseDto
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.UUID
 
 @Service
 class TilkjentYtelseService(private val behandlingService: BehandlingService,
+                            private val featureToggleService: FeatureToggleService,
                             private val tilkjentYtelseRepository: TilkjentYtelseRepository) {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
+    private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     fun hentForBehandling(behandlingId: UUID): TilkjentYtelse {
         return tilkjentYtelseRepository.findByBehandlingId(behandlingId)
@@ -35,7 +42,26 @@ class TilkjentYtelseService(private val behandlingService: BehandlingService,
         return behandlingService.finnSisteIverksatteBehandlinger(stønadstype)
                 .chunked(1000)
                 .map(List<UUID>::toSet)
-                .flatMap { behandlingIder -> finnTilkjentYtelserTilKonsistensavstemming(behandlingIder, datoForAvstemming) }
+                .flatMap { behandlingIder ->
+                    val konsistensavstemming = finnTilkjentYtelserTilKonsistensavstemming(behandlingIder, datoForAvstemming)
+                    loggKonsistensavstemming(konsistensavstemming)
+                    konsistensavstemming
+                }
+    }
+
+    private fun loggKonsistensavstemming(konsistensavstemming: List<KonsistensavstemmingTilkjentYtelseDto>) {
+        val beløp = konsistensavstemming.sumOf { it.andelerTilkjentYtelse.sumOf(AndelTilkjentYtelseDto::beløp) }
+        logger.info("Konsistensavstemming antall=${konsistensavstemming.size} beløp=$beløp")
+
+        if (featureToggleService.isEnabled("familie.ef.sak.konsistensavstemming-logg")) {
+            konsistensavstemming.forEach {
+                val andeler = it.andelerTilkjentYtelse.map { aty -> "beløp=${aty.beløp} fom=${aty.fraOgMed} tom=${aty.tilOgMed}" }
+                secureLogger.info("Konsistensavstemming" +
+                                  " behandling=${it.behandlingId}" +
+                                  " fagsak=${it.eksternFagsakId}" +
+                                  " andeler=$andeler")
+            }
+        }
     }
 
     private fun finnTilkjentYtelserTilKonsistensavstemming(behandlingIder: Set<UUID>,

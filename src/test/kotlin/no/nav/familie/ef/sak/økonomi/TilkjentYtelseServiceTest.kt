@@ -5,6 +5,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.repository.domain.EksternId
@@ -23,7 +24,8 @@ class TilkjentYtelseServiceTest {
     private val behandlingService = mockk<BehandlingService>()
 
     private val tilkjentYtelseService = TilkjentYtelseService(behandlingService = behandlingService,
-                                                              tilkjentYtelseRepository = tilkjentYtelseRepository)
+                                                              tilkjentYtelseRepository = tilkjentYtelseRepository,
+                                                              featureToggleService = mockFeatureToggleService())
 
     @Test
     internal fun `konsistensavstemming - filtrer andeler har tom dato som er etter`() {
