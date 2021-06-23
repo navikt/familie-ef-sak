@@ -4,13 +4,19 @@ import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.repository.BehandlingRepository
 import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
-import no.nav.familie.ef.sak.repository.domain.*
+import no.nav.familie.ef.sak.repository.domain.Behandling
+import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
+import no.nav.familie.ef.sak.repository.domain.BehandlingType
+import no.nav.familie.ef.sak.repository.domain.Stønadstype
+import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseType
 import no.nav.familie.ef.sak.service.steg.StegType
 import no.nav.familie.ef.sak.task.PollStatusTekniskOpphør
 import no.nav.familie.kontrakter.ef.felles.StønadType
 import no.nav.familie.kontrakter.ef.iverksett.TekniskOpphørDto
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.prosessering.domene.TaskRepository
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -24,16 +30,26 @@ class TekniskOpphørService(val behandlingService: BehandlingService,
                            val iverksettClient: IverksettClient,
                            val taskRepository: TaskRepository) {
 
+
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     @Transactional
     fun håndterTeknisktOpphør(personIdent: PersonIdent) {
         val sisteFerdigstilteBehandling =
-                behandlingRepository.finnSisteIverksatteBehandling(stønadstype = Stønadstype.OVERGANGSSTØNAD, personidenter = setOf(personIdent.ident))
-        require(sisteFerdigstilteBehandling != null) { throw Feil("Finner ikke behandling med stønadstype overgangsstønad") }
+                behandlingRepository.finnSisteIverksatteBehandling(stønadstype = Stønadstype.OVERGANGSSTØNAD,
+                                                                   personidenter = setOf(personIdent.ident))
+        require(sisteFerdigstilteBehandling != null) {
+            throw Feil("Finner ikke behandling med stønadstype overgangsstønad")
+        }
         val fagsakId = sisteFerdigstilteBehandling.fagsakId
-        val sisteBehandling = behandlingService.hentBehandlinger(fagsakId)
-                .maxByOrNull { it.opprettet }!!
+        val sisteBehandling = behandlingService.hentBehandlinger(fagsakId).maxByOrNull { it.opprettet }!!
 
-        require(sisteBehandling.id == sisteFerdigstilteBehandling.id) { throw Feil("Kan ikke utføre teknisk opphør på en aktiv behandling") }
+
+        require(sisteBehandling.id == sisteFerdigstilteBehandling.id) {
+            throw Feil("Kan ikke utføre teknisk opphør på en aktiv behandling, " +
+                       "sisteFerdigstilteBehandling=${sisteFerdigstilteBehandling.id} sisteBehandling=${sisteBehandling.id}")
+        }
+        logger.info("Utfører teknisk opphør behandling=${sisteFerdigstilteBehandling.id}")
 
         val aktivIdent = fagsakService.hentAktivIdent(fagsakId)
         val eksternFagsakId = fagsakService.hentEksternId(fagsakId)
