@@ -5,7 +5,7 @@ import no.nav.familie.ef.sak.repository.domain.Vedtak
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
-import java.util.*
+import java.util.UUID
 
 @Service
 class VedtakService(private val vedtakRepository: VedtakRepository) {
@@ -26,5 +26,17 @@ class VedtakService(private val vedtakRepository: VedtakRepository) {
     fun hentVedtakHvisEksisterer(behandlingId: UUID): VedtakDto? {
         return vedtakRepository.findByIdOrNull(behandlingId)
                 ?.tilVedtakDto()
+    }
+
+    fun oppdaterSaksbehandler(behandlingId: UUID, saksbehandlerIdent: String) {
+        val vedtak = hentVedtak(behandlingId)
+        vedtak.copy(saksbehandlerIdent = saksbehandlerIdent)
+        vedtakRepository.update(vedtak)
+    }
+
+    fun oppdaterBeslutter(behandlingId: UUID, beslutterIdent: String) {
+        val vedtak = hentVedtak(behandlingId)
+        vedtak.copy(beslutterIdent = beslutterIdent)
+        vedtakRepository.update(vedtak)
     }
 }
