@@ -19,9 +19,14 @@ class VedtaksbrevService(private val brevClient: BrevClient,
                          private val brevRepository: VedtaksbrevRepository,
                          private val behandlingService: BehandlingService) {
 
-    fun hentBrev(behandlingId: UUID) =
-            brevRepository.findByIdOrThrow(behandlingId).beslutterPdf?.bytes
-            ?: error("Mangler beslutterPdf for behandling=$behandlingId")
+    fun hentBrev(behandlingId: UUID): ByteArray {
+        val vedtaksbrev = brevRepository.findByIdOrThrow(behandlingId)
+        return if (vedtaksbrev.beslutterPdf != null) {
+            vedtaksbrev.beslutterPdf.bytes
+        } else {
+            brevClient.genererBrev(vedtaksbrev)
+        }
+    }
 
     fun lagBeslutterBrev(behandlingId: UUID): ByteArray {
         val behandling = behandlingService.hentBehandling(behandlingId)
