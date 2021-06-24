@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.service.steg
 
 import no.nav.familie.ef.sak.api.Feil
+import no.nav.familie.ef.sak.api.beregning.VedtakService
 import no.nav.familie.ef.sak.api.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.blankett.JournalførBlankettTask
 import no.nav.familie.ef.sak.featuretoggle.FeatureToggleService
@@ -33,7 +34,8 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
                          private val iverksettClient: IverksettClient,
                          private val iverksettingDtoMapper: IverksettingDtoMapper,
                          private val totrinnskontrollService: TotrinnskontrollService,
-                         private val vedtaksbrevRepository: VedtaksbrevRepository) : BehandlingSteg<BeslutteVedtakDto> {
+                         private val vedtaksbrevRepository: VedtaksbrevRepository,
+                         private val vedtakService: VedtakService) : BehandlingSteg<BeslutteVedtakDto> {
 
     override fun validerSteg(behandling: Behandling) {
         if (behandling.steg != stegType()) {
@@ -49,6 +51,7 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
         ferdigstillOppgave(behandling)
 
         return if (data.godkjent) {
+            vedtakService.oppdaterBeslutter(behandling.id, SikkerhetContext.hentSaksbehandler(strict = true))
             if (behandling.type != BehandlingType.BLANKETT) {
                 val vedtaksbrev = vedtaksbrevRepository.findByIdOrThrow(behandling.id)
                 val fil = utledVedtaksbrev(vedtaksbrev)
@@ -79,7 +82,10 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
         val oppgavetype = Oppgavetype.GodkjenneVedtak
         val aktivIdent = fagsakService.hentAktivIdent(behandling.fagsakId)
         oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype, behandling)?.let {
-            taskRepository.save(FerdigstillOppgaveTask.opprettTask(behandlingId = behandling.id, oppgavetype, it.gsakOppgaveId, aktivIdent))
+            taskRepository.save(FerdigstillOppgaveTask.opprettTask(behandlingId = behandling.id,
+                                                                   oppgavetype,
+                                                                   it.gsakOppgaveId,
+                                                                   aktivIdent))
         }
     }
 

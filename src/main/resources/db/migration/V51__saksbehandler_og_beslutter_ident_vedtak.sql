@@ -1,0 +1,2 @@
+ALTER TABLE vedtak ADD COLUMN saksbehandler_ident VARCHAR DEFAULT NULL;
+ALTER TABLE vedtak ADD COLUMN beslutter_ident VARCHAR DEFAULT NULL;

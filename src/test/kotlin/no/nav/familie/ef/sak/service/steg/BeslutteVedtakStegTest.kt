@@ -7,6 +7,7 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
+import no.nav.familie.ef.sak.api.beregning.VedtakService
 import no.nav.familie.ef.sak.api.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.iverksett.IverksettClient
@@ -51,6 +52,7 @@ internal class BeslutteVedtakStegTest {
     private val featureToggleService = mockk<FeatureToggleService>()
     private val iverksettingDtoMapper = mockk<IverksettingDtoMapper>()
     private val iverksett = mockk<IverksettClient>()
+    private val vedtakService = mockk<VedtakService>()
 
     private val beslutteVedtakSteg = BeslutteVedtakSteg(taskRepository,
                                                         fagsakService,
@@ -59,8 +61,8 @@ internal class BeslutteVedtakStegTest {
                                                         iverksett,
                                                         iverksettingDtoMapper,
                                                         totrinnskontrollService,
-                                                        vedtaksbrevRepository
-    )
+                                                        vedtaksbrevRepository,
+                                                        vedtakService)
     private val vedtaksbrev = Vedtaksbrev(UUID.randomUUID(),
                                           "123",
                                           "mal",
@@ -101,6 +103,7 @@ internal class BeslutteVedtakStegTest {
     @Test
     internal fun `skal opprette iverksettMotOppdragTask etter beslutte vedtak hvis godkjent`() {
         every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev
+        every { vedtakService.oppdaterBeslutter(behandlingId, any()) } just Runs
         val nesteSteg = utførTotrinnskontroll(godkjent = true)
         assertThat(nesteSteg).isEqualTo(StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT)
         assertThat(taskSlot.captured.type).isEqualTo(PollStatusFraIverksettTask.TYPE)

@@ -5,7 +5,7 @@ import no.nav.familie.ef.sak.api.beregning.ResultatType
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 
 data class Vedtak(@Id
@@ -16,7 +16,9 @@ data class Vedtak(@Id
                   @Column("avsla_begrunnelse")
                   val avslåBegrunnelse: String? = null,
                   val perioder: PeriodeWrapper? = null,
-                  val inntekter: InntektWrapper? = null)
+                  val inntekter: InntektWrapper? = null,
+                  val saksbehandlerIdent: String? = null,
+                  val beslutterIdent: String? = null)
 
 data class Vedtaksperiode(
         val datoFra: LocalDate,
