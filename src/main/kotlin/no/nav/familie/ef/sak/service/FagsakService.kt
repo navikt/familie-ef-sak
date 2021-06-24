@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.api.dto.FagsakDto
 import no.nav.familie.ef.sak.api.dto.tilDto
 import no.nav.familie.ef.sak.repository.FagsakRepository
+import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.Fagsak
 import no.nav.familie.ef.sak.repository.domain.FagsakPerson
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
@@ -17,7 +18,7 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
 
     fun hentEllerOpprettFagsakMedBehandlinger(personIdent: String, stønadstype: Stønadstype): FagsakDto {
         val fagsak = hentEllerOpprettFagsak(personIdent, stønadstype)
-        val behandlinger = behandlingService.hentBehandlinger(fagsak.id)
+        val behandlinger = behandlingService.hentBehandlinger(fagsak.id).map(Behandling::tilDto)
         return fagsak.tilDto(behandlinger)
     }
 
@@ -29,7 +30,7 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
     }
 
     fun hentFagsakMedBehandlinger(fagsakId: UUID): FagsakDto =
-            hentFagsak(fagsakId).tilDto(behandlinger = behandlingService.hentBehandlinger(fagsakId))
+            hentFagsak(fagsakId).tilDto(behandlinger = behandlingService.hentBehandlinger(fagsakId).map(Behandling::tilDto))
 
     fun hentFagsak(fagsakId: UUID): Fagsak = fagsakRepository.findByIdOrThrow(fagsakId)
 

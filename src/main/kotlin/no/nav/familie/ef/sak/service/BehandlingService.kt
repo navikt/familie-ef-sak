@@ -96,8 +96,8 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
     }
 
 
-    fun hentBehandlinger(fagsakId: UUID): List<BehandlingDto> {
-        return behandlingRepository.findByFagsakId(fagsakId).map(Behandling::tilDto)
+    fun hentBehandlinger(fagsakId: UUID): List<Behandling> {
+        return behandlingRepository.findByFagsakId(fagsakId)
     }
 
     fun leggTilBehandlingsjournalpost(journalpostId: String, journalposttype: Journalposttype, behandlingId: UUID) {
