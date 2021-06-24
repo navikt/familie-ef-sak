@@ -26,6 +26,7 @@ import no.nav.familie.ef.sak.repository.domain.Oppgave
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.ef.sak.service.BehandlingshistorikkService
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.OppgaveService
 import no.nav.familie.ef.sak.service.TotrinnskontrollService
@@ -49,7 +50,7 @@ internal class BeslutteVedtakStegTest {
     private val totrinnskontrollService = mockk<TotrinnskontrollService>(relaxed = true)
     private val oppgaveService = mockk<OppgaveService>()
     private val vedtaksbrevRepository = mockk<VedtaksbrevRepository>()
-    private val featureToggleService = mockk<FeatureToggleService>()
+    private val behandlingshistorikkService = mockk<BehandlingshistorikkService>()
     private val iverksettingDtoMapper = mockk<IverksettingDtoMapper>()
     private val iverksett = mockk<IverksettClient>()
     private val vedtakService = mockk<VedtakService>()
@@ -57,11 +58,11 @@ internal class BeslutteVedtakStegTest {
     private val beslutteVedtakSteg = BeslutteVedtakSteg(taskRepository,
                                                         fagsakService,
                                                         oppgaveService,
-                                                        featureToggleService,
                                                         iverksett,
                                                         iverksettingDtoMapper,
                                                         totrinnskontrollService,
                                                         vedtaksbrevRepository,
+                                                        behandlingshistorikkService,
                                                         vedtakService)
     private val vedtaksbrev = Vedtaksbrev(UUID.randomUUID(),
                                           "123",
@@ -90,7 +91,6 @@ internal class BeslutteVedtakStegTest {
         } returns Task("", "", Properties())
         every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(any(), any()) } returns oppgave
         every { vedtaksbrevRepository.deleteById(any()) } just Runs
-        every { featureToggleService.isEnabled(any()) } returns false
         every { iverksettingDtoMapper.tilDto(any(), any()) } returns mockk()
         every { iverksett.iverksett(any(), any()) } just Runs
     }

@@ -32,6 +32,7 @@ import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariantformat
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
+import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -45,6 +46,7 @@ internal class JournalføringServiceTest {
     private val oppgaveService = mockk<OppgaveService>()
     private val fagsakService = mockk<FagsakService>()
     private val pdlClient = mockk<PdlClient>()
+    private val taskRepository = mockk<TaskRepository>()
     private val iverksettService = mockk<IverksettService>(relaxed = true)
 
     private val journalføringService =
@@ -55,7 +57,8 @@ internal class JournalføringServiceTest {
                                  pdlClient = pdlClient,
                                  grunnlagsdataService = mockk(relaxed = true),
                                  iverksettService = iverksettService,
-                                 oppgaveService = oppgaveService)
+                                 oppgaveService = oppgaveService,
+                                 taskRepository = taskRepository)
 
     private val fagsakId: UUID = UUID.randomUUID()
     private val fagsakEksternId = 12345L

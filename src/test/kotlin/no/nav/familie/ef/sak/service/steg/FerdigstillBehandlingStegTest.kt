@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.service.steg
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.familie.ef.sak.api.beregning.VedtakService
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
@@ -17,8 +18,9 @@ internal class FerdigstillBehandlingStegTest {
 
     private val behandlingService = mockk<BehandlingService>(relaxed = true)
     private val taskRepository = mockk<TaskRepository>()
+    private val vedtakService = mockk<VedtakService>()
 
-    private val task = FerdigstillBehandlingSteg(behandlingService, taskRepository)
+    private val task = FerdigstillBehandlingSteg(behandlingService, vedtakService, taskRepository)
 
     private val fagsak = fagsak()
 

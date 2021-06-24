@@ -40,6 +40,7 @@ import no.nav.familie.ef.sak.service.VurderingStegService
 import no.nav.familie.ef.sak.service.steg.StegService
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
+import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.BeforeEach
@@ -57,12 +58,15 @@ internal class VurderingStegServiceTest {
     private val blankettRepository = mockk<BlankettRepository>()
     private val vilkårGrunnlagService = mockk<VilkårGrunnlagService>()
     private val stegService = mockk<StegService>()
+    private val taskRepository = mockk<TaskRepository>()
     private val vurderingService = VurderingStegService(behandlingService = behandlingService,
                                                         søknadService = søknadService,
                                                         vilkårsvurderingRepository = vilkårsvurderingRepository,
                                                         blankettRepository = blankettRepository,
                                                         stegService = stegService,
-                                                        vilkårGrunnlagService = vilkårGrunnlagService)
+                                                        vilkårGrunnlagService = vilkårGrunnlagService,
+                                                        taskRepository = taskRepository
+    )
     private val søknad = SøknadsskjemaMapper.tilDomene(TestsøknadBuilder.Builder().setBarn(listOf(
             TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "13071489536"),
             TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "01012067050")

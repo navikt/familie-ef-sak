@@ -4,7 +4,6 @@ import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.api.beregning.VedtakService
 import no.nav.familie.ef.sak.api.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.blankett.JournalførBlankettTask
-import no.nav.familie.ef.sak.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.mapper.IverksettingDtoMapper
 import no.nav.familie.ef.sak.repository.VedtaksbrevRepository
@@ -13,6 +12,7 @@ import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.domain.Fil
 import no.nav.familie.ef.sak.repository.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.ef.sak.service.BehandlingshistorikkService
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.OppgaveService
 import no.nav.familie.ef.sak.service.TotrinnskontrollService
@@ -37,6 +37,7 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
                          private val iverksettingDtoMapper: IverksettingDtoMapper,
                          private val totrinnskontrollService: TotrinnskontrollService,
                          private val vedtaksbrevRepository: VedtaksbrevRepository,
+                         private val behandlingshistorikkService: BehandlingshistorikkService,
                          private val vedtakService: VedtakService) : BehandlingSteg<BeslutteVedtakDto> {
 
     override fun validerSteg(behandling: Behandling) {
@@ -75,10 +76,11 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
 
     private fun opprettTaskForBehandlingsstatistikk(behandlingId: UUID, oppgaveId: Long?) {
         val vedtak = vedtakService.hentVedtak(behandlingId)
+        val vedtakstidspunkt = behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId, StegType.SEND_TIL_BESLUTTER)?.endretTid ?: error("Mangler behandlingshistorikk for vedtak")
 
         taskRepository.save(BehandlingsstatistikkTask.opprettTask(behandlingId = behandlingId,
                                                                   hendelse = Hendelse.VEDTATT,
-                                                                  hendelseTidspunkt = vedtak.opprettetTid, // Kan hente ut fra behandlingsstatistikken
+                                                                  hendelseTidspunkt = vedtakstidspunkt,
                                                                   gjeldendeSaksbehandler = vedtak.saksbehandlerIdent ?: error("Mangler saksbehandlerIdent på vedtaket"),
                                                                   oppgaveId = oppgaveId
         ))

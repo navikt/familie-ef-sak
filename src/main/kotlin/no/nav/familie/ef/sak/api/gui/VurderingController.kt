@@ -43,7 +43,6 @@ class VurderingController(private val vurderingService: VurderingService,
             : Ressurs<VilkårsvurderingDto> {
         tilgangService.validerTilgangTilBehandling(vilkårsvurdering.behandlingId)
         try {
-            // TODO: Bør sette behandlingsstatus til Utredes og opprette Task for behandlingsstatistikk
             return Ressurs.success(vurderingStegService.oppdaterVilkår(vilkårsvurdering))
         } catch (e: Exception) {
             val delvilkårJson = objectMapper.writeValueAsString(vilkårsvurdering.delvilkårsvurderinger)
