@@ -2,10 +2,8 @@ package no.nav.familie.ef.sak.økonomi
 
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.repository.domain.EksternId
@@ -15,7 +13,6 @@ import no.nav.familie.ef.sak.service.TilkjentYtelseService
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Test
-import org.springframework.data.repository.findByIdOrNull
 import java.time.LocalDate
 
 class TilkjentYtelseServiceTest {
@@ -24,8 +21,7 @@ class TilkjentYtelseServiceTest {
     private val behandlingService = mockk<BehandlingService>()
 
     private val tilkjentYtelseService = TilkjentYtelseService(behandlingService = behandlingService,
-                                                              tilkjentYtelseRepository = tilkjentYtelseRepository,
-                                                              featureToggleService = mockFeatureToggleService())
+                                                              tilkjentYtelseRepository = tilkjentYtelseRepository)
 
     @Test
     internal fun `konsistensavstemming - filtrer andeler har tom dato som er etter`() {
