@@ -81,5 +81,41 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
         assertThat(vedtakService.hentVedtakHvisEksisterer(behandling.id)).usingRecursiveComparison().isEqualTo(vedtakDto)
     }
 
+    @Test
+    internal fun `skal oppdatere saksbehandler på vedtaket`() {
+        val fagsak = fagsakRepository.insert(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak,
+                                                                steg = StegType.VILKÅR,
+                                                                status = BehandlingStatus.UTREDES,
+                                                                type = BehandlingType.BLANKETT))
 
+        val tomBegrunnelse = ""
+        val vedtakDto = Innvilget(resultatType = ResultatType.INNVILGE,
+                                  tomBegrunnelse,
+                                  tomBegrunnelse, emptyList(), emptyList())
+
+        vedtakService.lagreVedtak(vedtakDto, behandling.id)
+        val saksbehandlerIdent = "S123456"
+        vedtakService.oppdaterSaksbehandler(behandlingId = behandling.id, saksbehandlerIdent = saksbehandlerIdent)
+        assertThat(vedtakService.hentVedtak(behandling.id).saksbehandlerIdent).isEqualTo(saksbehandlerIdent)
+    }
+
+    @Test
+    internal fun `skal oppdatere beslutter på vedtaket`() {
+        val fagsak = fagsakRepository.insert(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak,
+                                                                steg = StegType.VILKÅR,
+                                                                status = BehandlingStatus.UTREDES,
+                                                                type = BehandlingType.BLANKETT))
+
+        val tomBegrunnelse = ""
+        val vedtakDto = Innvilget(resultatType = ResultatType.INNVILGE,
+                                  tomBegrunnelse,
+                                  tomBegrunnelse, emptyList(), emptyList())
+
+        vedtakService.lagreVedtak(vedtakDto, behandling.id)
+        val beslutterIdent = "B123456"
+        vedtakService.oppdaterBeslutter(behandlingId = behandling.id, beslutterIdent = beslutterIdent)
+        assertThat(vedtakService.hentVedtak(behandling.id).beslutterIdent).isEqualTo(beslutterIdent)
+    }
 }
