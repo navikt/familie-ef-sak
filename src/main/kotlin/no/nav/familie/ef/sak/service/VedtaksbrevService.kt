@@ -19,7 +19,7 @@ class VedtaksbrevService(private val brevClient: BrevClient,
                          private val brevRepository: VedtaksbrevRepository,
                          private val behandlingService: BehandlingService) {
 
-    fun hentBrev(behandlingId: UUID): ByteArray {
+    fun hentEllerRekonstruerSaksbehandlerBrevrequest(behandlingId: UUID): ByteArray {
         val vedtaksbrev = brevRepository.findByIdOrThrow(behandlingId)
         return if (vedtaksbrev.beslutterPdf != null) {
             vedtaksbrev.beslutterPdf.bytes
