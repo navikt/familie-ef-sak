@@ -22,9 +22,9 @@ class VedtaksbrevController(private val brevService: VedtaksbrevService,
                             private val tilgangService: TilgangService) {
 
     @GetMapping("/{behandlingId}")
-    fun hentEllerRekonstruerSaksbehandlerBrevrequest(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
+    fun hentBeslutterbrevEllerRekonstruerSaksbehandlerBrev(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
-        return Ressurs.success(brevService.hentEllerRekonstruerSaksbehandlerBrevrequest(behandlingId))
+        return Ressurs.success(brevService.hentBeslutterbrevEllerRekonstruerSaksbehandlerBrev(behandlingId))
     }
 
     @PostMapping("/{behandlingId}/{brevMal}")
