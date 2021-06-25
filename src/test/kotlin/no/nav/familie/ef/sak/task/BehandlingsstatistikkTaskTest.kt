@@ -1,18 +1,20 @@
 package no.nav.familie.ef.sak.task
 
-import io.mockk.slot
-import no.nav.familie.kontrakter.ef.iverksett.BehandlingsstatistikkDto
-import no.nav.familie.ef.sak.iverksett.IverksettClient
-import org.junit.jupiter.api.Test
-import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.familie.prosessering.domene.Task
-import java.util.UUID
+import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
-import org.assertj.core.api.Assertions.assertThat
-import io.mockk.Runs
+import io.mockk.slot
+import no.nav.familie.ef.sak.api.beregning.ResultatType
 import no.nav.familie.ef.sak.api.beregning.VedtakService
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker
+import no.nav.familie.ef.sak.iverksett.IverksettClient
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.repository.domain.BehandlingResultat
+import no.nav.familie.ef.sak.repository.domain.BehandlingType.FØRSTEGANGSBEHANDLING
+import no.nav.familie.ef.sak.repository.domain.Vedtak
+import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsstønad
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.OppgaveService
@@ -20,8 +22,16 @@ import no.nav.familie.ef.sak.service.PersonService
 import no.nav.familie.ef.sak.service.SøknadService
 import no.nav.familie.kontrakter.ef.felles.BehandlingType
 import no.nav.familie.kontrakter.ef.felles.StønadType
+import no.nav.familie.kontrakter.ef.iverksett.BehandlingsstatistikkDto
 import no.nav.familie.kontrakter.ef.iverksett.Hendelse
+import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
+import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.oppgave.Oppgave
+import no.nav.familie.prosessering.domene.Task
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
 import java.time.ZonedDateTime
+import java.util.UUID
 
 data class BehandlingStatistikkDto(
         val behandlingId: UUID,
@@ -45,23 +55,34 @@ internal class BehandlingsstatistikkTaskTest {
     @Test
     internal fun `skal sende behandlingsstatistikk`() {
 
-        val behandlingsstatistikkSlot = slot<BehandlingsstatistikkDto>();
+        val fagsak = fagsak()
+        val behandling = behandling(fagsak, resultat = BehandlingResultat.INNVILGET, type = FØRSTEGANGSBEHANDLING)
+        val hendelse = Hendelse.BESLUTTET
+        val hendelseTidspunkt = ZonedDateTime.now()
+        val søknadstidspunkt = ZonedDateTime.now().minusDays(5)
+        val oppgaveId = 1L
+        val saksbehandlerId = "389221"
+        val beslutterId = "389221"
+        val personIdent = "123456789012"
+        val opprettetEnhet = "4489"
+        val tildeltEnhet = "4488"
+        val periodeBegrunnelse = "Lorem ipsum"
+        val inntektBegrunnelse = "Inntektus loremus ipsums"
 
-        val behandlingsstatistikk = BehandlingStatistikkDto(
-                behandlingId = UUID.randomUUID(),
-                personIdent = "123456789012",
-                gjeldendeSaksbehandlerId = "389221",
-                saksnummer = "392423",
-                hendelseTidspunkt = ZonedDateTime.now(),
-                søknadstidspunkt = ZonedDateTime.now(),
-                hendelse = Hendelse.BESLUTTET,
-                opprettetEnhet = "A",
-                ansvarligEnhet = "A",
-                strengtFortroligAdresse = false,
-                stønadstype = StønadType.OVERGANGSSTØNAD,
-                behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING
+        val payload = BehandlingsstatistikkTaskPayload(
+                behandling.id,
+                hendelse,
+                hendelseTidspunkt.toLocalDateTime(),
+                saksbehandlerId,
+                oppgaveId
         )
 
+
+        val behandlingsstatistikkSlot = slot<BehandlingsstatistikkDto>();
+
+        val oppgaveMock = mockk<Oppgave>()
+        val søknadskjemaMock = mockk<SøknadsskjemaOvergangsstønad>()
+        val søkerMock = mockk<PdlSøker>()
         val iverksettClient = mockk<IverksettClient>()
         val behandlingService = mockk<BehandlingService>()
         val søknadService = mockk<SøknadService>()
@@ -69,6 +90,25 @@ internal class BehandlingsstatistikkTaskTest {
         val personService = mockk<PersonService>()
         val vedtakService = mockk<VedtakService>()
         val oppgaveService = mockk<OppgaveService>()
+
+        every { iverksettClient.sendBehandlingsstatistikk(capture(behandlingsstatistikkSlot)) } just Runs
+        every { behandlingService.hentAktivIdent(behandling.id) } returns personIdent
+        every { behandlingService.hentBehandling(behandling.id) } returns behandling
+        every { fagsakService.hentFagsak(fagsak.id) } returns fagsak
+        every { oppgaveService.hentOppgave(oppgaveId) } returns oppgaveMock
+        every { søknadService.hentOvergangsstønad(any()) } returns søknadskjemaMock
+        every { søknadskjemaMock.datoMottatt } returns søknadstidspunkt.toLocalDateTime()
+        every { personService.hentSøker(personIdent)} returns søkerMock
+        every { vedtakService.hentVedtak(behandling.id) } returns Vedtak(behandlingId =behandling.id,
+                                                                         resultatType = ResultatType.INNVILGE,
+                                                                         periodeBegrunnelse = periodeBegrunnelse,
+                                                                         inntektBegrunnelse = inntektBegrunnelse,
+                                                                         saksbehandlerIdent = saksbehandlerId,
+                                                                         beslutterIdent = beslutterId)
+        every { oppgaveMock.tildeltEnhetsnr } returns tildeltEnhet
+        every { oppgaveMock.opprettetAvEnhetsnr } returns opprettetEnhet
+        every { søkerMock.adressebeskyttelse } returns emptyList()
+
 
         val behandlingsstatistikkTask = BehandlingsstatistikkTask(iverksettClient = iverksettClient,
                                                                   behandlingService = behandlingService,
@@ -78,24 +118,23 @@ internal class BehandlingsstatistikkTaskTest {
                                                                   oppgaveService = oppgaveService,
                                                                   personService = personService)
 
-        val task = Task(type = "behandlingsstatistikkTask", payload = objectMapper.writeValueAsString(behandlingsstatistikk))
-
-        every {
-            iverksettClient.sendBehandlingsstatistikk(capture(behandlingsstatistikkSlot));
-        } just Runs
+        val task = Task(type = "behandlingsstatistikkTask",
+                        payload = objectMapper.writeValueAsString(payload))
 
         behandlingsstatistikkTask.doTask(task);
 
-        assertThat(behandlingsstatistikk.behandlingId).isEqualTo(behandlingsstatistikkSlot.captured.behandlingId)
-        assertThat(behandlingsstatistikk.personIdent).isEqualTo(behandlingsstatistikkSlot.captured.personIdent)
-        assertThat(behandlingsstatistikk.gjeldendeSaksbehandlerId).isEqualTo(behandlingsstatistikkSlot.captured.gjeldendeSaksbehandlerId)
-        assertThat(behandlingsstatistikk.hendelseTidspunkt).isEqualTo(behandlingsstatistikkSlot.captured.hendelseTidspunkt)
-        assertThat(behandlingsstatistikk.søknadstidspunkt).isEqualTo(behandlingsstatistikkSlot.captured.søknadstidspunkt)
-        assertThat(behandlingsstatistikk.hendelse).isEqualTo(behandlingsstatistikkSlot.captured.hendelse)
-        assertThat(behandlingsstatistikk.opprettetEnhet).isEqualTo(behandlingsstatistikkSlot.captured.opprettetEnhet)
-        assertThat(behandlingsstatistikk.ansvarligEnhet).isEqualTo(behandlingsstatistikkSlot.captured.ansvarligEnhet)
-        assertThat(behandlingsstatistikk.strengtFortroligAdresse).isEqualTo(behandlingsstatistikkSlot.captured.strengtFortroligAdresse)
-        assertThat(behandlingsstatistikk.stønadstype).isEqualTo(behandlingsstatistikkSlot.captured.stønadstype)
-        assertThat(behandlingsstatistikk.behandlingstype).isEqualTo(behandlingsstatistikkSlot.captured.behandlingstype)
+        val behandlingsstatistikk = behandlingsstatistikkSlot.captured
+        assertThat(behandlingsstatistikk.behandlingId).isEqualTo(behandling.id)
+        assertThat(behandlingsstatistikk.personIdent).isEqualTo(personIdent)
+        assertThat(behandlingsstatistikk.gjeldendeSaksbehandlerId).isEqualTo(beslutterId)
+        assertThat(behandlingsstatistikk.hendelseTidspunkt).isEqualTo(hendelseTidspunkt)
+        assertThat(behandlingsstatistikk.søknadstidspunkt).isEqualTo(søknadstidspunkt)
+        assertThat(behandlingsstatistikk.hendelse).isEqualTo(hendelse)
+        assertThat(behandlingsstatistikk.opprettetEnhet).isEqualTo(opprettetEnhet)
+        assertThat(behandlingsstatistikk.ansvarligEnhet).isEqualTo(tildeltEnhet)
+        assertThat(behandlingsstatistikk.strengtFortroligAdresse).isEqualTo(false)
+        assertThat(behandlingsstatistikk.stønadstype).isEqualTo(StønadType.OVERGANGSSTØNAD)
+        assertThat(behandlingsstatistikk.behandlingstype).isEqualTo(BehandlingType.FØRSTEGANGSBEHANDLING)
+        assertThat(behandlingsstatistikk.resultatBegrunnelse).isEqualTo(periodeBegrunnelse)
     }
 }

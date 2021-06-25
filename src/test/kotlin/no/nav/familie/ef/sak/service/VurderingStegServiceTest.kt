@@ -85,7 +85,7 @@ internal class VurderingStegServiceTest {
         every { behandlingService.oppdaterStatusPåBehandling(any(), any()) } returns behandling
         every { søknadService.hentOvergangsstønad(any()) }.returns(søknad)
         every { blankettRepository.deleteById(any()) } just runs
-        every { taskRepository.save(any()) } returns Task("", "", Properties())
+        every { taskRepository.save(any())} answers { firstArg() }
         every { familieIntegrasjonerClient.hentMedlemskapsinfo(any()) }
                 .returns(Medlemskapsinfo(personIdent = søknad.fødselsnummer,
                                          gyldigePerioder = emptyList(),
