@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.service
 
 import io.mockk.CapturingSlot
+import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -22,6 +23,7 @@ import no.nav.familie.ef.sak.mapper.SøknadsskjemaMapper
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.vilkårsvurdering
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.util.BrukerContextUtil
 import no.nav.familie.ef.sak.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.regler.RegelId
 import no.nav.familie.ef.sak.regler.SvarId
@@ -40,12 +42,15 @@ import no.nav.familie.ef.sak.service.VurderingStegService
 import no.nav.familie.ef.sak.service.steg.StegService
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
+import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.data.repository.findByIdOrNull
+import java.util.Properties
 import java.util.UUID
 
 
@@ -77,8 +82,10 @@ internal class VurderingStegServiceTest {
     @BeforeEach
     fun setUp() {
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+        every { behandlingService.oppdaterStatusPåBehandling(any(), any()) } returns behandling
         every { søknadService.hentOvergangsstønad(any()) }.returns(søknad)
         every { blankettRepository.deleteById(any()) } just runs
+        every { taskRepository.save(any()) } returns Task("", "", Properties())
         every { familieIntegrasjonerClient.hentMedlemskapsinfo(any()) }
                 .returns(Medlemskapsinfo(personIdent = søknad.fødselsnummer,
                                          gyldigePerioder = emptyList(),
@@ -95,8 +102,14 @@ internal class VurderingStegServiceTest {
                                                                                              mockk(relaxed = true),
                                                                                              mockk(relaxed = true),
                                                                                              false)
+
+        BrukerContextUtil.mockBrukerContext("saksbehandlernavn")
     }
 
+    @AfterEach
+    internal fun tearDown() {
+        BrukerContextUtil.clearBrukerContext()
+    }
 
     @Test
     internal fun `kan ikke oppdatere vilkårsvurdering koblet til en behandling som ikke finnes`() {
@@ -165,6 +178,38 @@ internal class VurderingStegServiceTest {
         }).isInstanceOf(Feil::class.java)
                 .hasMessageContaining("er låst for videre redigering")
         verify(exactly = 0) { vilkårsvurderingRepository.insertAll(any()) }
+    }
+
+    @Test
+    internal fun `skal oppdatere status fra OPPRETTET til UTREDES for første vilkår`() {
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling(fagsak(), true, BehandlingStatus.OPPRETTET)
+        val lagretVilkårsvurdering = slot<Vilkårsvurdering>()
+        val vilkårsvurdering = initiererVurderinger(lagretVilkårsvurdering)
+        val delvilkårDto = listOf(DelvilkårsvurderingDto(Vilkårsresultat.IKKE_OPPFYLT,
+                                                         listOf(VurderingDto(RegelId.SØKER_MEDLEM_I_FOLKETRYGDEN,
+                                                                             SvarId.JA,
+                                                                             "a"))))
+        vurderingService.oppdaterVilkår(SvarPåVurderingerDto(id = vilkårsvurdering.id,
+                                                             behandlingId = BEHANDLING_ID,
+                                                             delvilkårsvurderinger = delvilkårDto))
+
+        verify(exactly = 1) { behandlingService.oppdaterStatusPåBehandling(any(), BehandlingStatus.UTREDES) }
+    }
+
+    @Test
+    internal fun `skal ikke oppdatere status til UTREDES hvis den allerede er dette `() {
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling(fagsak(), true, BehandlingStatus.UTREDES)
+        val lagretVilkårsvurdering = slot<Vilkårsvurdering>()
+        val vilkårsvurdering = initiererVurderinger(lagretVilkårsvurdering)
+        val delvilkårDto = listOf(DelvilkårsvurderingDto(Vilkårsresultat.IKKE_OPPFYLT,
+                                                         listOf(VurderingDto(RegelId.SØKER_MEDLEM_I_FOLKETRYGDEN,
+                                                                             SvarId.JA,
+                                                                             "a"))))
+        vurderingService.oppdaterVilkår(SvarPåVurderingerDto(id = vilkårsvurdering.id,
+                                                             behandlingId = BEHANDLING_ID,
+                                                             delvilkårsvurderinger = delvilkårDto))
+
+        verify(exactly = 0) { behandlingService.oppdaterStatusPåBehandling(any(), BehandlingStatus.UTREDES) }
     }
 
     //KUN FOR Å TESTE OPPDATERSTEG
