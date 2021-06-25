@@ -30,13 +30,13 @@ class VedtakService(private val vedtakRepository: VedtakRepository) {
 
     fun oppdaterSaksbehandler(behandlingId: UUID, saksbehandlerIdent: String) {
         val vedtak = hentVedtak(behandlingId)
-        vedtak.copy(saksbehandlerIdent = saksbehandlerIdent)
-        vedtakRepository.update(vedtak)
+        val oppdatertVedtak = vedtak.copy(saksbehandlerIdent = saksbehandlerIdent)
+        vedtakRepository.update(oppdatertVedtak)
     }
 
     fun oppdaterBeslutter(behandlingId: UUID, beslutterIdent: String) {
         val vedtak = hentVedtak(behandlingId)
-        vedtak.copy(beslutterIdent = beslutterIdent)
-        vedtakRepository.update(vedtak)
+        val oppdatertVedtak = vedtak.copy(beslutterIdent = beslutterIdent)
+        vedtakRepository.update(oppdatertVedtak)
     }
 }
