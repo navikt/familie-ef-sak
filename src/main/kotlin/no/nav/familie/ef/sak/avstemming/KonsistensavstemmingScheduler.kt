@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.task.KonsistensavstemmingPayload
 import no.nav.familie.ef.sak.task.KonsistensavstemmingTask
 import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.util.isOptimisticLocking
 import org.slf4j.LoggerFactory
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Version
@@ -17,15 +18,33 @@ import java.time.LocalDate
 import kotlin.random.Random
 
 @Service
-class KonsistensavstemmingScheduler(private val repository: KonsistensavstemmingJobbRepository,
-                                    private val taskRepository: TaskRepository) {
+class KonsistensavstemmingScheduler(private val konsistensavstemmingService: KonsistensavstemmingService) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Scheduled(cron = "0 0 0/12 * * *")
+    fun opprettTasks() {
+        Thread.sleep(Random.nextLong(5_000)) // YOLO unngå feil med att 2 noder
+        try {
+            konsistensavstemmingService.opprettTasks()
+        } catch (e: Exception) {
+            if (isOptimisticLocking(e)) {
+                logger.warn("OptimisticLockingFailureException ved opprettelse av konsistensavstemmingtasks")
+            } else {
+                logger.error("Feilet opprettelse av tasks for konsistensavstemming", e)
+            }
+        }
+    }
+}
+
+@Service
+class KonsistensavstemmingService(private val repository: KonsistensavstemmingJobbRepository,
+                                  private val taskRepository: TaskRepository) {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     @Transactional
     fun opprettTasks() {
-        Thread.sleep(Random.nextLong(20)) // YOLO unngå feil med att 2 noder
         val tidspunkt = LocalDate.now().plusDays(2)
         val jobber = repository.findAllByOpprettetIsFalseAndTriggerdatoIsBefore(tidspunkt)
         jobber.forEach {
@@ -36,7 +55,6 @@ class KonsistensavstemmingScheduler(private val repository: Konsistensavstemming
         }
         repository.updateAll(jobber.map { it.copy(opprettet = true) })
     }
-
 }
 
 @Repository
