@@ -29,8 +29,11 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.prosessering.domene.Task
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.util.TimeZone
 import java.util.UUID
 
 data class BehandlingStatistikkDto(
@@ -51,6 +54,11 @@ data class BehandlingStatistikkDto(
 )
 
 internal class BehandlingsstatistikkTaskTest {
+
+    @BeforeEach
+    internal fun setUp() {
+        TimeZone.setDefault(TimeZone.getTimeZone(ZoneId.of("Europe/Oslo")))
+    }
 
     @Test
     internal fun `skal sende behandlingsstatistikk`() {
