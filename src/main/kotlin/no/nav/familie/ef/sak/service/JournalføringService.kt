@@ -77,7 +77,6 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
     private fun opprettBehandlingsstatistikkTask(behandlingId: UUID, oppgaveId: Long) {
         taskRepository.save(BehandlingsstatistikkTask.opprettTask(behandlingId = behandlingId,
                                                                   hendelse = Hendelse.MOTTATT,
-                                                                  hendelseTidspunkt = LocalDateTime.now(),
                                                                   gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler(true),
                                                                   oppgaveId = oppgaveId
         ))

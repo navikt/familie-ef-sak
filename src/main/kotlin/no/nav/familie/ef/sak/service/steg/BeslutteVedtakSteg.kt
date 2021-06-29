@@ -86,7 +86,6 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
         ))
         taskRepository.save(BehandlingsstatistikkTask.opprettTask(behandlingId = behandlingId,
                                                                   hendelse = Hendelse.BESLUTTET,
-                                                                  hendelseTidspunkt = LocalDateTime.now(),
                                                                   gjeldendeSaksbehandler = vedtak.beslutterIdent ?: error("Mangler beslutterIdent på vedtaket"),
                                                                   oppgaveId = oppgaveId
 

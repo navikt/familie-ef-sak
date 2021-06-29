@@ -115,7 +115,6 @@ class VurderingStegService(private val behandlingService: BehandlingService,
             taskRepository.save(BehandlingsstatistikkTask.opprettTask(
                     behandlingId = behandling.id,
                     hendelse = Hendelse.PÅBEGYNT,
-                    hendelseTidspunkt = LocalDateTime.now(),
                     gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler(strict = true)
             ))
         }

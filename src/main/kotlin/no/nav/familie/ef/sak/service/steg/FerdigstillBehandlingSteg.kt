@@ -32,7 +32,6 @@ class FerdigstillBehandlingSteg(private val behandlingService: BehandlingService
             taskRepository.save(PubliserVedtakshendelseTask.opprettTask(behandling.id))
             taskRepository.save(BehandlingsstatistikkTask.opprettTask(behandlingId = behandling.id,
                                                                       hendelse = Hendelse.FERDIG,
-                                                                      hendelseTidspunkt = LocalDateTime.now(),
                                                                       gjeldendeSaksbehandler = beslutterIdent,
 
             ))

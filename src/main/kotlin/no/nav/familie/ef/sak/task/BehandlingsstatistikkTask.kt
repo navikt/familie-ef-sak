@@ -54,7 +54,7 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
         val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
 
         val sisteOppgaveForBehandling = finnSisteOppgaveForBehandlingen(behandlingId, oppgaveId)
-        val resultatBegrunnelse = finnResultatBegrunnelse(behandlingId)
+        val resultatBegrunnelse = finnResultatBegrunnelse(behandlingId) // TODO: Har ikke vedtak før den er vedtatt!
         val søker = personService.hentSøker(personIdent);
         val søknadstidspunkt = finnSøknadstidspunkt(fagsak, behandlingId)
 
@@ -108,7 +108,7 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
         fun opprettTask(
                 behandlingId: UUID,
                 hendelse: Hendelse,
-                hendelseTidspunkt: LocalDateTime,
+                hendelseTidspunkt: LocalDateTime = LocalDateTime.now(),
                 gjeldendeSaksbehandler: String,
                 oppgaveId: Long? = null
         ): Task =
@@ -127,6 +127,7 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
                             this["saksbehandler"] = gjeldendeSaksbehandler
                             this["behandlingId"] = behandlingId.toString()
                             this["hendelse"] = hendelse.name
+                            this["hendelseTidspunkt"] = hendelseTidspunkt
                         })
 
 
