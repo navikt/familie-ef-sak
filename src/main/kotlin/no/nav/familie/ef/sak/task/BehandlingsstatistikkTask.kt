@@ -54,7 +54,7 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
         val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
 
         val sisteOppgaveForBehandling = finnSisteOppgaveForBehandlingen(behandlingId, oppgaveId)
-        val resultatBegrunnelse = finnResultatBegrunnelse(behandlingId) // TODO: Har ikke vedtak før den er vedtatt!
+        val resultatBegrunnelse = finnResultatBegrunnelse(hendelse, behandlingId)
         val søker = personService.hentSøker(personIdent);
         val søknadstidspunkt = finnSøknadstidspunkt(fagsak, behandlingId)
 
@@ -84,12 +84,17 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
         return oppgaveService.hentOppgave(gsakOppgaveId)
     }
 
-    private fun finnResultatBegrunnelse(behandlingId: UUID): String? {
-        val vedtak = vedtakService.hentVedtak(behandlingId)
-        return when (vedtak.resultatType) {
-            ResultatType.INNVILGE -> vedtak.periodeBegrunnelse
-            ResultatType.AVSLÅ -> vedtak.avslåBegrunnelse
-            ResultatType.HENLEGGE -> error("Ikke implementert")
+    private fun finnResultatBegrunnelse(hendelse: Hendelse, behandlingId: UUID): String? {
+        return when (hendelse) {
+            Hendelse.PÅBEGYNT, Hendelse.MOTTATT -> null
+            else -> {
+                val vedtak = vedtakService.hentVedtak(behandlingId)
+                return when (vedtak.resultatType) {
+                    ResultatType.INNVILGE -> vedtak.periodeBegrunnelse
+                    ResultatType.AVSLÅ -> vedtak.avslåBegrunnelse
+                    ResultatType.HENLEGGE -> error("Ikke implementert")
+                }
+            }
         }
     }
 
@@ -127,7 +132,8 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
                             this["saksbehandler"] = gjeldendeSaksbehandler
                             this["behandlingId"] = behandlingId.toString()
                             this["hendelse"] = hendelse.name
-                            this["hendelseTidspunkt"] = hendelseTidspunkt
+                            this["hendelseTidspunkt"] = hendelseTidspunkt.toString()
+                            this["oppgaveId"] = oppgaveId.toString() ?: ""
                         })
 
 
