@@ -79,7 +79,7 @@ class PdlClientConfig {
         }
 
         every { pdlClient.hentPersonKortBolk(any()) } answers {
-            (firstArg() as List<String>).map { it to PdlPersonKort(lagNavn(fornavn = it)) }.toMap()
+            (firstArg() as List<String>).map { it to PdlPersonKort(lagNavn(fornavn = it), emptyList()) }.toMap()
         }
 
         every { pdlClient.hentSøker(any()) } returns opprettPdlSøker()

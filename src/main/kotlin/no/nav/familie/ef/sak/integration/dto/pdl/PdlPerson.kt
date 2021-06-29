@@ -48,7 +48,8 @@ data class PdlIdenter(val identer: List<PdlIdent>)
 
 data class PdlHentIdenter(val hentIdenter: PdlIdenter?)
 
-data class PdlPersonKort(val navn: List<Navn>)
+data class PdlPersonKort(val navn: List<Navn>,
+                         @JsonProperty("doedsfall") val dødsfall: List<Dødsfall>)
 
 data class PdlSøkerKort(@JsonProperty("kjoenn") val kjønn: List<Kjønn>,
                         val navn: List<Navn>)

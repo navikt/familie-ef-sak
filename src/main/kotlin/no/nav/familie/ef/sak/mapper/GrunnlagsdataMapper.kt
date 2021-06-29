@@ -72,12 +72,14 @@ object GrunnlagsdataMapper {
     private fun mapSivivilstand(pdlSøker: PdlSøker, andrePersoner: Map<String, PdlPersonKort>): List<SivilstandMedNavn> {
 
         return pdlSøker.sivilstand.map {
+            val person = andrePersoner[it.relatertVedSivilstand]
             SivilstandMedNavn(type = Sivilstandstype.valueOf(it.type.name),
                               gyldigFraOgMed = it.gyldigFraOgMed,
                               relatertVedSivilstand = it.relatertVedSivilstand,
                               bekreftelsesdato = it.bekreftelsesdato,
+                              dødsfall = person?.dødsfall?.gjeldende(),
                               metadata = it.metadata,
-                              navn = andrePersoner[it.relatertVedSivilstand]?.navn?.gjeldende()?.visningsnavn())
+                              navn = person?.navn?.gjeldende()?.visningsnavn())
         }
     }
 
