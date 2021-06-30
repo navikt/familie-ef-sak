@@ -22,11 +22,9 @@ import no.nav.familie.ef.sak.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.task.OpprettOppgaveTask.OpprettOppgaveTaskData
 import no.nav.familie.ef.sak.task.PollStatusFraIverksettTask
-import no.nav.familie.kontrakter.ef.iverksett.Hendelse
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -75,16 +73,13 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
     }
 
     private fun opprettTaskForBehandlingsstatistikk(behandlingId: UUID, oppgaveId: Long?) {
-        val vedtak = vedtakService.hentVedtak(behandlingId)
         val vedtakstidspunkt = behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId, StegType.SEND_TIL_BESLUTTER)?.endretTid ?: error("Mangler behandlingshistorikk for vedtak") // TODO: Bruk vedtak.endretTid når det kommer på plass
 
         taskRepository.save(BehandlingsstatistikkTask.opprettVedtattTask(behandlingId = behandlingId,
                                                                   hendelseTidspunkt = vedtakstidspunkt,
-                                                                  gjeldendeSaksbehandler = vedtak.saksbehandlerIdent ?: error("Mangler saksbehandlerIdent på vedtaket"),
                                                                   oppgaveId = oppgaveId))
 
         taskRepository.save(BehandlingsstatistikkTask.opprettBesluttetTask(behandlingId = behandlingId,
-                                                                  gjeldendeSaksbehandler = vedtak.beslutterIdent ?: error("Mangler beslutterIdent på vedtaket"),
                                                                   oppgaveId = oppgaveId))
 
     }

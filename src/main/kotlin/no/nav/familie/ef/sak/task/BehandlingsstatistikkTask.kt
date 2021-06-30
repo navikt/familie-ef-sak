@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.repository.domain.Fagsak
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
+import no.nav.familie.ef.sak.repository.domain.Vedtak
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.OppgaveService
@@ -56,14 +57,16 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
         val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
 
         val sisteOppgaveForBehandling = finnSisteOppgaveForBehandlingen(behandlingId, oppgaveId)
-        val resultatBegrunnelse = finnResultatBegrunnelse(hendelse, behandlingId)
+        val vedtak = vedtakService.hentVedtak(behandlingId)
+
+        val resultatBegrunnelse = finnResultatBegrunnelse(hendelse, vedtak)
         val søker = personService.hentSøker(personIdent);
         val søknadstidspunkt = finnSøknadstidspunkt(fagsak, behandlingId)
 
         val behandlingsstatistikkDto = BehandlingsstatistikkDto(
                 behandlingId = behandlingId,
                 personIdent = personIdent,
-                gjeldendeSaksbehandlerId = gjeldendeSaksbehandler,
+                gjeldendeSaksbehandlerId = finnSaksbehandler(hendelse, vedtak, gjeldendeSaksbehandler),
                 eksternFagsakId = fagsak.eksternId.id.toString(),
                 hendelseTidspunkt = hendelseTidspunkt.atZone(zoneIdOslo),
                 søknadstidspunkt = søknadstidspunkt.atZone(zoneIdOslo),
@@ -86,17 +89,24 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
         return oppgaveService.hentOppgave(gsakOppgaveId)
     }
 
-    private fun finnResultatBegrunnelse(hendelse: Hendelse, behandlingId: UUID): String? {
+    private fun finnResultatBegrunnelse(hendelse: Hendelse, vedtak: Vedtak): String? {
         return when (hendelse) {
             Hendelse.PÅBEGYNT, Hendelse.MOTTATT -> null
             else -> {
-                val vedtak = vedtakService.hentVedtak(behandlingId)
                 return when (vedtak.resultatType) {
                     ResultatType.INNVILGE -> vedtak.periodeBegrunnelse
                     ResultatType.AVSLÅ -> vedtak.avslåBegrunnelse
                     ResultatType.HENLEGGE -> error("Ikke implementert")
                 }
             }
+        }
+    }
+
+    private fun finnSaksbehandler(hendelse: Hendelse, vedtak: Vedtak, gjeldendeSaksbehandler: String?): String {
+        return when (hendelse) {
+            Hendelse.MOTTATT, Hendelse.PÅBEGYNT -> gjeldendeSaksbehandler ?: error("Mangler saksbehandler for hendelse")
+            Hendelse.VEDTATT -> vedtak.saksbehandlerIdent ?: error("Mangler saksbehandler på vedtaket")
+            Hendelse.BESLUTTET, Hendelse.FERDIG -> vedtak.beslutterIdent ?: error("Mangler beslutter på vedtaket")
         }
     }
 
@@ -116,8 +126,7 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
                 opprettTask(behandlingId = behandlingId,
                             hendelse = Hendelse.MOTTATT,
                             hendelseTidspunkt = LocalDateTime.now(),
-                            gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler(
-                                    true),
+                            gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler(true),
                             oppgaveId = oppgaveId)
 
         fun opprettPåbegyntTask(behandlingId: UUID): Task =
@@ -128,35 +137,29 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
 
         fun opprettVedtattTask(behandlingId: UUID,
                                hendelseTidspunkt: LocalDateTime,
-                               gjeldendeSaksbehandler: String,
                                oppgaveId: Long?): Task =
                 opprettTask(behandlingId = behandlingId,
                             hendelse = Hendelse.VEDTATT,
                             hendelseTidspunkt = hendelseTidspunkt,
-                            gjeldendeSaksbehandler = gjeldendeSaksbehandler,
                             oppgaveId = oppgaveId)
 
         fun opprettBesluttetTask(behandlingId: UUID,
-                                 gjeldendeSaksbehandler: String,
                                  oppgaveId: Long?): Task =
                 opprettTask(behandlingId = behandlingId,
                             hendelse = Hendelse.BESLUTTET,
                             hendelseTidspunkt = LocalDateTime.now(),
-                            gjeldendeSaksbehandler = gjeldendeSaksbehandler,
                             oppgaveId = oppgaveId)
 
-        fun opprettFerdigTask(behandlingId: UUID,
-                                 gjeldendeSaksbehandler: String): Task =
+        fun opprettFerdigTask(behandlingId: UUID): Task =
                 opprettTask(behandlingId = behandlingId,
                             hendelse = Hendelse.FERDIG,
-                            hendelseTidspunkt = LocalDateTime.now(),
-                            gjeldendeSaksbehandler = gjeldendeSaksbehandler)
+                            hendelseTidspunkt = LocalDateTime.now())
 
         private fun opprettTask(
                 behandlingId: UUID,
                 hendelse: Hendelse,
                 hendelseTidspunkt: LocalDateTime = LocalDateTime.now(),
-                gjeldendeSaksbehandler: String,
+                gjeldendeSaksbehandler: String? = null,
                 oppgaveId: Long? = null
         ): Task =
                 Task(
@@ -188,6 +191,6 @@ data class BehandlingsstatistikkTaskPayload(
         val behandlingId: UUID,
         val hendelse: Hendelse,
         val hendelseTidspunkt: LocalDateTime,
-        val gjeldendeSaksbehandler: String,
+        val gjeldendeSaksbehandler: String?,
         val oppgaveId: Long?
 )
