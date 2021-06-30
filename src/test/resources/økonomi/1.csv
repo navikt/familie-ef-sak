@@ -1,0 +1,5 @@
+behandling_id, fom, tom, beløp, inntekt, inntektsreduksjon, samordningsfradrag
+1, 2021-01, 2021-01, 10000, 0, 0, 0
+2, 2021-01, 2021-01, 10000, 0, 0, 0
+OUTPUT,,,,,,
+1, 2021-01, 2021-01, 10000, 0, 0, 0
