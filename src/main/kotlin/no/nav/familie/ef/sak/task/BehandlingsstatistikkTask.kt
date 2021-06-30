@@ -3,16 +3,14 @@ package no.nav.familie.ef.sak.task
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.api.beregning.ResultatType
 import no.nav.familie.ef.sak.api.beregning.VedtakService
-import no.nav.familie.ef.sak.integration.dto.pdl.AdressebeskyttelseGradering
-import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.repository.domain.Fagsak
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.domain.Vedtak
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.FagsakService
+import no.nav.familie.ef.sak.service.GrunnlagsdataService
 import no.nav.familie.ef.sak.service.OppgaveService
-import no.nav.familie.ef.sak.service.PersonService
 import no.nav.familie.ef.sak.service.SøknadService
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.ef.felles.BehandlingType
@@ -42,7 +40,7 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
                                 private val søknadService: SøknadService,
                                 private val vedtakService: VedtakService,
                                 private val oppgaveService: OppgaveService,
-                                private val personService: PersonService
+                                private val grunnlagsdataService: GrunnlagsdataService
 ) : AsyncTaskStep {
 
     private val zoneIdOslo = ZoneId.of("Europe/Oslo")
@@ -52,15 +50,15 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
                 task.payload
         )
 
-        val personIdent = behandlingService.hentAktivIdent(behandlingId)
         val behandling = behandlingService.hentBehandling(behandlingId)
         val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
+        val personIdent = fagsak.hentAktivIdent()
 
         val sisteOppgaveForBehandling = finnSisteOppgaveForBehandlingen(behandlingId, oppgaveId)
         val vedtak = vedtakService.hentVedtak(behandlingId)
 
         val resultatBegrunnelse = finnResultatBegrunnelse(hendelse, vedtak)
-        val søker = personService.hentSøker(personIdent);
+        val søker = grunnlagsdataService.hentGrunnlagsdata(behandlingId).grunnlagsdata.søker
         val søknadstidspunkt = finnSøknadstidspunkt(fagsak, behandlingId)
 
         val behandlingsstatistikkDto = BehandlingsstatistikkDto(
@@ -75,7 +73,7 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
                 resultatBegrunnelse = resultatBegrunnelse,
                 opprettetEnhet = sisteOppgaveForBehandling.opprettetAvEnhetsnr ?: "9999",
                 ansvarligEnhet = sisteOppgaveForBehandling.tildeltEnhetsnr ?: "9999",
-                strengtFortroligAdresse = søker.adressebeskyttelse.gjeldende()?.gradering == AdressebeskyttelseGradering.STRENGT_FORTROLIG,
+                strengtFortroligAdresse = søker.adressebeskyttelse?.erStrengtFortrolig() ?: false,
                 stønadstype = StønadType.valueOf(fagsak.stønadstype.name),
                 behandlingstype = BehandlingType.valueOf(behandling.type.name)
         )

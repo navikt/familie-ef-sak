@@ -100,7 +100,7 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
                                                                    oppgavetype = oppgavetype,
                                                                    oppgaveId = it.gsakOppgaveId,
                                                                    personIdent = aktivIdent))
-            return it.gsakOppgaveId
+            it.gsakOppgaveId
         }
     }
 
