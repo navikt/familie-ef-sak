@@ -57,9 +57,9 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
                 val vedtaksbrev = vedtaksbrevRepository.findByIdOrThrow(behandling.id)
                 val fil = utledVedtaksbrev(vedtaksbrev)
                 val iverksettDto = iverksettingDtoMapper.tilDto(behandling, beslutter)
-                iverksettClient.iverksett(iverksettDto, fil)
                 opprettPollForStatusOppgave(behandling.id)
                 opprettTaskForBehandlingsstatistikk(behandling.id, oppgaveId)
+                iverksettClient.iverksett(iverksettDto, fil)
                 StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT
             } else {
                 opprettTaskForJournalførBlankett(behandling)
