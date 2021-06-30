@@ -76,20 +76,16 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
 
     private fun opprettTaskForBehandlingsstatistikk(behandlingId: UUID, oppgaveId: Long?) {
         val vedtak = vedtakService.hentVedtak(behandlingId)
-        val vedtakstidspunkt = behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId, StegType.SEND_TIL_BESLUTTER)?.endretTid ?: error("Mangler behandlingshistorikk for vedtak")
+        val vedtakstidspunkt = behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId, StegType.SEND_TIL_BESLUTTER)?.endretTid ?: error("Mangler behandlingshistorikk for vedtak") // TODO: Bruk vedtak.endretTid når det kommer på plass
 
-        taskRepository.save(BehandlingsstatistikkTask.opprettTask(behandlingId = behandlingId,
-                                                                  hendelse = Hendelse.VEDTATT,
+        taskRepository.save(BehandlingsstatistikkTask.opprettVedtattTask(behandlingId = behandlingId,
                                                                   hendelseTidspunkt = vedtakstidspunkt,
                                                                   gjeldendeSaksbehandler = vedtak.saksbehandlerIdent ?: error("Mangler saksbehandlerIdent på vedtaket"),
-                                                                  oppgaveId = oppgaveId
-        ))
-        taskRepository.save(BehandlingsstatistikkTask.opprettTask(behandlingId = behandlingId,
-                                                                  hendelse = Hendelse.BESLUTTET,
-                                                                  gjeldendeSaksbehandler = vedtak.beslutterIdent ?: error("Mangler beslutterIdent på vedtaket"),
-                                                                  oppgaveId = oppgaveId
+                                                                  oppgaveId = oppgaveId))
 
-        ))
+        taskRepository.save(BehandlingsstatistikkTask.opprettBesluttetTask(behandlingId = behandlingId,
+                                                                  gjeldendeSaksbehandler = vedtak.beslutterIdent ?: error("Mangler beslutterIdent på vedtaket"),
+                                                                  oppgaveId = oppgaveId))
 
     }
 

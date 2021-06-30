@@ -112,11 +112,7 @@ class VurderingStegService(private val behandlingService: BehandlingService,
 
     private fun opprettBehandlingsstatistikkTask(behandling: Behandling) {
         if (behandling.type != BehandlingType.BLANKETT) {
-            taskRepository.save(BehandlingsstatistikkTask.opprettTask(
-                    behandlingId = behandling.id,
-                    hendelse = Hendelse.PÅBEGYNT,
-                    gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler(strict = true)
-            ))
+            taskRepository.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId = behandling.id))
         }
 
     }

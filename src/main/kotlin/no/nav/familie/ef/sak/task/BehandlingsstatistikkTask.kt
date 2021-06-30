@@ -1,7 +1,5 @@
 package no.nav.familie.ef.sak.task
 
-import no.nav.familie.kontrakter.felles.objectMapper
-import java.time.LocalDateTime
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.api.beregning.ResultatType
 import no.nav.familie.ef.sak.api.beregning.VedtakService
@@ -15,15 +13,18 @@ import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.OppgaveService
 import no.nav.familie.ef.sak.service.PersonService
 import no.nav.familie.ef.sak.service.SøknadService
+import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.ef.felles.BehandlingType
 import no.nav.familie.kontrakter.ef.felles.StønadType
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingsstatistikkDto
 import no.nav.familie.kontrakter.ef.iverksett.Hendelse
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.Properties
 import java.util.UUID
@@ -42,6 +43,7 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
                                 private val oppgaveService: OppgaveService,
                                 private val personService: PersonService
 ) : AsyncTaskStep {
+
     private val zoneIdOslo = ZoneId.of("Europe/Oslo")
 
     override fun doTask(task: Task) {
@@ -110,7 +112,47 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
 
     companion object {
 
-        fun opprettTask(
+        fun opprettMottattTask(behandlingId: UUID, oppgaveId: Long): Task =
+                opprettTask(behandlingId = behandlingId,
+                            hendelse = Hendelse.MOTTATT,
+                            hendelseTidspunkt = LocalDateTime.now(),
+                            gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler(
+                                    true),
+                            oppgaveId = oppgaveId)
+
+        fun opprettPåbegyntTask(behandlingId: UUID): Task =
+                opprettTask(behandlingId = behandlingId,
+                            hendelse = Hendelse.PÅBEGYNT,
+                            hendelseTidspunkt = LocalDateTime.now(),
+                            gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler(true))
+
+        fun opprettVedtattTask(behandlingId: UUID,
+                               hendelseTidspunkt: LocalDateTime,
+                               gjeldendeSaksbehandler: String,
+                               oppgaveId: Long?): Task =
+                opprettTask(behandlingId = behandlingId,
+                            hendelse = Hendelse.VEDTATT,
+                            hendelseTidspunkt = hendelseTidspunkt,
+                            gjeldendeSaksbehandler = gjeldendeSaksbehandler,
+                            oppgaveId = oppgaveId)
+
+        fun opprettBesluttetTask(behandlingId: UUID,
+                                 gjeldendeSaksbehandler: String,
+                                 oppgaveId: Long?): Task =
+                opprettTask(behandlingId = behandlingId,
+                            hendelse = Hendelse.BESLUTTET,
+                            hendelseTidspunkt = LocalDateTime.now(),
+                            gjeldendeSaksbehandler = gjeldendeSaksbehandler,
+                            oppgaveId = oppgaveId)
+
+        fun opprettFerdigTask(behandlingId: UUID,
+                                 gjeldendeSaksbehandler: String): Task =
+                opprettTask(behandlingId = behandlingId,
+                            hendelse = Hendelse.FERDIG,
+                            hendelseTidspunkt = LocalDateTime.now(),
+                            gjeldendeSaksbehandler = gjeldendeSaksbehandler)
+
+        private fun opprettTask(
                 behandlingId: UUID,
                 hendelse: Hendelse,
                 hendelseTidspunkt: LocalDateTime = LocalDateTime.now(),

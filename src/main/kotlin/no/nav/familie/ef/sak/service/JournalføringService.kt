@@ -75,11 +75,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
     }
 
     private fun opprettBehandlingsstatistikkTask(behandlingId: UUID, oppgaveId: Long) {
-        taskRepository.save(BehandlingsstatistikkTask.opprettTask(behandlingId = behandlingId,
-                                                                  hendelse = Hendelse.MOTTATT,
-                                                                  gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler(true),
-                                                                  oppgaveId = oppgaveId
-        ))
+        taskRepository.save(BehandlingsstatistikkTask.opprettMottattTask(behandlingId = behandlingId, oppgaveId = oppgaveId))
     }
 
     fun hentSøknadFraJournalpostForOvergangsstønad(journalpostId: String): SøknadOvergangsstønad {
