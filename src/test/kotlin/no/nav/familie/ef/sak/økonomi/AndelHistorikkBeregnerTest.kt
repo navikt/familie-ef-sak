@@ -10,14 +10,16 @@ import java.net.URL
 import java.time.YearMonth
 import java.util.UUID
 
-object AndelHistorikk {
+data class AndelHistorikk(val andel: AndelTilkjentYtelse, val slettet: UUID?)
 
-    fun lagHistorikk(tilkjentYtelser: List<TilkjentYtelse>): List<AndelTilkjentYtelse> {
-        return tilkjentYtelser.flatMap { it.andelerTilkjentYtelse }
+object AndelHistorikkBeregner {
+
+    fun lagHistorikk(tilkjentYtelser: List<TilkjentYtelse>): List<AndelHistorikk> {
+        return tilkjentYtelser.flatMap { it.andelerTilkjentYtelse.map { andel -> AndelHistorikk(andel, null) } }
     }
 }
 
-class AndelHistorikkTest {
+class AndelHistorikkBeregnerTest {
 
     @Test
     internal fun `a b`() {
@@ -34,18 +36,18 @@ object AndelHistorikkRunner {
     fun run(url: URL) {
         val grupper = AndelHistorikkParser.parseGroup(url)
 
-        val output = AndelHistorikk.lagHistorikk(grupper.input)
+        val output = AndelHistorikkBeregner.lagHistorikk(grupper.input)
 
         assertThat(toString(output)).isEqualTo(toString(grupper.expectedOutput))
     }
 
     private val headerString = values().joinToString(", ") { mapValue(it, it.key) }
 
-    private fun mapValue(key: AndelHistorikkHeader, value: Any): String {
+    private fun mapValue(key: AndelHistorikkHeader, value: Any?): String {
         return String.format("%-${key.minHeaderValue}s", value)
     }
 
-    private fun toString(andeler: List<AndelTilkjentYtelse>): String {
+    private fun toString(andeler: List<AndelHistorikk>): String {
         return "\n$headerString\n" +
                andeler.joinToString("\n") { andel ->
                    values().joinToString(", ") { mapValue(it, it.value.invoke(andel)) }
@@ -53,22 +55,30 @@ object AndelHistorikkRunner {
     }
 }
 
-private data class AndelHistorikkData(val erOutput: Boolean, val behandlingId: UUID, val andelTilkjentYtelse: AndelTilkjentYtelse)
-data class ParsetAndelHistorikkData(val input: List<TilkjentYtelse>,
-                                    val expectedOutput: List<AndelTilkjentYtelse>)
+private data class AndelHistorikkData(val erOutput: Boolean,
+                                      val behandlingId: UUID,
+                                      val andel: AndelTilkjentYtelse,
+                                      val slettet: UUID?)
 
+data class ParsetAndelHistorikkData(val input: List<TilkjentYtelse>,
+                                    val expectedOutput: List<AndelHistorikk>)
+
+private val oppdragIdn = mutableMapOf<Int, UUID>()
+private fun generateBehandlingId(behandlingId: String): UUID = oppdragIdn.getOrPut(behandlingId.toInt()) { UUID.randomUUID() }
+private fun hentBehandlingId(behandlingId: UUID) = oppdragIdn.entries.first { it.value == behandlingId }.key
 
 private enum class AndelHistorikkHeader(val key: String,
-                                        val value: (AndelTilkjentYtelse) -> Any,
+                                        val value: (AndelHistorikk) -> Any?,
                                         val minHeaderValue: Int = key.length) {
 
-    KEY_FOM("fom", AndelTilkjentYtelse::stønadFom, 11),
-    KEY_TOM("tom", AndelTilkjentYtelse::stønadFom, 11),
-    KEY_BELØP("beløp", AndelTilkjentYtelse::beløp, 8),
-    KEY_INNTEKT("inntekt", AndelTilkjentYtelse::inntekt, 10),
-    KEY_INNTEKTSREDUKSJON("inntektsreduksjon", AndelTilkjentYtelse::inntektsreduksjon),
-    KEY_SAMORDNINGSFRADRAG("samordningsfradrag", AndelTilkjentYtelse::samordningsfradrag),
-    KEY_BEHANDLING("behandling_id", AndelTilkjentYtelse::kildeBehandlingId, UUID.randomUUID().toString().length)
+    FOM("fom", { it.andel.stønadFom }, 11),
+    TOM("tom", { it.andel.stønadTom }, 11),
+    BELØP("beløp", { it.andel.beløp }, 8),
+    INNTEKT("inntekt", { it.andel.inntekt }, 10),
+    INNTEKTSREDUKSJON("inntektsreduksjon", { it.andel.inntektsreduksjon }),
+    SAMORDNINGSFRADRAG("samordningsfradrag", { it.andel.samordningsfradrag }),
+    BEHANDLING("behandling_id", { hentBehandlingId(it.andel.kildeBehandlingId) }),
+    SLETTET("slettet", { it.slettet?.let { hentBehandlingId(it) } })
 }
 
 object AndelHistorikkParser {
@@ -80,7 +90,7 @@ object AndelHistorikkParser {
     private fun parse(url: URL): List<AndelHistorikkData> {
         val fileContent = url.openStream()!!
         val rows: List<Map<String, String>> = csvReader().readAllWithHeader(fileContent)
-                .filterNot { it.getValue(KEY_BEHANDLING.key).startsWith("!") }
+                .filterNot { it.getValue(BEHANDLING.key).startsWith("!") }
 
         var erOutput = false
 
@@ -88,7 +98,7 @@ object AndelHistorikkParser {
                 .map { row -> row.entries.map { it.key.trim() to it.value.trim() }.toMap() }
                 .mapIndexedNotNull { index, row ->
                     try {
-                        val behandlingIdStr = row.getValue(KEY_BEHANDLING.key)
+                        val behandlingIdStr = row.getValue(BEHANDLING.key)
                         if (behandlingIdStr == OUTPUT) {
                             erOutput = true
                             return@mapIndexedNotNull null
@@ -106,29 +116,29 @@ object AndelHistorikkParser {
                        row: Map<String, String>) =
             AndelHistorikkData(erOutput,
                                behandlingId,
-                               AndelTilkjentYtelse(beløp = row.getInt(KEY_BELØP),
-                                                   stønadFom = row.getValue(KEY_FOM).let { YearMonth.parse(it).atDay(1) },
-                                                   stønadTom = row.getValue(KEY_TOM).let { YearMonth.parse(it).atEndOfMonth() },
+                               AndelTilkjentYtelse(beløp = row.getInt(BELØP),
+                                                   stønadFom = row.getValue(FOM)
+                                                           .let { YearMonth.parse(it).atDay(1) },
+                                                   stønadTom = row.getValue(TOM)
+                                                           .let { YearMonth.parse(it).atEndOfMonth() },
                                                    personIdent = PERSON_IDENT,
-                                                   inntekt = row.getInt(KEY_INNTEKT),
-                                                   inntektsreduksjon = row.getInt(KEY_INNTEKTSREDUKSJON),
-                                                   samordningsfradrag = row.getInt(KEY_SAMORDNINGSFRADRAG),
-                                                   kildeBehandlingId = behandlingId))
+                                                   inntekt = row.getInt(INNTEKT),
+                                                   inntektsreduksjon = row.getInt(INNTEKTSREDUKSJON),
+                                                   samordningsfradrag = row.getInt(SAMORDNINGSFRADRAG),
+                                                   kildeBehandlingId = behandlingId),
+                               emptyAsNull(row[SLETTET.key])?.let { generateBehandlingId(it) })
 
     private fun Map<String, String>.getValue(header: AndelHistorikkHeader) = getValue(header.key)
     private fun Map<String, String>.getInt(header: AndelHistorikkHeader) = getValue(header).toInt()
 
-    private val oppdragIdn = mutableMapOf<Int, UUID>()
-
-    private fun generateBehandlingId(behandlingId: String): UUID {
-        return oppdragIdn.getOrPut(behandlingId.toInt()) { UUID.randomUUID() }
-    }
+    private fun emptyAsNull(s: String?): String? =
+            if (s == null || s.isEmpty()) null else s
 
     fun parseGroup(url: URL): ParsetAndelHistorikkData {
         val parse = parse(url)
         val groupBy = parse.groupBy { it.erOutput }
         return ParsetAndelHistorikkData(input = mapInput(groupBy[false]!!),
-                                        expectedOutput = groupBy[true]!!.map { it.andelTilkjentYtelse })
+                                        expectedOutput = groupBy[true]!!.map { AndelHistorikk(it.andel, it.slettet) })
     }
 
     private fun mapInput(input: List<AndelHistorikkData>): List<TilkjentYtelse> {
@@ -136,9 +146,9 @@ object AndelHistorikkParser {
                 .fold(mutableListOf<Pair<UUID, MutableList<AndelTilkjentYtelse>>>(), { acc, pair ->
                     val last = acc.lastOrNull()
                     if (last?.first != pair.behandlingId) {
-                        acc.add(Pair(pair.behandlingId, mutableListOf(pair.andelTilkjentYtelse)))
+                        acc.add(Pair(pair.behandlingId, mutableListOf(pair.andel)))
                     } else {
-                        last.second.add(pair.andelTilkjentYtelse)
+                        last.second.add(pair.andel)
                     }
                     acc
                 })

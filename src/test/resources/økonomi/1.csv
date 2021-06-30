@@ -1,5 +1,7 @@
-behandling_id, fom, tom, beløp, inntekt, inntektsreduksjon, samordningsfradrag
-1, 2021-01, 2021-01, 10000, 0, 0, 0
-2, 2021-01, 2021-01, 10000, 0, 0, 0
-OUTPUT,,,,,,
-1, 2021-01, 2021-01, 10000, 0, 0, 0
+behandling_id, fom, tom, beløp, inntekt, inntektsreduksjon, samordningsfradrag, slettet
+1, 2021-01, 2021-01, 10000, 0, 0, 0,
+1, 2021-02, 2021-02, 10000, 0, 0, 0,
+2, 2021-01, 2021-01, 10000, 0, 0, 0,
+OUTPUT,,,,,,,
+1, 2021-01, 2021-01, 10000, 0, 0, 0,
+1, 2021-01, 2021-01, 10000, 0, 0, 0, 2
