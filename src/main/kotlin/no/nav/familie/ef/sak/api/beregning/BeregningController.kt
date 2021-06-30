@@ -22,7 +22,7 @@ class BeregningController(private val stegService: StegService,
 
     @PostMapping
     fun beregnYtelserForRequest(@RequestBody beregningRequest: BeregningRequest): Ressurs<List<Beløpsperiode>> {
-        val vedtaksperioder = beregningRequest.vedtaksperioder.tilPerioder()
+        val vedtaksperioder = beregningRequest.vedtaksperioder.map(ÅrMånedPeriode::tilPerioder)
         val inntektsperioder = beregningRequest.inntekt.tilInntektsperioder()
         return Ressurs.success(beregningService.beregnYtelse(vedtaksperioder, inntektsperioder))
     }
