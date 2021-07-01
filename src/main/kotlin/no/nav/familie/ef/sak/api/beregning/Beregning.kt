@@ -12,8 +12,8 @@ data class Beløpsperiode(val periode: Periode,
 data class Beregningsgrunnlag(val inntekt: BigDecimal,
                               val samordningsfradrag: BigDecimal,
                               val avkortningPerMåned: BigDecimal,
-                              val fullOvergangsStønadPerMåned: BigDecimal,
-                              val grunnbeløp: BigDecimal)
+                              val fullOvergangsStønadPerMåned: BigDecimal? = null,
+                              val grunnbeløp: BigDecimal? = null)
 
 data class Grunnbeløp(val fraOgMedDato: LocalDate,
                       val tilOgMedDato: LocalDate,

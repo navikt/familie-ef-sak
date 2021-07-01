@@ -35,6 +35,11 @@ class BeregningService {
 
         feilHvis(inntektsperioder.zipWithNext { a, b -> a.startDato.isBefore(b.startDato) && a.sluttDato.isBefore(b.sluttDato) }
                          .any { !it }) { "Inntektsperioder må være sortert" }
+
+        feilHvis(vedtaksperioder.any { vedtaksperiode -> vedtaksperiode.fradato.isAfter(vedtaksperiode.tildato)})
+        {"Fravedtaksdato må være etter vedtakstildato"}
+
+
         feilHvis(vedtaksperioder.zipWithNext { a, b -> a.fradato.isBefore(b.fradato) && a.tildato.isBefore(b.tildato) }
                          .any { !it }) { "Vedtaksperioder må være sortert" }
 
