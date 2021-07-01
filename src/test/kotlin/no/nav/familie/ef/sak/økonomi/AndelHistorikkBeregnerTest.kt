@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test
 import java.net.URL
 import java.time.LocalDate
 import java.time.YearMonth
+import java.util.LinkedList
 import java.util.UUID
 
 //G-omregning splitter opp en periode i 2, der nr 2 skal få nytt tildato,
@@ -44,12 +45,19 @@ object AndelHistorikkBeregner {
     }
 
     fun lagHistorikk(tilkjentYtelser: List<TilkjentYtelse>): List<AndelHistorikk> {
-        val result = mutableListOf<AndelHistorikkHolder>()
+        val result = LinkedList(listOf<AndelHistorikkHolder>())
+
         tilkjentYtelser.forEach { tilkjentYtelse ->
             tilkjentYtelse.andelerTilkjentYtelse.forEach { andel ->
                 val tidligereAndel = finnTidligereAndel(result, andel)
                 if (tidligereAndel == null) {
-                    result.add(nyHolder(tilkjentYtelse, andel))
+                    val index = result.indexOfFirst { it.andel.stønadFom.isAfter(andel.stønadTom) }
+                    val nyHolder = nyHolder(tilkjentYtelse, andel)
+                    if (index == -1) {
+                        result.add(nyHolder)
+                    } else {
+                        result.add(index, nyHolder)
+                    }
                 } else {
                     val endringType = tidligereAndel.andel.endring(andel)
                     if (endringType != null) {
@@ -69,7 +77,7 @@ object AndelHistorikkBeregner {
 
         return result.map {
             AndelHistorikk(it.behandlingId, it.vedtaksdato, it.andel, it.type, it.endretI)
-        }.sortedBy { it.andel.stønadFom }
+        }
     }
 
     private fun nyHolder(tilkjentYtelse: TilkjentYtelse,
