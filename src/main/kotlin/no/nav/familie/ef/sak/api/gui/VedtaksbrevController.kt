@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import java.time.LocalDate
 import java.util.UUID
 
 @RestController
@@ -23,9 +22,9 @@ class VedtaksbrevController(private val brevService: VedtaksbrevService,
                             private val tilgangService: TilgangService) {
 
     @GetMapping("/{behandlingId}")
-    fun hentBrev(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
+    fun hentBeslutterbrevEllerRekonstruerSaksbehandlerBrev(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
-        return Ressurs.success(brevService.hentBrev(behandlingId))
+        return Ressurs.success(brevService.hentBeslutterbrevEllerRekonstruerSaksbehandlerBrev(behandlingId))
     }
 
     @PostMapping("/{behandlingId}/{brevMal}")
