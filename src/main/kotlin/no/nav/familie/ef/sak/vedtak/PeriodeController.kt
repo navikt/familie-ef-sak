@@ -22,7 +22,7 @@ class PeriodeController(private val tilgangService: TilgangService,
 
     @GetMapping("/{behandlingId}")
     fun hentPerioder(@PathVariable behandlingId: UUID): Ressurs<TilkjentYtelseDto> {
-        tilgangService.validerTilgangTilFagsak(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId)
         return Ressurs.success(tilkjentYtelseService.hentForBehandling(behandlingId).tilDto())
     }
 
