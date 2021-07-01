@@ -42,10 +42,6 @@ class SimuleringService(private val iverksettClient: IverksettClient,
     }
 
     private fun simulerMedTilkjentYtelse(behandling: Behandling, fagsak: Fagsak): DetaljertSimuleringResultat {
-        if (behandling.type == BehandlingType.BLANKETT) {
-            return simulerUtenTilkjentYtelse(behandling, fagsak)
-        }
-
         val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(behandling.id)
 
         val tilkjentYtelseMedMedtadata =
