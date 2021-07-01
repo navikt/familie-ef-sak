@@ -172,7 +172,7 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
                                 )
                         ),
                         properties = Properties().apply {
-                            this["saksbehandler"] = gjeldendeSaksbehandler
+                            this["saksbehandler"] = gjeldendeSaksbehandler ?: ""
                             this["behandlingId"] = behandlingId.toString()
                             this["hendelse"] = hendelse.name
                             this["hendelseTidspunkt"] = hendelseTidspunkt.toString()

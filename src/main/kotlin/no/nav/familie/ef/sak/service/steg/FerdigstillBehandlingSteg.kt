@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.service.steg
 
-import no.nav.familie.ef.sak.api.beregning.VedtakService
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Service
 
 @Service
 class FerdigstillBehandlingSteg(private val behandlingService: BehandlingService,
-                                private val vedtakService: VedtakService,
                                 private val taskRepository: TaskRepository) : BehandlingSteg<Void?> {
 
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
@@ -25,11 +23,8 @@ class FerdigstillBehandlingSteg(private val behandlingService: BehandlingService
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.FERDIGSTILT)
 
         if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING || behandling.type == BehandlingType.REVURDERING) {
-            val beslutterIdent = vedtakService.hentVedtak(behandlingId = behandling.id).beslutterIdent
-                                 ?: error("Mangler beslutter på vedtaket")
             taskRepository.save(PubliserVedtakshendelseTask.opprettTask(behandling.id))
-            taskRepository.save(BehandlingsstatistikkTask.opprettFerdigTask(behandlingId = behandling.id,
-                                                                            gjeldendeSaksbehandler = beslutterIdent))
+            taskRepository.save(BehandlingsstatistikkTask.opprettFerdigTask(behandlingId = behandling.id))
         } else if (behandling.type == BehandlingType.BLANKETT || behandling.type == BehandlingType.TEKNISK_OPPHØR) {
             //ignore
         } else {

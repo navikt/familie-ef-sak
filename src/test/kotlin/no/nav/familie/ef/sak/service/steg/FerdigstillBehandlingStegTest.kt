@@ -21,16 +21,14 @@ internal class FerdigstillBehandlingStegTest {
 
     private val behandlingService = mockk<BehandlingService>(relaxed = true)
     private val taskRepository = mockk<TaskRepository>()
-    private val vedtakService = mockk<VedtakService>()
 
-    private val task = FerdigstillBehandlingSteg(behandlingService, vedtakService, taskRepository)
+    private val task = FerdigstillBehandlingSteg(behandlingService, taskRepository)
 
     private val fagsak = fagsak()
 
     @BeforeEach
     internal fun setUp() {
         every { taskRepository.save(any()) } answers { firstArg() }
-        every { vedtakService.hentVedtak(any()) } returns Vedtak(behandlingId = UUID.randomUUID(), resultatType = ResultatType.INNVILGE, saksbehandlerIdent = "sak1", beslutterIdent = "beslutter1" )
     }
 
     @Test

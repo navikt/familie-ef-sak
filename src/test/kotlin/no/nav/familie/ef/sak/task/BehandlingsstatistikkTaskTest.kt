@@ -7,24 +7,24 @@ import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ef.sak.api.beregning.ResultatType
 import no.nav.familie.ef.sak.api.beregning.VedtakService
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker
+import no.nav.familie.ef.sak.domene.GrunnlagsdataMedMetadata
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.repository.domain.BehandlingResultat
 import no.nav.familie.ef.sak.repository.domain.BehandlingType.FØRSTEGANGSBEHANDLING
 import no.nav.familie.ef.sak.repository.domain.Vedtak
 import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsstønad
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.FagsakService
+import no.nav.familie.ef.sak.service.GrunnlagsdataService
 import no.nav.familie.ef.sak.service.OppgaveService
-import no.nav.familie.ef.sak.service.PersonService
 import no.nav.familie.ef.sak.service.SøknadService
 import no.nav.familie.kontrakter.ef.felles.BehandlingType
 import no.nav.familie.kontrakter.ef.felles.StønadType
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingsstatistikkDto
 import no.nav.familie.kontrakter.ef.iverksett.Hendelse
-import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.prosessering.domene.Task
@@ -63,7 +63,8 @@ internal class BehandlingsstatistikkTaskTest {
     @Test
     internal fun `skal sende behandlingsstatistikk`() {
 
-        val fagsak = fagsak()
+        val personIdent = "123456789012"
+        val fagsak = fagsak(identer = fagsakpersoner(setOf(personIdent)) )
         val behandling = behandling(fagsak, resultat = BehandlingResultat.INNVILGET, type = FØRSTEGANGSBEHANDLING)
         val hendelse = Hendelse.BESLUTTET
         val hendelseTidspunkt = ZonedDateTime.now()
@@ -71,7 +72,6 @@ internal class BehandlingsstatistikkTaskTest {
         val oppgaveId = 1L
         val saksbehandlerId = "389221"
         val beslutterId = "389221"
-        val personIdent = "123456789012"
         val opprettetEnhet = "4489"
         val tildeltEnhet = "4488"
         val periodeBegrunnelse = "Lorem ipsum"
@@ -90,23 +90,22 @@ internal class BehandlingsstatistikkTaskTest {
 
         val oppgaveMock = mockk<Oppgave>()
         val søknadskjemaMock = mockk<SøknadsskjemaOvergangsstønad>()
-        val søkerMock = mockk<PdlSøker>()
+        val grunnlagsdataMock = mockk<GrunnlagsdataMedMetadata>()
         val iverksettClient = mockk<IverksettClient>()
         val behandlingService = mockk<BehandlingService>()
         val søknadService = mockk<SøknadService>()
         val fagsakService = mockk<FagsakService>()
-        val personService = mockk<PersonService>()
+        val grunnlagsdataService = mockk<GrunnlagsdataService>()
         val vedtakService = mockk<VedtakService>()
         val oppgaveService = mockk<OppgaveService>()
 
         every { iverksettClient.sendBehandlingsstatistikk(capture(behandlingsstatistikkSlot)) } just Runs
-        every { behandlingService.hentAktivIdent(behandling.id) } returns personIdent
         every { behandlingService.hentBehandling(behandling.id) } returns behandling
         every { fagsakService.hentFagsak(fagsak.id) } returns fagsak
         every { oppgaveService.hentOppgave(oppgaveId) } returns oppgaveMock
         every { søknadService.hentOvergangsstønad(any()) } returns søknadskjemaMock
         every { søknadskjemaMock.datoMottatt } returns søknadstidspunkt.toLocalDateTime()
-        every { personService.hentSøker(personIdent)} returns søkerMock
+        every { grunnlagsdataService.hentGrunnlagsdata(behandling.id)} returns grunnlagsdataMock
         every { vedtakService.hentVedtak(behandling.id) } returns Vedtak(behandlingId =behandling.id,
                                                                          resultatType = ResultatType.INNVILGE,
                                                                          periodeBegrunnelse = periodeBegrunnelse,
@@ -115,7 +114,7 @@ internal class BehandlingsstatistikkTaskTest {
                                                                          beslutterIdent = beslutterId)
         every { oppgaveMock.tildeltEnhetsnr } returns tildeltEnhet
         every { oppgaveMock.opprettetAvEnhetsnr } returns opprettetEnhet
-        every { søkerMock.adressebeskyttelse } returns emptyList()
+        every { grunnlagsdataMock.grunnlagsdata.søker.adressebeskyttelse } returns null
 
 
         val behandlingsstatistikkTask = BehandlingsstatistikkTask(iverksettClient = iverksettClient,
@@ -124,7 +123,7 @@ internal class BehandlingsstatistikkTaskTest {
                                                                   søknadService = søknadService,
                                                                   vedtakService = vedtakService,
                                                                   oppgaveService = oppgaveService,
-                                                                  personService = personService)
+                                                                  grunnlagsdataService = grunnlagsdataService)
 
         val task = Task(type = "behandlingsstatistikkTask",
                         payload = objectMapper.writeValueAsString(payload))
