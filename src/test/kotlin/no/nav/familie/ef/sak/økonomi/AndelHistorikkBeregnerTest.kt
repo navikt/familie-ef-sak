@@ -7,27 +7,114 @@ import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.net.URL
+import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
-data class AndelHistorikk(val andel: AndelTilkjentYtelse, val slettetIBehandling: UUID?)
+//G-omregning splitter opp en periode i 2, der nr 2 skal få nytt tildato,
+
+enum class HistorikkType {
+    VANLIG,
+    FJERNET,
+    ENDRET,
+    ENDRING_I_INNTEKT // mindre endring i inntekt som ikke endrer beløp
+}
+
+data class AndelHistorikk(val behandlingId: UUID,
+                          val vedtaksdato: LocalDate,
+                          val andel: AndelTilkjentYtelse,
+                          val type: HistorikkType,
+                          val endretI: UUID?)
 
 object AndelHistorikkBeregner {
 
-    fun lagHistorikk(tilkjentYtelser: List<TilkjentYtelse>): List<AndelHistorikk> {
-        return tilkjentYtelser.flatMap { it.andelerTilkjentYtelse.map { andel -> AndelHistorikk(andel, null) } }
+    private class AndelHistorikkHolder(val behandlingId: UUID,
+                                       val vedtaksdato: LocalDate,
+                                       var andel: AndelTilkjentYtelse,
+                                       var type: HistorikkType,
+                                       var endretI: UUID?,
+                                       var kontrollert: UUID)
+
+    private fun AndelTilkjentYtelse.endring(other: AndelTilkjentYtelse): HistorikkType? {
+        return when {
+            this.stønadTom != other.stønadTom || this.beløp != other.beløp -> HistorikkType.ENDRET
+            this.inntekt != other.inntekt -> HistorikkType.ENDRING_I_INNTEKT
+            else -> null
+        }
     }
+
+    fun lagHistorikk(tilkjentYtelser: List<TilkjentYtelse>): List<AndelHistorikk> {
+        val result = mutableListOf<AndelHistorikkHolder>()
+        tilkjentYtelser.forEach { tilkjentYtelse ->
+            tilkjentYtelse.andelerTilkjentYtelse.forEach { andel ->
+                val tidligereAndel = finnTidligereAndel(result, andel)
+                if (tidligereAndel == null) {
+                    result.add(nyHolder(tilkjentYtelse, andel))
+                } else {
+                    val endringType = tidligereAndel.andel.endring(andel)
+                    if (endringType != null) {
+                        tidligereAndel.andel = andel //.copy(kildeBehandlingId = tidligereAndel.andel.kildeBehandlingId)
+                        tidligereAndel.type = endringType
+                        tidligereAndel.endretI = tilkjentYtelse.behandlingId
+                    }
+                    tidligereAndel.kontrollert = tilkjentYtelse.id
+                }
+            }
+
+            result.filter { it.type != HistorikkType.FJERNET && it.kontrollert != tilkjentYtelse.id }.forEach {
+                it.type = HistorikkType.FJERNET
+                it.endretI = tilkjentYtelse.behandlingId
+            }
+        }
+
+        return result.map {
+            AndelHistorikk(it.behandlingId, it.vedtaksdato, it.andel, it.type, it.endretI)
+        }.sortedBy { it.andel.stønadFom }
+    }
+
+    private fun nyHolder(tilkjentYtelse: TilkjentYtelse,
+                         andel: AndelTilkjentYtelse) =
+            AndelHistorikkHolder(tilkjentYtelse.behandlingId,
+                                 tilkjentYtelse.vedtaksdato!!,
+                                 andel,
+                                 HistorikkType.VANLIG,
+                                 null,
+                                 tilkjentYtelse.id)
+
+    private fun finnTidligereAndel(result: MutableList<AndelHistorikkHolder>,
+                                   andel: AndelTilkjentYtelse) =
+            result.find { it.type != HistorikkType.FJERNET && it.andel.stønadFom == andel.stønadFom }
 }
 
 class AndelHistorikkBeregnerTest {
 
     @Test
-    internal fun `a b`() {
-        run("1.csv")
+    internal fun `inntek_endrer_seg`() {
+        run("/økonomi/inntekt_endrer_seg.csv")
+    }
+
+    @Test
+    internal fun `periode2_slettes`() {
+        run("/økonomi/periode2_slettes.csv")
+    }
+
+    @Test
+    internal fun `periode2_slettes_og_får_en_ny_periode`() {
+        run("/økonomi/periode2_slettes_og_får_en_ny_periode.csv")
+    }
+
+    @Test
+    internal fun `periode_blir_lagt_til_på_nytt`() {
+        run("/økonomi/periode_blir_lagt_til_på_nytt.csv")
+    }
+
+    @Test
+    internal fun `periode_splittes`() {
+        run("/økonomi/periode_splittes.csv")
     }
 
     private fun run(filnavn: String) {
-        AndelHistorikkRunner.run(javaClass.getResource("/økonomi/$filnavn"))
+        AndelHistorikkRunner.run(javaClass.getResource(filnavn))
     }
 }
 
@@ -58,7 +145,8 @@ object AndelHistorikkRunner {
 private data class AndelHistorikkData(val erOutput: Boolean,
                                       val behandlingId: UUID,
                                       val andel: AndelTilkjentYtelse,
-                                      val slettet: UUID?)
+                                      val type: HistorikkType,
+                                      val endretI: UUID?)
 
 data class ParsetAndelHistorikkData(val input: List<TilkjentYtelse>,
                                     val expectedOutput: List<AndelHistorikk>)
@@ -77,8 +165,9 @@ private enum class AndelHistorikkHeader(val key: String,
     INNTEKT("inntekt", { it.andel.inntekt }, 10),
     INNTEKTSREDUKSJON("inntektsreduksjon", { it.andel.inntektsreduksjon }),
     SAMORDNINGSFRADRAG("samordningsfradrag", { it.andel.samordningsfradrag }),
-    BEHANDLING("behandling_id", { hentBehandlingId(it.andel.kildeBehandlingId) }),
-    SLETTET_I_BEHANDLING("slettet_i_behandling", { it.slettetIBehandling?.let { hentBehandlingId(it) } })
+    BEHANDLING("behandling_id", { hentBehandlingId(it.behandlingId) }),
+    TYPE_ENDRING("type_endring", { it.type }),
+    ENDRET_I("endret_i", { it.endretI?.let(::hentBehandlingId) })
 }
 
 object AndelHistorikkParser {
@@ -126,9 +215,11 @@ object AndelHistorikkParser {
                                                    inntektsreduksjon = row.getInt(INNTEKTSREDUKSJON),
                                                    samordningsfradrag = row.getInt(SAMORDNINGSFRADRAG),
                                                    kildeBehandlingId = behandlingId),
-                               emptyAsNull(row[SLETTET_I_BEHANDLING.key])?.let { generateBehandlingId(it) })
+                               row.getOptionalValue(TYPE_ENDRING)?.let { HistorikkType.valueOf(it) } ?: HistorikkType.VANLIG,
+                               row.getOptionalValue(ENDRET_I)?.let { generateBehandlingId(it) })
 
     private fun Map<String, String>.getValue(header: AndelHistorikkHeader) = getValue(header.key)
+    private fun Map<String, String>.getOptionalValue(header: AndelHistorikkHeader) = get(header.key)?.let { emptyAsNull(it) }
     private fun Map<String, String>.getInt(header: AndelHistorikkHeader) = getValue(header).toInt()
 
     private fun emptyAsNull(s: String?): String? =
@@ -138,7 +229,13 @@ object AndelHistorikkParser {
         val parse = parse(url)
         val groupBy = parse.groupBy { it.erOutput }
         return ParsetAndelHistorikkData(input = mapInput(groupBy[false]!!),
-                                        expectedOutput = groupBy[true]!!.map { AndelHistorikk(it.andel, it.slettet) })
+                                        expectedOutput = groupBy[true]!!.map {
+                                            AndelHistorikk(it.behandlingId,
+                                                           LocalDate.now(), // burde denne testes? EKs att man oppretter vedtaksdato per behandlingId
+                                                           it.andel,
+                                                           it.type,
+                                                           it.endretI)
+                                        })
     }
 
     private fun mapInput(input: List<AndelHistorikkData>): List<TilkjentYtelse> {
@@ -154,6 +251,7 @@ object AndelHistorikkParser {
                 })
                 .map {
                     TilkjentYtelse(behandlingId = it.first,
+                                   vedtaksdato = LocalDate.now(),
                                    andelerTilkjentYtelse = it.second,
                                    personident = PERSON_IDENT)
                 }
