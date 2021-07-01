@@ -10,7 +10,7 @@ import java.net.URL
 import java.time.YearMonth
 import java.util.UUID
 
-data class AndelHistorikk(val andel: AndelTilkjentYtelse, val slettet: UUID?)
+data class AndelHistorikk(val andel: AndelTilkjentYtelse, val slettetIBehandling: UUID?)
 
 object AndelHistorikkBeregner {
 
@@ -78,7 +78,7 @@ private enum class AndelHistorikkHeader(val key: String,
     INNTEKTSREDUKSJON("inntektsreduksjon", { it.andel.inntektsreduksjon }),
     SAMORDNINGSFRADRAG("samordningsfradrag", { it.andel.samordningsfradrag }),
     BEHANDLING("behandling_id", { hentBehandlingId(it.andel.kildeBehandlingId) }),
-    SLETTET("slettet", { it.slettet?.let { hentBehandlingId(it) } })
+    SLETTET_I_BEHANDLING("slettet_i_behandling", { it.slettetIBehandling?.let { hentBehandlingId(it) } })
 }
 
 object AndelHistorikkParser {
@@ -126,7 +126,7 @@ object AndelHistorikkParser {
                                                    inntektsreduksjon = row.getInt(INNTEKTSREDUKSJON),
                                                    samordningsfradrag = row.getInt(SAMORDNINGSFRADRAG),
                                                    kildeBehandlingId = behandlingId),
-                               emptyAsNull(row[SLETTET.key])?.let { generateBehandlingId(it) })
+                               emptyAsNull(row[SLETTET_I_BEHANDLING.key])?.let { generateBehandlingId(it) })
 
     private fun Map<String, String>.getValue(header: AndelHistorikkHeader) = getValue(header.key)
     private fun Map<String, String>.getInt(header: AndelHistorikkHeader) = getValue(header).toInt()
