@@ -2,8 +2,8 @@ package no.nav.familie.ef.sak.task
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.api.beregning.ResultatType
-import no.nav.familie.ef.sak.api.beregning.VedtakService
 import no.nav.familie.ef.sak.iverksett.IverksettClient
+import no.nav.familie.ef.sak.repository.VedtakRepository
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.BehandlingType.FØRSTEGANGSBEHANDLING
 import no.nav.familie.ef.sak.repository.domain.Vedtak
@@ -22,6 +22,7 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -38,7 +39,7 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
                                 private val behandlingService: BehandlingService,
                                 private val fagsakService: FagsakService,
                                 private val søknadService: SøknadService,
-                                private val vedtakService: VedtakService,
+                                private val vedtakRepository: VedtakRepository,
                                 private val oppgaveService: OppgaveService,
                                 private val grunnlagsdataService: GrunnlagsdataService
 ) : AsyncTaskStep {
@@ -55,7 +56,7 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
         val personIdent = fagsak.hentAktivIdent()
 
         val sisteOppgaveForBehandling = finnSisteOppgaveForBehandlingen(behandlingId, oppgaveId)
-        val vedtak = vedtakService.hentVedtak(behandlingId)
+        val vedtak = vedtakRepository.findByIdOrNull(behandlingId)
 
         val resultatBegrunnelse = finnResultatBegrunnelse(hendelse, vedtak)
         val søker = grunnlagsdataService.hentGrunnlagsdata(behandlingId).grunnlagsdata.søker
@@ -78,7 +79,7 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
                 behandlingstype = BehandlingType.valueOf(behandling.type.name)
         )
 
-        iverksettClient.sendBehandlingsstatistikk(behandlingsstatistikkDto);
+        iverksettClient.sendBehandlingsstatistikk(behandlingsstatistikkDto)
     }
 
     private fun finnSisteOppgaveForBehandlingen(behandlingId: UUID, oppgaveId: Long?): Oppgave {
@@ -87,24 +88,25 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
         return oppgaveService.hentOppgave(gsakOppgaveId)
     }
 
-    private fun finnResultatBegrunnelse(hendelse: Hendelse, vedtak: Vedtak): String? {
+    private fun finnResultatBegrunnelse(hendelse: Hendelse, vedtak: Vedtak?): String? {
         return when (hendelse) {
             Hendelse.PÅBEGYNT, Hendelse.MOTTATT -> null
             else -> {
-                return when (vedtak.resultatType) {
+                return when (vedtak?.resultatType) {
                     ResultatType.INNVILGE -> vedtak.periodeBegrunnelse
                     ResultatType.AVSLÅ -> vedtak.avslåBegrunnelse
                     ResultatType.HENLEGGE -> error("Ikke implementert")
+                    else -> error("Mangler vedtak")
                 }
             }
         }
     }
 
-    private fun finnSaksbehandler(hendelse: Hendelse, vedtak: Vedtak, gjeldendeSaksbehandler: String?): String {
+    private fun finnSaksbehandler(hendelse: Hendelse, vedtak: Vedtak?, gjeldendeSaksbehandler: String?): String {
         return when (hendelse) {
             Hendelse.MOTTATT, Hendelse.PÅBEGYNT -> gjeldendeSaksbehandler ?: error("Mangler saksbehandler for hendelse")
-            Hendelse.VEDTATT -> vedtak.saksbehandlerIdent ?: error("Mangler saksbehandler på vedtaket")
-            Hendelse.BESLUTTET, Hendelse.FERDIG -> vedtak.beslutterIdent ?: error("Mangler beslutter på vedtaket")
+            Hendelse.VEDTATT -> vedtak?.saksbehandlerIdent ?: error("Mangler saksbehandler på vedtaket")
+            Hendelse.BESLUTTET, Hendelse.FERDIG -> vedtak?.beslutterIdent ?: error("Mangler beslutter på vedtaket")
         }
     }
 
@@ -174,7 +176,7 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
                             this["behandlingId"] = behandlingId.toString()
                             this["hendelse"] = hendelse.name
                             this["hendelseTidspunkt"] = hendelseTidspunkt.toString()
-                            this["oppgaveId"] = oppgaveId.toString() ?: ""
+                            this["oppgaveId"] = oppgaveId?.toString() ?: ""
                         })
 
 

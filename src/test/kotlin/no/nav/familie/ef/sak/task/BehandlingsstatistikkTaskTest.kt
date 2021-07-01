@@ -6,12 +6,12 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ef.sak.api.beregning.ResultatType
-import no.nav.familie.ef.sak.api.beregning.VedtakService
 import no.nav.familie.ef.sak.domene.GrunnlagsdataMedMetadata
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsakpersoner
+import no.nav.familie.ef.sak.repository.VedtakRepository
 import no.nav.familie.ef.sak.repository.domain.BehandlingResultat
 import no.nav.familie.ef.sak.repository.domain.BehandlingType.FØRSTEGANGSBEHANDLING
 import no.nav.familie.ef.sak.repository.domain.Vedtak
@@ -30,27 +30,11 @@ import no.nav.familie.prosessering.domene.Task
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.data.repository.findByIdOrNull
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.TimeZone
 import java.util.UUID
-
-data class BehandlingStatistikkDto(
-        val behandlingId: UUID,
-        val personIdent: String,
-        val gjeldendeSaksbehandlerId: String,
-        val saksnummer: String,
-        val hendelseTidspunkt: ZonedDateTime,
-        val søknadstidspunkt: ZonedDateTime? = null,
-        val hendelse: Hendelse,
-        val behandlingResultat: String? = null,
-        val resultatBegrunnelse: String? = null,
-        val opprettetEnhet: String,
-        val ansvarligEnhet: String,
-        val strengtFortroligAdresse: Boolean,
-        val stønadstype: StønadType,
-        val behandlingstype: BehandlingType
-)
 
 internal class BehandlingsstatistikkTaskTest {
 
@@ -94,7 +78,7 @@ internal class BehandlingsstatistikkTaskTest {
         val søknadService = mockk<SøknadService>()
         val fagsakService = mockk<FagsakService>()
         val grunnlagsdataService = mockk<GrunnlagsdataService>()
-        val vedtakService = mockk<VedtakService>()
+        val vedtakRepository = mockk<VedtakRepository>()
         val oppgaveService = mockk<OppgaveService>()
 
         every { iverksettClient.sendBehandlingsstatistikk(capture(behandlingsstatistikkSlot)) } just Runs
@@ -103,7 +87,7 @@ internal class BehandlingsstatistikkTaskTest {
         every { oppgaveService.hentOppgave(oppgaveId) } returns oppgaveMock
         every { søknadService.finnDatoMottattForSøknad(any()) } returns søknadstidspunkt.toLocalDateTime()
         every { grunnlagsdataService.hentGrunnlagsdata(behandling.id)} returns grunnlagsdataMock
-        every { vedtakService.hentVedtak(behandling.id) } returns Vedtak(behandlingId =behandling.id,
+        every { vedtakRepository.findByIdOrNull(behandling.id) } returns Vedtak(behandlingId =behandling.id,
                                                                          resultatType = ResultatType.INNVILGE,
                                                                          periodeBegrunnelse = periodeBegrunnelse,
                                                                          inntektBegrunnelse = inntektBegrunnelse,
@@ -118,7 +102,7 @@ internal class BehandlingsstatistikkTaskTest {
                                                                   behandlingService = behandlingService,
                                                                   fagsakService = fagsakService,
                                                                   søknadService = søknadService,
-                                                                  vedtakService = vedtakService,
+                                                                  vedtakRepository = vedtakRepository,
                                                                   oppgaveService = oppgaveService,
                                                                   grunnlagsdataService = grunnlagsdataService)
 
