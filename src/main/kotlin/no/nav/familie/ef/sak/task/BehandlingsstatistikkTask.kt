@@ -4,8 +4,8 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.api.beregning.ResultatType
 import no.nav.familie.ef.sak.api.beregning.VedtakService
 import no.nav.familie.ef.sak.iverksett.IverksettClient
-import no.nav.familie.ef.sak.repository.domain.Fagsak
-import no.nav.familie.ef.sak.repository.domain.Stønadstype
+import no.nav.familie.ef.sak.repository.domain.Behandling
+import no.nav.familie.ef.sak.repository.domain.BehandlingType.FØRSTEGANGSBEHANDLING
 import no.nav.familie.ef.sak.repository.domain.Vedtak
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.FagsakService
@@ -59,7 +59,7 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
 
         val resultatBegrunnelse = finnResultatBegrunnelse(hendelse, vedtak)
         val søker = grunnlagsdataService.hentGrunnlagsdata(behandlingId).grunnlagsdata.søker
-        val søknadstidspunkt = finnSøknadstidspunkt(fagsak, behandlingId)
+        val søknadstidspunkt = finnSøknadstidspunkt(behandling)
 
         val behandlingsstatistikkDto = BehandlingsstatistikkDto(
                 behandlingId = behandlingId,
@@ -108,12 +108,10 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
         }
     }
 
-    private fun finnSøknadstidspunkt(fagsak: Fagsak,
-                                     behandlingId: UUID): LocalDateTime {
-        return when (fagsak.stønadstype) {
-            Stønadstype.OVERGANGSSTØNAD -> søknadService.hentOvergangsstønad(behandlingId).datoMottatt
-            Stønadstype.BARNETILSYN -> søknadService.hentBarnetilsyn(behandlingId).datoMottatt
-            Stønadstype.SKOLEPENGER -> søknadService.hentSkolepenger(behandlingId).datoMottatt
+    private fun finnSøknadstidspunkt(behandling: Behandling): LocalDateTime {
+        return when (behandling.type) {
+            FØRSTEGANGSBEHANDLING -> søknadService.finnDatoMottattForSøknad(behandling.id)
+            else -> error("Støtter ikke uthenting av mottatt-dato for ${behandling.type}")
         }
     }
 

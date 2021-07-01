@@ -15,7 +15,6 @@ import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.repository.domain.BehandlingResultat
 import no.nav.familie.ef.sak.repository.domain.BehandlingType.FØRSTEGANGSBEHANDLING
 import no.nav.familie.ef.sak.repository.domain.Vedtak
-import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsstønad
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.GrunnlagsdataService
@@ -89,7 +88,6 @@ internal class BehandlingsstatistikkTaskTest {
         val behandlingsstatistikkSlot = slot<BehandlingsstatistikkDto>();
 
         val oppgaveMock = mockk<Oppgave>()
-        val søknadskjemaMock = mockk<SøknadsskjemaOvergangsstønad>()
         val grunnlagsdataMock = mockk<GrunnlagsdataMedMetadata>()
         val iverksettClient = mockk<IverksettClient>()
         val behandlingService = mockk<BehandlingService>()
@@ -103,8 +101,7 @@ internal class BehandlingsstatistikkTaskTest {
         every { behandlingService.hentBehandling(behandling.id) } returns behandling
         every { fagsakService.hentFagsak(fagsak.id) } returns fagsak
         every { oppgaveService.hentOppgave(oppgaveId) } returns oppgaveMock
-        every { søknadService.hentOvergangsstønad(any()) } returns søknadskjemaMock
-        every { søknadskjemaMock.datoMottatt } returns søknadstidspunkt.toLocalDateTime()
+        every { søknadService.finnDatoMottattForSøknad(any()) } returns søknadstidspunkt.toLocalDateTime()
         every { grunnlagsdataService.hentGrunnlagsdata(behandling.id)} returns grunnlagsdataMock
         every { vedtakService.hentVedtak(behandling.id) } returns Vedtak(behandlingId =behandling.id,
                                                                          resultatType = ResultatType.INNVILGE,

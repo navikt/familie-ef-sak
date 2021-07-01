@@ -16,6 +16,7 @@ import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
 import no.nav.familie.kontrakter.ef.søknad.SøknadSkolepenger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -37,6 +38,10 @@ class SøknadService(private val søknadRepository: SøknadRepository,
     fun hentBarnetilsyn(behandlingId: UUID): SøknadsskjemaBarnetilsyn {
         val søknad = hentSøknad(behandlingId)
         return søknadBarnetilsynRepository.findByIdOrThrow(søknad.soknadsskjemaId)
+    }
+
+    fun finnDatoMottattForSøknad(behandlingId: UUID): LocalDateTime {
+        return søknadRepository.finnDatoMottattForSøknad(behandlingId)
     }
 
     @Transactional
