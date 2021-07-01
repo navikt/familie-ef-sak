@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.api.beregning.VedtakDto
 import no.nav.familie.ef.sak.api.beregning.VedtakService
 import no.nav.familie.ef.sak.api.beregning.tilInntektsperioder
 import no.nav.familie.ef.sak.api.beregning.tilPerioder
+import no.nav.familie.ef.sak.repository.BehandlingRepository
 import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
@@ -41,10 +42,6 @@ class SimuleringService(private val iverksettClient: IverksettClient,
     }
 
     private fun simulerMedTilkjentYtelse(behandling: Behandling, fagsak: Fagsak): DetaljertSimuleringResultat {
-        if (behandling.type == BehandlingType.BLANKETT) {
-            return simulerUtenTilkjentYtelse(behandling, fagsak)
-        }
-
         val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(behandling.id)
 
         val tilkjentYtelseMedMedtadata =
@@ -54,12 +51,11 @@ class SimuleringService(private val iverksettClient: IverksettClient,
                                                        eksternFagsakId = fagsak.eksternId.id
 
                 )
-        val forrigeTilkjentYtelse = tilkjentYtelseService.finnSisteTilkjentYtelse(fagsakId = behandling.fagsakId)?.tilIverksett()
+        val forrigeBehandlingId = behandlingService.hentForrigeBehandlingId(behandling.fagsakId)
 
         return iverksettClient.simuler(SimuleringDto(
                 nyTilkjentYtelseMedMetaData = tilkjentYtelseMedMedtadata,
-                forrigeTilkjentYtelse = forrigeTilkjentYtelse
-
+                forrigeBehandlingId = forrigeBehandlingId
         ))
     }
 
@@ -68,7 +64,7 @@ class SimuleringService(private val iverksettClient: IverksettClient,
         val tilkjentYtelseForBlankett = genererTilkjentYtelseForBlankett(vedtak, behandling, fagsak)
         val simuleringDto = SimuleringDto(
                 nyTilkjentYtelseMedMetaData = tilkjentYtelseForBlankett,
-                forrigeTilkjentYtelse = null
+                forrigeBehandlingId = null
 
         )
         return iverksettClient.simuler(simuleringDto)
