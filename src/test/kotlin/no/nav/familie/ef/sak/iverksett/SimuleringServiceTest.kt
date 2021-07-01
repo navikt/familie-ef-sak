@@ -63,8 +63,8 @@ internal class SimuleringServiceTest {
             tilkjentYtelseService.hentForBehandling(any())
         } returns tilkjentYtelse
         every {
-            tilkjentYtelseService.finnSisteTilkjentYtelse(any())
-        } returns null
+            behandlingService.hentForrigeBehandlingId(any())
+        } returns behandling.id
 
         val simulerSlot = slot<SimuleringDto>()
         every {
@@ -79,7 +79,7 @@ internal class SimuleringServiceTest {
                 tilkjentYtelse.andelerTilkjentYtelse.first().stønadFom)
         assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().tilOgMed).isEqualTo(
                 tilkjentYtelse.andelerTilkjentYtelse.first().stønadTom)
-
+        assertThat(simulerSlot.captured.forrigeBehandlingId).isEqualTo(behandling.id)
     }
 
     @Test

@@ -9,7 +9,7 @@ import java.util.UUID
 
 data class SimuleringDto(
         val nyTilkjentYtelseMedMetaData: TilkjentYtelseForIverksettMedMetadata,
-        val forrigeTilkjentYtelse: TilkjentYtelseForIverksett?
+        val forrigeBehandlingId: UUID?
 )
 
 
