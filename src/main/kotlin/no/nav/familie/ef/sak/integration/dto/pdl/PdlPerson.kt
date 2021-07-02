@@ -170,7 +170,10 @@ data class Koordinater(val x: Float?,
                        val z: Float?,
                        val kvalitet: Int?)
 
-data class Adressebeskyttelse(val gradering: AdressebeskyttelseGradering, val metadata: Metadata)
+data class Adressebeskyttelse(val gradering: AdressebeskyttelseGradering, val metadata: Metadata) {
+
+    fun erStrengtFortrolig(): Boolean = this.gradering == AdressebeskyttelseGradering.STRENGT_FORTROLIG || this.gradering == AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND
+}
 
 enum class AdressebeskyttelseGradering {
     STRENGT_FORTROLIG,

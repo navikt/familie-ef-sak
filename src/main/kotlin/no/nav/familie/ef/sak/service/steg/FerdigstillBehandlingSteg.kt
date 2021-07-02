@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.service.BehandlingService
+import no.nav.familie.ef.sak.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.task.PubliserVedtakshendelseTask
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.Logger
@@ -23,6 +24,7 @@ class FerdigstillBehandlingSteg(private val behandlingService: BehandlingService
 
         if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING || behandling.type == BehandlingType.REVURDERING) {
             taskRepository.save(PubliserVedtakshendelseTask.opprettTask(behandling.id))
+            taskRepository.save(BehandlingsstatistikkTask.opprettFerdigTask(behandlingId = behandling.id))
         } else if (behandling.type == BehandlingType.BLANKETT || behandling.type == BehandlingType.TEKNISK_OPPHØR) {
             //ignore
         } else {

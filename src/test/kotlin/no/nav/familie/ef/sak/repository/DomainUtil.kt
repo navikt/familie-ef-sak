@@ -32,10 +32,10 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-fun oppgave(behandling: Behandling, erFerdigstilt: Boolean = false): Oppgave =
+fun oppgave(behandling: Behandling, erFerdigstilt: Boolean = false, gsakOppgaveId: Long = 123, type: Oppgavetype = Oppgavetype.Journalføring): Oppgave =
         Oppgave(behandlingId = behandling.id,
-                gsakOppgaveId = 123,
-                type = Oppgavetype.Journalføring,
+                gsakOppgaveId = gsakOppgaveId,
+                type = type,
                 erFerdigstilt = erFerdigstilt)
 
 fun behandling(fagsak: Fagsak,

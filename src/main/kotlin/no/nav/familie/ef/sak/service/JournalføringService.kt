@@ -9,6 +9,9 @@ import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.domain.Fagsak
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
+import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.task.BehandlingsstatistikkTask
+import no.nav.familie.kontrakter.ef.iverksett.Hendelse
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
@@ -25,8 +28,10 @@ import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariant
 import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariantformat
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -37,6 +42,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
                            private val pdlClient: PdlClient,
                            private val grunnlagsdataService: GrunnlagsdataService,
                            private val iverksettService: IverksettService,
+                           private val taskRepository: TaskRepository,
                            private val oppgaveService: OppgaveService) {
 
     fun hentJournalpost(journalpostId: String): Journalpost {
@@ -62,9 +68,14 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         oppdaterJournalpost(journalpost, journalføringRequest.dokumentTitler, fagsak.eksternId.id)
         ferdigstillJournalføring(journalpostId, journalføringRequest.journalførendeEnhet)
         ferdigstillJournalføringsoppgave(journalføringRequest)
+        opprettBehandlingsstatistikkTask(behandling.id, journalføringRequest.oppgaveId.toLong())
 
         return opprettSaksbehandlingsoppgave(behandling, journalføringRequest.navIdent)
 
+    }
+
+    private fun opprettBehandlingsstatistikkTask(behandlingId: UUID, oppgaveId: Long) {
+        taskRepository.save(BehandlingsstatistikkTask.opprettMottattTask(behandlingId = behandlingId, oppgaveId = oppgaveId))
     }
 
     fun hentSøknadFraJournalpostForOvergangsstønad(journalpostId: String): SøknadOvergangsstønad {

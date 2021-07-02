@@ -12,6 +12,9 @@ import no.nav.familie.ef.sak.regler.evalutation.OppdaterVilkår
 import no.nav.familie.ef.sak.regler.evalutation.OppdaterVilkår.utledResultatForAleneomsorg
 import no.nav.familie.ef.sak.regler.hentVilkårsregel
 import no.nav.familie.ef.sak.repository.VilkårsvurderingRepository
+import no.nav.familie.ef.sak.repository.domain.Behandling
+import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
+import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.domain.DelvilkårsvurderingWrapper
 import no.nav.familie.ef.sak.repository.domain.VilkårType
 import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
@@ -19,9 +22,14 @@ import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.service.steg.StegService
 import no.nav.familie.ef.sak.service.steg.StegType
+import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.task.BehandlingsstatistikkTask
+import no.nav.familie.kontrakter.ef.iverksett.Hendelse
+import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -30,6 +38,7 @@ class VurderingStegService(private val behandlingService: BehandlingService,
                            private val vilkårsvurderingRepository: VilkårsvurderingRepository,
                            private val vilkårGrunnlagService: VilkårGrunnlagService,
                            private val stegService: StegService,
+                           private val taskRepository: TaskRepository,
                            private val blankettRepository: BlankettRepository) {
 
     @Transactional
@@ -95,7 +104,21 @@ class VurderingStegService(private val behandlingService: BehandlingService,
             stegService.håndterVilkår(behandling).id
         } else if (behandling.steg != StegType.VILKÅR && vilkårsresultat.any { it == Vilkårsresultat.IKKE_TATT_STILLING_TIL }) {
             stegService.resetSteg(behandling.id, StegType.VILKÅR)
+        } else if (erInitiellVurderingAvVilkår(behandling)) {
+            behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.UTREDES)
+            opprettBehandlingsstatistikkTask(behandling)
         }
+    }
+
+    private fun opprettBehandlingsstatistikkTask(behandling: Behandling) {
+        if (behandling.type != BehandlingType.BLANKETT) {
+            taskRepository.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId = behandling.id))
+        }
+
+    }
+
+    private fun erInitiellVurderingAvVilkår(behandling: Behandling): Boolean {
+        return behandling.status == BehandlingStatus.OPPRETTET
     }
 
     private fun nullstillVilkårMedNyeHovedregler(behandlingId: UUID,

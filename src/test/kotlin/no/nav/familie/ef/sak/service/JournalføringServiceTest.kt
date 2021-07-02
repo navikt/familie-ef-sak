@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.integration.JournalpostClient
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.iverksett.IverksettService
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.util.BrukerContextUtil
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.BehandlingResultat
 import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
@@ -32,9 +33,13 @@ import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariantformat
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
+import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.util.Properties
 import java.util.UUID
 
 internal class JournalføringServiceTest {
@@ -45,6 +50,7 @@ internal class JournalføringServiceTest {
     private val oppgaveService = mockk<OppgaveService>()
     private val fagsakService = mockk<FagsakService>()
     private val pdlClient = mockk<PdlClient>()
+    private val taskRepository = mockk<TaskRepository>()
     private val iverksettService = mockk<IverksettService>(relaxed = true)
 
     private val journalføringService =
@@ -55,7 +61,8 @@ internal class JournalføringServiceTest {
                                  pdlClient = pdlClient,
                                  grunnlagsdataService = mockk(relaxed = true),
                                  iverksettService = iverksettService,
-                                 oppgaveService = oppgaveService)
+                                 oppgaveService = oppgaveService,
+                                 taskRepository = taskRepository)
 
     private val fagsakId: UUID = UUID.randomUUID()
     private val fagsakEksternId = 12345L
@@ -121,6 +128,14 @@ internal class JournalføringServiceTest {
             søknadService.lagreSøknadForOvergangsstønad(any(), any(), any(), any())
         } just Runs
 
+        every { taskRepository.save(any())} answers { firstArg() }
+
+        BrukerContextUtil.mockBrukerContext("saksbehandlernavn")
+    }
+
+    @AfterEach
+    internal fun tearDown() {
+        BrukerContextUtil.clearBrukerContext()
     }
 
     @Test
