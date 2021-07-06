@@ -1,6 +1,8 @@
 package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.api.Feil
+import no.nav.familie.ef.sak.api.beregning.ResultatType
+import no.nav.familie.ef.sak.api.beregning.VedtakService
 import no.nav.familie.ef.sak.api.dto.BehandlingDto
 import no.nav.familie.ef.sak.api.dto.tilDto
 import no.nav.familie.ef.sak.repository.BehandlingRepository
@@ -29,7 +31,8 @@ import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad as SøknadOv
 class BehandlingService(private val behandlingsjournalpostRepository: BehandlingsjournalpostRepository,
                         private val behandlingRepository: BehandlingRepository,
                         private val behandlingshistorikkService: BehandlingshistorikkService,
-                        private val søknadService: SøknadService) {
+                        private val søknadService: SøknadService,
+                        private val vedtakService: VedtakService) {
 
     val logger: Logger = LoggerFactory.getLogger(this.javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -127,6 +130,17 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
                     httpStatus = HttpStatus.BAD_REQUEST,
                     throwable = null
             )
+        }
+    }
+
+    fun oppdaterResultatPåBehandling(behandlingId: UUID) {
+        val behandling = hentBehandling(behandlingId)
+        val vedtak = vedtakService.hentVedtak(behandlingId)
+        when (vedtak.resultatType) {
+            ResultatType.INNVILGE -> {
+                behandling.resultat = BehandlingResultat.INNVILGET
+                behandlingRepository.update(behandling)
+            }
         }
     }
 

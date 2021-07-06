@@ -23,6 +23,7 @@ class FerdigstillBehandlingSteg(private val behandlingService: BehandlingService
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.FERDIGSTILT)
 
         if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING || behandling.type == BehandlingType.REVURDERING) {
+            behandlingService.oppdaterResultatPåBehandling(behandling.id)
             taskRepository.save(PubliserVedtakshendelseTask.opprettTask(behandling.id))
             taskRepository.save(BehandlingsstatistikkTask.opprettFerdigTask(behandlingId = behandling.id))
         } else if (behandling.type == BehandlingType.BLANKETT || behandling.type == BehandlingType.TEKNISK_OPPHØR) {
