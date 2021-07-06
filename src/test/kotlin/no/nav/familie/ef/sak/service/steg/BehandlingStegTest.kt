@@ -53,8 +53,6 @@ internal class BehandlingStegTest {
         assertTrue(StegType.VILKÅR.erGyldigIKombinasjonMedStatus(BehandlingStatus.UTREDES))
         assertTrue(StegType.SEND_TIL_BESLUTTER.erGyldigIKombinasjonMedStatus(BehandlingStatus.UTREDES))
         assertTrue(StegType.BESLUTTE_VEDTAK.erGyldigIKombinasjonMedStatus(BehandlingStatus.FATTER_VEDTAK))
-        assertTrue(StegType.JOURNALFØR_VEDTAKSBREV.erGyldigIKombinasjonMedStatus(BehandlingStatus.IVERKSETTER_VEDTAK))
-        assertTrue(StegType.DISTRIBUER_VEDTAKSBREV.erGyldigIKombinasjonMedStatus(BehandlingStatus.IVERKSETTER_VEDTAK))
         assertTrue(StegType.FERDIGSTILLE_BEHANDLING.erGyldigIKombinasjonMedStatus(BehandlingStatus.IVERKSETTER_VEDTAK))
 
         assertFalse(StegType.VILKÅR.erGyldigIKombinasjonMedStatus(BehandlingStatus.IVERKSETTER_VEDTAK))
