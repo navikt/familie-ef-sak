@@ -29,7 +29,7 @@ class VedleggService(private val behandlingService: BehandlingService,
                                                                  tema = listOf(Tema.ENF),
                                                                  journalposttype = Journalposttype.values().toList()))
                 .flatMap { journalpost -> journalpost.dokumenter?.map { tilDokumentInfoDto(it, journalpost) } ?: emptyList() }
-                .partition { dokumentInfoDto -> journalposter.find { it.journalpostId == dokumentInfoDto.journalpostId } != null }
+                .partition { dokumentInfoDto -> journalposter.any { it.journalpostId == dokumentInfoDto.journalpostId } }
 
         return JournalposterDto(dokumenterKnyttetTilBehandlingen = dokumentinfoDtoList.first,
                                 andreDokumenter = dokumentinfoDtoList.second)
