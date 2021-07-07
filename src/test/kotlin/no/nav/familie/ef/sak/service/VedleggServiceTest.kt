@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.service
 
-import io.mockk.InternalPlatformDsl.toArray
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.integration.JournalpostClient
@@ -12,7 +11,7 @@ import no.nav.familie.kontrakter.felles.journalpost.*
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.*
+import java.util.UUID
 
 internal class VedleggServiceTest {
 
