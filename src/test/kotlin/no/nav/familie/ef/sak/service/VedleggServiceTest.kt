@@ -47,7 +47,7 @@ internal class VedleggServiceTest {
 
     @Test
     internal fun `skal hente dokumenter fra alle journalposter for en behandling`() {
-        val alleVedlegg = vedleggService.finnVedleggForBehandling(UUID.randomUUID())
+        val alleVedlegg = vedleggService.finnJournalposter(UUID.randomUUID())
 
         val søknad = alleVedlegg.find { it.dokumentinfoId == søknadsdokument.dokumentInfoId }
         Assertions.assertThat(søknad).isNotNull

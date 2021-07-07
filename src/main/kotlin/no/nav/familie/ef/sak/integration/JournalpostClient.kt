@@ -14,6 +14,7 @@ import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostResponse
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
+import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
@@ -31,6 +32,12 @@ class JournalpostClient(@Qualifier("azure") restOperations: RestOperations,
     override val pingUri: URI = integrasjonerConfig.pingUri
     private val journalpostURI: URI = integrasjonerConfig.journalPostUri
     private val dokarkivUri: URI = integrasjonerConfig.dokarkivUri
+
+    fun finnJournalposter(journalposterForBrukerRequest: JournalposterForBrukerRequest):List<Journalpost> {
+        return postForEntity<Ressurs<List<Journalpost>>>(URI.create("${journalpostURI}}"),
+                                                               journalposterForBrukerRequest).data
+               ?: error("Kunne ikke hente vedlegg for ${journalposterForBrukerRequest.brukerId.id}")
+    }
 
     fun hentJournalpost(journalpostId: String): Journalpost {
         return getForEntity<Ressurs<Journalpost>>(URI.create("${journalpostURI}?journalpostId=${journalpostId}")).getDataOrThrow()

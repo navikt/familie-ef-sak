@@ -1,27 +1,33 @@
 package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.api.dto.DokumentinfoDto
-import no.nav.familie.ef.sak.domene.DokumentVariantformat
-import no.nav.familie.kontrakter.felles.journalpost.DokumentInfo
-import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariantformat
-import no.nav.familie.kontrakter.felles.journalpost.Journalpost
+import no.nav.familie.ef.sak.api.dto.JournalposterDto
+import no.nav.familie.ef.sak.integration.JournalpostClient
+import no.nav.familie.kontrakter.felles.BrukerIdType
+import no.nav.familie.kontrakter.felles.Tema
+import no.nav.familie.kontrakter.felles.journalpost.*
 import org.springframework.stereotype.Service
-import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 
 @Service
 class VedleggService(private val behandlingService: BehandlingService,
-                     private val journalføringService: JournalføringService) {
+                     private val journalpostClient: JournalpostClient) {
 
 
-    fun finnVedleggForBehandling(behandlingId: UUID): List<DokumentinfoDto> {
+    fun finnJournalposter(behandlingId: UUID): JournalposterDto {
         val journalposter = behandlingService.hentBehandlingsjournalposter(behandlingId)
-        return journalposter
-                .map { journalføringService.hentJournalpost(it.journalpostId) }
-                .flatMap { journalpost ->
-                    journalpost.dokumenter?.map { tilDokumentInfoDto(it, journalpost) } ?: emptyList()
-                }
+        val ident = behandlingService.hentAktivIdent(behandlingId)
+        val dokumentinfoDtoList = journalpostClient
+                .finnJournalposter(JournalposterForBrukerRequest(brukerId = Bruker(id = ident,
+                                                                                   type = BrukerIdType.FNR),
+                                                                 antall = 20,
+                                                                 tema = listOf(Tema.ENF),
+                                                                 journalposttype = Journalposttype.values().toList()))
+                .flatMap { journalpost -> journalpost.dokumenter?.map { tilDokumentInfoDto(it, journalpost) } ?: emptyList() }
+                .partition { dokumentInfoDto -> journalposter.find { it.journalpostId == dokumentInfoDto.journalpostId } != null }
+
+        return JournalposterDto(dokumenterKnyttetTilBehandlingen = dokumentinfoDtoList.first,
+                                andreDokumenter = dokumentinfoDtoList.second)
     }
 
     private fun tilDokumentInfoDto(dokumentInfo: DokumentInfo,
