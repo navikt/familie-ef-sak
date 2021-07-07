@@ -1,7 +1,9 @@
 package no.nav.familie.ef.sak.service
 
+import io.mockk.InternalPlatformDsl.toArray
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ef.sak.integration.JournalpostClient
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.domain.Behandlingsjournalpost
@@ -16,23 +18,23 @@ internal class VedleggServiceTest {
 
 
     private val behandlingService = mockk<BehandlingService>()
-    private val journalføringService = mockk<JournalføringService>()
+    private val journalpostClient = mockk<JournalpostClient>()
 
-    private val vedleggService = VedleggService(behandlingService, journalføringService)
+    private val vedleggService = VedleggService(behandlingService, journalpostClient)
 
     @BeforeEach
     internal fun setUp() {
+        val behandling = behandling(fagsak())
         every {
-            journalføringService.hentJournalpost("1")
-        } returns journalpostSøknad
-
-        every {
-            journalføringService.hentJournalpost("2")
-        } returns journalpostEttersendelse
+            journalpostClient.finnJournalposter(any())
+        } returns listOf(journalpostSøknad, journalpostEttersendelse)
 
         every {
             behandlingService.hentBehandling(any())
-        } returns behandling(fagsak())
+        } returns behandling
+         every {
+            behandlingService.hentAktivIdent(any())
+        } returns "1234"
         every {
             behandlingService.hentBehandlingsjournalposter(any())
         } answers {
@@ -47,7 +49,8 @@ internal class VedleggServiceTest {
 
     @Test
     internal fun `skal hente dokumenter fra alle journalposter for en behandling`() {
-        val alleVedlegg = vedleggService.finnJournalposter(UUID.randomUUID())
+        val journalPoster = vedleggService.finnJournalposter(UUID.randomUUID())
+        val alleVedlegg = journalPoster.andreDokumenter + journalPoster.dokumenterKnyttetTilBehandlingen
 
         val søknad = alleVedlegg.find { it.dokumentinfoId == søknadsdokument.dokumentInfoId }
         Assertions.assertThat(søknad).isNotNull
