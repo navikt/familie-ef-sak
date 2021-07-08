@@ -34,8 +34,7 @@ class JournalpostClient(@Qualifier("azure") restOperations: RestOperations,
     private val dokarkivUri: URI = integrasjonerConfig.dokarkivUri
 
     fun finnJournalposter(journalposterForBrukerRequest: JournalposterForBrukerRequest):List<Journalpost> {
-        return postForEntity<Ressurs<List<Journalpost>>>(URI.create("${journalpostURI}}"),
-                                                               journalposterForBrukerRequest).data
+        return postForEntity<Ressurs<List<Journalpost>>>(journalpostURI, journalposterForBrukerRequest).data
                ?: error("Kunne ikke hente vedlegg for ${journalposterForBrukerRequest.brukerId.id}")
     }
 
