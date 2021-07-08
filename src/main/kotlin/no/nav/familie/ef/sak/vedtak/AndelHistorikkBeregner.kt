@@ -61,7 +61,7 @@ object AndelHistorikkBeregner {
                 }
             }
 
-            result.filter { it.type != HistorikkType.FJERNET && it.kontrollert != tilkjentYtelse.id }.forEach {
+            result.filterNot { alleredeFjernetEllerKontrollert(it, tilkjentYtelse) }.forEach {
                 it.type = HistorikkType.FJERNET
                 it.endretI = tilkjentYtelse.behandlingId
             }
@@ -71,6 +71,10 @@ object AndelHistorikkBeregner {
             AndelHistorikk(it.behandlingId, it.vedtaksdato, it.andel, it.type, it.endretI)
         }
     }
+
+    private fun alleredeFjernetEllerKontrollert(holder: AndelHistorikkHolder,
+                                                tilkjentYtelse: TilkjentYtelse) =
+            holder.type == HistorikkType.FJERNET || holder.kontrollert == tilkjentYtelse.id
 
     private fun nyHolder(tilkjentYtelse: TilkjentYtelse,
                          andel: AndelTilkjentYtelse) =
