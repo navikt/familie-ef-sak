@@ -11,13 +11,13 @@ interface TilkjentYtelseRepository : RepositoryInterface<TilkjentYtelse, UUID>, 
 
     fun findByBehandlingId(behandlingId: UUID): TilkjentYtelse?
 
-    //TODO AND b.status = 'FERDIGSTILT'
     // language=PostgreSQL
     @Query("""
         SELECT ty.*
         FROM tilkjent_ytelse ty
             JOIN behandling b ON b.id = ty.behandling_id
         WHERE b.fagsak_id = :fagsakId
+         AND b.status = 'FERDIGSTILT'
          AND b.type IN ('FØRSTEGANGSBEHANDLING', 'REVURDERING', 'TEKNISK_OPPHØR')
         ORDER BY b.opprettet_tid ASC""")
     fun finnAlleIverksatteForFagsak(fagsakId: UUID): List<TilkjentYtelse>
