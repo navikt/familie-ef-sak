@@ -2,9 +2,9 @@ package no.nav.familie.ef.sak.vedtak
 
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
 import no.nav.familie.ef.sak.mapper.tilDto
-import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.*
 import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.net.URL
@@ -71,7 +71,7 @@ object AndelHistorikkRunner {
 private data class AndelHistorikkData(val erOutput: Boolean,
                                       val behandlingId: UUID,
                                       val andel: AndelTilkjentYtelse,
-                                      val type: HistorikkType,
+                                      val type: EndringType?,
                                       val endretI: UUID?)
 
 data class ParsetAndelHistorikkData(val input: List<TilkjentYtelse>,
@@ -92,8 +92,8 @@ private enum class AndelHistorikkHeader(val key: String,
     INNTEKTSREDUKSJON("inntektsreduksjon", { it.andel.inntektsreduksjon }),
     SAMORDNINGSFRADRAG("samordningsfradrag", { it.andel.samordningsfradrag }),
     BEHANDLING("behandling_id", { hentBehandlingId(it.behandlingId) }),
-    TYPE_ENDRING("type_endring", { it.type }),
-    ENDRET_I("endret_i", { it.endretI?.let(::hentBehandlingId) })
+    TYPE_ENDRING("type_endring", { it.endring?.type }),
+    ENDRET_I("endret_i", { it.endring?.behandlingId?.let(::hentBehandlingId) })
 }
 
 object AndelHistorikkParser {
@@ -141,7 +141,7 @@ object AndelHistorikkParser {
                                                    inntektsreduksjon = row.getInt(INNTEKTSREDUKSJON),
                                                    samordningsfradrag = row.getInt(SAMORDNINGSFRADRAG),
                                                    kildeBehandlingId = behandlingId),
-                               row.getOptionalValue(TYPE_ENDRING)?.let { HistorikkType.valueOf(it) } ?: HistorikkType.VANLIG,
+                               row.getOptionalValue(TYPE_ENDRING)?.let { EndringType.valueOf(it) },
                                row.getOptionalValue(ENDRET_I)?.let { generateBehandlingId(it) })
 
     private fun Map<String, String>.getValue(header: AndelHistorikkHeader) = getValue(header.key)
@@ -155,15 +155,20 @@ object AndelHistorikkParser {
         val parse = parse(url)
         val groupBy = parse.groupBy { it.erOutput }
         return ParsetAndelHistorikkData(input = mapInput(groupBy[false]!!),
-                                        expectedOutput = groupBy[true]!!.map {
-                                            AndelHistorikkDto(it.behandlingId,
-                                                              LocalDate.now(), // burde denne testes? EKs att man oppretter vedtaksdato per behandlingId
-                                                              "",
-                                                              it.andel.tilDto(),
-                                                              it.type,
-                                                              it.endretI)
-                                        })
+                                        expectedOutput = groupBy[true]!!.map { lagAndel(it) })
     }
+
+    private fun lagAndel(it: AndelHistorikkData) =
+            AndelHistorikkDto(it.behandlingId,
+                              LocalDate.now(), // burde denne testes? EKs att man oppretter vedtaksdato per behandlingId
+                              "",
+                              it.andel.tilDto(),
+                              it.type?.let { type ->
+                                  HistorikkEndring(type,
+                                                   it.endretI
+                                                   ?: error("Trenger id til behandling hvis det finnes en endring"),
+                                                   LocalDate.now())
+                              })
 
     private fun mapInput(input: List<AndelHistorikkData>): List<TilkjentYtelse> {
         return input

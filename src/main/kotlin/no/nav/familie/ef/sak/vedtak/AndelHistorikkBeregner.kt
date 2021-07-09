@@ -8,8 +8,7 @@ import java.time.LocalDate
 import java.util.LinkedList
 import java.util.UUID
 
-enum class HistorikkType {
-    VANLIG,
+enum class EndringType {
     FJERNET,
     ENDRET,
     ENDRING_I_INNTEKT // mindre endring i inntekt som ikke endrer beløp
@@ -19,8 +18,11 @@ data class AndelHistorikkDto(val behandlingId: UUID,
                              val vedtaksdato: LocalDate, // TODO burde denne være datotid sånn att man kan vise tiden den ble opprettet?
                              val saksbehandler: String,
                              val andel: AndelTilkjentYtelseDto,
-                             val type: HistorikkType,
-                             val endretI: UUID?)
+                             val endring: HistorikkEndring?)
+
+data class HistorikkEndring(val type: EndringType,
+                            val behandlingId: UUID,
+                            val vedtaksdato: LocalDate)
 
 object AndelHistorikkBeregner {
 
@@ -28,14 +30,13 @@ object AndelHistorikkBeregner {
                                        val vedtaksdato: LocalDate,
                                        val saksbehandler: String,
                                        var andel: AndelTilkjentYtelse,
-                                       var type: HistorikkType,
-                                       var endretI: UUID?,
+                                       var endring: HistorikkEndring?,
                                        var kontrollert: UUID)
 
-    private fun AndelTilkjentYtelse.endring(other: AndelTilkjentYtelse): HistorikkType? {
+    private fun AndelTilkjentYtelse.endring(other: AndelTilkjentYtelse): EndringType? {
         return when {
-            this.stønadTom != other.stønadTom || this.beløp != other.beløp -> HistorikkType.ENDRET
-            this.inntekt != other.inntekt -> HistorikkType.ENDRING_I_INNTEKT
+            this.stønadTom != other.stønadTom || this.beløp != other.beløp -> EndringType.ENDRET
+            this.inntekt != other.inntekt -> EndringType.ENDRING_I_INNTEKT
             else -> null
         }
     }
@@ -58,27 +59,30 @@ object AndelHistorikkBeregner {
                     val endringType = tidligereAndel.andel.endring(andel)
                     if (endringType != null) {
                         tidligereAndel.andel = andel //.copy(kildeBehandlingId = tidligereAndel.andel.kildeBehandlingId)
-                        tidligereAndel.type = endringType
-                        tidligereAndel.endretI = tilkjentYtelse.behandlingId
+                        tidligereAndel.endring = lagEndring(endringType, tilkjentYtelse)
                     }
                     tidligereAndel.kontrollert = tilkjentYtelse.id
                 }
             }
 
             result.filterNot { alleredeFjernetEllerKontrollert(it, tilkjentYtelse) }.forEach {
-                it.type = HistorikkType.FJERNET
-                it.endretI = tilkjentYtelse.behandlingId
+                it.endring = lagEndring(EndringType.FJERNET, tilkjentYtelse)
             }
         }
 
         return result.map {
-            AndelHistorikkDto(it.behandlingId, it.vedtaksdato, it.saksbehandler, it.andel.tilDto(), it.type, it.endretI)
+            AndelHistorikkDto(it.behandlingId, it.vedtaksdato, it.saksbehandler, it.andel.tilDto(), it.endring)
         }
     }
 
+    private fun lagEndring(type: EndringType, tilkjentYtelse: TilkjentYtelse) =
+            HistorikkEndring(type = type,
+                             behandlingId = tilkjentYtelse.behandlingId,
+                             vedtaksdato = tilkjentYtelse.vedtaksdato!!)
+
     private fun alleredeFjernetEllerKontrollert(holder: AndelHistorikkHolder,
                                                 tilkjentYtelse: TilkjentYtelse) =
-            holder.type == HistorikkType.FJERNET || holder.kontrollert == tilkjentYtelse.id
+            holder.endring?.type == EndringType.FJERNET || holder.kontrollert == tilkjentYtelse.id
 
     private fun nyHolder(tilkjentYtelse: TilkjentYtelse,
                          andel: AndelTilkjentYtelse) =
@@ -86,11 +90,10 @@ object AndelHistorikkBeregner {
                                  tilkjentYtelse.vedtaksdato!!,
                                  tilkjentYtelse.sporbar.opprettetAv,
                                  andel,
-                                 HistorikkType.VANLIG,
                                  null,
                                  tilkjentYtelse.id)
 
     private fun finnTidligereAndel(result: MutableList<AndelHistorikkHolder>,
                                    andel: AndelTilkjentYtelse) =
-            result.find { it.type != HistorikkType.FJERNET && it.andel.stønadFom == andel.stønadFom }
+            result.find { it.endring?.type != EndringType.FJERNET && it.andel.stønadFom == andel.stønadFom }
 }
