@@ -1,8 +1,7 @@
 package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.api.Feil
-import no.nav.familie.ef.sak.api.dto.BehandlingDto
-import no.nav.familie.ef.sak.api.dto.tilDto
+import no.nav.familie.ef.sak.api.beregning.ResultatType
 import no.nav.familie.ef.sak.repository.BehandlingRepository
 import no.nav.familie.ef.sak.repository.BehandlingsjournalpostRepository
 import no.nav.familie.ef.sak.repository.domain.Behandling
@@ -41,6 +40,8 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
 
     fun finnSisteIverksatteBehandlinger(stønadstype: Stønadstype) =
             behandlingRepository.finnSisteIverksatteBehandlingerSomIkkeErTekniskOpphør(stønadstype)
+
+    fun hentForrigeBehandlingId(fagsakId: UUID) = behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
 
     @Transactional
     fun opprettBehandling(behandlingType: BehandlingType,
@@ -126,6 +127,12 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
                     throwable = null
             )
         }
+    }
+
+    fun oppdaterResultatPåBehandling(behandlingId: UUID, behandlingResultat: BehandlingResultat) {
+        val behandling = hentBehandling(behandlingId)
+        behandling.resultat = behandlingResultat
+        behandlingRepository.update(behandling)
     }
 
 }

@@ -4,7 +4,6 @@ import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.api.beregning.VedtakService
 import no.nav.familie.ef.sak.api.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.blankett.JournalførBlankettTask
-import no.nav.familie.ef.sak.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.mapper.IverksettingDtoMapper
 import no.nav.familie.ef.sak.repository.VedtaksbrevRepository
@@ -13,10 +12,12 @@ import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.domain.Fil
 import no.nav.familie.ef.sak.repository.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.ef.sak.service.BehandlingshistorikkService
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.OppgaveService
 import no.nav.familie.ef.sak.service.TotrinnskontrollService
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.task.OpprettOppgaveTask.OpprettOppgaveTaskData
@@ -30,11 +31,11 @@ import java.util.UUID
 class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
                          private val fagsakService: FagsakService,
                          private val oppgaveService: OppgaveService,
-                         private val featureToggleService: FeatureToggleService,
                          private val iverksettClient: IverksettClient,
                          private val iverksettingDtoMapper: IverksettingDtoMapper,
                          private val totrinnskontrollService: TotrinnskontrollService,
                          private val vedtaksbrevRepository: VedtaksbrevRepository,
+                         private val behandlingshistorikkService: BehandlingshistorikkService,
                          private val vedtakService: VedtakService) : BehandlingSteg<BeslutteVedtakDto> {
 
     override fun validerSteg(behandling: Behandling) {
@@ -48,7 +49,7 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
         val saksbehandler = totrinnskontrollService.lagreTotrinnskontrollOgReturnerBehandler(behandling, data)
         val beslutter = SikkerhetContext.hentSaksbehandler(strict = true)
 
-        ferdigstillOppgave(behandling)
+        val oppgaveId = ferdigstillOppgave(behandling)
 
         return if (data.godkjent) {
             vedtakService.oppdaterBeslutter(behandling.id, SikkerhetContext.hentSaksbehandler(strict = true))
@@ -56,8 +57,9 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
                 val vedtaksbrev = vedtaksbrevRepository.findByIdOrThrow(behandling.id)
                 val fil = utledVedtaksbrev(vedtaksbrev)
                 val iverksettDto = iverksettingDtoMapper.tilDto(behandling, beslutter)
-                iverksettClient.iverksett(iverksettDto, fil)
                 opprettPollForStatusOppgave(behandling.id)
+                opprettTaskForBehandlingsstatistikk(behandling.id, oppgaveId)
+                iverksettClient.iverksett(iverksettDto, fil)
                 StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT
             } else {
                 opprettTaskForJournalførBlankett(behandling)
@@ -70,6 +72,18 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
         }
     }
 
+    private fun opprettTaskForBehandlingsstatistikk(behandlingId: UUID, oppgaveId: Long?) {
+        val vedtakstidspunkt = behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId, StegType.SEND_TIL_BESLUTTER)?.endretTid ?: error("Mangler behandlingshistorikk for vedtak") // TODO: Bruk vedtak.endretTid når det kommer på plass
+
+        taskRepository.save(BehandlingsstatistikkTask.opprettVedtattTask(behandlingId = behandlingId,
+                                                                  hendelseTidspunkt = vedtakstidspunkt,
+                                                                  oppgaveId = oppgaveId))
+
+        taskRepository.save(BehandlingsstatistikkTask.opprettBesluttetTask(behandlingId = behandlingId,
+                                                                  oppgaveId = oppgaveId))
+
+    }
+
     private fun utledVedtaksbrev(vedtaksbrev: Vedtaksbrev): Fil {
         require(vedtaksbrev.beslutterPdf != null) { "For å iverksette må det finnes en pdf" }
         require(vedtaksbrev.besluttersignatur == SikkerhetContext.hentSaksbehandlerNavn(strict = true)) {
@@ -78,14 +92,15 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
         return vedtaksbrev.beslutterPdf
     }
 
-    private fun ferdigstillOppgave(behandling: Behandling) {
+    private fun ferdigstillOppgave(behandling: Behandling): Long? {
         val oppgavetype = Oppgavetype.GodkjenneVedtak
         val aktivIdent = fagsakService.hentAktivIdent(behandling.fagsakId)
-        oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype, behandling)?.let {
+        return oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype, behandling)?.let {
             taskRepository.save(FerdigstillOppgaveTask.opprettTask(behandlingId = behandling.id,
-                                                                   oppgavetype,
-                                                                   it.gsakOppgaveId,
-                                                                   aktivIdent))
+                                                                   oppgavetype = oppgavetype,
+                                                                   oppgaveId = it.gsakOppgaveId,
+                                                                   personIdent = aktivIdent))
+            it.gsakOppgaveId
         }
     }
 

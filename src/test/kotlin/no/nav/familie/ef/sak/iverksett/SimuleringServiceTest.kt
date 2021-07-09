@@ -20,6 +20,7 @@ import no.nav.familie.ef.sak.repository.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.TilkjentYtelseService
+import no.nav.familie.kontrakter.ef.iverksett.SimuleringDto
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -63,8 +64,8 @@ internal class SimuleringServiceTest {
             tilkjentYtelseService.hentForBehandling(any())
         } returns tilkjentYtelse
         every {
-            tilkjentYtelseService.finnSisteTilkjentYtelse(any())
-        } returns null
+            behandlingService.hentForrigeBehandlingId(any())
+        } returns behandling.id
 
         val simulerSlot = slot<SimuleringDto>()
         every {
@@ -79,7 +80,7 @@ internal class SimuleringServiceTest {
                 tilkjentYtelse.andelerTilkjentYtelse.first().stønadFom)
         assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().tilOgMed).isEqualTo(
                 tilkjentYtelse.andelerTilkjentYtelse.first().stønadTom)
-
+        assertThat(simulerSlot.captured.forrigeBehandlingId).isEqualTo(behandling.id)
     }
 
     @Test

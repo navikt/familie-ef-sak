@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.api.gui
 
-import no.nav.familie.ef.sak.api.dto.*
+import no.nav.familie.ef.sak.api.dto.PersonIdentDto
+import no.nav.familie.ef.sak.api.dto.PersonopplysningerDto
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.PersonopplysningerService
@@ -10,8 +11,13 @@ import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.*
-import java.util.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
+import java.util.UUID
 
 
 @RestController
@@ -47,6 +53,12 @@ class PersonopplysningerController(private val personopplysningerService: Person
         tilgangService.validerTilgangTilBehandling(behandlingId)
         val aktivIdent = behandlingService.hentAktivIdent(behandlingId)
         return Ressurs.success(personopplysningerService.hentNavKontor(aktivIdent))
+    }
+
+    @PostMapping("/nav-kontor")
+    fun hentNavKontorTilFagsak(@RequestBody personIdent: PersonIdentDto): Ressurs<NavKontorEnhet> {
+        tilgangService.validerTilgangTilPersonMedBarn(personIdent.personIdent)
+        return Ressurs.success(personopplysningerService.hentNavKontor(personIdent.personIdent))
     }
 
 }

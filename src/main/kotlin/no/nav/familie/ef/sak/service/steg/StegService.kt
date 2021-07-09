@@ -14,10 +14,8 @@ import no.nav.familie.ef.sak.service.BehandlingshistorikkService
 import no.nav.familie.ef.sak.service.steg.StegType.BEHANDLING_FERDIGSTILT
 import no.nav.familie.ef.sak.service.steg.StegType.BEREGNE_YTELSE
 import no.nav.familie.ef.sak.service.steg.StegType.BESLUTTE_VEDTAK
-import no.nav.familie.ef.sak.service.steg.StegType.DISTRIBUER_VEDTAKSBREV
 import no.nav.familie.ef.sak.service.steg.StegType.FERDIGSTILLE_BEHANDLING
 import no.nav.familie.ef.sak.service.steg.StegType.JOURNALFØR_BLANKETT
-import no.nav.familie.ef.sak.service.steg.StegType.JOURNALFØR_VEDTAKSBREV
 import no.nav.familie.ef.sak.service.steg.StegType.LAG_SAKSBEHANDLINGSBLANKETT
 import no.nav.familie.ef.sak.service.steg.StegType.PUBLISER_VEDTAKSHENDELSE
 import no.nav.familie.ef.sak.service.steg.StegType.SEND_TIL_BESLUTTER
@@ -103,20 +101,6 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
         val behandlingSteg: VentePåTekniskOpphørStatus = hentBehandlingSteg(VENTE_PÅ_TEKNISK_OPPHØR_STATUS)
 
         return håndterSteg(behandling, behandlingSteg, null)
-    }
-
-    @Transactional
-    fun håndterJournalførVedtaksbrev(behandling: Behandling): Behandling {
-        val behandlingSteg: JournalførVedtaksbrevSteg = hentBehandlingSteg(JOURNALFØR_VEDTAKSBREV)
-
-        return håndterSteg(behandling, behandlingSteg, null)
-    }
-
-    @Transactional
-    fun håndterDistribuerVedtaksbrev(behandling: Behandling, journalpostId: String): Behandling {
-        val behandlingSteg: DistribuerVedtaksbrevSteg = hentBehandlingSteg(DISTRIBUER_VEDTAKSBREV)
-
-        return håndterSteg(behandling, behandlingSteg, journalpostId)
     }
 
     @Transactional
@@ -262,13 +246,13 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
     }
 
     private fun initStegMetrikker(type: String): Map<StegType, Counter> {
-        return behandlingSteg.map {
+        return behandlingSteg.associate {
             it.stegType() to Metrics.counter("behandling.steg.$type",
                                              "steg",
                                              it.stegType().name,
                                              "beskrivelse",
                                              "${it.stegType().rekkefølge} ${it.stegType().displayName()}")
-        }.toMap()
+        }
     }
 
 }

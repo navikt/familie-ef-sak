@@ -10,12 +10,17 @@ import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.domain.Fagsak
+import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseType
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.TilkjentYtelseService
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.kontrakter.ef.felles.StønadType
+import no.nav.familie.kontrakter.ef.iverksett.SimuleringDto
+import no.nav.familie.kontrakter.ef.iverksett.TilkjentYtelseDto
+import no.nav.familie.kontrakter.ef.iverksett.TilkjentYtelseMedMetadata
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -41,10 +46,6 @@ class SimuleringService(private val iverksettClient: IverksettClient,
     }
 
     private fun simulerMedTilkjentYtelse(behandling: Behandling, fagsak: Fagsak): DetaljertSimuleringResultat {
-        if (behandling.type == BehandlingType.BLANKETT) {
-            return simulerUtenTilkjentYtelse(behandling, fagsak)
-        }
-
         val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(behandling.id)
 
         val tilkjentYtelseMedMedtadata =
@@ -54,12 +55,11 @@ class SimuleringService(private val iverksettClient: IverksettClient,
                                                        eksternFagsakId = fagsak.eksternId.id
 
                 )
-        val forrigeTilkjentYtelse = tilkjentYtelseService.finnSisteTilkjentYtelse(fagsakId = behandling.fagsakId)?.tilIverksett()
+        val forrigeBehandlingId = behandlingService.hentForrigeBehandlingId(behandling.fagsakId)
 
         return iverksettClient.simuler(SimuleringDto(
                 nyTilkjentYtelseMedMetaData = tilkjentYtelseMedMedtadata,
-                forrigeTilkjentYtelse = forrigeTilkjentYtelse
-
+                forrigeBehandlingId = forrigeBehandlingId
         ))
     }
 
@@ -68,7 +68,7 @@ class SimuleringService(private val iverksettClient: IverksettClient,
         val tilkjentYtelseForBlankett = genererTilkjentYtelseForBlankett(vedtak, behandling, fagsak)
         val simuleringDto = SimuleringDto(
                 nyTilkjentYtelseMedMetaData = tilkjentYtelseForBlankett,
-                forrigeTilkjentYtelse = null
+                forrigeBehandlingId = null
 
         )
         return iverksettClient.simuler(simuleringDto)
@@ -76,7 +76,7 @@ class SimuleringService(private val iverksettClient: IverksettClient,
 
     private fun genererTilkjentYtelseForBlankett(vedtak: VedtakDto?,
                                                  behandling: Behandling,
-                                                 fagsak: Fagsak): TilkjentYtelseForIverksettMedMetadata {
+                                                 fagsak: Fagsak): TilkjentYtelseMedMetadata {
         val andeler = when (vedtak) {
             is Innvilget -> {
                 beregningService.beregnYtelse(vedtak.perioder.tilPerioder(),
@@ -112,5 +112,21 @@ class SimuleringService(private val iverksettClient: IverksettClient,
                 )
     }
 
+    private fun TilkjentYtelse.tilIverksettMedMetaData(saksbehandlerId: String,
+                                                       eksternBehandlingId: Long,
+                                                       stønadstype: Stønadstype,
+                                                       eksternFagsakId: Long): TilkjentYtelseMedMetadata {
+        return TilkjentYtelseMedMetadata(tilkjentYtelse = this.tilIverksett(),
+                                         saksbehandlerId = saksbehandlerId,
+                                         eksternBehandlingId = eksternBehandlingId,
+                                         stønadstype = StønadType.valueOf(stønadstype.name),
+                                         eksternFagsakId = eksternFagsakId,
+                                         personIdent = this.personident,
+                                         behandlingId = this.behandlingId,
+                                         vedtaksdato = this.vedtaksdato ?: LocalDate.now())
+    }
 
+    private fun TilkjentYtelse.tilIverksett(): TilkjentYtelseDto {
+        return TilkjentYtelseDto(andelerTilkjentYtelse = this.andelerTilkjentYtelse.map { it.tilIverksettDto() })
+    }
 }
