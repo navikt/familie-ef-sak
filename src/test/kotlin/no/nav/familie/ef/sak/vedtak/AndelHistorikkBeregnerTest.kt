@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.vedtak
 
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
+import no.nav.familie.ef.sak.mapper.tilDto
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.*
 import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
@@ -59,7 +60,7 @@ object AndelHistorikkRunner {
         return String.format("%-${key.minHeaderValue}s", value)
     }
 
-    private fun toString(andeler: List<AndelHistorikk>): String {
+    private fun toString(andeler: List<AndelHistorikkDto>): String {
         return "\n$headerString\n" +
                andeler.joinToString("\n") { andel ->
                    values().joinToString(", ") { mapValue(it, it.value.invoke(andel)) }
@@ -74,18 +75,18 @@ private data class AndelHistorikkData(val erOutput: Boolean,
                                       val endretI: UUID?)
 
 data class ParsetAndelHistorikkData(val input: List<TilkjentYtelse>,
-                                    val expectedOutput: List<AndelHistorikk>)
+                                    val expectedOutput: List<AndelHistorikkDto>)
 
 private val oppdragIdn = mutableMapOf<Int, UUID>()
 private fun generateBehandlingId(behandlingId: String): UUID = oppdragIdn.getOrPut(behandlingId.toInt()) { UUID.randomUUID() }
 private fun hentBehandlingId(behandlingId: UUID) = oppdragIdn.entries.first { it.value == behandlingId }.key
 
 private enum class AndelHistorikkHeader(val key: String,
-                                        val value: (AndelHistorikk) -> Any?,
+                                        val value: (AndelHistorikkDto) -> Any?,
                                         val minHeaderValue: Int = key.length) {
 
-    FOM("fom", { it.andel.stønadFom }, 11),
-    TOM("tom", { it.andel.stønadTom }, 11),
+    FOM("fom", { it.andel.stønadFra }, 11),
+    TOM("tom", { it.andel.stønadTil }, 11),
     BELØP("beløp", { it.andel.beløp }, 8),
     INNTEKT("inntekt", { it.andel.inntekt }, 10),
     INNTEKTSREDUKSJON("inntektsreduksjon", { it.andel.inntektsreduksjon }),
@@ -155,11 +156,12 @@ object AndelHistorikkParser {
         val groupBy = parse.groupBy { it.erOutput }
         return ParsetAndelHistorikkData(input = mapInput(groupBy[false]!!),
                                         expectedOutput = groupBy[true]!!.map {
-                                            AndelHistorikk(it.behandlingId,
-                                                           LocalDate.now(), // burde denne testes? EKs att man oppretter vedtaksdato per behandlingId
-                                                           it.andel,
-                                                           it.type,
-                                                           it.endretI)
+                                            AndelHistorikkDto(it.behandlingId,
+                                                              LocalDate.now(), // burde denne testes? EKs att man oppretter vedtaksdato per behandlingId
+                                                              "",
+                                                              it.andel.tilDto(),
+                                                              it.type,
+                                                              it.endretI)
                                         })
     }
 

@@ -1,5 +1,7 @@
 package no.nav.familie.ef.sak.vedtak
 
+import no.nav.familie.ef.sak.api.dto.AndelTilkjentYtelseDto
+import no.nav.familie.ef.sak.mapper.tilDto
 import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import java.time.LocalDate
@@ -13,16 +15,18 @@ enum class HistorikkType {
     ENDRING_I_INNTEKT // mindre endring i inntekt som ikke endrer beløp
 }
 
-data class AndelHistorikk(val behandlingId: UUID,
-                          val vedtaksdato: LocalDate,
-                          val andel: AndelTilkjentYtelse,
-                          val type: HistorikkType,
-                          val endretI: UUID?)
+data class AndelHistorikkDto(val behandlingId: UUID,
+                             val vedtaksdato: LocalDate, // TODO burde denne være datotid sånn att man kan vise tiden den ble opprettet?
+                             val saksbehandler: String,
+                             val andel: AndelTilkjentYtelseDto,
+                             val type: HistorikkType,
+                             val endretI: UUID?)
 
 object AndelHistorikkBeregner {
 
     private class AndelHistorikkHolder(val behandlingId: UUID,
                                        val vedtaksdato: LocalDate,
+                                       val saksbehandler: String,
                                        var andel: AndelTilkjentYtelse,
                                        var type: HistorikkType,
                                        var endretI: UUID?,
@@ -36,7 +40,7 @@ object AndelHistorikkBeregner {
         }
     }
 
-    fun lagHistorikk(tilkjentYtelser: List<TilkjentYtelse>): List<AndelHistorikk> {
+    fun lagHistorikk(tilkjentYtelser: List<TilkjentYtelse>): List<AndelHistorikkDto> {
         val result = LinkedList(listOf<AndelHistorikkHolder>())
 
         tilkjentYtelser.forEach { tilkjentYtelse ->
@@ -68,7 +72,7 @@ object AndelHistorikkBeregner {
         }
 
         return result.map {
-            AndelHistorikk(it.behandlingId, it.vedtaksdato, it.andel, it.type, it.endretI)
+            AndelHistorikkDto(it.behandlingId, it.vedtaksdato, it.saksbehandler, it.andel.tilDto(), it.type, it.endretI)
         }
     }
 
@@ -80,6 +84,7 @@ object AndelHistorikkBeregner {
                          andel: AndelTilkjentYtelse) =
             AndelHistorikkHolder(tilkjentYtelse.behandlingId,
                                  tilkjentYtelse.vedtaksdato!!,
+                                 tilkjentYtelse.sporbar.opprettetAv,
                                  andel,
                                  HistorikkType.VANLIG,
                                  null,

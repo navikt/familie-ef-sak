@@ -6,7 +6,7 @@ import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.util.isEqualOrAfter
-import no.nav.familie.ef.sak.vedtak.AndelHistorikk
+import no.nav.familie.ef.sak.vedtak.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkBeregner
 import no.nav.familie.kontrakter.ef.iverksett.KonsistensavstemmingTilkjentYtelseDto
 import org.springframework.stereotype.Service
@@ -66,7 +66,7 @@ class TilkjentYtelseService(private val behandlingService: BehandlingService,
         tilkjentYtelseRepository.findByBehandlingId(behandlingId)?.let { tilkjentYtelseRepository.deleteById(it.id) }
     }
 
-    fun hentHistorikk(fagsakId: UUID): List<AndelHistorikk> {
+    fun hentHistorikk(fagsakId: UUID): List<AndelHistorikkDto> {
         val tilkjenteYtelser = tilkjentYtelseRepository.finnAlleIverksatteForFagsak(fagsakId)
         return AndelHistorikkBeregner.lagHistorikk(tilkjenteYtelser)
     }
