@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.integration.PdlSaksbehandlerClient
 import no.nav.familie.ef.sak.integration.dto.pdl.Adressebeskyttelse
 import no.nav.familie.ef.sak.integration.dto.pdl.AdressebeskyttelseGradering
 import no.nav.familie.ef.sak.integration.dto.pdl.Bostedsadresse
+import no.nav.familie.ef.sak.integration.dto.pdl.Dødsfall
 import no.nav.familie.ef.sak.integration.dto.pdl.Familierelasjonsrolle
 import no.nav.familie.ef.sak.integration.dto.pdl.Folkeregisteridentifikator
 import no.nav.familie.ef.sak.integration.dto.pdl.Folkeregistermetadata
@@ -42,7 +43,8 @@ import no.nav.familie.ef.sak.integration.dto.pdl.Statsborgerskap
 import no.nav.familie.ef.sak.integration.dto.pdl.Telefonnummer
 import no.nav.familie.ef.sak.integration.dto.pdl.UtflyttingFraNorge
 import no.nav.familie.ef.sak.integration.dto.pdl.Vegadresse
-import no.nav.familie.ef.sak.integration.dto.pdl.Dødsfall
+import no.nav.familie.ef.sak.integration.dto.pdl.VergeEllerFullmektig
+import no.nav.familie.ef.sak.integration.dto.pdl.VergemaalEllerFremtidsfullmakt
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
@@ -130,7 +132,7 @@ class PdlClientConfig {
                          tilrettelagtKommunikasjon = listOf(),
                          innflyttingTilNorge = listOf(InnflyttingTilNorge("SWE", "Stockholm", folkeregistermetadata)),
                          utflyttingFraNorge = listOf(UtflyttingFraNorge("SWE", "Stockholm", folkeregistermetadata)),
-                         vergemaalEllerFremtidsfullmakt = listOf()
+                         vergemaalEllerFremtidsfullmakt = vergemaalEllerFremtidsfullmakt()
                 )
 
         private val folkeregistermetadata = Folkeregistermetadata(LocalDateTime.of(2010, Month.AUGUST, 30, 10, 10),
@@ -259,5 +261,25 @@ class PdlClientConfig {
                            tilleggsnavn = null,
                            koordinater = null,
                            matrikkelId = 0)
+
+        private fun vergemaalEllerFremtidsfullmakt(): List<VergemaalEllerFremtidsfullmakt> {
+            return listOf(
+                    VergemaalEllerFremtidsfullmakt(embete = null,
+                                                   folkeregistermetadata = null,
+                                                   type = "voksen",
+                                                   vergeEllerFullmektig =
+                                                   VergeEllerFullmektig(motpartsPersonident = annenForelderFnr,
+                                                                        navn = null,
+                                                                        omfang = "personligeOgOekonomiskeInteresser",
+                                                                        omfangetErInnenPersonligOmraade = false)),
+                    VergemaalEllerFremtidsfullmakt(embete = null,
+                                                   folkeregistermetadata = null,
+                                                   type = "stadfestetFremtidsfullmakt",
+                                                   vergeEllerFullmektig =
+                                                   VergeEllerFullmektig(motpartsPersonident = annenForelderFnr,
+                                                                        navn = null,
+                                                                        omfang = "personligeOgOekonomiskeInteresser",
+                                                                        omfangetErInnenPersonligOmraade = false)))
+        }
     }
 }
