@@ -71,6 +71,30 @@ class TilkjentYtelseServiceTest {
         }).hasMessageContaining(behandling.id.toString())
     }
 
+    @Test
+    internal fun `harLøpendeUtbetaling skal returnere true hvis det finnes andel med sluttdato etter idag`() {
+        val andelTilkjentYtelse = lagAndelTilkjentYtelse(1, LocalDate.of(2021, 1, 1), LocalDate.now().plusDays(1))
+        val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(behandling)
+                .copy(andelerTilkjentYtelse = listOf(andelTilkjentYtelse))
+        every { tilkjentYtelseRepository.findByBehandlingId(any()) } returns tilkjentYtelse
+        assertThat(tilkjentYtelseService.harLøpendeUtbetaling(behandling.id)).isTrue
+    }
+
+    @Test
+    internal fun `harLøpendeUtbetaling skal returnere false hvis det finnes andel mer sluttdato før idag`() {
+        val andelTilkjentYtelse = lagAndelTilkjentYtelse(1, LocalDate.of(2021, 1, 1), LocalDate.now().minusDays(1))
+        val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(behandling)
+                .copy(andelerTilkjentYtelse = listOf(andelTilkjentYtelse))
+        every { tilkjentYtelseRepository.findByBehandlingId(any()) } returns tilkjentYtelse
+        assertThat(tilkjentYtelseService.harLøpendeUtbetaling(behandling.id)).isFalse
+    }
+
+    @Test
+    internal fun `harLøpendeUtbetaling skal returnere false hvis det ikke finnes noen andel`() {
+        every { tilkjentYtelseRepository.findByBehandlingId(any()) } returns null
+        assertThat(tilkjentYtelseService.harLøpendeUtbetaling(behandling.id)).isFalse
+    }
+
     companion object {
 
         val fagsak = fagsak()

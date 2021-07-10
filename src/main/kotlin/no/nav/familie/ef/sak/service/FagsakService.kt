@@ -5,6 +5,9 @@ import no.nav.familie.ef.sak.api.dto.FagsakDto
 import no.nav.familie.ef.sak.api.dto.tilDto
 import no.nav.familie.ef.sak.repository.FagsakRepository
 import no.nav.familie.ef.sak.repository.domain.Behandling
+import no.nav.familie.ef.sak.repository.domain.BehandlingResultat
+import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
+import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.domain.Fagsak
 import no.nav.familie.ef.sak.repository.domain.FagsakPerson
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
@@ -14,12 +17,11 @@ import java.util.UUID
 
 @Service
 class FagsakService(private val fagsakRepository: FagsakRepository,
-                    private val behandlingService: BehandlingService) {
+                    private val behandlingService: BehandlingService,
+                    private val tilkjentYtelseService: TilkjentYtelseService) {
 
     fun hentEllerOpprettFagsakMedBehandlinger(personIdent: String, stønadstype: Stønadstype): FagsakDto {
-        val fagsak = hentEllerOpprettFagsak(personIdent, stønadstype)
-        val behandlinger = behandlingService.hentBehandlinger(fagsak.id).map(Behandling::tilDto)
-        return fagsak.tilDto(behandlinger)
+        return fagsakTilDto(hentEllerOpprettFagsak(personIdent, stønadstype))
     }
 
     fun hentEllerOpprettFagsak(personIdent: String,
@@ -29,8 +31,24 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
                                                   søkerIdenter = setOf(FagsakPerson(ident = personIdent)))))
     }
 
-    fun hentFagsakMedBehandlinger(fagsakId: UUID): FagsakDto =
-            hentFagsak(fagsakId).tilDto(behandlinger = behandlingService.hentBehandlinger(fagsakId).map(Behandling::tilDto))
+    fun hentFagsakMedBehandlinger(fagsakId: UUID): FagsakDto {
+        return fagsakTilDto(hentFagsak(fagsakId))
+    }
+
+    private fun fagsakTilDto(fagsak: Fagsak): FagsakDto {
+        val behandlinger = behandlingService.hentBehandlinger(fagsak.id)
+        val erLøpende = erLøpende(behandlinger)
+        return fagsak.tilDto(behandlinger = behandlinger.map(Behandling::tilDto), erLøpende = erLøpende)
+    }
+
+    private fun erLøpende(behandlinger: List<Behandling>): Boolean {
+        return behandlinger.filter {
+            it.type != BehandlingType.BLANKETT &&
+            it.resultat !== BehandlingResultat.ANNULLERT &&
+            it.status == BehandlingStatus.FERDIGSTILT
+        }.maxByOrNull { it.sporbar.opprettetTid }
+                       ?.let { tilkjentYtelseService.harLøpendeUtbetaling(it.id) } ?: false
+    }
 
     fun hentFagsak(fagsakId: UUID): Fagsak = fagsakRepository.findByIdOrThrow(fagsakId)
 

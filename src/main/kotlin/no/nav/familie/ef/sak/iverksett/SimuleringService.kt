@@ -55,7 +55,7 @@ class SimuleringService(private val iverksettClient: IverksettClient,
                                                        eksternFagsakId = fagsak.eksternId.id
 
                 )
-        val forrigeBehandlingId = behandlingService.hentForrigeBehandlingId(behandling.fagsakId)
+        val forrigeBehandlingId = behandlingService.finnSisteIverksatteBehandling(behandling.fagsakId)
 
         return iverksettClient.simuler(SimuleringDto(
                 nyTilkjentYtelseMedMetaData = tilkjentYtelseMedMedtadata,
