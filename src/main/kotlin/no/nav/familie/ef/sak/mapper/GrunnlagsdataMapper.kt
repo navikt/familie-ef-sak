@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.integration.dto.pdl.PdlAnnenForelder
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlBarn
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlPersonKort
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker
+import no.nav.familie.ef.sak.integration.dto.pdl.Personnavn
 import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
 import no.nav.familie.ef.sak.integration.dto.pdl.visningsnavn
 
@@ -66,8 +67,20 @@ object GrunnlagsdataMapper {
             telefonnummer = pdlSøker.telefonnummer,
             tilrettelagtKommunikasjon = pdlSøker.tilrettelagtKommunikasjon,
             utflyttingFraNorge = pdlSøker.utflyttingFraNorge,
-            vergemaalEllerFremtidsfullmakt = pdlSøker.vergemaalEllerFremtidsfullmakt
+            vergemaalEllerFremtidsfullmakt = mapVergemålEllerFremtidsfullmakt(pdlSøker, andrePersoner)
     )
+
+    /**
+     * Legger inn navn fra [andrePersoner] hvis personIdent finnes
+     */
+    private fun mapVergemålEllerFremtidsfullmakt(pdlSøker: PdlSøker, andrePersoner: Map<String, PdlPersonKort>) =
+            pdlSøker.vergemaalEllerFremtidsfullmakt.map { vergemaal ->
+                val personIdent = vergemaal.vergeEllerFullmektig.motpartsPersonident
+                personIdent?.let { andrePersoner[it] }?.navn?.gjeldende()
+                        ?.let { Personnavn(etternavn = it.etternavn, fornavn = it.fornavn, mellomnavn = it.mellomnavn) }
+                        ?.let { vergemaal.copy(vergeEllerFullmektig = vergemaal.vergeEllerFullmektig.copy(navn = it)) }
+                ?: vergemaal
+            }
 
     private fun mapSivivilstand(pdlSøker: PdlSøker, andrePersoner: Map<String, PdlPersonKort>): List<SivilstandMedNavn> {
 

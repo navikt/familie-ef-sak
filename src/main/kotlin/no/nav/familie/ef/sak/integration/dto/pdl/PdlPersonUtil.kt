@@ -8,6 +8,11 @@ fun Navn.visningsnavn(): String {
     else "$fornavn $mellomnavn $etternavn"
 }
 
+fun Personnavn.visningsnavn(): String {
+    return if (mellomnavn == null) "$fornavn $etternavn"
+    else "$fornavn $mellomnavn $etternavn"
+}
+
 fun List<Navn>.gjeldende(): Navn = this.single()
 fun List<Bostedsadresse>.gjeldende(): Bostedsadresse? = this.find { !it.metadata.historisk }
 fun List<Oppholdsadresse>.gjeldende(): Oppholdsadresse? = this.find { !it.metadata.historisk }
