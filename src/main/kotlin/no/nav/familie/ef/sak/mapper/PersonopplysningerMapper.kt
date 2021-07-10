@@ -13,7 +13,7 @@ import no.nav.familie.ef.sak.api.dto.SivilstandDto
 import no.nav.familie.ef.sak.api.dto.Sivilstandstype
 import no.nav.familie.ef.sak.api.dto.TelefonnummerDto
 import no.nav.familie.ef.sak.api.dto.UtflyttingDto
-import no.nav.familie.ef.sak.api.dto.VergemaalEllerFremtidsfullmaktDto
+import no.nav.familie.ef.sak.api.dto.VergemålDto
 import no.nav.familie.ef.sak.domene.BarnMedIdent
 import no.nav.familie.ef.sak.domene.GrunnlagsdataMedMetadata
 import no.nav.familie.ef.sak.domene.Søker
@@ -85,17 +85,17 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                                   tilflyttingssted = it.tilflyttingsstedIUtlandet)
                 },
                 oppholdstillatelse = OppholdstillatelseMapper.map(søker.opphold),
-                vergemaalEllerFremtidsfullmakt = mapVergemaalEllerFremtidsfullmakt(søker)
+                vergemål = mapVergemål(søker)
         )
     }
 
-    private fun mapVergemaalEllerFremtidsfullmakt(søker: Søker) =
-            søker.vergemaalEllerFremtidsfullmakt.map {
-                VergemaalEllerFremtidsfullmaktDto(embete = it.embete,
-                                                  type = it.type,
-                                                  motpartsPersonident = it.vergeEllerFullmektig.motpartsPersonident,
-                                                  navn = it.vergeEllerFullmektig.navn?.visningsnavn(),
-                                                  omfang = it.vergeEllerFullmektig.omfang)
+    private fun mapVergemål(søker: Søker) =
+            søker.vergemaalEllerFremtidsfullmakt.filter { it.type != "stadfestetFremtidsfullmakt" }.map {
+                VergemålDto(embete = it.embete,
+                            type = it.type,
+                            motpartsPersonident = it.vergeEllerFullmektig.motpartsPersonident,
+                            navn = it.vergeEllerFullmektig.navn?.visningsnavn(),
+                            omfang = it.vergeEllerFullmektig.omfang)
             }
 
     fun tilAdresser(søker: Søker): List<AdresseDto> {

@@ -98,15 +98,9 @@
     "fraDato" : "2020-01-01",
     "tilDato" : null
   } ],
-  "vergemaalEllerFremtidsfullmakt" : [ {
+  "vergemål" : [ {
     "embete" : null,
     "type" : "voksen",
-    "motpartsPersonident" : "17097926735",
-    "navn" : "17097926735 mellomnavn Etternavn",
-    "omfang" : "personligeOgOekonomiskeInteresser"
-  }, {
-    "embete" : null,
-    "type" : "stadfestetFremtidsfullmakt",
     "motpartsPersonident" : "17097926735",
     "navn" : "17097926735 mellomnavn Etternavn",
     "omfang" : "personligeOgOekonomiskeInteresser"

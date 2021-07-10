@@ -27,7 +27,7 @@ data class PersonopplysningerDto(val personIdent: String,
                                  val innflyttingTilNorge: List<InnflyttingDto>,
                                  val utflyttingFraNorge: List<UtflyttingDto>,
                                  val oppholdstillatelse: List<OppholdstillatelseDto>,
-                                 val vergemaalEllerFremtidsfullmakt: List<VergemaalEllerFremtidsfullmaktDto>,
+                                 val vergemål: List<VergemålDto>,
                                  val lagtTilEtterFerdigstilling: Boolean)
 
 data class BarnDto(val personIdent: String,
@@ -137,8 +137,8 @@ data class NavnDto(val fornavn: String,
     }
 }
 
-data class VergemaalEllerFremtidsfullmaktDto(val embete: String?,
-                                             val type: String?,
-                                             val motpartsPersonident: String?,
-                                             val navn: String?,
-                                             val omfang: String?)
+data class VergemålDto(val embete: String?,
+                       val type: String?,
+                       val motpartsPersonident: String?,
+                       val navn: String?,
+                       val omfang: String?)
