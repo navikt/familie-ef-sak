@@ -17,8 +17,6 @@ class PdlConfig(@Value("\${PDL_URL}") pdlUrl: URI) {
 
         val personBolkKortQuery = graphqlQuery("/pdl/person_kort_bolk.graphql")
 
-        val søkerKortBolkQuery = graphqlQuery("/pdl/søker_kort_bolk.graphql")
-
         val søkerQuery = graphqlQuery("/pdl/søker.graphql")
 
         val barnQuery = graphqlQuery("/pdl/barn.graphql")

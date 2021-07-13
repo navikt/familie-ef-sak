@@ -78,16 +78,6 @@ class PdlClientTest {
     }
 
     @Test
-    fun `pdlClient håndterer response for søkerKort-query mot pdl-tjenesten riktig`() {
-        wiremockServerItem.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
-                                           .willReturn(okJson(readFile("søker_kort_bolk.json"))))
-
-        val response = pdlClient.hentSøkerKortBolk(listOf("11111122222"))
-
-        assertThat(response["11111122222"]?.navn?.get(0)?.fornavn).isEqualTo("BRÅKETE")
-    }
-
-    @Test
     fun `pdlClient håndterer response for personKortBolk-query mot pdl-tjenesten riktig`() {
         wiremockServerItem.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
                                            .willReturn(okJson(readFile("person_kort_bolk.json"))))

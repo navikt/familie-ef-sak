@@ -26,7 +26,7 @@
             "nullable" : false
           }
         },
-        "nullable" : false
+        "nullable" : true
       },
       "bostedsadresse" : {
         "name" : "bostedsadresse",
@@ -35,22 +35,22 @@
           "angittFlyttedato" : {
             "name" : "angittFlyttedato",
             "type" : "LocalDate",
-            "nullable" : false
+            "nullable" : true
           },
           "gyldigFraOgMed" : {
             "name" : "gyldigFraOgMed",
             "type" : "LocalDate",
-            "nullable" : false
+            "nullable" : true
           },
           "gyldigTilOgMed" : {
             "name" : "gyldigTilOgMed",
             "type" : "LocalDate",
-            "nullable" : false
+            "nullable" : true
           },
           "coAdressenavn" : {
             "name" : "coAdressenavn",
             "type" : "String",
-            "nullable" : false
+            "nullable" : true
           },
           "utenlandskAdresse" : {
             "name" : "utenlandskAdresse",
@@ -59,17 +59,17 @@
               "adressenavnNummer" : {
                 "name" : "adressenavnNummer",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "bySted" : {
                 "name" : "bySted",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "bygningEtasjeLeilighet" : {
                 "name" : "bygningEtasjeLeilighet",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "landkode" : {
                 "name" : "landkode",
@@ -79,20 +79,20 @@
               "postboksNummerNavn" : {
                 "name" : "postboksNummerNavn",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "postkode" : {
                 "name" : "postkode",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "regionDistriktOmraade" : {
                 "name" : "regionDistriktOmraade",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               }
             },
-            "nullable" : false
+            "nullable" : true
           },
           "vegadresse" : {
             "name" : "vegadresse",
@@ -101,37 +101,37 @@
               "husnummer" : {
                 "name" : "husnummer",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "husbokstav" : {
                 "name" : "husbokstav",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "bruksenhetsnummer" : {
                 "name" : "bruksenhetsnummer",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "adressenavn" : {
                 "name" : "adressenavn",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "kommunenummer" : {
                 "name" : "kommunenummer",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "tilleggsnavn" : {
                 "name" : "tilleggsnavn",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "postnummer" : {
                 "name" : "postnummer",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "koordinater" : {
                 "name" : "koordinater",
@@ -140,33 +140,33 @@
                   "x" : {
                     "name" : "x",
                     "type" : "Float",
-                    "nullable" : false
+                    "nullable" : true
                   },
                   "y" : {
                     "name" : "y",
                     "type" : "Float",
-                    "nullable" : false
+                    "nullable" : true
                   },
                   "z" : {
                     "name" : "z",
                     "type" : "Float",
-                    "nullable" : false
+                    "nullable" : true
                   },
                   "kvalitet" : {
                     "name" : "kvalitet",
                     "type" : "Int",
-                    "nullable" : false
+                    "nullable" : true
                   }
                 },
-                "nullable" : false
+                "nullable" : true
               },
               "matrikkelId" : {
                 "name" : "matrikkelId",
                 "type" : "Long",
-                "nullable" : false
+                "nullable" : true
               }
             },
-            "nullable" : false
+            "nullable" : true
           },
           "ukjentBosted" : {
             "name" : "ukjentBosted",
@@ -175,10 +175,10 @@
               "bostedskommune" : {
                 "name" : "bostedskommune",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               }
             },
-            "nullable" : false
+            "nullable" : true
           },
           "matrikkeladresse" : {
             "name" : "matrikkeladresse",
@@ -187,25 +187,25 @@
               "matrikkelId" : {
                 "name" : "matrikkelId",
                 "type" : "Long",
-                "nullable" : false
+                "nullable" : true
               },
               "bruksenhetsnummer" : {
                 "name" : "bruksenhetsnummer",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "tilleggsnavn" : {
                 "name" : "tilleggsnavn",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "postnummer" : {
                 "name" : "postnummer",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               }
             },
-            "nullable" : false
+            "nullable" : true
           },
           "metadata" : {
             "name" : "metadata",
@@ -229,10 +229,10 @@
           "dødsdato" : {
             "name" : "dødsdato",
             "type" : "LocalDate",
-            "nullable" : false
+            "nullable" : true
           }
         },
-        "nullable" : false
+        "nullable" : true
       },
       "forelderBarnRelasjon" : {
         "name" : "forelderBarnRelasjon",
@@ -253,7 +253,7 @@
             "name" : "minRolleForPerson",
             "type" : "Enum",
             "values" : [ "BARN", "MOR", "FAR", "MEDMOR" ],
-            "nullable" : false
+            "nullable" : true
           }
         },
         "nullable" : false
@@ -265,27 +265,27 @@
           "fødselsår" : {
             "name" : "fødselsår",
             "type" : "Int",
-            "nullable" : false
+            "nullable" : true
           },
           "fødselsdato" : {
             "name" : "fødselsdato",
             "type" : "LocalDate",
-            "nullable" : false
+            "nullable" : true
           },
           "fødeland" : {
             "name" : "fødeland",
             "type" : "String",
-            "nullable" : false
+            "nullable" : true
           },
           "fødested" : {
             "name" : "fødested",
             "type" : "String",
-            "nullable" : false
+            "nullable" : true
           },
           "fødekommune" : {
             "name" : "fødekommune",
             "type" : "String",
-            "nullable" : false
+            "nullable" : true
           },
           "metadata" : {
             "name" : "metadata",
@@ -353,7 +353,7 @@
           "navn" : {
             "name" : "navn",
             "type" : "String",
-            "nullable" : false
+            "nullable" : true
           }
         },
         "nullable" : false
@@ -371,17 +371,17 @@
           "coAdressenavn" : {
             "name" : "coAdressenavn",
             "type" : "String",
-            "nullable" : false
+            "nullable" : true
           },
           "gyldigFraOgMed" : {
             "name" : "gyldigFraOgMed",
             "type" : "LocalDate",
-            "nullable" : false
+            "nullable" : true
           },
           "gyldigTilOgMed" : {
             "name" : "gyldigTilOgMed",
             "type" : "LocalDate",
-            "nullable" : false
+            "nullable" : true
           },
           "postadresseIFrittFormat" : {
             "name" : "postadresseIFrittFormat",
@@ -390,25 +390,25 @@
               "adresselinje1" : {
                 "name" : "adresselinje1",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "adresselinje2" : {
                 "name" : "adresselinje2",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "adresselinje3" : {
                 "name" : "adresselinje3",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "postnummer" : {
                 "name" : "postnummer",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               }
             },
-            "nullable" : false
+            "nullable" : true
           },
           "postboksadresse" : {
             "name" : "postboksadresse",
@@ -422,15 +422,15 @@
               "postbokseier" : {
                 "name" : "postbokseier",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "postnummer" : {
                 "name" : "postnummer",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               }
             },
-            "nullable" : false
+            "nullable" : true
           },
           "type" : {
             "name" : "type",
@@ -445,17 +445,17 @@
               "adressenavnNummer" : {
                 "name" : "adressenavnNummer",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "bySted" : {
                 "name" : "bySted",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "bygningEtasjeLeilighet" : {
                 "name" : "bygningEtasjeLeilighet",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "landkode" : {
                 "name" : "landkode",
@@ -465,20 +465,20 @@
               "postboksNummerNavn" : {
                 "name" : "postboksNummerNavn",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "postkode" : {
                 "name" : "postkode",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "regionDistriktOmraade" : {
                 "name" : "regionDistriktOmraade",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               }
             },
-            "nullable" : false
+            "nullable" : true
           },
           "utenlandskAdresseIFrittFormat" : {
             "name" : "utenlandskAdresseIFrittFormat",
@@ -487,22 +487,22 @@
               "adresselinje1" : {
                 "name" : "adresselinje1",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "adresselinje2" : {
                 "name" : "adresselinje2",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "adresselinje3" : {
                 "name" : "adresselinje3",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "byEllerStedsnavn" : {
                 "name" : "byEllerStedsnavn",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "landkode" : {
                 "name" : "landkode",
@@ -512,10 +512,10 @@
               "postkode" : {
                 "name" : "postkode",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               }
             },
-            "nullable" : false
+            "nullable" : true
           },
           "vegadresse" : {
             "name" : "vegadresse",
@@ -524,37 +524,37 @@
               "husnummer" : {
                 "name" : "husnummer",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "husbokstav" : {
                 "name" : "husbokstav",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "bruksenhetsnummer" : {
                 "name" : "bruksenhetsnummer",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "adressenavn" : {
                 "name" : "adressenavn",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "kommunenummer" : {
                 "name" : "kommunenummer",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "tilleggsnavn" : {
                 "name" : "tilleggsnavn",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "postnummer" : {
                 "name" : "postnummer",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "koordinater" : {
                 "name" : "koordinater",
@@ -563,33 +563,33 @@
                   "x" : {
                     "name" : "x",
                     "type" : "Float",
-                    "nullable" : false
+                    "nullable" : true
                   },
                   "y" : {
                     "name" : "y",
                     "type" : "Float",
-                    "nullable" : false
+                    "nullable" : true
                   },
                   "z" : {
                     "name" : "z",
                     "type" : "Float",
-                    "nullable" : false
+                    "nullable" : true
                   },
                   "kvalitet" : {
                     "name" : "kvalitet",
                     "type" : "Int",
-                    "nullable" : false
+                    "nullable" : true
                   }
                 },
-                "nullable" : false
+                "nullable" : true
               },
               "matrikkelId" : {
                 "name" : "matrikkelId",
                 "type" : "Long",
-                "nullable" : false
+                "nullable" : true
               }
             },
-            "nullable" : false
+            "nullable" : true
           }
         },
         "nullable" : false
@@ -606,7 +606,7 @@
           "mellomnavn" : {
             "name" : "mellomnavn",
             "type" : "String",
-            "nullable" : false
+            "nullable" : true
           },
           "etternavn" : {
             "name" : "etternavn",
@@ -641,12 +641,12 @@
           "oppholdFra" : {
             "name" : "oppholdFra",
             "type" : "LocalDate",
-            "nullable" : false
+            "nullable" : true
           },
           "oppholdTil" : {
             "name" : "oppholdTil",
             "type" : "LocalDate",
-            "nullable" : false
+            "nullable" : true
           }
         },
         "nullable" : false
@@ -658,7 +658,7 @@
           "gyldigFraOgMed" : {
             "name" : "gyldigFraOgMed",
             "type" : "LocalDate",
-            "nullable" : false
+            "nullable" : true
           },
           "gyldigTilOgMed" : {
             "name" : "gyldigTilOgMed",
@@ -668,7 +668,7 @@
           "coAdressenavn" : {
             "name" : "coAdressenavn",
             "type" : "String",
-            "nullable" : false
+            "nullable" : true
           },
           "utenlandskAdresse" : {
             "name" : "utenlandskAdresse",
@@ -677,17 +677,17 @@
               "adressenavnNummer" : {
                 "name" : "adressenavnNummer",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "bySted" : {
                 "name" : "bySted",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "bygningEtasjeLeilighet" : {
                 "name" : "bygningEtasjeLeilighet",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "landkode" : {
                 "name" : "landkode",
@@ -697,20 +697,20 @@
               "postboksNummerNavn" : {
                 "name" : "postboksNummerNavn",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "postkode" : {
                 "name" : "postkode",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "regionDistriktOmraade" : {
                 "name" : "regionDistriktOmraade",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               }
             },
-            "nullable" : false
+            "nullable" : true
           },
           "vegadresse" : {
             "name" : "vegadresse",
@@ -719,37 +719,37 @@
               "husnummer" : {
                 "name" : "husnummer",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "husbokstav" : {
                 "name" : "husbokstav",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "bruksenhetsnummer" : {
                 "name" : "bruksenhetsnummer",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "adressenavn" : {
                 "name" : "adressenavn",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "kommunenummer" : {
                 "name" : "kommunenummer",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "tilleggsnavn" : {
                 "name" : "tilleggsnavn",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "postnummer" : {
                 "name" : "postnummer",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "koordinater" : {
                 "name" : "koordinater",
@@ -758,38 +758,38 @@
                   "x" : {
                     "name" : "x",
                     "type" : "Float",
-                    "nullable" : false
+                    "nullable" : true
                   },
                   "y" : {
                     "name" : "y",
                     "type" : "Float",
-                    "nullable" : false
+                    "nullable" : true
                   },
                   "z" : {
                     "name" : "z",
                     "type" : "Float",
-                    "nullable" : false
+                    "nullable" : true
                   },
                   "kvalitet" : {
                     "name" : "kvalitet",
                     "type" : "Int",
-                    "nullable" : false
+                    "nullable" : true
                   }
                 },
-                "nullable" : false
+                "nullable" : true
               },
               "matrikkelId" : {
                 "name" : "matrikkelId",
                 "type" : "Long",
-                "nullable" : false
+                "nullable" : true
               }
             },
-            "nullable" : false
+            "nullable" : true
           },
           "oppholdAnnetSted" : {
             "name" : "oppholdAnnetSted",
             "type" : "String",
-            "nullable" : false
+            "nullable" : true
           },
           "metadata" : {
             "name" : "metadata",
@@ -819,22 +819,34 @@
           "gyldigFraOgMed" : {
             "name" : "gyldigFraOgMed",
             "type" : "LocalDate",
-            "nullable" : false
+            "nullable" : true
           },
           "relatertVedSivilstand" : {
             "name" : "relatertVedSivilstand",
             "type" : "String",
-            "nullable" : false
+            "nullable" : true
           },
           "bekreftelsesdato" : {
             "name" : "bekreftelsesdato",
             "type" : "String",
-            "nullable" : false
+            "nullable" : true
+          },
+          "dødsfall" : {
+            "name" : "dødsfall",
+            "type" : "Object",
+            "fields" : {
+              "dødsdato" : {
+                "name" : "dødsdato",
+                "type" : "LocalDate",
+                "nullable" : true
+              }
+            },
+            "nullable" : true
           },
           "navn" : {
             "name" : "navn",
             "type" : "String",
-            "nullable" : false
+            "nullable" : true
           },
           "metadata" : {
             "name" : "metadata",
@@ -863,12 +875,12 @@
           "gyldigFraOgMed" : {
             "name" : "gyldigFraOgMed",
             "type" : "LocalDate",
-            "nullable" : false
+            "nullable" : true
           },
           "gyldigTilOgMed" : {
             "name" : "gyldigTilOgMed",
             "type" : "LocalDate",
-            "nullable" : false
+            "nullable" : true
           }
         },
         "nullable" : false
@@ -906,10 +918,10 @@
               "språk" : {
                 "name" : "språk",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               }
             },
-            "nullable" : false
+            "nullable" : true
           },
           "tegnspråktolk" : {
             "name" : "tegnspråktolk",
@@ -918,10 +930,10 @@
               "språk" : {
                 "name" : "språk",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               }
             },
-            "nullable" : false
+            "nullable" : true
           }
         },
         "nullable" : false
@@ -933,12 +945,12 @@
           "fraflyttingsland" : {
             "name" : "fraflyttingsland",
             "type" : "String",
-            "nullable" : false
+            "nullable" : true
           },
           "fraflyttingsstedIUtlandet" : {
             "name" : "fraflyttingsstedIUtlandet",
             "type" : "String",
-            "nullable" : false
+            "nullable" : true
           },
           "folkeregistermetadata" : {
             "name" : "folkeregistermetadata",
@@ -947,12 +959,12 @@
               "gyldighetstidspunkt" : {
                 "name" : "gyldighetstidspunkt",
                 "type" : "LocalDateTime",
-                "nullable" : false
+                "nullable" : true
               },
               "opphørstidspunkt" : {
                 "name" : "opphørstidspunkt",
                 "type" : "LocalDateTime",
-                "nullable" : false
+                "nullable" : true
               }
             },
             "nullable" : false
@@ -967,12 +979,12 @@
           "tilflyttingsland" : {
             "name" : "tilflyttingsland",
             "type" : "String",
-            "nullable" : false
+            "nullable" : true
           },
           "tilflyttingsstedIUtlandet" : {
             "name" : "tilflyttingsstedIUtlandet",
             "type" : "String",
-            "nullable" : false
+            "nullable" : true
           },
           "folkeregistermetadata" : {
             "name" : "folkeregistermetadata",
@@ -981,12 +993,12 @@
               "gyldighetstidspunkt" : {
                 "name" : "gyldighetstidspunkt",
                 "type" : "LocalDateTime",
-                "nullable" : false
+                "nullable" : true
               },
               "opphørstidspunkt" : {
                 "name" : "opphørstidspunkt",
                 "type" : "LocalDateTime",
-                "nullable" : false
+                "nullable" : true
               }
             },
             "nullable" : false
@@ -1001,7 +1013,7 @@
           "embete" : {
             "name" : "embete",
             "type" : "String",
-            "nullable" : false
+            "nullable" : true
           },
           "folkeregistermetadata" : {
             "name" : "folkeregistermetadata",
@@ -1010,20 +1022,20 @@
               "gyldighetstidspunkt" : {
                 "name" : "gyldighetstidspunkt",
                 "type" : "LocalDateTime",
-                "nullable" : false
+                "nullable" : true
               },
               "opphørstidspunkt" : {
                 "name" : "opphørstidspunkt",
                 "type" : "LocalDateTime",
-                "nullable" : false
+                "nullable" : true
               }
             },
-            "nullable" : false
+            "nullable" : true
           },
           "type" : {
             "name" : "type",
             "type" : "String",
-            "nullable" : false
+            "nullable" : true
           },
           "vergeEllerFullmektig" : {
             "name" : "vergeEllerFullmektig",
@@ -1032,7 +1044,7 @@
               "motpartsPersonident" : {
                 "name" : "motpartsPersonident",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "navn" : {
                 "name" : "navn",
@@ -1051,15 +1063,15 @@
                   "mellomnavn" : {
                     "name" : "mellomnavn",
                     "type" : "String",
-                    "nullable" : false
+                    "nullable" : true
                   }
                 },
-                "nullable" : false
+                "nullable" : true
               },
               "omfang" : {
                 "name" : "omfang",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "omfangetErInnenPersonligOmraade" : {
                 "name" : "omfangetErInnenPersonligOmraade",
@@ -1111,22 +1123,22 @@
           "angittFlyttedato" : {
             "name" : "angittFlyttedato",
             "type" : "LocalDate",
-            "nullable" : false
+            "nullable" : true
           },
           "gyldigFraOgMed" : {
             "name" : "gyldigFraOgMed",
             "type" : "LocalDate",
-            "nullable" : false
+            "nullable" : true
           },
           "gyldigTilOgMed" : {
             "name" : "gyldigTilOgMed",
             "type" : "LocalDate",
-            "nullable" : false
+            "nullable" : true
           },
           "coAdressenavn" : {
             "name" : "coAdressenavn",
             "type" : "String",
-            "nullable" : false
+            "nullable" : true
           },
           "utenlandskAdresse" : {
             "name" : "utenlandskAdresse",
@@ -1135,17 +1147,17 @@
               "adressenavnNummer" : {
                 "name" : "adressenavnNummer",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "bySted" : {
                 "name" : "bySted",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "bygningEtasjeLeilighet" : {
                 "name" : "bygningEtasjeLeilighet",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "landkode" : {
                 "name" : "landkode",
@@ -1155,20 +1167,20 @@
               "postboksNummerNavn" : {
                 "name" : "postboksNummerNavn",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "postkode" : {
                 "name" : "postkode",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "regionDistriktOmraade" : {
                 "name" : "regionDistriktOmraade",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               }
             },
-            "nullable" : false
+            "nullable" : true
           },
           "vegadresse" : {
             "name" : "vegadresse",
@@ -1177,37 +1189,37 @@
               "husnummer" : {
                 "name" : "husnummer",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "husbokstav" : {
                 "name" : "husbokstav",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "bruksenhetsnummer" : {
                 "name" : "bruksenhetsnummer",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "adressenavn" : {
                 "name" : "adressenavn",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "kommunenummer" : {
                 "name" : "kommunenummer",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "tilleggsnavn" : {
                 "name" : "tilleggsnavn",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "postnummer" : {
                 "name" : "postnummer",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "koordinater" : {
                 "name" : "koordinater",
@@ -1216,33 +1228,33 @@
                   "x" : {
                     "name" : "x",
                     "type" : "Float",
-                    "nullable" : false
+                    "nullable" : true
                   },
                   "y" : {
                     "name" : "y",
                     "type" : "Float",
-                    "nullable" : false
+                    "nullable" : true
                   },
                   "z" : {
                     "name" : "z",
                     "type" : "Float",
-                    "nullable" : false
+                    "nullable" : true
                   },
                   "kvalitet" : {
                     "name" : "kvalitet",
                     "type" : "Int",
-                    "nullable" : false
+                    "nullable" : true
                   }
                 },
-                "nullable" : false
+                "nullable" : true
               },
               "matrikkelId" : {
                 "name" : "matrikkelId",
                 "type" : "Long",
-                "nullable" : false
+                "nullable" : true
               }
             },
-            "nullable" : false
+            "nullable" : true
           },
           "ukjentBosted" : {
             "name" : "ukjentBosted",
@@ -1251,10 +1263,10 @@
               "bostedskommune" : {
                 "name" : "bostedskommune",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               }
             },
-            "nullable" : false
+            "nullable" : true
           },
           "matrikkeladresse" : {
             "name" : "matrikkeladresse",
@@ -1263,25 +1275,25 @@
               "matrikkelId" : {
                 "name" : "matrikkelId",
                 "type" : "Long",
-                "nullable" : false
+                "nullable" : true
               },
               "bruksenhetsnummer" : {
                 "name" : "bruksenhetsnummer",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "tilleggsnavn" : {
                 "name" : "tilleggsnavn",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "postnummer" : {
                 "name" : "postnummer",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               }
             },
-            "nullable" : false
+            "nullable" : true
           },
           "metadata" : {
             "name" : "metadata",
@@ -1305,7 +1317,7 @@
           "dødsdato" : {
             "name" : "dødsdato",
             "type" : "LocalDate",
-            "nullable" : false
+            "nullable" : true
           }
         },
         "nullable" : false
@@ -1317,27 +1329,27 @@
           "fødselsår" : {
             "name" : "fødselsår",
             "type" : "Int",
-            "nullable" : false
+            "nullable" : true
           },
           "fødselsdato" : {
             "name" : "fødselsdato",
             "type" : "LocalDate",
-            "nullable" : false
+            "nullable" : true
           },
           "fødeland" : {
             "name" : "fødeland",
             "type" : "String",
-            "nullable" : false
+            "nullable" : true
           },
           "fødested" : {
             "name" : "fødested",
             "type" : "String",
-            "nullable" : false
+            "nullable" : true
           },
           "fødekommune" : {
             "name" : "fødekommune",
             "type" : "String",
-            "nullable" : false
+            "nullable" : true
           },
           "metadata" : {
             "name" : "metadata",
@@ -1366,7 +1378,7 @@
           "mellomnavn" : {
             "name" : "mellomnavn",
             "type" : "String",
-            "nullable" : false
+            "nullable" : true
           },
           "etternavn" : {
             "name" : "etternavn",
@@ -1401,12 +1413,12 @@
           "oppholdFra" : {
             "name" : "oppholdFra",
             "type" : "LocalDate",
-            "nullable" : false
+            "nullable" : true
           },
           "oppholdTil" : {
             "name" : "oppholdTil",
             "type" : "LocalDate",
-            "nullable" : false
+            "nullable" : true
           }
         },
         "nullable" : false
@@ -1418,7 +1430,7 @@
           "gyldigFraOgMed" : {
             "name" : "gyldigFraOgMed",
             "type" : "LocalDate",
-            "nullable" : false
+            "nullable" : true
           },
           "gyldigTilOgMed" : {
             "name" : "gyldigTilOgMed",
@@ -1428,7 +1440,7 @@
           "coAdressenavn" : {
             "name" : "coAdressenavn",
             "type" : "String",
-            "nullable" : false
+            "nullable" : true
           },
           "utenlandskAdresse" : {
             "name" : "utenlandskAdresse",
@@ -1437,17 +1449,17 @@
               "adressenavnNummer" : {
                 "name" : "adressenavnNummer",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "bySted" : {
                 "name" : "bySted",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "bygningEtasjeLeilighet" : {
                 "name" : "bygningEtasjeLeilighet",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "landkode" : {
                 "name" : "landkode",
@@ -1457,20 +1469,20 @@
               "postboksNummerNavn" : {
                 "name" : "postboksNummerNavn",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "postkode" : {
                 "name" : "postkode",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "regionDistriktOmraade" : {
                 "name" : "regionDistriktOmraade",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               }
             },
-            "nullable" : false
+            "nullable" : true
           },
           "vegadresse" : {
             "name" : "vegadresse",
@@ -1479,37 +1491,37 @@
               "husnummer" : {
                 "name" : "husnummer",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "husbokstav" : {
                 "name" : "husbokstav",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "bruksenhetsnummer" : {
                 "name" : "bruksenhetsnummer",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "adressenavn" : {
                 "name" : "adressenavn",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "kommunenummer" : {
                 "name" : "kommunenummer",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "tilleggsnavn" : {
                 "name" : "tilleggsnavn",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "postnummer" : {
                 "name" : "postnummer",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "koordinater" : {
                 "name" : "koordinater",
@@ -1518,38 +1530,38 @@
                   "x" : {
                     "name" : "x",
                     "type" : "Float",
-                    "nullable" : false
+                    "nullable" : true
                   },
                   "y" : {
                     "name" : "y",
                     "type" : "Float",
-                    "nullable" : false
+                    "nullable" : true
                   },
                   "z" : {
                     "name" : "z",
                     "type" : "Float",
-                    "nullable" : false
+                    "nullable" : true
                   },
                   "kvalitet" : {
                     "name" : "kvalitet",
                     "type" : "Int",
-                    "nullable" : false
+                    "nullable" : true
                   }
                 },
-                "nullable" : false
+                "nullable" : true
               },
               "matrikkelId" : {
                 "name" : "matrikkelId",
                 "type" : "Long",
-                "nullable" : false
+                "nullable" : true
               }
             },
-            "nullable" : false
+            "nullable" : true
           },
           "oppholdAnnetSted" : {
             "name" : "oppholdAnnetSted",
             "type" : "String",
-            "nullable" : false
+            "nullable" : true
           },
           "metadata" : {
             "name" : "metadata",
@@ -1578,12 +1590,12 @@
           "gyldigFraOgMed" : {
             "name" : "gyldigFraOgMed",
             "type" : "LocalDate",
-            "nullable" : false
+            "nullable" : true
           },
           "gyldigTilOgMed" : {
             "name" : "gyldigTilOgMed",
             "type" : "LocalDate",
-            "nullable" : false
+            "nullable" : true
           }
         },
         "nullable" : false
@@ -1595,12 +1607,12 @@
           "fraflyttingsland" : {
             "name" : "fraflyttingsland",
             "type" : "String",
-            "nullable" : false
+            "nullable" : true
           },
           "fraflyttingsstedIUtlandet" : {
             "name" : "fraflyttingsstedIUtlandet",
             "type" : "String",
-            "nullable" : false
+            "nullable" : true
           },
           "folkeregistermetadata" : {
             "name" : "folkeregistermetadata",
@@ -1609,12 +1621,12 @@
               "gyldighetstidspunkt" : {
                 "name" : "gyldighetstidspunkt",
                 "type" : "LocalDateTime",
-                "nullable" : false
+                "nullable" : true
               },
               "opphørstidspunkt" : {
                 "name" : "opphørstidspunkt",
                 "type" : "LocalDateTime",
-                "nullable" : false
+                "nullable" : true
               }
             },
             "nullable" : false
@@ -1629,12 +1641,12 @@
           "tilflyttingsland" : {
             "name" : "tilflyttingsland",
             "type" : "String",
-            "nullable" : false
+            "nullable" : true
           },
           "tilflyttingsstedIUtlandet" : {
             "name" : "tilflyttingsstedIUtlandet",
             "type" : "String",
-            "nullable" : false
+            "nullable" : true
           },
           "folkeregistermetadata" : {
             "name" : "folkeregistermetadata",
@@ -1643,12 +1655,12 @@
               "gyldighetstidspunkt" : {
                 "name" : "gyldighetstidspunkt",
                 "type" : "LocalDateTime",
-                "nullable" : false
+                "nullable" : true
               },
               "opphørstidspunkt" : {
                 "name" : "opphørstidspunkt",
                 "type" : "LocalDateTime",
-                "nullable" : false
+                "nullable" : true
               }
             },
             "nullable" : false
@@ -1844,22 +1856,22 @@
           "angittFlyttedato" : {
             "name" : "angittFlyttedato",
             "type" : "LocalDate",
-            "nullable" : false
+            "nullable" : true
           },
           "gyldigFraOgMed" : {
             "name" : "gyldigFraOgMed",
             "type" : "LocalDate",
-            "nullable" : false
+            "nullable" : true
           },
           "gyldigTilOgMed" : {
             "name" : "gyldigTilOgMed",
             "type" : "LocalDate",
-            "nullable" : false
+            "nullable" : true
           },
           "coAdressenavn" : {
             "name" : "coAdressenavn",
             "type" : "String",
-            "nullable" : false
+            "nullable" : true
           },
           "utenlandskAdresse" : {
             "name" : "utenlandskAdresse",
@@ -1868,17 +1880,17 @@
               "adressenavnNummer" : {
                 "name" : "adressenavnNummer",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "bySted" : {
                 "name" : "bySted",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "bygningEtasjeLeilighet" : {
                 "name" : "bygningEtasjeLeilighet",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "landkode" : {
                 "name" : "landkode",
@@ -1888,20 +1900,20 @@
               "postboksNummerNavn" : {
                 "name" : "postboksNummerNavn",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "postkode" : {
                 "name" : "postkode",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "regionDistriktOmraade" : {
                 "name" : "regionDistriktOmraade",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               }
             },
-            "nullable" : false
+            "nullable" : true
           },
           "vegadresse" : {
             "name" : "vegadresse",
@@ -1910,37 +1922,37 @@
               "husnummer" : {
                 "name" : "husnummer",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "husbokstav" : {
                 "name" : "husbokstav",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "bruksenhetsnummer" : {
                 "name" : "bruksenhetsnummer",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "adressenavn" : {
                 "name" : "adressenavn",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "kommunenummer" : {
                 "name" : "kommunenummer",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "tilleggsnavn" : {
                 "name" : "tilleggsnavn",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "postnummer" : {
                 "name" : "postnummer",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "koordinater" : {
                 "name" : "koordinater",
@@ -1949,33 +1961,33 @@
                   "x" : {
                     "name" : "x",
                     "type" : "Float",
-                    "nullable" : false
+                    "nullable" : true
                   },
                   "y" : {
                     "name" : "y",
                     "type" : "Float",
-                    "nullable" : false
+                    "nullable" : true
                   },
                   "z" : {
                     "name" : "z",
                     "type" : "Float",
-                    "nullable" : false
+                    "nullable" : true
                   },
                   "kvalitet" : {
                     "name" : "kvalitet",
                     "type" : "Int",
-                    "nullable" : false
+                    "nullable" : true
                   }
                 },
-                "nullable" : false
+                "nullable" : true
               },
               "matrikkelId" : {
                 "name" : "matrikkelId",
                 "type" : "Long",
-                "nullable" : false
+                "nullable" : true
               }
             },
-            "nullable" : false
+            "nullable" : true
           },
           "ukjentBosted" : {
             "name" : "ukjentBosted",
@@ -1984,10 +1996,10 @@
               "bostedskommune" : {
                 "name" : "bostedskommune",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               }
             },
-            "nullable" : false
+            "nullable" : true
           },
           "matrikkeladresse" : {
             "name" : "matrikkeladresse",
@@ -1996,25 +2008,25 @@
               "matrikkelId" : {
                 "name" : "matrikkelId",
                 "type" : "Long",
-                "nullable" : false
+                "nullable" : true
               },
               "bruksenhetsnummer" : {
                 "name" : "bruksenhetsnummer",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "tilleggsnavn" : {
                 "name" : "tilleggsnavn",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "postnummer" : {
                 "name" : "postnummer",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               }
             },
-            "nullable" : false
+            "nullable" : true
           },
           "metadata" : {
             "name" : "metadata",
@@ -2043,7 +2055,7 @@
           "sluttdatoForKontrakt" : {
             "name" : "sluttdatoForKontrakt",
             "type" : "LocalDate",
-            "nullable" : false
+            "nullable" : true
           },
           "vegadresse" : {
             "name" : "vegadresse",
@@ -2052,37 +2064,37 @@
               "husnummer" : {
                 "name" : "husnummer",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "husbokstav" : {
                 "name" : "husbokstav",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "bruksenhetsnummer" : {
                 "name" : "bruksenhetsnummer",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "adressenavn" : {
                 "name" : "adressenavn",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "kommunenummer" : {
                 "name" : "kommunenummer",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "tilleggsnavn" : {
                 "name" : "tilleggsnavn",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "postnummer" : {
                 "name" : "postnummer",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               },
               "koordinater" : {
                 "name" : "koordinater",
@@ -2091,33 +2103,33 @@
                   "x" : {
                     "name" : "x",
                     "type" : "Float",
-                    "nullable" : false
+                    "nullable" : true
                   },
                   "y" : {
                     "name" : "y",
                     "type" : "Float",
-                    "nullable" : false
+                    "nullable" : true
                   },
                   "z" : {
                     "name" : "z",
                     "type" : "Float",
-                    "nullable" : false
+                    "nullable" : true
                   },
                   "kvalitet" : {
                     "name" : "kvalitet",
                     "type" : "Int",
-                    "nullable" : false
+                    "nullable" : true
                   }
                 },
-                "nullable" : false
+                "nullable" : true
               },
               "matrikkelId" : {
                 "name" : "matrikkelId",
                 "type" : "Long",
-                "nullable" : false
+                "nullable" : true
               }
             },
-            "nullable" : false
+            "nullable" : true
           },
           "ukjentBosted" : {
             "name" : "ukjentBosted",
@@ -2126,10 +2138,10 @@
               "bostedskommune" : {
                 "name" : "bostedskommune",
                 "type" : "String",
-                "nullable" : false
+                "nullable" : true
               }
             },
-            "nullable" : false
+            "nullable" : true
           },
           "metadata" : {
             "name" : "metadata",
@@ -2153,7 +2165,7 @@
           "dødsdato" : {
             "name" : "dødsdato",
             "type" : "LocalDate",
-            "nullable" : false
+            "nullable" : true
           }
         },
         "nullable" : false
@@ -2177,7 +2189,7 @@
             "name" : "minRolleForPerson",
             "type" : "Enum",
             "values" : [ "BARN", "MOR", "FAR", "MEDMOR" ],
-            "nullable" : false
+            "nullable" : true
           }
         },
         "nullable" : false
@@ -2189,27 +2201,27 @@
           "fødselsår" : {
             "name" : "fødselsår",
             "type" : "Int",
-            "nullable" : false
+            "nullable" : true
           },
           "fødselsdato" : {
             "name" : "fødselsdato",
             "type" : "LocalDate",
-            "nullable" : false
+            "nullable" : true
           },
           "fødeland" : {
             "name" : "fødeland",
             "type" : "String",
-            "nullable" : false
+            "nullable" : true
           },
           "fødested" : {
             "name" : "fødested",
             "type" : "String",
-            "nullable" : false
+            "nullable" : true
           },
           "fødekommune" : {
             "name" : "fødekommune",
             "type" : "String",
-            "nullable" : false
+            "nullable" : true
           },
           "metadata" : {
             "name" : "metadata",
@@ -2238,7 +2250,7 @@
           "mellomnavn" : {
             "name" : "mellomnavn",
             "type" : "String",
-            "nullable" : false
+            "nullable" : true
           },
           "etternavn" : {
             "name" : "etternavn",

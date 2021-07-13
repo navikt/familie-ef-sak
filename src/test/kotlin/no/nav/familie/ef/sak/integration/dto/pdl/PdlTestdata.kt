@@ -1,6 +1,58 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.integration.dto.pdl
 
-import no.nav.familie.ef.sak.integration.dto.pdl.*
+import no.nav.familie.ef.sak.integration.dto.pdl.Adressebeskyttelse
+import no.nav.familie.ef.sak.integration.dto.pdl.AdressebeskyttelseGradering
+import no.nav.familie.ef.sak.integration.dto.pdl.Bostedsadresse
+import no.nav.familie.ef.sak.integration.dto.pdl.DeltBosted
+import no.nav.familie.ef.sak.integration.dto.pdl.Dødsfall
+import no.nav.familie.ef.sak.integration.dto.pdl.Familierelasjonsrolle
+import no.nav.familie.ef.sak.integration.dto.pdl.Folkeregisteridentifikator
+import no.nav.familie.ef.sak.integration.dto.pdl.Folkeregistermetadata
+import no.nav.familie.ef.sak.integration.dto.pdl.Folkeregisterpersonstatus
+import no.nav.familie.ef.sak.integration.dto.pdl.ForelderBarnRelasjon
+import no.nav.familie.ef.sak.integration.dto.pdl.Fullmakt
+import no.nav.familie.ef.sak.integration.dto.pdl.Fødsel
+import no.nav.familie.ef.sak.integration.dto.pdl.InnflyttingTilNorge
+import no.nav.familie.ef.sak.integration.dto.pdl.Kjønn
+import no.nav.familie.ef.sak.integration.dto.pdl.KjønnType
+import no.nav.familie.ef.sak.integration.dto.pdl.Kontaktadresse
+import no.nav.familie.ef.sak.integration.dto.pdl.KontaktadresseType
+import no.nav.familie.ef.sak.integration.dto.pdl.Koordinater
+import no.nav.familie.ef.sak.integration.dto.pdl.Matrikkeladresse
+import no.nav.familie.ef.sak.integration.dto.pdl.Metadata
+import no.nav.familie.ef.sak.integration.dto.pdl.MotpartsRolle
+import no.nav.familie.ef.sak.integration.dto.pdl.Navn
+import no.nav.familie.ef.sak.integration.dto.pdl.Opphold
+import no.nav.familie.ef.sak.integration.dto.pdl.Oppholdsadresse
+import no.nav.familie.ef.sak.integration.dto.pdl.Oppholdstillatelse
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlAnnenForelder
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlBarn
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlPersonFraSøk
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlPersonKort
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøkerData
+import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøkerKort
+import no.nav.familie.ef.sak.integration.dto.pdl.PersonBolk
+import no.nav.familie.ef.sak.integration.dto.pdl.PersonDataBolk
+import no.nav.familie.ef.sak.integration.dto.pdl.PersonSøk
+import no.nav.familie.ef.sak.integration.dto.pdl.PersonSøkResultat
+import no.nav.familie.ef.sak.integration.dto.pdl.PersonSøkTreff
+import no.nav.familie.ef.sak.integration.dto.pdl.Personnavn
+import no.nav.familie.ef.sak.integration.dto.pdl.PostadresseIFrittFormat
+import no.nav.familie.ef.sak.integration.dto.pdl.Postboksadresse
+import no.nav.familie.ef.sak.integration.dto.pdl.Sivilstand
+import no.nav.familie.ef.sak.integration.dto.pdl.Sivilstandstype
+import no.nav.familie.ef.sak.integration.dto.pdl.Statsborgerskap
+import no.nav.familie.ef.sak.integration.dto.pdl.Telefonnummer
+import no.nav.familie.ef.sak.integration.dto.pdl.TilrettelagtKommunikasjon
+import no.nav.familie.ef.sak.integration.dto.pdl.Tolk
+import no.nav.familie.ef.sak.integration.dto.pdl.UkjentBosted
+import no.nav.familie.ef.sak.integration.dto.pdl.UtenlandskAdresse
+import no.nav.familie.ef.sak.integration.dto.pdl.UtenlandskAdresseIFrittFormat
+import no.nav.familie.ef.sak.integration.dto.pdl.UtflyttingFraNorge
+import no.nav.familie.ef.sak.integration.dto.pdl.Vegadresse
+import no.nav.familie.ef.sak.integration.dto.pdl.VergeEllerFullmektig
+import no.nav.familie.ef.sak.integration.dto.pdl.VergemaalEllerFremtidsfullmakt
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -124,7 +176,9 @@ object PdlTestdata {
                                                                                    innflyttingTilNorge,
                                                                                    utflyttingFraNorge))))
 
-    val pdlPersonKortBolk = PersonBolk(listOf(PersonDataBolk("11111122222", "ok", PdlPersonKort(navn))))
+    val pdlPersonKortBolk = PersonBolk(listOf(PersonDataBolk("11111122222", "ok",
+                                                             PdlPersonKort(navn,
+                                                                           dødsfall))))
 
     val pdlPersonSøk = PersonSøk(
             PersonSøkResultat(hits = listOf(PersonSøkTreff(person = PdlPersonFraSøk(listOf(Folkeregisteridentifikator("123456789")),bostedsadresse, navn))),

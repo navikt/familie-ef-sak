@@ -5,6 +5,7 @@
         "ident": "11111122222",
         "code": "ok",
         "person": {
+          "doedsfall": [],
           "navn": [
             {
               "fornavn": "BRÅKETE",
