@@ -1,27 +1,45 @@
 package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.api.dto.DokumentinfoDto
-import no.nav.familie.ef.sak.domene.DokumentVariantformat
+import no.nav.familie.ef.sak.api.dto.JournalposterDto
+import no.nav.familie.ef.sak.repository.domain.Behandlingsjournalpost
 import no.nav.familie.kontrakter.felles.journalpost.DokumentInfo
 import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariantformat
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import org.springframework.stereotype.Service
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 @Service
 class VedleggService(private val behandlingService: BehandlingService,
                      private val journalføringService: JournalføringService) {
 
 
-    fun finnVedleggForBehandling(behandlingId: UUID): List<DokumentinfoDto> {
-        val journalposter = behandlingService.hentBehandlingsjournalposter(behandlingId)
-        return journalposter
-                .map { journalføringService.hentJournalpost(it.journalpostId) }
-                .flatMap { journalpost ->
-                    journalpost.dokumenter?.map { tilDokumentInfoDto(it, journalpost) } ?: emptyList()
-                }
+    fun finnJournalposter(behandlingId: UUID): JournalposterDto {
+        val behandlingsjournalposter = behandlingService.hentBehandlingsjournalposter(behandlingId)
+        val journalposter = finnJournalposter(behandlingId, behandlingsjournalposter)
+
+        val dokumentinfoDtoList = journalposter
+                .flatMap { journalpost -> journalpost.dokumenter?.map { tilDokumentInfoDto(it, journalpost) } ?: emptyList() }
+                .partition { dokumentInfoDto -> behandlingsjournalposter.any { it.journalpostId == dokumentInfoDto.journalpostId } }
+
+        return JournalposterDto(dokumenterKnyttetTilBehandlingen = dokumentinfoDtoList.first,
+                                andreDokumenter = dokumentinfoDtoList.second)
+    }
+
+    private fun finnJournalposter(behandlingId: UUID,
+                                  behandlingsjournalposter: List<Behandlingsjournalpost>): List<Journalpost> {
+        val personIdent = behandlingService.hentAktivIdent(behandlingId)
+        val sistejournalposter = journalføringService.finnJournalposter(personIdent)
+
+        return sistejournalposter + hentJournalposterTilBehandlingSomIkkeErFunnet(sistejournalposter, behandlingsjournalposter)
+    }
+
+    private fun hentJournalposterTilBehandlingSomIkkeErFunnet(sistejournalposter: List<Journalpost>,
+                                                              behandlingsjournalposter: List<Behandlingsjournalpost>): List<Journalpost> {
+        val journalpostIderFraFunnetJournalposter = sistejournalposter.map { it.journalpostId }
+        val behandlingsjournalposterIkkeFunnet =
+                behandlingsjournalposter.filterNot { journalpostIderFraFunnetJournalposter.contains(it.journalpostId) }
+        return behandlingsjournalposterIkkeFunnet.map { journalføringService.hentJournalpost(it.journalpostId) }
     }
 
     private fun tilDokumentInfoDto(dokumentInfo: DokumentInfo,

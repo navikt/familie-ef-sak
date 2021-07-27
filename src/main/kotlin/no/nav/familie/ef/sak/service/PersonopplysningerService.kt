@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.integration.dto.pdl.visningsnavn
 import no.nav.familie.ef.sak.mapper.PersonopplysningerMapper
 import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
 import org.slf4j.LoggerFactory
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -52,6 +53,7 @@ class PersonopplysningerService(private val personService: PersonService,
         return personService.hentPdlPersonKort(identer).map { it.key to it.value.navn.gjeldende().visningsnavn() }.toMap()
     }
 
+    @Cacheable("navKontor")
     fun hentNavKontor(ident: String): NavKontorEnhet {
         return familieIntegrasjonerClient.hentNavKontor(ident)
     }

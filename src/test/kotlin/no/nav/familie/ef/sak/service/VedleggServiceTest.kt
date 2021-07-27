@@ -2,15 +2,21 @@ package no.nav.familie.ef.sak.service
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.domain.Behandlingsjournalpost
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
-import no.nav.familie.kontrakter.felles.journalpost.*
-import org.assertj.core.api.Assertions
+import no.nav.familie.kontrakter.felles.journalpost.DokumentInfo
+import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariant
+import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariantformat
+import no.nav.familie.kontrakter.felles.journalpost.Journalpost
+import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
+import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.*
+import java.util.UUID
 
 internal class VedleggServiceTest {
 
@@ -22,62 +28,94 @@ internal class VedleggServiceTest {
 
     @BeforeEach
     internal fun setUp() {
+        val behandling = behandling(fagsak())
         every {
-            journalføringService.hentJournalpost("1")
+            journalføringService.finnJournalposter(any())
+        } returns listOf(journalpostSøknad, journalpostEttersendelse)
+        every {
+            journalføringService.hentJournalpost(journalpostSøknad.journalpostId)
         } returns journalpostSøknad
-
         every {
-            journalføringService.hentJournalpost("2")
+            journalføringService.hentJournalpost(journalpostEttersendelse.journalpostId)
         } returns journalpostEttersendelse
 
         every {
             behandlingService.hentBehandling(any())
-        } returns behandling(fagsak())
+        } returns behandling
+        every {
+            behandlingService.hentAktivIdent(any())
+        } returns "1234"
         every {
             behandlingService.hentBehandlingsjournalposter(any())
         } answers {
             val behandlingId = firstArg<UUID>()
             listOf(
                     Behandlingsjournalpost(behandlingId, journalpostSøknad.journalpostId, journalpostSøknad.journalposttype),
-                    Behandlingsjournalpost(behandlingId, journalpostEttersendelse.journalpostId, journalpostEttersendelse.journalposttype)
+                    Behandlingsjournalpost(behandlingId,
+                                           journalpostEttersendelse.journalpostId,
+                                           journalpostEttersendelse.journalposttype)
             )
         }
 
     }
 
     @Test
+    internal fun `skal mappe journalposter fra behandlingen`() {
+        val journalposter = vedleggService.finnJournalposter(UUID.randomUUID())
+        assertThat(journalposter.dokumenterKnyttetTilBehandlingen).hasSize(5)
+        assertThat(journalposter.andreDokumenter).isEmpty()
+    }
+
+    @Test
+    internal fun `skal ikke hente journalposter 2 ganger hvis de allerede finnes i finnJournalposter`() {
+        vedleggService.finnJournalposter(UUID.randomUUID())
+        verify(exactly = 1) { journalføringService.finnJournalposter(any()) }
+        verify(exactly = 0) { journalføringService.hentJournalpost(any()) }
+    }
+
+    @Test
+    internal fun `skal hente journalpost direke hvis den ikke finnes blant de siste funnet journalpostene`() {
+        every { journalføringService.finnJournalposter(any()) } returns emptyList()
+        vedleggService.finnJournalposter(UUID.randomUUID())
+
+        verify(exactly = 1) { journalføringService.finnJournalposter(any()) }
+        verify(exactly = 2) { journalføringService.hentJournalpost(any()) }
+    }
+
+    @Test
     internal fun `skal hente dokumenter fra alle journalposter for en behandling`() {
-        val alleVedlegg = vedleggService.finnVedleggForBehandling(UUID.randomUUID())
+        val journalPoster = vedleggService.finnJournalposter(UUID.randomUUID())
+        val alleVedlegg = journalPoster.andreDokumenter + journalPoster.dokumenterKnyttetTilBehandlingen
 
         val søknad = alleVedlegg.find { it.dokumentinfoId == søknadsdokument.dokumentInfoId }
-        Assertions.assertThat(søknad).isNotNull
-        Assertions.assertThat(søknad!!.filnavn).isEqualTo("FilnavnDok1")
-        Assertions.assertThat(søknad.tittel).isEqualTo(søknadsdokument.tittel)
-        Assertions.assertThat(søknad.journalpostId).isEqualTo(journalpostSøknad.journalpostId)
+        assertThat(søknad).isNotNull
+        assertThat(søknad!!.filnavn).isEqualTo("FilnavnDok1")
+        assertThat(søknad.tittel).isEqualTo(søknadsdokument.tittel)
+        assertThat(søknad.journalpostId).isEqualTo(journalpostSøknad.journalpostId)
 
         val syktBarn = alleVedlegg.find { it.dokumentinfoId == syktBarnDokument.dokumentInfoId }
-        Assertions.assertThat(syktBarn).isNotNull
-        Assertions.assertThat(syktBarn!!.filnavn).isEqualTo("FilnavnDok2")
-        Assertions.assertThat(syktBarn.tittel).isEqualTo(syktBarnDokument.tittel)
-        Assertions.assertThat(syktBarn.journalpostId).isEqualTo(journalpostSøknad.journalpostId)
+        assertThat(syktBarn).isNotNull
+        assertThat(syktBarn!!.filnavn).isEqualTo("FilnavnDok2")
+        assertThat(syktBarn.tittel).isEqualTo(syktBarnDokument.tittel)
+        assertThat(syktBarn.journalpostId).isEqualTo(journalpostSøknad.journalpostId)
 
         val ukjentKontrakt = alleVedlegg.find { it.dokumentinfoId == ukjentDokument.dokumentInfoId }
-        Assertions.assertThat(ukjentKontrakt).isNotNull
-        Assertions.assertThat(ukjentKontrakt!!.filnavn).isNull()
-        Assertions.assertThat(ukjentKontrakt.tittel).isEqualTo(ukjentKontrakt.tittel)
-        Assertions.assertThat(ukjentKontrakt.journalpostId).isEqualTo(journalpostSøknad.journalpostId)
+        assertThat(ukjentKontrakt).isNotNull
+        assertThat(ukjentKontrakt!!.filnavn).isNull()
+        assertThat(ukjentKontrakt.tittel).isEqualTo(ukjentKontrakt.tittel)
+        assertThat(ukjentKontrakt.journalpostId).isEqualTo(journalpostSøknad.journalpostId)
 
         val samboerkontrakt = alleVedlegg.find { it.dokumentinfoId == samboerdokument.dokumentInfoId }
-        Assertions.assertThat(samboerkontrakt).isNotNull
-        Assertions.assertThat(samboerkontrakt!!.filnavn).isEqualTo("FilnavnDok3")
-        Assertions.assertThat(samboerkontrakt.tittel).isEqualTo(samboerdokument.tittel)
-        Assertions.assertThat(samboerkontrakt.journalpostId).isEqualTo(journalpostEttersendelse.journalpostId)
+        assertThat(samboerkontrakt).isNotNull
+        assertThat(samboerkontrakt!!.filnavn).isEqualTo("FilnavnDok3")
+        assertThat(samboerkontrakt.tittel).isEqualTo(samboerdokument.tittel)
+        assertThat(samboerkontrakt.journalpostId).isEqualTo(journalpostEttersendelse.journalpostId)
 
         val skilsmissepapirer = alleVedlegg.find { it.dokumentinfoId == skilsmissedokument.dokumentInfoId }
-        Assertions.assertThat(skilsmissepapirer).isNotNull
-        Assertions.assertThat(skilsmissepapirer!!.filnavn).isEqualTo("FilnavnDok4")
-        Assertions.assertThat(skilsmissepapirer.tittel).isEqualTo(skilsmissedokument.tittel)
-        Assertions.assertThat(skilsmissepapirer.journalpostId).isEqualTo(journalpostEttersendelse.journalpostId)
+        assertThat(skilsmissepapirer).isNotNull
+        assertThat(skilsmissepapirer!!.filnavn).isEqualTo("FilnavnDok4")
+        assertThat(skilsmissepapirer.tittel).isEqualTo(skilsmissedokument.tittel)
+        assertThat(skilsmissepapirer.journalpostId).isEqualTo(journalpostEttersendelse.journalpostId)
 
     }
 

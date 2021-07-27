@@ -5,9 +5,11 @@ import no.nav.familie.ef.sak.util.medContentTypeJsonUTF8
 import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.http.client.MultipartBuilder
 import no.nav.familie.kontrakter.ef.infotrygd.OpprettStartBehandlingHendelseDto
+import no.nav.familie.kontrakter.ef.iverksett.BehandlingsstatistikkDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettStatus
 import no.nav.familie.kontrakter.ef.iverksett.KonsistensavstemmingDto
+import no.nav.familie.kontrakter.ef.iverksett.SimuleringDto
 import no.nav.familie.kontrakter.ef.iverksett.TekniskOpphørDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
@@ -45,10 +47,13 @@ class IverksettClient(@Value("\${FAMILIE_EF_IVERKSETT_URL}")
         postForEntity<Any>(URI.create("$familieEfIverksettUri/api/start-behandling"), request)
     }
 
+    fun sendBehandlingsstatistikk(request: BehandlingsstatistikkDto) {
+        postForEntity<Any>(URI.create("$familieEfIverksettUri/api/statistikk/behandlingsstatistikk"), request)
+    }
+
     fun publiserVedtakshendelse(behandlingId: UUID) {
         postForEntity<Any>(URI.create("$familieEfIverksettUri/api/iverksett/vedtakshendelse/${behandlingId}"), "")
     }
-
 
     fun iverksett(iverksettDto: IverksettDto, fil: Fil) {
         val url = URI.create("$familieEfIverksettUri/api/iverksett")
