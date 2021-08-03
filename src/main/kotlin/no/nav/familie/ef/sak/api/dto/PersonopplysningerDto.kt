@@ -45,7 +45,8 @@ data class TelefonnummerDto(val landskode: String,
 data class SivilstandDto(val type: Sivilstandstype,
                          val gyldigFraOgMed: String?,
                          val relatertVedSivilstand: String?,
-                         val navn: String?)
+                         val navn: String?,
+                         val dødsdato: LocalDate?)
 
 @Suppress("unused") //Kopi fra PDL
 enum class Sivilstandstype {

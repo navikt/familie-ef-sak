@@ -74,16 +74,11 @@ class PdlClientConfig {
 
         every { pdlClient.ping() } just runs
 
-        every { pdlClient.hentSøkerKortBolk(any()) } answers {
-            (firstArg() as List<String>).map { it to PdlSøkerKort(lagKjønn(), lagNavn(fornavn = it)) }.toMap()
-        }
-
         every { pdlClient.hentPersonKortBolk(any()) } answers {
-            (firstArg() as List<String>).map { it to PdlPersonKort(lagNavn(fornavn = it)) }.toMap()
+            (firstArg() as List<String>).map { it to PdlPersonKort(lagNavn(fornavn = it), emptyList()) }.toMap()
         }
 
         every { pdlClient.hentSøker(any()) } returns opprettPdlSøker()
-        every { pdlClient.hentSøkerAsMap(any()) } returns mapOf()
 
         every { pdlClient.hentBarn(any()) } returns barn()
 
