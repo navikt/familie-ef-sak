@@ -64,7 +64,7 @@ internal class SimuleringServiceTest {
             tilkjentYtelseService.hentForBehandling(any())
         } returns tilkjentYtelse
         every {
-            behandlingService.hentForrigeBehandlingId(any())
+            behandlingService.finnSisteIverksatteBehandling(any())
         } returns behandling.id
 
         val simulerSlot = slot<SimuleringDto>()
