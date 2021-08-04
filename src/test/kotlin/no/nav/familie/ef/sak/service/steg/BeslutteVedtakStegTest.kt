@@ -1,16 +1,14 @@
 package no.nav.familie.ef.sak.service.steg
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.mockk.CapturingSlot
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
-import io.mockk.slot
+import io.mockk.verify
 import no.nav.familie.ef.sak.api.beregning.ResultatType
 import no.nav.familie.ef.sak.api.beregning.VedtakService
 import no.nav.familie.ef.sak.api.dto.BeslutteVedtakDto
-import no.nav.familie.ef.sak.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.mapper.IverksettingDtoMapper
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.util.BrukerContextUtil.clearBrukerContext
@@ -29,6 +27,7 @@ import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.domain.Vedtak
 import no.nav.familie.ef.sak.repository.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.BehandlingshistorikkService
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.OppgaveService
@@ -59,6 +58,7 @@ internal class BeslutteVedtakStegTest {
     private val iverksettingDtoMapper = mockk<IverksettingDtoMapper>()
     private val iverksett = mockk<IverksettClient>()
     private val vedtakService = mockk<VedtakService>()
+    private val behandlingService = mockk<BehandlingService>()
 
     private val beslutteVedtakSteg = BeslutteVedtakSteg(taskRepository,
                                                         fagsakService,
@@ -68,6 +68,7 @@ internal class BeslutteVedtakStegTest {
                                                         totrinnskontrollService,
                                                         vedtaksbrevRepository,
                                                         behandlingshistorikkService,
+                                                        behandlingService,
                                                         vedtakService)
     private val vedtaksbrev = Vedtaksbrev(UUID.randomUUID(),
                                           "123",
@@ -98,6 +99,16 @@ internal class BeslutteVedtakStegTest {
         every { vedtaksbrevRepository.deleteById(any()) } just Runs
         every { iverksettingDtoMapper.tilDto(any(), any()) } returns mockk()
         every { iverksett.iverksett(any(), any()) } just Runs
+        every { vedtakService.hentVedtak(any()) } returns Vedtak(behandlingId = UUID.randomUUID(),
+                                                                 resultatType = ResultatType.INNVILGE,
+                                                                 periodeBegrunnelse = null,
+                                                                 inntektBegrunnelse = null,
+                                                                 avslåBegrunnelse = null,
+                                                                 perioder = null,
+                                                                 inntekter = null,
+                                                                 saksbehandlerIdent = null,
+                                                                 beslutterIdent = null)
+
     }
 
     @AfterEach
@@ -109,16 +120,22 @@ internal class BeslutteVedtakStegTest {
     internal fun `skal opprette iverksettMotOppdragTask etter beslutte vedtak hvis godkjent`() {
         every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev
         every { vedtakService.oppdaterBeslutter(behandlingId, any()) } just Runs
-        every { vedtakService.hentVedtak(behandlingId) } returns Vedtak(behandlingId = behandlingId, resultatType = ResultatType.INNVILGE, saksbehandlerIdent = "sak1", beslutterIdent = "beslutter1" )
-        every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any(), any())} returns Behandlingshistorikk(behandlingId = behandlingId,
-                                                                                                                      steg = StegType.SEND_TIL_BESLUTTER,
-                                                                                                                      opprettetAvNavn = "sb sb",
-                                                                                                                      opprettetAv = "saksbehandler1")
+        every { vedtakService.hentVedtak(behandlingId) } returns Vedtak(behandlingId = behandlingId,
+                                                                        resultatType = ResultatType.INNVILGE,
+                                                                        saksbehandlerIdent = "sak1",
+                                                                        beslutterIdent = "beslutter1")
+        every { behandlingService.oppdaterResultatPåBehandling(any(), any()) } just Runs
+        every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any(), any()) } returns Behandlingshistorikk(
+                behandlingId = behandlingId,
+                steg = StegType.SEND_TIL_BESLUTTER,
+                opprettetAvNavn = "sb sb",
+                opprettetAv = "saksbehandler1")
         val nesteSteg = utførTotrinnskontroll(godkjent = true)
         assertThat(nesteSteg).isEqualTo(StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT)
         assertThat(taskSlot[0].type).isEqualTo(FerdigstillOppgaveTask.TYPE)
         assertThat(taskSlot[1].type).isEqualTo(PollStatusFraIverksettTask.TYPE)
         assertThat(taskSlot[2].type).isEqualTo(BehandlingsstatistikkTask.TYPE)
+        verify(exactly = 1) { behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.INNVILGET) }
     }
 
     @Test

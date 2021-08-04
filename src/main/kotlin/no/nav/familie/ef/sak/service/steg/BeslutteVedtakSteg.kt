@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.service.steg
 
 import no.nav.familie.ef.sak.api.Feil
+import no.nav.familie.ef.sak.api.beregning.ResultatType
 import no.nav.familie.ef.sak.api.beregning.VedtakService
 import no.nav.familie.ef.sak.api.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.blankett.JournalførBlankettTask
@@ -8,10 +9,12 @@ import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.mapper.IverksettingDtoMapper
 import no.nav.familie.ef.sak.repository.VedtaksbrevRepository
 import no.nav.familie.ef.sak.repository.domain.Behandling
+import no.nav.familie.ef.sak.repository.domain.BehandlingResultat
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.domain.Fil
 import no.nav.familie.ef.sak.repository.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.BehandlingshistorikkService
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.OppgaveService
@@ -36,6 +39,7 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
                          private val totrinnskontrollService: TotrinnskontrollService,
                          private val vedtaksbrevRepository: VedtaksbrevRepository,
                          private val behandlingshistorikkService: BehandlingshistorikkService,
+                         private val behandlingService: BehandlingService,
                          private val vedtakService: VedtakService) : BehandlingSteg<BeslutteVedtakDto> {
 
     override fun validerSteg(behandling: Behandling) {
@@ -57,6 +61,7 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
                 val vedtaksbrev = vedtaksbrevRepository.findByIdOrThrow(behandling.id)
                 val fil = utledVedtaksbrev(vedtaksbrev)
                 val iverksettDto = iverksettingDtoMapper.tilDto(behandling, beslutter)
+                oppdaterResultatPåBehandling(behandling.id)
                 opprettPollForStatusOppgave(behandling.id)
                 opprettTaskForBehandlingsstatistikk(behandling.id, oppgaveId)
                 iverksettClient.iverksett(iverksettDto, fil)
@@ -82,6 +87,13 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
         taskRepository.save(BehandlingsstatistikkTask.opprettBesluttetTask(behandlingId = behandlingId,
                                                                   oppgaveId = oppgaveId))
 
+    }
+
+    fun oppdaterResultatPåBehandling(behandlingId: UUID) {
+        val vedtak = vedtakService.hentVedtak(behandlingId)
+        when (vedtak.resultatType) {
+            ResultatType.INNVILGE -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.INNVILGET)
+        }
     }
 
     private fun utledVedtaksbrev(vedtaksbrev: Vedtaksbrev): Fil {
