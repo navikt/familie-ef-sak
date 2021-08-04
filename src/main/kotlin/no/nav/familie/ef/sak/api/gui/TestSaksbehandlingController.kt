@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.api.gui
 
-import no.nav.familie.ef.sak.blankett.BlankettService
 import no.nav.familie.ef.sak.domene.SøkerMedBarn
 import no.nav.familie.ef.sak.integration.JournalpostClient
 import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
@@ -14,9 +13,12 @@ import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.BehandlingshistorikkService
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.GrunnlagsdataService
+import no.nav.familie.ef.sak.service.OppgaveService
 import no.nav.familie.ef.sak.service.PersonService
 import no.nav.familie.ef.sak.service.SøknadService
 import no.nav.familie.ef.sak.service.steg.StegType
+import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.task.BehandlingsstatistikkTask
 import no.nav.familie.kontrakter.ef.søknad.Barn
 import no.nav.familie.kontrakter.ef.søknad.EnumTekstverdiMedSvarId
 import no.nav.familie.kontrakter.ef.søknad.Fødselsnummer
@@ -27,6 +29,8 @@ import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Dokument
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Filtype
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.context.annotation.Profile
 import org.springframework.http.MediaType
@@ -47,7 +51,8 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
                                    private val søknadService: SøknadService,
                                    private val personService: PersonService,
                                    private val grunnlagsdataService: GrunnlagsdataService,
-                                   private val blankettService: BlankettService,
+                                   private val taskRepository: TaskRepository,
+                                   private val oppgaveService: OppgaveService,
                                    private val journalpostClient: JournalpostClient) {
 
     @PostMapping(path = ["fagsak"], consumes = [MediaType.APPLICATION_JSON_VALUE])
@@ -66,6 +71,12 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
         grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
         behandlingshistorikkService.opprettHistorikkInnslag(Behandlingshistorikk(behandlingId = behandling.id,
                                                                                  steg = StegType.VILKÅR))
+        val oppgaveId = oppgaveService.opprettOppgave(behandling.id,
+                                                      Oppgavetype.BehandleSak,
+                                                      "4489",
+                                                      SikkerhetContext.hentSaksbehandler(true),
+                                                      "Dummy-oppgave opprettet i ny løsning")
+        taskRepository.save(taskRepository.save(BehandlingsstatistikkTask.opprettMottattTask(behandlingId = behandling.id, oppgaveId = oppgaveId)))
 
         return Ressurs.success(behandling.id)
     }
