@@ -81,7 +81,8 @@ internal class GrunnlagsdataServiceTest {
     @Test
     internal fun `skal hente navn til relatertVedSivilstand fra sivilstand når personen har sivilstand`() {
         val sivilstand = Sivilstand(Sivilstandstype.GIFT, null, "11111122222", null, Metadata(false))
-        val pdlSøker = PdlClientConfig.opprettPdlSøker().copy(sivilstand = listOf(sivilstand))
+        val pdlSøker = PdlClientConfig.opprettPdlSøker().copy(sivilstand = listOf(sivilstand),
+                                                              vergemaalEllerFremtidsfullmakt = emptyList())
         val fullmakt = pdlSøker.fullmakt.map { it.motpartsPersonident }
         every { pdlClient.hentSøker(any()) } returns pdlSøker
 
@@ -94,7 +95,9 @@ internal class GrunnlagsdataServiceTest {
     internal fun `skal ikke hente navn til relatertVedSivilstand fra sivilstand når det ikke finnes sivilstand`() {
         val sivilstand = Sivilstand(Sivilstandstype.UOPPGITT, null, null, null, Metadata(false))
         every { pdlClient.hentSøker(any()) } returns PdlClientConfig.opprettPdlSøker()
-                .copy(sivilstand = listOf(sivilstand), fullmakt = emptyList())
+                .copy(sivilstand = listOf(sivilstand),
+                      fullmakt = emptyList(),
+                      vergemaalEllerFremtidsfullmakt = emptyList())
 
         service.hentGrunnlagsdataFraRegister("1", emptyList())
 

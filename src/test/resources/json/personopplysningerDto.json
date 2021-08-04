@@ -1,0 +1,110 @@
+{
+  "personIdent" : "01010172272",
+  "navn" : {
+    "fornavn" : "Fornavn",
+    "mellomnavn" : "mellomnavn",
+    "etternavn" : "Etternavn",
+    "visningsnavn" : "Fornavn mellomnavn Etternavn"
+  },
+  "kjønn" : "KVINNE",
+  "adressebeskyttelse" : "UGRADERT",
+  "folkeregisterpersonstatus" : "BOSATT",
+  "dødsdato" : null,
+  "telefonnummer" : {
+    "landskode" : "+47",
+    "nummer" : "98999923"
+  },
+  "statsborgerskap" : [ {
+    "land" : "Norge",
+    "gyldigFraOgMedDato" : "2020-01-01",
+    "gyldigTilOgMedDato" : null
+  }, {
+    "land" : "Sverige",
+    "gyldigFraOgMedDato" : "2017-01-01",
+    "gyldigTilOgMedDato" : "2020-01-01"
+  } ],
+  "sivilstand" : [ {
+    "type" : "GIFT",
+    "gyldigFraOgMed" : "2020-01-01",
+    "relatertVedSivilstand" : "11111122222",
+    "navn" : "11111122222 mellomnavn Etternavn",
+    "dødsdato" : null
+  } ],
+  "adresse" : [ {
+    "visningsadresse" : "c/o CONAVN, Charlies vei 13 b, 0575 Oslo",
+    "type" : "BOSTEDADRESSE",
+    "gyldigFraOgMed" : "2020-01-01",
+    "gyldigTilOgMed" : "2199-01-01",
+    "angittFlyttedato" : "2020-01-02"
+  }, {
+    "visningsadresse" : "c/o co, Charlies vei 13 b, 0575 Oslo",
+    "type" : "KONTAKTADRESSE",
+    "gyldigFraOgMed" : "2020-01-01",
+    "gyldigTilOgMed" : "2021-01-01",
+    "angittFlyttedato" : null
+  } ],
+  "fullmakt" : [ {
+    "gyldigFraOgMed" : "2021-01-01",
+    "gyldigTilOgMed" : "2020-01-01",
+    "motpartsPersonident" : "11111133333",
+    "navn" : "11111133333 mellomnavn Etternavn"
+  } ],
+  "egenAnsatt" : true,
+  "navEnhet" : "1 - Enhet",
+  "barn" : [ {
+    "personIdent" : "01012067050",
+    "navn" : "Barn Barnesen",
+    "annenForelder" : {
+      "personIdent" : "17097926735",
+      "navn" : "Bob  Burger"
+    },
+    "adresse" : [ {
+      "visningsadresse" : "c/o CONAVN, Charlies vei 13 b, 0575 Oslo",
+      "type" : "BOSTEDADRESSE",
+      "gyldigFraOgMed" : "2020-01-01",
+      "gyldigTilOgMed" : "2199-01-01",
+      "angittFlyttedato" : "2020-01-02"
+    } ],
+    "borHosSøker" : true,
+    "fødselsdato" : "2018-01-01"
+  }, {
+    "personIdent" : "13071489536",
+    "navn" : "Barn2 Barnesen",
+    "annenForelder" : {
+      "personIdent" : "17097926735",
+      "navn" : "Bob  Burger"
+    },
+    "adresse" : [ {
+      "visningsadresse" : "c/o CONAVN, Charlies vei 13 b, 0575 Oslo",
+      "type" : "BOSTEDADRESSE",
+      "gyldigFraOgMed" : "2020-01-01",
+      "gyldigTilOgMed" : "2199-01-01",
+      "angittFlyttedato" : "2020-01-02"
+    } ],
+    "borHosSøker" : true,
+    "fødselsdato" : "2018-01-01"
+  } ],
+  "innflyttingTilNorge" : [ {
+    "fraflyttingsland" : "Sverige",
+    "dato" : null,
+    "fraflyttingssted" : "Stockholm"
+  } ],
+  "utflyttingFraNorge" : [ {
+    "tilflyttingsland" : "Sverige",
+    "dato" : null,
+    "tilflyttingssted" : "Stockholm"
+  } ],
+  "oppholdstillatelse" : [ {
+    "oppholdstillatelse" : "PERMANENT",
+    "fraDato" : "2020-01-01",
+    "tilDato" : null
+  } ],
+  "vergemål" : [ {
+    "embete" : null,
+    "type" : "voksen",
+    "motpartsPersonident" : "17097926735",
+    "navn" : "17097926735 mellomnavn Etternavn",
+    "omfang" : "personligeOgOekonomiskeInteresser"
+  } ],
+  "lagtTilEtterFerdigstilling" : false
+}
