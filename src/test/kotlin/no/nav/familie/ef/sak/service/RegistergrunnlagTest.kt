@@ -59,7 +59,7 @@ internal class RegistergrunnlagTest {
             val classifier = parameter.type.classifier as KClass<*>
             val simpleName = classifier.simpleName!!
             val qualifiedName = classifier.qualifiedName!!
-            val nullable = parameter.isOptional
+            val nullable = parameter.type.isMarkedNullable
             when {
                 classifier in endClasses -> ObjectInfo(name, simpleName, nullable = nullable)
                 classifier.isSubclassOf(Collection::class) -> {
