@@ -56,7 +56,8 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                     SivilstandDto(type = Sivilstandstype.valueOf(it.type.name),
                                   gyldigFraOgMed = it.gyldigFraOgMed?.toString() ?: it.bekreftelsesdato,
                                   relatertVedSivilstand = it.relatertVedSivilstand,
-                                  navn = it.navn)
+                                  navn = it.navn,
+                                  dødsdato = it.dødsfall?.dødsdato)
                 },
                 adresse = tilAdresser(søker),
                 fullmakt = søker.fullmakt.map {

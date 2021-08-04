@@ -41,7 +41,7 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
     fun finnSisteIverksatteBehandlinger(stønadstype: Stønadstype) =
             behandlingRepository.finnSisteIverksatteBehandlingerSomIkkeErTekniskOpphør(stønadstype)
 
-    fun hentForrigeBehandlingId(fagsakId: UUID) = behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
+    fun finnSisteIverksatteBehandling(fagsakId: UUID) = behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
 
     @Transactional
     fun opprettBehandling(behandlingType: BehandlingType,

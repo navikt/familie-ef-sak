@@ -6,15 +6,6 @@ import org.junit.jupiter.api.Test
 class PdlDtoTest {
 
     @Test
-    fun `pdlSøkerKortBolk inneholder samme felter som blir spurt om i query`() {
-        val spørringsfelter = PdlTestUtil.parseSpørring("/pdl/søker_kort_bolk.graphql")
-
-        val dtoFelter = PdlTestUtil.finnFeltStruktur(PdlTestdata.pdlSøkerKortBolk)!!
-
-        Assertions.assertThat(dtoFelter).isEqualTo(spørringsfelter["data"])
-    }
-
-    @Test
     fun `pdlSøkerData inneholder samme felter som blir spurt om i query`() {
         val spørringsfelter = PdlTestUtil.parseSpørring("/pdl/søker.graphql")
 
