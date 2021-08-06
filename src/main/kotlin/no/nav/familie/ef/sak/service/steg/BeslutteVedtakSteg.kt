@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.api.beregning.ResultatType
 import no.nav.familie.ef.sak.api.beregning.VedtakService
 import no.nav.familie.ef.sak.api.dto.BeslutteVedtakDto
+import no.nav.familie.ef.sak.api.feilHvis
 import no.nav.familie.ef.sak.blankett.JournalførBlankettTask
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.mapper.IverksettingDtoMapper
@@ -97,11 +98,11 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
     }
 
     private fun utledVedtaksbrev(vedtaksbrev: Vedtaksbrev): Fil {
-        require(vedtaksbrev.beslutterPdf != null) { "For å iverksette må det finnes en pdf" }
-        require(vedtaksbrev.besluttersignatur == SikkerhetContext.hentSaksbehandlerNavn(strict = true)) {
+        feilHvis(vedtaksbrev.beslutterPdf == null) { "For å iverksette må det finnes en pdf" }
+        feilHvis(vedtaksbrev.besluttersignatur != SikkerhetContext.hentSaksbehandlerNavn(strict = true)) {
             "En annen saksbehandler har signert vedtaksbrevet"
         }
-        return vedtaksbrev.beslutterPdf
+        return vedtaksbrev.beslutterPdf!!
     }
 
     private fun ferdigstillOppgave(behandling: Behandling): Long? {
