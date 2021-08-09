@@ -32,14 +32,6 @@ object AndelHistorikkBeregner {
                                        var endring: HistorikkEndring?,
                                        var kontrollert: UUID)
 
-    private fun AndelTilkjentYtelse.endring(other: AndelTilkjentYtelse): EndringType? {
-        return when {
-            this.stønadTom != other.stønadTom || this.beløp != other.beløp -> EndringType.ENDRET
-            this.inntekt != other.inntekt -> EndringType.ENDRING_I_INNTEKT
-            else -> null
-        }
-    }
-
     fun lagHistorikk(tilkjentYtelser: List<TilkjentYtelse>): List<AndelHistorikkDto> {
         val historikk = lagHistorikkHolders(sorterTilkjentYtelser(tilkjentYtelser))
 
@@ -55,8 +47,8 @@ object AndelHistorikkBeregner {
             tilkjentYtelse.andelerTilkjentYtelse.forEach { andel ->
                 val andelFraHistorikk = finnTilsværendeAndelIHistorikk(historikk, andel)
                 if (andelFraHistorikk == null) {
-                    val index = finnIndeksForPeriodeSomErEtterAndel(historikk, andel)
-                    historikk.add(index, nyAndel(tilkjentYtelse, andel))
+                    val index = finnIndeksForNyAndel(historikk, andel)
+                    historikk.add(index, lagNyAndel(tilkjentYtelse, andel))
                 } else {
                     val endringType = andelFraHistorikk.andel.endring(andel)
                     if (endringType != null) {
@@ -72,42 +64,12 @@ object AndelHistorikkBeregner {
         return historikk
     }
 
-    /**
-     * Hvis en [tilkjentYtelse] sin behandlingId ikke er lik andelene i historikk sine verdier for kontrollert,
-     * så betyr det att selve andelen i historikken er fjernet då den ikke har blitt kontrollert i denne iterasjonen.
-     * Den markeres då som fjernet.
-     */
-    private fun markerFjernede(historikk: MutableList<AndelHistorikkHolder>,
-                               tilkjentYtelse: TilkjentYtelse) {
-        historikk.filterNot { alleredeFjernetEllerKontrollert(it, tilkjentYtelse) }.forEach {
-            it.endring = lagEndring(EndringType.FJERNET, tilkjentYtelse)
-        }
-    }
-
     private fun sorterTilkjentYtelser(tilkjentYtelser: List<TilkjentYtelse>): List<TilkjentYtelse> =
             tilkjentYtelser.sortedBy { it.sporbar.opprettetTid }
                     .map { it.copy(andelerTilkjentYtelse = it.andelerTilkjentYtelse.sortedBy(AndelTilkjentYtelse::stønadFom)) }
 
-    /**
-     * Finner indeks for andelen etter [andel], hvis den ikke finnes returneres [result] sin size
-     */
-    private fun finnIndeksForPeriodeSomErEtterAndel(result: List<AndelHistorikkHolder>,
-                                                    andel: AndelTilkjentYtelse): Int {
-        val index = result.indexOfFirst { it.andel.stønadFom.isAfter(andel.stønadTom) }
-        return if (index == -1) result.size else index
-    }
-
-    private fun lagEndring(type: EndringType, tilkjentYtelse: TilkjentYtelse) =
-            HistorikkEndring(type = type,
-                             behandlingId = tilkjentYtelse.behandlingId,
-                             vedtaksdato = tilkjentYtelse.vedtaksdato!!)
-
-    private fun alleredeFjernetEllerKontrollert(holder: AndelHistorikkHolder,
-                                                tilkjentYtelse: TilkjentYtelse) =
-            holder.endring?.type == EndringType.FJERNET || holder.kontrollert == tilkjentYtelse.id
-
-    private fun nyAndel(tilkjentYtelse: TilkjentYtelse,
-                        andel: AndelTilkjentYtelse) =
+    private fun lagNyAndel(tilkjentYtelse: TilkjentYtelse,
+                           andel: AndelTilkjentYtelse) =
             AndelHistorikkHolder(behandlingId = tilkjentYtelse.behandlingId,
                                  vedtaksdato = tilkjentYtelse.vedtaksdato!!,
                                  saksbehandler = tilkjentYtelse.sporbar.opprettetAv,
@@ -115,8 +77,45 @@ object AndelHistorikkBeregner {
                                  endring = null,
                                  kontrollert = tilkjentYtelse.id)
 
+    private fun AndelTilkjentYtelse.endring(other: AndelTilkjentYtelse): EndringType? {
+        return when {
+            this.stønadTom != other.stønadTom || this.beløp != other.beløp -> EndringType.ENDRET
+            this.inntekt != other.inntekt -> EndringType.ENDRING_I_INNTEKT
+            else -> null
+        }
+    }
+
+    private fun lagEndring(type: EndringType, tilkjentYtelse: TilkjentYtelse) =
+            HistorikkEndring(type = type,
+                             behandlingId = tilkjentYtelse.behandlingId,
+                             vedtaksdato = tilkjentYtelse.vedtaksdato!!)
+
+    /**
+     * Finner indeks for andelen etter [andel], hvis den ikke finnes returneres [result] sin size
+     */
+    private fun finnIndeksForNyAndel(result: List<AndelHistorikkHolder>,
+                                     andel: AndelTilkjentYtelse): Int {
+        val index = result.indexOfFirst { it.andel.stønadFom.isAfter(andel.stønadTom) }
+        return if (index == -1) result.size else index
+    }
+
     private fun finnTilsværendeAndelIHistorikk(result: MutableList<AndelHistorikkHolder>,
                                                andel: AndelTilkjentYtelse): AndelHistorikkHolder? =
             result.findLast { it.endring?.type != EndringType.FJERNET && it.andel.stønadFom == andel.stønadFom }
 
+    /**
+     * Hvis en [tilkjentYtelse] sin behandlingId ikke er lik andelene i historikk sine verdier for kontrollert,
+     * så betyr det att selve andelen i historikken er fjernet då den ikke har blitt kontrollert i denne iterasjonen.
+     * Den markeres då som fjernet.
+     */
+    private fun markerFjernede(historikk: MutableList<AndelHistorikkHolder>,
+                               tilkjentYtelse: TilkjentYtelse) {
+        historikk.filterNot { erAlleredeFjernetEllerKontrollert(it, tilkjentYtelse) }.forEach {
+            it.endring = lagEndring(EndringType.FJERNET, tilkjentYtelse)
+        }
+    }
+
+    private fun erAlleredeFjernetEllerKontrollert(holder: AndelHistorikkHolder,
+                                                  tilkjentYtelse: TilkjentYtelse) =
+            holder.endring?.type == EndringType.FJERNET || holder.kontrollert == tilkjentYtelse.id
 }
