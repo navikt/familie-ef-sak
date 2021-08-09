@@ -5,7 +5,6 @@ import no.nav.familie.ef.sak.mapper.tilDto
 import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import java.time.LocalDate
-import java.util.LinkedList
 import java.util.UUID
 
 enum class EndringType {
@@ -42,19 +41,14 @@ object AndelHistorikkBeregner {
     }
 
     fun lagHistorikk(tilkjentYtelser: List<TilkjentYtelse>): List<AndelHistorikkDto> {
-        val result = LinkedList(listOf<AndelHistorikkHolder>())
+        val result = mutableListOf<AndelHistorikkHolder>()
 
-        tilkjentYtelser.forEach { tilkjentYtelse ->
+        sorterTilkjentYtelser(tilkjentYtelser).forEach { tilkjentYtelse ->
             tilkjentYtelse.andelerTilkjentYtelse.forEach { andel ->
-                val tidligereAndel = finnTidligereAndel(result, andel)
+                val tidligereAndel = finnTilsværendeAndelITidiligereBehandlinger(result, andel)
                 if (tidligereAndel == null) {
-                    val index = result.indexOfFirst { it.andel.stønadFom.isAfter(andel.stønadTom) }
-                    val nyHolder = nyHolder(tilkjentYtelse, andel)
-                    if (index == -1) {
-                        result.add(nyHolder)
-                    } else {
-                        result.add(index, nyHolder)
-                    }
+                    val index = finnIndeksForPeriodeSomErEtterAndel(result, andel)
+                    result.add(index, nyAndel(tilkjentYtelse, andel))
                 } else {
                     val endringType = tidligereAndel.andel.endring(andel)
                     if (endringType != null) {
@@ -75,6 +69,19 @@ object AndelHistorikkBeregner {
         }
     }
 
+    private fun sorterTilkjentYtelser(tilkjentYtelser: List<TilkjentYtelse>): List<TilkjentYtelse> =
+            tilkjentYtelser.sortedBy { it.sporbar.opprettetTid }
+                    .map { it.copy(andelerTilkjentYtelse = it.andelerTilkjentYtelse.sortedBy(AndelTilkjentYtelse::stønadFom)) }
+
+    /**
+     * Finner indeks for andelen etter [andel], hvis den ikke finnes returneres [result] sin size
+     */
+    private fun finnIndeksForPeriodeSomErEtterAndel(result: List<AndelHistorikkHolder>,
+                                                    andel: AndelTilkjentYtelse): Int {
+        val index = result.indexOfFirst { it.andel.stønadFom.isAfter(andel.stønadTom) }
+        return if (index == -1) result.size else index
+    }
+
     private fun lagEndring(type: EndringType, tilkjentYtelse: TilkjentYtelse) =
             HistorikkEndring(type = type,
                              behandlingId = tilkjentYtelse.behandlingId,
@@ -84,8 +91,8 @@ object AndelHistorikkBeregner {
                                                 tilkjentYtelse: TilkjentYtelse) =
             holder.endring?.type == EndringType.FJERNET || holder.kontrollert == tilkjentYtelse.id
 
-    private fun nyHolder(tilkjentYtelse: TilkjentYtelse,
-                         andel: AndelTilkjentYtelse) =
+    private fun nyAndel(tilkjentYtelse: TilkjentYtelse,
+                        andel: AndelTilkjentYtelse) =
             AndelHistorikkHolder(tilkjentYtelse.behandlingId,
                                  tilkjentYtelse.vedtaksdato!!,
                                  tilkjentYtelse.sporbar.opprettetAv,
@@ -93,7 +100,7 @@ object AndelHistorikkBeregner {
                                  null,
                                  tilkjentYtelse.id)
 
-    private fun finnTidligereAndel(result: MutableList<AndelHistorikkHolder>,
-                                   andel: AndelTilkjentYtelse) =
+    private fun finnTilsværendeAndelITidiligereBehandlinger(result: MutableList<AndelHistorikkHolder>,
+                                                            andel: AndelTilkjentYtelse) =
             result.find { it.endring?.type != EndringType.FJERNET && it.andel.stønadFom == andel.stønadFom }
 }
