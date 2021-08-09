@@ -41,31 +41,46 @@ object AndelHistorikkBeregner {
     }
 
     fun lagHistorikk(tilkjentYtelser: List<TilkjentYtelse>): List<AndelHistorikkDto> {
-        val result = mutableListOf<AndelHistorikkHolder>()
+        val historikk = lagHistorikkHolders(sorterTilkjentYtelser(tilkjentYtelser))
 
-        sorterTilkjentYtelser(tilkjentYtelser).forEach { tilkjentYtelse ->
+        return historikk.map {
+            AndelHistorikkDto(it.behandlingId, it.vedtaksdato, it.saksbehandler, it.andel.tilDto(), it.endring)
+        }
+    }
+
+    private fun lagHistorikkHolders(tilkjentYtelser: List<TilkjentYtelse>): List<AndelHistorikkHolder> {
+        val historikk = mutableListOf<AndelHistorikkHolder>()
+
+        tilkjentYtelser.forEach { tilkjentYtelse ->
             tilkjentYtelse.andelerTilkjentYtelse.forEach { andel ->
-                val tidligereAndel = finnTilsværendeAndelITidiligereBehandlinger(result, andel)
-                if (tidligereAndel == null) {
-                    val index = finnIndeksForPeriodeSomErEtterAndel(result, andel)
-                    result.add(index, nyAndel(tilkjentYtelse, andel))
+                val andelFraHistorikk = finnTilsværendeAndelIHistorikk(historikk, andel)
+                if (andelFraHistorikk == null) {
+                    val index = finnIndeksForPeriodeSomErEtterAndel(historikk, andel)
+                    historikk.add(index, nyAndel(tilkjentYtelse, andel))
                 } else {
-                    val endringType = tidligereAndel.andel.endring(andel)
+                    val endringType = andelFraHistorikk.andel.endring(andel)
                     if (endringType != null) {
-                        tidligereAndel.andel = andel //.copy(kildeBehandlingId = tidligereAndel.andel.kildeBehandlingId)
-                        tidligereAndel.endring = lagEndring(endringType, tilkjentYtelse)
+                        andelFraHistorikk.andel = andel
+                        andelFraHistorikk.endring = lagEndring(endringType, tilkjentYtelse)
                     }
-                    tidligereAndel.kontrollert = tilkjentYtelse.id
+                    andelFraHistorikk.kontrollert = tilkjentYtelse.id
                 }
             }
 
-            result.filterNot { alleredeFjernetEllerKontrollert(it, tilkjentYtelse) }.forEach {
-                it.endring = lagEndring(EndringType.FJERNET, tilkjentYtelse)
-            }
+            markerFjernede(historikk, tilkjentYtelse)
         }
+        return historikk
+    }
 
-        return result.map {
-            AndelHistorikkDto(it.behandlingId, it.vedtaksdato, it.saksbehandler, it.andel.tilDto(), it.endring)
+    /**
+     * Hvis en [tilkjentYtelse] sin behandlingId ikke er lik andelene i historikk sine verdier for kontrollert,
+     * så betyr det att selve andelen i historikken er fjernet då den ikke har blitt kontrollert i denne iterasjonen.
+     * Den markeres då som fjernet.
+     */
+    private fun markerFjernede(historikk: MutableList<AndelHistorikkHolder>,
+                               tilkjentYtelse: TilkjentYtelse) {
+        historikk.filterNot { alleredeFjernetEllerKontrollert(it, tilkjentYtelse) }.forEach {
+            it.endring = lagEndring(EndringType.FJERNET, tilkjentYtelse)
         }
     }
 
@@ -93,14 +108,15 @@ object AndelHistorikkBeregner {
 
     private fun nyAndel(tilkjentYtelse: TilkjentYtelse,
                         andel: AndelTilkjentYtelse) =
-            AndelHistorikkHolder(tilkjentYtelse.behandlingId,
-                                 tilkjentYtelse.vedtaksdato!!,
-                                 tilkjentYtelse.sporbar.opprettetAv,
-                                 andel,
-                                 null,
-                                 tilkjentYtelse.id)
+            AndelHistorikkHolder(behandlingId = tilkjentYtelse.behandlingId,
+                                 vedtaksdato = tilkjentYtelse.vedtaksdato!!,
+                                 saksbehandler = tilkjentYtelse.sporbar.opprettetAv,
+                                 andel = andel,
+                                 endring = null,
+                                 kontrollert = tilkjentYtelse.id)
 
-    private fun finnTilsværendeAndelITidiligereBehandlinger(result: MutableList<AndelHistorikkHolder>,
-                                                            andel: AndelTilkjentYtelse) =
-            result.find { it.endring?.type != EndringType.FJERNET && it.andel.stønadFom == andel.stønadFom }
+    private fun finnTilsværendeAndelIHistorikk(result: MutableList<AndelHistorikkHolder>,
+                                               andel: AndelTilkjentYtelse): AndelHistorikkHolder? =
+            result.findLast { it.endring?.type != EndringType.FJERNET && it.andel.stønadFom == andel.stønadFom }
+
 }
