@@ -43,7 +43,7 @@ internal class SimuleringControllerTest : OppslagSpringRunnerTest() {
         val behandling = behandlingRepository.insert(behandling(fagsak, aktiv = true))
         tilkjentYtelseRepository.insert(TilkjentYtelse(behandlingId = behandling.id,
                                                        personident = personIdent,
-                                                       vedtaksdato = LocalDate.of(2020, 5, 5),
+                                                       vedtakstidspunkt = LocalDate.of(2020, 5, 5).atStartOfDay(),
                                                        type = TilkjentYtelseType.FØRSTEGANGSBEHANDLING,
                                                        andelerTilkjentYtelse = listOf(AndelTilkjentYtelse(15000,
                                                                                                           LocalDate.of(2021,
