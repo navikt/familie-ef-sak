@@ -25,6 +25,9 @@ data class HistorikkEndring(val type: EndringType,
 
 object AndelHistorikkBeregner {
 
+    /**
+     * @param kontrollert brukes for å sjekke om en andel er fjernet eller ikke
+     */
     private class AndelHistorikkHolder(val behandlingId: UUID,
                                        val vedtaksdato: LocalDate,
                                        val saksbehandler: String,
@@ -45,12 +48,12 @@ object AndelHistorikkBeregner {
 
         tilkjentYtelser.forEach { tilkjentYtelse ->
             tilkjentYtelse.andelerTilkjentYtelse.forEach { andel ->
-                val andelFraHistorikk = finnTilsværendeAndelIHistorikk(historikk, andel)
+                val andelFraHistorikk = finnTilsvarendeAndelIHistorikk(historikk, andel)
                 if (andelFraHistorikk == null) {
                     val index = finnIndeksForNyAndel(historikk, andel)
                     historikk.add(index, lagNyAndel(tilkjentYtelse, andel))
                 } else {
-                    val endringType = andelFraHistorikk.andel.endring(andel)
+                    val endringType = andelFraHistorikk.andel.finnEndringstype(andel)
                     if (endringType != null) {
                         andelFraHistorikk.andel = andel
                         andelFraHistorikk.endring = lagEndring(endringType, tilkjentYtelse)
@@ -59,7 +62,7 @@ object AndelHistorikkBeregner {
                 }
             }
 
-            markerFjernede(historikk, tilkjentYtelse)
+            markerAndelerSomErFjernet(historikk, tilkjentYtelse)
         }
         return historikk
     }
@@ -77,10 +80,10 @@ object AndelHistorikkBeregner {
                                  endring = null,
                                  kontrollert = tilkjentYtelse.id)
 
-    private fun AndelTilkjentYtelse.endring(other: AndelTilkjentYtelse): EndringType? {
+    private fun AndelTilkjentYtelse.finnEndringstype(andel: AndelTilkjentYtelse): EndringType? {
         return when {
-            this.stønadTom != other.stønadTom || this.beløp != other.beløp -> EndringType.ENDRET
-            this.inntekt != other.inntekt -> EndringType.ENDRING_I_INNTEKT
+            this.stønadTom != andel.stønadTom || this.beløp != andel.beløp -> EndringType.ENDRET
+            this.inntekt != andel.inntekt -> EndringType.ENDRING_I_INNTEKT
             else -> null
         }
     }
@@ -91,31 +94,31 @@ object AndelHistorikkBeregner {
                              vedtaksdato = tilkjentYtelse.vedtaksdato!!)
 
     /**
-     * Finner indeks for andelen etter [andel], hvis den ikke finnes returneres [result] sin size
+     * Finner indeks for andelen etter [andel], hvis den ikke finnes returneres [historikk] sin size
      */
-    private fun finnIndeksForNyAndel(result: List<AndelHistorikkHolder>,
+    private fun finnIndeksForNyAndel(historikk: List<AndelHistorikkHolder>,
                                      andel: AndelTilkjentYtelse): Int {
-        val index = result.indexOfFirst { it.andel.stønadFom.isAfter(andel.stønadTom) }
-        return if (index == -1) result.size else index
+        val index = historikk.indexOfFirst { it.andel.stønadFom.isAfter(andel.stønadTom) }
+        return if (index == -1) historikk.size else index
     }
 
-    private fun finnTilsværendeAndelIHistorikk(result: MutableList<AndelHistorikkHolder>,
+    private fun finnTilsvarendeAndelIHistorikk(historikk: List<AndelHistorikkHolder>,
                                                andel: AndelTilkjentYtelse): AndelHistorikkHolder? =
-            result.findLast { it.endring?.type != EndringType.FJERNET && it.andel.stønadFom == andel.stønadFom }
+            historikk.findLast { it.endring?.type != EndringType.FJERNET && it.andel.stønadFom == andel.stønadFom }
 
     /**
      * Hvis en [tilkjentYtelse] sin behandlingId ikke er lik andelene i historikk sine verdier for kontrollert,
      * så betyr det att selve andelen i historikken er fjernet då den ikke har blitt kontrollert i denne iterasjonen.
      * Den markeres då som fjernet.
      */
-    private fun markerFjernede(historikk: MutableList<AndelHistorikkHolder>,
-                               tilkjentYtelse: TilkjentYtelse) {
+    private fun markerAndelerSomErFjernet(historikk: MutableList<AndelHistorikkHolder>,
+                                          tilkjentYtelse: TilkjentYtelse) {
         historikk.filterNot { erAlleredeFjernetEllerKontrollert(it, tilkjentYtelse) }.forEach {
             it.endring = lagEndring(EndringType.FJERNET, tilkjentYtelse)
         }
     }
 
-    private fun erAlleredeFjernetEllerKontrollert(holder: AndelHistorikkHolder,
+    private fun erAlleredeFjernetEllerKontrollert(historikk: AndelHistorikkHolder,
                                                   tilkjentYtelse: TilkjentYtelse) =
-            holder.endring?.type == EndringType.FJERNET || holder.kontrollert == tilkjentYtelse.id
+            historikk.endring?.type == EndringType.FJERNET || historikk.kontrollert == tilkjentYtelse.id
 }
