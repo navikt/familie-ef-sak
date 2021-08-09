@@ -15,7 +15,7 @@ class Feil(message: String,
 
 inline fun feilHvis(boolean: Boolean, lazyMessage: () -> String) {
     if (boolean) {
-        throw Feil(lazyMessage())
+        throw Feil(message = lazyMessage(), frontendFeilmelding = lazyMessage())
     }
 }
 
