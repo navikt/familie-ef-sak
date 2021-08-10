@@ -1,15 +1,15 @@
 package no.nav.familie.ef.sak.mapper
 
-import no.nav.familie.ef.sak.api.dto.AndelTilkjentYtelseDto
-import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDto
 import no.nav.familie.ef.sak.api.beregning.Beløpsperiode
 import no.nav.familie.ef.sak.api.beregning.Beregningsgrunnlag
+import no.nav.familie.ef.sak.api.dto.AndelTilkjentYtelseDto
+import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDto
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.util.Periode
 
 fun TilkjentYtelse.tilDto(): TilkjentYtelseDto {
     return TilkjentYtelseDto(behandlingId = this.behandlingId,
-                             vedtaksdato = this.vedtaksdato,
+                             vedtakstidspunkt = this.vedtakstidspunkt,
                              andeler = this.andelerTilkjentYtelse.map { andel ->
                                  AndelTilkjentYtelseDto(beløp = andel.beløp,
                                                         stønadFra = andel.stønadFom,

@@ -4,18 +4,19 @@ import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseType
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 fun lagTilkjentYtelse(andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
                       id: UUID = UUID.randomUUID(),
                       behandlingId: UUID = UUID.randomUUID(),
                       personident: String = "123",
-                      vedtaksdato: LocalDate? = null,
+                      vedtaksdato: LocalDate = LocalDate.now(),
                       type: TilkjentYtelseType = TilkjentYtelseType.FØRSTEGANGSBEHANDLING) =
         TilkjentYtelse(id = id,
                        behandlingId = behandlingId,
                        personident = personident,
-                       vedtaksdato = vedtaksdato,
+                       vedtakstidspunkt = vedtaksdato.atStartOfDay().truncatedTo(ChronoUnit.MILLIS),
                        type = type,
                        andelerTilkjentYtelse = andelerTilkjentYtelse)
 
