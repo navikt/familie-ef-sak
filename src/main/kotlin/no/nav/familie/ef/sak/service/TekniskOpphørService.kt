@@ -72,7 +72,6 @@ class TekniskOpphørService(val behandlingService: BehandlingService,
     private fun opprettTilkjentYtelse(behandlingId: UUID, personIdent: String): TilkjentYtelse {
         return tilkjentYtelseRepository.insert(TilkjentYtelse(behandlingId = behandlingId,
                                                               personident = personIdent,
-                                                              vedtaksdato = LocalDate.now(),
                                                               type = TilkjentYtelseType.OPPHØR,
                                                               andelerTilkjentYtelse = emptyList()))
     }

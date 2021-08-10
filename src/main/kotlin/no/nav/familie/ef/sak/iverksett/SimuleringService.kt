@@ -24,6 +24,7 @@ import no.nav.familie.kontrakter.ef.iverksett.TilkjentYtelseMedMetadata
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -98,7 +99,6 @@ class SimuleringService(private val iverksettClient: IverksettClient,
 
         val tilkjentYtelseForBlankett = TilkjentYtelse(
                 personident = fagsak.hentAktivIdent(),
-                vedtaksdato = LocalDate.now(),
                 behandlingId = behandling.id,
                 andelerTilkjentYtelse = andeler,
                 type = TilkjentYtelseType.FØRSTEGANGSBEHANDLING)
@@ -123,7 +123,7 @@ class SimuleringService(private val iverksettClient: IverksettClient,
                                          eksternFagsakId = eksternFagsakId,
                                          personIdent = this.personident,
                                          behandlingId = this.behandlingId,
-                                         vedtaksdato = this.vedtaksdato ?: LocalDate.now())
+                                         vedtaksdato = this.vedtakstidspunkt?.toLocalDate() ?: LocalDate.now())
     }
 
     private fun TilkjentYtelse.tilIverksett(): TilkjentYtelseDto {

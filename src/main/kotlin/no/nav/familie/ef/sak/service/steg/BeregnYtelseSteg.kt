@@ -12,7 +12,6 @@ import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.TilkjentYtelseService
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 
 @Service
 class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
@@ -58,7 +57,6 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
             tilkjentYtelseService.opprettTilkjentYtelse(
                     TilkjentYtelse(
                             personident = aktivIdent,
-                            vedtaksdato = LocalDate.now(),
                             behandlingId = behandling.id,
                             andelerTilkjentYtelse = beløpsperioder
                     )
