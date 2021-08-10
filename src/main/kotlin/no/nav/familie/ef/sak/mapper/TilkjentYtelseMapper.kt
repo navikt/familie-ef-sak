@@ -4,19 +4,24 @@ import no.nav.familie.ef.sak.api.beregning.Beløpsperiode
 import no.nav.familie.ef.sak.api.beregning.Beregningsgrunnlag
 import no.nav.familie.ef.sak.api.dto.AndelTilkjentYtelseDto
 import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDto
+import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.util.Periode
 
 fun TilkjentYtelse.tilDto(): TilkjentYtelseDto {
     return TilkjentYtelseDto(behandlingId = this.behandlingId,
                              vedtakstidspunkt = this.vedtakstidspunkt,
-                             andeler = this.andelerTilkjentYtelse.map { andel ->
-                                 AndelTilkjentYtelseDto(beløp = andel.beløp,
-                                                        stønadFra = andel.stønadFom,
-                                                        stønadTil = andel.stønadTom,
-                                                        inntekt = andel.inntekt,
-                                                        samordningsfradrag = andel.samordningsfradrag)
-                             })
+                             andeler = this.andelerTilkjentYtelse.map { andel -> andel.tilDto() })
+}
+
+fun AndelTilkjentYtelse.tilDto(): AndelTilkjentYtelseDto {
+    return AndelTilkjentYtelseDto(beløp = this.beløp,
+                                  stønadFra = this.stønadFom,
+                                  stønadTil = this.stønadTom,
+                                  inntekt = this.inntekt,
+                                  inntektsreduksjon = this.inntektsreduksjon,
+                                  samordningsfradrag = this.samordningsfradrag)
+
 }
 
 fun TilkjentYtelse.tilBeløpsperiode(): List<Beløpsperiode> {
