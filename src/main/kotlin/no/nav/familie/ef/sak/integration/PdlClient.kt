@@ -36,17 +36,6 @@ class PdlClient(val pdlConfig: PdlConfig,
         operations.optionsForAllow(pingUri)
     }
 
-    fun hentSøkerKortBolk(personIdenter: List<String>): Map<String, PdlSøkerKort> {
-        if (personIdenter.isEmpty()) return emptyMap()
-        require(personIdenter.size <= 100) { "Liste med personidenter må være færre enn 100 st" }
-        val pdlPersonRequest = PdlPersonBolkRequest(variables = PdlPersonBolkRequestVariables(personIdenter),
-                                                    query = PdlConfig.søkerKortBolkQuery)
-        val pdlResponse: PdlBolkResponse<PdlSøkerKort> = postForEntity(pdlConfig.pdlUri,
-                                                                       pdlPersonRequest,
-                                                                       httpHeaders())
-        return feilsjekkOgReturnerData(pdlResponse)
-    }
-
     fun hentSøker(personIdent: String): PdlSøker {
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
                                                 query = PdlConfig.søkerQuery)
@@ -54,16 +43,6 @@ class PdlClient(val pdlConfig: PdlConfig,
                                                                    pdlPersonRequest,
                                                                    httpHeaders())
         return feilsjekkOgReturnerData(personIdent, pdlResponse) { it.person }
-    }
-
-    //Brukes for å hente hele pdl dataobjektet uten serialisering
-    fun hentSøkerAsMap(personIdent: String): Map<String, Any> {
-        val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
-                                                query = PdlConfig.søkerQuery)
-        val pdlResponse: PdlResponse<Map<String, Any>> = postForEntity(pdlConfig.pdlUri,
-                                                                       pdlPersonRequest,
-                                                                       httpHeaders())
-        return feilsjekkOgReturnerData(personIdent, pdlResponse) { it }
     }
 
     fun hentBarn(personIdenter: List<String>): Map<String, PdlBarn> {

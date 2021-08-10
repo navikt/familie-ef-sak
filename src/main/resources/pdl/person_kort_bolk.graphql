@@ -3,6 +3,9 @@ query($identer: [ID!]!){
         code
         ident
         person {
+            doedsfall {
+                doedsdato
+            }
             navn {
                 fornavn
                 mellomnavn

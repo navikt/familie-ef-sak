@@ -28,8 +28,9 @@ class TilkjentYtelseService(private val behandlingService: BehandlingService,
         return tilkjentYtelseRepository.insert(nyTilkjentYtelse.copy(andelerTilkjentYtelse = andelerMedGodtykkligKildeId))
     }
 
-    fun finnSisteTilkjentYtelse(fagsakId: UUID): TilkjentYtelse? {
-        return tilkjentYtelseRepository.finnSisteTilkjentYtelse(fagsakId)
+    fun harLøpendeUtbetaling(behandlingId: UUID): Boolean {
+        return tilkjentYtelseRepository.findByBehandlingId(behandlingId)
+                       ?.let { it.andelerTilkjentYtelse.any { andel -> andel.stønadTom.isAfter(LocalDate.now()) } } ?: false
     }
 
     fun finnTilkjentYtelserTilKonsistensavstemming(stønadstype: Stønadstype,

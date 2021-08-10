@@ -14,9 +14,9 @@ import no.nav.familie.ef.sak.repository.domain.Fagsak
 import no.nav.familie.ef.sak.repository.domain.FagsakPerson
 import no.nav.familie.ef.sak.repository.domain.InntektWrapper
 import no.nav.familie.ef.sak.repository.domain.Oppgave
+import no.nav.familie.ef.sak.repository.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.repository.domain.Sporbar
 import no.nav.familie.ef.sak.repository.domain.SporbarUtils
-import no.nav.familie.ef.sak.repository.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.Vedtak
@@ -32,7 +32,10 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-fun oppgave(behandling: Behandling, erFerdigstilt: Boolean = false, gsakOppgaveId: Long = 123, type: Oppgavetype = Oppgavetype.Journalføring): Oppgave =
+fun oppgave(behandling: Behandling,
+            erFerdigstilt: Boolean = false,
+            gsakOppgaveId: Long = 123,
+            type: Oppgavetype = Oppgavetype.Journalføring): Oppgave =
         Oppgave(behandlingId = behandling.id,
                 gsakOppgaveId = gsakOppgaveId,
                 type = type,
@@ -73,16 +76,18 @@ fun fagsakpersoner(identer: Set<String>): Set<FagsakPerson> = identer.map {
 }.toSet()
 
 fun tilkjentYtelse(behandlingId: UUID, personIdent: String): TilkjentYtelse = TilkjentYtelse(
-        behandlingId = behandlingId, personident = personIdent, vedtaksdato = LocalDate.now(), andelerTilkjentYtelse = listOf(
-        AndelTilkjentYtelse(beløp = 9500,
-                            stønadFom = LocalDate.of(2021, 1, 1),
-                            stønadTom = LocalDate.of(2021, 12, 31),
-                            personIdent = personIdent,
-                            inntektsreduksjon = 0,
-                            inntekt = 0,
-                            samordningsfradrag = 0,
-                            kildeBehandlingId = behandlingId))
-)
+        behandlingId = behandlingId,
+        personident = personIdent,
+        vedtakstidspunkt = LocalDateTime.now(),
+        andelerTilkjentYtelse = listOf(
+                AndelTilkjentYtelse(beløp = 9500,
+                                    stønadFom = LocalDate.of(2021, 1, 1),
+                                    stønadTom = LocalDate.of(2021, 12, 31),
+                                    personIdent = personIdent,
+                                    inntektsreduksjon = 0,
+                                    inntekt = 0,
+                                    samordningsfradrag = 0,
+                                    kildeBehandlingId = behandlingId)))
 
 fun vedtak(behandlingId: UUID): Vedtak =
         Vedtak(behandlingId = behandlingId,

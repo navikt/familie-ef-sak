@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.domain.*
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 object DataGenerator {
@@ -29,7 +30,6 @@ object DataGenerator {
 
     fun tilfeldigTilkjentYtelse(behandling: Behandling = behandling(fagsak()), antallAndelerTilkjentYtelse: Int = 1) =
             TilkjentYtelse(personident = tilfeldigFødselsnummer(),
-                           vedtaksdato = LocalDate.now(),
                            behandlingId = behandling.id,
                            andelerTilkjentYtelse = flereTilfeldigeAndelerTilkjentYtelse(antallAndelerTilkjentYtelse, behandling.id))
 }

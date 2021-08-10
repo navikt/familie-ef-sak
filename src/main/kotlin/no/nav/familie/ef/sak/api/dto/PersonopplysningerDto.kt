@@ -27,6 +27,7 @@ data class PersonopplysningerDto(val personIdent: String,
                                  val innflyttingTilNorge: List<InnflyttingDto>,
                                  val utflyttingFraNorge: List<UtflyttingDto>,
                                  val oppholdstillatelse: List<OppholdstillatelseDto>,
+                                 val vergemål: List<VergemålDto>,
                                  val lagtTilEtterFerdigstilling: Boolean)
 
 data class BarnDto(val personIdent: String,
@@ -45,7 +46,8 @@ data class TelefonnummerDto(val landskode: String,
 data class SivilstandDto(val type: Sivilstandstype,
                          val gyldigFraOgMed: String?,
                          val relatertVedSivilstand: String?,
-                         val navn: String?)
+                         val navn: String?,
+                         val dødsdato: LocalDate?)
 
 @Suppress("unused") //Kopi fra PDL
 enum class Sivilstandstype {
@@ -135,3 +137,9 @@ data class NavnDto(val fornavn: String,
         fun fraNavn(navn: Navn): NavnDto = NavnDto(navn.fornavn, navn.mellomnavn, navn.etternavn, navn.visningsnavn())
     }
 }
+
+data class VergemålDto(val embete: String?,
+                       val type: String?,
+                       val motpartsPersonident: String?,
+                       val navn: String?,
+                       val omfang: String?)

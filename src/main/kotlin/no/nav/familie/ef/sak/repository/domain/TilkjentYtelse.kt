@@ -3,13 +3,14 @@ package no.nav.familie.ef.sak.repository.domain
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Embedded
 import java.time.LocalDate
-import java.util.*
+import java.time.LocalDateTime
+import java.util.UUID
 
 data class TilkjentYtelse(@Id
                           val id: UUID = UUID.randomUUID(),
                           val behandlingId: UUID,
                           val personident: String,
-                          val vedtaksdato: LocalDate? = null,
+                          val vedtakstidspunkt: LocalDateTime = SporbarUtils.now(),
                           val type: TilkjentYtelseType = TilkjentYtelseType.FØRSTEGANGSBEHANDLING,
                           val andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
                           @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)

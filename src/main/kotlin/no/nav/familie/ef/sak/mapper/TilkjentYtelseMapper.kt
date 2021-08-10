@@ -10,7 +10,7 @@ import no.nav.familie.ef.sak.util.Periode
 
 fun TilkjentYtelse.tilDto(): TilkjentYtelseDto {
     return TilkjentYtelseDto(behandlingId = this.behandlingId,
-                             vedtaksdato = this.vedtaksdato,
+                             vedtakstidspunkt = this.vedtakstidspunkt,
                              andeler = this.andelerTilkjentYtelse.map { andel -> andel.tilDto() })
 }
 

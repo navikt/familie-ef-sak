@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.api.dto.SivilstandDto
 import no.nav.familie.ef.sak.api.dto.Sivilstandstype
 import no.nav.familie.ef.sak.api.dto.TelefonnummerDto
 import no.nav.familie.ef.sak.api.dto.UtflyttingDto
+import no.nav.familie.ef.sak.api.dto.VergemålDto
 import no.nav.familie.ef.sak.domene.BarnMedIdent
 import no.nav.familie.ef.sak.domene.GrunnlagsdataMedMetadata
 import no.nav.familie.ef.sak.domene.Søker
@@ -55,7 +56,8 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                     SivilstandDto(type = Sivilstandstype.valueOf(it.type.name),
                                   gyldigFraOgMed = it.gyldigFraOgMed?.toString() ?: it.bekreftelsesdato,
                                   relatertVedSivilstand = it.relatertVedSivilstand,
-                                  navn = it.navn)
+                                  navn = it.navn,
+                                  dødsdato = it.dødsfall?.dødsdato)
                 },
                 adresse = tilAdresser(søker),
                 fullmakt = søker.fullmakt.map {
@@ -83,9 +85,19 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                                   dato = null,
                                   tilflyttingssted = it.tilflyttingsstedIUtlandet)
                 },
-                oppholdstillatelse = OppholdstillatelseMapper.map(søker.opphold)
+                oppholdstillatelse = OppholdstillatelseMapper.map(søker.opphold),
+                vergemål = mapVergemål(søker)
         )
     }
+
+    private fun mapVergemål(søker: Søker) =
+            søker.vergemaalEllerFremtidsfullmakt.filter { it.type != "stadfestetFremtidsfullmakt" }.map {
+                VergemålDto(embete = it.embete,
+                            type = it.type,
+                            motpartsPersonident = it.vergeEllerFullmektig.motpartsPersonident,
+                            navn = it.vergeEllerFullmektig.navn?.visningsnavn(),
+                            omfang = it.vergeEllerFullmektig.omfang)
+            }
 
     fun tilAdresser(søker: Søker): List<AdresseDto> {
         val adresser =
