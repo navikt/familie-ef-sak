@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.service.steg.StegType
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.vedtaksbrev.BrevClient
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -20,11 +21,14 @@ import java.util.UUID
 class MellomlagringBrevService(private val mellomlagerBrevRepository: MellomlagerBrevRepository) {
 
     fun mellomLagreBrev(mellomlagretBrev: MellomlagretBrev): UUID {
-        return mellomlagerBrevRepository.insert(mellomlagretBrev).behandlingId
+        return when (mellomlagerBrevRepository.existsById(mellomlagretBrev.behandlingId)) {
+            true -> mellomlagerBrevRepository.update(mellomlagretBrev)
+            false -> mellomlagerBrevRepository.insert(mellomlagretBrev)
+        }.behandlingId
     }
 
-    fun hentMellomlagretBrev(behhandlingId: UUID): MellomlagretBrev {
-        return mellomlagerBrevRepository.findByIdOrThrow(behhandlingId)
+    fun hentMellomlagretBrev(behhandlingId: UUID): MellomlagretBrev? {
+        return mellomlagerBrevRepository.findByIdOrNull(behhandlingId)
     }
 
 }
