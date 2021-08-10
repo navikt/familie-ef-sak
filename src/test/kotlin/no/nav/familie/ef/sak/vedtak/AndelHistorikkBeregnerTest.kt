@@ -8,7 +8,7 @@ import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.net.URL
-import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 
@@ -160,14 +160,14 @@ object AndelHistorikkParser {
 
     private fun lagAndel(it: AndelHistorikkData) =
             AndelHistorikkDto(it.behandlingId,
-                              LocalDate.now(), // burde denne testes? EKs att man oppretter vedtaksdato per behandlingId
+                              LocalDateTime.now(), // burde denne testes? EKs att man oppretter vedtaksdato per behandlingId
                               "",
                               it.andel.tilDto(),
                               it.type?.let { type ->
                                   HistorikkEndring(type,
                                                    it.endretI
                                                    ?: error("Trenger id til behandling hvis det finnes en endring"),
-                                                   LocalDate.now())
+                                                   LocalDateTime.now())
                               })
 
     private fun mapInput(input: List<AndelHistorikkData>): List<TilkjentYtelse> {
@@ -183,7 +183,7 @@ object AndelHistorikkParser {
                 })
                 .map {
                     TilkjentYtelse(behandlingId = it.first,
-                                   vedtaksdato = LocalDate.now(),
+                                   vedtakstidspunkt = LocalDateTime.now(),
                                    andelerTilkjentYtelse = it.second,
                                    personident = PERSON_IDENT)
                 }

@@ -4,7 +4,7 @@ import no.nav.familie.ef.sak.api.dto.AndelTilkjentYtelseDto
 import no.nav.familie.ef.sak.mapper.tilDto
 import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
-import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 enum class EndringType {
@@ -14,14 +14,14 @@ enum class EndringType {
 }
 
 data class AndelHistorikkDto(val behandlingId: UUID,
-                             val vedtaksdato: LocalDate, // TODO burde denne være datotid sånn att man kan vise tiden den ble opprettet?
+                             val vedtakstidspunkt: LocalDateTime,
                              val saksbehandler: String,
                              val andel: AndelTilkjentYtelseDto,
                              val endring: HistorikkEndring?)
 
 data class HistorikkEndring(val type: EndringType,
                             val behandlingId: UUID,
-                            val vedtaksdato: LocalDate)
+                            val vedtakstidspunkt: LocalDateTime)
 
 object AndelHistorikkBeregner {
 
@@ -29,7 +29,7 @@ object AndelHistorikkBeregner {
      * @param kontrollert brukes for å sjekke om en andel er fjernet eller ikke
      */
     private class AndelHistorikkHolder(val behandlingId: UUID,
-                                       val vedtaksdato: LocalDate,
+                                       val vedtakstidspunkt: LocalDateTime,
                                        val saksbehandler: String,
                                        var andel: AndelTilkjentYtelse,
                                        var endring: HistorikkEndring?,
@@ -39,7 +39,7 @@ object AndelHistorikkBeregner {
         val historikk = lagHistorikkHolders(sorterTilkjentYtelser(tilkjentYtelser))
 
         return historikk.map {
-            AndelHistorikkDto(it.behandlingId, it.vedtaksdato, it.saksbehandler, it.andel.tilDto(), it.endring)
+            AndelHistorikkDto(it.behandlingId, it.vedtakstidspunkt, it.saksbehandler, it.andel.tilDto(), it.endring)
         }
     }
 
@@ -74,7 +74,7 @@ object AndelHistorikkBeregner {
     private fun lagNyAndel(tilkjentYtelse: TilkjentYtelse,
                            andel: AndelTilkjentYtelse) =
             AndelHistorikkHolder(behandlingId = tilkjentYtelse.behandlingId,
-                                 vedtaksdato = tilkjentYtelse.vedtaksdato!!,
+                                 vedtakstidspunkt = tilkjentYtelse.vedtakstidspunkt,
                                  saksbehandler = tilkjentYtelse.sporbar.opprettetAv,
                                  andel = andel,
                                  endring = null,
@@ -91,7 +91,7 @@ object AndelHistorikkBeregner {
     private fun lagEndring(type: EndringType, tilkjentYtelse: TilkjentYtelse) =
             HistorikkEndring(type = type,
                              behandlingId = tilkjentYtelse.behandlingId,
-                             vedtaksdato = tilkjentYtelse.vedtaksdato!!)
+                             vedtakstidspunkt = tilkjentYtelse.vedtakstidspunkt)
 
     /**
      * Finner indeks for andelen etter [andel], hvis den ikke finnes returneres [historikk] sin size
