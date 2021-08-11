@@ -18,9 +18,12 @@ import no.nav.familie.prosessering.PropertiesWrapperTilStringConverter
 import no.nav.familie.prosessering.StringTilPropertiesWrapperConverter
 import org.apache.commons.lang3.StringUtils
 import org.postgresql.util.PGobject
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.autoconfigure.flyway.FlywayConfigurationCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.convert.converter.Converter
+import org.springframework.core.env.Environment
 import org.springframework.data.convert.ReadingConverter
 import org.springframework.data.convert.WritingConverter
 import org.springframework.data.domain.AuditorAware
@@ -58,6 +61,21 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
     fun auditSporbarEndret(): AuditorAware<Endret> {
         return AuditorAware {
             Optional.of(Endret())
+        }
+    }
+
+    @Bean
+    fun verifyIgnoreIfProd(@Value("\${spring.flyway.placeholders.ignoreIfProd}") ignoreIfProd: String,
+                           environment: Environment): FlywayConfigurationCustomizer {
+        val isProd = environment.activeProfiles.contains("prod")
+        val ignore = ignoreIfProd == "--"
+        return FlywayConfigurationCustomizer {
+            if (isProd && !ignore) {
+                throw RuntimeException("Prod profile men har ikke riktig verdi for placeholder ignoreIfProd=$ignoreIfProd")
+            }
+            if (!isProd && ignore) {
+                throw RuntimeException("Profile=${environment.activeProfiles} men har ignoreIfProd=--")
+            }
         }
     }
 
@@ -144,7 +162,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
             }
         }
     }
-
 
 
     @ReadingConverter

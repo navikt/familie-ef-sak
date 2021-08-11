@@ -101,4 +101,10 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(finnFagsakTilBehandling.søkerIdenter).hasSize(3)
         assertThat(finnFagsakTilBehandling.eksternId).isEqualTo(fagsak.eksternId)
     }
+
+    @Test
+    internal fun `skal sette eksternId til 200_000_000 som default`() {
+        val fagsak = fagsakRepository.insert(fagsak())
+        assertThat(fagsak.eksternId.id).isGreaterThanOrEqualTo(200_000_000)
+    }
 }

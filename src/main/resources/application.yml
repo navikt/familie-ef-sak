@@ -102,6 +102,8 @@ spring:
     banner-mode: "off"
   flyway:
     enabled: true
+    placeholders:
+      ignoreIfProd:
   datasource:
     url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/familie-ef-sak
     username: ${DB_USERNAME}
