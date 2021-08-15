@@ -1,0 +1,8 @@
+behandling_id,fom,tom,beløp,inntekt,inntektsreduksjon,samordningsfradrag,type_endring,endret_i
+1,2021-01,2021-03,1000,0,0,0,,
+!2,,,,,,,,
+2,2021-01,2021-01,1000,0,0,0,,
+2,2021-02,2021-03,2000,0,0,0,,
+OUTPUT,,,,,,,,
+1,2021-01,2021-01,1000,0,0,0,ENDRET,2
+2,2021-02,2021-03,2000,0,0,0,,
