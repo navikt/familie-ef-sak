@@ -2,9 +2,11 @@ package no.nav.familie.ef.sak.api.gui
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.familie.ef.sak.api.dto.MellomlagretBrevDto
 import no.nav.familie.ef.sak.repository.domain.MellomlagretBrev
 import no.nav.familie.ef.sak.service.MellomlagringBrevService
 import no.nav.familie.ef.sak.service.TilgangService
+import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -19,13 +21,19 @@ import java.util.UUID
 @RestController
 @RequestMapping(path = ["/api/brev/mellomlager/"])
 @ProtectedWithClaims(issuer = "azuread")
-class BrevMellomlagerController(private val tilgangService: TilgangService, private val mellomlagringBrevService: MellomlagringBrevService) {
+class BrevMellomlagerController(private val tilgangService: TilgangService,
+                                private val mellomlagringBrevService: MellomlagringBrevService) {
 
     @PostMapping("/{behandlingId}")
-    fun mellomlagreBrevverdier(@PathVariable behandlingId: UUID, @RequestBody mellomlagretBrev: MellomlagretBrev): Ressurs<UUID> {
+    fun mellomlagreBrevverdier(@PathVariable behandlingId: UUID,
+                               @RequestBody mellomlagretBrev: MellomlagretBrevDto): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
 
-        return Ressurs.success(mellomlagringBrevService.mellomLagreBrev(mellomlagretBrev))
+        return Ressurs.success(mellomlagringBrevService.mellomLagreBrev(MellomlagretBrev(behandlingId,
+                                                                                         mellomlagretBrev.brevverdier,
+                                                                                         mellomlagretBrev.brevmal,
+                                                                                         SikkerhetContext.hentSaksbehandler(strict = true),
+                                                                                         "1")))
     }
 
 
