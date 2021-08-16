@@ -28,7 +28,7 @@ class BrevMellomlagerController(private val tilgangService: TilgangService,
         return Ressurs.success(mellomlagringBrevService.mellomLagreBrev(MellomlagretBrev(behandlingId,
                                                                                          mellomlagretBrev.brevverdier,
                                                                                          mellomlagretBrev.brevmal,
-                                                                                         "1")))
+                                                                                         mellomlagretBrev.versjon)))
     }
 
 
@@ -38,7 +38,7 @@ class BrevMellomlagerController(private val tilgangService: TilgangService,
 
         val mellomlagretBrev = mellomlagringBrevService.hentMellomlagretBrev(behandlingId)
 
-        return Ressurs.success(if(mellomlagretBrev?.brevmal == brevmal) mellomlagretBrev.brevverdier else null)
+        return Ressurs.success(if (mellomlagretBrev?.brevmal == brevmal) mellomlagretBrev.brevverdier else null)
     }
 
 }
