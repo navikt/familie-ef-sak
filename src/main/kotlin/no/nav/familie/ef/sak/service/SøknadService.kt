@@ -47,17 +47,11 @@ class SøknadService(private val søknadRepository: SøknadRepository,
 
     /**
      * Vi kopierer nå for å ikke bryte mye annen funksjonalitet, men burde vurdere OM vi MÅ ha en søknad i en revurdering
-     * TODO Vi burde endre modell hvis vi skal kopiere søknaden mellan 2 behandlinger
-     * behandling-søknad m-1
      */
     @Transactional
-    fun kopierOvergangsstønad(forrigeBehandlingId: UUID, nyBehandlingId: UUID) {
+    fun kopierSøknad(forrigeBehandlingId: UUID, nyBehandlingId: UUID) {
         val søknad = hentSøknad(forrigeBehandlingId)
-        val søknadsskjemaOvergangsstønad = søknadOvergangsstønadRepository.findByIdOrThrow(søknad.soknadsskjemaId)
-
-        val nySøknadsskjema = søknadOvergangsstønadRepository.insert(søknadsskjemaOvergangsstønad.copy(id = UUID.randomUUID()))
         søknadRepository.insert(søknad.copy(behandlingId = nyBehandlingId,
-                                            soknadsskjemaId = nySøknadsskjema.id,
                                             sporbar = Sporbar()))
     }
 

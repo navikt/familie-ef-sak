@@ -97,6 +97,7 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
             if (sisteBehandling.type == BehandlingType.BLANKETT) { // Hvordan blir migrerte behandlinger behandlet?
                 throw ApiFeil("Siste behandling ble behandlet i infotrygd", HttpStatus.BAD_REQUEST)
             }
+            //TODO forrige aktive behandling kan ikke være teknisk behandling hvis det er revurdering
         }
     }
 
