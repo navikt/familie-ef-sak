@@ -9,7 +9,9 @@ import java.util.UUID
 @Service
 class RevurderingService(private val søknadService: SøknadService,
                          private val behandlingService: BehandlingService,
-                         private val oppgaveService: OppgaveService) {
+                         private val oppgaveService: OppgaveService,
+                         private val vurderingService: VurderingService,
+                         private val grunnlagsdataService: GrunnlagsdataService) {
 
     fun opprettRevurderingManuelt(fagsakId: UUID) {
         val sisteIverksatteBehandlingUUID = behandlingService.finnSisteIverksatteBehandling(fagsakId)
@@ -21,7 +23,13 @@ class RevurderingService(private val søknadService: SøknadService,
          */
         søknadService.kopierOvergangsstønad(sisteIverksatteBehandlingUUID, revurdering.id)
         //vilkår
-        //personopplysninger
+        //personopplysninger ->
+
+        vurderingService.kopierVurderingerTilNyBehandling(sisteIverksatteBehandlingUUID, revurdering.id)
+
+        // Hent ny grunnlagsdata
+        grunnlagsdataService.opprettGrunnlagsdata(revurdering.id)
+
 
         val oppgave = oppgaveService.opprettOppgave(revurdering.id,
                                                     Oppgavetype.BehandleSak,

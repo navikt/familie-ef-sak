@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.api.dto.tilDto
 import no.nav.familie.ef.sak.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.regler.evalutation.OppdaterVilkår.opprettNyeVilkårsvurderinger
 import no.nav.familie.ef.sak.repository.VilkårsvurderingRepository
+import no.nav.familie.ef.sak.repository.domain.Sporbar
 import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -60,5 +61,11 @@ class VurderingService(private val behandlingService: BehandlingService,
     private fun behandlingErLåstForVidereRedigering(behandlingId: UUID) =
             behandlingService.hentBehandling(behandlingId).status.behandlingErLåstForVidereRedigering()
 
-
+    fun kopierVurderingerTilNyBehandling(eksisterendeBehandlingsId: UUID, nyBehandlingsId: UUID) {
+        val vurderinger = vilkårsvurderingRepository.findByBehandlingId(eksisterendeBehandlingsId)
+        val vurderingerKopi: List<Vilkårsvurdering> = vurderinger.map {
+            it.copy(behandlingId = nyBehandlingsId, sporbar = Sporbar())
+        }
+        vilkårsvurderingRepository.insertAll(vurderingerKopi)
+    }
 }
