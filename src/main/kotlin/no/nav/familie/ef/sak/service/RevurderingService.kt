@@ -11,23 +11,22 @@ class RevurderingService(private val søknadService: SøknadService,
                          private val behandlingService: BehandlingService,
                          private val oppgaveService: OppgaveService) {
 
-    fun startRevurdering(fagsakId: UUID) {
-
-
-        // no.nav.familie.ef.sak.service.JournalføringService.fullførJournalpost
-
+    fun opprettRevurderingManuelt(fagsakId: UUID) {
+        val sisteIverksatteBehandlingUUID = behandlingService.finnSisteIverksatteBehandling(fagsakId)
+                                            ?: error("Revurdering må ha eksisterende iverksatt behandling")
         val revurdering = behandlingService.opprettBehandling(BehandlingType.REVURDERING, fagsakId)
         val saksbehandler = SikkerhetContext.hentSaksbehandler(true)
+        /**
+         * Når man revurderer basert på en ny søknad så kan man ikke bruke denne metoden hvis den kopierer forrige søknad
+         */
+        søknadService.kopierOvergangsstønad(sisteIverksatteBehandlingUUID, revurdering.id)
+        //vilkår
+        //personopplysninger
+
         val oppgave = oppgaveService.opprettOppgave(revurdering.id,
                                                     Oppgavetype.BehandleSak,
                                                     saksbehandler,
                                                     "Revurdering i ny løsning") // TODO 1. kan vi ha en type revurdering? 2. Bedre beskrivelse?
-
-        val sisteIverksatteBehandlingUUID = behandlingService.finnSisteIverksatteBehandling(fagsakId)
-                                            ?: error("Revurdering må ha eksisterende iverksatt behandling")
-        val hentOvergangsstønad = søknadService.hentOvergangsstønad(sisteIverksatteBehandlingUUID)
-
-
     }
 
 

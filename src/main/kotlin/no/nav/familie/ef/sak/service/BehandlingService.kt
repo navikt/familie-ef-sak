@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.service
 
+import no.nav.familie.ef.sak.api.ApiFeil
 import no.nav.familie.ef.sak.api.Feil
-import no.nav.familie.ef.sak.api.beregning.ResultatType
 import no.nav.familie.ef.sak.repository.BehandlingRepository
 import no.nav.familie.ef.sak.repository.BehandlingsjournalpostRepository
 import no.nav.familie.ef.sak.repository.domain.Behandling
@@ -48,6 +48,10 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
                           fagsakId: UUID,
                           søknad: SøknadOvergangsstønadKontrakt,
                           journalpost: Journalpost): Behandling {
+        /**
+         * Trenger noen form av håndtering av aktiv her, sånn att vi ikke har flere blanketter på en person som er aktive,
+         * hvis vi har det så kan den andre opprettBehandling bli feil, då den ved eks revurdering 2 henter opp en blankett
+         */
         val behandling = behandlingRepository.insert(Behandling(fagsakId = fagsakId,
                                                                 type = behandlingType,
                                                                 steg = StegType.VILKÅR,
@@ -68,11 +72,32 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
                           fagsakId: UUID,
                           status: BehandlingStatus = BehandlingStatus.OPPRETTET,
                           stegType: StegType = StegType.VILKÅR): Behandling {
+        val sisteBehandling = behandlingRepository.findByFagsakIdAndAktivIsTrue(fagsakId)
+        validOmViKanOppretteNyBehandling(sisteBehandling, behandlingType)
+        if(sisteBehandling != null) {
+            behandlingRepository.update(sisteBehandling.copy(aktiv = false))
+        }
+
         return behandlingRepository.insert(Behandling(fagsakId = fagsakId,
                                                       type = behandlingType,
                                                       steg = stegType,
                                                       status = status,
                                                       resultat = BehandlingResultat.IKKE_SATT))
+    }
+
+    private fun validOmViKanOppretteNyBehandling(sisteBehandling: Behandling?,
+                                                 behandlingType: BehandlingType) {
+        if (sisteBehandling != null && sisteBehandling.status != BehandlingStatus.FERDIGSTILT) {
+            throw ApiFeil("Det finnes en behandling på fagsaken som ikke er ferdigstilt", HttpStatus.BAD_REQUEST)
+        }
+        if (behandlingType == BehandlingType.REVURDERING) {
+            if (sisteBehandling == null) {
+                throw ApiFeil("Det finnes ikke en tidligere behandling på fagsaken", HttpStatus.BAD_REQUEST)
+            }
+            if (sisteBehandling.type == BehandlingType.BLANKETT) { // Hvordan blir migrerte behandlinger behandlet?
+                throw ApiFeil("Siste behandling ble behandlet i infotrygd", HttpStatus.BAD_REQUEST)
+            }
+        }
     }
 
 

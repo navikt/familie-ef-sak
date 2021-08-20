@@ -14,21 +14,14 @@ import java.util.UUID
 @RequestMapping(path = ["/api/revurdering"])
 @ProtectedWithClaims(issuer = "azuread")
 class RevurderingsController(
-        private val revurderingService: RevurderingService
+        private val revurderingService: RevurderingService,
         private val tilgangService: TilgangService,
 ) {
 
-
     @GetMapping("{fagsakId}") // bytt til post
     fun startRevurdering(@PathVariable fagsakId: UUID): Ressurs<String> {
-
-
         tilgangService.validerTilgangTilFagsak(fagsakId)
-        revurderingService.startRevurdering(fagsakId)
-
-
-
-
+        revurderingService.opprettRevurderingManuelt(fagsakId)
         return Ressurs.success("OK")
     }
 
