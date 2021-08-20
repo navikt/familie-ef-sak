@@ -64,7 +64,7 @@ class VurderingService(private val behandlingService: BehandlingService,
     fun kopierVurderingerTilNyBehandling(eksisterendeBehandlingsId: UUID, nyBehandlingsId: UUID) {
         val vurderinger = vilkårsvurderingRepository.findByBehandlingId(eksisterendeBehandlingsId)
         val vurderingerKopi: List<Vilkårsvurdering> = vurderinger.map {
-            it.copy(behandlingId = nyBehandlingsId, sporbar = Sporbar())
+            it.copy(id = UUID.randomUUID(), behandlingId = nyBehandlingsId, sporbar = Sporbar())
         }
         vilkårsvurderingRepository.insertAll(vurderingerKopi)
     }
