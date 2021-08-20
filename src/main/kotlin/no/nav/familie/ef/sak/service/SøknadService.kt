@@ -51,21 +51,21 @@ class SøknadService(private val søknadRepository: SøknadRepository,
                                       journalpostId: String) {
         val søknadsskjema = SøknadsskjemaMapper.tilDomene(søknad)
         søknadOvergangsstønadRepository.insert(søknadsskjema)
-        søknadRepository.insert(SøknadMapper.toDomain(fagsakId.toString(), journalpostId, søknadsskjema, behandlingId))
+        søknadRepository.insert(SøknadMapper.toDomain(journalpostId, søknadsskjema, behandlingId))
     }
 
     @Transactional
     fun lagreSøknadForBarnetilsyn(søknad: SøknadBarnetilsyn, behandlingId: UUID, fagsakId: UUID, journalpostId: String) {
         val søknadsskjema = SøknadsskjemaMapper.tilDomene(søknad)
         søknadBarnetilsynRepository.insert(søknadsskjema)
-        søknadRepository.insert(SøknadMapper.toDomain(fagsakId.toString(), journalpostId, søknadsskjema, behandlingId))
+        søknadRepository.insert(SøknadMapper.toDomain(journalpostId, søknadsskjema, behandlingId))
     }
 
     @Transactional
     fun lagreSøknadForSkolepenger(søknad: SøknadSkolepenger, behandlingId: UUID, fagsakId: UUID, journalpostId: String) {
         val søknadsskjema = SøknadsskjemaMapper.tilDomene(søknad)
         søknadSkolepengerRepository.insert(søknadsskjema)
-        søknadRepository.insert(SøknadMapper.toDomain(fagsakId.toString(), journalpostId, søknadsskjema, behandlingId))
+        søknadRepository.insert(SøknadMapper.toDomain(journalpostId, søknadsskjema, behandlingId))
     }
 
     private fun hentSøknad(behandlingId: UUID): Søknad {

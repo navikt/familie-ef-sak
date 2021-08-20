@@ -13,7 +13,6 @@ data class Søknad(@Id
                   val behandlingId: UUID,
                   val type: SøknadType,
                   val soknadsskjemaId: UUID,
-                  val saksnummerInfotrygd: String?,
                   val journalpostId: String,
                   @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                   val sporbar: Sporbar = Sporbar(),
@@ -30,13 +29,11 @@ enum class SøknadType {
 
 object SøknadMapper {
 
-    fun toDomain(saksnummer: String,
-                 journalpostId: String,
+    fun toDomain(journalpostId: String,
                  søknad: ISøknadsskjema,
                  behandlingId: UUID): Søknad {
         return Søknad(soknadsskjemaId = søknad.id,
                       behandlingId = behandlingId,
-                      saksnummerInfotrygd = saksnummer,
                       journalpostId = journalpostId,
                       søker = Søker(søknad.fødselsnummer, søknad.navn),
                       type = søknad.type,
