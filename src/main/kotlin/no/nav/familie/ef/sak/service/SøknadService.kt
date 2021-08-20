@@ -51,7 +51,8 @@ class SøknadService(private val søknadRepository: SøknadRepository,
     @Transactional
     fun kopierSøknad(forrigeBehandlingId: UUID, nyBehandlingId: UUID) {
         val søknad = hentSøknad(forrigeBehandlingId)
-        søknadRepository.insert(søknad.copy(behandlingId = nyBehandlingId,
+        søknadRepository.insert(søknad.copy(id = UUID.randomUUID(),
+                                            behandlingId = nyBehandlingId,
                                             sporbar = Sporbar()))
     }
 
