@@ -7,4 +7,4 @@ data class MellomlagretBrev(@Id
                             val behandlingId: UUID,
                             val brevverdier: String,
                             val brevmal: String,
-                            val versjon: String)
+                            val sanityVersjon: String)
