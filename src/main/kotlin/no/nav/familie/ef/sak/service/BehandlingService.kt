@@ -74,7 +74,7 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
                           stegType: StegType = StegType.VILKÅR): Behandling {
         val sisteBehandling = behandlingRepository.findByFagsakIdAndAktivIsTrue(fagsakId)
         validOmViKanOppretteNyBehandling(sisteBehandling, behandlingType)
-        if(sisteBehandling != null) {
+        if (sisteBehandling != null) {
             behandlingRepository.update(sisteBehandling.copy(aktiv = false))
         }
 
@@ -97,7 +97,10 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
             if (sisteBehandling.type == BehandlingType.BLANKETT) { // Hvordan blir migrerte behandlinger behandlet?
                 throw ApiFeil("Siste behandling ble behandlet i infotrygd", HttpStatus.BAD_REQUEST)
             }
-            //TODO forrige aktive behandling kan ikke være teknisk behandling hvis det er revurdering
+            if (sisteBehandling.type == BehandlingType.TEKNISK_OPPHØR) {
+                throw ApiFeil("Det er ikke mulig å lage en revurdering når siste behandlingen er teknisk opphør",
+                              HttpStatus.BAD_REQUEST)
+            }
         }
     }
 

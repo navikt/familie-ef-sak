@@ -15,8 +15,8 @@ import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsst
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -30,16 +30,14 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
     @Autowired lateinit var søknadService: SøknadService
 
     private lateinit var fagsak: Fagsak
-    private lateinit var behandling: Behandling
+    private val personIdent = "123456789012"
+
 
     @BeforeEach
     fun setUp() {
         BrukerContextUtil.mockBrukerContext("Heider")
-        val personIdent = "123456789012"
         val identer = fagsakpersoner(setOf(personIdent))
         fagsak = fagsakRepository.insert(fagsak(identer = identer))
-        behandling = behandlingRepository.insert(behandling(fagsak = fagsak, status = BehandlingStatus.FERDIGSTILT))
-        lagreSøknad(behandling, fagsak)
     }
 
     @AfterEach
@@ -48,22 +46,32 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `Skal opprette revurdering`() {
+    internal fun `skal opprette revurdering`() {
+        val behandling = behandlingRepository.insert(behandling(fagsak = fagsak, status = BehandlingStatus.FERDIGSTILT))
+        lagreSøknad(behandling, fagsak)
+
         val opprettRevurderingManuelt = revurderingService.opprettRevurderingManuelt(fagsak.id)
-        val hentEfOppgave = oppgaveService.hentEfOppgave(opprettRevurderingManuelt)
-        val revurdering = behandlingRepository.findByIdOrThrow(hentEfOppgave!!.behandlingId)
+
+        val hentEfOppgave = oppgaveService.hentEfOppgave(opprettRevurderingManuelt)!!
+        assertThat(hentEfOppgave.behandlingId).isNotEqualTo(behandling.id)
+
+        val revurdering = behandlingRepository.findByIdOrThrow(hentEfOppgave.behandlingId)
         assertThat(revurdering.type).isEqualTo(BehandlingType.REVURDERING)
     }
 
     @Test
-    internal fun `Skal ikke være mulig å opprette fagsak hvis siste behandling ikke er ferdig`() {
-        val behandlingSomUtredes = behandling.copy(status = BehandlingStatus.UTREDES)
-        behandlingRepository.update(behandlingSomUtredes)
-        val exception =
-                Assertions.assertThrows(IllegalStateException::class.java) { revurderingService.opprettRevurderingManuelt(fagsak.id) }
-        assertThat(exception.message).isEqualTo("Revurdering må ha eksisterende iverksatt behandling")
+    internal fun `skal ikke være mulig å opprette fagsak hvis siste behandling ikke er ferdig`() {
+        behandlingRepository.insert(behandling(fagsak = fagsak, status = BehandlingStatus.UTREDES))
+
+        assertThat(catchThrowable { revurderingService.opprettRevurderingManuelt(fagsak.id) })
+                .hasMessageContaining("Revurdering må ha eksisterende iverksatt behandling")
     }
 
+    @Test
+    internal fun `skal ikke være mulig å opprette fagsak hvis det ikke finnes en behandling fra før`() {
+        assertThat(catchThrowable { revurderingService.opprettRevurderingManuelt(fagsak.id) })
+                .hasMessageContaining("Revurdering må ha eksisterende iverksatt behandling")
+    }
 
     private fun lagreSøknad(behandling: Behandling,
                             fagsak: Fagsak): SøknadsskjemaOvergangsstønad {

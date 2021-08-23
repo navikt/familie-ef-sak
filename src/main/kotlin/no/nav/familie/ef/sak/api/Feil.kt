@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.api
 
 import org.springframework.http.HttpStatus
 
-data class ApiFeil(val feil: String, val httpStatus: HttpStatus) : RuntimeException()
+data class ApiFeil(val feil: String, val httpStatus: HttpStatus) : RuntimeException(feil)
 
 class Feil(message: String,
            val frontendFeilmelding: String? = null,
