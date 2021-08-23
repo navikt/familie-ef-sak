@@ -13,7 +13,7 @@ class RevurderingService(private val søknadService: SøknadService,
                          private val vurderingService: VurderingService,
                          private val grunnlagsdataService: GrunnlagsdataService) {
 
-    fun opprettRevurderingManuelt(fagsakId: UUID) {
+    fun opprettRevurderingManuelt(fagsakId: UUID): Long {
         val sisteIverksatteBehandlingUUID = behandlingService.finnSisteIverksatteBehandling(fagsakId)
                                             ?: error("Revurdering må ha eksisterende iverksatt behandling")
         val revurdering = behandlingService.opprettBehandling(BehandlingType.REVURDERING, fagsakId)
@@ -30,6 +30,10 @@ class RevurderingService(private val søknadService: SøknadService,
                                                     Oppgavetype.BehandleSak,
                                                     saksbehandler,
                                                     "Revurdering i ny løsning") // TODO 1. kan vi ha en type revurdering? 2. Bedre beskrivelse?
+
+//TODO opprettBehandlingsstatistikkTask(revurdering.id, oppgaveId.toLong())
+//TODO returnere revurdering (behandling UUID?)
+        return oppgave
     }
 
 
