@@ -33,8 +33,6 @@ internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `Skal kopiere vurderinger fra behandling 1 til 2 `() {
-
-
         val fagsak = fagsakRepository.insert(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
         val revurdering = behandlingRepository.insert(behandling(fagsak))

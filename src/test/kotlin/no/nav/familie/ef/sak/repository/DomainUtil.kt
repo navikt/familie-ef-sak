@@ -65,10 +65,12 @@ fun fagsak(identer: Set<FagsakPerson> = setOf(), stønadstype: Stønadstype = St
 fun vilkårsvurdering(behandlingId: UUID,
                      resultat: Vilkårsresultat,
                      type: VilkårType,
-                     delvilkårsvurdering: List<Delvilkårsvurdering> = emptyList()): Vilkårsvurdering =
+                     delvilkårsvurdering: List<Delvilkårsvurdering> = emptyList(),
+                     barnId: UUID? = null): Vilkårsvurdering =
         Vilkårsvurdering(behandlingId = behandlingId,
                          resultat = resultat,
                          type = type,
+                         barnId = barnId,
                          delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurdering))
 
 fun fagsakpersoner(identer: Set<String>): Set<FagsakPerson> = identer.map {

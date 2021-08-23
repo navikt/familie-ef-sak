@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.service
 
+import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
@@ -13,7 +14,7 @@ class RevurderingService(private val søknadService: SøknadService,
                          private val vurderingService: VurderingService,
                          private val grunnlagsdataService: GrunnlagsdataService) {
 
-    fun opprettRevurderingManuelt(fagsakId: UUID): Long {
+    fun opprettRevurderingManuelt(fagsakId: UUID): Behandling {
         val sisteIverksatteBehandlingUUID = behandlingService.finnSisteIverksatteBehandling(fagsakId)
                                             ?: error("Revurdering må ha eksisterende iverksatt behandling")
         val revurdering = behandlingService.opprettBehandling(BehandlingType.REVURDERING, fagsakId)
@@ -21,19 +22,17 @@ class RevurderingService(private val søknadService: SøknadService,
         /**
          * Når man revurderer basert på en ny søknad så kan man ikke bruke denne metoden hvis den kopierer forrige søknad
          */
+        grunnlagsdataService.opprettGrunnlagsdata(revurdering.id)
         søknadService.kopierSøknad(sisteIverksatteBehandlingUUID, revurdering.id)
         vurderingService.kopierVurderingerTilNyBehandling(sisteIverksatteBehandlingUUID, revurdering.id)
-        grunnlagsdataService.opprettGrunnlagsdata(revurdering.id)
 
+        oppgaveService.opprettOppgave(revurdering.id,
+                                      Oppgavetype.BehandleSak,
+                                      saksbehandler,
+                                      "Revurdering i ny løsning") // TODO 1. kan vi ha en type revurdering? 2. Bedre beskrivelse?
 
-        val oppgave = oppgaveService.opprettOppgave(revurdering.id,
-                                                    Oppgavetype.BehandleSak,
-                                                    saksbehandler,
-                                                    "Revurdering i ny løsning") // TODO 1. kan vi ha en type revurdering? 2. Bedre beskrivelse?
-
-//TODO opprettBehandlingsstatistikkTask(revurdering.id, oppgaveId.toLong())
-//TODO returnere revurdering (behandling UUID?)
-        return oppgave
+        //TODO opprettBehandlingsstatistikkTask(revurdering.id, oppgaveId.toLong())
+        return revurdering
     }
 
 
