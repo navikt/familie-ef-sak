@@ -22,8 +22,8 @@ class RevurderingService(private val søknadService: SøknadService,
         /**
          * Når man revurderer basert på en ny søknad så kan man ikke bruke denne metoden hvis den kopierer forrige søknad
          */
-        grunnlagsdataService.opprettGrunnlagsdata(revurdering.id)
         søknadService.kopierSøknad(sisteIverksatteBehandlingUUID, revurdering.id)
+        grunnlagsdataService.opprettGrunnlagsdata(revurdering.id)
         vurderingService.kopierVurderingerTilNyBehandling(sisteIverksatteBehandlingUUID, revurdering.id)
 
         oppgaveService.opprettOppgave(revurdering.id,
