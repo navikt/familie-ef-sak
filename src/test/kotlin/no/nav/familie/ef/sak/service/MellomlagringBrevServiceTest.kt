@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.repository.domain.MellomlagretBrev
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.data.repository.findByIdOrNull
+import java.time.LocalDate
 import java.util.UUID
 
 
@@ -33,7 +34,8 @@ internal class MellomlagringBrevServiceTest {
         every { MellomlagerBrevRepository.findByIdOrNull(behandlingId) } returns MellomlagretBrev(behandlingId,
                                                                                                   brevverdier,
                                                                                                   brevmal,
-                                                                                                  "1")
+                                                                                                  "1",
+                                                                                                  LocalDate.now())
 
         assertThat(MellomlagringBrevService.hentOgValiderMellomlagretBrev(behandlingId, brevmal, "2")).isNull()
     }
@@ -43,7 +45,8 @@ internal class MellomlagringBrevServiceTest {
         every { MellomlagerBrevRepository.findByIdOrNull(behandlingId) } returns MellomlagretBrev(behandlingId,
                                                                                                   brevverdier,
                                                                                                   "enAnnenBrevmal",
-                                                                                                  sanityVersjon)
+                                                                                                  sanityVersjon,
+                                                                                                  LocalDate.now())
 
         assertThat(MellomlagringBrevService.hentOgValiderMellomlagretBrev(behandlingId, brevmal, sanityVersjon)).isNull()
     }
@@ -52,6 +55,6 @@ internal class MellomlagringBrevServiceTest {
     val brevmal = "testMal"
     val sanityVersjon = "1"
     val brevverdier = "{}"
-    private val mellomlagretBrev = MellomlagretBrev(behandlingId, brevverdier, brevmal, sanityVersjon)
+    private val mellomlagretBrev = MellomlagretBrev(behandlingId, brevverdier, brevmal, sanityVersjon, LocalDate.now())
 
 }

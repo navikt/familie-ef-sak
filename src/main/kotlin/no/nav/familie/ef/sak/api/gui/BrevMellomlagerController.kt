@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.api.dto.MellomlagretBrevDto
 import no.nav.familie.ef.sak.repository.domain.MellomlagretBrev
 import no.nav.familie.ef.sak.service.MellomlagringBrevService
 import no.nav.familie.ef.sak.service.TilgangService
+import no.nav.familie.ef.sak.util.RessursUtils
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.web.bind.annotation.GetMapping
@@ -26,10 +27,10 @@ class BrevMellomlagerController(private val tilgangService: TilgangService,
                                @RequestBody mellomlagretBrev: MellomlagretBrevDto): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
 
-        return Ressurs.success(mellomlagringBrevService.mellomLagreBrev(MellomlagretBrev(behandlingId,
-                                                                                         mellomlagretBrev.brevverdier,
-                                                                                         mellomlagretBrev.brevmal,
-                                                                                         mellomlagretBrev.versjon)))
+        return Ressurs.success(mellomlagringBrevService.mellomLagreBrev (behandlingId,
+                                                 mellomlagretBrev.brevverdier,
+                                                 mellomlagretBrev.brevmal,
+                                                 mellomlagretBrev.versjon))
     }
 
 

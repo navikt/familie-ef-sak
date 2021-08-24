@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.repository.domain.MellomlagretBrev
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.LocalDate
 
 internal class MellomlagringBrevRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -19,7 +20,7 @@ internal class MellomlagringBrevRepositoryTest : OppslagSpringRunnerTest() {
     internal fun `skal lagre mellomlagret brev`() {
         val fagsak = fagsakRepository.insert(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
-        val mellomlagretBrev = MellomlagretBrev(behandling.id, "{}", "mal", "1")
+        val mellomlagretBrev = MellomlagretBrev(behandling.id, "{}", "mal", "1", LocalDate.now())
 
         mellomlagerBrevRepository.insert(mellomlagretBrev)
 
