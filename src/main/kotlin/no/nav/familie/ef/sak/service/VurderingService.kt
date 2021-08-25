@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.service
 
+import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.api.dto.VilkårDto
 import no.nav.familie.ef.sak.api.dto.VilkårGrunnlagDto
 import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
@@ -35,7 +36,6 @@ class VurderingService(private val behandlingService: BehandlingService,
     }
 
 
-
     private fun hentEllerOpprettVurderinger(behandlingId: UUID,
                                             metadata: HovedregelMetadata): List<VilkårsvurderingDto> {
         return hentEllerOpprettVurderingerForVilkår(behandlingId, metadata).map(Vilkårsvurdering::tilDto)
@@ -61,8 +61,12 @@ class VurderingService(private val behandlingService: BehandlingService,
     private fun behandlingErLåstForVidereRedigering(behandlingId: UUID) =
             behandlingService.hentBehandling(behandlingId).status.behandlingErLåstForVidereRedigering()
 
-    fun kopierVurderingerTilNyBehandling(eksisterendeBehandlingsId: UUID, nyBehandlingsId: UUID) {
-        val vurderinger = vilkårsvurderingRepository.findByBehandlingId(eksisterendeBehandlingsId)
+    fun kopierVurderingerTilNyBehandling(eksisterendeBehandlingId: UUID, nyBehandlingsId: UUID) {
+        val vurderinger = vilkårsvurderingRepository.findByBehandlingId(eksisterendeBehandlingId)
+        if (vurderinger.isEmpty()) {
+            val melding = "Tidligere behandling=$eksisterendeBehandlingId har ikke noen vilkår";
+            throw Feil(melding, melding)
+        }
         val vurderingerKopi: List<Vilkårsvurdering> = vurderinger.map {
             it.copy(id = UUID.randomUUID(), behandlingId = nyBehandlingsId, sporbar = Sporbar())
         }

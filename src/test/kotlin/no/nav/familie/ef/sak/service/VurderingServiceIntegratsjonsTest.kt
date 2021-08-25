@@ -14,13 +14,16 @@ import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.Fagsak
 import no.nav.familie.ef.sak.repository.domain.VilkårType
 import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
+import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
 import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsstønad
 import no.nav.familie.ef.sak.service.SøknadService
 import no.nav.familie.ef.sak.service.VurderingService
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.util.UUID
 
 
 internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
@@ -32,36 +35,49 @@ internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
     @Autowired lateinit var søknadService: SøknadService
 
     @Test
-    internal fun `Skal kopiere vurderinger fra behandling 1 til 2 `() {
+    internal fun `kopierVurderingerTilNyBehandling - skal kopiere vurderinger til ny behandling`() {
         val fagsak = fagsakRepository.insert(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
         val revurdering = behandlingRepository.insert(behandling(fagsak))
-        val søknadskjema: SøknadsskjemaOvergangsstønad = lagreSøknad(behandling, fagsak)
-        val delvilkårsvurdering = SivilstandRegel().initereDelvilkårsvurdering(HovedregelMetadata(søknadskjema,
-                                                                                                  Sivilstandstype.ENKE_ELLER_ENKEMANN))
-        val vilkårsvurderinger = listOf(vilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT,
-                                                         type = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
-                                                         behandlingId = behandling.id),
-                                        vilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT,
-                                                         type = VilkårType.SIVILSTAND,
-                                                         behandlingId = behandling.id,
-                                                         delvilkårsvurdering = delvilkårsvurdering)
-        )
-        vilkårsvurderingRepository.insertAll(vilkårsvurderinger)
+        val søknadskjema = lagreSøknad(behandling, fagsak)
+        val vilkårForBehandling = opprettVilkårsvurderinger(søknadskjema, behandling).first()
 
         vurderingService.kopierVurderingerTilNyBehandling(behandling.id, revurdering.id)
 
-        //val orginalVurderinger = vilkårsvurderingRepository.findByBehandlingId(behandling.id)
-        val revurderingsVurderinger = vilkårsvurderingRepository.findByBehandlingId(revurdering.id)
+        val vilkårForRevurdering = vilkårsvurderingRepository.findByBehandlingId(revurdering.id).first()
 
-        Assertions.assertThat(revurderingsVurderinger).isNotNull
-        val sivilstand = revurderingsVurderinger.find { it.type === VilkårType.SIVILSTAND }!!
-        Assertions.assertThat(sivilstand.delvilkårsvurdering.delvilkårsvurderinger.first()).isNotNull // TODO sjekke hva?
+        assertThat(vilkårForBehandling.id).isNotEqualTo(vilkårForRevurdering.id)
+        assertThat(vilkårForBehandling.behandlingId).isNotEqualTo(vilkårForRevurdering.behandlingId)
+        assertThat(vilkårForBehandling.sporbar.opprettetTid).isNotEqualTo(vilkårForRevurdering.sporbar.opprettetTid)
 
+        assertThat(vilkårForBehandling.resultat).isEqualTo(vilkårForRevurdering.resultat)
+        assertThat(vilkårForBehandling.type).isEqualTo(vilkårForRevurdering.type)
+        assertThat(vilkårForBehandling.barnId).isNotNull
+        assertThat(vilkårForBehandling.barnId).isEqualTo(vilkårForRevurdering.barnId)
+        assertThat(vilkårForBehandling.delvilkårsvurdering).isEqualTo(vilkårForRevurdering.delvilkårsvurdering)
+    }
 
-        // sjekk delvilkårsvurdering
+    @Test
+    internal fun `kopierVurderingerTilNyBehandling - skal kaste feil hvis det ikke finnes noen vurderinger`() {
+        val tidligereBehandlingId = UUID.randomUUID()
+        val fagsak = fagsakRepository.insert(fagsak())
+        val revurdering = behandlingRepository.insert(behandling(fagsak))
 
+        assertThat(catchThrowable { vurderingService.kopierVurderingerTilNyBehandling(tidligereBehandlingId, revurdering.id) })
+                .hasMessage("Tidligere behandling=$tidligereBehandlingId har ikke noen vilkår")
+    }
 
+    private fun opprettVilkårsvurderinger(søknadskjema: SøknadsskjemaOvergangsstønad,
+                                          behandling: Behandling): List<Vilkårsvurdering> {
+        val barnId = søknadskjema.barn.first().id
+        val hovedregelMetadata = HovedregelMetadata(søknadskjema, Sivilstandstype.ENKE_ELLER_ENKEMANN)
+        val delvilkårsvurdering = SivilstandRegel().initereDelvilkårsvurdering(hovedregelMetadata)
+        val vilkårsvurderinger = listOf(vilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT,
+                                                         type = VilkårType.SIVILSTAND,
+                                                         behandlingId = behandling.id,
+                                                         barnId = barnId,
+                                                         delvilkårsvurdering = delvilkårsvurdering))
+        return vilkårsvurderingRepository.insertAll(vilkårsvurderinger)
     }
 
     private fun lagreSøknad(behandling: Behandling,
