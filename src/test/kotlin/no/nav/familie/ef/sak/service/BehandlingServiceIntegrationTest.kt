@@ -20,19 +20,6 @@ internal class BehandlingServiceIntegrationTest : OppslagSpringRunnerTest() {
     @Autowired lateinit var behandlingService: BehandlingService
 
     @Test
-    internal fun `opprettBehandling - revurdering skal sette forrige behandling til aktiv = false`() {
-        val fagsak = fagsakRepository.insert(fagsak())
-        val behandling = behandlingRepository.insert(behandling(fagsak = fagsak, status = BehandlingStatus.FERDIGSTILT))
-
-        val revurdering = behandlingService.opprettBehandling(BehandlingType.REVURDERING, fagsak.id)
-
-        assertThat(behandling.aktiv).isTrue
-        assertThat(behandlingService.hentBehandling(behandling.id).aktiv).isFalse
-        assertThat(behandling.fagsakId).isEqualTo(revurdering.fagsakId)
-        assertThat(revurdering.aktiv).isTrue
-    }
-
-    @Test
     internal fun `opprettBehandling - skal ikke være mulig å opprette en revurdering hvis forrige behandling ikke er ferdigstilt`() {
         val fagsak = fagsakRepository.insert(fagsak())
         behandlingRepository.insert(behandling(fagsak = fagsak,

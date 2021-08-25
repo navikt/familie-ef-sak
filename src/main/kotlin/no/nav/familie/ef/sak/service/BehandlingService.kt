@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.service
 
-import no.nav.familie.ef.sak.api.ApiFeil
 import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.repository.BehandlingRepository
 import no.nav.familie.ef.sak.repository.BehandlingsjournalpostRepository
@@ -14,6 +13,7 @@ import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.service.steg.StegType
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.util.OpprettBehandlingUtil.validerKanOppretteNyBehandling
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import org.slf4j.Logger
@@ -48,15 +48,7 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
                           fagsakId: UUID,
                           søknad: SøknadOvergangsstønadKontrakt,
                           journalpost: Journalpost): Behandling {
-        /**
-         * Trenger noen form av håndtering av aktiv her, sånn att vi ikke har flere blanketter på en person som er aktive,
-         * hvis vi har det så kan den andre opprettBehandling bli feil, då den ved eks revurdering 2 henter opp en blankett
-         */
-        val behandling = behandlingRepository.insert(Behandling(fagsakId = fagsakId,
-                                                                type = behandlingType,
-                                                                steg = StegType.VILKÅR,
-                                                                status = BehandlingStatus.OPPRETTET,
-                                                                resultat = BehandlingResultat.IKKE_SATT))
+        val behandling = opprettBehandling(behandlingType, fagsakId)
         behandlingsjournalpostRepository.insert(Behandlingsjournalpost(behandling.id,
                                                                        journalpost.journalpostId,
                                                                        journalpost.journalposttype))
@@ -72,11 +64,8 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
                           fagsakId: UUID,
                           status: BehandlingStatus = BehandlingStatus.OPPRETTET,
                           stegType: StegType = StegType.VILKÅR): Behandling {
-        val sisteBehandling = behandlingRepository.findByFagsakIdAndAktivIsTrue(fagsakId)
-        validOmViKanOppretteNyBehandling(sisteBehandling, behandlingType)
-        if (sisteBehandling != null) {
-            behandlingRepository.update(sisteBehandling.copy(aktiv = false))
-        }
+        val tidligereBehandlinger = behandlingRepository.findByFagsakId(fagsakId)
+        validerKanOppretteNyBehandling(behandlingType, tidligereBehandlinger)
 
         return behandlingRepository.insert(Behandling(fagsakId = fagsakId,
                                                       type = behandlingType,
@@ -84,26 +73,6 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
                                                       status = status,
                                                       resultat = BehandlingResultat.IKKE_SATT))
     }
-
-    private fun validOmViKanOppretteNyBehandling(sisteBehandling: Behandling?,
-                                                 behandlingType: BehandlingType) {
-        if (sisteBehandling != null && sisteBehandling.status != BehandlingStatus.FERDIGSTILT) {
-            throw ApiFeil("Det finnes en behandling på fagsaken som ikke er ferdigstilt", HttpStatus.BAD_REQUEST)
-        }
-        if (behandlingType == BehandlingType.REVURDERING) {
-            if (sisteBehandling == null) {
-                throw ApiFeil("Det finnes ikke en tidligere behandling på fagsaken", HttpStatus.BAD_REQUEST)
-            }
-            if (sisteBehandling.type == BehandlingType.BLANKETT) { // Hvordan blir migrerte behandlinger behandlet?
-                throw ApiFeil("Siste behandling ble behandlet i infotrygd", HttpStatus.BAD_REQUEST)
-            }
-            if (sisteBehandling.type == BehandlingType.TEKNISK_OPPHØR) {
-                throw ApiFeil("Det er ikke mulig å lage en revurdering når siste behandlingen er teknisk opphør",
-                              HttpStatus.BAD_REQUEST)
-            }
-        }
-    }
-
 
     fun hentBehandling(behandlingId: UUID): Behandling = behandlingRepository.findByIdOrThrow(behandlingId)
 
