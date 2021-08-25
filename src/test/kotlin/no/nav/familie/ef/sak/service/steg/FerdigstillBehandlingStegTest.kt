@@ -47,7 +47,6 @@ internal class FerdigstillBehandlingStegTest {
 
     @Test
     internal fun `skal kaste feil hvis behandlingen er av andre typer`() {
-        assertThat(catchThrowable { task.utførSteg(behandling(fagsak, type = BehandlingType.KLAGE), null) })
         assertThat(catchThrowable { task.utførSteg(behandling(fagsak, type = BehandlingType.TEKNISK_OPPHØR), null) })
         assertThat(catchThrowable { task.utførSteg(behandling(fagsak, type = BehandlingType.REVURDERING), null) })
     }
