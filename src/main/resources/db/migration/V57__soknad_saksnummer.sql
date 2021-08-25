@@ -1,0 +1,1 @@
+ALTER TABLE grunnlag_soknad DROP COLUMN saksnummer_infotrygd;
