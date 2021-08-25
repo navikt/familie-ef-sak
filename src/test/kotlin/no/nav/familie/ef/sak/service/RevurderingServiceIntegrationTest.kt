@@ -55,7 +55,8 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `skal opprette revurdering`() {
         val behandling = behandlingRepository.insert(behandling(fagsak = fagsak, status = BehandlingStatus.FERDIGSTILT))
-        lagreSøknad(behandling, fagsak)
+        val søknad = lagreSøknad(behandling, fagsak)
+        opprettVilkår(behandling, søknad)
 
         val opprettRevurderingManuelt = revurderingService.opprettRevurderingManuelt(fagsak.id)
 
