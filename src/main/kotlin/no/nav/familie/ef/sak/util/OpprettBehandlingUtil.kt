@@ -27,12 +27,12 @@ object OpprettBehandlingUtil {
             validerKanOppretteFørstegangsbehandling(sisteBehandling)
         }
         if (behandlingType == BehandlingType.REVURDERING) {
-            validerKanOppretteReurdering(sisteBehandling)
+            validerKanOppretteRevurdering(sisteBehandling)
         }
     }
 
     private fun validerTidligereBehandlingerErFerdigstile(tidligereBehandlinger: List<Behandling>) {
-        if (tidligereBehandlinger.isNotEmpty() && tidligereBehandlinger.any { it.status != BehandlingStatus.FERDIGSTILT }) {
+        if (tidligereBehandlinger.any { it.status != BehandlingStatus.FERDIGSTILT }) {
             throw ApiFeil("Det finnes en behandling på fagsaken som ikke er ferdigstilt", HttpStatus.BAD_REQUEST)
         }
     }
@@ -52,7 +52,7 @@ object OpprettBehandlingUtil {
         }
     }
 
-    private fun validerKanOppretteReurdering(sisteBehandling: Behandling?) {
+    private fun validerKanOppretteRevurdering(sisteBehandling: Behandling?) {
         if (sisteBehandling == null) {
             throw ApiFeil("Det finnes ikke en tidligere behandling på fagsaken", HttpStatus.BAD_REQUEST)
         }
