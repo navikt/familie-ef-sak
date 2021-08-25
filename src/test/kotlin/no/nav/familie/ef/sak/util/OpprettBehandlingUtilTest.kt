@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.util
 
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
-import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.util.OpprettBehandlingUtil.validerKanOppretteNyBehandling
@@ -16,23 +15,8 @@ internal class OpprettBehandlingUtilTest {
 
     @Test
     internal fun `førstegangsbehandling - mulig å lage behandling når det ikke finnes behandling fra før`() {
-        val tidligereBehandlinger: List<Behandling> = listOf()
-        validerKanOppretteNyBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, tidligereBehandlinger)
-        // skal ikke kaste feil
-    }
-
-
-    @Test
-    internal fun `det skal ikke være mulig å opprette en revurdering hvis forrige behandling ikke er ferdigstilt`() {
-        assertThat(catchThrowable {
-            validerKanOppretteNyBehandling(BehandlingType.REVURDERING,
-                                           listOf(behandling(fagsak = fagsak,
-                                                             status = BehandlingStatus.FERDIGSTILT),
-                                                  behandling(fagsak = fagsak,
-                                                             status = BehandlingStatus.UTREDES),
-                                                  behandling(fagsak = fagsak,
-                                                             status = BehandlingStatus.FERDIGSTILT)))
-        }).hasMessage("Det finnes en behandling på fagsaken som ikke er ferdigstilt")
+        assertThat(catchThrowable { validerKanOppretteNyBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, listOf()) })
+                .doesNotThrowAnyException()
     }
 
     @Test
@@ -49,6 +33,19 @@ internal class OpprettBehandlingUtilTest {
                 }).hasMessage("Siste behandlingen for en førstegangsbehandling må være av typen blankett eller teknisk opphør")
             }
         }
+    }
+
+    @Test
+    internal fun `revurdering - det skal ikke være mulig å opprette en revurdering hvis forrige behandling ikke er ferdigstilt`() {
+        assertThat(catchThrowable {
+            validerKanOppretteNyBehandling(BehandlingType.REVURDERING,
+                                           listOf(behandling(fagsak = fagsak,
+                                                             status = BehandlingStatus.FERDIGSTILT),
+                                                  behandling(fagsak = fagsak,
+                                                             status = BehandlingStatus.UTREDES),
+                                                  behandling(fagsak = fagsak,
+                                                             status = BehandlingStatus.FERDIGSTILT)))
+        }).hasMessage("Det finnes en behandling på fagsaken som ikke er ferdigstilt")
     }
 
     @Test

@@ -18,7 +18,7 @@ object OpprettBehandlingUtil {
                 .filter { it.resultat != BehandlingResultat.ANNULLERT }
                 .maxByOrNull { it.sporbar.opprettetTid }
 
-        validerTidligereBehandlingerErFerdigstile(tidligereBehandlinger)
+        validerTidligereBehandlingerErFerdigstilte(tidligereBehandlinger)
 
         if (behandlingType == BehandlingType.BLANKETT) {
             validerKanOppretteBlankett(tidligereBehandlinger)
@@ -31,7 +31,7 @@ object OpprettBehandlingUtil {
         }
     }
 
-    private fun validerTidligereBehandlingerErFerdigstile(tidligereBehandlinger: List<Behandling>) {
+    private fun validerTidligereBehandlingerErFerdigstilte(tidligereBehandlinger: List<Behandling>) {
         if (tidligereBehandlinger.any { it.status != BehandlingStatus.FERDIGSTILT }) {
             throw ApiFeil("Det finnes en behandling på fagsaken som ikke er ferdigstilt", HttpStatus.BAD_REQUEST)
         }
