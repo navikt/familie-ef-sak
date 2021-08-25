@@ -36,7 +36,6 @@ internal class SøknadRepositoryTest : OppslagSpringRunnerTest() {
                 .insert(Søknad(soknadsskjemaId = UUID.randomUUID(),
                                behandlingId = behandlingId,
                                type = SøknadType.OVERGANGSSTØNAD,
-                               saksnummerInfotrygd = saksnummer,
                                søker = Søker(fødselsnummer, "Navn"),
                                journalpostId = "journalId$saksnummer",
                                sporbar = Sporbar(opprettetTid = LocalDateTime.of(nextInt(0, 2020),
