@@ -26,10 +26,10 @@ class RevurderingService(private val søknadService: SøknadService,
         grunnlagsdataService.opprettGrunnlagsdata(revurdering.id)
         vurderingService.kopierVurderingerTilNyBehandling(sisteIverksatteBehandlingUUID, revurdering.id)
 
-        oppgaveService.opprettOppgave(revurdering.id,
-                                      Oppgavetype.BehandleSak,
-                                      saksbehandler,
-                                      "Revurdering i ny løsning") // TODO 1. kan vi ha en type revurdering? 2. Bedre beskrivelse?
+        oppgaveService.opprettOppgave(behandlingId= revurdering.id,
+                                      oppgavetype = Oppgavetype.BehandleSak,
+                                      tilordnetNavIdent = saksbehandler,
+                                      beskrivelse = "Revurdering i ny løsning")
 
         //TODO opprettBehandlingsstatistikkTask(revurdering.id, oppgaveId.toLong())
         return revurdering
