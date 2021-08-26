@@ -29,7 +29,7 @@ class MellomlagringBrevService(private val mellomlagerBrevRepository: Mellomlage
 
     fun hentOgValiderMellomlagretBrev(behhandlingId: UUID, brevmal: String, sanityVersjon: String): MellomlagretBrev? {
         val mellomlagretBrev = mellomlagerBrevRepository.findByIdOrNull(behhandlingId)
-        if (mellomlagretBrev?.brevmal === brevmal && sanityVersjon === mellomlagretBrev.sanityVersjon) {
+        if (mellomlagretBrev?.brevmal == brevmal && sanityVersjon == mellomlagretBrev.sanityVersjon) {
             return mellomlagretBrev
         }
         return null
