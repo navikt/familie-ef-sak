@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.api.beregning.Innvilget
 import no.nav.familie.ef.sak.api.beregning.ResultatType
 import no.nav.familie.ef.sak.api.beregning.VedtakService
 import no.nav.familie.ef.sak.api.beregning.VedtaksperiodeDto
+import no.nav.familie.ef.sak.api.simulering.BlankettSimuleringsService
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsakpersoner
@@ -35,14 +36,14 @@ internal class SimuleringServiceTest {
     private val behandlingService = mockk<BehandlingService>()
     private val fagsakService = mockk<FagsakService>()
     private val vedtakService = mockk<VedtakService>()
-    private val beregningService = BeregningService()
+    private val blankettSimuleringsService = mockk<BlankettSimuleringsService>()
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
 
     private val simuleringService = SimuleringService(iverksettClient = iverksettClient,
                                                       behandlingService = behandlingService,
                                                       fagsakService = fagsakService,
                                                       vedtakService = vedtakService,
-                                                      beregningService = beregningService,
+                                                      blankettSimuleringsService = blankettSimuleringsService,
                                                       tilkjentYtelseService = tilkjentYtelseService)
 
 

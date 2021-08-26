@@ -1,0 +1,340 @@
+{
+  "simuleringMottaker": [
+    {
+      "simulertPostering": [
+        {
+          "fagOmrådeKode": "ENSLIG_FORSØRGER_OVERGANGSSTØNAD",
+          "fom": "2021-02-01",
+          "tom": "2021-02-28",
+          "betalingType": "DEBIT",
+          "beløp": 18903,
+          "posteringType": "FEILUTBETALING",
+          "forfallsdato": "2021-08-25",
+          "utenInntrekk": false
+        },
+        {
+          "fagOmrådeKode": "ENSLIG_FORSØRGER_OVERGANGSSTØNAD",
+          "fom": "2021-02-01",
+          "tom": "2021-02-28",
+          "betalingType": "DEBIT",
+          "beløp": 18903,
+          "posteringType": "YTELSE",
+          "forfallsdato": "2021-08-25",
+          "utenInntrekk": false
+        },
+        {
+          "fagOmrådeKode": "ENSLIG_FORSØRGER_OVERGANGSSTØNAD",
+          "fom": "2021-02-01",
+          "tom": "2021-02-28",
+          "betalingType": "KREDIT",
+          "beløp": -18903,
+          "posteringType": "MOTP",
+          "forfallsdato": "2021-08-25",
+          "utenInntrekk": false
+        },
+        {
+          "fagOmrådeKode": "ENSLIG_FORSØRGER_OVERGANGSSTØNAD",
+          "fom": "2021-02-01",
+          "tom": "2021-02-28",
+          "betalingType": "KREDIT",
+          "beløp": -18903,
+          "posteringType": "YTELSE",
+          "forfallsdato": "2021-08-25",
+          "utenInntrekk": false
+        },
+        {
+          "fagOmrådeKode": "ENSLIG_FORSØRGER_OVERGANGSSTØNAD",
+          "fom": "2021-03-01",
+          "tom": "2021-03-31",
+          "betalingType": "DEBIT",
+          "beløp": 11125,
+          "posteringType": "YTELSE",
+          "forfallsdato": "2021-08-25",
+          "utenInntrekk": false
+        },
+        {
+          "fagOmrådeKode": "ENSLIG_FORSØRGER_OVERGANGSSTØNAD",
+          "fom": "2021-03-01",
+          "tom": "2021-03-31",
+          "betalingType": "DEBIT",
+          "beløp": 11125,
+          "posteringType": "FEILUTBETALING",
+          "forfallsdato": "2021-08-25",
+          "utenInntrekk": false
+        },
+        {
+          "fagOmrådeKode": "ENSLIG_FORSØRGER_OVERGANGSSTØNAD",
+          "fom": "2021-03-01",
+          "tom": "2021-03-31",
+          "betalingType": "KREDIT",
+          "beløp": -11125,
+          "posteringType": "MOTP",
+          "forfallsdato": "2021-08-25",
+          "utenInntrekk": false
+        },
+        {
+          "fagOmrådeKode": "ENSLIG_FORSØRGER_OVERGANGSSTØNAD",
+          "fom": "2021-03-01",
+          "tom": "2021-03-31",
+          "betalingType": "DEBIT",
+          "beløp": 7778,
+          "posteringType": "YTELSE",
+          "forfallsdato": "2021-08-25",
+          "utenInntrekk": false
+        },
+        {
+          "fagOmrådeKode": "ENSLIG_FORSØRGER_OVERGANGSSTØNAD",
+          "fom": "2021-03-01",
+          "tom": "2021-03-31",
+          "betalingType": "KREDIT",
+          "beløp": -18903,
+          "posteringType": "YTELSE",
+          "forfallsdato": "2021-08-25",
+          "utenInntrekk": false
+        },
+        {
+          "fagOmrådeKode": "ENSLIG_FORSØRGER_OVERGANGSSTØNAD",
+          "fom": "2021-04-01",
+          "tom": "2021-04-30",
+          "betalingType": "DEBIT",
+          "beløp": 11125,
+          "posteringType": "YTELSE",
+          "forfallsdato": "2021-08-25",
+          "utenInntrekk": false
+        },
+        {
+          "fagOmrådeKode": "ENSLIG_FORSØRGER_OVERGANGSSTØNAD",
+          "fom": "2021-04-01",
+          "tom": "2021-04-30",
+          "betalingType": "DEBIT",
+          "beløp": 11125,
+          "posteringType": "FEILUTBETALING",
+          "forfallsdato": "2021-08-25",
+          "utenInntrekk": false
+        },
+        {
+          "fagOmrådeKode": "ENSLIG_FORSØRGER_OVERGANGSSTØNAD",
+          "fom": "2021-04-01",
+          "tom": "2021-04-30",
+          "betalingType": "KREDIT",
+          "beløp": -11125,
+          "posteringType": "MOTP",
+          "forfallsdato": "2021-08-25",
+          "utenInntrekk": false
+        },
+        {
+          "fagOmrådeKode": "ENSLIG_FORSØRGER_OVERGANGSSTØNAD",
+          "fom": "2021-04-01",
+          "tom": "2021-04-30",
+          "betalingType": "DEBIT",
+          "beløp": 7778,
+          "posteringType": "YTELSE",
+          "forfallsdato": "2021-08-25",
+          "utenInntrekk": false
+        },
+        {
+          "fagOmrådeKode": "ENSLIG_FORSØRGER_OVERGANGSSTØNAD",
+          "fom": "2021-04-01",
+          "tom": "2021-04-30",
+          "betalingType": "KREDIT",
+          "beløp": -18903,
+          "posteringType": "YTELSE",
+          "forfallsdato": "2021-08-25",
+          "utenInntrekk": false
+        },
+        {
+          "fagOmrådeKode": "ENSLIG_FORSØRGER_OVERGANGSSTØNAD",
+          "fom": "2021-05-01",
+          "tom": "2021-05-31",
+          "betalingType": "DEBIT",
+          "beløp": 11030,
+          "posteringType": "YTELSE",
+          "forfallsdato": "2021-08-25",
+          "utenInntrekk": false
+        },
+        {
+          "fagOmrådeKode": "ENSLIG_FORSØRGER_OVERGANGSSTØNAD",
+          "fom": "2021-05-01",
+          "tom": "2021-05-31",
+          "betalingType": "DEBIT",
+          "beløp": 11030,
+          "posteringType": "FEILUTBETALING",
+          "forfallsdato": "2021-08-25",
+          "utenInntrekk": false
+        },
+        {
+          "fagOmrådeKode": "ENSLIG_FORSØRGER_OVERGANGSSTØNAD",
+          "fom": "2021-05-01",
+          "tom": "2021-05-31",
+          "betalingType": "KREDIT",
+          "beløp": -11030,
+          "posteringType": "MOTP",
+          "forfallsdato": "2021-08-25",
+          "utenInntrekk": false
+        },
+        {
+          "fagOmrådeKode": "ENSLIG_FORSØRGER_OVERGANGSSTØNAD",
+          "fom": "2021-05-01",
+          "tom": "2021-05-31",
+          "betalingType": "DEBIT",
+          "beløp": 8820,
+          "posteringType": "YTELSE",
+          "forfallsdato": "2021-08-25",
+          "utenInntrekk": false
+        },
+        {
+          "fagOmrådeKode": "ENSLIG_FORSØRGER_OVERGANGSSTØNAD",
+          "fom": "2021-05-01",
+          "tom": "2021-05-31",
+          "betalingType": "KREDIT",
+          "beløp": -19850,
+          "posteringType": "YTELSE",
+          "forfallsdato": "2021-08-25",
+          "utenInntrekk": false
+        },
+        {
+          "fagOmrådeKode": "ENSLIG_FORSØRGER_OVERGANGSSTØNAD",
+          "fom": "2021-06-01",
+          "tom": "2021-06-30",
+          "betalingType": "DEBIT",
+          "beløp": 11030,
+          "posteringType": "YTELSE",
+          "forfallsdato": "2021-08-25",
+          "utenInntrekk": false
+        },
+        {
+          "fagOmrådeKode": "ENSLIG_FORSØRGER_OVERGANGSSTØNAD",
+          "fom": "2021-06-01",
+          "tom": "2021-06-30",
+          "betalingType": "DEBIT",
+          "beløp": 11030,
+          "posteringType": "FEILUTBETALING",
+          "forfallsdato": "2021-08-25",
+          "utenInntrekk": false
+        },
+        {
+          "fagOmrådeKode": "ENSLIG_FORSØRGER_OVERGANGSSTØNAD",
+          "fom": "2021-06-01",
+          "tom": "2021-06-30",
+          "betalingType": "KREDIT",
+          "beløp": -11030,
+          "posteringType": "MOTP",
+          "forfallsdato": "2021-08-25",
+          "utenInntrekk": false
+        },
+        {
+          "fagOmrådeKode": "ENSLIG_FORSØRGER_OVERGANGSSTØNAD",
+          "fom": "2021-06-01",
+          "tom": "2021-06-30",
+          "betalingType": "DEBIT",
+          "beløp": 8820,
+          "posteringType": "YTELSE",
+          "forfallsdato": "2021-08-25",
+          "utenInntrekk": false
+        },
+        {
+          "fagOmrådeKode": "ENSLIG_FORSØRGER_OVERGANGSSTØNAD",
+          "fom": "2021-06-01",
+          "tom": "2021-06-30",
+          "betalingType": "KREDIT",
+          "beløp": -19850,
+          "posteringType": "YTELSE",
+          "forfallsdato": "2021-08-25",
+          "utenInntrekk": false
+        },
+        {
+          "fagOmrådeKode": "ENSLIG_FORSØRGER_OVERGANGSSTØNAD",
+          "fom": "2021-07-01",
+          "tom": "2021-07-31",
+          "betalingType": "KREDIT",
+          "beløp": -3472,
+          "posteringType": "FORSKUDSSKATT",
+          "forfallsdato": "2021-07-19",
+          "utenInntrekk": false
+        },
+        {
+          "fagOmrådeKode": "ENSLIG_FORSØRGER_OVERGANGSSTØNAD",
+          "fom": "2021-07-01",
+          "tom": "2021-07-31",
+          "betalingType": "DEBIT",
+          "beløp": 6945,
+          "posteringType": "YTELSE",
+          "forfallsdato": "2021-07-19",
+          "utenInntrekk": false
+        },
+        {
+          "fagOmrådeKode": "ENSLIG_FORSØRGER_OVERGANGSSTØNAD",
+          "fom": "2021-08-01",
+          "tom": "2021-08-31",
+          "betalingType": "DEBIT",
+          "beløp": 12905,
+          "posteringType": "YTELSE",
+          "forfallsdato": "2021-08-25",
+          "utenInntrekk": false
+        },
+        {
+          "fagOmrådeKode": "ENSLIG_FORSØRGER_OVERGANGSSTØNAD",
+          "fom": "2021-08-01",
+          "tom": "2021-08-31",
+          "betalingType": "DEBIT",
+          "beløp": 12905,
+          "posteringType": "FEILUTBETALING",
+          "forfallsdato": "2021-08-25",
+          "utenInntrekk": false
+        },
+        {
+          "fagOmrådeKode": "ENSLIG_FORSØRGER_OVERGANGSSTØNAD",
+          "fom": "2021-08-01",
+          "tom": "2021-08-31",
+          "betalingType": "KREDIT",
+          "beløp": -12905,
+          "posteringType": "MOTP",
+          "forfallsdato": "2021-08-25",
+          "utenInntrekk": false
+        },
+        {
+          "fagOmrådeKode": "ENSLIG_FORSØRGER_OVERGANGSSTØNAD",
+          "fom": "2021-08-01",
+          "tom": "2021-08-31",
+          "betalingType": "DEBIT",
+          "beløp": 6945,
+          "posteringType": "YTELSE",
+          "forfallsdato": "2021-08-25",
+          "utenInntrekk": false
+        },
+        {
+          "fagOmrådeKode": "ENSLIG_FORSØRGER_OVERGANGSSTØNAD",
+          "fom": "2021-08-01",
+          "tom": "2021-08-31",
+          "betalingType": "KREDIT",
+          "beløp": -19850,
+          "posteringType": "YTELSE",
+          "forfallsdato": "2021-08-25",
+          "utenInntrekk": false
+        },
+        {
+          "fagOmrådeKode": "ENSLIG_FORSØRGER_OVERGANGSSTØNAD",
+          "fom": "2021-09-01",
+          "tom": "2021-09-30",
+          "betalingType": "KREDIT",
+          "beløp": -3472,
+          "posteringType": "FORSKUDSSKATT",
+          "forfallsdato": "2021-09-17",
+          "utenInntrekk": false
+        },
+        {
+          "fagOmrådeKode": "ENSLIG_FORSØRGER_OVERGANGSSTØNAD",
+          "fom": "2021-09-01",
+          "tom": "2021-09-30",
+          "betalingType": "DEBIT",
+          "beløp": 6945,
+          "posteringType": "YTELSE",
+          "forfallsdato": "2021-09-17",
+          "utenInntrekk": false
+        }
+      ],
+      "mottakerNummer": "03096519477",
+      "mottakerType": "BRUKER"
+    }
+  ]
+}

@@ -1,11 +1,15 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.config
 
+import com.fasterxml.jackson.module.kotlin.readValue
+import com.github.jknack.handlebars.internal.antlr.misc.Utils.readFile
+import com.github.tomakehurst.wiremock.client.WireMock
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.kontrakter.ef.iverksett.IverksettStatus
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.simulering.BetalingType
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import no.nav.familie.kontrakter.felles.simulering.FagOmrådeKode
@@ -17,6 +21,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
+import java.io.File
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -38,15 +43,16 @@ class IverksettClientMock {
                                                   forfallsdato = LocalDate.of(2021, 1, 15),
                                                   utenInntrekk = false)
 
-        every { iverksettClient.simuler(any()) } returns DetaljertSimuleringResultat(simuleringMottaker = listOf(
-                SimuleringMottaker(simulertPostering = listOf(simulertPostering),
-                                   mottakerNummer = "123",
-                                   mottakerType = MottakerType.BRUKER)))
+        every { iverksettClient.simuler(any()) } returns objectMapper.readValue(readFile("simuleringsresultat.json"))
 
         every { iverksettClient.iverksett(any(), any()) } just Runs
         every { iverksettClient.iverksettTekniskOpphør(any()) } just Runs
         every { iverksettClient.hentStatus(any()) } returns IverksettStatus.OK
 
         return iverksettClient
+    }
+
+    private fun readFile(filnavn: String): String {
+        return this::class.java.getResource("/json/$filnavn").readText()
     }
 }
