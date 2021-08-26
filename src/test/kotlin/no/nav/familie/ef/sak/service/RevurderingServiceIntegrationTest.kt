@@ -78,10 +78,8 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         assertThat(vilkårForBehandling.behandlingId).isNotEqualTo(vilkårForRevurdering.behandlingId)
         assertThat(vilkårForBehandling.sporbar.opprettetTid).isNotEqualTo(vilkårForRevurdering.sporbar.opprettetTid)
 
-        assertThat(vilkårForBehandling.resultat).isEqualTo(vilkårForRevurdering.resultat)
-        assertThat(vilkårForBehandling.type).isEqualTo(vilkårForRevurdering.type)
-        assertThat(vilkårForBehandling.barnId).isEqualTo(vilkårForRevurdering.barnId)
-        assertThat(vilkårForBehandling.delvilkårsvurdering).isEqualTo(vilkårForRevurdering.delvilkårsvurdering)
+        assertThat(vilkårForBehandling).usingRecursiveComparison().ignoringFields("id", "sporbar", "behandlingId")
+                .isEqualTo(vilkårForRevurdering)
     }
 
     @Test
