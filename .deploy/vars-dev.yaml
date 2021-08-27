@@ -2,7 +2,6 @@ springProfile: dev
 ingress: https://familie-ef-sak.dev.intern.nav.no
 inboundApplications:
   - familie-ef-sak-frontend-lokal
-  - familie-ef-personhendelse
 inboundApplicationsExternal:
   - application: familie-ef-proxy
     namespace: teamfamilie

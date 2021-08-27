@@ -48,6 +48,7 @@ spec:
       rules:
         - application: familie-ef-sak-frontend
         - application: familie-prosessering
+        - application: familie-ef-personhendelse
         {{#each inboundApplications as |application|}}
         - application: {{application}}
         {{/each}}
