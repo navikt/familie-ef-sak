@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.repository.SøknadBarnetilsynRepository
 import no.nav.familie.ef.sak.repository.SøknadOvergangsstønadRepository
 import no.nav.familie.ef.sak.repository.SøknadRepository
 import no.nav.familie.ef.sak.repository.SøknadSkolepengerRepository
+import no.nav.familie.ef.sak.repository.domain.Sporbar
 import no.nav.familie.ef.sak.repository.domain.Søknad
 import no.nav.familie.ef.sak.repository.domain.SøknadMapper
 import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaBarnetilsyn
@@ -42,6 +43,17 @@ class SøknadService(private val søknadRepository: SøknadRepository,
 
     fun finnDatoMottattForSøknad(behandlingId: UUID): LocalDateTime {
         return søknadRepository.finnDatoMottattForSøknad(behandlingId)
+    }
+
+    /**
+     * Vi kopierer nå for å ikke bryte mye annen funksjonalitet, men burde vurdere OM vi MÅ ha en søknad i en revurdering
+     */
+    @Transactional
+    fun kopierSøknad(forrigeBehandlingId: UUID, nyBehandlingId: UUID) {
+        val søknad = hentSøknad(forrigeBehandlingId)
+        søknadRepository.insert(søknad.copy(id = UUID.randomUUID(),
+                                            behandlingId = nyBehandlingId,
+                                            sporbar = Sporbar()))
     }
 
     @Transactional

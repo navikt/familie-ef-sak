@@ -69,7 +69,6 @@ internal class BehandlingServiceTest {
         annullerOgForventFeilmelding(behandling)
     }
 
-
     private fun annullerOgForventOk(behandling: Behandling) {
         every {
             behandlingRepository.findByIdOrThrow(any())
