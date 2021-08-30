@@ -13,7 +13,15 @@ import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostResponse
-import no.nav.familie.kontrakter.felles.journalpost.*
+import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
+import no.nav.familie.kontrakter.felles.journalpost.Bruker
+import no.nav.familie.kontrakter.felles.journalpost.DokumentInfo
+import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariant
+import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariantformat
+import no.nav.familie.kontrakter.felles.journalpost.Journalpost
+import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
+import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
+import no.nav.familie.kontrakter.felles.journalpost.RelevantDato
 import no.nav.familie.kontrakter.felles.kodeverk.BeskrivelseDto
 import no.nav.familie.kontrakter.felles.kodeverk.BetydningDto
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
@@ -71,7 +79,10 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                     WireMock.post(WireMock.urlPathEqualTo(integrasjonerConfig.medlemskapUri.path))
                             .willReturn(WireMock.okJson(objectMapper.writeValueAsString(medl))),
                     WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.navKontorUri.path))
-                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(navKontorEnhet)))
+                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(navKontorEnhet))),
+
+                    WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.infotrygdVedtaksperioder.path))
+                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(infotrygdPerioder)))
 
             )
 
@@ -164,5 +175,7 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                                                                     navn = "NAV Kristiansand",
                                                                     enhetNr = "1001",
                                                                     status = "Aktiv"))
+
+        private val infotrygdPerioder = Ressurs.success(PerioderOvergangsstønadResponse(emptyList()))
     }
 }
