@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.repository.VedtakRepository
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.BehandlingType.FØRSTEGANGSBEHANDLING
+import no.nav.familie.ef.sak.repository.domain.BehandlingType.REVURDERING
 import no.nav.familie.ef.sak.repository.domain.Vedtak
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.FagsakService
@@ -113,6 +114,7 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
     private fun finnSøknadstidspunkt(behandling: Behandling): LocalDateTime {
         return when (behandling.type) {
             FØRSTEGANGSBEHANDLING -> søknadService.finnDatoMottattForSøknad(behandling.id)
+            REVURDERING -> LocalDateTime.now() // TODO - skulle vi tillate nullverdier her?
             else -> error("Støtter ikke uthenting av mottatt-dato for ${behandling.type}")
         }
     }
