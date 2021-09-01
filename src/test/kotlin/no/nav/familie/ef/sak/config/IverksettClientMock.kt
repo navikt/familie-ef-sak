@@ -46,6 +46,7 @@ class IverksettClientMock {
         every { iverksettClient.iverksett(any(), any()) } just Runs
         every { iverksettClient.iverksettTekniskOpphør(any()) } just Runs
         every { iverksettClient.hentStatus(any()) } returns IverksettStatus.OK
+        every { iverksettClient.sendBehandlingsstatistikk(any()) } just Runs
 
         return iverksettClient
     }
