@@ -36,7 +36,8 @@ internal class SimuleringServiceTest {
     private val behandlingService = mockk<BehandlingService>()
     private val fagsakService = mockk<FagsakService>()
     private val vedtakService = mockk<VedtakService>()
-    private val blankettSimuleringsService = mockk<BlankettSimuleringsService>()
+    private val beregningService = BeregningService()
+    private val blankettSimuleringsService = BlankettSimuleringsService(beregningService)
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
 
     private val simuleringService = SimuleringService(iverksettClient = iverksettClient,
@@ -117,6 +118,7 @@ internal class SimuleringServiceTest {
         every {
             iverksettClient.simuler(capture(simulerSlot))
         } returns DetaljertSimuleringResultat(simuleringMottaker = emptyList())
+
         simuleringService.simulerForBehandling(behandling.id)
 
         assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().fraOgMed).isEqualTo(
