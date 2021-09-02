@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.FagsakPerson
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseType
+import no.nav.familie.ef.sak.simulering.SimuleringsresultatDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import org.assertj.core.api.Assertions
@@ -59,15 +60,15 @@ internal class SimuleringControllerTest : OppslagSpringRunnerTest() {
                                                                                                           kildeBehandlingId = behandling.id))
                                                        ))
 
-        val respons: ResponseEntity<Ressurs<DetaljertSimuleringResultat>> = simulerForBehandling(behandling.id)
+        val respons: ResponseEntity<Ressurs<SimuleringsresultatDto>> = simulerForBehandling(behandling.id)
 
         Assertions.assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
         Assertions.assertThat(respons.body.status).isEqualTo(Ressurs.Status.SUKSESS)
         Assertions.assertThat(respons.body.data).isNotNull()
-        Assertions.assertThat(respons.body.data?.simuleringMottaker).hasSize(1)
+        Assertions.assertThat(respons.body.data?.perioder).hasSize(8)
     }
 
-    private fun simulerForBehandling(behandlingId: UUID): ResponseEntity<Ressurs<DetaljertSimuleringResultat>> {
+    private fun simulerForBehandling(behandlingId: UUID): ResponseEntity<Ressurs<SimuleringsresultatDto>> {
         return restTemplate.exchange(localhost("/api/simulering/$behandlingId"),
                                      HttpMethod.GET,
                                      HttpEntity<Ressurs<BehandlingDto>>(headers))

@@ -1,8 +1,7 @@
-package no.nav.familie.ef.sak.iverksett
+package no.nav.familie.ef.sak.simulering
 
 import no.nav.familie.ef.sak.service.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
@@ -20,9 +19,8 @@ class SimuleringController(
 ) {
 
     @GetMapping("/{behandlingId}")
-    fun simulerForBehandling(@PathVariable behandlingId: UUID): Ressurs<DetaljertSimuleringResultat> {
+    fun simulerForBehandling(@PathVariable behandlingId: UUID): Ressurs<SimuleringsresultatDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         return Ressurs.success(simuleringService.simulerForBehandling(behandlingId))
     }
-
 }

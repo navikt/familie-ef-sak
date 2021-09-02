@@ -3,12 +3,14 @@ package no.nav.familie.ef.sak.iverksett
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.api.beregning.BeregningService
 import no.nav.familie.ef.sak.api.beregning.Inntekt
 import no.nav.familie.ef.sak.api.beregning.Innvilget
 import no.nav.familie.ef.sak.api.beregning.ResultatType
 import no.nav.familie.ef.sak.api.beregning.VedtakService
 import no.nav.familie.ef.sak.api.beregning.VedtaksperiodeDto
+import no.nav.familie.ef.sak.simulering.BlankettSimuleringsService
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsakpersoner
@@ -35,13 +37,14 @@ internal class SimuleringServiceTest {
     private val fagsakService = mockk<FagsakService>()
     private val vedtakService = mockk<VedtakService>()
     private val beregningService = BeregningService()
+    private val blankettSimuleringsService = BlankettSimuleringsService(beregningService)
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
 
     private val simuleringService = SimuleringService(iverksettClient = iverksettClient,
                                                       behandlingService = behandlingService,
                                                       fagsakService = fagsakService,
                                                       vedtakService = vedtakService,
-                                                      beregningService = beregningService,
+                                                      blankettSimuleringsService = blankettSimuleringsService,
                                                       tilkjentYtelseService = tilkjentYtelseService)
 
 
@@ -115,6 +118,7 @@ internal class SimuleringServiceTest {
         every {
             iverksettClient.simuler(capture(simulerSlot))
         } returns DetaljertSimuleringResultat(simuleringMottaker = emptyList())
+
         simuleringService.simulerForBehandling(behandling.id)
 
         assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().fraOgMed).isEqualTo(
