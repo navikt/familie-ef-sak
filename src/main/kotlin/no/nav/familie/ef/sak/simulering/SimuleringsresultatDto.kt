@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.api.simulering
+package no.nav.familie.ef.sak.simulering
 
 import java.math.BigDecimal
 import java.time.LocalDate

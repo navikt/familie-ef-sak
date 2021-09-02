@@ -3,14 +3,14 @@ package no.nav.familie.ef.sak.iverksett
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import no.nav.familie.ef.sak.api.simulering.SimuleringService
+import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.api.beregning.BeregningService
 import no.nav.familie.ef.sak.api.beregning.Inntekt
 import no.nav.familie.ef.sak.api.beregning.Innvilget
 import no.nav.familie.ef.sak.api.beregning.ResultatType
 import no.nav.familie.ef.sak.api.beregning.VedtakService
 import no.nav.familie.ef.sak.api.beregning.VedtaksperiodeDto
-import no.nav.familie.ef.sak.api.simulering.BlankettSimuleringsService
+import no.nav.familie.ef.sak.simulering.BlankettSimuleringsService
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsakpersoner

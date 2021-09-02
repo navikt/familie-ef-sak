@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.api.simulering
+package no.nav.familie.ef.sak.simulering
 
 import no.nav.familie.ef.sak.service.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
