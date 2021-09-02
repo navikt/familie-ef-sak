@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.simulering
 
 import no.nav.familie.ef.sak.iverksett.tilIverksettDto
+import no.nav.familie.ef.sak.mapper.tilIverksettDto
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.kontrakter.ef.felles.StønadType
@@ -107,16 +108,13 @@ fun TilkjentYtelse.tilIverksettMedMetaData(saksbehandlerId: String,
                                            eksternBehandlingId: Long,
                                            stønadstype: Stønadstype,
                                            eksternFagsakId: Long): TilkjentYtelseMedMetadata {
-    return TilkjentYtelseMedMetadata(tilkjentYtelse = this.tilIverksett(),
+    return TilkjentYtelseMedMetadata(tilkjentYtelse = this.tilIverksettDto(),
                                      saksbehandlerId = saksbehandlerId,
                                      eksternBehandlingId = eksternBehandlingId,
                                      stønadstype = StønadType.valueOf(stønadstype.name),
                                      eksternFagsakId = eksternFagsakId,
                                      personIdent = this.personident,
                                      behandlingId = this.behandlingId,
-                                     vedtaksdato = this.vedtakstidspunkt?.toLocalDate() ?: LocalDate.now())
+                                     vedtaksdato = this.vedtakstidspunkt.toLocalDate())
 }
 
-fun TilkjentYtelse.tilIverksett(): TilkjentYtelseDto {
-    return TilkjentYtelseDto(andelerTilkjentYtelse = this.andelerTilkjentYtelse.map { it.tilIverksettDto() })
-}

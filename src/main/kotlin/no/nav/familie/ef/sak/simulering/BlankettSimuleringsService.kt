@@ -19,8 +19,8 @@ import org.springframework.stereotype.Service
 class BlankettSimuleringsService(val beregningService: BeregningService) {
 
     fun genererTilkjentYtelseForBlankett(vedtak: VedtakDto?,
-                                                 behandling: Behandling,
-                                                 fagsak: Fagsak): TilkjentYtelseMedMetadata {
+                                         behandling: Behandling,
+                                         fagsak: Fagsak): TilkjentYtelseMedMetadata {
         val andeler = when (vedtak) {
             is Innvilget -> {
                 beregningService.beregnYtelse(vedtak.perioder.tilPerioder(),
