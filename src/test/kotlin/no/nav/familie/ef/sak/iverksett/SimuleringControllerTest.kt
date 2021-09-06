@@ -11,9 +11,10 @@ import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.FagsakPerson
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseType
+import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.simulering.SimuleringsresultatDto
+import no.nav.familie.ef.sak.simulering.SimuleringsresultatRepository
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -31,6 +32,7 @@ internal class SimuleringControllerTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var fagsakRepository: FagsakRepository
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
     @Autowired private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
+    @Autowired private lateinit var simuleringsresultatRepository: SimuleringsresultatRepository
 
     @BeforeEach
     fun setUp() {
@@ -66,6 +68,11 @@ internal class SimuleringControllerTest : OppslagSpringRunnerTest() {
         Assertions.assertThat(respons.body.status).isEqualTo(Ressurs.Status.SUKSESS)
         Assertions.assertThat(respons.body.data).isNotNull()
         Assertions.assertThat(respons.body.data?.perioder).hasSize(8)
+        val simuleringsresultat = simuleringsresultatRepository.findByIdOrThrow(behandling.id)
+
+        // Verifiser at simuleringsresultatet er lagret
+        Assertions.assertThat(simuleringsresultat.data.simuleringMottaker).hasSize(1)
+        Assertions.assertThat(simuleringsresultat.data.simuleringMottaker.first().simulertPostering).hasSizeGreaterThan(1)
     }
 
     private fun simulerForBehandling(behandlingId: UUID): ResponseEntity<Ressurs<SimuleringsresultatDto>> {

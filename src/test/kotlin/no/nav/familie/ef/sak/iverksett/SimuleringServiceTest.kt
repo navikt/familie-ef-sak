@@ -1,32 +1,39 @@
 package no.nav.familie.ef.sak.iverksett
 
+import io.mockk.Runs
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
-import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.api.beregning.BeregningService
 import no.nav.familie.ef.sak.api.beregning.Inntekt
 import no.nav.familie.ef.sak.api.beregning.Innvilget
 import no.nav.familie.ef.sak.api.beregning.ResultatType
 import no.nav.familie.ef.sak.api.beregning.VedtakService
 import no.nav.familie.ef.sak.api.beregning.VedtaksperiodeDto
-import no.nav.familie.ef.sak.simulering.BlankettSimuleringsService
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.tilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.AktivitetType
+import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.TilkjentYtelseService
+import no.nav.familie.ef.sak.simulering.BlankettSimuleringsService
+import no.nav.familie.ef.sak.simulering.SimuleringService
+import no.nav.familie.ef.sak.simulering.Simuleringsresultat
+import no.nav.familie.ef.sak.simulering.SimuleringsresultatRepository
 import no.nav.familie.kontrakter.ef.iverksett.SimuleringDto
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import org.springframework.data.repository.findByIdOrNull
 import java.math.BigDecimal
 import java.time.YearMonth
 
@@ -36,6 +43,7 @@ internal class SimuleringServiceTest {
     private val behandlingService = mockk<BehandlingService>()
     private val fagsakService = mockk<FagsakService>()
     private val vedtakService = mockk<VedtakService>()
+    private val simuleringsresultatRepository = mockk<SimuleringsresultatRepository>()
     private val beregningService = BeregningService()
     private val blankettSimuleringsService = BlankettSimuleringsService(beregningService)
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
@@ -45,6 +53,7 @@ internal class SimuleringServiceTest {
                                                       fagsakService = fagsakService,
                                                       vedtakService = vedtakService,
                                                       blankettSimuleringsService = blankettSimuleringsService,
+                                                      simuleringsresultatRepository = simuleringsresultatRepository,
                                                       tilkjentYtelseService = tilkjentYtelseService)
 
 
@@ -62,19 +71,19 @@ internal class SimuleringServiceTest {
         val behandling = behandling(fagsak = fagsak, type = BehandlingType.FØRSTEGANGSBEHANDLING)
 
         val tilkjentYtelse = tilkjentYtelse(behandlingId = behandling.id, personIdent = personIdent)
+        val simuleringsresultat = Simuleringsresultat(behandlingId = behandling.id,
+                                                      data = DetaljertSimuleringResultat(emptyList()))
         every { behandlingService.hentBehandling(any()) } returns behandling
-        every {
-            tilkjentYtelseService.hentForBehandling(any())
-        } returns tilkjentYtelse
-        every {
-            behandlingService.finnSisteIverksatteBehandling(any())
-        } returns behandling.id
+        every { tilkjentYtelseService.hentForBehandling(any()) } returns tilkjentYtelse
+        every { behandlingService.finnSisteIverksatteBehandling(any()) } returns behandling.id
+        every { simuleringsresultatRepository.deleteById(any()) } just Runs
+        every { simuleringsresultatRepository.insert(any()) } returns simuleringsresultat
 
         val simulerSlot = slot<SimuleringDto>()
         every {
             iverksettClient.simuler(capture(simulerSlot))
         } returns DetaljertSimuleringResultat(simuleringMottaker = emptyList())
-        simuleringService.simulerForBehandling(behandling.id)
+        simuleringService.simuler(behandling.id)
 
         assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.behandlingId).isEqualTo(tilkjentYtelse.behandlingId)
         assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().beløp).isEqualTo(
@@ -119,7 +128,7 @@ internal class SimuleringServiceTest {
             iverksettClient.simuler(capture(simulerSlot))
         } returns DetaljertSimuleringResultat(simuleringMottaker = emptyList())
 
-        simuleringService.simulerForBehandling(behandling.id)
+        simuleringService.simuler(behandling.id)
 
         assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().fraOgMed).isEqualTo(
                 årMånedFraStart.atDay(1))
@@ -137,5 +146,26 @@ internal class SimuleringServiceTest {
 
     }
 
+    @Test
+    internal fun `skal feile hvis behandlingen ikke er redigerbar og mangler lagret simulering`() {
+        val behandling =
+                behandling(fagsak = fagsak, type = BehandlingType.FØRSTEGANGSBEHANDLING, status = BehandlingStatus.FATTER_VEDTAK)
+        every { behandlingService.hentBehandling(any()) } returns behandling
+        assertThrows<RuntimeException> {
+            simuleringService.simuler(behandling.id)
+        }
+    }
 
+    @Test
+    internal fun `skal hente lagret simulering hvis behandlingen ikke er redigerbar`() {
+        val behandling =
+                behandling(fagsak = fagsak, type = BehandlingType.FØRSTEGANGSBEHANDLING, status = BehandlingStatus.FATTER_VEDTAK)
+        every { behandlingService.hentBehandling(any()) } returns behandling
+        every {
+            simuleringsresultatRepository.findByIdOrNull(behandling.id)
+        } returns Simuleringsresultat(behandlingId = behandling.id,
+                                      data = DetaljertSimuleringResultat(emptyList()))
+        val simuleringsresultatDto = simuleringService.simuler(behandling.id)
+        assertThat(simuleringsresultatDto).isNotNull
+    }
 }

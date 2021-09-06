@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.simulering
 
+import no.nav.familie.ef.sak.api.ApiFeil
 import no.nav.familie.ef.sak.api.beregning.VedtakService
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.repository.domain.Behandling
@@ -11,9 +12,11 @@ import no.nav.familie.ef.sak.service.TilkjentYtelseService
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.ef.iverksett.SimuleringDto
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
+import org.springframework.data.repository.findByIdOrNull
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 @Service
 class SimuleringService(private val iverksettClient: IverksettClient,
@@ -21,20 +24,39 @@ class SimuleringService(private val iverksettClient: IverksettClient,
                         private val fagsakService: FagsakService,
                         private val vedtakService: VedtakService,
                         private val blankettSimuleringsService: BlankettSimuleringsService,
+                        private val simuleringsresultatRepository: SimuleringsresultatRepository,
                         private val tilkjentYtelseService: TilkjentYtelseService) {
 
 
-    fun simulerForBehandling(behandlingId: UUID): SimuleringsresultatDto {
+    fun simuler(behandlingId: UUID): SimuleringsresultatDto {
         val behandling = behandlingService.hentBehandling(behandlingId)
-        val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
 
-        val simuleringResultat = when (behandling.type) {
-            BehandlingType.BLANKETT -> simulerUtenTilkjentYtelse(behandling, fagsak)
-            else -> simulerMedTilkjentYtelse(behandling, fagsak)
+        return when (behandling.type) {
+            BehandlingType.BLANKETT -> simulerForBlankett(behandling)
+            else -> simulerForBehandling(behandling)
+        }
+    }
+
+    fun hentOgLagreSimuleringsresultat(behandling: Behandling): Simuleringsresultat {
+        val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
+        simuleringsresultatRepository.deleteById(behandling.id)
+        return simuleringsresultatRepository.insert(Simuleringsresultat(
+                behandlingId = behandling.id,
+                data = simulerMedTilkjentYtelse(behandling, fagsak)
+        ))
+    }
+
+    private fun simulerForBehandling(behandling: Behandling): SimuleringsresultatDto {
+
+        if (behandling.status.behandlingErLåstForVidereRedigering()) {
+            val simuleringsresultat: Simuleringsresultat = simuleringsresultatRepository.findByIdOrNull(behandling.id)
+                    ?: throw ApiFeil("Finner ingen simulering for behandlingen", HttpStatus.INTERNAL_SERVER_ERROR)
+            return tilSimuleringsresultatDto(simuleringsresultat.data, simuleringsresultat.sporbar.opprettetTid.toLocalDate())
         }
 
-        val datoForSimulering = LocalDate.now() // TODO: bruk databaseverdi hvis resultatet er hentet fra DB
-        return tilSimuleringsresultatDto(simuleringResultat, datoForSimulering)
+        val simuleringsresultat = hentOgLagreSimuleringsresultat(behandling)
+        return tilSimuleringsresultatDto(simuleringsresultat.data, LocalDate.now())
+
     }
 
     private fun simulerMedTilkjentYtelse(behandling: Behandling, fagsak: Fagsak): DetaljertSimuleringResultat {
@@ -42,9 +64,9 @@ class SimuleringService(private val iverksettClient: IverksettClient,
 
         val tilkjentYtelseMedMedtadata =
                 tilkjentYtelse.tilIverksettMedMetaData(saksbehandlerId = SikkerhetContext.hentSaksbehandler(),
-                                                       eksternBehandlingId = behandling.eksternId.id,
-                                                       stønadstype = fagsak.stønadstype,
-                                                       eksternFagsakId = fagsak.eksternId.id
+                        eksternBehandlingId = behandling.eksternId.id,
+                        stønadstype = fagsak.stønadstype,
+                        eksternFagsakId = fagsak.eksternId.id
 
                 )
         val forrigeBehandlingId = behandlingService.finnSisteIverksatteBehandling(behandling.fagsakId)
@@ -55,7 +77,8 @@ class SimuleringService(private val iverksettClient: IverksettClient,
         ))
     }
 
-    private fun simulerUtenTilkjentYtelse(behandling: Behandling, fagsak: Fagsak): DetaljertSimuleringResultat {
+    private fun simulerForBlankett(behandling: Behandling): SimuleringsresultatDto {
+        val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
         val vedtak = vedtakService.hentVedtakHvisEksisterer(behandling.id)
         val tilkjentYtelseForBlankett = blankettSimuleringsService.genererTilkjentYtelseForBlankett(vedtak, behandling, fagsak)
         val simuleringDto = SimuleringDto(
@@ -63,7 +86,7 @@ class SimuleringService(private val iverksettClient: IverksettClient,
                 forrigeBehandlingId = null
 
         )
-        return iverksettClient.simuler(simuleringDto)
+        return tilSimuleringsresultatDto(iverksettClient.simuler(simuleringDto), LocalDate.now())
     }
 
 

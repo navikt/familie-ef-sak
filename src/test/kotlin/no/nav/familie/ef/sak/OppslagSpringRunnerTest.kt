@@ -21,6 +21,7 @@ import no.nav.familie.ef.sak.repository.domain.Vedtak
 import no.nav.familie.ef.sak.repository.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
 import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsstønad
+import no.nav.familie.ef.sak.simulering.Simuleringsresultat
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskLogg
 import org.junit.jupiter.api.AfterEach
@@ -86,6 +87,7 @@ abstract class OppslagSpringRunnerTest {
 
     private fun resetDatabase() {
         listOf(KonsistensavstemmingJobb::class,
+               Simuleringsresultat::class,
                Søknad::class,
                SøknadsskjemaOvergangsstønad::class,
                TilkjentYtelse::class,
