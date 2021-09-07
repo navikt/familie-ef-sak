@@ -16,7 +16,7 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 @Service
 class SimuleringService(private val iverksettClient: IverksettClient,
@@ -50,7 +50,8 @@ class SimuleringService(private val iverksettClient: IverksettClient,
 
         if (behandling.status.behandlingErLåstForVidereRedigering()) {
             val simuleringsresultat: Simuleringsresultat = simuleringsresultatRepository.findByIdOrNull(behandling.id)
-                    ?: throw ApiFeil("Finner ingen simulering for behandlingen", HttpStatus.INTERNAL_SERVER_ERROR)
+                                                           ?: throw ApiFeil("Finner ingen simulering for behandlingen",
+                                                                            HttpStatus.INTERNAL_SERVER_ERROR)
             return tilSimuleringsresultatDto(simuleringsresultat.data, simuleringsresultat.sporbar.opprettetTid.toLocalDate())
         }
 
@@ -64,9 +65,9 @@ class SimuleringService(private val iverksettClient: IverksettClient,
 
         val tilkjentYtelseMedMedtadata =
                 tilkjentYtelse.tilIverksettMedMetaData(saksbehandlerId = SikkerhetContext.hentSaksbehandler(),
-                        eksternBehandlingId = behandling.eksternId.id,
-                        stønadstype = fagsak.stønadstype,
-                        eksternFagsakId = fagsak.eksternId.id
+                                                       eksternBehandlingId = behandling.eksternId.id,
+                                                       stønadstype = fagsak.stønadstype,
+                                                       eksternFagsakId = fagsak.eksternId.id
 
                 )
         val forrigeBehandlingId = behandlingService.finnSisteIverksatteBehandling(behandling.fagsakId)
