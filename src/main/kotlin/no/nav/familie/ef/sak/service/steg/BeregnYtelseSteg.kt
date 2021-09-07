@@ -8,11 +8,14 @@ import no.nav.familie.ef.sak.api.beregning.tilInntektsperioder
 import no.nav.familie.ef.sak.api.beregning.tilPerioder
 import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.Behandling
+import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.TilkjentYtelseService
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import org.springframework.stereotype.Service
+import java.time.LocalDate
+import java.time.temporal.TemporalAdjusters
 
 @Service
 class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
@@ -53,20 +56,53 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
             else -> emptyList()
         }
 
-        // TODO: Hent tilkjentYtelse fra forrige behandling og gjør diff med ny og ta vare på kildeBehandlingId
         tilkjentYtelseService.slettTilkjentYtelseForBehandling(behandling.id)
+
         if (beløpsperioder.isNotEmpty()) {
+            val nyeAndeler = when (behandling.type) {
+                BehandlingType.FØRSTEGANGSBEHANDLING -> beløpsperioder
+                BehandlingType.REVURDERING -> andelerForRevurdering(behandling, beløpsperioder)
+                else -> error("Steg ikke støttet for type=${behandling.type}")
+            }
+
             tilkjentYtelseService.opprettTilkjentYtelse(
                     TilkjentYtelse(
                             personident = aktivIdent,
                             behandlingId = behandling.id,
-                            andelerTilkjentYtelse = beløpsperioder
+                            andelerTilkjentYtelse = nyeAndeler
                     )
             )
+        } else if (vedtak is Innvilget) {
+            error("Innvilget vedtak må ha minimum en beløpsperiode")
         }
         vedtakService.slettVedtakHvisFinnes(behandling.id)
         vedtakService.lagreVedtak(vedtakDto = vedtak, behandlingId = behandling.id)
         simuleringService.hentOgLagreSimuleringsresultat(behandling)
     }
+
+    private fun andelerForRevurdering(behandling: Behandling,
+                                      beløpsperioder: List<AndelTilkjentYtelse>): List<AndelTilkjentYtelse> {
+        val forrigeBehandlingId = behandlingService.finnSisteIverksatteBehandling(behandling.fagsakId)
+                                  ?: error("Finner ikke forrige behandling til behandling=${behandling.id}")
+        val forrigeAndeler = tilkjentYtelseService.hentForBehandling(forrigeBehandlingId)
+        return slåSammenAndelerSomSkalVidereføres(beløpsperioder, forrigeAndeler)
+    }
+
+    fun slåSammenAndelerSomSkalVidereføres(beløpsperioder: List<AndelTilkjentYtelse>,
+                                           forrigeTilkjentYtelse: TilkjentYtelse): List<AndelTilkjentYtelse> {
+        val fom = beløpsperioder.first().stønadFom
+        return forrigeTilkjentYtelse.andelerTilkjentYtelse
+                       .filter { andel -> andel.stønadTom < fom || (erStønadOverlappende(andel, fom)) }
+                       .map { andel ->
+                           if (erStønadOverlappende(andel, fom)) {
+                               andel.copy(stønadTom = fom.minusMonths(1).with(TemporalAdjusters.lastDayOfMonth()))
+                           } else {
+                               andel
+                           }
+                       } + beløpsperioder
+    }
+
+    private fun erStønadOverlappende(andel: AndelTilkjentYtelse, fom: LocalDate) =
+            andel.stønadFom < fom && andel.stønadTom >= fom
 
 }
