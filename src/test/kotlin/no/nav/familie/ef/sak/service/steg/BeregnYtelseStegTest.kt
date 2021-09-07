@@ -63,6 +63,8 @@ internal class BeregnYtelseStegTest {
 
         assertThat(andeler[1].stønadFom).isEqualTo(nyAndelFom)
         assertThat(andeler[1].stønadTom).isEqualTo(nyAndelTom)
+
+        assertThat(andeler[0].kildeBehandlingId).isNotEqualTo(andeler[1].kildeBehandlingId)
     }
 
     @Test
@@ -116,6 +118,8 @@ internal class BeregnYtelseStegTest {
         assertThat(nyeAndeler[1].stønadFom).isEqualTo(nyAndelFom)
         assertThat(nyeAndeler[1].stønadTom).isEqualTo(nyAndelTom)
         assertThat(nyeAndeler[1].beløp).isEqualTo(100)
+
+        assertThat(nyeAndeler[0].kildeBehandlingId).isNotEqualTo(nyeAndeler[1].kildeBehandlingId)
     }
 
     @Test
