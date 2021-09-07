@@ -61,7 +61,7 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
 
         val resultatBegrunnelse = finnResultatBegrunnelse(hendelse, vedtak)
         val søker = grunnlagsdataService.hentGrunnlagsdata(behandlingId).grunnlagsdata.søker
-        val søknadstidspunkt = finnSøknadstidspunkt(behandling)
+        val henvendelseTidspunkt = finnHenvendelsestidspunkt(behandling)
 
         val behandlingsstatistikkDto = BehandlingsstatistikkDto(
                 behandlingId = behandlingId,
@@ -69,7 +69,7 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
                 gjeldendeSaksbehandlerId = finnSaksbehandler(hendelse, vedtak, gjeldendeSaksbehandler),
                 eksternFagsakId = fagsak.eksternId.id.toString(),
                 hendelseTidspunkt = hendelseTidspunkt.atZone(zoneIdOslo),
-                søknadstidspunkt = søknadstidspunkt.atZone(zoneIdOslo),
+                søknadstidspunkt = henvendelseTidspunkt.atZone(zoneIdOslo),
                 hendelse = hendelse,
                 behandlingResultat = behandling.resultat.name,
                 resultatBegrunnelse = resultatBegrunnelse,
@@ -77,10 +77,22 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
                 ansvarligEnhet = sisteOppgaveForBehandling.tildeltEnhetsnr ?: "9999",
                 strengtFortroligAdresse = søker.adressebeskyttelse?.erStrengtFortrolig() ?: false,
                 stønadstype = StønadType.valueOf(fagsak.stønadstype.name),
-                behandlingstype = BehandlingType.valueOf(behandling.type.name)
+                behandlingstype = BehandlingType.valueOf(behandling.type.name),
+                henvendelseTidspunkt = henvendelseTidspunkt.atZone(zoneIdOslo),
+                relatertBehandlingId = finnRelatertBehandlingId(behandling, hendelse)
         )
 
         iverksettClient.sendBehandlingsstatistikk(behandlingsstatistikkDto)
+    }
+
+    private fun finnRelatertBehandlingId(behandling: Behandling, hendelse: Hendelse): UUID? {
+        if (hendelse == Hendelse.FERDIG) {
+            return null
+        }
+        return when (behandling.type) {
+            REVURDERING -> behandlingService.finnSisteIverksatteBehandling(fagsakId = behandling.fagsakId)
+            else -> null
+        }
     }
 
     private fun finnSisteOppgaveForBehandlingen(behandlingId: UUID, oppgaveId: Long?): Oppgave {
@@ -111,10 +123,10 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
         }
     }
 
-    private fun finnSøknadstidspunkt(behandling: Behandling): LocalDateTime {
+    private fun finnHenvendelsestidspunkt(behandling: Behandling): LocalDateTime {
         return when (behandling.type) {
             FØRSTEGANGSBEHANDLING -> søknadService.finnDatoMottattForSøknad(behandling.id)
-            REVURDERING -> LocalDateTime.now() // TODO - skulle vi tillate nullverdier her?
+            REVURDERING -> LocalDateTime.now()
             else -> error("Støtter ikke uthenting av mottatt-dato for ${behandling.type}")
         }
     }
