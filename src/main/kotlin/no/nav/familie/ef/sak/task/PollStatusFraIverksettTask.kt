@@ -15,7 +15,7 @@ import java.util.UUID
 @TaskStepBeskrivelse(taskStepType = PollStatusFraIverksettTask.TYPE,
                      maxAntallFeil = 50,
                      settTilManuellOppfølgning = true,
-                     triggerTidVedFeilISekunder = 15 * 60L,
+                     triggerTidVedFeilISekunder = 31L,
                      beskrivelse = "Sjekker status på iverksetting av behandling.")
 
 class PollStatusFraIverksettTask(private val stegService: StegService,
@@ -34,7 +34,7 @@ class PollStatusFraIverksettTask(private val stegService: StegService,
                      payload = behandlingId.toString(),
                      properties = Properties().apply {
                          this["behandlingId"] = behandlingId.toString()
-                     }).copy(triggerTid = LocalDateTime.now().plusMinutes(5))
+                     }).copy(triggerTid = LocalDateTime.now().plusSeconds(31))
 
 
 
