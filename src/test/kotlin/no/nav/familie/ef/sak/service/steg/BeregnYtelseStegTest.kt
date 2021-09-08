@@ -17,7 +17,10 @@ import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.TilkjentYtelseService
+import no.nav.familie.ef.sak.simulering.SimuleringService
+import no.nav.familie.ef.sak.simulering.Simuleringsresultat
 import no.nav.familie.ef.sak.util.Periode
+import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -32,13 +35,18 @@ internal class BeregnYtelseStegTest {
     private val behandlingService = mockk<BehandlingService>()
     private val beregningService = mockk<BeregningService>()
     private val vedtakService = mockk<VedtakService>(relaxed = true)
+    private val simuleringService = mockk<SimuleringService>()
 
-    private val steg = BeregnYtelseSteg(tilkjentYtelseService, behandlingService, beregningService, vedtakService)
+    private val steg =
+            BeregnYtelseSteg(tilkjentYtelseService, behandlingService, beregningService, simuleringService, vedtakService)
 
     @BeforeEach
     internal fun setUp() {
         every { behandlingService.hentAktivIdent(any()) } returns "123"
         every { behandlingService.finnSisteIverksatteBehandling(any()) } returns UUID.randomUUID()
+        every { simuleringService.hentOgLagreSimuleringsresultat(any()) } returns Simuleringsresultat(behandlingId = UUID.randomUUID(),
+                                                                                                      data = DetaljertSimuleringResultat(
+                                                                                                              emptyList()))
     }
 
     @Test
@@ -65,6 +73,9 @@ internal class BeregnYtelseStegTest {
         assertThat(andeler[1].stønadTom).isEqualTo(nyAndelTom)
 
         assertThat(andeler[0].kildeBehandlingId).isNotEqualTo(andeler[1].kildeBehandlingId)
+        verify (exactly = 1){
+            simuleringService.hentOgLagreSimuleringsresultat(any())
+        }
     }
 
     @Test

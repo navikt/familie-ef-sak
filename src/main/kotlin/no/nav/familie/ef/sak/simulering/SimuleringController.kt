@@ -21,6 +21,6 @@ class SimuleringController(
     @GetMapping("/{behandlingId}")
     fun simulerForBehandling(@PathVariable behandlingId: UUID): Ressurs<SimuleringsresultatDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
-        return Ressurs.success(simuleringService.simulerForBehandling(behandlingId))
+        return Ressurs.success(simuleringService.simuler(behandlingId))
     }
 }
