@@ -33,13 +33,11 @@ import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariantformat
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
-import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.Properties
 import java.util.UUID
 
 internal class JournalføringServiceTest {
@@ -122,13 +120,13 @@ internal class JournalføringServiceTest {
         every { oppgaveService.ferdigstillOppgave(any()) } just runs
         every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) } returns nyOppgaveId
         every { behandlingService.leggTilBehandlingsjournalpost(any(), any(), any()) } just runs
-        every { journalpostClient.ferdigstillJournalpost(any(), any()) } just runs
+        every { journalpostClient.ferdigstillJournalpost(any(), any(), null) } just runs
 
         every {
             søknadService.lagreSøknadForOvergangsstønad(any(), any(), any(), any())
         } just Runs
 
-        every { taskRepository.save(any())} answers { firstArg() }
+        every { taskRepository.save(any()) } answers { firstArg() }
 
         BrukerContextUtil.mockBrukerContext("saksbehandlernavn")
     }
@@ -145,7 +143,8 @@ internal class JournalføringServiceTest {
 
         every {
             journalpostClient.oppdaterJournalpost(capture(slotJournalpost),
-                                                  journalpostId)
+                                                  journalpostId,
+                                                  null)
         } returns OppdaterJournalpostResponse(journalpostId = journalpostId)
 
         every {
@@ -189,7 +188,7 @@ internal class JournalføringServiceTest {
 
         val slot = slot<OppdaterJournalpostRequest>()
 
-        every { journalpostClient.oppdaterJournalpost(capture(slot), journalpostId) }
+        every { journalpostClient.oppdaterJournalpost(capture(slot), journalpostId, null) }
                 .returns(OppdaterJournalpostResponse(journalpostId = journalpostId))
 
         every {

@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.domain.Fagsak
 import no.nav.familie.ef.sak.repository.domain.Stønadstype
+import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.task.BehandlingsstatistikkTask
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
@@ -67,6 +68,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
 
     @Transactional
     fun fullførJournalpost(journalføringRequest: JournalføringRequest, journalpostId: String): Long {
+        val saksbehandler = SikkerhetContext.hentSaksbehandler(true)
         val behandling: Behandling = hentBehandling(journalføringRequest)
         val journalpost = hentJournalpost(journalpostId)
         val fagsak = fagsakService.hentFagsak(journalføringRequest.fagsakId)
@@ -75,8 +77,9 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         settSøknadPåBehandling(journalpostId, fagsak, behandling.id)
         knyttJournalpostTilBehandling(journalpost, behandling)
         grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
-        oppdaterJournalpost(journalpost, journalføringRequest.dokumentTitler, fagsak.eksternId.id)
-        ferdigstillJournalføring(journalpostId, journalføringRequest.journalførendeEnhet)
+
+        oppdaterJournalpost(journalpost, journalføringRequest.dokumentTitler, fagsak.eksternId.id, saksbehandler)
+        ferdigstillJournalføring(journalpostId, journalføringRequest.journalførendeEnhet, saksbehandler)
         ferdigstillJournalføringsoppgave(journalføringRequest)
         opprettBehandlingsstatistikkTask(behandling.id, journalføringRequest.oppgaveId.toLong())
 
@@ -122,8 +125,8 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
                        } ?: error("Fant ingen søknad")
     }
 
-    private fun ferdigstillJournalføring(journalpostId: String, journalførendeEnhet: String) {
-        journalpostClient.ferdigstillJournalpost(journalpostId, journalførendeEnhet)
+    private fun ferdigstillJournalføring(journalpostId: String, journalførendeEnhet: String, saksbehandler: String) {
+        journalpostClient.ferdigstillJournalpost(journalpostId, journalførendeEnhet, saksbehandler)
     }
 
     private fun opprettSaksbehandlingsoppgave(behandling: Behandling, navIdent: String): Long {
@@ -176,7 +179,10 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
             dokument.dokumentvarianter?.contains(Dokumentvariant(variantformat = Dokumentvariantformat.ORIGINAL))
             ?: false
 
-    private fun oppdaterJournalpost(journalpost: Journalpost, dokumenttitler: Map<String, String>?, eksternFagsakId: Long) {
+    private fun oppdaterJournalpost(journalpost: Journalpost,
+                                    dokumenttitler: Map<String, String>?,
+                                    eksternFagsakId: Long,
+                                    saksbehandler: String) {
         val oppdatertJournalpost =
                 OppdaterJournalpostRequest(bruker = journalpost.bruker?.let {
                     DokarkivBruker(idType = BrukerIdType.valueOf(it.type.toString()), id = it.id)
@@ -196,7 +202,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
                                                                 brevkode = dokumentInfo.brevkode)
                                                }
                                            })
-        journalpostClient.oppdaterJournalpost(oppdatertJournalpost, journalpost.journalpostId)
+        journalpostClient.oppdaterJournalpost(oppdatertJournalpost, journalpost.journalpostId, saksbehandler)
     }
 
 

@@ -152,7 +152,8 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
                                                                             Dokumenttype.OVERGANGSSTØNAD_SØKNAD)),
                                                             emptyList())
 
-        val dokumentResponse = journalpostClient.arkiverDokument(arkiverDokumentRequest)
+        val saksbehandler = SikkerhetContext.hentSaksbehandler(true)
+        val dokumentResponse = journalpostClient.arkiverDokument(arkiverDokumentRequest, saksbehandler)
         return dokumentResponse.journalpostId
     }
 

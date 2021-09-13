@@ -14,6 +14,7 @@ import no.nav.familie.ef.sak.repository.domain.StegUtfall.BESLUTTE_VEDTAK_UNDERK
 import no.nav.familie.ef.sak.service.steg.BehandlerRolle
 import no.nav.familie.ef.sak.service.steg.StegType
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext.NAVIDENT_REGEX
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -50,6 +51,12 @@ class TotrinnskontrollService(private val behandlingshistorikkService: Behandlin
 
         behandlingService.oppdaterStatusPåBehandling(behandling.id, nyStatus)
         return sisteBehandlingshistorikk.opprettetAv
+    }
+
+    fun hentBeslutter(behandlingId: UUID): String? {
+        return behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId, StegType.BESLUTTE_VEDTAK)
+                ?.opprettetAv
+                ?.takeIf { NAVIDENT_REGEX.matches(it) }
     }
 
     fun hentTotrinnskontrollStatus(behandlingId: UUID): TotrinnskontrollStatusDto {
