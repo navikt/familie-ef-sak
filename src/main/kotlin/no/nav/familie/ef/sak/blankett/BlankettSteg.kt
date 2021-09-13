@@ -46,7 +46,7 @@ class BlankettSteg(
         val blankettPdf = blankettRepository.findByIdOrThrow(behandling.id).pdf.bytes
         val beslutter = totrinnskontrollService.hentBeslutter(behandling.id)
         if (beslutter == null) {
-            logger.info("Fant ikke beslutter på behandling=$behandling")
+            logger.info("steg=${stegType()} fant ikke beslutter på behandling=$behandling")
         }
 
         val arkiverDokumentRequest =
