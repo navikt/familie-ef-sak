@@ -120,7 +120,7 @@ internal class JournalføringServiceTest {
         every { oppgaveService.ferdigstillOppgave(any()) } just runs
         every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) } returns nyOppgaveId
         every { behandlingService.leggTilBehandlingsjournalpost(any(), any(), any()) } just runs
-        every { journalpostClient.ferdigstillJournalpost(any(), any(), null) } just runs
+        every { journalpostClient.ferdigstillJournalpost(any(), any(), any()) } just runs
 
         every {
             søknadService.lagreSøknadForOvergangsstønad(any(), any(), any(), any())
@@ -144,7 +144,7 @@ internal class JournalføringServiceTest {
         every {
             journalpostClient.oppdaterJournalpost(capture(slotJournalpost),
                                                   journalpostId,
-                                                  null)
+                                                  any())
         } returns OppdaterJournalpostResponse(journalpostId = journalpostId)
 
         every {
@@ -188,7 +188,7 @@ internal class JournalføringServiceTest {
 
         val slot = slot<OppdaterJournalpostRequest>()
 
-        every { journalpostClient.oppdaterJournalpost(capture(slot), journalpostId, null) }
+        every { journalpostClient.oppdaterJournalpost(capture(slot), journalpostId, any()) }
                 .returns(OppdaterJournalpostResponse(journalpostId = journalpostId))
 
         every {

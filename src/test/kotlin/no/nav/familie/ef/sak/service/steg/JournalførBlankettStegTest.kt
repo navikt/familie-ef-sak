@@ -51,7 +51,7 @@ class JournalførBlankettStegTest {
     private val taskRepository = mockk<TaskRepository>()
     private val blankettRepository = mockk<BlankettRepository>()
     private val arbeidsfordelingService = mockk<ArbeidsfordelingService>()
-    private val totrinnskontrollService = mockk<TotrinnskontrollService>()
+    private val totrinnskontrollService = mockk<TotrinnskontrollService>(relaxed = true)
 
     private val blankettSteg = BlankettSteg(behandlingService = behandlingService,
                                             behandlingRepository = behandlingRepository,
@@ -134,7 +134,7 @@ class JournalførBlankettStegTest {
         val journalpostId = "12345678"
 
         every {
-            journalpostClient.arkiverDokument(capture(arkiverDokumentRequestSlot), null)
+            journalpostClient.arkiverDokument(capture(arkiverDokumentRequestSlot), any())
         } returns ArkiverDokumentResponse(journalpostId, false)
 
         every {
