@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.domain.Fagsak
+import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.service.BehandlingService
 import no.nav.familie.ef.sak.service.FagsakService
 import no.nav.familie.ef.sak.service.TilkjentYtelseService
@@ -49,15 +50,12 @@ class SimuleringService(private val iverksettClient: IverksettClient,
     private fun simulerForBehandling(behandling: Behandling): SimuleringsresultatDto {
 
         if (behandling.status.behandlingErLåstForVidereRedigering()) {
-            val simuleringsresultat: Simuleringsresultat = simuleringsresultatRepository.findByIdOrNull(behandling.id)
-                                                           ?: throw ApiFeil("Finner ingen simulering for behandlingen",
-                                                                            HttpStatus.INTERNAL_SERVER_ERROR)
+            val simuleringsresultat: Simuleringsresultat = simuleringsresultatRepository.findByIdOrThrow(behandling.id)
             return tilSimuleringsresultatDto(simuleringsresultat.data, simuleringsresultat.sporbar.opprettetTid.toLocalDate())
         }
 
         val simuleringsresultat = hentOgLagreSimuleringsresultat(behandling)
         return tilSimuleringsresultatDto(simuleringsresultat.data, LocalDate.now())
-
     }
 
     private fun simulerMedTilkjentYtelse(behandling: Behandling, fagsak: Fagsak): DetaljertSimuleringResultat {
@@ -67,9 +65,7 @@ class SimuleringService(private val iverksettClient: IverksettClient,
                 tilkjentYtelse.tilIverksettMedMetaData(saksbehandlerId = SikkerhetContext.hentSaksbehandler(),
                                                        eksternBehandlingId = behandling.eksternId.id,
                                                        stønadstype = fagsak.stønadstype,
-                                                       eksternFagsakId = fagsak.eksternId.id
-
-                )
+                                                       eksternFagsakId = fagsak.eksternId.id)
         val forrigeBehandlingId = behandlingService.finnSisteIverksatteBehandling(behandling.fagsakId)
 
         return iverksettClient.simuler(SimuleringDto(

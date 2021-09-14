@@ -9,6 +9,8 @@ object SikkerhetContext {
     private const val SYSTEM_NAVN = "System"
     private const val SYSTEM_FORKORTELSE = "VL"
 
+    val NAVIDENT_REGEX = """^[a-zA-Z]\d{6}$""".toRegex()
+
     /**
      * @param strict hvis true - skal kaste feil hvis token ikke inneholder NAVident
      */
