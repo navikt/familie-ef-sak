@@ -83,20 +83,20 @@ class JournalpostClient(@Qualifier("azure") restOperations: RestOperations,
                             saksbehandler: String?): OppdaterJournalpostResponse {
         return putForEntity<Ressurs<OppdaterJournalpostResponse>>(URI.create("${dokarkivUri}/v2/${journalpostId}"),
                                                                   oppdaterJournalpostRequest,
-                                                                  headerdMedSaksbehandler(saksbehandler)).data
+                                                                  headerMedSaksbehandler(saksbehandler)).data
                ?: error("Kunne ikke oppdatere journalpost med id $journalpostId")
     }
 
     fun arkiverDokument(arkiverDokumentRequest: ArkiverDokumentRequest, saksbehandler: String?): ArkiverDokumentResponse {
         return postForEntity<Ressurs<ArkiverDokumentResponse>>(URI.create("${dokarkivUri}/v4/"),
-                                                               arkiverDokumentRequest, headerdMedSaksbehandler(saksbehandler)).data
+                                                               arkiverDokumentRequest, headerMedSaksbehandler(saksbehandler)).data
                ?: error("Kunne ikke arkivere dokument med fagsakid ${arkiverDokumentRequest.fagsakId}")
     }
 
     fun ferdigstillJournalpost(journalpostId: String, journalførendeEnhet: String, saksbehandler: String?) {
         val ressurs = putForEntity<Ressurs<OppdaterJournalpostResponse>>(
                 URI.create("${dokarkivUri}/v2/${journalpostId}/ferdigstill?journalfoerendeEnhet=${journalførendeEnhet}"),
-                "", headerdMedSaksbehandler(saksbehandler))
+                "", headerMedSaksbehandler(saksbehandler))
 
         if (ressurs.status != Ressurs.Status.SUKSESS) {
             secureLogger.error(" Feil ved oppdatering av journalpost=${journalpostId} - mottok: $ressurs")
@@ -105,7 +105,7 @@ class JournalpostClient(@Qualifier("azure") restOperations: RestOperations,
 
     }
 
-    private fun headerdMedSaksbehandler(saksbehandler: String?): HttpHeaders {
+    private fun headerMedSaksbehandler(saksbehandler: String?): HttpHeaders {
         val httpHeaders = HttpHeaders()
         if (saksbehandler != null) {
             httpHeaders.set(NavHttpHeaders.NAV_USER_ID.asString(), saksbehandler)
