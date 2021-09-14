@@ -18,6 +18,8 @@ data class Vedtak(@Id
                   val perioder: PeriodeWrapper? = null,
                   val inntekter: InntektWrapper? = null,
                   val saksbehandlerIdent: String? = null,
+                  @Column("opphor_fom") // TODO: Husk å legg til i migreringsscript
+                  val opphørFom: LocalDate? = null,
                   val beslutterIdent: String? = null)
 
 data class Vedtaksperiode(

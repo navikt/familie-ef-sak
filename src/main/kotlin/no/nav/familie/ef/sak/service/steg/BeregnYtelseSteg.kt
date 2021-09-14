@@ -75,6 +75,9 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
         } else if (vedtak is Innvilget) {
             error("Innvilget vedtak må ha minimum en beløpsperiode")
         }
+
+        // TODO: Hvis opphør, "klipp opp" eksisterende andeler til (ikke med!) dato for opphør
+
         vedtakService.slettVedtakHvisFinnes(behandling.id)
         vedtakService.lagreVedtak(vedtakDto = vedtak, behandlingId = behandling.id)
         simuleringService.hentOgLagreSimuleringsresultat(behandling)
