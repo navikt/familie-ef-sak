@@ -67,15 +67,16 @@ internal class SimuleringServiceTest {
 
     @Test
     internal fun `skal bruke lagret tilkjentYtelse for simulering`() {
-
-        val behandling = behandling(fagsak = fagsak, type = BehandlingType.FØRSTEGANGSBEHANDLING)
+        val forrigeBehandlingId = behandling(fagsak).id
+        val behandling = behandling(fagsak = fagsak,
+                                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                                    forrigeBehandlingId = forrigeBehandlingId)
 
         val tilkjentYtelse = tilkjentYtelse(behandlingId = behandling.id, personIdent = personIdent)
         val simuleringsresultat = Simuleringsresultat(behandlingId = behandling.id,
                                                       data = DetaljertSimuleringResultat(emptyList()))
         every { behandlingService.hentBehandling(any()) } returns behandling
         every { tilkjentYtelseService.hentForBehandling(any()) } returns tilkjentYtelse
-        every { behandlingService.finnSisteIverksatteBehandling(any()) } returns behandling.id
         every { simuleringsresultatRepository.deleteById(any()) } just Runs
         every { simuleringsresultatRepository.insert(any()) } returns simuleringsresultat
 
@@ -92,7 +93,7 @@ internal class SimuleringServiceTest {
                 tilkjentYtelse.andelerTilkjentYtelse.first().stønadFom)
         assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().tilOgMed).isEqualTo(
                 tilkjentYtelse.andelerTilkjentYtelse.first().stønadTom)
-        assertThat(simulerSlot.captured.forrigeBehandlingId).isEqualTo(behandling.id)
+        assertThat(simulerSlot.captured.forrigeBehandlingId).isEqualTo(forrigeBehandlingId)
     }
 
     @Test

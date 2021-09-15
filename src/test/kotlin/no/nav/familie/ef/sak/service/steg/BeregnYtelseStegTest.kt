@@ -43,7 +43,6 @@ internal class BeregnYtelseStegTest {
     @BeforeEach
     internal fun setUp() {
         every { behandlingService.hentAktivIdent(any()) } returns "123"
-        every { behandlingService.finnSisteIverksatteBehandling(any()) } returns UUID.randomUUID()
         every { simuleringService.hentOgLagreSimuleringsresultat(any()) } returns Simuleringsresultat(behandlingId = UUID.randomUUID(),
                                                                                                       data = DetaljertSimuleringResultat(
                                                                                                               emptyList()))
@@ -89,7 +88,6 @@ internal class BeregnYtelseStegTest {
         every { beregningService.beregnYtelse(any(), any()) } returns listOf(lagBeløpsperiode(LocalDate.now(), LocalDate.now()))
         utførSteg(BehandlingType.FØRSTEGANGSBEHANDLING)
 
-        verify(exactly = 0) { behandlingService.finnSisteIverksatteBehandling(any()) }
         verify(exactly = 0) { tilkjentYtelseService.hentForBehandling(any()) }
     }
 

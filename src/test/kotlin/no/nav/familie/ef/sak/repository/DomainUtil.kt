@@ -48,8 +48,10 @@ fun behandling(fagsak: Fagsak,
                id: UUID = UUID.randomUUID(),
                type: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                resultat: BehandlingResultat = BehandlingResultat.IKKE_SATT,
-               opprettetTid: LocalDateTime = SporbarUtils.now()): Behandling =
+               opprettetTid: LocalDateTime = SporbarUtils.now(),
+               forrigeBehandlingId: UUID? = null): Behandling =
         Behandling(fagsakId = fagsak.id,
+                   forrigeBehandlingId = forrigeBehandlingId,
                    id = id,
                    type = type,
                    status = status,
