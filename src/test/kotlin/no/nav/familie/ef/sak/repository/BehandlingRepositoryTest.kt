@@ -4,7 +4,6 @@ import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.util.BehandlingOppsettUtil
-import no.nav.familie.ef.sak.repository.domain.BehandlingResultat
 import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import no.nav.familie.ef.sak.repository.domain.BehandlingStatus.FERDIGSTILT
 import no.nav.familie.ef.sak.repository.domain.BehandlingStatus.UTREDES
@@ -13,10 +12,8 @@ import no.nav.familie.ef.sak.repository.domain.FagsakPerson
 import no.nav.familie.ef.sak.repository.domain.Sporbar
 import no.nav.familie.ef.sak.repository.domain.Stønadstype.BARNETILSYN
 import no.nav.familie.ef.sak.repository.domain.Stønadstype.OVERGANGSSTØNAD
-import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.relational.core.conversion.DbActionExecutionException
@@ -162,7 +159,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `finnSisteIverksatteBehandling skal finne id til siste behandling som er ferdigstilt, ikke annulert eller blankett`() {
-        val førstegangsbehandling = BehandlingOppsettUtil.førstegangsbehandling
+        val førstegangsbehandling = BehandlingOppsettUtil.iverksattFørstegangsbehandling
         fagsakRepository.insert(fagsak(setOf(FagsakPerson("1"))).copy(id = førstegangsbehandling.fagsakId))
 
         val behandlinger = BehandlingOppsettUtil.lagBehandlingerForSisteIverksatte()

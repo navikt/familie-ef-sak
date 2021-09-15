@@ -27,13 +27,13 @@ object BehandlingOppsettUtil {
                   sporbar = Sporbar(opprettetTid = LocalDateTime.now()
                           .minusDays(4)))
 
-    val førstegangsbehandling = behandling(fagsak)
+    val iverksattFørstegangsbehandling = behandling(fagsak)
             .copy(type = BehandlingType.FØRSTEGANGSBEHANDLING,
                   status = BehandlingStatus.FERDIGSTILT,
                   resultat = BehandlingResultat.INNVILGET,
                   sporbar = Sporbar(opprettetTid = LocalDateTime.now().minusDays(3)))
 
-    val blankett = behandling(fagsak)
+    val ferdigstiltBlankett = behandling(fagsak)
             .copy(type = BehandlingType.BLANKETT,
                   status = BehandlingStatus.FERDIGSTILT,
                   resultat = BehandlingResultat.INNVILGET,
@@ -55,9 +55,19 @@ object BehandlingOppsettUtil {
                   status = BehandlingStatus.FERDIGSTILT,
                   resultat = BehandlingResultat.INNVILGET)
 
+    val revurdering = behandling(fagsak)
+            .copy(type = BehandlingType.REVURDERING,
+                  status = BehandlingStatus.UTREDES,
+                  resultat = BehandlingResultat.IKKE_SATT)
+
+    val iverksattTekniskOpphør = behandling(fagsak)
+            .copy(type = BehandlingType.TEKNISK_OPPHØR,
+                  status = BehandlingStatus.FERDIGSTILT,
+                  resultat = BehandlingResultat.INNVILGET)
+
     fun lagBehandlingerForSisteIverksatte() = listOf(annullertFørstegangsbehandling,
-                                                     førstegangsbehandling,
-                                                     blankett,
+                                                     iverksattFørstegangsbehandling,
+                                                     ferdigstiltBlankett,
                                                      annullertRevurdering,
                                                      revurderingUnderArbeid)
 

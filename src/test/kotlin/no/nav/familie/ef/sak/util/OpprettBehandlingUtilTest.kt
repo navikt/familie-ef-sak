@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.util
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.util.BehandlingOppsettUtil
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.util.BehandlingOppsettUtil.iverksattFørstegangsbehandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.util.BehandlingOppsettUtil.iverksattRevurdering
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.util.BehandlingOppsettUtil.lagBehandlingerForSisteIverksatte
 import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
@@ -83,9 +84,39 @@ internal class OpprettBehandlingUtilTest {
     }
 
     @Test
+    internal fun `teknisk opphør - siste behandlingen må være iverksatt`() {
+        validerKanOppretteNyBehandling(BehandlingType.TEKNISK_OPPHØR, listOf(iverksattRevurdering))
+        validerKanOppretteNyBehandling(BehandlingType.TEKNISK_OPPHØR, listOf(iverksattFørstegangsbehandling))
+    }
+
+    @Test
+    internal fun `teknisk opphør - siste behandlingen kan ikke være teknisk opphør`() {
+        assertThat(catchThrowable {
+            validerKanOppretteNyBehandling(BehandlingType.TEKNISK_OPPHØR,
+                                           listOf(BehandlingOppsettUtil.iverksattTekniskOpphør))
+        }).hasMessage("Kan ikke opphøre en allerede opphørt behandling")
+    }
+
+    @Test
+    internal fun `teknisk opphør - skal kaste feil hvis siste behandling ikke er iverksatt`() {
+        assertThat(catchThrowable { validerKanOppretteNyBehandling(BehandlingType.TEKNISK_OPPHØR, listOf()) })
+                .hasMessage("Det finnes ikke en tidligere behandling for fagsaken")
+
+        assertThat(catchThrowable {
+            validerKanOppretteNyBehandling(BehandlingType.TEKNISK_OPPHØR,
+                                           listOf(BehandlingOppsettUtil.ferdigstiltBlankett))
+        }).hasMessage("Siste behandlingen må være iverksatt for å kunne utføre teknisk opphør")
+
+        assertThat(catchThrowable {
+            validerKanOppretteNyBehandling(BehandlingType.TEKNISK_OPPHØR,
+                                           listOf(BehandlingOppsettUtil.annullertRevurdering))
+        }).hasMessage("Det finnes ikke en tidligere behandling for fagsaken")
+    }
+
+    @Test
     internal fun `finnSisteIverksatteBehandling skal finne id til siste behandling som er ferdigstilt, ikke annulert eller blankett`() {
         val behandlinger = lagBehandlingerForSisteIverksatte()
-        val førstegangsbehandling = BehandlingOppsettUtil.førstegangsbehandling
+        val førstegangsbehandling = iverksattFørstegangsbehandling
         val sistIverksatteBehandlingId = sistIverksatteBehandling(behandlinger)?.id
 
         assertThat(sistIverksatteBehandlingId).isNotNull
@@ -94,7 +125,7 @@ internal class OpprettBehandlingUtilTest {
 
     @Test
     internal fun `skal returnere tidligere behandling hvis den er iverksatt`() {
-        assertThat(sistIverksatteBehandling(listOf(BehandlingOppsettUtil.førstegangsbehandling))).isNotNull
+        assertThat(sistIverksatteBehandling(listOf(iverksattFørstegangsbehandling))).isNotNull
         assertThat(sistIverksatteBehandling(listOf(iverksattRevurdering))).isNotNull
     }
 
@@ -115,7 +146,7 @@ internal class OpprettBehandlingUtilTest {
     internal fun `skal ikke returnere tidligere behandling for førstegangsbehandling som ikke er iverksatt`() {
         assertThat(sistIverksatteBehandling(listOf(BehandlingOppsettUtil.førstegangsbehandlingUnderBehandling))).isNull()
         assertThat(sistIverksatteBehandling(listOf(BehandlingOppsettUtil.annullertFørstegangsbehandling))).isNull()
-        assertThat(sistIverksatteBehandling(listOf(BehandlingOppsettUtil.blankett))).isNull()
+        assertThat(sistIverksatteBehandling(listOf(BehandlingOppsettUtil.ferdigstiltBlankett))).isNull()
         assertThat(sistIverksatteBehandling(listOf(BehandlingOppsettUtil.annullertRevurdering))).isNull()
         assertThat(sistIverksatteBehandling(listOf(BehandlingOppsettUtil.revurderingUnderArbeid))).isNull()
     }

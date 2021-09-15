@@ -1,20 +1,17 @@
 package no.nav.familie.ef.sak.service
 
-import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.repository.BehandlingRepository
 import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.repository.domain.Behandling
 import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
-import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseType
 import no.nav.familie.ef.sak.service.steg.StegType
 import no.nav.familie.ef.sak.task.PollStatusTekniskOpphør
 import no.nav.familie.kontrakter.ef.felles.StønadType
 import no.nav.familie.kontrakter.ef.iverksett.TekniskOpphørDto
-import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -34,38 +31,23 @@ class TekniskOpphørService(val behandlingService: BehandlingService,
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Transactional
-    fun håndterTeknisktOpphør(personIdent: PersonIdent) {
-        val sisteFerdigstilteBehandling =
-                behandlingRepository.finnSisteIverksatteBehandling(stønadstype = Stønadstype.OVERGANGSSTØNAD,
-                                                                   personidenter = setOf(personIdent.ident))
-        require(sisteFerdigstilteBehandling != null) {
-            throw Feil("Finner ikke behandling med stønadstype overgangsstønad")
-        }
-        val fagsakId = sisteFerdigstilteBehandling.fagsakId
-        val sisteBehandling = behandlingService.hentBehandlinger(fagsakId).maxByOrNull { it.sporbar.opprettetTid }!!
-
-
-        require(sisteBehandling.id == sisteFerdigstilteBehandling.id) {
-            throw Feil("Kan ikke utføre teknisk opphør på en aktiv behandling, " +
-                       "sisteFerdigstilteBehandling=${sisteFerdigstilteBehandling.id} sisteBehandling=${sisteBehandling.id}")
-        }
-        logger.info("Utfører teknisk opphør behandling=${sisteFerdigstilteBehandling.id}")
-
+    fun håndterTeknisktOpphør(fagsakId: UUID) {
         val aktivIdent = fagsakService.hentAktivIdent(fagsakId)
         val eksternFagsakId = fagsakService.hentEksternId(fagsakId)
-        val nyBehandling = opprettBehandlingTekniskOpphør(fagsakId)
-        val tilkjentYtelseTilOpphør = opprettTilkjentYtelse(behandlingId = nyBehandling.id,
+        val behandling = opprettBehandlingTekniskOpphør(fagsakId)
+        logger.info("Utfører teknisk opphør behandling=${behandling.id}")
+        val tilkjentYtelseTilOpphør = opprettTilkjentYtelse(behandlingId = behandling.id,
                                                             personIdent = aktivIdent)
 
-        taskRepository.save(PollStatusTekniskOpphør.opprettTask(nyBehandling.id, aktivIdent))
+        taskRepository.save(PollStatusTekniskOpphør.opprettTask(behandling.id, aktivIdent))
 
-        iverksettClient.iverksettTekniskOpphør(TekniskOpphørDto(forrigeBehandlingId = sisteFerdigstilteBehandling.id,
+        iverksettClient.iverksettTekniskOpphør(TekniskOpphørDto(forrigeBehandlingId = behandling.forrigeBehandlingId!!,
                                                                 saksbehandlerId = tilkjentYtelseTilOpphør.sporbar.opprettetAv,
-                                                                eksternBehandlingId = nyBehandling.eksternId.id,
+                                                                eksternBehandlingId = behandling.eksternId.id,
                                                                 stønadstype = StønadType.OVERGANGSSTØNAD,
                                                                 eksternFagsakId = eksternFagsakId,
                                                                 personIdent = aktivIdent,
-                                                                behandlingId = nyBehandling.id,
+                                                                behandlingId = behandling.id,
                                                                 vedtaksdato = LocalDate.now()))
     }
 
