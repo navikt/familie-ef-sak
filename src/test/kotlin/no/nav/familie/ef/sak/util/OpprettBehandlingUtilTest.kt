@@ -107,7 +107,8 @@ internal class OpprettBehandlingUtilTest {
         val behandlingB = iverksatt(LocalDateTime.now())
         val behandlingC = iverksatt(LocalDateTime.now().plusDays(5))
 
-        assertThat(sistIverksatteBehandling(listOf(behandlingA, behandlingB, behandlingC))?.id).isEqualTo(behandlingB.id)
+        val behandlingerMedSistBehandlerIMidten = listOf(behandlingA, behandlingC, behandlingB)
+        assertThat(sistIverksatteBehandling(behandlingerMedSistBehandlerIMidten)?.id).isEqualTo(behandlingC.id)
     }
 
     @Test
