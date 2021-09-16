@@ -11,9 +11,10 @@ import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.Behandlingshistorikk
-import no.nav.familie.ef.sak.repository.domain.JsonWrapper
+import no.nav.familie.ef.sak.domene.JsonWrapper
 import no.nav.familie.ef.sak.behandling.domain.StegUtfall
-import no.nav.familie.ef.sak.service.steg.StegType
+import no.nav.familie.ef.sak.infrastruktur.tilgang.TilgangService
+import no.nav.familie.ef.sak.steg.StegType
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat

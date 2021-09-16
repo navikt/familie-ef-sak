@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.vurdering.medlemskap
 
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlPerson
-import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPerson
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.nare.evaluations.Evaluering
 import no.nav.familie.ef.sak.nare.specifications.Regel
 import no.nav.familie.ef.sak.util.Periode

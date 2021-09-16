@@ -4,9 +4,11 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import no.nav.familie.ef.sak.infrastruktur.config.PdlConfig
-import no.nav.familie.ef.sak.integration.dto.pdl.Bostedsadresse
-import no.nav.familie.ef.sak.integration.dto.pdl.Metadata
-import no.nav.familie.ef.sak.integration.dto.pdl.Vegadresse
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlPersonSøkHjelper
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlSaksbehandlerClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Vegadresse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach

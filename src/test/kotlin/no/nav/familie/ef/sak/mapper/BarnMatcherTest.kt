@@ -1,9 +1,9 @@
 package no.nav.familie.ef.sak.mapper
 
 import no.nav.familie.ef.sak.domene.BarnMedIdent
-import no.nav.familie.ef.sak.integration.dto.pdl.Metadata
-import no.nav.familie.ef.sak.integration.dto.pdl.Navn
-import no.nav.familie.ef.sak.repository.domain.søknad.Barn
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.Barn
 import no.nav.familie.util.FnrGenerator
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

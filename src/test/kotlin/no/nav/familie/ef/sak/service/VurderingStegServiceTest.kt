@@ -7,7 +7,7 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.familie.ef.sak.api.Feil
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.api.dto.DelvilkårsvurderingDto
 import no.nav.familie.ef.sak.api.dto.OppdaterVilkårsvurderingDto
 import no.nav.familie.ef.sak.api.dto.SivilstandInngangsvilkårDto
@@ -18,7 +18,7 @@ import no.nav.familie.ef.sak.api.dto.VilkårGrunnlagDto
 import no.nav.familie.ef.sak.api.dto.VurderingDto
 import no.nav.familie.ef.sak.blankett.BlankettRepository
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
-import no.nav.familie.ef.sak.mapper.SøknadsskjemaMapper
+import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.vilkårsvurdering
@@ -35,10 +35,10 @@ import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.Vurdering
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.service.SøknadService
+import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.vilkår.VilkårGrunnlagService
 import no.nav.familie.ef.sak.vilkår.VurderingStegService
-import no.nav.familie.ef.sak.service.steg.StegService
+import no.nav.familie.ef.sak.steg.StegService
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import no.nav.familie.prosessering.domene.TaskRepository

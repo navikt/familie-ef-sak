@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.fagsak
 
-import no.nav.familie.ef.sak.repository.domain.Sporbar
+import no.nav.familie.ef.sak.domene.Sporbar
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded

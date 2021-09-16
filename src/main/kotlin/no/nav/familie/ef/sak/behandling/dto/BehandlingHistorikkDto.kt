@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.api.dto
 
 import no.nav.familie.ef.sak.behandling.domain.StegUtfall
-import no.nav.familie.ef.sak.service.steg.StegType
+import no.nav.familie.ef.sak.steg.StegType
 import java.time.LocalDateTime
 import java.util.*
 

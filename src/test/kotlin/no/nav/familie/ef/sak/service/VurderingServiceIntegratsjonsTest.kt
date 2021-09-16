@@ -15,8 +15,8 @@ import no.nav.familie.ef.sak.fagsak.Fagsak
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
-import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsstønad
-import no.nav.familie.ef.sak.service.SøknadService
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.SøknadsskjemaOvergangsstønad
+import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import org.assertj.core.api.Assertions.assertThat

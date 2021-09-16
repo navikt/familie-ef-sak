@@ -6,9 +6,9 @@ import no.nav.familie.ef.sak.api.dto.Kjønn
 import no.nav.familie.ef.sak.api.dto.Sivilstandstype
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
-import no.nav.familie.ef.sak.integration.dto.pdl.AdressebeskyttelseGradering as PdlAdressebeskyttelseGradering
-import no.nav.familie.ef.sak.integration.dto.pdl.KjønnType as PdlKjønnType
-import no.nav.familie.ef.sak.integration.dto.pdl.Sivilstandstype as PdlSivilstandstype
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.AdressebeskyttelseGradering as PdlAdressebeskyttelseGradering
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.KjønnType as PdlKjønnType
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Sivilstandstype as PdlSivilstandstype
 
 class PersonoppslysningerDtoTest {
 

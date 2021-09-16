@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.oppgave
 
+import no.nav.familie.ef.sak.oppgave.dto.FinnOppgaveRequestDto
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Enhetsmappe

@@ -1,15 +1,15 @@
 package no.nav.familie.ef.sak.fagsak
 
-import no.nav.familie.ef.sak.api.Feil
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.api.dto.NavnDto
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.integration.PdlPersonSøkHjelper
-import no.nav.familie.ef.sak.integration.PdlSaksbehandlerClient
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlPersonFraSøk
-import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
-import no.nav.familie.ef.sak.mapper.AdresseMapper
-import no.nav.familie.ef.sak.mapper.KjønnMapper
-import no.nav.familie.ef.sak.service.PersonService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlPersonSøkHjelper
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlSaksbehandlerClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonFraSøk
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseMapper
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.KjønnMapper
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import org.springframework.stereotype.Service
 import java.util.UUID
 

@@ -4,11 +4,11 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import no.nav.familie.ef.sak.arena.ArenaPeriodeUtil.mapOgFiltrer
 import no.nav.familie.ef.sak.arena.ArenaPeriodeUtil.slåSammenPerioder
-import no.nav.familie.ef.sak.exception.PdlNotFoundException
+import no.nav.familie.ef.sak.infrastruktur.exception.PdlNotFoundException
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
-import no.nav.familie.ef.sak.integration.InfotrygdReplikaClient
-import no.nav.familie.ef.sak.integration.PdlClient
-import no.nav.familie.ef.sak.integration.dto.pdl.identer
+import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.fagsak.Stønadstype

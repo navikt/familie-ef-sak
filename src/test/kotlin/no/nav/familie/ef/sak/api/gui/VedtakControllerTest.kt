@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.api.gui
 
 import com.nimbusds.jwt.JWTClaimsSet
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.api.Feil
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.api.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.api.dto.TotrinnkontrollStatus
 import no.nav.familie.ef.sak.api.dto.TotrinnskontrollStatusDto
@@ -19,14 +19,14 @@ import no.nav.familie.ef.sak.no.nav.familie.ef.sak.util.BrukerContextUtil.mockBr
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
-import no.nav.familie.ef.sak.repository.VedtakRepository
+import no.nav.familie.ef.sak.vedtak.VedtakRepository
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.fagsak.FagsakPerson
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
-import no.nav.familie.ef.sak.service.GrunnlagsdataService
-import no.nav.familie.ef.sak.service.SøknadService
-import no.nav.familie.ef.sak.service.VedtaksbrevService
-import no.nav.familie.ef.sak.service.steg.StegType
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
+import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.ef.sak.vedtak.VedtaksbrevService
+import no.nav.familie.ef.sak.steg.StegType
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper

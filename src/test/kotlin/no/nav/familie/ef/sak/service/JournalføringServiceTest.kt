@@ -11,7 +11,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.journalføring.JournalføringBehandling
 import no.nav.familie.ef.sak.journalføring.JournalføringRequest
 import no.nav.familie.ef.sak.journalføring.JournalpostClient
-import no.nav.familie.ef.sak.integration.PdlClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.iverksett.IverksettService
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.util.BrukerContextUtil
@@ -25,7 +25,8 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.Stønadstype
 import no.nav.familie.ef.sak.journalføring.JournalføringService
 import no.nav.familie.ef.sak.oppgave.OppgaveService
-import no.nav.familie.ef.sak.service.steg.StegType
+import no.nav.familie.ef.sak.steg.StegType
+import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.Fagsystem

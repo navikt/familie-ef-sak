@@ -1,15 +1,11 @@
 package no.nav.familie.ef.sak.vilkår
 
-import no.nav.familie.ef.sak.api.Feil
-import no.nav.familie.ef.sak.api.dto.VilkårDto
-import no.nav.familie.ef.sak.api.dto.VilkårGrunnlagDto
-import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
-import no.nav.familie.ef.sak.api.dto.tilDto
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår.opprettNyeVilkårsvurderinger
-import no.nav.familie.ef.sak.repository.domain.Sporbar
-import no.nav.familie.ef.sak.service.SøknadService
+import no.nav.familie.ef.sak.domene.Sporbar
+import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID

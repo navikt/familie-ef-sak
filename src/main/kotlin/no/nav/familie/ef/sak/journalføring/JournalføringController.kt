@@ -1,9 +1,9 @@
 package no.nav.familie.ef.sak.journalføring
 
-import no.nav.familie.ef.sak.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.api.ApiFeil
-import no.nav.familie.ef.sak.integration.PdlClient
-import no.nav.familie.ef.sak.service.TilgangService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
+import no.nav.familie.ef.sak.infrastruktur.tilgang.TilgangService
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost

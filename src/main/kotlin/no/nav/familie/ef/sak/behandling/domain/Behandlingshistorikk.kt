@@ -2,8 +2,8 @@ package no.nav.familie.ef.sak.behandling.domain
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.api.dto.BehandlingshistorikkDto
-import no.nav.familie.ef.sak.repository.domain.JsonWrapper
-import no.nav.familie.ef.sak.service.steg.StegType
+import no.nav.familie.ef.sak.domene.JsonWrapper
+import no.nav.familie.ef.sak.steg.StegType
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.data.annotation.Id

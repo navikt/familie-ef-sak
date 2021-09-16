@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.task
 
-import no.nav.familie.ef.sak.integration.PdlClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext

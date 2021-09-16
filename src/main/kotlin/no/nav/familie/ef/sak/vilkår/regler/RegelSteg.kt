@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.vilkår.regler
 
-import no.nav.familie.ef.sak.api.Feil
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 
 /**
  * Ett [RegelSteg] er en regel med ett spørsmål med flere svar som mapper til en [SvarRegel]

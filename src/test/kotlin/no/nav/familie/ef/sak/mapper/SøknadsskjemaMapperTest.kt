@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.mapper
 
+import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
 import no.nav.familie.kontrakter.ef.søknad.*
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test

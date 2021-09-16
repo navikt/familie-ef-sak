@@ -11,8 +11,8 @@ import no.nav.familie.ef.sak.fagsak.Stønadstype
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.service.GrunnlagsdataService
-import no.nav.familie.ef.sak.service.SøknadService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
+import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.kontrakter.ef.søknad.SøknadMedVedlegg
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.Ressurs

@@ -1,13 +1,13 @@
 package no.nav.familie.ef.sak.vilkår.regler
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import no.nav.familie.ef.sak.api.Feil
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.api.dto.Sivilstandstype
 import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.Vurdering
-import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsstønad
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.SøknadsskjemaOvergangsstønad
 
 /**
  * Brukes for å utlede hvilke delvilkår som må besvares

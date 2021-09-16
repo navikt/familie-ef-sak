@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.simulering
 
-import no.nav.familie.ef.sak.beregning.VedtakService
+import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType

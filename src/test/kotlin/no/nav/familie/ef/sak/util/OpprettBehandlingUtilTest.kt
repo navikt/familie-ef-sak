@@ -8,7 +8,7 @@ import no.nav.familie.ef.sak.no.nav.familie.ef.sak.util.BehandlingOppsettUtil.iv
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.util.BehandlingOppsettUtil.lagBehandlingerForSisteIverksatte
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.repository.domain.Sporbar
+import no.nav.familie.ef.sak.domene.Sporbar
 import no.nav.familie.ef.sak.util.OpprettBehandlingUtil.sistIverksatteBehandling
 import no.nav.familie.ef.sak.util.OpprettBehandlingUtil.validerKanOppretteNyBehandling
 import org.assertj.core.api.Assertions.assertThat

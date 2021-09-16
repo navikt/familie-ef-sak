@@ -1,18 +1,16 @@
 package no.nav.familie.ef.sak.behandling
 
-import no.nav.familie.ef.sak.api.Feil
-import no.nav.familie.ef.sak.behandling.BehandlingRepository
-import no.nav.familie.ef.sak.behandling.BehandlingsjournalpostRepository
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.domain.Behandlingsjournalpost
-import no.nav.familie.ef.sak.repository.domain.Sporbar
+import no.nav.familie.ef.sak.domene.Sporbar
 import no.nav.familie.ef.sak.fagsak.Stønadstype
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
-import no.nav.familie.ef.sak.service.SøknadService
-import no.nav.familie.ef.sak.service.steg.StegType
+import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.ef.sak.steg.StegType
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.util.OpprettBehandlingUtil.sistIverksatteBehandling
 import no.nav.familie.ef.sak.util.OpprettBehandlingUtil.validerKanOppretteNyBehandling

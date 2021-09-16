@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.beregning
 
-import no.nav.familie.ef.sak.api.Feil
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.util.Periode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

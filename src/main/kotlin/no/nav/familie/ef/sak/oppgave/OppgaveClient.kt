@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.oppgave
 
 import no.nav.familie.ef.sak.infrastruktur.config.IntegrasjonerConfig
-import no.nav.familie.ef.sak.exception.IntegrasjonException
+import no.nav.familie.ef.sak.infrastruktur.exception.IntegrasjonException
 import no.nav.familie.ef.sak.util.medContentTypeJsonUTF8
 import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.kontrakter.felles.Ressurs

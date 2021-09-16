@@ -3,10 +3,11 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.beregning.Inntektsperiode
-import no.nav.familie.ef.sak.beregning.ResultatType
+import no.nav.familie.ef.sak.vedtak.ResultatType
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.repository.*
-import no.nav.familie.ef.sak.repository.domain.*
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.*
+import no.nav.familie.ef.sak.vedtak.VedtakRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

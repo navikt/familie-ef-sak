@@ -1,11 +1,11 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.mapper.SøknadsskjemaMapper
-import no.nav.familie.ef.sak.repository.SøknadBarnetilsynRepository
-import no.nav.familie.ef.sak.repository.SøknadOvergangsstønadRepository
-import no.nav.familie.ef.sak.repository.SøknadSkolepengerRepository
-import no.nav.familie.ef.sak.repository.domain.søknad.Sivilstandsplaner
+import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
+import no.nav.familie.ef.sak.opplysninger.søknad.SøknadBarnetilsynRepository
+import no.nav.familie.ef.sak.opplysninger.søknad.SøknadOvergangsstønadRepository
+import no.nav.familie.ef.sak.opplysninger.søknad.SøknadSkolepengerRepository
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.Sivilstandsplaner
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.kontrakter.ef.søknad.Søknadsfelt
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad

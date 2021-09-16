@@ -7,7 +7,7 @@ import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.FagsakPerson
-import no.nav.familie.ef.sak.repository.domain.Sporbar
+import no.nav.familie.ef.sak.domene.Sporbar
 import no.nav.familie.ef.sak.fagsak.Stønadstype
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

@@ -2,9 +2,9 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.util
 
 import no.nav.familie.ef.sak.domene.GrunnlagsdataDomene
 import no.nav.familie.ef.sak.domene.Søker
-import no.nav.familie.ef.sak.integration.dto.pdl.KjønnType
-import no.nav.familie.ef.sak.integration.dto.pdl.Metadata
-import no.nav.familie.ef.sak.integration.dto.pdl.Navn
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.KjønnType
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 
 fun opprettGrunnlagsdata() = GrunnlagsdataDomene(

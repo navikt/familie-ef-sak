@@ -11,7 +11,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.FERDIGSTILT
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.UTREDES
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.fagsak.FagsakPerson
-import no.nav.familie.ef.sak.repository.domain.Sporbar
+import no.nav.familie.ef.sak.domene.Sporbar
 import no.nav.familie.ef.sak.fagsak.Stønadstype.BARNETILSYN
 import no.nav.familie.ef.sak.fagsak.Stønadstype.OVERGANGSSTØNAD
 import org.assertj.core.api.Assertions.assertThat

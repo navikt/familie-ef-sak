@@ -1,12 +1,12 @@
 package no.nav.familie.ef.sak.vilkår.regler
 
 import no.nav.familie.ef.sak.api.dto.Sivilstandstype
-import no.nav.familie.ef.sak.mapper.SøknadsskjemaMapper
+import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.SivilstandRegel
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
-import no.nav.familie.ef.sak.repository.domain.søknad.Sivilstand
-import no.nav.familie.ef.sak.repository.domain.søknad.SøknadsskjemaOvergangsstønad
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.Sivilstand
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.SøknadsskjemaOvergangsstønad
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test

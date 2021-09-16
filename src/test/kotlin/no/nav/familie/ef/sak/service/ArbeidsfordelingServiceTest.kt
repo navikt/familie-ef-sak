@@ -3,13 +3,15 @@ package no.nav.familie.ef.sak.service
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.familie.ef.sak.domene.SøkerMedBarn
+import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.SøkerMedBarn
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
-import no.nav.familie.ef.sak.integration.dto.pdl.Adressebeskyttelse
-import no.nav.familie.ef.sak.integration.dto.pdl.AdressebeskyttelseGradering
-import no.nav.familie.ef.sak.integration.dto.pdl.Metadata
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Adressebeskyttelse
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.AdressebeskyttelseGradering
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vurdering.medlemskap.pdlBarn
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vurdering.medlemskap.pdlSøker
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 

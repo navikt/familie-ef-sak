@@ -1,15 +1,15 @@
 package no.nav.familie.ef.sak.simulering
 
 import no.nav.familie.ef.sak.beregning.BeregningService
-import no.nav.familie.ef.sak.beregning.Innvilget
-import no.nav.familie.ef.sak.beregning.VedtakDto
+import no.nav.familie.ef.sak.vedtak.Innvilget
+import no.nav.familie.ef.sak.vedtak.VedtakDto
 import no.nav.familie.ef.sak.beregning.tilInntektsperioder
-import no.nav.familie.ef.sak.beregning.tilPerioder
-import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
+import no.nav.familie.ef.sak.vedtak.tilPerioder
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.fagsak.Fagsak
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseType
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.TilkjentYtelseType
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.ef.iverksett.TilkjentYtelseMedMetadata
 import org.springframework.stereotype.Service

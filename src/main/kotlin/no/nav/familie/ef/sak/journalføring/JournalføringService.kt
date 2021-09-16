@@ -1,16 +1,16 @@
 package no.nav.familie.ef.sak.journalføring
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.integration.PdlClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.iverksett.IverksettService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.fagsak.Fagsak
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.Stønadstype
-import no.nav.familie.ef.sak.service.GrunnlagsdataService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.oppgave.OppgaveService
-import no.nav.familie.ef.sak.service.SøknadService
+import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.task.BehandlingsstatistikkTask
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode

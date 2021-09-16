@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.util
 
-import no.nav.familie.ef.sak.api.ApiFeil
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus

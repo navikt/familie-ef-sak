@@ -1,9 +1,9 @@
 package no.nav.familie.ef.sak.vilkår.regler.evalutation
 
-import no.nav.familie.ef.sak.api.Feil
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.api.dto.DelvilkårsvurderingDto
 import no.nav.familie.ef.sak.api.dto.VurderingDto
-import no.nav.familie.ef.sak.api.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.vilkår.regler.BegrunnelseType
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
 import no.nav.familie.ef.sak.vilkår.regler.SluttSvarRegel

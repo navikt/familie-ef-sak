@@ -1,8 +1,8 @@
 package no.nav.familie.ef.sak.sikkerhet
 
-import no.nav.familie.ef.sak.api.ManglerTilgang
+import no.nav.familie.ef.sak.infrastruktur.exception.ManglerTilgang
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
-import no.nav.familie.ef.sak.service.steg.BehandlerRolle
+import no.nav.familie.ef.sak.steg.BehandlerRolle
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter

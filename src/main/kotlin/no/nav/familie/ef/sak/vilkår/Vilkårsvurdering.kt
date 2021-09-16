@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.vilkår
 
-import no.nav.familie.ef.sak.repository.domain.Sporbar
+import no.nav.familie.ef.sak.domene.Sporbar
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import org.springframework.data.annotation.Id

@@ -1,17 +1,16 @@
 package no.nav.familie.ef.sak.infrastruktur.config
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.familie.ef.sak.api.dto.BrevRequest
-import no.nav.familie.ef.sak.domene.GrunnlagsdataDomene
 import no.nav.familie.ef.sak.vilkår.DelvilkårsvurderingWrapper
-import no.nav.familie.ef.sak.repository.domain.Endret
-import no.nav.familie.ef.sak.repository.domain.Fil
-import no.nav.familie.ef.sak.repository.domain.InntektWrapper
-import no.nav.familie.ef.sak.repository.domain.JsonWrapper
-import no.nav.familie.ef.sak.repository.domain.PeriodeWrapper
-import no.nav.familie.ef.sak.repository.domain.søknad.Arbeidssituasjon
-import no.nav.familie.ef.sak.repository.domain.søknad.Dokumentasjon
-import no.nav.familie.ef.sak.repository.domain.søknad.GjelderDeg
+import no.nav.familie.ef.sak.domene.Endret
+import no.nav.familie.ef.sak.domene.Fil
+import no.nav.familie.ef.sak.domene.JsonWrapper
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.Arbeidssituasjon
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.Dokumentasjon
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.GjelderDeg
+import no.nav.familie.ef.sak.vedtak.InntektWrapper
+import no.nav.familie.ef.sak.vedtak.PeriodeWrapper
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
@@ -98,8 +97,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
                                             StringTilArbeidssituasjonConverter(),
                                             PGobjectTilJsonWrapperConverter(),
                                             JsonWrapperTilPGobjectConverter(),
-                                            BrevRequestTilStringConverter(),
-                                            StringTilBrevRequestConverter(),
                                             FilTilBytearrayConverter(),
                                             BytearrayTilFilConverter(),
                                             PGobjectTilVedtaksperioder(),
@@ -201,23 +198,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
         }
     }
-
-    @WritingConverter
-    class BrevRequestTilStringConverter : Converter<BrevRequest, String> {
-
-        override fun convert(brevRequest: BrevRequest): String {
-            return objectMapper.writeValueAsString(brevRequest)
-        }
-    }
-
-    @ReadingConverter
-    class StringTilBrevRequestConverter : Converter<String, BrevRequest> {
-
-        override fun convert(brevRequest: String): BrevRequest {
-            return objectMapper.readValue(brevRequest, BrevRequest::class.java)
-        }
-    }
-
 
     @WritingConverter
     class ArbeidssituasjonTilStringConverter : Converter<Arbeidssituasjon, String> {

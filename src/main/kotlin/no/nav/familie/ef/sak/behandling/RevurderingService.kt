@@ -1,14 +1,13 @@
 package no.nav.familie.ef.sak.behandling
 
-import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.oppgave.OppgaveService
-import no.nav.familie.ef.sak.service.GrunnlagsdataService
-import no.nav.familie.ef.sak.service.SøknadService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
+import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.vilkår.VurderingService
-import no.nav.familie.ef.sak.service.steg.StegType
+import no.nav.familie.ef.sak.steg.StegType
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.task.BehandlingsstatistikkTask
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype

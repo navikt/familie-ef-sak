@@ -5,10 +5,13 @@ import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
-import no.nav.familie.ef.sak.repository.VedtakRepository
+import no.nav.familie.ef.sak.vedtak.VedtakRepository
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.service.steg.StegType
+import no.nav.familie.ef.sak.steg.StegType
+import no.nav.familie.ef.sak.vedtak.Innvilget
+import no.nav.familie.ef.sak.vedtak.ResultatType
+import no.nav.familie.ef.sak.vedtak.VedtakService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -34,8 +37,8 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
 
         val tomBegrunnelse = ""
         val vedtakRequest = Innvilget(resultatType = ResultatType.INNVILGE,
-                                           tomBegrunnelse,
-                                           tomBegrunnelse, emptyList(), emptyList())
+                                      tomBegrunnelse,
+                                      tomBegrunnelse, emptyList(), emptyList())
 
         /** Skal ikke gjøre noe når den ikke er opprettet **/
         vedtakService.slettVedtakHvisFinnes(behandling.id)
@@ -73,8 +76,8 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
 
         val tomBegrunnelse = ""
         val vedtakDto = Innvilget(resultatType = ResultatType.INNVILGE,
-                                       tomBegrunnelse,
-                                       tomBegrunnelse, emptyList(), emptyList())
+                                  tomBegrunnelse,
+                                  tomBegrunnelse, emptyList(), emptyList())
 
         vedtakService.lagreVedtak(vedtakDto, behandling.id)
 

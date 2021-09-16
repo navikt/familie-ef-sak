@@ -1,11 +1,6 @@
 package no.nav.familie.ef.sak.vilkår
 
-import no.nav.familie.ef.sak.api.Feil
-import no.nav.familie.ef.sak.api.dto.OppdaterVilkårsvurderingDto
-import no.nav.familie.ef.sak.api.dto.SvarPåVurderingerDto
-import no.nav.familie.ef.sak.api.dto.VilkårGrunnlagDto
-import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
-import no.nav.familie.ef.sak.api.dto.tilDto
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.blankett.BlankettRepository
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
@@ -16,9 +11,9 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
-import no.nav.familie.ef.sak.service.SøknadService
-import no.nav.familie.ef.sak.service.steg.StegService
-import no.nav.familie.ef.sak.service.steg.StegType
+import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.ef.sak.steg.StegService
+import no.nav.familie.ef.sak.steg.StegType
 import no.nav.familie.ef.sak.task.BehandlingsstatistikkTask
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.http.HttpStatus

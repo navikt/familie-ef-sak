@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.api.beregning
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.beregning.*
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
@@ -9,8 +8,14 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.fagsak.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
-import no.nav.familie.ef.sak.repository.domain.*
-import no.nav.familie.ef.sak.service.steg.StegType
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.*
+import no.nav.familie.ef.sak.steg.StegType
+import no.nav.familie.ef.sak.vedtak.Avslå
+import no.nav.familie.ef.sak.vedtak.Henlegge
+import no.nav.familie.ef.sak.vedtak.Innvilget
+import no.nav.familie.ef.sak.vedtak.ResultatType
+import no.nav.familie.ef.sak.vedtak.VedtakDto
+import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach

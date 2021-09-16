@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.oppgave
 
-import no.nav.familie.ef.sak.repository.domain.Sporbar
+import no.nav.familie.ef.sak.domene.Sporbar
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column

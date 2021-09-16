@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.beregning
 
-import no.nav.familie.ef.sak.api.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.util.Periode
 import no.nav.familie.ef.sak.util.isEqualOrAfter
 import no.nav.familie.ef.sak.util.isEqualOrBefore
