@@ -31,14 +31,14 @@ class BeregningController(private val stegService: StegService,
     }
 
     @PostMapping("/{behandlingId}/fullfor")
-    fun beregnYtelseForStønad(@PathVariable behandlingId: UUID, @RequestBody vedtak: VedtakDto): Ressurs<UUID> {
+    fun lagreVedtak(@PathVariable behandlingId: UUID, @RequestBody vedtak: VedtakDto): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         val behandling = behandlingService.hentBehandling(behandlingId)
         return Ressurs.success(stegService.håndterBeregnYtelseForStønad(behandling, vedtak).id)
     }
 
     @PostMapping("/{behandlingId}/lagre-vedtak")
-    fun lagreVedtak(@PathVariable behandlingId: UUID, @RequestBody vedtak: VedtakDto): Ressurs<UUID> {
+    fun lagreBlankettVedtak(@PathVariable behandlingId: UUID, @RequestBody vedtak: VedtakDto): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         val behandling = behandlingService.hentBehandling(behandlingId)
 

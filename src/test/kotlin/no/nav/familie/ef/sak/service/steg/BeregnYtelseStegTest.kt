@@ -4,9 +4,11 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.familie.ef.sak.api.Feil
 import no.nav.familie.ef.sak.api.beregning.Beløpsperiode
 import no.nav.familie.ef.sak.api.beregning.BeregningService
 import no.nav.familie.ef.sak.api.beregning.Innvilget
+import no.nav.familie.ef.sak.api.beregning.Opphør
 import no.nav.familie.ef.sak.api.beregning.VedtakDto
 import no.nav.familie.ef.sak.api.beregning.VedtakService
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
@@ -27,6 +29,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 
 internal class BeregnYtelseStegTest {
@@ -72,7 +75,7 @@ internal class BeregnYtelseStegTest {
         assertThat(andeler[1].stønadTom).isEqualTo(nyAndelTom)
 
         assertThat(andeler[0].kildeBehandlingId).isNotEqualTo(andeler[1].kildeBehandlingId)
-        verify (exactly = 1){
+        verify(exactly = 1) {
             simuleringService.hentOgLagreSimuleringsresultat(any())
         }
     }
@@ -80,7 +83,7 @@ internal class BeregnYtelseStegTest {
     @Test
     internal fun `innvilget - skal kaste feil når man sender inn uten nye beløpsperioder`() {
         every { beregningService.beregnYtelse(any(), any()) } returns emptyList()
-        assertThrows<IllegalStateException> { utførSteg(BehandlingType.REVURDERING) }
+        assertThrows<Feil> { utførSteg(BehandlingType.REVURDERING) }
     }
 
     @Test
@@ -178,6 +181,124 @@ internal class BeregnYtelseStegTest {
         assertThat(nyeAndeler[1].stønadTom).isEqualTo(nyAndelTom)
         assertThat(nyeAndeler[1].beløp).isEqualTo(100)
     }
+
+    @Test
+    internal fun `skal opphøre vedtak fra dato`() {
+        val opphørFom = YearMonth.of(2021, 6)
+
+        val forrigeAndelFom = LocalDate.of(2021, 1, 1)
+        val forrigeAndelTom = LocalDate.of(2021, 12, 31)
+        val forventetNyAndelFom = LocalDate.of(2021, 1, 1)
+        val forventetNyAndelTom = LocalDate.of(2021, 5, 31)
+
+        val slot = slot<TilkjentYtelse>()
+        every { tilkjentYtelseService.opprettTilkjentYtelse(capture(slot)) } answers { firstArg() }
+        every { tilkjentYtelseService.hentForBehandling(any()) } returns
+                lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, forrigeAndelFom, forrigeAndelTom)))
+
+        utførSteg(BehandlingType.REVURDERING, Opphør(opphørFom = opphørFom, begrunnelse = "null"), forrigeBehandlingId = UUID.randomUUID())
+
+        assertThat(slot.captured.andelerTilkjentYtelse).hasSize(1)
+        assertThat(slot.captured.andelerTilkjentYtelse.first().stønadFom).isEqualTo(forventetNyAndelFom)
+        assertThat(slot.captured.andelerTilkjentYtelse.first().stønadTom).isEqualTo(forventetNyAndelTom)
+    }
+
+    @Test
+    internal fun `skal feile hvis opphørsdato ikke sammenfaller med en periode`() {
+        val opphørFom = YearMonth.of(2021, 6)
+
+        val forrigeAndelFom = LocalDate.of(2021, 1, 1)
+        val forrigeAndelTom = LocalDate.of(2021, 3, 31)
+
+        val slot = slot<TilkjentYtelse>()
+        every { tilkjentYtelseService.opprettTilkjentYtelse(capture(slot)) } answers { firstArg() }
+        every { tilkjentYtelseService.hentForBehandling(any()) } returns
+                lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, forrigeAndelFom, forrigeAndelTom)))
+
+        assertThrows<Feil> { utførSteg(BehandlingType.REVURDERING, Opphør(opphørFom = opphørFom, begrunnelse = "null"), forrigeBehandlingId = UUID.randomUUID()) }
+    }
+
+
+    @Test
+    internal fun `skal opphøre hvis opphørsdato samsvarer med startdato for andel`() {
+        val opphørFom = YearMonth.of(2021, 7)
+
+        val andel1Fom = LocalDate.of(2021, 1, 1)
+        val andel1Tom = LocalDate.of(2021, 6, 30)
+        val andel2Fom = LocalDate.of(2021, 7, 1)
+        val andel2Tom = LocalDate.of(2021, 12, 31)
+
+        val forventetNyAndelFom = LocalDate.of(2021, 1, 1)
+        val forventetNyAndelTom = LocalDate.of(2021, 6, 30)
+
+        val slot = slot<TilkjentYtelse>()
+        every { tilkjentYtelseService.opprettTilkjentYtelse(capture(slot)) } answers { firstArg() }
+        every { tilkjentYtelseService.hentForBehandling(any()) } returns
+                lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, andel1Fom, andel1Tom),
+                                         lagAndelTilkjentYtelse(200, andel2Fom, andel2Tom)))
+
+        utførSteg(BehandlingType.REVURDERING, Opphør(opphørFom = opphørFom, begrunnelse = "null"), forrigeBehandlingId = UUID.randomUUID())
+
+        assertThat(slot.captured.andelerTilkjentYtelse).hasSize(1)
+        assertThat(slot.captured.andelerTilkjentYtelse.first().stønadFom).isEqualTo(forventetNyAndelFom)
+        assertThat(slot.captured.andelerTilkjentYtelse.first().stønadTom).isEqualTo(forventetNyAndelTom)
+    }
+
+    @Test
+    internal fun `skal opphøre hvis opphørsdato er måneden etter periodestart`() {
+        val opphørFom = YearMonth.of(2021, 8)
+
+        val andel1Fom = LocalDate.of(2021, 1, 1)
+        val andel1Tom = LocalDate.of(2021, 6, 30)
+        val andel2Fom = LocalDate.of(2021, 7, 1)
+        val andel2Tom = LocalDate.of(2021, 12, 31)
+
+        val forventetAndelFom1 = LocalDate.of(2021, 1, 1)
+        val forventetAndelTom1 = LocalDate.of(2021, 6, 30)
+        val forventetAndelFom2 = LocalDate.of(2021, 7, 1)
+        val forventetAndelTom2 = LocalDate.of(2021, 7, 31)
+
+        val slot = slot<TilkjentYtelse>()
+        every { tilkjentYtelseService.opprettTilkjentYtelse(capture(slot)) } answers { firstArg() }
+        every { tilkjentYtelseService.hentForBehandling(any()) } returns
+                lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, andel1Fom, andel1Tom),
+                                         lagAndelTilkjentYtelse(200, andel2Fom, andel2Tom)))
+
+        utførSteg(BehandlingType.REVURDERING, Opphør(opphørFom = opphørFom, begrunnelse = "null"), forrigeBehandlingId = UUID.randomUUID())
+
+        assertThat(slot.captured.andelerTilkjentYtelse).hasSize(2)
+        assertThat(slot.captured.andelerTilkjentYtelse[0].stønadFom).isEqualTo(forventetAndelFom1)
+        assertThat(slot.captured.andelerTilkjentYtelse[0].stønadTom).isEqualTo(forventetAndelTom1)
+        assertThat(slot.captured.andelerTilkjentYtelse[1].stønadFom).isEqualTo(forventetAndelFom2)
+        assertThat(slot.captured.andelerTilkjentYtelse[1].stønadTom).isEqualTo(forventetAndelTom2)
+    }
+
+    @Test
+    internal fun `skal opphøre hvis opphørsdato samsvarer med startdato for første andel`() {
+        val opphørFom = YearMonth.of(2021, 1)
+
+        val andelFom = LocalDate.of(2021, 1, 1)
+        val andelTom = LocalDate.of(2021, 6, 30)
+
+        val slot = slot<TilkjentYtelse>()
+        every { tilkjentYtelseService.opprettTilkjentYtelse(capture(slot)) } answers { firstArg() }
+        every { tilkjentYtelseService.hentForBehandling(any()) } returns
+                lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, andelFom, andelTom)))
+
+        utførSteg(BehandlingType.REVURDERING, Opphør(opphørFom = opphørFom, begrunnelse = "null"), forrigeBehandlingId = UUID.randomUUID())
+
+        assertThat(slot.captured.andelerTilkjentYtelse).hasSize(0)
+    }
+
+    @Test
+    internal fun `skal feile ved opphør, dersom behandlingstype ikke er revurdering`() {
+        val feil = assertThrows<Feil> {
+            utførSteg(BehandlingType.FØRSTEGANGSBEHANDLING,
+                      Opphør(opphørFom = YearMonth.of(2021, 6), begrunnelse = "null"), forrigeBehandlingId = UUID.randomUUID())
+        }
+        assertThat(feil.frontendFeilmelding).contains("Kan kun opphøre ved revurdering")
+    }
+
 
     private fun utførSteg(type: BehandlingType, vedtak: VedtakDto = Innvilget(periodeBegrunnelse = "", inntektBegrunnelse = ""), forrigeBehandlingId: UUID? = null) {
         steg.utførSteg(behandling(fagsak(), type = type, forrigeBehandlingId = forrigeBehandlingId), vedtak = vedtak)

@@ -1,0 +1,1 @@
+ALTER TABLE vedtak ADD COLUMN opphor_fom DATE;
