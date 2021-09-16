@@ -29,14 +29,33 @@ object OpprettBehandlingUtil {
         if (behandlingType == BehandlingType.REVURDERING) {
             validerKanOppretteRevurdering(sisteBehandling)
         }
+        if (behandlingType == BehandlingType.TEKNISK_OPPHØR) {
+            validerTekniskOpphør(sisteBehandling, tidligereBehandlinger)
+        }
     }
 
     fun sistIverksatteBehandling(behandlinger: List<Behandling>): Behandling? {
         return behandlinger
-                .filter { it.type != BehandlingType.BLANKETT }
-                .filter { it.resultat != BehandlingResultat.ANNULLERT }
-                .filter { it.status == BehandlingStatus.FERDIGSTILT }
+                .filter(this::erIverksatt)
                 .maxByOrNull { it.sporbar.opprettetTid }
+    }
+
+    private fun erIverksatt(behandling: Behandling) =
+            behandling.type != BehandlingType.BLANKETT &&
+            behandling.resultat != BehandlingResultat.ANNULLERT &&
+            behandling.status == BehandlingStatus.FERDIGSTILT
+
+    private fun validerTekniskOpphør(sisteBehandling: Behandling?, tidligereBehandlinger: List<Behandling>) {
+        if (sisteBehandling == null) {
+            throw ApiFeil("Det finnes ikke en tidligere behandling for fagsaken", HttpStatus.BAD_REQUEST)
+        }
+        val sistIverksatteBehandling = sistIverksatteBehandling(tidligereBehandlinger)
+        if (sistIverksatteBehandling != sisteBehandling) {
+            throw ApiFeil("Siste behandlingen må være iverksatt for å kunne utføre teknisk opphør", HttpStatus.BAD_REQUEST)
+        }
+        if (sistIverksatteBehandling.type == BehandlingType.TEKNISK_OPPHØR) {
+            throw ApiFeil("Kan ikke opphøre en allerede opphørt behandling", HttpStatus.BAD_REQUEST)
+        }
     }
 
     private fun validerTidligereBehandlingerErFerdigstilte(tidligereBehandlinger: List<Behandling>) {

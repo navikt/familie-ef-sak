@@ -49,7 +49,7 @@ internal class TekniskOpphørTest : OppslagSpringRunnerTest() {
         val fagsak = fagsakRepository.insert(fagsak(identer = setOf(FagsakPerson(ident = ident))))
         behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.FERDIGSTILT))
 
-        tekniskOpphørService.håndterTeknisktOpphør(PersonIdent(ident))
+        tekniskOpphørService.håndterTeknisktOpphør(fagsak.id)
 
         val task = taskRepository.findAll().first()
         assertThat(task.type).isEqualTo(PollStatusTekniskOpphør.TYPE)
