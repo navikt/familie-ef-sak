@@ -2,8 +2,16 @@ package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.util.BrukerContextUtil
-import no.nav.familie.ef.sak.repository.BehandlingRepository
-import no.nav.familie.ef.sak.repository.FagsakRepository
+import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.fagsak.Fagsak
+import no.nav.familie.ef.sak.fagsak.FagsakPerson
+import no.nav.familie.ef.sak.fagsak.FagsakRepository
+import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.fagsak.Stønadstype
 import no.nav.familie.ef.sak.repository.domain.*
 import no.nav.familie.ef.sak.service.steg.StegType
 import no.nav.familie.kontrakter.felles.objectMapper

@@ -3,7 +3,7 @@ package no.nav.familie.ef.sak.integration
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import no.nav.familie.ef.sak.config.PdlConfig
+import no.nav.familie.ef.sak.infrastruktur.config.PdlConfig
 import no.nav.familie.ef.sak.integration.dto.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.integration.dto.pdl.Metadata
 import no.nav.familie.ef.sak.integration.dto.pdl.Vegadresse

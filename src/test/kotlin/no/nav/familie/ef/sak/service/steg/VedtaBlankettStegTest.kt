@@ -2,12 +2,12 @@ package no.nav.familie.ef.sak.service.steg
 
 import io.mockk.*
 import no.nav.familie.ef.sak.api.Feil
-import no.nav.familie.ef.sak.api.beregning.*
+import no.nav.familie.ef.sak.beregning.*
 import no.nav.familie.ef.sak.blankett.BlankettRepository
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
-import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
-import no.nav.familie.ef.sak.repository.domain.BehandlingType
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 

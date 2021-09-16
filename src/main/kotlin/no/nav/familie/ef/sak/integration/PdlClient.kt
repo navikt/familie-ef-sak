@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.integration
 
-import no.nav.familie.ef.sak.config.PdlConfig
+import no.nav.familie.ef.sak.infrastruktur.config.PdlConfig
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlAnnenForelder
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlBarn
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlBolkResponse
@@ -16,7 +16,6 @@ import no.nav.familie.ef.sak.integration.dto.pdl.PdlPersonRequestVariables
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlResponse
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøkerData
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøkerKort
 import no.nav.familie.http.client.AbstractPingableRestClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders

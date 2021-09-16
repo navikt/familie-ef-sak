@@ -1,9 +1,10 @@
 package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.api.feilHvis
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.iverksett.tilIverksettDto
 import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
-import no.nav.familie.ef.sak.repository.domain.Stønadstype
+import no.nav.familie.ef.sak.fagsak.Stønadstype
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.util.isEqualOrAfter
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkDto

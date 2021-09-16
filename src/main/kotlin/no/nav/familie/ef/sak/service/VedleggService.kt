@@ -2,7 +2,9 @@ package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.api.dto.DokumentinfoDto
 import no.nav.familie.ef.sak.api.dto.JournalposterDto
-import no.nav.familie.ef.sak.repository.domain.Behandlingsjournalpost
+import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.domain.Behandlingsjournalpost
+import no.nav.familie.ef.sak.journalføring.JournalføringService
 import no.nav.familie.kontrakter.felles.journalpost.DokumentInfo
 import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariantformat
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost

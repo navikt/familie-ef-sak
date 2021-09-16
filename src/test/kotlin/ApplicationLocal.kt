@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak
 
-import no.nav.familie.ef.sak.config.ApplicationConfig
+import no.nav.familie.ef.sak.infrastruktur.config.ApplicationConfig
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.database.DbContainerInitializer
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration

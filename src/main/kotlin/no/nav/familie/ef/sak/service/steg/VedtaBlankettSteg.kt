@@ -1,9 +1,9 @@
 package no.nav.familie.ef.sak.service.steg
 
 import no.nav.familie.ef.sak.api.Feil
-import no.nav.familie.ef.sak.api.beregning.*
+import no.nav.familie.ef.sak.beregning.*
 import no.nav.familie.ef.sak.blankett.BlankettRepository
-import no.nav.familie.ef.sak.repository.domain.Behandling
+import no.nav.familie.ef.sak.behandling.domain.Behandling
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 

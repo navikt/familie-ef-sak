@@ -1,12 +1,12 @@
 package no.nav.familie.ef.sak.api.dto
 
-import no.nav.familie.ef.sak.regler.RegelId
-import no.nav.familie.ef.sak.regler.SvarId
-import no.nav.familie.ef.sak.repository.domain.Delvilkårsvurdering
-import no.nav.familie.ef.sak.repository.domain.VilkårType
-import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
-import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
-import no.nav.familie.ef.sak.repository.domain.Vurdering
+import no.nav.familie.ef.sak.vilkår.regler.RegelId
+import no.nav.familie.ef.sak.vilkår.regler.SvarId
+import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
+import no.nav.familie.ef.sak.vilkår.VilkårType
+import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
+import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
+import no.nav.familie.ef.sak.vilkår.Vurdering
 import java.time.LocalDateTime
 import java.util.UUID
 

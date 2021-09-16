@@ -1,13 +1,13 @@
 package no.nav.familie.ef.sak.simulering
 
-import no.nav.familie.ef.sak.api.beregning.BeregningService
-import no.nav.familie.ef.sak.api.beregning.Innvilget
-import no.nav.familie.ef.sak.api.beregning.VedtakDto
-import no.nav.familie.ef.sak.api.beregning.tilInntektsperioder
-import no.nav.familie.ef.sak.api.beregning.tilPerioder
+import no.nav.familie.ef.sak.beregning.BeregningService
+import no.nav.familie.ef.sak.beregning.Innvilget
+import no.nav.familie.ef.sak.beregning.VedtakDto
+import no.nav.familie.ef.sak.beregning.tilInntektsperioder
+import no.nav.familie.ef.sak.beregning.tilPerioder
 import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
-import no.nav.familie.ef.sak.repository.domain.Behandling
-import no.nav.familie.ef.sak.repository.domain.Fagsak
+import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.fagsak.Fagsak
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseType
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext

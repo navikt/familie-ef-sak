@@ -1,10 +1,11 @@
 package no.nav.familie.ef.sak.api.gui
 
 import no.nav.familie.ef.sak.api.ApiFeil
-import no.nav.familie.ef.sak.api.beregning.VedtakDto
-import no.nav.familie.ef.sak.api.beregning.VedtakService
+import no.nav.familie.ef.sak.beregning.VedtakDto
+import no.nav.familie.ef.sak.beregning.VedtakService
 import no.nav.familie.ef.sak.api.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.api.dto.TotrinnskontrollStatusDto
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.service.*
 import no.nav.familie.ef.sak.service.steg.StegService
 import no.nav.familie.kontrakter.felles.Ressurs

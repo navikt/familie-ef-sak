@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.repository
 
-import no.nav.familie.ef.sak.repository.domain.Oppgave
+import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.springframework.stereotype.Repository
 import java.util.*

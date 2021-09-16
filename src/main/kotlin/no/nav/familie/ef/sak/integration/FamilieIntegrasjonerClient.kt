@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.integration
 
 import no.nav.familie.ef.sak.api.Feil
-import no.nav.familie.ef.sak.config.IntegrasjonerConfig
+import no.nav.familie.ef.sak.infrastruktur.config.IntegrasjonerConfig
 import no.nav.familie.ef.sak.integration.dto.familie.Arbeidsfordelingsenhet
 import no.nav.familie.ef.sak.integration.dto.familie.EgenAnsattRequest
 import no.nav.familie.ef.sak.integration.dto.familie.EgenAnsattResponse

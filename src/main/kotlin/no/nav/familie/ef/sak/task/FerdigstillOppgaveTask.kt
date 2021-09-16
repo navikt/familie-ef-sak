@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.task
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.familie.ef.sak.service.OppgaveService
+import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype

@@ -5,12 +5,14 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ef.sak.api.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.api.dto.TotrinnkontrollStatus
+import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.BehandlingshistorikkService
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
-import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
-import no.nav.familie.ef.sak.repository.domain.Behandlingshistorikk
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.behandling.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.repository.domain.JsonWrapper
-import no.nav.familie.ef.sak.repository.domain.StegUtfall
+import no.nav.familie.ef.sak.behandling.domain.StegUtfall
 import no.nav.familie.ef.sak.service.steg.StegType
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.objectMapper

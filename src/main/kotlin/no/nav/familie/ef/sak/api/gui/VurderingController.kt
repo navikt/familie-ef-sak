@@ -4,10 +4,10 @@ import no.nav.familie.ef.sak.api.dto.OppdaterVilkårsvurderingDto
 import no.nav.familie.ef.sak.api.dto.SvarPåVurderingerDto
 import no.nav.familie.ef.sak.api.dto.VilkårDto
 import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
-import no.nav.familie.ef.sak.regler.Vilkårsregler
+import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregler
 import no.nav.familie.ef.sak.service.TilgangService
-import no.nav.familie.ef.sak.service.VurderingService
-import no.nav.familie.ef.sak.service.VurderingStegService
+import no.nav.familie.ef.sak.vilkår.VurderingService
+import no.nav.familie.ef.sak.vilkår.VurderingStegService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.security.token.support.core.api.ProtectedWithClaims

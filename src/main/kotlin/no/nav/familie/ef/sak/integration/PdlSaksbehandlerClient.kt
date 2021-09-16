@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.integration
 
-import no.nav.familie.ef.sak.config.PdlConfig
+import no.nav.familie.ef.sak.infrastruktur.config.PdlConfig
 import no.nav.familie.ef.sak.integration.dto.pdl.Paging
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlPersonSøkRequest
 import no.nav.familie.ef.sak.integration.dto.pdl.PdlPersonSøkRequestVariables

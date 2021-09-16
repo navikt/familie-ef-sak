@@ -1,14 +1,12 @@
 package no.nav.familie.ef.sak.task
 
-import no.nav.familie.ef.sak.repository.domain.Behandling
-import no.nav.familie.ef.sak.service.BehandlingService
+import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.service.steg.StegService
-import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
 import java.util.*
 
 @Service

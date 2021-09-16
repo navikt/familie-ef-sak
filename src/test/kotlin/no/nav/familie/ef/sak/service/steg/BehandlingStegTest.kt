@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.service.steg
 
-import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
-import no.nav.familie.ef.sak.repository.domain.BehandlingType
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue

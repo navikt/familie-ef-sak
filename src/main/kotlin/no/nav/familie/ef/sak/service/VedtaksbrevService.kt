@@ -2,8 +2,9 @@ package no.nav.familie.ef.sak.service
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.familie.ef.sak.api.Feil
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.repository.VedtaksbrevRepository
-import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.repository.domain.Fil
 import no.nav.familie.ef.sak.repository.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.repository.findByIdOrThrow

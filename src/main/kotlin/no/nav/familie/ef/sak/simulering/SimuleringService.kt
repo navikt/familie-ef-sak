@@ -1,20 +1,17 @@
 package no.nav.familie.ef.sak.simulering
 
-import no.nav.familie.ef.sak.api.ApiFeil
-import no.nav.familie.ef.sak.api.beregning.VedtakService
+import no.nav.familie.ef.sak.beregning.VedtakService
 import no.nav.familie.ef.sak.iverksett.IverksettClient
-import no.nav.familie.ef.sak.repository.domain.Behandling
-import no.nav.familie.ef.sak.repository.domain.BehandlingType
-import no.nav.familie.ef.sak.repository.domain.Fagsak
+import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.fagsak.Fagsak
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
-import no.nav.familie.ef.sak.service.BehandlingService
-import no.nav.familie.ef.sak.service.FagsakService
+import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.service.TilkjentYtelseService
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.ef.iverksett.SimuleringDto
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
-import org.springframework.data.repository.findByIdOrNull
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.UUID

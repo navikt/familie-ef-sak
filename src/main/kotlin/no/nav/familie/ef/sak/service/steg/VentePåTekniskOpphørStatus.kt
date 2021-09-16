@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.service.steg
 
 import no.nav.familie.ef.sak.iverksett.IverksettClient
-import no.nav.familie.ef.sak.repository.domain.Behandling
+import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.kontrakter.ef.iverksett.IverksettStatus
 import no.nav.familie.prosessering.domene.TaskRepository

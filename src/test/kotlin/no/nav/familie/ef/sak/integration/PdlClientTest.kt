@@ -5,7 +5,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.okJson
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
-import no.nav.familie.ef.sak.config.PdlConfig
+import no.nav.familie.ef.sak.infrastruktur.config.PdlConfig
 import no.nav.familie.ef.sak.exception.PdlRequestException
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat

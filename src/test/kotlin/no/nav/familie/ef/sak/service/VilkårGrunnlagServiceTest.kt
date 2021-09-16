@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.GrunnlagsdataRepository
 import no.nav.familie.ef.sak.repository.domain.Grunnlagsdata
+import no.nav.familie.ef.sak.vilkår.VilkårGrunnlagService
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import org.assertj.core.api.Assertions.assertThat

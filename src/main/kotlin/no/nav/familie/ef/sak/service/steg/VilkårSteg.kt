@@ -1,9 +1,9 @@
 package no.nav.familie.ef.sak.service.steg
 
-import no.nav.familie.ef.sak.repository.domain.Behandling
-import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
-import no.nav.familie.ef.sak.repository.domain.BehandlingType
-import no.nav.familie.ef.sak.service.BehandlingService
+import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import org.springframework.stereotype.Service
 
 @Service

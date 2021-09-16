@@ -10,14 +10,11 @@ import no.nav.familie.ef.sak.api.dto.UtflyttingDto
 import no.nav.familie.ef.sak.api.dto.tilDto
 import no.nav.familie.ef.sak.domene.GrunnlagsdataDomene
 import no.nav.familie.ef.sak.domene.Søker
-import no.nav.familie.ef.sak.integration.dto.pdl.Folkeregistermetadata
 import no.nav.familie.ef.sak.integration.dto.pdl.InnflyttingTilNorge
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlSøker
 import no.nav.familie.ef.sak.integration.dto.pdl.UtflyttingFraNorge
 import no.nav.familie.ef.sak.integration.dto.pdl.gjeldende
 import no.nav.familie.ef.sak.repository.domain.søknad.Medlemskap
 import no.nav.familie.ef.sak.service.KodeverkService
-import no.nav.familie.ef.sak.util.min
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import org.springframework.stereotype.Component
 import java.time.LocalDate

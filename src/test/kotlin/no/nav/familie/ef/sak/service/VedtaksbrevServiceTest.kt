@@ -5,13 +5,14 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ef.sak.api.Feil
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.repository.VedtaksbrevRepository
-import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
-import no.nav.familie.ef.sak.repository.domain.FagsakPerson
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.fagsak.FagsakPerson
 import no.nav.familie.ef.sak.repository.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.service.steg.StegType

@@ -1,7 +1,9 @@
 package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.api.ManglerTilgang
-import no.nav.familie.ef.sak.config.RolleConfig
+import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.service.steg.BehandlerRolle
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext

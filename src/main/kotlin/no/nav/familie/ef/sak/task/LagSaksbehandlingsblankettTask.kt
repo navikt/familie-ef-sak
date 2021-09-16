@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.task
 
-import no.nav.familie.ef.sak.service.BehandlingService
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.service.steg.StegService
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.prosessering.AsyncTaskStep

@@ -3,9 +3,9 @@ package no.nav.familie.ef.sak.service.steg
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
-import no.nav.familie.ef.sak.repository.BehandlingRepository
-import no.nav.familie.ef.sak.repository.FagsakRepository
-import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
+import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.fagsak.FagsakRepository
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired

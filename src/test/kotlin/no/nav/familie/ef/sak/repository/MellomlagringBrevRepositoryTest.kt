@@ -1,8 +1,8 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.repository.BehandlingRepository
-import no.nav.familie.ef.sak.repository.FagsakRepository
+import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.repository.MellomlagerBrevRepository
 import no.nav.familie.ef.sak.repository.domain.MellomlagretBrev
 import org.assertj.core.api.Assertions.assertThat

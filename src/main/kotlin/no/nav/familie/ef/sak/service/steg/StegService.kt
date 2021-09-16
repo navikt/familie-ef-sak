@@ -2,15 +2,15 @@ package no.nav.familie.ef.sak.service.steg
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
-import no.nav.familie.ef.sak.api.beregning.VedtakDto
+import no.nav.familie.ef.sak.beregning.VedtakDto
 import no.nav.familie.ef.sak.api.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.blankett.BlankettSteg
-import no.nav.familie.ef.sak.config.RolleConfig
-import no.nav.familie.ef.sak.repository.domain.Behandling
-import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
-import no.nav.familie.ef.sak.repository.domain.Behandlingshistorikk
-import no.nav.familie.ef.sak.service.BehandlingService
-import no.nav.familie.ef.sak.service.BehandlingshistorikkService
+import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
+import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.behandling.domain.Behandlingshistorikk
+import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.BehandlingshistorikkService
 import no.nav.familie.ef.sak.service.steg.StegType.BEHANDLING_FERDIGSTILT
 import no.nav.familie.ef.sak.service.steg.StegType.BEREGNE_YTELSE
 import no.nav.familie.ef.sak.service.steg.StegType.BESLUTTE_VEDTAK

@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.api.gui
 
-import no.nav.familie.ef.sak.service.TekniskOpphørService
+import no.nav.familie.ef.sak.behandling.TekniskOpphørService
 import no.nav.familie.ef.sak.service.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims

@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.service.steg
 
 import no.nav.familie.ef.sak.blankett.BlankettService
-import no.nav.familie.ef.sak.repository.domain.Behandling
+import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service

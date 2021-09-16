@@ -2,8 +2,8 @@ package no.nav.familie.ef.sak.api.gui
 
 import no.nav.familie.ef.sak.api.dto.PersonIdentDto
 import no.nav.familie.ef.sak.api.dto.PersonopplysningerDto
-import no.nav.familie.ef.sak.service.BehandlingService
-import no.nav.familie.ef.sak.service.FagsakService
+import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.service.PersonopplysningerService
 import no.nav.familie.ef.sak.service.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs

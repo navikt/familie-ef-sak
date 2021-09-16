@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.task
 
 import no.nav.familie.ef.sak.integration.PdlClient
 import no.nav.familie.ef.sak.iverksett.IverksettClient
-import no.nav.familie.ef.sak.service.FagsakService
+import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.ef.felles.StønadType
 import no.nav.familie.kontrakter.ef.infotrygd.OpprettStartBehandlingHendelseDto

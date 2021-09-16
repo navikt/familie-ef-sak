@@ -2,10 +2,10 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.util
 
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
-import no.nav.familie.ef.sak.repository.domain.BehandlingResultat
-import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
-import no.nav.familie.ef.sak.repository.domain.BehandlingType
-import no.nav.familie.ef.sak.repository.domain.FagsakPerson
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.fagsak.FagsakPerson
 import no.nav.familie.ef.sak.repository.domain.Sporbar
 import java.time.LocalDateTime
 

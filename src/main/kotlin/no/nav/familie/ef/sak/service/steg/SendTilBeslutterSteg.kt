@@ -1,14 +1,14 @@
 package no.nav.familie.ef.sak.service.steg
 
 import no.nav.familie.ef.sak.api.Feil
-import no.nav.familie.ef.sak.api.beregning.VedtakService
+import no.nav.familie.ef.sak.beregning.VedtakService
 import no.nav.familie.ef.sak.repository.VedtaksbrevRepository
-import no.nav.familie.ef.sak.repository.domain.Behandling
-import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
-import no.nav.familie.ef.sak.repository.domain.BehandlingType
-import no.nav.familie.ef.sak.service.BehandlingService
-import no.nav.familie.ef.sak.service.FagsakService
-import no.nav.familie.ef.sak.service.OppgaveService
+import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.task.OpprettOppgaveTask

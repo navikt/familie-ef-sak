@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.repository.domain
 
-import no.nav.familie.ef.sak.api.beregning.Inntektsperiode
-import no.nav.familie.ef.sak.api.beregning.ResultatType
+import no.nav.familie.ef.sak.beregning.Inntektsperiode
+import no.nav.familie.ef.sak.beregning.ResultatType
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import java.time.LocalDate

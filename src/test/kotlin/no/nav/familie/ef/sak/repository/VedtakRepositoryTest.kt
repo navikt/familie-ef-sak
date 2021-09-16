@@ -1,8 +1,10 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.api.beregning.Inntektsperiode
-import no.nav.familie.ef.sak.api.beregning.ResultatType
+import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.beregning.Inntektsperiode
+import no.nav.familie.ef.sak.beregning.ResultatType
+import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.repository.*
 import no.nav.familie.ef.sak.repository.domain.*
 import org.assertj.core.api.Assertions.assertThat
