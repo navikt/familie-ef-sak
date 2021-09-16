@@ -41,7 +41,6 @@ import no.nav.familie.kontrakter.ef.iverksett.VurderingDto
 import no.nav.familie.kontrakter.felles.annotasjoner.Improvement
 import org.springframework.stereotype.Component
 import java.time.LocalDate
-import java.util.UUID
 import no.nav.familie.kontrakter.ef.felles.RegelId as RegelIdIverksett
 import no.nav.familie.kontrakter.ef.felles.VilkårType as VilkårTypeIverksett
 import no.nav.familie.kontrakter.ef.felles.Vilkårsresultat as VilkårsresultatIverksett
@@ -68,7 +67,7 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
         val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(behandling.id)
         val vilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(behandling.id)
 
-        val behandlingsdetaljer = mapBehandlingsdetaljer(behandling, vilkårsvurderinger, behandling.forrigeBehandlingId)
+        val behandlingsdetaljer = mapBehandlingsdetaljer(behandling, vilkårsvurderinger)
         val fagsakdetaljerDto = mapFagsakdetaljer(fagsak)
         val søkerDto = mapSøkerDto(fagsak, behandling)
         val vedtakDto = mapVedtaksdetaljerDto(vedtak, saksbehandler, beslutter, tilkjentYtelse)
@@ -86,14 +85,13 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
 
     @Improvement("Årsak og Type må utledes når vi støtter revurdering")
     private fun mapBehandlingsdetaljer(behandling: Behandling,
-                                       vilkårsvurderinger: List<Vilkårsvurdering>,
-                                       forrigeBehandlingId: UUID?) =
+                                       vilkårsvurderinger: List<Vilkårsvurdering>) =
             BehandlingsdetaljerDto(behandlingId = behandling.id,
                                    behandlingType = BehandlingType.valueOf(behandling.type.name),
                                    behandlingÅrsak = BehandlingÅrsak.SØKNAD,
                                    eksternId = behandling.eksternId.id,
                                    vilkårsvurderinger = vilkårsvurderinger.map { it.tilIverksettDto() },
-                                   forrigeBehandlingId = forrigeBehandlingId
+                                   forrigeBehandlingId = behandling.forrigeBehandlingId
             )
 
     @Improvement("Opphørårsak må utledes ved revurdering")

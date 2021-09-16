@@ -50,10 +50,10 @@ object OpprettBehandlingUtil {
             throw ApiFeil("Det finnes ikke en tidligere behandling for fagsaken", HttpStatus.BAD_REQUEST)
         }
         val sistIverksatteBehandling = sistIverksatteBehandling(tidligereBehandlinger)
-        if(sistIverksatteBehandling != sisteBehandling) {
+        if (sistIverksatteBehandling != sisteBehandling) {
             throw ApiFeil("Siste behandlingen må være iverksatt for å kunne utføre teknisk opphør", HttpStatus.BAD_REQUEST)
         }
-        if(sistIverksatteBehandling.type == BehandlingType.TEKNISK_OPPHØR) {
+        if (sistIverksatteBehandling.type == BehandlingType.TEKNISK_OPPHØR) {
             throw ApiFeil("Kan ikke opphøre en allerede opphørt behandling", HttpStatus.BAD_REQUEST)
         }
     }
