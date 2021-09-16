@@ -11,10 +11,10 @@ import no.nav.familie.ef.sak.vedtak.Innvilget
 import no.nav.familie.ef.sak.vedtak.Opphør
 import no.nav.familie.ef.sak.vedtak.VedtakDto
 import no.nav.familie.ef.sak.vedtak.VedtakService
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
+import no.nav.familie.ef.sak.repository.behandling
+import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
+import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.behandling.BehandlingService

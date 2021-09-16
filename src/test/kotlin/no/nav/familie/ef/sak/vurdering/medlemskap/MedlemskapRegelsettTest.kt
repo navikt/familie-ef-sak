@@ -7,8 +7,8 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fødsel
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Statsborgerskap
 import no.nav.familie.ef.sak.nare.evaluations.Resultat
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vurdering.medlemskap.pdlSøker
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vurdering.medlemskap.søknad
+import no.nav.familie.ef.sak.vurdering.medlemskap.pdlSøker
+import no.nav.familie.ef.sak.vurdering.medlemskap.søknad
 import no.nav.familie.kontrakter.ef.søknad.Medlemskapsdetaljer
 import no.nav.familie.kontrakter.ef.søknad.Stønadsstart
 import no.nav.familie.kontrakter.ef.søknad.Søknadsfelt

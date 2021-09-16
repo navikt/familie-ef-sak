@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.arena
 
 import no.nav.familie.ef.sak.arena.ArenaPeriodeUtil.mapOgFiltrer
 import no.nav.familie.ef.sak.arena.ArenaPeriodeUtil.slåSammenPerioder
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
+import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeOvergangsstønad
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPerioderOvergangsstønadResponse
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad

@@ -1,11 +1,11 @@
 package no.nav.familie.ef.sak.util
 
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.util.BehandlingOppsettUtil
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.util.BehandlingOppsettUtil.iverksattFørstegangsbehandling
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.util.BehandlingOppsettUtil.iverksattRevurdering
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.util.BehandlingOppsettUtil.lagBehandlingerForSisteIverksatte
+import no.nav.familie.ef.sak.repository.behandling
+import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.util.BehandlingOppsettUtil
+import no.nav.familie.ef.sak.util.BehandlingOppsettUtil.iverksattFørstegangsbehandling
+import no.nav.familie.ef.sak.util.BehandlingOppsettUtil.iverksattRevurdering
+import no.nav.familie.ef.sak.util.BehandlingOppsettUtil.lagBehandlingerForSisteIverksatte
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.domene.Sporbar

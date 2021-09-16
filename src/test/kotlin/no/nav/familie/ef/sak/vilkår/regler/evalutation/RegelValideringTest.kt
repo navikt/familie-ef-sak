@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.vilkår.regler.evalutation
 
 import io.mockk.mockk
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.regler.evalutation.delvilkårsvurderingDto
+import no.nav.familie.ef.sak.regler.evalutation.delvilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.DelvilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.VurderingDto
 import no.nav.familie.ef.sak.vilkår.regler.RegelId

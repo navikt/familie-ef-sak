@@ -1,9 +1,9 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.api.gui
+package no.nav.familie.ef.sak.api.gui
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.api.dto.PersonIdentDto
 import no.nav.familie.ef.sak.fagsak.Søkeresultat
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.Stønadstype

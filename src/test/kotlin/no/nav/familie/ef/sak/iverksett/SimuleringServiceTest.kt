@@ -12,10 +12,10 @@ import no.nav.familie.ef.sak.beregning.BeregningService
 import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.Stønadstype
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsakpersoner
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.tilkjentYtelse
+import no.nav.familie.ef.sak.repository.behandling
+import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.repository.fagsakpersoner
+import no.nav.familie.ef.sak.repository.tilkjentYtelse
 import no.nav.familie.ef.sak.service.TilkjentYtelseService
 import no.nav.familie.ef.sak.simulering.BlankettSimuleringsService
 import no.nav.familie.ef.sak.simulering.SimuleringService

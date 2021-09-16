@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.mapper;
 
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.mapper.sjekkAtAlleVerdierErSatt
+import no.nav.familie.ef.sak.mapper.sjekkAtAlleVerdierErSatt
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.Aksjeselskap
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.Aktivitet
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.Arbeidsgiver

@@ -13,7 +13,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.UkjentBosted
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.UtenlandskAdresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.UtenlandskAdresseIFrittFormat
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Vegadresse
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.config.KodeverkServiceMock
+import no.nav.familie.ef.sak.config.KodeverkServiceMock
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

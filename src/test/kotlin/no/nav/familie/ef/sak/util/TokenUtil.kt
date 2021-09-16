@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.util
+package no.nav.familie.ef.sak.util
 
 import com.nimbusds.jwt.JWTClaimsSet
 import no.nav.security.token.support.test.JwkGenerator

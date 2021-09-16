@@ -13,8 +13,8 @@ import no.nav.familie.ef.sak.journalføring.JournalføringRequest
 import no.nav.familie.ef.sak.journalføring.JournalpostClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.iverksett.IverksettService
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.util.BrukerContextUtil
+import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.util.BrukerContextUtil
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus

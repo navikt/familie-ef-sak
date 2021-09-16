@@ -8,8 +8,8 @@ import no.nav.familie.ef.sak.arbeidsfordeling.Arbeidsfordelingsenhet
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.PersonopplysningerMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.StatsborgerskapMapper
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.config.KodeverkServiceMock
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.config.PdlClientConfig
+import no.nav.familie.ef.sak.config.KodeverkServiceMock
+import no.nav.familie.ef.sak.config.PdlClientConfig
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService

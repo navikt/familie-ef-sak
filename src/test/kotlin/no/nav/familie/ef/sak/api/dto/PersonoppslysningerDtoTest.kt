@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.api.dto
+package no.nav.familie.ef.sak.api.dto
 
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.AdresseType
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Adressebeskyttelse

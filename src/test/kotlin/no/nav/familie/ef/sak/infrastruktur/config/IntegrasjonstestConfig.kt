@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.config
+package no.nav.familie.ef.sak.config
 
 import no.nav.security.token.support.test.spring.TokenGeneratorConfiguration
 import org.springframework.context.annotation.Configuration

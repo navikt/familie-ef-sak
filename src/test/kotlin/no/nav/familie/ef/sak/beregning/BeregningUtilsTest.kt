@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.api.beregning
+package no.nav.familie.ef.sak.api.beregning
 
 import no.nav.familie.ef.sak.beregning.Beløpsperiode
 import no.nav.familie.ef.sak.beregning.BeregningUtils.Companion.finnStartDatoOgSluttDatoForBeløpsperiode

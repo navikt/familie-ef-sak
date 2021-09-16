@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.regler.evalutation
+package no.nav.familie.ef.sak.regler.evalutation
 
 import no.nav.familie.ef.sak.vilkår.DelvilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat

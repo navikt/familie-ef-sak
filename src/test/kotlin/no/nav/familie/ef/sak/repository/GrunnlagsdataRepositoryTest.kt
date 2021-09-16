@@ -1,7 +1,7 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository
+package no.nav.familie.ef.sak.repository
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.util.opprettGrunnlagsdata
+import no.nav.familie.ef.sak.util.opprettGrunnlagsdata
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRepository

@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.service.steg
+package no.nav.familie.ef.sak.service.steg
 
 import io.mockk.Runs
 import io.mockk.every
