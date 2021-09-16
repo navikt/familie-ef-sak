@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper
 
-import no.nav.familie.ef.sak.vilkår.StatsborgerskapDto
+import no.nav.familie.ef.sak.vilkår.dto.StatsborgerskapDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Statsborgerskap
 import no.nav.familie.ef.sak.service.KodeverkService
 import no.nav.familie.ef.sak.util.datoEllerIdag

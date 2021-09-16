@@ -13,13 +13,13 @@ import no.nav.familie.ef.sak.behandling.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.behandling.domain.Behandlingsjournalpost
 import no.nav.familie.ef.sak.fagsak.Fagsak
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdata
-import no.nav.familie.ef.sak.vedtak.MellomlagretBrev
+import no.nav.familie.ef.sak.vedtak.domain.MellomlagretBrev
 import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknad
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.vedtak.Vedtaksbrev
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelse
+import no.nav.familie.ef.sak.vedtak.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.SøknadsskjemaOvergangsstønad
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadsskjemaOvergangsstønad
 import no.nav.familie.ef.sak.simulering.Simuleringsresultat
 import no.nav.familie.ef.sak.vedtak.Vedtak
 import no.nav.familie.prosessering.domene.Task

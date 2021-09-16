@@ -22,9 +22,9 @@ import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.steg.StegType
-import no.nav.familie.ef.sak.vedtak.BeslutteVedtakDto
-import no.nav.familie.ef.sak.vedtak.TotrinnkontrollStatus
-import no.nav.familie.ef.sak.vedtak.TotrinnskontrollStatusDto
+import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
+import no.nav.familie.ef.sak.vedtak.dto.TotrinnkontrollStatus
+import no.nav.familie.ef.sak.vedtak.dto.TotrinnskontrollStatusDto
 import no.nav.familie.ef.sak.vedtak.VedtakRepository
 import no.nav.familie.ef.sak.vedtak.VedtaksbrevService
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad

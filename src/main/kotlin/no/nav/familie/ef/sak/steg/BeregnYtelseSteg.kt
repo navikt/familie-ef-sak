@@ -1,18 +1,18 @@
 package no.nav.familie.ef.sak.steg
 
-import no.nav.familie.ef.sak.vedtak.Avslå
+import no.nav.familie.ef.sak.vedtak.dto.Avslå
 import no.nav.familie.ef.sak.beregning.BeregningService
-import no.nav.familie.ef.sak.vedtak.Innvilget
-import no.nav.familie.ef.sak.vedtak.Opphør
-import no.nav.familie.ef.sak.vedtak.VedtakDto
+import no.nav.familie.ef.sak.vedtak.dto.Innvilget
+import no.nav.familie.ef.sak.vedtak.dto.Opphør
+import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.beregning.tilInntektsperioder
-import no.nav.familie.ef.sak.vedtak.tilPerioder
+import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.AndelTilkjentYtelse
+import no.nav.familie.ef.sak.tilkjentytelse.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelse
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.service.TilkjentYtelseService
 import no.nav.familie.ef.sak.simulering.SimuleringService

@@ -1,10 +1,10 @@
 package no.nav.familie.ef.sak.opplysninger.søknad.mapper
 
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.PersonMinimumDto
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.Bosituasjon
-import no.nav.familie.ef.sak.vilkår.BosituasjonDto
-import no.nav.familie.ef.sak.vilkår.DokumentasjonDto
-import no.nav.familie.ef.sak.vilkår.VedleggDto
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Bosituasjon
+import no.nav.familie.ef.sak.vilkår.dto.BosituasjonDto
+import no.nav.familie.ef.sak.vilkår.dto.DokumentasjonDto
+import no.nav.familie.ef.sak.vilkår.dto.VedleggDto
 
 object BosituasjonMapper {
 

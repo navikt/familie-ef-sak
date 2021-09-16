@@ -30,11 +30,11 @@ import no.nav.familie.ef.sak.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.task.PollStatusFraIverksettTask
-import no.nav.familie.ef.sak.vedtak.BeslutteVedtakDto
-import no.nav.familie.ef.sak.vedtak.ResultatType
+import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
+import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.Vedtak
 import no.nav.familie.ef.sak.vedtak.VedtakService
-import no.nav.familie.ef.sak.vedtak.Vedtaksbrev
+import no.nav.familie.ef.sak.vedtak.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.vedtak.VedtaksbrevRepository
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype

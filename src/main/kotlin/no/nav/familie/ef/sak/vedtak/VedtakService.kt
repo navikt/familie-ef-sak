@@ -1,6 +1,9 @@
 package no.nav.familie.ef.sak.vedtak
 
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
+import no.nav.familie.ef.sak.vedtak.dto.tilVedtak
+import no.nav.familie.ef.sak.vedtak.dto.tilVedtakDto
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -22,8 +25,7 @@ class VedtakService(private val vedtakRepository: VedtakRepository) {
     }
 
     fun hentVedtakHvisEksisterer(behandlingId: UUID): VedtakDto? {
-        return vedtakRepository.findByIdOrNull(behandlingId)
-                ?.tilVedtakDto()
+        return vedtakRepository.findByIdOrNull(behandlingId)?.tilVedtakDto()
     }
 
     fun oppdaterSaksbehandler(behandlingId: UUID, saksbehandlerIdent: String) {

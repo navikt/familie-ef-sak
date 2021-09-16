@@ -18,7 +18,7 @@ import no.nav.familie.ef.sak.fagsak.Fagsak
 import no.nav.familie.ef.sak.fagsak.FagsakPerson
 import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.fagsak.Stønadstype
-import no.nav.familie.ef.sak.vedtak.Vedtaksbrev
+import no.nav.familie.ef.sak.vedtak.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService

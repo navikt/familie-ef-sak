@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.opplysninger.søknad.mapper
 
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.Situasjon
-import no.nav.familie.ef.sak.vilkår.SagtOppEllerRedusertStillingDto
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Situasjon
+import no.nav.familie.ef.sak.vilkår.dto.SagtOppEllerRedusertStillingDto
 
 object SagtOppEllerRedusertStillingMapper {
 

@@ -1,9 +1,8 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.dto
 
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.UtflyttingDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
-import no.nav.familie.ef.sak.vilkår.StatsborgerskapDto
+import no.nav.familie.ef.sak.vilkår.dto.StatsborgerskapDto
 import java.time.LocalDate
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Folkeregisterpersonstatus as PdlFolkeregisterpersonstatus
 

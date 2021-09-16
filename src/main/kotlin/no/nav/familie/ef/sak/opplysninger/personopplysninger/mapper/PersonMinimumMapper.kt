@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper
 
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.PersonMinimumDto
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.PersonMinimum
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.PersonMinimum
 
 object PersonMinimumMapper {
 

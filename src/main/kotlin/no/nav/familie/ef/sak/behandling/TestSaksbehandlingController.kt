@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.behandling
 
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.SøkerMedBarn
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.SøkerMedBarn
 import no.nav.familie.ef.sak.journalføring.JournalpostClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn

@@ -1,23 +1,23 @@
 package no.nav.familie.ef.sak.opplysninger.søknad.mapper
 
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.Aksjeselskap
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.Aktivitet
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.Arbeidsgiver
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.Arbeidssøker
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.Barn
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.Selvstendig
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.Situasjon
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.TidligereUtdanning
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.UnderUtdanning
-import no.nav.familie.ef.sak.vilkår.AksjeselskapDto
-import no.nav.familie.ef.sak.vilkår.AktivitetDto
-import no.nav.familie.ef.sak.vilkår.ArbeidsforholdDto
-import no.nav.familie.ef.sak.vilkår.ArbeidssøkerDto
-import no.nav.familie.ef.sak.vilkår.SelvstendigDto
-import no.nav.familie.ef.sak.vilkår.SærligeTilsynsbehovDto
-import no.nav.familie.ef.sak.vilkår.TidligereUtdanningDto
-import no.nav.familie.ef.sak.vilkår.UnderUtdanningDto
-import no.nav.familie.ef.sak.vilkår.VirksomhetDto
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Aksjeselskap
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Aktivitet
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Arbeidsgiver
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Arbeidssøker
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Barn
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Selvstendig
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Situasjon
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.TidligereUtdanning
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.UnderUtdanning
+import no.nav.familie.ef.sak.vilkår.dto.AksjeselskapDto
+import no.nav.familie.ef.sak.vilkår.dto.AktivitetDto
+import no.nav.familie.ef.sak.vilkår.dto.ArbeidsforholdDto
+import no.nav.familie.ef.sak.vilkår.dto.ArbeidssøkerDto
+import no.nav.familie.ef.sak.vilkår.dto.SelvstendigDto
+import no.nav.familie.ef.sak.vilkår.dto.SærligeTilsynsbehovDto
+import no.nav.familie.ef.sak.vilkår.dto.TidligereUtdanningDto
+import no.nav.familie.ef.sak.vilkår.dto.UnderUtdanningDto
+import no.nav.familie.ef.sak.vilkår.dto.VirksomhetDto
 
 object AktivitetMapper {
 

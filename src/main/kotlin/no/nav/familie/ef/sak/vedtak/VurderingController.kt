@@ -2,10 +2,10 @@ package no.nav.familie.ef.sak.tilkjentytelse
 
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregler
 import no.nav.familie.ef.sak.infrastruktur.tilgang.TilgangService
-import no.nav.familie.ef.sak.vilkår.OppdaterVilkårsvurderingDto
-import no.nav.familie.ef.sak.vilkår.SvarPåVurderingerDto
-import no.nav.familie.ef.sak.vilkår.VilkårDto
-import no.nav.familie.ef.sak.vilkår.VilkårsvurderingDto
+import no.nav.familie.ef.sak.vilkår.dto.OppdaterVilkårsvurderingDto
+import no.nav.familie.ef.sak.vilkår.dto.SvarPåVurderingerDto
+import no.nav.familie.ef.sak.vilkår.dto.VilkårDto
+import no.nav.familie.ef.sak.vilkår.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.ef.sak.vilkår.VurderingStegService
 import no.nav.familie.kontrakter.felles.Ressurs

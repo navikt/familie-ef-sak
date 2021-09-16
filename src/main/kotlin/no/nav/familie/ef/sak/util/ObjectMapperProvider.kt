@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.util
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import no.nav.familie.ef.sak.vedtak.VedtakDtoModule
+import no.nav.familie.ef.sak.vedtak.dto.VedtakDtoModule
 
 class ObjectMapperProvider {
     companion object {

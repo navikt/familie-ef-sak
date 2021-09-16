@@ -15,6 +15,11 @@ import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.steg.StegService
 import no.nav.familie.ef.sak.steg.StegType
 import no.nav.familie.ef.sak.task.BehandlingsstatistikkTask
+import no.nav.familie.ef.sak.vilkår.dto.OppdaterVilkårsvurderingDto
+import no.nav.familie.ef.sak.vilkår.dto.SvarPåVurderingerDto
+import no.nav.familie.ef.sak.vilkår.dto.VilkårGrunnlagDto
+import no.nav.familie.ef.sak.vilkår.dto.VilkårsvurderingDto
+import no.nav.familie.ef.sak.vilkår.dto.tilDto
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service

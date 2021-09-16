@@ -2,8 +2,8 @@ package no.nav.familie.ef.sak.vedtak
 
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
 import no.nav.familie.ef.sak.mapper.tilDto
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.AndelTilkjentYtelse
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.tilkjentytelse.AndelTilkjentYtelse
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.opplysninger.søknad.domain
 
 import no.nav.familie.ef.sak.domene.Sporbar
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.ISøknadsskjema
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.MappedCollection

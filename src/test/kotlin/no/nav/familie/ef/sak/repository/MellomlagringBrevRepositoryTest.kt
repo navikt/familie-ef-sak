@@ -4,7 +4,7 @@ import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.vedtak.MellomlagerBrevRepository
-import no.nav.familie.ef.sak.vedtak.MellomlagretBrev
+import no.nav.familie.ef.sak.vedtak.domain.MellomlagretBrev
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

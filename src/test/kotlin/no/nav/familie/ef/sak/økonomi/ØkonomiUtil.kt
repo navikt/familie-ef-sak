@@ -1,8 +1,8 @@
 package no.nav.familie.ef.sak.økonomi
 
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.AndelTilkjentYtelse
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.TilkjentYtelseType
+import no.nav.familie.ef.sak.tilkjentytelse.AndelTilkjentYtelse
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelse
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseType
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import java.util.UUID

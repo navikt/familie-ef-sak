@@ -3,7 +3,7 @@ package no.nav.familie.ef.sak.service
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.vedtak.MellomlagerBrevRepository
-import no.nav.familie.ef.sak.vedtak.MellomlagretBrev
+import no.nav.familie.ef.sak.vedtak.domain.MellomlagretBrev
 import no.nav.familie.ef.sak.vedtak.MellomlagringBrevService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

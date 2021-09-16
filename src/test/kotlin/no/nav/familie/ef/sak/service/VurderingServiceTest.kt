@@ -18,9 +18,9 @@ import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
 import no.nav.familie.ef.sak.steg.StegService
 import no.nav.familie.ef.sak.vilkår.DelvilkårsvurderingWrapper
-import no.nav.familie.ef.sak.vilkår.SivilstandInngangsvilkårDto
-import no.nav.familie.ef.sak.vilkår.SivilstandRegistergrunnlagDto
-import no.nav.familie.ef.sak.vilkår.VilkårGrunnlagDto
+import no.nav.familie.ef.sak.vilkår.dto.SivilstandInngangsvilkårDto
+import no.nav.familie.ef.sak.vilkår.dto.SivilstandRegistergrunnlagDto
+import no.nav.familie.ef.sak.vilkår.dto.VilkårGrunnlagDto
 import no.nav.familie.ef.sak.vilkår.VilkårGrunnlagService
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat

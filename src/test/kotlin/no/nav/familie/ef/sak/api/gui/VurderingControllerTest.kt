@@ -7,11 +7,11 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.Stønadstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
-import no.nav.familie.ef.sak.vilkår.OppdaterVilkårsvurderingDto
-import no.nav.familie.ef.sak.vilkår.SvarPåVurderingerDto
-import no.nav.familie.ef.sak.vilkår.VilkårDto
+import no.nav.familie.ef.sak.vilkår.dto.OppdaterVilkårsvurderingDto
+import no.nav.familie.ef.sak.vilkår.dto.SvarPåVurderingerDto
+import no.nav.familie.ef.sak.vilkår.dto.VilkårDto
 import no.nav.familie.ef.sak.vilkår.VilkårType
-import no.nav.familie.ef.sak.vilkår.VilkårsvurderingDto
+import no.nav.familie.ef.sak.vilkår.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.kontrakter.ef.søknad.SøknadMedVedlegg
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad

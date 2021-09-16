@@ -1,19 +1,18 @@
 package no.nav.familie.ef.sak.mapper;
 
-import no.nav.familie.ef.sak.mapper.sjekkAtAlleVerdierErSatt
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.Aksjeselskap
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.Aktivitet
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.Arbeidsgiver
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.Arbeidssituasjon
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.Arbeidssøker
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.Barn
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.Dokumentasjon
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.GjelderDeg
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.Selvstendig
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.Situasjon
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.TidligereUtdanning
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.UnderUtdanning
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.Virksomhet
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Aksjeselskap
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Aktivitet
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Arbeidsgiver
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Arbeidssituasjon
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Arbeidssøker
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Barn
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Dokumentasjon
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.GjelderDeg
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Selvstendig
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Situasjon
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.TidligereUtdanning
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.UnderUtdanning
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Virksomhet
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.AktivitetMapper
 
 import org.junit.jupiter.api.Test;

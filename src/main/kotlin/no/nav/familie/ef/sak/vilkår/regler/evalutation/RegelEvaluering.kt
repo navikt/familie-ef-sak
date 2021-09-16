@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.vilkår.regler.evalutation
 
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
-import no.nav.familie.ef.sak.vilkår.DelvilkårsvurderingDto
+import no.nav.familie.ef.sak.vilkår.dto.DelvilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.regler.RegelId

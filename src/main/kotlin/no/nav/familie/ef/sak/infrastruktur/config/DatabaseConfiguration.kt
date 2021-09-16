@@ -6,9 +6,9 @@ import no.nav.familie.ef.sak.domene.Endret
 import no.nav.familie.ef.sak.domene.Fil
 import no.nav.familie.ef.sak.domene.JsonWrapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.Arbeidssituasjon
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.Dokumentasjon
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.GjelderDeg
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Arbeidssituasjon
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Dokumentasjon
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.GjelderDeg
 import no.nav.familie.ef.sak.vedtak.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.PeriodeWrapper
 import no.nav.familie.kontrakter.felles.objectMapper

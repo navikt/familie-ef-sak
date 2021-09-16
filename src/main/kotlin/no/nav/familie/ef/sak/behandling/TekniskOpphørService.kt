@@ -6,8 +6,8 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.TilkjentYtelseType
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelse
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseType
 import no.nav.familie.ef.sak.steg.StegType
 import no.nav.familie.ef.sak.task.PollStatusTekniskOpphør
 import no.nav.familie.kontrakter.ef.felles.StønadType

@@ -7,7 +7,7 @@ import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.vedtak.AktivitetType
 import no.nav.familie.ef.sak.vedtak.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.PeriodeWrapper
-import no.nav.familie.ef.sak.vedtak.ResultatType
+import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.Vedtak
 import no.nav.familie.ef.sak.vedtak.VedtakRepository
 import no.nav.familie.ef.sak.vedtak.Vedtaksperiode

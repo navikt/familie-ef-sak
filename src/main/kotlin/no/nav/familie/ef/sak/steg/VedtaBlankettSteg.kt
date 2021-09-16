@@ -3,9 +3,9 @@ package no.nav.familie.ef.sak.steg
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.blankett.BlankettRepository
 import no.nav.familie.ef.sak.behandling.domain.Behandling
-import no.nav.familie.ef.sak.vedtak.Avslå
-import no.nav.familie.ef.sak.vedtak.Innvilget
-import no.nav.familie.ef.sak.vedtak.VedtakDto
+import no.nav.familie.ef.sak.vedtak.dto.Avslå
+import no.nav.familie.ef.sak.vedtak.dto.Innvilget
+import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service

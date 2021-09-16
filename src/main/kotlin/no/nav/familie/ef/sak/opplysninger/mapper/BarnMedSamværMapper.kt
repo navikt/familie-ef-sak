@@ -7,13 +7,13 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Familierelasjonsrolle
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.AnnenForelder
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.Barn
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.SøknadsskjemaOvergangsstønad
-import no.nav.familie.ef.sak.vilkår.AnnenForelderDto
-import no.nav.familie.ef.sak.vilkår.BarnMedSamværDto
-import no.nav.familie.ef.sak.vilkår.BarnMedSamværRegistergrunnlagDto
-import no.nav.familie.ef.sak.vilkår.BarnMedSamværSøknadsgrunnlagDto
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.AnnenForelder
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Barn
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadsskjemaOvergangsstønad
+import no.nav.familie.ef.sak.vilkår.dto.AnnenForelderDto
+import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværDto
+import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværRegistergrunnlagDto
+import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværSøknadsgrunnlagDto
 
 object BarnMedSamværMapper {
 

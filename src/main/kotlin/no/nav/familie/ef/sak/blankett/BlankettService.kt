@@ -1,8 +1,8 @@
 package no.nav.familie.ef.sak.blankett
 
-import no.nav.familie.ef.sak.vedtak.VedtakDto
+import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.VedtakService
-import no.nav.familie.ef.sak.vedtak.tilVedtakDto
+import no.nav.familie.ef.sak.vedtak.dto.tilVedtakDto
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadDatoerDto
 import no.nav.familie.ef.sak.oppgave.OppgaveRepository
 import no.nav.familie.ef.sak.behandling.domain.Behandling

@@ -15,7 +15,7 @@ import no.nav.familie.ef.sak.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.steg.StegType
 import no.nav.familie.ef.sak.vedtak.BrevClient
-import no.nav.familie.ef.sak.vedtak.Vedtaksbrev
+import no.nav.familie.ef.sak.vedtak.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.vedtak.VedtaksbrevRepository
 import no.nav.familie.ef.sak.vedtak.VedtaksbrevService
 import no.nav.familie.kontrakter.felles.objectMapper

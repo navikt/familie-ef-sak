@@ -3,7 +3,8 @@ package no.nav.familie.ef.sak.økonomi
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.*
+import no.nav.familie.ef.sak.tilkjentytelse.AndelTilkjentYtelse
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelse
 import java.time.LocalDate
 import java.util.*
 

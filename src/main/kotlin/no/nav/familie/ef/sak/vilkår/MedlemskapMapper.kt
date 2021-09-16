@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.vilkår
 
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.UtflyttingDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.UtflyttingDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Søker
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Folkeregisterpersonstatus
@@ -11,8 +11,13 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.Statsborgers
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.InnflyttingTilNorge
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.UtflyttingFraNorge
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.Medlemskap
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Medlemskap
 import no.nav.familie.ef.sak.service.KodeverkService
+import no.nav.familie.ef.sak.vilkår.dto.MedlemskapDto
+import no.nav.familie.ef.sak.vilkår.dto.MedlemskapRegistergrunnlagDto
+import no.nav.familie.ef.sak.vilkår.dto.MedlemskapSøknadsgrunnlagDto
+import no.nav.familie.ef.sak.vilkår.dto.UtenlandsoppholdDto
+import no.nav.familie.ef.sak.vilkår.dto.tilDto
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import org.springframework.stereotype.Component
 import java.time.LocalDate

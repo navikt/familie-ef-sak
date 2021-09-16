@@ -4,8 +4,8 @@ import no.nav.familie.ef.sak.beregning.Beløpsperiode
 import no.nav.familie.ef.sak.beregning.Beregningsgrunnlag
 import no.nav.familie.ef.sak.api.dto.AndelTilkjentYtelseDto
 import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDto
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.AndelTilkjentYtelse
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.tilkjentytelse.AndelTilkjentYtelse
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelse
 import no.nav.familie.ef.sak.util.Periode
 
 fun TilkjentYtelse.tilDto(): TilkjentYtelseDto {

@@ -21,8 +21,8 @@ import no.nav.familie.ef.sak.steg.StegType.SEND_TIL_BESLUTTER
 import no.nav.familie.ef.sak.steg.StegType.VEDTA_BLANKETT
 import no.nav.familie.ef.sak.steg.StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT
 import no.nav.familie.ef.sak.steg.StegType.VENTE_PÅ_TEKNISK_OPPHØR_STATUS
-import no.nav.familie.ef.sak.vedtak.BeslutteVedtakDto
-import no.nav.familie.ef.sak.vedtak.VedtakDto
+import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
+import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service

@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.journalføring
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.infrastruktur.config.IntegrasjonerConfig
-import no.nav.familie.ef.sak.journalføring.DokumentVariantformat
+import no.nav.familie.ef.sak.journalføring.dto.DokumentVariantformat
 import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad

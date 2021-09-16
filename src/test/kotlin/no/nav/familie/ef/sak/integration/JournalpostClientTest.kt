@@ -7,7 +7,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.matching.EqualToPattern
 import no.nav.familie.ef.sak.infrastruktur.config.IntegrasjonerConfig
-import no.nav.familie.ef.sak.journalføring.DokumentVariantformat
+import no.nav.familie.ef.sak.journalføring.dto.DokumentVariantformat
 import no.nav.familie.ef.sak.journalføring.JournalpostClient
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.Ressurs

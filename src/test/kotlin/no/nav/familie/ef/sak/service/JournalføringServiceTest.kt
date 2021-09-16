@@ -8,8 +8,8 @@ import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.journalføring.JournalføringBehandling
-import no.nav.familie.ef.sak.journalføring.JournalføringRequest
+import no.nav.familie.ef.sak.journalføring.dto.JournalføringBehandling
+import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequest
 import no.nav.familie.ef.sak.journalføring.JournalpostClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.iverksett.IverksettService

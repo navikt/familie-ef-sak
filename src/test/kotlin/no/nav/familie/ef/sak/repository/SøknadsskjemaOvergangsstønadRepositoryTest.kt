@@ -5,8 +5,7 @@ import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadBarnetilsynRepository
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadOvergangsstønadRepository
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadSkolepengerRepository
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.Sivilstandsplaner
-import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Sivilstandsplaner
 import no.nav.familie.kontrakter.ef.søknad.Søknadsfelt
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import org.assertj.core.api.Assertions.assertThat

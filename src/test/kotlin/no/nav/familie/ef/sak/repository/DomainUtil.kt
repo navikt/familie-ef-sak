@@ -11,13 +11,13 @@ import no.nav.familie.ef.sak.fagsak.Fagsak
 import no.nav.familie.ef.sak.fagsak.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.Stønadstype
 import no.nav.familie.ef.sak.oppgave.Oppgave
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.AndelTilkjentYtelse
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.tilkjentytelse.AndelTilkjentYtelse
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelse
 import no.nav.familie.ef.sak.steg.StegType
 import no.nav.familie.ef.sak.vedtak.AktivitetType
 import no.nav.familie.ef.sak.vedtak.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.PeriodeWrapper
-import no.nav.familie.ef.sak.vedtak.ResultatType
+import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.Vedtak
 import no.nav.familie.ef.sak.vedtak.Vedtaksperiode
 import no.nav.familie.ef.sak.vedtak.VedtaksperiodeType

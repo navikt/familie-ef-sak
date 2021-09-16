@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.vedtak
 
-import no.nav.familie.ef.sak.vedtak.MellomlagerBrevRepository
-import no.nav.familie.ef.sak.vedtak.MellomlagretBrev
+import no.nav.familie.ef.sak.vedtak.domain.MellomlagretBrev
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.time.LocalDate
