@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.domene
 
-import no.nav.familie.ef.sak.api.dto.Sivilstandstype
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Adressebeskyttelse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.DeltBosted

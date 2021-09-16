@@ -1,5 +1,7 @@
 package no.nav.familie.ef.sak.vilkår
 
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.PersonMinimumDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import java.time.LocalDate
 
 data class SivilstandInngangsvilkårDto(val søknadsgrunnlag: SivilstandSøknadsgrunnlagDto,

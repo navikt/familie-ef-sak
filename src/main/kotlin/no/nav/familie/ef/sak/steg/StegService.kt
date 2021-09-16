@@ -2,15 +2,14 @@ package no.nav.familie.ef.sak.steg
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
-import no.nav.familie.ef.sak.vedtak.VedtakDto
-import no.nav.familie.ef.sak.api.dto.BeslutteVedtakDto
-import no.nav.familie.ef.sak.blankett.BlankettSteg
-import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
+import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.Behandlingshistorikk
-import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.behandling.BehandlingshistorikkService
+import no.nav.familie.ef.sak.blankett.BlankettSteg
+import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
+import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.steg.StegType.BEHANDLING_FERDIGSTILT
 import no.nav.familie.ef.sak.steg.StegType.BEREGNE_YTELSE
 import no.nav.familie.ef.sak.steg.StegType.BESLUTTE_VEDTAK
@@ -22,7 +21,8 @@ import no.nav.familie.ef.sak.steg.StegType.SEND_TIL_BESLUTTER
 import no.nav.familie.ef.sak.steg.StegType.VEDTA_BLANKETT
 import no.nav.familie.ef.sak.steg.StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT
 import no.nav.familie.ef.sak.steg.StegType.VENTE_PÅ_TEKNISK_OPPHØR_STATUS
-import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.vedtak.BeslutteVedtakDto
+import no.nav.familie.ef.sak.vedtak.VedtakDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service

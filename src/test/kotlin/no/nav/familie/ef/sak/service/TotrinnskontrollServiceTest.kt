@@ -3,25 +3,25 @@ package no.nav.familie.ef.sak.service
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.familie.ef.sak.api.dto.BeslutteVedtakDto
-import no.nav.familie.ef.sak.api.dto.TotrinnkontrollStatus
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.BehandlingshistorikkService
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.Behandlingshistorikk
-import no.nav.familie.ef.sak.domene.JsonWrapper
 import no.nav.familie.ef.sak.behandling.domain.StegUtfall
+import no.nav.familie.ef.sak.domene.JsonWrapper
 import no.nav.familie.ef.sak.infrastruktur.tilgang.TilgangService
-import no.nav.familie.ef.sak.steg.StegType
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.steg.StegType
+import no.nav.familie.ef.sak.vedtak.BeslutteVedtakDto
+import no.nav.familie.ef.sak.vedtak.TotrinnkontrollStatus
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.*
+import java.util.UUID
 
 internal class TotrinnskontrollServiceTest {
 

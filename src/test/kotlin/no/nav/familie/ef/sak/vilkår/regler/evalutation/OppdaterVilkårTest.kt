@@ -1,9 +1,15 @@
 package no.nav.familie.ef.sak.vilkår.regler.evalutation
 
-import no.nav.familie.ef.sak.api.dto.DelvilkårsvurderingDto
-import no.nav.familie.ef.sak.api.dto.Sivilstandstype
-import no.nav.familie.ef.sak.api.dto.VurderingDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
+import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
+import no.nav.familie.ef.sak.vilkår.DelvilkårsvurderingDto
+import no.nav.familie.ef.sak.vilkår.DelvilkårsvurderingWrapper
+import no.nav.familie.ef.sak.vilkår.VilkårType
+import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
+import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
+import no.nav.familie.ef.sak.vilkår.Vurdering
+import no.nav.familie.ef.sak.vilkår.VurderingDto
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
@@ -11,12 +17,6 @@ import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår.erAlleVilkårVurdert
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår.utledResultatForAleneomsorg
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.SivilstandRegel
-import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
-import no.nav.familie.ef.sak.vilkår.DelvilkårsvurderingWrapper
-import no.nav.familie.ef.sak.vilkår.VilkårType
-import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
-import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
-import no.nav.familie.ef.sak.vilkår.Vurdering
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable

@@ -1,19 +1,21 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.api.beregning
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.fagsak.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.*
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.steg.StegType
 import no.nav.familie.ef.sak.vedtak.Avslå
 import no.nav.familie.ef.sak.vedtak.Henlegge
+import no.nav.familie.ef.sak.vedtak.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.Innvilget
+import no.nav.familie.ef.sak.vedtak.PeriodeWrapper
 import no.nav.familie.ef.sak.vedtak.ResultatType
+import no.nav.familie.ef.sak.vedtak.Vedtak
 import no.nav.familie.ef.sak.vedtak.VedtakDto
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -25,7 +27,7 @@ import org.springframework.boot.test.web.client.exchange
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
-import java.util.*
+import java.util.UUID
 
 class BeregningControllerTest : OppslagSpringRunnerTest() {
 

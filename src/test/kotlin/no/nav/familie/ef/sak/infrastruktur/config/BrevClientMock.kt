@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.config
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ef.sak.vedtaksbrev.BrevClient
+import no.nav.familie.ef.sak.vedtak.BrevClient
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary

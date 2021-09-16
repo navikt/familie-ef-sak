@@ -1,11 +1,11 @@
 package no.nav.familie.ef.sak.opplysninger.mapper
 
-import no.nav.familie.ef.sak.api.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Søker
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.PersonMinimumMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.Sivilstand
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.PersonMinimumMapper
 import no.nav.familie.ef.sak.vilkår.SivilstandInngangsvilkårDto
 import no.nav.familie.ef.sak.vilkår.SivilstandRegistergrunnlagDto
 import no.nav.familie.ef.sak.vilkår.SivilstandSøknadsgrunnlagDto

@@ -1,18 +1,18 @@
 package no.nav.familie.ef.sak.api.gui
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.api.dto.OppdaterVilkårsvurderingDto
-import no.nav.familie.ef.sak.api.dto.SvarPåVurderingerDto
-import no.nav.familie.ef.sak.api.dto.VilkårDto
-import no.nav.familie.ef.sak.api.dto.VilkårsvurderingDto
-import no.nav.familie.ef.sak.vilkår.regler.SvarId
-import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.fagsak.Stønadstype
-import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.fagsak.Stønadstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.ef.sak.vilkår.OppdaterVilkårsvurderingDto
+import no.nav.familie.ef.sak.vilkår.SvarPåVurderingerDto
+import no.nav.familie.ef.sak.vilkår.VilkårDto
+import no.nav.familie.ef.sak.vilkår.VilkårType
+import no.nav.familie.ef.sak.vilkår.VilkårsvurderingDto
+import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.kontrakter.ef.søknad.SøknadMedVedlegg
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.Ressurs

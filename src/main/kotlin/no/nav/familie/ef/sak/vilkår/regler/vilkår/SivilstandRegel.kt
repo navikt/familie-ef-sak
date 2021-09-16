@@ -1,7 +1,12 @@
 package no.nav.familie.ef.sak.vilkår.regler.vilkår
 
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
-import no.nav.familie.ef.sak.api.dto.Sivilstandstype
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.SøknadsskjemaOvergangsstønad
+import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
+import no.nav.familie.ef.sak.vilkår.VilkårType
+import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
+import no.nav.familie.ef.sak.vilkår.Vurdering
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.vilkår.regler.NesteRegel
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
@@ -11,11 +16,6 @@ import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 import no.nav.familie.ef.sak.vilkår.regler.jaNeiSvarRegel
 import no.nav.familie.ef.sak.vilkår.regler.regelIder
-import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
-import no.nav.familie.ef.sak.vilkår.VilkårType
-import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
-import no.nav.familie.ef.sak.vilkår.Vurdering
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.SøknadsskjemaOvergangsstønad
 
 class SivilstandRegel : Vilkårsregel(vilkårType = VilkårType.SIVILSTAND,
                                      regler = setOf(KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE,

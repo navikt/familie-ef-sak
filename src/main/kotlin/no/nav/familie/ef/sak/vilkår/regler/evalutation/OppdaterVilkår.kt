@@ -1,19 +1,19 @@
 package no.nav.familie.ef.sak.vilkår.regler.evalutation
 
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
-import no.nav.familie.ef.sak.api.dto.DelvilkårsvurderingDto
-import no.nav.familie.ef.sak.api.dto.svarTilDomene
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.vilkår.DelvilkårsvurderingDto
+import no.nav.familie.ef.sak.vilkår.DelvilkårsvurderingWrapper
+import no.nav.familie.ef.sak.vilkår.VilkårType
+import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
+import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregler.Companion.VILKÅRSREGLER
 import no.nav.familie.ef.sak.vilkår.regler.alleVilkårsregler
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.RegelEvaluering.utledResultat
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.RegelValidering.validerVurdering
-import no.nav.familie.ef.sak.vilkår.DelvilkårsvurderingWrapper
-import no.nav.familie.ef.sak.vilkår.VilkårType
-import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
-import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
+import no.nav.familie.ef.sak.vilkår.svarTilDomene
 import java.util.UUID
 
 object OppdaterVilkår {

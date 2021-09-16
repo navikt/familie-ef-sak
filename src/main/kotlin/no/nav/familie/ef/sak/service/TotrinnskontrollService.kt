@@ -1,11 +1,6 @@
 package no.nav.familie.ef.sak.service
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.familie.ef.sak.infrastruktur.exception.Feil
-import no.nav.familie.ef.sak.api.dto.BeslutteVedtakDto
-import no.nav.familie.ef.sak.api.dto.TotrinnkontrollStatus.*
-import no.nav.familie.ef.sak.api.dto.TotrinnskontrollDto
-import no.nav.familie.ef.sak.api.dto.TotrinnskontrollStatusDto
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
@@ -13,15 +8,23 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.behandling.domain.StegUtfall.BESLUTTE_VEDTAK_GODKJENT
 import no.nav.familie.ef.sak.behandling.domain.StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.tilgang.TilgangService
-import no.nav.familie.ef.sak.steg.BehandlerRolle
-import no.nav.familie.ef.sak.steg.StegType
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext.NAVIDENT_REGEX
+import no.nav.familie.ef.sak.steg.BehandlerRolle
+import no.nav.familie.ef.sak.steg.StegType
+import no.nav.familie.ef.sak.vedtak.BeslutteVedtakDto
+import no.nav.familie.ef.sak.vedtak.TotrinnkontrollStatus.IKKE_AUTORISERT
+import no.nav.familie.ef.sak.vedtak.TotrinnkontrollStatus.KAN_FATTE_VEDTAK
+import no.nav.familie.ef.sak.vedtak.TotrinnkontrollStatus.TOTRINNSKONTROLL_UNDERKJENT
+import no.nav.familie.ef.sak.vedtak.TotrinnkontrollStatus.UAKTUELT
+import no.nav.familie.ef.sak.vedtak.TotrinnskontrollDto
+import no.nav.familie.ef.sak.vedtak.TotrinnskontrollStatusDto
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.*
+import java.util.UUID
 
 @Service
 class TotrinnskontrollService(private val behandlingshistorikkService: BehandlingshistorikkService,

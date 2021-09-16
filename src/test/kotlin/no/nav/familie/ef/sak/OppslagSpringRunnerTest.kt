@@ -17,11 +17,11 @@ import no.nav.familie.ef.sak.vedtak.MellomlagretBrev
 import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknad
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.Vedtaksbrev
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.søknad.SøknadsskjemaOvergangsstønad
 import no.nav.familie.ef.sak.simulering.Simuleringsresultat
+import no.nav.familie.ef.sak.vedtak.Vedtak
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskLogg
 import org.junit.jupiter.api.AfterEach

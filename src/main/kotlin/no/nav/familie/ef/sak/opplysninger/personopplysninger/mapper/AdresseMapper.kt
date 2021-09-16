@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper
 
-import no.nav.familie.ef.sak.api.dto.AdresseDto
-import no.nav.familie.ef.sak.api.dto.AdresseType
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.AdresseDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.AdresseType
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Kontaktadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.KontaktadresseType

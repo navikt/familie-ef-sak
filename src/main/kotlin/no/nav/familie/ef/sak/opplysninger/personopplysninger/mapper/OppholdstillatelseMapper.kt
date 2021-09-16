@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper
 
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.OppholdType
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.OppholdstillatelseDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.OppholdType
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.OppholdstillatelseDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Opphold
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Oppholdstillatelse
 

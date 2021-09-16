@@ -1,13 +1,13 @@
 package no.nav.familie.ef.sak.vilkår
 
-import no.nav.familie.ef.sak.api.dto.Folkeregisterpersonstatus
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.OppholdstillatelseMapper
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.StatsborgerskapMapper
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.InnflyttingDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.UtflyttingDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Søker
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Folkeregisterpersonstatus
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.InnflyttingDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseMapper
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.OppholdstillatelseMapper
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.StatsborgerskapMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.InnflyttingTilNorge
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.UtflyttingFraNorge
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende

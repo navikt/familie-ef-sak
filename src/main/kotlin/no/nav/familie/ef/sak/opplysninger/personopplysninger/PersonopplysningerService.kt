@@ -1,11 +1,11 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger
 
-import no.nav.familie.ef.sak.api.dto.PersonopplysningerDto
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.PersonopplysningerDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.PersonopplysningerMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.PersonopplysningerMapper
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
 import org.slf4j.LoggerFactory

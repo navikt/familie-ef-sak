@@ -1,6 +1,11 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper
 
-import no.nav.familie.ef.sak.api.dto.Sivilstandstype
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.AnnenForelderMedIdent
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.FullmaktMedNavn
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.SivilstandMedNavn
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Søker
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.KjønnType
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlAnnenForelder
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlBarn
@@ -9,11 +14,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlSøker
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Personnavn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.AnnenForelderMedIdent
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.FullmaktMedNavn
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.SivilstandMedNavn
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Søker
 
 object GrunnlagsdataMapper {
 

@@ -1,10 +1,10 @@
 package no.nav.familie.ef.sak.vilkår
 
-import no.nav.familie.ef.sak.api.dto.AdresseDto
-import no.nav.familie.ef.sak.api.dto.Folkeregisterpersonstatus
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.InnflyttingDto
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.OppholdstillatelseDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.UtflyttingDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.AdresseDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Folkeregisterpersonstatus
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.InnflyttingDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.OppholdstillatelseDto
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import no.nav.familie.kontrakter.felles.medlemskap.PeriodeInfo
 import java.time.LocalDate

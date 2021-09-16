@@ -1,10 +1,10 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger
 
 import no.nav.familie.ef.sak.api.dto.PersonIdentDto
-import no.nav.familie.ef.sak.api.dto.PersonopplysningerDto
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.tilgang.TilgangService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.PersonopplysningerDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
 import no.nav.security.token.support.core.api.ProtectedWithClaims
