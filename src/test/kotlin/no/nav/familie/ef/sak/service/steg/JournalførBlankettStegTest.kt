@@ -1,27 +1,47 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.service.steg
 
-import io.mockk.*
+import io.mockk.Runs
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.slot
 import no.nav.familie.ef.sak.blankett.Blankett
 import no.nav.familie.ef.sak.blankett.BlankettRepository
 import no.nav.familie.ef.sak.blankett.BlankettSteg
 import no.nav.familie.ef.sak.integration.JournalpostClient
 import no.nav.familie.ef.sak.repository.BehandlingRepository
-import no.nav.familie.ef.sak.repository.domain.*
+import no.nav.familie.ef.sak.repository.domain.Behandling
+import no.nav.familie.ef.sak.repository.domain.BehandlingResultat
+import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
+import no.nav.familie.ef.sak.repository.domain.BehandlingType
+import no.nav.familie.ef.sak.repository.domain.Behandlingsjournalpost
+import no.nav.familie.ef.sak.repository.domain.Fagsak
+import no.nav.familie.ef.sak.repository.domain.FagsakPerson
+import no.nav.familie.ef.sak.repository.domain.Fil
+import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.service.ArbeidsfordelingService
 import no.nav.familie.ef.sak.service.BehandlingService
+import no.nav.familie.ef.sak.service.TotrinnskontrollService
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Filtype
-import no.nav.familie.kontrakter.felles.journalpost.*
+import no.nav.familie.kontrakter.felles.journalpost.Bruker
+import no.nav.familie.kontrakter.felles.journalpost.DokumentInfo
+import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariant
+import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariantformat
+import no.nav.familie.kontrakter.felles.journalpost.Journalpost
+import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
+import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
+import no.nav.familie.kontrakter.felles.journalpost.Sak
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.*
+import java.util.Properties
 
 class JournalførBlankettStegTest {
 
@@ -31,40 +51,48 @@ class JournalførBlankettStegTest {
     private val taskRepository = mockk<TaskRepository>()
     private val blankettRepository = mockk<BlankettRepository>()
     private val arbeidsfordelingService = mockk<ArbeidsfordelingService>()
+    private val totrinnskontrollService = mockk<TotrinnskontrollService>(relaxed = true)
 
-    private val blankettSteg = BlankettSteg(behandlingService, behandlingRepository, journalpostClient, arbeidsfordelingService, blankettRepository, taskRepository)
+    private val blankettSteg = BlankettSteg(behandlingService = behandlingService,
+                                            behandlingRepository = behandlingRepository,
+                                            journalpostClient = journalpostClient,
+                                            arbeidsfordelingService = arbeidsfordelingService,
+                                            blankettRepository = blankettRepository,
+                                            totrinnskontrollService = totrinnskontrollService,
+                                            taskRepository = taskRepository)
 
     private lateinit var taskSlot: MutableList<Task>
 
     val fnr = "12345678901"
     val fagsak = Fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD,
-        søkerIdenter = setOf(FagsakPerson(ident = fnr)))
+                        søkerIdenter = setOf(FagsakPerson(ident = fnr)))
 
     private val journalpost =
-        Journalpost(journalpostId = "1234",
-                    journalposttype = Journalposttype.I,
-                    journalstatus = Journalstatus.MOTTATT,
-                    tema = "ENF",
-                    behandlingstema = "ab0071",
-                    tittel = "abrakadabra",
-                    bruker = Bruker(type = BrukerIdType.FNR, id = fnr),
-                    journalforendeEnhet = "4817",
-                    kanal = "SKAN_IM",
-                    sak = Sak("1234", "arkivsaksystem", fagsak.id.toString()),
-                    dokumenter =
-            listOf(DokumentInfo(dokumentInfoId = "12345",
-                tittel = "Tittel",
-                brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
-                dokumentvarianter = listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV))))
-        )
+            Journalpost(journalpostId = "1234",
+                        journalposttype = Journalposttype.I,
+                        journalstatus = Journalstatus.MOTTATT,
+                        tema = "ENF",
+                        behandlingstema = "ab0071",
+                        tittel = "abrakadabra",
+                        bruker = Bruker(type = BrukerIdType.FNR, id = fnr),
+                        journalforendeEnhet = "4817",
+                        kanal = "SKAN_IM",
+                        sak = Sak("1234", "arkivsaksystem", fagsak.id.toString()),
+                        dokumenter =
+                        listOf(DokumentInfo(dokumentInfoId = "12345",
+                                            tittel = "Tittel",
+                                            brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
+                                            dokumentvarianter = listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV))))
+            )
 
     private val behandling = Behandling(fagsakId = fagsak.id,
-                                type = BehandlingType.BLANKETT,
-                                status = BehandlingStatus.IVERKSETTER_VEDTAK,
-                                steg = blankettSteg.stegType(),
-                                resultat = BehandlingResultat.IKKE_SATT)
+                                        type = BehandlingType.BLANKETT,
+                                        status = BehandlingStatus.IVERKSETTER_VEDTAK,
+                                        steg = blankettSteg.stegType(),
+                                        resultat = BehandlingResultat.IKKE_SATT)
 
-    private val behandlingJournalpost = Behandlingsjournalpost(behandling.id, journalpost.journalpostId, journalpost.journalposttype)
+    private val behandlingJournalpost =
+            Behandlingsjournalpost(behandling.id, journalpost.journalpostId, journalpost.journalposttype)
 
     private val pdf = "enPdF".toByteArray()
 
@@ -80,7 +108,7 @@ class JournalførBlankettStegTest {
         } returns fnr
 
         every {
-            journalpostClient.arkiverDokument(any())
+            journalpostClient.arkiverDokument(any(), null)
         } returns ArkiverDokumentResponse("1", false)
 
         every {
@@ -106,7 +134,7 @@ class JournalførBlankettStegTest {
         val journalpostId = "12345678"
 
         every {
-            journalpostClient.arkiverDokument(capture(arkiverDokumentRequestSlot))
+            journalpostClient.arkiverDokument(capture(arkiverDokumentRequestSlot), any())
         } returns ArkiverDokumentResponse(journalpostId, false)
 
         every {

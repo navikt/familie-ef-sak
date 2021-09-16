@@ -6,9 +6,13 @@ import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.MappedCollection
 import java.util.UUID
 
+/**
+ * @param forrigeBehandlingId forrige iverksatte behandling
+ */
 data class Behandling(@Id
                       val id: UUID = UUID.randomUUID(),
                       val fagsakId: UUID,
+                      val forrigeBehandlingId: UUID? = null,
                       @MappedCollection(idColumn = "behandling_id")
                       val eksternId: EksternBehandlingId = EksternBehandlingId(),
                       val versjon: Int = 0,

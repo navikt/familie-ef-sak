@@ -16,7 +16,9 @@ import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.log.NavHttpHeaders
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
 import org.springframework.web.util.UriComponentsBuilder
@@ -33,7 +35,7 @@ class JournalpostClient(@Qualifier("azure") restOperations: RestOperations,
     private val journalpostURI: URI = integrasjonerConfig.journalPostUri
     private val dokarkivUri: URI = integrasjonerConfig.dokarkivUri
 
-    fun finnJournalposter(journalposterForBrukerRequest: JournalposterForBrukerRequest):List<Journalpost> {
+    fun finnJournalposter(journalposterForBrukerRequest: JournalposterForBrukerRequest): List<Journalpost> {
         return postForEntity<Ressurs<List<Journalpost>>>(journalpostURI, journalposterForBrukerRequest).data
                ?: error("Kunne ikke hente vedlegg for ${journalposterForBrukerRequest.brukerId.id}")
     }
@@ -77,27 +79,37 @@ class JournalpostClient(@Qualifier("azure") restOperations: RestOperations,
     }
 
     fun oppdaterJournalpost(oppdaterJournalpostRequest: OppdaterJournalpostRequest,
-                            journalpostId: String): OppdaterJournalpostResponse {
+                            journalpostId: String,
+                            saksbehandler: String?): OppdaterJournalpostResponse {
         return putForEntity<Ressurs<OppdaterJournalpostResponse>>(URI.create("${dokarkivUri}/v2/${journalpostId}"),
-                                                                  oppdaterJournalpostRequest).data
+                                                                  oppdaterJournalpostRequest,
+                                                                  headerMedSaksbehandler(saksbehandler)).data
                ?: error("Kunne ikke oppdatere journalpost med id $journalpostId")
     }
 
-    fun arkiverDokument(arkiverDokumentRequest: ArkiverDokumentRequest): ArkiverDokumentResponse {
+    fun arkiverDokument(arkiverDokumentRequest: ArkiverDokumentRequest, saksbehandler: String?): ArkiverDokumentResponse {
         return postForEntity<Ressurs<ArkiverDokumentResponse>>(URI.create("${dokarkivUri}/v4/"),
-                                                                  arkiverDokumentRequest).data
+                                                               arkiverDokumentRequest, headerMedSaksbehandler(saksbehandler)).data
                ?: error("Kunne ikke arkivere dokument med fagsakid ${arkiverDokumentRequest.fagsakId}")
     }
 
-    fun ferdigstillJournalpost(journalpostId: String, journalførendeEnhet: String) {
+    fun ferdigstillJournalpost(journalpostId: String, journalførendeEnhet: String, saksbehandler: String?) {
         val ressurs = putForEntity<Ressurs<OppdaterJournalpostResponse>>(
                 URI.create("${dokarkivUri}/v2/${journalpostId}/ferdigstill?journalfoerendeEnhet=${journalførendeEnhet}"),
-                "")
+                "", headerMedSaksbehandler(saksbehandler))
 
         if (ressurs.status != Ressurs.Status.SUKSESS) {
             secureLogger.error(" Feil ved oppdatering av journalpost=${journalpostId} - mottok: $ressurs")
             error("Feil ved oppdatering av journalpost=$journalpostId")
         }
 
+    }
+
+    private fun headerMedSaksbehandler(saksbehandler: String?): HttpHeaders {
+        val httpHeaders = HttpHeaders()
+        if (saksbehandler != null) {
+            httpHeaders.set(NavHttpHeaders.NAV_USER_ID.asString(), saksbehandler)
+        }
+        return httpHeaders
     }
 }

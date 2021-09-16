@@ -87,13 +87,13 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         behandlingRepository.insert(behandling(fagsak = fagsak, status = BehandlingStatus.UTREDES))
 
         assertThat(catchThrowable { revurderingService.opprettRevurderingManuelt(fagsak.id) })
-                .hasMessageContaining("Revurdering må ha eksisterende iverksatt behandling")
+                .hasMessageContaining("Det finnes en behandling på fagsaken som ikke er ferdigstilt")
     }
 
     @Test
     internal fun `skal ikke være mulig å opprette fagsak hvis det ikke finnes en behandling fra før`() {
         assertThat(catchThrowable { revurderingService.opprettRevurderingManuelt(fagsak.id) })
-                .hasMessageContaining("Revurdering må ha eksisterende iverksatt behandling")
+                .hasMessageContaining("Det finnes ikke en tidligere behandling på fagsaken")
     }
 
     private fun lagreSøknad(behandling: Behandling,

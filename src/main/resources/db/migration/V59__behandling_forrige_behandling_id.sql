@@ -1,0 +1,1 @@
+ALTER TABLE behandling ADD COLUMN forrige_behandling_id UUID REFERENCES behandling(id);

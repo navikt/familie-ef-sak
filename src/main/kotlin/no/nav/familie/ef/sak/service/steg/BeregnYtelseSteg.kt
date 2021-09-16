@@ -110,8 +110,8 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
     }
 
     private fun hentForrigeTilkjenteYtelse(behandling: Behandling): TilkjentYtelse {
-        val forrigeBehandlingId = behandlingService.finnSisteIverksatteBehandling(behandling.fagsakId)
-                                  ?: error("Finner ikke forrige behandling til behandling=${behandling.id}")
+        val forrigeBehandlingId = behandling.forrigeBehandlingId
+                ?: error("Finner ikke forrige behandling til behandling=${behandling.id}")
         val forrigeAndeler = tilkjentYtelseService.hentForBehandling(forrigeBehandlingId)
         return forrigeAndeler
     }

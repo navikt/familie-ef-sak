@@ -20,17 +20,17 @@ class RevurderingService(private val søknadService: SøknadService,
                          private val taskRepository: TaskRepository) {
 
     fun opprettRevurderingManuelt(fagsakId: UUID): Behandling {
-        val sisteIverksatteBehandlingUUID = behandlingService.finnSisteIverksatteBehandling(fagsakId)
-                                            ?: error("Revurdering må ha eksisterende iverksatt behandling")
         val revurdering = behandlingService.opprettBehandling(BehandlingType.REVURDERING,
                                                               fagsakId,
                                                               BehandlingStatus.UTREDES,
                                                               StegType.BEREGNE_YTELSE)
+        val forrigeBehandlingId = revurdering.forrigeBehandlingId
+                                  ?: error("Revurdering må ha eksisterende iverksatt behandling")
         val saksbehandler = SikkerhetContext.hentSaksbehandler(true)
 
-        søknadService.kopierSøknad(sisteIverksatteBehandlingUUID, revurdering.id)
+        søknadService.kopierSøknad(forrigeBehandlingId, revurdering.id)
         grunnlagsdataService.opprettGrunnlagsdata(revurdering.id)
-        vurderingService.kopierVurderingerTilNyBehandling(sisteIverksatteBehandlingUUID, revurdering.id)
+        vurderingService.kopierVurderingerTilNyBehandling(forrigeBehandlingId, revurdering.id)
         val oppgaveId = oppgaveService.opprettOppgave(behandlingId = revurdering.id,
                                                       oppgavetype = Oppgavetype.BehandleSak,
                                                       tilordnetNavIdent = saksbehandler,

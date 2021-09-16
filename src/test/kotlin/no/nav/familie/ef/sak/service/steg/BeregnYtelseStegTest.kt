@@ -46,7 +46,6 @@ internal class BeregnYtelseStegTest {
     @BeforeEach
     internal fun setUp() {
         every { behandlingService.hentAktivIdent(any()) } returns "123"
-        every { behandlingService.finnSisteIverksatteBehandling(any()) } returns UUID.randomUUID()
         every { simuleringService.hentOgLagreSimuleringsresultat(any()) } returns Simuleringsresultat(behandlingId = UUID.randomUUID(),
                                                                                                       data = DetaljertSimuleringResultat(
                                                                                                               emptyList()))
@@ -65,7 +64,7 @@ internal class BeregnYtelseStegTest {
                 lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, forrigeAndelFom, forrigeAndelTom)))
         every { beregningService.beregnYtelse(any(), any()) } returns listOf(lagBeløpsperiode(nyAndelFom, nyAndelTom))
 
-        utførSteg(BehandlingType.REVURDERING)
+        utførSteg(BehandlingType.REVURDERING, forrigeBehandlingId = UUID.randomUUID())
 
         val andeler = slot.captured.andelerTilkjentYtelse
         assertThat(andeler).hasSize(2)
@@ -92,7 +91,6 @@ internal class BeregnYtelseStegTest {
         every { beregningService.beregnYtelse(any(), any()) } returns listOf(lagBeløpsperiode(LocalDate.now(), LocalDate.now()))
         utførSteg(BehandlingType.FØRSTEGANGSBEHANDLING)
 
-        verify(exactly = 0) { behandlingService.finnSisteIverksatteBehandling(any()) }
         verify(exactly = 0) { tilkjentYtelseService.hentForBehandling(any()) }
     }
 
@@ -198,7 +196,7 @@ internal class BeregnYtelseStegTest {
         every { tilkjentYtelseService.hentForBehandling(any()) } returns
                 lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, forrigeAndelFom, forrigeAndelTom)))
 
-        utførSteg(BehandlingType.REVURDERING, Opphør(opphørFom = opphørFom, begrunnelse = "null"))
+        utførSteg(BehandlingType.REVURDERING, Opphør(opphørFom = opphørFom, begrunnelse = "null"), forrigeBehandlingId = UUID.randomUUID())
 
         assertThat(slot.captured.andelerTilkjentYtelse).hasSize(1)
         assertThat(slot.captured.andelerTilkjentYtelse.first().stønadFom).isEqualTo(forventetNyAndelFom)
@@ -217,7 +215,7 @@ internal class BeregnYtelseStegTest {
         every { tilkjentYtelseService.hentForBehandling(any()) } returns
                 lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, forrigeAndelFom, forrigeAndelTom)))
 
-        assertThrows<Feil> { utførSteg(BehandlingType.REVURDERING, Opphør(opphørFom = opphørFom, begrunnelse = "null")) }
+        assertThrows<Feil> { utførSteg(BehandlingType.REVURDERING, Opphør(opphørFom = opphørFom, begrunnelse = "null"), forrigeBehandlingId = UUID.randomUUID()) }
     }
 
 
@@ -239,7 +237,7 @@ internal class BeregnYtelseStegTest {
                 lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, andel1Fom, andel1Tom),
                                          lagAndelTilkjentYtelse(200, andel2Fom, andel2Tom)))
 
-        utførSteg(BehandlingType.REVURDERING, Opphør(opphørFom = opphørFom, begrunnelse = "null"))
+        utførSteg(BehandlingType.REVURDERING, Opphør(opphørFom = opphørFom, begrunnelse = "null"), forrigeBehandlingId = UUID.randomUUID())
 
         assertThat(slot.captured.andelerTilkjentYtelse).hasSize(1)
         assertThat(slot.captured.andelerTilkjentYtelse.first().stønadFom).isEqualTo(forventetNyAndelFom)
@@ -266,7 +264,7 @@ internal class BeregnYtelseStegTest {
                 lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, andel1Fom, andel1Tom),
                                          lagAndelTilkjentYtelse(200, andel2Fom, andel2Tom)))
 
-        utførSteg(BehandlingType.REVURDERING, Opphør(opphørFom = opphørFom, begrunnelse = "null"))
+        utførSteg(BehandlingType.REVURDERING, Opphør(opphørFom = opphørFom, begrunnelse = "null"), forrigeBehandlingId = UUID.randomUUID())
 
         assertThat(slot.captured.andelerTilkjentYtelse).hasSize(2)
         assertThat(slot.captured.andelerTilkjentYtelse[0].stønadFom).isEqualTo(forventetAndelFom1)
@@ -287,7 +285,7 @@ internal class BeregnYtelseStegTest {
         every { tilkjentYtelseService.hentForBehandling(any()) } returns
                 lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, andelFom, andelTom)))
 
-        utførSteg(BehandlingType.REVURDERING, Opphør(opphørFom = opphørFom, begrunnelse = "null"))
+        utførSteg(BehandlingType.REVURDERING, Opphør(opphørFom = opphørFom, begrunnelse = "null"), forrigeBehandlingId = UUID.randomUUID())
 
         assertThat(slot.captured.andelerTilkjentYtelse).hasSize(0)
     }
@@ -296,13 +294,14 @@ internal class BeregnYtelseStegTest {
     internal fun `skal feile ved opphør, dersom behandlingstype ikke er revurdering`() {
         val feil = assertThrows<Feil> {
             utførSteg(BehandlingType.FØRSTEGANGSBEHANDLING,
-                      Opphør(opphørFom = YearMonth.of(2021, 6), begrunnelse = "null"))
+                      Opphør(opphørFom = YearMonth.of(2021, 6), begrunnelse = "null"), forrigeBehandlingId = UUID.randomUUID())
         }
         assertThat(feil.frontendFeilmelding).contains("Kan kun opphøre ved revurdering")
     }
 
-    private fun utførSteg(type: BehandlingType, vedtak: VedtakDto = Innvilget(periodeBegrunnelse = "", inntektBegrunnelse = "")) {
-        steg.utførSteg(behandling(fagsak(), type = type), vedtak = vedtak)
+
+    private fun utførSteg(type: BehandlingType, vedtak: VedtakDto = Innvilget(periodeBegrunnelse = "", inntektBegrunnelse = ""), forrigeBehandlingId: UUID? = null) {
+        steg.utførSteg(behandling(fagsak(), type = type, forrigeBehandlingId = forrigeBehandlingId), vedtak = vedtak)
     }
 
     private fun lagBeløpsperiode(fom: LocalDate, tom: LocalDate) =

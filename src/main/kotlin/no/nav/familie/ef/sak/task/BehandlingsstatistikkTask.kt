@@ -48,9 +48,8 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
     private val zoneIdOslo = ZoneId.of("Europe/Oslo")
 
     override fun doTask(task: Task) {
-        val (behandlingId, hendelse, hendelseTidspunkt, gjeldendeSaksbehandler, oppgaveId) = objectMapper.readValue<BehandlingsstatistikkTaskPayload>(
-                task.payload
-        )
+        val (behandlingId, hendelse, hendelseTidspunkt, gjeldendeSaksbehandler, oppgaveId) =
+                objectMapper.readValue<BehandlingsstatistikkTaskPayload>(task.payload)
 
         val behandling = behandlingService.hentBehandling(behandlingId)
         val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
@@ -79,20 +78,10 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
                 stønadstype = StønadType.valueOf(fagsak.stønadstype.name),
                 behandlingstype = BehandlingType.valueOf(behandling.type.name),
                 henvendelseTidspunkt = henvendelseTidspunkt.atZone(zoneIdOslo),
-                relatertBehandlingId = finnRelatertBehandlingId(behandling, hendelse)
+                relatertBehandlingId = behandling.forrigeBehandlingId
         )
 
         iverksettClient.sendBehandlingsstatistikk(behandlingsstatistikkDto)
-    }
-
-    private fun finnRelatertBehandlingId(behandling: Behandling, hendelse: Hendelse): UUID? {
-        if (hendelse == Hendelse.FERDIG) {
-            return null
-        }
-        return when (behandling.type) {
-            REVURDERING -> behandlingService.finnSisteIverksatteBehandling(fagsakId = behandling.fagsakId)
-            else -> null
-        }
     }
 
     private fun finnSisteOppgaveForBehandlingen(behandlingId: UUID, oppgaveId: Long?): Oppgave {

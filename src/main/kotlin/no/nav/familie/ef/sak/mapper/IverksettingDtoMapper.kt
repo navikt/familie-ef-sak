@@ -62,15 +62,13 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
 
         val fagsak = fagsakService.hentFaksakForBehandling(behandling.id)
         val vedtak = vedtakService.hentVedtak(behandling.id)
-        val forrigeBehandlingId = behandlingRepository.finnSisteIverksatteBehandling(behandling.fagsakId)
         val saksbehandler =
                 behandlinghistorikkService.finnSisteBehandlingshistorikk(behandling.id, StegType.SEND_TIL_BESLUTTER)?.opprettetAv
                 ?: error("Kan ikke finne saksbehandler på behandlingen")
         val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(behandling.id)
         val vilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(behandling.id)
 
-
-        val behandlingsdetaljer = mapBehandlingsdetaljer(behandling, vilkårsvurderinger, forrigeBehandlingId)
+        val behandlingsdetaljer = mapBehandlingsdetaljer(behandling, vilkårsvurderinger)
         val fagsakdetaljerDto = mapFagsakdetaljer(fagsak)
         val søkerDto = mapSøkerDto(fagsak, behandling)
         val vedtakDto = mapVedtaksdetaljerDto(vedtak, saksbehandler, beslutter, tilkjentYtelse)
@@ -88,14 +86,13 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
 
     @Improvement("Årsak og Type må utledes når vi støtter revurdering")
     private fun mapBehandlingsdetaljer(behandling: Behandling,
-                                       vilkårsvurderinger: List<Vilkårsvurdering>,
-                                       forrigeBehandlingId: UUID?) =
+                                       vilkårsvurderinger: List<Vilkårsvurdering>) =
             BehandlingsdetaljerDto(behandlingId = behandling.id,
                                    behandlingType = BehandlingType.valueOf(behandling.type.name),
                                    behandlingÅrsak = BehandlingÅrsak.SØKNAD,
                                    eksternId = behandling.eksternId.id,
                                    vilkårsvurderinger = vilkårsvurderinger.map { it.tilIverksettDto() },
-                                   forrigeBehandlingId = forrigeBehandlingId
+                                   forrigeBehandlingId = behandling.forrigeBehandlingId
             )
 
     @Improvement("Opphørårsak må utledes ved revurdering")

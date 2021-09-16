@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.repository.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.service.steg.StegType
 import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.util.OpprettBehandlingUtil.sistIverksatteBehandling
 import no.nav.familie.ef.sak.util.OpprettBehandlingUtil.validerKanOppretteNyBehandling
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
@@ -41,8 +42,6 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
     fun finnSisteIverksatteBehandlinger(stønadstype: Stønadstype) =
             behandlingRepository.finnSisteIverksatteBehandlingerSomIkkeErTekniskOpphør(stønadstype)
 
-    fun finnSisteIverksatteBehandling(fagsakId: UUID) = behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
-
     @Transactional
     fun opprettBehandling(behandlingType: BehandlingType,
                           fagsakId: UUID,
@@ -66,8 +65,10 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
                           stegType: StegType = StegType.VILKÅR): Behandling {
         val tidligereBehandlinger = behandlingRepository.findByFagsakId(fagsakId)
         validerKanOppretteNyBehandling(behandlingType, tidligereBehandlinger)
+        val forrigeBehandlingId = sistIverksatteBehandling(tidligereBehandlinger)?.id
 
         return behandlingRepository.insert(Behandling(fagsakId = fagsakId,
+                                                      forrigeBehandlingId = forrigeBehandlingId,
                                                       type = behandlingType,
                                                       steg = stegType,
                                                       status = status,
