@@ -34,6 +34,15 @@ class BrevClient(@Value("\${FAMILIE_BREV_API_URL}")
                              HttpHeaders().medContentTypeJsonUTF8())
     }
 
+
+    fun lagManueltBrev(brevinnhold: JsonNode): ByteArray {
+        val url = URI.create("$familieBrevUri/api/json2pdf")
+
+        return postForEntity(url,
+                             brevinnhold,
+                             HttpHeaders().medContentTypeJsonUTF8())
+    }
+
     companion object {
 
         val ef = "ef-brev"
@@ -44,4 +53,8 @@ class BrevClient(@Value("\${FAMILIE_BREV_API_URL}")
 data class BrevRequestMedSignaturer(val brevFraSaksbehandler: JsonNode,
                                     val saksbehandlersignatur: String,
                                     val besluttersignatur: String?)
+
+data class ManueltBrev(
+        val brevinnhold: JsonNode)
+
 
