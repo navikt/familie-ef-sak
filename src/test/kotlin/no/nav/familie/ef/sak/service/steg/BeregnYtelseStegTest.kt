@@ -43,7 +43,6 @@ internal class BeregnYtelseStegTest {
     @BeforeEach
     internal fun setUp() {
         every { behandlingService.hentAktivIdent(any()) } returns "123"
-        every { behandlingService.finnSisteIverksatteBehandling(any()) } returns UUID.randomUUID()
         every { simuleringService.hentOgLagreSimuleringsresultat(any()) } returns Simuleringsresultat(behandlingId = UUID.randomUUID(),
                                                                                                       data = DetaljertSimuleringResultat(
                                                                                                               emptyList()))
@@ -62,7 +61,7 @@ internal class BeregnYtelseStegTest {
                 lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, forrigeAndelFom, forrigeAndelTom)))
         every { beregningService.beregnYtelse(any(), any()) } returns listOf(lagBeløpsperiode(nyAndelFom, nyAndelTom))
 
-        utførSteg(BehandlingType.REVURDERING)
+        utførSteg(BehandlingType.REVURDERING, forrigeBehandlingId = UUID.randomUUID())
 
         val andeler = slot.captured.andelerTilkjentYtelse
         assertThat(andeler).hasSize(2)
@@ -89,7 +88,6 @@ internal class BeregnYtelseStegTest {
         every { beregningService.beregnYtelse(any(), any()) } returns listOf(lagBeløpsperiode(LocalDate.now(), LocalDate.now()))
         utførSteg(BehandlingType.FØRSTEGANGSBEHANDLING)
 
-        verify(exactly = 0) { behandlingService.finnSisteIverksatteBehandling(any()) }
         verify(exactly = 0) { tilkjentYtelseService.hentForBehandling(any()) }
     }
 
@@ -181,8 +179,8 @@ internal class BeregnYtelseStegTest {
         assertThat(nyeAndeler[1].beløp).isEqualTo(100)
     }
 
-    private fun utførSteg(type: BehandlingType, vedtak: VedtakDto = Innvilget(periodeBegrunnelse = "", inntektBegrunnelse = "")) {
-        steg.utførSteg(behandling(fagsak(), type = type), vedtak = vedtak)
+    private fun utførSteg(type: BehandlingType, vedtak: VedtakDto = Innvilget(periodeBegrunnelse = "", inntektBegrunnelse = ""), forrigeBehandlingId: UUID? = null) {
+        steg.utførSteg(behandling(fagsak(), type = type, forrigeBehandlingId = forrigeBehandlingId), vedtak = vedtak)
     }
 
     private fun lagBeløpsperiode(fom: LocalDate, tom: LocalDate) =

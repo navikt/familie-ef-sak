@@ -31,6 +31,14 @@ object OpprettBehandlingUtil {
         }
     }
 
+    fun sistIverksatteBehandling(behandlinger: List<Behandling>): Behandling? {
+        return behandlinger
+                .filter { it.type != BehandlingType.BLANKETT }
+                .filter { it.resultat != BehandlingResultat.ANNULLERT }
+                .filter { it.status == BehandlingStatus.FERDIGSTILT }
+                .maxByOrNull { it.sporbar.opprettetTid }
+    }
+
     private fun validerTidligereBehandlingerErFerdigstilte(tidligereBehandlinger: List<Behandling>) {
         if (tidligereBehandlinger.any { it.status != BehandlingStatus.FERDIGSTILT }) {
             throw ApiFeil("Det finnes en behandling på fagsaken som ikke er ferdigstilt", HttpStatus.BAD_REQUEST)

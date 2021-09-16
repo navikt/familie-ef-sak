@@ -2,12 +2,19 @@ package no.nav.familie.ef.sak.util
 
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.util.BehandlingOppsettUtil
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.util.BehandlingOppsettUtil.iverksattRevurdering
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.util.BehandlingOppsettUtil.lagBehandlingerForSisteIverksatte
 import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import no.nav.familie.ef.sak.repository.domain.BehandlingType
+import no.nav.familie.ef.sak.repository.domain.Sporbar
+import no.nav.familie.ef.sak.util.OpprettBehandlingUtil.sistIverksatteBehandling
 import no.nav.familie.ef.sak.util.OpprettBehandlingUtil.validerKanOppretteNyBehandling
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class OpprettBehandlingUtilTest {
 
@@ -75,4 +82,41 @@ internal class OpprettBehandlingUtilTest {
         }).hasMessage("Det er ikke mulig å lage en revurdering når siste behandlingen er teknisk opphør")
     }
 
+    @Test
+    internal fun `finnSisteIverksatteBehandling skal finne id til siste behandling som er ferdigstilt, ikke annulert eller blankett`() {
+        val behandlinger = lagBehandlingerForSisteIverksatte()
+        val førstegangsbehandling = BehandlingOppsettUtil.førstegangsbehandling
+        val sistIverksatteBehandlingId = sistIverksatteBehandling(behandlinger)?.id
+
+        assertThat(sistIverksatteBehandlingId).isNotNull
+        assertThat(sistIverksatteBehandlingId).isEqualTo(førstegangsbehandling.id)
+    }
+
+    @Test
+    internal fun `skal returnere tidligere behandling hvis den er iverksatt`() {
+        assertThat(sistIverksatteBehandling(listOf(BehandlingOppsettUtil.førstegangsbehandling))).isNotNull
+        assertThat(sistIverksatteBehandling(listOf(iverksattRevurdering))).isNotNull
+    }
+
+    @Test
+    internal fun `skal returnere sist iverksatte behandlingen`() {
+        fun iverksatt(tid: LocalDateTime) = iverksattRevurdering.copy(id = UUID.randomUUID(),
+                                                                      sporbar = Sporbar(opprettetTid = tid))
+
+        val behandlingA = iverksatt(LocalDateTime.now().minusDays(5))
+        val behandlingB = iverksatt(LocalDateTime.now())
+        val behandlingC = iverksatt(LocalDateTime.now().plusDays(5))
+
+        val behandlingerMedSistBehandlerIMidten = listOf(behandlingA, behandlingC, behandlingB)
+        assertThat(sistIverksatteBehandling(behandlingerMedSistBehandlerIMidten)?.id).isEqualTo(behandlingC.id)
+    }
+
+    @Test
+    internal fun `skal ikke returnere tidligere behandling for førstegangsbehandling som ikke er iverksatt`() {
+        assertThat(sistIverksatteBehandling(listOf(BehandlingOppsettUtil.førstegangsbehandlingUnderBehandling))).isNull()
+        assertThat(sistIverksatteBehandling(listOf(BehandlingOppsettUtil.annullertFørstegangsbehandling))).isNull()
+        assertThat(sistIverksatteBehandling(listOf(BehandlingOppsettUtil.blankett))).isNull()
+        assertThat(sistIverksatteBehandling(listOf(BehandlingOppsettUtil.annullertRevurdering))).isNull()
+        assertThat(sistIverksatteBehandling(listOf(BehandlingOppsettUtil.revurderingUnderArbeid))).isNull()
+    }
 }

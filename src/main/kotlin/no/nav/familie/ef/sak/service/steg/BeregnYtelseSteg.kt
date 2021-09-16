@@ -82,7 +82,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
 
     private fun andelerForRevurdering(behandling: Behandling,
                                       beløpsperioder: List<AndelTilkjentYtelse>): List<AndelTilkjentYtelse> {
-        val forrigeBehandlingId = behandlingService.finnSisteIverksatteBehandling(behandling.fagsakId)
+        val forrigeBehandlingId = behandling.forrigeBehandlingId
                                   ?: error("Finner ikke forrige behandling til behandling=${behandling.id}")
         val forrigeAndeler = tilkjentYtelseService.hentForBehandling(forrigeBehandlingId)
         return slåSammenAndelerSomSkalVidereføres(beløpsperioder, forrigeAndeler)

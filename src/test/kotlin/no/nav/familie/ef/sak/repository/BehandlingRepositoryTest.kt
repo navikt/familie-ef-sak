@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.repository
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.util.BehandlingOppsettUtil
 import no.nav.familie.ef.sak.repository.domain.BehandlingResultat
 import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
 import no.nav.familie.ef.sak.repository.domain.BehandlingStatus.FERDIGSTILT
@@ -12,9 +13,13 @@ import no.nav.familie.ef.sak.repository.domain.FagsakPerson
 import no.nav.familie.ef.sak.repository.domain.Sporbar
 import no.nav.familie.ef.sak.repository.domain.Stønadstype.BARNETILSYN
 import no.nav.familie.ef.sak.repository.domain.Stønadstype.OVERGANGSSTØNAD
+import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.relational.core.conversion.DbActionExecutionException
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -24,6 +29,13 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
 
     private val ident = "123"
+
+    @Test
+    internal fun `skal ikke være mulig å legge inn en behandling med referanse til en behandling som ikke eksisterer`() {
+        val fagsak = fagsakRepository.insert(fagsak())
+        assertThatThrownBy { behandlingRepository.insert(behandling(fagsak, forrigeBehandlingId = UUID.randomUUID())) }
+                .isInstanceOf(DbActionExecutionException::class.java)
+    }
 
     @Test
     internal fun findByFagsakId() {
@@ -150,46 +162,14 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `finnSisteIverksatteBehandling skal finne id til siste behandling som er ferdigstilt, ikke annulert eller blankett`() {
-        val fagsak = fagsakRepository.insert(fagsak(setOf(FagsakPerson("1"))))
-        val annullertFørstegangsbehandling = behandling(fagsak).copy(type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                                     status = FERDIGSTILT,
-                                                                     resultat = BehandlingResultat.ANNULLERT,
-                                                                     sporbar = Sporbar(opprettetTid = LocalDateTime.now()
-                                                                             .minusDays(4)))
-        val førstegangsbehandling = behandling(fagsak).copy(type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                            status = FERDIGSTILT,
-                                                            resultat = BehandlingResultat.INNVILGET,
-                                                            sporbar = Sporbar(opprettetTid = LocalDateTime.now().minusDays(3)))
-        val blankett = behandling(fagsak).copy(type = BehandlingType.BLANKETT,
-                                               status = FERDIGSTILT,
-                                               resultat = BehandlingResultat.INNVILGET,
-                                               sporbar = Sporbar(opprettetTid = LocalDateTime.now().minusDays(2)))
-        val annullertRevurdering = behandling(fagsak).copy(type = BehandlingType.REVURDERING,
-                                                           status = FERDIGSTILT,
-                                                           resultat = BehandlingResultat.ANNULLERT,
-                                                           sporbar = Sporbar(opprettetTid = LocalDateTime.now().minusDays(1)))
-        val revurderingUnderArbeid = behandling(fagsak).copy(type = BehandlingType.REVURDERING,
-                                                             status = BehandlingStatus.IVERKSETTER_VEDTAK,
-                                                             resultat = BehandlingResultat.INNVILGET)
-        behandlingRepository.insert(annullertFørstegangsbehandling)
-        behandlingRepository.insert(førstegangsbehandling)
-        behandlingRepository.insert(blankett)
-        behandlingRepository.insert(annullertRevurdering)
-        behandlingRepository.insert(revurderingUnderArbeid)
-        assertThat(behandlingRepository.finnSisteIverksatteBehandling(fagsak.id)).isEqualTo(førstegangsbehandling.id)
+        val førstegangsbehandling = BehandlingOppsettUtil.førstegangsbehandling
+        fagsakRepository.insert(fagsak(setOf(FagsakPerson("1"))).copy(id = førstegangsbehandling.fagsakId))
+
+        val behandlinger = BehandlingOppsettUtil.lagBehandlingerForSisteIverksatte()
+        behandlingRepository.insertAll(behandlinger)
+
         assertThat(behandlingRepository.finnSisteIverksatteBehandling(OVERGANGSSTØNAD, setOf("1"))?.id)
                 .isEqualTo(førstegangsbehandling.id)
-    }
-
-    @Test
-    internal fun `skal ikke finnes noen siste iverksatte behandlingId når en førstegangsbehandling iverksettes`() {
-        val fagsak = fagsakRepository.insert(fagsak(setOf(FagsakPerson("1"))))
-        val førstegangsbehandling = behandling(fagsak).copy(type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                            status = BehandlingStatus.IVERKSETTER_VEDTAK,
-                                                            resultat = BehandlingResultat.INNVILGET)
-        behandlingRepository.insert(førstegangsbehandling)
-        val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(førstegangsbehandling.fagsakId)
-        assertThat(sisteIverksatteBehandling).isNull()
     }
 
     @Test
