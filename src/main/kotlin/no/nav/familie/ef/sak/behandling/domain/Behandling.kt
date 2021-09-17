@@ -41,6 +41,8 @@ enum class BehandlingType(val visningsnavn: String) {
 
 enum class BehandlingResultat(val displayName: String) {
     INNVILGET(displayName = "Innvilget"),
+    OPPHØRT(displayName = "Opphørt"),
+    AVSLÅTT(displayName = "Avslått"),
     IKKE_SATT(displayName = "Ikke satt"),
     ANNULLERT(displayName = "Annullert"),
 }
