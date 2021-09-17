@@ -1,15 +1,15 @@
 package no.nav.familie.ef.sak.api.gui
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.fagsak.FagsakDto
+import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
+import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.FagsakRequest
+import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
+import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
+import no.nav.familie.ef.sak.fagsak.dto.FagsakDto
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
-import no.nav.familie.ef.sak.behandling.BehandlingRepository
-import no.nav.familie.ef.sak.fagsak.FagsakRepository
-import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
-import no.nav.familie.ef.sak.fagsak.FagsakPerson
-import no.nav.familie.ef.sak.fagsak.Stønadstype
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach

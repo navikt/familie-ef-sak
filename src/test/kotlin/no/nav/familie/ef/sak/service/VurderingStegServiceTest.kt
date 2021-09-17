@@ -19,7 +19,7 @@ import no.nav.familie.ef.sak.util.BrukerContextUtil
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
-import no.nav.familie.ef.sak.steg.StegService
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.dto.DelvilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.OppdaterVilkårsvurderingDto

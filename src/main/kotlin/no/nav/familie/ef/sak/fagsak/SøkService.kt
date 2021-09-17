@@ -1,6 +1,10 @@
 package no.nav.familie.ef.sak.fagsak
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.fagsak.dto.FagsakForSøkeresultat
+import no.nav.familie.ef.sak.fagsak.dto.PersonFraSøk
+import no.nav.familie.ef.sak.fagsak.dto.Søkeresultat
+import no.nav.familie.ef.sak.fagsak.dto.SøkeresultatPerson
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlPersonSøkHjelper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlSaksbehandlerClient

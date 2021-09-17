@@ -5,12 +5,12 @@ import no.nav.familie.ef.sak.vedtak.dto.Innvilget
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.beregning.tilInntektsperioder
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
-import no.nav.familie.ef.sak.tilkjentytelse.AndelTilkjentYtelse
+import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.behandling.domain.Behandling
-import no.nav.familie.ef.sak.fagsak.Fagsak
-import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelse
-import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseType
-import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelseType
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.ef.iverksett.TilkjentYtelseMedMetadata
 import org.springframework.stereotype.Service
 

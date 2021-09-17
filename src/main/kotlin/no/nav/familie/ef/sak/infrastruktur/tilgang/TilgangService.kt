@@ -5,8 +5,8 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.infrastruktur.exception.ManglerTilgang
 import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
-import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.ef.sak.steg.BehandlerRolle
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.behandlingsflyt.steg.BehandlerRolle
 import org.springframework.cache.CacheManager
 import org.springframework.stereotype.Service
 import java.util.UUID

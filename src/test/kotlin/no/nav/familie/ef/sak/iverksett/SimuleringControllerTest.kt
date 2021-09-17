@@ -6,11 +6,11 @@ import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.dto.BehandlingDto
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
-import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
-import no.nav.familie.ef.sak.tilkjentytelse.AndelTilkjentYtelse
-import no.nav.familie.ef.sak.fagsak.FagsakPerson
-import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelse
-import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseType
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
+import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
+import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
+import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelseType
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.simulering.SimuleringsresultatDto
 import no.nav.familie.ef.sak.simulering.SimuleringsresultatRepository

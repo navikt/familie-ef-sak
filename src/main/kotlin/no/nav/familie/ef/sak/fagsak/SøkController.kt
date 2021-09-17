@@ -1,6 +1,8 @@
 package no.nav.familie.ef.sak.fagsak
 
-import no.nav.familie.ef.sak.api.dto.PersonIdentDto
+import no.nav.familie.ef.sak.domene.PersonIdentDto
+import no.nav.familie.ef.sak.fagsak.dto.Søkeresultat
+import no.nav.familie.ef.sak.fagsak.dto.SøkeresultatPerson
 import no.nav.familie.ef.sak.infrastruktur.tilgang.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims

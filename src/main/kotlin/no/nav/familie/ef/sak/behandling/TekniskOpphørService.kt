@@ -1,15 +1,15 @@
 package no.nav.familie.ef.sak.behandling
 
 import no.nav.familie.ef.sak.iverksett.IverksettClient
-import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelse
-import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseType
-import no.nav.familie.ef.sak.steg.StegType
-import no.nav.familie.ef.sak.task.PollStatusTekniskOpphør
+import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelseType
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
+import no.nav.familie.ef.sak.behandlingsflyt.task.PollStatusTekniskOpphør
 import no.nav.familie.kontrakter.ef.felles.StønadType
 import no.nav.familie.kontrakter.ef.iverksett.TekniskOpphørDto
 import no.nav.familie.prosessering.domene.TaskRepository

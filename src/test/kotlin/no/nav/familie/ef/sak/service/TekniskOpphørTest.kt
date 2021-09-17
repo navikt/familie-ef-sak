@@ -10,9 +10,9 @@ import no.nav.familie.ef.sak.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
-import no.nav.familie.ef.sak.fagsak.FagsakPerson
+import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.behandling.TekniskOpphørService
-import no.nav.familie.ef.sak.task.PollStatusTekniskOpphør
+import no.nav.familie.ef.sak.behandlingsflyt.task.PollStatusTekniskOpphør
 import no.nav.familie.kontrakter.ef.iverksett.IverksettStatus
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat

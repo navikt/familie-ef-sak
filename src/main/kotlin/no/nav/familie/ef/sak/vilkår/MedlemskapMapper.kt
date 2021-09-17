@@ -12,7 +12,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.InnflyttingTilN
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.UtflyttingFraNorge
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Medlemskap
-import no.nav.familie.ef.sak.service.KodeverkService
+import no.nav.familie.ef.sak.integration.KodeverkService
 import no.nav.familie.ef.sak.vilkår.dto.MedlemskapDto
 import no.nav.familie.ef.sak.vilkår.dto.MedlemskapRegistergrunnlagDto
 import no.nav.familie.ef.sak.vilkår.dto.MedlemskapSøknadsgrunnlagDto

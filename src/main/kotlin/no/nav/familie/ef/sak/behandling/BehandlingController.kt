@@ -4,8 +4,8 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.dto.BehandlingDto
 import no.nav.familie.ef.sak.behandling.dto.tilDto
 import no.nav.familie.ef.sak.infrastruktur.tilgang.TilgangService
-import no.nav.familie.ef.sak.steg.StegService
-import no.nav.familie.ef.sak.steg.StegType
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.validation.annotation.Validated

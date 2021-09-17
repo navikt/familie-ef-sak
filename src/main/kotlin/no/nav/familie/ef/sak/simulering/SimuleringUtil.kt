@@ -1,8 +1,8 @@
 package no.nav.familie.ef.sak.simulering
 
 import no.nav.familie.ef.sak.iverksett.tilIverksettDto
-import no.nav.familie.ef.sak.fagsak.Stønadstype
-import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelse
+import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
+import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.kontrakter.ef.felles.StønadType
 import no.nav.familie.kontrakter.ef.iverksett.TilkjentYtelseMedMetadata
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat

@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.domene
 
-import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import org.springframework.data.annotation.LastModifiedBy
 import org.springframework.data.relational.core.mapping.Embedded
 import java.time.LocalDateTime

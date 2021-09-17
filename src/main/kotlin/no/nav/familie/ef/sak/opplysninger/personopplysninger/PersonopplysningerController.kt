@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger
 
-import no.nav.familie.ef.sak.api.dto.PersonIdentDto
+import no.nav.familie.ef.sak.domene.PersonIdentDto
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.tilgang.TilgangService

@@ -3,8 +3,8 @@ package no.nav.familie.ef.sak.service
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.fagsak.PersonFraSøk
-import no.nav.familie.ef.sak.fagsak.SøkeresultatPerson
+import no.nav.familie.ef.sak.fagsak.dto.PersonFraSøk
+import no.nav.familie.ef.sak.fagsak.dto.SøkeresultatPerson
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlSaksbehandlerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Folkeregisteridentifikator

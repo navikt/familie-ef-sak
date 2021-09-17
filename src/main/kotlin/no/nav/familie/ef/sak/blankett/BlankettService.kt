@@ -9,7 +9,7 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.domene.Fil
 import no.nav.familie.ef.sak.oppgave.Oppgave
-import no.nav.familie.ef.sak.fagsak.Stønadstype
+import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService

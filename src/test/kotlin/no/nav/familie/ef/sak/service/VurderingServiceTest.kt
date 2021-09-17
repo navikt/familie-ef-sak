@@ -16,7 +16,7 @@ import no.nav.familie.ef.sak.repository.vilkårsvurdering
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
-import no.nav.familie.ef.sak.steg.StegService
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.vilkår.DelvilkårsvurderingWrapper
 import no.nav.familie.ef.sak.vilkår.dto.SivilstandInngangsvilkårDto
 import no.nav.familie.ef.sak.vilkår.dto.SivilstandRegistergrunnlagDto

@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.infrastruktur.featuretoggle
 
 import no.finn.unleash.strategy.Strategy
-import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 
 class ByUserIdStrategy : Strategy {
 
