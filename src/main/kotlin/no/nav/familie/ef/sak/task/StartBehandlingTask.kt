@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.task
 
+import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.fagsak.FagsakService
@@ -19,15 +20,18 @@ import java.util.UUID
 
 class StartBehandlingTask(private val iverksettClient: IverksettClient,
                           private val pdlClient: PdlClient,
-                          private val fagsakService: FagsakService) : AsyncTaskStep {
+                          private val fagsakService: FagsakService,
+                          private val behandlingRepository: BehandlingRepository) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val fagsakId = UUID.fromString(task.payload)
         val fagsak = fagsakService.hentFagsak(fagsakId)
         val stønadType = StønadType.valueOf(fagsak.stønadstype.name)
 
-        val identer = pdlClient.hentPersonidenter(fagsak.hentAktivIdent(), historikk = true).identer.map { it.ident }.toSet()
-        iverksettClient.startBehandling(OpprettStartBehandlingHendelseDto(identer, stønadType))
+        if (behandlingRepository.finnSisteIverksatteBehandling(fagsak.stønadstype, fagsak.søkerIdenter.map { it.ident }.toSet()) == null) {
+            val identer = pdlClient.hentPersonidenter(fagsak.hentAktivIdent(), historikk = true).identer.map { it.ident }.toSet()
+            iverksettClient.startBehandling(OpprettStartBehandlingHendelseDto(identer, stønadType))
+        }
     }
 
     companion object {
