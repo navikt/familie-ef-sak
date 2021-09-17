@@ -5,7 +5,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
+import no.nav.familie.ef.sak.felles.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Sivilstand
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Sivilstandstype

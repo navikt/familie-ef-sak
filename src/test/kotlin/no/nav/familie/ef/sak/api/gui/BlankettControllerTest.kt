@@ -7,7 +7,7 @@ import no.nav.familie.ef.sak.repository.oppgave
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.oppgave.OppgaveRepository
-import no.nav.familie.ef.sak.fagsak.FagsakPerson
+import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach

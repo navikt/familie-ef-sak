@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.iverksett
 
-import no.nav.familie.ef.sak.fagsak.Fagsak
-import no.nav.familie.ef.sak.task.StartBehandlingTask
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.behandlingsflyt.task.StartBehandlingTask
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
 

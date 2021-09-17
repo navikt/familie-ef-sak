@@ -9,7 +9,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.ManglerTilgang
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
-import no.nav.familie.ef.sak.infrastruktur.tilgang.TilgangService
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringBehandling
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequest
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode

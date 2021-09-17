@@ -5,7 +5,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.ManglerTilgang
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
-import no.nav.familie.ef.sak.infrastruktur.tilgang.TilgangService
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.oppgave.dto.FinnOppgaveRequestDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest

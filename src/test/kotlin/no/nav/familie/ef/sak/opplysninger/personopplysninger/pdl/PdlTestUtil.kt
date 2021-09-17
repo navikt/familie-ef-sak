@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.integration.dto.pdl
+package no.nav.familie.ef.sak.felles.integration.dto.pdl
 
 import kotlin.reflect.KParameter
 import kotlin.reflect.KProperty1

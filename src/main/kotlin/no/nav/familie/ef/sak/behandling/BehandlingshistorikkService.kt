@@ -2,9 +2,9 @@ package no.nav.familie.ef.sak.behandling
 
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.Behandlingshistorikk
-import no.nav.familie.ef.sak.domene.JsonWrapper
+import no.nav.familie.ef.sak.felles.domain.JsonWrapper
 import no.nav.familie.ef.sak.behandling.domain.StegUtfall
-import no.nav.familie.ef.sak.steg.StegType
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.stereotype.Service
 import java.util.*

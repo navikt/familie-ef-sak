@@ -4,11 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
-import no.nav.familie.ef.sak.domene.Fil
+import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
-import no.nav.familie.ef.sak.steg.StegType
-import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.util.UUID

@@ -2,9 +2,8 @@ package no.nav.familie.ef.sak.vedtak
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
-import no.nav.familie.ef.sak.infrastruktur.tilgang.TilgangService
-import no.nav.familie.ef.sak.service.TotrinnskontrollService
-import no.nav.familie.ef.sak.steg.StegService
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.TotrinnskontrollStatusDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto

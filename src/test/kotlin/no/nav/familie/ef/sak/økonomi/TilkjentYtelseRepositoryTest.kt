@@ -5,7 +5,7 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
-import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import org.assertj.core.api.Assertions.assertThat

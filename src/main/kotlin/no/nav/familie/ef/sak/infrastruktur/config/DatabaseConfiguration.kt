@@ -2,9 +2,9 @@ package no.nav.familie.ef.sak.infrastruktur.config
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.vilkår.DelvilkårsvurderingWrapper
-import no.nav.familie.ef.sak.domene.Endret
-import no.nav.familie.ef.sak.domene.Fil
-import no.nav.familie.ef.sak.domene.JsonWrapper
+import no.nav.familie.ef.sak.felles.domain.Endret
+import no.nav.familie.ef.sak.felles.domain.Fil
+import no.nav.familie.ef.sak.felles.domain.JsonWrapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Arbeidssituasjon
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Dokumentasjon

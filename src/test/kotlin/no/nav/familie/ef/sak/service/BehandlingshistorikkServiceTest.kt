@@ -9,8 +9,8 @@ import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.behandling.BehandlingshistorikkService
-import no.nav.familie.ef.sak.steg.StegType
-import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

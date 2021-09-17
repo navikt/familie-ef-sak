@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.integration.dto.pdl
+package no.nav.familie.ef.sak.felles.integration.dto.pdl
 
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Adressebeskyttelse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.AdressebeskyttelseGradering

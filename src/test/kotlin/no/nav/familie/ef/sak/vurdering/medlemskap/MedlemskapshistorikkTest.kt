@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.vurdering.medlemskap
 
-import no.nav.familie.ef.sak.vurdering.medlemskap.Medlemskapshistorikk
-import no.nav.familie.ef.sak.util.Periode
+import no.nav.familie.ef.sak.felles.dto.Periode
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

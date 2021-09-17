@@ -2,8 +2,8 @@ package no.nav.familie.ef.sak.vedtak
 
 import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDto
 import no.nav.familie.ef.sak.mapper.tilDto
-import no.nav.familie.ef.sak.infrastruktur.tilgang.TilgangService
-import no.nav.familie.ef.sak.service.TilkjentYtelseService
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.validation.annotation.Validated

@@ -12,8 +12,8 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Postboksadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.UtenlandskAdresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.UtenlandskAdresseIFrittFormat
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Vegadresse
-import no.nav.familie.ef.sak.service.KodeverkService
-import no.nav.familie.ef.sak.util.datoEllerIdag
+import no.nav.familie.ef.sak.felles.integration.KodeverkService
+import no.nav.familie.ef.sak.felles.util.datoEllerIdag
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 

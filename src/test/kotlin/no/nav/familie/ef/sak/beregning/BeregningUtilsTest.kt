@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.api.beregning
 
 import no.nav.familie.ef.sak.beregning.Beløpsperiode
 import no.nav.familie.ef.sak.beregning.BeregningUtils.Companion.finnStartDatoOgSluttDatoForBeløpsperiode
-import no.nav.familie.ef.sak.util.Periode
+import no.nav.familie.ef.sak.felles.dto.Periode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

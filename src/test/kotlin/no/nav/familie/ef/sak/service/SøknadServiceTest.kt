@@ -7,7 +7,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadRepository
 import no.nav.familie.ef.sak.behandling.domain.Behandling
-import no.nav.familie.ef.sak.fagsak.Fagsak
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadsskjemaOvergangsstønad
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad

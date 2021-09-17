@@ -5,7 +5,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.SøkerMedBarn
-import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
+import no.nav.familie.ef.sak.felles.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Adressebeskyttelse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.AdressebeskyttelseGradering
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata

@@ -12,9 +12,9 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
-import no.nav.familie.ef.sak.steg.StegService
-import no.nav.familie.ef.sak.steg.StegType
-import no.nav.familie.ef.sak.task.BehandlingsstatistikkTask
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
+import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.vilkår.dto.OppdaterVilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.SvarPåVurderingerDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårGrunnlagDto

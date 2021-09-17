@@ -1,8 +1,8 @@
 package no.nav.familie.ef.sak.arena
 
-import no.nav.familie.ef.sak.tilkjentytelse.AndelTilkjentYtelse
-import no.nav.familie.ef.sak.util.isEqualOrAfter
-import no.nav.familie.ef.sak.util.isEqualOrBefore
+import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
+import no.nav.familie.ef.sak.felles.util.isEqualOrAfter
+import no.nav.familie.ef.sak.felles.util.isEqualOrBefore
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeOvergangsstønad
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPerioderOvergangsstønadResponse
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad

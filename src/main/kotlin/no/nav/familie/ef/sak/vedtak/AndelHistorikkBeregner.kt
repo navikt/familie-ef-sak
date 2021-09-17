@@ -2,8 +2,8 @@ package no.nav.familie.ef.sak.vedtak
 
 import no.nav.familie.ef.sak.api.dto.AndelTilkjentYtelseDto
 import no.nav.familie.ef.sak.mapper.tilDto
-import no.nav.familie.ef.sak.tilkjentytelse.AndelTilkjentYtelse
-import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelse
+import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
+import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import java.time.LocalDateTime
 import java.util.UUID
 

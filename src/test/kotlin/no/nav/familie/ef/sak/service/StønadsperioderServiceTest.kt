@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ef.sak.infrastruktur.exception.PdlNotFoundException
-import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
+import no.nav.familie.ef.sak.felles.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
@@ -15,7 +15,8 @@ import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.ekstern.StønadsperioderService
-import no.nav.familie.ef.sak.fagsak.Stønadstype
+import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeOvergangsstønad
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPerioderOvergangsstønadRequest
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPerioderOvergangsstønadResponse

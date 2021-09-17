@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.integration
+package no.nav.familie.ef.sak.felles.integration
 
 import no.nav.familie.ef.sak.infrastruktur.exception.PdlNotFoundException
 import no.nav.familie.ef.sak.infrastruktur.exception.PdlRequestException

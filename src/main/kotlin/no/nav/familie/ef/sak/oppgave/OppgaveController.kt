@@ -4,7 +4,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.oppgave.dto.OppgaveEfDto
 import no.nav.familie.ef.sak.oppgave.dto.OppgaveResponseDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
-import no.nav.familie.ef.sak.infrastruktur.tilgang.TilgangService
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.oppgave.dto.FinnOppgaveRequestDto
 import no.nav.familie.ef.sak.oppgave.dto.OppgaveDto
 import no.nav.familie.kontrakter.felles.Ressurs

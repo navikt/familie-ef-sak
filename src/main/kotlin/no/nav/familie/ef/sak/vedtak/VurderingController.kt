@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.tilkjentytelse
 
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregler
-import no.nav.familie.ef.sak.infrastruktur.tilgang.TilgangService
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.vilkår.dto.OppdaterVilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.SvarPåVurderingerDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårDto

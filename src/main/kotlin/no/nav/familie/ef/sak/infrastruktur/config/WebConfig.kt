@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.infrastruktur.config
 
-import no.nav.familie.ef.sak.sikkerhet.TilgangInterceptor
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangInterceptor
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer

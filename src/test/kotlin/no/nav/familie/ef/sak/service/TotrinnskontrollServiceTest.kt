@@ -8,12 +8,13 @@ import no.nav.familie.ef.sak.behandling.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.behandling.domain.StegUtfall
-import no.nav.familie.ef.sak.domene.JsonWrapper
-import no.nav.familie.ef.sak.infrastruktur.tilgang.TilgangService
+import no.nav.familie.ef.sak.felles.domain.JsonWrapper
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
-import no.nav.familie.ef.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.ef.sak.steg.StegType
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
+import no.nav.familie.ef.sak.vedtak.TotrinnskontrollService
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.TotrinnkontrollStatus
 import no.nav.familie.kontrakter.felles.objectMapper

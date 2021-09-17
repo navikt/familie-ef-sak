@@ -4,7 +4,7 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.steg.StegType
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import java.time.LocalDateTime
 import java.util.UUID
 

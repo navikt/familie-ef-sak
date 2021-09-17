@@ -16,7 +16,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
-import no.nav.familie.ef.sak.steg.StegType
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
