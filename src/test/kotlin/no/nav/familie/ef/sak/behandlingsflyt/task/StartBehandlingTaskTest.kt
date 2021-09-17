@@ -17,7 +17,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.behandlingsflyt.task.StartBehandlingTask
-import no.nav.familie.ef.sak.util.BehandlingOppsettUtil
+import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil
 import no.nav.familie.kontrakter.ef.felles.StønadType
 import no.nav.familie.kontrakter.ef.infotrygd.OpprettStartBehandlingHendelseDto
 import no.nav.familie.prosessering.domene.Task

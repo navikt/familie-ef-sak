@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.beregning
 
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
-import no.nav.familie.ef.sak.util.Periode
+import no.nav.familie.ef.sak.felles.dto.Periode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -48,22 +48,22 @@ internal class BeregningServiceTest {
 
         assertThat(fullYtelse.size).isEqualTo(4)
         assertThat(fullYtelse[0]).isEqualTo(Beløpsperiode(Periode(LocalDate.parse("2019-04-30"),
-                                                          LocalDate.parse("2019-04-30")),
+                                                                  LocalDate.parse("2019-04-30")),
                                                           beregningsgrunnlagG2018,
                                                           18166.toBigDecimal(),
                                                           18166.toBigDecimal()))
         assertThat(fullYtelse[1]).isEqualTo(Beløpsperiode(Periode(LocalDate.parse("2019-05-01"),
-                                                          LocalDate.parse("2020-04-30")),
+                                                                  LocalDate.parse("2020-04-30")),
                                                           beregningsgrunnlagG2019,
                                                           18723.toBigDecimal(),
                                                           18723.toBigDecimal()))
         assertThat(fullYtelse[2]).isEqualTo(Beløpsperiode(Periode(LocalDate.parse("2020-05-01"),
-                                                          LocalDate.parse("2021-04-30")),
+                                                                  LocalDate.parse("2021-04-30")),
                                                           beregningsgrunnlagG2020,
                                                           19003.toBigDecimal(),
                                                           19003.toBigDecimal()))
         assertThat(fullYtelse[3]).isEqualTo(Beløpsperiode(Periode(LocalDate.parse("2021-05-01"),
-                                                          LocalDate.parse("2022-04-30")),
+                                                                  LocalDate.parse("2022-04-30")),
                                                           beregningsgrunnlagG2021,
                                                           19950.toBigDecimal(),
                                                           19950.toBigDecimal()))
@@ -101,7 +101,7 @@ internal class BeregningServiceTest {
 
         assertThat(fullYtelse.size).isEqualTo(1)
         assertThat(fullYtelse[0]).isEqualTo(Beløpsperiode(Periode(LocalDate.parse("2019-06-01"),
-                                                          LocalDate.parse("2020-04-30")),
+                                                                  LocalDate.parse("2020-04-30")),
                                                           beregningsgrunnlagG2019,
                                                           beløpTilUtbetalning,
                                                           beløpTilUtbetalning))
@@ -162,13 +162,13 @@ internal class BeregningServiceTest {
         )
         assertThat(fullYtelse.size).isEqualTo(2)
         assertThat(fullYtelse[0]).isEqualTo(Beløpsperiode(Periode(LocalDate.parse("2019-01-01"),
-                                                          LocalDate.parse("2019-02-28")),
+                                                                  LocalDate.parse("2019-02-28")),
                                                           beregningsgrunnlagIFørstePerioden,
                                                           beløpTilUtbetalningIFørstePerioden,
                                                           beløpTilUtbetalningIFørstePerioden))
 
         assertThat(fullYtelse[1]).isEqualTo(Beløpsperiode(Periode(LocalDate.parse("2019-06-01"),
-                                                          LocalDate.parse("2020-04-30")),
+                                                                  LocalDate.parse("2020-04-30")),
                                                           beregningsgrunnlagIAndrePerioden,
                                                           beløpTilUtbetalningIAndraPerioden,
                                                           beløpTilUtbetalningIAndraPerioden))

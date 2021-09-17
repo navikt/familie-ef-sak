@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.beregning
 
-import no.nav.familie.ef.sak.util.Periode
+import no.nav.familie.ef.sak.felles.dto.Periode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.DynamicTest.dynamicTest

@@ -2,8 +2,7 @@ package no.nav.familie.ef.sak.behandling
 
 import no.nav.familie.ef.sak.api.dto.BehandlingshistorikkDto
 import no.nav.familie.ef.sak.behandling.domain.tilDto
-import no.nav.familie.ef.sak.behandling.BehandlingshistorikkService
-import no.nav.familie.ef.sak.infrastruktur.tilgang.TilgangService
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.web.bind.annotation.*

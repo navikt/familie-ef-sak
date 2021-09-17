@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.tilkjentytelse.domain
 
-import no.nav.familie.ef.sak.domene.Sporbar
-import no.nav.familie.ef.sak.domene.SporbarUtils
+import no.nav.familie.ef.sak.felles.domain.Sporbar
+import no.nav.familie.ef.sak.felles.domain.SporbarUtils
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Embedded
 import java.time.LocalDate

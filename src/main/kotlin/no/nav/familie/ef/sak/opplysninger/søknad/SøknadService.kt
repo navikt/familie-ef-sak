@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.opplysninger.søknad
 
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
-import no.nav.familie.ef.sak.domene.Sporbar
+import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknad
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadMapper
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadsskjemaBarnetilsyn

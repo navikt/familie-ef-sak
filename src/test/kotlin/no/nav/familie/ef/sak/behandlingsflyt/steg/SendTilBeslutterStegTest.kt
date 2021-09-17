@@ -7,8 +7,8 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ef.sak.vedtak.VedtakService
-import no.nav.familie.ef.sak.util.BrukerContextUtil.clearBrukerContext
-import no.nav.familie.ef.sak.util.BrukerContextUtil.mockBrukerContext
+import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
+import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.vedtak.VedtaksbrevRepository
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat

@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.vedtak.dto
 
 import no.nav.familie.ef.sak.beregning.ÅrMånedPeriode
-import no.nav.familie.ef.sak.util.Periode
+import no.nav.familie.ef.sak.felles.dto.Periode
 import no.nav.familie.ef.sak.vedtak.AktivitetType
 import no.nav.familie.ef.sak.vedtak.Vedtaksperiode
 import no.nav.familie.ef.sak.vedtak.VedtaksperiodeType

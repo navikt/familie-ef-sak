@@ -15,8 +15,8 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.tilkjentYtelse
 import no.nav.familie.ef.sak.repository.vedtak
-import no.nav.familie.ef.sak.util.BrukerContextUtil.clearBrukerContext
-import no.nav.familie.ef.sak.util.BrukerContextUtil.mockBrukerContext
+import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
+import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository

@@ -22,7 +22,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Familierelasjonsrolle
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
-import no.nav.familie.ef.sak.integration.KodeverkService
+import no.nav.familie.ef.sak.felles.integration.KodeverkService
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 

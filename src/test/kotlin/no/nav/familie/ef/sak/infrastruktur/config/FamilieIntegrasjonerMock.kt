@@ -5,8 +5,8 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.equalTo
 import no.nav.familie.ef.sak.infrastruktur.config.IntegrasjonerConfig
 import no.nav.familie.ef.sak.arbeidsfordeling.Arbeidsfordelingsenhet
-import no.nav.familie.ef.sak.integration.dto.EgenAnsattResponse
-import no.nav.familie.ef.sak.integration.dto.Tilgang
+import no.nav.familie.ef.sak.felles.integration.dto.EgenAnsattResponse
+import no.nav.familie.ef.sak.felles.integration.dto.Tilgang
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.BrukerIdType

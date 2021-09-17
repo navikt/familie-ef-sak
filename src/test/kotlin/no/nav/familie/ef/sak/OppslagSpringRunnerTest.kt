@@ -7,7 +7,7 @@ import no.nav.familie.ef.sak.avstemming.KonsistensavstemmingJobb
 import no.nav.familie.ef.sak.blankett.Blankett
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.database.DbContainerInitializer
-import no.nav.familie.ef.sak.util.onBehalfOfToken
+import no.nav.familie.ef.sak.felles.util.onBehalfOfToken
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.behandling.domain.Behandlingsjournalpost

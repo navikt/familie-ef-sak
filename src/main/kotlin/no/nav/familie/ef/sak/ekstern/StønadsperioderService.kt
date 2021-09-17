@@ -5,7 +5,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.familie.ef.sak.arena.ArenaPeriodeUtil.mapOgFiltrer
 import no.nav.familie.ef.sak.arena.ArenaPeriodeUtil.slåSammenPerioder
 import no.nav.familie.ef.sak.infrastruktur.exception.PdlNotFoundException
-import no.nav.familie.ef.sak.integration.FamilieIntegrasjonerClient
+import no.nav.familie.ef.sak.felles.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer

@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.fagsak
 
 import no.nav.familie.ef.sak.fagsak.dto.FagsakDto
-import no.nav.familie.ef.sak.infrastruktur.tilgang.TilgangService
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.validation.annotation.Validated

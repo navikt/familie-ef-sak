@@ -1,9 +1,9 @@
 package no.nav.familie.ef.sak.beregning
 
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
-import no.nav.familie.ef.sak.util.Periode
-import no.nav.familie.ef.sak.util.isEqualOrAfter
-import no.nav.familie.ef.sak.util.isEqualOrBefore
+import no.nav.familie.ef.sak.felles.dto.Periode
+import no.nav.familie.ef.sak.felles.util.isEqualOrAfter
+import no.nav.familie.ef.sak.felles.util.isEqualOrBefore
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 

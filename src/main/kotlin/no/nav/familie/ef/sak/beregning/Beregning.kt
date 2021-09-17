@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.beregning
 
-import no.nav.familie.ef.sak.util.Periode
+import no.nav.familie.ef.sak.felles.dto.Periode
 import java.math.BigDecimal
 import java.time.LocalDate
 

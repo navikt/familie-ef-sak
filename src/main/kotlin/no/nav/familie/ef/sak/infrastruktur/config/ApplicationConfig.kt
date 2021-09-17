@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.infrastruktur.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import no.nav.familie.ef.sak.util.ObjectMapperProvider
 import no.nav.familie.http.config.RestTemplateAzure
 import no.nav.familie.http.interceptor.ConsumerIdClientInterceptor
 import no.nav.familie.http.interceptor.MdcValuesPropagatingClientInterceptor

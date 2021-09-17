@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.api.gui
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.domene.PersonIdentDto
+import no.nav.familie.ef.sak.felles.domain.PersonIdentDto
 import no.nav.familie.ef.sak.fagsak.dto.Søkeresultat
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
