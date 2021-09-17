@@ -29,7 +29,7 @@ class StartBehandlingTask(private val iverksettClient: IverksettClient,
         val fagsak = fagsakService.hentFagsak(fagsakId)
         val stønadType = StønadType.valueOf(fagsak.stønadstype.name)
 
-        if (finnesEnIverksattBehandlingFor(fagsak)) {
+        if (!finnesEnIverksattBehandlingFor(fagsak)) {
             val identer = pdlClient.hentPersonidenter(fagsak.hentAktivIdent(), historikk = true).identer.map { it.ident }.toSet()
             iverksettClient.startBehandling(OpprettStartBehandlingHendelseDto(identer, stønadType))
         }
