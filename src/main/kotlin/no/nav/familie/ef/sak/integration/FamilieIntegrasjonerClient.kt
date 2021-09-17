@@ -1,11 +1,11 @@
 package no.nav.familie.ef.sak.integration
 
-import no.nav.familie.ef.sak.api.Feil
-import no.nav.familie.ef.sak.config.IntegrasjonerConfig
-import no.nav.familie.ef.sak.integration.dto.familie.Arbeidsfordelingsenhet
-import no.nav.familie.ef.sak.integration.dto.familie.EgenAnsattRequest
-import no.nav.familie.ef.sak.integration.dto.familie.EgenAnsattResponse
-import no.nav.familie.ef.sak.integration.dto.familie.Tilgang
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.infrastruktur.config.IntegrasjonerConfig
+import no.nav.familie.ef.sak.arbeidsfordeling.Arbeidsfordelingsenhet
+import no.nav.familie.ef.sak.integration.dto.EgenAnsattRequest
+import no.nav.familie.ef.sak.integration.dto.EgenAnsattResponse
+import no.nav.familie.ef.sak.integration.dto.Tilgang
 import no.nav.familie.ef.sak.util.medContentTypeJsonUTF8
 import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.kontrakter.felles.Fagsystem

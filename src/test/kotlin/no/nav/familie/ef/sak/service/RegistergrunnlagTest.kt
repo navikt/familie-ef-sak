@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.service
 
 import com.fasterxml.jackson.annotation.JsonInclude
-import no.nav.familie.ef.sak.domene.GrunnlagsdataDomene
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

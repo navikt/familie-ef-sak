@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.avstemming
 
 import no.nav.familie.ef.sak.repository.InsertUpdateRepository
 import no.nav.familie.ef.sak.repository.RepositoryInterface
-import no.nav.familie.ef.sak.repository.domain.Stønadstype
+import no.nav.familie.ef.sak.fagsak.Stønadstype
 import no.nav.familie.ef.sak.task.KonsistensavstemmingPayload
 import no.nav.familie.ef.sak.task.KonsistensavstemmingTask
 import no.nav.familie.prosessering.domene.TaskRepository

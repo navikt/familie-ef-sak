@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.mapper
+package no.nav.familie.ef.sak.mapper
 
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat

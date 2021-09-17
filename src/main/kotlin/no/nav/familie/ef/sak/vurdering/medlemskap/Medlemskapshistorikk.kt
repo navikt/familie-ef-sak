@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.vurdering.medlemskap
 
-import no.nav.familie.ef.sak.integration.dto.pdl.Bostedsadresse
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlPerson
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPerson
 import no.nav.familie.ef.sak.util.Periode
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import java.time.LocalDate

@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.vurdering.medlemskap
+package no.nav.familie.ef.sak.vurdering.medlemskap
 
 import no.nav.familie.ef.sak.vurdering.medlemskap.Medlemskapshistorikk
 import no.nav.familie.ef.sak.util.Periode

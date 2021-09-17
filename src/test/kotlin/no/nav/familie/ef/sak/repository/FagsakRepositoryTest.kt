@@ -1,19 +1,19 @@
 package no.nav.familie.ef.sak.repository
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsakpersoner
-import no.nav.familie.ef.sak.repository.FagsakRepository
-import no.nav.familie.ef.sak.repository.domain.FagsakPerson
-import no.nav.familie.ef.sak.repository.domain.Sporbar
-import no.nav.familie.ef.sak.repository.domain.Stønadstype
+import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.repository.behandling
+import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.repository.fagsakpersoner
+import no.nav.familie.ef.sak.fagsak.FagsakRepository
+import no.nav.familie.ef.sak.fagsak.FagsakPerson
+import no.nav.familie.ef.sak.domene.Sporbar
+import no.nav.familie.ef.sak.fagsak.Stønadstype
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
 import java.time.LocalDateTime
-import java.util.UUID
 
 internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
 

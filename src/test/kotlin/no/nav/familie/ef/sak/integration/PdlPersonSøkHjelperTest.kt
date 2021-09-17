@@ -1,10 +1,10 @@
 package no.nav.familie.ef.sak.integration
 
-import no.nav.familie.ef.sak.integration.dto.pdl.Bostedsadresse
-import no.nav.familie.ef.sak.integration.dto.pdl.Folkeregistermetadata
-import no.nav.familie.ef.sak.integration.dto.pdl.Matrikkeladresse
-import no.nav.familie.ef.sak.integration.dto.pdl.Metadata
-import no.nav.familie.ef.sak.integration.dto.pdl.Vegadresse
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlPersonSøkHjelper
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Matrikkeladresse
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Vegadresse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 

@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.sikkerhet
 
-import no.nav.familie.ef.sak.config.RolleConfig
-import no.nav.familie.ef.sak.service.steg.BehandlerRolle
+import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
+import no.nav.familie.ef.sak.steg.BehandlerRolle
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 
 object SikkerhetContext {

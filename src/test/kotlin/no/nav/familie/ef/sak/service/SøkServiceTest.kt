@@ -2,27 +2,28 @@ package no.nav.familie.ef.sak.service
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ef.sak.api.dto.PersonFraSøk
-import no.nav.familie.ef.sak.api.dto.SøkeresultatPerson
-import no.nav.familie.ef.sak.integration.PdlSaksbehandlerClient
-import no.nav.familie.ef.sak.integration.dto.pdl.Bostedsadresse
-import no.nav.familie.ef.sak.integration.dto.pdl.Folkeregisteridentifikator
-import no.nav.familie.ef.sak.integration.dto.pdl.Folkeregistermetadata
-import no.nav.familie.ef.sak.integration.dto.pdl.Metadata
-import no.nav.familie.ef.sak.integration.dto.pdl.Navn
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlPersonFraSøk
-import no.nav.familie.ef.sak.integration.dto.pdl.PersonSøkResultat
-import no.nav.familie.ef.sak.integration.dto.pdl.PersonSøkTreff
-import no.nav.familie.ef.sak.integration.dto.pdl.UkjentBosted
-import no.nav.familie.ef.sak.integration.dto.pdl.Vegadresse
-import no.nav.familie.ef.sak.mapper.AdresseMapper
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.config.KodeverkServiceMock
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vurdering.medlemskap.pdlSøker
-import no.nav.familie.ef.sak.repository.FagsakRepository
+import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.fagsak.PersonFraSøk
+import no.nav.familie.ef.sak.fagsak.SøkeresultatPerson
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlSaksbehandlerClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Folkeregisteridentifikator
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonFraSøk
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PersonSøkResultat
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PersonSøkTreff
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.UkjentBosted
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Vegadresse
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseMapper
+import no.nav.familie.ef.sak.config.KodeverkServiceMock
+import no.nav.familie.ef.sak.vurdering.medlemskap.pdlSøker
+import no.nav.familie.ef.sak.fagsak.FagsakRepository
+import no.nav.familie.ef.sak.fagsak.SøkService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 
 

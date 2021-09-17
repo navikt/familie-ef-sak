@@ -1,15 +1,15 @@
 package no.nav.familie.ef.sak.blankett
 
-import no.nav.familie.ef.sak.api.Feil
-import no.nav.familie.ef.sak.integration.JournalpostClient
-import no.nav.familie.ef.sak.repository.BehandlingRepository
-import no.nav.familie.ef.sak.repository.domain.Behandling
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.journalføring.JournalpostClient
+import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
-import no.nav.familie.ef.sak.service.ArbeidsfordelingService
-import no.nav.familie.ef.sak.service.BehandlingService
+import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.service.TotrinnskontrollService
-import no.nav.familie.ef.sak.service.steg.BehandlingSteg
-import no.nav.familie.ef.sak.service.steg.StegType
+import no.nav.familie.ef.sak.steg.BehandlingSteg
+import no.nav.familie.ef.sak.steg.StegType
 import no.nav.familie.ef.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest

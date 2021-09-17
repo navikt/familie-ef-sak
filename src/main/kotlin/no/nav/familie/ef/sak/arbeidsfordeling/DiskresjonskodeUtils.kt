@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.arbeidsfordeling
 
-import no.nav.familie.ef.sak.integration.dto.pdl.AdressebeskyttelseGradering
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.AdressebeskyttelseGradering
 
 fun finnPersonMedStrengesteAdressebeskyttelse(personer: List<IdentMedAdressebeskyttelse>): String? {
     return personer.fold(null,

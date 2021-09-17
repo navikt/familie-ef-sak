@@ -1,16 +1,16 @@
 package no.nav.familie.ef.sak.iverksett
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.api.dto.BehandlingDto
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
-import no.nav.familie.ef.sak.repository.BehandlingRepository
-import no.nav.familie.ef.sak.repository.FagsakRepository
+import no.nav.familie.ef.sak.repository.behandling
+import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.behandling.dto.BehandlingDto
+import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.repository.TilkjentYtelseRepository
-import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
-import no.nav.familie.ef.sak.repository.domain.FagsakPerson
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelseType
+import no.nav.familie.ef.sak.tilkjentytelse.AndelTilkjentYtelse
+import no.nav.familie.ef.sak.fagsak.FagsakPerson
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelse
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseType
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.simulering.SimuleringsresultatDto
 import no.nav.familie.ef.sak.simulering.SimuleringsresultatRepository

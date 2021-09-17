@@ -2,11 +2,12 @@ package no.nav.familie.ef.sak.service
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ef.sak.integration.InfotrygdReplikaClient
-import no.nav.familie.ef.sak.integration.PdlClient
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlIdent
-import no.nav.familie.ef.sak.integration.dto.pdl.PdlIdenter
-import no.nav.familie.ef.sak.repository.domain.SøknadType
+import no.nav.familie.ef.sak.infotrygd.InfotrygdService
+import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadType
 import no.nav.familie.kontrakter.ef.felles.StønadType
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdFinnesResponse
 import no.nav.familie.kontrakter.ef.infotrygd.Saktreff

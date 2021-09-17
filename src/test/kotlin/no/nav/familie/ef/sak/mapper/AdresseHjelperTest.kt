@@ -1,14 +1,15 @@
 package no.nav.familie.ef.sak.mapper
 
-import no.nav.familie.ef.sak.api.dto.AdresseDto
-import no.nav.familie.ef.sak.api.dto.AdresseType
-import no.nav.familie.ef.sak.domene.BarnMedIdent
-import no.nav.familie.ef.sak.integration.dto.pdl.Bostedsadresse
-import no.nav.familie.ef.sak.integration.dto.pdl.DeltBosted
-import no.nav.familie.ef.sak.integration.dto.pdl.Matrikkeladresse
-import no.nav.familie.ef.sak.integration.dto.pdl.Metadata
-import no.nav.familie.ef.sak.integration.dto.pdl.Navn
-import no.nav.familie.ef.sak.integration.dto.pdl.Vegadresse
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.AdresseDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.AdresseType
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseHjelper
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.DeltBosted
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Matrikkeladresse
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Vegadresse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

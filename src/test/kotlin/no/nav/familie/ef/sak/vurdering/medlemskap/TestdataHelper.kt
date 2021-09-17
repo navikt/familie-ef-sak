@@ -1,7 +1,7 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.vurdering.medlemskap
+package no.nav.familie.ef.sak.vurdering.medlemskap
 
 import io.mockk.mockk
-import no.nav.familie.ef.sak.integration.dto.pdl.*
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.*
 import no.nav.familie.kontrakter.ef.søknad.*
 import no.nav.familie.kontrakter.felles.medlemskap.PeriodeInfo
 import no.nav.familie.kontrakter.felles.medlemskap.PeriodeStatus

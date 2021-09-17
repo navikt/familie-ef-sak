@@ -1,10 +1,17 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository
+package no.nav.familie.ef.sak.repository
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.api.beregning.Inntektsperiode
-import no.nav.familie.ef.sak.api.beregning.ResultatType
-import no.nav.familie.ef.sak.repository.*
-import no.nav.familie.ef.sak.repository.domain.*
+import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.beregning.Inntektsperiode
+import no.nav.familie.ef.sak.fagsak.FagsakRepository
+import no.nav.familie.ef.sak.vedtak.AktivitetType
+import no.nav.familie.ef.sak.vedtak.InntektWrapper
+import no.nav.familie.ef.sak.vedtak.PeriodeWrapper
+import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.ef.sak.vedtak.Vedtak
+import no.nav.familie.ef.sak.vedtak.VedtakRepository
+import no.nav.familie.ef.sak.vedtak.Vedtaksperiode
+import no.nav.familie.ef.sak.vedtak.VedtaksperiodeType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

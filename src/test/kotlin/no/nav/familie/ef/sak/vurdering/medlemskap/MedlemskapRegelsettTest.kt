@@ -1,14 +1,14 @@
 package no.nav.familie.ef.sak.vurdering.medlemskap
 
 import io.mockk.mockk
-import no.nav.familie.ef.sak.integration.dto.pdl.Bostedsadresse
-import no.nav.familie.ef.sak.integration.dto.pdl.Folkeregisterpersonstatus
-import no.nav.familie.ef.sak.integration.dto.pdl.Fødsel
-import no.nav.familie.ef.sak.integration.dto.pdl.Metadata
-import no.nav.familie.ef.sak.integration.dto.pdl.Statsborgerskap
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Folkeregisterpersonstatus
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fødsel
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Statsborgerskap
 import no.nav.familie.ef.sak.nare.evaluations.Resultat
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vurdering.medlemskap.pdlSøker
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vurdering.medlemskap.søknad
+import no.nav.familie.ef.sak.vurdering.medlemskap.pdlSøker
+import no.nav.familie.ef.sak.vurdering.medlemskap.søknad
 import no.nav.familie.kontrakter.ef.søknad.Medlemskapsdetaljer
 import no.nav.familie.kontrakter.ef.søknad.Stønadsstart
 import no.nav.familie.kontrakter.ef.søknad.Søknadsfelt

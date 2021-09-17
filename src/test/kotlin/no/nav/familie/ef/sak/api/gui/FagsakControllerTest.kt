@@ -1,15 +1,15 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.api.gui
+package no.nav.familie.ef.sak.api.gui
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.api.dto.FagsakDto
-import no.nav.familie.ef.sak.api.dto.FagsakRequest
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
-import no.nav.familie.ef.sak.repository.BehandlingRepository
-import no.nav.familie.ef.sak.repository.FagsakRepository
-import no.nav.familie.ef.sak.repository.domain.BehandlingResultat
-import no.nav.familie.ef.sak.repository.domain.FagsakPerson
-import no.nav.familie.ef.sak.repository.domain.Stønadstype
+import no.nav.familie.ef.sak.fagsak.FagsakDto
+import no.nav.familie.ef.sak.fagsak.FagsakRequest
+import no.nav.familie.ef.sak.repository.behandling
+import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.fagsak.FagsakRepository
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
+import no.nav.familie.ef.sak.fagsak.FagsakPerson
+import no.nav.familie.ef.sak.fagsak.Stønadstype
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -63,8 +63,8 @@ internal class FagsakControllerTest : OppslagSpringRunnerTest() {
 
     private fun hentFagsakForId(fagsakId: UUID): Ressurs<FagsakDto> {
         val response = restTemplate.exchange<Ressurs<FagsakDto>>(localhost("/api/fagsak/$fagsakId"),
-                                                  HttpMethod.GET,
-                                                  HttpEntity<Any>(headers))
+                                                                 HttpMethod.GET,
+                                                                 HttpEntity<Any>(headers))
 
         Assertions.assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
         Assertions.assertThat(response.body.status).isEqualTo(Ressurs.Status.SUKSESS)

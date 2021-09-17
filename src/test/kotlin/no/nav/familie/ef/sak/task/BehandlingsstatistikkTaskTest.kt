@@ -5,21 +5,21 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
-import no.nav.familie.ef.sak.api.beregning.ResultatType
-import no.nav.familie.ef.sak.domene.GrunnlagsdataMedMetadata
+import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
+import no.nav.familie.ef.sak.behandling.domain.BehandlingType.FØRSTEGANGSBEHANDLING
+import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.iverksett.IverksettClient
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsakpersoner
-import no.nav.familie.ef.sak.repository.VedtakRepository
-import no.nav.familie.ef.sak.repository.domain.BehandlingResultat
-import no.nav.familie.ef.sak.repository.domain.BehandlingType.FØRSTEGANGSBEHANDLING
-import no.nav.familie.ef.sak.repository.domain.Vedtak
-import no.nav.familie.ef.sak.service.BehandlingService
-import no.nav.familie.ef.sak.service.FagsakService
-import no.nav.familie.ef.sak.service.GrunnlagsdataService
-import no.nav.familie.ef.sak.service.OppgaveService
-import no.nav.familie.ef.sak.service.SøknadService
+import no.nav.familie.ef.sak.repository.behandling
+import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.repository.fagsakpersoner
+import no.nav.familie.ef.sak.oppgave.OppgaveService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
+import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.ef.sak.vedtak.Vedtak
+import no.nav.familie.ef.sak.vedtak.VedtakRepository
 import no.nav.familie.kontrakter.ef.felles.BehandlingType
 import no.nav.familie.kontrakter.ef.felles.StønadType
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingsstatistikkDto
@@ -34,7 +34,6 @@ import org.springframework.data.repository.findByIdOrNull
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.TimeZone
-import java.util.UUID
 
 internal class BehandlingsstatistikkTaskTest {
 
@@ -88,11 +87,11 @@ internal class BehandlingsstatistikkTaskTest {
         every { søknadService.finnDatoMottattForSøknad(any()) } returns søknadstidspunkt.toLocalDateTime()
         every { grunnlagsdataService.hentGrunnlagsdata(behandling.id)} returns grunnlagsdataMock
         every { vedtakRepository.findByIdOrNull(behandling.id) } returns Vedtak(behandlingId =behandling.id,
-                                                                         resultatType = ResultatType.INNVILGE,
-                                                                         periodeBegrunnelse = periodeBegrunnelse,
-                                                                         inntektBegrunnelse = inntektBegrunnelse,
-                                                                         saksbehandlerIdent = saksbehandlerId,
-                                                                         beslutterIdent = beslutterId)
+                                                                                resultatType = ResultatType.INNVILGE,
+                                                                                periodeBegrunnelse = periodeBegrunnelse,
+                                                                                inntektBegrunnelse = inntektBegrunnelse,
+                                                                                saksbehandlerIdent = saksbehandlerId,
+                                                                                beslutterIdent = beslutterId)
         every { oppgaveMock.tildeltEnhetsnr } returns tildeltEnhet
         every { oppgaveMock.opprettetAvEnhetsnr } returns opprettetEnhet
         every { grunnlagsdataMock.grunnlagsdata.søker.adressebeskyttelse } returns null

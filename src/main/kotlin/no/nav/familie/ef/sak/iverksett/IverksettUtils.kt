@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.iverksett
 
-import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
+import no.nav.familie.ef.sak.tilkjentytelse.AndelTilkjentYtelse
 import no.nav.familie.kontrakter.ef.iverksett.AndelTilkjentYtelseDto
 import no.nav.familie.kontrakter.ef.iverksett.Periodetype
 
