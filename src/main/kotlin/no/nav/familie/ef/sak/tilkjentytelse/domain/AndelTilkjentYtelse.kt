@@ -15,3 +15,5 @@ data class AndelTilkjentYtelse(@Column("belop")
                                val inntektsreduksjon: Int,
                                val samordningsfradrag: Int,
                                val kildeBehandlingId: UUID)
+
+fun AndelTilkjentYtelse.erStønadOverlappende(fom: LocalDate): Boolean = this.stønadFom < fom && this.stønadTom >= fom

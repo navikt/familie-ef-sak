@@ -6,6 +6,7 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Embedded
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.temporal.TemporalAdjusters
 import java.util.UUID
 
 data class TilkjentYtelse(@Id
@@ -20,6 +21,16 @@ data class TilkjentYtelse(@Id
 
 fun TilkjentYtelse.stønadFom(): LocalDate? = this.andelerTilkjentYtelse.minByOrNull { it.stønadFom }?.stønadFom
 fun TilkjentYtelse.stønadTom(): LocalDate? = this.andelerTilkjentYtelse.minByOrNull { it.stønadFom }?.stønadFom
+
+fun TilkjentYtelse.taMedAndelerFremTilDato(fom: LocalDate): List<AndelTilkjentYtelse> = this.andelerTilkjentYtelse
+        .filter { andel -> andel.stønadTom < fom || (andel.erStønadOverlappende(fom)) }
+        .map { andel ->
+            if (andel.erStønadOverlappende(fom)) {
+                andel.copy(stønadTom = fom.minusMonths(1).with(TemporalAdjusters.lastDayOfMonth()))
+            } else {
+                andel
+            }
+        }
 
 
 enum class TilkjentYtelseType {
