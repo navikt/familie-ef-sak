@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.task
 
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.fagsak.Fagsak
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.fagsak.FagsakService
@@ -28,11 +29,17 @@ class StartBehandlingTask(private val iverksettClient: IverksettClient,
         val fagsak = fagsakService.hentFagsak(fagsakId)
         val stønadType = StønadType.valueOf(fagsak.stønadstype.name)
 
-        if (behandlingRepository.finnSisteIverksatteBehandling(fagsak.stønadstype, fagsak.søkerIdenter.map { it.ident }.toSet()) == null) {
+        if (finnesEnIverksattBehandlingFor(fagsak)) {
             val identer = pdlClient.hentPersonidenter(fagsak.hentAktivIdent(), historikk = true).identer.map { it.ident }.toSet()
             iverksettClient.startBehandling(OpprettStartBehandlingHendelseDto(identer, stønadType))
         }
     }
+
+    private fun finnesEnIverksattBehandlingFor(fagsak: Fagsak) =
+        behandlingRepository.finnSisteIverksatteBehandling(
+            fagsak.stønadstype,
+            fagsak.søkerIdenter.map { it.ident }.toSet()
+        ) == null
 
     companion object {
 
