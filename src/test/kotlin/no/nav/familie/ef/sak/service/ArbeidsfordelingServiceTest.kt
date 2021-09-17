@@ -9,8 +9,8 @@ import no.nav.familie.ef.sak.felles.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Adressebeskyttelse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.AdressebeskyttelseGradering
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
-import no.nav.familie.ef.sak.vurdering.medlemskap.pdlBarn
-import no.nav.familie.ef.sak.vurdering.medlemskap.pdlSøker
+import no.nav.familie.ef.sak.testutil.pdlBarn
+import no.nav.familie.ef.sak.testutil.pdlSøker
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

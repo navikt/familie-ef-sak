@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.vurdering.medlemskap
+package no.nav.familie.ef.sak.testutil
 
 import io.mockk.mockk
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.*
@@ -6,24 +6,6 @@ import no.nav.familie.kontrakter.ef.søknad.*
 import no.nav.familie.kontrakter.felles.medlemskap.PeriodeInfo
 import no.nav.familie.kontrakter.felles.medlemskap.PeriodeStatus
 import java.time.LocalDate
-import java.time.LocalDateTime
-
-fun pdlPerson(vararg perioder: Pair<LocalDate, LocalDateTime?>) = object : PdlPerson {
-
-    override val fødsel: List<Fødsel> = listOf(Fødsel(null, null, null, null, null, Metadata(false)))
-
-    override val bostedsadresse: List<Bostedsadresse> = perioder.map {
-        Bostedsadresse(angittFlyttedato = null,
-                       gyldigFraOgMed = it.first,
-                       gyldigTilOgMed = it.second?.toLocalDate(),
-                       coAdressenavn = null,
-                       utenlandskAdresse = null,
-                       vegadresse = null,
-                       ukjentBosted = null,
-                       matrikkeladresse = null,
-                       metadata = Metadata(false))
-    }
-}
 
 fun pdlSøker(adressebeskyttelse: List<Adressebeskyttelse> = mockk(),
              bostedsadresse: List<Bostedsadresse> = mockk(),
@@ -79,18 +61,6 @@ fun pdlBarn(adressebeskyttelse: List<Adressebeskyttelse> = mockk(),
                 fødsel,
                 navn)
 
-fun avvistePerioder(vararg perioder: Pair<LocalDate, LocalDate>) = perioder.map {
-    PeriodeInfo(PeriodeStatus.AVST, null, it.first, it.second, true, "", null)
-}
-
-fun gyldigePerioder(vararg perioder: Pair<LocalDate, LocalDate>) = perioder.map {
-    PeriodeInfo(PeriodeStatus.GYLD, null, it.first, it.second, true, "", null)
-}
-
-fun uavklartePerioder(vararg perioder: Pair<LocalDate, LocalDate>) = perioder.map {
-    PeriodeInfo(PeriodeStatus.UAVK, null, it.first, it.second, true, "", null)
-}
-
 fun søknad(personalia: Søknadsfelt<Personalia> = mockk(),
            innsendingsdetaljer: Søknadsfelt<Innsendingsdetaljer> = mockk(),
            sivilstandsdetaljer: Søknadsfelt<Sivilstandsdetaljer> = mockk(),
@@ -111,5 +81,3 @@ fun søknad(personalia: Søknadsfelt<Personalia> = mockk(),
                               aktivitet,
                               situasjon,
                               stønadsstart)
-
-fun <T> søknadsfelt(verdi: T, svarId: T? = null): Søknadsfelt<T> = Søknadsfelt(label = "label", verdi = verdi, svarId = svarId)
