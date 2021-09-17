@@ -39,7 +39,7 @@ class StartBehandlingTask(private val iverksettClient: IverksettClient,
         behandlingRepository.finnSisteIverksatteBehandling(
             fagsak.stønadstype,
             fagsak.søkerIdenter.map { it.ident }.toSet()
-        ) == null
+        ) != null
 
     companion object {
 
