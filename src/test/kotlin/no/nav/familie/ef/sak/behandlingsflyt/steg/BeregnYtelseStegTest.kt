@@ -218,6 +218,47 @@ internal class BeregnYtelseStegTest {
         assertThrows<Feil> { utførSteg(BehandlingType.REVURDERING, Opphør(opphørFom = opphørFom, begrunnelse = "null"), forrigeBehandlingId = UUID.randomUUID()) }
     }
 
+    @Test
+    internal fun `skal få kun første periode hvis opphørsdato er starten på neste periode som er delt i to`() {
+        val opphørFom = YearMonth.of(2021, 9)
+
+        val andel1Fom = LocalDate.of(2021, 1, 1)
+        val andel1Tom = LocalDate.of(2021, 6, 30)
+        val andel2Fom = LocalDate.of(2021, 9, 1)
+        val andel2Tom = LocalDate.of(2021, 12, 31)
+
+        val slot = slot<TilkjentYtelse>()
+        every { tilkjentYtelseService.opprettTilkjentYtelse(capture(slot)) } answers { firstArg() }
+        every { tilkjentYtelseService.hentForBehandling(any()) } returns
+                lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, andel1Fom, andel1Tom),
+                                         lagAndelTilkjentYtelse(200, andel2Fom, andel2Tom)))
+
+        utførSteg(BehandlingType.REVURDERING, Opphør(opphørFom = opphørFom, begrunnelse = "null"), forrigeBehandlingId = UUID.randomUUID())
+        assertThat(slot.captured.andelerTilkjentYtelse).hasSize(1)
+        assertThat(slot.captured.andelerTilkjentYtelse.first().stønadFom).isEqualTo(andel1Fom)
+        assertThat(slot.captured.andelerTilkjentYtelse.first().stønadTom).isEqualTo(andel1Tom)
+
+    }
+
+    @Test
+    internal fun `skal feile hvis opphørsdato er mellom to perioder`() {
+        val opphørFom = YearMonth.of(2021, 8)
+
+        val andel1Fom = LocalDate.of(2021, 1, 1)
+        val andel1Tom = LocalDate.of(2021, 6, 30)
+        val andel2Fom = LocalDate.of(2021, 9, 1)
+        val andel2Tom = LocalDate.of(2021, 12, 31)
+
+        val slot = slot<TilkjentYtelse>()
+        every { tilkjentYtelseService.opprettTilkjentYtelse(capture(slot)) } answers { firstArg() }
+        every { tilkjentYtelseService.hentForBehandling(any()) } returns
+                lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, andel1Fom, andel1Tom),
+                                         lagAndelTilkjentYtelse(200, andel2Fom, andel2Tom)))
+
+        assertThrows<Feil> { utførSteg(BehandlingType.REVURDERING, Opphør(opphørFom = opphørFom, begrunnelse = "null"), forrigeBehandlingId = UUID.randomUUID()) }
+
+    }
+
 
     @Test
     internal fun `skal opphøre hvis opphørsdato samsvarer med startdato for andel`() {

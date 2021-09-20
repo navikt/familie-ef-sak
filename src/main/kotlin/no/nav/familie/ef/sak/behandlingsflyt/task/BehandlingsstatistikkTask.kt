@@ -96,7 +96,7 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
             else -> {
                 return when (vedtak?.resultatType) {
                     ResultatType.INNVILGE -> vedtak.periodeBegrunnelse
-                    ResultatType.AVSLÅ -> vedtak.avslåBegrunnelse
+                    ResultatType.AVSLÅ, ResultatType.OPPHØRT -> vedtak.avslåBegrunnelse
                     ResultatType.HENLEGGE -> error("Ikke implementert")
                     else -> error("Mangler vedtak")
                 }
