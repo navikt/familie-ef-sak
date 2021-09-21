@@ -13,7 +13,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
-import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPerioderOvergangsstønadRequest
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPerioderArenaRequest
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadRequest
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
@@ -27,11 +27,11 @@ import java.time.LocalDate
  * skulle hente perioder for overgangsstønad fra oss.
  */
 @Service
-class StønadsperioderService(private val infotrygdReplikaClient: InfotrygdReplikaClient,
-                             private val behandlingRepository: BehandlingRepository,
-                             private val tilkjentYtelseService: TilkjentYtelseService,
-                             private val familieIntegrasjonerClient: FamilieIntegrasjonerClient,
-                             private val pdlClient: PdlClient) {
+class ArenaStønadsperioderService(private val infotrygdReplikaClient: InfotrygdReplikaClient,
+                                  private val behandlingRepository: BehandlingRepository,
+                                  private val tilkjentYtelseService: TilkjentYtelseService,
+                                  private val familieIntegrasjonerClient: FamilieIntegrasjonerClient,
+                                  private val pdlClient: PdlClient) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -72,8 +72,8 @@ class StønadsperioderService(private val infotrygdReplikaClient: InfotrygdRepli
 
     private fun hentPerioderFraReplika(personIdenter: Set<String>,
                                        request: PerioderOvergangsstønadRequest): List<PeriodeOvergangsstønad> {
-        val infotrygdRequest = InfotrygdPerioderOvergangsstønadRequest(personIdenter, request.fomDato, request.tomDato)
-        val infotrygdPerioder = infotrygdReplikaClient.hentPerioderOvergangsstønad(infotrygdRequest)
+        val infotrygdRequest = InfotrygdPerioderArenaRequest(personIdenter, request.fomDato, request.tomDato)
+        val infotrygdPerioder = infotrygdReplikaClient.hentPerioderArena(infotrygdRequest)
         val perioder = mapOgFiltrer(infotrygdPerioder)
         return slåSammenPerioder(perioder)
     }

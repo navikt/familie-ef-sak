@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdFinnesResponse
-import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPerioderOvergangsstønadResponse
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPerioderResponse
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
@@ -18,7 +18,7 @@ class InfotrygdReplikaMock {
     @Primary
     fun infotrygdReplikaClient(): InfotrygdReplikaClient {
         val client = mockk<InfotrygdReplikaClient>()
-        every { client.hentPerioderOvergangsstønad(any()) } returns InfotrygdPerioderOvergangsstønadResponse(emptyList())
+        every { client.hentPerioderArena(any()) } returns InfotrygdPerioderResponse(emptyList())
         every { client.hentInslagHosInfotrygd(any()) } answers { InfotrygdFinnesResponse(emptyList(), emptyList()) }
         return client
     }
