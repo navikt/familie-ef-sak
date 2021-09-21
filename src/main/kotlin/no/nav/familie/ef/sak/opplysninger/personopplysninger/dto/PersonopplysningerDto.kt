@@ -36,10 +36,12 @@ data class BarnDto(val personIdent: String,
                    val annenForelder: AnnenForelderMinimumDto?,
                    val adresse: List<AdresseDto>,
                    val borHosSøker: Boolean,
-                   val fødselsdato: LocalDate?)
+                   val fødselsdato: LocalDate?,
+                   val dødsdato: LocalDate?)
 
 data class AnnenForelderMinimumDto(val personIdent: String,
-                                   val navn: String)
+                                   val navn: String,
+                                   val dødsdato: LocalDate?)
 
 data class TelefonnummerDto(val landskode: String,
                             val nummer: String)
