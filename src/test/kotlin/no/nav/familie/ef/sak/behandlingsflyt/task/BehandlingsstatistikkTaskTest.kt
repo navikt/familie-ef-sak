@@ -115,7 +115,6 @@ internal class BehandlingsstatistikkTaskTest {
         assertThat(behandlingsstatistikk.personIdent).isEqualTo(personIdent)
         assertThat(behandlingsstatistikk.gjeldendeSaksbehandlerId).isEqualTo(beslutterId)
         assertThat(behandlingsstatistikk.hendelseTidspunkt).isEqualTo(hendelseTidspunkt)
-        assertThat(behandlingsstatistikk.søknadstidspunkt).isEqualTo(søknadstidspunkt)
         assertThat(behandlingsstatistikk.hendelse).isEqualTo(hendelse)
         assertThat(behandlingsstatistikk.opprettetEnhet).isEqualTo(opprettetEnhet)
         assertThat(behandlingsstatistikk.ansvarligEnhet).isEqualTo(tildeltEnhet)
