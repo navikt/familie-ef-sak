@@ -36,10 +36,12 @@ data class BarnDto(val personIdent: String,
                    val annenForelder: AnnenForelderMinimumDto?,
                    val adresse: List<AdresseDto>,
                    val borHosSøker: Boolean,
-                   val fødselsdato: LocalDate?)
+                   val fødselsdato: LocalDate?,
+                   val dødsdato: LocalDate?)
 
 data class AnnenForelderMinimumDto(val personIdent: String,
-                                   val navn: String)
+                                   val navn: String,
+                                   val dødsdato: LocalDate?)
 
 data class TelefonnummerDto(val landskode: String,
                             val nummer: String)
@@ -64,11 +66,11 @@ enum class Sivilstandstype {
     SKILT_PARTNER,
     GJENLEVENDE_PARTNER;
 
-    fun erGift(): Boolean = this == REGISTRERT_PARTNER || this == GIFT;
-    fun erUgiftEllerUoppgitt(): Boolean = this == UGIFT || this == UOPPGITT;
-    fun erSeparert(): Boolean = this == SEPARERT_PARTNER || this == SEPARERT;
-    fun erEnkeEllerEnkemann(): Boolean = this == ENKE_ELLER_ENKEMANN || this == GJENLEVENDE_PARTNER;
-    fun erSkilt(): Boolean = this == SKILT || this == SKILT_PARTNER;
+    fun erGift(): Boolean = this == REGISTRERT_PARTNER || this == GIFT
+    fun erUgiftEllerUoppgitt(): Boolean = this == UGIFT || this == UOPPGITT
+    fun erSeparert(): Boolean = this == SEPARERT_PARTNER || this == SEPARERT
+    fun erEnkeEllerEnkemann(): Boolean = this == ENKE_ELLER_ENKEMANN || this == GJENLEVENDE_PARTNER
+    fun erSkilt(): Boolean = this == SKILT || this == SKILT_PARTNER
 
 }
 
