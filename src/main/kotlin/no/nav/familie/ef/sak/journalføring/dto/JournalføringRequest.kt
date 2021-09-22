@@ -10,5 +10,7 @@ data class JournalføringRequest(val dokumentTitler: Map<String, String>? = null
                                 val navIdent: String,
                                 val journalførendeEnhet: String)
 
+fun JournalføringRequest.skalJournalførePåEksisterendeBehandling(): Boolean = this.behandling.behandlingsId != null
+
 data class JournalføringBehandling(val behandlingsId: UUID? = null,
                                    val behandlingstype: BehandlingType? = null)

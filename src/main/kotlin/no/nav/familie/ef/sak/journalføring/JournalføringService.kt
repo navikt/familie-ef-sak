@@ -1,20 +1,22 @@
 package no.nav.familie.ef.sak.journalføring
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
-import no.nav.familie.ef.sak.iverksett.IverksettService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.iverksett.IverksettService
 import no.nav.familie.ef.sak.journalføring.dto.DokumentVariantformat
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequest
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
+import no.nav.familie.ef.sak.journalføring.dto.skalJournalførePåEksisterendeBehandling
 import no.nav.familie.ef.sak.oppgave.OppgaveService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
-import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
-import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
@@ -72,12 +74,37 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
 
     @Transactional
     fun fullførJournalpost(journalføringRequest: JournalføringRequest, journalpostId: String): Long {
+        return if (journalføringRequest.skalJournalførePåEksisterendeBehandling()) {
+            journalførSøknadTilEksisterendeBehandling(journalføringRequest, journalpostId)
+        } else {
+            journalførSøknadTilNyBehandling(journalføringRequest, journalpostId)
+        }
+    }
+
+    private fun journalførSøknadTilEksisterendeBehandling(journalføringRequest: JournalføringRequest,
+                                                          journalpostId: String): Long {
         val saksbehandler = SikkerhetContext.hentSaksbehandler(true)
         val behandling: Behandling = hentBehandling(journalføringRequest)
         val journalpost = hentJournalpost(journalpostId)
         val fagsak = fagsakService.hentFagsak(journalføringRequest.fagsakId)
+        knyttJournalpostTilBehandling(journalpost, behandling)
+        oppdaterJournalpost(journalpost, journalføringRequest.dokumentTitler, fagsak.eksternId.id, saksbehandler)
+        ferdigstillJournalføring(journalpostId, journalføringRequest.journalførendeEnhet, saksbehandler)
+        ferdigstillJournalføringsoppgave(journalføringRequest)
+        return journalføringRequest.oppgaveId.toLong()
+    }
 
-        iverksettService.startBehandling(fagsak)
+    private fun journalførSøknadTilNyBehandling(journalføringRequest: JournalføringRequest,
+                                                journalpostId: String): Long {
+        val saksbehandler = SikkerhetContext.hentSaksbehandler(true)
+        val behandling = opprettBehandlingMedBehandlingstype(journalføringRequest.behandling.behandlingstype,
+                                                             journalføringRequest.fagsakId)
+        val journalpost = hentJournalpost(journalpostId)
+        val fagsak = fagsakService.hentFagsak(journalføringRequest.fagsakId)
+
+        if (journalføringRequest.behandling.behandlingstype == BehandlingType.FØRSTEGANGSBEHANDLING) {
+            iverksettService.startBehandling(fagsak)
+        }
         settSøknadPåBehandling(journalpostId, fagsak, behandling.id)
         knyttJournalpostTilBehandling(journalpost, behandling)
         grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
@@ -88,7 +115,6 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         opprettBehandlingsstatistikkTask(behandling.id, journalføringRequest.oppgaveId.toLong())
 
         return opprettSaksbehandlingsoppgave(behandling, journalføringRequest.navIdent)
-
     }
 
     private fun opprettBehandlingsstatistikkTask(behandlingId: UUID, oppgaveId: Long) {
@@ -145,8 +171,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
 
     private fun hentBehandling(journalføringRequest: JournalføringRequest): Behandling =
             hentEksisterendeBehandling(journalføringRequest.behandling.behandlingsId)
-            ?: opprettBehandlingMedBehandlingstype(journalføringRequest.behandling.behandlingstype,
-                                                   journalføringRequest.fagsakId)
+            ?: error("Finner ikke behandling med id=${journalføringRequest.behandling.behandlingsId}")
 
 
     private fun opprettBehandlingMedBehandlingstype(behandlingsType: BehandlingType?, fagsakId: UUID): Behandling {
