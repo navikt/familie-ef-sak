@@ -1,7 +1,8 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper
 
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.UtflyttingDto
+import no.nav.familie.ef.sak.felles.integration.KodeverkService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.AnnenForelderMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Søker
@@ -17,12 +18,12 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Personopplysnin
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.SivilstandDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.TelefonnummerDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.UtflyttingDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.VergemålDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Familierelasjonsrolle
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
-import no.nav.familie.ef.sak.felles.integration.KodeverkService
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 
@@ -37,7 +38,7 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                               ident: String): PersonopplysningerDto {
         val grunnlagsdata = grunnlagsdataMedMetadata.grunnlagsdata
         val søker = grunnlagsdata.søker
-        val identNavn = grunnlagsdata.annenForelder.associate { it.personIdent to it.navn.visningsnavn() }
+        val annenForelderMap = grunnlagsdata.annenForelder.associate { it.personIdent to it }
 
         return PersonopplysningerDto(
                 lagtTilEtterFerdigstilling = grunnlagsdataMedMetadata.lagtTilEtterFerdigstilling,
@@ -73,7 +74,7 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                     mapBarn(it,
                             ident,
                             søker.bostedsadresse,
-                            identNavn)
+                            annenForelderMap)
                 },
                 innflyttingTilNorge = søker.innflyttingTilNorge.map {
                     InnflyttingDto(fraflyttingsland = it.fraflyttingsland?.let { kodeverkService.hentLand(it, LocalDate.now()) },
@@ -111,18 +112,21 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
     fun mapBarn(barn: BarnMedIdent,
                 søkerIdent: String,
                 bostedsadresserForelder: List<Bostedsadresse>,
-                identNavnMap: Map<String, String>): BarnDto {
+                annenForelderMap: Map<String, AnnenForelderMedIdent>): BarnDto {
 
         val annenForelderIdent = barn.forelderBarnRelasjon.find {
             it.relatertPersonsIdent != søkerIdent && it.relatertPersonsRolle != Familierelasjonsrolle.BARN
         }?.relatertPersonsIdent
-        return BarnDto(
-                personIdent = barn.personIdent,
-                navn = barn.navn.visningsnavn(),
-                annenForelder = annenForelderIdent?.let { AnnenForelderMinimumDto(it, identNavnMap[it] ?: "Finner ikke navn") },
-                adresse = barn.bostedsadresse.map(adresseMapper::tilAdresse),
-                borHosSøker = AdresseHjelper.borPåSammeAdresse(barn, bostedsadresserForelder),
-                fødselsdato = barn.fødsel.gjeldende().fødselsdato
-        )
+        return BarnDto(personIdent = barn.personIdent,
+                       navn = barn.navn.visningsnavn(),
+                       annenForelder = annenForelderIdent?.let {
+                           AnnenForelderMinimumDto(personIdent = it,
+                                                   navn = annenForelderMap[it]?.navn?.visningsnavn() ?: "Finner ikke navn",
+                                                   dødsdato = annenForelderMap[it]?.dødsfall?.gjeldende()?.dødsdato)
+                       },
+                       adresse = barn.bostedsadresse.map(adresseMapper::tilAdresse),
+                       borHosSøker = AdresseHjelper.borPåSammeAdresse(barn, bostedsadresserForelder),
+                       fødselsdato = barn.fødsel.gjeldende().fødselsdato,
+                       dødsdato = barn.dødsfall.gjeldende()?.dødsdato)
     }
 }

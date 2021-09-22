@@ -16,9 +16,9 @@ import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.simulering.SimuleringService
+import no.nav.familie.ef.sak.tilkjentytelse.domain.taMedAndelerFremTilDato
 import org.springframework.stereotype.Service
 import java.time.LocalDate
-import java.time.temporal.TemporalAdjusters
 
 @Service
 class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
@@ -42,37 +42,42 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
         tilkjentYtelseService.slettTilkjentYtelseForBehandling(behandling.id)
 
         when (vedtak) {
-            is Innvilget -> {
-                val beløpsperioder = lagBeløpsperioderForInnvilgetVedtak(vedtak, behandling, aktivIdent)
-                feilHvis(beløpsperioder.isEmpty()) { "Innvilget vedtak må ha minimum en beløpsperiode" }
-
-                val nyeAndeler = when (behandling.type) {
-                    BehandlingType.FØRSTEGANGSBEHANDLING -> beløpsperioder
-                    BehandlingType.REVURDERING -> andelerForRevurdering(behandling, beløpsperioder)
-                    else -> error("Steg ikke støttet for type=${behandling.type}")
-                }
-
-                tilkjentYtelseService.opprettTilkjentYtelse(TilkjentYtelse(personident = aktivIdent,
-                                                                           behandlingId = behandling.id,
-                                                                           andelerTilkjentYtelse = nyeAndeler))
-            }
-            is Opphør -> {
-                feilHvis(behandling.type != BehandlingType.REVURDERING) { "Kan kun opphøre ved revurdering" }
-                val nyeAndeler = andelerForOpphør(behandling, vedtak.opphørFom.atDay(1))
-                tilkjentYtelseService.opprettTilkjentYtelse(TilkjentYtelse(personident = aktivIdent,
-                                                                           behandlingId = behandling.id,
-                                                                           andelerTilkjentYtelse = nyeAndeler))
-            }
-            is Avslå -> {
-                feilHvis(behandling.type != BehandlingType.FØRSTEGANGSBEHANDLING) { "Kan kun avslå ved førstegangsbehandling" }
-            }
-            else -> {
-            }
+            is Innvilget -> opprettTilkjentYtelseForInnvilgetBehandling(vedtak, behandling, aktivIdent)
+            is Opphør -> opprettTilkjentYtelseForOpphørtBehandling(behandling, vedtak, aktivIdent)
+            is Avslå -> feilHvis(behandling.type != BehandlingType.FØRSTEGANGSBEHANDLING) { "Kan kun avslå ved førstegangsbehandling" }
+            else -> error("Kan ikke utføre steg ${stegType()} for behandling ${behandling.id}")
         }
 
         vedtakService.slettVedtakHvisFinnes(behandling.id)
         vedtakService.lagreVedtak(vedtakDto = vedtak, behandlingId = behandling.id)
         simuleringService.hentOgLagreSimuleringsresultat(behandling)
+    }
+
+    private fun opprettTilkjentYtelseForOpphørtBehandling(behandling: Behandling,
+                                                          vedtak: Opphør,
+                                                          aktivIdent: String) {
+        feilHvis(behandling.type != BehandlingType.REVURDERING) { "Kan kun opphøre ved revurdering" }
+        val nyeAndeler = andelerForOpphør(behandling, vedtak.opphørFom.atDay(1))
+        tilkjentYtelseService.opprettTilkjentYtelse(TilkjentYtelse(personident = aktivIdent,
+                                                                   behandlingId = behandling.id,
+                                                                   andelerTilkjentYtelse = nyeAndeler))
+    }
+
+    private fun opprettTilkjentYtelseForInnvilgetBehandling(vedtak: Innvilget,
+                                                            behandling: Behandling,
+                                                            aktivIdent: String) {
+        val beløpsperioder = lagBeløpsperioderForInnvilgetVedtak(vedtak, behandling, aktivIdent)
+        feilHvis(beløpsperioder.isEmpty()) { "Innvilget vedtak må ha minimum en beløpsperiode" }
+
+        val nyeAndeler = when (behandling.type) {
+            BehandlingType.FØRSTEGANGSBEHANDLING -> beløpsperioder
+            BehandlingType.REVURDERING -> andelerForInnvilgetRevurdering(behandling, beløpsperioder)
+            else -> error("Steg ikke støttet for type=${behandling.type}")
+        }
+
+        tilkjentYtelseService.opprettTilkjentYtelse(TilkjentYtelse(personident = aktivIdent,
+                                                                   behandlingId = behandling.id,
+                                                                   andelerTilkjentYtelse = nyeAndeler))
     }
 
     private fun lagBeløpsperioderForInnvilgetVedtak(vedtak: Innvilget,
@@ -92,48 +97,32 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                         )
                     }
 
-    private fun andelerForRevurdering(behandling: Behandling,
-                                      beløpsperioder: List<AndelTilkjentYtelse>): List<AndelTilkjentYtelse> {
-        val forrigeAndeler = hentForrigeTilkjenteYtelse(behandling)
-
-        return slåSammenAndelerSomSkalVidereføres(beløpsperioder, forrigeAndeler)
-    }
-
-    private fun andelerForOpphør(behandling: Behandling, opphørFom: LocalDate): List<AndelTilkjentYtelse> {
-        val forrigeAndeler = hentForrigeTilkjenteYtelse(behandling)
-
-        feilHvis(forrigeAndeler.andelerTilkjentYtelse.none { andel ->
-            andel.stønadFom <= opphørFom && andel.stønadTom >= opphørFom
-        }) { "Opphørsdato sammenfaller ikke med løpende vedtaksperioder" }
-
-        return taMedAndelerFremTilDato(forrigeAndeler, opphørFom)
-    }
-
-    private fun hentForrigeTilkjenteYtelse(behandling: Behandling): TilkjentYtelse {
-        val forrigeBehandlingId = behandling.forrigeBehandlingId
-                ?: error("Finner ikke forrige behandling til behandling=${behandling.id}")
-        val forrigeAndeler = tilkjentYtelseService.hentForBehandling(forrigeBehandlingId)
-        return forrigeAndeler
+    private fun andelerForInnvilgetRevurdering(behandling: Behandling,
+                                               beløpsperioder: List<AndelTilkjentYtelse>): List<AndelTilkjentYtelse> {
+        val forrigeTilkjenteYtelse = hentForrigeTilkjenteYtelse(behandling)
+        return slåSammenAndelerSomSkalVidereføres(beløpsperioder, forrigeTilkjenteYtelse)
     }
 
     fun slåSammenAndelerSomSkalVidereføres(beløpsperioder: List<AndelTilkjentYtelse>,
                                            forrigeTilkjentYtelse: TilkjentYtelse): List<AndelTilkjentYtelse> {
         val fom = beløpsperioder.first().stønadFom
-        return taMedAndelerFremTilDato(forrigeTilkjentYtelse, fom) + beløpsperioder
+        return forrigeTilkjentYtelse.taMedAndelerFremTilDato(fom) + beløpsperioder
     }
 
-    private fun taMedAndelerFremTilDato(forrigeTilkjentYtelse: TilkjentYtelse,
-                                        fom: LocalDate) = forrigeTilkjentYtelse.andelerTilkjentYtelse
-            .filter { andel -> andel.stønadTom < fom || (erStønadOverlappende(andel, fom)) }
-            .map { andel ->
-                if (erStønadOverlappende(andel, fom)) {
-                    andel.copy(stønadTom = fom.minusMonths(1).with(TemporalAdjusters.lastDayOfMonth()))
-                } else {
-                    andel
-                }
-            }
+    private fun andelerForOpphør(behandling: Behandling, opphørFom: LocalDate): List<AndelTilkjentYtelse> {
+        val forrigeTilkjenteYtelse = hentForrigeTilkjenteYtelse(behandling)
 
-    private fun erStønadOverlappende(andel: AndelTilkjentYtelse, fom: LocalDate) =
-            andel.stønadFom < fom && andel.stønadTom >= fom
+        feilHvis(forrigeTilkjenteYtelse.andelerTilkjentYtelse.none { andel ->
+            andel.stønadFom <= opphørFom && andel.stønadTom >= opphørFom
+        }) { "Opphørsdato sammenfaller ikke med løpende vedtaksperioder" }
+
+        return forrigeTilkjenteYtelse.taMedAndelerFremTilDato(opphørFom)
+    }
+
+    private fun hentForrigeTilkjenteYtelse(behandling: Behandling): TilkjentYtelse {
+        val forrigeBehandlingId = behandling.forrigeBehandlingId
+                                  ?: error("Finner ikke forrige behandling til behandling=${behandling.id}")
+        return tilkjentYtelseService.hentForBehandling(forrigeBehandlingId)
+    }
 
 }

@@ -17,13 +17,13 @@ import org.springframework.web.bind.annotation.RestController
                 consumes = [APPLICATION_JSON_VALUE],
                 produces = [APPLICATION_JSON_VALUE])
 @Validated
-class EksternStønadsperioderController(private val stønadsperioderService: StønadsperioderService) {
+class EksternStønadsperioderController(private val arenaStønadsperioderService: ArenaStønadsperioderService) {
 
     @PostMapping()
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"] )
     fun hentPerioder(@RequestBody request: PerioderOvergangsstønadRequest): Ressurs<PerioderOvergangsstønadResponse> {
         return try {
-            Ressurs.success(stønadsperioderService.hentPerioder(request))
+            Ressurs.success(arenaStønadsperioderService.hentPerioder(request))
         } catch (e: Exception) {
             Ressurs.failure("Henting av perioder for overgangsstønad feilet", error = e)
         }

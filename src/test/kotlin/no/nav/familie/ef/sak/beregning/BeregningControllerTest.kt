@@ -95,7 +95,7 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
     }
 
     private fun fatteVedtak(id: UUID, vedtakDto: VedtakDto): ResponseEntity<Ressurs<UUID>> {
-        return restTemplate.exchange(localhost("/api/beregning/$id/lagre-vedtak"),
+        return restTemplate.exchange(localhost("/api/beregning/$id/lagre-blankettvedtak"),
                                      HttpMethod.POST,
                                      HttpEntity(vedtakDto, headers))
     }
