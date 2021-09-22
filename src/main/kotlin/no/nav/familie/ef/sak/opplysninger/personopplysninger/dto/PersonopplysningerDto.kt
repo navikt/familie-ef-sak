@@ -66,11 +66,11 @@ enum class Sivilstandstype {
     SKILT_PARTNER,
     GJENLEVENDE_PARTNER;
 
-    fun erGift(): Boolean = this == REGISTRERT_PARTNER || this == GIFT;
-    fun erUgiftEllerUoppgitt(): Boolean = this == UGIFT || this == UOPPGITT;
-    fun erSeparert(): Boolean = this == SEPARERT_PARTNER || this == SEPARERT;
-    fun erEnkeEllerEnkemann(): Boolean = this == ENKE_ELLER_ENKEMANN || this == GJENLEVENDE_PARTNER;
-    fun erSkilt(): Boolean = this == SKILT || this == SKILT_PARTNER;
+    fun erGift(): Boolean = this == REGISTRERT_PARTNER || this == GIFT
+    fun erUgiftEllerUoppgitt(): Boolean = this == UGIFT || this == UOPPGITT
+    fun erSeparert(): Boolean = this == SEPARERT_PARTNER || this == SEPARERT
+    fun erEnkeEllerEnkemann(): Boolean = this == ENKE_ELLER_ENKEMANN || this == GJENLEVENDE_PARTNER
+    fun erSkilt(): Boolean = this == SKILT || this == SKILT_PARTNER
 
 }
 
