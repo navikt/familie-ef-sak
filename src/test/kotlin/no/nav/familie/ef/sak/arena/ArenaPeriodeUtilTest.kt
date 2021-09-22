@@ -3,7 +3,7 @@ package no.nav.familie.ef.sak.arena
 import no.nav.familie.ef.sak.arena.ArenaPeriodeUtil.mapOgFiltrer
 import no.nav.familie.ef.sak.arena.ArenaPeriodeUtil.slåSammenPerioder
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
-import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeOvergangsstønad
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPerioderResponse
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import org.assertj.core.api.Assertions.assertThat
@@ -186,6 +186,6 @@ internal class ArenaPeriodeUtilTest {
     fun List<PeriodeOvergangsstønad>.tilFomTomDato(): List<Pair<LocalDate, LocalDate>> = this.map { it.fomDato to it.tomDato }
 
     private fun periode(fomDato: LocalDate, tomDato: LocalDate, beløp: Float, opphørsdato: LocalDate? = null) =
-            InfotrygdPeriodeOvergangsstønad(ident, fomDato, tomDato, beløp, opphørsdato)
+            InfotrygdPeriode(ident, fomDato, tomDato, beløp, opphørsdato)
 
 }
