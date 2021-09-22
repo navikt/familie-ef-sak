@@ -3,23 +3,23 @@ package no.nav.familie.ef.sak.service
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.familie.ef.sak.infrastruktur.exception.PdlNotFoundException
+import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.ekstern.ArenaStønadsperioderService
+import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
+import no.nav.familie.ef.sak.infrastruktur.exception.PdlNotFoundException
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
-import no.nav.familie.ef.sak.behandling.BehandlingRepository
-import no.nav.familie.ef.sak.ekstern.StønadsperioderService
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
-import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
-import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeOvergangsstønad
-import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPerioderOvergangsstønadRequest
-import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPerioderOvergangsstønadResponse
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPerioderArenaRequest
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPerioderResponse
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad.Datakilde
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadRequest
@@ -30,7 +30,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDate.parse
 
-internal class StønadsperioderServiceTest {
+internal class ArenaStønadsperioderServiceTest {
 
     private val pdlClient = mockk<PdlClient>()
     private val infotrygdReplikaClient = mockk<InfotrygdReplikaClient>(relaxed = true)
@@ -39,11 +39,11 @@ internal class StønadsperioderServiceTest {
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
 
     private val service =
-            StønadsperioderService(infotrygdReplikaClient = infotrygdReplikaClient,
-                                   behandlingRepository = behandlingRepository,
-                                   pdlClient = pdlClient,
-                                   tilkjentYtelseService = tilkjentYtelseService,
-                                   familieIntegrasjonerClient = familieIntegrasjonerClient)
+            ArenaStønadsperioderService(infotrygdReplikaClient = infotrygdReplikaClient,
+                                        behandlingRepository = behandlingRepository,
+                                        pdlClient = pdlClient,
+                                        tilkjentYtelseService = tilkjentYtelseService,
+                                        familieIntegrasjonerClient = familieIntegrasjonerClient)
 
     private val ident = "01234567890"
 
@@ -60,8 +60,8 @@ internal class StønadsperioderServiceTest {
         val request = PerioderOvergangsstønadRequest(ident, fomDato, tomDato)
 
         mockPdl(historiskIdent)
-        every { infotrygdReplikaClient.hentPerioderOvergangsstønad(any()) } returns
-                infotrygdResponse(InfotrygdPeriodeOvergangsstønad(ident, LocalDate.now(), LocalDate.now(), 10f))
+        every { infotrygdReplikaClient.hentPerioderArena(any()) } returns
+                infotrygdResponse(InfotrygdPeriode(ident, LocalDate.now(), LocalDate.now(), 10f))
 
         val hentPerioder = service.hentReplikaPerioder(request)
 
@@ -69,8 +69,8 @@ internal class StønadsperioderServiceTest {
 
         verify(exactly = 1) { pdlClient.hentPersonidenter(ident, true) }
         verify(exactly = 1) {
-            val infotrygdRequest = InfotrygdPerioderOvergangsstønadRequest(setOf(ident, historiskIdent), fomDato, tomDato)
-            infotrygdReplikaClient.hentPerioderOvergangsstønad(infotrygdRequest)
+            val infotrygdRequest = InfotrygdPerioderArenaRequest(setOf(ident, historiskIdent), fomDato, tomDato)
+            infotrygdReplikaClient.hentPerioderArena(infotrygdRequest)
         }
     }
 
@@ -80,7 +80,7 @@ internal class StønadsperioderServiceTest {
 
         service.hentReplikaPerioder(PerioderOvergangsstønadRequest(ident))
         verify(exactly = 1) {
-            infotrygdReplikaClient.hentPerioderOvergangsstønad(InfotrygdPerioderOvergangsstønadRequest(setOf(ident)))
+            infotrygdReplikaClient.hentPerioderArena(InfotrygdPerioderArenaRequest(setOf(ident)))
         }
     }
 
@@ -112,7 +112,7 @@ internal class StønadsperioderServiceTest {
     }
 
     private fun periode(fomDato: LocalDate, tomDato: LocalDate, beløp: Float, opphørsdato: LocalDate? = null) =
-            InfotrygdPeriodeOvergangsstønad(ident, fomDato, tomDato, beløp, opphørsdato)
+        InfotrygdPeriode(ident, fomDato, tomDato, beløp, opphørsdato)
 
     private fun mockPdl(historiskIdent: String? = null) {
         val pdlIdenter = mutableListOf(PdlIdent(ident, false))
@@ -122,6 +122,6 @@ internal class StønadsperioderServiceTest {
         every { pdlClient.hentPersonidenter(ident, true) } returns PdlIdenter(pdlIdenter)
     }
 
-    private fun infotrygdResponse(vararg infotrygdPeriodeOvergangsstønad: InfotrygdPeriodeOvergangsstønad) =
-            InfotrygdPerioderOvergangsstønadResponse(infotrygdPeriodeOvergangsstønad.toList())
+    private fun infotrygdResponse(vararg infotrygdPeriodeOvergangsstønad: InfotrygdPeriode) =
+            InfotrygdPerioderResponse(infotrygdPeriodeOvergangsstønad.toList())
 }
