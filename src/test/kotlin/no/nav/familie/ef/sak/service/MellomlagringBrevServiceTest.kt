@@ -40,17 +40,6 @@ internal class MellomlagringBrevServiceTest {
         assertThat(MellomlagringBrevService.hentOgValiderMellomlagretBrev(behandlingId, "2")).isNull()
     }
 
-    @Test
-    fun `hentOgValiderMellomlagretBrev skal returnere null når brevmal ikke matcher`() {
-        every { MellomlagerBrevRepository.findByIdOrNull(behandlingId) } returns MellomlagretBrev(behandlingId,
-                                                                                                  brevverdier,
-                                                                                                  "enAnnenBrevmal",
-                                                                                                  sanityVersjon,
-                                                                                                  LocalDate.now())
-
-        assertThat(MellomlagringBrevService.hentOgValiderMellomlagretBrev(behandlingId, sanityVersjon)).isNull()
-    }
-
     private val behandlingId = UUID.randomUUID()
     val brevmal = "testMal"
     val sanityVersjon = "1"
