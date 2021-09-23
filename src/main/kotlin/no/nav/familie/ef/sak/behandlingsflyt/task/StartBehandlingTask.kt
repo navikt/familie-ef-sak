@@ -25,8 +25,8 @@ class StartBehandlingTask(private val iverksettClient: IverksettClient,
                           private val behandlingRepository: BehandlingRepository) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
-        val fagsakId = UUID.fromString(task.payload)
-        val fagsak = fagsakService.hentFagsak(fagsakId)
+        val behandlingId = UUID.fromString(task.payload)
+        val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
         val stønadType = StønadType.valueOf(fagsak.stønadstype.name)
 
         if (!finnesEnIverksattBehandlingFor(fagsak)) {
@@ -36,18 +36,19 @@ class StartBehandlingTask(private val iverksettClient: IverksettClient,
     }
 
     private fun finnesEnIverksattBehandlingFor(fagsak: Fagsak) =
-        behandlingRepository.finnSisteIverksatteBehandling(
+        behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(
             fagsak.stønadstype,
             fagsak.søkerIdenter.map { it.ident }.toSet()
         ) != null
 
     companion object {
 
-        fun opprettTask(fagsakId: UUID, personIdent: String): Task =
+        fun opprettTask(behandlingId: UUID, fagsakId: UUID, personIdent: String): Task =
                 Task(type = TYPE,
-                     payload = fagsakId.toString(),
+                     payload = behandlingId.toString(),
                      properties = Properties().apply {
                          this["saksbehandler"] = SikkerhetContext.hentSaksbehandler()
+                         this["behandlingId"] = behandlingId.toString()
                          this["fagsakId"] = fagsakId.toString()
                          this["personIdent"] = personIdent
                      })

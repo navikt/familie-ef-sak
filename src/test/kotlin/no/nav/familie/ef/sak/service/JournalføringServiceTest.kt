@@ -176,7 +176,7 @@ internal class JournalføringServiceTest {
         }
         assertThat(slotJournalpost.captured.dokumenter).hasSize(4)
         verify(exactly = 0) { søknadService.lagreSøknadForOvergangsstønad(any(), any(), any(), any()) }
-        verify(exactly = 0) { iverksettService.startBehandling(any()) }
+        verify(exactly = 0) { iverksettService.startBehandling(any(), any()) }
         verify(exactly = 1) { journalpostClient.ferdigstillJournalpost(any(), any(), any()) }
         verify(exactly = 1) { oppgaveService.ferdigstillOppgave(oppgaveId.toLong()) }
     }

@@ -54,7 +54,7 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
 
     fun hentFagsak(fagsakId: UUID): Fagsak = fagsakRepository.findByIdOrThrow(fagsakId)
 
-    fun hentFaksakForBehandling(behandlingId: UUID): Fagsak {
+    fun hentFagsakForBehandling(behandlingId: UUID): Fagsak {
         return fagsakRepository.finnFagsakTilBehandling(behandlingId)
                ?: throw Feil("Finner ikke fagsak til behandlingId=$behandlingId")
     }

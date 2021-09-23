@@ -60,7 +60,7 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
 
     fun tilDto(behandling: Behandling, beslutter: String): IverksettDto {
 
-        val fagsak = fagsakService.hentFaksakForBehandling(behandling.id)
+        val fagsak = fagsakService.hentFagsakForBehandling(behandling.id)
         val vedtak = vedtakService.hentVedtak(behandling.id)
         val saksbehandler =
                 behandlinghistorikkService.finnSisteBehandlingshistorikk(behandling.id, StegType.SEND_TIL_BESLUTTER)?.opprettetAv

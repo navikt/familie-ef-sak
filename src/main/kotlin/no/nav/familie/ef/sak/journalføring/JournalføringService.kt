@@ -102,9 +102,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         val journalpost = hentJournalpost(journalpostId)
         val fagsak = fagsakService.hentFagsak(journalføringRequest.fagsakId)
 
-        if (journalføringRequest.behandling.behandlingstype == BehandlingType.FØRSTEGANGSBEHANDLING) {
-            iverksettService.startBehandling(fagsak)
-        }
+        iverksettService.startBehandling(behandling,  fagsak)
         settSøknadPåBehandling(journalpostId, fagsak, behandling.id)
         knyttJournalpostTilBehandling(journalpost, behandling)
         grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
