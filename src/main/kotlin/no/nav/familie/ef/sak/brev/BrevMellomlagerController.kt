@@ -25,9 +25,9 @@ class BrevMellomlagerController(private val tilgangService: TilgangService,
         tilgangService.validerTilgangTilBehandling(behandlingId)
 
         return Ressurs.success(mellomlagringBrevService.mellomLagreBrev (behandlingId,
-                                                 mellomlagretBrev.brevverdier,
-                                                 mellomlagretBrev.brevmal,
-                                                 mellomlagretBrev.versjon))
+                                                                         mellomlagretBrev.brevverdier,
+                                                                         mellomlagretBrev.brevmal,
+                                                                         mellomlagretBrev.versjon))
     }
 
 
