@@ -24,7 +24,6 @@ internal class MellomlagringBrevServiceTest {
         every { MellomlagerBrevRepository.findByIdOrNull(behandlingId) } returns mellomlagretBrev
 
         assertThat(MellomlagringBrevService.hentOgValiderMellomlagretBrev(behandlingId,
-                                                                          brevmal,
                                                                           sanityVersjon)).usingRecursiveComparison()
                 .isEqualTo(mellomlagretBrev)
 
@@ -38,18 +37,7 @@ internal class MellomlagringBrevServiceTest {
                                                                                                   "1",
                                                                                                   LocalDate.now())
 
-        assertThat(MellomlagringBrevService.hentOgValiderMellomlagretBrev(behandlingId, brevmal, "2")).isNull()
-    }
-
-    @Test
-    fun `hentOgValiderMellomlagretBrev skal returnere null når brevmal ikke matcher`() {
-        every { MellomlagerBrevRepository.findByIdOrNull(behandlingId) } returns MellomlagretBrev(behandlingId,
-                                                                                                  brevverdier,
-                                                                                                  "enAnnenBrevmal",
-                                                                                                  sanityVersjon,
-                                                                                                  LocalDate.now())
-
-        assertThat(MellomlagringBrevService.hentOgValiderMellomlagretBrev(behandlingId, brevmal, sanityVersjon)).isNull()
+        assertThat(MellomlagringBrevService.hentOgValiderMellomlagretBrev(behandlingId, "2")).isNull()
     }
 
     private val behandlingId = UUID.randomUUID()
