@@ -36,8 +36,7 @@ internal class MellomlagringBrevServiceTest {
                                                                                                   brevmal,
                                                                                                   "1",
                                                                                                   LocalDate.now())
-
-        assertThat(MellomlagringBrevService.hentOgValiderMellomlagretBrev(behandlingId, "2")).isNull()
+        assertThat(MellomlagringBrevService.hentOgValiderMellomlagretBrev(behandlingId, "1")).isNull()
     }
 
     private val behandlingId = UUID.randomUUID()
@@ -45,5 +44,4 @@ internal class MellomlagringBrevServiceTest {
     val sanityVersjon = "1"
     val brevverdier = "{}"
     private val mellomlagretBrev = MellomlagretBrev(behandlingId, brevverdier, brevmal, sanityVersjon, LocalDate.now())
-
 }
