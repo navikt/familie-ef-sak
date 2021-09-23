@@ -3,10 +3,13 @@ package no.nav.familie.ef.sak.vedlegg
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandlingsjournalpost
 import no.nav.familie.ef.sak.journalføring.JournalføringService
+import no.nav.familie.ef.sak.journalføring.JournalpostDatoUtil.mestRelevanteDato
 import no.nav.familie.kontrakter.felles.journalpost.DokumentInfo
 import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariantformat
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
+import no.nav.familie.kontrakter.felles.journalpost.RelevantDato
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -49,7 +52,7 @@ class VedleggService(private val behandlingService: BehandlingService,
                 filnavn = dokumentInfo.dokumentvarianter?.find { it.variantformat == Dokumentvariantformat.ARKIV }?.filnavn,
                 tittel = dokumentInfo.tittel ?: "Tittel mangler",
                 journalpostId = journalpost.journalpostId,
-                dato = journalpost.datoMottatt,
+                dato = mestRelevanteDato(journalpost),
                 journalposttype = journalpost.journalposttype
         )
     }
