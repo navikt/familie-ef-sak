@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.vedtak
 
 import no.nav.familie.ef.sak.vedtak.domain.MellomlagretBrev
+import no.nav.familie.ef.sak.vedtak.dto.MellomlagretBrevResponseDto
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -26,10 +27,10 @@ class MellomlagringBrevService(private val mellomlagerBrevRepository: Mellomlage
 
     }
 
-    fun hentOgValiderMellomlagretBrev(behhandlingId: UUID, brevmal: String, sanityVersjon: String): MellomlagretBrev? {
+    fun hentOgValiderMellomlagretBrev(behhandlingId: UUID, sanityVersjon: String): MellomlagretBrevResponseDto? {
         val mellomlagretBrev = mellomlagerBrevRepository.findByIdOrNull(behhandlingId)
-        if (mellomlagretBrev?.brevmal == brevmal && sanityVersjon == mellomlagretBrev.sanityVersjon) {
-            return mellomlagretBrev
+        if (sanityVersjon == mellomlagretBrev?.sanityVersjon) {
+            return MellomlagretBrevResponseDto(brevverdier = mellomlagretBrev.brevverdier, brevmal = mellomlagretBrev.brevmal)
         }
         return null
     }
