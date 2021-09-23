@@ -18,6 +18,7 @@ import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.behandlingsflyt.task.StartBehandlingTask
 import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil
+import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.kontrakter.ef.felles.StønadType
 import no.nav.familie.kontrakter.ef.infotrygd.OpprettStartBehandlingHendelseDto
 import no.nav.familie.prosessering.domene.Task
@@ -42,10 +43,11 @@ class StartBehandlingTaskTest : OppslagSpringRunnerTest() {
     val opprettStartBehandlingHendelseDtoSlot = slot<OpprettStartBehandlingHendelseDto>()
     val personIdent = "123456789012"
     val fagsak = fagsak(identer = fagsakpersoner(setOf(personIdent)) )
+    val behandling = behandling(fagsak)
 
     @BeforeEach
     fun setup() {
-        every { fagsakService.hentFagsak(fagsak.id) } returns fagsak
+        every { fagsakService.hentFagsakForBehandling(behandling.id) } returns fagsak
         every { pdlClient.hentPersonidenter(personIdent, true)} returns PdlIdenter(listOf(PdlIdent(personIdent, false)))
         every { iverksettClient.startBehandling(capture(opprettStartBehandlingHendelseDtoSlot)) } just Runs
     }
@@ -53,7 +55,7 @@ class StartBehandlingTaskTest : OppslagSpringRunnerTest() {
     @Test
     fun `skal sende StartBehandling da det ikke finnes tidligere iverksatt sak på person`() {
         val startBehandlingTask = StartBehandlingTask(iverksettClient, pdlClient, fagsakService, behandlingRepository)
-        startBehandlingTask.doTask(Task("forrigeTask", fagsak.id.toString(), Properties()))
+        startBehandlingTask.doTask(Task("forrigeTask", behandling.id.toString(), Properties()))
 
         Assertions.assertThat(opprettStartBehandlingHendelseDtoSlot.isCaptured).isEqualTo(true)
         Assertions.assertThat(opprettStartBehandlingHendelseDtoSlot.captured.type).isEqualTo(StønadType.OVERGANGSSTØNAD)
@@ -69,7 +71,7 @@ class StartBehandlingTaskTest : OppslagSpringRunnerTest() {
         behandlingRepository.insertAll(behandlinger)
 
         val startBehandlingTask = StartBehandlingTask(iverksettClient, pdlClient, fagsakService, behandlingRepository)
-        startBehandlingTask.doTask(Task("forrigeTask", fagsak.id.toString(), Properties()))
+        startBehandlingTask.doTask(Task("forrigeTask", behandling.id.toString(), Properties()))
 
         Assertions.assertThat(opprettStartBehandlingHendelseDtoSlot.isCaptured).isEqualTo(false)
     }

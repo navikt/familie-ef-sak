@@ -143,7 +143,6 @@ internal class JournalføringServiceTest {
 
     @Test
     internal fun `skal fullføre manuell journalføring på eksisterende behandling`() {
-        val slotDokumentInfoIder: MutableList<String> = mutableListOf()
         val slotJournalpost = slot<OppdaterJournalpostRequest>()
 
         every {
@@ -153,14 +152,10 @@ internal class JournalføringServiceTest {
         } returns OppdaterJournalpostResponse(journalpostId = journalpostId)
 
         every {
-            journalpostClient.hentOvergangsstønadSøknad(any(), capture(slotDokumentInfoIder))
-        } returns Testsøknad.søknadOvergangsstønad
-
-        every {
             fagsakService.hentFagsak(any())
         } returns fagsak().copy(id = fagsakId, eksternId = EksternFagsakId(fagsakEksternId))
 
-        val behandleSakOppgaveId =
+        val journalførtOppgaveId =
                 journalføringService.fullførJournalpost(journalpostId = journalpostId,
                                                         journalføringRequest =
                                                         JournalføringRequest(dokumentTitler,
@@ -170,7 +165,7 @@ internal class JournalføringServiceTest {
                                                                              "Z1234567",
                                                                              "1234"))
 
-        assertThat(behandleSakOppgaveId).isEqualTo(nyOppgaveId)
+        assertThat(journalførtOppgaveId).isEqualTo(oppgaveId.toLong())
         assertThat(slotJournalpost.captured.sak?.fagsakId).isEqualTo(fagsakEksternId.toString())
         assertThat(slotJournalpost.captured.sak?.sakstype).isEqualTo("FAGSAK")
         assertThat(slotJournalpost.captured.sak?.fagsaksystem).isEqualTo(Fagsystem.EF)
@@ -179,10 +174,11 @@ internal class JournalføringServiceTest {
                     slotJournalpost.captured.dokumenter?.find { dokument -> dokument.dokumentInfoId === dokumentId }
             assertThat(oppdatertDokument?.tittel).isEqualTo(nyTittel)
         }
-        assertThat(slotDokumentInfoIder[0]).isEqualTo(dokumentInfoIdMedJsonVerdi)
-        assertThat(slotDokumentInfoIder.size).isEqualTo(1)
-        verify(exactly = 1) { søknadService.lagreSøknadForOvergangsstønad(any(), any(), any(), any()) }
-        verify(exactly = 1) { iverksettService.startBehandling(any()) }
+        assertThat(slotJournalpost.captured.dokumenter).hasSize(4)
+        verify(exactly = 0) { søknadService.lagreSøknadForOvergangsstønad(any(), any(), any(), any()) }
+        verify(exactly = 0) { iverksettService.startBehandling(any(), any()) }
+        verify(exactly = 1) { journalpostClient.ferdigstillJournalpost(any(), any(), any()) }
+        verify(exactly = 1) { oppgaveService.ferdigstillOppgave(oppgaveId.toLong()) }
     }
 
     @Test
