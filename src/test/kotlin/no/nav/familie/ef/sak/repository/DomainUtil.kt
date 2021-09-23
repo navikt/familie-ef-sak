@@ -1,31 +1,31 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository
+package no.nav.familie.ef.sak.repository
 
-import no.nav.familie.ef.sak.api.beregning.Inntektsperiode
-import no.nav.familie.ef.sak.api.beregning.ResultatType
-import no.nav.familie.ef.sak.repository.domain.AktivitetType
-import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
-import no.nav.familie.ef.sak.repository.domain.Behandling
-import no.nav.familie.ef.sak.repository.domain.BehandlingResultat
-import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
-import no.nav.familie.ef.sak.repository.domain.BehandlingType
-import no.nav.familie.ef.sak.repository.domain.Delvilkårsvurdering
-import no.nav.familie.ef.sak.repository.domain.DelvilkårsvurderingWrapper
-import no.nav.familie.ef.sak.repository.domain.Fagsak
-import no.nav.familie.ef.sak.repository.domain.FagsakPerson
-import no.nav.familie.ef.sak.repository.domain.InntektWrapper
-import no.nav.familie.ef.sak.repository.domain.Oppgave
-import no.nav.familie.ef.sak.repository.domain.PeriodeWrapper
-import no.nav.familie.ef.sak.repository.domain.Sporbar
-import no.nav.familie.ef.sak.repository.domain.SporbarUtils
-import no.nav.familie.ef.sak.repository.domain.Stønadstype
-import no.nav.familie.ef.sak.repository.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.repository.domain.Vedtak
-import no.nav.familie.ef.sak.repository.domain.Vedtaksperiode
-import no.nav.familie.ef.sak.repository.domain.VedtaksperiodeType
-import no.nav.familie.ef.sak.repository.domain.VilkårType
-import no.nav.familie.ef.sak.repository.domain.Vilkårsresultat
-import no.nav.familie.ef.sak.repository.domain.Vilkårsvurdering
-import no.nav.familie.ef.sak.service.steg.StegType
+import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.beregning.Inntektsperiode
+import no.nav.familie.ef.sak.felles.domain.Sporbar
+import no.nav.familie.ef.sak.felles.domain.SporbarUtils
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
+import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
+import no.nav.familie.ef.sak.oppgave.Oppgave
+import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
+import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
+import no.nav.familie.ef.sak.vedtak.AktivitetType
+import no.nav.familie.ef.sak.vedtak.InntektWrapper
+import no.nav.familie.ef.sak.vedtak.PeriodeWrapper
+import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.ef.sak.vedtak.Vedtak
+import no.nav.familie.ef.sak.vedtak.Vedtaksperiode
+import no.nav.familie.ef.sak.vedtak.VedtaksperiodeType
+import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
+import no.nav.familie.ef.sak.vilkår.DelvilkårsvurderingWrapper
+import no.nav.familie.ef.sak.vilkår.VilkårType
+import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
+import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -48,8 +48,10 @@ fun behandling(fagsak: Fagsak,
                id: UUID = UUID.randomUUID(),
                type: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                resultat: BehandlingResultat = BehandlingResultat.IKKE_SATT,
-               opprettetTid: LocalDateTime = SporbarUtils.now()): Behandling =
+               opprettetTid: LocalDateTime = SporbarUtils.now(),
+               forrigeBehandlingId: UUID? = null): Behandling =
         Behandling(fagsakId = fagsak.id,
+                   forrigeBehandlingId = forrigeBehandlingId,
                    id = id,
                    type = type,
                    status = status,

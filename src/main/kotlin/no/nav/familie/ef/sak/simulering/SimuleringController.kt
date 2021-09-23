@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.simulering
 
-import no.nav.familie.ef.sak.service.TilgangService
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType

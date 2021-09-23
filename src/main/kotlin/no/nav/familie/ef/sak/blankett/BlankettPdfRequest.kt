@@ -1,8 +1,8 @@
 package no.nav.familie.ef.sak.blankett
 
-import no.nav.familie.ef.sak.api.beregning.VedtakDto
-import no.nav.familie.ef.sak.api.dto.SøknadDatoerDto
-import no.nav.familie.ef.sak.api.dto.VilkårDto
+import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
+import no.nav.familie.ef.sak.opplysninger.søknad.SøknadDatoerDto
+import no.nav.familie.ef.sak.vilkår.dto.VilkårDto
 
 data class BlankettPdfRequest(
         val personopplysninger: PersonopplysningerDto,

@@ -5,28 +5,28 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
-import no.nav.familie.ef.sak.api.beregning.BeregningService
-import no.nav.familie.ef.sak.api.beregning.Inntekt
-import no.nav.familie.ef.sak.api.beregning.Innvilget
-import no.nav.familie.ef.sak.api.beregning.ResultatType
-import no.nav.familie.ef.sak.api.beregning.VedtakService
-import no.nav.familie.ef.sak.api.beregning.VedtaksperiodeDto
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.behandling
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsakpersoner
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.tilkjentYtelse
-import no.nav.familie.ef.sak.repository.domain.AktivitetType
-import no.nav.familie.ef.sak.repository.domain.BehandlingStatus
-import no.nav.familie.ef.sak.repository.domain.BehandlingType
-import no.nav.familie.ef.sak.repository.domain.Stønadstype
-import no.nav.familie.ef.sak.repository.domain.VedtaksperiodeType
-import no.nav.familie.ef.sak.service.BehandlingService
-import no.nav.familie.ef.sak.service.FagsakService
-import no.nav.familie.ef.sak.service.TilkjentYtelseService
+import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.beregning.BeregningService
+import no.nav.familie.ef.sak.beregning.Inntekt
+import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
+import no.nav.familie.ef.sak.repository.behandling
+import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.repository.fagsakpersoner
+import no.nav.familie.ef.sak.repository.tilkjentYtelse
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.simulering.BlankettSimuleringsService
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.simulering.Simuleringsresultat
 import no.nav.familie.ef.sak.simulering.SimuleringsresultatRepository
+import no.nav.familie.ef.sak.vedtak.AktivitetType
+import no.nav.familie.ef.sak.vedtak.dto.Innvilget
+import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
+import no.nav.familie.ef.sak.vedtak.VedtaksperiodeType
 import no.nav.familie.kontrakter.ef.iverksett.SimuleringDto
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import org.assertj.core.api.Assertions.assertThat
@@ -67,15 +67,16 @@ internal class SimuleringServiceTest {
 
     @Test
     internal fun `skal bruke lagret tilkjentYtelse for simulering`() {
-
-        val behandling = behandling(fagsak = fagsak, type = BehandlingType.FØRSTEGANGSBEHANDLING)
+        val forrigeBehandlingId = behandling(fagsak).id
+        val behandling = behandling(fagsak = fagsak,
+                                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                                    forrigeBehandlingId = forrigeBehandlingId)
 
         val tilkjentYtelse = tilkjentYtelse(behandlingId = behandling.id, personIdent = personIdent)
         val simuleringsresultat = Simuleringsresultat(behandlingId = behandling.id,
                                                       data = DetaljertSimuleringResultat(emptyList()))
         every { behandlingService.hentBehandling(any()) } returns behandling
         every { tilkjentYtelseService.hentForBehandling(any()) } returns tilkjentYtelse
-        every { behandlingService.finnSisteIverksatteBehandling(any()) } returns behandling.id
         every { simuleringsresultatRepository.deleteById(any()) } just Runs
         every { simuleringsresultatRepository.insert(any()) } returns simuleringsresultat
 
@@ -92,7 +93,7 @@ internal class SimuleringServiceTest {
                 tilkjentYtelse.andelerTilkjentYtelse.first().stønadFom)
         assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().tilOgMed).isEqualTo(
                 tilkjentYtelse.andelerTilkjentYtelse.first().stønadTom)
-        assertThat(simulerSlot.captured.forrigeBehandlingId).isEqualTo(behandling.id)
+        assertThat(simulerSlot.captured.forrigeBehandlingId).isEqualTo(forrigeBehandlingId)
     }
 
     @Test

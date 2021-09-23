@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.blankett
 
-import no.nav.familie.ef.sak.util.medContentTypeJsonUTF8
+import no.nav.familie.ef.sak.felles.util.medContentTypeJsonUTF8
 import no.nav.familie.http.client.AbstractPingableRestClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value

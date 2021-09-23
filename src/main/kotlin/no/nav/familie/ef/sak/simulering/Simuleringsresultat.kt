@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.simulering
 
-import no.nav.familie.ef.sak.repository.domain.Sporbar
+import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Embedded

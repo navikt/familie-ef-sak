@@ -1,12 +1,12 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.api.gui
+package no.nav.familie.ef.sak.api.gui
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.api.dto.PersonIdentDto
-import no.nav.familie.ef.sak.api.dto.Søkeresultat
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository.fagsak
-import no.nav.familie.ef.sak.repository.FagsakRepository
-import no.nav.familie.ef.sak.repository.domain.FagsakPerson
-import no.nav.familie.ef.sak.repository.domain.Stønadstype
+import no.nav.familie.ef.sak.felles.domain.PersonIdentDto
+import no.nav.familie.ef.sak.fagsak.dto.Søkeresultat
+import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.fagsak.FagsakRepository
+import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
+import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach

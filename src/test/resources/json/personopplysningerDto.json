@@ -56,7 +56,8 @@
     "navn" : "Barn Barnesen",
     "annenForelder" : {
       "personIdent" : "17097926735",
-      "navn" : "Bob  Burger"
+      "navn" : "Bob  Burger",
+      "dødsdato" : "2021-09-22"
     },
     "adresse" : [ {
       "visningsadresse" : "c/o CONAVN, Charlies vei 13 b, 0575 Oslo",
@@ -66,13 +67,15 @@
       "angittFlyttedato" : "2020-01-02"
     } ],
     "borHosSøker" : true,
-    "fødselsdato" : "2018-01-01"
+    "fødselsdato" : "2018-01-01",
+    "dødsdato" : null
   }, {
     "personIdent" : "13071489536",
     "navn" : "Barn2 Barnesen",
     "annenForelder" : {
       "personIdent" : "17097926735",
-      "navn" : "Bob  Burger"
+      "navn" : "Bob  Burger",
+      "dødsdato" : "2021-09-22"
     },
     "adresse" : [ {
       "visningsadresse" : "c/o CONAVN, Charlies vei 13 b, 0575 Oslo",
@@ -82,7 +85,8 @@
       "angittFlyttedato" : "2020-01-02"
     } ],
     "borHosSøker" : true,
-    "fødselsdato" : "2018-01-01"
+    "fødselsdato" : "2018-01-01",
+    "dødsdato" : null
   } ],
   "innflyttingTilNorge" : [ {
     "fraflyttingsland" : "Sverige",

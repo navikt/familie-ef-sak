@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.iverksett
 
-import no.nav.familie.ef.sak.repository.domain.Fil
-import no.nav.familie.ef.sak.util.medContentTypeJsonUTF8
+import no.nav.familie.ef.sak.felles.domain.Fil
+import no.nav.familie.ef.sak.felles.util.medContentTypeJsonUTF8
 import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.http.client.MultipartBuilder
 import no.nav.familie.kontrakter.ef.infotrygd.OpprettStartBehandlingHendelseDto

@@ -1,10 +1,10 @@
 package no.nav.familie.ef.sak.arena
 
-import no.nav.familie.ef.sak.repository.domain.AndelTilkjentYtelse
-import no.nav.familie.ef.sak.util.isEqualOrAfter
-import no.nav.familie.ef.sak.util.isEqualOrBefore
-import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeOvergangsstønad
-import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPerioderOvergangsstønadResponse
+import no.nav.familie.ef.sak.felles.util.isEqualOrAfter
+import no.nav.familie.ef.sak.felles.util.isEqualOrBefore
+import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPerioderResponse
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad.Datakilde
 import java.time.LocalDate
@@ -17,7 +17,7 @@ object ArenaPeriodeUtil {
      * Skal filtrere bort de som har beløp = 0
      * Skal filtere bort de som har tomdato < fomDato || opphørdato < tomDato
      */
-    fun mapOgFiltrer(infotrygdPerioder: InfotrygdPerioderOvergangsstønadResponse) =
+    fun mapOgFiltrer(infotrygdPerioder: InfotrygdPerioderResponse) =
             infotrygdPerioder.perioder.filter { it.beløp > 0 }.map {
                 PeriodeOvergangsstønad(personIdent = it.personIdent,
                                        fomDato = it.fomDato,
@@ -33,7 +33,7 @@ object ArenaPeriodeUtil {
                                        datakilde = Datakilde.EF)
             }
 
-    private fun InfotrygdPeriodeOvergangsstønad.opphørsdatoEllerTomDato(): LocalDate {
+    private fun InfotrygdPeriode.opphørsdatoEllerTomDato(): LocalDate {
         val opphørsdato = this.opphørsdato
         return if (opphørsdato != null && opphørsdato.isBefore(tomDato)) {
             opphørsdato

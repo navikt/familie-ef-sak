@@ -1,18 +1,18 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository
+package no.nav.familie.ef.sak.repository
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.repository.BehandlingRepository
-import no.nav.familie.ef.sak.repository.FagsakRepository
-import no.nav.familie.ef.sak.repository.SøknadRepository
-import no.nav.familie.ef.sak.repository.domain.Sporbar
-import no.nav.familie.ef.sak.repository.domain.Søker
-import no.nav.familie.ef.sak.repository.domain.Søknad
-import no.nav.familie.ef.sak.repository.domain.SøknadType
+import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.felles.domain.Sporbar
+import no.nav.familie.ef.sak.fagsak.FagsakRepository
+import no.nav.familie.ef.sak.opplysninger.søknad.SøknadRepository
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søker
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknad
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import kotlin.random.Random.Default.nextInt
 
 internal class SøknadRepositoryTest : OppslagSpringRunnerTest() {
