@@ -36,7 +36,7 @@ class BrevClient(@Value("\${FAMILIE_BREV_API_URL}")
 
 
     fun lagManueltBrev(brevinnhold: JsonNode): ByteArray {
-        val url = URI.create("$familieBrevUri/api/json2pdf")
+        val url = URI.create("$familieBrevUri/api/manuelt-brev")
 
         return postForEntity(url,
                              brevinnhold,
