@@ -2,9 +2,9 @@ package no.nav.familie.ef.sak.service
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ef.sak.vedtak.MellomlagerBrevRepository
-import no.nav.familie.ef.sak.vedtak.domain.MellomlagretBrev
-import no.nav.familie.ef.sak.vedtak.MellomlagringBrevService
+import no.nav.familie.ef.sak.brev.MellomlagerBrevRepository
+import no.nav.familie.ef.sak.brev.domain.MellomlagretBrev
+
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.data.repository.findByIdOrNull
@@ -15,7 +15,7 @@ import java.util.UUID
 internal class MellomlagringBrevServiceTest {
 
     val MellomlagerBrevRepository = mockk<MellomlagerBrevRepository>()
-    val MellomlagringBrevService = MellomlagringBrevService(MellomlagerBrevRepository)
+    val MellomlagringBrevService = no.nav.familie.ef.sak.brev.MellomlagringBrevService(MellomlagerBrevRepository)
 
 
     @Test

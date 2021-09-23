@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.infrastruktur.health
 
-import no.nav.familie.ef.sak.vedtak.BrevClient
+import no.nav.familie.ef.sak.brev.BrevClient
 import no.nav.familie.http.health.AbstractHealthIndicator
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component

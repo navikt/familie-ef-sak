@@ -1,8 +1,7 @@
-package no.nav.familie.ef.sak.api.gui
+package no.nav.familie.ef.sak.brev
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.familie.ef.sak.vedtaksbrev.BrevClient
-import no.nav.familie.ef.sak.vedtaksbrev.ManueltBrev
+
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.web.bind.annotation.PostMapping
@@ -17,7 +16,6 @@ class ManueltBrevController(private val brevClient: BrevClient) {
 
     @PostMapping("")
     fun lagManueltBrev(@RequestBody brevInnhold: JsonNode): Ressurs<ByteArray> {
-        val brevMedSignatur = ManueltBrev(brevInnhold)
         return Ressurs.success(brevClient.lagManueltBrev(brevInnhold))
     }
 
