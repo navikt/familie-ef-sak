@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.vedtak.domain
+package no.nav.familie.ef.sak.brev.domain
 
 
 import no.nav.familie.ef.sak.felles.domain.Fil

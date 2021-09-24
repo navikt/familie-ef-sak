@@ -1,8 +1,8 @@
-package no.nav.familie.ef.sak.vedtak
+package no.nav.familie.ef.sak.brev
 
+import no.nav.familie.ef.sak.brev.dto.MellomlagreBrevRequestDto
+import no.nav.familie.ef.sak.brev.dto.MellomlagretBrevResponseDto
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
-import no.nav.familie.ef.sak.vedtak.dto.MellomlagreBrevRequestDto
-import no.nav.familie.ef.sak.vedtak.dto.MellomlagretBrevResponseDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.web.bind.annotation.GetMapping
@@ -22,13 +22,14 @@ class BrevMellomlagerController(private val tilgangService: TilgangService,
 
     @PostMapping("/{behandlingId}")
     fun mellomlagreBrevverdier(@PathVariable behandlingId: UUID,
-                               @RequestBody mellomlagretBrev: MellomlagreBrevRequestDto): Ressurs<UUID> {
+                               @RequestBody mellomlagretBrev: MellomlagreBrevRequestDto
+    ): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
 
         return Ressurs.success(mellomlagringBrevService.mellomLagreBrev (behandlingId,
-                                                 mellomlagretBrev.brevverdier,
-                                                 mellomlagretBrev.brevmal,
-                                                 mellomlagretBrev.versjon))
+                                                                         mellomlagretBrev.brevverdier,
+                                                                         mellomlagretBrev.brevmal,
+                                                                         mellomlagretBrev.versjon))
     }
 
 

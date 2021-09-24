@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.vedtak.domain
+package no.nav.familie.ef.sak.brev.domain
 
 import org.springframework.data.annotation.Id
 import java.time.LocalDate

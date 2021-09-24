@@ -1,7 +1,7 @@
-package no.nav.familie.ef.sak.vedtak
+package no.nav.familie.ef.sak.brev
 
-import no.nav.familie.ef.sak.vedtak.domain.MellomlagretBrev
-import no.nav.familie.ef.sak.vedtak.dto.MellomlagretBrevResponseDto
+import no.nav.familie.ef.sak.brev.domain.MellomlagretBrev
+import no.nav.familie.ef.sak.brev.dto.MellomlagretBrevResponseDto
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.time.LocalDate

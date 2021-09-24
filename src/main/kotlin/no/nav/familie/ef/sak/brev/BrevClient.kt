@@ -1,8 +1,8 @@
-package no.nav.familie.ef.sak.vedtak
+package no.nav.familie.ef.sak.brev
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.felles.util.medContentTypeJsonUTF8
-import no.nav.familie.ef.sak.vedtak.domain.Vedtaksbrev
 import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.beans.factory.annotation.Qualifier
@@ -34,8 +34,14 @@ class BrevClient(@Value("\${FAMILIE_BREV_API_URL}")
                              HttpHeaders().medContentTypeJsonUTF8())
     }
 
+    fun lagManueltBrev(brevinnhold: JsonNode): ByteArray {
+        val url = URI.create("$familieBrevUri/api/manuelt-brev")
+        return postForEntity(url,
+                             brevinnhold,
+                             HttpHeaders().medContentTypeJsonUTF8())
+    }
+    
     companion object {
-
         val ef = "ef-brev"
         val test = "testdata"
     }
@@ -44,4 +50,5 @@ class BrevClient(@Value("\${FAMILIE_BREV_API_URL}")
 data class BrevRequestMedSignaturer(val brevFraSaksbehandler: JsonNode,
                                     val saksbehandlersignatur: String,
                                     val besluttersignatur: String?)
+
 

@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.vedtak
+package no.nav.familie.ef.sak.brev
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
