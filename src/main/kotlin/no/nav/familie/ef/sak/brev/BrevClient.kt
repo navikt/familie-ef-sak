@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.brev
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
+import no.nav.familie.ef.sak.brev.dto.ManueltBrevRequestDto
 import no.nav.familie.ef.sak.felles.util.medContentTypeJsonUTF8
 import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -34,7 +35,7 @@ class BrevClient(@Value("\${FAMILIE_BREV_API_URL}")
                              HttpHeaders().medContentTypeJsonUTF8())
     }
 
-    fun lagManueltBrev(brevinnhold: JsonNode): ByteArray {
+    fun lagManueltBrev(brevinnhold: ManueltBrevRequestDto): ByteArray {
         val url = URI.create("$familieBrevUri/api/manuelt-brev")
         return postForEntity(url,
                              brevinnhold,
