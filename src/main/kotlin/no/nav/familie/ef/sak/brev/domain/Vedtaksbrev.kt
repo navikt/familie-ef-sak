@@ -9,6 +9,14 @@ data class Vedtaksbrev(@Id
                        val behandlingId: UUID,
                        val saksbehandlerBrevrequest: String,
                        val brevmal: String,
+                       val brevtype: Brevtype,
                        val saksbehandlersignatur: String,
                        val besluttersignatur: String? = null,
                        val beslutterPdf: Fil? = null)
+
+fun Vedtaksbrev.erFritekstType(): Boolean = this.brevmal.equals("fritekst")
+
+enum class Brevtype {
+    SANITY,
+    FRITEKST,
+}

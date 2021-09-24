@@ -36,6 +36,7 @@ class ManueltBrevService(private val brevClient: BrevClient,
                                             saksbehandlersignatur = SikkerhetContext.hentSaksbehandlerNavn(true)
             )
 
+
         return brevClient.lagManueltBrev(request)
     }
 

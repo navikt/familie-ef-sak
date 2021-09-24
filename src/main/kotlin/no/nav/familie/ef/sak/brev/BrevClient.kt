@@ -1,7 +1,9 @@
 package no.nav.familie.ef.sak.brev
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
+import no.nav.familie.ef.sak.brev.domain.erFritekstType
 import no.nav.familie.ef.sak.brev.dto.ManueltBrevRequestDto
 import no.nav.familie.ef.sak.felles.util.medContentTypeJsonUTF8
 import no.nav.familie.http.client.AbstractPingableRestClient
@@ -27,6 +29,10 @@ class BrevClient(@Value("\${FAMILIE_BREV_API_URL}")
     }
 
     fun genererBrev(vedtaksbrev: Vedtaksbrev): ByteArray {
+
+        if(vedtaksbrev.erFritekstType()) {
+            return lagManueltBrev(objectMapper.readValue(vedtaksbrev.saksbehandlerBrevrequest))
+        }
         val url = URI.create("$familieBrevUri/api/ef-brev/avansert-dokument/bokmaal/${vedtaksbrev.brevmal}/pdf")
         return postForEntity(url,
                              BrevRequestMedSignaturer(objectMapper.readTree(vedtaksbrev.saksbehandlerBrevrequest),
@@ -35,10 +41,12 @@ class BrevClient(@Value("\${FAMILIE_BREV_API_URL}")
                              HttpHeaders().medContentTypeJsonUTF8())
     }
 
-    fun lagManueltBrev(brevinnhold: ManueltBrevRequestDto): ByteArray {
+    private fun lagManueltBrev(vedtaksbrev: Vedtaksbrev): ByteArray {
         val url = URI.create("$familieBrevUri/api/manuelt-brev")
         return postForEntity(url,
-                             brevinnhold,
+                             BrevRequestMedSignaturer(objectMapper.readTree(vedtaksbrev.saksbehandlerBrevrequest),
+                                                      vedtaksbrev.saksbehandlersignatur,
+                                                      vedtaksbrev.besluttersignatur),
                              HttpHeaders().medContentTypeJsonUTF8())
     }
     
