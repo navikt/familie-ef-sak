@@ -30,6 +30,7 @@ import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
 import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.oppgave.OppgaveService
+import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.vedtak.TotrinnskontrollService
 import no.nav.familie.ef.sak.vedtak.Vedtak
@@ -124,7 +125,9 @@ internal class BeslutteVedtakStegTest {
                                                                         resultatType = ResultatType.INNVILGE,
                                                                         saksbehandlerIdent = "sak1",
                                                                         beslutterIdent = "beslutter1")
-        every { behandlingService.oppdaterResultatPåBehandling(any(), any()) } just Runs
+        every { behandlingService.oppdaterResultatPåBehandling(any(), any()) } answers {
+            behandling(fagsak, resultat = secondArg())
+        }
         every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any(), any()) } returns Behandlingshistorikk(
                 behandlingId = behandlingId,
                 steg = StegType.SEND_TIL_BESLUTTER,
