@@ -5,8 +5,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
-import no.nav.familie.ef.sak.brev.dto.ManueltBrevDto
-import no.nav.familie.ef.sak.brev.dto.ManueltBrevRequestDto
+import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevRequestDto
 import no.nav.familie.ef.sak.brev.dto.VedtaksbrevFritekstDto
 import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
@@ -81,19 +80,19 @@ class VedtaksbrevService(private val brevClient: BrevClient,
         return beslutterPdf.bytes
     }
 
-    fun lagFritekstbrev(manueltBrevDto: VedtaksbrevFritekstDto): ByteArray {
+    fun lagFritekstbrev(frittståendeBrevDto: VedtaksbrevFritekstDto): ByteArray {
         val ident = behandlingService.hentAktivIdent(
-                UUID.fromString(manueltBrevDto.behandlingId))
+                UUID.fromString(frittståendeBrevDto.behandlingId))
         val navn = personopplysningerService.hentGjeldeneNavn(listOf(ident))
-        val request = ManueltBrevRequestDto(overskrift = manueltBrevDto.overskrift,
-                                            avsnitt = manueltBrevDto.avsnitt,
-                                            ident = ident,
-                                            navn = navn[ident]!!,
-                                            brevdato = LocalDate.now())
-        val vedtaksbrev = lagreEllerOppdaterVedtaksbrev(behandlingId = UUID.fromString(manueltBrevDto.behandlingId),
-                                      brevrequest = objectMapper.writeValueAsString(request),
-                                      brevmal = "fritekst",
-                                      saksbehandlersignatur = SikkerhetContext.hentSaksbehandlerNavn(true))
+        val request = FrittståendeBrevRequestDto(overskrift = frittståendeBrevDto.overskrift,
+                                                 avsnitt = frittståendeBrevDto.avsnitt,
+                                                 ident = ident,
+                                                 navn = navn[ident]!!,
+                                                 brevdato = LocalDate.now())
+        val vedtaksbrev = lagreEllerOppdaterVedtaksbrev(behandlingId = UUID.fromString(frittståendeBrevDto.behandlingId),
+                                                        brevrequest = objectMapper.writeValueAsString(request),
+                                                        brevmal = "fritekst",
+                                                        saksbehandlersignatur = SikkerhetContext.hentSaksbehandlerNavn(true))
 
         return brevClient.genererBrev(vedtaksbrev = vedtaksbrev)
     }
