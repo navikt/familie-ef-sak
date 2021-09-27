@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.ekstern
 
+import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadRequest
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
@@ -17,10 +18,11 @@ import org.springframework.web.bind.annotation.RestController
                 consumes = [APPLICATION_JSON_VALUE],
                 produces = [APPLICATION_JSON_VALUE])
 @Validated
-class EksternStønadsperioderController(private val arenaStønadsperioderService: ArenaStønadsperioderService) {
+class EksternStønadsperioderController(private val arenaStønadsperioderService: ArenaStønadsperioderService,
+                                       private val perioderForBarnetrygdService: PerioderForBarnetrygdService) {
 
     @PostMapping()
-    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"] )
+    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
     fun hentPerioder(@RequestBody request: PerioderOvergangsstønadRequest): Ressurs<PerioderOvergangsstønadResponse> {
         return try {
             Ressurs.success(arenaStønadsperioderService.hentPerioder(request))
@@ -28,5 +30,16 @@ class EksternStønadsperioderController(private val arenaStønadsperioderService
             Ressurs.failure("Henting av perioder for overgangsstønad feilet", error = e)
         }
     }
+
+    @PostMapping("full-overgangsstonad")
+    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
+    fun hentPerioderForOvergangsstonad(@RequestBody request: PersonIdent): Ressurs<PerioderOvergangsstønadResponse> {
+        return try {
+            Ressurs.success(perioderForBarnetrygdService.hentPerioder(request))
+        } catch (e: Exception) {
+            Ressurs.failure("Henting av perioder for overgangsstønad feilet", error = e)
+        }
+    }
+
 
 }

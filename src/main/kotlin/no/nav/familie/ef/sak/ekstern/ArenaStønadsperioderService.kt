@@ -4,14 +4,14 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import no.nav.familie.ef.sak.arena.ArenaPeriodeUtil.mapOgFiltrer
 import no.nav.familie.ef.sak.arena.ArenaPeriodeUtil.slåSammenPerioder
-import no.nav.familie.ef.sak.infrastruktur.exception.PdlNotFoundException
-import no.nav.familie.ef.sak.felles.integration.FamilieIntegrasjonerClient
-import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
-import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
+import no.nav.familie.ef.sak.felles.integration.FamilieIntegrasjonerClient
+import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
+import no.nav.familie.ef.sak.infrastruktur.exception.PdlNotFoundException
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPerioderArenaRequest
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
@@ -28,7 +28,7 @@ import java.time.LocalDate
  */
 @Service
 class ArenaStønadsperioderService(private val infotrygdReplikaClient: InfotrygdReplikaClient,
-                                  private val behandlingRepository: BehandlingRepository,
+                                  private val behandlingService: BehandlingService,
                                   private val tilkjentYtelseService: TilkjentYtelseService,
                                   private val familieIntegrasjonerClient: FamilieIntegrasjonerClient,
                                   private val pdlClient: PdlClient) {
@@ -61,7 +61,7 @@ class ArenaStønadsperioderService(private val infotrygdReplikaClient: Infotrygd
         val tom = request.tomDato ?: LocalDate.now()
         val personIdenter = hentPersonIdenter(request)
         return Stønadstype.values()
-                .mapNotNull { behandlingRepository.finnSisteIverksatteBehandling(it, personIdenter) }
+                .mapNotNull { behandlingService.finnSisteIverksatteBehandling(it, personIdenter) }
                 .mapNotNull { if (it.type != BehandlingType.TEKNISK_OPPHØR) it else null }
                 .map { tilkjentYtelseService.hentForBehandling(it.id) }
                 .flatMap { it.andelerTilkjentYtelse }
