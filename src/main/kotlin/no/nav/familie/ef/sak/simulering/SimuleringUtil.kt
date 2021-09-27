@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.simulering
 
-import no.nav.familie.ef.sak.iverksett.tilIverksettDto
+import no.nav.familie.ef.sak.iverksett.tilDto
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.kontrakter.ef.felles.StønadType
@@ -106,7 +106,7 @@ fun TilkjentYtelse.tilIverksettMedMetaData(saksbehandlerId: String,
                                            eksternBehandlingId: Long,
                                            stønadstype: Stønadstype,
                                            eksternFagsakId: Long): TilkjentYtelseMedMetadata {
-    return TilkjentYtelseMedMetadata(tilkjentYtelse = this.tilIverksettDto(),
+    return TilkjentYtelseMedMetadata(tilkjentYtelse = this.tilDto(),
                                      saksbehandlerId = saksbehandlerId,
                                      eksternBehandlingId = eksternBehandlingId,
                                      stønadstype = StønadType.valueOf(stønadstype.name),
