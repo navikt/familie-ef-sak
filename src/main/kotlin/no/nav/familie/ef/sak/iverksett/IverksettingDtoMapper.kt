@@ -89,7 +89,7 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
                                    behandlingType = BehandlingType.valueOf(behandling.type.name),
                                    behandlingÅrsak = BehandlingÅrsak.SØKNAD,
                                    eksternId = behandling.eksternId.id,
-                                   vilkårsvurderinger = vilkårsvurderinger.map { it.tilDto() },
+                                   vilkårsvurderinger = vilkårsvurderinger.map { it.tilIverksettDto() },
                                    forrigeBehandlingId = behandling.forrigeBehandlingId
             )
 
@@ -103,8 +103,8 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
                                opphørÅrsak = null,
                                saksbehandlerId = saksbehandler,
                                beslutterId = beslutter,
-                               tilkjentYtelse = tilkjentYtelse.tilDto(),
-                               vedtaksperioder = vedtak.perioder?.tilDto() ?: emptyList()
+                               tilkjentYtelse = tilkjentYtelse.tilIverksettDto(),
+                               vedtaksperioder = vedtak.perioder?.tilIverksettDto() ?: emptyList()
             )
 
     private fun mapSøkerDto(fagsak: Fagsak, behandling: Behandling): SøkerDto {
@@ -124,7 +124,7 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
     }
 }
 
-fun TilkjentYtelse.tilDto(): TilkjentYtelseDto = TilkjentYtelseDto(
+fun TilkjentYtelse.tilIverksettDto(): TilkjentYtelseDto = TilkjentYtelseDto(
         andelerTilkjentYtelse = andelerTilkjentYtelse.map { andel ->
             AndelTilkjentYtelseDto(beløp = andel.beløp,
                                    fraOgMed = andel.stønadFom,
@@ -137,27 +137,27 @@ fun TilkjentYtelse.tilDto(): TilkjentYtelseDto = TilkjentYtelseDto(
         }
 )
 
-fun Vurdering.tilDto(): VurderingDto = VurderingDto(
+fun Vurdering.tilIverksettDto(): VurderingDto = VurderingDto(
         regelId = RegelIdIverksett.valueOf(this.regelId.name),
         svar = this.svar?.let { SvarIdIverksett.valueOf(it.name) },
         begrunnelse = this.begrunnelse
 )
 
-fun Delvilkårsvurdering.tilDto(): DelvilkårsvurderingDto = DelvilkårsvurderingDto(
+fun Delvilkårsvurdering.tilIverksettDto(): DelvilkårsvurderingDto = DelvilkårsvurderingDto(
         resultat = VilkårsresultatIverksett.valueOf(this.resultat.name),
-        vurderinger = this.vurderinger.map { vurdering -> vurdering.tilDto() }
+        vurderinger = this.vurderinger.map { vurdering -> vurdering.tilIverksettDto() }
 
 )
 
-fun Vilkårsvurdering.tilDto(): VilkårsvurderingDto = VilkårsvurderingDto(
+fun Vilkårsvurdering.tilIverksettDto(): VilkårsvurderingDto = VilkårsvurderingDto(
         vilkårType = VilkårTypeIverksett.valueOf(this.type.name),
         resultat = VilkårsresultatIverksett.valueOf(this.resultat.name),
         delvilkårsvurderinger = this.delvilkårsvurdering.delvilkårsvurderinger.map { delvilkårsvurdering ->
-            delvilkårsvurdering.tilDto()
+            delvilkårsvurdering.tilIverksettDto()
         }
 )
 
-fun PeriodeWrapper.tilDto(): List<VedtaksperiodeDto> = this.perioder.map {
+fun PeriodeWrapper.tilIverksettDto(): List<VedtaksperiodeDto> = this.perioder.map {
     VedtaksperiodeDto(fraOgMed = it.datoFra,
                       tilOgMed = it.datoTil,
                       aktivitet = AktivitetType.valueOf(it.aktivitet.name),

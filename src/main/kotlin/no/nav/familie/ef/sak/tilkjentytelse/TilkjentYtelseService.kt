@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.tilkjentytelse
 
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.iverksett.tilDto
+import no.nav.familie.ef.sak.iverksett.tilIverksettDto
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.felles.util.isEqualOrAfter
@@ -53,7 +53,7 @@ class TilkjentYtelseService(private val behandlingService: BehandlingService,
                             ?: error("Finner ikke eksterne id'er til behandling=${tilkjentYtelse.behandlingId}")
             val andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse
                     .filter { it.stønadTom.isEqualOrAfter(datoForAvstemming) }
-                    .map { it.tilDto() }
+                    .map { it.tilIverksettDto() }
             KonsistensavstemmingTilkjentYtelseDto(behandlingId = tilkjentYtelse.behandlingId,
                                                   eksternBehandlingId = eksternId.eksternBehandlingId,
                                                   eksternFagsakId = eksternId.eksternFagsakId,

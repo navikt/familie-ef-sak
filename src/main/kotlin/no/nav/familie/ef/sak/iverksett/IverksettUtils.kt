@@ -4,7 +4,7 @@ import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.kontrakter.ef.iverksett.AndelTilkjentYtelseDto
 import no.nav.familie.kontrakter.ef.iverksett.Periodetype
 
-fun AndelTilkjentYtelse.tilDto() =
+fun AndelTilkjentYtelse.tilIverksettDto() =
         AndelTilkjentYtelseDto(beløp = this.beløp,
                                periodetype = Periodetype.MÅNED,
                                inntekt = this.inntekt,
