@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.brev
 
 import no.nav.familie.ef.sak.brev.dto.ManueltBrevDto
-
+import no.nav.familie.ef.sak.brev.dto.VedtaksbrevFritekstDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.web.bind.annotation.PostMapping
