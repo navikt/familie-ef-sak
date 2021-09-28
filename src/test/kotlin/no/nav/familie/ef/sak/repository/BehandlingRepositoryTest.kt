@@ -137,7 +137,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
                                                                              status = FERDIGSTILT,
                                                                              type = BehandlingType.TEKNISK_OPPHØR,
                                                                              resultat = BehandlingResultat.OPPHØRT))
-        assertThat(behandlingRepository.finnSisteIverksatteBehandling(OVERGANGSSTØNAD, setOf(ident)))
+        assertThat(behandlingRepository.finnSisteIverksatteBehandling(fagsak.id))
                 .isEqualTo(tekniskOpphørBehandling)
     }
 
@@ -147,7 +147,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         behandlingRepository.insert(behandling(fagsak,
                                                status = UTREDES,
                                                opprettetTid = LocalDateTime.now().minusDays(2)))
-        assertThat(behandlingRepository.finnSisteIverksatteBehandling(OVERGANGSSTØNAD, setOf(ident))).isNull()
+        assertThat(behandlingRepository.finnSisteIverksatteBehandling(fagsak.id)).isNull()
     }
 
     @Test
@@ -157,18 +157,18 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
                                                status = FERDIGSTILT,
                                                type = BehandlingType.BLANKETT,
                                                opprettetTid = LocalDateTime.now().minusDays(2)))
-        assertThat(behandlingRepository.finnSisteIverksatteBehandling(OVERGANGSSTØNAD, setOf(ident))).isNull()
+        assertThat(behandlingRepository.finnSisteIverksatteBehandling(fagsak.id)).isNull()
     }
 
     @Test
     internal fun `finnSisteIverksatteBehandling skal finne id til siste behandling som er ferdigstilt, ikke annulert eller blankett`() {
         val førstegangsbehandling = BehandlingOppsettUtil.iverksattFørstegangsbehandling
-        fagsakRepository.insert(fagsak(setOf(FagsakPerson("1"))).copy(id = førstegangsbehandling.fagsakId))
+        val fagsak = fagsakRepository.insert(fagsak(setOf(FagsakPerson("1"))).copy(id = førstegangsbehandling.fagsakId))
 
         val behandlinger = BehandlingOppsettUtil.lagBehandlingerForSisteIverksatte()
         behandlingRepository.insertAll(behandlinger)
 
-        assertThat(behandlingRepository.finnSisteIverksatteBehandling(OVERGANGSSTØNAD, setOf("1"))?.id)
+        assertThat(behandlingRepository.finnSisteIverksatteBehandling(fagsak.id)?.id)
                 .isEqualTo(førstegangsbehandling.id)
     }
 

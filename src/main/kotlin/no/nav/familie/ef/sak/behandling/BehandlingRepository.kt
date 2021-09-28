@@ -55,17 +55,14 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         SELECT b.*, be.id as eksternid_id
         FROM behandling b
         JOIN behandling_ekstern be ON b.id = be.behandling_id
-        JOIN fagsak f ON f.id = b.fagsak_id
-        JOIN fagsak_person fp ON b.fagsak_id = fp.fagsak_id
-        WHERE fp.ident IN (:personidenter)
-         AND f.stonadstype = :stønadstype
+        WHERE b.fagsak_id = :fagsakId
          AND b.type != 'BLANKETT'
          AND b.resultat IN ('OPPHØRT', 'INNVILGET')
          AND b.status = 'FERDIGSTILT'
         ORDER BY b.opprettet_tid DESC
         LIMIT 1
     """)
-    fun finnSisteIverksatteBehandling(stønadstype: Stønadstype, personidenter: Set<String>): Behandling?
+    fun finnSisteIverksatteBehandling(fagsakId: UUID): Behandling?
 
     // language=PostgreSQL
     @Query("""

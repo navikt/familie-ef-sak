@@ -63,8 +63,8 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
                           status: BehandlingStatus = BehandlingStatus.OPPRETTET,
                           stegType: StegType = StegType.VILKÅR): Behandling {
         val tidligereBehandlinger = behandlingRepository.findByFagsakId(fagsakId)
+        val forrigeBehandlingId = behandlingRepository.finnSisteIverksatteBehandling(fagsakId)?.id
         validerKanOppretteNyBehandling(behandlingType, tidligereBehandlinger)
-        val forrigeBehandlingId = sistIverksatteBehandling(tidligereBehandlinger)?.id
 
         return behandlingRepository.insert(Behandling(fagsakId = fagsakId,
                                                       forrigeBehandlingId = forrigeBehandlingId,
