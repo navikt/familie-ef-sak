@@ -21,6 +21,9 @@ import org.springframework.web.bind.annotation.RestController
 class EksternStønadsperioderController(private val arenaStønadsperioderService: ArenaStønadsperioderService,
                                        private val perioderForBarnetrygdService: PerioderForBarnetrygdService) {
 
+    /**
+     * Brukes av Arena
+     */
     @PostMapping()
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
     fun hentPerioder(@RequestBody request: PerioderOvergangsstønadRequest): Ressurs<PerioderOvergangsstønadResponse> {
@@ -31,14 +34,13 @@ class EksternStønadsperioderController(private val arenaStønadsperioderService
         }
     }
 
+    /**
+     * Brukes av Barnetrygd, for å vurdere utvidet barnetrygd, henter kun perioder med full overgangsstønad
+     */
     @PostMapping("full-overgangsstonad")
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
     fun hentPerioderForOvergangsstonad(@RequestBody request: PersonIdent): Ressurs<PerioderOvergangsstønadResponse> {
-        return try {
-            Ressurs.success(perioderForBarnetrygdService.hentPerioder(request))
-        } catch (e: Exception) {
-            Ressurs.failure("Henting av perioder for overgangsstønad feilet", error = e)
-        }
+        return Ressurs.success(perioderForBarnetrygdService.hentPerioder(request))
     }
 
 
