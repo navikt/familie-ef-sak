@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.brev
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.brev.domain.FRITEKST
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevDto
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevRequestDto
@@ -20,17 +21,17 @@ class FrittståendeBrevService(private val brevClient: BrevClient,
                               private val personopplysningerService: PersonopplysningerService) {
 
     fun lagFrittståendeBrev(frittståendeBrevDto: FrittståendeBrevDto): ByteArray {
-        val ident = fagsakService.hentAktivIdent(UUID.fromString(frittståendeBrevDto.fagsakId))
+        val ident = fagsakService.hentAktivIdent(frittståendeBrevDto.fagsakId)
         val navn = personopplysningerService.hentGjeldeneNavn(listOf(ident))
         val request = FrittståendeBrevRequestDto(overskrift = frittståendeBrevDto.overskrift,
                                                  avsnitt = frittståendeBrevDto.avsnitt,
-                                                 ident = ident,
-                                                 navn = navn[ident]!!,
+                                                 personIdent = ident,
+                                                 navn = navn.getValue(ident),
                                                  brevdato = LocalDate.now())
 
         val vedtaksbrev = Vedtaksbrev(behandlingId = UUID.randomUUID(),
                                       saksbehandlerBrevrequest = objectMapper.writeValueAsString(request),
-                                      brevmal = "fritekst",
+                                      brevmal = FRITEKST,
                                       saksbehandlersignatur = SikkerhetContext.hentSaksbehandlerNavn(true),
                                       besluttersignatur = null,
                                       beslutterPdf = null)

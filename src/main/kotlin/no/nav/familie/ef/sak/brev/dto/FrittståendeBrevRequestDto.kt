@@ -5,5 +5,5 @@ import java.time.LocalDate
 data class FrittståendeBrevRequestDto(val overskrift: String,
                                       val avsnitt: List<FrittståendeBrevAvsnitt>,
                                       val brevdato: LocalDate,
-                                      val ident: String,
+                                      val personIdent: String,
                                       val navn: String)

@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController
 @ProtectedWithClaims(issuer = "azuread")
 class FritekstBrevController(private val frittståendeBrevService: FrittståendeBrevService) {
 
-    @PostMapping("/frittstående")
+    @PostMapping("/frittstaende")
     fun lagFrittståendeBrev(@RequestBody brevInnhold: FrittståendeBrevDto): Ressurs<ByteArray> {
         return Ressurs.success(frittståendeBrevService.lagFrittståendeBrev(brevInnhold))
     }

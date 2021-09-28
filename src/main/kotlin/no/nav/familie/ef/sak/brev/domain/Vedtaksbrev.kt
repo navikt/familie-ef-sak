@@ -13,4 +13,6 @@ data class Vedtaksbrev(@Id
                        val besluttersignatur: String? = null,
                        val beslutterPdf: Fil? = null)
 
-fun Vedtaksbrev.erFritekstType(): Boolean = this.brevmal.equals("fritekst")
+fun Vedtaksbrev.erFritekstType(): Boolean = this.brevmal.equals(FRITEKST)
+
+const val FRITEKST = "fritekst"
