@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.ekstern.arena
 
+import no.nav.familie.ef.sak.ekstern.tilEksternPeriodeOvergangsstønad
 import no.nav.familie.ef.sak.felles.util.isEqualOrAfter
 import no.nav.familie.ef.sak.felles.util.isEqualOrBefore
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
@@ -26,12 +27,8 @@ object ArenaPeriodeUtil {
             }.filterNot { it.tomDato.isBefore(it.fomDato) }
 
     fun mapOgFiltrer(andeler: List<AndelTilkjentYtelse>) =
-            andeler.filter { it.beløp > 0 }.map {
-                PeriodeOvergangsstønad(personIdent = it.personIdent,
-                                       fomDato = it.stønadFom,
-                                       tomDato = it.stønadTom,
-                                       datakilde = Datakilde.EF)
-            }
+            andeler.filter { it.beløp > 0 }
+                    .map(AndelTilkjentYtelse::tilEksternPeriodeOvergangsstønad)
 
     private fun InfotrygdPeriode.opphørsdatoEllerTomDato(): LocalDate {
         val opphørsdato = this.opphørsdato

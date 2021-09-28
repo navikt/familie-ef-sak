@@ -14,6 +14,7 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.brev.MellomlagringBrevService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.taMedAndelerFremTilDato
@@ -25,7 +26,8 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                        private val behandlingService: BehandlingService,
                        private val beregningService: BeregningService,
                        private val simuleringService: SimuleringService,
-                       private val vedtakService: VedtakService) : BehandlingSteg<VedtakDto> {
+                       private val vedtakService: VedtakService,
+                       private val mellomlagringBrevService: MellomlagringBrevService) : BehandlingSteg<VedtakDto> {
 
 
     override fun validerSteg(behandling: Behandling) {
@@ -51,6 +53,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
         vedtakService.slettVedtakHvisFinnes(behandling.id)
         vedtakService.lagreVedtak(vedtakDto = vedtak, behandlingId = behandling.id)
         simuleringService.hentOgLagreSimuleringsresultat(behandling)
+        mellomlagringBrevService.slettMellomlagringHvisFinnes(behandling.id)
     }
 
     private fun opprettTilkjentYtelseForOpphørtBehandling(behandling: Behandling,

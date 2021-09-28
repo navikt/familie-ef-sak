@@ -1,10 +1,10 @@
 package no.nav.familie.ef.sak.behandling
 
-import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import org.springframework.http.HttpStatus
 
 object OpprettBehandlingUtil {
@@ -13,48 +13,27 @@ object OpprettBehandlingUtil {
      * @param behandlingType for ny behandling
      */
     fun validerKanOppretteNyBehandling(behandlingType: BehandlingType,
-                                       tidligereBehandlinger: List<Behandling>) {
+                                       tidligereBehandlinger: List<Behandling>,
+                                       sistIverksatteBehandling: Behandling?) {
         val sisteBehandling = tidligereBehandlinger
-                .filter { it.resultat != BehandlingResultat.ANNULLERT }
+                .filter { it.resultat != BehandlingResultat.ANNULLERT && it.status == BehandlingStatus.FERDIGSTILT }
                 .maxByOrNull { it.sporbar.opprettetTid }
 
         validerTidligereBehandlingerErFerdigstilte(tidligereBehandlinger)
 
-        if (behandlingType == BehandlingType.BLANKETT) {
-            validerKanOppretteBlankett(tidligereBehandlinger)
-        }
-        if (behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING) {
-            validerKanOppretteFørstegangsbehandling(sisteBehandling)
-        }
-        if (behandlingType == BehandlingType.REVURDERING) {
-            validerKanOppretteRevurdering(sisteBehandling)
-        }
-        if (behandlingType == BehandlingType.TEKNISK_OPPHØR) {
-            validerTekniskOpphør(sisteBehandling, tidligereBehandlinger)
+        when (behandlingType) {
+            BehandlingType.BLANKETT -> validerKanOppretteBlankett(tidligereBehandlinger)
+            BehandlingType.FØRSTEGANGSBEHANDLING -> validerKanOppretteFørstegangsbehandling(sisteBehandling)
+            BehandlingType.REVURDERING -> validerKanOppretteRevurdering(sisteBehandling)
+            BehandlingType.TEKNISK_OPPHØR -> validerTekniskOpphør(sisteBehandling, sistIverksatteBehandling)
         }
     }
 
-    fun sistIverksatteBehandling(behandlinger: List<Behandling>): Behandling? {
-        return behandlinger
-                .filter(this::erIverksatt)
-                .maxByOrNull { it.sporbar.opprettetTid }
-    }
-
-    /**
-     * Vi ønsker å peke den nye behandlingen til en behandling som er iverksatt og som påvirker andeler
-     *  [BehandlingResultat.INNVILGET] ELLER [BehandlingResultat.OPPHØRT]
-     *  [BehandlingResultat.AVSLÅTT] og [BehandlingResultat.ANNULLERT] er ikke intressante for det formålet
-     */
-    private fun erIverksatt(behandling: Behandling) =
-            behandling.type != BehandlingType.BLANKETT &&
-            setOf(BehandlingResultat.INNVILGET, BehandlingResultat.OPPHØRT).contains(behandling.resultat) &&
-            behandling.status == BehandlingStatus.FERDIGSTILT
-
-    private fun validerTekniskOpphør(sisteBehandling: Behandling?, tidligereBehandlinger: List<Behandling>) {
+    private fun validerTekniskOpphør(sisteBehandling: Behandling?,
+                                     sistIverksatteBehandling: Behandling?) {
         if (sisteBehandling == null) {
             throw ApiFeil("Det finnes ikke en tidligere behandling for fagsaken", HttpStatus.BAD_REQUEST)
         }
-        val sistIverksatteBehandling = sistIverksatteBehandling(tidligereBehandlinger)
         if (sistIverksatteBehandling != sisteBehandling) {
             throw ApiFeil("Siste behandlingen må være iverksatt for å kunne utføre teknisk opphør", HttpStatus.BAD_REQUEST)
         }
