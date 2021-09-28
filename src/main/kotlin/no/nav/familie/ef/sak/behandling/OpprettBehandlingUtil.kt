@@ -40,9 +40,14 @@ object OpprettBehandlingUtil {
                 .maxByOrNull { it.sporbar.opprettetTid }
     }
 
+    /**
+     * Vi ønsker å peke den nye behandlingen til en behandling som er iverksatt og som påvirker andeler
+     *  [BehandlingResultat.INNVILGET] ELLER [BehandlingResultat.OPPHØRT]
+     *  [BehandlingResultat.AVSLÅTT] og [BehandlingResultat.ANNULLERT] er ikke intressante for det formålet
+     */
     private fun erIverksatt(behandling: Behandling) =
             behandling.type != BehandlingType.BLANKETT &&
-            behandling.resultat != BehandlingResultat.ANNULLERT &&
+            setOf(BehandlingResultat.INNVILGET, BehandlingResultat.OPPHØRT).contains(behandling.resultat) &&
             behandling.status == BehandlingStatus.FERDIGSTILT
 
     private fun validerTekniskOpphør(sisteBehandling: Behandling?, tidligereBehandlinger: List<Behandling>) {
