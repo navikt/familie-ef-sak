@@ -1,9 +1,9 @@
-package no.nav.familie.ef.sak.api.dto
+package no.nav.familie.ef.sak.behandlingshistorikk.dto
 
-import no.nav.familie.ef.sak.behandling.domain.StegUtfall
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
+import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 data class BehandlingshistorikkDto(val behandlingId: UUID,
                                    var steg: StegType,

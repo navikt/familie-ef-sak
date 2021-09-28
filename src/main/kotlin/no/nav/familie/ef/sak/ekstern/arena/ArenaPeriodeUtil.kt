@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.arena
+package no.nav.familie.ef.sak.ekstern.arena
 
 import no.nav.familie.ef.sak.ekstern.tilEksternPeriodeOvergangsstønad
 import no.nav.familie.ef.sak.felles.util.isEqualOrAfter

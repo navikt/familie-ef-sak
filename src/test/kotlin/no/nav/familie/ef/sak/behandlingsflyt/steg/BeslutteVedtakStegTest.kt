@@ -7,16 +7,16 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.behandling.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.behandling.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.PollStatusFraIverksettTask
+import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
+import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.brev.VedtaksbrevRepository
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.fagsak.FagsakService
@@ -30,6 +30,7 @@ import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
 import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.oppgave.OppgaveService
+import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.vedtak.TotrinnskontrollService
 import no.nav.familie.ef.sak.vedtak.Vedtak
@@ -124,7 +125,9 @@ internal class BeslutteVedtakStegTest {
                                                                         resultatType = ResultatType.INNVILGE,
                                                                         saksbehandlerIdent = "sak1",
                                                                         beslutterIdent = "beslutter1")
-        every { behandlingService.oppdaterResultatPåBehandling(any(), any()) } just Runs
+        every { behandlingService.oppdaterResultatPåBehandling(any(), any()) } answers {
+            behandling(fagsak, resultat = secondArg())
+        }
         every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any(), any()) } returns Behandlingshistorikk(
                 behandlingId = behandlingId,
                 steg = StegType.SEND_TIL_BESLUTTER,

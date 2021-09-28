@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.behandling
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.fagsak.FagsakService
@@ -59,9 +60,10 @@ class TekniskOpphørService(val behandlingService: BehandlingService,
     }
 
     private fun opprettBehandlingTekniskOpphør(fagsakId: UUID): Behandling {
-        return behandlingService.opprettBehandling(behandlingType = BehandlingType.TEKNISK_OPPHØR,
-                                                   fagsakId = fagsakId,
-                                                   status = BehandlingStatus.IVERKSETTER_VEDTAK,
-                                                   stegType = StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT)
+        val behandling = behandlingService.opprettBehandling(behandlingType = BehandlingType.TEKNISK_OPPHØR,
+                                                             fagsakId = fagsakId,
+                                                             status = BehandlingStatus.IVERKSETTER_VEDTAK,
+                                                             stegType = StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT)
+        return behandlingService.oppdaterResultatPåBehandling(behandling.id, BehandlingResultat.OPPHØRT)
     }
 }

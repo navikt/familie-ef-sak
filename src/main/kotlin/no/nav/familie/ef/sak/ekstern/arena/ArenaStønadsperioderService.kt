@@ -1,11 +1,11 @@
-package no.nav.familie.ef.sak.ekstern
+package no.nav.familie.ef.sak.ekstern.arena
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
-import no.nav.familie.ef.sak.arena.ArenaPeriodeUtil.mapOgFiltrer
-import no.nav.familie.ef.sak.arena.ArenaPeriodeUtil.slåSammenPerioder
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.ekstern.arena.ArenaPeriodeUtil.mapOgFiltrer
+import no.nav.familie.ef.sak.ekstern.arena.ArenaPeriodeUtil.slåSammenPerioder
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient

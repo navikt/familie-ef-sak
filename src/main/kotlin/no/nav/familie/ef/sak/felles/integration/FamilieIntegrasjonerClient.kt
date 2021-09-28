@@ -1,17 +1,14 @@
 package no.nav.familie.ef.sak.felles.integration
 
-import no.nav.familie.ef.sak.infrastruktur.exception.Feil
-import no.nav.familie.ef.sak.infrastruktur.config.IntegrasjonerConfig
 import no.nav.familie.ef.sak.arbeidsfordeling.Arbeidsfordelingsenhet
 import no.nav.familie.ef.sak.felles.integration.dto.EgenAnsattRequest
 import no.nav.familie.ef.sak.felles.integration.dto.EgenAnsattResponse
 import no.nav.familie.ef.sak.felles.integration.dto.Tilgang
-import no.nav.familie.ef.sak.felles.util.medContentTypeJsonUTF8
+import no.nav.familie.ef.sak.infrastruktur.config.IntegrasjonerConfig
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.http.client.AbstractPingableRestClient
-import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.dokdist.DistribuerJournalpostRequest
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadRequest
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
 import no.nav.familie.kontrakter.felles.getDataOrThrow
@@ -70,18 +67,6 @@ class FamilieIntegrasjonerClient(@Qualifier("azure") restOperations: RestOperati
     fun hentInfotrygdPerioder(request: PerioderOvergangsstønadRequest): PerioderOvergangsstønadResponse {
         return postForEntity<Ressurs<PerioderOvergangsstønadResponse>>(integrasjonerConfig.infotrygdVedtaksperioder, request)
                 .getDataOrThrow()
-    }
-
-    fun distribuerBrev(journalpostId: String): String {
-        logger.info("Kaller dokdist-tjeneste for journalpost=$journalpostId")
-
-        val journalpostRequest = DistribuerJournalpostRequest(journalpostId = journalpostId,
-                                                              bestillendeFagsystem = Fagsystem.EF,
-                                                              dokumentProdApp = "FAMILIE_EF_SAK")
-
-        return postForEntity<Ressurs<String>>(integrasjonerConfig.distribuerDokumentUri,
-                                              journalpostRequest,
-                                              HttpHeaders().medContentTypeJsonUTF8()).getDataOrThrow()
     }
 
     fun hentNavKontor(ident: String): NavKontorEnhet {
