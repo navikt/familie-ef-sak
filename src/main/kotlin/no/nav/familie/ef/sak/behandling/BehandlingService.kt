@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.behandling
 
-import no.nav.familie.ef.sak.behandling.OpprettBehandlingUtil.sistIverksatteBehandling
 import no.nav.familie.ef.sak.behandling.OpprettBehandlingUtil.validerKanOppretteNyBehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
@@ -64,11 +63,11 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
                           status: BehandlingStatus = BehandlingStatus.OPPRETTET,
                           stegType: StegType = StegType.VILKÅR): Behandling {
         val tidligereBehandlinger = behandlingRepository.findByFagsakId(fagsakId)
-        validerKanOppretteNyBehandling(behandlingType, tidligereBehandlinger)
-        val forrigeBehandlingId = sistIverksatteBehandling(tidligereBehandlinger)?.id
+        val forrigeBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
+        validerKanOppretteNyBehandling(behandlingType, tidligereBehandlinger, forrigeBehandling)
 
         return behandlingRepository.insert(Behandling(fagsakId = fagsakId,
-                                                      forrigeBehandlingId = forrigeBehandlingId,
+                                                      forrigeBehandlingId = forrigeBehandling?.id,
                                                       type = behandlingType,
                                                       steg = stegType,
                                                       status = status,

@@ -17,9 +17,9 @@ interface FagsakRepository : RepositoryInterface<Fagsak, UUID>, InsertUpdateRepo
                     JOIN fagsak_ekstern fe ON fe.fagsak_id = f.id
                     LEFT JOIN fagsak_person fp 
                     ON fp.fagsak_id = f.id 
-                    WHERE ident = :ident 
+                    WHERE ident IN (:personIdenter)
                     AND stonadstype = :stønadstype""")
-    fun findBySøkerIdent(ident: String, stønadstype: Stønadstype): Fagsak?
+    fun findBySøkerIdent(personIdenter: Set<String>, stønadstype: Stønadstype): Fagsak?
 
     // language=PostgreSQL
     @Query("""SELECT f.*, fe.id AS eksternid_id

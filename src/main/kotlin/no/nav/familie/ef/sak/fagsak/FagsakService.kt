@@ -28,10 +28,13 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
 
     fun hentEllerOpprettFagsak(personIdent: String,
                                stønadstype: Stønadstype): Fagsak {
-        return (fagsakRepository.findBySøkerIdent(personIdent, stønadstype)
+        return (fagsakRepository.findBySøkerIdent(setOf(personIdent), stønadstype)
                 ?: fagsakRepository.insert(Fagsak(stønadstype = stønadstype,
                                                   søkerIdenter = setOf(FagsakPerson(ident = personIdent)))))
     }
+
+    fun finnFagsak(personIdenter: Set<String>, stønadstype: Stønadstype): Fagsak? =
+            fagsakRepository.findBySøkerIdent(personIdenter, stønadstype)
 
     fun hentFagsakMedBehandlinger(fagsakId: UUID): FagsakDto {
         return fagsakTilDto(hentFagsak(fagsakId))
