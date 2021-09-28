@@ -1,12 +1,13 @@
-package no.nav.familie.ef.sak.behandlingsflyt.steg
+package no.nav.familie.ef.sak.blankett
 
-import no.nav.familie.ef.sak.infrastruktur.exception.Feil
-import no.nav.familie.ef.sak.blankett.BlankettRepository
 import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandlingsflyt.steg.BehandlingSteg
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.Avslå
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
-import no.nav.familie.ef.sak.vedtak.VedtakService
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 

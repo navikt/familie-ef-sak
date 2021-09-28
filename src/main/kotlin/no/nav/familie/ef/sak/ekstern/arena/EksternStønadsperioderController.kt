@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.ekstern
+package no.nav.familie.ef.sak.ekstern.arena
 
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadRequest

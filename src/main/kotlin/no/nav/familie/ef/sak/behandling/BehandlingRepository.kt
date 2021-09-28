@@ -1,11 +1,11 @@
 package no.nav.familie.ef.sak.behandling
 
-import no.nav.familie.ef.sak.repository.InsertUpdateRepository
-import no.nav.familie.ef.sak.repository.RepositoryInterface
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
-import no.nav.familie.ef.sak.behandling.domain.EksternId
+import no.nav.familie.ef.sak.behandling.dto.EksternId
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
+import no.nav.familie.ef.sak.repository.InsertUpdateRepository
+import no.nav.familie.ef.sak.repository.RepositoryInterface
 import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.stereotype.Repository
 import java.util.UUID
