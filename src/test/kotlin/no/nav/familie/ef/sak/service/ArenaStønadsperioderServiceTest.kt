@@ -5,6 +5,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.ekstern.arena.ArenaStønadsperioderService
+import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
@@ -37,19 +38,29 @@ internal class ArenaStønadsperioderServiceTest {
     private val behandlingService = mockk<BehandlingService>(relaxed = true)
     private val familieIntegrasjonerClient = mockk<FamilieIntegrasjonerClient>()
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
+    private val fagsakService = mockk<FagsakService>()
 
     private val service =
             ArenaStønadsperioderService(infotrygdReplikaClient = infotrygdReplikaClient,
                                         behandlingService = behandlingService,
                                         pdlClient = pdlClient,
                                         tilkjentYtelseService = tilkjentYtelseService,
-                                        familieIntegrasjonerClient = familieIntegrasjonerClient)
+                                        familieIntegrasjonerClient = familieIntegrasjonerClient,
+                                        fagsakService = fagsakService)
 
     private val ident = "01234567890"
 
+    private val fagsakOvergangsstønad = fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD)
+    private val fagsakBarnetilsyn = fagsak(stønadstype = Stønadstype.BARNETILSYN)
+    private val behandlingOvergangsstønad = behandling(fagsakOvergangsstønad)
+    private val behandlingBarnetilsyn = behandling(fagsakBarnetilsyn)
+
     @BeforeEach
     internal fun setUp() {
-        every { behandlingService.finnSisteIverksatteBehandling(any(), any()) } returns null
+        every { behandlingService.finnSisteIverksatteBehandling(any()) } returns null
+        every { fagsakService.finnFagsak(any(), Stønadstype.OVERGANGSSTØNAD) } returns fagsakOvergangsstønad
+        every { fagsakService.finnFagsak(any(), Stønadstype.BARNETILSYN) } returns fagsakBarnetilsyn
+        every { fagsakService.finnFagsak(any(), Stønadstype.SKOLEPENGER) } returns null
     }
 
     @Test
@@ -86,15 +97,9 @@ internal class ArenaStønadsperioderServiceTest {
 
     @Test
     internal fun `skal returnere perioder fra både infotrygd og ef`() {
-        val behandlingOvergangsstønad = behandling(fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD))
-        val behandlingBarnetilsyn = behandling(fagsak(stønadstype = Stønadstype.BARNETILSYN))
-
         mockPdl()
-        every {
-            behandlingService.finnSisteIverksatteBehandling(Stønadstype.OVERGANGSSTØNAD,
-                                                            any())
-        } returns behandlingOvergangsstønad
-        every { behandlingService.finnSisteIverksatteBehandling(Stønadstype.BARNETILSYN, any()) } returns behandlingBarnetilsyn
+        every { behandlingService.finnSisteIverksatteBehandling(fagsakOvergangsstønad.id) } returns behandlingOvergangsstønad
+        every { behandlingService.finnSisteIverksatteBehandling(fagsakBarnetilsyn.id) } returns behandlingBarnetilsyn
 
         every { familieIntegrasjonerClient.hentInfotrygdPerioder(any()) } returns PerioderOvergangsstønadResponse(listOf(
                 PeriodeOvergangsstønad(ident, parse("2021-01-01"), parse("2021-01-31"), Datakilde.INFOTRYGD)))

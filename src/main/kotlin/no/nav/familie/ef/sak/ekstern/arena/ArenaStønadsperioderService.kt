@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.ekstern.arena.ArenaPeriodeUtil.mapOgFiltrer
 import no.nav.familie.ef.sak.ekstern.arena.ArenaPeriodeUtil.slåSammenPerioder
+import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
@@ -28,6 +29,7 @@ import java.time.LocalDate
  */
 @Service
 class ArenaStønadsperioderService(private val infotrygdReplikaClient: InfotrygdReplikaClient,
+                                  private val fagsakService: FagsakService,
                                   private val behandlingService: BehandlingService,
                                   private val tilkjentYtelseService: TilkjentYtelseService,
                                   private val familieIntegrasjonerClient: FamilieIntegrasjonerClient,
@@ -61,7 +63,8 @@ class ArenaStønadsperioderService(private val infotrygdReplikaClient: Infotrygd
         val tom = request.tomDato ?: LocalDate.now()
         val personIdenter = hentPersonIdenter(request)
         return Stønadstype.values()
-                .mapNotNull { behandlingService.finnSisteIverksatteBehandling(it, personIdenter) }
+                .mapNotNull { fagsakService.finnFagsak(personIdenter, it)}
+                .mapNotNull { behandlingService.finnSisteIverksatteBehandling(it.id) }
                 .mapNotNull { if (it.type != BehandlingType.TEKNISK_OPPHØR) it else null }
                 .map { tilkjentYtelseService.hentForBehandling(it.id) }
                 .flatMap { it.andelerTilkjentYtelse }

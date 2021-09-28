@@ -81,8 +81,7 @@ internal class TekniskOpphørTest : OppslagSpringRunnerTest() {
                 .isEmpty()
     }
 
-    private fun finnSistIverksatteBehandling() =
-            behandlingRepository.finnSisteIverksatteBehandling(Stønadstype.OVERGANGSSTØNAD, setOf(ident))
+    private fun finnSistIverksatteBehandling() = behandlingRepository.finnSisteIverksatteBehandling(fagsak.id)
 
     private fun håndterTekniskOpphør(fagsak: Fagsak) {
         tekniskOpphørService.håndterTeknisktOpphør(fagsak.id)
