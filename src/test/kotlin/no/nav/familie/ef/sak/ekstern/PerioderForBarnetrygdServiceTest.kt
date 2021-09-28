@@ -4,6 +4,8 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
@@ -23,19 +25,28 @@ import java.time.LocalDate
 internal class PerioderForBarnetrygdServiceTest {
 
     private val pdlClient = mockk<PdlClient>()
+    private val fagsakService = mockk<FagsakService>()
     private val behandlingService = mockk<BehandlingService>()
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
 
-    private val service = PerioderForBarnetrygdService(pdlClient, behandlingService, tilkjentYtelseService)
+    private val service = PerioderForBarnetrygdService(pdlClient, fagsakService, behandlingService, tilkjentYtelseService)
 
     private val personIdent = "123"
-    private val behandling = behandling(fagsak())
+    private val fagsak = fagsak()
+    private val behandling = behandling(fagsak)
 
     @BeforeEach
     internal fun setUp() {
+        mockFagsak(fagsak)
         every {
             pdlClient.hentPersonidenter(personIdent, true)
         } returns PdlIdenter(listOf(PdlIdent(personIdent, false)))
+    }
+
+    @Test
+    internal fun `skal returnere tom liste hvis det ikke finnes en fagsak for personen`() {
+        mockFagsak(null)
+        assertThat(service.hentPerioder(PersonIdent(personIdent)).perioder).isEmpty()
     }
 
     @Test
@@ -56,10 +67,12 @@ internal class PerioderForBarnetrygdServiceTest {
         assertThat(perioder[0].tomDato).isEqualTo(LocalDate.now().plusDays(1))
     }
 
+    private fun mockFagsak(fagsak: Fagsak? = this.fagsak) {
+        every { fagsakService.finnFagsak(setOf(personIdent), Stønadstype.OVERGANGSSTØNAD) } returns fagsak
+    }
+
     private fun mockBehandling(behandling: Behandling? = this.behandling) {
-        every {
-            behandlingService.finnSisteIverksatteBehandling(Stønadstype.OVERGANGSSTØNAD, setOf(personIdent))
-        } returns behandling
+        every { behandlingService.finnSisteIverksatteBehandling(fagsak.id) } returns behandling
     }
 
     private fun mockTilkjentYtelse() {

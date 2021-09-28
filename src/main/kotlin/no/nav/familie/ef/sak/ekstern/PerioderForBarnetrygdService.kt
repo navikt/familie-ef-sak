@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.ekstern
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
@@ -20,17 +21,16 @@ import org.springframework.stereotype.Service
  */
 @Service
 class PerioderForBarnetrygdService(private val pdlClient: PdlClient,
+                                   private val fagsakService: FagsakService,
                                    private val behandlingService: BehandlingService,
                                    private val tilkjentYtelseService: TilkjentYtelseService) {
 
     fun hentPerioder(request: PersonIdent): PerioderOvergangsstønadResponse {
         val personIdenter = pdlClient.hentPersonidenter(request.ident, true).identer()
-        val perioder =
-                behandlingService.finnSisteIverksatteBehandling(Stønadstype.OVERGANGSSTØNAD, personIdenter)
-                        ?.let {
-                            hentPerioderFraReplika() + hentPerioderFraEf(it)
-                        }
-                ?: emptyList()
+        val perioder = fagsakService.finnFagsak(personIdenter, Stønadstype.OVERGANGSSTØNAD)
+                               ?.let { behandlingService.finnSisteIverksatteBehandling(it.id) }
+                               ?.let { hentPerioderFraReplika() + hentPerioderFraEf(it) }
+                       ?: emptyList()
 
         return PerioderOvergangsstønadResponse(perioder)
     }
