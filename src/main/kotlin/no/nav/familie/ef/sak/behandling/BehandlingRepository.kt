@@ -60,7 +60,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         WHERE fp.ident IN (:personidenter)
          AND f.stonadstype = :stønadstype
          AND b.type != 'BLANKETT'
-         AND b.resultat != 'ANNULLERT'
+         AND b.resultat IN ('OPPHØRT', 'INNVILGET')
          AND b.status = 'FERDIGSTILT'
         ORDER BY b.opprettet_tid DESC
         LIMIT 1
