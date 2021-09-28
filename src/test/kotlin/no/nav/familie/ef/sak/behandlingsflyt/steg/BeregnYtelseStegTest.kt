@@ -342,6 +342,16 @@ internal class BeregnYtelseStegTest {
         assertThat(feil.frontendFeilmelding).contains("Kan kun opphøre ved revurdering")
     }
 
+    @Test
+    internal fun `skal slette mellomlagret brev ved utførBeregnYtelseSteg`() {
+        every { beregningService.beregnYtelse(any(), any()) } returns listOf(lagBeløpsperiode(LocalDate.now(), LocalDate.now()))
+        utførSteg(BehandlingType.FØRSTEGANGSBEHANDLING)
+
+        verify { mellomlagringBrevService.slettMellomlagringHvisFinnes(any()) }
+    }
+
+
+
 
     private fun utførSteg(type: BehandlingType, vedtak: VedtakDto = Innvilget(periodeBegrunnelse = "", inntektBegrunnelse = ""), forrigeBehandlingId: UUID? = null) {
         steg.utførSteg(behandling(fagsak(), type = type, forrigeBehandlingId = forrigeBehandlingId), vedtak = vedtak)
