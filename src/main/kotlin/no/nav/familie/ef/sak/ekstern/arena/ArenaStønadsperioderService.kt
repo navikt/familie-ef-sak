@@ -1,18 +1,18 @@
-package no.nav.familie.ef.sak.ekstern
+package no.nav.familie.ef.sak.ekstern.arena
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
-import no.nav.familie.ef.sak.arena.ArenaPeriodeUtil.mapOgFiltrer
-import no.nav.familie.ef.sak.arena.ArenaPeriodeUtil.slåSammenPerioder
-import no.nav.familie.ef.sak.infrastruktur.exception.PdlNotFoundException
-import no.nav.familie.ef.sak.felles.integration.FamilieIntegrasjonerClient
-import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.ekstern.arena.ArenaPeriodeUtil.mapOgFiltrer
+import no.nav.familie.ef.sak.ekstern.arena.ArenaPeriodeUtil.slåSammenPerioder
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
+import no.nav.familie.ef.sak.felles.integration.FamilieIntegrasjonerClient
+import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
+import no.nav.familie.ef.sak.infrastruktur.exception.PdlNotFoundException
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPerioderArenaRequest
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad

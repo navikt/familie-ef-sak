@@ -1,15 +1,15 @@
-package no.nav.familie.ef.sak.behandling.domain
+package no.nav.familie.ef.sak.behandlingshistorikk.domain
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.familie.ef.sak.api.dto.BehandlingshistorikkDto
-import no.nav.familie.ef.sak.felles.domain.JsonWrapper
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
+import no.nav.familie.ef.sak.behandlingshistorikk.dto.BehandlingshistorikkDto
+import no.nav.familie.ef.sak.felles.domain.JsonWrapper
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.data.annotation.Id
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
-import java.util.*
+import java.util.UUID
 
 data class Behandlingshistorikk(@Id
                                 val id: UUID = UUID.randomUUID(),
