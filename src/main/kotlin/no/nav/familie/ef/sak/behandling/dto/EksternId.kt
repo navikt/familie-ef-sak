@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.behandling.domain
+package no.nav.familie.ef.sak.behandling.dto
 
 import java.util.UUID
 

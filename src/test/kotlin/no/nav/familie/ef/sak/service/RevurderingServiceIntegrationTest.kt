@@ -4,19 +4,20 @@ import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.RevurderingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
-import no.nav.familie.ef.sak.repository.behandling
-import no.nav.familie.ef.sak.repository.fagsak
-import no.nav.familie.ef.sak.repository.fagsakpersoner
-import no.nav.familie.ef.sak.repository.vilkårsvurdering
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadsskjemaOvergangsstønad
+import no.nav.familie.ef.sak.repository.behandling
+import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.ef.sak.repository.vilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
@@ -56,7 +57,9 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal opprette revurdering`() {
-        val behandling = behandlingRepository.insert(behandling(fagsak = fagsak, status = BehandlingStatus.FERDIGSTILT))
+        val behandling = behandlingRepository.insert(behandling(fagsak = fagsak,
+                                                                status = BehandlingStatus.FERDIGSTILT,
+                                                                resultat = BehandlingResultat.INNVILGET))
         val søknad = lagreSøknad(behandling, fagsak)
         opprettVilkår(behandling, søknad)
 
@@ -68,7 +71,9 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `revurdering - skal kopiere vilkår`() {
-        val behandling = behandlingRepository.insert(behandling(fagsak = fagsak, status = BehandlingStatus.FERDIGSTILT))
+        val behandling = behandlingRepository.insert(behandling(fagsak = fagsak,
+                                                                status = BehandlingStatus.FERDIGSTILT,
+                                                                resultat = BehandlingResultat.INNVILGET))
         val søknad = lagreSøknad(behandling, fagsak)
         opprettVilkår(behandling, søknad)
 
