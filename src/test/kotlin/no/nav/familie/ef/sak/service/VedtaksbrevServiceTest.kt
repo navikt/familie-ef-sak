@@ -33,7 +33,7 @@ internal class VedtaksbrevServiceTest {
     private val vedtaksbrevRepository = mockk<VedtaksbrevRepository>()
     private val behandlingService = mockk<BehandlingService>()
 
-    private val vedtaksbrevService = VedtaksbrevService(brevClient, vedtaksbrevRepository, behandlingService)
+    private val vedtaksbrevService = VedtaksbrevService(brevClient, vedtaksbrevRepository, behandlingService, mockk())
 
     private val vedtaksbrev = Vedtaksbrev(behandling.id,
                                           "123",

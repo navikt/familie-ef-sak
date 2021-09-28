@@ -2,21 +2,29 @@ package no.nav.familie.ef.sak.brev
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
+import no.nav.familie.ef.sak.brev.domain.FRITEKST
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
+import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevRequestDto
+import no.nav.familie.ef.sak.brev.dto.VedtaksbrevFritekstDto
 import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.util.UUID
 
 @Service
 class VedtaksbrevService(private val brevClient: BrevClient,
                          private val brevRepository: VedtaksbrevRepository,
-                         private val behandlingService: BehandlingService) {
+                         private val behandlingService: BehandlingService,
+                         private val personopplysningerService: PersonopplysningerService) {
 
     fun hentBeslutterbrevEllerRekonstruerSaksbehandlerBrev(behandlingId: UUID): ByteArray {
         val vedtaksbrev = brevRepository.findByIdOrThrow(behandlingId)
@@ -24,6 +32,30 @@ class VedtaksbrevService(private val brevClient: BrevClient,
             vedtaksbrev.beslutterPdf.bytes
         } else {
             brevClient.genererBrev(vedtaksbrev)
+        }
+    }
+
+    fun lagSaksbehandlerBrev(behandlingId: UUID, brevrequest: JsonNode, brevmal: String): ByteArray {
+        val behandling = behandlingService.hentBehandling(behandlingId)
+        validerRedigerbarBehandling(behandling)
+        val saksbehandlersignatur = SikkerhetContext.hentSaksbehandlerNavn(strict = true)
+        val vedtaksbrev = lagreEllerOppdaterVedtaksbrev(behandlingId, brevrequest.toString(), brevmal, saksbehandlersignatur)
+
+        return brevClient.genererBrev(vedtaksbrev)
+    }
+
+    private fun lagreEllerOppdaterVedtaksbrev(behandlingId: UUID,
+                                              brevrequest: String,
+                                              brevmal: String,
+                                              saksbehandlersignatur: String): Vedtaksbrev {
+        val vedtaksbrev = Vedtaksbrev(behandlingId,
+                                      brevrequest,
+                                      brevmal,
+                                      saksbehandlersignatur,
+                                      beslutterPdf = null)
+        return when (brevRepository.existsById(behandlingId)) {
+            true -> brevRepository.update(vedtaksbrev)
+            false -> brevRepository.insert(vedtaksbrev)
         }
     }
 
@@ -46,6 +78,31 @@ class VedtaksbrevService(private val brevClient: BrevClient,
         return beslutterPdf.bytes
     }
 
+    fun lagSaksbehandlerFritekstbrev(frittståendeBrevDto: VedtaksbrevFritekstDto): ByteArray {
+        val behandling = behandlingService.hentBehandling(frittståendeBrevDto.behandlingId)
+        validerRedigerbarBehandling(behandling)
+        val ident = behandlingService.hentAktivIdent(frittståendeBrevDto.behandlingId)
+        val navn = personopplysningerService.hentGjeldeneNavn(listOf(ident))
+        val request = FrittståendeBrevRequestDto(overskrift = frittståendeBrevDto.overskrift,
+                                                 avsnitt = frittståendeBrevDto.avsnitt,
+                                                 personIdent = ident,
+                                                 navn = navn[ident]!!,
+                                                 brevdato = LocalDate.now())
+        val vedtaksbrev = lagreEllerOppdaterVedtaksbrev(behandlingId = frittståendeBrevDto.behandlingId,
+                                                        brevrequest = objectMapper.writeValueAsString(request),
+                                                        brevmal = FRITEKST,
+                                                        saksbehandlersignatur = SikkerhetContext.hentSaksbehandlerNavn(true))
+
+        return brevClient.genererBrev(vedtaksbrev = vedtaksbrev)
+    }
+
+    private fun validerRedigerbarBehandling(behandling: Behandling) {
+        if (behandling.status.behandlingErLåstForVidereRedigering()) {
+            throw Feil("Behandling er i feil steg=${behandling.steg} status=${behandling.status}",
+                       httpStatus = HttpStatus.BAD_REQUEST)
+        }
+    }
+
     private fun validerBeslutterIkkeErLikSaksbehandler(vedtaksbrev: Vedtaksbrev,
                                                        besluttersignatur: String) {
         if (vedtaksbrev.saksbehandlersignatur == besluttersignatur) {
@@ -54,28 +111,5 @@ class VedtaksbrevService(private val brevClient: BrevClient,
         }
     }
 
-    fun lagSaksbehandlerBrev(behandlingId: UUID, brevrequest: JsonNode, brevmal: String): ByteArray {
-        val behandling = behandlingService.hentBehandling(behandlingId)
-        if (behandling.status.behandlingErLåstForVidereRedigering()) {
-            throw Feil("Behandling er i feil steg=${behandling.steg} status=${behandling.status}",
-                       httpStatus = HttpStatus.BAD_REQUEST)
-        }
-
-        val saksbehandlersignatur = SikkerhetContext.hentSaksbehandlerNavn(strict = true)
-        val vedtaksbrev = when (brevRepository.existsById(behandlingId)) {
-            true -> brevRepository.update(Vedtaksbrev(behandlingId,
-                                                      brevrequest.toString(),
-                                                      brevmal,
-                                                      saksbehandlersignatur,
-                                                      beslutterPdf = null))
-            false -> brevRepository.insert(Vedtaksbrev(behandlingId,
-                                                       brevrequest.toString(),
-                                                       brevmal,
-                                                       saksbehandlersignatur,
-                                                       beslutterPdf = null))
-        }
-
-        return brevClient.genererBrev(vedtaksbrev)
-    }
 
 }
