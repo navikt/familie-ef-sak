@@ -1,7 +1,7 @@
-package no.nav.familie.ef.sak.arena
+package no.nav.familie.ef.sak.ekstern.arena
 
-import no.nav.familie.ef.sak.arena.ArenaPeriodeUtil.mapOgFiltrer
-import no.nav.familie.ef.sak.arena.ArenaPeriodeUtil.slåSammenPerioder
+import no.nav.familie.ef.sak.ekstern.arena.ArenaPeriodeUtil.mapOgFiltrer
+import no.nav.familie.ef.sak.ekstern.arena.ArenaPeriodeUtil.slåSammenPerioder
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPerioderResponse
