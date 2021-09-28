@@ -2,16 +2,17 @@ package no.nav.familie.ef.sak.repository
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
-import no.nav.familie.ef.sak.fagsak.FagsakRepository
-import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.FERDIGSTILT
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.UTREDES
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
-import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype.BARNETILSYN
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype.OVERGANGSSTØNAD
+import no.nav.familie.ef.sak.felles.domain.Sporbar
+import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
@@ -132,8 +133,10 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         behandlingRepository.insert(behandling(fagsak,
                                                status = FERDIGSTILT,
                                                opprettetTid = LocalDateTime.now().minusDays(2)))
-        val tekniskOpphørBehandling =
-                behandlingRepository.insert(behandling(fagsak, status = FERDIGSTILT, type = BehandlingType.TEKNISK_OPPHØR))
+        val tekniskOpphørBehandling = behandlingRepository.insert(behandling(fagsak,
+                                                                             status = FERDIGSTILT,
+                                                                             type = BehandlingType.TEKNISK_OPPHØR,
+                                                                             resultat = BehandlingResultat.OPPHØRT))
         assertThat(behandlingRepository.finnSisteIverksatteBehandling(OVERGANGSSTØNAD, setOf(ident)))
                 .isEqualTo(tekniskOpphørBehandling)
     }

@@ -127,10 +127,10 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
         }
     }
 
-    fun oppdaterResultatPåBehandling(behandlingId: UUID, behandlingResultat: BehandlingResultat) {
+    fun oppdaterResultatPåBehandling(behandlingId: UUID, behandlingResultat: BehandlingResultat): Behandling {
         val behandling = hentBehandling(behandlingId)
         behandling.resultat = behandlingResultat
-        behandlingRepository.update(behandling)
+        return behandlingRepository.update(behandling)
     }
 
 }

@@ -39,7 +39,7 @@ class AleneomsorgRegel : Vilkårsregel(vilkårType = VilkårType.ALENEOMSORG,
 
         private val SKRIFTLIG_AVTALE_OM_DELT_BOSTED =
                 RegelSteg(regelId = RegelId.SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
-                          jaNeiSvarRegel(hvisJa = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                          jaNeiSvarRegel(hvisJa = SluttSvarRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
                                          hvisNei = SluttSvarRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE))
 
     }
