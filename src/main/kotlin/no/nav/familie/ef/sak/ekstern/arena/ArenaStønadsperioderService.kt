@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.ekstern.arena
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
-import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.ekstern.arena.ArenaPeriodeUtil.mapOgFiltrer
 import no.nav.familie.ef.sak.ekstern.arena.ArenaPeriodeUtil.slåSammenPerioder
@@ -30,7 +30,7 @@ import java.time.LocalDate
 @Service
 class ArenaStønadsperioderService(private val infotrygdReplikaClient: InfotrygdReplikaClient,
                                   private val fagsakService: FagsakService,
-                                  private val behandlingRepository: BehandlingRepository,
+                                  private val behandlingService: BehandlingService,
                                   private val tilkjentYtelseService: TilkjentYtelseService,
                                   private val familieIntegrasjonerClient: FamilieIntegrasjonerClient,
                                   private val pdlClient: PdlClient) {
@@ -64,7 +64,7 @@ class ArenaStønadsperioderService(private val infotrygdReplikaClient: Infotrygd
         val personIdenter = hentPersonIdenter(request)
         return Stønadstype.values()
                 .mapNotNull { fagsakService.finnFagsak(personIdenter, it)}
-                .mapNotNull { behandlingRepository.finnSisteIverksatteBehandling(it.id) }
+                .mapNotNull { behandlingService.finnSisteIverksatteBehandling(it.id) }
                 .mapNotNull { if (it.type != BehandlingType.TEKNISK_OPPHØR) it else null }
                 .map { tilkjentYtelseService.hentForBehandling(it.id) }
                 .flatMap { it.andelerTilkjentYtelse }
