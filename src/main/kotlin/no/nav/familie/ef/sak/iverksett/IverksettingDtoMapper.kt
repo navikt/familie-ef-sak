@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.iverksett
 
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
-import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
@@ -50,7 +49,6 @@ import no.nav.familie.kontrakter.ef.iverksett.SvarId as SvarIdIverksett
 @Component
 class IverksettingDtoMapper(private val arbeidsfordelingService: ArbeidsfordelingService,
                             private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-                            private val behandlingRepository: BehandlingRepository,
                             private val søknadService: SøknadService,
                             private val vedtakService: VedtakService,
                             private val behandlinghistorikkService: BehandlingshistorikkService,
