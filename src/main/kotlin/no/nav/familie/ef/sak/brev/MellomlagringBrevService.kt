@@ -35,4 +35,10 @@ class MellomlagringBrevService(private val mellomlagerBrevRepository: Mellomlage
         return null
     }
 
+    fun slettMellomlagringHvisFinnes(behandlingId: UUID){
+        if(mellomlagerBrevRepository.existsById(behandlingId)){
+            mellomlagerBrevRepository.deleteById(behandlingId)
+        }
+    }
+
 }
