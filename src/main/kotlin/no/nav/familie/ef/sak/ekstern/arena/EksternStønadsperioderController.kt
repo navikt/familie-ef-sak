@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.ekstern.arena
 
+import no.nav.familie.ef.sak.ekstern.PerioderForBarnetrygdService
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadRequest
