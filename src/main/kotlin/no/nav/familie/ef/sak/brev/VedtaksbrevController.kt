@@ -37,7 +37,7 @@ class VedtaksbrevController(private val brevService: VedtaksbrevService,
 
     @PostMapping("/fritekst")
     fun lagSaksbehandlerbrev(@RequestBody brevInnhold: VedtaksbrevFritekstDto): Ressurs<ByteArray> {
-        return Ressurs.success(brevService.lagFritekstbrev(brevInnhold))
+        return Ressurs.success(brevService.lagSaksbehandlerFritekstbrev(brevInnhold))
     }
 
     @PostMapping("/{behandlingId}")

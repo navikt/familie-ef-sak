@@ -9,11 +9,11 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping(path = ["/api/brev"])
+@RequestMapping(path = ["/api/frittstaende-brev"])
 @ProtectedWithClaims(issuer = "azuread")
 class FritekstBrevController(private val frittståendeBrevService: FrittståendeBrevService) {
 
-    @PostMapping("/frittstaende")
+    @PostMapping("")
     fun lagFrittståendeBrev(@RequestBody brevInnhold: FrittståendeBrevDto): Ressurs<ByteArray> {
         return Ressurs.success(frittståendeBrevService.lagFrittståendeBrev(brevInnhold))
     }
