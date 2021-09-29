@@ -7,16 +7,36 @@ import java.time.LocalDate
 
 internal class InfotrygdPeriodeUtilTest {
 
-
+    /**
+     * Output er lik input då det ikke er noen overlappende perioder
+     */
     @Test
-    internal fun `enkel case 3 perioder`() {
-        val perioder = parseFil("infotrygd/enkel_case_3_perioder.csv")
-        assertThat(perioder).hasSize(3)
+    internal fun `leser riktig antall input og output`() {
+        val inputOutput = parseFil("infotrygd/enkel_case_3_perioder.csv")
+        assertThat(inputOutput.input).hasSize(3)
+        assertThat(inputOutput.output).hasSize(3)
     }
 
     @Test
+    internal fun `enkel case 3 perioder`() {
+        val inputOutput = parseFil("infotrygd/enkel_case_3_perioder.csv")
+        val perioder = InfotrygdPeriodeUtil.lagPerioder(inputOutput.input)
+
+        assertThat(inputOutput.output).isEqualTo(perioder)
+    }
+
+    @Test
+    internal fun `startdato i perioden til første periode`() {
+        val inputOutput = parseFil("infotrygd/erstatter_del_av_tidligere_periode.csv")
+        val perioder = InfotrygdPeriodeUtil.lagPerioder(inputOutput.input)
+
+        assertThat(inputOutput.output).isEqualTo(perioder)
+    }
+
+    /*
+    @Test
     internal fun `enkel case med hopp mellom perioder`() {
-        val perioder = parseFil("infotrygd/enkel_case_med_hopp.csv")
+        val inputOutput = parseFil("infotrygd/enkel_case_med_hopp.csv")
         assertThat(perioder).hasSize(3)
         val førstePeriode = perioder.first()
         assertThat(førstePeriode.beløp).isEqualTo(18723)
@@ -24,11 +44,12 @@ internal class InfotrygdPeriodeUtilTest {
 
     @Test
     internal fun `samme start dato`() {
-        val perioder = parseFil("infotrygd/samme_start_dato.csv")
+        val inputOutput = parseFil("infotrygd/samme_start_dato.csv")
         assertThat(perioder).hasSize(3)
         val førstePeriode = perioder.first()
         assertThat(førstePeriode.beløp).isEqualTo(18723)
     }
+     */
 
     private fun parseFil(fil: String) = InfotrygdPeriodeParser.parse(this::class.java.classLoader.getResource(fil)!!)
 
