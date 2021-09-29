@@ -33,7 +33,7 @@ object InfotrygdPeriodeParser {
                              samordningsfradrag = getValue(row, KEY_INNT_FRADRAG)!!.toInt(),
                              beløp = getValue(row, KEY_NETTO_BELØP)!!.toInt(),
                              stønadFom = LocalDate.parse(getValue(row, KEY_STØNAD_FOM)!!, DATO_FORMATTERER),
-                             stønadTom = LocalDate.parse(getValue(row, KEY_STØNAD_FOM)!!, DATO_FORMATTERER),
+                             stønadTom = LocalDate.parse(getValue(row, KEY_STØNAD_TOM)!!, DATO_FORMATTERER),
                              datoOpphor = getValue(row, KEY_DATO_OPPHØR)
                                      ?.let { emptyAsNull(it) }
                                      ?.let { LocalDate.parse(it, DATO_FORMATTERER) }
