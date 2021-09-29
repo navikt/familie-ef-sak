@@ -61,9 +61,11 @@ object InfotrygdPeriodeParser {
         val fileContent = url.openStream()!!
         val rows: List<Map<String, String>> = csvReader().readAllWithHeader(fileContent)
 
-        val inputOutput = rows.map { row ->
-            getValue(row, KEY_TYPE)!! to parseInfotrygdPeriode(row)
-        }.groupBy({ it.first }, { it.second })
+        val inputOutput = rows
+                .map { row -> row.entries.associate { it.key.trim() to it.value } }
+                .map { row ->
+                    getValue(row, KEY_TYPE)!! to parseInfotrygdPeriode(row)
+                }.groupBy({ it.first }, { it.second })
         return InfotrygdTestData(inputOutput["INPUT"]!!, inputOutput["OUTPUT"]!!)
     }
 
@@ -77,7 +79,7 @@ object InfotrygdPeriodeParser {
                                                          DATO_FORMATTERER),
                              stønadTom = LocalDate.parse(getValue(row, KEY_STØNAD_TOM)!!,
                                                          DATO_FORMATTERER),
-                             datoOpphor = getValue(row, KEY_DATO_OPPHØR)
+                             opphørsdato = getValue(row, KEY_DATO_OPPHØR)
                                      ?.let { emptyAsNull(it) }
                                      ?.let { LocalDate.parse(it, DATO_FORMATTERER) }
             )

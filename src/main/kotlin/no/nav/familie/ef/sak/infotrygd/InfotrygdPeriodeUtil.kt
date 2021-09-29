@@ -7,9 +7,9 @@ object InfotrygdPeriodeUtil {
 
         val perioder = perioderFraInfotrygd.toSet()
             .map {
-                if(it.datoOpphor != null) {
-                    if(it.datoOpphor.isBefore(it.stønadTom)) {
-                        return@map it.copy(stønadTom = it.datoOpphor)
+                if(it.opphørsdato != null) {
+                    if(it.opphørsdato.isBefore(it.stønadTom)) {
+                        return@map it.copy(stønadTom = it.opphørsdato)
                     }
                 }
                 it

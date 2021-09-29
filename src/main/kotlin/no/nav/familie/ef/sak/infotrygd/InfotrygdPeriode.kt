@@ -14,7 +14,7 @@ data class InfotrygdPeriode(
         //val datoStart: String, // usikker om vi trenger denne
         var stønadFom: LocalDate,
         var stønadTom: LocalDate,
-        val datoOpphor: LocalDate?
+        val opphørsdato: LocalDate?
 ) {
 
     fun erDatoInnenforPeriode(dato: LocalDate): Boolean {

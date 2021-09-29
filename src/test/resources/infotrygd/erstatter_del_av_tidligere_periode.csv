@@ -1,4 +1,4 @@
-type,stonad_id,vedtak_id,stonad_belop,innt_fradrag,sam_fradrag,netto_belop,belop,dato_start,dato_innv_fom,dato_innv_tom,dato_opphor
+type  ,stonad_id,vedtak_id,stonad_belop,innt_fradrag,sam_fradrag,netto_belop,belop,dato_start,dato_innv_fom,dato_innv_tom,dato_opphor
 INPUT ,1        ,1        ,0           ,0           ,0          ,4739       ,4739 ,01.12.2008,01.12.2008   ,30.06.2009   ,
 INPUT ,1        ,2        ,0           ,7049        ,0          ,4916       ,4916 ,01.12.2008,01.05.2009   ,30.06.2009   ,
 OUTPUT,1        ,1        ,0           ,0           ,0          ,4739       ,4739 ,01.12.2008,01.12.2008   ,30.04.2009   ,
