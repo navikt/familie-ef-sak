@@ -1,5 +1,7 @@
 package no.nav.familie.ef.sak.infotrygd
 
+import no.nav.familie.ef.sak.felles.util.isEqualOrAfter
+import no.nav.familie.ef.sak.felles.util.isEqualOrBefore
 import java.time.LocalDate
 
 data class InfotrygdPeriode(
@@ -10,8 +12,8 @@ data class InfotrygdPeriode(
         val samordningsfradrag: Int,
         val beløp: Int, // netto_belop
         //val datoStart: String, // usikker om vi trenger denne
-        val stønadFom: LocalDate,
-        val stønadTom: LocalDate,
+        var stønadFom: LocalDate,
+        var stønadTom: LocalDate,
         val datoOpphor: LocalDate?
 ) {
 
