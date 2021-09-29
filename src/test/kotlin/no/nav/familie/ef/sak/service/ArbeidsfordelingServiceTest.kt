@@ -4,29 +4,29 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.SøkerMedBarn
-import no.nav.familie.ef.sak.felles.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Adressebeskyttelse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.AdressebeskyttelseGradering
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
 import no.nav.familie.ef.sak.testutil.pdlBarn
 import no.nav.familie.ef.sak.testutil.pdlSøker
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class ArbeidsfordelingServiceTest {
 
     private lateinit var personService: PersonService
-    private lateinit var familieIntegrasjonerClient: FamilieIntegrasjonerClient
+    private lateinit var personopplysningerIntegrasjonerClient: PersonopplysningerIntegrasjonerClient
     private lateinit var arbeidsfordelingService: ArbeidsfordelingService
 
     @BeforeEach
     internal fun setUp() {
         personService = mockk()
-        familieIntegrasjonerClient = mockk()
-        every { familieIntegrasjonerClient.hentNavEnhet(any()) } returns listOf()
-        arbeidsfordelingService = ArbeidsfordelingService(personService, familieIntegrasjonerClient)
+        personopplysningerIntegrasjonerClient = mockk()
+        every { personopplysningerIntegrasjonerClient.hentNavEnhet(any()) } returns listOf()
+        arbeidsfordelingService = ArbeidsfordelingService(personService, personopplysningerIntegrasjonerClient)
     }
 
     @Test
@@ -36,7 +36,7 @@ internal class ArbeidsfordelingServiceTest {
                              graderingBarn = AdressebeskyttelseGradering.FORTROLIG)
 
         arbeidsfordelingService.hentNavEnhet(IDENT_FORELDER)
-        verify(exactly = 1) { familieIntegrasjonerClient.hentNavEnhet(IDENT_FORELDER) }
+        verify(exactly = 1) { personopplysningerIntegrasjonerClient.hentNavEnhet(IDENT_FORELDER) }
     }
 
     @Test
@@ -46,7 +46,7 @@ internal class ArbeidsfordelingServiceTest {
                              graderingBarn = AdressebeskyttelseGradering.STRENGT_FORTROLIG)
 
         arbeidsfordelingService.hentNavEnhet(IDENT_FORELDER)
-        verify(exactly = 1) { familieIntegrasjonerClient.hentNavEnhet(IDENT_BARN) }
+        verify(exactly = 1) { personopplysningerIntegrasjonerClient.hentNavEnhet(IDENT_BARN) }
     }
 
     private fun søkerMedBarn(graderingForelder: AdressebeskyttelseGradering,

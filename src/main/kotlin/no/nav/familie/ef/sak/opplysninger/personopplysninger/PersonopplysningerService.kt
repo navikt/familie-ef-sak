@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger
 
-import no.nav.familie.ef.sak.felles.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.PersonopplysningerDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.PersonopplysningerMapper
@@ -16,7 +15,7 @@ import java.util.UUID
 @Service
 class PersonopplysningerService(private val personService: PersonService,
                                 private val søknadService: SøknadService,
-                                private val familieIntegrasjonerClient: FamilieIntegrasjonerClient,
+                                private val personopplysningerIntegrasjonerClient: PersonopplysningerIntegrasjonerClient,
                                 private val grunnlagsdataService: GrunnlagsdataService,
                                 private val personopplysningerMapper: PersonopplysningerMapper) {
 
@@ -26,7 +25,7 @@ class PersonopplysningerService(private val personService: PersonService,
         val søknad = søknadService.hentOvergangsstønad(behandlingId)
         val personIdent = søknad.fødselsnummer
         val grunnlagsdata = grunnlagsdataService.hentGrunnlagsdata(behandlingId)
-        val egenAnsatt = familieIntegrasjonerClient.egenAnsatt(personIdent)
+        val egenAnsatt = personopplysningerIntegrasjonerClient.egenAnsatt(personIdent)
 
 
         return personopplysningerMapper.tilPersonopplysninger(
@@ -38,7 +37,7 @@ class PersonopplysningerService(private val personService: PersonService,
 
     fun hentPersonopplysninger(personIdent: String): PersonopplysningerDto {
         val grunnlagsdata = grunnlagsdataService.hentGrunnlagsdataFraRegister(personIdent, emptyList())
-        val egenAnsatt = familieIntegrasjonerClient.egenAnsatt(personIdent)
+        val egenAnsatt = personopplysningerIntegrasjonerClient.egenAnsatt(personIdent)
 
 
         return personopplysningerMapper.tilPersonopplysninger(
@@ -56,6 +55,6 @@ class PersonopplysningerService(private val personService: PersonService,
 
     @Cacheable("navKontor")
     fun hentNavKontor(ident: String): NavKontorEnhet {
-        return familieIntegrasjonerClient.hentNavKontor(ident)
+        return personopplysningerIntegrasjonerClient.hentNavKontor(ident)
     }
 }

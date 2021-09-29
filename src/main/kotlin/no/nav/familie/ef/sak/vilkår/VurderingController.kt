@@ -1,13 +1,11 @@
-package no.nav.familie.ef.sak.tilkjentytelse
+package no.nav.familie.ef.sak.vilkår
 
-import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregler
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.vilkår.dto.OppdaterVilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.SvarPåVurderingerDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårsvurderingDto
-import no.nav.familie.ef.sak.vilkår.VurderingService
-import no.nav.familie.ef.sak.vilkår.VurderingStegService
+import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregler
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.security.token.support.core.api.ProtectedWithClaims
