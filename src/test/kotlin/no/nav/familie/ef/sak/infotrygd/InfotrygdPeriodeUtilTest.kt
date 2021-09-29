@@ -25,28 +25,26 @@ internal class InfotrygdPeriodeUtilTest {
     @Test
     internal fun `startdato i perioden til første periode`() {
         val inputOutput = parseFil("infotrygd/erstatter_del_av_tidligere_periode.csv")
-        val perioder = InfotrygdPeriodeUtil.lagPerioder(inputOutput.input)
-
-        assertThat(inputOutput.output).isEqualTo(perioder)
+        assertThat(inputOutput.output).isEqualTo(InfotrygdPeriodeUtil.lagPerioder(inputOutput.input))
     }
 
-    /*
+    @Test
+    internal fun `startdato i perioden til første periode med opphør`() {
+        val inputOutput = parseFil("infotrygd/erstatter_del_av_tidligere_periode_med_opphør.csv")
+        assertThat(inputOutput.output).isEqualTo(InfotrygdPeriodeUtil.lagPerioder(inputOutput.input))
+    }
+
     @Test
     internal fun `enkel case med hopp mellom perioder`() {
         val inputOutput = parseFil("infotrygd/enkel_case_med_hopp.csv")
-        assertThat(perioder).hasSize(3)
-        val førstePeriode = perioder.first()
-        assertThat(førstePeriode.beløp).isEqualTo(18723)
+        assertThat(inputOutput.output).isEqualTo(InfotrygdPeriodeUtil.lagPerioder(inputOutput.input))
     }
 
     @Test
     internal fun `samme start dato`() {
         val inputOutput = parseFil("infotrygd/samme_start_dato.csv")
-        assertThat(perioder).hasSize(3)
-        val førstePeriode = perioder.first()
-        assertThat(førstePeriode.beløp).isEqualTo(18723)
+        assertThat(inputOutput.output).isEqualTo(InfotrygdPeriodeUtil.lagPerioder(inputOutput.input))
     }
-     */
 
     private fun parseFil(fil: String) = InfotrygdPeriodeParser.parse(this::class.java.classLoader.getResource(fil)!!)
 
