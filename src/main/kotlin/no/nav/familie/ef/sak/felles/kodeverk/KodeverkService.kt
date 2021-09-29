@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.felles.integration
+package no.nav.familie.ef.sak.felles.kodeverk
 
 import no.nav.familie.kontrakter.felles.kodeverk.hentGjeldende
 import org.springframework.stereotype.Service

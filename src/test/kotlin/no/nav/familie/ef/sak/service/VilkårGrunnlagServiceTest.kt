@@ -2,17 +2,17 @@ package no.nav.familie.ef.sak.service
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.felles.integration.FamilieIntegrasjonerClient
-import no.nav.familie.ef.sak.vilkår.MedlemskapMapper
-import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
 import no.nav.familie.ef.sak.config.PdlClientConfig
-import no.nav.familie.ef.sak.repository.behandling
-import no.nav.familie.ef.sak.repository.fagsak
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRepository
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdata
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
+import no.nav.familie.ef.sak.repository.behandling
+import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.vilkår.MedlemskapMapper
 import no.nav.familie.ef.sak.vilkår.VilkårGrunnlagService
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
@@ -26,7 +26,7 @@ internal class VilkårGrunnlagServiceTest {
 
     private val grunnlagsdataRepository = mockk<GrunnlagsdataRepository>()
     private val pdlClient = PdlClientConfig().pdlClient()
-    private val familieIntegrasjonerClient = mockk<FamilieIntegrasjonerClient>()
+    private val personopplysningerIntegrasjonerClient = mockk<PersonopplysningerIntegrasjonerClient>()
     private val søknadService = mockk<SøknadService>()
     private val featureToggleService = mockk<FeatureToggleService>()
     private val medlemskapMapper = MedlemskapMapper(mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true))
@@ -34,7 +34,7 @@ internal class VilkårGrunnlagServiceTest {
     private val grunnlagsdataService = GrunnlagsdataService(pdlClient,
                                                             grunnlagsdataRepository,
                                                             søknadService,
-                                                            familieIntegrasjonerClient)
+                                                            personopplysningerIntegrasjonerClient)
 
     private val service = VilkårGrunnlagService(medlemskapMapper, grunnlagsdataService)
     private val behandling = behandling(fagsak())
@@ -49,7 +49,7 @@ internal class VilkårGrunnlagServiceTest {
     @BeforeEach
     internal fun setUp() {
         every { søknadService.hentOvergangsstønad(behandlingId) } returns søknad
-        every { familieIntegrasjonerClient.hentMedlemskapsinfo(any()) } returns medlemskapsinfo
+        every { personopplysningerIntegrasjonerClient.hentMedlemskapsinfo(any()) } returns medlemskapsinfo
         every { featureToggleService.isEnabled(any(), any()) } returns false
     }
 

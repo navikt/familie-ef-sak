@@ -1,19 +1,18 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger
 
-import no.nav.familie.ef.sak.felles.integration.FamilieIntegrasjonerClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdata
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.GrunnlagsdataMapper.mapAnnenForelder
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.GrunnlagsdataMapper.mapBarn
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.GrunnlagsdataMapper.mapSøker
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Familierelasjonsrolle
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlAnnenForelder
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonKort
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlSøker
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.GrunnlagsdataMapper.mapAnnenForelder
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.GrunnlagsdataMapper.mapBarn
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.GrunnlagsdataMapper.mapSøker
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdata
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
-import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -23,7 +22,7 @@ import java.util.UUID
 class GrunnlagsdataService(private val pdlClient: PdlClient,
                            private val grunnlagsdataRepository: GrunnlagsdataRepository,
                            private val søknadService: SøknadService,
-                           private val familieIntegrasjonerClient: FamilieIntegrasjonerClient) {
+                           private val personopplysningerIntegrasjonerClient: PersonopplysningerIntegrasjonerClient) {
 
     val logger = LoggerFactory.getLogger(this.javaClass)
     val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -57,7 +56,7 @@ class GrunnlagsdataService(private val pdlClient: PdlClient,
         val dataTilAndreIdenter = hentDataTilAndreIdenter(pdlSøker)
 
         /*TODO VAD SKA VI BRUKE FRA MEDL ?? */
-        val medlUnntak = familieIntegrasjonerClient.hentMedlemskapsinfo(ident = personIdent)
+        val medlUnntak = personopplysningerIntegrasjonerClient.hentMedlemskapsinfo(ident = personIdent)
 
         return GrunnlagsdataDomene(
                 søker = mapSøker(pdlSøker, dataTilAndreIdenter),

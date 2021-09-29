@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.felles.integration
+package no.nav.familie.ef.sak.opplysninger.personopplysninger
 
 import no.nav.familie.ef.sak.arbeidsfordeling.Arbeidsfordelingsenhet
 import no.nav.familie.ef.sak.felles.integration.dto.EgenAnsattRequest
@@ -9,10 +9,10 @@ import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.annotasjoner.Improvement
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadRequest
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
 import no.nav.familie.kontrakter.felles.getDataOrThrow
-import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
 import org.slf4j.LoggerFactory
@@ -24,7 +24,7 @@ import org.springframework.web.client.RestOperations
 import java.net.URI
 
 @Component
-class FamilieIntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
+class PersonopplysningerIntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
                                  private val integrasjonerConfig: IntegrasjonerConfig)
     : AbstractPingableRestClient(restOperations, "familie.integrasjoner") {
 
@@ -39,14 +39,6 @@ class FamilieIntegrasjonerClient(@Qualifier("azure") restOperations: RestOperati
 
     fun hentMedlemskapsinfo(ident: String): Medlemskapsinfo {
         return postForEntity<Ressurs<Medlemskapsinfo>>(integrasjonerConfig.medlemskapUri, PersonIdent(ident)).data!!
-    }
-
-    fun hentKodeverkLandkoder(): KodeverkDto {
-        return getForEntity<Ressurs<KodeverkDto>>(integrasjonerConfig.kodeverkLandkoderUri).data!!
-    }
-
-    fun hentKodeverkPoststed(): KodeverkDto {
-        return getForEntity<Ressurs<KodeverkDto>>(integrasjonerConfig.kodeverkPoststedUri).data!!
     }
 
     fun hentNavEnhet(ident: String): List<Arbeidsfordelingsenhet> {
@@ -64,13 +56,15 @@ class FamilieIntegrasjonerClient(@Qualifier("azure") restOperations: RestOperati
                                                           EgenAnsattRequest(ident)).data!!.erEgenAnsatt
     }
 
-    fun hentInfotrygdPerioder(request: PerioderOvergangsstønadRequest): PerioderOvergangsstønadResponse {
-        return postForEntity<Ressurs<PerioderOvergangsstønadResponse>>(integrasjonerConfig.infotrygdVedtaksperioder, request)
-                .getDataOrThrow()
-    }
 
     fun hentNavKontor(ident: String): NavKontorEnhet {
         return postForEntity<Ressurs<NavKontorEnhet>>(integrasjonerConfig.navKontorUri, PersonIdent(ident)).getDataOrThrow()
+    }
+
+    @Improvement("Fjern denne når infotrygdReplika fungerer i prod")
+    fun hentInfotrygdPerioder(request: PerioderOvergangsstønadRequest): PerioderOvergangsstønadResponse {
+        return postForEntity<Ressurs<PerioderOvergangsstønadResponse>>(integrasjonerConfig.infotrygdVedtaksperioder, request)
+                .getDataOrThrow()
     }
 
 }

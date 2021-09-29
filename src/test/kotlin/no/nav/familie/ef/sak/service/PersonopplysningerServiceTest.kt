@@ -6,9 +6,9 @@ import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.arbeidsfordeling.Arbeidsfordelingsenhet
 import no.nav.familie.ef.sak.config.KodeverkServiceMock
 import no.nav.familie.ef.sak.config.PdlClientConfig
-import no.nav.familie.ef.sak.felles.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.PersonopplysningerMapper
@@ -25,7 +25,7 @@ internal class PersonopplysningerServiceTest {
     private val kodeverkService = KodeverkServiceMock().kodeverkService()
 
     private lateinit var personopplysningerService: PersonopplysningerService
-    private lateinit var familieIntegrasjonerClient: FamilieIntegrasjonerClient
+    private lateinit var personopplysningerIntegrasjonerClient: PersonopplysningerIntegrasjonerClient
     private lateinit var adresseMapper: AdresseMapper
     private lateinit var arbeidsfordelingService: ArbeidsfordelingService
     private lateinit var grunnlagsdataService: GrunnlagsdataService
@@ -33,13 +33,13 @@ internal class PersonopplysningerServiceTest {
 
     @BeforeEach
     internal fun setUp() {
-        familieIntegrasjonerClient = mockk()
+        personopplysningerIntegrasjonerClient = mockk()
         adresseMapper = AdresseMapper(kodeverkService)
         arbeidsfordelingService = mockk()
         søknadService = mockk()
 
         val pdlClient = PdlClientConfig().pdlClient()
-        grunnlagsdataService = GrunnlagsdataService(pdlClient, mockk(), søknadService, familieIntegrasjonerClient)
+        grunnlagsdataService = GrunnlagsdataService(pdlClient, mockk(), søknadService, personopplysningerIntegrasjonerClient)
         val personopplysningerMapper =
                 PersonopplysningerMapper(adresseMapper,
                                          StatsborgerskapMapper(kodeverkService),
@@ -48,18 +48,18 @@ internal class PersonopplysningerServiceTest {
         val personService = PersonService(pdlClient)
         personopplysningerService = PersonopplysningerService(personService,
                                                               søknadService,
-                                                              familieIntegrasjonerClient,
+                                                              personopplysningerIntegrasjonerClient,
                                                               grunnlagsdataService,
                                                               personopplysningerMapper)
     }
 
     @Test
     internal fun `mapper grunnlagsdata til PersonopplysningerDto`() {
-        every { familieIntegrasjonerClient.egenAnsatt(any()) } returns true
-        every { familieIntegrasjonerClient.hentMedlemskapsinfo(any()) } returns Medlemskapsinfo("01010172272",
-                                                                                                emptyList(),
-                                                                                                emptyList(),
-                                                                                                emptyList())
+        every { personopplysningerIntegrasjonerClient.egenAnsatt(any()) } returns true
+        every { personopplysningerIntegrasjonerClient.hentMedlemskapsinfo(any()) } returns Medlemskapsinfo("01010172272",
+                                                                                                           emptyList(),
+                                                                                                           emptyList(),
+                                                                                                           emptyList())
         every { arbeidsfordelingService.hentNavEnhet(any()) } returns Arbeidsfordelingsenhet("1", "Enhet")
         val søker = personopplysningerService.hentPersonopplysninger("01010172272")
         assertThat(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(søker))

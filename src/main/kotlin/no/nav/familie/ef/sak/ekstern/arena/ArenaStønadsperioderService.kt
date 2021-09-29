@@ -8,10 +8,10 @@ import no.nav.familie.ef.sak.ekstern.arena.ArenaPeriodeUtil.mapOgFiltrer
 import no.nav.familie.ef.sak.ekstern.arena.ArenaPeriodeUtil.slåSammenPerioder
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
-import no.nav.familie.ef.sak.felles.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
 import no.nav.familie.ef.sak.infrastruktur.exception.PdlNotFoundException
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPerioderArenaRequest
@@ -32,7 +32,7 @@ class ArenaStønadsperioderService(private val infotrygdReplikaClient: Infotrygd
                                   private val fagsakService: FagsakService,
                                   private val behandlingService: BehandlingService,
                                   private val tilkjentYtelseService: TilkjentYtelseService,
-                                  private val familieIntegrasjonerClient: FamilieIntegrasjonerClient,
+                                  private val personopplysningerIntegrasjonerClient: PersonopplysningerIntegrasjonerClient,
                                   private val pdlClient: PdlClient) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -43,9 +43,9 @@ class ArenaStønadsperioderService(private val infotrygdReplikaClient: Infotrygd
      */
     fun hentPerioder(request: PerioderOvergangsstønadRequest): PerioderOvergangsstønadResponse {
         return runBlocking {
-            val asyncResponse = async { familieIntegrasjonerClient.hentInfotrygdPerioder(request) }
+            val asyncResponse = async { personopplysningerIntegrasjonerClient.hentInfotrygdPerioder(request) }
 
-            //val responseFraReplika = hentReplikaPerioder(request) // TODO ta i bruk når replikaen virker i prod
+            //val responseFraReplika = hentReplikaPerioder(request) // TODO ta i bruk når replikaen virker i prod. Husk å rydde i PersonopplysningerInt
             val perioderFraInfotrygd = asyncResponse.await()
             val perioderFraEf = hentPerioderFraEf(request)
             PerioderOvergangsstønadResponse(perioderFraInfotrygd.perioder + perioderFraEf)
