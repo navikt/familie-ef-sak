@@ -1,4 +1,4 @@
-type,stonad_id,vedtak_id,stonad_belop,innt_fradrag,sam_fradrag,netto_belop,belop,dato_start,dato_innv_fom,dato_innv_tom,dato_opphpr
+type,stonad_id,vedtak_id,stonad_belop,innt_fradrag,sam_fradrag,netto_belop,belop,dato_start,dato_innv_fom,dato_innv_tom,dato_opphor
 INPUT ,1        ,1        ,0           ,0           ,0          ,18723      ,18723,01.04.2020,01.04.2020   ,30.04.2020   ,
 INPUT ,1        ,2        ,0           ,0           ,0          ,19003      ,19003,01.04.2020,01.05.2020   ,31.12.2020   ,
 INPUT ,1        ,3        ,0           ,0           ,0          ,19003      ,19003,01.04.2020,01.01.2021   ,31.05.2023   ,
