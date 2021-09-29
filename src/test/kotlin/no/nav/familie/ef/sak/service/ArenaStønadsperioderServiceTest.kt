@@ -7,10 +7,10 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.ekstern.arena.ArenaStønadsperioderService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
-import no.nav.familie.ef.sak.felles.integration.FamilieIntegrasjonerClient
 import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
 import no.nav.familie.ef.sak.infrastruktur.exception.PdlNotFoundException
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.repository.behandling
@@ -36,7 +36,7 @@ internal class ArenaStønadsperioderServiceTest {
     private val pdlClient = mockk<PdlClient>()
     private val infotrygdReplikaClient = mockk<InfotrygdReplikaClient>(relaxed = true)
     private val behandlingService = mockk<BehandlingService>(relaxed = true)
-    private val familieIntegrasjonerClient = mockk<FamilieIntegrasjonerClient>()
+    private val personopplysningerIntergasjonerClient = mockk<PersonopplysningerIntegrasjonerClient>()
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
     private val fagsakService = mockk<FagsakService>()
 
@@ -45,7 +45,7 @@ internal class ArenaStønadsperioderServiceTest {
                                         behandlingService = behandlingService,
                                         pdlClient = pdlClient,
                                         tilkjentYtelseService = tilkjentYtelseService,
-                                        familieIntegrasjonerClient = familieIntegrasjonerClient,
+                                        personopplysningerIntegrasjonerClient = personopplysningerIntergasjonerClient,
                                         fagsakService = fagsakService)
 
     private val ident = "01234567890"
@@ -101,7 +101,7 @@ internal class ArenaStønadsperioderServiceTest {
         every { behandlingService.finnSisteIverksatteBehandling(fagsakOvergangsstønad.id) } returns behandlingOvergangsstønad
         every { behandlingService.finnSisteIverksatteBehandling(fagsakBarnetilsyn.id) } returns behandlingBarnetilsyn
 
-        every { familieIntegrasjonerClient.hentInfotrygdPerioder(any()) } returns PerioderOvergangsstønadResponse(listOf(
+        every { personopplysningerIntergasjonerClient.hentInfotrygdPerioder(any()) } returns PerioderOvergangsstønadResponse(listOf(
                 PeriodeOvergangsstønad(ident, parse("2021-01-01"), parse("2021-01-31"), Datakilde.INFOTRYGD)))
         every { tilkjentYtelseService.hentForBehandling(behandlingOvergangsstønad.id) } returns
                 lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(1, parse("2021-01-01"), parse("2021-01-31"), ident)))

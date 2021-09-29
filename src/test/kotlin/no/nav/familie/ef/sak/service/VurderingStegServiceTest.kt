@@ -9,32 +9,32 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.blankett.BlankettRepository
-import no.nav.familie.ef.sak.infrastruktur.exception.Feil
-import no.nav.familie.ef.sak.felles.integration.FamilieIntegrasjonerClient
-import no.nav.familie.ef.sak.repository.behandling
-import no.nav.familie.ef.sak.repository.fagsak
-import no.nav.familie.ef.sak.repository.vilkårsvurdering
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
-import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
+import no.nav.familie.ef.sak.repository.behandling
+import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.repository.vilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
-import no.nav.familie.ef.sak.vilkår.dto.DelvilkårsvurderingDto
-import no.nav.familie.ef.sak.vilkår.dto.OppdaterVilkårsvurderingDto
-import no.nav.familie.ef.sak.vilkår.dto.SivilstandInngangsvilkårDto
-import no.nav.familie.ef.sak.vilkår.dto.SivilstandRegistergrunnlagDto
-import no.nav.familie.ef.sak.vilkår.dto.SvarPåVurderingerDto
-import no.nav.familie.ef.sak.vilkår.dto.VilkårGrunnlagDto
 import no.nav.familie.ef.sak.vilkår.VilkårGrunnlagService
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.vilkår.Vurdering
-import no.nav.familie.ef.sak.vilkår.dto.VurderingDto
 import no.nav.familie.ef.sak.vilkår.VurderingStegService
+import no.nav.familie.ef.sak.vilkår.dto.DelvilkårsvurderingDto
+import no.nav.familie.ef.sak.vilkår.dto.OppdaterVilkårsvurderingDto
+import no.nav.familie.ef.sak.vilkår.dto.SivilstandInngangsvilkårDto
+import no.nav.familie.ef.sak.vilkår.dto.SivilstandRegistergrunnlagDto
+import no.nav.familie.ef.sak.vilkår.dto.SvarPåVurderingerDto
+import no.nav.familie.ef.sak.vilkår.dto.VilkårGrunnlagDto
+import no.nav.familie.ef.sak.vilkår.dto.VurderingDto
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
@@ -56,7 +56,7 @@ internal class VurderingStegServiceTest {
     private val behandlingService = mockk<BehandlingService>()
     private val søknadService = mockk<SøknadService>()
     private val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
-    private val familieIntegrasjonerClient = mockk<FamilieIntegrasjonerClient>()
+    private val personopplysningerIntegrasjonerClient = mockk<PersonopplysningerIntegrasjonerClient>()
     private val blankettRepository = mockk<BlankettRepository>()
     private val vilkårGrunnlagService = mockk<VilkårGrunnlagService>()
     private val stegService = mockk<StegService>()
@@ -83,7 +83,7 @@ internal class VurderingStegServiceTest {
         every { søknadService.hentOvergangsstønad(any()) }.returns(søknad)
         every { blankettRepository.deleteById(any()) } just runs
         every { taskRepository.save(any())} answers { firstArg() }
-        every { familieIntegrasjonerClient.hentMedlemskapsinfo(any()) }
+        every { personopplysningerIntegrasjonerClient.hentMedlemskapsinfo(any()) }
                 .returns(Medlemskapsinfo(personIdent = søknad.fødselsnummer,
                                          gyldigePerioder = emptyList(),
                                          uavklartePerioder = emptyList(),
