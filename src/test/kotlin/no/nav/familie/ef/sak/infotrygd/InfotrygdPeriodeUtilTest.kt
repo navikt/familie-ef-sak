@@ -3,7 +3,6 @@ package no.nav.familie.ef.sak.infotrygd
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeParser
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
 internal class InfotrygdPeriodeUtilTest {
 
@@ -20,9 +19,7 @@ internal class InfotrygdPeriodeUtilTest {
     @Test
     internal fun `enkel case 3 perioder`() {
         val inputOutput = parseFil("infotrygd/enkel_case_3_perioder.csv")
-        val perioder = InfotrygdPeriodeUtil.lagPerioder(inputOutput.input)
-
-        assertThat(inputOutput.output).isEqualTo(perioder)
+        assertThat(inputOutput.output).isEqualTo(InfotrygdPeriodeUtil.lagPerioder(inputOutput.input))
     }
 
     @Test
