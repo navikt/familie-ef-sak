@@ -46,6 +46,18 @@ internal class InfotrygdPeriodeUtilTest {
         assertThat(inputOutput.output).isEqualTo(InfotrygdPeriodeUtil.lagPerioder(inputOutput.input))
     }
 
+    @Test
+    internal fun `2172101`() {
+        val inputOutput = parseFil("infotrygd/2172101.csv")
+        assertThat(inputOutput.output).isEqualTo(InfotrygdPeriodeUtil.lagPerioder(inputOutput.input))
+    }
+
+    @Test
+    internal fun `4571388`() {
+        val inputOutput = parseFil("infotrygd/4571388.csv")
+        assertThat(inputOutput.output).isEqualTo(InfotrygdPeriodeUtil.lagPerioder(inputOutput.input))
+    }
+
     private fun parseFil(fil: String) = InfotrygdPeriodeParser.parse(this::class.java.classLoader.getResource(fil)!!)
 
 }
