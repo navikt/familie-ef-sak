@@ -13,4 +13,17 @@ data class InfotrygdPeriode(
         val stønadFom: LocalDate,
         val stønadTom: LocalDate,
         val datoOpphor: LocalDate?
-)
+) {
+
+    fun erDatoInnenforPeriode(dato: LocalDate): Boolean {
+        return dato.isEqualOrBefore(stønadTom) && dato.isEqualOrAfter(stønadFom)
+    }
+
+    fun erInfotrygdPeriodeOverlappende(infotrygdPeriode: InfotrygdPeriode): Boolean {
+        return (erDatoInnenforPeriode(infotrygdPeriode.stønadFom) || erDatoInnenforPeriode(infotrygdPeriode.stønadTom))
+               || omslutter(infotrygdPeriode)
+    }
+
+    private fun omslutter(infotrygdPeriode: InfotrygdPeriode) =
+            infotrygdPeriode.stønadFom.isBefore(stønadFom) && infotrygdPeriode.stønadTom.isAfter(stønadTom)
+}
