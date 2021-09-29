@@ -29,20 +29,25 @@ object InfotrygdPeriodeParser {
         val rows: List<Map<String, String>> = csvReader().readAllWithHeader(fileContent)
 
         val inputOutput = rows.map { row ->
-            row[KEY_TYPE]!! to InfotrygdPeriode(stønadId = getValue(row, KEY_STØNAD_ID)!!.toLong(),
-                                                vedtakId = getValue(row, KEY_VEDTAK_ID)!!.toLong(),
-                                                inntektsreduksjon = getValue(row, KEY_INNT_FRADRAG)!!.toInt(),
-                                                samordningsfradrag = getValue(row, KEY_INNT_FRADRAG)!!.toInt(),
-                                                beløp = getValue(row, KEY_NETTO_BELØP)!!.toInt(),
-                                                stønadFom = LocalDate.parse(getValue(row, KEY_STØNAD_FOM)!!, DATO_FORMATTERER),
-                                                stønadTom = LocalDate.parse(getValue(row, KEY_STØNAD_TOM)!!, DATO_FORMATTERER),
-                                                datoOpphor = getValue(row, KEY_DATO_OPPHØR)
-                                                        ?.let { emptyAsNull(it) }
-                                                        ?.let { LocalDate.parse(it, DATO_FORMATTERER) }
-            )
+            getValue(row, KEY_TYPE)!! to parseInfotrygdPeriode(row)
         }.groupBy({ it.first }, { it.second })
         return InfotrygdTestData(inputOutput["INPUT"]!!, inputOutput["OUTPUT"]!!)
     }
+
+    private fun parseInfotrygdPeriode(row: Map<String, String>) =
+            InfotrygdPeriode(stønadId = getValue(row, KEY_STØNAD_ID)!!.toLong(),
+                             vedtakId = getValue(row, KEY_VEDTAK_ID)!!.toLong(),
+                             inntektsreduksjon = getValue(row, KEY_INNT_FRADRAG)!!.toInt(),
+                             samordningsfradrag = getValue(row, KEY_INNT_FRADRAG)!!.toInt(),
+                             beløp = getValue(row, KEY_NETTO_BELØP)!!.toInt(),
+                             stønadFom = LocalDate.parse(getValue(row, KEY_STØNAD_FOM)!!,
+                                                         DATO_FORMATTERER),
+                             stønadTom = LocalDate.parse(getValue(row, KEY_STØNAD_TOM)!!,
+                                                         DATO_FORMATTERER),
+                             datoOpphor = getValue(row, KEY_DATO_OPPHØR)
+                                     ?.let { emptyAsNull(it) }
+                                     ?.let { LocalDate.parse(it, DATO_FORMATTERER) }
+            )
 
     private fun getValue(row: Map<String, String>, key: String) = row[key]?.trim()
 

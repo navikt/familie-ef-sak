@@ -4,6 +4,6 @@ object InfotrygdPeriodeUtil {
 
 
     fun lagPerioder(perioder: List<InfotrygdPeriode>) : List<InfotrygdPeriode> {
-        return emptyList()
+        return perioder
     }
 }
