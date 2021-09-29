@@ -5,7 +5,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.infrastruktur.config.IntegrasjonerConfig
-import no.nav.familie.ef.sak.felles.integration.KodeverkService
+import no.nav.familie.ef.sak.felles.kodeverk.KodeverkService
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate

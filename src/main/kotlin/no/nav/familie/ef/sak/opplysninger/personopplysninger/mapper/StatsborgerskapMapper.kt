@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper
 
 import no.nav.familie.ef.sak.vilkår.dto.StatsborgerskapDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Statsborgerskap
-import no.nav.familie.ef.sak.felles.integration.KodeverkService
+import no.nav.familie.ef.sak.felles.kodeverk.KodeverkService
 import no.nav.familie.ef.sak.felles.util.datoEllerIdag
 import org.springframework.stereotype.Component
 

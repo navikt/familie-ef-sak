@@ -12,7 +12,6 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadRequest
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
 import no.nav.familie.kontrakter.felles.getDataOrThrow
-import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
 import org.slf4j.LoggerFactory
@@ -39,14 +38,6 @@ class FamilieIntegrasjonerClient(@Qualifier("azure") restOperations: RestOperati
 
     fun hentMedlemskapsinfo(ident: String): Medlemskapsinfo {
         return postForEntity<Ressurs<Medlemskapsinfo>>(integrasjonerConfig.medlemskapUri, PersonIdent(ident)).data!!
-    }
-
-    fun hentKodeverkLandkoder(): KodeverkDto {
-        return getForEntity<Ressurs<KodeverkDto>>(integrasjonerConfig.kodeverkLandkoderUri).data!!
-    }
-
-    fun hentKodeverkPoststed(): KodeverkDto {
-        return getForEntity<Ressurs<KodeverkDto>>(integrasjonerConfig.kodeverkPoststedUri).data!!
     }
 
     fun hentNavEnhet(ident: String): List<Arbeidsfordelingsenhet> {
