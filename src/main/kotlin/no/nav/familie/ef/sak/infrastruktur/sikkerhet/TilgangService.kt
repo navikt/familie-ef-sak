@@ -1,17 +1,17 @@
 package no.nav.familie.ef.sak.infrastruktur.sikkerhet
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandlingsflyt.steg.BehandlerRolle
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.infrastruktur.exception.ManglerTilgang
-import no.nav.familie.ef.sak.felles.integration.FamilieIntegrasjonerClient
-import no.nav.familie.ef.sak.behandlingsflyt.steg.BehandlerRolle
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
 import org.springframework.cache.CacheManager
 import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
-class TilgangService(private val integrasjonerClient: FamilieIntegrasjonerClient,
+class TilgangService(private val personopplysningerIntegrasjonerClient: PersonopplysningerIntegrasjonerClient,
                      private val behandlingService: BehandlingService,
                      private val fagsakService: FagsakService,
                      private val rolleConfig: RolleConfig,
@@ -27,7 +27,7 @@ class TilgangService(private val integrasjonerClient: FamilieIntegrasjonerClient
 
     private fun harTilgangTilPersonMedRelasjoner(personIdent: String): Boolean {
         return harSaksbehandlerTilgang("validerTilgangTilPersonMedBarn", personIdent) {
-            integrasjonerClient.sjekkTilgangTilPersonMedRelasjoner(personIdent).harTilgang
+            personopplysningerIntegrasjonerClient.sjekkTilgangTilPersonMedRelasjoner(personIdent).harTilgang
         }
     }
 

@@ -1,13 +1,13 @@
 package no.nav.familie.ef.sak.arbeidsfordeling
 
-import no.nav.familie.ef.sak.felles.integration.FamilieIntegrasjonerClient
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import org.springframework.stereotype.Component
 
 @Component
 class ArbeidsfordelingService(private val personService: PersonService,
-                              private val familieIntegrasjonerClient: FamilieIntegrasjonerClient) {
+                              private val personopplysningerIntegrasjonerClient: PersonopplysningerIntegrasjonerClient) {
 
     private val MASKINELL_JOURNALFOERENDE_ENHET = "9999"
 
@@ -22,7 +22,7 @@ class ArbeidsfordelingService(private val personService: PersonService,
                                                                           it.value.adressebeskyttelse.gjeldende()?.gradering)
                                            }
         val identMedStrengeste = finnPersonMedStrengesteAdressebeskyttelse(identerMedAdressebeskyttelse)
-        return familieIntegrasjonerClient.hentNavEnhet(identMedStrengeste ?: ident).firstOrNull()
+        return personopplysningerIntegrasjonerClient.hentNavEnhet(identMedStrengeste ?: ident).firstOrNull()
     }
 
     fun hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(personIdent: String): String {
