@@ -3,8 +3,8 @@ package no.nav.familie.ef.sak.ekstern.arena
 import no.nav.familie.ef.sak.ekstern.arena.ArenaPeriodeUtil.mapOgFiltrer
 import no.nav.familie.ef.sak.ekstern.arena.ArenaPeriodeUtil.slåSammenPerioder
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
-import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
-import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPerioderResponse
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdArenaPeriode
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPerioderArenaResponse
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -26,7 +26,7 @@ internal class ArenaPeriodeUtilTest {
                                       periode(LocalDate.parse("2020-05-01"), LocalDate.parse("2020-08-31"), 1f))
 
 
-        val perioder = slåSammenPerioder(mapOgFiltrer(InfotrygdPerioderResponse(infotrygPerioder)))
+        val perioder = slåSammenPerioder(mapOgFiltrer(InfotrygdPerioderArenaResponse(infotrygPerioder)))
 
         assertThat(perioder.tilFomTomDato())
                 .isEqualTo(listOf(LocalDate.parse("2017-08-01") to LocalDate.parse("2018-07-31"),
@@ -44,7 +44,7 @@ internal class ArenaPeriodeUtilTest {
                                       periode(LocalDate.parse("2021-01-01"), LocalDate.parse("2022-01-31"), 1f))
 
 
-        val perioder = slåSammenPerioder(mapOgFiltrer(InfotrygdPerioderResponse(infotrygPerioder)))
+        val perioder = slåSammenPerioder(mapOgFiltrer(InfotrygdPerioderArenaResponse(infotrygPerioder)))
 
         assertThat(perioder.tilFomTomDato())
                 .isEqualTo(listOf(LocalDate.parse("2018-12-01") to LocalDate.parse("2022-01-31")))
@@ -67,7 +67,7 @@ internal class ArenaPeriodeUtilTest {
                                       periode(LocalDate.parse("2020-05-01"), LocalDate.parse("2020-08-31"), 1f))
 
 
-        val perioder = slåSammenPerioder(mapOgFiltrer(InfotrygdPerioderResponse(infotrygPerioder)))
+        val perioder = slåSammenPerioder(mapOgFiltrer(InfotrygdPerioderArenaResponse(infotrygPerioder)))
 
         assertThat(perioder.tilFomTomDato())
                 .isEqualTo(listOf(
@@ -107,7 +107,7 @@ internal class ArenaPeriodeUtilTest {
                        periode(LocalDate.parse("2016-06-01"), LocalDate.parse("2016-06-30"), 0f),
                        periode(LocalDate.parse("2016-05-01"), LocalDate.parse("2016-05-31"), 269f))
 
-        val perioder = slåSammenPerioder(mapOgFiltrer(InfotrygdPerioderResponse(infotrygPerioder)))
+        val perioder = slåSammenPerioder(mapOgFiltrer(InfotrygdPerioderArenaResponse(infotrygPerioder)))
 
         assertThat(perioder.tilFomTomDato())
                 .isEqualTo(listOf(
@@ -129,7 +129,7 @@ internal class ArenaPeriodeUtilTest {
                                LocalDate.parse("2017-05-31"), 17358f,
                                LocalDate.parse("2017-03-31")))
 
-        val perioder = slåSammenPerioder(mapOgFiltrer(InfotrygdPerioderResponse(infotrygPerioder)))
+        val perioder = slåSammenPerioder(mapOgFiltrer(InfotrygdPerioderArenaResponse(infotrygPerioder)))
 
         assertThat(perioder.tilFomTomDato())
                 .isEqualTo(listOf(LocalDate.parse("2017-01-01") to LocalDate.parse("2017-03-31")))
@@ -142,7 +142,7 @@ internal class ArenaPeriodeUtilTest {
                        periode(LocalDate.parse("2011-09-01"), LocalDate.parse("2017-02-28"), 1f))
 
 
-        val perioder = slåSammenPerioder(mapOgFiltrer(InfotrygdPerioderResponse(infotrygPerioder)))
+        val perioder = slåSammenPerioder(mapOgFiltrer(InfotrygdPerioderArenaResponse(infotrygPerioder)))
 
         assertThat(perioder.tilFomTomDato())
                 .isEqualTo(listOf(LocalDate.parse("2011-08-01") to LocalDate.parse("2017-02-28")))
@@ -163,7 +163,7 @@ internal class ArenaPeriodeUtilTest {
                                LocalDate.parse("2009-01-31")))
 
 
-        val perioder = slåSammenPerioder(mapOgFiltrer(InfotrygdPerioderResponse(infotrygPerioder)))
+        val perioder = slåSammenPerioder(mapOgFiltrer(InfotrygdPerioderArenaResponse(infotrygPerioder)))
 
         assertThat(perioder.tilFomTomDato())
                 .isEqualTo(listOf(LocalDate.parse("2008-12-01") to LocalDate.parse("2009-02-28"),
@@ -186,6 +186,6 @@ internal class ArenaPeriodeUtilTest {
     fun List<PeriodeOvergangsstønad>.tilFomTomDato(): List<Pair<LocalDate, LocalDate>> = this.map { it.fomDato to it.tomDato }
 
     private fun periode(fomDato: LocalDate, tomDato: LocalDate, beløp: Float, opphørsdato: LocalDate? = null) =
-            InfotrygdPeriode(ident, fomDato, tomDato, beløp, opphørsdato)
+            InfotrygdArenaPeriode(ident, fomDato, tomDato, beløp, opphørsdato)
 
 }
