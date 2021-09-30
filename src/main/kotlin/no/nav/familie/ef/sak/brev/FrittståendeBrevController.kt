@@ -19,8 +19,8 @@ class FrittståendeBrevController(private val frittståendeBrevService: Frittst�
     }
 
     @PostMapping("/send")
-    fun sendFrittståendeBrev(@RequestBody brevInnhold: FrittståendeBrevDto): Ressurs<ByteArray> {
-        return Ressurs.success(frittståendeBrevService.lagFrittståendeBrev(brevInnhold))
+    fun sendFrittståendeBrev(@RequestBody brevInnhold: FrittståendeBrevDto): Ressurs<Unit>{
+        return Ressurs.success(frittståendeBrevService.sendFrittståendeBrev(brevInnhold))
     }
 
 }
