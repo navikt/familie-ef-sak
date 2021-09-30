@@ -20,6 +20,7 @@ import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.taMedAndelerFremTilDato
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.util.UUID
 
 @Service
 class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
@@ -39,21 +40,28 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
     }
 
     override fun utførSteg(behandling: Behandling, vedtak: VedtakDto) {
-
         val aktivIdent = behandlingService.hentAktivIdent(behandling.id)
-        tilkjentYtelseService.slettTilkjentYtelseForBehandling(behandling.id)
+        nullstillEksisterendeVedtakPåBehandling(behandling.id)
+        vedtakService.lagreVedtak(vedtakDto = vedtak, behandlingId = behandling.id)
 
         when (vedtak) {
-            is Innvilget -> opprettTilkjentYtelseForInnvilgetBehandling(vedtak, behandling, aktivIdent)
-            is Opphør -> opprettTilkjentYtelseForOpphørtBehandling(behandling, vedtak, aktivIdent)
+            is Innvilget -> {
+                opprettTilkjentYtelseForInnvilgetBehandling(vedtak, behandling, aktivIdent)
+                simuleringService.hentOgLagreSimuleringsresultat(behandling)
+            }
+            is Opphør -> {
+                opprettTilkjentYtelseForOpphørtBehandling(behandling, vedtak, aktivIdent)
+                simuleringService.hentOgLagreSimuleringsresultat(behandling)
+            }
             is Avslå -> feilHvis(behandling.type != BehandlingType.FØRSTEGANGSBEHANDLING) { "Kan kun avslå ved førstegangsbehandling" }
             else -> error("Kan ikke utføre steg ${stegType()} for behandling ${behandling.id}")
         }
+    }
 
-        vedtakService.slettVedtakHvisFinnes(behandling.id)
-        vedtakService.lagreVedtak(vedtakDto = vedtak, behandlingId = behandling.id)
-        simuleringService.hentOgLagreSimuleringsresultat(behandling)
-        mellomlagringBrevService.slettMellomlagringHvisFinnes(behandling.id)
+    private fun nullstillEksisterendeVedtakPåBehandling(behandlingId: UUID) {
+        tilkjentYtelseService.slettTilkjentYtelseForBehandling(behandlingId)
+        mellomlagringBrevService.slettMellomlagringHvisFinnes(behandlingId)
+        vedtakService.slettVedtakHvisFinnes(behandlingId)
     }
 
     private fun opprettTilkjentYtelseForOpphørtBehandling(behandling: Behandling,

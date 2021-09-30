@@ -14,6 +14,7 @@ import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.PeriodeWrapper
 import no.nav.familie.ef.sak.vedtak.Vedtak
 import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtaksresultat
 import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
@@ -63,7 +64,7 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
         val saksbehandler =
                 behandlinghistorikkService.finnSisteBehandlingshistorikk(behandling.id, StegType.SEND_TIL_BESLUTTER)?.opprettetAv
                 ?: error("Kan ikke finne saksbehandler på behandlingen")
-        val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(behandling.id)
+        val tilkjentYtelse = if (vedtak.resultatType != ResultatType.AVSLÅ) tilkjentYtelseService.hentForBehandling(behandling.id) else null
         val vilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(behandling.id)
 
         val behandlingsdetaljer = mapBehandlingsdetaljer(behandling, vilkårsvurderinger)
@@ -97,13 +98,13 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
     private fun mapVedtaksdetaljerDto(vedtak: Vedtak,
                                       saksbehandler: String,
                                       beslutter: String,
-                                      tilkjentYtelse: TilkjentYtelse) =
+                                      tilkjentYtelse: TilkjentYtelse?) =
             VedtaksdetaljerDto(resultat = vedtak.resultatType.tilVedtaksresultat(),
                                vedtaksdato = LocalDate.now(),
                                opphørÅrsak = null,
                                saksbehandlerId = saksbehandler,
                                beslutterId = beslutter,
-                               tilkjentYtelse = tilkjentYtelse.tilIverksettDto(),
+                               tilkjentYtelse = tilkjentYtelse?.tilIverksettDto(),
                                vedtaksperioder = vedtak.perioder?.tilIverksettDto() ?: emptyList()
             )
 
