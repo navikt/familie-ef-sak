@@ -35,6 +35,10 @@ class SimuleringService(private val iverksettClient: IverksettClient,
         }
     }
 
+    fun slettSimuleringForBehandling(behandlingId: UUID) {
+        simuleringsresultatRepository.deleteById(behandlingId)
+    }
+
     fun hentOgLagreSimuleringsresultat(behandling: Behandling): Simuleringsresultat {
         val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
         simuleringsresultatRepository.deleteById(behandling.id)
