@@ -18,9 +18,10 @@ import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdArenaPeriode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPerioderArenaRequest
-import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPerioderResponse
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPerioderArenaResponse
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad.Datakilde
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadRequest
@@ -72,7 +73,7 @@ internal class ArenaStønadsperioderServiceTest {
 
         mockPdl(historiskIdent)
         every { infotrygdReplikaClient.hentPerioderArena(any()) } returns
-                infotrygdResponse(InfotrygdPeriode(ident, LocalDate.now(), LocalDate.now(), 10f))
+                infotrygdResponse(InfotrygdArenaPeriode(ident, LocalDate.now(), LocalDate.now(), 10f))
 
         val hentPerioder = service.hentReplikaPerioder(request)
 
@@ -124,6 +125,6 @@ internal class ArenaStønadsperioderServiceTest {
         every { pdlClient.hentPersonidenter(ident, true) } returns PdlIdenter(pdlIdenter)
     }
 
-    private fun infotrygdResponse(vararg infotrygdPeriodeOvergangsstønad: InfotrygdPeriode) =
-            InfotrygdPerioderResponse(infotrygdPeriodeOvergangsstønad.toList())
+    private fun infotrygdResponse(vararg infotrygdPeriodeOvergangsstønad: InfotrygdArenaPeriode) =
+            InfotrygdPerioderArenaResponse(infotrygdPeriodeOvergangsstønad.toList())
 }
