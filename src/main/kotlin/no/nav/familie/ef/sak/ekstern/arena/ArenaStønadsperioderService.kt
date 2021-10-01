@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.ekstern.arena.ArenaPeriodeUtil.mapOgFiltrer
 import no.nav.familie.ef.sak.ekstern.arena.ArenaPeriodeUtil.slåSammenPerioder
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
+import no.nav.familie.ef.sak.felles.util.EnvUtil
 import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
 import no.nav.familie.ef.sak.infrastruktur.exception.PdlNotFoundException
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
@@ -63,7 +64,7 @@ class ArenaStønadsperioderService(private val infotrygdReplikaClient: Infotrygd
         val tom = request.tomDato ?: LocalDate.now()
         val personIdenter = hentPersonIdenter(request)
         return Stønadstype.values()
-                .mapNotNull { fagsakService.finnFagsak(personIdenter, it)}
+                .mapNotNull { fagsakService.finnFagsak(personIdenter, it) }
                 .mapNotNull { behandlingService.finnSisteIverksatteBehandling(it.id) }
                 .mapNotNull { if (it.type != BehandlingType.TEKNISK_OPPHØR) it else null }
                 .map { tilkjentYtelseService.hentForBehandling(it.id) }
@@ -85,8 +86,11 @@ class ArenaStønadsperioderService(private val infotrygdReplikaClient: Infotrygd
         return try {
             pdlClient.hentPersonidenter(request.personIdent, true).identer()
         } catch (e: PdlNotFoundException) {
-            logger.warn("Finner ikke person, returnerer personIdent i request")
-            setOf(request.personIdent)
+            if (EnvUtil.erIDev()) {
+                logger.warn("Finner ikke person, returnerer personIdent i request")
+                return setOf(request.personIdent)
+            }
+            throw e
         }
     }
 

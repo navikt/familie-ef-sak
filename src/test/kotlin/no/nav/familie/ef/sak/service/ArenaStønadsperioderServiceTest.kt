@@ -29,6 +29,7 @@ import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.LocalDate.parse
 
@@ -87,11 +88,11 @@ internal class ArenaStønadsperioderServiceTest {
     }
 
     @Test
-    internal fun `skal kalle infotrygd hvis pdl ikke finner personIdent med personIdent i requesten`() {
+    internal fun `skal ikke kalle infotrygd hvis pdl ikke finner personIdent med personIdent i requesten`() {
         every { pdlClient.hentPersonidenter(any(), true) } throws PdlNotFoundException()
 
-        service.hentReplikaPerioder(PerioderOvergangsstønadRequest(ident))
-        verify(exactly = 1) {
+        assertThrows<PdlNotFoundException> { service.hentReplikaPerioder(PerioderOvergangsstønadRequest(ident)) }
+        verify(exactly = 0) {
             infotrygdReplikaClient.hentPerioderArena(InfotrygdPerioderArenaRequest(setOf(ident)))
         }
     }
