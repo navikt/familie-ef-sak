@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.brev
 
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
-import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.brev.domain.FRITEKST
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevDto
@@ -18,8 +17,6 @@ import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevDto as Frittstående
 
 @Service
 class FrittståendeBrevService(private val brevClient: BrevClient,
-                              private val brevRepository: VedtaksbrevRepository,
-                              private val behandlingService: BehandlingService,
                               private val fagsakService: FagsakService,
                               private val personopplysningerService: PersonopplysningerService,
                               private val arbeidsfordelingService: ArbeidsfordelingService,
@@ -53,14 +50,17 @@ class FrittståendeBrevService(private val brevClient: BrevClient,
         val request = lagFrittståendeBrevRequest(frittståendeBrevDto)
         val brev = brevClient.genererBrev(request, SikkerhetContext.hentSaksbehandlerNavn(true))
         val ident = fagsakService.hentAktivIdent(frittståendeBrevDto.fagsakId)
+        val eksternFagsakId = fagsakService.hentEksternId(frittståendeBrevDto.fagsakId)
         val journalførendeEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(
                 ident)
+        val saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(true)
         iverksettClient.sendFrittståendeBrev(FrittståendeBrevDtoIverksetting(personIdent = ident,
-                                                                             fagsakId = frittståendeBrevDto.fagsakId,
+                                                                             eksternFagsakId = eksternFagsakId,
                                                                              stønadType = frittståendeBrevDto.stønadType,
                                                                              brevtype = frittståendeBrevDto.brevType,
                                                                              fil = brev,
-                                                                             journalførendeEnhet = journalførendeEnhet))
+                                                                             journalførendeEnhet = journalførendeEnhet,
+                                                                             saksbehandlerIdent = saksbehandlerIdent))
     }
 
 }
