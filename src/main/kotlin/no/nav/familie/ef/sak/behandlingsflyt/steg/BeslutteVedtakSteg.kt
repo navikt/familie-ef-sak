@@ -58,18 +58,21 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
 
         return if (data.godkjent) {
             vedtakService.oppdaterBeslutter(behandling.id, SikkerhetContext.hentSaksbehandler(strict = true))
-            if (behandling.type != BehandlingType.BLANKETT) {
-                val vedtaksbrev = vedtaksbrevRepository.findByIdOrThrow(behandling.id)
-                val fil = utledVedtaksbrev(vedtaksbrev)
-                val iverksettDto = iverksettingDtoMapper.tilDto(behandling, beslutter)
-                oppdaterResultatPåBehandling(behandling.id)
-                opprettPollForStatusOppgave(behandling.id)
-                opprettTaskForBehandlingsstatistikk(behandling.id, oppgaveId)
-                iverksettClient.iverksett(iverksettDto, fil)
-                StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT
-            } else {
-                opprettTaskForJournalførBlankett(behandling)
-                stegType().hentNesteSteg(behandling.type)
+            when (behandling.type) {
+                BehandlingType.BLANKETT -> {
+                    opprettTaskForJournalførBlankett(behandling)
+                    stegType().hentNesteSteg(behandling.type)
+                }
+                else -> {
+                    val vedtaksbrev = vedtaksbrevRepository.findByIdOrThrow(behandling.id)
+                    val fil = utledVedtaksbrev(vedtaksbrev)
+                    val iverksettDto = iverksettingDtoMapper.tilDto(behandling, beslutter)
+                    oppdaterResultatPåBehandling(behandling.id)
+                    opprettPollForStatusOppgave(behandling.id)
+                    opprettTaskForBehandlingsstatistikk(behandling.id, oppgaveId)
+                    iverksettClient.iverksett(iverksettDto, fil)
+                    StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT
+                }
             }
         } else {
             vedtaksbrevRepository.deleteById(behandling.id)
@@ -79,14 +82,16 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
     }
 
     private fun opprettTaskForBehandlingsstatistikk(behandlingId: UUID, oppgaveId: Long?) {
-        val vedtakstidspunkt = behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId, StegType.SEND_TIL_BESLUTTER)?.endretTid ?: error("Mangler behandlingshistorikk for vedtak") // TODO: Bruk vedtak.endretTid når det kommer på plass
+        val vedtakstidspunkt =
+                behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId, StegType.SEND_TIL_BESLUTTER)?.endretTid
+                ?: error("Mangler behandlingshistorikk for vedtak") // TODO: Bruk vedtak.endretTid når det kommer på plass
 
         taskRepository.save(BehandlingsstatistikkTask.opprettVedtattTask(behandlingId = behandlingId,
-                                                                  hendelseTidspunkt = vedtakstidspunkt,
-                                                                  oppgaveId = oppgaveId))
+                                                                         hendelseTidspunkt = vedtakstidspunkt,
+                                                                         oppgaveId = oppgaveId))
 
         taskRepository.save(BehandlingsstatistikkTask.opprettBesluttetTask(behandlingId = behandlingId,
-                                                                  oppgaveId = oppgaveId))
+                                                                           oppgaveId = oppgaveId))
 
     }
 
@@ -94,7 +99,7 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
         val vedtak = vedtakService.hentVedtak(behandlingId)
         when (vedtak.resultatType) {
             ResultatType.INNVILGE -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.INNVILGET)
-            ResultatType.OPPHØRT ->  behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.OPPHØRT)
+            ResultatType.OPPHØRT -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.OPPHØRT)
             ResultatType.AVSLÅ -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.AVSLÅTT)
             else -> error("Støtter ikke resultattypen=${vedtak.resultatType}")
         }
