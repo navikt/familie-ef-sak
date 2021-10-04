@@ -37,6 +37,7 @@ class ArenaStønadsperioderService(private val infotrygdReplikaClient: Infotrygd
                                   private val pdlClient: PdlClient) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
+    private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     /**
      * Henter perioder fra infotrygd for en person
@@ -45,11 +46,22 @@ class ArenaStønadsperioderService(private val infotrygdReplikaClient: Infotrygd
     fun hentPerioder(request: PerioderOvergangsstønadRequest): PerioderOvergangsstønadResponse {
         return runBlocking {
             val asyncResponse = async { personopplysningerIntegrasjonerClient.hentInfotrygdPerioder(request) }
-
-            //val responseFraReplika = hentReplikaPerioder(request) // TODO ta i bruk når replikaen virker i prod. Husk å rydde i PersonopplysningerInt
-            val perioderFraInfotrygd = asyncResponse.await()
+            val responseFraReplika = async { hentReplikaPerioder(request) }
             val perioderFraEf = hentPerioderFraEf(request)
-            PerioderOvergangsstønadResponse(perioderFraInfotrygd.perioder + perioderFraEf)
+            val perioderFraInfotrygd = asyncResponse.await().perioder
+            sjekkDiff(request, responseFraReplika.await(), perioderFraInfotrygd)
+            // TODO returner replika og fjern henting fra infotrygd
+            PerioderOvergangsstønadResponse(perioderFraInfotrygd + perioderFraEf)
+        }
+    }
+
+    private fun sjekkDiff(request: PerioderOvergangsstønadRequest,
+                          perioderFraReplika: List<PeriodeOvergangsstønad>,
+                          perioderFraInfotrygd: List<PeriodeOvergangsstønad>) {
+        if (perioderFraReplika != perioderFraInfotrygd) {
+            logger.warn("Diff i perioder mellom infotrygd og replika")
+            secureLogger.warn("Diff i perioder mellom infotrygd og replika for request={} - infotrygd={} replika={}",
+                              request, perioderFraInfotrygd, perioderFraReplika)
         }
     }
 
