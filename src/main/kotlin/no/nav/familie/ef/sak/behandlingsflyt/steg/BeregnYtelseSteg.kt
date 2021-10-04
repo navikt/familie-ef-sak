@@ -1,23 +1,23 @@
 package no.nav.familie.ef.sak.behandlingsflyt.steg
 
-import no.nav.familie.ef.sak.vedtak.dto.Avslå
+import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.beregning.BeregningService
+import no.nav.familie.ef.sak.beregning.tilInntektsperioder
+import no.nav.familie.ef.sak.brev.MellomlagringBrevService
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.simulering.SimuleringService
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
+import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
+import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.tilkjentytelse.domain.taMedAndelerFremTilDato
+import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.dto.Avslå
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
 import no.nav.familie.ef.sak.vedtak.dto.Opphør
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
-import no.nav.familie.ef.sak.vedtak.VedtakService
-import no.nav.familie.ef.sak.beregning.tilInntektsperioder
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
-import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
-import no.nav.familie.ef.sak.behandling.domain.Behandling
-import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.brev.MellomlagringBrevService
-import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
-import no.nav.familie.ef.sak.simulering.SimuleringService
-import no.nav.familie.ef.sak.tilkjentytelse.domain.taMedAndelerFremTilDato
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.UUID
@@ -53,7 +53,9 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                 opprettTilkjentYtelseForOpphørtBehandling(behandling, vedtak, aktivIdent)
                 simuleringService.hentOgLagreSimuleringsresultat(behandling)
             }
-            is Avslå -> feilHvis(behandling.type != BehandlingType.FØRSTEGANGSBEHANDLING) { "Kan kun avslå ved førstegangsbehandling" }
+            is Avslå -> {
+                simuleringService.slettSimuleringForBehandling(behandling.id)
+            }
             else -> error("Kan ikke utføre steg ${stegType()} for behandling ${behandling.id}")
         }
     }
