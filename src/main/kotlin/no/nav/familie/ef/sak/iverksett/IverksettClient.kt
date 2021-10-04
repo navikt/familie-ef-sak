@@ -81,6 +81,6 @@ class IverksettClient(@Value("\${FAMILIE_EF_IVERKSETT_URL}")
     }
 
     fun sendFrittståendeBrev(frittståendeBrevDto: FrittståendeBrevDto){
-        postForEntity<Any>(URI.create("$familieEfIverksettUri/api/frittstaende-brev"), frittståendeBrevDto)
+        postForEntity<Any>(URI.create("$familieEfIverksettUri/api/brev/frittstaende"), frittståendeBrevDto)
     }
 }
