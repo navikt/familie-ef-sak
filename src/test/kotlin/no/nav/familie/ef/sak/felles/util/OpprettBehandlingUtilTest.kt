@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.felles.util
 
 import no.nav.familie.ef.sak.behandling.OpprettBehandlingUtil.validerKanOppretteNyBehandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil.iverksattFørstegangsbehandling
@@ -38,6 +39,17 @@ internal class OpprettBehandlingUtilTest {
     }
 
     @Test
+    internal fun `førstegangsbehandling - det skal være mulig å opprette hvis eksisterende behandling er avslått førstegangsbehandling`() {
+
+        validerKanOppretteNyBehandling(BehandlingType.FØRSTEGANGSBEHANDLING,
+                                       listOf(behandling(fagsak = fagsak,
+                                                         resultat = BehandlingResultat.AVSLÅTT,
+                                                         status = BehandlingStatus.FERDIGSTILT)
+                                       ), null)
+    }
+
+
+    @Test
     internal fun `revurdering - det skal ikke være mulig å opprette en revurdering hvis forrige behandling ikke er ferdigstilt`() {
         assertThat(catchThrowable {
             validerKanOppretteNyBehandling(BehandlingType.REVURDERING,
@@ -48,6 +60,32 @@ internal class OpprettBehandlingUtilTest {
                                                   behandling(fagsak = fagsak,
                                                              status = BehandlingStatus.FERDIGSTILT)), null)
         }).hasMessage("Det finnes en behandling på fagsaken som ikke er ferdigstilt")
+    }
+
+    @Test
+    internal fun `revurdering - det skal ikke være mulig å opprette en revurdering hvis eksisterende behandling er avslått førstegangsbehandling`() {
+        assertThat(catchThrowable {
+            validerKanOppretteNyBehandling(BehandlingType.REVURDERING,
+                                           listOf(behandling(fagsak = fagsak,
+                                                             resultat = BehandlingResultat.AVSLÅTT,
+                                                             status = BehandlingStatus.FERDIGSTILT)
+                                           ), null)
+        }).hasMessage("Det finnes ikke en tidligere behandling på fagsaken")
+    }
+
+
+    @Test
+    internal fun `revurdering - det skal ikke være mulig å opprette en revurdering hvis eksisterende behandling er avslått og annullert`() {
+        assertThat(catchThrowable {
+            validerKanOppretteNyBehandling(BehandlingType.REVURDERING,
+                                           listOf(behandling(fagsak = fagsak,
+                                                             resultat = BehandlingResultat.AVSLÅTT,
+                                                             status = BehandlingStatus.FERDIGSTILT),
+                                                  behandling(fagsak = fagsak,
+                                                             resultat = BehandlingResultat.ANNULLERT,
+                                                             status = BehandlingStatus.FERDIGSTILT)
+                                           ), null)
+        }).hasMessage("Det finnes ikke en tidligere behandling på fagsaken")
     }
 
     @Test
