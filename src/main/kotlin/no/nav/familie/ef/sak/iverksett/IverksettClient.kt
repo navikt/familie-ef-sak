@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.felles.util.medContentTypeJsonUTF8
 import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.http.client.MultipartBuilder
+import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevDto
 import no.nav.familie.kontrakter.ef.infotrygd.OpprettStartBehandlingHendelseDto
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingsstatistikkDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettDto
@@ -77,5 +78,9 @@ class IverksettClient(@Value("\${FAMILIE_EF_IVERKSETT_URL}")
 
     fun konsistensavstemming(request: KonsistensavstemmingDto) {
         postForEntity<Any>(URI.create("$familieEfIverksettUri/api/konsistensavstemming"), request)
+    }
+
+    fun sendFrittståendeBrev(frittståendeBrevDto: FrittståendeBrevDto){
+        postForEntity<Any>(URI.create("$familieEfIverksettUri/api/brev/frittstaende"), frittståendeBrevDto)
     }
 }
