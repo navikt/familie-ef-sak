@@ -21,7 +21,7 @@ enum class RegelId(val beskrivelse: String) {
     MER_AV_DAGLIG_OMSORG(""),
 
     // Mor eller far
-    OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN("Har bruker omsorgen for egne/adopterte barn?"),
+    OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN("Søker brukeren stønad for egne/adopterte barn?"),
 
     // Sivilstand
     SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON("Kan samlivsbruddet likestilles med formell separasjon?"),
