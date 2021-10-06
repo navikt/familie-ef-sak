@@ -6,39 +6,6 @@ import java.net.URL
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-/*
-KODE    	TEKST
-CHAR(2) 	CHAR(30)
-------- 	------------------------------
-AN      	Annullert
-AS      	Avgang småbarnstillegg
-B       	Barnetillegg
-BB      	Barn 18 år
-E       	Endring i beregningsgrunnlag
-F       	Førstegangsvedtak
-G       	G-regulering
-H       	Barn etterlatte.3 måneder
-I       	Institusjonsopphold
-IN      	Ny inntektsgr.
-KB      	Barn 3 år
-NB      	Nytt barn
-NY      	Ny
-O       	Opphørt
-S       	Satsendring
-TS      	Tilgang småbarnstillegg
-U       	Uføregrad
-UA      	Uaktuell
-P       	Passivt
-AV      	Avslag
-OO      	Overf ny løsning
-
-O 	44823
-F 	123680
-E 	285547
-NY	19679
-G 	242131
- */
-
 object InfotrygdPeriodeParser {
 
     data class InfotrygdTestData(val input: List<InfotrygdPeriode>, val output: List<InfotrygdPeriode>)
