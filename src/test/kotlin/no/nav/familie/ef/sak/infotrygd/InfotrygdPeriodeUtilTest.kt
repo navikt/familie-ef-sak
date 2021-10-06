@@ -47,26 +47,26 @@ internal class InfotrygdPeriodeUtilTest {
     }
 
     @Test
-    internal fun `158`() {
-        val inputOutput = parseFil("infotrygd/158.csv")
+    internal fun `enkel_forkortning_periode_158`() {
+        val inputOutput = parseFil("infotrygd/enkel_forkortning_periode_158.csv")
         assertThat(inputOutput.output).isEqualTo(InfotrygdPeriodeUtil.lagPerioder(inputOutput.input))
     }
 
     @Test
-    internal fun `2172101`() {
-        val inputOutput = parseFil("infotrygd/2172101.csv")
+    internal fun `perioder med flere opphør, returnerer kun en periode av vedtak 2 `() {
+        val inputOutput = parseFil("infotrygd/perioder_med_flere_opphør_2172101.csv")
         assertThat(inputOutput.output).isEqualTo(InfotrygdPeriodeUtil.lagPerioder(inputOutput.input))
     }
 
     @Test
-    internal fun `4571388`() {
-        val inputOutput = parseFil("infotrygd/4571388.csv")
+    internal fun `periode avkorter en tidligere lenger periode, vedtak 6 avkorter vedtak 5`() {
+        val inputOutput = parseFil("infotrygd/avkorter_periode_4571388.csv")
         assertThat(inputOutput.output).isEqualTo(InfotrygdPeriodeUtil.lagPerioder(inputOutput.input))
     }
 
     @Test
-    internal fun `4120848`() {
-        val inputOutput = parseFil("infotrygd/4120848.csv")
+    internal fun `4 perioder omsluttes av annen periode og returneres ikke, vedtak 11 gjør vedtak 7 til 10 irrelevant`() {
+        val inputOutput = parseFil("infotrygd/4_perioder_omsluttes_av_annen_periode_4120848.csv")
         assertThat(inputOutput.output).isEqualTo(InfotrygdPeriodeUtil.lagPerioder(inputOutput.input))
     }
 
