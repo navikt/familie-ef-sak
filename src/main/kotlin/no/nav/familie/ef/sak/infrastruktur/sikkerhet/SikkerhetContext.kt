@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.infrastruktur.sikkerhet
 
-import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BehandlerRolle
+import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 
 object SikkerhetContext {
@@ -10,6 +10,11 @@ object SikkerhetContext {
     private const val SYSTEM_FORKORTELSE = "VL"
 
     val NAVIDENT_REGEX = """^[a-zA-Z]\d{6}$""".toRegex()
+
+    fun erTokenUtstedtAvSaksbehandler(): Boolean {
+        val claims = SpringTokenValidationContextHolder().tokenValidationContext.getClaims("azuread")
+        return claims.get("aud") != null && claims.get("aud") != claims.get("client_id")
+    }
 
     /**
      * @param strict hvis true - skal kaste feil hvis token ikke inneholder NAVident

@@ -15,7 +15,6 @@ import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
 import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Component
@@ -25,15 +24,20 @@ import java.net.URI
 
 @Component
 class PersonopplysningerIntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
-                                 private val integrasjonerConfig: IntegrasjonerConfig)
+                                            private val integrasjonerConfig: IntegrasjonerConfig)
     : AbstractPingableRestClient(restOperations, "familie.integrasjoner") {
 
     override val pingUri: URI = integrasjonerConfig.pingUri
-    val logger = LoggerFactory.getLogger(this::class.java)
+
+    fun sjekkTilgangTilPerson(personIdent: String): Tilgang {
+        return postForEntity(integrasjonerConfig.tilgangPersonUri, listOf(personIdent), HttpHeaders().also {
+            it.set(HEADER_NAV_TEMA, HEADER_NAV_TEMA_ENF)
+        })
+    }
 
     fun sjekkTilgangTilPersonMedRelasjoner(personIdent: String): Tilgang {
         return postForEntity(integrasjonerConfig.tilgangRelasjonerUri, PersonIdent(personIdent), HttpHeaders().also {
-            it.set("Nav-Tema", "ENF")
+            it.set(HEADER_NAV_TEMA, HEADER_NAV_TEMA_ENF)
         })
     }
 
@@ -56,7 +60,6 @@ class PersonopplysningerIntegrasjonerClient(@Qualifier("azure") restOperations: 
                                                           EgenAnsattRequest(ident)).data!!.erEgenAnsatt
     }
 
-
     fun hentNavKontor(ident: String): NavKontorEnhet {
         return postForEntity<Ressurs<NavKontorEnhet>>(integrasjonerConfig.navKontorUri, PersonIdent(ident)).getDataOrThrow()
     }
@@ -65,6 +68,12 @@ class PersonopplysningerIntegrasjonerClient(@Qualifier("azure") restOperations: 
     fun hentInfotrygdPerioder(request: PerioderOvergangsstønadRequest): PerioderOvergangsstønadResponse {
         return postForEntity<Ressurs<PerioderOvergangsstønadResponse>>(integrasjonerConfig.infotrygdVedtaksperioder, request)
                 .getDataOrThrow()
+    }
+
+    companion object {
+
+        const val HEADER_NAV_TEMA = "Nav-Tema"
+        const val HEADER_NAV_TEMA_ENF = "ENF"
     }
 
 }
