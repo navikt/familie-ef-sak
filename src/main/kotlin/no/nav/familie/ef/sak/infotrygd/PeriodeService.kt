@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.kontrakter.ef.felles.StønadType
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdEndringKode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeRequest
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
@@ -28,21 +29,23 @@ class PeriodeService(
         val perioderFraReplika = hentPerioderFraReplika(personIdenter)
         val perioderFraEf = hentPerioderFraEf(personIdenter)
 
-        return InternPeriodeUtil.slåSammenPerioder(perioderFraReplika + perioderFraEf)
+        return InternPeriodeUtil.slåSammenPerioder(perioderFraEf + perioderFraReplika)
     }
 
     private fun hentPerioderFraEf(personIdenter: Set<String>): List<InternPeriode> {
         return fagsakService.finnFagsak(personIdenter, Stønadstype.OVERGANGSSTØNAD)
                        ?.let { behandlingService.finnSisteIverksatteBehandling(it.id) }
                        ?.let { hentPerioderFraEf(it) }
+                       // trenger å sortere de revers pga filtrerOgSorterPerioderFraInfotrygd gjør det, då vi ønsker de sortert på siste hendelsen først
+                       ?.sortedWith(compareBy<InternPeriode> { it.stønadFom }.reversed())
                ?: emptyList()
     }
 
     private fun hentPerioderFraReplika(personIdenter: Set<String>): List<InternPeriode> {
-        val perioder =
-                replikaClient.hentPerioder(InfotrygdPeriodeRequest(personIdenter,
-                                                                   setOf(StønadType.OVERGANGSSTØNAD))).overgangsstønad
+        val request = InfotrygdPeriodeRequest(personIdenter, setOf(StønadType.OVERGANGSSTØNAD))
+        val perioder = replikaClient.hentPerioder(request).overgangsstønad
         val filtrertPerioder = InfotrygdPeriodeUtil.filtrerOgSorterPerioderFraInfotrygd(perioder)
+                .filter { it.kode != InfotrygdEndringKode.ANNULERT && it.kode != InfotrygdEndringKode.UAKTUELL }
         return filtrertPerioder.map(InfotrygdPeriode::tilInternPeriode)
     }
 
@@ -56,7 +59,7 @@ private fun AndelTilkjentYtelse.tilInternPeriode(): InternPeriode = InternPeriod
         samordningsfradrag = this.samordningsfradrag,
         beløp = this.beløp,
         stønadFom = this.stønadFom,
-        stønadTom = this.stønadFom,
+        stønadTom = this.stønadTom,
         opphørsdato = null,
         datakilde = PeriodeOvergangsstønad.Datakilde.EF
 )

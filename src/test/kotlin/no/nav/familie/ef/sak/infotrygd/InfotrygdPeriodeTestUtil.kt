@@ -12,6 +12,7 @@ object InfotrygdPeriodeTestUtil {
                             opphørdato: LocalDate? = null,
                             stønadId: Int = 1,
                             vedtakId: Int = 1,
+                            beløp: Int = 1,
                             kode: InfotrygdEndringKode = InfotrygdEndringKode.NY): InfotrygdPeriode {
         return InfotrygdPeriode(personIdent = personIdent,
                                 kode = kode,
@@ -21,7 +22,7 @@ object InfotrygdPeriodeTestUtil {
                                 stønadBeløp = 0,
                                 inntektsreduksjon = 0,
                                 samordningsfradrag = 0,
-                                beløp = 0,
+                                beløp = beløp,
                                 startDato = LocalDate.now(),
                                 stønadFom = stønadFom,
                                 stønadTom = stønadTom,

@@ -14,14 +14,15 @@ object InfotrygdPeriodeUtil {
 
     fun filtrerOgSorterPerioderFraInfotrygd(perioderFraInfotrygd: List<InfotrygdPeriode>): List<InfotrygdPeriode> {
         return perioderFraInfotrygd.toSet()
-            .map {
-                if (it.opphørsdato != null && it.opphørsdato!!.isBefore(it.stønadTom)) { // TODO slett !!
-                    return@map it.copy(stønadTom = it.opphørsdato!!) // TODO slett !!
+                .map {
+                    val opphørsdato = it.opphørsdato
+                    if (opphørsdato != null && opphørsdato.isBefore(it.stønadTom)) {
+                        return@map it.copy(stønadTom = opphørsdato)
+                    }
+                    it
                 }
-                it
-            }
-            .filter { it.stønadTom > it.stønadFom } // Skal infotrygd rydde bort disse? (inkl de der opphørdato er før startdato)
-            .sortedWith(compareBy<InfotrygdPeriode>({ it.stønadId }, { it.vedtakId }, { it.stønadFom }).reversed())
+                .filter { it.stønadTom > it.stønadFom } // Skal infotrygd rydde bort disse? (inkl de der opphørdato er før startdato)
+                .sortedWith(compareBy<InfotrygdPeriode>({ it.stønadId }, { it.vedtakId }, { it.stønadFom }).reversed())
     }
 
 }
