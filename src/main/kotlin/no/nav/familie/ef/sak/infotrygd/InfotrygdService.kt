@@ -10,7 +10,6 @@ import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSøkRequest
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
-
 @Service
 class InfotrygdService(private val infotrygdReplikaClient: InfotrygdReplikaClient,
                        private val pdlClient: PdlClient) {

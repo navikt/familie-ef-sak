@@ -16,11 +16,11 @@ import org.springframework.stereotype.Component
 
 @Component
 class PeriodeService(
-    private val pdlClient: PdlClient,
-    private val fagsakService: FagsakService,
-    private val behandlingService: BehandlingService,
-    private val tilkjentYtelseService: TilkjentYtelseService,
-    private val replikaClient: InfotrygdReplikaClient
+        private val pdlClient: PdlClient,
+        private val fagsakService: FagsakService,
+        private val behandlingService: BehandlingService,
+        private val tilkjentYtelseService: TilkjentYtelseService,
+        private val replikaClient: InfotrygdReplikaClient
 ) {
 
     fun hentPerioderFraEfOgInfotrygd(personIdent: String): List<InternPeriode> {
@@ -33,39 +33,40 @@ class PeriodeService(
 
     private fun hentPerioderFraEf(personIdenter: Set<String>): List<InternPeriode> {
         return fagsakService.finnFagsak(personIdenter, Stønadstype.OVERGANGSSTØNAD)
-            ?.let { behandlingService.finnSisteIverksatteBehandling(it.id) }
-            ?.let { hentPerioderFraEf(it) }
-            ?: emptyList()
+                       ?.let { behandlingService.finnSisteIverksatteBehandling(it.id) }
+                       ?.let { hentPerioderFraEf(it) }
+               ?: emptyList()
     }
 
     private fun hentPerioderFraReplika(personIdenter: Set<String>): List<InternPeriode> {
         val perioder =
-            replikaClient.hentPerioder(InfotrygdPeriodeRequest(personIdenter, setOf(StønadType.OVERGANGSSTØNAD))).overgangsstønad
+                replikaClient.hentPerioder(InfotrygdPeriodeRequest(personIdenter,
+                                                                   setOf(StønadType.OVERGANGSSTØNAD))).overgangsstønad
         val filtrertPerioder = InfotrygdPeriodeUtil.filtrerOgSorterPerioderFraInfotrygd(perioder)
         return filtrertPerioder.map(InfotrygdPeriode::tilInternPeriode)
     }
 
     private fun hentPerioderFraEf(it: Behandling): List<InternPeriode> =
-        tilkjentYtelseService.hentForBehandling(it.id).andelerTilkjentYtelse
-            .map(AndelTilkjentYtelse::tilInternPeriode)
+            tilkjentYtelseService.hentForBehandling(it.id).andelerTilkjentYtelse
+                    .map(AndelTilkjentYtelse::tilInternPeriode)
 }
 
 private fun AndelTilkjentYtelse.tilInternPeriode(): InternPeriode = InternPeriode(
-    inntektsreduksjon = this.inntektsreduksjon,
-    samordningsfradrag = this.samordningsfradrag,
-    beløp = this.beløp,
-    stønadFom = this.stønadFom,
-    stønadTom = this.stønadFom,
-    opphørsdato = null,
-    datakilde = PeriodeOvergangsstønad.Datakilde.EF
+        inntektsreduksjon = this.inntektsreduksjon,
+        samordningsfradrag = this.samordningsfradrag,
+        beløp = this.beløp,
+        stønadFom = this.stønadFom,
+        stønadTom = this.stønadFom,
+        opphørsdato = null,
+        datakilde = PeriodeOvergangsstønad.Datakilde.EF
 )
 
 fun InfotrygdPeriode.tilInternPeriode(): InternPeriode = InternPeriode(
-    inntektsreduksjon = this.inntektsreduksjon,
-    samordningsfradrag = this.samordningsfradrag,
-    beløp = this.beløp,
-    stønadFom = this.stønadFom,
-    stønadTom = this.stønadTom,
-    opphørsdato = this.opphørsdato,
-    datakilde = PeriodeOvergangsstønad.Datakilde.INFOTRYGD
+        inntektsreduksjon = this.inntektsreduksjon,
+        samordningsfradrag = this.samordningsfradrag,
+        beløp = this.beløp,
+        stønadFom = this.stønadFom,
+        stønadTom = this.stønadTom,
+        opphørsdato = this.opphørsdato,
+        datakilde = PeriodeOvergangsstønad.Datakilde.INFOTRYGD
 )

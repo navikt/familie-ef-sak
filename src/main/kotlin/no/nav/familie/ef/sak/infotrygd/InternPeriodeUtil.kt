@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.infotrygd
 import no.nav.familie.ef.sak.felles.util.isEqualOrAfter
 
 object InternPeriodeUtil {
+
     /**
      * Slår sammen perioder tvers kilder, viktig att EF-perioder
      */

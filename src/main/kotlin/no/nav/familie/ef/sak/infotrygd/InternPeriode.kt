@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.infotrygd
 
 import no.nav.familie.ef.sak.felles.util.isEqualOrAfter
 import no.nav.familie.ef.sak.felles.util.isEqualOrBefore
-import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import java.time.LocalDate
 
