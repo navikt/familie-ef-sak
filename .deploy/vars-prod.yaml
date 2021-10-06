@@ -7,6 +7,9 @@ inboundApplicationsExternal:
   - application: familie-ef-mottak
     namespace: teamfamilie
     cluster: prod-fss
+  - application: familie-ba-sak
+    namespace: teamfamilie
+    cluster: prod-fss
 externalHosts:
   - api-gw.oera.no
   - unleash.nais.io
