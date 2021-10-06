@@ -57,9 +57,7 @@ internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest()
     }
 
     @Test
-    internal fun `full overgangsstønad - skal ikke kunne kalle endepunkt med client_credential token som ikke har tilgang til ef-sak`() {
-        headers.setBearerAuth(clientToken("familie-ba-sak", false))
-
+    internal fun `full overgangsstønad - skal ikke kunne kalle endepunkt uten token`() {
         val response: ResponseEntity<Ressurs<PerioderOvergangsstønadResponse>> =
                 restTemplate.exchange(localhost("/api/ekstern/perioder/full-overgangsstonad"),
                                       HttpMethod.POST,
@@ -84,7 +82,7 @@ internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest()
 
     @Test
     internal fun `full overgangsstønad - on-behalf-of token har ikke tilgang til person`() {
-        headers.setBearerAuth(onBehalfOfToken("familie-ba-sak"))
+        headers.setBearerAuth(onBehalfOfToken("d21e00a4-969d-4b28-8782-dc818abfae65"))
 
         val response: ResponseEntity<Ressurs<PerioderOvergangsstønadResponse>> =
                 restTemplate.exchange(localhost("/api/ekstern/perioder/full-overgangsstonad"),

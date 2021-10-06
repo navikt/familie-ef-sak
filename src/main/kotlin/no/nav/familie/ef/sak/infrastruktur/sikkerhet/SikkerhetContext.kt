@@ -11,9 +11,11 @@ object SikkerhetContext {
 
     val NAVIDENT_REGEX = """^[a-zA-Z]\d{6}$""".toRegex()
 
-    fun erTokenUtstedtAvSaksbehandler(): Boolean {
+    fun erMaskinTilMaskinToken(): Boolean {
         val claims = SpringTokenValidationContextHolder().tokenValidationContext.getClaims("azuread")
-        return claims.get("aud") != null && claims.get("aud") != claims.get("client_id")
+        return claims.get("aud") != null &&
+               claims.get("aud") == claims.get("sub") &&
+               claims.getAsList("roles").contains("access_as_application")
     }
 
     /**

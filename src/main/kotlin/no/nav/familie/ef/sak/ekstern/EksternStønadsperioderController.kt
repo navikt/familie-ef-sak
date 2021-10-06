@@ -44,7 +44,7 @@ class EksternStønadsperioderController(private val arenaStønadsperioderService
      */
     @PostMapping("full-overgangsstonad")
     fun hentPerioderForOvergangsstonad(@RequestBody request: PersonIdent): Ressurs<PerioderOvergangsstønadResponse> {
-        if (SikkerhetContext.erTokenUtstedtAvSaksbehandler()) {
+        if (!SikkerhetContext.erMaskinTilMaskinToken()) {
             tilgangService.validerTilgangTilPerson(request.ident)
         }
         return Ressurs.success(perioderForBarnetrygdService.hentPerioder(request))

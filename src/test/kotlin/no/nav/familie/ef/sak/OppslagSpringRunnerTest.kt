@@ -68,6 +68,7 @@ abstract class OppslagSpringRunnerTest {
 
     @AfterEach
     fun reset() {
+        headers.clear()
         loggingEvents.clear()
         resetDatabase()
         clearCaches()
