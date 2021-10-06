@@ -19,6 +19,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdat
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknad
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadsskjemaOvergangsstønad
 import no.nav.familie.ef.sak.simulering.Simuleringsresultat
+import no.nav.familie.ef.sak.tilbakekreving.domain.Tilbakekreving
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.Vedtak
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
@@ -86,25 +87,28 @@ abstract class OppslagSpringRunnerTest {
     }
 
     private fun resetDatabase() {
-        listOf(KonsistensavstemmingJobb::class,
-               Simuleringsresultat::class,
-               Søknad::class,
-               SøknadsskjemaOvergangsstønad::class,
-               TilkjentYtelse::class,
-               Oppgave::class,
-               Vilkårsvurdering::class,
-               Behandlingshistorikk::class,
-               Vedtaksbrev::class,
-               Blankett::class,
-               Vedtak::class,
-               MellomlagretBrev::class,
-               Behandlingsjournalpost::class,
-               Grunnlagsdata::class,
-               Behandling::class,
-               Fagsak::class,
-               TaskLogg::class,
-               Task::class
-        ).forEach { jdbcAggregateOperations.deleteAll(it.java) }
+        listOf(
+                KonsistensavstemmingJobb::class,
+                Simuleringsresultat::class,
+                Søknad::class,
+                SøknadsskjemaOvergangsstønad::class,
+                TilkjentYtelse::class,
+                Oppgave::class,
+                Vilkårsvurdering::class,
+                Behandlingshistorikk::class,
+                Vedtaksbrev::class,
+                Blankett::class,
+                Vedtak::class,
+                MellomlagretBrev::class,
+                Behandlingsjournalpost::class,
+                Grunnlagsdata::class,
+                Tilbakekreving::class,
+                Behandling::class,
+                Fagsak::class,
+                TaskLogg::class,
+                Task::class,
+
+                ).forEach { jdbcAggregateOperations.deleteAll(it.java) }
     }
 
     protected fun getPort(): String {
