@@ -9,6 +9,7 @@ import java.time.LocalDate
  * Brukes for å mappe interne ef-perioder og infotrygd perioder til ett felles format
  */
 data class InternPeriode(
+        val personIdent: String,
         val inntektsreduksjon: Int,
         val samordningsfradrag: Int,
         val beløp: Int, // netto_belop

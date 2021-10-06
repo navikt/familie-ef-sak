@@ -55,6 +55,7 @@ class PeriodeService(
 }
 
 private fun AndelTilkjentYtelse.tilInternPeriode(): InternPeriode = InternPeriode(
+        personIdent = this.personIdent,
         inntektsreduksjon = this.inntektsreduksjon,
         samordningsfradrag = this.samordningsfradrag,
         beløp = this.beløp,
@@ -65,6 +66,7 @@ private fun AndelTilkjentYtelse.tilInternPeriode(): InternPeriode = InternPeriod
 )
 
 fun InfotrygdPeriode.tilInternPeriode(): InternPeriode = InternPeriode(
+        personIdent = this.personIdent,
         inntektsreduksjon = this.inntektsreduksjon,
         samordningsfradrag = this.samordningsfradrag,
         beløp = this.beløp,

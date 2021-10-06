@@ -20,16 +20,16 @@ class PerioderForBarnetrygdService(
     fun hentPerioder(request: PersonIdent): PerioderOvergangsstønadResponse {
         val perioder = periodeService.hentPerioderFraEfOgInfotrygd(request.ident)
                 .filter(InternPeriode::erFullOvergangsstønad)
-                .map { it.tilEksternPeriodeOvergangsstønad(request.ident) }
+                .map(InternPeriode::tilEksternPeriodeOvergangsstønad)
 
         return PerioderOvergangsstønadResponse(perioder)
     }
 
 }
 
-private fun InternPeriode.tilEksternPeriodeOvergangsstønad(personIdent: String): PeriodeOvergangsstønad =
+private fun InternPeriode.tilEksternPeriodeOvergangsstønad(): PeriodeOvergangsstønad =
         PeriodeOvergangsstønad(
-                personIdent = personIdent,
+                personIdent = this.personIdent,
                 fomDato = this.stønadFom,
                 tomDato = this.stønadTom,
                 datakilde = this.datakilde
