@@ -4,7 +4,7 @@ import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdEndringKode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
 import java.time.LocalDate
 
-object InfotrygdPeriodeUtil {
+object InfotrygdPeriodeTestUtil {
 
     fun lagInfotrygdPeriode(personIdent: String,
                             kode: InfotrygdEndringKode = InfotrygdEndringKode.NY): InfotrygdPeriode {

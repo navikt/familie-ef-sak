@@ -7,6 +7,8 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
+import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
+import no.nav.familie.ef.sak.infotrygd.PeriodeService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
@@ -28,8 +30,17 @@ internal class PerioderForBarnetrygdServiceTest {
     private val fagsakService = mockk<FagsakService>()
     private val behandlingService = mockk<BehandlingService>()
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
+    private val replikaClient = mockk<InfotrygdReplikaClient>()
 
-    private val service = PerioderForBarnetrygdService(pdlClient, fagsakService, behandlingService, tilkjentYtelseService)
+    private val service = PerioderForBarnetrygdService(
+        PeriodeService(
+            pdlClient = pdlClient,
+            fagsakService = fagsakService,
+            behandlingService = behandlingService,
+            tilkjentYtelseService = tilkjentYtelseService,
+            replikaClient = replikaClient
+        )
+    )
 
     private val personIdent = "123"
     private val fagsak = fagsak()
@@ -78,10 +89,12 @@ internal class PerioderForBarnetrygdServiceTest {
     private fun mockTilkjentYtelse() {
         val fraOgMed = LocalDate.now().minusYears(1)
         every { tilkjentYtelseService.hentForBehandling(any()) } returns
-                tilkjentYtelse(behandling.id, personIdent).copy(andelerTilkjentYtelse = listOf(
+                tilkjentYtelse(behandling.id, personIdent).copy(
+                    andelerTilkjentYtelse = listOf(
                         lagAndelTilkjentYtelse(1, fraOgMed, fraOgMed, inntektsreduksjon = 1),
                         lagAndelTilkjentYtelse(2, fraOgMed, fraOgMed, samordningsfradrag = 1),
                         lagAndelTilkjentYtelse(1000, LocalDate.now(), LocalDate.now().plusDays(1))
-                ))
+                    )
+                )
     }
 }
