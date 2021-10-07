@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.brev.domain.FRITEKST
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
+import no.nav.familie.ef.sak.brev.domain.tilDto
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevRequestDto
 import no.nav.familie.ef.sak.brev.dto.VedtaksbrevFritekstDto
 import no.nav.familie.ef.sak.felles.domain.Fil
@@ -31,7 +32,7 @@ class VedtaksbrevService(private val brevClient: BrevClient,
         return if (vedtaksbrev.beslutterPdf != null) {
             vedtaksbrev.beslutterPdf.bytes
         } else {
-            brevClient.genererBrev(vedtaksbrev)
+            brevClient.genererBrev(vedtaksbrev.tilDto())
         }
     }
 
@@ -41,7 +42,7 @@ class VedtaksbrevService(private val brevClient: BrevClient,
         val saksbehandlersignatur = SikkerhetContext.hentSaksbehandlerNavn(strict = true)
         val vedtaksbrev = lagreEllerOppdaterVedtaksbrev(behandlingId, brevrequest.toString(), brevmal, saksbehandlersignatur)
 
-        return brevClient.genererBrev(vedtaksbrev)
+        return brevClient.genererBrev(vedtaksbrev.tilDto())
     }
 
     private fun lagreEllerOppdaterVedtaksbrev(behandlingId: UUID,
@@ -72,7 +73,7 @@ class VedtaksbrevService(private val brevClient: BrevClient,
 
         validerBeslutterIkkeErLikSaksbehandler(vedtaksbrev, besluttersignatur)
 
-        val beslutterPdf = Fil(brevClient.genererBrev(besluttervedtaksbrev))
+        val beslutterPdf = Fil(brevClient.genererBrev(besluttervedtaksbrev.tilDto()))
         val besluttervedtaksbrevMedPdf = besluttervedtaksbrev.copy(beslutterPdf = beslutterPdf)
         brevRepository.update(besluttervedtaksbrevMedPdf)
         return beslutterPdf.bytes
@@ -93,7 +94,7 @@ class VedtaksbrevService(private val brevClient: BrevClient,
                                                         brevmal = FRITEKST,
                                                         saksbehandlersignatur = SikkerhetContext.hentSaksbehandlerNavn(true))
 
-        return brevClient.genererBrev(vedtaksbrev = vedtaksbrev)
+        return brevClient.genererBrev(vedtaksbrev = vedtaksbrev.tilDto())
     }
 
     private fun validerRedigerbarBehandling(behandling: Behandling) {

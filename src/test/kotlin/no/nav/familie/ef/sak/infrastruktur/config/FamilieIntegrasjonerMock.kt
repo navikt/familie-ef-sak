@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.arbeidsfordeling.Arbeidsfordelingsenhet
 import no.nav.familie.ef.sak.felles.integration.dto.EgenAnsattResponse
 import no.nav.familie.ef.sak.felles.integration.dto.Tilgang
 import no.nav.familie.ef.sak.infrastruktur.config.IntegrasjonerConfig
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.infrastruktur.config.pdfAsBase64String
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.BrukerIdType
@@ -66,6 +67,8 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                     WireMock.get(WireMock.urlPathEqualTo(integrasjonerConfig.journalPostUri.path))
                             .withQueryParam("journalpostId", equalTo("1234"))
                             .willReturn(WireMock.okJson(objectMapper.writeValueAsString(journalpost))),
+                    WireMock.post(WireMock.urlPathEqualTo(integrasjonerConfig.journalPostUri.path))
+                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(journalposter))),
                     WireMock.get(WireMock.urlPathMatching("${integrasjonerConfig.journalPostUri.path}/hentdokument/([0-9]*)/([0-9]*)"))
                             .withQueryParam("variantFormat", equalTo("ORIGINAL"))
                             .willReturn(WireMock.okJson(
@@ -132,53 +135,61 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
 
         private val oppdatertJournalpostResponse =
                 Ressurs.success(OppdaterJournalpostResponse(journalpostId = "1234"))
-        val pdfAsBase64String =
-                "JVBERi0xLjIgCjkgMCBvYmoKPDwKPj4Kc3RyZWFtCkJULyA5IFRmKFRlc3QpJyBFVAplbmRzdHJlYW0KZW5kb2JqCjQgMCBvYmoKPDwKL1R5cGUgL1BhZ2UKL1BhcmVudCA1IDAgUgovQ29udGVudHMgOSAwIFIKPj4KZW5kb2JqCjUgMCBvYmoKPDwKL0tpZHMgWzQgMCBSIF0KL0NvdW50IDEKL1R5cGUgL1BhZ2VzCi9NZWRpYUJveCBbIDAgMCA5OSA5IF0KPj4KZW5kb2JqCjMgMCBvYmoKPDwKL1BhZ2VzIDUgMCBSCi9UeXBlIC9DYXRhbG9nCj4+CmVuZG9iagp0cmFpbGVyCjw8Ci9Sb290IDMgMCBSCj4+CiUlRU9G"
         private val arkiverDokumentResponse = Ressurs.success(ArkiverDokumentResponse(journalpostId = "1234", ferdigstilt = true))
-        private val journalpost =
-                Ressurs.success(Journalpost(journalpostId = "1234",
-                                            journalposttype = Journalposttype.I,
-                                            journalstatus = Journalstatus.MOTTATT,
-                                            tema = "ENF",
-                                            behandlingstema = "ab0071",
-                                            tittel = "abrakadabra",
-                                            bruker = Bruker(type = BrukerIdType.FNR, id = fnr),
-                                            journalforendeEnhet = "4817",
-                                            kanal = "SKAN_IM",
-                                            relevanteDatoer = listOf(RelevantDato(LocalDateTime.now(), "DATO_REGISTRERT")),
-                                            dokumenter =
-                                            listOf(DokumentInfo(dokumentInfoId = "12345",
-                                                                tittel = "Søknad om overgangsstønad - dokument 1",
-                                                                brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
-                                                                dokumentvarianter =
-                                                                listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV),
-                                                                       Dokumentvariant(variantformat = Dokumentvariantformat.ORIGINAL))),
-                                                   DokumentInfo(dokumentInfoId = "12345",
-                                                                tittel = "Søknad om barnetilsyn - dokument 1",
-                                                                brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
-                                                                dokumentvarianter =
-                                                                listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV))),
-                                                   DokumentInfo(dokumentInfoId = "12345",
-                                                                tittel = "Samboeravtale",
-                                                                brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
-                                                                dokumentvarianter =
-                                                                listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV))),
-                                                   DokumentInfo(dokumentInfoId = "12345",
-                                                                tittel = "EtFrykteligLangtDokumentNavnSomTroligIkkeBrekkerOgØdeleggerGUI",
-                                                                brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
-                                                                dokumentvarianter =
-                                                                listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV))),
-                                                   DokumentInfo(dokumentInfoId = "12345",
-                                                                tittel = "Søknad om overgangsstønad - dokument 2",
-                                                                brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
-                                                                dokumentvarianter =
-                                                                listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV))),
-                                                   DokumentInfo(dokumentInfoId = "12345",
-                                                                tittel = "Søknad om overgangsstønad - dokument 3",
-                                                                brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
-                                                                dokumentvarianter =
-                                                                listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV))))))
-
+        val journalpostFraIntegrasjoner = Journalpost(journalpostId = "1234",
+                                                      journalposttype = Journalposttype.I,
+                                                      journalstatus = Journalstatus.MOTTATT,
+                                                      tema = "ENF",
+                                                      behandlingstema = "ab0071",
+                                                      tittel = "abrakadabra",
+                                                      bruker = Bruker(type = BrukerIdType.FNR, id = fnr),
+                                                      journalforendeEnhet = "4817",
+                                                      kanal = "SKAN_IM",
+                                                      relevanteDatoer = listOf(RelevantDato(LocalDateTime.now(),
+                                                                                            "DATO_REGISTRERT")),
+                                                      dokumenter =
+                                                      listOf(DokumentInfo(dokumentInfoId = "12345",
+                                                                          tittel = "Søknad om overgangsstønad - dokument 1",
+                                                                          brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
+                                                                          dokumentvarianter =
+                                                                          listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV),
+                                                                                 Dokumentvariant(variantformat = Dokumentvariantformat.ORIGINAL)
+                                                                          )
+                                                      ),
+                                                             DokumentInfo(dokumentInfoId = "12345",
+                                                                          tittel = "Søknad om barnetilsyn - dokument 1",
+                                                                          brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
+                                                                          dokumentvarianter =
+                                                                          listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV))
+                                                             ),
+                                                             DokumentInfo(dokumentInfoId = "12345",
+                                                                          tittel = "Samboeravtale",
+                                                                          brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
+                                                                          dokumentvarianter =
+                                                                          listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV))
+                                                             ),
+                                                             DokumentInfo(dokumentInfoId = "12345",
+                                                                          tittel = "EtFrykteligLangtDokumentNavnSomTroligIkkeBrekkerOgØdeleggerGUI",
+                                                                          brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
+                                                                          dokumentvarianter =
+                                                                          listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV))
+                                                             ),
+                                                             DokumentInfo(dokumentInfoId = "12345",
+                                                                          tittel = "Søknad om overgangsstønad - dokument 2",
+                                                                          brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
+                                                                          dokumentvarianter =
+                                                                          listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV))
+                                                             ),
+                                                             DokumentInfo(dokumentInfoId = "12345",
+                                                                          tittel = "Søknad om overgangsstønad - dokument 3",
+                                                                          brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
+                                                                          dokumentvarianter =
+                                                                          listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV))
+                                                             )
+                                                      )
+        )
+        private val journalpost = Ressurs.success(journalpostFraIntegrasjoner)
+        private val journalposter = Ressurs.success(listOf(journalpostFraIntegrasjoner))
         private val navKontorEnhet = Ressurs.success(NavKontorEnhet(enhetId = 100000194,
                                                                     navn = "NAV Kristiansand",
                                                                     enhetNr = "1001",

@@ -37,6 +37,12 @@ class VedleggService(private val behandlingService: BehandlingService,
         return sistejournalposter + hentJournalposterTilBehandlingSomIkkeErFunnet(sistejournalposter, behandlingsjournalposter)
     }
 
+    fun finnJournalposter(personIdent: String): List<Journalpost> {
+        val journalposter = journalføringService.finnJournalposter(personIdent)
+
+        return journalposter;
+    }
+
     private fun hentJournalposterTilBehandlingSomIkkeErFunnet(sistejournalposter: List<Journalpost>,
                                                               behandlingsjournalposter: List<Behandlingsjournalpost>): List<Journalpost> {
         val journalpostIderFraFunnetJournalposter = sistejournalposter.map { it.journalpostId }
