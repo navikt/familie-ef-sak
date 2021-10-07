@@ -12,7 +12,7 @@ data class FrittståendeBrevDto(val overskrift: String,
 
 data class FrittståendeBrevAvsnitt(val deloverskrift: String, val innhold: String)
 
-data class VedtaksbrevFritekstDto(val overskrift: String,
+data class VedtaksbrevFritekstDto (val overskrift: String,
                                   val avsnitt: List<FrittståendeBrevAvsnitt>,
                                   val behandlingId: UUID)
 
