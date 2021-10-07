@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.4.5</version>
+        <version>2.5.5</version>
     </parent>
     <repositories>
         <repository>
@@ -43,10 +43,8 @@
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
         <sonar.organization>navit</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <nav.security.version>1.3.8</nav.security.version> <!-- Denne burde være samme versjon som i felles -->
+        <nav.security.version>1.3.9</nav.security.version> <!-- Denne burde være samme versjon som i felles -->
         <okhttp3.version>4.9.1</okhttp3.version> <!-- overskrever spring sin versjon, blir brukt av mock-oauth2-server -->
-        <oauth2-oidc-sdk.version>9.17</oauth2-oidc-sdk.version> <!-- TODO remove when updated spring version -->
-        <nimbus-jose-jwt.version>9.15.2</nimbus-jose-jwt.version> <!-- TODO remove when updated spring version -->
         <unleash.version>4.4.0</unleash.version>
         <!--suppress UnresolvedMavenProperty -->
         <sonar.login>${SONAR_LOGIN}</sonar.login>
