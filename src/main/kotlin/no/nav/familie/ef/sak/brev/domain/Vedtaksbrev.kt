@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.brev.domain
 
 
+import no.nav.familie.ef.sak.brev.dto.VedtaksbrevDto
 import no.nav.familie.ef.sak.felles.domain.Fil
 import org.springframework.data.annotation.Id
 import java.util.UUID
@@ -13,6 +14,9 @@ data class Vedtaksbrev(@Id
                        val besluttersignatur: String? = null,
                        val beslutterPdf: Fil? = null)
 
-fun Vedtaksbrev.erFritekstType(): Boolean = this.brevmal.equals(FRITEKST)
+fun Vedtaksbrev.tilDto(): VedtaksbrevDto = VedtaksbrevDto(saksbehandlerBrevrequest = this.saksbehandlerBrevrequest,
+                                                          brevmal = this.brevmal,
+                                                          saksbehandlersignatur = this.saksbehandlersignatur,
+                                                          besluttersignatur = this.besluttersignatur)
 
 const val FRITEKST = "fritekst"
