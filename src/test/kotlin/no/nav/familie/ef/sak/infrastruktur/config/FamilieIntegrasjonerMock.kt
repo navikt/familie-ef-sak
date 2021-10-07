@@ -3,10 +3,10 @@ package no.nav.familie.ef.sak.config
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.equalTo
-import no.nav.familie.ef.sak.infrastruktur.config.IntegrasjonerConfig
 import no.nav.familie.ef.sak.arbeidsfordeling.Arbeidsfordelingsenhet
 import no.nav.familie.ef.sak.felles.integration.dto.EgenAnsattResponse
 import no.nav.familie.ef.sak.felles.integration.dto.Tilgang
+import no.nav.familie.ef.sak.infrastruktur.config.IntegrasjonerConfig
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.BrukerIdType
@@ -47,12 +47,14 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                     WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.tilgangRelasjonerUri.path))
                             .withRequestBody(WireMock.matching(".*ikkeTilgang.*"))
                             .atPriority(1)
-                            .willReturn(WireMock.okJson(objectMapper
-                                                                .writeValueAsString(Tilgang(false,
-                                                                                            "Mock sier: Du har " +
-                                                                                            "ikke tilgang " +
-                                                                                            "til person ikkeTilgang")))),
+                            .willReturn(lagIkkeTilgangResponse()),
                     WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.tilgangRelasjonerUri.path))
+                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(Tilgang(true, null)))),
+                    WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.tilgangPersonUri.path))
+                            .withRequestBody(WireMock.matching(".*ikkeTilgang.*"))
+                            .atPriority(1)
+                            .willReturn(lagIkkeTilgangResponse()),
+                    WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.tilgangPersonUri.path))
                             .willReturn(WireMock.okJson(objectMapper.writeValueAsString(Tilgang(true, null)))),
                     WireMock.get(WireMock.urlEqualTo(integrasjonerConfig.kodeverkPoststedUri.path))
                             .willReturn(WireMock.okJson(objectMapper.writeValueAsString(kodeverkPoststed))),
@@ -85,6 +87,12 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                             .willReturn(WireMock.okJson(objectMapper.writeValueAsString(infotrygdPerioder)))
 
             )
+
+    private fun lagIkkeTilgangResponse() = WireMock.okJson(
+            objectMapper.writeValueAsString(Tilgang(false,
+                                                    "Mock sier: Du har " +
+                                                    "ikke tilgang " +
+                                                    "til person ikkeTilgang")))
 
     @Bean("mock-integrasjoner")
     @Profile("mock-integrasjoner")
