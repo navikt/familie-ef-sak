@@ -12,7 +12,7 @@ import no.nav.familie.ef.sak.brev.domain.MellomlagretBrev
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.database.DbContainerInitializer
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
-import no.nav.familie.ef.sak.felles.util.onBehalfOfToken
+import no.nav.familie.ef.sak.felles.util.TokenUtil
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdata
@@ -24,6 +24,8 @@ import no.nav.familie.ef.sak.vedtak.Vedtak
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskLogg
+import no.nav.security.mock.oauth2.MockOAuth2Server
+import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -50,6 +52,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
                 "mock-infotrygd-replika",
                 "mock-iverksett",
                 "mock-brev")
+@EnableMockOAuth2Server
 abstract class OppslagSpringRunnerTest {
 
     protected val listAppender = initLoggingEventListAppender()
@@ -62,6 +65,7 @@ abstract class OppslagSpringRunnerTest {
     @Autowired private lateinit var cacheManager: CacheManager
     @Autowired @Qualifier("kodeverkCache") private lateinit var cacheManagerKodeverk: CacheManager
     @Autowired private lateinit var rolleConfig: RolleConfig
+    @Autowired private lateinit var mockOAuth2Server: MockOAuth2Server
 
     @LocalServerPort
     private var port: Int? = 0
@@ -123,6 +127,14 @@ abstract class OppslagSpringRunnerTest {
         get() {
             return onBehalfOfToken(role = rolleConfig.beslutterRolle)
         }
+
+    protected fun onBehalfOfToken(role: String = rolleConfig.beslutterRolle, saksbehandler: String = "julenissen"): String {
+        return TokenUtil.onBehalfOfToken(mockOAuth2Server, role, saksbehandler)
+    }
+
+    protected fun clientToken(clientId: String = "1", accessAsApplication: Boolean = true): String {
+        return TokenUtil.clientToken(mockOAuth2Server, clientId, accessAsApplication)
+    }
 
     companion object {
 

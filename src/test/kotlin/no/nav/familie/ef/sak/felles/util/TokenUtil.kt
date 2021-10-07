@@ -1,38 +1,46 @@
 package no.nav.familie.ef.sak.felles.util
 
-import com.nimbusds.jwt.JWTClaimsSet
-import no.nav.security.token.support.test.JwkGenerator
-import no.nav.security.token.support.test.JwtTokenGenerator
+import no.nav.security.mock.oauth2.MockOAuth2Server
 import java.util.UUID
 
+object TokenUtil {
 
-fun clientToken(clientId: String?, accessAsApplication: Boolean): String {
-    val thisId = UUID.randomUUID().toString()
-    var claimsSet = JwtTokenGenerator.createSignedJWT(clientId).jwtClaimsSet
-    val builder = JWTClaimsSet.Builder(claimsSet)
-            .claim("oid", thisId)
-            .claim("sub", thisId)
-            .claim("azp", clientId)
+    fun clientToken(mockOAuth2Server: MockOAuth2Server, clientId: String, accessAsApplication: Boolean): String {
+        val thisId = UUID.randomUUID().toString()
 
-    if (accessAsApplication) {
-        builder.claim("roles", listOf("access_as_application"))
+        val claims = mapOf(
+            "oid" to thisId,
+            "azp" to clientId,
+            "roles" to if (accessAsApplication) listOf("access_as_application") else emptyList()
+        )
+
+        return mockOAuth2Server.issueToken(
+            issuerId = "azuread",
+            subject = thisId,
+            audience = "aud-localhost",
+            claims = claims
+        ).serialize()
+
     }
 
-    claimsSet = builder.build()
-    return JwtTokenGenerator.createSignedJWT(JwkGenerator.getDefaultRSAKey(), claimsSet).serialize()
-}
+    fun onBehalfOfToken(mockOAuth2Server: MockOAuth2Server, role: String, saksbehandler: String): String {
+        val thisId = UUID.randomUUID().toString()
+        val clientId = UUID.randomUUID().toString()
 
-fun onBehalfOfToken(role: String, saksbehandler: String = "julenissen"): String {
-    val thisId = UUID.randomUUID().toString()
-    val clientId = UUID.randomUUID().toString()
-    var claimsSet = JwtTokenGenerator.createSignedJWT(thisId).jwtClaimsSet // default claimSet
-    val builder = JWTClaimsSet.Builder(claimsSet)
-            .claim("oid", saksbehandler)
-            .claim("sub", thisId)
-            .claim("azp", clientId)
-            .claim("NAVident", saksbehandler)
-            .claim("groups", listOf(role))
+        val claims = mapOf(
+            "oid" to thisId,
+            "azp" to clientId,
+            "name" to saksbehandler,
+            "NAVident" to saksbehandler,
+            "groups" to listOf(role)
+        )
 
-    claimsSet = builder.build()
-    return JwtTokenGenerator.createSignedJWT(JwkGenerator.getDefaultRSAKey(), claimsSet).serialize()
+        return mockOAuth2Server.issueToken(
+            issuerId = "azuread",
+            subject = thisId,
+            audience = "aud-localhost",
+            claims = claims
+        ).serialize()
+    }
+
 }
