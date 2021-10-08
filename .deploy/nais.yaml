@@ -49,6 +49,7 @@ spec:
         - application: familie-ef-sak-frontend
         - application: familie-prosessering
         - application: familie-ef-personhendelse
+        - application: familie-ef-mottak
         {{#each inboundApplications as |application|}}
         - application: {{application}}
         {{/each}}
