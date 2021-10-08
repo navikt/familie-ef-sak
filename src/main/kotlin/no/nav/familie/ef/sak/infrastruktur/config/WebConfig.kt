@@ -17,7 +17,9 @@ class WebConfig(private val tilgangInterceptor: TilgangInterceptor) : WebMvcConf
                    "/swagger-ui/**",
                    "/swagger-ui",
                    "/v2/api-docs/**",
-                   "/v2/api-docs")
+                   "/v2/api-docs",
+                   "/api/ekstern/perioder/full-overgangsstonad" // håndteres i controllern
+            )
 
     override fun addInterceptors(registry: InterceptorRegistry) {
         registry.addInterceptor(tilgangInterceptor).excludePathPatterns(excludePatterns)
