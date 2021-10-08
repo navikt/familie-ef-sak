@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.felles.integration
+package no.nav.familie.ef.sak.felles.kodeverk
 
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
 import org.slf4j.LoggerFactory
@@ -13,16 +13,16 @@ import org.springframework.stereotype.Service
 
 @Service
 @CacheConfig(cacheManager = "kodeverkCache")
-class CachedKodeverkService(private val familieIntegrasjonerClient: FamilieIntegrasjonerClient) {
+class CachedKodeverkService(private val kodeverkClient: KodeverkClient) {
 
     @Cacheable("kodeverk_landkoder")
     fun hentLandkoder(): KodeverkDto {
-        return familieIntegrasjonerClient.hentKodeverkLandkoder()
+        return kodeverkClient.hentKodeverkLandkoder()
     }
 
     @Cacheable("kodeverk_poststed")
     fun hentPoststed(): KodeverkDto {
-        return familieIntegrasjonerClient.hentKodeverkPoststed()
+        return kodeverkClient.hentKodeverkPoststed()
     }
 }
 

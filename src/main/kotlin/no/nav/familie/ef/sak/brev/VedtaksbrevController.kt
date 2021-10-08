@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.brev
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.familie.ef.sak.brev.dto.VedtaksbrevFritekstDto
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -32,6 +33,11 @@ class VedtaksbrevController(private val brevService: VedtaksbrevService,
                              @RequestBody brevRequest: JsonNode): Ressurs<ByteArray> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         return Ressurs.success(brevService.lagSaksbehandlerBrev(behandlingId, brevRequest, brevMal))
+    }
+
+    @PostMapping("/fritekst")
+    fun lagSaksbehandlerbrev(@RequestBody brevInnhold: VedtaksbrevFritekstDto): Ressurs<ByteArray> {
+        return Ressurs.success(brevService.lagSaksbehandlerFritekstbrev(brevInnhold))
     }
 
     @PostMapping("/{behandlingId}")

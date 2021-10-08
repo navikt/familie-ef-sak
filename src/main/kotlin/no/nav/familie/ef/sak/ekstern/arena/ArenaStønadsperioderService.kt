@@ -1,17 +1,19 @@
-package no.nav.familie.ef.sak.ekstern
+package no.nav.familie.ef.sak.ekstern.arena
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
-import no.nav.familie.ef.sak.arena.ArenaPeriodeUtil.mapOgFiltrer
-import no.nav.familie.ef.sak.arena.ArenaPeriodeUtil.slåSammenPerioder
-import no.nav.familie.ef.sak.infrastruktur.exception.PdlNotFoundException
-import no.nav.familie.ef.sak.felles.integration.FamilieIntegrasjonerClient
-import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
-import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.ekstern.arena.ArenaPeriodeUtil.mapOgFiltrer
+import no.nav.familie.ef.sak.ekstern.arena.ArenaPeriodeUtil.slåSammenPerioder
+import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
+import no.nav.familie.ef.sak.felles.util.EnvUtil
+import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
+import no.nav.familie.ef.sak.infrastruktur.exception.PdlNotFoundException
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPerioderArenaRequest
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
@@ -28,12 +30,14 @@ import java.time.LocalDate
  */
 @Service
 class ArenaStønadsperioderService(private val infotrygdReplikaClient: InfotrygdReplikaClient,
-                                  private val behandlingRepository: BehandlingRepository,
+                                  private val fagsakService: FagsakService,
+                                  private val behandlingService: BehandlingService,
                                   private val tilkjentYtelseService: TilkjentYtelseService,
-                                  private val familieIntegrasjonerClient: FamilieIntegrasjonerClient,
+                                  private val personopplysningerIntegrasjonerClient: PersonopplysningerIntegrasjonerClient,
                                   private val pdlClient: PdlClient) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
+    private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     /**
      * Henter perioder fra infotrygd for en person
@@ -41,12 +45,23 @@ class ArenaStønadsperioderService(private val infotrygdReplikaClient: Infotrygd
      */
     fun hentPerioder(request: PerioderOvergangsstønadRequest): PerioderOvergangsstønadResponse {
         return runBlocking {
-            val asyncResponse = async { familieIntegrasjonerClient.hentInfotrygdPerioder(request) }
-
-            //val responseFraReplika = hentReplikaPerioder(request) // TODO ta i bruk når replikaen virker i prod
-            val perioderFraInfotrygd = asyncResponse.await()
+            val asyncResponse = async { personopplysningerIntegrasjonerClient.hentInfotrygdPerioder(request) }
+            val responseFraReplika = async { hentReplikaPerioder(request) }
             val perioderFraEf = hentPerioderFraEf(request)
-            PerioderOvergangsstønadResponse(perioderFraInfotrygd.perioder + perioderFraEf)
+            val perioderFraInfotrygd = asyncResponse.await().perioder
+            sjekkDiff(request, responseFraReplika.await(), perioderFraInfotrygd)
+            // TODO returner replika og fjern henting fra infotrygd
+            PerioderOvergangsstønadResponse(perioderFraInfotrygd + perioderFraEf)
+        }
+    }
+
+    private fun sjekkDiff(request: PerioderOvergangsstønadRequest,
+                          perioderFraReplika: List<PeriodeOvergangsstønad>,
+                          perioderFraInfotrygd: List<PeriodeOvergangsstønad>) {
+        if (perioderFraReplika != perioderFraInfotrygd) {
+            logger.warn("Diff i perioder mellom infotrygd og replika")
+            secureLogger.warn("Diff i perioder mellom infotrygd og replika for request={} - infotrygd={} replika={}",
+                              request, perioderFraInfotrygd, perioderFraReplika)
         }
     }
 
@@ -61,7 +76,8 @@ class ArenaStønadsperioderService(private val infotrygdReplikaClient: Infotrygd
         val tom = request.tomDato ?: LocalDate.now()
         val personIdenter = hentPersonIdenter(request)
         return Stønadstype.values()
-                .mapNotNull { behandlingRepository.finnSisteIverksatteBehandling(it, personIdenter) }
+                .mapNotNull { fagsakService.finnFagsak(personIdenter, it) }
+                .mapNotNull { behandlingService.finnSisteIverksatteBehandling(it.id) }
                 .mapNotNull { if (it.type != BehandlingType.TEKNISK_OPPHØR) it else null }
                 .map { tilkjentYtelseService.hentForBehandling(it.id) }
                 .flatMap { it.andelerTilkjentYtelse }
@@ -82,8 +98,11 @@ class ArenaStønadsperioderService(private val infotrygdReplikaClient: Infotrygd
         return try {
             pdlClient.hentPersonidenter(request.personIdent, true).identer()
         } catch (e: PdlNotFoundException) {
-            logger.warn("Finner ikke person, returnerer personIdent i request")
-            setOf(request.personIdent)
+            if (EnvUtil.erIDev()) {
+                logger.warn("Finner ikke person, returnerer personIdent i request")
+                return setOf(request.personIdent)
+            }
+            throw e
         }
     }
 

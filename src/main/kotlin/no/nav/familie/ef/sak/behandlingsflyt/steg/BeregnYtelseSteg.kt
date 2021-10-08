@@ -1,31 +1,34 @@
 package no.nav.familie.ef.sak.behandlingsflyt.steg
 
-import no.nav.familie.ef.sak.vedtak.dto.Avslå
+import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.beregning.BeregningService
+import no.nav.familie.ef.sak.beregning.tilInntektsperioder
+import no.nav.familie.ef.sak.brev.MellomlagringBrevService
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.simulering.SimuleringService
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
+import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
+import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.tilkjentytelse.domain.taMedAndelerFremTilDato
+import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.dto.Avslå
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
 import no.nav.familie.ef.sak.vedtak.dto.Opphør
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
-import no.nav.familie.ef.sak.vedtak.VedtakService
-import no.nav.familie.ef.sak.beregning.tilInntektsperioder
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
-import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
-import no.nav.familie.ef.sak.behandling.domain.Behandling
-import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
-import no.nav.familie.ef.sak.simulering.SimuleringService
-import no.nav.familie.ef.sak.tilkjentytelse.domain.taMedAndelerFremTilDato
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.util.UUID
 
 @Service
 class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                        private val behandlingService: BehandlingService,
                        private val beregningService: BeregningService,
                        private val simuleringService: SimuleringService,
-                       private val vedtakService: VedtakService) : BehandlingSteg<VedtakDto> {
+                       private val vedtakService: VedtakService,
+                       private val mellomlagringBrevService: MellomlagringBrevService) : BehandlingSteg<VedtakDto> {
 
 
     override fun validerSteg(behandling: Behandling) {
@@ -37,20 +40,30 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
     }
 
     override fun utførSteg(behandling: Behandling, vedtak: VedtakDto) {
-
         val aktivIdent = behandlingService.hentAktivIdent(behandling.id)
-        tilkjentYtelseService.slettTilkjentYtelseForBehandling(behandling.id)
+        nullstillEksisterendeVedtakPåBehandling(behandling.id)
+        vedtakService.lagreVedtak(vedtakDto = vedtak, behandlingId = behandling.id)
 
         when (vedtak) {
-            is Innvilget -> opprettTilkjentYtelseForInnvilgetBehandling(vedtak, behandling, aktivIdent)
-            is Opphør -> opprettTilkjentYtelseForOpphørtBehandling(behandling, vedtak, aktivIdent)
-            is Avslå -> feilHvis(behandling.type != BehandlingType.FØRSTEGANGSBEHANDLING) { "Kan kun avslå ved førstegangsbehandling" }
+            is Innvilget -> {
+                opprettTilkjentYtelseForInnvilgetBehandling(vedtak, behandling, aktivIdent)
+                simuleringService.hentOgLagreSimuleringsresultat(behandling)
+            }
+            is Opphør -> {
+                opprettTilkjentYtelseForOpphørtBehandling(behandling, vedtak, aktivIdent)
+                simuleringService.hentOgLagreSimuleringsresultat(behandling)
+            }
+            is Avslå -> {
+                simuleringService.slettSimuleringForBehandling(behandling.id)
+            }
             else -> error("Kan ikke utføre steg ${stegType()} for behandling ${behandling.id}")
         }
+    }
 
-        vedtakService.slettVedtakHvisFinnes(behandling.id)
-        vedtakService.lagreVedtak(vedtakDto = vedtak, behandlingId = behandling.id)
-        simuleringService.hentOgLagreSimuleringsresultat(behandling)
+    private fun nullstillEksisterendeVedtakPåBehandling(behandlingId: UUID) {
+        tilkjentYtelseService.slettTilkjentYtelseForBehandling(behandlingId)
+        mellomlagringBrevService.slettMellomlagringHvisFinnes(behandlingId)
+        vedtakService.slettVedtakHvisFinnes(behandlingId)
     }
 
     private fun opprettTilkjentYtelseForOpphørtBehandling(behandling: Behandling,

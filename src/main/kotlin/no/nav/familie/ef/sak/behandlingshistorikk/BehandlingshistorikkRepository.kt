@@ -1,11 +1,11 @@
-package no.nav.familie.ef.sak.behandling
+package no.nav.familie.ef.sak.behandlingshistorikk
 
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
+import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.repository.InsertUpdateRepository
 import no.nav.familie.ef.sak.repository.RepositoryInterface
-import no.nav.familie.ef.sak.behandling.domain.Behandlingshistorikk
-import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import org.springframework.stereotype.Repository
-import java.util.*
+import java.util.UUID
 
 @Repository
 interface BehandlingshistorikkRepository : RepositoryInterface<Behandlingshistorikk, UUID>,

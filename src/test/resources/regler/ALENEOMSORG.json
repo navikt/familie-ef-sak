@@ -5,7 +5,7 @@
       "regelId" : "SKRIFTLIG_AVTALE_OM_DELT_BOSTED",
       "svarMapping" : {
         "JA" : {
-          "begrunnelseType" : "PÅKREVD",
+          "begrunnelseType" : "VALGFRI",
           "regelId" : "SLUTT_NODE"
         },
         "NEI" : {

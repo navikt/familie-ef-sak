@@ -1,16 +1,21 @@
 package no.nav.familie.ef.sak.behandlingsflyt.steg
 
-import io.mockk.*
-import no.nav.familie.ef.sak.infrastruktur.exception.Feil
-import no.nav.familie.ef.sak.blankett.BlankettRepository
-import no.nav.familie.ef.sak.repository.behandling
-import no.nav.familie.ef.sak.repository.fagsak
+import io.mockk.Runs
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.blankett.BlankettRepository
+import no.nav.familie.ef.sak.blankett.VedtaBlankettSteg
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.repository.behandling
+import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.Henlegge
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
-import no.nav.familie.ef.sak.vedtak.VedtakService
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 

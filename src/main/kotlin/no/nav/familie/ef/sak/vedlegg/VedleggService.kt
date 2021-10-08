@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandlingsjournalpost
 import no.nav.familie.ef.sak.journalføring.JournalføringService
 import no.nav.familie.ef.sak.journalføring.JournalpostDatoUtil.mestRelevanteDato
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Dokument
 import no.nav.familie.kontrakter.felles.journalpost.DokumentInfo
 import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariantformat
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
@@ -35,6 +36,14 @@ class VedleggService(private val behandlingService: BehandlingService,
         val sistejournalposter = journalføringService.finnJournalposter(personIdent)
 
         return sistejournalposter + hentJournalposterTilBehandlingSomIkkeErFunnet(sistejournalposter, behandlingsjournalposter)
+    }
+
+    fun finnDokumentInfo(personIdent: String): List<DokumentinfoDto> {
+        val journalposter = journalføringService.finnJournalposter(personIdent)
+        val dokumentinfoDtoList = journalposter
+                .flatMap { journalpost -> journalpost.dokumenter?.map { tilDokumentInfoDto(it, journalpost) } ?: emptyList() }
+
+        return dokumentinfoDtoList;
     }
 
     private fun hentJournalposterTilBehandlingSomIkkeErFunnet(sistejournalposter: List<Journalpost>,

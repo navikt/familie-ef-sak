@@ -1,24 +1,20 @@
-package no.nav.familie.ef.sak.felles.integration
+package no.nav.familie.ef.sak.opplysninger.personopplysninger
 
-import no.nav.familie.ef.sak.infrastruktur.exception.Feil
-import no.nav.familie.ef.sak.infrastruktur.config.IntegrasjonerConfig
 import no.nav.familie.ef.sak.arbeidsfordeling.Arbeidsfordelingsenhet
 import no.nav.familie.ef.sak.felles.integration.dto.EgenAnsattRequest
 import no.nav.familie.ef.sak.felles.integration.dto.EgenAnsattResponse
 import no.nav.familie.ef.sak.felles.integration.dto.Tilgang
-import no.nav.familie.ef.sak.felles.util.medContentTypeJsonUTF8
+import no.nav.familie.ef.sak.infrastruktur.config.IntegrasjonerConfig
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.http.client.AbstractPingableRestClient
-import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.dokdist.DistribuerJournalpostRequest
+import no.nav.familie.kontrakter.felles.annotasjoner.Improvement
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadRequest
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
 import no.nav.familie.kontrakter.felles.getDataOrThrow
-import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Component
@@ -27,29 +23,26 @@ import org.springframework.web.client.RestOperations
 import java.net.URI
 
 @Component
-class FamilieIntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
-                                 private val integrasjonerConfig: IntegrasjonerConfig)
+class PersonopplysningerIntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
+                                            private val integrasjonerConfig: IntegrasjonerConfig)
     : AbstractPingableRestClient(restOperations, "familie.integrasjoner") {
 
     override val pingUri: URI = integrasjonerConfig.pingUri
-    val logger = LoggerFactory.getLogger(this::class.java)
+
+    fun sjekkTilgangTilPerson(personIdent: String): Tilgang {
+        return postForEntity(integrasjonerConfig.tilgangPersonUri, listOf(personIdent), HttpHeaders().also {
+            it.set(HEADER_NAV_TEMA, HEADER_NAV_TEMA_ENF)
+        })
+    }
 
     fun sjekkTilgangTilPersonMedRelasjoner(personIdent: String): Tilgang {
         return postForEntity(integrasjonerConfig.tilgangRelasjonerUri, PersonIdent(personIdent), HttpHeaders().also {
-            it.set("Nav-Tema", "ENF")
+            it.set(HEADER_NAV_TEMA, HEADER_NAV_TEMA_ENF)
         })
     }
 
     fun hentMedlemskapsinfo(ident: String): Medlemskapsinfo {
         return postForEntity<Ressurs<Medlemskapsinfo>>(integrasjonerConfig.medlemskapUri, PersonIdent(ident)).data!!
-    }
-
-    fun hentKodeverkLandkoder(): KodeverkDto {
-        return getForEntity<Ressurs<KodeverkDto>>(integrasjonerConfig.kodeverkLandkoderUri).data!!
-    }
-
-    fun hentKodeverkPoststed(): KodeverkDto {
-        return getForEntity<Ressurs<KodeverkDto>>(integrasjonerConfig.kodeverkPoststedUri).data!!
     }
 
     fun hentNavEnhet(ident: String): List<Arbeidsfordelingsenhet> {
@@ -67,25 +60,20 @@ class FamilieIntegrasjonerClient(@Qualifier("azure") restOperations: RestOperati
                                                           EgenAnsattRequest(ident)).data!!.erEgenAnsatt
     }
 
+    fun hentNavKontor(ident: String): NavKontorEnhet {
+        return postForEntity<Ressurs<NavKontorEnhet>>(integrasjonerConfig.navKontorUri, PersonIdent(ident)).getDataOrThrow()
+    }
+
+    @Improvement("Fjern denne når infotrygdReplika fungerer i prod")
     fun hentInfotrygdPerioder(request: PerioderOvergangsstønadRequest): PerioderOvergangsstønadResponse {
         return postForEntity<Ressurs<PerioderOvergangsstønadResponse>>(integrasjonerConfig.infotrygdVedtaksperioder, request)
                 .getDataOrThrow()
     }
 
-    fun distribuerBrev(journalpostId: String): String {
-        logger.info("Kaller dokdist-tjeneste for journalpost=$journalpostId")
+    companion object {
 
-        val journalpostRequest = DistribuerJournalpostRequest(journalpostId = journalpostId,
-                                                              bestillendeFagsystem = Fagsystem.EF,
-                                                              dokumentProdApp = "FAMILIE_EF_SAK")
-
-        return postForEntity<Ressurs<String>>(integrasjonerConfig.distribuerDokumentUri,
-                                              journalpostRequest,
-                                              HttpHeaders().medContentTypeJsonUTF8()).getDataOrThrow()
-    }
-
-    fun hentNavKontor(ident: String): NavKontorEnhet {
-        return postForEntity<Ressurs<NavKontorEnhet>>(integrasjonerConfig.navKontorUri, PersonIdent(ident)).getDataOrThrow()
+        const val HEADER_NAV_TEMA = "Nav-Tema"
+        const val HEADER_NAV_TEMA_ENF = "ENF"
     }
 
 }

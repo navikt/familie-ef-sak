@@ -1,19 +1,19 @@
 package no.nav.familie.ef.sak.behandling
 
-import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.behandling.OpprettBehandlingUtil.validerKanOppretteNyBehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.domain.Behandlingsjournalpost
-import no.nav.familie.ef.sak.felles.domain.Sporbar
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
-import no.nav.familie.ef.sak.repository.findByIdOrThrow
-import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
+import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
+import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
+import no.nav.familie.ef.sak.felles.domain.Sporbar
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
-import no.nav.familie.ef.sak.behandling.OpprettBehandlingUtil.sistIverksatteBehandling
-import no.nav.familie.ef.sak.behandling.OpprettBehandlingUtil.validerKanOppretteNyBehandling
+import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import org.slf4j.Logger
@@ -41,6 +41,9 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
     fun finnSisteIverksatteBehandlinger(stønadstype: Stønadstype) =
             behandlingRepository.finnSisteIverksatteBehandlingerSomIkkeErTekniskOpphør(stønadstype)
 
+    fun finnSisteIverksatteBehandling(fagsakId: UUID) =
+            behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
+
     @Transactional
     fun opprettBehandling(behandlingType: BehandlingType,
                           fagsakId: UUID,
@@ -63,11 +66,11 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
                           status: BehandlingStatus = BehandlingStatus.OPPRETTET,
                           stegType: StegType = StegType.VILKÅR): Behandling {
         val tidligereBehandlinger = behandlingRepository.findByFagsakId(fagsakId)
-        validerKanOppretteNyBehandling(behandlingType, tidligereBehandlinger)
-        val forrigeBehandlingId = sistIverksatteBehandling(tidligereBehandlinger)?.id
+        val forrigeBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
+        validerKanOppretteNyBehandling(behandlingType, tidligereBehandlinger, forrigeBehandling)
 
         return behandlingRepository.insert(Behandling(fagsakId = fagsakId,
-                                                      forrigeBehandlingId = forrigeBehandlingId,
+                                                      forrigeBehandlingId = forrigeBehandling?.id,
                                                       type = behandlingType,
                                                       steg = stegType,
                                                       status = status,
@@ -127,10 +130,10 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
         }
     }
 
-    fun oppdaterResultatPåBehandling(behandlingId: UUID, behandlingResultat: BehandlingResultat) {
+    fun oppdaterResultatPåBehandling(behandlingId: UUID, behandlingResultat: BehandlingResultat): Behandling {
         val behandling = hentBehandling(behandlingId)
         behandling.resultat = behandlingResultat
-        behandlingRepository.update(behandling)
+        return behandlingRepository.update(behandling)
     }
 
 }

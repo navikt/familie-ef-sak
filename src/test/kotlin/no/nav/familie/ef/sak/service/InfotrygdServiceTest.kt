@@ -2,14 +2,16 @@ package no.nav.familie.ef.sak.service
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
+import no.nav.familie.ef.sak.infotrygd.InfotrygdService
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeUtil.lagInfotrygdPeriode
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadType
 import no.nav.familie.kontrakter.ef.felles.StønadType
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdFinnesResponse
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeRequest
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
 import no.nav.familie.kontrakter.ef.infotrygd.Saktreff
 import no.nav.familie.kontrakter.ef.infotrygd.Vedtakstreff
 import org.assertj.core.api.Assertions.assertThat
@@ -30,14 +32,34 @@ internal class InfotrygdServiceTest {
     }
 
     @Test
+    internal fun `hentPerioderForOvergangsstønad skal mappe perioder fra overgangsstønad`() {
+        every {
+            infotrygdReplikaClient.hentPerioder(InfotrygdPeriodeRequest(setOf(ident), setOf(StønadType.OVERGANGSSTØNAD)))
+        } returns InfotrygdPeriodeResponse(overgangsstønad = listOf(lagInfotrygdPeriode(ident)),
+                                           barnetilsyn = emptyList(),
+                                           skolepenger = emptyList())
+        assertThat(infotrygdService.hentPerioderForOvergangsstønad(ident)).hasSize(1)
+    }
+
+    @Test
+    internal fun `hentPerioderForOvergangsstønad skal ikke mappe perioder fra barnetilsyn eller skolepenger`() {
+        every {
+            infotrygdReplikaClient.hentPerioder(InfotrygdPeriodeRequest(setOf(ident), setOf(StønadType.OVERGANGSSTØNAD)))
+        } returns InfotrygdPeriodeResponse(overgangsstønad = emptyList(),
+                                           barnetilsyn = listOf(lagInfotrygdPeriode(ident)),
+                                           skolepenger = listOf(lagInfotrygdPeriode(ident)))
+        assertThat(infotrygdService.hentPerioderForOvergangsstønad(ident)).isEmpty()
+    }
+
+    @Test
     internal fun `person har treff i vedtak om overgangsstønad`() {
         every { infotrygdReplikaClient.hentInslagHosInfotrygd(any()) } answers {
             InfotrygdFinnesResponse(listOf(Vedtakstreff(ident, StønadType.OVERGANGSSTØNAD, false)), emptyList())
         }
-        assertThat(infotrygdService.eksisterer(ident, setOf(SøknadType.OVERGANGSSTØNAD))).isTrue
-        assertThat(infotrygdService.eksisterer(ident, setOf(SøknadType.OVERGANGSSTØNAD, SøknadType.SKOLEPENGER))).isTrue
-        assertThat(infotrygdService.eksisterer(ident, setOf(SøknadType.BARNETILSYN))).isFalse
-        assertThat(infotrygdService.eksisterer(ident, setOf(SøknadType.BARNETILSYN, SøknadType.SKOLEPENGER))).isFalse
+        assertThat(infotrygdService.eksisterer(ident, setOf(StønadType.OVERGANGSSTØNAD))).isTrue
+        assertThat(infotrygdService.eksisterer(ident, setOf(StønadType.OVERGANGSSTØNAD, StønadType.SKOLEPENGER))).isTrue
+        assertThat(infotrygdService.eksisterer(ident, setOf(StønadType.BARNETILSYN))).isFalse
+        assertThat(infotrygdService.eksisterer(ident, setOf(StønadType.BARNETILSYN, StønadType.SKOLEPENGER))).isFalse
     }
 
     @Test
@@ -45,10 +67,10 @@ internal class InfotrygdServiceTest {
         every { infotrygdReplikaClient.hentInslagHosInfotrygd(any()) } answers {
             InfotrygdFinnesResponse(emptyList(), listOf(Saktreff(ident, StønadType.BARNETILSYN)))
         }
-        assertThat(infotrygdService.eksisterer(ident, setOf(SøknadType.BARNETILSYN))).isTrue
-        assertThat(infotrygdService.eksisterer(ident, setOf(SøknadType.BARNETILSYN, SøknadType.OVERGANGSSTØNAD))).isTrue
-        assertThat(infotrygdService.eksisterer(ident, setOf(SøknadType.OVERGANGSSTØNAD))).isFalse
-        assertThat(infotrygdService.eksisterer(ident, setOf(SøknadType.OVERGANGSSTØNAD, SøknadType.SKOLEPENGER))).isFalse
+        assertThat(infotrygdService.eksisterer(ident, setOf(StønadType.BARNETILSYN))).isTrue
+        assertThat(infotrygdService.eksisterer(ident, setOf(StønadType.BARNETILSYN, StønadType.OVERGANGSSTØNAD))).isTrue
+        assertThat(infotrygdService.eksisterer(ident, setOf(StønadType.OVERGANGSSTØNAD))).isFalse
+        assertThat(infotrygdService.eksisterer(ident, setOf(StønadType.OVERGANGSSTØNAD, StønadType.SKOLEPENGER))).isFalse
     }
 
     @Test
@@ -56,7 +78,7 @@ internal class InfotrygdServiceTest {
         every { infotrygdReplikaClient.hentInslagHosInfotrygd(any()) } answers {
             InfotrygdFinnesResponse(emptyList(), emptyList())
         }
-        SøknadType.values().forEach {
+        StønadType.values().forEach {
             assertThat(infotrygdService.eksisterer(ident, setOf(it))).isFalse
         }
     }

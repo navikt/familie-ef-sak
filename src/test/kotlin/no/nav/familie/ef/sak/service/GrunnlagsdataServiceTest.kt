@@ -4,19 +4,19 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.config.PdlClientConfig
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.felles.integration.FamilieIntegrasjonerClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRepository
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Sivilstand
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Sivilstandstype
+import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
-import no.nav.familie.ef.sak.config.PdlClientConfig
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRepository
-import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
-import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import org.assertj.core.api.Assertions.assertThat
@@ -34,7 +34,7 @@ internal class GrunnlagsdataServiceTest {
     private val behandlingService = mockk<BehandlingService>()
     private val pdlClient = PdlClientConfig().pdlClient()
     private val søknadService = mockk<SøknadService>()
-    private val familieIntegrasjonerClient = mockk<FamilieIntegrasjonerClient>()
+    private val personopplysningerIntegrasjonerClient = mockk<PersonopplysningerIntegrasjonerClient>()
 
     private val søknad = SøknadsskjemaMapper.tilDomene(TestsøknadBuilder.Builder().setBarn(listOf(
             TestsøknadBuilder.Builder().defaultBarn("Navn1 navnesen", fødselTermindato = LocalDate.now().plusMonths(4)),
@@ -44,12 +44,12 @@ internal class GrunnlagsdataServiceTest {
     private val service = GrunnlagsdataService(pdlClient = pdlClient,
                                                grunnlagsdataRepository = grunnlagsdataRepository,
                                                søknadService = søknadService,
-                                               familieIntegrasjonerClient = familieIntegrasjonerClient)
+                                               personopplysningerIntegrasjonerClient = personopplysningerIntegrasjonerClient)
 
     @BeforeEach
     internal fun setUp() {
         every { søknadService.hentOvergangsstønad(any()) } returns søknad
-        every { familieIntegrasjonerClient.hentMedlemskapsinfo(any()) } returns
+        every { personopplysningerIntegrasjonerClient.hentMedlemskapsinfo(any()) } returns
                 Medlemskapsinfo("", emptyList(), emptyList(), emptyList())
     }
 

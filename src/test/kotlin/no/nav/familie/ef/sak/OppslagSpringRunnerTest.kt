@@ -5,8 +5,8 @@ import ch.qos.logback.core.read.ListAppender
 import com.github.tomakehurst.wiremock.WireMockServer
 import no.nav.familie.ef.sak.avstemming.KonsistensavstemmingJobb
 import no.nav.familie.ef.sak.behandling.domain.Behandling
-import no.nav.familie.ef.sak.behandling.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.behandling.domain.Behandlingsjournalpost
+import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.blankett.Blankett
 import no.nav.familie.ef.sak.brev.domain.MellomlagretBrev
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
@@ -68,6 +68,7 @@ abstract class OppslagSpringRunnerTest {
 
     @AfterEach
     fun reset() {
+        headers.clear()
         loggingEvents.clear()
         resetDatabase()
         clearCaches()

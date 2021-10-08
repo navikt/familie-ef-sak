@@ -1,10 +1,11 @@
-package no.nav.familie.ef.sak.arena
+package no.nav.familie.ef.sak.ekstern.arena
 
+import no.nav.familie.ef.sak.ekstern.tilEksternPeriodeOvergangsstønad
 import no.nav.familie.ef.sak.felles.util.isEqualOrAfter
 import no.nav.familie.ef.sak.felles.util.isEqualOrBefore
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
-import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
-import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPerioderResponse
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdArenaPeriode
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPerioderArenaResponse
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad.Datakilde
 import java.time.LocalDate
@@ -17,7 +18,7 @@ object ArenaPeriodeUtil {
      * Skal filtrere bort de som har beløp = 0
      * Skal filtere bort de som har tomdato < fomDato || opphørdato < tomDato
      */
-    fun mapOgFiltrer(infotrygdPerioder: InfotrygdPerioderResponse) =
+    fun mapOgFiltrer(infotrygdPerioder: InfotrygdPerioderArenaResponse) =
             infotrygdPerioder.perioder.filter { it.beløp > 0 }.map {
                 PeriodeOvergangsstønad(personIdent = it.personIdent,
                                        fomDato = it.fomDato,
@@ -26,14 +27,10 @@ object ArenaPeriodeUtil {
             }.filterNot { it.tomDato.isBefore(it.fomDato) }
 
     fun mapOgFiltrer(andeler: List<AndelTilkjentYtelse>) =
-            andeler.filter { it.beløp > 0 }.map {
-                PeriodeOvergangsstønad(personIdent = it.personIdent,
-                                       fomDato = it.stønadFom,
-                                       tomDato = it.stønadTom,
-                                       datakilde = Datakilde.EF)
-            }
+            andeler.filter { it.beløp > 0 }
+                    .map(AndelTilkjentYtelse::tilEksternPeriodeOvergangsstønad)
 
-    private fun InfotrygdPeriode.opphørsdatoEllerTomDato(): LocalDate {
+    private fun InfotrygdArenaPeriode.opphørsdatoEllerTomDato(): LocalDate {
         val opphørsdato = this.opphørsdato
         return if (opphørsdato != null && opphørsdato.isBefore(tomDato)) {
             opphørsdato

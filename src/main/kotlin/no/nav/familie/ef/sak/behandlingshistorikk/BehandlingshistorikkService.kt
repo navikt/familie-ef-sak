@@ -1,13 +1,13 @@
-package no.nav.familie.ef.sak.behandling
+package no.nav.familie.ef.sak.behandlingshistorikk
 
 import no.nav.familie.ef.sak.behandling.domain.Behandling
-import no.nav.familie.ef.sak.behandling.domain.Behandlingshistorikk
-import no.nav.familie.ef.sak.felles.domain.JsonWrapper
-import no.nav.familie.ef.sak.behandling.domain.StegUtfall
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
+import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
+import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
+import no.nav.familie.ef.sak.felles.domain.JsonWrapper
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.stereotype.Service
-import java.util.*
+import java.util.UUID
 
 @Service
 class BehandlingshistorikkService(private val behandlingshistorikkRepository: BehandlingshistorikkRepository) {

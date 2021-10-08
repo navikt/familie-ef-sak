@@ -2,16 +2,17 @@ package no.nav.familie.ef.sak.repository
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
-import no.nav.familie.ef.sak.fagsak.FagsakRepository
-import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.FERDIGSTILT
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.UTREDES
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
-import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype.BARNETILSYN
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype.OVERGANGSSTØNAD
+import no.nav.familie.ef.sak.felles.domain.Sporbar
+import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
@@ -132,9 +133,11 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         behandlingRepository.insert(behandling(fagsak,
                                                status = FERDIGSTILT,
                                                opprettetTid = LocalDateTime.now().minusDays(2)))
-        val tekniskOpphørBehandling =
-                behandlingRepository.insert(behandling(fagsak, status = FERDIGSTILT, type = BehandlingType.TEKNISK_OPPHØR))
-        assertThat(behandlingRepository.finnSisteIverksatteBehandling(OVERGANGSSTØNAD, setOf(ident)))
+        val tekniskOpphørBehandling = behandlingRepository.insert(behandling(fagsak,
+                                                                             status = FERDIGSTILT,
+                                                                             type = BehandlingType.TEKNISK_OPPHØR,
+                                                                             resultat = BehandlingResultat.OPPHØRT))
+        assertThat(behandlingRepository.finnSisteIverksatteBehandling(fagsak.id))
                 .isEqualTo(tekniskOpphørBehandling)
     }
 
@@ -144,7 +147,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         behandlingRepository.insert(behandling(fagsak,
                                                status = UTREDES,
                                                opprettetTid = LocalDateTime.now().minusDays(2)))
-        assertThat(behandlingRepository.finnSisteIverksatteBehandling(OVERGANGSSTØNAD, setOf(ident))).isNull()
+        assertThat(behandlingRepository.finnSisteIverksatteBehandling(fagsak.id)).isNull()
     }
 
     @Test
@@ -154,18 +157,18 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
                                                status = FERDIGSTILT,
                                                type = BehandlingType.BLANKETT,
                                                opprettetTid = LocalDateTime.now().minusDays(2)))
-        assertThat(behandlingRepository.finnSisteIverksatteBehandling(OVERGANGSSTØNAD, setOf(ident))).isNull()
+        assertThat(behandlingRepository.finnSisteIverksatteBehandling(fagsak.id)).isNull()
     }
 
     @Test
     internal fun `finnSisteIverksatteBehandling skal finne id til siste behandling som er ferdigstilt, ikke annulert eller blankett`() {
         val førstegangsbehandling = BehandlingOppsettUtil.iverksattFørstegangsbehandling
-        fagsakRepository.insert(fagsak(setOf(FagsakPerson("1"))).copy(id = førstegangsbehandling.fagsakId))
+        val fagsak = fagsakRepository.insert(fagsak(setOf(FagsakPerson("1"))).copy(id = førstegangsbehandling.fagsakId))
 
         val behandlinger = BehandlingOppsettUtil.lagBehandlingerForSisteIverksatte()
         behandlingRepository.insertAll(behandlinger)
 
-        assertThat(behandlingRepository.finnSisteIverksatteBehandling(OVERGANGSSTØNAD, setOf("1"))?.id)
+        assertThat(behandlingRepository.finnSisteIverksatteBehandling(fagsak.id)?.id)
                 .isEqualTo(førstegangsbehandling.id)
     }
 
@@ -191,10 +194,12 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         val fagsak = fagsakRepository.insert(fagsak())
         behandlingRepository.insert(behandling(fagsak,
                                                status = FERDIGSTILT,
+                                               resultat = BehandlingResultat.INNVILGET,
                                                opprettetTid = LocalDateTime.now().minusDays(2)))
-        val behandling2 = behandlingRepository.insert(behandling(fagsak, status = FERDIGSTILT))
-        assertThat(behandlingRepository.finnSisteIverksatteBehandlingerSomIkkeErTekniskOpphør(OVERGANGSSTØNAD)).containsExactly(
-                behandling2.id)
+        val behandling2 =
+                behandlingRepository.insert(behandling(fagsak, status = FERDIGSTILT, resultat = BehandlingResultat.INNVILGET))
+        assertThat(behandlingRepository.finnSisteIverksatteBehandlingerSomIkkeErTekniskOpphør(OVERGANGSSTØNAD))
+                .containsExactly(behandling2.id)
     }
 
     @Test
@@ -202,8 +207,24 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         val fagsak = fagsakRepository.insert(fagsak())
         behandlingRepository.insert(behandling(fagsak,
                                                status = FERDIGSTILT,
+                                               resultat = BehandlingResultat.INNVILGET,
                                                opprettetTid = LocalDateTime.now().minusDays(2)))
-        behandlingRepository.insert(behandling(fagsak, status = FERDIGSTILT, type = BehandlingType.TEKNISK_OPPHØR))
+        behandlingRepository.insert(behandling(fagsak,
+                                               status = FERDIGSTILT,
+                                               type = BehandlingType.TEKNISK_OPPHØR,
+                                               resultat = BehandlingResultat.OPPHØRT))
+        behandlingRepository.insert(behandling(fagsak,
+                                               status = FERDIGSTILT,
+                                               type = BehandlingType.TEKNISK_OPPHØR,
+                                               resultat = BehandlingResultat.INNVILGET)) // ugyldig kombinasjon med teknisk opphør
+        assertThat(behandlingRepository.finnSisteIverksatteBehandlingerSomIkkeErTekniskOpphør(OVERGANGSSTØNAD)).isEmpty()
+    }
+
+    @Test
+    internal fun `finnSisteIverksatteBehandlinger - skal ikke finne behandling hvis siste er avslått eller annulert`() {
+        val fagsak = fagsakRepository.insert(fagsak())
+        behandlingRepository.insert(behandling(fagsak, status = FERDIGSTILT, resultat = BehandlingResultat.AVSLÅTT))
+        behandlingRepository.insert(behandling(fagsak, status = FERDIGSTILT, resultat = BehandlingResultat.ANNULLERT))
         assertThat(behandlingRepository.finnSisteIverksatteBehandlingerSomIkkeErTekniskOpphør(OVERGANGSSTØNAD)).isEmpty()
     }
 
@@ -212,12 +233,14 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         val fagsak = fagsakRepository.insert(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak,
                                                                 status = FERDIGSTILT,
+                                                                resultat = BehandlingResultat.INNVILGET,
                                                                 opprettetTid = LocalDateTime.now().minusDays(2)))
         behandlingRepository.insert(behandling(fagsak,
                                                type = BehandlingType.BLANKETT,
-                                               status = FERDIGSTILT))
-        assertThat(behandlingRepository.finnSisteIverksatteBehandlingerSomIkkeErTekniskOpphør(OVERGANGSSTØNAD)).containsExactly(
-                behandling.id)
+                                               status = FERDIGSTILT,
+                                               resultat = BehandlingResultat.INNVILGET))
+        assertThat(behandlingRepository.finnSisteIverksatteBehandlingerSomIkkeErTekniskOpphør(OVERGANGSSTØNAD))
+                .containsExactly(behandling.id)
     }
 
     @Test
@@ -225,8 +248,11 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         val fagsak = fagsakRepository.insert(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak,
                                                                 status = FERDIGSTILT,
+                                                                resultat = BehandlingResultat.INNVILGET,
                                                                 opprettetTid = LocalDateTime.now().minusDays(2)))
-        behandlingRepository.insert(behandling(fagsak, type = BehandlingType.BLANKETT, status = FERDIGSTILT))
+        behandlingRepository.insert(behandling(fagsak, type = BehandlingType.BLANKETT,
+                                               status = FERDIGSTILT,
+                                               resultat = BehandlingResultat.INNVILGET))
         assertThat(behandlingRepository.finnSisteIverksatteBehandlingerSomIkkeErTekniskOpphør(OVERGANGSSTØNAD)).containsExactly(
                 behandling.id)
     }
