@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.tilbakekreving
 
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
+import no.nav.familie.ef.sak.tilbakekreving.domain.tilDto
 import no.nav.familie.ef.sak.tilbakekreving.dto.TilbakekrevingDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -29,6 +30,6 @@ class TilbakekrevingController(private val tilgangService: TilgangService,
     @GetMapping("/{behandlingId}")
     fun hentTilbakekreving(@PathVariable behandlingId: UUID): Ressurs<TilbakekrevingDto?> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
-        return Ressurs.success(tilbakekrevingService.hentTilbakekrevingDto(behandlingId))
+        return Ressurs.success(tilbakekrevingService.hentTilbakekreving(behandlingId)?.tilDto())
     }
 }

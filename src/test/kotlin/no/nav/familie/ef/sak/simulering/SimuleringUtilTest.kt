@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.simulering
 
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.simulering.SimuleringsposteringTestUtil.lagPosteringer
 import no.nav.familie.kontrakter.felles.simulering.BetalingType
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import no.nav.familie.kontrakter.felles.simulering.FagOmrådeKode
@@ -128,19 +129,4 @@ internal class SimuleringUtilTest {
         assertThat(simuleringsresultatDto.forfallsdatoNestePeriode).isEqualTo(tidSimuleringHentet.with(TemporalAdjusters.lastDayOfMonth()))
     }
 
-    private fun lagPosteringer(fraDato: LocalDate,
-                               antallMåneder: Int = 1,
-                               beløp: BigDecimal = BigDecimal(5000),
-                               posteringstype: PosteringType = PosteringType.YTELSE
-
-    ): List<SimulertPostering> = MutableList(antallMåneder) { index ->
-        SimulertPostering(fagOmrådeKode = FagOmrådeKode.ENSLIG_FORSØRGER_OVERGANGSSTØNAD,
-                          fom = fraDato.plusMonths(index.toLong()),
-                          tom = fraDato.plusMonths(index.toLong()).with(TemporalAdjusters.lastDayOfMonth()),
-                          betalingType = BetalingType.DEBIT,
-                          beløp = beløp,
-                          posteringType = posteringstype,
-                          forfallsdato = fraDato.plusMonths(index.toLong()).with(TemporalAdjusters.lastDayOfMonth()),
-                          utenInntrekk = false)
-    }
 }
