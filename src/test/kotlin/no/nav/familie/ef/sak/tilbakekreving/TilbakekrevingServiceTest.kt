@@ -1,6 +1,8 @@
 package no.nav.familie.ef.sak.tilbakekreving
 
+import io.mockk.Runs
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ef.sak.behandling.BehandlingService
@@ -74,6 +76,7 @@ internal class TilbakekrevingServiceTest {
                                   begrunnelse = forventetBegrunnelse)
 
         val behandlingId = UUID.randomUUID()
+        every { tilbakekrevingRepository.deleteById(any()) } just Runs
         every { tilbakekrevingRepository.insert(capture(tilbakekrevingSlot)) } answers { firstArg() }
         tilbakekrevingService.lagreTilbakekreving(tilbakekrevingDto, behandlingId = behandlingId)
         assertThat(tilbakekrevingSlot.captured.behandlingId).isEqualTo(behandlingId)
