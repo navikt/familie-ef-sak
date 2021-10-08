@@ -26,6 +26,6 @@ class VedleggController(private val vedleggService: VedleggService,
 
     @GetMapping("/person/{personIdent}")
     fun finnVedleggForPerson(@PathVariable personIdent: String): Ressurs<List<DokumentinfoDto>> {
-        return Ressurs.success(vedleggService.finnJournalposter(personIdent))
+        return Ressurs.success(vedleggService.finnDokumentInfo(personIdent))
     }
 }
