@@ -2,9 +2,9 @@ package no.nav.familie.ef.sak.brev
 
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.brev.domain.FRITEKST
-import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevDto
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevRequestDto
+import no.nav.familie.ef.sak.brev.dto.VedtaksbrevDto
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
@@ -12,7 +12,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerS
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.stereotype.Service
 import java.time.LocalDate
-import java.util.UUID
 import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevDto as FrittståendeBrevDtoIverksetting
 
 @Service
@@ -25,12 +24,10 @@ class FrittståendeBrevService(private val brevClient: BrevClient,
     fun lagFrittståendeBrev(frittståendeBrevDto: FrittståendeBrevDto): ByteArray {
         val request = lagFrittståendeBrevRequest(frittståendeBrevDto)
 
-        val vedtaksbrev = Vedtaksbrev(behandlingId = UUID.randomUUID(),
-                                      saksbehandlerBrevrequest = objectMapper.writeValueAsString(request),
-                                      brevmal = FRITEKST,
-                                      saksbehandlersignatur = SikkerhetContext.hentSaksbehandlerNavn(true),
-                                      besluttersignatur = null,
-                                      beslutterPdf = null)
+        val vedtaksbrev = VedtaksbrevDto(saksbehandlerBrevrequest = objectMapper.writeValueAsString(request),
+                                         brevmal = FRITEKST,
+                                         saksbehandlersignatur = SikkerhetContext.hentSaksbehandlerNavn(true),
+                                         besluttersignatur = null)
 
         return brevClient.genererBrev(vedtaksbrev = vedtaksbrev)
     }

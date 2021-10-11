@@ -17,6 +17,14 @@ class TilgangService(private val personopplysningerIntegrasjonerClient: Personop
                      private val rolleConfig: RolleConfig,
                      private val cacheManager: CacheManager) {
 
+    fun validerTilgangTilPerson(personIdent: String) {
+        val harTilgang = personopplysningerIntegrasjonerClient.sjekkTilgangTilPerson(personIdent).harTilgang
+        if (!harTilgang) {
+            throw ManglerTilgang("Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
+                                 "har ikke tilgang til $personIdent")
+        }
+    }
+
     fun validerTilgangTilPersonMedBarn(personIdent: String) {
         val harTilgang = harTilgangTilPersonMedRelasjoner(personIdent)
         if (!harTilgang) {
