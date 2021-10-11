@@ -155,9 +155,10 @@ funksjonsbrytere:
     applicationName: ${NAIS_APP_NAME}
 
 prosessering:
+  continuousRunning.enabled: true
   fixedDelayString:
     in:
-      milliseconds: 10000
+      milliseconds: 15000
   delete:
     after:
       weeks: 16
