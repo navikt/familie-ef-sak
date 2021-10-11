@@ -1,28 +1,32 @@
 package no.nav.familie.ef.sak.behandlingsflyt.steg
 
+import io.mockk.Runs
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.beregning.Beløpsperiode
 import no.nav.familie.ef.sak.beregning.BeregningService
+import no.nav.familie.ef.sak.brev.MellomlagringBrevService
+import no.nav.familie.ef.sak.felles.dto.Periode
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.repository.behandling
+import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.simulering.SimuleringService
+import no.nav.familie.ef.sak.simulering.Simuleringsresultat
+import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
+import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.dto.Avslå
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
 import no.nav.familie.ef.sak.vedtak.dto.Opphør
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
-import no.nav.familie.ef.sak.vedtak.VedtakService
-import no.nav.familie.ef.sak.repository.behandling
-import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
-import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.brev.MellomlagringBrevService
-import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
-import no.nav.familie.ef.sak.simulering.SimuleringService
-import no.nav.familie.ef.sak.simulering.Simuleringsresultat
-import no.nav.familie.ef.sak.felles.dto.Periode
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -41,9 +45,15 @@ internal class BeregnYtelseStegTest {
     private val vedtakService = mockk<VedtakService>(relaxed = true)
     private val simuleringService = mockk<SimuleringService>()
     private val mellomlagringBrevService = mockk<MellomlagringBrevService>(relaxed = true)
+    private val tilbakekrevingService = mockk<TilbakekrevingService>(relaxed = true)
 
-    private val steg =
-            BeregnYtelseSteg(tilkjentYtelseService, behandlingService, beregningService, simuleringService, vedtakService, mellomlagringBrevService)
+    private val steg = BeregnYtelseSteg(tilkjentYtelseService,
+                                        behandlingService,
+                                        beregningService,
+                                        simuleringService,
+                                        vedtakService,
+                                        mellomlagringBrevService,
+                                        tilbakekrevingService)
 
     @BeforeEach
     internal fun setUp() {
@@ -198,7 +208,9 @@ internal class BeregnYtelseStegTest {
         every { tilkjentYtelseService.hentForBehandling(any()) } returns
                 lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, forrigeAndelFom, forrigeAndelTom)))
 
-        utførSteg(BehandlingType.REVURDERING, Opphør(opphørFom = opphørFom, begrunnelse = "null"), forrigeBehandlingId = UUID.randomUUID())
+        utførSteg(BehandlingType.REVURDERING,
+                  Opphør(opphørFom = opphørFom, begrunnelse = "null"),
+                  forrigeBehandlingId = UUID.randomUUID())
 
         assertThat(slot.captured.andelerTilkjentYtelse).hasSize(1)
         assertThat(slot.captured.andelerTilkjentYtelse.first().stønadFom).isEqualTo(forventetNyAndelFom)
@@ -217,7 +229,11 @@ internal class BeregnYtelseStegTest {
         every { tilkjentYtelseService.hentForBehandling(any()) } returns
                 lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, forrigeAndelFom, forrigeAndelTom)))
 
-        assertThrows<Feil> { utførSteg(BehandlingType.REVURDERING, Opphør(opphørFom = opphørFom, begrunnelse = "null"), forrigeBehandlingId = UUID.randomUUID()) }
+        assertThrows<Feil> {
+            utførSteg(BehandlingType.REVURDERING,
+                      Opphør(opphørFom = opphørFom, begrunnelse = "null"),
+                      forrigeBehandlingId = UUID.randomUUID())
+        }
     }
 
     @Test
@@ -235,7 +251,9 @@ internal class BeregnYtelseStegTest {
                 lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, andel1Fom, andel1Tom),
                                          lagAndelTilkjentYtelse(200, andel2Fom, andel2Tom)))
 
-        utførSteg(BehandlingType.REVURDERING, Opphør(opphørFom = opphørFom, begrunnelse = "null"), forrigeBehandlingId = UUID.randomUUID())
+        utførSteg(BehandlingType.REVURDERING,
+                  Opphør(opphørFom = opphørFom, begrunnelse = "null"),
+                  forrigeBehandlingId = UUID.randomUUID())
         assertThat(slot.captured.andelerTilkjentYtelse).hasSize(1)
         assertThat(slot.captured.andelerTilkjentYtelse.first().stønadFom).isEqualTo(andel1Fom)
         assertThat(slot.captured.andelerTilkjentYtelse.first().stønadTom).isEqualTo(andel1Tom)
@@ -257,7 +275,11 @@ internal class BeregnYtelseStegTest {
                 lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, andel1Fom, andel1Tom),
                                          lagAndelTilkjentYtelse(200, andel2Fom, andel2Tom)))
 
-        assertThrows<Feil> { utførSteg(BehandlingType.REVURDERING, Opphør(opphørFom = opphørFom, begrunnelse = "null"), forrigeBehandlingId = UUID.randomUUID()) }
+        assertThrows<Feil> {
+            utførSteg(BehandlingType.REVURDERING,
+                      Opphør(opphørFom = opphørFom, begrunnelse = "null"),
+                      forrigeBehandlingId = UUID.randomUUID())
+        }
 
     }
 
@@ -280,7 +302,9 @@ internal class BeregnYtelseStegTest {
                 lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, andel1Fom, andel1Tom),
                                          lagAndelTilkjentYtelse(200, andel2Fom, andel2Tom)))
 
-        utførSteg(BehandlingType.REVURDERING, Opphør(opphørFom = opphørFom, begrunnelse = "null"), forrigeBehandlingId = UUID.randomUUID())
+        utførSteg(BehandlingType.REVURDERING,
+                  Opphør(opphørFom = opphørFom, begrunnelse = "null"),
+                  forrigeBehandlingId = UUID.randomUUID())
 
         assertThat(slot.captured.andelerTilkjentYtelse).hasSize(1)
         assertThat(slot.captured.andelerTilkjentYtelse.first().stønadFom).isEqualTo(forventetNyAndelFom)
@@ -307,7 +331,9 @@ internal class BeregnYtelseStegTest {
                 lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, andel1Fom, andel1Tom),
                                          lagAndelTilkjentYtelse(200, andel2Fom, andel2Tom)))
 
-        utførSteg(BehandlingType.REVURDERING, Opphør(opphørFom = opphørFom, begrunnelse = "null"), forrigeBehandlingId = UUID.randomUUID())
+        utførSteg(BehandlingType.REVURDERING,
+                  Opphør(opphørFom = opphørFom, begrunnelse = "null"),
+                  forrigeBehandlingId = UUID.randomUUID())
 
         assertThat(slot.captured.andelerTilkjentYtelse).hasSize(2)
         assertThat(slot.captured.andelerTilkjentYtelse[0].stønadFom).isEqualTo(forventetAndelFom1)
@@ -328,7 +354,9 @@ internal class BeregnYtelseStegTest {
         every { tilkjentYtelseService.hentForBehandling(any()) } returns
                 lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, andelFom, andelTom)))
 
-        utførSteg(BehandlingType.REVURDERING, Opphør(opphørFom = opphørFom, begrunnelse = "null"), forrigeBehandlingId = UUID.randomUUID())
+        utførSteg(BehandlingType.REVURDERING,
+                  Opphør(opphørFom = opphørFom, begrunnelse = "null"),
+                  forrigeBehandlingId = UUID.randomUUID())
 
         assertThat(slot.captured.andelerTilkjentYtelse).hasSize(0)
     }
@@ -350,10 +378,21 @@ internal class BeregnYtelseStegTest {
         verify { mellomlagringBrevService.slettMellomlagringHvisFinnes(any()) }
     }
 
+    @Test
+    internal fun `skal slette tilbakekreving og simulering ved avslag`() {
+        every { simuleringService.slettSimuleringForBehandling(any()) } just Runs
+        every { tilbakekrevingService.slettTilbakekreving(any()) } just Runs
+        utførSteg(type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                  vedtak = Avslå(avslåBegrunnelse = ""))
+
+        verify { tilbakekrevingService.slettTilbakekreving(any()) }
+        verify { simuleringService.slettSimuleringForBehandling(any()) }
+    }
 
 
-
-    private fun utførSteg(type: BehandlingType, vedtak: VedtakDto = Innvilget(periodeBegrunnelse = "", inntektBegrunnelse = ""), forrigeBehandlingId: UUID? = null) {
+    private fun utførSteg(type: BehandlingType,
+                          vedtak: VedtakDto = Innvilget(periodeBegrunnelse = "", inntektBegrunnelse = ""),
+                          forrigeBehandlingId: UUID? = null) {
         steg.utførSteg(behandling(fagsak(), type = type, forrigeBehandlingId = forrigeBehandlingId), vedtak = vedtak)
     }
 

@@ -1,15 +1,15 @@
 package no.nav.familie.ef.sak.simulering
 
-import no.nav.familie.ef.sak.vedtak.VedtakService
-import no.nav.familie.ef.sak.iverksett.IverksettClient
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.fagsak.domain.Fagsak
-import no.nav.familie.ef.sak.repository.findByIdOrThrow
-import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.iverksett.IverksettClient
+import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
+import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.kontrakter.ef.iverksett.SimuleringDto
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import org.springframework.stereotype.Service
@@ -33,6 +33,11 @@ class SimuleringService(private val iverksettClient: IverksettClient,
             BehandlingType.BLANKETT -> simulerForBlankett(behandling)
             else -> simulerForBehandling(behandling)
         }
+    }
+
+    fun hentLagretSimuleringsresultat(behandlingId: UUID): SimuleringsresultatDto {
+        val simuleringsresultat: Simuleringsresultat = simuleringsresultatRepository.findByIdOrThrow(behandlingId)
+        return tilSimuleringsresultatDto(simuleringsresultat.data, simuleringsresultat.sporbar.endret.endretTid.toLocalDate())
     }
 
     fun slettSimuleringForBehandling(behandlingId: UUID) {

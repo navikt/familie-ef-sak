@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.tilbakekreving
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.tilbakekreving.domain.Tilbakekreving
 import no.nav.familie.ef.sak.tilbakekreving.domain.Tilbakekrevingsvalg
 import no.nav.familie.ef.sak.tilbakekreving.domain.tilDto
 import no.nav.familie.ef.sak.tilbakekreving.dto.TilbakekrevingDto
@@ -23,8 +24,12 @@ class TilbakekrevingService(private val tilbakekrevingRepository: Tilbakekreving
         tilbakekrevingRepository.insert(tilbakekrevingDto.tilDomene(behandlingId))
     }
 
-    fun hentTilbakekrevingDto(behandlingId: UUID): TilbakekrevingDto? {
-        return tilbakekrevingRepository.findByIdOrNull(behandlingId)?.tilDto()
+    fun hentTilbakekreving(behandlingId: UUID): Tilbakekreving? {
+        return tilbakekrevingRepository.findByIdOrNull(behandlingId)
+    }
+
+    fun slettTilbakekreving(behandlingId: UUID) {
+        tilbakekrevingRepository.deleteById(behandlingId)
     }
 
     private fun validerTilbakekreving(behandling: Behandling, tilbakekrevingDto: TilbakekrevingDto) {
