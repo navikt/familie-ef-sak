@@ -41,7 +41,7 @@ class EksternStønadsperioderController(private val arenaStønadsperioderService
     @PostMapping("full-overgangsstonad")
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
     fun hentPerioderForOvergangsstonad(@RequestBody request: PersonIdent): Ressurs<PerioderOvergangsstønadResponse> {
-        return Ressurs.success(perioderForBarnetrygdService.hentPerioder(request))
+        return Ressurs.success(perioderForBarnetrygdService.hentPerioderMedFullOvergangsstønad(request))
     }
 
 

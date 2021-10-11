@@ -21,13 +21,13 @@ internal class PerioderForBarnetrygdServiceTest {
     internal fun `skal ikke ha med perioder som ikke har fullOvergangsstønad`() {
         every { periodeService.hentPerioderFraEfOgInfotrygd(any()) } returns listOf(lagInternPeriode(inntektsreduksjon = 1),
                                                                                     lagInternPeriode(samordningsfradrag = 1))
-        assertThat(service.hentPerioder(PersonIdent(personIdent)).perioder).isEmpty()
+        assertThat(service.hentPerioderMedFullOvergangsstønad(PersonIdent(personIdent)).perioder).isEmpty()
     }
 
     @Test
     internal fun `skal returnere perioder`() {
         every { periodeService.hentPerioderFraEfOgInfotrygd(any()) } returns listOf(lagInternPeriode(beløp = 1))
-        assertThat(service.hentPerioder(PersonIdent(personIdent)).perioder).hasSize(1)
+        assertThat(service.hentPerioderMedFullOvergangsstønad(PersonIdent(personIdent)).perioder).hasSize(1)
     }
 
 }

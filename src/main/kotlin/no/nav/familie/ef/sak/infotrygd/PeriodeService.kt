@@ -36,7 +36,8 @@ class PeriodeService(
         return fagsakService.finnFagsak(personIdenter, Stønadstype.OVERGANGSSTØNAD)
                        ?.let { behandlingService.finnSisteIverksatteBehandling(it.id) }
                        ?.let { hentPerioderFraEf(it) }
-                       // trenger å sortere de revers pga filtrerOgSorterPerioderFraInfotrygd gjør det, då vi ønsker de sortert på siste hendelsen først
+                       // trenger å sortere de revers pga filtrerOgSorterPerioderFraInfotrygd gjør det,
+                       // då vi ønsker de sortert på siste hendelsen først
                        ?.sortedWith(compareBy<InternPeriode> { it.stønadFom }.reversed())
                ?: emptyList()
     }

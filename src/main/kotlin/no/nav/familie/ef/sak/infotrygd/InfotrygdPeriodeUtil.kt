@@ -17,9 +17,10 @@ object InfotrygdPeriodeUtil {
                 .map {
                     val opphørsdato = it.opphørsdato
                     if (opphørsdato != null && opphørsdato.isBefore(it.stønadTom)) {
-                        return@map it.copy(stønadTom = opphørsdato)
+                        it.copy(stønadTom = opphørsdato)
+                    } else {
+                        it
                     }
-                    it
                 }
                 .filter { it.stønadTom > it.stønadFom } // Skal infotrygd rydde bort disse? (inkl de der opphørdato er før startdato)
                 .sortedWith(compareBy<InfotrygdPeriode>({ it.stønadId }, { it.vedtakId }, { it.stønadFom }).reversed())
