@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.simulering
 
-import no.nav.familie.ef.iverksett.økonomi.simulering.BeriketSimuleringsresultat
+import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
@@ -30,7 +30,7 @@ class DbMigreringService(
                             .tilFelles()
 
             simuleringsresultatRepository.update(
-                    it.copy(beriket_data = BeriketSimuleringsresultat(it.data, simuleringsoppsummering)))
+                    it.copy(beriketData = BeriketSimuleringsresultat(it.data, simuleringsoppsummering)))
         }
 
         logger.info("Migrert  ${iterable.count()} beriket_data for simuleringsresultat.")

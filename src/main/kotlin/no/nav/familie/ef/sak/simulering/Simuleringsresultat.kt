@@ -1,12 +1,12 @@
 package no.nav.familie.ef.sak.simulering
 
-import no.nav.familie.ef.iverksett.økonomi.simulering.BeriketSimuleringsresultat
 import no.nav.familie.ef.sak.felles.domain.Sporbar
+import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.Table
-import java.util.*
+import java.util.UUID
 
 @Table
 data class Simuleringsresultat(@Id
@@ -14,6 +14,6 @@ data class Simuleringsresultat(@Id
                                val data: DetaljertSimuleringResultat,
                                @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                                val sporbar: Sporbar = Sporbar(),
-                               val beriket_data: BeriketSimuleringsresultat? = null)
+                               val beriketData: BeriketSimuleringsresultat? = null)
 
 

@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.simulering
 
-import no.nav.familie.ef.iverksett.økonomi.simulering.Simuleringsoppsummering
-import no.nav.familie.ef.iverksett.økonomi.simulering.Simuleringsperiode
+import no.nav.familie.kontrakter.felles.simulering.Simuleringsoppsummering
+import no.nav.familie.kontrakter.felles.simulering.Simuleringsperiode
 import java.math.BigDecimal
 import java.time.LocalDate
 

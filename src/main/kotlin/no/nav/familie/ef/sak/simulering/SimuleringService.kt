@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.simulering
 
-import no.nav.familie.ef.iverksett.økonomi.simulering.BeriketSimuleringsresultat
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
@@ -12,6 +11,7 @@ import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.kontrakter.ef.iverksett.SimuleringDto
+import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -53,7 +53,7 @@ class SimuleringService(private val iverksettClient: IverksettClient,
         return simuleringsresultatRepository.insert(Simuleringsresultat(
                 behandlingId = behandling.id,
                 data = detaljertSimuleringResultat,
-                beriket_data = BeriketSimuleringsresultat(detaljertSimuleringResultat,simuleringsoppsummering)
+                beriketData = BeriketSimuleringsresultat(detaljertSimuleringResultat, simuleringsoppsummering)
         ))
     }
 
