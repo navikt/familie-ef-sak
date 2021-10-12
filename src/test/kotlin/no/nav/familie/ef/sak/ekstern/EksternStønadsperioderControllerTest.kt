@@ -1,8 +1,6 @@
 package no.nav.familie.ef.sak.ekstern
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.felles.util.clientToken
-import no.nav.familie.ef.sak.felles.util.onBehalfOfToken
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadRequest
