@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.beregning.tilInntektsperioder
 import no.nav.familie.ef.sak.brev.MellomlagringBrevService
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.simulering.SimuleringService
+import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
@@ -28,7 +29,8 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                        private val beregningService: BeregningService,
                        private val simuleringService: SimuleringService,
                        private val vedtakService: VedtakService,
-                       private val mellomlagringBrevService: MellomlagringBrevService) : BehandlingSteg<VedtakDto> {
+                       private val mellomlagringBrevService: MellomlagringBrevService,
+                       private val tilbakekrevingService: TilbakekrevingService) : BehandlingSteg<VedtakDto> {
 
 
     override fun validerSteg(behandling: Behandling) {
@@ -55,6 +57,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
             }
             is Avslå -> {
                 simuleringService.slettSimuleringForBehandling(behandling.id)
+                tilbakekrevingService.slettTilbakekreving(behandling.id)
             }
             else -> error("Kan ikke utføre steg ${stegType()} for behandling ${behandling.id}")
         }

@@ -47,7 +47,7 @@ class EksternStønadsperioderController(private val arenaStønadsperioderService
         if (!SikkerhetContext.erMaskinTilMaskinToken()) {
             tilgangService.validerTilgangTilPerson(request.ident)
         }
-        return Ressurs.success(perioderForBarnetrygdService.hentPerioder(request))
+        return Ressurs.success(perioderForBarnetrygdService.hentPerioderMedFullOvergangsstønad(request))
     }
 
 
