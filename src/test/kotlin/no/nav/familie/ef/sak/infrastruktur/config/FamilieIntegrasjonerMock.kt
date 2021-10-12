@@ -48,15 +48,15 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                     WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.tilgangRelasjonerUri.path))
                             .withRequestBody(WireMock.matching(".*ikkeTilgang.*"))
                             .atPriority(1)
-                            .willReturn(lagIkkeTilgangResponse()),
+                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(lagIkkeTilgangResponse()))),
                     WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.tilgangRelasjonerUri.path))
                             .willReturn(WireMock.okJson(objectMapper.writeValueAsString(Tilgang(true, null)))),
                     WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.tilgangPersonUri.path))
                             .withRequestBody(WireMock.matching(".*ikkeTilgang.*"))
                             .atPriority(1)
-                            .willReturn(lagIkkeTilgangResponse()),
+                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(listOf(lagIkkeTilgangResponse())))),
                     WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.tilgangPersonUri.path))
-                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(Tilgang(true, null)))),
+                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(listOf(Tilgang(true, null))))),
                     WireMock.get(WireMock.urlEqualTo(integrasjonerConfig.kodeverkPoststedUri.path))
                             .willReturn(WireMock.okJson(objectMapper.writeValueAsString(kodeverkPoststed))),
                     WireMock.get(WireMock.urlEqualTo(integrasjonerConfig.kodeverkLandkoderUri.path))
@@ -91,11 +91,10 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
 
             )
 
-    private fun lagIkkeTilgangResponse() = WireMock.okJson(
-            objectMapper.writeValueAsString(Tilgang(false,
-                                                    "Mock sier: Du har " +
-                                                    "ikke tilgang " +
-                                                    "til person ikkeTilgang")))
+    private fun lagIkkeTilgangResponse() = Tilgang(false,
+                                                   "Mock sier: Du har " +
+                                                   "ikke tilgang " +
+                                                   "til person ikkeTilgang")
 
     @Bean("mock-integrasjoner")
     @Profile("mock-integrasjoner")
