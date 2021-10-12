@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.simulering
 
+import no.nav.familie.ef.iverksett.økonomi.simulering.BeriketSimuleringsresultat
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
@@ -47,9 +48,12 @@ class SimuleringService(private val iverksettClient: IverksettClient,
     fun hentOgLagreSimuleringsresultat(behandling: Behandling): Simuleringsresultat {
         val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
         simuleringsresultatRepository.deleteById(behandling.id)
+        val detaljertSimuleringResultat = simulerMedTilkjentYtelse(behandling, fagsak)
+        val simuleringsoppsummering = tilSimuleringsresultatDto(detaljertSimuleringResultat, LocalDate.now()).tilFelles()
         return simuleringsresultatRepository.insert(Simuleringsresultat(
                 behandlingId = behandling.id,
-                data = simulerMedTilkjentYtelse(behandling, fagsak)
+                data = detaljertSimuleringResultat,
+                beriket_data = BeriketSimuleringsresultat(detaljertSimuleringResultat,simuleringsoppsummering)
         ))
     }
 

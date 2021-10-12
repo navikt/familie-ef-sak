@@ -1,5 +1,7 @@
 package no.nav.familie.ef.sak.simulering
 
+import no.nav.familie.ef.iverksett.økonomi.simulering.Simuleringsoppsummering
+import no.nav.familie.ef.iverksett.økonomi.simulering.Simuleringsperiode
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -51,3 +53,27 @@ data class SimuleringsPeriode(
         val resultat: BigDecimal,
         val feilutbetaling: BigDecimal,
 )
+
+fun SimuleringsresultatDto.tilFelles(): Simuleringsoppsummering =
+        Simuleringsoppsummering(
+                perioder = this.perioder.map { it.tilFelles() },
+                fomDatoNestePeriode = this.fomDatoNestePeriode,
+                etterbetaling = this.etterbetaling,
+                feilutbetaling = this.feilutbetaling,
+                fom = this.fom,
+                tomDatoNestePeriode = this.tomDatoNestePeriode,
+                forfallsdatoNestePeriode = this.forfallsdatoNestePeriode,
+                tidSimuleringHentet = this.tidSimuleringHentet,
+                tomSisteUtbetaling = this.tomSisteUtbetaling
+        )
+
+fun SimuleringsPeriode.tilFelles(): Simuleringsperiode =
+        Simuleringsperiode(
+                fom = this.fom,
+                tom = this.tom,
+                forfallsdato = this.forfallsdato,
+                nyttBeløp = this.nyttBeløp,
+                tidligereUtbetalt = this.tidligereUtbetalt,
+                resultat = this.resultat,
+                feilutbetaling = this.feilutbetaling
+        )

@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.infrastruktur.config
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.familie.ef.iverksett.økonomi.simulering.BeriketSimuleringsresultat
 import no.nav.familie.ef.sak.vilkår.DelvilkårsvurderingWrapper
 import no.nav.familie.ef.sak.felles.domain.Endret
 import no.nav.familie.ef.sak.felles.domain.Fil
@@ -106,7 +107,9 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
                                             PGobjectTilGrunnlagsdata(),
                                             InntektsperiodeTilPGobjectConverter(),
                                             PGobjectTilDetaljertSimuleringResultat(),
-                                            DetaljertSimuleringResultatTilPGobjectConverter()
+                                            DetaljertSimuleringResultatTilPGobjectConverter(),
+                                            PGobjectTilBeriketSimuleringsresultat(),
+                                            BeriketSimuleringsresultatTilPGobjectConverter()
         ))
     }
 
@@ -320,6 +323,24 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
                 PGobject().apply {
                     type = "json"
                     value = objectMapper.writeValueAsString(simuleringsresultat.simuleringMottaker)
+                }
+    }
+
+    @ReadingConverter
+    class PGobjectTilBeriketSimuleringsresultat : Converter<PGobject, BeriketSimuleringsresultat?> {
+
+        override fun convert(pGobject: PGobject): BeriketSimuleringsresultat? {
+            return pGobject.value?.let { objectMapper.readValue(it) }
+        }
+    }
+
+    @WritingConverter
+    class BeriketSimuleringsresultatTilPGobjectConverter : Converter<BeriketSimuleringsresultat, PGobject> {
+
+        override fun convert(simuleringsresultat: BeriketSimuleringsresultat): PGobject =
+                PGobject().apply {
+                    type = "json"
+                    value = objectMapper.writeValueAsString(simuleringsresultat)
                 }
     }
 }
