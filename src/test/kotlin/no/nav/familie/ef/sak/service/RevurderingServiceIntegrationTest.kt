@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
@@ -30,6 +31,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.LocalDate
 
 internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
@@ -41,6 +43,9 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
     private lateinit var fagsak: Fagsak
     private val personIdent = "123456789012"
+    private val behandlingsårsak = "NYE_OPPLYSNINGER"
+    private val kravMottatt = LocalDate.of(2021, 9, 9)
+    private val revurderingDto = RevurderingDto(fagsak.id, behandlingsårsak, kravMottatt)
 
 
     @BeforeEach
@@ -63,7 +68,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         val søknad = lagreSøknad(behandling, fagsak)
         opprettVilkår(behandling, søknad)
 
-        val opprettRevurderingManuelt = revurderingService.opprettRevurderingManuelt(fagsak.id)
+        val opprettRevurderingManuelt = revurderingService.opprettRevurderingManuelt(revurderingDto)
 
         val revurdering = behandlingRepository.findByIdOrThrow(opprettRevurderingManuelt.id)
         assertThat(revurdering.type).isEqualTo(BehandlingType.REVURDERING)
@@ -77,7 +82,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         val søknad = lagreSøknad(behandling, fagsak)
         opprettVilkår(behandling, søknad)
 
-        val revurdering = revurderingService.opprettRevurderingManuelt(fagsak.id)
+        val revurdering = revurderingService.opprettRevurderingManuelt(revurderingDto)
         val vilkårForBehandling = vilkårsvurderingRepository.findByBehandlingId(behandling.id)[0]
         val vilkårForRevurdering = vilkårsvurderingRepository.findByBehandlingId(revurdering.id)[0]
 
@@ -93,13 +98,13 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
     internal fun `skal ikke være mulig å opprette fagsak hvis siste behandling ikke er ferdig`() {
         behandlingRepository.insert(behandling(fagsak = fagsak, status = BehandlingStatus.UTREDES))
 
-        assertThat(catchThrowable { revurderingService.opprettRevurderingManuelt(fagsak.id) })
+        assertThat(catchThrowable { revurderingService.opprettRevurderingManuelt(revurderingDto) })
                 .hasMessageContaining("Det finnes en behandling på fagsaken som ikke er ferdigstilt")
     }
 
     @Test
     internal fun `skal ikke være mulig å opprette fagsak hvis det ikke finnes en behandling fra før`() {
-        assertThat(catchThrowable { revurderingService.opprettRevurderingManuelt(fagsak.id) })
+        assertThat(catchThrowable { revurderingService.opprettRevurderingManuelt(revurderingDto) })
                 .hasMessageContaining("Det finnes ikke en tidligere behandling på fagsaken")
     }
 

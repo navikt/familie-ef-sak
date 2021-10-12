@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.behandling.domain
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.MappedCollection
 import java.util.UUID
@@ -22,6 +23,8 @@ data class Behandling(@Id
                       val type: BehandlingType,
                       var status: BehandlingStatus,
                       var steg: StegType,
+                      @Column("arsak")
+                      val årsak: String? = null,
 
                       @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                       val sporbar: Sporbar = Sporbar(),

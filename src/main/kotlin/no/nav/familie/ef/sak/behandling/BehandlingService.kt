@@ -64,7 +64,8 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
     fun opprettBehandling(behandlingType: BehandlingType,
                           fagsakId: UUID,
                           status: BehandlingStatus = BehandlingStatus.OPPRETTET,
-                          stegType: StegType = StegType.VILKÅR): Behandling {
+                          stegType: StegType = StegType.VILKÅR,
+                          behandlingsårsak: String? = null): Behandling {
         val tidligereBehandlinger = behandlingRepository.findByFagsakId(fagsakId)
         val forrigeBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
         validerKanOppretteNyBehandling(behandlingType, tidligereBehandlinger, forrigeBehandling)
@@ -74,7 +75,8 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
                                                       type = behandlingType,
                                                       steg = stegType,
                                                       status = status,
-                                                      resultat = BehandlingResultat.IKKE_SATT))
+                                                      resultat = BehandlingResultat.IKKE_SATT,
+                                                      årsak = behandlingsårsak))
     }
 
     fun hentBehandling(behandlingId: UUID): Behandling = behandlingRepository.findByIdOrThrow(behandlingId)
