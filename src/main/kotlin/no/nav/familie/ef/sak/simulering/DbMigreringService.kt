@@ -6,6 +6,7 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
+@Deprecated("Kan fjernes når den er kjørt i produksjon")
 @Service
 class DbMigreringService(
         private val simuleringsresultatRepository: SimuleringsresultatRepository
@@ -27,7 +28,7 @@ class DbMigreringService(
         iterable.forEach {
             val simuleringsoppsummering =
                     tilSimuleringsresultatDto(it.data, it.sporbar.endret.endretTid.toLocalDate())
-                            .tilFelles()
+                            .tilSimuleringsperiode()
 
             simuleringsresultatRepository.update(
                     it.copy(beriketData = BeriketSimuleringsresultat(it.data, simuleringsoppsummering)))

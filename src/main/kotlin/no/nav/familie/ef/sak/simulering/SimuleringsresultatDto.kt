@@ -54,9 +54,9 @@ data class SimuleringsPeriode(
         val feilutbetaling: BigDecimal,
 )
 
-fun SimuleringsresultatDto.tilFelles(): Simuleringsoppsummering =
+fun SimuleringsresultatDto.tilSimuleringsperiode(): Simuleringsoppsummering =
         Simuleringsoppsummering(
-                perioder = this.perioder.map { it.tilFelles() },
+                perioder = this.perioder.map { it.tilSimuleringsperiode() },
                 fomDatoNestePeriode = this.fomDatoNestePeriode,
                 etterbetaling = this.etterbetaling,
                 feilutbetaling = this.feilutbetaling,
@@ -67,7 +67,7 @@ fun SimuleringsresultatDto.tilFelles(): Simuleringsoppsummering =
                 tomSisteUtbetaling = this.tomSisteUtbetaling
         )
 
-fun SimuleringsPeriode.tilFelles(): Simuleringsperiode =
+fun SimuleringsPeriode.tilSimuleringsperiode(): Simuleringsperiode =
         Simuleringsperiode(
                 fom = this.fom,
                 tom = this.tom,

@@ -49,7 +49,7 @@ class SimuleringService(private val iverksettClient: IverksettClient,
         val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
         simuleringsresultatRepository.deleteById(behandling.id)
         val detaljertSimuleringResultat = simulerMedTilkjentYtelse(behandling, fagsak)
-        val simuleringsoppsummering = tilSimuleringsresultatDto(detaljertSimuleringResultat, LocalDate.now()).tilFelles()
+        val simuleringsoppsummering = tilSimuleringsresultatDto(detaljertSimuleringResultat, LocalDate.now()).tilSimuleringsperiode()
         return simuleringsresultatRepository.insert(Simuleringsresultat(
                 behandlingId = behandling.id,
                 data = detaljertSimuleringResultat,
