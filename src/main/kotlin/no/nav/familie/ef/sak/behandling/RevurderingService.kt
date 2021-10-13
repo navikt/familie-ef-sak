@@ -28,7 +28,8 @@ class RevurderingService(private val søknadService: SøknadService,
                                                               revurderingInnhold.fagsakId,
                                                               BehandlingStatus.UTREDES,
                                                               StegType.BEREGNE_YTELSE,
-                                                              revurderingInnhold.behandlingsårsak)
+                                                              revurderingInnhold.behandlingsårsak,
+                                                              revurderingInnhold.kravMottatt)
         val forrigeBehandlingId = revurdering.forrigeBehandlingId
                                   ?: error("Revurdering må ha eksisterende iverksatt behandling")
         val saksbehandler = SikkerhetContext.hentSaksbehandler(true)

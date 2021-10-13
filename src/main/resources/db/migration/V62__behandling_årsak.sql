@@ -1,1 +1,2 @@
 ALTER TABLE behandling ADD COLUMN arsak VARCHAR;
+ALTER TABLE behandling ADD COLUMN krav_mottatt TIMESTAMP(3);

@@ -128,7 +128,7 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
                                        vilkårsvurderinger: List<Vilkårsvurdering>) =
             BehandlingsdetaljerDto(behandlingId = behandling.id,
                                    behandlingType = BehandlingType.valueOf(behandling.type.name),
-                                   behandlingÅrsak = BehandlingÅrsak.SØKNAD,
+                                   behandlingÅrsak = behandling.årsak ?: BehandlingÅrsak.SØKNAD,
                                    eksternId = behandling.eksternId.id,
                                    vilkårsvurderinger = vilkårsvurderinger.map { it.tilIverksettDto() },
                                    forrigeBehandlingId = behandling.forrigeBehandlingId

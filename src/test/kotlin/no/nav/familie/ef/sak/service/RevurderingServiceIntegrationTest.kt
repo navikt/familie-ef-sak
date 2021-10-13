@@ -24,6 +24,7 @@ import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.SivilstandRegel
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
@@ -43,7 +44,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
     private lateinit var fagsak: Fagsak
     private val personIdent = "123456789012"
-    private val behandlingsårsak = "NYE_OPPLYSNINGER"
+    private val behandlingsårsak = BehandlingÅrsak.NYE_OPPLYSNINGER
     private val kravMottatt = LocalDate.of(2021, 9, 9)
     private val revurderingDto = RevurderingDto(fagsak.id, behandlingsårsak, kravMottatt)
 
