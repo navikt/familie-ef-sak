@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.infotrygd
 
+import no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeTestUtil.lagInfotrygdPeriode
 import no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeUtil.filtrerOgSorterPerioderFraInfotrygd
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeTestUtil.lagInfotrygdPeriode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

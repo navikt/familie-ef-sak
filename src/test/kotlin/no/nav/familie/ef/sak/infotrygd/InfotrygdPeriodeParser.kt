@@ -1,8 +1,6 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.infotrygd
+package no.nav.familie.ef.sak.infotrygd
 
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
-import no.nav.familie.ef.sak.infotrygd.InternPeriode
-import no.nav.familie.ef.sak.infotrygd.tilInternPeriode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdEndringKode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
 import java.net.URL

@@ -1,7 +1,5 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.infotrygd
+package no.nav.familie.ef.sak.infotrygd
 
-import no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeUtil
-import no.nav.familie.ef.sak.infotrygd.InternPeriode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
