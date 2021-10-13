@@ -54,7 +54,6 @@ For å koble til preprod kan du kjøre kommandoene:
 4. Brukernavn: `fornavn.etternavn@nav.no` som brukernavn 
 5. Passord: Lim inn det som ligger i clipboard fra steg 2
 
-
 ## Produksjonssetting
 Applikasjonen vil deployes til produksjon ved ny commit på master-branchen. Det er dermed tilstrekkelig å merge PR for å trigge produksjonsbygget. 
 
