@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.infotrygd
 
+import no.nav.familie.ef.sak.felles.util.isEqualOrAfter
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
 
 
@@ -24,6 +25,33 @@ object InfotrygdPeriodeUtil {
                 }
                 .filter { it.stønadTom > it.stønadFom } // Skal infotrygd rydde bort disse? (inkl de der opphørdato er før startdato)
                 .sortedWith(compareBy<InfotrygdPeriode>({ it.stønadId }, { it.vedtakId }, { it.stønadFom }).reversed())
+    }
+
+    /**
+     * Slår sammen perioder fra infotrygd, disse skal ikke slås sammen tvers ulike stønadId'er
+     */
+    fun slåSammenInfotrygdperioder(infotrygdperioder: List<InfotrygdPeriode>): List<InternPeriode> {
+        return infotrygdperioder
+                .groupBy({ it.stønadId }, { it.tilInternPeriode() })
+                .values
+                .flatMap(this::slåSammenPerioder)
+                .sortedBy { it.stønadFom }
+    }
+
+    private fun slåSammenPerioder(perioder: List<InternPeriode>): MutableList<InternPeriode> {
+        val list = mutableListOf<InternPeriode>()
+
+        for (periode in perioder) {
+            val minStønadFom = list.minByOrNull { it.stønadFom }
+            if (minStønadFom != null && periode.stønadFom.isEqualOrAfter(minStønadFom.stønadFom)) {
+                continue
+            } else if (minStønadFom != null && minStønadFom.erPeriodeOverlappende(periode)) {
+                list.add(periode.copy(stønadTom = minStønadFom.stønadFom.minusDays(1)))
+            } else {
+                list.add(periode)
+            }
+        }
+        return list
     }
 
 }

@@ -6,6 +6,7 @@ object InternPeriodeUtil {
 
     /**
      * Slår sammen perioder tvers kilder, viktig att EF-perioder
+     * Till forskjell mot [InfotrygdPeriodeUtil.slåSammenInfotrygdperioder] så skal ikke denne sjekke stønadId etc
      */
     fun slåSammenPerioder(perioder: List<InternPeriode>): List<InternPeriode> {
         val list = mutableListOf<InternPeriode>()

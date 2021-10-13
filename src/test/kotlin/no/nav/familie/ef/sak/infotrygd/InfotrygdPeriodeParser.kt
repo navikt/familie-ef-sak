@@ -36,7 +36,10 @@ object InfotrygdPeriodeParser {
                 .map { row ->
                     getValue(row, KEY_TYPE)!! to parseInfotrygdPeriode(row)
                 }.groupBy({ it.first }, { it.second })
-        return InfotrygdTestData(inputOutput["INPUT"]!!, inputOutput["OUTPUT"]!!.map { it.tilInternPeriode() })
+        return InfotrygdTestData(inputOutput["INPUT"]!!,
+                                 inputOutput["OUTPUT"]!!
+                                         .map(InfotrygdPeriode::tilInternPeriode)
+                                         .sortedBy(InternPeriode::stønadFom))
     }
 
     private fun parseInfotrygdPeriode(row: Map<String, String>) =
