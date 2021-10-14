@@ -38,7 +38,8 @@ internal class TilbakekrevingControllerTest : OppslagSpringRunnerTest() {
         lagInitiellTilbakekreving(behandling)
         val oppdatertTilbakekrevingsDto = TilbakekrevingDto(valg = OPPRETT_MED_VARSEL,
                                                             varseltekst = "Dette er tekst",
-                                                            begrunnelse = "Nei")
+                                                            begrunnelse = "Nei",
+                                                            behandlingFinnes = false)
 
         lagreTilbakekreving(behandling, oppdatertTilbakekrevingsDto)
         val andreLagredeTilbakekrevingDto = hentTilbakekreving(behandling)
@@ -49,7 +50,8 @@ internal class TilbakekrevingControllerTest : OppslagSpringRunnerTest() {
     private fun lagInitiellTilbakekreving(behandling: Behandling) {
         val initiellTilbakekrevingDto = TilbakekrevingDto(valg = OPPRETT_UTEN_VARSEL,
                                                           varseltekst = "",
-                                                          begrunnelse = "Ja")
+                                                          begrunnelse = "Ja",
+                                                          behandlingFinnes = false)
         lagreTilbakekreving(behandling, initiellTilbakekrevingDto)
         val førsteLagredeTilbakekrevingDto = hentTilbakekreving(behandling)
         assertThat(førsteLagredeTilbakekrevingDto.body.getDataOrThrow()).isEqualTo(initiellTilbakekrevingDto)

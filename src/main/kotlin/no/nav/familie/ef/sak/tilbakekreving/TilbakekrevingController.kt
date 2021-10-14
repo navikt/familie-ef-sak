@@ -30,6 +30,8 @@ class TilbakekrevingController(private val tilgangService: TilgangService,
     @GetMapping("/{behandlingId}")
     fun hentTilbakekreving(@PathVariable behandlingId: UUID): Ressurs<TilbakekrevingDto?> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
-        return Ressurs.success(tilbakekrevingService.hentTilbakekreving(behandlingId)?.tilDto())
+        val harÅpenTilbakekrevingsbehandling = tilbakekrevingService.harÅpenTilbakekrevingsbehandling(behandlingId)
+        val data = tilbakekrevingService.hentTilbakekreving(behandlingId)?.tilDto(harÅpenTilbakekrevingsbehandling)
+        return Ressurs.success(data)
     }
 }

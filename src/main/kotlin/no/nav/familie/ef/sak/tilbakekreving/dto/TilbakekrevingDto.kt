@@ -6,7 +6,8 @@ import java.util.UUID
 
 data class TilbakekrevingDto(val valg: Tilbakekrevingsvalg,
                              val varseltekst: String? = null,
-                             var begrunnelse: String)
+                             var begrunnelse: String,
+                             val behandlingFinnes: Boolean)
 
 
 fun TilbakekrevingDto.tilDomene(behandlingId: UUID) = Tilbakekreving(

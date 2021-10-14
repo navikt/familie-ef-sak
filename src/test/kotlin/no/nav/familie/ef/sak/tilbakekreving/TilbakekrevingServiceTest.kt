@@ -23,13 +23,16 @@ internal class TilbakekrevingServiceTest {
 
     val tilbakekrevingRepository = mockk<TilbakekrevingRepository>()
     val behandlingService = mockk<BehandlingService>()
-    private val tilbakekrevingService = TilbakekrevingService(tilbakekrevingRepository, behandlingService)
+    private val tilbakekrevingService = TilbakekrevingService(tilbakekrevingRepository, behandlingService, mockk(), mockk())
 
     @Test
     internal fun `skal ikke være mulig å lagre tilbakekreving for låst behandlig `() {
         every { behandlingService.hentBehandling(any()) } returns behandling(fagsak = fagsak(), status = FERDIGSTILT)
         val tilbakekrevingDto =
-                TilbakekrevingDto(valg = Tilbakekrevingsvalg.AVVENT, varseltekst = "", begrunnelse = "Dette er tekst ")
+                TilbakekrevingDto(valg = Tilbakekrevingsvalg.AVVENT,
+                                  varseltekst = "",
+                                  begrunnelse = "Dette er tekst ",
+                                  behandlingFinnes = false)
         val feil = assertThrows<Feil> {
             tilbakekrevingService.lagreTilbakekreving(tilbakekrevingDto,
                                                       behandlingId = UUID.randomUUID())
@@ -41,7 +44,10 @@ internal class TilbakekrevingServiceTest {
     internal fun `Skal kaste feil dersom vi forsøker lagre tilbakekreving med varsl som mangler varseltekst`() {
         every { behandlingService.hentBehandling(any()) } returns behandling(fagsak = fagsak())
         val tilbakekrevingDto =
-                TilbakekrevingDto(valg = Tilbakekrevingsvalg.OPPRETT_MED_VARSEL, varseltekst = null, begrunnelse = "tekst her")
+                TilbakekrevingDto(valg = Tilbakekrevingsvalg.OPPRETT_MED_VARSEL,
+                                  varseltekst = null,
+                                  begrunnelse = "tekst her",
+                                  behandlingFinnes = false)
 
         val feil = assertThrows<Feil> {
             tilbakekrevingService.lagreTilbakekreving(tilbakekrevingDto,
@@ -55,7 +61,10 @@ internal class TilbakekrevingServiceTest {
     internal fun `Skal kaste feil dersom vi forsøker lagre tilbakekreving med varsel som har tom varseltekst`() {
         every { behandlingService.hentBehandling(any()) } returns behandling(fagsak = fagsak())
         val tilbakekrevingDto =
-                TilbakekrevingDto(valg = Tilbakekrevingsvalg.OPPRETT_MED_VARSEL, varseltekst = "   ", begrunnelse = "tekst her")
+                TilbakekrevingDto(valg = Tilbakekrevingsvalg.OPPRETT_MED_VARSEL,
+                                  varseltekst = "   ",
+                                  begrunnelse = "tekst her",
+                                  behandlingFinnes = false)
 
         val feil = assertThrows<Feil> {
             tilbakekrevingService.lagreTilbakekreving(tilbakekrevingDto,
@@ -73,7 +82,8 @@ internal class TilbakekrevingServiceTest {
         val tilbakekrevingDto =
                 TilbakekrevingDto(valg = Tilbakekrevingsvalg.OPPRETT_MED_VARSEL,
                                   varseltekst = varseltekst,
-                                  begrunnelse = forventetBegrunnelse)
+                                  begrunnelse = forventetBegrunnelse,
+                                  behandlingFinnes = false)
 
         val behandlingId = UUID.randomUUID()
         every { tilbakekrevingRepository.deleteById(any()) } just Runs

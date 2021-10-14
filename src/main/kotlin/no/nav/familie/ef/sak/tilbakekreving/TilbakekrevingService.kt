@@ -2,10 +2,10 @@ package no.nav.familie.ef.sak.tilbakekreving
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.tilbakekreving.domain.Tilbakekreving
 import no.nav.familie.ef.sak.tilbakekreving.domain.Tilbakekrevingsvalg
-import no.nav.familie.ef.sak.tilbakekreving.domain.tilDto
 import no.nav.familie.ef.sak.tilbakekreving.dto.TilbakekrevingDto
 import no.nav.familie.ef.sak.tilbakekreving.dto.tilDomene
 import org.springframework.data.repository.findByIdOrNull
@@ -14,7 +14,9 @@ import java.util.UUID
 
 @Service
 class TilbakekrevingService(private val tilbakekrevingRepository: TilbakekrevingRepository,
-                            private val behandlingService: BehandlingService) {
+                            private val behandlingService: BehandlingService,
+                            private val fagsakService: FagsakService,
+                            private val tilbakekrevingClient: TilbakekrevingClient) {
 
 
     fun lagreTilbakekreving(tilbakekrevingDto: TilbakekrevingDto, behandlingId: UUID) {
@@ -39,6 +41,11 @@ class TilbakekrevingService(private val tilbakekrevingRepository: Tilbakekreving
         feilHvis(behandling.status.behandlingErLåstForVidereRedigering()) {
             "Behandlingen er låst for redigering"
         }
+    }
+
+    fun harÅpenTilbakekrevingsbehandling(behandlingId: UUID): Boolean {
+        val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
+        return tilbakekrevingClient.finnesÅpenBehandling(fagsakExternId = fagsak.eksternId.id)
     }
 
 }
