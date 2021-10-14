@@ -8,9 +8,4 @@ import org.springframework.stereotype.Repository
 import java.util.*
 
 @Repository
-interface SimuleringsresultatRepository : RepositoryInterface<Simuleringsresultat, UUID>, InsertUpdateRepository<Simuleringsresultat> {
-
-    @Query("""select * from simuleringsresultat where beriket_data is null limit 10000""")
-    fun findWhereBeriketDataIsNull(): Iterable<Simuleringsresultat>
-
-}
+interface SimuleringsresultatRepository : RepositoryInterface<Simuleringsresultat, UUID>, InsertUpdateRepository<Simuleringsresultat>
