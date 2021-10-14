@@ -52,7 +52,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
                 "mock-integrasjoner",
                 "mock-infotrygd-replika",
                 "mock-iverksett",
-                "mock-brev")
+                "mock-brev",
+                "mock-tilbakekreving")
 @EnableMockOAuth2Server
 abstract class OppslagSpringRunnerTest {
 
