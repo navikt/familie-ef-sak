@@ -47,11 +47,12 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
             behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
 
     @Transactional
-    fun opprettBehandling(behandlingType: BehandlingType,
-                          fagsakId: UUID,
-                          søknad: SøknadOvergangsstønadKontrakt,
-                          journalpost: Journalpost): Behandling {
-        val behandling = opprettBehandling(behandlingType, fagsakId)
+    fun opprettBehandlingForBlankett(behandlingType: BehandlingType,
+                                     fagsakId: UUID,
+                                     søknad: SøknadOvergangsstønadKontrakt,
+                                     journalpost: Journalpost): Behandling {
+        val behandling =
+                opprettBehandling(behandlingType = behandlingType, fagsakId = fagsakId, behandlingsårsak = BehandlingÅrsak.SØKNAD)
         behandlingsjournalpostRepository.insert(Behandlingsjournalpost(behandling.id,
                                                                        journalpost.journalpostId,
                                                                        journalpost.journalposttype))
@@ -67,7 +68,7 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
                           fagsakId: UUID,
                           status: BehandlingStatus = BehandlingStatus.OPPRETTET,
                           stegType: StegType = StegType.VILKÅR,
-                          behandlingsårsak: BehandlingÅrsak? = null,
+                          behandlingsårsak: BehandlingÅrsak,
                           kravMottatt: LocalDate? = null): Behandling {
         val tidligereBehandlinger = behandlingRepository.findByFagsakId(fagsakId)
         val forrigeBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsakId)

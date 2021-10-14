@@ -37,6 +37,7 @@ import no.nav.familie.ef.sak.vedtak.Vedtak
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.Task
@@ -159,7 +160,8 @@ internal class BeslutteVedtakStegTest {
                                                                                type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                                                                status = BehandlingStatus.FATTER_VEDTAK,
                                                                                steg = beslutteVedtakSteg.stegType(),
-                                                                               resultat = BehandlingResultat.IKKE_SATT),
+                                                                               resultat = BehandlingResultat.IKKE_SATT,
+                                                                               årsak = BehandlingÅrsak.SØKNAD),
                                                                     BeslutteVedtakDto(godkjent = godkjent))
         return nesteSteg
     }

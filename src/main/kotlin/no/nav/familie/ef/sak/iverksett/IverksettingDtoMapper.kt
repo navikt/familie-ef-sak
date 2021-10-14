@@ -131,7 +131,8 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
                                    behandlingÅrsak = behandling.årsak ?: BehandlingÅrsak.SØKNAD,
                                    eksternId = behandling.eksternId.id,
                                    vilkårsvurderinger = vilkårsvurderinger.map { it.tilIverksettDto() },
-                                   forrigeBehandlingId = behandling.forrigeBehandlingId
+                                   forrigeBehandlingId = behandling.forrigeBehandlingId,
+                                   kravMottatt = behandling.kravMottatt,
             )
 
     @Improvement("Opphørårsak må utledes ved revurdering")

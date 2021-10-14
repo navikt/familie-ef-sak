@@ -26,7 +26,7 @@ data class Behandling(@Id
                       var status: BehandlingStatus,
                       var steg: StegType,
                       @Column("arsak")
-                      val årsak: BehandlingÅrsak? = null,
+                      val årsak: BehandlingÅrsak,
                       val kravMottatt: LocalDate? = null,
 
                       @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)

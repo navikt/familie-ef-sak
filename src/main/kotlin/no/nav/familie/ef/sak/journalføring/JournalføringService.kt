@@ -7,7 +7,6 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettService
 import no.nav.familie.ef.sak.journalføring.dto.DokumentVariantformat
@@ -17,6 +16,7 @@ import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
@@ -102,7 +102,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         val journalpost = hentJournalpost(journalpostId)
         val fagsak = fagsakService.hentFagsak(journalføringRequest.fagsakId)
 
-        iverksettService.startBehandling(behandling,  fagsak)
+        iverksettService.startBehandling(behandling, fagsak)
         settSøknadPåBehandling(journalpostId, fagsak, behandling.id)
         knyttJournalpostTilBehandling(journalpost, behandling)
         grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
@@ -174,7 +174,8 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
 
     private fun opprettBehandlingMedBehandlingstype(behandlingsType: BehandlingType?, fagsakId: UUID): Behandling {
         return behandlingService.opprettBehandling(behandlingType = behandlingsType!!,
-                                                   fagsakId = fagsakId)
+                                                   fagsakId = fagsakId,
+                                                   behandlingsårsak = BehandlingÅrsak.SØKNAD)
     }
 
     private fun hentEksisterendeBehandling(behandlingId: UUID?): Behandling? {

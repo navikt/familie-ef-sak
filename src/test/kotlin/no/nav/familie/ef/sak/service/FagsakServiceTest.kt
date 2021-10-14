@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -52,13 +53,15 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
                                            status = BehandlingStatus.FERDIGSTILT,
                                            aktiv = false,
                                            steg = StegType.BEHANDLING_FERDIGSTILT,
-                                           resultat = BehandlingResultat.INNVILGET)
+                                           resultat = BehandlingResultat.INNVILGET,
+                                           årsak = BehandlingÅrsak.SØKNAD)
         val behandlingAktiv = Behandling(fagsakId = fagsakDB.id,
                                          type = BehandlingType.REVURDERING,
                                          status = BehandlingStatus.UTREDES,
                                          aktiv = true,
                                          steg = StegType.VILKÅR,
-                                         resultat = BehandlingResultat.INNVILGET)
+                                         resultat = BehandlingResultat.INNVILGET,
+                                         årsak = BehandlingÅrsak.SØKNAD)
 
         behandlingRepository.insert(behandlingInaktiv)
         behandlingRepository.insert(behandlingAktiv)

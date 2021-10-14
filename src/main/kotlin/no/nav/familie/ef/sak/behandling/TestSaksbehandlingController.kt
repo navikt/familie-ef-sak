@@ -160,7 +160,7 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
     private fun lagBlankettBehandling(fagsak: Fagsak, fnr: String, søknad: SøknadOvergangsstønad): Behandling {
         val journalpostId = arkiver(fnr)
         val journalpost = journalpostClient.hentJournalpost(journalpostId)
-        val behandling = behandlingService.opprettBehandling(BehandlingType.BLANKETT, fagsak.id, søknad, journalpost)
+        val behandling = behandlingService.opprettBehandlingForBlankett(BehandlingType.BLANKETT, fagsak.id, søknad, journalpost)
         return behandling
     }
 }

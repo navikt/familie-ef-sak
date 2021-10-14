@@ -8,25 +8,26 @@ import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.journalføring.dto.JournalføringBehandling
-import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequest
-import no.nav.familie.ef.sak.journalføring.JournalpostClient
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
-import no.nav.familie.ef.sak.iverksett.IverksettService
-import no.nav.familie.ef.sak.repository.fagsak
-import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
+import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
-import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
+import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
+import no.nav.familie.ef.sak.iverksett.IverksettService
 import no.nav.familie.ef.sak.journalføring.JournalføringService
+import no.nav.familie.ef.sak.journalføring.JournalpostClient
+import no.nav.familie.ef.sak.journalføring.dto.JournalføringBehandling
+import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequest
 import no.nav.familie.ef.sak.oppgave.OppgaveService
-import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.Fagsystem
@@ -112,15 +113,17 @@ internal class JournalføringServiceTest {
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     status = BehandlingStatus.UTREDES,
                                     steg = StegType.VILKÅR,
-                                    resultat = BehandlingResultat.IKKE_SATT))
+                                    resultat = BehandlingResultat.IKKE_SATT,
+                                    årsak = BehandlingÅrsak.SØKNAD))
 
-        every { behandlingService.opprettBehandling(any(), any()) }
+        every { behandlingService.opprettBehandling(any(), any(), behandlingsårsak = any()) }
                 .returns(Behandling(id = behandlingId,
                                     fagsakId = fagsakId,
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     status = BehandlingStatus.UTREDES,
                                     steg = StegType.VILKÅR,
-                                    resultat = BehandlingResultat.IKKE_SATT))
+                                    resultat = BehandlingResultat.IKKE_SATT,
+                                    årsak = BehandlingÅrsak.SØKNAD))
 
         every { oppgaveService.ferdigstillOppgave(any()) } just runs
         every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) } returns nyOppgaveId
