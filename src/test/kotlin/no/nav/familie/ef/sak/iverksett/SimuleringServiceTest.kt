@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.iverksett
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -16,18 +17,19 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.repository.tilkjentYtelse
-import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.simulering.BlankettSimuleringsService
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.simulering.Simuleringsresultat
 import no.nav.familie.ef.sak.simulering.SimuleringsresultatRepository
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.vedtak.AktivitetType
+import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
-import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
-import no.nav.familie.ef.sak.vedtak.VedtaksperiodeType
 import no.nav.familie.kontrakter.ef.iverksett.SimuleringDto
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -35,7 +37,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.data.repository.findByIdOrNull
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.YearMonth
+import java.util.UUID
 
 internal class SimuleringServiceTest {
 
@@ -169,4 +173,34 @@ internal class SimuleringServiceTest {
         val simuleringsresultatDto = simuleringService.simuler(behandling.id)
         assertThat(simuleringsresultatDto).isNotNull
     }
+
+    @Test
+    internal fun `skal berike simlueringsresultat`() {
+        val forrigeBehandlingId = behandling(fagsak).id
+        val behandling = behandling(fagsak = fagsak,
+                                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                                    forrigeBehandlingId = forrigeBehandlingId)
+
+        val tilkjentYtelse = tilkjentYtelse(behandlingId = behandling.id, personIdent = personIdent)
+
+        every { iverksettClient.simuler(any()) } returns
+                objectMapper.readValue(readFile("simuleringsresultat.json"))
+
+        every { behandlingService.hentBehandling(any()) } returns behandling
+        every { tilkjentYtelseService.hentForBehandling(any()) } returns tilkjentYtelse
+        every { simuleringsresultatRepository.deleteById(any()) } just Runs
+
+        val simulerSlot = slot<Simuleringsresultat>()
+        every { simuleringsresultatRepository.insert(capture(simulerSlot)) } answers { firstArg()}
+
+        simuleringService.simuler(behandling.id)
+
+        assertThat(simulerSlot.captured.beriketData?.oppsummering?.fom)
+                .isEqualTo(LocalDate.of(2021,2,1))
+    }
+
+    private fun readFile(filnavn: String): String {
+        return this::class.java.getResource("/json/$filnavn").readText()
+    }
+    
 }

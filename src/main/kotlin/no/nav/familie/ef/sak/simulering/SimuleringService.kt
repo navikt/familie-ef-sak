@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.kontrakter.ef.iverksett.SimuleringDto
+import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -47,9 +48,12 @@ class SimuleringService(private val iverksettClient: IverksettClient,
     fun hentOgLagreSimuleringsresultat(behandling: Behandling): Simuleringsresultat {
         val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
         simuleringsresultatRepository.deleteById(behandling.id)
+        val detaljertSimuleringResultat = simulerMedTilkjentYtelse(behandling, fagsak)
+        val simuleringsoppsummering = tilSimuleringsresultatDto(detaljertSimuleringResultat, LocalDate.now()).tilSimuleringsperiode()
         return simuleringsresultatRepository.insert(Simuleringsresultat(
                 behandlingId = behandling.id,
-                data = simulerMedTilkjentYtelse(behandling, fagsak)
+                data = detaljertSimuleringResultat,
+                beriketData = BeriketSimuleringsresultat(detaljertSimuleringResultat, simuleringsoppsummering)
         ))
     }
 

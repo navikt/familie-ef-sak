@@ -30,9 +30,9 @@ class PersonopplysningerIntegrasjonerClient(@Qualifier("azure") restOperations: 
     override val pingUri: URI = integrasjonerConfig.pingUri
 
     fun sjekkTilgangTilPerson(personIdent: String): Tilgang {
-        return postForEntity(integrasjonerConfig.tilgangPersonUri, listOf(personIdent), HttpHeaders().also {
+        return postForEntity<List<Tilgang>>(integrasjonerConfig.tilgangPersonUri, listOf(personIdent), HttpHeaders().also {
             it.set(HEADER_NAV_TEMA, HEADER_NAV_TEMA_ENF)
-        })
+        }).single()
     }
 
     fun sjekkTilgangTilPersonMedRelasjoner(personIdent: String): Tilgang {

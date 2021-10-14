@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.vedtak.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.PeriodeWrapper
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
+import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import no.nav.familie.prosessering.PropertiesWrapperTilStringConverter
 import no.nav.familie.prosessering.StringTilPropertiesWrapperConverter
@@ -106,7 +107,9 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
                                             PGobjectTilGrunnlagsdata(),
                                             InntektsperiodeTilPGobjectConverter(),
                                             PGobjectTilDetaljertSimuleringResultat(),
-                                            DetaljertSimuleringResultatTilPGobjectConverter()
+                                            DetaljertSimuleringResultatTilPGobjectConverter(),
+                                            PGobjectTilBeriketSimuleringsresultat(),
+                                            BeriketSimuleringsresultatTilPGobjectConverter()
         ))
     }
 
@@ -320,6 +323,24 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
                 PGobject().apply {
                     type = "json"
                     value = objectMapper.writeValueAsString(simuleringsresultat.simuleringMottaker)
+                }
+    }
+
+    @ReadingConverter
+    class PGobjectTilBeriketSimuleringsresultat : Converter<PGobject, BeriketSimuleringsresultat?> {
+
+        override fun convert(pGobject: PGobject): BeriketSimuleringsresultat? {
+            return pGobject.value?.let { objectMapper.readValue(it) }
+        }
+    }
+
+    @WritingConverter
+    class BeriketSimuleringsresultatTilPGobjectConverter : Converter<BeriketSimuleringsresultat, PGobject> {
+
+        override fun convert(simuleringsresultat: BeriketSimuleringsresultat): PGobject =
+                PGobject().apply {
+                    type = "json"
+                    value = objectMapper.writeValueAsString(simuleringsresultat)
                 }
     }
 }

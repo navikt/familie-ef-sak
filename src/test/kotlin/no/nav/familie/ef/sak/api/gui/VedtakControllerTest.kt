@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.api.gui
 
-import com.nimbusds.jwt.JWTClaimsSet
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.api.gui.VedtakControllerTest.Saksbehandler.BESLUTTER
 import no.nav.familie.ef.sak.api.gui.VedtakControllerTest.Saksbehandler.BESLUTTER_2
@@ -30,8 +29,6 @@ import no.nav.familie.ef.sak.vedtak.dto.TotrinnskontrollStatusDto
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.security.token.support.test.JwkGenerator
-import no.nav.security.token.support.test.JwtTokenGenerator
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -273,14 +270,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
     private fun token(saksbehandler: Saksbehandler): String {
         val rolle = if (saksbehandler.beslutter) rolleConfig.beslutterRolle else rolleConfig.saksbehandlerRolle
-        var claimsSet = JwtTokenGenerator.createSignedJWT("subject").jwtClaimsSet
-        claimsSet = JWTClaimsSet.Builder(claimsSet)
-                .claim("NAVident", saksbehandler.name)
-                .claim("groups", listOf(rolle))
-                .claim("name", saksbehandler.name)
-                .build()
-        val createSignedJWT = JwtTokenGenerator.createSignedJWT(JwkGenerator.getDefaultRSAKey(), claimsSet)
-        return createSignedJWT.serialize()
+        return onBehalfOfToken(role = rolle, saksbehandler = saksbehandler.name)
     }
 
     private fun lagSaksbehandlerBrev() {
