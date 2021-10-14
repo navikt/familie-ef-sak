@@ -7,7 +7,7 @@ import java.math.RoundingMode
 class BeregningUtils {
     companion object {
 
-        val REDUKSJONSFAKTOR = BigDecimal(0.45)
+        private val REDUKSJONSFAKTOR = BigDecimal(0.45)
 
         fun beregnStønadForInntekt(inntektsperiode: Inntektsperiode): List<Beløpsperiode> {
             val (startDato, sluttDato, inntekt, samordningsfradrag) = inntektsperiode
@@ -38,14 +38,14 @@ class BeregningUtils {
         }
 
 
-        fun beregnAvkortning(grunnbeløp: BigDecimal, inntekt: BigDecimal): BigDecimal {
+        private fun beregnAvkortning(grunnbeløp: BigDecimal, inntekt: BigDecimal): BigDecimal {
             val inntektOverHalveGrunnbeløp = inntekt.subtract(grunnbeløp.multiply(BigDecimal(0.5)))
             return if (inntektOverHalveGrunnbeløp > BigDecimal.ZERO)
                 inntektOverHalveGrunnbeløp.multiply(REDUKSJONSFAKTOR).setScale(5, RoundingMode.HALF_DOWN) else BigDecimal.ZERO
         }
 
         fun finnStartDatoOgSluttDatoForBeløpsperiode(beløpForInnteksperioder: List<Beløpsperiode>,
-                                                             vedtaksperiode: Periode): List<Beløpsperiode> {
+                                                     vedtaksperiode: Periode): List<Beløpsperiode> {
             return beløpForInnteksperioder.mapNotNull {
                 when {
                     it.periode.omsluttesAv(vedtaksperiode) -> {

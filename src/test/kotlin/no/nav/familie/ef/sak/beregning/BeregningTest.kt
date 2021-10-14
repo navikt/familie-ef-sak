@@ -32,9 +32,10 @@ internal class BeregningTest {
         )
         return testData
                 .map { (periode, fasit) ->
-                    dynamicTest("skal finne grunnbeløp for perioden=[${periode.first}-${periode.second}] med forventet svar: $fasit") {
+                    dynamicTest("skal finne grunnbeløp for perioden=[${periode.first}-${periode.second}] " +
+                                "med forventet svar: $fasit") {
                         assertThat(finnGrunnbeløpsPerioder(LocalDate.parse(periode.first),
-                                                                      LocalDate.parse(periode.second)))
+                                                           LocalDate.parse(periode.second)))
                                 .isEqualTo(fasit.map {
                                     Beløpsperiode(Periode(LocalDate.parse(it.first),
                                                           LocalDate.parse(it.second)),

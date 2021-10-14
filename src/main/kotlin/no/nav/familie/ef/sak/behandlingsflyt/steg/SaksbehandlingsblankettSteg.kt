@@ -1,8 +1,8 @@
 package no.nav.familie.ef.sak.behandlingsflyt.steg
 
-import no.nav.familie.ef.sak.blankett.BlankettService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillBehandlingTask
+import no.nav.familie.ef.sak.blankett.BlankettService
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
 

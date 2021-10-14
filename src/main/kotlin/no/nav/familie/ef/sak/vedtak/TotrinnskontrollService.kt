@@ -32,7 +32,8 @@ class TotrinnskontrollService(private val behandlingshistorikkService: Behandlin
                               private val tilgangService: TilgangService) {
 
     /**
-     * Lagrer data om besluttning av totrinnskontroll og returnerer navIdent til saksbehandleren som sendte behandling til beslutter
+     * Lagrer data om besluttning av totrinnskontroll
+     * og returnerer navIdent til saksbehandleren som sendte behandling til beslutter
      */
     @Transactional
     fun lagreTotrinnskontrollOgReturnerBehandler(behandling: Behandling, beslutteVedtak: BeslutteVedtakDto): String {
@@ -121,7 +122,8 @@ class TotrinnskontrollService(private val behandlingshistorikkService: Behandlin
                                                               beslutt.godkjent,
                                                               beslutt.begrunnelse))
             }
-            else -> error("Skal ikke kunne være annen status enn UNDERKJENT når behandligStatus!=${BehandlingStatus.FATTER_VEDTAK}")
+            else -> error("Skal ikke kunne være annen status enn UNDERKJENT når " +
+                          "behandligStatus!=${BehandlingStatus.FATTER_VEDTAK}")
         }
     }
 

@@ -223,10 +223,10 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
     private fun hentTotrinnskontrollStatus(saksbehandler: Saksbehandler): TotrinnskontrollStatusDto {
         headers.setBearerAuth(token(saksbehandler))
-        val response =
-                restTemplate.exchange<Ressurs<TotrinnskontrollStatusDto>>(localhost("/api/vedtak/${behandling.id}/totrinnskontroll"),
-                                                                          HttpMethod.GET,
-                                                                          HttpEntity<Any>(headers))
+        val response = restTemplate
+                .exchange<Ressurs<TotrinnskontrollStatusDto>>(localhost("/api/vedtak/${behandling.id}/totrinnskontroll"),
+                                                              HttpMethod.GET,
+                                                              HttpEntity<Any>(headers))
         responseOK<TotrinnskontrollStatusDto>().invoke(response)
         return response.body.data!!
     }

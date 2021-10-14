@@ -1,13 +1,10 @@
 package no.nav.familie.ef.sak.simulering
 
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.simulering.SimuleringsposteringTestUtil.lagPosteringer
-import no.nav.familie.kontrakter.felles.simulering.BetalingType
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
-import no.nav.familie.kontrakter.felles.simulering.FagOmrådeKode
 import no.nav.familie.kontrakter.felles.simulering.MottakerType
 import no.nav.familie.kontrakter.felles.simulering.PosteringType
 import no.nav.familie.kontrakter.felles.simulering.SimuleringMottaker
-import no.nav.familie.kontrakter.felles.simulering.SimulertPostering
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
@@ -66,7 +63,8 @@ internal class SimuleringUtilTest {
         assertThat(simuleringsresultatDto.etterbetaling).isEqualTo(beløp.multiply(antallMånederEtterStart.toBigDecimal()))
         assertThat(simuleringsresultatDto.feilutbetaling).isZero
         assertThat(simuleringsresultatDto.fom).isEqualTo(fraDato)
-        assertThat(simuleringsresultatDto.forfallsdatoNestePeriode).isEqualTo(tidSimuleringHentet.with(TemporalAdjusters.lastDayOfMonth()))
+        assertThat(simuleringsresultatDto.forfallsdatoNestePeriode)
+                .isEqualTo(tidSimuleringHentet.with(TemporalAdjusters.lastDayOfMonth()))
     }
 
 
@@ -114,8 +112,7 @@ internal class SimuleringUtilTest {
         assertThat(posteringerGruppert).hasSize(antallMåneder + 1)
         assertThat(posteringerGruppert.sumOf { it.feilutbetaling }).isEqualTo(totaltFeilutbetaltBeløp)
         assertThat(posteringerGruppert.sumOf { it.nyttBeløp }).isEqualTo(nyttBeløp.plus(beløp.multiply(BigDecimal(antallMåneder))
-                                                                                                .minus(
-                                                                                                        totaltFeilutbetaltBeløp)))
+                                                                                                .minus(totaltFeilutbetaltBeløp)))
         assertThat(posteringerGruppert.sumOf { it.resultat }).isEqualTo(nyttBeløp.plus(
                 beløp.multiply(BigDecimal(antallMåneder - antallMånederFeilutbetalt)).minus(totaltFeilutbetaltBeløp))
         )
@@ -123,10 +120,12 @@ internal class SimuleringUtilTest {
         assertThat(posteringerGruppert.last().nyttBeløp).isEqualTo(nyttBeløp)
         assertThat(posteringerGruppert.first().fom).isEqualTo(fraDato)
         assertThat(posteringerGruppert.last().fom).isEqualTo(fraDato.plusMonths(antallMåneder.toLong()))
-        assertThat(simuleringsresultatDto.etterbetaling).isEqualTo(beløp.multiply(BigDecimal(antallMånederEtterStart - antallMånederFeilutbetalt)))
+        assertThat(simuleringsresultatDto.etterbetaling)
+                .isEqualTo(beløp.multiply(BigDecimal(antallMånederEtterStart - antallMånederFeilutbetalt)))
         assertThat(simuleringsresultatDto.feilutbetaling).isEqualTo(totaltFeilutbetaltBeløp)
         assertThat(simuleringsresultatDto.fom).isEqualTo(fraDato)
-        assertThat(simuleringsresultatDto.forfallsdatoNestePeriode).isEqualTo(tidSimuleringHentet.with(TemporalAdjusters.lastDayOfMonth()))
+        assertThat(simuleringsresultatDto.forfallsdatoNestePeriode)
+                .isEqualTo(tidSimuleringHentet.with(TemporalAdjusters.lastDayOfMonth()))
     }
 
 }

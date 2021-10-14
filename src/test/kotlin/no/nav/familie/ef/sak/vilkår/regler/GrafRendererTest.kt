@@ -21,7 +21,7 @@ internal class GrafRendererTest {
         val vilkårsregler = Vilkårsregler.VILKÅRSREGLER.vilkårsregler.filter { it.key != VilkårType.SIVILSTAND }.map {
             val regler = it.value.regler
             mapOf("name" to it.key,
-                  "children" to it.value.hovedregler.map { mapSpørsmål(regler, it) })
+                  "children" to it.value.hovedregler.map { regelId -> mapSpørsmål(regler, regelId) })
         }
         println(objectMapper.writeValueAsString(mapOf("name" to "vilkår",
                                                       "children" to vilkårsregler.toList())))
@@ -44,8 +44,9 @@ internal class GrafRendererTest {
         val regel = SivilstandRegel()
         val sivilstandregler = SivilstandData.values().map {
             val initereDelvilkårsvurdering = regel.initereDelvilkårsvurdering(HovedregelMetadata(it.søknad, it.sivilstandstype))
-            val hovedregler = initereDelvilkårsvurdering.filter { it.resultat != Vilkårsresultat.IKKE_AKTUELL }
-                    .map { delvilkår -> mapSpørsmål(regel.regler, delvilkår.hovedregel) }
+            val hovedregler = initereDelvilkårsvurdering.filter { delvilkårsvurdering ->
+                delvilkårsvurdering.resultat != Vilkårsresultat.IKKE_AKTUELL
+            }.map { delvilkår -> mapSpørsmål(regel.regler, delvilkår.hovedregel) }
 
             mapOf("name" to it.name,
                   "children" to hovedregler)
@@ -71,7 +72,7 @@ internal class GrafRendererTest {
         val type = "svar"
     }
 
-    fun mapSvar(regler: Map<RegelId, RegelSteg>, svarMapping: Map<SvarId, SvarRegel>): List<Svar> {
+    private fun mapSvar(regler: Map<RegelId, RegelSteg>, svarMapping: Map<SvarId, SvarRegel>): List<Svar> {
         return svarMapping.map {
             try {
                 val value = it.value
@@ -86,7 +87,7 @@ internal class GrafRendererTest {
         }
     }
 
-    fun mapSpørsmål(regler: Map<RegelId, RegelSteg>, regelId: RegelId): Spørsmål {
+    private fun mapSpørsmål(regler: Map<RegelId, RegelSteg>, regelId: RegelId): Spørsmål {
         val svarMapping = regler[regelId]!!.svarMapping
         return Spørsmål(regelId, mapSvar(regler, svarMapping))
     }

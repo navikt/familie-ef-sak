@@ -3,9 +3,14 @@ package no.nav.familie.ef.sak.service
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.infrastruktur.config.KodeverkServiceMock
+import no.nav.familie.ef.sak.fagsak.FagsakRepository
+import no.nav.familie.ef.sak.fagsak.SøkService
 import no.nav.familie.ef.sak.fagsak.dto.PersonFraSøk
 import no.nav.familie.ef.sak.fagsak.dto.SøkeresultatPerson
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlSaksbehandlerClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Folkeregisteridentifikator
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
@@ -15,12 +20,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PersonSøkResul
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PersonSøkTreff
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.UkjentBosted
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Vegadresse
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseMapper
-import no.nav.familie.ef.sak.config.KodeverkServiceMock
 import no.nav.familie.ef.sak.testutil.pdlSøker
-import no.nav.familie.ef.sak.fagsak.FagsakRepository
-import no.nav.familie.ef.sak.fagsak.SøkService
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

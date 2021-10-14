@@ -5,28 +5,29 @@ import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
-import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.beregning.tilInntekt
 import no.nav.familie.ef.sak.beregning.tilInntektsperioder
-import no.nav.familie.ef.sak.vedtak.InntektWrapper
-import no.nav.familie.ef.sak.vedtak.PeriodeWrapper
-import no.nav.familie.ef.sak.vedtak.Vedtak
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
+import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
+import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.kontrakter.ef.felles.Vedtaksresultat
 import no.nav.familie.kontrakter.felles.annotasjoner.Improvement
 import org.springframework.http.HttpStatus
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 @Improvement("Bytt til Innvilget, Avslått og Henlagt")
 enum class ResultatType {
+
     INNVILGE,
     AVSLÅ,
     HENLEGGE,
     OPPHØRT,
 }
 
-fun ResultatType.tilVedtaksresultat(): Vedtaksresultat = when(this) {
+fun ResultatType.tilVedtaksresultat(): Vedtaksresultat = when (this) {
     ResultatType.INNVILGE -> Vedtaksresultat.INNVILGET // TODO: Når skal vi ha delvis innvilget og opphørt
     ResultatType.HENLEGGE -> error("Vedtaksresultat kan ikke være henlegge")
     ResultatType.AVSLÅ -> Vedtaksresultat.AVSLÅTT
@@ -43,6 +44,7 @@ class Innvilget(val resultatType: ResultatType = ResultatType.INNVILGE,
 
 class Avslå(val resultatType: ResultatType = ResultatType.AVSLÅ,
             val avslåBegrunnelse: String?) : VedtakDto()
+
 class Opphør(val resultatType: ResultatType = ResultatType.OPPHØRT,
              val opphørFom: YearMonth,
              val begrunnelse: String?) : VedtakDto()
@@ -63,29 +65,31 @@ fun VedtakDto.tilVedtak(behandlingId: UUID): Vedtak = when (this) {
                         resultatType = ResultatType.OPPHØRT,
                         opphørFom = opphørFom.atDay(1)
     )
-    is Henlegge -> throw Feil("Kan ikke sette vedtak $this då det har feil type", "Kan ikke sette vedtak $this då det har feil type", HttpStatus.BAD_REQUEST)
+    is Henlegge -> throw Feil("Kan ikke sette vedtak $this då det har feil type",
+                              "Kan ikke sette vedtak $this då det har feil type",
+                              HttpStatus.BAD_REQUEST)
 }
 
 fun Vedtak.tilVedtakDto(): VedtakDto =
-    when (this.resultatType) {
-        ResultatType.INNVILGE -> Innvilget(
-                resultatType = this.resultatType,
-                periodeBegrunnelse = this.periodeBegrunnelse,
-                inntektBegrunnelse = this.inntektBegrunnelse,
-                perioder = (this.perioder ?: PeriodeWrapper(emptyList())).perioder.fraDomene(),
-                inntekter = (this.inntekter ?: InntektWrapper(emptyList())).inntekter.tilInntekt())
-        ResultatType.AVSLÅ -> Avslå(
-                resultatType = this.resultatType,
-                avslåBegrunnelse = this.avslåBegrunnelse
-        )
-        ResultatType.OPPHØRT -> Opphør(
-                resultatType = this.resultatType,
-                begrunnelse = this.avslåBegrunnelse,
-                opphørFom = YearMonth.from(this.opphørFom)
-        )
-        else -> throw Feil("Kan ikke sette vedtaksresultat som $this - ikke implementert")
+        when (this.resultatType) {
+            ResultatType.INNVILGE -> Innvilget(
+                    resultatType = this.resultatType,
+                    periodeBegrunnelse = this.periodeBegrunnelse,
+                    inntektBegrunnelse = this.inntektBegrunnelse,
+                    perioder = (this.perioder ?: PeriodeWrapper(emptyList())).perioder.fraDomene(),
+                    inntekter = (this.inntekter ?: InntektWrapper(emptyList())).inntekter.tilInntekt())
+            ResultatType.AVSLÅ -> Avslå(
+                    resultatType = this.resultatType,
+                    avslåBegrunnelse = this.avslåBegrunnelse
+            )
+            ResultatType.OPPHØRT -> Opphør(
+                    resultatType = this.resultatType,
+                    begrunnelse = this.avslåBegrunnelse,
+                    opphørFom = YearMonth.from(this.opphørFom)
+            )
+            else -> throw Feil("Kan ikke sette vedtaksresultat som $this - ikke implementert")
 
-}
+        }
 
 
 private class VedtakDtoDeserializer : StdDeserializer<VedtakDto>(VedtakDto::class.java) {

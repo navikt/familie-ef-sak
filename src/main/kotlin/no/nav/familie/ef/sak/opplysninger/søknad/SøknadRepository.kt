@@ -1,13 +1,13 @@
 package no.nav.familie.ef.sak.opplysninger.søknad
 
 
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknad
 import no.nav.familie.ef.sak.repository.InsertUpdateRepository
 import no.nav.familie.ef.sak.repository.RepositoryInterface
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknad
 import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.stereotype.Repository
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 @Repository
 interface SøknadRepository : RepositoryInterface<Søknad, UUID>, InsertUpdateRepository<Søknad> {

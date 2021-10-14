@@ -1,27 +1,27 @@
-package no.nav.familie.ef.sak.service.steg
+package no.nav.familie.ef.sak.behandlingsflyt.steg
 
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
-import no.nav.familie.ef.sak.blankett.Blankett
-import no.nav.familie.ef.sak.blankett.BlankettRepository
-import no.nav.familie.ef.sak.blankett.BlankettSteg
-import no.nav.familie.ef.sak.journalføring.JournalpostClient
+import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.domain.Behandlingsjournalpost
+import no.nav.familie.ef.sak.blankett.Blankett
+import no.nav.familie.ef.sak.blankett.BlankettRepository
+import no.nav.familie.ef.sak.blankett.BlankettSteg
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
-import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
+import no.nav.familie.ef.sak.felles.domain.Fil
+import no.nav.familie.ef.sak.journalføring.JournalpostClient
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
-import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
-import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.vedtak.TotrinnskontrollService
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.felles.BrukerIdType
@@ -63,7 +63,7 @@ class JournalførBlankettStegTest {
 
     private lateinit var taskSlot: MutableList<Task>
 
-    val fnr = "12345678901"
+    private val fnr = "12345678901"
     val fagsak = Fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD,
                         søkerIdenter = setOf(FagsakPerson(ident = fnr)))
 
@@ -82,7 +82,7 @@ class JournalførBlankettStegTest {
                         listOf(DokumentInfo(dokumentInfoId = "12345",
                                             tittel = "Tittel",
                                             brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
-                                            dokumentvarianter = listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV))))
+                                            dokumentvarianter = listOf(Dokumentvariant(Dokumentvariantformat.ARKIV))))
             )
 
     private val behandling = Behandling(fagsakId = fagsak.id,

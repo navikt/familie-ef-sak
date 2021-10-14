@@ -1,12 +1,12 @@
 package no.nav.familie.ef.sak.oppgave
 
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
-import no.nav.familie.ef.sak.oppgave.dto.OppgaveEfDto
-import no.nav.familie.ef.sak.oppgave.dto.OppgaveResponseDto
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.oppgave.dto.FinnOppgaveRequestDto
 import no.nav.familie.ef.sak.oppgave.dto.OppgaveDto
+import no.nav.familie.ef.sak.oppgave.dto.OppgaveEfDto
+import no.nav.familie.ef.sak.oppgave.dto.OppgaveResponseDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
@@ -15,7 +15,13 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/oppgave")
@@ -45,7 +51,7 @@ class OppgaveController(private val oppgaveService: OppgaveService,
                       @RequestParam("saksbehandler") saksbehandler: String): Ressurs<Long> {
         tilgangService.validerHarSaksbehandlerrolle()
         if (!tilgangService.validerSaksbehandler(saksbehandler)) {
-            throw ApiFeil("Kunne ikke validere saksbehandler : ${saksbehandler}", HttpStatus.BAD_REQUEST)
+            throw ApiFeil("Kunne ikke validere saksbehandler : $saksbehandler", HttpStatus.BAD_REQUEST)
         }
         return Ressurs.success(oppgaveService.fordelOppgave(gsakOppgaveId, saksbehandler))
     }

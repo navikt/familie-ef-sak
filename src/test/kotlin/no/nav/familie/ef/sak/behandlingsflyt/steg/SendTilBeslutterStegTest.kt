@@ -48,7 +48,12 @@ internal class SendTilBeslutterStegTest {
 
 
     private val beslutteVedtakSteg =
-            SendTilBeslutterSteg(taskRepository, oppgaveService, fagsakService, behandlingService, vedtaksbrevRepository, vedtakService)
+            SendTilBeslutterSteg(taskRepository,
+                                 oppgaveService,
+                                 fagsakService,
+                                 behandlingService,
+                                 vedtaksbrevRepository,
+                                 vedtakService)
     private val fagsak = Fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD,
                                 søkerIdenter = setOf(FagsakPerson(ident = "12345678901")))
     private val vedtaksbrev = Vedtaksbrev(behandlingId = UUID.randomUUID(),
@@ -96,11 +101,12 @@ internal class SendTilBeslutterStegTest {
 
 
     private fun utførOgVerifiserKall(oppgavetype: Oppgavetype) {
-        every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype, any()) } returns Oppgave(id = UUID.randomUUID(),
-                                                                                                     behandlingId = behandling.id,
-                                                                                                     gsakOppgaveId = 123L,
-                                                                                                     type = Oppgavetype.BehandleSak,
-                                                                                                     erFerdigstilt = false)
+        every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype, any()) }
+                .returns(Oppgave(id = UUID.randomUUID(),
+                                 behandlingId = behandling.id,
+                                 gsakOppgaveId = 123L,
+                                 type = Oppgavetype.BehandleSak,
+                                 erFerdigstilt = false))
 
         every { vedtakService.oppdaterSaksbehandler(any(), any()) } just Runs
         mockBrukerContext("saksbehandlernavn")

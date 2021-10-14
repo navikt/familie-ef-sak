@@ -1,9 +1,9 @@
 package no.nav.familie.ef.sak.behandlingsflyt.steg
 
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.behandling.BehandlingService
 import org.springframework.stereotype.Service
 
 @Service

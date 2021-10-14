@@ -38,7 +38,7 @@ internal class TilgangServiceTest {
     private val mocketPersonIdent = "12345"
 
     private val fagsak = fagsak(fagsakpersoner(setOf(mocketPersonIdent)))
-    private  val behandling: Behandling = behandling(fagsak)
+    private val behandling: Behandling = behandling(fagsak)
     private val olaIdent = "4567"
     private val kariIdent = "98765"
 

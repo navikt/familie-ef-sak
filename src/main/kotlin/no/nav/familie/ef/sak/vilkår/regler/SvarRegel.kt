@@ -33,9 +33,9 @@ interface SvarRegel {
  * @param resultat trengs ikke for frontend, men for validering i backend
  * [regelId] er [RegelId.SLUTT_NODE] som betyr att den ikke har noen flere spørsmål for svaret
  */
-data class SluttSvarRegel private constructor(@JsonIgnore
-                                              val resultat: Resultat,
-                                              override val begrunnelseType: BegrunnelseType = BegrunnelseType.UTEN) : SvarRegel {
+class SluttSvarRegel private constructor(@JsonIgnore
+                                         val resultat: Resultat,
+                                         override val begrunnelseType: BegrunnelseType = BegrunnelseType.UTEN) : SvarRegel {
 
     override val regelId: RegelId = RegelId.SLUTT_NODE
 

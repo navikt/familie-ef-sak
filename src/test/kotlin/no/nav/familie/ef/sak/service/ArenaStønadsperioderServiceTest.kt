@@ -19,7 +19,6 @@ import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdArenaPeriode
-import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPerioderArenaRequest
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPerioderArenaResponse
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
@@ -103,8 +102,9 @@ internal class ArenaStønadsperioderServiceTest {
         every { behandlingService.finnSisteIverksatteBehandling(fagsakOvergangsstønad.id) } returns behandlingOvergangsstønad
         every { behandlingService.finnSisteIverksatteBehandling(fagsakBarnetilsyn.id) } returns behandlingBarnetilsyn
 
-        every { personopplysningerIntergasjonerClient.hentInfotrygdPerioder(any()) } returns PerioderOvergangsstønadResponse(listOf(
-                PeriodeOvergangsstønad(ident, parse("2021-01-01"), parse("2021-01-31"), Datakilde.INFOTRYGD)))
+        every { personopplysningerIntergasjonerClient.hentInfotrygdPerioder(any()) } returns PerioderOvergangsstønadResponse(
+                listOf(
+                        PeriodeOvergangsstønad(ident, parse("2021-01-01"), parse("2021-01-31"), Datakilde.INFOTRYGD)))
         every { tilkjentYtelseService.hentForBehandling(behandlingOvergangsstønad.id) } returns
                 lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(1, parse("2021-01-01"), parse("2021-01-31"), ident)))
         every { tilkjentYtelseService.hentForBehandling(behandlingBarnetilsyn.id) } returns

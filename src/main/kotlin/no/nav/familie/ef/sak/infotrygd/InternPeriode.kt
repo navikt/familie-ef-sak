@@ -19,7 +19,7 @@ data class InternPeriode(
         val datakilde: PeriodeOvergangsstønad.Datakilde
 ) {
 
-    fun erDatoInnenforPeriode(dato: LocalDate): Boolean {
+    private fun erDatoInnenforPeriode(dato: LocalDate): Boolean {
         return dato.isEqualOrBefore(stønadTom) && dato.isEqualOrAfter(stønadFom)
     }
 

@@ -1,9 +1,9 @@
 package no.nav.familie.ef.sak.behandlingsflyt.steg
 
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.PubliserVedtakshendelseTask
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -22,13 +22,14 @@ class FerdigstillBehandlingSteg(private val behandlingService: BehandlingService
         logger.info("Ferdigstiller behandling [${behandling.id}]")
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.FERDIGSTILT)
 
-        if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING || behandling.type == BehandlingType.REVURDERING) {
-            taskRepository.save(PubliserVedtakshendelseTask.opprettTask(behandling.id))
-            taskRepository.save(BehandlingsstatistikkTask.opprettFerdigTask(behandlingId = behandling.id))
-        } else if (behandling.type == BehandlingType.BLANKETT || behandling.type == BehandlingType.TEKNISK_OPPHØR) {
-            //ignore
-        } else {
-            error("Har ikke lagt inn håndtering av type=${behandling.type} i ferdigstilling")
+        when (behandling.type) {
+            BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingType.REVURDERING -> {
+                taskRepository.save(PubliserVedtakshendelseTask.opprettTask(behandling.id))
+                taskRepository.save(BehandlingsstatistikkTask.opprettFerdigTask(behandlingId = behandling.id))
+            }
+            BehandlingType.BLANKETT, BehandlingType.TEKNISK_OPPHØR -> {
+                //ignore
+            }
         }
     }
 

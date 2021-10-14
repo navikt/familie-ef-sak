@@ -10,16 +10,16 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType.FØRSTEGANGSBEHANDLING
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.iverksett.IverksettClient
-import no.nav.familie.ef.sak.repository.behandling
-import no.nav.familie.ef.sak.repository.fagsak
-import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
-import no.nav.familie.ef.sak.vedtak.dto.ResultatType
-import no.nav.familie.ef.sak.vedtak.Vedtak
+import no.nav.familie.ef.sak.repository.behandling
+import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.repository.fagsakpersoner
+import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.VedtakRepository
+import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.kontrakter.ef.felles.BehandlingType
 import no.nav.familie.kontrakter.ef.felles.StønadType
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingsstatistikkDto
@@ -46,7 +46,7 @@ internal class BehandlingsstatistikkTaskTest {
     internal fun `skal sende behandlingsstatistikk`() {
 
         val personIdent = "123456789012"
-        val fagsak = fagsak(identer = fagsakpersoner(setOf(personIdent)) )
+        val fagsak = fagsak(identer = fagsakpersoner(setOf(personIdent)))
         val behandling = behandling(fagsak, resultat = BehandlingResultat.INNVILGET, type = FØRSTEGANGSBEHANDLING)
         val hendelse = Hendelse.BESLUTTET
         val hendelseTidspunkt = ZonedDateTime.now()
@@ -68,7 +68,7 @@ internal class BehandlingsstatistikkTaskTest {
         )
 
 
-        val behandlingsstatistikkSlot = slot<BehandlingsstatistikkDto>();
+        val behandlingsstatistikkSlot = slot<BehandlingsstatistikkDto>()
 
         val oppgaveMock = mockk<Oppgave>()
         val grunnlagsdataMock = mockk<GrunnlagsdataMedMetadata>()
@@ -85,8 +85,8 @@ internal class BehandlingsstatistikkTaskTest {
         every { fagsakService.hentFagsak(fagsak.id) } returns fagsak
         every { oppgaveService.hentOppgave(oppgaveId) } returns oppgaveMock
         every { søknadService.finnDatoMottattForSøknad(any()) } returns søknadstidspunkt.toLocalDateTime()
-        every { grunnlagsdataService.hentGrunnlagsdata(behandling.id)} returns grunnlagsdataMock
-        every { vedtakRepository.findByIdOrNull(behandling.id) } returns Vedtak(behandlingId =behandling.id,
+        every { grunnlagsdataService.hentGrunnlagsdata(behandling.id) } returns grunnlagsdataMock
+        every { vedtakRepository.findByIdOrNull(behandling.id) } returns Vedtak(behandlingId = behandling.id,
                                                                                 resultatType = ResultatType.INNVILGE,
                                                                                 periodeBegrunnelse = periodeBegrunnelse,
                                                                                 inntektBegrunnelse = inntektBegrunnelse,
@@ -108,7 +108,7 @@ internal class BehandlingsstatistikkTaskTest {
         val task = Task(type = "behandlingsstatistikkTask",
                         payload = objectMapper.writeValueAsString(payload))
 
-        behandlingsstatistikkTask.doTask(task);
+        behandlingsstatistikkTask.doTask(task)
 
         val behandlingsstatistikk = behandlingsstatistikkSlot.captured
         assertThat(behandlingsstatistikk.behandlingId).isEqualTo(behandling.id)

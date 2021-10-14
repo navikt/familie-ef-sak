@@ -161,7 +161,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `finnSisteIverksatteBehandling skal finne id til siste behandling som er ferdigstilt, ikke annulert eller blankett`() {
+    internal fun `finnSisteIverksatteBehandling skal finne id til siste ferdigstilte behandling, ikke annulert eller blankett`() {
         val førstegangsbehandling = BehandlingOppsettUtil.iverksattFørstegangsbehandling
         val fagsak = fagsakRepository.insert(fagsak(setOf(FagsakPerson("1"))).copy(id = førstegangsbehandling.fagsakId))
 

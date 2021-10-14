@@ -1,9 +1,9 @@
 package no.nav.familie.ef.sak.beregning
 
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.felles.dto.Periode
 import no.nav.familie.ef.sak.felles.util.isEqualOrAfter
 import no.nav.familie.ef.sak.felles.util.isEqualOrBefore
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 
@@ -25,7 +25,7 @@ class BeregningService {
 
     private fun validerVedtaksperioder(vedtaksperioder: List<Periode>) {
         feilHvis(vedtaksperioder.zipWithNext { a, b -> a.tildato.isEqualOrAfter(b.fradato) }
-                         .any { it }) { "Vedtaksperioder ${vedtaksperioder} overlapper" }
+                         .any { it }) { "Vedtaksperioder $vedtaksperioder overlapper" }
     }
 
     private fun validerInnteksperioder(inntektsperioder: List<Inntektsperiode>, vedtaksperioder: List<Periode>) {
@@ -36,8 +36,8 @@ class BeregningService {
         feilHvis(inntektsperioder.zipWithNext { a, b -> a.startDato.isBefore(b.startDato) && a.sluttDato.isBefore(b.sluttDato) }
                          .any { !it }) { "Inntektsperioder må være sortert" }
 
-        feilHvis(vedtaksperioder.any { vedtaksperiode -> vedtaksperiode.fradato.isAfter(vedtaksperiode.tildato)})
-        {"Fravedtaksdato må være etter vedtakstildato"}
+        feilHvis(vedtaksperioder.any { vedtaksperiode -> vedtaksperiode.fradato.isAfter(vedtaksperiode.tildato) })
+        { "Fravedtaksdato må være etter vedtakstildato" }
 
 
         feilHvis(vedtaksperioder.zipWithNext { a, b -> a.fradato.isBefore(b.fradato) && a.tildato.isBefore(b.tildato) }
@@ -52,9 +52,11 @@ class BeregningService {
         }
 
         feilHvis(inntektsperioder.any { it.inntekt < BigDecimal.ZERO }) { "Inntekten kan ikke være negativt" }
-        feilHvis(inntektsperioder.any { it.samordningsfradrag < BigDecimal.ZERO }) { "Samordningsfradraget kan ikke være negativt" }
+        feilHvis(inntektsperioder.any {
+            it.samordningsfradrag < BigDecimal.ZERO
+        }) { "Samordningsfradraget kan ikke være negativt" }
 
         feilHvis(inntektsperioder.zipWithNext { a, b -> a.sluttDato.isEqual(b.startDato.minusDays(1)) }
-                         .any { !it }) { "Inntektsperioder ${inntektsperioder} overlapper eller er ikke sammenhengde" }
+                         .any { !it }) { "Inntektsperioder $inntektsperioder overlapper eller er ikke sammenhengde" }
     }
 }

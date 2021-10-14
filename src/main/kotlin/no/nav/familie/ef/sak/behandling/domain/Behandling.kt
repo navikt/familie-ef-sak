@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.behandling.domain
 
-import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
+import no.nav.familie.ef.sak.felles.domain.Sporbar
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.MappedCollection
@@ -34,6 +34,7 @@ enum class BehandlingType(val visningsnavn: String) {
     FØRSTEGANGSBEHANDLING("Førstegangsbehandling"),
     BLANKETT("Blankett"),
     REVURDERING("Revurdering"),
+
     // Klage burde bli en årsak til revurdering for å unngå klage som lever lenge, kanskje flyttes til egen tabell?
     //KLAGE("Klage"),
     TEKNISK_OPPHØR("Teknisk opphør")

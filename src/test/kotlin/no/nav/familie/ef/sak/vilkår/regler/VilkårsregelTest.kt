@@ -25,7 +25,7 @@ internal class VilkårsregelTest {
 
     private fun skrivTilFil(it: Vilkårsregel, json: String) {
         val file = File("src/test/resources/regler/${it.vilkårType}.json")
-        if(!file.exists()) {
+        if (!file.exists()) {
             file.createNewFile()
         }
         file.writeText(json)

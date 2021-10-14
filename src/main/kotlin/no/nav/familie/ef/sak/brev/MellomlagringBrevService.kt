@@ -11,9 +11,8 @@ import java.util.UUID
 class MellomlagringBrevService(private val mellomlagerBrevRepository: MellomlagerBrevRepository) {
 
     fun mellomLagreBrev(behandlingId: UUID, brevverdier: String, brevmal: String, sanityVersjon: String): UUID {
-        val mellomlagretBrev = mellomlagerBrevRepository.findByIdOrNull(behandlingId)
 
-        return when (mellomlagretBrev) {
+        return when (val mellomlagretBrev = mellomlagerBrevRepository.findByIdOrNull(behandlingId)) {
             null -> mellomlagerBrevRepository.insert(MellomlagretBrev(behandlingId,
                                                                       brevverdier,
                                                                       brevmal,

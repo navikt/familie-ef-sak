@@ -5,7 +5,6 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.tilbakekreving.domain.Tilbakekreving
 import no.nav.familie.ef.sak.tilbakekreving.domain.Tilbakekrevingsvalg
-import no.nav.familie.ef.sak.tilbakekreving.domain.tilDto
 import no.nav.familie.ef.sak.tilbakekreving.dto.TilbakekrevingDto
 import no.nav.familie.ef.sak.tilbakekreving.dto.tilDomene
 import org.springframework.data.repository.findByIdOrNull
@@ -33,7 +32,8 @@ class TilbakekrevingService(private val tilbakekrevingRepository: Tilbakekreving
     }
 
     private fun validerTilbakekreving(behandling: Behandling, tilbakekrevingDto: TilbakekrevingDto) {
-        feilHvis(tilbakekrevingDto.valg == Tilbakekrevingsvalg.OPPRETT_MED_VARSEL && tilbakekrevingDto.varseltekst.isNullOrBlank()) {
+        feilHvis(tilbakekrevingDto.valg == Tilbakekrevingsvalg.OPPRETT_MED_VARSEL
+                 && tilbakekrevingDto.varseltekst.isNullOrBlank()) {
             "Må fylle ut varseltekst for å lage tilbakekreving med varsel"
         }
         feilHvis(behandling.status.behandlingErLåstForVidereRedigering()) {

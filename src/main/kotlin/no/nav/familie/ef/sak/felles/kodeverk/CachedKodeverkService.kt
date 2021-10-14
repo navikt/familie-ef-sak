@@ -34,7 +34,7 @@ class KodeverkInitializer(private val cachedKodeverkService: CachedKodeverkServi
 
     @Scheduled(cron = "0 0 2 * * *")
     fun syncKodeverk() {
-        logger.info("Kjører schedulert jobb for å hente kodeverk");
+        logger.info("Kjører schedulert jobb for å hente kodeverk")
         sync()
     }
 

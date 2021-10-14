@@ -45,7 +45,8 @@ internal class ApplicationConfigTest : OppslagSpringRunnerTest() {
         customizers.isAccessible = true
         assertThat(customizers.get(restTemplateBuilder) as Set<Any>).isEmpty()
         assertThat(catchThrowable { build.getForEntity<String>("http://microsoft") })
-                .hasMessageContaining("I/O error on GET request for \"http://microsoft\": microsoft: nodename nor servname provided")
+                .hasMessageContaining("I/O error on GET request for \"http://microsoft\": " +
+                                      "microsoft: nodename nor servname provided")
     }
 
     companion object {

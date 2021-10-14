@@ -5,7 +5,7 @@ import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.MappedCollection
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 interface IBarn {
 

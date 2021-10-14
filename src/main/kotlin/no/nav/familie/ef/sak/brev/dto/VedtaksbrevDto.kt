@@ -8,4 +8,4 @@ data class VedtaksbrevDto(val saksbehandlerBrevrequest: String,
                           val saksbehandlersignatur: String,
                           val besluttersignatur: String? = null)
 
-fun VedtaksbrevDto.erFritekstType(): Boolean = this.brevmal.equals(FRITEKST)
+fun VedtaksbrevDto.erFritekstType(): Boolean = this.brevmal == FRITEKST

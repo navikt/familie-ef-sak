@@ -1,17 +1,17 @@
 package no.nav.familie.ef.sak.api.soknad
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.opplysninger.søknad.SøknadDatoerDto
-import no.nav.familie.ef.sak.repository.behandling
-import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
-import no.nav.familie.ef.sak.fagsak.FagsakRepository
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.fagsak.FagsakRepository
+import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
-import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.opplysninger.søknad.SøknadDatoerDto
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.ef.sak.repository.behandling
+import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.kontrakter.ef.søknad.SøknadMedVedlegg
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -24,7 +24,7 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import java.util.*
+import java.util.UUID
 
 internal class SøknadControllerTest : OppslagSpringRunnerTest() {
 
@@ -51,7 +51,7 @@ internal class SøknadControllerTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `Skal hente søknadsinformasjon gitt behandlingId`(){
+    internal fun `Skal hente søknadsinformasjon gitt behandlingId`() {
         val søknad = SøknadMedVedlegg(Testsøknad.søknadOvergangsstønad, emptyList())
         val fagsak = fagsakService.hentEllerOpprettFagsakMedBehandlinger(søknad.søknad.personalia.verdi.fødselsnummer.verdi.verdi,
                                                                          Stønadstype.OVERGANGSSTØNAD)

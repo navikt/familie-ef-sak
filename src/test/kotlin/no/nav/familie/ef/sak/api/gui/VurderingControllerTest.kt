@@ -7,10 +7,10 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.dto.OppdaterVilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.SvarPåVurderingerDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårDto
-import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.kontrakter.ef.søknad.SøknadMedVedlegg
@@ -59,7 +59,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `nullstillVilkår - skal sjekke att behandlingId som blir sendt inn er lik den som finnes i vilkårsvurderingen`() {
+    internal fun `nullstillVilkår skal sjekke att behandlingId som blir sendt inn er lik den som finnes i vilkårsvurderingen`() {
         val opprettetVurdering = opprettInngangsvilkår().body.data!!
 
         val fagsak = fagsakService.hentEllerOpprettFagsakMedBehandlinger("0", Stønadstype.OVERGANGSSTØNAD)
@@ -101,12 +101,12 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
 
     private fun lagOppdaterVilkårsvurderingMedSvarJa(it: VilkårsvurderingDto) =
             SvarPåVurderingerDto(id = it.id,
-                                        behandlingId = it.behandlingId,
-                                        delvilkårsvurderinger = it.delvilkårsvurderinger.map {
-                                            it.copy(vurderinger = it.vurderinger.map { vurderingDto ->
-                                                vurderingDto.copy(svar = SvarId.JA)
-                                            })
-                                        })
+                                 behandlingId = it.behandlingId,
+                                 delvilkårsvurderinger = it.delvilkårsvurderinger.map {
+                                     it.copy(vurderinger = it.vurderinger.map { vurderingDto ->
+                                         vurderingDto.copy(svar = SvarId.JA)
+                                     })
+                                 })
 
 
     private fun opprettInngangsvilkår(): ResponseEntity<Ressurs<VilkårDto>> {

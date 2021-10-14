@@ -16,7 +16,11 @@ object OpprettBehandlingUtil {
                                        tidligereBehandlinger: List<Behandling>,
                                        sistIverksatteBehandling: Behandling?) {
         val sisteBehandling = tidligereBehandlinger
-                .filter { it.resultat != BehandlingResultat.ANNULLERT && it.resultat != BehandlingResultat.AVSLÅTT && it.status == BehandlingStatus.FERDIGSTILT }
+                .filter {
+                    it.resultat != BehandlingResultat.ANNULLERT
+                    && it.resultat != BehandlingResultat.AVSLÅTT
+                    && it.status == BehandlingStatus.FERDIGSTILT
+                }
                 .maxByOrNull { it.sporbar.opprettetTid }
 
         validerTidligereBehandlingerErFerdigstilte(tidligereBehandlinger)

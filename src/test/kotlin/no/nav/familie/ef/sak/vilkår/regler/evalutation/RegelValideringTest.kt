@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.vilkår.regler.evalutation
 
 import io.mockk.mockk
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
-import no.nav.familie.ef.sak.regler.evalutation.delvilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.DelvilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.VurderingDto
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
@@ -46,7 +45,8 @@ internal class RegelValideringTest {
                     VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE),
                     VurderingDto(RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE))
         })
-                .hasMessage("Mangler svar på ett spørsmål som ikke er siste besvarte spørsmålet vilkårType=ALENEOMSORG regelId=BOR_OG_OPPHOLDER_SEG_I_NORGE")
+                .hasMessage("Mangler svar på ett spørsmål som ikke er siste besvarte spørsmålet vilkårType=ALENEOMSORG " +
+                            "regelId=BOR_OG_OPPHOLDER_SEG_I_NORGE")
                 .isInstanceOf(Feil::class.java)
     }
 
@@ -85,7 +85,8 @@ internal class RegelValideringTest {
             valider(regel,
                     VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.JA, "b"))
         })
-                .hasMessage("Begrunnelse for vilkårType=ALENEOMSORG regelId=BOR_OG_OPPHOLDER_SEG_I_NORGE svarId=JA skal ikke ha begrunnelse")
+                .hasMessage("Begrunnelse for vilkårType=ALENEOMSORG regelId=BOR_OG_OPPHOLDER_SEG_I_NORGE " +
+                            "svarId=JA skal ikke ha begrunnelse")
                 .isInstanceOf(Feil::class.java)
     }
 
@@ -97,7 +98,8 @@ internal class RegelValideringTest {
             valider(regel,
                     VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.JA, "      "))
         })
-                .hasMessage("Begrunnelse for vilkårType=ALENEOMSORG regelId=BOR_OG_OPPHOLDER_SEG_I_NORGE svarId=JA skal ikke ha begrunnelse")
+                .hasMessage("Begrunnelse for vilkårType=ALENEOMSORG regelId=BOR_OG_OPPHOLDER_SEG_I_NORGE " +
+                            "svarId=JA skal ikke ha begrunnelse")
                 .isInstanceOf(Feil::class.java)
     }
 

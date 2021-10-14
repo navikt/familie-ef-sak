@@ -24,14 +24,20 @@ data class Grunnbeløp(val fraOgMedDato: LocalDate,
 fun finnGrunnbeløpsPerioder(fraOgMedDato: LocalDate, tilDato: LocalDate): List<Beløpsperiode> {
     return grunnbeløpsperioder
             .filter { overlapper(it, fraOgMedDato, tilDato) }
-            .map { Beløpsperiode(periode = Periode(fradato = maxOf(it.fraOgMedDato, fraOgMedDato), tildato = minOf(it.tilOgMedDato, tilDato)), beløp = it.grunnbeløp, beløpFørSamordning = it.grunnbeløp) }
+            .map {
+                Beløpsperiode(periode = Periode(fradato = maxOf(it.fraOgMedDato, fraOgMedDato),
+                                                tildato = minOf(it.tilOgMedDato, tilDato)),
+                              beløp = it.grunnbeløp,
+                              beløpFørSamordning = it.grunnbeløp)
+            }
             .sortedBy { it.periode.fradato }
 }
 
 private fun overlapper(grunnbeløpsperiode: Grunnbeløp,
                        fraOgMedDato: LocalDate,
                        tilDato: LocalDate) =
-        grunnbeløpsperiode.fraOgMedDato in fraOgMedDato..tilDato || fraOgMedDato in grunnbeløpsperiode.fraOgMedDato..grunnbeløpsperiode.tilOgMedDato
+        grunnbeløpsperiode.fraOgMedDato in fraOgMedDato..tilDato
+        || fraOgMedDato in grunnbeløpsperiode.fraOgMedDato..grunnbeløpsperiode.tilOgMedDato
 
 // TODO: Kopiert inn fra https://github.com/navikt/g - kan kanskje kalle tjenesten på sikt hvis den er tenkt å være oppdatert?
 // TODO: tilDato må være siste dag i måneden

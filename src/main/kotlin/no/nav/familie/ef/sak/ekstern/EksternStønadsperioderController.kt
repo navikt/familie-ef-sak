@@ -29,7 +29,7 @@ class EksternStønadsperioderController(private val arenaStønadsperioderService
     /**
      * Brukes av Arena
      */
-    @PostMapping()
+    @PostMapping
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
     fun hentPerioder(@RequestBody request: PerioderOvergangsstønadRequest): Ressurs<PerioderOvergangsstønadResponse> {
         return try {

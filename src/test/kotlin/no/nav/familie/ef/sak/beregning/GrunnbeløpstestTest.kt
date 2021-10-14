@@ -13,7 +13,7 @@ internal class GrunnbeløpstestTest {
         assertThat(perioder.size).isEqualTo(22)
         perioder.forEachIndexed { index, beløpsperiode ->
             if (perioder.size > index + 1) {
-                assertThat(beløpsperiode.periode.tildato).isBefore(perioder[index+1].periode.fradato)
+                assertThat(beløpsperiode.periode.tildato).isBefore(perioder[index + 1].periode.fradato)
             }
         }
     }

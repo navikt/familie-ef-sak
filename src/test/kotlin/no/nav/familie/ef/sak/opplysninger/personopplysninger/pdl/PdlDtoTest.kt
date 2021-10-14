@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.felles.integration.dto.pdl
+package no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl
 
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test

@@ -1,10 +1,19 @@
 package no.nav.familie.ef.sak.vedtak
 
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
-import no.nav.familie.ef.sak.mapper.tilDto
+import no.nav.familie.ef.sak.tilkjentytelse.tilDto
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.*
+import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.BEHANDLING
+import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.BELØP
+import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.ENDRET_I
+import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.FOM
+import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.INNTEKT
+import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.INNTEKTSREDUKSJON
+import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.SAMORDNINGSFRADRAG
+import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.TOM
+import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.TYPE_ENDRING
+import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.values
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.net.URL
@@ -110,7 +119,7 @@ object AndelHistorikkParser {
         var erOutput = false
 
         return rows
-                .map { row -> row.entries.map { it.key.trim() to it.value.trim() }.toMap() }
+                .map { row -> row.entries.associate { it.key.trim() to it.value.trim() } }
                 .mapIndexedNotNull { index, row ->
                     try {
                         val behandlingIdStr = row.getValue(BEHANDLING.key)
@@ -172,7 +181,7 @@ object AndelHistorikkParser {
 
     private fun mapInput(input: List<AndelHistorikkData>): List<TilkjentYtelse> {
         return input
-                .fold(mutableListOf<Pair<UUID, MutableList<AndelTilkjentYtelse>>>(), { acc, pair ->
+                .fold(mutableListOf<Pair<UUID, MutableList<AndelTilkjentYtelse>>>()) { acc, pair ->
                     val last = acc.lastOrNull()
                     if (last?.first != pair.behandlingId) {
                         acc.add(Pair(pair.behandlingId, mutableListOf(pair.andel)))
@@ -180,7 +189,7 @@ object AndelHistorikkParser {
                         last.second.add(pair.andel)
                     }
                     acc
-                })
+                }
                 .map {
                     TilkjentYtelse(behandlingId = it.first,
                                    vedtakstidspunkt = LocalDateTime.now(),

@@ -7,7 +7,4 @@ import org.springframework.stereotype.Repository
 import java.util.UUID
 
 @Repository
-interface MellomlagerBrevRepository : RepositoryInterface<MellomlagretBrev, UUID>, InsertUpdateRepository<MellomlagretBrev> {
-
-
-}
+interface MellomlagerBrevRepository : RepositoryInterface<MellomlagretBrev, UUID>, InsertUpdateRepository<MellomlagretBrev>

@@ -33,7 +33,7 @@ import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.vedtak.TotrinnskontrollService
-import no.nav.familie.ef.sak.vedtak.Vedtak
+import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
@@ -82,7 +82,11 @@ internal class BeslutteVedtakStegTest {
                                 søkerIdenter = setOf(FagsakPerson(ident = "12345678901")))
     private val behandlingId = UUID.randomUUID()
 
-    private val oppgave = Oppgave(id = UUID.randomUUID(), behandlingId = behandlingId, gsakOppgaveId = 123L, type = Oppgavetype.BehandleSak, erFerdigstilt = false)
+    private val oppgave = Oppgave(id = UUID.randomUUID(),
+                                  behandlingId = behandlingId,
+                                  gsakOppgaveId = 123L,
+                                  type = Oppgavetype.BehandleSak,
+                                  erFerdigstilt = false)
     private lateinit var taskSlot: MutableList<Task>
 
 
@@ -154,13 +158,12 @@ internal class BeslutteVedtakStegTest {
     }
 
     private fun utførTotrinnskontroll(godkjent: Boolean): StegType {
-        val nesteSteg = beslutteVedtakSteg.utførOgReturnerNesteSteg(Behandling(id = behandlingId,
-                                                                               fagsakId = fagsak.id,
-                                                                               type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                                               status = BehandlingStatus.FATTER_VEDTAK,
-                                                                               steg = beslutteVedtakSteg.stegType(),
-                                                                               resultat = BehandlingResultat.IKKE_SATT),
-                                                                    BeslutteVedtakDto(godkjent = godkjent))
-        return nesteSteg
+        return beslutteVedtakSteg.utførOgReturnerNesteSteg(Behandling(id = behandlingId,
+                                                                      fagsakId = fagsak.id,
+                                                                      type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                                                                      status = BehandlingStatus.FATTER_VEDTAK,
+                                                                      steg = beslutteVedtakSteg.stegType(),
+                                                                      resultat = BehandlingResultat.IKKE_SATT),
+                                                           BeslutteVedtakDto(godkjent = godkjent))
     }
 }

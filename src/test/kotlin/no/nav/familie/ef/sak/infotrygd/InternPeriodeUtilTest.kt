@@ -83,7 +83,7 @@ internal class InternPeriodeUtilTest {
         assertThat(inputOutput.output).isEqualTo(lagPerioder(inputOutput.input))
     }
 
-    fun lagPerioder(perioder: List<InfotrygdPeriode>): List<InternPeriode> {
+    private fun lagPerioder(perioder: List<InfotrygdPeriode>): List<InternPeriode> {
         val perioder = InfotrygdPeriodeUtil.filtrerOgSorterPerioderFraInfotrygd(perioder)
                 .map { it.tilInternPeriode() }
 

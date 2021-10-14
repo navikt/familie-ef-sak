@@ -21,7 +21,8 @@ abstract class Vilkårsregel(val vilkårType: VilkårType,
                             val hovedregler: Set<RegelId>) {
 
     open fun initereDelvilkårsvurdering(metadata: HovedregelMetadata,
-                                        resultat: Vilkårsresultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL): List<Delvilkårsvurdering> {
+                                        resultat: Vilkårsresultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL)
+            : List<Delvilkårsvurdering> {
         return hovedregler.map {
             Delvilkårsvurdering(resultat,
                                 vurderinger = listOf(Vurdering(it)))

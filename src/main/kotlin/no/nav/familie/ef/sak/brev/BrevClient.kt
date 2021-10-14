@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.brev
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevRequestDto
 import no.nav.familie.ef.sak.brev.dto.VedtaksbrevDto
 import no.nav.familie.ef.sak.brev.dto.erFritekstType
@@ -52,8 +51,8 @@ class BrevClient(@Value("\${FAMILIE_BREV_API_URL}")
 
     companion object {
 
-        val ef = "ef-brev"
-        val test = "testdata"
+        const val ef = "ef-brev"
+        const val test = "testdata"
     }
 }
 

@@ -1,58 +1,5 @@
-package no.nav.familie.ef.sak.felles.integration.dto.pdl
+package no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl
 
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Adressebeskyttelse
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.AdressebeskyttelseGradering
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.DeltBosted
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Dødsfall
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Familierelasjonsrolle
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Folkeregisteridentifikator
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Folkeregistermetadata
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Folkeregisterpersonstatus
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.ForelderBarnRelasjon
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fullmakt
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fødsel
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.InnflyttingTilNorge
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Kjønn
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.KjønnType
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Kontaktadresse
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.KontaktadresseType
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Koordinater
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Matrikkeladresse
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.MotpartsRolle
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Opphold
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Oppholdsadresse
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Oppholdstillatelse
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlAnnenForelder
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlBarn
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonFraSøk
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonKort
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlSøker
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlSøkerData
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlSøkerKort
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PersonBolk
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PersonDataBolk
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PersonSøk
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PersonSøkResultat
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PersonSøkTreff
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Personnavn
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PostadresseIFrittFormat
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Postboksadresse
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Sivilstand
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Sivilstandstype
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Statsborgerskap
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Telefonnummer
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.TilrettelagtKommunikasjon
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Tolk
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.UkjentBosted
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.UtenlandskAdresse
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.UtenlandskAdresseIFrittFormat
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.UtflyttingFraNorge
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Vegadresse
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.VergeEllerFullmektig
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.VergemaalEllerFremtidsfullmakt
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -181,6 +128,10 @@ object PdlTestdata {
                                                                            dødsfall))))
 
     val pdlPersonSøk = PersonSøk(
-            PersonSøkResultat(hits = listOf(PersonSøkTreff(person = PdlPersonFraSøk(listOf(Folkeregisteridentifikator("123456789")),bostedsadresse, navn))),
-                              totalHits = 1, pageNumber = 1, totalPages = 1))
+            PersonSøkResultat(hits = listOf(PersonSøkTreff(PdlPersonFraSøk(listOf(Folkeregisteridentifikator("123456789")),
+                                                                           bostedsadresse,
+                                                                           navn))),
+                              totalHits = 1,
+                              pageNumber = 1,
+                              totalPages = 1))
 }

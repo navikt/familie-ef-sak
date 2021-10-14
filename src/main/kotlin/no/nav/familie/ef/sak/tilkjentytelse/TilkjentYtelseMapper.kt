@@ -1,12 +1,10 @@
-package no.nav.familie.ef.sak.mapper
+package no.nav.familie.ef.sak.tilkjentytelse
 
 import no.nav.familie.ef.sak.beregning.Beløpsperiode
 import no.nav.familie.ef.sak.beregning.Beregningsgrunnlag
-import no.nav.familie.ef.sak.api.dto.AndelTilkjentYtelseDto
-import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDto
+import no.nav.familie.ef.sak.felles.dto.Periode
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.felles.dto.Periode
 
 fun TilkjentYtelse.tilDto(): TilkjentYtelseDto {
     return TilkjentYtelseDto(behandlingId = this.behandlingId,

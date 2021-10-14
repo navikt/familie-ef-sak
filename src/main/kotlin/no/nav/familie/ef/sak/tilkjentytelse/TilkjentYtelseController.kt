@@ -1,7 +1,5 @@
 package no.nav.familie.ef.sak.tilkjentytelse
 
-import no.nav.familie.ef.sak.api.dto.TilkjentYtelseDto
-import no.nav.familie.ef.sak.mapper.tilDto
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims

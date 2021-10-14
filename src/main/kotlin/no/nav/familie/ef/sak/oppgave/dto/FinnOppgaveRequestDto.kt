@@ -2,7 +2,9 @@ package no.nav.familie.ef.sak.oppgave.dto
 
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
-import no.nav.familie.kontrakter.felles.oppgave.*
+import no.nav.familie.kontrakter.felles.oppgave.Enhetsmappe
+import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import java.time.LocalDate
 
 data class FinnOppgaveRequestDto(val behandlingstema: String? = null,

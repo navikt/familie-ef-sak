@@ -2,18 +2,18 @@ package no.nav.familie.ef.sak.vilkår.regler.evalutation
 
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
-import no.nav.familie.ef.sak.vilkår.dto.DelvilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.DelvilkårsvurderingWrapper
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
+import no.nav.familie.ef.sak.vilkår.dto.DelvilkårsvurderingDto
+import no.nav.familie.ef.sak.vilkår.dto.svarTilDomene
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregler.Companion.VILKÅRSREGLER
 import no.nav.familie.ef.sak.vilkår.regler.alleVilkårsregler
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.RegelEvaluering.utledResultat
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.RegelValidering.validerVurdering
-import no.nav.familie.ef.sak.vilkår.dto.svarTilDomene
 import java.util.UUID
 
 object OppdaterVilkår {
@@ -24,7 +24,8 @@ object OppdaterVilkår {
      */
     fun lagNyOppdatertVilkårsvurdering(vilkårsvurdering: Vilkårsvurdering,
                                        oppdatering: List<DelvilkårsvurderingDto>,
-                                       vilkårsregler: Map<VilkårType, Vilkårsregel> = VILKÅRSREGLER.vilkårsregler): Vilkårsvurdering {
+                                       vilkårsregler: Map<VilkårType, Vilkårsregel> = VILKÅRSREGLER.vilkårsregler)
+            : Vilkårsvurdering {
         val vilkårsregel = vilkårsregler[vilkårsvurdering.type] ?: error("Finner ikke vilkårsregler for ${vilkårsvurdering.type}")
 
         validerVurdering(vilkårsregel, oppdatering, vilkårsvurdering.delvilkårsvurdering.delvilkårsvurderinger)
@@ -51,7 +52,8 @@ object OppdaterVilkår {
 
     /**
      * Oppdaterer delvilkår
-     * Den beholder den opprinnelige rekkefølgen som finnes på delvilkåren i databasen, slik att frontend kan sende inn de i en annen rekkefølge
+     * Den beholder den opprinnelige rekkefølgen som finnes på delvilkåren i databasen,
+     * slik att frontend kan sende inn de i en annen rekkefølge
      *
      * @param vilkårsvurdering Vilkårsoppdatering fra databasen som skal oppdateres
      */
@@ -96,8 +98,10 @@ object OppdaterVilkår {
             value.any { it.resultat == Vilkårsresultat.IKKE_TATT_STILLING_TIL } -> Vilkårsresultat.IKKE_TATT_STILLING_TIL
             value.all { it.resultat == Vilkårsresultat.SKAL_IKKE_VURDERES } -> Vilkårsresultat.SKAL_IKKE_VURDERES
             value.any { it.resultat == Vilkårsresultat.IKKE_OPPFYLT } &&
-            value.all { it.resultat == Vilkårsresultat.IKKE_OPPFYLT || it.resultat == Vilkårsresultat.SKAL_IKKE_VURDERES } -> Vilkårsresultat.IKKE_OPPFYLT
-            else -> throw Feil("Utled resultat for aleneomsorg - kombinasjon av resultat er ikke behandlet: ${value.map { it.resultat }}")
+            value.all { it.resultat == Vilkårsresultat.IKKE_OPPFYLT || it.resultat == Vilkårsresultat.SKAL_IKKE_VURDERES } ->
+                Vilkårsresultat.IKKE_OPPFYLT
+            else -> throw Feil("Utled resultat for aleneomsorg - kombinasjon av resultat er ikke behandlet: " +
+                               "${value.map { it.resultat }}")
         }
     }
 

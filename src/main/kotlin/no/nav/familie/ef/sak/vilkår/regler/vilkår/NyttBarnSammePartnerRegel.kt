@@ -1,12 +1,12 @@
 package no.nav.familie.ef.sak.vilkår.regler.vilkår
 
+import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
 import no.nav.familie.ef.sak.vilkår.regler.RegelSteg
 import no.nav.familie.ef.sak.vilkår.regler.SluttSvarRegel
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 import no.nav.familie.ef.sak.vilkår.regler.jaNeiSvarRegel
 import no.nav.familie.ef.sak.vilkår.regler.regelIder
-import no.nav.familie.ef.sak.vilkår.VilkårType
 
 class NyttBarnSammePartnerRegel : Vilkårsregel(vilkårType = VilkårType.NYTT_BARN_SAMME_PARTNER,
                                                regler = setOf(HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER),

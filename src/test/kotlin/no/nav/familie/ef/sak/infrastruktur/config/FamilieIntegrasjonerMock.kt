@@ -1,12 +1,20 @@
-package no.nav.familie.ef.sak.config
+package no.nav.familie.ef.sak.infrastruktur.config
 
 import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.equalTo
+import com.github.tomakehurst.wiremock.client.WireMock.get
+import com.github.tomakehurst.wiremock.client.WireMock.matching
+import com.github.tomakehurst.wiremock.client.WireMock.okJson
+import com.github.tomakehurst.wiremock.client.WireMock.post
+import com.github.tomakehurst.wiremock.client.WireMock.put
+import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
+import com.github.tomakehurst.wiremock.client.WireMock.urlMatching
+import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
+import com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching
 import no.nav.familie.ef.sak.arbeidsfordeling.Arbeidsfordelingsenhet
 import no.nav.familie.ef.sak.felles.integration.dto.EgenAnsattResponse
 import no.nav.familie.ef.sak.felles.integration.dto.Tilgang
-import no.nav.familie.ef.sak.infrastruktur.config.IntegrasjonerConfig
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.infrastruktur.config.pdfAsBase64String
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
@@ -41,53 +49,54 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
 
     val responses =
             listOf(
-                    WireMock.get(WireMock.urlEqualTo(integrasjonerConfig.pingUri.path))
-                            .willReturn(WireMock.aResponse().withStatus(200)),
-                    WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.egenAnsattUri.path))
-                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(egenAnsatt))),
-                    WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.tilgangRelasjonerUri.path))
-                            .withRequestBody(WireMock.matching(".*ikkeTilgang.*"))
+                    get(urlEqualTo(integrasjonerConfig.pingUri.path))
+                            .willReturn(aResponse().withStatus(200)),
+                    post(urlEqualTo(integrasjonerConfig.egenAnsattUri.path))
+                            .willReturn(okJson(objectMapper.writeValueAsString(egenAnsatt))),
+                    post(urlEqualTo(integrasjonerConfig.tilgangRelasjonerUri.path))
+                            .withRequestBody(matching(".*ikkeTilgang.*"))
                             .atPriority(1)
-                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(lagIkkeTilgangResponse()))),
-                    WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.tilgangRelasjonerUri.path))
-                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(Tilgang(true, null)))),
-                    WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.tilgangPersonUri.path))
-                            .withRequestBody(WireMock.matching(".*ikkeTilgang.*"))
+                            .willReturn(okJson(objectMapper.writeValueAsString(lagIkkeTilgangResponse()))),
+                    post(urlEqualTo(integrasjonerConfig.tilgangRelasjonerUri.path))
+                            .willReturn(okJson(objectMapper.writeValueAsString(Tilgang(true, null)))),
+                    post(urlEqualTo(integrasjonerConfig.tilgangPersonUri.path))
+                            .withRequestBody(matching(".*ikkeTilgang.*"))
                             .atPriority(1)
-                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(listOf(lagIkkeTilgangResponse())))),
-                    WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.tilgangPersonUri.path))
-                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(listOf(Tilgang(true, null))))),
-                    WireMock.get(WireMock.urlEqualTo(integrasjonerConfig.kodeverkPoststedUri.path))
-                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(kodeverkPoststed))),
-                    WireMock.get(WireMock.urlEqualTo(integrasjonerConfig.kodeverkLandkoderUri.path))
-                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(kodeverkLand))),
-                    WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.arbeidsfordelingUri.path))
-                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(arbeidsfordeling))),
+                            .willReturn(okJson(objectMapper.writeValueAsString(listOf(lagIkkeTilgangResponse())))),
+                    post(urlEqualTo(integrasjonerConfig.tilgangPersonUri.path))
+                            .willReturn(okJson(objectMapper.writeValueAsString(listOf(Tilgang(true, null))))),
+                    get(urlEqualTo(integrasjonerConfig.kodeverkPoststedUri.path))
+                            .willReturn(okJson(objectMapper.writeValueAsString(kodeverkPoststed))),
+                    get(urlEqualTo(integrasjonerConfig.kodeverkLandkoderUri.path))
+                            .willReturn(okJson(objectMapper.writeValueAsString(kodeverkLand))),
+                    post(urlEqualTo(integrasjonerConfig.arbeidsfordelingUri.path))
+                            .willReturn(okJson(objectMapper.writeValueAsString(arbeidsfordeling))),
 
-                    WireMock.get(WireMock.urlPathEqualTo(integrasjonerConfig.journalPostUri.path))
+                    get(urlPathEqualTo(integrasjonerConfig.journalPostUri.path))
                             .withQueryParam("journalpostId", equalTo("1234"))
-                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(journalpost))),
-                    WireMock.post(WireMock.urlPathEqualTo(integrasjonerConfig.journalPostUri.path))
-                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(journalposter))),
-                    WireMock.get(WireMock.urlPathMatching("${integrasjonerConfig.journalPostUri.path}/hentdokument/([0-9]*)/([0-9]*)"))
+                            .willReturn(okJson(objectMapper.writeValueAsString(journalpost))),
+                    post(urlPathEqualTo(integrasjonerConfig.journalPostUri.path))
+                            .willReturn(okJson(objectMapper.writeValueAsString(journalposter))),
+                    get(urlPathMatching("${integrasjonerConfig.journalPostUri.path}/hentdokument/([0-9]*)/([0-9]*)"))
                             .withQueryParam("variantFormat", equalTo("ORIGINAL"))
-                            .willReturn(WireMock.okJson(
-                                    objectMapper.writeValueAsString(Ressurs.success(objectMapper.writeValueAsBytes(Testsøknad.søknadOvergangsstønad)))
-                            )),
-                    WireMock.get(WireMock.urlPathMatching("${integrasjonerConfig.journalPostUri.path}/hentdokument/([0-9]*)/([0-9]*)"))
+                            .willReturn(okJson(
+                                    objectMapper.writeValueAsString(Ressurs.success(
+                                            objectMapper.writeValueAsBytes(Testsøknad.søknadOvergangsstønad))
+                                    ))),
+                    get(urlPathMatching("${integrasjonerConfig.journalPostUri.path}/hentdokument/([0-9]*)/([0-9]*)"))
                             .withQueryParam("variantFormat", equalTo("ARKIV"))
-                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(Ressurs.success(pdfAsBase64String)))),
-                    WireMock.put(WireMock.urlMatching("${integrasjonerConfig.dokarkivUri.path}.*"))
-                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(oppdatertJournalpostResponse))),
-                    WireMock.post(WireMock.urlMatching("${integrasjonerConfig.dokarkivUri.path}.*"))
-                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(arkiverDokumentResponse))),
-                    WireMock.post(WireMock.urlPathEqualTo(integrasjonerConfig.medlemskapUri.path))
-                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(medl))),
-                    WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.navKontorUri.path))
-                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(navKontorEnhet))),
+                            .willReturn(okJson(objectMapper.writeValueAsString(Ressurs.success(pdfAsBase64String)))),
+                    put(urlMatching("${integrasjonerConfig.dokarkivUri.path}.*"))
+                            .willReturn(okJson(objectMapper.writeValueAsString(oppdatertJournalpostResponse))),
+                    post(urlMatching("${integrasjonerConfig.dokarkivUri.path}.*"))
+                            .willReturn(okJson(objectMapper.writeValueAsString(arkiverDokumentResponse))),
+                    post(urlPathEqualTo(integrasjonerConfig.medlemskapUri.path))
+                            .willReturn(okJson(objectMapper.writeValueAsString(medl))),
+                    post(urlEqualTo(integrasjonerConfig.navKontorUri.path))
+                            .willReturn(okJson(objectMapper.writeValueAsString(navKontorEnhet))),
 
-                    WireMock.post(WireMock.urlEqualTo(integrasjonerConfig.infotrygdVedtaksperioder.path))
-                            .willReturn(WireMock.okJson(objectMapper.writeValueAsString(infotrygdPerioder)))
+                    post(urlEqualTo(integrasjonerConfig.infotrygdVedtaksperioder.path))
+                            .willReturn(okJson(objectMapper.writeValueAsString(infotrygdPerioder)))
 
             )
 
@@ -125,7 +134,7 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
         private val arbeidsfordeling =
                 Ressurs.success(listOf(Arbeidsfordelingsenhet("1234", "nerd-enhet")))
 
-        val fnr = "23097825289"
+        private const val fnr = "23097825289"
         private val medl =
                 Ressurs.success(Medlemskapsinfo(personIdent = fnr,
                                                 gyldigePerioder = emptyList(),
@@ -135,58 +144,59 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
         private val oppdatertJournalpostResponse =
                 Ressurs.success(OppdaterJournalpostResponse(journalpostId = "1234"))
         private val arkiverDokumentResponse = Ressurs.success(ArkiverDokumentResponse(journalpostId = "1234", ferdigstilt = true))
-        val journalpostFraIntegrasjoner = Journalpost(journalpostId = "1234",
-                                                      journalposttype = Journalposttype.I,
-                                                      journalstatus = Journalstatus.MOTTATT,
-                                                      tema = "ENF",
-                                                      behandlingstema = "ab0071",
-                                                      tittel = "abrakadabra",
-                                                      bruker = Bruker(type = BrukerIdType.FNR, id = fnr),
-                                                      journalforendeEnhet = "4817",
-                                                      kanal = "SKAN_IM",
-                                                      relevanteDatoer = listOf(RelevantDato(LocalDateTime.now(),
-                                                                                            "DATO_REGISTRERT")),
-                                                      dokumenter =
-                                                      listOf(DokumentInfo(dokumentInfoId = "12345",
-                                                                          tittel = "Søknad om overgangsstønad - dokument 1",
-                                                                          brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
-                                                                          dokumentvarianter =
-                                                                          listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV),
-                                                                                 Dokumentvariant(variantformat = Dokumentvariantformat.ORIGINAL)
-                                                                          )
-                                                      ),
-                                                             DokumentInfo(dokumentInfoId = "12345",
-                                                                          tittel = "Søknad om barnetilsyn - dokument 1",
-                                                                          brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
-                                                                          dokumentvarianter =
-                                                                          listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV))
-                                                             ),
-                                                             DokumentInfo(dokumentInfoId = "12345",
-                                                                          tittel = "Samboeravtale",
-                                                                          brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
-                                                                          dokumentvarianter =
-                                                                          listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV))
-                                                             ),
-                                                             DokumentInfo(dokumentInfoId = "12345",
-                                                                          tittel = "EtFrykteligLangtDokumentNavnSomTroligIkkeBrekkerOgØdeleggerGUI",
-                                                                          brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
-                                                                          dokumentvarianter =
-                                                                          listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV))
-                                                             ),
-                                                             DokumentInfo(dokumentInfoId = "12345",
-                                                                          tittel = "Søknad om overgangsstønad - dokument 2",
-                                                                          brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
-                                                                          dokumentvarianter =
-                                                                          listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV))
-                                                             ),
-                                                             DokumentInfo(dokumentInfoId = "12345",
-                                                                          tittel = "Søknad om overgangsstønad - dokument 3",
-                                                                          brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
-                                                                          dokumentvarianter =
-                                                                          listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV))
-                                                             )
-                                                      )
-        )
+        private val journalpostFraIntegrasjoner =
+                Journalpost(journalpostId = "1234",
+                            journalposttype = Journalposttype.I,
+                            journalstatus = Journalstatus.MOTTATT,
+                            tema = "ENF",
+                            behandlingstema = "ab0071",
+                            tittel = "abrakadabra",
+                            bruker = Bruker(type = BrukerIdType.FNR, id = fnr),
+                            journalforendeEnhet = "4817",
+                            kanal = "SKAN_IM",
+                            relevanteDatoer = listOf(RelevantDato(LocalDateTime.now(),
+                                                                  "DATO_REGISTRERT")),
+                            dokumenter =
+                            listOf(DokumentInfo(dokumentInfoId = "12345",
+                                                tittel = "Søknad om overgangsstønad - dokument 1",
+                                                brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
+                                                dokumentvarianter =
+                                                listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV),
+                                                       Dokumentvariant(variantformat = Dokumentvariantformat.ORIGINAL)
+                                                )
+                            ),
+                                   DokumentInfo(dokumentInfoId = "12345",
+                                                tittel = "Søknad om barnetilsyn - dokument 1",
+                                                brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
+                                                dokumentvarianter =
+                                                listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV))
+                                   ),
+                                   DokumentInfo(dokumentInfoId = "12345",
+                                                tittel = "Samboeravtale",
+                                                brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
+                                                dokumentvarianter =
+                                                listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV))
+                                   ),
+                                   DokumentInfo(dokumentInfoId = "12345",
+                                                tittel = "EtFrykteligLangtDokumentNavnSomTroligIkkeBrekkerOgØdeleggerGUI",
+                                                brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
+                                                dokumentvarianter =
+                                                listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV))
+                                   ),
+                                   DokumentInfo(dokumentInfoId = "12345",
+                                                tittel = "Søknad om overgangsstønad - dokument 2",
+                                                brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
+                                                dokumentvarianter =
+                                                listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV))
+                                   ),
+                                   DokumentInfo(dokumentInfoId = "12345",
+                                                tittel = "Søknad om overgangsstønad - dokument 3",
+                                                brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
+                                                dokumentvarianter =
+                                                listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV))
+                                   )
+                            )
+                )
         private val journalpost = Ressurs.success(journalpostFraIntegrasjoner)
         private val journalposter = Ressurs.success(listOf(journalpostFraIntegrasjoner))
         private val navKontorEnhet = Ressurs.success(NavKontorEnhet(enhetId = 100000194,

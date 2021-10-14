@@ -8,7 +8,7 @@ import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 @Table("soknadsskjema")
 data class SøknadsskjemaOvergangsstønad(@Id

@@ -5,12 +5,12 @@ import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import no.nav.familie.kontrakter.felles.simulering.MottakerType
 import no.nav.familie.kontrakter.felles.simulering.PosteringType
 import no.nav.familie.kontrakter.felles.simulering.SimuleringMottaker
-import org.assertj.core.api.Assertions.*
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
 
-internal class SimuleringsresultatDtoTest{
+internal class SimuleringsresultatDtoTest {
 
 
     private val januarStart = LocalDate.of(2021, 1, 1)
@@ -19,30 +19,30 @@ internal class SimuleringsresultatDtoTest{
     private val augustSlutt = LocalDate.of(2021, 8, 31)
     private val oktoberStart = LocalDate.of(2021, 10, 1)
     private val oktoberSlutt = LocalDate.of(2021, 10, 31)
-    val januarTilApril = SimuleringsposteringTestUtil.lagPosteringer(fraDato = januarStart,
-                                                                     antallMåneder = 4,
-                                                                     beløp = BigDecimal(5000),
-                                                                     posteringstype = PosteringType.FEILUTBETALING)
+    private val januarTilApril = SimuleringsposteringTestUtil.lagPosteringer(fraDato = januarStart,
+                                                                             antallMåneder = 4,
+                                                                             beløp = BigDecimal(5000),
+                                                                             posteringstype = PosteringType.FEILUTBETALING)
 
 
-    val mai = SimuleringsposteringTestUtil.lagPosteringer(fraDato = LocalDate.of(2021, 5, 1),
+    private val mai = SimuleringsposteringTestUtil.lagPosteringer(fraDato = LocalDate.of(2021, 5, 1),
                                                                   antallMåneder = 1,
                                                                   beløp = BigDecimal(5000),
                                                                   posteringstype = PosteringType.YTELSE)
 
 
-    val juniTilAugust = SimuleringsposteringTestUtil.lagPosteringer(fraDato = juniStart,
-                                                                  antallMåneder = 3,
-                                                                  beløp = BigDecimal(5000),
-                                                                  posteringstype = PosteringType.FEILUTBETALING)
+    private val juniTilAugust = SimuleringsposteringTestUtil.lagPosteringer(fraDato = juniStart,
+                                                                            antallMåneder = 3,
+                                                                            beløp = BigDecimal(5000),
+                                                                            posteringstype = PosteringType.FEILUTBETALING)
 
-    val oktober = SimuleringsposteringTestUtil.lagPosteringer(fraDato = oktoberStart,
-                                                                  antallMåneder = 1,
-                                                                  beløp = BigDecimal(5000),
-                                                                  posteringstype = PosteringType.FEILUTBETALING)
+    private val oktober = SimuleringsposteringTestUtil.lagPosteringer(fraDato = oktoberStart,
+                                                                      antallMåneder = 1,
+                                                                      beløp = BigDecimal(5000),
+                                                                      posteringstype = PosteringType.FEILUTBETALING)
 
 
-    val simuleringsmottakere = listOf(SimuleringMottaker(
+    private val simuleringsmottakere = listOf(SimuleringMottaker(
             simulertPostering = januarTilApril + mai + juniTilAugust + oktober,
             mottakerNummer = "12345678901",
             mottakerType = MottakerType.BRUKER

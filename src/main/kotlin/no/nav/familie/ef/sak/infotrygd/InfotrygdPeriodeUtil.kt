@@ -22,7 +22,8 @@ object InfotrygdPeriodeUtil {
                         it
                     }
                 }
-                .filter { it.stønadTom > it.stønadFom } // Skal infotrygd rydde bort disse? (inkl de der opphørdato er før startdato)
+                // Skal infotrygd rydde bort disse? (inkl de der opphørdato er før startdato)
+                .filter { it.stønadTom > it.stønadFom }
                 .sortedWith(compareBy<InfotrygdPeriode>({ it.stønadId }, { it.vedtakId }, { it.stønadFom }).reversed())
     }
 

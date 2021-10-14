@@ -17,14 +17,14 @@ object SivilstandMapper {
                                            registergrunnlag = mapRegistergrunnlag(grunnlagsdata.søker))
     }
 
-    fun mapRegistergrunnlag(søker: Søker): SivilstandRegistergrunnlagDto {
+    private fun mapRegistergrunnlag(søker: Søker): SivilstandRegistergrunnlagDto {
         val sivilstand = søker.sivilstand.gjeldende()
         return SivilstandRegistergrunnlagDto(type = Sivilstandstype.valueOf(sivilstand.type.name),
                                              navn = sivilstand.navn,
                                              gyldigFraOgMed = sivilstand.gyldigFraOgMed)
     }
 
-    fun mapSøknadsgrunnlag(sivilstandsdetaljer: Sivilstand): SivilstandSøknadsgrunnlagDto {
+    private fun mapSøknadsgrunnlag(sivilstandsdetaljer: Sivilstand): SivilstandSøknadsgrunnlagDto {
         return SivilstandSøknadsgrunnlagDto(samlivsbruddsdato = sivilstandsdetaljer.samlivsbruddsdato,
                                             endringSamværsordningDato = sivilstandsdetaljer.endringSamværsordningDato,
                                             fraflytningsdato = sivilstandsdetaljer.fraflytningsdato,

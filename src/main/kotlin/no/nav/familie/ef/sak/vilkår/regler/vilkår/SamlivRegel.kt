@@ -1,12 +1,12 @@
 package no.nav.familie.ef.sak.vilkår.regler.vilkår
 
+import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
 import no.nav.familie.ef.sak.vilkår.regler.RegelSteg
 import no.nav.familie.ef.sak.vilkår.regler.SluttSvarRegel
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 import no.nav.familie.ef.sak.vilkår.regler.jaNeiSvarRegel
 import no.nav.familie.ef.sak.vilkår.regler.regelIder
-import no.nav.familie.ef.sak.vilkår.VilkårType
 
 class SamlivRegel : Vilkårsregel(vilkårType = VilkårType.SAMLIV,
                                  regler = setOf(LEVER_IKKE_MED_ANNEN_FORELDER, LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD),

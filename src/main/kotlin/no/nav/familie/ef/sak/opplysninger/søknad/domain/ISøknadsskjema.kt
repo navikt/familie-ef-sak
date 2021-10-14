@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.opplysninger.søknad.domain
 
 import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 @Table("soknadsskjema")
 interface ISøknadsskjema {

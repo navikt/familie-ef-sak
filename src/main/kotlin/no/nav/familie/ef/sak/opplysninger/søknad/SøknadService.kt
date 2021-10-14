@@ -1,12 +1,12 @@
 package no.nav.familie.ef.sak.opplysninger.søknad
 
-import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknad
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadMapper
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadsskjemaBarnetilsyn
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadsskjemaOvergangsstønad
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadsskjemaSkolepenger
+import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
@@ -17,10 +17,12 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
-class SøknadService(private val søknadRepository: SøknadRepository,
-                    private val søknadOvergangsstønadRepository: SøknadOvergangsstønadRepository,
-                    private val søknadSkolepengerRepository: SøknadSkolepengerRepository,
-                    private val søknadBarnetilsynRepository: SøknadBarnetilsynRepository,) {
+class SøknadService(
+        private val søknadRepository: SøknadRepository,
+        private val søknadOvergangsstønadRepository: SøknadOvergangsstønadRepository,
+        private val søknadSkolepengerRepository: SøknadSkolepengerRepository,
+        private val søknadBarnetilsynRepository: SøknadBarnetilsynRepository,
+) {
 
     fun hentOvergangsstønad(behandlingId: UUID): SøknadsskjemaOvergangsstønad {
         val søknad = hentSøknad(behandlingId)

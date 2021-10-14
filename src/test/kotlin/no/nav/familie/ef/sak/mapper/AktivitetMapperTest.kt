@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.mapper;
+package no.nav.familie.ef.sak.mapper
 
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Aksjeselskap
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Aktivitet
@@ -14,12 +14,10 @@ import no.nav.familie.ef.sak.opplysninger.søknad.domain.TidligereUtdanning
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.UnderUtdanning
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Virksomhet
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.AktivitetMapper
-
-import org.junit.jupiter.api.Test;
-
+import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 internal class AktivitetMapperTest {
 
@@ -33,7 +31,9 @@ internal class AktivitetMapperTest {
             Situasjon(arbeidskontrakt = dokumentliste(),
                       barnMedSærligeBehov = dokumentliste(),
                       barnsSykdom = dokumentliste(),
-                      gjelderDetteDeg = GjelderDeg(listOf(" Jeg har søkt om barnepass, men ikke fått plass enda; Jeg har barn som har behov for særlig tilsyn på grunn av fysiske, psykiske eller store sosiale problemer")),
+                      gjelderDetteDeg = GjelderDeg(listOf(" Jeg har søkt om barnepass, men ikke fått plass enda; " +
+                                                          "Jeg har barn som har behov for særlig tilsyn på grunn av fysiske, " +
+                                                          "psykiske eller store sosiale problemer")),
                       manglendeBarnepass = dokumentliste(),
                       oppsigelseDokumentasjon = dokumentliste(),
                       oppsigelseReduksjonTidspunkt = LocalDate.now(),

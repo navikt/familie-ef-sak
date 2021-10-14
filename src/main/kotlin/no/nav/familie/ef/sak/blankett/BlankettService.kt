@@ -1,22 +1,22 @@
 package no.nav.familie.ef.sak.blankett
 
-import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
-import no.nav.familie.ef.sak.vedtak.VedtakService
-import no.nav.familie.ef.sak.vedtak.dto.tilVedtakDto
-import no.nav.familie.ef.sak.opplysninger.søknad.SøknadDatoerDto
-import no.nav.familie.ef.sak.oppgave.OppgaveRepository
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.felles.domain.Fil
-import no.nav.familie.ef.sak.oppgave.Oppgave
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
-import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
-import no.nav.familie.ef.sak.journalføring.JournalføringService
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
-import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
+import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
+import no.nav.familie.ef.sak.journalføring.JournalføringService
+import no.nav.familie.ef.sak.oppgave.Oppgave
+import no.nav.familie.ef.sak.oppgave.OppgaveRepository
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
+import no.nav.familie.ef.sak.opplysninger.søknad.SøknadDatoerDto
+import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
+import no.nav.familie.ef.sak.vedtak.dto.tilVedtakDto
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.springframework.data.repository.findByIdOrNull
@@ -80,7 +80,7 @@ class BlankettService(private val tilgangService: TilgangService,
 
     private fun hentVilkårDto(behandlingId: UUID) = vurderingService.hentEllerOpprettVurderinger(behandlingId)
 
-    private fun lagSøknadsdatoer(behandlingId: UUID) : SøknadDatoerDto {
+    private fun lagSøknadsdatoer(behandlingId: UUID): SøknadDatoerDto {
         val overgangsstønad = søknadService.hentOvergangsstønad(behandlingId)
         return SøknadDatoerDto(
                 søknadsdato = overgangsstønad.datoMottatt,

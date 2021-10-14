@@ -88,6 +88,6 @@ class TilgangService(private val personopplysningerIntegrasjonerClient: Personop
     }
 
     fun validerSaksbehandler(saksbehandler: String): Boolean {
-        return SikkerhetContext.hentSaksbehandler().equals(saksbehandler)
+        return SikkerhetContext.hentSaksbehandler() == saksbehandler
     }
 }

@@ -127,7 +127,8 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
             error("Kan ikke endre steg når status=${behandling.status} behandling=$behandlingId")
         }
         if (!behandling.steg.kommerEtter(steg, behandling.type)) {
-            error("Kan ikke sette behandling til steg=$steg når behandling allerede er på ${behandling.steg} behandling=$behandlingId")
+            error("Kan ikke sette behandling til steg=$steg når behandling allerede " +
+                  "er på ${behandling.steg} behandling=$behandlingId")
         }
 
         validerAtStegKanResettes(behandling, steg)
@@ -232,7 +233,8 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
         val harTilgangTilSteg = SikkerhetContext.harTilgangTilGittRolle(rolleConfig, behandling.steg.tillattFor)
 
         logger.info("Starter håndtering av $stegType på behandling ${behandling.id}")
-        secureLogger.info("Starter håndtering av $stegType på behandling ${behandling.id} med saksbehandler=[$saksbehandlerIdent]")
+        secureLogger.info("Starter håndtering av $stegType på behandling " +
+                          "${behandling.id} med saksbehandler=[$saksbehandlerIdent]")
 
         if (!harTilgangTilSteg) {
             error("$saksbehandlerIdent kan ikke utføre steg '${stegType.displayName()} pga manglende rolle.")

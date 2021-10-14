@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.simulering
 
-import no.nav.familie.ef.sak.iverksett.tilIverksettDto
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
+import no.nav.familie.ef.sak.iverksett.tilIverksettDto
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.kontrakter.ef.felles.StønadType
 import no.nav.familie.kontrakter.ef.iverksett.TilkjentYtelseMedMetadata
@@ -12,7 +12,8 @@ import no.nav.familie.kontrakter.felles.simulering.SimulertPostering
 import java.math.BigDecimal
 import java.time.LocalDate
 
-fun tilSimuleringsresultatDto(detaljertSimuleringResultat: DetaljertSimuleringResultat, tidSimuleringHentet: LocalDate): SimuleringsresultatDto {
+fun tilSimuleringsresultatDto(detaljertSimuleringResultat: DetaljertSimuleringResultat,
+                              tidSimuleringHentet: LocalDate): SimuleringsresultatDto {
     val perioder = grupperPosteringerEtterDato(detaljertSimuleringResultat.simuleringMottaker)
 
     val framtidigePerioder =
@@ -42,12 +43,13 @@ private fun grupperPosteringerEtterDato(mottakere: List<SimuleringMottaker>): Li
 
 
     mottakere.forEach {
-        it.simulertPostering.filter { it.posteringType == PosteringType.YTELSE || it.posteringType == PosteringType.FEILUTBETALING }
-                .forEach { postering ->
-                    if (simuleringPerioder.containsKey(postering.fom))
-                        simuleringPerioder[postering.fom]?.add(postering)
-                    else simuleringPerioder[postering.fom] = mutableListOf(postering)
-                }
+        it.simulertPostering.filter { postering ->
+            postering.posteringType == PosteringType.YTELSE || postering.posteringType == PosteringType.FEILUTBETALING
+        }.forEach { postering ->
+            if (simuleringPerioder.containsKey(postering.fom))
+                simuleringPerioder[postering.fom]?.add(postering)
+            else simuleringPerioder[postering.fom] = mutableListOf(postering)
+        }
     }
 
     return simuleringPerioder.map { (fom, posteringListe) ->

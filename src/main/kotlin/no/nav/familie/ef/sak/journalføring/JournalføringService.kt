@@ -7,7 +7,6 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettService
 import no.nav.familie.ef.sak.journalføring.dto.DokumentVariantformat
@@ -102,7 +101,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         val journalpost = hentJournalpost(journalpostId)
         val fagsak = fagsakService.hentFagsak(journalføringRequest.fagsakId)
 
-        iverksettService.startBehandling(behandling,  fagsak)
+        iverksettService.startBehandling(behandling, fagsak)
         settSøknadPåBehandling(journalpostId, fagsak, behandling.id)
         knyttJournalpostTilBehandling(journalpost, behandling)
         grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
@@ -145,7 +144,8 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
     }
 
     private fun hentOriginaldokument(journalpostId: String,
-                                     dokumentBrevkode: DokumentBrevkode): no.nav.familie.kontrakter.felles.journalpost.DokumentInfo {
+                                     dokumentBrevkode: DokumentBrevkode)
+            : no.nav.familie.kontrakter.felles.journalpost.DokumentInfo {
         return hentJournalpost(journalpostId).dokumenter
                        ?.first {
                            dokumentBrevkode == DokumentBrevkode.fraBrevkode(it.brevkode.toString()) && harOriginalDokument(
@@ -215,7 +215,8 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
                     DokarkivBruker(idType = BrukerIdType.valueOf(it.type.toString()), id = it.id)
                 },
                                            tema = journalpost.tema?.let { Tema.valueOf(it) }, // TODO: Funker dette?
-                                           behandlingstema = journalpost.behandlingstema?.let { Behandlingstema.fromValue(it) },// TODO: Funker dette?
+                                           // TODO: Funker dette?
+                                           behandlingstema = journalpost.behandlingstema?.let { Behandlingstema.fromValue(it) },
                                            tittel = journalpost.tittel,
                                            journalfoerendeEnhet = journalpost.journalforendeEnhet,
                                            sak = Sak(fagsakId = eksternFagsakId.toString(),

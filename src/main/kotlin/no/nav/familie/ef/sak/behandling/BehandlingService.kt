@@ -122,10 +122,10 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
     private fun validerAtBehandlingenKanAnnulleres(behandling: Behandling) {
         if (!behandling.kanAnnulleres()) {
             throw Feil(
-                    message = "Kan ikke annullere en behandling med status ${behandling.status} for ${behandling.type}",
-                    frontendFeilmelding = "Kan ikke annullere en behandling med status ${behandling.status} for ${behandling.type}",
-                    httpStatus = HttpStatus.BAD_REQUEST,
-                    throwable = null
+                    "Kan ikke annullere en behandling med status ${behandling.status} for ${behandling.type}",
+                    "Kan ikke annullere en behandling med status ${behandling.status} for ${behandling.type}",
+                    HttpStatus.BAD_REQUEST,
+                    null
             )
         }
     }

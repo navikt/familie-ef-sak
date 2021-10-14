@@ -1,8 +1,8 @@
 package no.nav.familie.ef.sak.behandlingsflyt.task
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -10,7 +10,8 @@ import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
-import java.util.*
+import java.util.Properties
+import java.util.UUID
 
 @Service
 @TaskStepBeskrivelse(taskStepType = FerdigstillOppgaveTask.TYPE,

@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.config
+package no.nav.familie.ef.sak.infrastruktur.config
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.Runs

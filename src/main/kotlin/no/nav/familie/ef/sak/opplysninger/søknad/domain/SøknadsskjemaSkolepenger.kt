@@ -6,7 +6,7 @@ import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.MappedCollection
 import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 @Table("soknadsskjema")
 data class SøknadsskjemaSkolepenger(@Id

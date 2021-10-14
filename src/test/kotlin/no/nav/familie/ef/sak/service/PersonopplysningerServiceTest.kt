@@ -4,8 +4,8 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.arbeidsfordeling.Arbeidsfordelingsenhet
-import no.nav.familie.ef.sak.config.KodeverkServiceMock
-import no.nav.familie.ef.sak.config.PdlClientConfig
+import no.nav.familie.ef.sak.infrastruktur.config.KodeverkServiceMock
+import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient

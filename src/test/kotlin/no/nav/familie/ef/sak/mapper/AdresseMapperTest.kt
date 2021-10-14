@@ -1,6 +1,8 @@
 package no.nav.familie.ef.sak.mapper
 
 import io.mockk.verify
+import no.nav.familie.ef.sak.infrastruktur.config.KodeverkServiceMock
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Kontaktadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.KontaktadresseType
@@ -13,8 +15,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.UkjentBosted
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.UtenlandskAdresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.UtenlandskAdresseIFrittFormat
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Vegadresse
-import no.nav.familie.ef.sak.config.KodeverkServiceMock
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

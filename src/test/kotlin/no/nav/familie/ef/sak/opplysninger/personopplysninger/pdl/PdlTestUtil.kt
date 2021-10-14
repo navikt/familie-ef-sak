@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.felles.integration.dto.pdl
+package no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl
 
 import kotlin.reflect.KParameter
 import kotlin.reflect.KProperty1
@@ -40,7 +40,7 @@ object PdlTestUtil {
                             finnFeltStruktur(getFeltverdi(it.second, entitet))
                         })
 
-        return if (map.isEmpty()) null else map
+        return map.ifEmpty { null }
     }
 
     private fun toMap(stringLines: ListIterator<String>): Map<String, Any?> {

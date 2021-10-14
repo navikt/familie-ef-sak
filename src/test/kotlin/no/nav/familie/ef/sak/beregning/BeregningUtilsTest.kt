@@ -1,6 +1,5 @@
-package no.nav.familie.ef.sak.api.beregning
+package no.nav.familie.ef.sak.beregning
 
-import no.nav.familie.ef.sak.beregning.Beløpsperiode
 import no.nav.familie.ef.sak.beregning.BeregningUtils.Companion.finnStartDatoOgSluttDatoForBeløpsperiode
 import no.nav.familie.ef.sak.felles.dto.Periode
 import org.assertj.core.api.Assertions.assertThat
@@ -62,6 +61,7 @@ internal class BeregningUtilsTest {
                 .isEqualTo(beløpsperiode.copy(periode = vedtaksperiode.copy(fradato = LocalDate.parse("2020-09-01"),
                                                                             tildato = LocalDate.parse("2020-12-31"))))
     }
+
     @Test
     internal fun `hvis beløpsperiode har ingen overlapp med vedtaksperiode skal tom liste returneres`() {
         val beløpsperiode =

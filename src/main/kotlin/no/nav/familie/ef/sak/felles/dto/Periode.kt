@@ -18,7 +18,9 @@ data class Periode(val fradato: LocalDate, val tildato: LocalDate, val gyldig: B
     }
 
     fun overlapperIStartenAv(periode: Periode) =
-            this.fradato.isBefore(periode.fradato) && this.tildato.isAfter(periode.fradato) && this.tildato.isBefore(periode.tildato)
+            this.fradato.isBefore(periode.fradato)
+            && this.tildato.isAfter(periode.fradato)
+            && this.tildato.isBefore(periode.tildato)
 
     val lengde: Period = Period.between(fradato, tildato)
 }

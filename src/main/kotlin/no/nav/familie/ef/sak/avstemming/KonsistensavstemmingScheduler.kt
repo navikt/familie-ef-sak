@@ -1,10 +1,10 @@
 package no.nav.familie.ef.sak.avstemming
 
-import no.nav.familie.ef.sak.repository.InsertUpdateRepository
-import no.nav.familie.ef.sak.repository.RepositoryInterface
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.behandlingsflyt.task.KonsistensavstemmingPayload
 import no.nav.familie.ef.sak.behandlingsflyt.task.KonsistensavstemmingTask
+import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
+import no.nav.familie.ef.sak.repository.InsertUpdateRepository
+import no.nav.familie.ef.sak.repository.RepositoryInterface
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.prosessering.util.isOptimisticLocking
 import org.slf4j.LoggerFactory
