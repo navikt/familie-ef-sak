@@ -1,5 +1,7 @@
 springProfile: prod
 ingress: https://familie-ef-sak.intern.nav.no
+inboundApplications:
+  - familie-ef-mottak
 inboundApplicationsExternal:
   - application: familie-ef-proxy
     namespace: teamfamilie
