@@ -59,6 +59,7 @@ spec:
         {{/each}}
     outbound:
       rules:
+        - application: familie-tilbake
         - application: familie-brev
         - application: familie-ef-blankett
         - application: familie-ef-iverksett
