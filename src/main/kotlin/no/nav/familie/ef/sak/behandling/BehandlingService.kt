@@ -14,6 +14,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import org.slf4j.Logger
@@ -21,6 +22,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 import java.util.UUID
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad as SøknadOvergangsstønadKontrakt
 
@@ -45,11 +47,12 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
             behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
 
     @Transactional
-    fun opprettBehandling(behandlingType: BehandlingType,
-                          fagsakId: UUID,
-                          søknad: SøknadOvergangsstønadKontrakt,
-                          journalpost: Journalpost): Behandling {
-        val behandling = opprettBehandling(behandlingType, fagsakId)
+    fun opprettBehandlingForBlankett(behandlingType: BehandlingType,
+                                     fagsakId: UUID,
+                                     søknad: SøknadOvergangsstønadKontrakt,
+                                     journalpost: Journalpost): Behandling {
+        val behandling =
+                opprettBehandling(behandlingType = behandlingType, fagsakId = fagsakId, behandlingsårsak = BehandlingÅrsak.SØKNAD)
         behandlingsjournalpostRepository.insert(Behandlingsjournalpost(behandling.id,
                                                                        journalpost.journalpostId,
                                                                        journalpost.journalposttype))
@@ -64,7 +67,9 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
     fun opprettBehandling(behandlingType: BehandlingType,
                           fagsakId: UUID,
                           status: BehandlingStatus = BehandlingStatus.OPPRETTET,
-                          stegType: StegType = StegType.VILKÅR): Behandling {
+                          stegType: StegType = StegType.VILKÅR,
+                          behandlingsårsak: BehandlingÅrsak,
+                          kravMottatt: LocalDate? = null): Behandling {
         val tidligereBehandlinger = behandlingRepository.findByFagsakId(fagsakId)
         val forrigeBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
         validerKanOppretteNyBehandling(behandlingType, tidligereBehandlinger, forrigeBehandling)
@@ -74,7 +79,9 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
                                                       type = behandlingType,
                                                       steg = stegType,
                                                       status = status,
-                                                      resultat = BehandlingResultat.IKKE_SATT))
+                                                      resultat = BehandlingResultat.IKKE_SATT,
+                                                      årsak = behandlingsårsak,
+                                                      kravMottatt = kravMottatt))
     }
 
     fun hentBehandling(behandlingId: UUID): Behandling = behandlingRepository.findByIdOrThrow(behandlingId)

@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.fagsak.domain.Stønadstype.OVERGANGSSTØNAD
 import no.nav.familie.ef.sak.tilbakekreving.domain.Tilbakekrevingsvalg.OPPRETT_MED_VARSEL
 import no.nav.familie.ef.sak.tilbakekreving.domain.Tilbakekrevingsvalg.OPPRETT_UTEN_VARSEL
 import no.nav.familie.ef.sak.tilbakekreving.dto.TilbakekrevingDto
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.getDataOrThrow
 import org.assertj.core.api.Assertions.assertThat
@@ -34,7 +35,9 @@ internal class TilbakekrevingControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `Skal lagre siste versjon av tilbakekreving ved to kall`() {
         val fagsak = fagsakService.hentEllerOpprettFagsakMedBehandlinger("01010172272", OVERGANGSSTØNAD)
-        val behandling = behandlingService.opprettBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, fagsak.id)
+        val behandling = behandlingService.opprettBehandling(BehandlingType.FØRSTEGANGSBEHANDLING,
+                                                             fagsak.id,
+                                                             behandlingsårsak = BehandlingÅrsak.SØKNAD)
         lagInitiellTilbakekreving(behandling)
         val oppdatertTilbakekrevingsDto = TilbakekrevingDto(valg = OPPRETT_MED_VARSEL,
                                                             varseltekst = "Dette er tekst",

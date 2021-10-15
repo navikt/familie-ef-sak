@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.søknad.SøknadMedVedlegg
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -55,7 +56,8 @@ internal class SøknadControllerTest : OppslagSpringRunnerTest() {
         val søknad = SøknadMedVedlegg(Testsøknad.søknadOvergangsstønad, emptyList())
         val fagsak = fagsakService.hentEllerOpprettFagsakMedBehandlinger(søknad.søknad.personalia.verdi.fødselsnummer.verdi.verdi,
                                                                          Stønadstype.OVERGANGSSTØNAD)
-        val behandling = behandlingService.opprettBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, fagsak.id)
+        val behandlingÅrsak = BehandlingÅrsak.SØKNAD
+        val behandling = behandlingService.opprettBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, fagsak.id, behandlingsårsak = behandlingÅrsak)
         søknadService.lagreSøknadForOvergangsstønad(søknad.søknad, behandling.id, fagsak.id, "1234")
         val søknadSkjema = søknadService.hentOvergangsstønad(behandling.id)
         val respons: ResponseEntity<Ressurs<SøknadDatoerDto>> = hentSøknadData(behandling.id)
