@@ -28,7 +28,7 @@ class BlankettController(private val tilgangService: TilgangService,
                          private val behandlingService: BehandlingService,
                          private val oppgaveService: OppgaveService) {
 
-    val logger: Logger = LoggerFactory.getLogger(this.javaClass)
+    private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
     @GetMapping("{behandlingId}")
     fun hentBlankettPdf(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {

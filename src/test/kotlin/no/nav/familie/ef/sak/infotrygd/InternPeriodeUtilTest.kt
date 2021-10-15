@@ -84,10 +84,10 @@ internal class InternPeriodeUtilTest {
     }
 
     private fun lagPerioder(perioder: List<InfotrygdPeriode>): List<InternPeriode> {
-        val perioder = InfotrygdPeriodeUtil.filtrerOgSorterPerioderFraInfotrygd(perioder)
+        val filtrertePerioder = InfotrygdPeriodeUtil.filtrerOgSorterPerioderFraInfotrygd(perioder)
                 .map { it.tilInternPeriode() }
 
-        return InternPeriodeUtil.slåSammenPerioder(perioder)
+        return InternPeriodeUtil.slåSammenPerioder(filtrertePerioder)
     }
 
     private fun parseFil(fil: String) = InfotrygdPeriodeParser.parse(this::class.java.classLoader.getResource(fil)!!)

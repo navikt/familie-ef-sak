@@ -25,8 +25,8 @@ class GrunnlagsdataService(private val pdlClient: PdlClient,
                            private val søknadService: SøknadService,
                            private val personopplysningerIntegrasjonerClient: PersonopplysningerIntegrasjonerClient) {
 
-    val logger: Logger = LoggerFactory.getLogger(this.javaClass)
-    val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
+    private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
+    private val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
 
     fun opprettGrunnlagsdata(behandlingId: UUID) {
         val grunnlagsdata = hentGrunnlagsdataFraRegister(behandlingId)

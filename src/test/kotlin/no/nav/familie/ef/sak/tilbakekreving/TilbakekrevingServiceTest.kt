@@ -22,7 +22,7 @@ internal class TilbakekrevingServiceTest {
 
 
     private val tilbakekrevingRepository = mockk<TilbakekrevingRepository>()
-    val behandlingService = mockk<BehandlingService>()
+    private val behandlingService = mockk<BehandlingService>()
     private val tilbakekrevingService = TilbakekrevingService(tilbakekrevingRepository, behandlingService)
 
     @Test

@@ -30,7 +30,7 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
                         private val behandlingshistorikkService: BehandlingshistorikkService,
                         private val søknadService: SøknadService) {
 
-    val logger: Logger = LoggerFactory.getLogger(this.javaClass)
+    private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
 

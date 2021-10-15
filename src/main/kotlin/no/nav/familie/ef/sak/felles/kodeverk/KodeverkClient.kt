@@ -17,7 +17,7 @@ class KodeverkClient(@Qualifier("azure") restOperations: RestOperations,
     : AbstractPingableRestClient(restOperations, "kodeverk") {
 
     override val pingUri: URI = integrasjonerConfig.pingUri
-    val logger: Logger = LoggerFactory.getLogger(this::class.java)
+    private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
 
     fun hentKodeverkLandkoder(): KodeverkDto {

@@ -47,7 +47,7 @@ import java.time.LocalDateTime
 @Component
 class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
 
-    val responses =
+    private val responses =
             listOf(
                     get(urlEqualTo(integrasjonerConfig.pingUri.path))
                             .willReturn(aResponse().withStatus(200)),

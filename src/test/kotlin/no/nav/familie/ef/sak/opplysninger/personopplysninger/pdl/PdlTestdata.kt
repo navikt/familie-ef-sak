@@ -27,8 +27,8 @@ object PdlTestdata {
 
     private val navn = listOf(Navn("", "", "", metadataGjeldende))
 
-    val pdlSøkerKortBolk = PersonBolk(listOf(PersonDataBolk("11111122222", "ok",
-                                                            PdlSøkerKort(listOf(Kjønn(KjønnType.KVINNE)), navn))))
+    private val pdlSøkerKortBolk = PersonBolk(listOf(PersonDataBolk("11111122222", "ok",
+                                                                    PdlSøkerKort(listOf(Kjønn(KjønnType.KVINNE)), navn))))
 
     private val adressebeskyttelse = listOf(Adressebeskyttelse(AdressebeskyttelseGradering.FORTROLIG, metadataGjeldende))
 

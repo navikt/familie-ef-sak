@@ -22,5 +22,5 @@ data class Periode(val fradato: LocalDate, val tildato: LocalDate, val gyldig: B
             && this.tildato.isAfter(periode.fradato)
             && this.tildato.isBefore(periode.tildato)
 
-    val lengde: Period = Period.between(fradato, tildato)
+    private val lengde: Period = Period.between(fradato, tildato)
 }

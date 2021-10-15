@@ -64,7 +64,7 @@ class JournalførBlankettStegTest {
     private lateinit var taskSlot: MutableList<Task>
 
     private val fnr = "12345678901"
-    val fagsak = Fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD,
+    private val fagsak = Fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD,
                         søkerIdenter = setOf(FagsakPerson(ident = fnr)))
 
     private val journalpost =
