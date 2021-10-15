@@ -43,7 +43,7 @@ internal class SimuleringControllerTest : OppslagSpringRunnerTest() {
     internal fun `Skal returnere 200 OK for simulering av behandling`() {
         val personIdent = "12345678901"
         val fagsak = fagsakRepository.insert(fagsak(identer = setOf(FagsakPerson(personIdent))))
-        val behandling = behandlingRepository.insert(behandling(fagsak, aktiv = true))
+        val behandling = behandlingRepository.insert(behandling(fagsak))
         tilkjentYtelseRepository.insert(TilkjentYtelse(behandlingId = behandling.id,
                                                        personident = personIdent,
                                                        vedtakstidspunkt = LocalDate.of(2020, 5, 5).atStartOfDay(),
