@@ -34,7 +34,7 @@ internal class BehandlingControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `Skal returnere 200 OK med status IKKE_TILGANG dersom man ikke har tilgang til brukeren`() {
         val fagsak = fagsakRepository.insert(fagsak(identer = setOf(FagsakPerson("ikkeTilgang"))))
-        val behandling = behandlingRepository.insert(behandling(fagsak, aktiv = false))
+        val behandling = behandlingRepository.insert(behandling(fagsak))
         val respons = hentBehandling(behandling.id)
 
         assertThat(respons.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
@@ -45,7 +45,7 @@ internal class BehandlingControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `Skal annullere behandling`() {
         val fagsak = fagsakRepository.insert(fagsak(identer = setOf(FagsakPerson("12345678901"))))
-        val behandling = behandlingRepository.insert(behandling(fagsak, aktiv = true, type = BehandlingType.BLANKETT))
+        val behandling = behandlingRepository.insert(behandling(fagsak, type = BehandlingType.BLANKETT))
         val respons = annullerBehandling(behandling.id)
 
         assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)

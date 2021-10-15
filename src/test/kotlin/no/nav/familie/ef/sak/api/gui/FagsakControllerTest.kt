@@ -52,8 +52,8 @@ internal class FagsakControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `Gitt fagsak med behandlinger finnes når get fagsak endpoint kalles skal det returneres 200 OK med fagsakDto`() {
         val fagsak = fagsakRepository.insert(fagsak(identer = setOf(FagsakPerson("01010199999"))))
-        behandlingRepository.insert(behandling(fagsak, aktiv = false))
-        behandlingRepository.insert(behandling(fagsak, aktiv = false))
+        behandlingRepository.insert(behandling(fagsak))
+        behandlingRepository.insert(behandling(fagsak))
 
         val fagsakForId = hentFagsakForId(fagsak.id)
         Assertions.assertThat(fagsakForId.data?.id).isEqualTo(fagsak.id)

@@ -39,7 +39,7 @@ internal class BehandlingshistorikkControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `Skal returnere 200 OK med status IKKE_TILGANG dersom man ikke har tilgang til brukeren`() {
         val fagsak = fagsakRepository.insert(fagsak(identer = setOf(FagsakPerson("ikkeTilgang"))))
-        val behandling = behandlingRepository.insert(behandling(fagsak, aktiv = false))
+        val behandling = behandlingRepository.insert(behandling(fagsak))
         val respons = hentHistorikk(behandling.id)
 
         assertThat(respons.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
@@ -50,7 +50,7 @@ internal class BehandlingshistorikkControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `skal returnere sortert historikk, sist opprettet først`() {
         val fagsak = fagsakRepository.insert(fagsak(identer = setOf(FagsakPerson(""))))
-        val behandling = behandlingRepository.insert(behandling(fagsak, aktiv = false))
+        val behandling = behandlingRepository.insert(behandling(fagsak))
 
         leggInnHistorikk(behandling, "1", LocalDateTime.now())
         leggInnHistorikk(behandling, "2", LocalDateTime.now().minusDays(1))
@@ -63,7 +63,7 @@ internal class BehandlingshistorikkControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `skal returnere metadata som json`() {
         val fagsak = fagsakRepository.insert(fagsak(identer = setOf(FagsakPerson(""))))
-        val behandling = behandlingRepository.insert(behandling(fagsak, aktiv = false))
+        val behandling = behandlingRepository.insert(behandling(fagsak))
 
         val jsonMap = mapOf("key" to "value")
         val metadata = JsonWrapper(objectMapper.writeValueAsString(jsonMap))
