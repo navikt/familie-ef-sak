@@ -43,7 +43,7 @@ class TilbakekrevingService(private val tilbakekrevingRepository: Tilbakekreving
         }
     }
 
-    fun finnesTilbakekreving(behandlingId: UUID): Boolean {
+    fun finnesÅpenTilbakekrevingsBehandling(behandlingId: UUID): Boolean {
         val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
         return tilbakekrevingClient.finnesÅpenBehandling(fagsakEksternId = fagsak.eksternId.id)
     }
