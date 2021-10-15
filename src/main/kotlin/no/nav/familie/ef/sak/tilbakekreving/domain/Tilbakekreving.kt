@@ -22,7 +22,8 @@ enum class Tilbakekrevingsvalg {
     AVVENT
 }
 
-fun Tilbakekreving.tilDto(behandlingFinnes: Boolean) = TilbakekrevingDto(valg = this.valg,
-                                                                         varseltekst = this.varseltekst,
-                                                                         begrunnelse = this.begrunnelse,
-                                                                         behandlingFinnes = behandlingFinnes)
+fun Tilbakekreving.tilDto() = TilbakekrevingDto(
+        valg = this.valg,
+        varseltekst = this.varseltekst,
+        begrunnelse = this.begrunnelse,
+)

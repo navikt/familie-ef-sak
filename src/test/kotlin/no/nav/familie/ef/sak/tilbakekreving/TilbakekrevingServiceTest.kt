@@ -31,8 +31,7 @@ internal class TilbakekrevingServiceTest {
         val tilbakekrevingDto =
                 TilbakekrevingDto(valg = Tilbakekrevingsvalg.AVVENT,
                                   varseltekst = "",
-                                  begrunnelse = "Dette er tekst ",
-                                  behandlingFinnes = false)
+                                  begrunnelse = "Dette er tekst ")
         val feil = assertThrows<Feil> {
             tilbakekrevingService.lagreTilbakekreving(tilbakekrevingDto,
                                                       behandlingId = UUID.randomUUID())
@@ -46,8 +45,7 @@ internal class TilbakekrevingServiceTest {
         val tilbakekrevingDto =
                 TilbakekrevingDto(valg = Tilbakekrevingsvalg.OPPRETT_MED_VARSEL,
                                   varseltekst = null,
-                                  begrunnelse = "tekst her",
-                                  behandlingFinnes = false)
+                                  begrunnelse = "tekst her")
 
         val feil = assertThrows<Feil> {
             tilbakekrevingService.lagreTilbakekreving(tilbakekrevingDto,
@@ -63,8 +61,7 @@ internal class TilbakekrevingServiceTest {
         val tilbakekrevingDto =
                 TilbakekrevingDto(valg = Tilbakekrevingsvalg.OPPRETT_MED_VARSEL,
                                   varseltekst = "   ",
-                                  begrunnelse = "tekst her",
-                                  behandlingFinnes = false)
+                                  begrunnelse = "tekst her")
 
         val feil = assertThrows<Feil> {
             tilbakekrevingService.lagreTilbakekreving(tilbakekrevingDto,
@@ -82,8 +79,7 @@ internal class TilbakekrevingServiceTest {
         val tilbakekrevingDto =
                 TilbakekrevingDto(valg = Tilbakekrevingsvalg.OPPRETT_MED_VARSEL,
                                   varseltekst = varseltekst,
-                                  begrunnelse = forventetBegrunnelse,
-                                  behandlingFinnes = false)
+                                  begrunnelse = forventetBegrunnelse)
 
         val behandlingId = UUID.randomUUID()
         every { tilbakekrevingRepository.deleteById(any()) } just Runs

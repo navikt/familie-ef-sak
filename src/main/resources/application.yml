@@ -107,6 +107,7 @@ no.nav.security.jwt:
 
 PDL_SCOPE: api://prod-fss.pdl.pdl-api/.default
 IVERKSETT_SCOPE: api://prod-gcp.teamfamilie.familie-ef-iverksett/.default
+FAMILIE_TILBAKE_SCOPE: api://${DEPLOY_ENV}-gcp.teamfamilie.familie-tilbake/.default
 
 
 spring:
@@ -157,7 +158,6 @@ FAMILIE_EF_IVERKSETT_URL: http://familie-ef-iverksett
 
 
 FAMILIE_TILBAKE_URL: http://familie-tilbake
-FAMILIE_TILBAKE_SCOPE: api://${DEPLOY_ENV}-gcp.teamfamilie.familie-tilbake/.default
 
 FAMILIE_OPPDRAG_API_URL: https://familie-oppdrag.${ON_PREM_URL_ENV}-fss-pub.nais.io
 FAMILIE_INTEGRASJONER_URL: https://familie-integrasjoner.${ON_PREM_URL_ENV}-fss-pub.nais.io

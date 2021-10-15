@@ -43,8 +43,8 @@ class TilbakekrevingClient(@Qualifier("azure") restOperations: RestOperations,
                              HttpHeaders().apply { accept = listOf(MediaType.APPLICATION_PDF) })
     }
 
-    fun finnesÅpenBehandling(fagsakExternId: Long): Boolean {
-        val response: Ressurs<FinnesBehandlingResponse> = getForEntity(finnesÅpenBehandlingUri(fagsakExternId))
+    fun finnesÅpenBehandling(fagsakEksternId: Long): Boolean {
+        val response: Ressurs<FinnesBehandlingResponse> = getForEntity(finnesÅpenBehandlingUri(fagsakEksternId))
         return response.getDataOrThrow().finnesÅpenBehandling
     }
 
