@@ -54,7 +54,7 @@ internal class VurderingServiceTest {
             TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "13071489536"),
             TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "01012067050")
     )).build().søknadOvergangsstønad)
-    private val behandling = behandling(fagsak(), true, BehandlingStatus.OPPRETTET)
+    private val behandling = behandling(fagsak(), BehandlingStatus.OPPRETTET)
     private val BEHANDLING_ID = UUID.randomUUID()
 
     @BeforeEach
