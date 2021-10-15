@@ -46,7 +46,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
     private val personIdent = "123456789012"
     private val behandlingsårsak = BehandlingÅrsak.NYE_OPPLYSNINGER
     private val kravMottatt = LocalDate.of(2021, 9, 9)
-    private val revurderingDto = RevurderingDto(fagsak.id, behandlingsårsak, kravMottatt)
+    private lateinit var revurderingDto: RevurderingDto
 
 
     @BeforeEach
@@ -54,6 +54,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         BrukerContextUtil.mockBrukerContext("Heider")
         val identer = fagsakpersoner(setOf(personIdent))
         fagsak = fagsakRepository.insert(fagsak(identer = identer))
+        revurderingDto = RevurderingDto(fagsak.id, behandlingsårsak, kravMottatt)
     }
 
     @AfterEach
