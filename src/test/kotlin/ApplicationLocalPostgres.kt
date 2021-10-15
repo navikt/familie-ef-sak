@@ -22,7 +22,8 @@ fun main(args: Array<String>) {
                       "mock-infotrygd-replika",
                       "mock-kodeverk",
                       "mock-blankett",
-                      "mock-iverksett")
+                      "mock-iverksett",
+                      "mock-tilbakekreving")
             .properties(properties)
             .run(*args)
 }

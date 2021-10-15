@@ -86,9 +86,28 @@ no.nav.security.jwt:
           client-id: ${AZURE_APP_CLIENT_ID}
           client-secret: ${AZURE_APP_CLIENT_SECRET}
           client-auth-method: client_secret_basic
+      familie-tilbake-clientcredentials:
+        resource-url: ${FAMILIE_TILBAKE_URL}
+        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
+        grant-type: client_credentials
+        scope: ${FAMILIE_TILBAKE_SCOPE}
+        authentication:
+          client-id: ${AZURE_APP_CLIENT_ID}
+          client-secret: ${AZURE_APP_CLIENT_SECRET}
+          client-auth-method: client_secret_basic
+      familie-tilbake-onbehalfof:
+        resource-url: ${FAMILIE_TILBAKE_URL}
+        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
+        grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+        scope: ${FAMILIE_TILBAKE_SCOPE}
+        authentication:
+          client-id: ${AZURE_APP_CLIENT_ID}
+          client-secret: ${AZURE_APP_CLIENT_SECRET}
+          client-auth-method: client_secret_basic
 
 PDL_SCOPE: api://prod-fss.pdl.pdl-api/.default
 IVERKSETT_SCOPE: api://prod-gcp.teamfamilie.familie-ef-iverksett/.default
+FAMILIE_TILBAKE_SCOPE: api://${DEPLOY_ENV}-gcp.teamfamilie.familie-tilbake/.default
 
 
 spring:
@@ -124,6 +143,7 @@ management:
   metrics.export.prometheus.enabled: true
   metrics.web.server.auto-time-requests: true
 
+DEPLOY_ENV: prod
 ON_PREM_URL_ENV: prod
 GATEWAY_PREFIX: api-gw
 
@@ -132,6 +152,9 @@ AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/${AZURE_APP_TENANT
 FAMILIE_BREV_API_URL: http://familie-brev
 FAMILIE_BLANKETT_API_URL: http://familie-ef-blankett
 FAMILIE_EF_IVERKSETT_URL: http://familie-ef-iverksett
+
+
+FAMILIE_TILBAKE_URL: http://familie-tilbake
 
 FAMILIE_OPPDRAG_API_URL: https://familie-oppdrag.${ON_PREM_URL_ENV}-fss-pub.nais.io
 FAMILIE_INTEGRASJONER_URL: https://familie-integrasjoner.${ON_PREM_URL_ENV}-fss-pub.nais.io
