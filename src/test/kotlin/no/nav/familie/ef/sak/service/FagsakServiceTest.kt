@@ -12,13 +12,8 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
-<<<<<<< HEAD
-import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
-import no.nav.familie.kontrakter.felles.objectMapper
-=======
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
->>>>>>> master
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
