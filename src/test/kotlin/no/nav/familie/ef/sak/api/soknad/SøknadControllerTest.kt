@@ -43,7 +43,7 @@ internal class SøknadControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `Skal returnere 200 OK med status IKKE_TILGANG dersom man ikke har tilgang til brukeren`() {
         val fagsak = fagsakRepository.insert(fagsak(identer = setOf(FagsakPerson("ikkeTilgang"))))
-        val behandling = behandlingRepository.insert(behandling(fagsak, aktiv = false))
+        val behandling = behandlingRepository.insert(behandling(fagsak))
         val respons = hentSøknadData(behandling.id)
 
         Assertions.assertThat(respons.statusCode).isEqualTo(HttpStatus.FORBIDDEN)

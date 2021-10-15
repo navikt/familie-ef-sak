@@ -162,7 +162,7 @@ internal class TotrinnskontrollServiceTest {
                                      JsonWrapper(objectMapper.writeValueAsString(it))
                                  })
 
-    private fun behandling(status: BehandlingStatus) = behandling(fagsak, true, status)
+    private fun behandling(status: BehandlingStatus) = behandling(fagsak, status)
 
     companion object {
 

@@ -20,7 +20,6 @@ data class Behandling(@Id
                       @MappedCollection(idColumn = "behandling_id")
                       val eksternId: EksternBehandlingId = EksternBehandlingId(),
                       val versjon: Int = 0,
-                      val aktiv: Boolean = true,
 
                       val type: BehandlingType,
                       var status: BehandlingStatus,

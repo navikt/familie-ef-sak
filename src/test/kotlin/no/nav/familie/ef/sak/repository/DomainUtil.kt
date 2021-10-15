@@ -43,7 +43,6 @@ fun oppgave(behandling: Behandling,
                 erFerdigstilt = erFerdigstilt)
 
 fun behandling(fagsak: Fagsak,
-               aktiv: Boolean = true,
                status: BehandlingStatus = BehandlingStatus.OPPRETTET,
                steg: StegType = StegType.VILKÅR,
                id: UUID = UUID.randomUUID(),
@@ -58,7 +57,6 @@ fun behandling(fagsak: Fagsak,
                    type = type,
                    status = status,
                    steg = steg,
-                   aktiv = aktiv,
                    resultat = resultat,
                    sporbar = Sporbar(opprettetTid = opprettetTid),
                    årsak = årsak)
