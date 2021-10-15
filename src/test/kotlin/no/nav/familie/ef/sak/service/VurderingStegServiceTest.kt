@@ -73,7 +73,7 @@ internal class VurderingStegServiceTest {
             TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "13071489536"),
             TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "01012067050")
     )).build().søknadOvergangsstønad)
-    private val behandling = behandling(fagsak(), true, BehandlingStatus.OPPRETTET)
+    private val behandling = behandling(fagsak(), BehandlingStatus.OPPRETTET)
     private val behandlingId = UUID.randomUUID()
 
     @BeforeEach
@@ -162,7 +162,7 @@ internal class VurderingStegServiceTest {
 
     @Test
     internal fun `skal ikke oppdatere vilkårsvurdering hvis behandlingen er låst for videre behandling`() {
-        every { behandlingService.hentBehandling(behandlingId) } returns behandling(fagsak(), true, BehandlingStatus.FERDIGSTILT)
+        every { behandlingService.hentBehandling(behandlingId) } returns behandling(fagsak(), BehandlingStatus.FERDIGSTILT)
         val vilkårsvurdering = vilkårsvurdering(behandlingId,
                                                 resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
                                                 VilkårType.FORUTGÅENDE_MEDLEMSKAP)
@@ -179,7 +179,7 @@ internal class VurderingStegServiceTest {
 
     @Test
     internal fun `skal oppdatere status fra OPPRETTET til UTREDES for første vilkår`() {
-        every { behandlingService.hentBehandling(behandlingId) } returns behandling(fagsak(), true, BehandlingStatus.OPPRETTET)
+        every { behandlingService.hentBehandling(behandlingId) } returns behandling(fagsak(), BehandlingStatus.OPPRETTET)
         val lagretVilkårsvurdering = slot<Vilkårsvurdering>()
         val vilkårsvurdering = initiererVurderinger(lagretVilkårsvurdering)
         val delvilkårDto = listOf(DelvilkårsvurderingDto(Vilkårsresultat.IKKE_OPPFYLT,
@@ -195,7 +195,7 @@ internal class VurderingStegServiceTest {
 
     @Test
     internal fun `skal ikke oppdatere status til UTREDES hvis den allerede er dette `() {
-        every { behandlingService.hentBehandling(behandlingId) } returns behandling(fagsak(), true, BehandlingStatus.UTREDES)
+        every { behandlingService.hentBehandling(behandlingId) } returns behandling(fagsak(), BehandlingStatus.UTREDES)
         val lagretVilkårsvurdering = slot<Vilkårsvurdering>()
         val vilkårsvurdering = initiererVurderinger(lagretVilkårsvurdering)
         val delvilkårDto = listOf(DelvilkårsvurderingDto(Vilkårsresultat.IKKE_OPPFYLT,

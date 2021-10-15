@@ -13,7 +13,6 @@ import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
-import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
@@ -47,33 +46,32 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
                                    søkerIdenter = setOf(FagsakPerson(ident = personIdent)))
         val fagsakDB = fagsakRepository.insert(fagsakRequest)
 
-        val behandlingInaktiv = Behandling(fagsakId = fagsakDB.id,
-                                           type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                           status = BehandlingStatus.FERDIGSTILT,
-                                           aktiv = false,
-                                           steg = StegType.BEHANDLING_FERDIGSTILT,
-                                           resultat = BehandlingResultat.INNVILGET)
-        val behandlingAktiv = Behandling(fagsakId = fagsakDB.id,
-                                         type = BehandlingType.REVURDERING,
-                                         status = BehandlingStatus.UTREDES,
-                                         aktiv = true,
-                                         steg = StegType.VILKÅR,
-                                         resultat = BehandlingResultat.INNVILGET)
+        val behandling1 = Behandling(fagsakId = fagsakDB.id,
+                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                                     status = BehandlingStatus.FERDIGSTILT,
+                                     steg = StegType.BEHANDLING_FERDIGSTILT,
+                                     resultat = BehandlingResultat.INNVILGET)
+        val behandling2 = Behandling(fagsakId = fagsakDB.id,
+                                     type = BehandlingType.REVURDERING,
+                                     status = BehandlingStatus.UTREDES,
+                                     steg = StegType.VILKÅR,
+                                     resultat = BehandlingResultat.INNVILGET)
 
-        behandlingRepository.insert(behandlingInaktiv)
-        behandlingRepository.insert(behandlingAktiv)
+        behandlingRepository.insert(behandling1)
+        behandlingRepository.insert(behandling2)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakMedBehandlinger(personIdent, Stønadstype.BARNETILSYN)
-        println(objectMapper.writeValueAsString(fagsak))
         assertThat(fagsak.behandlinger.size).isEqualTo(2)
         assertThat(fagsak.stønadstype).isEqualTo(fagsakRequest.stønadstype)
         assertThat(fagsak.personIdent).isEqualTo(personIdent)
-        assertThat(fagsak.behandlinger.find { it.aktiv }?.status).isEqualTo(behandlingAktiv.status)
-        assertThat(fagsak.behandlinger.find { it.aktiv }?.type).isEqualTo(behandlingAktiv.type)
 
-        assertThat(fagsak.behandlinger.find { !it.aktiv }?.status).isEqualTo(behandlingInaktiv.status)
-        assertThat(fagsak.behandlinger.find { !it.aktiv }?.type).isEqualTo(behandlingInaktiv.type)
+        val førstegangsbehandling = fagsak.behandlinger.single { it.type == BehandlingType.FØRSTEGANGSBEHANDLING }
+        assertThat(førstegangsbehandling.status).isEqualTo(behandling1.status)
+        assertThat(førstegangsbehandling.type).isEqualTo(behandling1.type)
+
+        val revurdering = fagsak.behandlinger.single { it.type == BehandlingType.REVURDERING }
+        assertThat(revurdering.status).isEqualTo(behandling2.status)
+        assertThat(revurdering.type).isEqualTo(behandling2.type)
     }
-
 
 }

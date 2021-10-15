@@ -44,7 +44,6 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
     internal fun `Skal klare å inserte ett vedtak med resultatet avslå`() {
         val fagsak = fagsakRepository.insert(fagsak(identer = setOf(FagsakPerson(""))))
         val behandling = behandlingRepository.insert(behandling(fagsak,
-                                                                aktiv = true,
                                                                 steg = StegType.VEDTA_BLANKETT,
                                                                 type = BehandlingType.BLANKETT,
                                                                 status = BehandlingStatus.UTREDES))
@@ -60,7 +59,6 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
     internal fun `Skal feile hvis resultatet er henlegge`() {
         val fagsak = fagsakRepository.insert(fagsak(identer = setOf(FagsakPerson(""))))
         val behandling = behandlingRepository.insert(behandling(fagsak,
-                                                                aktiv = true,
                                                                 steg = StegType.VEDTA_BLANKETT,
                                                                 type = BehandlingType.BLANKETT,
                                                                 status = BehandlingStatus.UTREDES))
@@ -75,7 +73,6 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
     internal fun `Skal klare å inserte ett vedtak med resultatet innvilge`() {
         val fagsak = fagsakRepository.insert(fagsak(identer = setOf(FagsakPerson(""))))
         val behandling = behandlingRepository.insert(behandling(fagsak,
-                                                                aktiv = true,
                                                                 steg = StegType.VEDTA_BLANKETT,
                                                                 type = BehandlingType.BLANKETT,
                                                                 status = BehandlingStatus.UTREDES))

@@ -37,9 +37,29 @@ class EksternBehandlingController(private val pdlClient: PdlClient,
     fun finnesBehandlingForPerson(@RequestParam("type") stønadstype: Stønadstype?,
                                   @RequestBody request: PersonIdent): Ressurs<Boolean> {
         val personidenter = pdlClient.hentPersonidenter(request.ident, historikk = true).identer()
+        return finnesBehandlingFor(personidenter, stønadstype)
+    }
+
+    /**
+     * Hvis man har alle identer til en person så kan man sende inn alle direkte, for å unngå oppslag mot pdl
+     * Dette er alltså ikke ett bolk-oppslag for flere ulike personer
+     */
+    @PostMapping("finnes/flere-identer")
+    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
+    fun finnesBehandlingForPersonIdenter(@RequestParam("type") stønadstype: Stønadstype?,
+                                         @RequestBody personidenter: Set<String>): Ressurs<Boolean> {
+        return finnesBehandlingFor(personidenter, stønadstype)
+    }
+
+    private fun finnesBehandlingFor(personidenter: Set<String>,
+                                    stønadstype: Stønadstype?): Ressurs<Boolean> {
         if (personidenter.isEmpty()) {
             return Ressurs.failure("Finner ikke identer til personen")
         }
+        if (personidenter.any { it.length != 11 }) {
+            return Ressurs.failure("Støtter kun identer av typen fnr/dnr")
+        }
+
         return if (stønadstype != null) {
             Ressurs.success(eksistererBehandlingSomIkkeErBlankett(stønadstype, personidenter))
         } else {

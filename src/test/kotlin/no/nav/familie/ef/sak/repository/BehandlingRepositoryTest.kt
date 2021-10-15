@@ -45,18 +45,6 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun findByFagsakIdAndAktivIsTrue() {
-        val fagsak = fagsakRepository.insert(fagsak())
-        behandlingRepository.insert(behandling(fagsak, aktiv = false))
-
-        assertThat(behandlingRepository.findByFagsakIdAndAktivIsTrue(UUID.randomUUID())).isNull()
-        assertThat(behandlingRepository.findByFagsakIdAndAktivIsTrue(fagsak.id)).isNull()
-
-        val aktivBehandling = behandlingRepository.insert(behandling(fagsak, aktiv = true))
-        assertThat(behandlingRepository.findByFagsakIdAndAktivIsTrue(fagsak.id)).isEqualTo(aktivBehandling)
-    }
-
-    @Test
     internal fun findByFagsakAndStatus() {
         val fagsak = fagsakRepository.insert(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.OPPRETTET))
