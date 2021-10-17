@@ -30,6 +30,7 @@ import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.kontrakter.ef.iverksett.SimuleringDto
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -39,7 +40,6 @@ import org.springframework.data.repository.findByIdOrNull
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
-import java.util.UUID
 
 internal class SimuleringServiceTest {
 
@@ -78,7 +78,8 @@ internal class SimuleringServiceTest {
 
         val tilkjentYtelse = tilkjentYtelse(behandlingId = behandling.id, personIdent = personIdent)
         val simuleringsresultat = Simuleringsresultat(behandlingId = behandling.id,
-                                                      data = DetaljertSimuleringResultat(emptyList()))
+                                                      data = DetaljertSimuleringResultat(emptyList()),
+                                                      beriketData = BeriketSimuleringsresultat(mockk(), mockk()))
         every { behandlingService.hentBehandling(any()) } returns behandling
         every { tilkjentYtelseService.hentForBehandling(any()) } returns tilkjentYtelse
         every { simuleringsresultatRepository.deleteById(any()) } just Runs
@@ -169,7 +170,8 @@ internal class SimuleringServiceTest {
         every {
             simuleringsresultatRepository.findByIdOrNull(behandling.id)
         } returns Simuleringsresultat(behandlingId = behandling.id,
-                                      data = DetaljertSimuleringResultat(emptyList()))
+                                      data = DetaljertSimuleringResultat(emptyList()),
+                                      beriketData = BeriketSimuleringsresultat(mockk(), mockk()))
         val simuleringsresultatDto = simuleringService.simuler(behandling.id)
         assertThat(simuleringsresultatDto).isNotNull
     }
@@ -195,12 +197,12 @@ internal class SimuleringServiceTest {
 
         simuleringService.simuler(behandling.id)
 
-        assertThat(simulerSlot.captured.beriketData?.oppsummering?.fom)
-                .isEqualTo(LocalDate.of(2021,2,1))
+        assertThat(simulerSlot.captured.beriketData.oppsummering.fom)
+                .isEqualTo(LocalDate.of(2021, 2, 1))
     }
 
     private fun readFile(filnavn: String): String {
         return this::class.java.getResource("/json/$filnavn").readText()
     }
-    
+
 }

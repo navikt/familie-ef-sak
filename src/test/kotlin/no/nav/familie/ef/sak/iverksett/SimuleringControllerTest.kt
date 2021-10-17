@@ -12,9 +12,9 @@ import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelseType
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
-import no.nav.familie.ef.sak.simulering.SimuleringsresultatDto
 import no.nav.familie.ef.sak.simulering.SimuleringsresultatRepository
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.simulering.Simuleringsoppsummering
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -62,7 +62,7 @@ internal class SimuleringControllerTest : OppslagSpringRunnerTest() {
                                                                                                           kildeBehandlingId = behandling.id))
                                                        ))
 
-        val respons: ResponseEntity<Ressurs<SimuleringsresultatDto>> = simulerForBehandling(behandling.id)
+        val respons: ResponseEntity<Ressurs<Simuleringsoppsummering>> = simulerForBehandling(behandling.id)
 
         Assertions.assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
         Assertions.assertThat(respons.body.status).isEqualTo(Ressurs.Status.SUKSESS)
@@ -75,7 +75,7 @@ internal class SimuleringControllerTest : OppslagSpringRunnerTest() {
         Assertions.assertThat(simuleringsresultat.data.simuleringMottaker.first().simulertPostering).hasSizeGreaterThan(1)
     }
 
-    private fun simulerForBehandling(behandlingId: UUID): ResponseEntity<Ressurs<SimuleringsresultatDto>> {
+    private fun simulerForBehandling(behandlingId: UUID): ResponseEntity<Ressurs<Simuleringsoppsummering>> {
         return restTemplate.exchange(localhost("/api/simulering/$behandlingId"),
                                      HttpMethod.GET,
                                      HttpEntity<Ressurs<BehandlingDto>>(headers))
