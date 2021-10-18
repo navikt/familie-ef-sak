@@ -26,6 +26,8 @@ import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.ef.sak.simulering.SimuleringService
+import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -46,10 +48,19 @@ internal class SendTilBeslutterStegTest {
     private val behandlingService = mockk<BehandlingService>(relaxed = true)
     private val vedtaksbrevRepository = mockk<VedtaksbrevRepository>()
     private val vedtakService = mockk<VedtakService>()
+    private val simuleringService = mockk<SimuleringService>()
+    private val tilbakekrevingService = mockk<TilbakekrevingService>()
 
 
     private val beslutteVedtakSteg =
-            SendTilBeslutterSteg(taskRepository, oppgaveService, fagsakService, behandlingService, vedtaksbrevRepository, vedtakService)
+            SendTilBeslutterSteg(taskRepository,
+                                 oppgaveService,
+                                 fagsakService,
+                                 behandlingService,
+                                 vedtaksbrevRepository,
+                                 vedtakService,
+                                 simuleringService,
+                                 tilbakekrevingService)
     private val fagsak = Fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD,
                                 søkerIdenter = setOf(FagsakPerson(ident = "12345678901")))
     private val vedtaksbrev = Vedtaksbrev(behandlingId = UUID.randomUUID(),

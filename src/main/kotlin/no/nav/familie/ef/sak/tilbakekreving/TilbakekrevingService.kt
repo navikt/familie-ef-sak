@@ -48,4 +48,8 @@ class TilbakekrevingService(private val tilbakekrevingRepository: Tilbakekreving
         return tilbakekrevingClient.finnesÅpenBehandling(fagsakEksternId = fagsak.eksternId.id)
     }
 
+    fun harSaksbehandlerTattStillingTilTilbakekreving(behandlingsId: UUID): Boolean {
+        return tilbakekrevingRepository.existsById(behandlingsId)
+    }
+
 }
