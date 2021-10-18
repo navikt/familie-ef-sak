@@ -14,6 +14,6 @@ data class Simuleringsresultat(@Id
                                val data: DetaljertSimuleringResultat,
                                @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                                val sporbar: Sporbar = Sporbar(),
-                               val beriketData: BeriketSimuleringsresultat? = null)
+                               val beriketData: BeriketSimuleringsresultat)
 
 

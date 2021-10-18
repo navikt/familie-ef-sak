@@ -1,13 +1,10 @@
 package no.nav.familie.ef.sak.simulering
 
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.simulering.SimuleringsposteringTestUtil.lagPosteringer
-import no.nav.familie.kontrakter.felles.simulering.BetalingType
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
-import no.nav.familie.kontrakter.felles.simulering.FagOmrådeKode
 import no.nav.familie.kontrakter.felles.simulering.MottakerType
 import no.nav.familie.kontrakter.felles.simulering.PosteringType
 import no.nav.familie.kontrakter.felles.simulering.SimuleringMottaker
-import no.nav.familie.kontrakter.felles.simulering.SimulertPostering
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
@@ -29,7 +26,7 @@ internal class SimuleringUtilTest {
         ))
 
         val simuleringsresultatDto =
-                tilSimuleringsresultatDto(DetaljertSimuleringResultat(simuleringsmottakere), fraDato.plusMonths(12))
+                tilSimuleringsoppsummering(DetaljertSimuleringResultat(simuleringsmottakere), fraDato.plusMonths(12))
 
         assertThat(simuleringsresultatDto.perioder).isEmpty()
         assertThat(simuleringsresultatDto.etterbetaling).isZero()
@@ -53,7 +50,7 @@ internal class SimuleringUtilTest {
         val antallMånederEtterStart: Long = 12
         val tidSimuleringHentet = fraDato.plusMonths(antallMånederEtterStart)
         val simuleringsresultatDto =
-                tilSimuleringsresultatDto(DetaljertSimuleringResultat(simuleringsmottakere), tidSimuleringHentet)
+                tilSimuleringsoppsummering(DetaljertSimuleringResultat(simuleringsmottakere), tidSimuleringHentet)
 
         val posteringerGruppert = simuleringsresultatDto.perioder
         assertThat(posteringerGruppert).hasSize(antallMåneder)
@@ -106,7 +103,7 @@ internal class SimuleringUtilTest {
         val antallMånederEtterStart: Long = 12
         val tidSimuleringHentet = fraDato.plusMonths(antallMånederEtterStart)
         val simuleringsresultatDto =
-                tilSimuleringsresultatDto(DetaljertSimuleringResultat(simuleringsmottakere), tidSimuleringHentet)
+                tilSimuleringsoppsummering(DetaljertSimuleringResultat(simuleringsmottakere), tidSimuleringHentet)
 
         val posteringerGruppert = simuleringsresultatDto.perioder
         val totaltFeilutbetaltBeløp = beløp.minus(nyttBeløp).multiply(BigDecimal(antallMånederFeilutbetalt))

@@ -46,8 +46,10 @@ import no.nav.familie.kontrakter.ef.iverksett.VedtaksperiodeType
 import no.nav.familie.kontrakter.ef.iverksett.VilkårsvurderingDto
 import no.nav.familie.kontrakter.ef.iverksett.VurderingDto
 import no.nav.familie.kontrakter.felles.annotasjoner.Improvement
+import no.nav.familie.kontrakter.felles.simulering.Simuleringsoppsummering
 import no.nav.familie.kontrakter.felles.tilbakekreving.Periode
 import org.springframework.stereotype.Component
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.familie.kontrakter.ef.felles.RegelId as RegelIdIverksett
@@ -209,3 +211,26 @@ fun PeriodeWrapper.tilIverksettDto(): List<VedtaksperiodeDto> = this.perioder.ma
                       periodeType = VedtaksperiodeType.valueOf(it.periodeType.name)
     )
 }
+
+fun Simuleringsoppsummering.hentSammenhengendePerioderMedFeilutbetaling(): List<Periode> {
+    val perioderMedFeilutbetaling =
+            perioder.sortedBy { it.fom }.filter { it.feilutbetaling > BigDecimal(0) }.map {
+                Periode(it.fom, it.tom)
+            }
+
+    return perioderMedFeilutbetaling.fold(mutableListOf()) { akkumulatorListe, nestePeriode ->
+        val gjeldendePeriode = akkumulatorListe.lastOrNull()
+
+        if (gjeldendePeriode != null && erPerioderSammenhengende(gjeldendePeriode, nestePeriode)) {
+            val oppdatertGjeldendePeriode = Periode(fom = gjeldendePeriode.fom,tom=nestePeriode.tom)
+            akkumulatorListe.removeLast()
+            akkumulatorListe.add(oppdatertGjeldendePeriode)
+        } else {
+            akkumulatorListe.add(nestePeriode)
+        }
+        akkumulatorListe
+    }
+}
+
+private fun erPerioderSammenhengende(gjeldendePeriode: Periode, nestePeriode: Periode) =
+        gjeldendePeriode.tom.plusDays(1) == nestePeriode.fom
