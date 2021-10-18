@@ -39,13 +39,14 @@ internal class OpprettBehandlingUtilTest {
     }
 
     @Test
-    internal fun `førstegangsbehandling - det skal være mulig å opprette hvis eksisterende behandling er avslått førstegangsbehandling`() {
-
-        validerKanOppretteNyBehandling(BehandlingType.FØRSTEGANGSBEHANDLING,
-                                       listOf(behandling(fagsak = fagsak,
-                                                         resultat = BehandlingResultat.AVSLÅTT,
-                                                         status = BehandlingStatus.FERDIGSTILT)
-                                       ), null)
+    internal fun `førstegangsbehandling - det skal ikke være mulig å opprette hvis eksisterende behandling er avslått førstegangsbehandling`() {
+        assertThat(catchThrowable {
+            validerKanOppretteNyBehandling(BehandlingType.FØRSTEGANGSBEHANDLING,
+                                           listOf(behandling(fagsak = fagsak,
+                                                             resultat = BehandlingResultat.AVSLÅTT,
+                                                             status = BehandlingStatus.FERDIGSTILT)
+                                           ), null)
+        }).hasMessage("Siste behandlingen for en førstegangsbehandling må være av typen blankett eller teknisk opphør")
     }
 
 
@@ -63,25 +64,19 @@ internal class OpprettBehandlingUtilTest {
     }
 
     @Test
-    internal fun `revurdering - det skal ikke være mulig å opprette en revurdering hvis eksisterende behandling er avslått førstegangsbehandling`() {
-        assertThat(catchThrowable {
-            validerKanOppretteNyBehandling(BehandlingType.REVURDERING,
-                                           listOf(behandling(fagsak = fagsak,
-                                                             resultat = BehandlingResultat.AVSLÅTT,
-                                                             status = BehandlingStatus.FERDIGSTILT)
-                                           ), null)
-        }).hasMessage("Det finnes ikke en tidligere behandling på fagsaken")
+    internal fun `revurdering - det skal være mulig å opprette en revurdering hvis eksisterende behandling er avslått førstegangsbehandling`() {
+        validerKanOppretteNyBehandling(BehandlingType.REVURDERING,
+                                       listOf(behandling(fagsak = fagsak,
+                                                         resultat = BehandlingResultat.AVSLÅTT,
+                                                         status = BehandlingStatus.FERDIGSTILT)
+                                       ), null)
     }
 
-
     @Test
-    internal fun `revurdering - det skal ikke være mulig å opprette en revurdering hvis eksisterende behandling er avslått og annullert`() {
+    internal fun `revurdering - det skal ikke være mulig å opprette en revurdering hvis eksisterende behandling er annullert`() {
         assertThat(catchThrowable {
             validerKanOppretteNyBehandling(BehandlingType.REVURDERING,
                                            listOf(behandling(fagsak = fagsak,
-                                                             resultat = BehandlingResultat.AVSLÅTT,
-                                                             status = BehandlingStatus.FERDIGSTILT),
-                                                  behandling(fagsak = fagsak,
                                                              resultat = BehandlingResultat.ANNULLERT,
                                                              status = BehandlingStatus.FERDIGSTILT)
                                            ), null)
