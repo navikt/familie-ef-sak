@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.behandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
@@ -13,7 +14,6 @@ import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
-import java.util.UUID
 
 @Service
 class RevurderingService(private val søknadService: SøknadService,
@@ -23,11 +23,13 @@ class RevurderingService(private val søknadService: SøknadService,
                          private val grunnlagsdataService: GrunnlagsdataService,
                          private val taskRepository: TaskRepository) {
 
-    fun opprettRevurderingManuelt(fagsakId: UUID): Behandling {
+    fun opprettRevurderingManuelt(revurderingInnhold: RevurderingDto): Behandling {
         val revurdering = behandlingService.opprettBehandling(BehandlingType.REVURDERING,
-                                                              fagsakId,
+                                                              revurderingInnhold.fagsakId,
                                                               BehandlingStatus.UTREDES,
-                                                              StegType.BEREGNE_YTELSE)
+                                                              StegType.BEREGNE_YTELSE,
+                                                              revurderingInnhold.behandlingsårsak,
+                                                              revurderingInnhold.kravMottatt)
         val forrigeBehandlingId = revurdering.forrigeBehandlingId
                                   ?: error("Revurdering må ha eksisterende iverksatt behandling")
         val saksbehandler = SikkerhetContext.hentSaksbehandler(true)

@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.infotrygd
 
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.infotrygd.InternPeriodeTestUtil
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

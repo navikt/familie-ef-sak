@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.kontrakter.ef.iverksett.SimuleringDto
 import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
+import no.nav.familie.kontrakter.felles.simulering.Simuleringsoppsummering
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.UUID
@@ -27,7 +28,7 @@ class SimuleringService(private val iverksettClient: IverksettClient,
                         private val tilkjentYtelseService: TilkjentYtelseService) {
 
 
-    fun simuler(behandlingId: UUID): SimuleringsresultatDto {
+    fun simuler(behandlingId: UUID): Simuleringsoppsummering {
         val behandling = behandlingService.hentBehandling(behandlingId)
 
         return when (behandling.type) {
@@ -36,9 +37,9 @@ class SimuleringService(private val iverksettClient: IverksettClient,
         }
     }
 
-    fun hentLagretSimuleringsresultat(behandlingId: UUID): SimuleringsresultatDto {
+    fun hentLagretSimuleringsresultat(behandlingId: UUID): Simuleringsoppsummering {
         val simuleringsresultat: Simuleringsresultat = simuleringsresultatRepository.findByIdOrThrow(behandlingId)
-        return tilSimuleringsresultatDto(simuleringsresultat.data, simuleringsresultat.sporbar.endret.endretTid.toLocalDate())
+        return simuleringsresultat.beriketData.oppsummering
     }
 
     fun slettSimuleringForBehandling(behandlingId: UUID) {
@@ -50,7 +51,7 @@ class SimuleringService(private val iverksettClient: IverksettClient,
         simuleringsresultatRepository.deleteById(behandling.id)
         val detaljertSimuleringResultat = simulerMedTilkjentYtelse(behandling, fagsak)
         val simuleringsoppsummering =
-                tilSimuleringsresultatDto(detaljertSimuleringResultat, LocalDate.now()).tilSimuleringsperiode()
+                tilSimuleringsoppsummering(detaljertSimuleringResultat, LocalDate.now())
         return simuleringsresultatRepository.insert(Simuleringsresultat(
                 behandlingId = behandling.id,
                 data = detaljertSimuleringResultat,
@@ -58,15 +59,15 @@ class SimuleringService(private val iverksettClient: IverksettClient,
         ))
     }
 
-    private fun simulerForBehandling(behandling: Behandling): SimuleringsresultatDto {
+    private fun simulerForBehandling(behandling: Behandling): Simuleringsoppsummering {
 
         if (behandling.status.behandlingErLåstForVidereRedigering()) {
             val simuleringsresultat: Simuleringsresultat = simuleringsresultatRepository.findByIdOrThrow(behandling.id)
-            return tilSimuleringsresultatDto(simuleringsresultat.data, simuleringsresultat.sporbar.opprettetTid.toLocalDate())
+            return simuleringsresultat.beriketData.oppsummering
         }
 
         val simuleringsresultat = hentOgLagreSimuleringsresultat(behandling)
-        return tilSimuleringsresultatDto(simuleringsresultat.data, LocalDate.now())
+        return simuleringsresultat.beriketData.oppsummering
     }
 
     private fun simulerMedTilkjentYtelse(behandling: Behandling, fagsak: Fagsak): DetaljertSimuleringResultat {
@@ -84,7 +85,7 @@ class SimuleringService(private val iverksettClient: IverksettClient,
         ))
     }
 
-    private fun simulerForBlankett(behandling: Behandling): SimuleringsresultatDto {
+    private fun simulerForBlankett(behandling: Behandling): Simuleringsoppsummering {
         val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
         val vedtak = vedtakService.hentVedtakHvisEksisterer(behandling.id)
         val tilkjentYtelseForBlankett = blankettSimuleringsService.genererTilkjentYtelseForBlankett(vedtak, behandling, fagsak)
@@ -93,8 +94,6 @@ class SimuleringService(private val iverksettClient: IverksettClient,
                 forrigeBehandlingId = null
 
         )
-        return tilSimuleringsresultatDto(iverksettClient.simuler(simuleringDto), LocalDate.now())
+        return tilSimuleringsoppsummering(iverksettClient.simuler(simuleringDto), LocalDate.now())
     }
-
-
 }

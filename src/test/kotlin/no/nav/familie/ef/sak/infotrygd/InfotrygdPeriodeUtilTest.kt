@@ -1,10 +1,11 @@
 package no.nav.familie.ef.sak.infotrygd
 
+import no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeTestUtil.lagInfotrygdPeriode
 import no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeUtil.filtrerOgSorterPerioderFraInfotrygd
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeTestUtil.lagInfotrygdPeriode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.YearMonth
 
 internal class InfotrygdPeriodeUtilTest {
 
@@ -34,6 +35,23 @@ internal class InfotrygdPeriodeUtilTest {
         val input = listOf(periode)
         val nyePerioder = filtrerOgSorterPerioderFraInfotrygd(input)
         assertThat(nyePerioder).isEqualTo(input)
+    }
+
+    @Test
+    internal fun `skat sette tom til opphørdato -1 når opphør er første i måneden`() {
+        val nowMåned = YearMonth.now()
+        val fom = nowMåned.atDay(1)
+        val tom = nowMåned.plusMonths(2).atEndOfMonth()
+        val opphøsdato = fom.plusMonths(1)
+        val periode1 = lagInfotrygdPeriode(stønadFom = fom,
+                                           stønadTom = tom,
+                                           opphørdato = opphøsdato)
+        val nyePerioder = filtrerOgSorterPerioderFraInfotrygd(listOf(periode1))
+
+        assertThat(nyePerioder).hasSize(1)
+        assertThat(nyePerioder[0].stønadFom).isEqualTo(fom)
+        assertThat(nyePerioder[0].stønadTom).isEqualTo(opphøsdato.minusDays(1))
+        assertThat(nyePerioder[0].opphørsdato).isEqualTo(opphøsdato)
     }
 
     @Test

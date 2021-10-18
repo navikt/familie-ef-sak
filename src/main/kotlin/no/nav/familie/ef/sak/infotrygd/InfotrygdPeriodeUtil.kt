@@ -1,6 +1,8 @@
 package no.nav.familie.ef.sak.infotrygd
 
+import no.nav.familie.ef.sak.felles.util.isEqualOrAfter
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
+import java.time.LocalDate
 
 
 /**
@@ -14,17 +16,51 @@ object InfotrygdPeriodeUtil {
 
     fun filtrerOgSorterPerioderFraInfotrygd(perioderFraInfotrygd: List<InfotrygdPeriode>): List<InfotrygdPeriode> {
         return perioderFraInfotrygd.toSet()
-                .map {
-                    val opphørsdato = it.opphørsdato
-                    if (opphørsdato != null && opphørsdato.isBefore(it.stønadTom)) {
-                        it.copy(stønadTom = opphørsdato)
-                    } else {
-                        it
-                    }
-                }
-                // Skal infotrygd rydde bort disse? (inkl de der opphørdato er før startdato)
-                .filter { it.stønadTom > it.stønadFom }
+                .map { brukOpphørsdatoSomTomHvisDenFinnes(it) }
+                .filter { it.stønadTom > it.stønadFom } // Skal infotrygd rydde bort disse? (inkl de der opphørdato er før startdato)
                 .sortedWith(compareBy<InfotrygdPeriode>({ it.stønadId }, { it.vedtakId }, { it.stønadFom }).reversed())
+    }
+
+    private fun brukOpphørsdatoSomTomHvisDenFinnes(it: InfotrygdPeriode): InfotrygdPeriode {
+        val opphørsdato = it.opphørsdato
+        return if (opphørsdato != null && opphørsdato.isBefore(it.stønadTom)) {
+            it.copy(stønadTom = trekkFraEnDagHvisFørsteIMåneden(opphørsdato))
+        } else {
+            it
+        }
+    }
+
+    /**
+     * Noen opphørsdatoer kommer som eks 01.02.yyyy, då skal vi bruke 31.01.yyyy
+     */
+    private fun trekkFraEnDagHvisFørsteIMåneden(opphørsdato: LocalDate) =
+            if (opphørsdato.dayOfMonth == 1) opphørsdato.minusDays(1) else opphørsdato
+
+    /**
+     * Slår sammen perioder fra infotrygd, disse skal ikke slås sammen tvers ulike stønadId'er
+     */
+    fun slåSammenInfotrygdperioder(infotrygdperioder: List<InfotrygdPeriode>): List<InternPeriode> {
+        return infotrygdperioder
+                .groupBy({ it.stønadId }, { it.tilInternPeriode() })
+                .values
+                .flatMap(this::slåSammenPerioder)
+                .sortedBy { it.stønadFom }
+    }
+
+    private fun slåSammenPerioder(perioder: List<InternPeriode>): MutableList<InternPeriode> {
+        val list = mutableListOf<InternPeriode>()
+
+        for (periode in perioder) {
+            val minStønadFom = list.minByOrNull { it.stønadFom }
+            if (minStønadFom != null && periode.stønadFom.isEqualOrAfter(minStønadFom.stønadFom)) {
+                continue
+            } else if (minStønadFom != null && minStønadFom.erPeriodeOverlappende(periode)) {
+                list.add(periode.copy(stønadTom = minStønadFom.stønadFom.minusDays(1)))
+            } else {
+                list.add(periode)
+            }
+        }
+        return list
     }
 
 }

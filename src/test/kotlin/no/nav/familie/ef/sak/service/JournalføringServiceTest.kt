@@ -27,6 +27,7 @@ import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.Fagsystem
@@ -112,15 +113,17 @@ internal class JournalføringServiceTest {
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     status = BehandlingStatus.UTREDES,
                                     steg = StegType.VILKÅR,
-                                    resultat = BehandlingResultat.IKKE_SATT))
+                                    resultat = BehandlingResultat.IKKE_SATT,
+                                    årsak = BehandlingÅrsak.SØKNAD))
 
-        every { behandlingService.opprettBehandling(any(), any()) }
+        every { behandlingService.opprettBehandling(any(), any(), behandlingsårsak = any()) }
                 .returns(Behandling(id = behandlingId,
                                     fagsakId = fagsakId,
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     status = BehandlingStatus.UTREDES,
                                     steg = StegType.VILKÅR,
-                                    resultat = BehandlingResultat.IKKE_SATT))
+                                    resultat = BehandlingResultat.IKKE_SATT,
+                                    årsak = BehandlingÅrsak.SØKNAD))
 
         every { oppgaveService.ferdigstillOppgave(any()) } just runs
         every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) } returns nyOppgaveId

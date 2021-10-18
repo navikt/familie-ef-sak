@@ -18,6 +18,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.SøkerMedBar
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.søknad.Barn
 import no.nav.familie.kontrakter.ef.søknad.EnumTekstverdiMedSvarId
 import no.nav.familie.kontrakter.ef.søknad.Fødselsnummer
@@ -135,7 +136,7 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
     }
 
     private fun lagFørstegangsbehandling(fagsak: Fagsak, søknad: SøknadOvergangsstønad): Behandling {
-        val behandling = behandlingService.opprettBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, fagsak.id)
+        val behandling = behandlingService.opprettBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, fagsak.id, behandlingsårsak = BehandlingÅrsak.SØKNAD)
         val journalposter = behandlingService.hentBehandlingsjournalposter(behandling.id)
         søknadService.lagreSøknadForOvergangsstønad(søknad,
                                                     behandling.id,
@@ -161,7 +162,7 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
     private fun lagBlankettBehandling(fagsak: Fagsak, fnr: String, søknad: SøknadOvergangsstønad): Behandling {
         val journalpostId = arkiver(fnr)
         val journalpost = journalpostClient.hentJournalpost(journalpostId)
-        return behandlingService.opprettBehandling(BehandlingType.BLANKETT, fagsak.id, søknad, journalpost)
+        return behandlingService.opprettBehandlingForBlankett(BehandlingType.BLANKETT, fagsak.id, søknad, journalpost)
     }
 }
 

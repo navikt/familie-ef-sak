@@ -8,12 +8,14 @@ import no.nav.familie.kontrakter.ef.iverksett.TilkjentYtelseMedMetadata
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import no.nav.familie.kontrakter.felles.simulering.PosteringType
 import no.nav.familie.kontrakter.felles.simulering.SimuleringMottaker
+import no.nav.familie.kontrakter.felles.simulering.Simuleringsoppsummering
 import no.nav.familie.kontrakter.felles.simulering.SimulertPostering
+import no.nav.familie.kontrakter.felles.simulering.Simuleringsperiode
 import java.math.BigDecimal
 import java.time.LocalDate
 
-fun tilSimuleringsresultatDto(detaljertSimuleringResultat: DetaljertSimuleringResultat,
-                              tidSimuleringHentet: LocalDate): SimuleringsresultatDto {
+fun tilSimuleringsoppsummering(detaljertSimuleringResultat: DetaljertSimuleringResultat,
+                              tidSimuleringHentet: LocalDate): Simuleringsoppsummering {
     val perioder = grupperPosteringerEtterDato(detaljertSimuleringResultat.simuleringMottaker)
 
     val framtidigePerioder =
@@ -25,7 +27,7 @@ fun tilSimuleringsresultatDto(detaljertSimuleringResultat: DetaljertSimuleringRe
     val nestePeriode = framtidigePerioder.filter { it.feilutbetaling == BigDecimal.ZERO }.minByOrNull { it.fom }
     val tomSisteUtbetaling = perioder.filter { nestePeriode == null || it.fom < nestePeriode.fom }.maxOfOrNull { it.tom }
 
-    return SimuleringsresultatDto(
+    return Simuleringsoppsummering(
             perioder = perioder,
             fomDatoNestePeriode = nestePeriode?.fom,
             etterbetaling = hentTotalEtterbetaling(perioder, nestePeriode?.fom),
@@ -38,9 +40,8 @@ fun tilSimuleringsresultatDto(detaljertSimuleringResultat: DetaljertSimuleringRe
     )
 }
 
-private fun grupperPosteringerEtterDato(mottakere: List<SimuleringMottaker>): List<SimuleringsPeriode> {
+private fun grupperPosteringerEtterDato(mottakere: List<SimuleringMottaker>): List<Simuleringsperiode> {
     val simuleringPerioder = mutableMapOf<LocalDate, MutableList<SimulertPostering>>()
-
 
     mottakere.forEach {
         it.simulertPostering.filter { postering ->
@@ -53,7 +54,7 @@ private fun grupperPosteringerEtterDato(mottakere: List<SimuleringMottaker>): Li
     }
 
     return simuleringPerioder.map { (fom, posteringListe) ->
-        SimuleringsPeriode(
+        Simuleringsperiode(
                 fom,
                 posteringListe[0].tom,
                 posteringListe[0].forfallsdato,
@@ -95,13 +96,13 @@ fun hentResultatIPeriode(periode: List<SimulertPostering>) =
         } else
             periode.sumOf { it.beløp }
 
-fun hentTotalEtterbetaling(simuleringPerioder: List<SimuleringsPeriode>, fomDatoNestePeriode: LocalDate?) =
+fun hentTotalEtterbetaling(simuleringPerioder: List<Simuleringsperiode>, fomDatoNestePeriode: LocalDate?) =
         simuleringPerioder.filter {
             it.resultat > BigDecimal.ZERO && (fomDatoNestePeriode == null || it.fom < fomDatoNestePeriode)
         }.sumOf { it.resultat }
 
 
-fun hentTotalFeilutbetaling(simuleringPerioder: List<SimuleringsPeriode>, fomDatoNestePeriode: LocalDate?) =
+fun hentTotalFeilutbetaling(simuleringPerioder: List<Simuleringsperiode>, fomDatoNestePeriode: LocalDate?) =
         simuleringPerioder.filter { fomDatoNestePeriode == null || it.fom < fomDatoNestePeriode }.sumOf { it.feilutbetaling }
 
 fun TilkjentYtelse.tilIverksettMedMetaData(saksbehandlerId: String,

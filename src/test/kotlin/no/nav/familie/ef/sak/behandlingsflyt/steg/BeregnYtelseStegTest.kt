@@ -27,6 +27,7 @@ import no.nav.familie.ef.sak.vedtak.dto.Opphør
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
+import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -60,7 +61,9 @@ internal class BeregnYtelseStegTest {
         every { behandlingService.hentAktivIdent(any()) } returns "123"
         every { simuleringService.hentOgLagreSimuleringsresultat(any()) }
                 .returns(Simuleringsresultat(behandlingId = UUID.randomUUID(),
-                                             data = DetaljertSimuleringResultat(emptyList())))
+                                             data = DetaljertSimuleringResultat(emptyList()),
+                                             beriketData = BeriketSimuleringsresultat(mockk(),
+                                                                                      mockk())))
     }
 
     @Test

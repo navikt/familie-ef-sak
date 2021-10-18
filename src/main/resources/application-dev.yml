@@ -3,6 +3,8 @@ spring:
 
 PDL_SCOPE: api://dev-fss.pdl.pdl-api/.default
 
+
+DEPLOY_ENV: dev
 ON_PREM_URL_ENV: dev
 GATEWAY_PREFIX: api-gw-q1
 

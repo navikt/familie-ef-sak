@@ -26,7 +26,7 @@ internal class SimuleringUtilTest {
         ))
 
         val simuleringsresultatDto =
-                tilSimuleringsresultatDto(DetaljertSimuleringResultat(simuleringsmottakere), fraDato.plusMonths(12))
+                tilSimuleringsoppsummering(DetaljertSimuleringResultat(simuleringsmottakere), fraDato.plusMonths(12))
 
         assertThat(simuleringsresultatDto.perioder).isEmpty()
         assertThat(simuleringsresultatDto.etterbetaling).isZero()
@@ -50,7 +50,7 @@ internal class SimuleringUtilTest {
         val antallMånederEtterStart: Long = 12
         val tidSimuleringHentet = fraDato.plusMonths(antallMånederEtterStart)
         val simuleringsresultatDto =
-                tilSimuleringsresultatDto(DetaljertSimuleringResultat(simuleringsmottakere), tidSimuleringHentet)
+                tilSimuleringsoppsummering(DetaljertSimuleringResultat(simuleringsmottakere), tidSimuleringHentet)
 
         val posteringerGruppert = simuleringsresultatDto.perioder
         assertThat(posteringerGruppert).hasSize(antallMåneder)
@@ -104,7 +104,7 @@ internal class SimuleringUtilTest {
         val antallMånederEtterStart: Long = 12
         val tidSimuleringHentet = fraDato.plusMonths(antallMånederEtterStart)
         val simuleringsresultatDto =
-                tilSimuleringsresultatDto(DetaljertSimuleringResultat(simuleringsmottakere), tidSimuleringHentet)
+                tilSimuleringsoppsummering(DetaljertSimuleringResultat(simuleringsmottakere), tidSimuleringHentet)
 
         val posteringerGruppert = simuleringsresultatDto.perioder
         val totaltFeilutbetaltBeløp = beløp.minus(nyttBeløp).multiply(BigDecimal(antallMånederFeilutbetalt))

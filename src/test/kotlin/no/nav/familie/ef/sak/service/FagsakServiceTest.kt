@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -50,12 +51,14 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
                                      type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                      status = BehandlingStatus.FERDIGSTILT,
                                      steg = StegType.BEHANDLING_FERDIGSTILT,
-                                     resultat = BehandlingResultat.INNVILGET)
+                                     resultat = BehandlingResultat.INNVILGET,
+                                     årsak = BehandlingÅrsak.SØKNAD)
         val behandling2 = Behandling(fagsakId = fagsakDB.id,
                                      type = BehandlingType.REVURDERING,
                                      status = BehandlingStatus.UTREDES,
                                      steg = StegType.VILKÅR,
-                                     resultat = BehandlingResultat.INNVILGET)
+                                     resultat = BehandlingResultat.INNVILGET,
+                                     årsak = BehandlingÅrsak.SØKNAD)
 
         behandlingRepository.insert(behandling1)
         behandlingRepository.insert(behandling2)

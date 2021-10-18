@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
@@ -23,6 +24,7 @@ import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.SivilstandRegel
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
@@ -30,6 +32,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.LocalDate
 
 internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
@@ -41,6 +44,9 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
     private lateinit var fagsak: Fagsak
     private val personIdent = "123456789012"
+    private val behandlingsårsak = BehandlingÅrsak.NYE_OPPLYSNINGER
+    private val kravMottatt = LocalDate.of(2021, 9, 9)
+    private lateinit var revurderingDto: RevurderingDto
 
 
     @BeforeEach
@@ -48,6 +54,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         BrukerContextUtil.mockBrukerContext("Heider")
         val identer = fagsakpersoner(setOf(personIdent))
         fagsak = fagsakRepository.insert(fagsak(identer = identer))
+        revurderingDto = RevurderingDto(fagsak.id, behandlingsårsak, kravMottatt)
     }
 
     @AfterEach
@@ -63,7 +70,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         val søknad = lagreSøknad(behandling, fagsak)
         opprettVilkår(behandling, søknad)
 
-        val opprettRevurderingManuelt = revurderingService.opprettRevurderingManuelt(fagsak.id)
+        val opprettRevurderingManuelt = revurderingService.opprettRevurderingManuelt(revurderingDto)
 
         val revurdering = behandlingRepository.findByIdOrThrow(opprettRevurderingManuelt.id)
         assertThat(revurdering.type).isEqualTo(BehandlingType.REVURDERING)
@@ -77,7 +84,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         val søknad = lagreSøknad(behandling, fagsak)
         opprettVilkår(behandling, søknad)
 
-        val revurdering = revurderingService.opprettRevurderingManuelt(fagsak.id)
+        val revurdering = revurderingService.opprettRevurderingManuelt(revurderingDto)
         val vilkårForBehandling = vilkårsvurderingRepository.findByBehandlingId(behandling.id)[0]
         val vilkårForRevurdering = vilkårsvurderingRepository.findByBehandlingId(revurdering.id)[0]
 
@@ -93,13 +100,13 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
     internal fun `skal ikke være mulig å opprette fagsak hvis siste behandling ikke er ferdig`() {
         behandlingRepository.insert(behandling(fagsak = fagsak, status = BehandlingStatus.UTREDES))
 
-        assertThat(catchThrowable { revurderingService.opprettRevurderingManuelt(fagsak.id) })
+        assertThat(catchThrowable { revurderingService.opprettRevurderingManuelt(revurderingDto) })
                 .hasMessageContaining("Det finnes en behandling på fagsaken som ikke er ferdigstilt")
     }
 
     @Test
     internal fun `skal ikke være mulig å opprette fagsak hvis det ikke finnes en behandling fra før`() {
-        assertThat(catchThrowable { revurderingService.opprettRevurderingManuelt(fagsak.id) })
+        assertThat(catchThrowable { revurderingService.opprettRevurderingManuelt(revurderingDto) })
                 .hasMessageContaining("Det finnes ikke en tidligere behandling på fagsaken")
     }
 

@@ -23,6 +23,7 @@ import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.journalføring.JournalpostClient
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.vedtak.TotrinnskontrollService
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
@@ -89,7 +90,8 @@ class JournalførBlankettStegTest {
                                         type = BehandlingType.BLANKETT,
                                         status = BehandlingStatus.IVERKSETTER_VEDTAK,
                                         steg = blankettSteg.stegType(),
-                                        resultat = BehandlingResultat.IKKE_SATT)
+                                        resultat = BehandlingResultat.IKKE_SATT,
+                                        årsak = BehandlingÅrsak.SØKNAD)
 
     private val behandlingJournalpost =
             Behandlingsjournalpost(behandling.id, journalpost.journalpostId, journalpost.journalposttype)

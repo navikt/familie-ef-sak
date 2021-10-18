@@ -47,7 +47,7 @@ class PeriodeService(
         val perioder = replikaClient.hentPerioder(request).overgangsstønad
         val filtrertPerioder = InfotrygdPeriodeUtil.filtrerOgSorterPerioderFraInfotrygd(perioder)
                 .filter { it.kode != InfotrygdEndringKode.ANNULERT && it.kode != InfotrygdEndringKode.UAKTUELL }
-        return filtrertPerioder.map(InfotrygdPeriode::tilInternPeriode)
+        return InfotrygdPeriodeUtil.slåSammenInfotrygdperioder(filtrertPerioder)
     }
 
     private fun hentPerioderFraEf(it: Behandling): List<InternPeriode> =

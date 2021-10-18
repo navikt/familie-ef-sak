@@ -16,6 +16,7 @@ import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
@@ -174,7 +175,8 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
 
     private fun opprettBehandlingMedBehandlingstype(behandlingsType: BehandlingType?, fagsakId: UUID): Behandling {
         return behandlingService.opprettBehandling(behandlingType = behandlingsType!!,
-                                                   fagsakId = fagsakId)
+                                                   fagsakId = fagsakId,
+                                                   behandlingsårsak = BehandlingÅrsak.SØKNAD)
     }
 
     private fun hentEksisterendeBehandling(behandlingId: UUID?): Behandling? {

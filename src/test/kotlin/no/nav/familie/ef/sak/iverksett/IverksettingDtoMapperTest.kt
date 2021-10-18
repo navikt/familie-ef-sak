@@ -1,6 +1,7 @@
-package no.nav.familie.ef.sak.simulering
+package no.nav.familie.ef.sak.iverksett
 
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.simulering.SimuleringsposteringTestUtil
+import no.nav.familie.ef.sak.simulering.tilSimuleringsoppsummering
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import no.nav.familie.kontrakter.felles.simulering.MottakerType
 import no.nav.familie.kontrakter.felles.simulering.PosteringType
@@ -10,8 +11,7 @@ import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
 
-internal class SimuleringsresultatDtoTest {
-
+internal class IverksettingDtoMapperTest {
 
     private val januarStart = LocalDate.of(2021, 1, 1)
     private val aprilSlutt = LocalDate.of(2021, 4, 30)
@@ -26,9 +26,9 @@ internal class SimuleringsresultatDtoTest {
 
 
     private val mai = SimuleringsposteringTestUtil.lagPosteringer(fraDato = LocalDate.of(2021, 5, 1),
-                                                                  antallMåneder = 1,
-                                                                  beløp = BigDecimal(5000),
-                                                                  posteringstype = PosteringType.YTELSE)
+                                                          antallMåneder = 1,
+                                                          beløp = BigDecimal(5000),
+                                                          posteringstype = PosteringType.YTELSE)
 
 
     private val juniTilAugust = SimuleringsposteringTestUtil.lagPosteringer(fraDato = juniStart,
@@ -50,10 +50,10 @@ internal class SimuleringsresultatDtoTest {
 
     @Test
     internal fun `skal slå sammen perioder som har feilutbetalinger til sammenhengende perioder`() {
-        val simuleringsresultatDto =
-                tilSimuleringsresultatDto(DetaljertSimuleringResultat(simuleringsmottakere), LocalDate.of(2021, 11, 1))
+        val simuleringsoppsummering =
+                tilSimuleringsoppsummering(DetaljertSimuleringResultat(simuleringsmottakere), LocalDate.of(2021, 11, 1))
 
-        val sammenhengendePerioderMedFeilutbetaling = simuleringsresultatDto.hentSammenhengendePerioderMedFeilutbetaling()
+        val sammenhengendePerioderMedFeilutbetaling = simuleringsoppsummering.hentSammenhengendePerioderMedFeilutbetaling()
         assertThat(sammenhengendePerioderMedFeilutbetaling).hasSize(3)
         assertThat(sammenhengendePerioderMedFeilutbetaling.first().fom).isEqualTo(januarStart)
         assertThat(sammenhengendePerioderMedFeilutbetaling.first().tom).isEqualTo(aprilSlutt)
@@ -63,7 +63,6 @@ internal class SimuleringsresultatDtoTest {
 
         assertThat(sammenhengendePerioderMedFeilutbetaling.last().fom).isEqualTo(oktoberStart)
         assertThat(sammenhengendePerioderMedFeilutbetaling.last().tom).isEqualTo(oktoberSlutt)
-
     }
 }
 

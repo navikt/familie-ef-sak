@@ -26,6 +26,7 @@ import no.nav.familie.ef.sak.vilkår.DelvilkårsvurderingWrapper
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -48,7 +49,8 @@ fun behandling(fagsak: Fagsak,
                type: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                resultat: BehandlingResultat = BehandlingResultat.IKKE_SATT,
                opprettetTid: LocalDateTime = SporbarUtils.now(),
-               forrigeBehandlingId: UUID? = null): Behandling =
+               forrigeBehandlingId: UUID? = null,
+               årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD): Behandling =
         Behandling(fagsakId = fagsak.id,
                    forrigeBehandlingId = forrigeBehandlingId,
                    id = id,
@@ -56,7 +58,8 @@ fun behandling(fagsak: Fagsak,
                    status = status,
                    steg = steg,
                    resultat = resultat,
-                   sporbar = Sporbar(opprettetTid = opprettetTid))
+                   sporbar = Sporbar(opprettetTid = opprettetTid),
+                   årsak = årsak)
 
 
 fun fagsak(identer: Set<FagsakPerson> = setOf(), stønadstype: Stønadstype = Stønadstype.OVERGANGSSTØNAD) =

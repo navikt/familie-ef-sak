@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelseType
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.felles.StønadType
 import no.nav.familie.kontrakter.ef.iverksett.TekniskOpphørDto
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -63,7 +64,8 @@ class TekniskOpphørService(val behandlingService: BehandlingService,
         val behandling = behandlingService.opprettBehandling(behandlingType = BehandlingType.TEKNISK_OPPHØR,
                                                              fagsakId = fagsakId,
                                                              status = BehandlingStatus.IVERKSETTER_VEDTAK,
-                                                             stegType = StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT)
+                                                             stegType = StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT,
+                                                             behandlingsårsak = BehandlingÅrsak.NYE_OPPLYSNINGER)
         return behandlingService.oppdaterResultatPåBehandling(behandling.id, BehandlingResultat.OPPHØRT)
     }
 }

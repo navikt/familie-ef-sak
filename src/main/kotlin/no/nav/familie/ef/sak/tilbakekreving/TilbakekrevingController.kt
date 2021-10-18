@@ -27,6 +27,11 @@ class TilbakekrevingController(private val tilgangService: TilgangService,
         return Ressurs.success(behandlingId)
     }
 
+    @GetMapping("/{behandlingId}/er-allerede-opprettet")
+    fun finnesTilbakekreving(@PathVariable behandlingId: UUID): Ressurs<Boolean> {
+        return Ressurs.success(tilbakekrevingService.finnesÅpenTilbakekrevingsBehandling(behandlingId))
+    }
+
     @GetMapping("/{behandlingId}")
     fun hentTilbakekreving(@PathVariable behandlingId: UUID): Ressurs<TilbakekrevingDto?> {
         tilgangService.validerTilgangTilBehandling(behandlingId)

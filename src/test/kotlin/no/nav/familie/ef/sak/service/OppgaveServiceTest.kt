@@ -26,6 +26,7 @@ import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
@@ -182,7 +183,8 @@ internal class OppgaveServiceTest {
                           type = BehandlingType.FØRSTEGANGSBEHANDLING,
                           status = BehandlingStatus.OPPRETTET,
                           steg = StegType.VILKÅR,
-                          resultat = BehandlingResultat.IKKE_SATT)
+                          resultat = BehandlingResultat.IKKE_SATT,
+                          årsak = BehandlingÅrsak.SØKNAD)
     }
 
     private fun lagTestFagsak(): Fagsak {

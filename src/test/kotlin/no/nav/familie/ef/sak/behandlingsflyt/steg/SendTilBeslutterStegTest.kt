@@ -27,6 +27,7 @@ import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.Task
@@ -67,7 +68,8 @@ internal class SendTilBeslutterStegTest {
                                         type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                         status = BehandlingStatus.UTREDES,
                                         steg = beslutteVedtakSteg.stegType(),
-                                        resultat = BehandlingResultat.IKKE_SATT)
+                                        resultat = BehandlingResultat.IKKE_SATT,
+                                        årsak = BehandlingÅrsak.SØKNAD)
     private lateinit var taskSlot: MutableList<Task>
 
     @BeforeEach
