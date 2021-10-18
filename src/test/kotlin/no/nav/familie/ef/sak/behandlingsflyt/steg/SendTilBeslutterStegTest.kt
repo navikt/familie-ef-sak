@@ -23,20 +23,26 @@ import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
+import no.nav.familie.ef.sak.vedtak.Vedtak
 import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.kontrakter.felles.simulering.Simuleringsoppsummering
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import java.math.BigDecimal
 import java.util.Properties
 import java.util.UUID
 
@@ -50,7 +56,15 @@ internal class SendTilBeslutterStegTest {
     private val vedtakService = mockk<VedtakService>()
     private val simuleringService = mockk<SimuleringService>()
     private val tilbakekrevingService = mockk<TilbakekrevingService>()
-
+    private val simuleringsoppsummering = Simuleringsoppsummering(perioder = listOf(),
+                                                                  fomDatoNestePeriode = null,
+                                                                  etterbetaling = BigDecimal.ZERO,
+                                                                  feilutbetaling = BigDecimal.ZERO,
+                                                                  fom = null,
+                                                                  tomDatoNestePeriode = null,
+                                                                  forfallsdatoNestePeriode = null,
+                                                                  tidSimuleringHentet = null,
+                                                                  tomSisteUtbetaling = null)
 
     private val beslutteVedtakSteg =
             SendTilBeslutterSteg(taskRepository,
@@ -76,6 +90,9 @@ internal class SendTilBeslutterStegTest {
                                         steg = beslutteVedtakSteg.stegType(),
                                         resultat = BehandlingResultat.IKKE_SATT,
                                         årsak = BehandlingÅrsak.SØKNAD)
+
+    private val revurdering = behandling.copy(type = BehandlingType.REVURDERING)
+
     private lateinit var taskSlot: MutableList<Task>
 
     @BeforeEach
@@ -95,6 +112,39 @@ internal class SendTilBeslutterStegTest {
         every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev
         every { vedtaksbrevRepository.update(any()) } returns vedtaksbrev
 
+    }
+
+    @Test
+    internal fun `Skal kaste feil hvis saksbehandler skulle tatt stilling til tilbakekreving`() {
+        // Gitt at vi har feilutbetaling,
+        // ikke har sak i tilbakekreving,
+        // behandling og vedtak er av relevant type og
+        // saksbehandler ikke har tatt stilling til tilbakekrevingsvarsel.
+        mockTilbakekrevingValideringsfeil()
+        val feil = assertThrows<Feil> { beslutteVedtakSteg.validerSteg(revurdering) }
+        assertThat(feil.frontendFeilmelding).isEqualTo("Feilutbetaling detektert. Må ta stilling til feilutbetalingsvarsel under simulering")
+    }
+
+    @Test
+    internal fun `Skal ikke kaste feil hvis ikke det har vært en feilutbetaling`() {
+        mockTilbakekrevingValideringsfeil()
+        // Gitt at vi IKKE har feilutbetaling,
+        every { simuleringService.hentLagretSimuleringsresultat(any()) } returns simuleringsoppsummering
+        beslutteVedtakSteg.validerSteg(revurdering)
+    }
+
+    @Test
+    internal fun `Skal ikke kaste feil hvis saksbehandler har tatt stilling til tilbakekreving`() {
+        mockTilbakekrevingValideringsfeil()
+        every { tilbakekrevingService.harSaksbehandlerTattStillingTilTilbakekreving(any()) } returns true
+        beslutteVedtakSteg.validerSteg(revurdering)
+    }
+
+    @Test
+    internal fun `Skal ikke kaste feil når det finnes åpen sak i tilbakekrevings app`() {
+        mockTilbakekrevingValideringsfeil()
+        every { tilbakekrevingService.finnesÅpenTilbakekrevingsBehandling(any()) } returns true
+        beslutteVedtakSteg.validerSteg(revurdering)
     }
 
     @Test
@@ -135,4 +185,31 @@ internal class SendTilBeslutterStegTest {
     private fun utførSteg() {
         beslutteVedtakSteg.utførSteg(behandling, null)
     }
+
+    // Mock feilutbetaling,
+    // ikke har sak i tilbakekreving,
+    // behandling og vedtak er av relevant type og
+    // saksbehandler ikke har tatt stilling til tilbakekrevingsvarsel.
+    private fun mockTilbakekrevingValideringsfeil() {
+        every { vedtaksbrevRepository.existsById(any()) } returns true
+        // tilbakekrevingService.
+        every { vedtakService.hentVedtak(any()) } returns Vedtak(
+                resultatType = ResultatType.INNVILGE,
+                behandlingId = revurdering.id,
+                periodeBegrunnelse = null,
+                inntektBegrunnelse = null,
+                avslåBegrunnelse = null,
+                perioder = null,
+                inntekter = null,
+                saksbehandlerIdent = null,
+                opphørFom = null,
+                beslutterIdent = null,
+        )
+        every { simuleringService.hentLagretSimuleringsresultat(any()) } returns simuleringsoppsummering.copy(feilutbetaling = BigDecimal(
+                1000))
+
+        every { tilbakekrevingService.harSaksbehandlerTattStillingTilTilbakekreving(any()) } returns false
+        every { tilbakekrevingService.finnesÅpenTilbakekrevingsBehandling(any()) } returns false
+    }
+
 }

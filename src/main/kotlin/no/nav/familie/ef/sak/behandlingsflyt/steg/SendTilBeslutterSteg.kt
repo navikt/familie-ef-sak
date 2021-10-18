@@ -40,31 +40,25 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
         if (behandling.type !== BehandlingType.BLANKETT && !vedtaksbrevRepository.existsById(behandling.id)) {
             throw Feil("Brev mangler for behandling=${behandling.id}")
         }
-        validerTilbakekreving(behandling)
-    }
-
-    private fun validerTilbakekreving(behandling: Behandling) {
-        if (erIkkeRelevantForTilbakekrevingTilbakekrevings(behandling)) {
-            return
-        }
-
-        feilHvis(saksbehandlerMåTaStillingTilFeilutbetaling(behandling)) {
+        feilHvis(saksbehandlerMåTaStilingTilTilbakekreving(behandling)) {
             "Feilutbetaling detektert. Må ta stilling til feilutbetalingsvarsel under simulering"
         }
     }
 
-    // TODO flytte til tilbakekrevingsservice?
-    private fun saksbehandlerMåTaStillingTilFeilutbetaling(behandling: Behandling): Boolean {
-        val lagretSimuleringsresultat = simuleringService.hentLagretSimuleringsresultat(behandling.id)
-        if (lagretSimuleringsresultat.feilutbetaling > BigDecimal.ZERO) {
-            if (!tilbakekrevingService.harSaksbehandlerTattStillingTilTilbakekreving(behandling.id)) {
-                return tilbakekrevingService.finnesÅpenTilbakekrevingsBehandling(behandling.id)
-            }
+    private fun saksbehandlerMåTaStilingTilTilbakekreving(behandling: Behandling): Boolean {
+        if (erIkkeRelevantForTilbakekreving(behandling)) {
+            return false
         }
+        val feilutbetaling = simuleringService.hentLagretSimuleringsresultat(behandling.id).feilutbetaling > BigDecimal.ZERO
+        val harIkkeTattStillingTil = !tilbakekrevingService.harSaksbehandlerTattStillingTilTilbakekreving(behandling.id)
+        if (feilutbetaling && harIkkeTattStillingTil) {
+            return !tilbakekrevingService.finnesÅpenTilbakekrevingsBehandling(behandling.id)
+        }
+
         return false
     }
 
-    private fun erIkkeRelevantForTilbakekrevingTilbakekrevings(behandling: Behandling): Boolean {
+    private fun erIkkeRelevantForTilbakekreving(behandling: Behandling): Boolean {
         val resultatType = vedtakService.hentVedtak(behandling.id).resultatType
         return behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING || behandling.type == BehandlingType.BLANKETT || resultatType == ResultatType.AVSLÅ || resultatType == ResultatType.HENLEGGE
     }
