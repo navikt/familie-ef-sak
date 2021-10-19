@@ -1,8 +1,6 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.infotrygd
+package no.nav.familie.ef.sak.infotrygd
 
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
-import no.nav.familie.ef.sak.infotrygd.InternPeriode
-import no.nav.familie.ef.sak.infotrygd.tilInternPeriode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdEndringKode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
 import java.net.URL
@@ -36,7 +34,10 @@ object InfotrygdPeriodeParser {
                 .map { row ->
                     getValue(row, KEY_TYPE)!! to parseInfotrygdPeriode(row)
                 }.groupBy({ it.first }, { it.second })
-        return InfotrygdTestData(inputOutput["INPUT"]!!, inputOutput["OUTPUT"]!!.map { it.tilInternPeriode() })
+        return InfotrygdTestData(inputOutput["INPUT"]!!,
+                                 inputOutput["OUTPUT"]!!
+                                         .map(InfotrygdPeriode::tilInternPeriode)
+                                         .sortedBy(InternPeriode::stønadFom))
     }
 
     private fun parseInfotrygdPeriode(row: Map<String, String>) =

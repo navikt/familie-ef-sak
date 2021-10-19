@@ -1,6 +1,5 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.infotrygd
+package no.nav.familie.ef.sak.infotrygd
 
-import no.nav.familie.ef.sak.infotrygd.InternPeriode
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import java.time.LocalDate
 
