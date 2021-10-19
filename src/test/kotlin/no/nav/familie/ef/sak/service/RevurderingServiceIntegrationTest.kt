@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
+import no.nav.familie.ef.sak.opplysninger.søknad.SøknadRepository
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadsskjemaOvergangsstønad
 import no.nav.familie.ef.sak.repository.behandling
@@ -41,6 +42,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
     @Autowired lateinit var fagsakRepository: FagsakRepository
     @Autowired lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
     @Autowired lateinit var søknadService: SøknadService
+    @Autowired lateinit var søknadRepository: SøknadRepository
 
     private lateinit var fagsak: Fagsak
     private val personIdent = "123456789012"
@@ -67,7 +69,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         val behandling = behandlingRepository.insert(behandling(fagsak = fagsak,
                                                                 status = BehandlingStatus.FERDIGSTILT,
                                                                 resultat = BehandlingResultat.INNVILGET))
-        val søknad = lagreSøknad(behandling, fagsak)
+        val søknad = lagreSøknad(behandling)
         opprettVilkår(behandling, søknad)
 
         val opprettRevurderingManuelt = revurderingService.opprettRevurderingManuelt(revurderingDto)
@@ -76,12 +78,53 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         assertThat(revurdering.type).isEqualTo(BehandlingType.REVURDERING)
     }
 
+    /**
+     * Behandling 1: Avslått og ferdigstilt
+     * Behandling 2: Revurdering, som bruker søknaden til behandling 1 då den er den siste som er ferdigstilt, men fortsatt avslått
+     */
+    @Test
+    internal fun `skal opprette revurdering med en avslått førstegangsbehandling`() {
+        val behandling = behandlingRepository.insert(behandling(fagsak = fagsak,
+                                                                status = BehandlingStatus.FERDIGSTILT,
+                                                                resultat = BehandlingResultat.AVSLÅTT))
+        opprettVilkår(behandling, lagreSøknad(behandling))
+
+        val revurdering = revurderingService.opprettRevurderingManuelt(revurderingDto)
+
+        assertThat(getSøknadsskjemaId(revurdering)).isEqualTo(getSøknadsskjemaId(behandling))
+    }
+
+    /**
+     * Behandling 1: Innvilget og ferdigstilt
+     * Behandling 2: Avslått revurdering med egen søknad
+     * Behandling 3: Revurdering, som bruker søknaden til behandling 1
+     */
+    @Test
+    internal fun `skal peke til forrige iverksatte behandling hvis den finnes`() {
+        val behandling = behandlingRepository.insert(behandling(fagsak = fagsak,
+                                                                status = BehandlingStatus.FERDIGSTILT,
+                                                                resultat = BehandlingResultat.INNVILGET))
+        opprettVilkår(behandling, lagreSøknad(behandling))
+
+        val revurdering1 = behandlingRepository.insert(behandling(fagsak = fagsak,
+                                                                  type = BehandlingType.REVURDERING,
+                                                                  status = BehandlingStatus.FERDIGSTILT,
+                                                                  resultat = BehandlingResultat.AVSLÅTT))
+        opprettVilkår(behandling, lagreSøknad(revurdering1))
+
+        val revurdering2 = revurderingService.opprettRevurderingManuelt(revurderingDto)
+
+        val soknadsskjemaId = getSøknadsskjemaId(revurdering2)
+        assertThat(soknadsskjemaId).isEqualTo(getSøknadsskjemaId(behandling))
+        assertThat(soknadsskjemaId).isNotEqualTo(getSøknadsskjemaId(revurdering1))
+    }
+
     @Test
     internal fun `revurdering - skal kopiere vilkår`() {
         val behandling = behandlingRepository.insert(behandling(fagsak = fagsak,
                                                                 status = BehandlingStatus.FERDIGSTILT,
                                                                 resultat = BehandlingResultat.INNVILGET))
-        val søknad = lagreSøknad(behandling, fagsak)
+        val søknad = lagreSøknad(behandling)
         opprettVilkår(behandling, søknad)
 
         val revurdering = revurderingService.opprettRevurderingManuelt(revurderingDto)
@@ -110,9 +153,11 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
                 .hasMessageContaining("Det finnes ikke en tidligere behandling på fagsaken")
     }
 
-    private fun lagreSøknad(behandling: Behandling,
-                            fagsak: Fagsak): SøknadsskjemaOvergangsstønad {
-        søknadService.lagreSøknadForOvergangsstønad(Testsøknad.søknadOvergangsstønad, behandling.id, fagsak.id, "1L")
+    private fun getSøknadsskjemaId(revurdering1: Behandling) =
+            søknadRepository.findByBehandlingId(revurdering1.id)!!.soknadsskjemaId
+
+    private fun lagreSøknad(behandling: Behandling): SøknadsskjemaOvergangsstønad {
+        søknadService.lagreSøknadForOvergangsstønad(Testsøknad.søknadOvergangsstønad, behandling.id, behandling.fagsakId, "1L")
         return søknadService.hentOvergangsstønad(behandling.id)
     }
 

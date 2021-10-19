@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.behandling
 
 import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
@@ -14,6 +15,7 @@ import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
+import java.util.UUID
 
 @Service
 class RevurderingService(private val søknadService: SøknadService,
@@ -30,8 +32,7 @@ class RevurderingService(private val søknadService: SøknadService,
                                                               StegType.BEREGNE_YTELSE,
                                                               revurderingInnhold.behandlingsårsak,
                                                               revurderingInnhold.kravMottatt)
-        val forrigeBehandlingId = revurdering.forrigeBehandlingId
-                                  ?: error("Revurdering må ha eksisterende iverksatt behandling")
+        val forrigeBehandlingId = forrigeBehandling(revurdering)
         val saksbehandler = SikkerhetContext.hentSaksbehandler(true)
 
         søknadService.kopierSøknad(forrigeBehandlingId, revurdering.id)
@@ -45,6 +46,20 @@ class RevurderingService(private val søknadService: SøknadService,
         taskRepository.save(BehandlingsstatistikkTask.opprettMottattTask(behandlingId = revurdering.id, oppgaveId = oppgaveId))
         taskRepository.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId = revurdering.id))
         return revurdering
+    }
+
+    /**
+     * Returnerer id til forrige behandling.
+     * Skal håndtere en førstegangsbehandling som er avslått, då vi trenger en behandlingId for å kopiere data fra søknaden
+     */
+    private fun forrigeBehandling(revurdering: Behandling): UUID {
+        val sisteBehandling = behandlingService.hentBehandlinger(revurdering.fagsakId)
+                .filter { it.id != revurdering.id }
+                .filter { it.resultat != BehandlingResultat.ANNULLERT }
+                .maxByOrNull { it.sporbar.opprettetTid }
+        return revurdering.forrigeBehandlingId
+               ?: sisteBehandling?.id
+               ?: error("Revurdering må ha eksisterende iverksatt behandling")
     }
 
 }
