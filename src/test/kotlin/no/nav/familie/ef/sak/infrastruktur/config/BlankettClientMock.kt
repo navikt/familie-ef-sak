@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.config
+package no.nav.familie.ef.sak.infrastruktur.config
 
 import io.mockk.every
 import io.mockk.mockk

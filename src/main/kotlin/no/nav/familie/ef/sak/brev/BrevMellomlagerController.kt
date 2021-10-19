@@ -26,10 +26,10 @@ class BrevMellomlagerController(private val tilgangService: TilgangService,
     ): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
 
-        return Ressurs.success(mellomlagringBrevService.mellomLagreBrev (behandlingId,
-                                                                         mellomlagretBrev.brevverdier,
-                                                                         mellomlagretBrev.brevmal,
-                                                                         mellomlagretBrev.versjon))
+        return Ressurs.success(mellomlagringBrevService.mellomLagreBrev(behandlingId,
+                                                                        mellomlagretBrev.brevverdier,
+                                                                        mellomlagretBrev.brevmal,
+                                                                        mellomlagretBrev.versjon))
     }
 
 

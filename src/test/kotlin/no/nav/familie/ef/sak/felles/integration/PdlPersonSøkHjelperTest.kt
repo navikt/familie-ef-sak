@@ -13,7 +13,8 @@ internal class PdlPersonSøkHjelperTest {
     @Test
     internal fun `søker har matrikkeladresse uten bruksenhetsnummer`() {
         val matrikkelId = 123L
-        val resultat = PdlPersonSøkHjelper.lagPdlPersonSøkKriterier(lagAdresse(null, Matrikkeladresse(matrikkelId, null, null, null)))
+        val resultat =
+                PdlPersonSøkHjelper.lagPdlPersonSøkKriterier(lagAdresse(null, Matrikkeladresse(matrikkelId, null, null, null)))
         assertThat(resultat.size).isEqualTo(1)
         assertThat(resultat[0].fieldName).isEqualTo("person.bostedsadresse.matrikkeladresse.matrikkelId")
         assertThat(resultat[0].searchRule.equals).isEqualTo(matrikkelId.toString())
@@ -24,7 +25,11 @@ internal class PdlPersonSøkHjelperTest {
         val matrikkelId = 123L
         val bruksenhetsnummer = "2"
         val resultat =
-                PdlPersonSøkHjelper.lagPdlPersonSøkKriterier(lagAdresse(null, Matrikkeladresse(matrikkelId, bruksenhetsnummer, null, null)))
+                PdlPersonSøkHjelper.lagPdlPersonSøkKriterier(lagAdresse(null,
+                                                                        Matrikkeladresse(matrikkelId,
+                                                                                         bruksenhetsnummer,
+                                                                                         null,
+                                                                                         null)))
         assertThat(resultat.size).isEqualTo(2)
         assertThat(resultat[0].fieldName).isEqualTo("person.bostedsadresse.matrikkeladresse.matrikkelId")
         assertThat(resultat[0].searchRule.equals).isEqualTo(matrikkelId.toString())

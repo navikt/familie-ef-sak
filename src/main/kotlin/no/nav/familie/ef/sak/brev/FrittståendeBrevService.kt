@@ -35,12 +35,11 @@ class FrittståendeBrevService(private val brevClient: BrevClient,
     private fun lagFrittståendeBrevRequest(frittståendeBrevDto: FrittståendeBrevDto): FrittståendeBrevRequestDto {
         val ident = fagsakService.hentAktivIdent(frittståendeBrevDto.fagsakId)
         val navn = personopplysningerService.hentGjeldeneNavn(listOf(ident))
-        val request = FrittståendeBrevRequestDto(overskrift = frittståendeBrevDto.overskrift,
-                                                 avsnitt = frittståendeBrevDto.avsnitt,
-                                                 personIdent = ident,
-                                                 navn = navn.getValue(ident),
-                                                 brevdato = LocalDate.now())
-        return request
+        return FrittståendeBrevRequestDto(overskrift = frittståendeBrevDto.overskrift,
+                                          avsnitt = frittståendeBrevDto.avsnitt,
+                                          personIdent = ident,
+                                          navn = navn.getValue(ident),
+                                          brevdato = LocalDate.now())
     }
 
     fun sendFrittståendeBrev(frittståendeBrevDto: FrittståendeBrevDto) {

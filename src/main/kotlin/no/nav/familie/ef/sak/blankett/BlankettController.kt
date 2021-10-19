@@ -1,19 +1,23 @@
 package no.nav.familie.ef.sak.blankett
 
-import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.oppgave.OppgaveService
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
+import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.security.token.support.core.api.Unprotected
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
-import org.springframework.web.bind.annotation.*
-import java.util.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
+import java.util.UUID
 
 @RestController
 @RequestMapping(path = ["/api/blankett"])
@@ -24,7 +28,7 @@ class BlankettController(private val tilgangService: TilgangService,
                          private val behandlingService: BehandlingService,
                          private val oppgaveService: OppgaveService) {
 
-    val logger: Logger = LoggerFactory.getLogger(this.javaClass)
+    private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
     @GetMapping("{behandlingId}")
     fun hentBlankettPdf(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
@@ -57,10 +61,10 @@ class BlankettController(private val tilgangService: TilgangService,
 
     private fun validerOpprettelseAvBlankett(behandling: Behandling) {
         if (behandling.status.behandlingErLåstForVidereRedigering()) {
-            kastApiFeil("Behandling er låst for videre redigering for behandling : ${behandling}", HttpStatus.BAD_REQUEST)
+            kastApiFeil("Behandling er låst for videre redigering for behandling : $behandling", HttpStatus.BAD_REQUEST)
         }
         if (!typeBlankett(behandling)) {
-            kastApiFeil("Behandling er ikke av typen blankett for behandling : ${behandling}", HttpStatus.BAD_REQUEST)
+            kastApiFeil("Behandling er ikke av typen blankett for behandling : $behandling", HttpStatus.BAD_REQUEST)
         }
     }
 

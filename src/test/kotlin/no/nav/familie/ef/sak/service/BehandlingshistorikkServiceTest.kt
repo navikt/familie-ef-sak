@@ -30,10 +30,11 @@ internal class BehandlingshistorikkServiceTest : OppslagSpringRunnerTest() {
         /** Lagre */
         val fagsak = fagsakRepository.insert(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
-        val behandlingHistorikk = behandlingshistorikkRepository.insert(Behandlingshistorikk(behandlingId = behandling.id,
-                                                                                             steg = behandling.steg,
-                                                                                             opprettetAvNavn = "Saksbehandlernavn",
-                                                                                             opprettetAv = SikkerhetContext.hentSaksbehandler()))
+        val behandlingHistorikk =
+                behandlingshistorikkRepository.insert(Behandlingshistorikk(behandlingId = behandling.id,
+                                                                           steg = behandling.steg,
+                                                                           opprettetAvNavn = "Saksbehandlernavn",
+                                                                           opprettetAv = SikkerhetContext.hentSaksbehandler()))
 
         /** Hent */
         val innslag: Behandlingshistorikk = behandlingshistorikkService.finnBehandlingshistorikk(behandling.id)[0]
@@ -63,7 +64,8 @@ internal class BehandlingshistorikkServiceTest : OppslagSpringRunnerTest() {
         insert(behandling, "B", LocalDateTime.now().plusDays(1))
         insert(behandling, "C", LocalDateTime.now())
 
-        var siste = behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId = behandling.id, StegType.BESLUTTE_VEDTAK)
+        var siste =
+                behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId = behandling.id, StegType.BESLUTTE_VEDTAK)
         assertThat(siste).isNull()
 
         siste = behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId = behandling.id, behandling.steg)

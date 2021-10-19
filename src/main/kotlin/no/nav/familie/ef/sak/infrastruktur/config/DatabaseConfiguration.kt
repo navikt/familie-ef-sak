@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.infrastruktur.config
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.familie.ef.sak.vilkår.DelvilkårsvurderingWrapper
 import no.nav.familie.ef.sak.felles.domain.Endret
 import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.felles.domain.JsonWrapper
@@ -9,8 +8,9 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdat
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Arbeidssituasjon
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Dokumentasjon
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.GjelderDeg
-import no.nav.familie.ef.sak.vedtak.InntektWrapper
-import no.nav.familie.ef.sak.vedtak.PeriodeWrapper
+import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
+import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
+import no.nav.familie.ef.sak.vilkår.DelvilkårsvurderingWrapper
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
@@ -233,7 +233,7 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
         override fun convert(jsonWrapper: JsonWrapper?): PGobject =
                 PGobject().apply {
                     type = "json"
-                    value = jsonWrapper?.let { it.json }
+                    value = jsonWrapper?.json
                 }
     }
 

@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.vilkår.dto
 
 import java.time.LocalDate
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 data class OvergangsstønadDto(val aktivitet: AktivitetDto,
                               val sagtOppEllerRedusertStilling: SagtOppEllerRedusertStillingDto?,

@@ -1,10 +1,17 @@
 package no.nav.familie.ef.sak.vilkår.regler.vilkår
 
-import no.nav.familie.ef.sak.vilkår.regler.*
 import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.Vurdering
+import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
+import no.nav.familie.ef.sak.vilkår.regler.RegelId
+import no.nav.familie.ef.sak.vilkår.regler.RegelSteg
+import no.nav.familie.ef.sak.vilkår.regler.SluttSvarRegel
+import no.nav.familie.ef.sak.vilkår.regler.SvarId
+import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
+import no.nav.familie.ef.sak.vilkår.regler.jaNeiSvarRegel
+import no.nav.familie.ef.sak.vilkår.regler.regelIder
 
 class TidligareVedtaksperioderRegel : Vilkårsregel(vilkårType = VilkårType.TIDLIGERE_VEDTAKSPERIODER,
                                                    regler = setOf(HAR_TIDLIGERE_MOTTATT_OVERGANSSTØNAD,

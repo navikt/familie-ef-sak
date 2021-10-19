@@ -9,7 +9,10 @@ import org.springframework.stereotype.Component
 class ArbeidsfordelingService(private val personService: PersonService,
                               private val personopplysningerIntegrasjonerClient: PersonopplysningerIntegrasjonerClient) {
 
-    private val MASKINELL_JOURNALFOERENDE_ENHET = "9999"
+    companion object {
+
+        private const val MASKINELL_JOURNALFOERENDE_ENHET = "9999"
+    }
 
     fun hentNavEnhet(ident: String): Arbeidsfordelingsenhet? {
         val personMedRelasjoner = personService.hentPersonMedRelasjoner(ident)

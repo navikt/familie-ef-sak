@@ -32,7 +32,7 @@ class SøkService(private val fagsakRepository: FagsakRepository,
                        frontendFeilmelding = "Finner ikke fagsak for søkte personen")
         }
 
-        val personIdent = fagsaker.first().hentAktivIdent();
+        val personIdent = fagsaker.first().hentAktivIdent()
         val person = personService.hentSøker(personIdent)
 
         return Søkeresultat(personIdent = personIdent,
@@ -42,7 +42,8 @@ class SøkService(private val fagsakRepository: FagsakRepository,
         )
     }
 
-    // Denne trenger ikke en tilgangskontroll då den ikke returnerer noe fra behandlingen. Pdl gjører tilgangskontroll for søkPersoner
+    // Denne trenger ikke en tilgangskontroll då den ikke returnerer noe fra behandlingen.
+    // Pdl gjører tilgangskontroll for søkPersoner
     // Midlertidlig løsning med å hente søker fra PDL
     // dette kan endres til å hente bosstedsadresse fra databasen når PDL-data blir lagret i databasen
     fun søkEtterPersonerMedSammeAdresse(behandlingId: UUID): SøkeresultatPerson {

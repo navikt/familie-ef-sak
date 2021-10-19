@@ -145,7 +145,8 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
     }
 
     private fun hentOriginaldokument(journalpostId: String,
-                                     dokumentBrevkode: DokumentBrevkode): no.nav.familie.kontrakter.felles.journalpost.DokumentInfo {
+                                     dokumentBrevkode: DokumentBrevkode)
+            : no.nav.familie.kontrakter.felles.journalpost.DokumentInfo {
         return hentJournalpost(journalpostId).dokumenter
                        ?.first {
                            dokumentBrevkode == DokumentBrevkode.fraBrevkode(it.brevkode.toString()) && harOriginalDokument(
@@ -216,7 +217,8 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
                     DokarkivBruker(idType = BrukerIdType.valueOf(it.type.toString()), id = it.id)
                 },
                                            tema = journalpost.tema?.let { Tema.valueOf(it) }, // TODO: Funker dette?
-                                           behandlingstema = journalpost.behandlingstema?.let { Behandlingstema.fromValue(it) },// TODO: Funker dette?
+                                           // TODO: Funker dette?
+                                           behandlingstema = journalpost.behandlingstema?.let { Behandlingstema.fromValue(it) },
                                            tittel = journalpost.tittel,
                                            journalfoerendeEnhet = journalpost.journalforendeEnhet,
                                            sak = Sak(fagsakId = eksternFagsakId.toString(),

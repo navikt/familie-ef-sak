@@ -215,7 +215,8 @@ object SøknadsskjemaMapper {
                        skalAnnenForelderHaSamvær = it.skalAnnenForelderHaSamvær?.svarId,
                        harDereSkriftligAvtaleOmSamvær = it.harDereSkriftligAvtaleOmSamvær?.svarId,
                        samværsavtale = tilDomene(it.samværsavtale?.verdi),
-                       skalBarnetBoHosSøkerMenAnnenForelderSamarbeiderIkke = tilDomene(it.skalBarnetBoHosSøkerMenAnnenForelderSamarbeiderIkke?.verdi),
+                       skalBarnetBoHosSøkerMenAnnenForelderSamarbeiderIkke =
+                       tilDomene(it.skalBarnetBoHosSøkerMenAnnenForelderSamarbeiderIkke?.verdi),
                        hvordanPraktiseresSamværet = it.hvordanPraktiseresSamværet?.verdi,
                        borAnnenForelderISammeHus = it.borAnnenForelderISammeHus?.svarId,
                        borAnnenForelderISammeHusBeskrivelse = it.borAnnenForelderISammeHusBeskrivelse?.verdi,
@@ -244,9 +245,10 @@ object SøknadsskjemaMapper {
                       aksjeselskap = tilAksjeselskap(aktivitet.aksjeselskap?.verdi),
                       erIArbeid = aktivitet.erIArbeid?.svarId,
                       erIArbeidDokumentasjon = tilDomene(aktivitet.erIArbeidDokumentasjon?.verdi),
-                      tidligereUtdanninger = tilTidligereUtdanninger(aktivitet.underUtdanning?.verdi?.tidligereUtdanninger?.verdi))
+                      tidligereUtdanninger =
+                      tilTidligereUtdanninger(aktivitet.underUtdanning?.verdi?.tidligereUtdanninger?.verdi))
 
-    private fun tilFirmaer(list: List<KontraktSelvstendig>?): Set<Selvstendig>? =
+    private fun tilFirmaer(list: List<KontraktSelvstendig>?): Set<Selvstendig> =
             list?.map {
                 Selvstendig(firmanavn = it.firmanavn.verdi,
                             organisasjonsnummer = it.organisasjonsnummer.verdi,
@@ -255,7 +257,7 @@ object SøknadsskjemaMapper {
                             hvordanSerArbeidsukenUt = it.hvordanSerArbeidsukenUt.verdi)
             }?.toSet() ?: emptySet()
 
-    private fun tilAksjeselskap(list: List<KontraktAksjeselskap>?): Set<Aksjeselskap>? = list?.map {
+    private fun tilAksjeselskap(list: List<KontraktAksjeselskap>?): Set<Aksjeselskap> = list?.map {
         Aksjeselskap(navn = it.navn.verdi,
                      arbeidsmengde = it.arbeidsmengde?.verdi)
     }?.toSet() ?: emptySet()
@@ -303,7 +305,7 @@ object SøknadsskjemaMapper {
                            dokumentasjon = tilDomene(it.dokumentasjon?.verdi))
             }
 
-    private fun tilArbeidsgivere(list: List<KontraktArbeidsgiver>?): Set<Arbeidsgiver>? =
+    private fun tilArbeidsgivere(list: List<KontraktArbeidsgiver>?): Set<Arbeidsgiver> =
             list?.map {
                 Arbeidsgiver(arbeidsgivernavn = it.arbeidsgivernavn.verdi,
                              arbeidsmengde = it.arbeidsmengde?.verdi,

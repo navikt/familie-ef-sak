@@ -1,9 +1,9 @@
 package no.nav.familie.ef.sak.vilkår.regler.evalutation
 
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
-import no.nav.familie.ef.sak.vilkår.dto.DelvilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
+import no.nav.familie.ef.sak.vilkår.dto.DelvilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
 import no.nav.familie.ef.sak.vilkår.regler.SluttSvarRegel
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
@@ -27,9 +27,9 @@ object RegelEvaluering {
      * @return [RegelResultat] med resultat for vilkåret og delvilkår
      */
     fun utledResultat(vilkårsregel: Vilkårsregel, delvilkår: List<DelvilkårsvurderingDto>): RegelResultat {
-        val delvilkårResultat = delvilkår.map { vurdering ->
+        val delvilkårResultat = delvilkår.associate { vurdering ->
             vurdering.hovedregel() to utledResultatForDelvilkår(vilkårsregel, vurdering)
-        }.toMap()
+        }
         return RegelResultat(vilkårType = vilkårsregel.vilkårType,
                              vilkår = utledVilkårResultat(delvilkårResultat),
                              delvilkår = delvilkårResultat)
@@ -41,7 +41,8 @@ object RegelEvaluering {
             delvilkårResultat.values.all { it == Vilkårsresultat.OPPFYLT || it == Vilkårsresultat.IKKE_OPPFYLT } ->
                 Vilkårsresultat.IKKE_OPPFYLT
             delvilkårResultat.values.any { it == Vilkårsresultat.SKAL_IKKE_VURDERES } -> Vilkårsresultat.SKAL_IKKE_VURDERES
-            delvilkårResultat.values.any { it == Vilkårsresultat.IKKE_TATT_STILLING_TIL } -> Vilkårsresultat.IKKE_TATT_STILLING_TIL
+            delvilkårResultat.values.any { it == Vilkårsresultat.IKKE_TATT_STILLING_TIL } ->
+                Vilkårsresultat.IKKE_TATT_STILLING_TIL
             else -> error("Håndterer ikke situasjonen med resultat=${delvilkårResultat.values}")
         }
     }

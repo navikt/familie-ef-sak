@@ -15,7 +15,8 @@ internal class IntegrasjonerConfigTest {
 
     @Test
     fun getTilgangUri() {
-        assertThat(integrasjonerConfig.tilgangRelasjonerUri).isEqualTo(URI("http://familie-integrasjoner/api/tilgang/person-med-relasjoner"))
+        assertThat(integrasjonerConfig.tilgangRelasjonerUri)
+                .isEqualTo(URI("http://familie-integrasjoner/api/tilgang/person-med-relasjoner"))
     }
 
 }

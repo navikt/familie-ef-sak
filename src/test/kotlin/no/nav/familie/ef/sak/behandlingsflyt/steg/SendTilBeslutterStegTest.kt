@@ -29,8 +29,8 @@ import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
-import no.nav.familie.ef.sak.vedtak.Vedtak
 import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -159,11 +159,12 @@ internal class SendTilBeslutterStegTest {
 
 
     private fun utførOgVerifiserKall(oppgavetype: Oppgavetype) {
-        every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype, any()) } returns Oppgave(id = UUID.randomUUID(),
-                                                                                                     behandlingId = behandling.id,
-                                                                                                     gsakOppgaveId = 123L,
-                                                                                                     type = Oppgavetype.BehandleSak,
-                                                                                                     erFerdigstilt = false)
+        every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype, any()) }
+                .returns(Oppgave(id = UUID.randomUUID(),
+                                 behandlingId = behandling.id,
+                                 gsakOppgaveId = 123L,
+                                 type = Oppgavetype.BehandleSak,
+                                 erFerdigstilt = false))
 
         every { vedtakService.oppdaterSaksbehandler(any(), any()) } just Runs
         mockBrukerContext("saksbehandlernavn")

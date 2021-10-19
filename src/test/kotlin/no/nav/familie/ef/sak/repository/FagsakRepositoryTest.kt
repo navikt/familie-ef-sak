@@ -4,8 +4,8 @@ import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
-import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
+import no.nav.familie.ef.sak.felles.domain.Sporbar
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -35,7 +35,8 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
 
         assertThat(fagsakHentetFinnesIkke).isNull()
 
-        val fagsak = fagsakRepository.findBySøkerIdent(setOf("12345678901"), Stønadstype.OVERGANGSSTØNAD) ?: error("Finner ikke fagsak")
+        val fagsak = fagsakRepository.findBySøkerIdent(setOf("12345678901"), Stønadstype.OVERGANGSSTØNAD)
+                     ?: error("Finner ikke fagsak")
 
         assertThat(fagsak.søkerIdenter.map { it.ident }).contains("12345678901")
         assertThat(fagsak.søkerIdenter.map { it.ident }).contains("98765432109")

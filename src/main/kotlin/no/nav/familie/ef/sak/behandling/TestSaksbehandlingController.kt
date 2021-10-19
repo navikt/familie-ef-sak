@@ -76,7 +76,8 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
                                                       "4489",
                                                       SikkerhetContext.hentSaksbehandler(true),
                                                       "Dummy-oppgave opprettet i ny løsning")
-        taskRepository.save(taskRepository.save(BehandlingsstatistikkTask.opprettMottattTask(behandlingId = behandling.id, oppgaveId = oppgaveId)))
+        taskRepository.save(taskRepository.save(BehandlingsstatistikkTask.opprettMottattTask(behandlingId = behandling.id,
+                                                                                             oppgaveId = oppgaveId)))
 
         return Ressurs.success(behandling.id)
     }
@@ -84,11 +85,12 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
     private fun lagSøknad(personIdent: String): SøknadOvergangsstønad {
         val søkerMedBarn = personService.hentPersonMedRelasjoner(personIdent)
         val barneListe: List<Barn> = mapSøkersBarn(søkerMedBarn)
-        val søknad: SøknadOvergangsstønad = TestsøknadBuilder.Builder()
+        return TestsøknadBuilder.Builder()
                 .setPersonalia(søkerMedBarn.søker.navn.gjeldende().visningsnavn(), søkerMedBarn.søkerIdent)
                 .setBarn(barneListe)
-                .setBosituasjon(delerDuBolig = EnumTekstverdiMedSvarId(verdi = "Nei, jeg bor alene med barn eller jeg er gravid og bor alene",
-                                                                       svarId = "borAleneMedBarnEllerGravid"))
+                .setBosituasjon(delerDuBolig =
+                                EnumTekstverdiMedSvarId(verdi = "Nei, jeg bor alene med barn eller jeg er gravid og bor alene",
+                                                        svarId = "borAleneMedBarnEllerGravid"))
                 .setSivilstandsplaner(
                         harPlaner = true,
                         fraDato = LocalDate.of(2019, 9, 17),
@@ -97,7 +99,6 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
                                                       fødselsdato = LocalDate.of(1979, 9, 17)),
                 )
                 .build().søknadOvergangsstønad
-        return søknad
     }
 
     private fun mapSøkersBarn(søkerMedBarn: SøkerMedBarn): List<Barn> {
@@ -161,8 +162,7 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
     private fun lagBlankettBehandling(fagsak: Fagsak, fnr: String, søknad: SøknadOvergangsstønad): Behandling {
         val journalpostId = arkiver(fnr)
         val journalpost = journalpostClient.hentJournalpost(journalpostId)
-        val behandling = behandlingService.opprettBehandlingForBlankett(BehandlingType.BLANKETT, fagsak.id, søknad, journalpost)
-        return behandling
+        return behandlingService.opprettBehandlingForBlankett(BehandlingType.BLANKETT, fagsak.id, søknad, journalpost)
     }
 }
 

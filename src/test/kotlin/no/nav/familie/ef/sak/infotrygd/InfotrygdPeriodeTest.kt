@@ -6,18 +6,21 @@ import java.time.LocalDate
 
 internal class InfotrygdPeriodeTest {
 
-    private val FOM = LocalDate.of(2021, 3, 1)
-    private val TOM = LocalDate.of(2021, 5, 31)
+    companion object {
 
-    private val FØR_STARTDATO_FOM = LocalDate.of(2021, 1, 1)
-    private val FØR_STARTDATO_TOM = LocalDate.of(2021, 1, 31)
-    private val ETTER_SLUTDATO_FOM = LocalDate.of(2021, 7, 1)
-    private val ETTER_SLUTTDATO_TOM = LocalDate.of(2021, 7, 31)
-    private val MIDT_I_FOM = LocalDate.of(2021, 3, 1)
-    private val MIDT_I_TOM = LocalDate.of(2021, 3, 31)
+        private val FOM = LocalDate.of(2021, 3, 1)
+        private val TOM = LocalDate.of(2021, 5, 31)
+
+        private val FØR_STARTDATO_FOM = LocalDate.of(2021, 1, 1)
+        private val FØR_STARTDATO_TOM = LocalDate.of(2021, 1, 31)
+        private val ETTER_SLUTDATO_FOM = LocalDate.of(2021, 7, 1)
+        private val ETTER_SLUTTDATO_TOM = LocalDate.of(2021, 7, 31)
+        private val MIDT_I_FOM = LocalDate.of(2021, 3, 1)
+        private val MIDT_I_TOM = LocalDate.of(2021, 3, 31)
+
+    }
 
     private val startperiode = lagInternPeriode(FOM, TOM)
-
 
     @Test
     internal fun `erInfotrygdPeriodeOverlappende - ikke overlappende`() {

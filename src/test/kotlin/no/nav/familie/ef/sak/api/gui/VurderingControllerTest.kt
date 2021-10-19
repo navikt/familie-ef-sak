@@ -63,7 +63,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `nullstillVilkår - skal sjekke att behandlingId som blir sendt inn er lik den som finnes i vilkårsvurderingen`() {
+    internal fun `nullstillVilkår skal sjekke att behandlingId som blir sendt inn er lik den som finnes i vilkårsvurderingen`() {
         val opprettetVurdering = opprettInngangsvilkår().body.data!!
 
         val fagsak = fagsakService.hentEllerOpprettFagsakMedBehandlinger("0", Stønadstype.OVERGANGSSTØNAD)

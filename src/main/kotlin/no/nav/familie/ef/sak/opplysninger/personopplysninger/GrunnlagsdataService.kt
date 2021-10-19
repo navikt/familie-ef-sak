@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonKort
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlSøker
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -24,8 +25,8 @@ class GrunnlagsdataService(private val pdlClient: PdlClient,
                            private val søknadService: SøknadService,
                            private val personopplysningerIntegrasjonerClient: PersonopplysningerIntegrasjonerClient) {
 
-    val logger = LoggerFactory.getLogger(this.javaClass)
-    val secureLogger = LoggerFactory.getLogger("secureLogger")
+    private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
+    private val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
 
     fun opprettGrunnlagsdata(behandlingId: UUID) {
         val grunnlagsdata = hentGrunnlagsdataFraRegister(behandlingId)

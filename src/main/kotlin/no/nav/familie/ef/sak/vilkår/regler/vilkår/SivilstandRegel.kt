@@ -33,10 +33,13 @@ class SivilstandRegel : Vilkårsregel(vilkårType = VilkårType.SIVILSTAND,
         val (søknad: SøknadsskjemaOvergangsstønad, sivilstandstype: Sivilstandstype) = metadata
 
         val hovedregel: RegelId = when {
-            sivilstandstype.erUgiftEllerUoppgitt() && (søknad.sivilstand.erUformeltGift == true || søknad.sivilstand.erUformeltSeparertEllerSkilt == true) -> KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE
+            sivilstandstype.erUgiftEllerUoppgitt()
+            && (søknad.sivilstand.erUformeltGift == true || søknad.sivilstand.erUformeltSeparertEllerSkilt == true) ->
+                KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE
             sivilstandstype.erUgiftEllerUoppgitt() -> KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE
 
-            sivilstandstype.erGift() && søknad.sivilstand.søktOmSkilsmisseSeparasjon == true -> SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON
+            sivilstandstype.erGift() && søknad.sivilstand.søktOmSkilsmisseSeparasjon == true ->
+                SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON
             sivilstandstype.erGift() -> KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE
 
             sivilstandstype.erSeparert() -> SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING
@@ -71,11 +74,12 @@ class SivilstandRegel : Vilkårsregel(vilkårType = VilkårType.SIVILSTAND,
                           svarMapping = jaNeiSvarRegel(hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
                                                        hvisNei = NesteRegel(KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE.regelId)))
 
-        private val UNNTAK = RegelSteg(regelId = RegelId.SIVILSTAND_UNNTAK,
-                                       svarMapping = mapOf(
-                                               SvarId.GJENLEVENDE_IKKE_RETT_TIL_YTELSER to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                                               SvarId.GJENLEVENDE_OVERTAR_OMSORG to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                                               SvarId.NEI to SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE
-                                       ))
+        private val UNNTAK =
+                RegelSteg(regelId = RegelId.SIVILSTAND_UNNTAK,
+                          svarMapping = mapOf(
+                                  SvarId.GJENLEVENDE_IKKE_RETT_TIL_YTELSER to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                                  SvarId.GJENLEVENDE_OVERTAR_OMSORG to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                                  SvarId.NEI to SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE
+                          ))
     }
 }

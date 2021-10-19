@@ -5,5 +5,5 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.KjønnType
 
 object KjønnMapper {
 
-    fun tilKjønn(kjønn: KjønnType): Kjønn =  kjønn.let { Kjønn.valueOf(it.name) }
+    fun tilKjønn(kjønn: KjønnType): Kjønn = kjønn.let { Kjønn.valueOf(it.name) }
 }

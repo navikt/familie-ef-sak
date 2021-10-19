@@ -18,9 +18,9 @@ object BosituasjonMapper {
                               bosituasjon.datoFlyttetFraHverandre,
                               bosituasjon.tidligereSamboerFortsattRegistrertPåAdresse?.let {
                                   DokumentasjonDto(it.harSendtInnTidligere,
-                                                   it.dokumenter.map {
-                                                       VedleggDto(it.id,
-                                                                  it.navn)
+                                                   it.dokumenter.map { dokument ->
+                                                       VedleggDto(dokument.id,
+                                                                  dokument.navn)
                                                    })
                               })
 

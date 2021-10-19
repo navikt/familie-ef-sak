@@ -21,8 +21,8 @@ import java.util.UUID
 internal class TilbakekrevingServiceTest {
 
 
-    val tilbakekrevingRepository = mockk<TilbakekrevingRepository>()
-    val behandlingService = mockk<BehandlingService>()
+    private val tilbakekrevingRepository = mockk<TilbakekrevingRepository>()
+    private val behandlingService = mockk<BehandlingService>()
     private val tilbakekrevingService = TilbakekrevingService(tilbakekrevingRepository, behandlingService, mockk(), mockk())
 
     @Test

@@ -19,30 +19,30 @@ internal class IverksettingDtoMapperTest {
     private val augustSlutt = LocalDate.of(2021, 8, 31)
     private val oktoberStart = LocalDate.of(2021, 10, 1)
     private val oktoberSlutt = LocalDate.of(2021, 10, 31)
-    val januarTilApril = SimuleringsposteringTestUtil.lagPosteringer(fraDato = januarStart,
-                                                                     antallMåneder = 4,
-                                                                     beløp = BigDecimal(5000),
-                                                                     posteringstype = PosteringType.FEILUTBETALING)
+    private val januarTilApril = SimuleringsposteringTestUtil.lagPosteringer(fraDato = januarStart,
+                                                                             antallMåneder = 4,
+                                                                             beløp = BigDecimal(5000),
+                                                                             posteringstype = PosteringType.FEILUTBETALING)
 
 
-    val mai = SimuleringsposteringTestUtil.lagPosteringer(fraDato = LocalDate.of(2021, 5, 1),
+    private val mai = SimuleringsposteringTestUtil.lagPosteringer(fraDato = LocalDate.of(2021, 5, 1),
                                                           antallMåneder = 1,
                                                           beløp = BigDecimal(5000),
                                                           posteringstype = PosteringType.YTELSE)
 
 
-    val juniTilAugust = SimuleringsposteringTestUtil.lagPosteringer(fraDato = juniStart,
-                                                                    antallMåneder = 3,
-                                                                    beløp = BigDecimal(5000),
-                                                                    posteringstype = PosteringType.FEILUTBETALING)
+    private val juniTilAugust = SimuleringsposteringTestUtil.lagPosteringer(fraDato = juniStart,
+                                                                            antallMåneder = 3,
+                                                                            beløp = BigDecimal(5000),
+                                                                            posteringstype = PosteringType.FEILUTBETALING)
 
-    val oktober = SimuleringsposteringTestUtil.lagPosteringer(fraDato = oktoberStart,
-                                                              antallMåneder = 1,
-                                                              beløp = BigDecimal(5000),
-                                                              posteringstype = PosteringType.FEILUTBETALING)
+    private val oktober = SimuleringsposteringTestUtil.lagPosteringer(fraDato = oktoberStart,
+                                                                      antallMåneder = 1,
+                                                                      beløp = BigDecimal(5000),
+                                                                      posteringstype = PosteringType.FEILUTBETALING)
 
 
-    val simuleringsmottakere = listOf(SimuleringMottaker(
+    private val simuleringsmottakere = listOf(SimuleringMottaker(
             simulertPostering = januarTilApril + mai + juniTilAugust + oktober,
             mottakerNummer = "12345678901",
             mottakerType = MottakerType.BRUKER

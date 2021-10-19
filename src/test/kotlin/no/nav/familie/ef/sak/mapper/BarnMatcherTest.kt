@@ -147,6 +147,13 @@ internal class BarnMatcherTest {
                  lagtTilManuelt = false)
 
     private fun pdlBarn(fnr: String) =
-            BarnMedIdent(emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), Navn("", "", "", Metadata(false)), fnr)
+            BarnMedIdent(emptyList(),
+                         emptyList(),
+                         emptyList(),
+                         emptyList(),
+                         emptyList(),
+                         emptyList(),
+                         Navn("", "", "", Metadata(false)),
+                         fnr)
 
 }

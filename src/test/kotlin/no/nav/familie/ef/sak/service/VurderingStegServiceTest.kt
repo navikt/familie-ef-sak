@@ -74,15 +74,15 @@ internal class VurderingStegServiceTest {
             TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "01012067050")
     )).build().søknadOvergangsstønad)
     private val behandling = behandling(fagsak(), BehandlingStatus.OPPRETTET)
-    private val BEHANDLING_ID = UUID.randomUUID()
+    private val behandlingId = UUID.randomUUID()
 
     @BeforeEach
     fun setUp() {
-        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+        every { behandlingService.hentBehandling(behandlingId) } returns behandling
         every { behandlingService.oppdaterStatusPåBehandling(any(), any()) } returns behandling
         every { søknadService.hentOvergangsstønad(any()) }.returns(søknad)
         every { blankettRepository.deleteById(any()) } just runs
-        every { taskRepository.save(any())} answers { firstArg() }
+        every { taskRepository.save(any()) } answers { firstArg() }
         every { personopplysningerIntegrasjonerClient.hentMedlemskapsinfo(any()) }
                 .returns(Medlemskapsinfo(personIdent = søknad.fødselsnummer,
                                          gyldigePerioder = emptyList(),
@@ -114,7 +114,7 @@ internal class VurderingStegServiceTest {
         every { vilkårsvurderingRepository.findByIdOrNull(vurderingId) } returns null
         assertThat(catchThrowable {
             vurderingService.oppdaterVilkår(SvarPåVurderingerDto(id = vurderingId,
-                                                                 behandlingId = BEHANDLING_ID,
+                                                                 behandlingId = behandlingId,
                                                                  delvilkårsvurderinger = listOf()))
         }).hasMessageContaining("Finner ikke Vilkårsvurdering med id")
     }
@@ -129,7 +129,7 @@ internal class VurderingStegServiceTest {
                                                                              SvarId.JA,
                                                                              "a"))))
         vurderingService.oppdaterVilkår(SvarPåVurderingerDto(id = vilkårsvurdering.id,
-                                                             behandlingId = BEHANDLING_ID,
+                                                             behandlingId = behandlingId,
                                                              delvilkårsvurderinger = delvilkårDto))
 
         assertThat(lagretVilkårsvurdering.captured.resultat).isEqualTo(Vilkårsresultat.OPPFYLT)
@@ -148,7 +148,7 @@ internal class VurderingStegServiceTest {
         val vilkårsvurdering = initiererVurderinger(oppdatertVurdering)
 
         vurderingService.settVilkårTilSkalIkkeVurderes(OppdaterVilkårsvurderingDto(id = vilkårsvurdering.id,
-                                                                                   behandlingId = BEHANDLING_ID))
+                                                                                   behandlingId = behandlingId))
 
         assertThat(oppdatertVurdering.captured.resultat).isEqualTo(Vilkårsresultat.SKAL_IKKE_VURDERES)
         assertThat(oppdatertVurdering.captured.type).isEqualTo(vilkårsvurdering.type)
@@ -162,15 +162,15 @@ internal class VurderingStegServiceTest {
 
     @Test
     internal fun `skal ikke oppdatere vilkårsvurdering hvis behandlingen er låst for videre behandling`() {
-        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling(fagsak(), BehandlingStatus.FERDIGSTILT)
-        val vilkårsvurdering = vilkårsvurdering(BEHANDLING_ID,
+        every { behandlingService.hentBehandling(behandlingId) } returns behandling(fagsak(), BehandlingStatus.FERDIGSTILT)
+        val vilkårsvurdering = vilkårsvurdering(behandlingId,
                                                 resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
                                                 VilkårType.FORUTGÅENDE_MEDLEMSKAP)
         every { vilkårsvurderingRepository.findByIdOrNull(vilkårsvurdering.id) } returns vilkårsvurdering
 
         assertThat(catchThrowable {
             vurderingService.oppdaterVilkår(SvarPåVurderingerDto(id = vilkårsvurdering.id,
-                                                                 behandlingId = BEHANDLING_ID,
+                                                                 behandlingId = behandlingId,
                                                                  listOf()))
         }).isInstanceOf(Feil::class.java)
                 .hasMessageContaining("er låst for videre redigering")
@@ -179,7 +179,7 @@ internal class VurderingStegServiceTest {
 
     @Test
     internal fun `skal oppdatere status fra OPPRETTET til UTREDES for første vilkår`() {
-        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling(fagsak(), BehandlingStatus.OPPRETTET)
+        every { behandlingService.hentBehandling(behandlingId) } returns behandling(fagsak(), BehandlingStatus.OPPRETTET)
         val lagretVilkårsvurdering = slot<Vilkårsvurdering>()
         val vilkårsvurdering = initiererVurderinger(lagretVilkårsvurdering)
         val delvilkårDto = listOf(DelvilkårsvurderingDto(Vilkårsresultat.IKKE_OPPFYLT,
@@ -187,7 +187,7 @@ internal class VurderingStegServiceTest {
                                                                              SvarId.JA,
                                                                              "a"))))
         vurderingService.oppdaterVilkår(SvarPåVurderingerDto(id = vilkårsvurdering.id,
-                                                             behandlingId = BEHANDLING_ID,
+                                                             behandlingId = behandlingId,
                                                              delvilkårsvurderinger = delvilkårDto))
 
         verify(exactly = 1) { behandlingService.oppdaterStatusPåBehandling(any(), BehandlingStatus.UTREDES) }
@@ -195,7 +195,7 @@ internal class VurderingStegServiceTest {
 
     @Test
     internal fun `skal ikke oppdatere status til UTREDES hvis den allerede er dette `() {
-        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling(fagsak(), BehandlingStatus.UTREDES)
+        every { behandlingService.hentBehandling(behandlingId) } returns behandling(fagsak(), BehandlingStatus.UTREDES)
         val lagretVilkårsvurdering = slot<Vilkårsvurdering>()
         val vilkårsvurdering = initiererVurderinger(lagretVilkårsvurdering)
         val delvilkårDto = listOf(DelvilkårsvurderingDto(Vilkårsresultat.IKKE_OPPFYLT,
@@ -203,7 +203,7 @@ internal class VurderingStegServiceTest {
                                                                              SvarId.JA,
                                                                              "a"))))
         vurderingService.oppdaterVilkår(SvarPåVurderingerDto(id = vilkårsvurdering.id,
-                                                             behandlingId = BEHANDLING_ID,
+                                                             behandlingId = behandlingId,
                                                              delvilkårsvurderinger = delvilkårDto))
 
         verify(exactly = 0) { behandlingService.oppdaterStatusPåBehandling(any(), BehandlingStatus.UTREDES) }
@@ -211,17 +211,18 @@ internal class VurderingStegServiceTest {
 
     //KUN FOR Å TESTE OPPDATERSTEG
     private fun initiererVurderinger(lagretVilkårsvurdering: CapturingSlot<Vilkårsvurdering>): Vilkårsvurdering {
-        val vilkårsvurdering = vilkårsvurdering(BEHANDLING_ID,
-                                                Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-                                                VilkårType.FORUTGÅENDE_MEDLEMSKAP,
-                                                listOf(Delvilkårsvurdering(Vilkårsresultat.OPPFYLT,
-                                                                           listOf(Vurdering(RegelId.SØKER_MEDLEM_I_FOLKETRYGDEN)))))
+        val vilkårsvurdering =
+                vilkårsvurdering(behandlingId,
+                                 Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+                                 VilkårType.FORUTGÅENDE_MEDLEMSKAP,
+                                 listOf(Delvilkårsvurdering(Vilkårsresultat.OPPFYLT,
+                                                            listOf(Vurdering(RegelId.SØKER_MEDLEM_I_FOLKETRYGDEN)))))
         val vilkårsvurderinger =
-                opprettNyeVilkårsvurderinger(BEHANDLING_ID, HovedregelMetadata(søknad, Sivilstandstype.UGIFT))
+                opprettNyeVilkårsvurderinger(behandlingId, HovedregelMetadata(søknad, Sivilstandstype.UGIFT))
                         .map { if (it.type == vilkårsvurdering.type) vilkårsvurdering else it }
 
         every { vilkårsvurderingRepository.findByIdOrNull(vilkårsvurdering.id) } returns vilkårsvurdering
-        every { vilkårsvurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns vilkårsvurderinger
+        every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns vilkårsvurderinger
         every { vilkårsvurderingRepository.update(capture(lagretVilkårsvurdering)) } answers
                 { it.invocation.args.first() as Vilkårsvurdering }
         return vilkårsvurdering

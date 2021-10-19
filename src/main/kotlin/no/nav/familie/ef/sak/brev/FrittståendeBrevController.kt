@@ -19,7 +19,7 @@ class Frittst책endeBrevController(private val frittst책endeBrevService: Frittst�
     }
 
     @PostMapping("/send")
-    fun sendFrittst책endeBrev(@RequestBody brevInnhold: Frittst책endeBrevDto): Ressurs<Unit>{
+    fun sendFrittst책endeBrev(@RequestBody brevInnhold: Frittst책endeBrevDto): Ressurs<Unit> {
         return Ressurs.success(frittst책endeBrevService.sendFrittst책endeBrev(brevInnhold))
     }
 

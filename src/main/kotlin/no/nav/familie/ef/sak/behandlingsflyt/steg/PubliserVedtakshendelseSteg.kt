@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.behandlingsflyt.steg
 
-import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.iverksett.IverksettClient
 import org.springframework.stereotype.Service
 
 @Service

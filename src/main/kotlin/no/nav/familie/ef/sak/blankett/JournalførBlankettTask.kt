@@ -1,14 +1,15 @@
 package no.nav.familie.ef.sak.blankett
 
-import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.springframework.stereotype.Service
-import java.util.*
+import java.util.Properties
+import java.util.UUID
 
 @Service
 @TaskStepBeskrivelse(taskStepType = JournalførBlankettTask.TYPE,

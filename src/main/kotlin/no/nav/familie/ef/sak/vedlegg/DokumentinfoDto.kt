@@ -4,7 +4,7 @@ import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import java.time.LocalDateTime
 
 data class JournalposterDto(
-        val dokumenterKnyttetTilBehandlingen : List<DokumentinfoDto>,
+        val dokumenterKnyttetTilBehandlingen: List<DokumentinfoDto>,
         val andreDokumenter: List<DokumentinfoDto>
 )
 

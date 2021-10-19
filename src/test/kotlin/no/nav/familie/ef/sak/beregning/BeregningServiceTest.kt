@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.beregning
 
-import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.felles.dto.Periode
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -82,12 +82,13 @@ internal class BeregningServiceTest {
         val beløpTilUtbetalning = fullOvergangsstønad.subtract(avkortning).setScale(0, RoundingMode.HALF_UP)
 
 
-        val beregningsgrunnlagG2019 = Beregningsgrunnlag(samordningsfradrag = BigDecimal(0),
-                                                         inntekt = inntekt,
-                                                         avkortningPerMåned = avkortning,
-                                                         grunnbeløp = grunnbeløp,
-                                                         fullOvergangsStønadPerMåned = fullOvergangsstønad.setScale(0,
-                                                                                                                    RoundingMode.HALF_DOWN))
+        val beregningsgrunnlagG2019 =
+                Beregningsgrunnlag(samordningsfradrag = BigDecimal(0),
+                                   inntekt = inntekt,
+                                   avkortningPerMåned = avkortning,
+                                   grunnbeløp = grunnbeløp,
+                                   fullOvergangsStønadPerMåned = fullOvergangsstønad.setScale(0,
+                                                                                              RoundingMode.HALF_DOWN))
         val fullYtelse = beregningService.beregnYtelse(inntektsperioder =
                                                        listOf(Inntektsperiode(startDato = LocalDate.parse("2019-06-01"),
                                                                               sluttDato = LocalDate.parse("2020-04-30"),
@@ -129,7 +130,6 @@ internal class BeregningServiceTest {
 
         val fullOvergangsstønad2019 =
                 grunnbeløp2019.multiply(BigDecimal(2.25)).divide(BigDecimal(12)).setScale(0, RoundingMode.HALF_UP)
-        val beløpTilUtbetalningIAndraPerioden = fullOvergangsstønad2019
 
 
         val beregningsgrunnlagIFørstePerioden = Beregningsgrunnlag(samordningsfradrag = BigDecimal.ZERO,
@@ -170,8 +170,8 @@ internal class BeregningServiceTest {
         assertThat(fullYtelse[1]).isEqualTo(Beløpsperiode(Periode(LocalDate.parse("2019-06-01"),
                                                                   LocalDate.parse("2020-04-30")),
                                                           beregningsgrunnlagIAndrePerioden,
-                                                          beløpTilUtbetalningIAndraPerioden,
-                                                          beløpTilUtbetalningIAndraPerioden))
+                                                          fullOvergangsstønad2019,
+                                                          fullOvergangsstønad2019))
 
     }
 
@@ -190,7 +190,8 @@ internal class BeregningServiceTest {
                                                       samordningsfradrag = BigDecimal.ZERO))
 
 
-        val ytelseTilUtbetalning = beregningService.beregnYtelse(inntektsperioder = inntektsperioder, vedtaksperioder = vedtakperioder)
+        val ytelseTilUtbetalning =
+                beregningService.beregnYtelse(inntektsperioder = inntektsperioder, vedtaksperioder = vedtakperioder)
         assertThat(ytelseTilUtbetalning[0].beløp).isEqualTo(BigDecimal.ZERO)
     }
 

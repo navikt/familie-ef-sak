@@ -80,7 +80,7 @@ class IverksettClient(@Value("\${FAMILIE_EF_IVERKSETT_URL}")
         postForEntity<Any>(URI.create("$familieEfIverksettUri/api/konsistensavstemming"), request)
     }
 
-    fun sendFrittståendeBrev(frittståendeBrevDto: FrittståendeBrevDto){
+    fun sendFrittståendeBrev(frittståendeBrevDto: FrittståendeBrevDto) {
         postForEntity<Any>(URI.create("$familieEfIverksettUri/api/brev/frittstaende"), frittståendeBrevDto)
     }
 }

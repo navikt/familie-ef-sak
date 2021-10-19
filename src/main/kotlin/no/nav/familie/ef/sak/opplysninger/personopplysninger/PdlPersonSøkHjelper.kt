@@ -48,7 +48,7 @@ object PdlPersonSøkHjelper {
         return emptyList()
     }
 
-    fun lagSøkeKriterier(søkefelt: String, søkeord: String): SøkeKriterier {
+    private fun lagSøkeKriterier(søkefelt: String, søkeord: String): SøkeKriterier {
         return SøkeKriterier(fieldName = søkefelt,
                              searchRule = SearchRule(equals = søkeord))
     }

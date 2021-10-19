@@ -39,12 +39,12 @@ class BehandlingshistorikkService(private val behandlingshistorikkRepository: Be
      */
     fun opprettHistorikkInnslag(behandling: Behandling, utfall: StegUtfall?, metadata: Any?) {
         opprettHistorikkInnslag(Behandlingshistorikk(
-                  behandlingId = behandling.id,
-                  steg = behandling.steg,
-                  utfall = utfall,
-                  metadata = metadata?.let {
-                      JsonWrapper(objectMapper.writeValueAsString (it))
-                  }))
-      }
+                behandlingId = behandling.id,
+                steg = behandling.steg,
+                utfall = utfall,
+                metadata = metadata?.let {
+                    JsonWrapper(objectMapper.writeValueAsString(it))
+                }))
+    }
 
 }

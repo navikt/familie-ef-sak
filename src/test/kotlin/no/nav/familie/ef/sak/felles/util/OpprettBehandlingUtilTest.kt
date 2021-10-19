@@ -17,13 +17,13 @@ internal class OpprettBehandlingUtilTest {
     private val fagsak = fagsak()
 
     @Test
-    internal fun `førstegangsbehandling - mulig å lage behandling når det ikke finnes behandling fra før`() {
+    fun `førstegangsbehandling - mulig å lage behandling når det ikke finnes behandling fra før`() {
         assertThat(catchThrowable { validerKanOppretteNyBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, listOf(), null) })
                 .doesNotThrowAnyException()
     }
 
     @Test
-    internal fun `førstegangsbehandling - forrige behandling må være blankett eller teknisk opphør`() {
+    fun `førstegangsbehandling - forrige behandling må være blankett eller teknisk opphør`() {
         BehandlingType.values().forEach {
             val tidligereBehandlinger = listOf(behandling(fagsak = fagsak,
                                                           type = it,
@@ -39,7 +39,7 @@ internal class OpprettBehandlingUtilTest {
     }
 
     @Test
-    internal fun `førstegangsbehandling - det skal ikke være mulig å opprette hvis eksisterende behandling er avslått førstegangsbehandling`() {
+    fun `førstegangsbehandling - det skal ikke være mulig å opprette hvis eksisterende behandling er avslått førstegangsbehandling`() {
         assertThat(catchThrowable {
             validerKanOppretteNyBehandling(BehandlingType.FØRSTEGANGSBEHANDLING,
                                            listOf(behandling(fagsak = fagsak,
@@ -51,7 +51,7 @@ internal class OpprettBehandlingUtilTest {
 
 
     @Test
-    internal fun `revurdering - det skal ikke være mulig å opprette en revurdering hvis forrige behandling ikke er ferdigstilt`() {
+    fun `revurdering - det skal ikke være mulig å opprette en revurdering hvis forrige behandling ikke er ferdigstilt`() {
         assertThat(catchThrowable {
             validerKanOppretteNyBehandling(BehandlingType.REVURDERING,
                                            listOf(behandling(fagsak = fagsak,
@@ -64,7 +64,7 @@ internal class OpprettBehandlingUtilTest {
     }
 
     @Test
-    internal fun `revurdering - det skal være mulig å opprette en revurdering hvis eksisterende behandling er avslått førstegangsbehandling`() {
+    fun `revurdering - det skal være mulig å opprette en revurdering hvis eksisterende behandling er avslått førstegangsbehandling`() {
         validerKanOppretteNyBehandling(BehandlingType.REVURDERING,
                                        listOf(behandling(fagsak = fagsak,
                                                          resultat = BehandlingResultat.AVSLÅTT,
@@ -73,7 +73,7 @@ internal class OpprettBehandlingUtilTest {
     }
 
     @Test
-    internal fun `revurdering - det skal ikke være mulig å opprette en revurdering hvis eksisterende behandling er annullert`() {
+    fun `revurdering - det skal ikke være mulig å opprette en revurdering om eksisterende behandling er annullert`() {
         assertThat(catchThrowable {
             validerKanOppretteNyBehandling(BehandlingType.REVURDERING,
                                            listOf(behandling(fagsak = fagsak,
@@ -84,14 +84,14 @@ internal class OpprettBehandlingUtilTest {
     }
 
     @Test
-    internal fun `revurdering - skal ikke være mulig å opprette en revurdering hvis det ikke finnes en behandling fra før`() {
+    fun `revurdering - skal ikke være mulig å opprette en revurdering hvis det ikke finnes en behandling fra før`() {
         assertThat(catchThrowable {
             validerKanOppretteNyBehandling(BehandlingType.REVURDERING, listOf(), null)
         }).hasMessage("Det finnes ikke en tidligere behandling på fagsaken")
     }
 
     @Test
-    internal fun `revurdering - skal ikke være mulig å opprette en revurdering hvis forrige behandling er blankett`() {
+    fun `revurdering - skal ikke være mulig å opprette en revurdering hvis forrige behandling er blankett`() {
         assertThat(catchThrowable {
             validerKanOppretteNyBehandling(BehandlingType.REVURDERING,
                                            listOf(behandling(fagsak = fagsak,
@@ -101,7 +101,7 @@ internal class OpprettBehandlingUtilTest {
     }
 
     @Test
-    internal fun `revurdering - skal ikke være mulig å opprette en revurdering hvis forrige behandling er teknisk opphør`() {
+    fun `revurdering - skal ikke være mulig å opprette en revurdering hvis forrige behandling er teknisk opphør`() {
         assertThat(catchThrowable {
             validerKanOppretteNyBehandling(BehandlingType.REVURDERING,
                                            listOf(behandling(fagsak = fagsak,
@@ -111,7 +111,7 @@ internal class OpprettBehandlingUtilTest {
     }
 
     @Test
-    internal fun `teknisk opphør - siste behandlingen må være iverksatt`() {
+    fun `teknisk opphør - siste behandlingen må være iverksatt`() {
         validerKanOppretteNyBehandling(BehandlingType.TEKNISK_OPPHØR, listOf(iverksattRevurdering), iverksattRevurdering)
         validerKanOppretteNyBehandling(BehandlingType.TEKNISK_OPPHØR,
                                        listOf(iverksattFørstegangsbehandling),
@@ -119,7 +119,7 @@ internal class OpprettBehandlingUtilTest {
     }
 
     @Test
-    internal fun `teknisk opphør - siste behandlingen kan ikke være teknisk opphør`() {
+    fun `teknisk opphør - siste behandlingen kan ikke være teknisk opphør`() {
         assertThat(catchThrowable {
             validerKanOppretteNyBehandling(BehandlingType.TEKNISK_OPPHØR,
                                            listOf(BehandlingOppsettUtil.iverksattTekniskOpphør),
@@ -128,7 +128,7 @@ internal class OpprettBehandlingUtilTest {
     }
 
     @Test
-    internal fun `teknisk opphør - skal kaste feil hvis siste behandling ikke er iverksatt`() {
+    fun `teknisk opphør - skal kaste feil hvis siste behandling ikke er iverksatt`() {
         assertThat(catchThrowable { validerKanOppretteNyBehandling(BehandlingType.TEKNISK_OPPHØR, listOf(), null) })
                 .hasMessage("Det finnes ikke en tidligere behandling for fagsaken")
 

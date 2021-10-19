@@ -76,6 +76,6 @@ internal class RegistergrunnlagTest {
                     error("$className - Class is not defined: $qualifiedName")
                 else -> ObjectInfo(name, "Object", getClassInfo(classifier), nullable = nullable)
             }
-        }.map { it.name to it }.toMap()
+        }.associateBy { it.name }
     }
 }

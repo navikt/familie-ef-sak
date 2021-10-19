@@ -72,7 +72,7 @@ internal class JournalføringServiceTest {
     private val fagsakEksternId = 12345L
     private val journalpostId = "98765"
     private val nyOppgaveId = 999999L
-    val behandlingId: UUID = UUID.randomUUID()
+    private val behandlingId: UUID = UUID.randomUUID()
     private val oppgaveId = "1234567"
     private val dokumentTitler = hashMapOf("12345" to "Asbjørns skilsmissepapirer", "23456" to "Eiriks samværsdokument")
     private val dokumentInfoIdMedJsonVerdi = "12345"

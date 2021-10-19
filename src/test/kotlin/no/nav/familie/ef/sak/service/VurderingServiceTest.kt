@@ -8,7 +8,6 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
-import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.blankett.BlankettRepository
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
@@ -45,7 +44,6 @@ internal class VurderingServiceTest {
     private val personopplysningerIntegrasjonerClient = mockk<PersonopplysningerIntegrasjonerClient>()
     private val blankettRepository = mockk<BlankettRepository>()
     private val vilkårGrunnlagService = mockk<VilkårGrunnlagService>()
-    private val stegService = mockk<StegService>()
     private val vurderingService = VurderingService(behandlingService = behandlingService,
                                                     søknadService = søknadService,
                                                     vilkårsvurderingRepository = vilkårsvurderingRepository,
@@ -55,11 +53,11 @@ internal class VurderingServiceTest {
             TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "01012067050")
     )).build().søknadOvergangsstønad)
     private val behandling = behandling(fagsak(), BehandlingStatus.OPPRETTET)
-    private val BEHANDLING_ID = UUID.randomUUID()
+    private val behandlingId = UUID.randomUUID()
 
     @BeforeEach
     fun setUp() {
-        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+        every { behandlingService.hentBehandling(behandlingId) } returns behandling
         every { søknadService.hentOvergangsstønad(any()) }.returns(søknad)
         every { blankettRepository.deleteById(any()) } just runs
         every { personopplysningerIntegrasjonerClient.hentMedlemskapsinfo(any()) }
@@ -82,14 +80,14 @@ internal class VurderingServiceTest {
 
     @Test
     fun `skal opprette nye Vilkårsvurdering for alle vilkår dersom ingen vurderinger finnes`() {
-        every { vilkårsvurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns emptyList()
+        every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns emptyList()
 
         val nyeVilkårsvurderinger = slot<List<Vilkårsvurdering>>()
         every { vilkårsvurderingRepository.insertAll(capture(nyeVilkårsvurderinger)) } answers
                 { it.invocation.args.first() as List<Vilkårsvurdering> }
         val vilkår = VilkårType.hentVilkår()
 
-        vurderingService.hentEllerOpprettVurderinger(BEHANDLING_ID)
+        vurderingService.hentEllerOpprettVurderinger(behandlingId)
 
         assertThat(nyeVilkårsvurderinger.captured).hasSize(vilkår.size + 1) // 2 barn
         assertThat(nyeVilkårsvurderinger.captured.map { it.type }.distinct()).containsExactlyInAnyOrderElementsOf(vilkår)
@@ -97,17 +95,17 @@ internal class VurderingServiceTest {
         assertThat(nyeVilkårsvurderinger.captured.filter { it.barnId != null }).hasSize(2)
         assertThat(nyeVilkårsvurderinger.captured.map { it.resultat }
                            .toSet()).containsOnly(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
-        assertThat(nyeVilkårsvurderinger.captured.map { it.behandlingId }.toSet()).containsOnly(BEHANDLING_ID)
+        assertThat(nyeVilkårsvurderinger.captured.map { it.behandlingId }.toSet()).containsOnly(behandlingId)
     }
 
     @Test
     fun `skal ikke opprette nye Vilkårsvurderinger for behandlinger som allerede har vurderinger`() {
-        every { vilkårsvurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns
+        every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns
                 listOf(vilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT,
                                         type = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
-                                        behandlingId = BEHANDLING_ID))
+                                        behandlingId = behandlingId))
 
-        vurderingService.hentEllerOpprettVurderinger(BEHANDLING_ID)
+        vurderingService.hentEllerOpprettVurderinger(behandlingId)
 
         verify(exactly = 0) { vilkårsvurderingRepository.updateAll(any()) }
         verify(exactly = 0) { vilkårsvurderingRepository.insertAll(any()) }
@@ -118,12 +116,12 @@ internal class VurderingServiceTest {
         val delvilkårsvurdering =
                 SivilstandRegel().initereDelvilkårsvurdering(HovedregelMetadata(mockk(),
                                                                                 Sivilstandstype.ENKE_ELLER_ENKEMANN))
-        every { vilkårsvurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns
-                listOf(Vilkårsvurdering(behandlingId = BEHANDLING_ID,
+        every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns
+                listOf(Vilkårsvurdering(behandlingId = behandlingId,
                                         type = VilkårType.SIVILSTAND,
                                         delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurdering)))
 
-        val vilkår = vurderingService.hentEllerOpprettVurderinger(BEHANDLING_ID)
+        val vilkår = vurderingService.hentEllerOpprettVurderinger(behandlingId)
 
         assertThat(delvilkårsvurdering).hasSize(5)
         assertThat(delvilkårsvurdering.filter { it.resultat == Vilkårsresultat.IKKE_AKTUELL }).hasSize(4)
@@ -140,10 +138,10 @@ internal class VurderingServiceTest {
     internal fun `skal ikke opprette vilkårsvurderinger hvis behandling er låst for videre vurdering`() {
         val vilkårsvurderinger = listOf(vilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT,
                                                          type = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
-                                                         behandlingId = BEHANDLING_ID))
-        every { vilkårsvurderingRepository.findByBehandlingId(BEHANDLING_ID) } returns vilkårsvurderinger
+                                                         behandlingId = behandlingId))
+        every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns vilkårsvurderinger
 
-        val alleVilkårsvurderinger = vurderingService.hentEllerOpprettVurderinger(BEHANDLING_ID).vurderinger
+        val alleVilkårsvurderinger = vurderingService.hentEllerOpprettVurderinger(behandlingId).vurderinger
 
         assertThat(alleVilkårsvurderinger).hasSize(1)
         verify(exactly = 0) { vilkårsvurderingRepository.insertAll(any()) }

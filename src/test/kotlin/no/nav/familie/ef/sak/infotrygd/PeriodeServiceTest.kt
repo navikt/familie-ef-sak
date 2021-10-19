@@ -125,7 +125,7 @@ internal class PeriodeServiceTest {
         assertThat(perioder[0].beløp).isEqualTo(2)
     }
 
-    fun mockReplika(overgangsstønad: List<InfotrygdPeriode>) {
+    private fun mockReplika(overgangsstønad: List<InfotrygdPeriode>) {
         every { replikaClient.hentPerioder(any()) } returns InfotrygdPeriodeResponse(overgangsstønad, emptyList(), emptyList())
     }
 

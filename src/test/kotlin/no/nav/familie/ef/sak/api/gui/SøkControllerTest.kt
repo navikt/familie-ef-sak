@@ -1,12 +1,12 @@
 package no.nav.familie.ef.sak.api.gui
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.felles.domain.PersonIdentDto
-import no.nav.familie.ef.sak.fagsak.dto.Søkeresultat
-import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
+import no.nav.familie.ef.sak.fagsak.dto.Søkeresultat
+import no.nav.familie.ef.sak.felles.dto.PersonIdentDto
+import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -29,7 +29,7 @@ internal class SøkControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `Gitt person med fagsak når søk på personensident kallas skal det returneres 200 OK med Søkeresultat`() {
-         fagsakRepository.insert(fagsak(identer = setOf(FagsakPerson("01010199999"))))
+        fagsakRepository.insert(fagsak(identer = setOf(FagsakPerson("01010199999"))))
 
         val response = søkPerson("01010199999")
         Assertions.assertThat(response.statusCode).isEqualTo(

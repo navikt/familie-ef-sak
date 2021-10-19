@@ -6,7 +6,7 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 class ByUserIdStrategy : Strategy {
 
     override fun getName(): String {
-        return "byUserId";
+        return "byUserId"
     }
 
     override fun isEnabled(map: MutableMap<String, String>): Boolean {

@@ -1,11 +1,40 @@
 package no.nav.familie.ef.sak.testutil
 
 import io.mockk.mockk
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.*
-import no.nav.familie.kontrakter.ef.søknad.*
-import no.nav.familie.kontrakter.felles.medlemskap.PeriodeInfo
-import no.nav.familie.kontrakter.felles.medlemskap.PeriodeStatus
-import java.time.LocalDate
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Adressebeskyttelse
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.DeltBosted
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Dødsfall
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Folkeregisterpersonstatus
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.ForelderBarnRelasjon
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fullmakt
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fødsel
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.InnflyttingTilNorge
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Kjønn
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Kontaktadresse
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Opphold
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Oppholdsadresse
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlBarn
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlSøker
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Sivilstand
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Statsborgerskap
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Telefonnummer
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.TilrettelagtKommunikasjon
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.UtflyttingFraNorge
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.VergemaalEllerFremtidsfullmakt
+import no.nav.familie.kontrakter.ef.søknad.Aktivitet
+import no.nav.familie.kontrakter.ef.søknad.Barn
+import no.nav.familie.kontrakter.ef.søknad.Bosituasjon
+import no.nav.familie.kontrakter.ef.søknad.Innsendingsdetaljer
+import no.nav.familie.kontrakter.ef.søknad.Medlemskapsdetaljer
+import no.nav.familie.kontrakter.ef.søknad.Personalia
+import no.nav.familie.kontrakter.ef.søknad.Situasjon
+import no.nav.familie.kontrakter.ef.søknad.Sivilstandsdetaljer
+import no.nav.familie.kontrakter.ef.søknad.Sivilstandsplaner
+import no.nav.familie.kontrakter.ef.søknad.Stønadsstart
+import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
+import no.nav.familie.kontrakter.ef.søknad.Søknadsfelt
 
 fun pdlSøker(adressebeskyttelse: List<Adressebeskyttelse> = mockk(),
              bostedsadresse: List<Bostedsadresse> = mockk(),

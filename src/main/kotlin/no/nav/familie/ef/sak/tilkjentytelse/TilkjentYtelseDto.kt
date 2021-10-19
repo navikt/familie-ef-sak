@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.api.dto
+package no.nav.familie.ef.sak.tilkjentytelse
 
 import java.time.LocalDate
 import java.time.LocalDateTime

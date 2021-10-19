@@ -1,11 +1,11 @@
 package no.nav.familie.ef.sak.repository
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadBarnetilsynRepository
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadOvergangsstønadRepository
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadSkolepengerRepository
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Sivilstandsplaner
+import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
 import no.nav.familie.kontrakter.ef.søknad.Søknadsfelt
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import org.assertj.core.api.Assertions.assertThat
@@ -25,7 +25,7 @@ internal class SøknadsskjemaOvergangsstønadRepositoryTest : OppslagSpringRunne
 
     @Test
     internal fun `søknad om overgangsstønad lagres korrekt med tom sivilstandsplaner`() {
-        val søknadTilLagring = SøknadsskjemaMapper.tilDomene(Testsøknad.søknadOvergangsstønad.copy(sivilstandsplaner =  null))
+        val søknadTilLagring = SøknadsskjemaMapper.tilDomene(Testsøknad.søknadOvergangsstønad.copy(sivilstandsplaner = null))
         søknadOvergangsstønadRepository.insert(søknadTilLagring)
         val søknadFraDatabase = søknadOvergangsstønadRepository.findByIdOrThrow(søknadTilLagring.id)
         assertThat(søknadFraDatabase.sivilstandsplaner).isEqualTo(Sivilstandsplaner(null, null, null))

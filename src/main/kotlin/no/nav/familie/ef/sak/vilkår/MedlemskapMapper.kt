@@ -1,10 +1,11 @@
 package no.nav.familie.ef.sak.vilkår
 
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.UtflyttingDto
+import no.nav.familie.ef.sak.felles.kodeverk.KodeverkService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Søker
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Folkeregisterpersonstatus
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.InnflyttingDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.UtflyttingDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.OppholdstillatelseMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.StatsborgerskapMapper
@@ -12,7 +13,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.InnflyttingTilN
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.UtflyttingFraNorge
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Medlemskap
-import no.nav.familie.ef.sak.felles.kodeverk.KodeverkService
 import no.nav.familie.ef.sak.vilkår.dto.MedlemskapDto
 import no.nav.familie.ef.sak.vilkår.dto.MedlemskapRegistergrunnlagDto
 import no.nav.familie.ef.sak.vilkår.dto.MedlemskapSøknadsgrunnlagDto

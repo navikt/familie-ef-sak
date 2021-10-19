@@ -28,9 +28,9 @@ object AdresseHjelper {
         val gjeldendeBostedsadresseForelder = bostedsadresserForelder.gjeldende()
 
         return barn.bostedsadresse.gjeldende()?.let { adresseBarn ->
-            return adresseBarn.matrikkelId()?.let { matrikkelId ->
+            return (adresseBarn.matrikkelId()?.let { matrikkelId ->
                 return matrikkelId == gjeldendeBostedsadresseForelder?.matrikkelId()
-            } ?: adresseBarn.vegadresse != null && adresseBarn.vegadresse == gjeldendeBostedsadresseForelder?.vegadresse
+            } ?: adresseBarn.vegadresse) != null && adresseBarn.vegadresse == gjeldendeBostedsadresseForelder?.vegadresse
         } ?: false
     }
 

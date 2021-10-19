@@ -36,7 +36,8 @@ class TilbakekrevingService(private val tilbakekrevingRepository: Tilbakekreving
     }
 
     private fun validerTilbakekreving(behandling: Behandling, tilbakekrevingDto: TilbakekrevingDto) {
-        feilHvis(tilbakekrevingDto.valg == Tilbakekrevingsvalg.OPPRETT_MED_VARSEL && tilbakekrevingDto.varseltekst.isNullOrBlank()) {
+        feilHvis(tilbakekrevingDto.valg == Tilbakekrevingsvalg.OPPRETT_MED_VARSEL
+                 && tilbakekrevingDto.varseltekst.isNullOrBlank()) {
             "Må fylle ut varseltekst for å lage tilbakekreving med varsel"
         }
         feilHvis(behandling.status.behandlingErLåstForVidereRedigering()) {

@@ -183,7 +183,8 @@ internal class ArenaPeriodeUtilTest {
                                   LocalDate.parse("2021-03-01") to LocalDate.parse("2021-07-31")))
     }
 
-    fun List<PeriodeOvergangsstønad>.tilFomTomDato(): List<Pair<LocalDate, LocalDate>> = this.map { it.fomDato to it.tomDato }
+    private fun List<PeriodeOvergangsstønad>.tilFomTomDato(): List<Pair<LocalDate, LocalDate>> =
+            this.map { it.fomDato to it.tomDato }
 
     private fun periode(fomDato: LocalDate, tomDato: LocalDate, beløp: Float, opphørsdato: LocalDate? = null) =
             InfotrygdArenaPeriode(ident, fomDato, tomDato, beløp, opphørsdato)

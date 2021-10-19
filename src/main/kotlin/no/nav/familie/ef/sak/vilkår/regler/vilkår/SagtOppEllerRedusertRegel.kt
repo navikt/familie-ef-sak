@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.vilkår.regler.vilkår
 
+import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.regler.NesteRegel
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
 import no.nav.familie.ef.sak.vilkår.regler.RegelSteg
@@ -7,7 +8,6 @@ import no.nav.familie.ef.sak.vilkår.regler.SluttSvarRegel
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 import no.nav.familie.ef.sak.vilkår.regler.jaNeiSvarRegel
 import no.nav.familie.ef.sak.vilkår.regler.regelIder
-import no.nav.familie.ef.sak.vilkår.VilkårType
 
 class SagtOppEllerRedusertRegel : Vilkårsregel(vilkårType = VilkårType.SAGT_OPP_ELLER_REDUSERT,
                                                regler = setOf(SAGT_OPP_ELLER_REDUSERT, RIMELIG_GRUNN_SAGT_OPP),

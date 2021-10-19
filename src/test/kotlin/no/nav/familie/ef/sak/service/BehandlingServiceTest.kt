@@ -24,9 +24,9 @@ import org.springframework.http.HttpStatus
 
 internal class BehandlingServiceTest {
 
-    val behandlingRepository = mockk<BehandlingRepository>()
-    val behandlingshistorikkService = mockk<BehandlingshistorikkService>()
-    val behandlingService = BehandlingService(mockk(), behandlingRepository, behandlingshistorikkService, mockk())
+    private val behandlingRepository = mockk<BehandlingRepository>()
+    private val behandlingshistorikkService = mockk<BehandlingshistorikkService>()
+    private val behandlingService = BehandlingService(mockk(), behandlingRepository, behandlingshistorikkService, mockk())
 
     @Test
     internal fun `skal annullere behandling som er blankett og status utredes`() {
@@ -103,7 +103,7 @@ internal class BehandlingServiceTest {
             behandlingshistorikkService.opprettHistorikkInnslag(any<Behandling>())
         } just runs
 
-        val feil: Feil = assertThrows<Feil> {
+        val feil: Feil = assertThrows {
             behandlingService.annullerBehandling(behandling.id)
         }
 

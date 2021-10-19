@@ -37,7 +37,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
 
     // language=PostgreSQL
     @Query("""
-        SELECT b.*, be.id as eksternid_id
+        SELECT b.*, be.id AS eksternid_id
         FROM behandling b
         JOIN behandling_ekstern be ON b.id = be.behandling_id
         JOIN fagsak f ON f.id = b.fagsak_id
@@ -50,7 +50,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
 
     // language=PostgreSQL
     @Query("""
-        SELECT b.*, be.id as eksternid_id
+        SELECT b.*, be.id AS eksternid_id
         FROM behandling b
         JOIN behandling_ekstern be ON b.id = be.behandling_id
         WHERE b.fagsak_id = :fagsakId

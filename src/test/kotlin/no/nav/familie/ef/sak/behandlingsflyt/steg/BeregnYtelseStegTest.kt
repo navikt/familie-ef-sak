@@ -59,12 +59,11 @@ internal class BeregnYtelseStegTest {
     @BeforeEach
     internal fun setUp() {
         every { behandlingService.hentAktivIdent(any()) } returns "123"
-        every { simuleringService.hentOgLagreSimuleringsresultat(any()) } returns Simuleringsresultat(behandlingId = UUID.randomUUID(),
-                                                                                                      data = DetaljertSimuleringResultat(
-                                                                                                              emptyList()),
-                                                                                                      beriketData = BeriketSimuleringsresultat(
-                                                                                                              mockk(),
-                                                                                                              mockk()))
+        every { simuleringService.hentOgLagreSimuleringsresultat(any()) }
+                .returns(Simuleringsresultat(behandlingId = UUID.randomUUID(),
+                                             data = DetaljertSimuleringResultat(emptyList()),
+                                             beriketData = BeriketSimuleringsresultat(mockk(),
+                                                                                      mockk())))
     }
 
     @Test

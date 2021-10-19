@@ -3,9 +3,9 @@ package no.nav.familie.ef.sak.vilkår.regler.evalutation
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
-import no.nav.familie.ef.sak.vilkår.dto.DelvilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
+import no.nav.familie.ef.sak.vilkår.dto.DelvilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.VurderingDto
 import no.nav.familie.ef.sak.vilkår.regler.BegrunnelseType
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
@@ -86,7 +86,8 @@ object RegelValidering {
             "Delvilkårsvurderinger savner svar på hovedregler - hovedregler=$aktuelleHvovedregler delvilkår=$delvilkårRegelIdn"
         }
         feilHvis(delvilkårRegelIdn.size != aktuelleHvovedregler.size) {
-            "Feil i antall regler dto har ${delvilkårRegelIdn.size} mens vilkår har ${aktuelleHvovedregler.size} aktuelle delvilkår"
+            "Feil i antall regler dto har ${delvilkårRegelIdn.size} " +
+            "mens vilkår har ${aktuelleHvovedregler.size} aktuelle delvilkår"
         }
     }
 
@@ -103,8 +104,9 @@ object RegelValidering {
     private fun validerSavnerBegrunnelseHvisUtenBegrunnelse(vilkårType: VilkårType,
                                                             svarMapping: SvarRegel,
                                                             vurdering: VurderingDto) {
-        if (svarMapping.begrunnelseType == BegrunnelseType.UTEN && vurdering.begrunnelse != null && vurdering.begrunnelse.isNotEmpty()) {
-            throw Feil("Begrunnelse for vilkårType=$vilkårType regelId=${vurdering.regelId} svarId=${vurdering.svar} skal ikke ha begrunnelse")
+        if (svarMapping.begrunnelseType == BegrunnelseType.UTEN && !vurdering.begrunnelse.isNullOrEmpty()) {
+            throw Feil("Begrunnelse for vilkårType=$vilkårType regelId=${vurdering.regelId} " +
+                       "svarId=${vurdering.svar} skal ikke ha begrunnelse")
         }
     }
 }

@@ -111,16 +111,19 @@ internal class VedtaksbrevServiceTest {
 
     @Test
     internal fun `lagBeslutterBrev - skal kaste feil hvis behandlingen ikke har riktig status`() {
-        every { behandlingService.hentBehandling(any()) } returns lagBehandlingForBeslutter().copy(status = BehandlingStatus.FERDIGSTILT)
+        every { behandlingService.hentBehandling(any()) } returns lagBehandlingForBeslutter()
+                .copy(status = BehandlingStatus.FERDIGSTILT)
         assertThrows<Feil> { vedtaksbrevService.lagBeslutterBrev(behandling.id) }
 
-        every { behandlingService.hentBehandling(any()) } returns lagBehandlingForBeslutter().copy(status = BehandlingStatus.UTREDES)
+        every { behandlingService.hentBehandling(any()) } returns lagBehandlingForBeslutter()
+                .copy(status = BehandlingStatus.UTREDES)
         assertThrows<Feil> { vedtaksbrevService.lagBeslutterBrev(behandling.id) }
     }
 
     @Test
     internal fun `lagSaksbehandlerBrev skal kaste feil når behandling er låst for videre behandling`() {
-        every { behandlingService.hentBehandling(any()) } returns lagBehandlingForBeslutter().copy(status = BehandlingStatus.FERDIGSTILT)
+        every { behandlingService.hentBehandling(any()) } returns lagBehandlingForBeslutter()
+                .copy(status = BehandlingStatus.FERDIGSTILT)
         assertThrows<Feil> { vedtaksbrevService.lagSaksbehandlerBrev(behandling.id, TextNode(""), "") }
     }
 

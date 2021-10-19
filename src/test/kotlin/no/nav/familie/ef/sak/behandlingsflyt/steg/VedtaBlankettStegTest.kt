@@ -103,7 +103,7 @@ internal class VedtaBlankettStegTest {
     }
 
     @Test
-    internal fun `skal forsøke å slette blankett ved lagring av vedtak`(){
+    internal fun `skal forsøke å slette blankett ved lagring av vedtak`() {
         val behandling = behandling(fagsak(),
                                     steg = StegType.VILKÅR,
                                     status = BehandlingStatus.UTREDES,

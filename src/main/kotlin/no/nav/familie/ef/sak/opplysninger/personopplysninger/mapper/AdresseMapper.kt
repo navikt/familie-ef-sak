@@ -1,5 +1,7 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper
 
+import no.nav.familie.ef.sak.felles.kodeverk.KodeverkService
+import no.nav.familie.ef.sak.felles.util.datoEllerIdag
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.AdresseDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.AdresseType
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
@@ -12,8 +14,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Postboksadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.UtenlandskAdresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.UtenlandskAdresseIFrittFormat
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Vegadresse
-import no.nav.familie.ef.sak.felles.kodeverk.KodeverkService
-import no.nav.familie.ef.sak.felles.util.datoEllerIdag
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 

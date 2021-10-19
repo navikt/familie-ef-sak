@@ -56,17 +56,17 @@ class JournalpostClient(@Qualifier("azure") restOperations: RestOperations,
 
     fun hentOvergangsstønadSøknad(journalpostId: String, dokumentInfoId: String): SøknadOvergangsstønad {
         val data = getForEntity<Ressurs<ByteArray>>(jsonDokumentUri(journalpostId, dokumentInfoId)).getDataOrThrow()
-        return objectMapper.readValue<SøknadOvergangsstønad>(data)
+        return objectMapper.readValue(data)
     }
 
     fun hentBarnetilsynSøknad(journalpostId: String, dokumentInfoId: String): SøknadBarnetilsyn {
         val data = getForEntity<Ressurs<ByteArray>>(jsonDokumentUri(journalpostId, dokumentInfoId)).getDataOrThrow()
-        return objectMapper.readValue<SøknadBarnetilsyn>(data)
+        return objectMapper.readValue(data)
     }
 
     fun hentSkolepengerSøknad(journalpostId: String, dokumentInfoId: String): SøknadSkolepenger {
         val data = getForEntity<Ressurs<ByteArray>>(jsonDokumentUri(journalpostId, dokumentInfoId)).getDataOrThrow()
-        return objectMapper.readValue<SøknadSkolepenger>(data)
+        return objectMapper.readValue(data)
     }
 
     private fun jsonDokumentUri(journalpostId: String, dokumentInfoId: String): URI {

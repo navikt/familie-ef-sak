@@ -2,9 +2,9 @@ package no.nav.familie.ef.sak.mapper
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ef.sak.felles.kodeverk.KodeverkService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.StatsborgerskapMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Statsborgerskap
-import no.nav.familie.ef.sak.felles.kodeverk.KodeverkService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

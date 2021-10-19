@@ -38,7 +38,7 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                               ident: String): PersonopplysningerDto {
         val grunnlagsdata = grunnlagsdataMedMetadata.grunnlagsdata
         val søker = grunnlagsdata.søker
-        val annenForelderMap = grunnlagsdata.annenForelder.associate { it.personIdent to it }
+        val annenForelderMap = grunnlagsdata.annenForelder.associateBy { it.personIdent }
 
         return PersonopplysningerDto(
                 lagtTilEtterFerdigstilling = grunnlagsdataMedMetadata.lagtTilEtterFerdigstilling,
@@ -77,14 +77,14 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                             annenForelderMap)
                 },
                 innflyttingTilNorge = søker.innflyttingTilNorge.map {
-                    InnflyttingDto(fraflyttingsland = it.fraflyttingsland?.let { kodeverkService.hentLand(it, LocalDate.now()) },
-                                   dato = null,
-                                   fraflyttingssted = it.fraflyttingsstedIUtlandet)
+                    InnflyttingDto(it.fraflyttingsland?.let { land -> kodeverkService.hentLand(land, LocalDate.now()) },
+                                   null,
+                                   it.fraflyttingsstedIUtlandet)
                 },
                 utflyttingFraNorge = søker.utflyttingFraNorge.map {
-                    UtflyttingDto(tilflyttingsland = it.tilflyttingsland?.let { kodeverkService.hentLand(it, LocalDate.now()) },
-                                  dato = null,
-                                  tilflyttingssted = it.tilflyttingsstedIUtlandet)
+                    UtflyttingDto(it.tilflyttingsland?.let { land -> kodeverkService.hentLand(land, LocalDate.now()) },
+                                  null,
+                                  it.tilflyttingsstedIUtlandet)
                 },
                 oppholdstillatelse = OppholdstillatelseMapper.map(søker.opphold),
                 vergemål = mapVergemål(søker)

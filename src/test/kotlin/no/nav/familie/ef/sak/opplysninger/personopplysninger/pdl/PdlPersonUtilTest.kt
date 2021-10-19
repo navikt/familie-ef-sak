@@ -25,8 +25,8 @@ internal class PdlPersonUtilTest {
     internal fun `skal finne riktig gjeldende bostedsadresse`() {
         val gjeldendeAdresse = vegadresse("Gjeldende gate", "12", false)
         val historiskeAdresser: List<Bostedsadresse> = listOf(vegadresse("Historisk gate", "15", true),
-                                                    vegadresse("Historisk gate", "13", true),
-                                                    vegadresse("Historisk gate", "1", true))
+                                                              vegadresse("Historisk gate", "13", true),
+                                                              vegadresse("Historisk gate", "1", true))
         val adresser: List<Bostedsadresse> = historiskeAdresser + gjeldendeAdresse
 
         assertThat(adresser.gjeldende()!!.vegadresse!!.adressenavn).isEqualTo(gjeldendeAdresse.vegadresse!!.adressenavn)
@@ -40,8 +40,8 @@ internal class PdlPersonUtilTest {
     internal fun `skal finne riktig gjeldende oppholdsadresse`() {
         val gjeldendeAdresse = oppholdsadresse("Gjeldende gate", "12", false)
         val historiskeAdresser: List<Oppholdsadresse> = listOf(oppholdsadresse("Historisk gate", "15", true),
-                                                    oppholdsadresse("Historisk gate", "13", true),
-                                                    oppholdsadresse("Historisk gate", "1", true))
+                                                               oppholdsadresse("Historisk gate", "13", true),
+                                                               oppholdsadresse("Historisk gate", "1", true))
 
         val adresser = historiskeAdresser + gjeldendeAdresse
 
@@ -54,9 +54,9 @@ internal class PdlPersonUtilTest {
 
     @Test
     internal fun `skal finne riktig gjeldende sivilstand`() {
-        val sivilstander = listOf(Sivilstand(Sivilstandstype.UGIFT, null, null,  null, Metadata(true)),
-        Sivilstand(Sivilstandstype.GIFT, null, null, null,  Metadata(true)),
-        Sivilstand(Sivilstandstype.SEPARERT, null, null, null, Metadata(false)))
+        val sivilstander = listOf(Sivilstand(Sivilstandstype.UGIFT, null, null, null, Metadata(true)),
+                                  Sivilstand(Sivilstandstype.GIFT, null, null, null, Metadata(true)),
+                                  Sivilstand(Sivilstandstype.SEPARERT, null, null, null, Metadata(false)))
 
         assertThat(sivilstander.gjeldende().type).isEqualTo(Sivilstandstype.SEPARERT)
     }

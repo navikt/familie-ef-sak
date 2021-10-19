@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.config
+package no.nav.familie.ef.sak.infrastruktur.config
 
 import io.mockk.every
 import io.mockk.just
@@ -76,7 +76,7 @@ class PdlClientConfig {
         every { pdlClient.ping() } just runs
 
         every { pdlClient.hentPersonKortBolk(any()) } answers {
-            (firstArg() as List<String>).map { it to PdlPersonKort(lagNavn(fornavn = it), emptyList()) }.toMap()
+            (firstArg() as List<String>).associate { it to PdlPersonKort(lagNavn(fornavn = it), emptyList()) }
         }
 
         every { pdlClient.hentSøker(any()) } returns opprettPdlSøker()
@@ -97,11 +97,11 @@ class PdlClientConfig {
 
         private val startdato = LocalDate.of(2020, 1, 1)
         private val sluttdato = LocalDate.of(2021, 1, 1)
-        private val barnFnr = "01012067050"
-        private val barn2Fnr = "13071489536"
-        private val søkerFnr = "01010172272"
-        private val annenForelderFnr = "17097926735"
-        private val fnrPåAdresseSøk = "01012067050"
+        private const val barnFnr = "01012067050"
+        private const val barn2Fnr = "13071489536"
+        private const val søkerFnr = "01010172272"
+        private const val annenForelderFnr = "17097926735"
+        private const val fnrPåAdresseSøk = "01012067050"
         private val metadataGjeldende = Metadata(historisk = false)
 
         fun opprettPdlSøker() =

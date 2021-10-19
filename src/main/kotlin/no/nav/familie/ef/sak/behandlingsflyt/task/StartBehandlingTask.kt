@@ -1,11 +1,11 @@
 package no.nav.familie.ef.sak.behandlingsflyt.task
 
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
-import no.nav.familie.ef.sak.fagsak.domain.Fagsak
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
-import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.iverksett.IverksettClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.kontrakter.ef.felles.StønadType
 import no.nav.familie.kontrakter.ef.infotrygd.OpprettStartBehandlingHendelseDto
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -36,10 +36,10 @@ class StartBehandlingTask(private val iverksettClient: IverksettClient,
     }
 
     private fun finnesEnIverksattBehandlingFor(fagsak: Fagsak) =
-        behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(
-            fagsak.stønadstype,
-            fagsak.søkerIdenter.map { it.ident }.toSet()
-        ) != null
+            behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(
+                    fagsak.stønadstype,
+                    fagsak.søkerIdenter.map { it.ident }.toSet()
+            ) != null
 
     companion object {
 

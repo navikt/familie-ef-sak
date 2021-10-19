@@ -36,7 +36,6 @@ class PollStatusFraIverksettTask(private val stegService: StegService,
                      }).copy(triggerTid = LocalDateTime.now().plusSeconds(31))
 
 
-
         const val TYPE = "pollerStatusFraIverksett"
     }
 
