@@ -22,7 +22,8 @@ externalHosts:
   - familie-oppdrag.dev-fss-pub.nais.io
   - familie-integrasjoner.dev-fss-pub.nais.io
   - infotrygd-enslig-forsoerger.dev-fss-pub.nais.io
-
+  - familie-ef-proxy.dev-fss-pub.nais.io
+fssCluster: dev-fss
 tenant: trygdeetaten.no
 claimGroups:
   - "01166863-22f1-4e16-9785-d7a05a22df74" # 0000-GA-Enslig-Forsorger-Beslutter

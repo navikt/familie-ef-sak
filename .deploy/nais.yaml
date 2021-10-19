@@ -63,6 +63,8 @@ spec:
         - application: familie-brev
         - application: familie-ef-blankett
         - application: familie-ef-iverksett
+        - application: familie-ef-proxy
+          cluster: {{fssCluster}}
       external:
         {{#each externalHosts as |host|}}
         - host: {{host}}
