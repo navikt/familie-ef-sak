@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.tilbakekreving.dto.tilDomene
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.util.UUID
+import no.nav.familie.kontrakter.felles.tilbakekreving.Behandling as TilbakekrevingBehandling
 
 @Service
 class TilbakekrevingService(private val tilbakekrevingRepository: TilbakekrevingRepository,
@@ -47,6 +48,16 @@ class TilbakekrevingService(private val tilbakekrevingRepository: Tilbakekreving
     fun finnesÅpenTilbakekrevingsBehandling(behandlingId: UUID): Boolean {
         val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
         return tilbakekrevingClient.finnesÅpenBehandling(fagsakEksternId = fagsak.eksternId.id)
+    }
+
+    fun hentTilbakekrevingBehandlinger(fagsakId: UUID): List<TilbakekrevingBehandling> {
+        val eksternFagsakId = fagsakService.hentEksternId(fagsakId)
+
+        return tilbakekrevingClient.finnBehandlinger(eksternFagsakId)
+    }
+
+    fun harSaksbehandlerTattStillingTilTilbakekreving(behandlingsId: UUID): Boolean {
+        return tilbakekrevingRepository.existsById(behandlingsId)
     }
 
 }
