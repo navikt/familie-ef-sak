@@ -21,6 +21,7 @@ import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.blankett.BlankettSteg
 import no.nav.familie.ef.sak.blankett.VedtaBlankettSteg
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
@@ -236,9 +237,7 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
         secureLogger.info("Starter håndtering av $stegType på behandling " +
                           "${behandling.id} med saksbehandler=[$saksbehandlerIdent]")
 
-        if (!harTilgangTilSteg) {
-            error("$saksbehandlerIdent kan ikke utføre steg '${stegType.displayName()} pga manglende rolle.")
-        }
+        feilHvis(!harTilgangTilSteg) { "$saksbehandlerIdent kan ikke utføre steg '${stegType.displayName()}' pga manglende rolle." }
     }
 
     private fun <T : BehandlingSteg<*>> hentBehandlingSteg(stegType: StegType): T {
