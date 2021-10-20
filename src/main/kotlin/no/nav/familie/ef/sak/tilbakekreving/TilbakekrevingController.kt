@@ -24,6 +24,7 @@ class TilbakekrevingController(private val tilgangService: TilgangService,
     @PostMapping("/{behandlingId}")
     fun lagreTilbakekreving(@PathVariable behandlingId: UUID, @RequestBody tilbakekrevingDto: TilbakekrevingDto): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
+        tilgangService.validerHarSaksbehandlerrolle()
         tilbakekrevingService.lagreTilbakekreving(tilbakekrevingDto, behandlingId)
         return Ressurs.success(behandlingId)
     }

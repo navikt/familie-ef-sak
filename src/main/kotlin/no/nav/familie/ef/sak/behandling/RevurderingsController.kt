@@ -29,6 +29,7 @@ class RevurderingsController(
                        "Kan ikke opprette revurdering da den er skrudd av")
         }
         tilgangService.validerTilgangTilFagsak(revurderingInnhold.fagsakId)
+        tilgangService.validerHarSaksbehandlerrolle()
         val revurdering = revurderingService.opprettRevurderingManuelt(revurderingInnhold)
         return Ressurs.success(revurdering.id)
     }

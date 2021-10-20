@@ -40,6 +40,7 @@ class VurderingController(private val vurderingService: VurderingService,
     fun oppdaterVurderingVilkår(@RequestBody vilkårsvurdering: SvarPåVurderingerDto)
             : Ressurs<VilkårsvurderingDto> {
         tilgangService.validerTilgangTilBehandling(vilkårsvurdering.behandlingId)
+        tilgangService.validerHarSaksbehandlerrolle()
         try {
             return Ressurs.success(vurderingStegService.oppdaterVilkår(vilkårsvurdering))
         } catch (e: Exception) {
@@ -54,12 +55,14 @@ class VurderingController(private val vurderingService: VurderingService,
     @PostMapping("nullstill")
     fun nullstillVilkår(@RequestBody request: OppdaterVilkårsvurderingDto): Ressurs<VilkårsvurderingDto> {
         tilgangService.validerTilgangTilBehandling(request.behandlingId)
+        tilgangService.validerHarSaksbehandlerrolle()
         return Ressurs.success(vurderingStegService.nullstillVilkår(request))
     }
 
     @PostMapping("ikkevurder")
     fun settVilkårTilSkalIkkeVurderes(@RequestBody request: OppdaterVilkårsvurderingDto): Ressurs<VilkårsvurderingDto> {
         tilgangService.validerTilgangTilBehandling(request.behandlingId)
+        tilgangService.validerHarSaksbehandlerrolle()
         return Ressurs.success(vurderingStegService.settVilkårTilSkalIkkeVurderes(request))
     }
 

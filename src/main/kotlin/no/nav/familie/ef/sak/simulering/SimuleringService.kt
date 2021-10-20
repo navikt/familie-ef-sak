@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
@@ -25,7 +26,8 @@ class SimuleringService(private val iverksettClient: IverksettClient,
                         private val vedtakService: VedtakService,
                         private val blankettSimuleringsService: BlankettSimuleringsService,
                         private val simuleringsresultatRepository: SimuleringsresultatRepository,
-                        private val tilkjentYtelseService: TilkjentYtelseService) {
+                        private val tilkjentYtelseService: TilkjentYtelseService,
+                        private val tilgangService: TilgangService) {
 
 
     fun simuler(behandlingId: UUID): Simuleringsoppsummering {
@@ -47,6 +49,7 @@ class SimuleringService(private val iverksettClient: IverksettClient,
     }
 
     fun hentOgLagreSimuleringsresultat(behandling: Behandling): Simuleringsresultat {
+        tilgangService.validerHarSaksbehandlerrolle()
         val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
         simuleringsresultatRepository.deleteById(behandling.id)
         val detaljertSimuleringResultat = simulerMedTilkjentYtelse(behandling, fagsak)
@@ -65,7 +68,6 @@ class SimuleringService(private val iverksettClient: IverksettClient,
             val simuleringsresultat: Simuleringsresultat = simuleringsresultatRepository.findByIdOrThrow(behandling.id)
             return simuleringsresultat.beriketData.oppsummering
         }
-
         val simuleringsresultat = hentOgLagreSimuleringsresultat(behandling)
         return simuleringsresultat.beriketData.oppsummering
     }
