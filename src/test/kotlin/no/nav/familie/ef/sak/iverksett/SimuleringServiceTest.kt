@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.beregning.BeregningService
 import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
@@ -22,8 +23,8 @@ import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.simulering.Simuleringsresultat
 import no.nav.familie.ef.sak.simulering.SimuleringsresultatRepository
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
-import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
@@ -51,6 +52,7 @@ internal class SimuleringServiceTest {
     private val beregningService = BeregningService()
     private val blankettSimuleringsService = BlankettSimuleringsService(beregningService)
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
+    private val tilgangService = mockk<TilgangService>()
 
     private val simuleringService = SimuleringService(iverksettClient = iverksettClient,
                                                       behandlingService = behandlingService,
@@ -58,7 +60,8 @@ internal class SimuleringServiceTest {
                                                       vedtakService = vedtakService,
                                                       blankettSimuleringsService = blankettSimuleringsService,
                                                       simuleringsresultatRepository = simuleringsresultatRepository,
-                                                      tilkjentYtelseService = tilkjentYtelseService)
+                                                      tilkjentYtelseService = tilkjentYtelseService,
+                                                      tilgangService = tilgangService)
 
 
     private val personIdent = "12345678901"
@@ -67,6 +70,8 @@ internal class SimuleringServiceTest {
     @BeforeEach
     internal fun setUp() {
         every { fagsakService.hentFagsak(any()) } returns fagsak
+        every { tilgangService.validerHarSaksbehandlerrolle() } just Runs
+        every { tilgangService.harTilgangTilRolle(any()) } returns true
     }
 
     @Test

@@ -43,6 +43,7 @@ class BlankettController(private val tilgangService: TilgangService,
         oppgaveService.hentEfOppgave(oppgaveId)?.let {
             return Ressurs.success(it.behandlingId)
         }
+        tilgangService.validerHarSaksbehandlerrolle()
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
         val journalpostId = oppgave.journalpostId
         require(journalpostId != null) { "For å plukke oppgaven må det eksistere en journalpostId" }

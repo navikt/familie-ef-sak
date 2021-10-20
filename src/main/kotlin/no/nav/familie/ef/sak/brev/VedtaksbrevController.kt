@@ -32,11 +32,14 @@ class VedtaksbrevController(private val brevService: VedtaksbrevService,
                              @PathVariable brevMal: String,
                              @RequestBody brevRequest: JsonNode): Ressurs<ByteArray> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
+        tilgangService.validerHarSaksbehandlerrolle()
         return Ressurs.success(brevService.lagSaksbehandlerBrev(behandlingId, brevRequest, brevMal))
     }
 
     @PostMapping("/fritekst")
     fun lagSaksbehandlerbrev(@RequestBody brevInnhold: VedtaksbrevFritekstDto): Ressurs<ByteArray> {
+        tilgangService.validerTilgangTilBehandling(brevInnhold.behandlingId)
+        tilgangService.validerHarSaksbehandlerrolle()
         return Ressurs.success(brevService.lagSaksbehandlerFritekstbrev(brevInnhold))
     }
 
