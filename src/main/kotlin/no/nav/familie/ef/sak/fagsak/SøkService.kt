@@ -45,7 +45,7 @@ class SøkService(private val fagsakRepository: FagsakRepository,
 
                                 val erLøpende: Boolean = fagsakService.erLøpende(behandlinger)
 
-                                return@map FagsakForSøkeresultat(fagsakId = it.id, stønadstype = it.stønadstype, erLøpende = erLøpende)
+                                FagsakForSøkeresultat(fagsakId = it.id, stønadstype = it.stønadstype, erLøpende = erLøpende)
                             }
         )
     }
