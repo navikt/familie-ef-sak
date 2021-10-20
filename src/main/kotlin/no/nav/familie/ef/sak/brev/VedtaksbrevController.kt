@@ -38,6 +38,7 @@ class VedtaksbrevController(private val brevService: VedtaksbrevService,
 
     @PostMapping("/fritekst")
     fun lagSaksbehandlerbrev(@RequestBody brevInnhold: VedtaksbrevFritekstDto): Ressurs<ByteArray> {
+        tilgangService.validerTilgangTilBehandling(brevInnhold.behandlingId)
         tilgangService.validerHarSaksbehandlerrolle()
         return Ressurs.success(brevService.lagSaksbehandlerFritekstbrev(brevInnhold))
     }
