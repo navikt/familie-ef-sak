@@ -25,6 +25,7 @@ class BrevMellomlagerController(private val tilgangService: TilgangService,
                                @RequestBody mellomlagretBrev: MellomlagreBrevRequestDto
     ): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
+        tilgangService.validerHarSaksbehandlerrolle()
 
         return Ressurs.success(mellomlagringBrevService.mellomLagreBrev(behandlingId,
                                                                         mellomlagretBrev.brevverdier,
