@@ -11,7 +11,7 @@ data class Søkeresultat(val personIdent: String,
                         val fagsaker: List<FagsakForSøkeresultat>)
 
 
-data class FagsakForSøkeresultat(val fagsakId: UUID, val stønadstype: Stønadstype)
+data class FagsakForSøkeresultat(val fagsakId: UUID, val stønadstype: Stønadstype, val erLøpende: Boolean)
 
 data class PersonFraSøk(
         val personIdent: String,
