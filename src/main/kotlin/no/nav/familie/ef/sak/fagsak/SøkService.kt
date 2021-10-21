@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.fagsak
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.fagsak.dto.FagsakForSøkeresultat
 import no.nav.familie.ef.sak.fagsak.dto.PersonFraSøk
 import no.nav.familie.ef.sak.fagsak.dto.Søkeresultat
@@ -22,7 +23,8 @@ class SøkService(private val fagsakRepository: FagsakRepository,
                  private val behandlingService: BehandlingService,
                  private val personService: PersonService,
                  private val pdlSaksbehandlerClient: PdlSaksbehandlerClient,
-                 private val adresseMapper: AdresseMapper) {
+                 private val adresseMapper: AdresseMapper,
+                 private val fagsakService: FagsakService) {
 
     fun søkPerson(personIdent: String): Søkeresultat {
         val fagsaker = fagsakRepository.findBySøkerIdent(personIdent)
@@ -38,7 +40,13 @@ class SøkService(private val fagsakRepository: FagsakRepository,
         return Søkeresultat(personIdent = personIdent,
                             kjønn = KjønnMapper.tilKjønn(person.kjønn.first().kjønn),
                             visningsnavn = NavnDto.fraNavn(person.navn.gjeldende()).visningsnavn,
-                            fagsaker = fagsaker.map { FagsakForSøkeresultat(fagsakId = it.id, stønadstype = it.stønadstype) }
+                            fagsaker = fagsaker.map {
+                                val behandlinger: List<Behandling> = behandlingService.hentBehandlinger(it.id)
+
+                                val erLøpende: Boolean = fagsakService.erLøpende(behandlinger)
+
+                                return@map FagsakForSøkeresultat(fagsakId = it.id, stønadstype = it.stønadstype, erLøpende = erLøpende)
+                            }
         )
     }
 
