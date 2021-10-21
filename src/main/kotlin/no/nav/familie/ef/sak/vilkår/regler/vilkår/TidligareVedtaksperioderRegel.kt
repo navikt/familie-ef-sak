@@ -25,20 +25,19 @@ class TidligareVedtaksperioderRegel : Vilkårsregel(vilkårType = VilkårType.TI
                                           listOf(Vurdering(regelId = RegelId.HAR_TIDLIGERE_MOTTATT_OVERGANSSTØNAD,
                                                            svar = SvarId.NEI))),
                       Delvilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT,
-                                          listOf(Vurdering(regelId = RegelId.HAR_TIDLIGERE_ANDRE_STØNADER_SOM_HAR_BETYDNING,
-                                                           svar = SvarId.NEI))))
+                                          listOf(Vurdering(regelId = RegelId.HAR_TIDLIGERE_ANDRE_STØNADER_SOM_HAR_BETYDNING))))
     }
 
     companion object {
 
         private val HAR_TIDLIGERE_MOTTATT_OVERGANSSTØNAD =
                 RegelSteg(regelId = RegelId.HAR_TIDLIGERE_MOTTATT_OVERGANSSTØNAD,
-                          svarMapping = jaNeiSvarRegel(hvisJa = SluttSvarRegel.IKKE_OPPFYLT,
+                          svarMapping = jaNeiSvarRegel(hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
                                                        hvisNei = SluttSvarRegel.OPPFYLT))
 
         private val LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD =
                 RegelSteg(regelId = RegelId.HAR_TIDLIGERE_ANDRE_STØNADER_SOM_HAR_BETYDNING,
-                          svarMapping = jaNeiSvarRegel(hvisJa = SluttSvarRegel.IKKE_OPPFYLT,
+                          svarMapping = jaNeiSvarRegel(hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
                                                        hvisNei = SluttSvarRegel.OPPFYLT))
     }
 }
