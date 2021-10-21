@@ -49,7 +49,7 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
     fun erLøpende(behandlinger: List<Behandling>): Boolean {
         return behandlinger.filter {
             it.type != BehandlingType.BLANKETT &&
-            it.resultat !== BehandlingResultat.ANNULLERT &&
+            it.resultat !== BehandlingResultat.HENLAGT &&
             it.resultat !== BehandlingResultat.AVSLÅTT &&
             it.status == BehandlingStatus.FERDIGSTILT
         }.maxByOrNull { it.sporbar.opprettetTid }

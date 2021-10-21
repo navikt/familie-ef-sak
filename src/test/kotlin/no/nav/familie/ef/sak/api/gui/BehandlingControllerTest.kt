@@ -43,13 +43,13 @@ internal class BehandlingControllerTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `Skal annullere behandling`() {
+    internal fun `Skal henlegge behandling`() {
         val fagsak = fagsakRepository.insert(fagsak(identer = setOf(FagsakPerson("12345678901"))))
         val behandling = behandlingRepository.insert(behandling(fagsak, type = BehandlingType.BLANKETT))
-        val respons = annullerBehandling(behandling.id)
+        val respons = henleggBehandling(behandling.id)
 
         assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(respons.body?.data!!.resultat).isEqualTo(BehandlingResultat.ANNULLERT)
+        assertThat(respons.body?.data!!.resultat).isEqualTo(BehandlingResultat.HENLAGT)
     }
 
     private fun hentBehandling(id: UUID): ResponseEntity<Ressurs<BehandlingDto>> {
@@ -58,8 +58,8 @@ internal class BehandlingControllerTest : OppslagSpringRunnerTest() {
                                      HttpEntity<Ressurs<BehandlingDto>>(headers))
     }
 
-    private fun annullerBehandling(id: UUID): ResponseEntity<Ressurs<BehandlingDto>> {
-        return restTemplate.exchange(localhost("/api/behandling/$id/annuller"),
+    private fun henleggBehandling(id: UUID): ResponseEntity<Ressurs<BehandlingDto>> {
+        return restTemplate.exchange(localhost("/api/behandling/$id/henlegg"),
                                      HttpMethod.POST,
                                      HttpEntity<Ressurs<BehandlingDto>>(headers))
     }

@@ -32,7 +32,7 @@ data class Behandling(@Id
                       val sporbar: Sporbar = Sporbar(),
                       var resultat: BehandlingResultat) {
 
-    fun kanAnnulleres(): Boolean = !status.behandlingErLåstForVidereRedigering() && type == BehandlingType.BLANKETT
+    fun kanHenlegges(): Boolean = !status.behandlingErLåstForVidereRedigering()
 }
 
 enum class BehandlingType(val visningsnavn: String) {
@@ -50,7 +50,7 @@ enum class BehandlingResultat(val displayName: String) {
     OPPHØRT(displayName = "Opphørt"),
     AVSLÅTT(displayName = "Avslått"),
     IKKE_SATT(displayName = "Ikke satt"),
-    ANNULLERT(displayName = "Annullert"),
+    HENLAGT(displayName = "Henlagt"),
 }
 
 enum class BehandlingStatus {

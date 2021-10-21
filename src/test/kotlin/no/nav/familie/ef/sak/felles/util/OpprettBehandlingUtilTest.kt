@@ -73,11 +73,11 @@ internal class OpprettBehandlingUtilTest {
     }
 
     @Test
-    fun `revurdering - det skal ikke være mulig å opprette en revurdering om eksisterende behandling er annullert`() {
+    fun `revurdering - det skal ikke være mulig å opprette en revurdering om eksisterende behandling er henlagt`() {
         assertThat(catchThrowable {
             validerKanOppretteNyBehandling(BehandlingType.REVURDERING,
                                            listOf(behandling(fagsak = fagsak,
-                                                             resultat = BehandlingResultat.ANNULLERT,
+                                                             resultat = BehandlingResultat.HENLAGT,
                                                              status = BehandlingStatus.FERDIGSTILT)
                                            ), null)
         }).hasMessage("Det finnes ikke en tidligere behandling på fagsaken")
@@ -139,7 +139,7 @@ internal class OpprettBehandlingUtilTest {
 
         assertThat(catchThrowable {
             validerKanOppretteNyBehandling(BehandlingType.TEKNISK_OPPHØR,
-                                           listOf(BehandlingOppsettUtil.annullertRevurdering), null)
+                                           listOf(BehandlingOppsettUtil.henlagtRevurdering), null)
         }).hasMessage("Det finnes ikke en tidligere behandling for fagsaken")
     }
 
