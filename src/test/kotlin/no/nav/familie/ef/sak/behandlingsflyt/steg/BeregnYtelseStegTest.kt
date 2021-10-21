@@ -95,6 +95,29 @@ internal class BeregnYtelseStegTest {
         }
     }
 
+
+    @Test
+    internal fun `revurdering - førstegangsbehandling er avslått - kun nye andeler som skal gjelde`() {
+        val nyAndelFom = LocalDate.of(2022, 1, 1)
+        val nyAndelTom = LocalDate.of(2022, 1, 31)
+
+        val slot = slot<TilkjentYtelse>()
+        every { tilkjentYtelseService.opprettTilkjentYtelse(capture(slot)) } answers { firstArg() }
+        every { tilkjentYtelseService.hentForBehandling(any()) } throws IllegalArgumentException("Hjelp")
+        every { beregningService.beregnYtelse(any(), any()) } returns listOf(lagBeløpsperiode(nyAndelFom, nyAndelTom))
+
+        utførSteg(BehandlingType.REVURDERING, forrigeBehandlingId = null)
+
+        val andeler = slot.captured.andelerTilkjentYtelse
+        assertThat(andeler).hasSize(1)
+        assertThat(andeler[0].stønadFom).isEqualTo(nyAndelFom)
+        assertThat(andeler[0].stønadTom).isEqualTo(nyAndelTom)
+
+        verify(exactly = 1) {
+            simuleringService.hentOgLagreSimuleringsresultat(any())
+        }
+    }
+
     @Test
     internal fun `innvilget - skal kaste feil når man sender inn uten nye beløpsperioder`() {
         every { beregningService.beregnYtelse(any(), any()) } returns emptyList()
