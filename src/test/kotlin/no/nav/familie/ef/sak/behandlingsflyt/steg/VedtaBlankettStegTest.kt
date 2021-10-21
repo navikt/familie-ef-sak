@@ -13,7 +13,6 @@ import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.vedtak.VedtakService
-import no.nav.familie.ef.sak.vedtak.dto.Henlegge
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import org.junit.jupiter.api.Test
@@ -85,20 +84,6 @@ internal class VedtaBlankettStegTest {
         } just Runs
 
         assertThrows<IllegalStateException> { vedtaBlankettSteg.utførOgReturnerNesteSteg(behandling, request) }
-
-    }
-
-    @Test
-    internal fun `skal feile hvis nytt vedtak er henlagt - ikke implementert ennå`() {
-        val behandling = behandling(fagsak(),
-                                    steg = StegType.VILKÅR,
-                                    status = BehandlingStatus.UTREDES,
-                                    type = BehandlingType.BLANKETT)
-        val request = Henlegge(
-                resultatType = ResultatType.HENLEGGE
-        )
-
-        assertThrows<Feil> { vedtaBlankettSteg.utførOgReturnerNesteSteg(behandling, request) }
 
     }
 
