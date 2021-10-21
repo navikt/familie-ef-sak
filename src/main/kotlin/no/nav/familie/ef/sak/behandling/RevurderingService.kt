@@ -55,7 +55,7 @@ class RevurderingService(private val søknadService: SøknadService,
     private fun forrigeBehandling(revurdering: Behandling): UUID {
         val sisteBehandling = behandlingService.hentBehandlinger(revurdering.fagsakId)
                 .filter { it.id != revurdering.id }
-                .filter { it.resultat != BehandlingResultat.ANNULLERT }
+                .filter { it.resultat != BehandlingResultat.HENLAGT }
                 .maxByOrNull { it.sporbar.opprettetTid }
         return revurdering.forrigeBehandlingId
                ?: sisteBehandling?.id

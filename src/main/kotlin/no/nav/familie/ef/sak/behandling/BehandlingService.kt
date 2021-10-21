@@ -116,21 +116,21 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
                                                                        journalpostType = journalposttype))
     }
 
-    fun annullerBehandling(behandlingId: UUID): Behandling {
+    fun henleggBehandling(behandlingId: UUID): Behandling {
         val behandling = hentBehandling(behandlingId)
-        validerAtBehandlingenKanAnnulleres(behandling)
+        validerAtBehandlingenKanHenlegges(behandling)
         behandling.status = BehandlingStatus.FERDIGSTILT
-        behandling.resultat = BehandlingResultat.ANNULLERT
+        behandling.resultat = BehandlingResultat.HENLAGT
         behandling.steg = StegType.BEHANDLING_FERDIGSTILT
         behandlingshistorikkService.opprettHistorikkInnslag(behandling)
         return behandlingRepository.update(behandling)
     }
 
-    private fun validerAtBehandlingenKanAnnulleres(behandling: Behandling) {
-        if (!behandling.kanAnnulleres()) {
+    private fun validerAtBehandlingenKanHenlegges(behandling: Behandling) {
+        if (!behandling.kanHenlegges()) {
             throw Feil(
-                    "Kan ikke annullere en behandling med status ${behandling.status} for ${behandling.type}",
-                    "Kan ikke annullere en behandling med status ${behandling.status} for ${behandling.type}",
+                    "Kan ikke henlegge en behandling med status ${behandling.status} for ${behandling.type}",
+                    "Kan ikke henlegge en behandling med status ${behandling.status} for ${behandling.type}",
                     HttpStatus.BAD_REQUEST,
                     null
             )

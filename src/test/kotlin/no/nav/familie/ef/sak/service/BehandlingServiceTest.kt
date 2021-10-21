@@ -29,49 +29,49 @@ internal class BehandlingServiceTest {
     private val behandlingService = BehandlingService(mockk(), behandlingRepository, behandlingshistorikkService, mockk())
 
     @Test
-    internal fun `skal annullere behandling som er blankett og status utredes`() {
+    internal fun `skal henlegge behandling som er blankett og status utredes`() {
         val behandling = behandling(fagsak(), type = BehandlingType.BLANKETT, status = BehandlingStatus.UTREDES)
-        annullerOgForventOk(behandling)
+        henleggOgForventOk(behandling)
     }
 
     @Test
-    internal fun `skal annullere behandling som er blankett og status opprettet`() {
+    internal fun `skal henlegge behandling som er blankett og status opprettet`() {
         val behandling = behandling(fagsak(), type = BehandlingType.BLANKETT, status = BehandlingStatus.OPPRETTET)
-        annullerOgForventOk(behandling)
+        henleggOgForventOk(behandling)
     }
 
     @Test
-    internal fun `skal ikke kunne annullere behandling hvor vedtak fattes`() {
-        val behandling = behandling(fagsak(), type = BehandlingType.BLANKETT, status = BehandlingStatus.FATTER_VEDTAK)
-        annullerOgForventFeilmelding(behandling)
+    internal fun `skal ikke kunne henlegge behandling hvor vedtak fattes`() {
+        val behandling = behandling(fagsak(), type = BehandlingType.FØRSTEGANGSBEHANDLING, status = BehandlingStatus.FATTER_VEDTAK)
+        henleggOgForventFeilmelding(behandling)
     }
 
     @Test
-    internal fun `skal ikke kunne annullere behandling som er iverksatt`() {
-        val behandling = behandling(fagsak(), type = BehandlingType.BLANKETT, status = BehandlingStatus.IVERKSETTER_VEDTAK)
-        annullerOgForventFeilmelding(behandling)
+    internal fun `skal ikke kunne henlegge behandling som er iverksatt`() {
+        val behandling = behandling(fagsak(), type = BehandlingType.FØRSTEGANGSBEHANDLING, status = BehandlingStatus.IVERKSETTER_VEDTAK)
+        henleggOgForventFeilmelding(behandling)
     }
 
     @Test
-    internal fun `skal ikke kunne annullere behandling som er ferdigstilt`() {
-        val behandling = behandling(fagsak(), type = BehandlingType.BLANKETT, status = BehandlingStatus.FERDIGSTILT)
-        annullerOgForventFeilmelding(behandling)
+    internal fun `skal ikke kunne henlegge behandling som er ferdigstilt`() {
+        val behandling = behandling(fagsak(), type = BehandlingType.FØRSTEGANGSBEHANDLING, status = BehandlingStatus.FERDIGSTILT)
+        henleggOgForventFeilmelding(behandling)
     }
 
 
     @Test
-    internal fun `skal ikke kunne annullere behandling som er førstegangsbehandling`() {
+    internal fun `skal kunne henlegge behandling som er førstegangsbehandling`() {
         val behandling = behandling(fagsak(), type = BehandlingType.FØRSTEGANGSBEHANDLING, status = BehandlingStatus.UTREDES)
-        annullerOgForventFeilmelding(behandling)
+        henleggOgForventOk(behandling)
     }
 
     @Test
-    internal fun `skal ikke kunne annullere behandling som er revurdering`() {
+    internal fun `skal kunne henlegge behandling som er revurdering`() {
         val behandling = behandling(fagsak(), type = BehandlingType.REVURDERING, status = BehandlingStatus.UTREDES)
-        annullerOgForventFeilmelding(behandling)
+        henleggOgForventOk(behandling)
     }
 
-    private fun annullerOgForventOk(behandling: Behandling) {
+    private fun henleggOgForventOk(behandling: Behandling) {
         every {
             behandlingRepository.findByIdOrThrow(any())
         } returns behandling
@@ -86,15 +86,15 @@ internal class BehandlingServiceTest {
         } answers {
             behandlingSlot.captured
         }
-        behandlingService.annullerBehandling(behandling.id)
+        behandlingService.henleggBehandling(behandling.id)
 
         assertThat(behandlingSlot.captured.status).isEqualTo(BehandlingStatus.FERDIGSTILT)
-        assertThat(behandlingSlot.captured.resultat).isEqualTo(BehandlingResultat.ANNULLERT)
+        assertThat(behandlingSlot.captured.resultat).isEqualTo(BehandlingResultat.HENLAGT)
         assertThat(behandlingSlot.captured.steg).isEqualTo(StegType.BEHANDLING_FERDIGSTILT)
     }
 
 
-    private fun annullerOgForventFeilmelding(behandling: Behandling) {
+    private fun henleggOgForventFeilmelding(behandling: Behandling) {
         every {
             behandlingRepository.findByIdOrThrow(any())
         } returns behandling
@@ -104,7 +104,7 @@ internal class BehandlingServiceTest {
         } just runs
 
         val feil: Feil = assertThrows {
-            behandlingService.annullerBehandling(behandling.id)
+            behandlingService.henleggBehandling(behandling.id)
         }
 
         assertThat(feil.httpStatus).isEqualTo(HttpStatus.BAD_REQUEST)
