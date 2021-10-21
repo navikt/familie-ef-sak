@@ -1,0 +1,1 @@
+UPDATE behandling SET resultat = 'HENLAGT' WHERE resultat = 'ANNULLERT';
