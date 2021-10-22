@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.domain.Behandlingsjournalpost
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
+import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
@@ -116,13 +117,15 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
                                                                        journalpostType = journalposttype))
     }
 
-    fun henleggBehandling(behandlingId: UUID): Behandling {
+    fun henleggBehandling(behandlingId: UUID, årsak: HenlagtDto): Behandling {
         val behandling = hentBehandling(behandlingId)
         validerAtBehandlingenKanHenlegges(behandling)
         behandling.status = BehandlingStatus.FERDIGSTILT
         behandling.resultat = BehandlingResultat.HENLAGT
         behandling.steg = StegType.BEHANDLING_FERDIGSTILT
-        behandlingshistorikkService.opprettHistorikkInnslag(behandling)
+        behandlingshistorikkService.opprettHistorikkInnslag(behandling = behandling,
+                                                            utfall = StegUtfall.HENLAGT,
+                                                            metadata = årsak)
         return behandlingRepository.update(behandling)
     }
 

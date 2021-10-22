@@ -7,6 +7,8 @@ import io.mockk.runs
 import io.mockk.slot
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.HenlagtDto
+import no.nav.familie.ef.sak.behandling.HenlagtÅrsak
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
@@ -86,7 +88,7 @@ internal class BehandlingServiceTest {
         } answers {
             behandlingSlot.captured
         }
-        behandlingService.henleggBehandling(behandling.id)
+        behandlingService.henleggBehandling(behandling.id, HenlagtDto(HenlagtÅrsak.TRUKKET_TILBAKE))
 
         assertThat(behandlingSlot.captured.status).isEqualTo(BehandlingStatus.FERDIGSTILT)
         assertThat(behandlingSlot.captured.resultat).isEqualTo(BehandlingResultat.HENLAGT)
@@ -104,7 +106,7 @@ internal class BehandlingServiceTest {
         } just runs
 
         val feil: Feil = assertThrows {
-            behandlingService.henleggBehandling(behandling.id)
+            behandlingService.henleggBehandling(behandling.id, HenlagtDto(HenlagtÅrsak.TRUKKET_TILBAKE))
         }
 
         assertThat(feil.httpStatus).isEqualTo(HttpStatus.BAD_REQUEST)
