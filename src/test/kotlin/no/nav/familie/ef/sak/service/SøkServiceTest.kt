@@ -21,6 +21,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PersonSøkTreff
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.UkjentBosted
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Vegadresse
 import no.nav.familie.ef.sak.testutil.pdlSøker
+import no.nav.familie.ef.sak.fagsak.FagsakService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -31,10 +32,11 @@ internal class SøkServiceTest {
 
     private val pdlSaksbehandlerClient: PdlSaksbehandlerClient = mockk()
     private val personService: PersonService = mockk()
+    private val fagsakService: FagsakService = mockk()
     private val fagsakRepository: FagsakRepository = mockk()
     private val adresseMapper: AdresseMapper = AdresseMapper(KodeverkServiceMock().kodeverkService())
     private val behandlingService: BehandlingService = mockk()
-    private val søkService = SøkService(fagsakRepository, behandlingService, personService, pdlSaksbehandlerClient, adresseMapper)
+    private val søkService = SøkService(fagsakRepository, behandlingService, personService, pdlSaksbehandlerClient, adresseMapper, fagsakService)
 
     @Test
     fun `skal finne personIdent, navn og adresse gitt bostedsadresse`() {

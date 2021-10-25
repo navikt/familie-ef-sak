@@ -14,7 +14,6 @@ import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.Avslå
-import no.nav.familie.ef.sak.vedtak.dto.Henlegge
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
@@ -53,20 +52,6 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
 
 
         assertThat(vedtakService.hentVedtak(respons.body.data!!)).isEqualTo(vedtak)
-    }
-
-    @Test
-    internal fun `Skal feile hvis resultatet er henlegge`() {
-        val fagsak = fagsakRepository.insert(fagsak(identer = setOf(FagsakPerson(""))))
-        val behandling = behandlingRepository.insert(behandling(fagsak,
-                                                                steg = StegType.VEDTA_BLANKETT,
-                                                                type = BehandlingType.BLANKETT,
-                                                                status = BehandlingStatus.UTREDES))
-        val vedtakDto = Henlegge()
-        val respons: ResponseEntity<Ressurs<UUID>> = fatteVedtak(behandling.id, vedtakDto)
-
-
-        assertThat(respons.body.status).isEqualTo(Ressurs.Status.FEILET)
     }
 
     @Test

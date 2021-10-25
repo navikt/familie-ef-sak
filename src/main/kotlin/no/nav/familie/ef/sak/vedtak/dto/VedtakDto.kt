@@ -35,7 +35,6 @@ fun ResultatType.tilVedtaksresultat(): Vedtaksresultat = when (this) {
 }
 
 sealed class VedtakDto
-class Henlegge(val resultatType: ResultatType = ResultatType.HENLEGGE) : VedtakDto()
 class Innvilget(val resultatType: ResultatType = ResultatType.INNVILGE,
                 val periodeBegrunnelse: String?,
                 val inntektBegrunnelse: String?,
@@ -65,9 +64,6 @@ fun VedtakDto.tilVedtak(behandlingId: UUID): Vedtak = when (this) {
                         resultatType = ResultatType.OPPHØRT,
                         opphørFom = opphørFom.atDay(1)
     )
-    is Henlegge -> throw Feil("Kan ikke sette vedtak $this då det har feil type",
-                              "Kan ikke sette vedtak $this då det har feil type",
-                              HttpStatus.BAD_REQUEST)
 }
 
 fun Vedtak.tilVedtakDto(): VedtakDto =

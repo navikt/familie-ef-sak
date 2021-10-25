@@ -13,10 +13,10 @@ object BehandlingOppsettUtil {
 
     private val fagsak = fagsak(setOf(FagsakPerson("1")))
 
-    private val annullertFørstegangsbehandling = behandling(fagsak)
+    private val henlagtFørstegangsbehandling = behandling(fagsak)
             .copy(type = BehandlingType.FØRSTEGANGSBEHANDLING,
                   status = BehandlingStatus.FERDIGSTILT,
-                  resultat = BehandlingResultat.ANNULLERT,
+                  resultat = BehandlingResultat.HENLAGT,
                   sporbar = Sporbar(opprettetTid = LocalDateTime.now()
                           .minusDays(4)))
 
@@ -39,10 +39,10 @@ object BehandlingOppsettUtil {
                   resultat = BehandlingResultat.INNVILGET,
                   sporbar = Sporbar(opprettetTid = LocalDateTime.now().minusDays(2)))
 
-    val annullertRevurdering = behandling(fagsak)
+    val henlagtRevurdering = behandling(fagsak)
             .copy(type = BehandlingType.REVURDERING,
                   status = BehandlingStatus.FERDIGSTILT,
-                  resultat = BehandlingResultat.ANNULLERT,
+                  resultat = BehandlingResultat.HENLAGT,
                   sporbar = Sporbar(opprettetTid = LocalDateTime.now().minusDays(1)))
 
     private val revurderingUnderArbeid = behandling(fagsak)
@@ -65,10 +65,10 @@ object BehandlingOppsettUtil {
                   status = BehandlingStatus.FERDIGSTILT,
                   resultat = BehandlingResultat.INNVILGET)
 
-    fun lagBehandlingerForSisteIverksatte() = listOf(annullertFørstegangsbehandling,
+    fun lagBehandlingerForSisteIverksatte() = listOf(henlagtFørstegangsbehandling,
                                                      iverksattFørstegangsbehandling,
                                                      ferdigstiltBlankett,
-                                                     annullertRevurdering,
+                                                     henlagtRevurdering,
                                                      revurderingUnderArbeid)
 
 }

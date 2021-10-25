@@ -149,7 +149,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `finnSisteIverksatteBehandling skal finne id til siste ferdigstilte behandling, ikke annulert eller blankett`() {
+    internal fun `finnSisteIverksatteBehandling skal finne id til siste ferdigstilte behandling, ikke henlagt eller blankett`() {
         val førstegangsbehandling = BehandlingOppsettUtil.iverksattFørstegangsbehandling
         val fagsak = fagsakRepository.insert(fagsak(setOf(FagsakPerson("1"))).copy(id = førstegangsbehandling.fagsakId))
 
@@ -209,10 +209,10 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `finnSisteIverksatteBehandlinger - skal ikke finne behandling hvis siste er avslått eller annulert`() {
+    internal fun `finnSisteIverksatteBehandlinger - skal ikke finne behandling hvis siste er avslått eller henlagt`() {
         val fagsak = fagsakRepository.insert(fagsak())
         behandlingRepository.insert(behandling(fagsak, status = FERDIGSTILT, resultat = BehandlingResultat.AVSLÅTT))
-        behandlingRepository.insert(behandling(fagsak, status = FERDIGSTILT, resultat = BehandlingResultat.ANNULLERT))
+        behandlingRepository.insert(behandling(fagsak, status = FERDIGSTILT, resultat = BehandlingResultat.HENLAGT))
         assertThat(behandlingRepository.finnSisteIverksatteBehandlingerSomIkkeErTekniskOpphør(OVERGANGSSTØNAD)).isEmpty()
     }
 
@@ -232,7 +232,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `finnSisteIverksatteBehandlinger - skal filtrere vekk annulerte behandlinger før den henter siste behandling`() {
+    internal fun `finnSisteIverksatteBehandlinger - skal filtrere vekk henlagte-, avslåtte- eller blankettbehandlinger før den henter siste behandling`() {
         val fagsak = fagsakRepository.insert(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak,
                                                                 status = FERDIGSTILT,
@@ -241,6 +241,8 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         behandlingRepository.insert(behandling(fagsak, type = BehandlingType.BLANKETT,
                                                status = FERDIGSTILT,
                                                resultat = BehandlingResultat.INNVILGET))
+        behandlingRepository.insert(behandling(fagsak, status = FERDIGSTILT, resultat = BehandlingResultat.AVSLÅTT))
+        behandlingRepository.insert(behandling(fagsak, status = FERDIGSTILT, resultat = BehandlingResultat.HENLAGT))
         assertThat(behandlingRepository.finnSisteIverksatteBehandlingerSomIkkeErTekniskOpphør(OVERGANGSSTØNAD)).containsExactly(
                 behandling.id)
     }

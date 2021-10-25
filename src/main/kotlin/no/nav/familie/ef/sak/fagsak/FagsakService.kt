@@ -46,10 +46,10 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
         return fagsak.tilDto(behandlinger = behandlinger.map(Behandling::tilDto), erLøpende = erLøpende)
     }
 
-    private fun erLøpende(behandlinger: List<Behandling>): Boolean {
+    fun erLøpende(behandlinger: List<Behandling>): Boolean {
         return behandlinger.filter {
             it.type != BehandlingType.BLANKETT &&
-            it.resultat !== BehandlingResultat.ANNULLERT &&
+            it.resultat !== BehandlingResultat.HENLAGT &&
             it.resultat !== BehandlingResultat.AVSLÅTT &&
             it.status == BehandlingStatus.FERDIGSTILT
         }.maxByOrNull { it.sporbar.opprettetTid }

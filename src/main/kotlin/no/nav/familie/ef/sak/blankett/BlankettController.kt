@@ -62,10 +62,10 @@ class BlankettController(private val tilgangService: TilgangService,
 
     private fun validerOpprettelseAvBlankett(behandling: Behandling) {
         if (behandling.status.behandlingErLåstForVidereRedigering()) {
-            kastApiFeil("Behandling er låst for videre redigering for behandling : $behandling", HttpStatus.BAD_REQUEST)
+            kastApiFeil("Behandling er låst for videre redigering for behandling : ${behandling.id}", HttpStatus.BAD_REQUEST)
         }
         if (!typeBlankett(behandling)) {
-            kastApiFeil("Behandling er ikke av typen blankett for behandling : $behandling", HttpStatus.BAD_REQUEST)
+            kastApiFeil("Behandling er ikke av typen blankett", HttpStatus.BAD_REQUEST)
         }
     }
 

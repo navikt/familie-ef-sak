@@ -115,8 +115,10 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
 
     private fun andelerForInnvilgetRevurdering(behandling: Behandling,
                                                beløpsperioder: List<AndelTilkjentYtelse>): List<AndelTilkjentYtelse> {
-        val forrigeTilkjenteYtelse = hentForrigeTilkjenteYtelse(behandling)
-        return slåSammenAndelerSomSkalVidereføres(beløpsperioder, forrigeTilkjenteYtelse)
+        return behandling.forrigeBehandlingId?.let {
+            val forrigeTilkjenteYtelse = hentForrigeTilkjenteYtelse(behandling)
+            return slåSammenAndelerSomSkalVidereføres(beløpsperioder, forrigeTilkjenteYtelse)
+        } ?: beløpsperioder
     }
 
     fun slåSammenAndelerSomSkalVidereføres(beløpsperioder: List<AndelTilkjentYtelse>,
