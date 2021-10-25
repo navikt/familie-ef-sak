@@ -5,7 +5,7 @@
       "regelId" : "HAR_TIDLIGERE_MOTTATT_OVERGANSSTØNAD",
       "svarMapping" : {
         "JA" : {
-          "begrunnelseType" : "UTEN",
+          "begrunnelseType" : "PÅKREVD",
           "regelId" : "SLUTT_NODE"
         },
         "NEI" : {
@@ -18,7 +18,7 @@
       "regelId" : "HAR_TIDLIGERE_ANDRE_STØNADER_SOM_HAR_BETYDNING",
       "svarMapping" : {
         "JA" : {
-          "begrunnelseType" : "UTEN",
+          "begrunnelseType" : "PÅKREVD",
           "regelId" : "SLUTT_NODE"
         },
         "NEI" : {
