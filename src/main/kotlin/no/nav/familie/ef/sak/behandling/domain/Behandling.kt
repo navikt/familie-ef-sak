@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.behandling.domain
 
+import no.nav.familie.ef.sak.behandling.HenlagtÅrsak
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
@@ -30,7 +31,9 @@ data class Behandling(@Id
 
                       @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                       val sporbar: Sporbar = Sporbar(),
-                      var resultat: BehandlingResultat) {
+                      var resultat: BehandlingResultat,
+                      @Column("behandlingsresultat_henlagt_arsak")
+                      val behandlingsresultatHenlagtÅrsak: HenlagtÅrsak? = null) {
 
     fun kanHenlegges(): Boolean = !status.behandlingErLåstForVidereRedigering()
 }

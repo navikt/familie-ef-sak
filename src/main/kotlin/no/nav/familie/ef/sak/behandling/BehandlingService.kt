@@ -117,16 +117,19 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
                                                                        journalpostType = journalposttype))
     }
 
-    fun henleggBehandling(behandlingId: UUID, årsak: HenlagtDto): Behandling {
+    fun henleggBehandling(behandlingId: UUID, henlagt: HenlagtDto): Behandling {
         val behandling = hentBehandling(behandlingId)
         validerAtBehandlingenKanHenlegges(behandling)
         behandling.status = BehandlingStatus.FERDIGSTILT
         behandling.resultat = BehandlingResultat.HENLAGT
         behandling.steg = StegType.BEHANDLING_FERDIGSTILT
-        behandlingshistorikkService.opprettHistorikkInnslag(behandling = behandling,
+
+        val henlagtBehandling = behandling.copy(behandlingsresultatHenlagtÅrsak = henlagt.årsak)
+
+        behandlingshistorikkService.opprettHistorikkInnslag(behandling = henlagtBehandling,
                                                             utfall = StegUtfall.HENLAGT,
-                                                            metadata = årsak)
-        return behandlingRepository.update(behandling)
+                                                            metadata = henlagt)
+        return behandlingRepository.update(henlagtBehandling)
     }
 
     private fun validerAtBehandlingenKanHenlegges(behandling: Behandling) {
