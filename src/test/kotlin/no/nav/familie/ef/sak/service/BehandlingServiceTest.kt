@@ -79,7 +79,7 @@ internal class BehandlingServiceTest {
         } returns behandling
 
         every {
-            behandlingshistorikkService.opprettHistorikkInnslag(any<Behandling>())
+            behandlingshistorikkService.opprettHistorikkInnslag(any(), any(), any())
         } just runs
 
         val behandlingSlot = slot<Behandling>()
