@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.behandling.OpprettBehandlingUtil.validerKanOpprette
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak
 import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil.iverksattFørstegangsbehandling
 import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil.iverksattRevurdering
 import no.nav.familie.ef.sak.repository.behandling
@@ -96,6 +97,7 @@ internal class OpprettBehandlingUtilTest {
             validerKanOppretteNyBehandling(BehandlingType.REVURDERING,
                                            listOf(behandling(fagsak = fagsak,
                                                              type = BehandlingType.BLANKETT,
+                                                             henlagtÅrsak = HenlagtÅrsak.BEHANDLES_I_GOSYS,
                                                              status = BehandlingStatus.FERDIGSTILT)), null)
         }).hasMessage("Siste behandling ble behandlet i infotrygd")
     }

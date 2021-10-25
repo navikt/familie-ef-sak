@@ -1,0 +1,1 @@
+ALTER TABLE behandling RENAME COLUMN behandlingsresultat_henlagt_arsak TO henlagt_arsak;

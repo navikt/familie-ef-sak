@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.domain.Behandlingsjournalpost
+import no.nav.familie.ef.sak.behandling.dto.HenlagtDto
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
@@ -124,7 +125,7 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
         behandling.resultat = BehandlingResultat.HENLAGT
         behandling.steg = StegType.BEHANDLING_FERDIGSTILT
 
-        val henlagtBehandling = behandling.copy(behandlingsresultatHenlagtÅrsak = henlagt.årsak)
+        val henlagtBehandling = behandling.copy(henlagtÅrsak = henlagt.årsak)
 
         behandlingshistorikkService.opprettHistorikkInnslag(behandling = henlagtBehandling,
                                                             utfall = StegUtfall.HENLAGT,
