@@ -24,7 +24,7 @@ class TidligareVedtaksperioderRegel : Vilkårsregel(vilkårType = VilkårType.TI
         return listOf(Delvilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT,
                                           listOf(Vurdering(regelId = RegelId.HAR_TIDLIGERE_MOTTATT_OVERGANSSTØNAD,
                                                            svar = SvarId.NEI))),
-                      Delvilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT,
+                      Delvilkårsvurdering(resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
                                           listOf(Vurdering(regelId = RegelId.HAR_TIDLIGERE_ANDRE_STØNADER_SOM_HAR_BETYDNING))))
     }
 

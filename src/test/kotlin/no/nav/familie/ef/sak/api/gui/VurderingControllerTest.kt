@@ -8,10 +8,12 @@ import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.vilkår.VilkårType
+import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.dto.OppdaterVilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.SvarPåVurderingerDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårsvurderingDto
+import no.nav.familie.ef.sak.vilkår.regler.RegelId
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.søknad.SøknadMedVedlegg
@@ -53,12 +55,14 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
         val opprettetVurdering = opprettInngangsvilkår().body.data!!
         val fagsak = fagsakService.hentEllerOpprettFagsakMedBehandlinger("0", Stønadstype.OVERGANGSSTØNAD)
         val behandlingÅrsak = BehandlingÅrsak.SØKNAD
-        val behandling = behandlingService.opprettBehandling(BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                             fagsak.id,
-                                                             behandlingsårsak = behandlingÅrsak)
+        val behandling = behandlingService.opprettBehandling(
+            BehandlingType.FØRSTEGANGSBEHANDLING,
+            fagsak.id,
+            behandlingsårsak = behandlingÅrsak
+        )
 
         val oppdaterVilkårsvurdering = lagOppdaterVilkårsvurdering(opprettetVurdering, VilkårType.FORUTGÅENDE_MEDLEMSKAP)
-                .copy(behandlingId = behandling.id)
+            .copy(behandlingId = behandling.id)
         validerSjekkPåBehandlingId(oppdaterVilkårsvurdering, "vilkar")
     }
 
@@ -68,7 +72,11 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
 
         val fagsak = fagsakService.hentEllerOpprettFagsakMedBehandlinger("0", Stønadstype.OVERGANGSSTØNAD)
         val behandlingÅrsak = BehandlingÅrsak.SØKNAD
-        val behandling = behandlingService.opprettBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, fagsak.id, behandlingsårsak = behandlingÅrsak)
+        val behandling = behandlingService.opprettBehandling(
+            BehandlingType.FØRSTEGANGSBEHANDLING,
+            fagsak.id,
+            behandlingsårsak = behandlingÅrsak
+        )
         val nullstillVurdering = OppdaterVilkårsvurderingDto(opprettetVurdering.vurderinger.first().id, behandling.id)
 
         validerSjekkPåBehandlingId(nullstillVurdering, "nullstill")
@@ -76,9 +84,11 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
 
     private fun validerSjekkPåBehandlingId(request: Any, path: String) {
         val respons: ResponseEntity<Ressurs<VilkårsvurderingDto>> =
-                restTemplate.exchange(localhost("/api/vurdering/$path"),
-                                      HttpMethod.POST,
-                                      HttpEntity(request, headers))
+            restTemplate.exchange(
+                localhost("/api/vurdering/$path"),
+                HttpMethod.POST,
+                HttpEntity(request, headers)
+            )
 
         assertThat(respons.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
         assertThat(respons.body!!.frontendFeilmelding).isEqualTo("BehandlingId er feil, her har noe gått galt")
@@ -89,12 +99,40 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
         val opprettetVurdering = opprettInngangsvilkår().body.data!!
         val oppdatertVilkårsvarMedJa = lagOppdaterVilkårsvurdering(opprettetVurdering, VilkårType.FORUTGÅENDE_MEDLEMSKAP)
         val respons: ResponseEntity<Ressurs<VilkårsvurderingDto>> =
-                restTemplate.exchange(localhost("/api/vurdering/vilkar"),
-                                      HttpMethod.POST,
-                                      HttpEntity(oppdatertVilkårsvarMedJa, headers))
+            restTemplate.exchange(
+                localhost("/api/vurdering/vilkar"),
+                HttpMethod.POST,
+                HttpEntity(oppdatertVilkårsvarMedJa, headers)
+            )
 
         assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(respons.body.status).isEqualTo(Ressurs.Status.SUKSESS)
+        assertThat(respons.body.data?.id).isEqualTo(oppdatertVilkårsvarMedJa.id)
+    }
+
+
+    @Test
+    internal fun `skal nullstille vurderingen for TIDLIGERE VEDTAKSPERIODER og initiere delvilkårsvurderingene med riktig resultattype`() {
+        val opprettetVurdering = opprettInngangsvilkår().body.data!!
+        val oppdatertVilkårsvarMedJa = OppdaterVilkårsvurderingDto(
+            opprettetVurdering.vurderinger.first { it.vilkårType == VilkårType.TIDLIGERE_VEDTAKSPERIODER }.id,
+            opprettetVurdering.vurderinger.first().behandlingId
+        )
+        val respons: ResponseEntity<Ressurs<VilkårsvurderingDto>> =
+            restTemplate.exchange(
+                localhost("/api/vurdering/nullstill"),
+                HttpMethod.POST,
+                HttpEntity(oppdatertVilkårsvarMedJa, headers)
+            )
+
+        assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(respons.body.status).isEqualTo(Ressurs.Status.SUKSESS)
+        assertThat(respons.body.data?.delvilkårsvurderinger?.first { it.vurderinger.first().regelId == RegelId.HAR_TIDLIGERE_ANDRE_STØNADER_SOM_HAR_BETYDNING }?.resultat).isEqualTo(
+            Vilkårsresultat.IKKE_TATT_STILLING_TIL
+        )
+        assertThat(respons.body.data?.delvilkårsvurderinger?.first { it.vurderinger.first().regelId == RegelId.HAR_TIDLIGERE_MOTTATT_OVERGANSSTØNAD }?.resultat).isEqualTo(
+            Vilkårsresultat.OPPFYLT
+        )
         assertThat(respons.body.data?.id).isEqualTo(oppdatertVilkårsvarMedJa.id)
     }
 
@@ -105,26 +143,34 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
     }
 
     private fun lagOppdaterVilkårsvurderingMedSvarJa(it: VilkårsvurderingDto) =
-            SvarPåVurderingerDto(id = it.id,
-                                 behandlingId = it.behandlingId,
-                                 delvilkårsvurderinger = it.delvilkårsvurderinger.map {
-                                     it.copy(vurderinger = it.vurderinger.map { vurderingDto ->
-                                         vurderingDto.copy(svar = SvarId.JA)
-                                     })
+        SvarPåVurderingerDto(id = it.id,
+                             behandlingId = it.behandlingId,
+                             delvilkårsvurderinger = it.delvilkårsvurderinger.map {
+                                 it.copy(vurderinger = it.vurderinger.map { vurderingDto ->
+                                     vurderingDto.copy(svar = SvarId.JA)
                                  })
+                             })
 
 
     private fun opprettInngangsvilkår(): ResponseEntity<Ressurs<VilkårDto>> {
         val søknad = SøknadMedVedlegg(Testsøknad.søknadOvergangsstønad, emptyList())
-        val fagsak = fagsakService.hentEllerOpprettFagsakMedBehandlinger(søknad.søknad.personalia.verdi.fødselsnummer.verdi.verdi,
-                                                                         Stønadstype.OVERGANGSSTØNAD)
+        val fagsak = fagsakService.hentEllerOpprettFagsakMedBehandlinger(
+            søknad.søknad.personalia.verdi.fødselsnummer.verdi.verdi,
+            Stønadstype.OVERGANGSSTØNAD
+        )
         val behandlingÅrsak = BehandlingÅrsak.SØKNAD
-        val behandling = behandlingService.opprettBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, fagsak.id, behandlingsårsak = behandlingÅrsak)
+        val behandling = behandlingService.opprettBehandling(
+            BehandlingType.FØRSTEGANGSBEHANDLING,
+            fagsak.id,
+            behandlingsårsak = behandlingÅrsak
+        )
         søknadService.lagreSøknadForOvergangsstønad(søknad.søknad, behandling.id, fagsak.id, "1234")
         grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
 
-        return restTemplate.exchange(localhost("/api/vurdering/${behandling.id}/vilkar"),
-                                     HttpMethod.GET,
-                                     HttpEntity<Any>(headers))
+        return restTemplate.exchange(
+            localhost("/api/vurdering/${behandling.id}/vilkar"),
+            HttpMethod.GET,
+            HttpEntity<Any>(headers)
+        )
     }
 }
