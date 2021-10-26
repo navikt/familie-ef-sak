@@ -65,20 +65,23 @@ class FrittståendeBrevService(private val brevClient: BrevClient,
 
     private fun utledFrittståendeBrevType(frittståendeBrevDto: FrittståendeBrevDto) =
             when (frittståendeBrevDto.brevType) {
-                FrittståendeBrevKategori.INFORMASJONSBREV, FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT -> {
-                    when (frittståendeBrevDto.stønadType) {
-                        StønadType.OVERGANGSSTØNAD -> FrittståendeBrevType.INFOBREV_OVERGANGSSTØNAD
-                        StønadType.BARNETILSYN -> FrittståendeBrevType.INFOBREV_BARNETILSYN
-                        StønadType.SKOLEPENGER -> FrittståendeBrevType.INFOBREV_SKOLEPENGER
-                    }
-                }
-                FrittståendeBrevKategori.INNHENTING_AV_OPPLYSNINGER -> {
-                    when (frittståendeBrevDto.stønadType) {
-                        StønadType.OVERGANGSSTØNAD -> FrittståendeBrevType.MANGELBREV_OVERGANGSSTØNAD
-                        StønadType.BARNETILSYN -> FrittståendeBrevType.MANGELBREV_BARNETILSYN
-                        StønadType.SKOLEPENGER -> FrittståendeBrevType.MANGELBREV_SKOLEPENGER
-                    }
-                }
+                FrittståendeBrevKategori.INFORMASJONSBREV, FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT ->
+                    utledBrevtypeInfobrev(frittståendeBrevDto.stønadType)
+                FrittståendeBrevKategori.INNHENTING_AV_OPPLYSNINGER -> utledBrevtypeMangelbrev(frittståendeBrevDto.stønadType)
+            }
+
+    private fun utledBrevtypeInfobrev(stønadType: StønadType) =
+            when (stønadType) {
+                StønadType.OVERGANGSSTØNAD -> FrittståendeBrevType.INFOBREV_OVERGANGSSTØNAD
+                StønadType.BARNETILSYN -> FrittståendeBrevType.INFOBREV_BARNETILSYN
+                StønadType.SKOLEPENGER -> FrittståendeBrevType.INFOBREV_SKOLEPENGER
+            }
+
+    private fun utledBrevtypeMangelbrev(stønadType: StønadType) =
+            when (stønadType) {
+                StønadType.OVERGANGSSTØNAD -> FrittståendeBrevType.MANGELBREV_OVERGANGSSTØNAD
+                StønadType.BARNETILSYN -> FrittståendeBrevType.MANGELBREV_BARNETILSYN
+                StønadType.SKOLEPENGER -> FrittståendeBrevType.MANGELBREV_SKOLEPENGER
             }
 
 
