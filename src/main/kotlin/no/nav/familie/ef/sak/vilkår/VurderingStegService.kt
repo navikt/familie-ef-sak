@@ -85,7 +85,6 @@ class VurderingStegService(private val behandlingService: BehandlingService,
     private fun oppdaterStegPåBehandling(behandlingId: UUID) {
         val behandling = behandlingService.hentBehandling(behandlingId)
         val lagredeVilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(behandlingId)
-                .filter { it.type != VilkårType.TIDLIGERE_VEDTAKSPERIODER } // TODO: Må håndteres senere
         val vilkårsresultat = lagredeVilkårsvurderinger.groupBy { it.type }.map {
             if (it.key == VilkårType.ALENEOMSORG) {
                 utledResultatForAleneomsorg(it.value)
