@@ -65,7 +65,7 @@ class FrittståendeBrevService(private val brevClient: BrevClient,
 
     private fun utledFrittståendeBrevType(frittståendeBrevDto: FrittståendeBrevDto) =
             when (frittståendeBrevDto.brevType) {
-                FrittståendeBrevKategori.INFORMASJONSBREV -> {
+                FrittståendeBrevKategori.INFORMASJONSBREV, FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT -> {
                     when (frittståendeBrevDto.stønadType) {
                         StønadType.OVERGANGSSTØNAD -> FrittståendeBrevType.INFOBREV_OVERGANGSSTØNAD
                         StønadType.BARNETILSYN -> FrittståendeBrevType.INFOBREV_BARNETILSYN
@@ -77,13 +77,6 @@ class FrittståendeBrevService(private val brevClient: BrevClient,
                         StønadType.OVERGANGSSTØNAD -> FrittståendeBrevType.MANGELBREV_OVERGANGSSTØNAD
                         StønadType.BARNETILSYN -> FrittståendeBrevType.MANGELBREV_BARNETILSYN
                         StønadType.SKOLEPENGER -> FrittståendeBrevType.MANGELBREV_SKOLEPENGER
-                    }
-                }
-                FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT -> {
-                    when (frittståendeBrevDto.stønadType) {
-                        StønadType.OVERGANGSSTØNAD -> FrittståendeBrevType.INFOBREV_OVERGANGSSTØNAD
-                        StønadType.BARNETILSYN -> FrittståendeBrevType.INFOBREV_BARNETILSYN
-                        StønadType.SKOLEPENGER -> FrittståendeBrevType.INFOBREV_SKOLEPENGER
                     }
                 }
             }
