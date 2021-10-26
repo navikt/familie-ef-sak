@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.brev.dto
 
-import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevType
 import no.nav.familie.kontrakter.ef.felles.StønadType
 import java.util.UUID
 
@@ -12,13 +11,4 @@ data class FrittståendeBrevDto(val overskrift: String,
 
 data class FrittståendeBrevAvsnitt(val deloverskrift: String, val innhold: String)
 
-data class VedtaksbrevFritekstDto(val overskrift: String,
-                                  val avsnitt: List<FrittståendeBrevAvsnitt>,
-                                  val behandlingId: UUID)
 
-
-enum class FrittståendeBrevKategori {
-    INFORMASJONSBREV,
-    INNHENTING_AV_OPPLYSNINGER,
-    VARSEL_OM_AKTIVITETSPLIKT,
-}
