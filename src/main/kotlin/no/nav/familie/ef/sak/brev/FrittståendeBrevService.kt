@@ -3,12 +3,15 @@ package no.nav.familie.ef.sak.brev
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.brev.domain.FRITEKST
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevDto
+import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevKategori
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevRequestDto
 import no.nav.familie.ef.sak.brev.dto.VedtaksbrevDto
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
+import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevType
+import no.nav.familie.kontrakter.ef.felles.StønadType
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -50,13 +53,36 @@ class FrittståendeBrevService(private val brevClient: BrevClient,
         val journalførendeEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(
                 ident)
         val saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(true)
+        val brevType = utledFrittståendeBrevType(frittståendeBrevDto)
         iverksettClient.sendFrittståendeBrev(FrittståendeBrevDtoIverksetting(personIdent = ident,
                                                                              eksternFagsakId = eksternFagsakId,
                                                                              stønadType = frittståendeBrevDto.stønadType,
-                                                                             brevtype = frittståendeBrevDto.brevType,
+                                                                             brevtype = brevType,
                                                                              fil = brev,
                                                                              journalførendeEnhet = journalførendeEnhet,
                                                                              saksbehandlerIdent = saksbehandlerIdent))
     }
+
+    private fun utledFrittståendeBrevType(frittståendeBrevDto: FrittståendeBrevDto) =
+            when (frittståendeBrevDto.brevType) {
+                FrittståendeBrevKategori.INFORMASJONSBREV, FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT ->
+                    utledBrevtypeInfobrev(frittståendeBrevDto.stønadType)
+                FrittståendeBrevKategori.INNHENTING_AV_OPPLYSNINGER -> utledBrevtypeMangelbrev(frittståendeBrevDto.stønadType)
+            }
+
+    private fun utledBrevtypeInfobrev(stønadType: StønadType) =
+            when (stønadType) {
+                StønadType.OVERGANGSSTØNAD -> FrittståendeBrevType.INFOBREV_OVERGANGSSTØNAD
+                StønadType.BARNETILSYN -> FrittståendeBrevType.INFOBREV_BARNETILSYN
+                StønadType.SKOLEPENGER -> FrittståendeBrevType.INFOBREV_SKOLEPENGER
+            }
+
+    private fun utledBrevtypeMangelbrev(stønadType: StønadType) =
+            when (stønadType) {
+                StønadType.OVERGANGSSTØNAD -> FrittståendeBrevType.MANGELBREV_OVERGANGSSTØNAD
+                StønadType.BARNETILSYN -> FrittståendeBrevType.MANGELBREV_BARNETILSYN
+                StønadType.SKOLEPENGER -> FrittståendeBrevType.MANGELBREV_SKOLEPENGER
+            }
+
 
 }
