@@ -15,9 +15,9 @@ import no.nav.familie.ef.sak.tilbakekreving.domain.Tilbakekreving
 import no.nav.familie.ef.sak.tilbakekreving.domain.Tilbakekrevingsvalg
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
-import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtaksresultat
 import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
@@ -25,7 +25,6 @@ import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.vilkår.Vurdering
 import no.nav.familie.kontrakter.ef.felles.BehandlingType
-import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.felles.StønadType
 import no.nav.familie.kontrakter.ef.iverksett.AdressebeskyttelseGradering
 import no.nav.familie.kontrakter.ef.iverksett.AktivitetType
@@ -106,9 +105,9 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
             val lagretSimuleringsresultat = simuleringService.hentLagretSimuleringsresultat(behandlingId)
             val perioder = lagretSimuleringsresultat.hentSammenhengendePerioderMedFeilutbetaling()
                     .map { Periode(fom = it.fom, tom = it.tom) }
-            TilbakekrevingMedVarselDto(varseltekst = tilbakekreving.varseltekst ?: "",
-                                       sumFeilutbetaling = lagretSimuleringsresultat.feilutbetaling,
-                                       perioder = perioder)
+            return TilbakekrevingMedVarselDto(varseltekst = tilbakekreving.varseltekst ?: "",
+                                              sumFeilutbetaling = lagretSimuleringsresultat.feilutbetaling,
+                                              perioder = perioder)
         }
         return null
     }
