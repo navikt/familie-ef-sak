@@ -92,7 +92,7 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
                             vedtak = vedtakDto)
     }
 
-    private fun mapTilbakekreving(behandlingId: UUID): TilbakekrevingDto? {
+    fun mapTilbakekreving(behandlingId: UUID): TilbakekrevingDto? {
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(behandlingId)
         return tilbakekreving?.let {
             TilbakekrevingDto(tilbakekrevingsvalg = mapTilbakekrevingsvalg(it.valg),
