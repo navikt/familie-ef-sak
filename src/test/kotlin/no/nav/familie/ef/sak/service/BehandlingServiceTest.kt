@@ -19,6 +19,7 @@ import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak.TRUKKET_TILBAKE
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
@@ -31,7 +32,9 @@ internal class BehandlingServiceTest {
 
     private val behandlingRepository = mockk<BehandlingRepository>()
     private val behandlingshistorikkService = mockk<BehandlingshistorikkService>()
-    private val behandlingService = BehandlingService(mockk(), behandlingRepository, behandlingshistorikkService, mockk())
+    private val oppgaveService = mockk<OppgaveService>()
+    private val behandlingService = BehandlingService(mockk(), behandlingRepository, behandlingshistorikkService, mockk(),
+                                                      oppgaveService)
 
     @Test
     internal fun `skal henlegge behandling som er blankett og status utredes`() {
@@ -47,13 +50,15 @@ internal class BehandlingServiceTest {
 
     @Test
     internal fun `skal ikke kunne henlegge behandling hvor vedtak fattes`() {
-        val behandling = behandling(fagsak(), type = BehandlingType.FØRSTEGANGSBEHANDLING, status = BehandlingStatus.FATTER_VEDTAK)
+        val behandling =
+                behandling(fagsak(), type = BehandlingType.FØRSTEGANGSBEHANDLING, status = BehandlingStatus.FATTER_VEDTAK)
         henleggOgForventFeilmelding(behandling, FEILREGISTRERT)
     }
 
     @Test
     internal fun `skal ikke kunne henlegge behandling som er iverksatt`() {
-        val behandling = behandling(fagsak(), type = BehandlingType.FØRSTEGANGSBEHANDLING, status = BehandlingStatus.IVERKSETTER_VEDTAK)
+        val behandling =
+                behandling(fagsak(), type = BehandlingType.FØRSTEGANGSBEHANDLING, status = BehandlingStatus.IVERKSETTER_VEDTAK)
         henleggOgForventFeilmelding(behandling, TRUKKET_TILBAKE)
     }
 
@@ -79,6 +84,10 @@ internal class BehandlingServiceTest {
         every {
             behandlingRepository.findByIdOrThrow(any())
         } returns behandling
+
+        every {
+            oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(any(), any())
+        } just runs
 
         every {
             behandlingshistorikkService.opprettHistorikkInnslag(any(), any(), any())

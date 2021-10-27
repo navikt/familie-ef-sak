@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.oppgave
 
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
-import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
@@ -22,7 +21,6 @@ import no.nav.familie.ef.sak.oppgave.Oppgave as EfOppgave
 
 @Service
 class OppgaveService(private val oppgaveClient: OppgaveClient,
-                     private val behandlingRepository: BehandlingRepository,
                      private val fagsakRepository: FagsakRepository,
                      private val oppgaveRepository: OppgaveRepository,
                      private val arbeidsfordelingService: ArbeidsfordelingService,
@@ -91,8 +89,18 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
     fun ferdigstillBehandleOppgave(behandlingId: UUID, oppgavetype: Oppgavetype) {
         val oppgave = oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
                       ?: error("Finner ikke oppgave for behandling $behandlingId")
-        ferdigstillOppgave(oppgave.gsakOppgaveId)
+        ferdigstillOppgaveOgSettEfOppgaveTilFerdig(oppgave)
+    }
 
+    fun ferdigstillOppgaveHvisOppgaveFinnes(behandlingId: UUID, oppgavetype: Oppgavetype) {
+        val oppgave = oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
+        oppgave?.let {
+            ferdigstillOppgaveOgSettEfOppgaveTilFerdig(oppgave)
+        }
+    }
+
+    private fun ferdigstillOppgaveOgSettEfOppgaveTilFerdig(oppgave: no.nav.familie.ef.sak.oppgave.Oppgave) {
+        ferdigstillOppgave(oppgave.gsakOppgaveId)
         oppgave.erFerdigstilt = true
         oppgaveRepository.update(oppgave)
     }

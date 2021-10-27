@@ -14,11 +14,13 @@ import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -32,7 +34,8 @@ import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad as SøknadOv
 class BehandlingService(private val behandlingsjournalpostRepository: BehandlingsjournalpostRepository,
                         private val behandlingRepository: BehandlingRepository,
                         private val behandlingshistorikkService: BehandlingshistorikkService,
-                        private val søknadService: SøknadService) {
+                        private val søknadService: SøknadService,
+                        private val oppgaveService: OppgaveService) {
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -126,11 +129,17 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
         behandling.steg = StegType.BEHANDLING_FERDIGSTILT
 
         val henlagtBehandling = behandling.copy(henlagtÅrsak = henlagt.årsak)
-
         behandlingshistorikkService.opprettHistorikkInnslag(behandling = henlagtBehandling,
                                                             utfall = StegUtfall.HENLAGT,
                                                             metadata = henlagt)
-        return behandlingRepository.update(henlagtBehandling)
+        val henlagtBehandlingFraDb = behandlingRepository.update(henlagtBehandling)
+        ferdigstillOppgaveTask(henlagtBehandlingFraDb)
+        return henlagtBehandlingFraDb
+    }
+
+    private fun ferdigstillOppgaveTask(behandling: Behandling) {
+        oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(behandlingId = behandling.id, Oppgavetype.BehandleSak)
+        oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(behandlingId = behandling.id, Oppgavetype.BehandleUnderkjentVedtak)
     }
 
     private fun validerAtBehandlingenKanHenlegges(behandling: Behandling) {
