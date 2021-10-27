@@ -38,4 +38,5 @@ fun JsonWrapper?.tilJson(): Map<String, Any>? {
 enum class StegUtfall {
     BESLUTTE_VEDTAK_GODKJENT,
     BESLUTTE_VEDTAK_UNDERKJENT,
+    HENLAGT
 }

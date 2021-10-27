@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.behandling
 
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.dto.BehandlingDto
+import no.nav.familie.ef.sak.behandling.dto.HenlagtDto
 import no.nav.familie.ef.sak.behandling.dto.tilDto
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
@@ -12,6 +13,7 @@ import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
@@ -39,12 +41,12 @@ class BehandlingController(private val behandlingService: BehandlingService,
         return Ressurs.success(behandlingId)
     }
 
-    @PostMapping("{behandlingId}/annuller", "{behandlingId}/henlegg")
-    fun henleggBehandling(@PathVariable behandlingId: UUID): Ressurs<BehandlingDto> {
+    @PostMapping("{behandlingId}/henlegg")
+    fun henleggBehandling(@PathVariable behandlingId: UUID, @RequestBody henlagt: HenlagtDto): Ressurs<BehandlingDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         tilgangService.validerHarSaksbehandlerrolle()
-        val henlagtBehandling = behandlingService.henleggBehandling(behandlingId)
+        val henlagtBehandling = behandlingService.henleggBehandling(behandlingId, henlagt)
         return Ressurs.success(henlagtBehandling.tilDto())
     }
-
 }
+
