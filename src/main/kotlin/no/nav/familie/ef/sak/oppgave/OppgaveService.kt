@@ -1,15 +1,17 @@
 package no.nav.familie.ef.sak.oppgave
 
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
-import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.*
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.cache.annotation.CacheConfig
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import java.net.URI
 import java.time.DayOfWeek
@@ -21,8 +23,8 @@ import no.nav.familie.ef.sak.oppgave.Oppgave as EfOppgave
 
 
 @Service
+@CacheConfig(cacheManager = "oppgaveCache")
 class OppgaveService(private val oppgaveClient: OppgaveClient,
-                     private val behandlingRepository: BehandlingRepository,
                      private val fagsakRepository: FagsakRepository,
                      private val oppgaveRepository: OppgaveRepository,
                      private val arbeidsfordelingService: ArbeidsfordelingService,
@@ -147,6 +149,18 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
             DayOfWeek.SUNDAY -> frist.plusDays(1)
             else -> frist
         }
+    }
+
+    @Cacheable("mapper")
+    fun finnMapper(tema: String, enhet: String): List<MappeDto> {
+        val mappeRespons = oppgaveClient.finnMapper(FinnMappeRequest(tema = listOf(tema),
+                                                                     enhetsnr = enhet,
+                                                                     opprettetFom = null,
+                                                                     limit = 1000))
+        if (mappeRespons.antallTreffTotalt > mappeRespons.mapper.size) {
+            secureLogger.error("Det finnes flere mapper [${mappeRespons.antallTreffTotalt}] enn vi har hentet ut [${mappeRespons.mapper.size}]. Sjekk limit. ")
+        }
+        return mappeRespons.mapper
     }
 
     private fun fristBasertPåKlokkeslett(gjeldendeTid: LocalDateTime): LocalDate {
