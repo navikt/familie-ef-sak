@@ -21,7 +21,6 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
 import no.nav.familie.ef.sak.oppgave.OppgaveService
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.vedtak.TotrinnskontrollService
 import no.nav.familie.ef.sak.vedtak.VedtakService
@@ -71,7 +70,6 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
                     oppdaterResultatPåBehandling(behandling.id)
                     opprettPollForStatusOppgave(behandling.id)
                     opprettTaskForBehandlingsstatistikk(behandling.id, oppgaveId)
-                    secureLogger.info("iverksettDto: $iverksettDto")
                     iverksettClient.iverksett(iverksettDto, fil)
                     StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT
                 }
