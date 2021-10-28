@@ -56,7 +56,6 @@ internal class OppgaveServiceTest {
 
     private val oppgaveService =
             OppgaveService(oppgaveClient,
-                           behandlingRepository,
                            fagsakRepository,
                            oppgaveRepository,
                            arbeidsfordelingService,
@@ -121,6 +120,7 @@ internal class OppgaveServiceTest {
         assertThat(slot.captured).isEqualTo(GSAK_OPPGAVE_ID)
     }
 
+
     @Test
     fun `Ferdigstill oppgave feiler fordi den ikke finner oppgave på behandlingen`() {
         every {
@@ -133,6 +133,30 @@ internal class OppgaveServiceTest {
                 .hasMessage("Finner ikke oppgave for behandling $BEHANDLING_ID")
                 .isInstanceOf(java.lang.IllegalStateException::class.java)
     }
+
+
+    @Test
+    fun `Ferdigstill oppgave hvis oppgave ikke finnes - kaster ikke feil`() {
+        every {
+            oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any())
+        } returns null
+        oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(BEHANDLING_ID, Oppgavetype.BehandleSak)
+    }
+
+    @Test
+    fun `Ferdigstill oppgave - hvis oppgave finnes`() {
+        every { behandlingRepository.findByIdOrNull(BEHANDLING_ID) } returns mockk {}
+        every {
+            oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any())
+        } returns lagTestOppgave()
+        every { oppgaveRepository.update(any()) } returns lagTestOppgave()
+        val slot = slot<Long>()
+        every { oppgaveClient.ferdigstillOppgave(capture(slot)) } just runs
+
+        oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(BEHANDLING_ID, Oppgavetype.BehandleSak)
+        assertThat(slot.captured).isEqualTo(GSAK_OPPGAVE_ID)
+    }
+
 
     @Test
     fun `Fordel oppgave skal tildele oppgave til saksbehandler`() {
