@@ -33,7 +33,10 @@ internal class BehandlingServiceTest {
     private val behandlingRepository = mockk<BehandlingRepository>()
     private val behandlingshistorikkService = mockk<BehandlingshistorikkService>()
     private val oppgaveService = mockk<OppgaveService>()
-    private val behandlingService = BehandlingService(mockk(), behandlingRepository, behandlingshistorikkService, mockk(),
+    private val behandlingService = BehandlingService(mockk(),
+                                                      behandlingRepository,
+                                                      behandlingshistorikkService,
+                                                      mockk(),
                                                       oppgaveService)
 
     @Test

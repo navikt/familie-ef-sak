@@ -99,7 +99,7 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
         }
     }
 
-    private fun ferdigstillOppgaveOgSettEfOppgaveTilFerdig(oppgave: no.nav.familie.ef.sak.oppgave.Oppgave) {
+    private fun ferdigstillOppgaveOgSettEfOppgaveTilFerdig(oppgave: EfOppgave) {
         ferdigstillOppgave(oppgave.gsakOppgaveId)
         oppgave.erFerdigstilt = true
         oppgaveRepository.update(oppgave)
