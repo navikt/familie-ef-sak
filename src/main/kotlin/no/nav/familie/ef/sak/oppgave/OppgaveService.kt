@@ -158,7 +158,8 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
                                                                      opprettetFom = null,
                                                                      limit = 1000))
         if (mappeRespons.antallTreffTotalt > mappeRespons.mapper.size) {
-            secureLogger.error("Det finnes flere mapper [${mappeRespons.antallTreffTotalt}] enn vi har hentet ut [${mappeRespons.mapper.size}]. Sjekk limit. ")
+            secureLogger.error("Det finnes flere mapper [${mappeRespons.antallTreffTotalt}] " +
+                               "enn vi har hentet ut [${mappeRespons.mapper.size}]. Sjekk limit. ")
         }
         return mappeRespons.mapper
     }
