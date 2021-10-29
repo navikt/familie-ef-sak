@@ -4,8 +4,10 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.oppgave.OppgaveClient
 import no.nav.familie.kontrakter.felles.Tema
+import no.nav.familie.kontrakter.felles.oppgave.FinnMappeResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
+import no.nav.familie.kontrakter.felles.oppgave.MappeDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
 import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
@@ -38,6 +40,17 @@ class OppgaveClientMock {
         every { oppgaveClient.finnOppgaveMedId(any()) } answers {
             val oppgaveId = firstArg<Long>()
             oppgaver[oppgaveId] ?: error("Finner ikke oppgave med oppgaveId=$oppgaveId")
+        }
+
+        every { oppgaveClient.finnMapper(any()) } answers {
+            FinnMappeResponseDto(antallTreffTotalt = 2,
+                                 mapper = listOf(
+                                         MappeDto(
+                                                 id = 123,
+                                                 navn = "EF Sak 01 - Uplassert lokal"),
+                                         MappeDto(
+                                                 id = 1234,
+                                                 navn = "EF Sak 99 - testmappe lokal 99")))
         }
 
         every { oppgaveClient.opprettOppgave(any()) } answers {
@@ -96,7 +109,7 @@ class OppgaveClientMock {
                        journalpostId = journalpostId,
                        tildeltEnhetsnr = "4408",
                        tilordnetRessurs = tildeltRessurs,
-                       mappeId = 100000035,
+                       mappeId = 123,
                        behandlesAvApplikasjon = "FS22",
                        beskrivelse = beskivelse,
                        tema = Tema.ENF,

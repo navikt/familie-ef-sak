@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.oppgave.dto.OppgaveResponseDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
+import no.nav.familie.kontrakter.felles.oppgave.MappeDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
@@ -69,6 +70,11 @@ class OppgaveController(private val oppgaveService: OppgaveService,
         return efOppgave?.let { Ressurs.success(OppgaveDto(it.behandlingId, it.gsakOppgaveId)) }
                ?: Ressurs.funksjonellFeil("Denne oppgaven må behandles i Gosys og Infotrygd",
                                           "Denne oppgaven må behandles i Gosys og Infotrygd")
+    }
+
+    @GetMapping(path = ["/mapper"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun hentMapper(): Ressurs<List<MappeDto>> {
+        return Ressurs.success(oppgaveService.finnMapper(enhet = "4489"))
     }
 
 

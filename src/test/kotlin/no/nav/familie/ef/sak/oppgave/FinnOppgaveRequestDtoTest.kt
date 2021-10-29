@@ -3,7 +3,6 @@ package no.nav.familie.ef.sak.oppgave
 import no.nav.familie.ef.sak.oppgave.dto.FinnOppgaveRequestDto
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.familie.kontrakter.felles.oppgave.Enhetsmappe
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
@@ -23,6 +22,7 @@ internal class FinnOppgaveRequestDtoTest {
         eksternInput["tilordnetRessurs"] = "XY1234"
         eksternInput["tildeltRessurs"] = "true"
         eksternInput["enhetsmappe"] = "100000035"
+        eksternInput["mappeId"] = "1234"
         eksternInput["opprettetFom"] = LocalDate.of(2020, 1, 1).toString()
         eksternInput["opprettetTom"] = LocalDate.of(2020, 1, 2).toString()
         eksternInput["fristFom"] = LocalDate.of(2020, 1, 2).toString()
@@ -45,7 +45,7 @@ internal class FinnOppgaveRequestDtoTest {
         Assertions.assertThat(finnOppgaveRequest.fristTomDato).isEqualTo(LocalDate.of(2020, 1, 2))
         Assertions.assertThat(finnOppgaveRequest.limit).isEqualTo(150)
         Assertions.assertThat(finnOppgaveRequest.offset).isEqualTo(0)
-        Assertions.assertThat(finnOppgaveRequest.enhetsmappe).isEqualTo(Enhetsmappe.SøknaderKlarTilBehandling)
+        Assertions.assertThat(finnOppgaveRequest.mappeId).isEqualTo(1234L)
 
 
     }

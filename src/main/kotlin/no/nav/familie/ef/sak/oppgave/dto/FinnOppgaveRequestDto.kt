@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.oppgave.dto
 
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
-import no.nav.familie.kontrakter.felles.oppgave.Enhetsmappe
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import java.time.LocalDate
@@ -19,6 +18,7 @@ data class FinnOppgaveRequestDto(val behandlingstema: String? = null,
                                  val fristFom: LocalDate? = null,
                                  val fristTom: LocalDate? = null,
                                  val enhetsmappe: Long? = null,
+                                 val mappeId: Long? = null,
                                  val ident: String?) {
 
     fun tilFinnOppgaveRequest(aktørid: String? = null): FinnOppgaveRequest =
@@ -39,8 +39,7 @@ data class FinnOppgaveRequestDto(val behandlingstema: String? = null,
                                fristTomDato = this.fristTom,
                                aktivFomDato = null,
                                aktivTomDato = null,
-                               enhetsmappe = if (this.enhetsmappe != null) Enhetsmappe.values()
-                                       .find { it.value == this.enhetsmappe } else null,
+                               mappeId = mappeId,
                                limit = 150,
                                offset = 0)
 }
