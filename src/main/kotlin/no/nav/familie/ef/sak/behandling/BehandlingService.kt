@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.HENLAGT
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.FERDIGSTILT
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.domain.Behandlingsjournalpost
 import no.nav.familie.ef.sak.behandling.dto.HenlagtDto
@@ -98,9 +99,7 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
         val behandling = hentBehandling(behandlingId)
         secureLogger.info("${SikkerhetContext.hentSaksbehandler()} endrer status på behandling $behandlingId " +
                           "fra ${behandling.status} til $status")
-
-        behandling.status = status
-        return behandlingRepository.update(behandling)
+        return behandlingRepository.update(behandling.copy(status = status))
     }
 
     fun oppdaterStegPåBehandling(behandlingId: UUID, steg: StegType): Behandling {
@@ -125,9 +124,10 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
     fun henleggBehandling(behandlingId: UUID, henlagt: HenlagtDto): Behandling {
         val behandling = hentBehandling(behandlingId)
         validerAtBehandlingenKanHenlegges(behandling)
-        behandling.status = BehandlingStatus.FERDIGSTILT
-
-        val henlagtBehandling = behandling.copy(henlagtÅrsak = henlagt.årsak, resultat = HENLAGT, steg = BEHANDLING_FERDIGSTILT)
+        val henlagtBehandling = behandling.copy(henlagtÅrsak = henlagt.årsak,
+                                                resultat = HENLAGT,
+                                                steg = BEHANDLING_FERDIGSTILT,
+                                                status = FERDIGSTILT)
         behandlingshistorikkService.opprettHistorikkInnslag(behandling = henlagtBehandling,
                                                             utfall = StegUtfall.HENLAGT,
                                                             metadata = henlagt)

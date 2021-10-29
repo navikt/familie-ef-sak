@@ -27,7 +27,7 @@ data class Behandling(@Id
                       val versjon: Int = 0,
 
                       val type: BehandlingType,
-                      var status: BehandlingStatus,
+                      val status: BehandlingStatus,
                       val steg: StegType,
                       @Column("arsak")
                       val årsak: BehandlingÅrsak,
