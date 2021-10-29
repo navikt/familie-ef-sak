@@ -86,6 +86,6 @@ internal class SøkServiceTest {
                                              "Fornavn Mellomnavn Etternavn")
 
         val person = SøkeresultatPerson(listOf(forventetResultat), 1, 1, 1)
-        assertThat(søkService.søkEtterPersonerMedSammeAdresse(UUID.randomUUID())).isEqualTo(person)
+        assertThat(søkService.søkEtterPersonerMedSammeAdressePåBehandling(UUID.randomUUID())).isEqualTo(person)
     }
 }
