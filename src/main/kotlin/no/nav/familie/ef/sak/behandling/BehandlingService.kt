@@ -125,10 +125,9 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
         val behandling = hentBehandling(behandlingId)
         validerAtBehandlingenKanHenlegges(behandling)
         behandling.status = BehandlingStatus.FERDIGSTILT
-        behandling.resultat = BehandlingResultat.HENLAGT
         behandling.steg = StegType.BEHANDLING_FERDIGSTILT
 
-        val henlagtBehandling = behandling.copy(henlagtÅrsak = henlagt.årsak)
+        val henlagtBehandling = behandling.copy(henlagtÅrsak = henlagt.årsak, resultat = BehandlingResultat.HENLAGT)
         behandlingshistorikkService.opprettHistorikkInnslag(behandling = henlagtBehandling,
                                                             utfall = StegUtfall.HENLAGT,
                                                             metadata = henlagt)
@@ -155,8 +154,7 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
 
     fun oppdaterResultatPåBehandling(behandlingId: UUID, behandlingResultat: BehandlingResultat): Behandling {
         val behandling = hentBehandling(behandlingId)
-        behandling.resultat = behandlingResultat
-        return behandlingRepository.update(behandling)
+        return behandlingRepository.update(behandling.copy(resultat = behandlingResultat))
     }
 
 }
