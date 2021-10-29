@@ -5,10 +5,10 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.*
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.CacheConfig
 import org.springframework.cache.annotation.Cacheable
@@ -30,6 +30,8 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
                      private val arbeidsfordelingService: ArbeidsfordelingService,
                      private val pdlClient: PdlClient,
                      @Value("\${FRONTEND_OPPGAVE_URL}") private val frontendOppgaveUrl: URI) {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     fun opprettOppgave(behandlingId: UUID,
                        oppgavetype: Oppgavetype,
@@ -158,8 +160,8 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
                                                                      opprettetFom = null,
                                                                      limit = 1000))
         if (mappeRespons.antallTreffTotalt > mappeRespons.mapper.size) {
-            secureLogger.error("Det finnes flere mapper [${mappeRespons.antallTreffTotalt}] " +
-                               "enn vi har hentet ut [${mappeRespons.mapper.size}]. Sjekk limit. ")
+            logger.error("Det finnes flere mapper (${mappeRespons.antallTreffTotalt}) " +
+                               "enn vi har hentet ut (${mappeRespons.mapper.size}). Sjekk limit. ")
         }
         return mappeRespons.mapper
     }
