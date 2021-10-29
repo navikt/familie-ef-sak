@@ -95,8 +95,18 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
     fun ferdigstillBehandleOppgave(behandlingId: UUID, oppgavetype: Oppgavetype) {
         val oppgave = oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
                       ?: error("Finner ikke oppgave for behandling $behandlingId")
-        ferdigstillOppgave(oppgave.gsakOppgaveId)
+        ferdigstillOppgaveOgSettEfOppgaveTilFerdig(oppgave)
+    }
 
+    fun ferdigstillOppgaveHvisOppgaveFinnes(behandlingId: UUID, oppgavetype: Oppgavetype) {
+        val oppgave = oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
+        oppgave?.let {
+            ferdigstillOppgaveOgSettEfOppgaveTilFerdig(oppgave)
+        }
+    }
+
+    private fun ferdigstillOppgaveOgSettEfOppgaveTilFerdig(oppgave: EfOppgave) {
+        ferdigstillOppgave(oppgave.gsakOppgaveId)
         oppgave.erFerdigstilt = true
         oppgaveRepository.update(oppgave)
     }
