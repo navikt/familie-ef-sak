@@ -64,9 +64,7 @@ class SøkService(private val fagsakRepository: FagsakRepository,
         return søkEtterPersonerMedSammeAdresse(aktivIdent)
     }
 
-    private fun søkEtterPersonerMedSammeAdresse(
-        aktivIdent: String,
-    ): SøkeresultatPerson {
+    private fun søkEtterPersonerMedSammeAdresse(aktivIdent: String): SøkeresultatPerson {
         val søker = personService.hentSøker(aktivIdent)
         val aktuelleBostedsadresser = søker.bostedsadresse.filterNot { it.metadata.historisk }
         val bostedsadresse = aktuelleBostedsadresser.singleOrNull()
@@ -82,11 +80,10 @@ class SøkService(private val fagsakRepository: FagsakRepository,
 
         val personSøkResultat = pdlSaksbehandlerClient.søkPersonerMedSammeAdresse(søkeKriterier)
 
-        return SøkeresultatPerson(
-            hits = personSøkResultat.hits.map { tilPersonFraSøk(it.person) },
-            totalHits = personSøkResultat.totalHits,
-            pageNumber = personSøkResultat.pageNumber,
-            totalPages = personSøkResultat.totalPages
+        return SøkeresultatPerson(hits = personSøkResultat.hits.map { tilPersonFraSøk(it.person) },
+                                  totalHits = personSøkResultat.totalHits,
+                                  pageNumber = personSøkResultat.pageNumber,
+                                  totalPages = personSøkResultat.totalPages
         )
     }
 

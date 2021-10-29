@@ -28,12 +28,12 @@ class SøkController(private val søkService: SøkService, private val tilgangSe
     }
 
     @GetMapping("{behandlingId}/samme-adresse")
-    fun søkPersonerMedSammeAdressePåBehandling(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<SøkeresultatPerson> {
+    fun søkPersonerMedSammeAdressePåBehandling(@PathVariable behandlingId: UUID): Ressurs<SøkeresultatPerson> {
         return Ressurs.success(søkService.søkEtterPersonerMedSammeAdressePåBehandling(behandlingId))
     }
 
     @GetMapping("fagsak/{fagsakId}/samme-adresse")
-    fun søkPersonerMedSammeAdressePåFagsak(@PathVariable("fagsakId") fagsakId: UUID): Ressurs<SøkeresultatPerson> {
+    fun søkPersonerMedSammeAdressePåFagsak(@PathVariable fagsakId: UUID): Ressurs<SøkeresultatPerson> {
         return Ressurs.success(søkService.søkEtterPersonerMedSammeAdressePåFagsak(fagsakId))
     }
 }
