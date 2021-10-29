@@ -133,7 +133,6 @@ internal class OppgaveServiceTest {
 
     @Test
     fun `Ferdigstill oppgave - hvis oppgave finnes`() {
-        every { behandlingRepository.findByIdOrNull(BEHANDLING_ID) } returns mockk {}
         every {
             oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any())
         } returns lagTestOppgave()
