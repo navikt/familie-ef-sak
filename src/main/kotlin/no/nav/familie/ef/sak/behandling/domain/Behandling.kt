@@ -28,7 +28,7 @@ data class Behandling(@Id
 
                       val type: BehandlingType,
                       var status: BehandlingStatus,
-                      var steg: StegType,
+                      val steg: StegType,
                       @Column("arsak")
                       val årsak: BehandlingÅrsak,
                       val kravMottatt: LocalDate? = null,
