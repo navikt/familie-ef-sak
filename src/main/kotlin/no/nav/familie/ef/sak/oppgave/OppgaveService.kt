@@ -164,8 +164,8 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
     }
 
     @Cacheable("mapper")
-    fun finnMapper(tema: String, enhet: String): List<MappeDto> {
-        val mappeRespons = oppgaveClient.finnMapper(FinnMappeRequest(tema = listOf(tema),
+    fun finnMapper(enhet: String): List<MappeDto> {
+        val mappeRespons = oppgaveClient.finnMapper(FinnMappeRequest(tema = listOf(),
                                                                      enhetsnr = enhet,
                                                                      opprettetFom = null,
                                                                      limit = 1000))
