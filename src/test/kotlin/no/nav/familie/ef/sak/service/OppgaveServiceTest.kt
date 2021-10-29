@@ -8,12 +8,6 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.arbeidsfordeling.Arbeidsfordelingsenhet
-import no.nav.familie.ef.sak.behandling.BehandlingRepository
-import no.nav.familie.ef.sak.behandling.domain.Behandling
-import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
-import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
-import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
@@ -26,7 +20,6 @@ import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
-import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
@@ -38,7 +31,6 @@ import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.springframework.data.repository.findByIdOrNull
 import java.net.URI
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -49,7 +41,6 @@ internal class OppgaveServiceTest {
 
     private val oppgaveClient = mockk<OppgaveClient>()
     private val arbeidsfordelingService = mockk<ArbeidsfordelingService>()
-    private val behandlingRepository = mockk<BehandlingRepository>()
     private val fagsakRepository = mockk<FagsakRepository>()
     private val oppgaveRepository = mockk<OppgaveRepository>()
     private val pdlClient = mockk<PdlClient>()
@@ -66,7 +57,6 @@ internal class OppgaveServiceTest {
     fun `Opprett oppgave skal samle data og opprette en ny oppgave basert på fagsak, behandling, fnr og enhet`() {
         val aktørIdentFraPdl = "AKTØERIDENT"
         every { fagsakRepository.finnFagsakTilBehandling(BEHANDLING_ID) } returns lagTestFagsak()
-        every { behandlingRepository.update(any()) } returns lagTestBehandling()
         every { oppgaveRepository.insert(any()) } returns lagTestOppgave()
         every {
             oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any())
@@ -108,7 +98,6 @@ internal class OppgaveServiceTest {
 
     @Test
     fun `Ferdigstill oppgave`() {
-        every { behandlingRepository.findByIdOrNull(BEHANDLING_ID) } returns mockk {}
         every {
             oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any())
         } returns lagTestOppgave()
@@ -127,7 +116,6 @@ internal class OppgaveServiceTest {
             oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any())
         } returns null
         every { oppgaveRepository.insert(any()) } returns lagTestOppgave()
-        every { behandlingRepository.findByIdOrNull(BEHANDLING_ID) } returns mockk {}
 
         Assertions.assertThatThrownBy { oppgaveService.ferdigstillBehandleOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak) }
                 .hasMessage("Finner ikke oppgave for behandling $BEHANDLING_ID")
@@ -145,7 +133,6 @@ internal class OppgaveServiceTest {
 
     @Test
     fun `Ferdigstill oppgave - hvis oppgave finnes`() {
-        every { behandlingRepository.findByIdOrNull(BEHANDLING_ID) } returns mockk {}
         every {
             oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any())
         } returns lagTestOppgave()
@@ -200,15 +187,6 @@ internal class OppgaveServiceTest {
             assertThat(oppgaveService.lagFristForOppgave(it.first)).isEqualTo(it.second)
         }
 
-    }
-
-    private fun lagTestBehandling(): Behandling {
-        return Behandling(fagsakId = FAGSAK_ID,
-                          type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                          status = BehandlingStatus.OPPRETTET,
-                          steg = StegType.VILKÅR,
-                          resultat = BehandlingResultat.IKKE_SATT,
-                          årsak = BehandlingÅrsak.SØKNAD)
     }
 
     private fun lagTestFagsak(): Fagsak {
