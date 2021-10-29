@@ -3,11 +3,15 @@ package no.nav.familie.ef.sak.behandling
 import no.nav.familie.ef.sak.behandling.OpprettBehandlingUtil.validerKanOppretteNyBehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.HENLAGT
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.FERDIGSTILT
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.domain.Behandlingsjournalpost
 import no.nav.familie.ef.sak.behandling.dto.HenlagtDto
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.BEHANDLING_FERDIGSTILT
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.VILKÅR
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
@@ -72,7 +76,7 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
     fun opprettBehandling(behandlingType: BehandlingType,
                           fagsakId: UUID,
                           status: BehandlingStatus = BehandlingStatus.OPPRETTET,
-                          stegType: StegType = StegType.VILKÅR,
+                          stegType: StegType = VILKÅR,
                           behandlingsårsak: BehandlingÅrsak,
                           kravMottatt: LocalDate? = null): Behandling {
         val tidligereBehandlinger = behandlingRepository.findByFagsakId(fagsakId)
@@ -95,18 +99,14 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
         val behandling = hentBehandling(behandlingId)
         secureLogger.info("${SikkerhetContext.hentSaksbehandler()} endrer status på behandling $behandlingId " +
                           "fra ${behandling.status} til $status")
-
-        behandling.status = status
-        return behandlingRepository.update(behandling)
+        return behandlingRepository.update(behandling.copy(status = status))
     }
 
     fun oppdaterStegPåBehandling(behandlingId: UUID, steg: StegType): Behandling {
         val behandling = hentBehandling(behandlingId)
         secureLogger.info("${SikkerhetContext.hentSaksbehandler()} endrer steg på behandling $behandlingId " +
                           "fra ${behandling.steg} til $steg")
-
-        behandling.steg = steg
-        return behandlingRepository.update(behandling)
+        return behandlingRepository.update(behandling.copy(steg = steg))
     }
 
 
@@ -124,11 +124,10 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
     fun henleggBehandling(behandlingId: UUID, henlagt: HenlagtDto): Behandling {
         val behandling = hentBehandling(behandlingId)
         validerAtBehandlingenKanHenlegges(behandling)
-        behandling.status = BehandlingStatus.FERDIGSTILT
-        behandling.resultat = BehandlingResultat.HENLAGT
-        behandling.steg = StegType.BEHANDLING_FERDIGSTILT
-
-        val henlagtBehandling = behandling.copy(henlagtÅrsak = henlagt.årsak)
+        val henlagtBehandling = behandling.copy(henlagtÅrsak = henlagt.årsak,
+                                                resultat = HENLAGT,
+                                                steg = BEHANDLING_FERDIGSTILT,
+                                                status = FERDIGSTILT)
         behandlingshistorikkService.opprettHistorikkInnslag(behandling = henlagtBehandling,
                                                             utfall = StegUtfall.HENLAGT,
                                                             metadata = henlagt)
@@ -155,8 +154,7 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
 
     fun oppdaterResultatPåBehandling(behandlingId: UUID, behandlingResultat: BehandlingResultat): Behandling {
         val behandling = hentBehandling(behandlingId)
-        behandling.resultat = behandlingResultat
-        return behandlingRepository.update(behandling)
+        return behandlingRepository.update(behandling.copy(resultat = behandlingResultat))
     }
 
 }
