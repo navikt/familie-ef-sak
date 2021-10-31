@@ -13,6 +13,7 @@ import no.nav.familie.kontrakter.ef.iverksett.KonsistensavstemmingDto
 import no.nav.familie.kontrakter.ef.iverksett.SimuleringDto
 import no.nav.familie.kontrakter.ef.iverksett.TekniskOpphørDto
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
@@ -36,10 +37,10 @@ class IverksettClient(@Value("\${FAMILIE_EF_IVERKSETT_URL}")
         operations.optionsForAllow(pingUri)
     }
 
-    fun simuler(simuleringRequest: SimuleringDto): DetaljertSimuleringResultat {
-        val url = URI.create("$familieEfIverksettUri/api/simulering")
+    fun simuler(simuleringRequest: SimuleringDto): BeriketSimuleringsresultat {
+        val url = URI.create("$familieEfIverksettUri/api/simulering/v2")
 
-        return postForEntity<Ressurs<DetaljertSimuleringResultat>>(url,
+        return postForEntity<Ressurs<BeriketSimuleringsresultat>>(url,
                                                                    simuleringRequest,
                                                                    HttpHeaders().medContentTypeJsonUTF8()).data!!
     }
