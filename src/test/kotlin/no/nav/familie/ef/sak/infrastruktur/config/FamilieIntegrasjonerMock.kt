@@ -132,7 +132,7 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
         private val kodeverkLand = Ressurs.success(land)
 
         private val arbeidsfordeling =
-                Ressurs.success(listOf(Arbeidsfordelingsenhet("1234", "nerd-enhet")))
+                Ressurs.success(listOf(Arbeidsfordelingsenhet("4489", "nerd-enhet")))
 
         private const val fnr = "23097825289"
         private val medl =
