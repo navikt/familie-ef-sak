@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.felles.kodeverk
 
+import no.nav.familie.kontrakter.felles.kodeverk.InntektKodeverkDto
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
 import org.slf4j.LoggerFactory
 import org.springframework.boot.context.event.ApplicationReadyEvent
@@ -24,6 +25,11 @@ class CachedKodeverkService(private val kodeverkClient: KodeverkClient) {
     fun hentPoststed(): KodeverkDto {
         return kodeverkClient.hentKodeverkPoststed()
     }
+
+    @Cacheable("kodeverk_inntekt")
+    fun hentInntekt(): InntektKodeverkDto {
+        return kodeverkClient.hentKodeverkInntekt()
+    }
 }
 
 @Profile("!integrasjonstest")
@@ -45,6 +51,7 @@ class KodeverkInitializer(private val cachedKodeverkService: CachedKodeverkServi
     private fun sync() {
         syncKodeverk("Lantkoder", cachedKodeverkService::hentLandkoder)
         syncKodeverk("Poststed", cachedKodeverkService::hentPoststed)
+        syncKodeverk("Inntekt", cachedKodeverkService::hentInntekt)
     }
 
     private fun syncKodeverk(navn: String, henter: () -> Unit) {

@@ -8,16 +8,21 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
+import java.time.YearMonth
 
 @Component
 class InntektClient(
-        @Value("\${FAMILIE_EF_PROXY_URL}") uri: URI,
+        @Value("\${FAMILIE_EF_PROXY_URL}") private val uri: URI,
         @Qualifier("azure") restOperations: RestOperations
 ) : AbstractRestClient(restOperations, "inntekt") {
 
-    private val inntektUri = UriComponentsBuilder.fromUri(uri).pathSegment("api/inntekt").build().toUri()
+    private fun lagInntektUri(fom: YearMonth, tom: YearMonth) =
+            UriComponentsBuilder.fromUri(uri).pathSegment("api/inntekt")
+                    .queryParam("fom", fom)
+                    .queryParam("tom", tom)
+                    .build().toUri()
 
-    fun hentInntekt(personIdent: String): Map<String, Any> {
-        return postForEntity(inntektUri, PersonIdent(personIdent))
+    fun hentInntekt(personIdent: String, fom: YearMonth, tom: YearMonth): HentInntektListeResponse {
+        return postForEntity(lagInntektUri(fom, tom), PersonIdent(personIdent))
     }
 }

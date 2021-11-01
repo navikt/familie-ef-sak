@@ -1,12 +1,16 @@
 package no.nav.familie.ef.sak.inntekt
 
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
+import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.time.YearMonth
 import java.util.UUID
 
 @RestController
@@ -19,8 +23,13 @@ class InntektController(
 ) {
 
     @GetMapping("fagsak/{fagsakId}")
-    fun hentInntekt(@PathVariable("fagsakId") fagsakId: UUID): Map<String, Any> {
+    fun hentInntekt(@PathVariable("fagsakId") fagsakId: UUID,
+                    @RequestParam("fom", required = false) fom: YearMonth?,
+                    @RequestParam("tom", required = false) tom: YearMonth?): Ressurs<InntektResponseDto> {
         tilgangService.validerTilgangTilFagsak(fagsakId)
-        return inntektService.hentInntekt(fagsakId = fagsakId)
+        val inntekt = inntektService.hentInntekt(fagsakId = fagsakId,
+                                                 fom = fom ?: YearMonth.now().minusMonths(2),
+                                                 tom = tom ?: YearMonth.now())
+        return success(inntekt)
     }
 }
