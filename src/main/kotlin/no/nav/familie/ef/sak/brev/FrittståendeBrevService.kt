@@ -14,7 +14,6 @@ import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevType
 import no.nav.familie.kontrakter.ef.felles.StønadType
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevDto as FrittståendeBrevDtoIverksetting
 
 @Service
@@ -41,8 +40,7 @@ class FrittståendeBrevService(private val brevClient: BrevClient,
         return FrittståendeBrevRequestDto(overskrift = frittståendeBrevDto.overskrift,
                                           avsnitt = frittståendeBrevDto.avsnitt,
                                           personIdent = ident,
-                                          navn = navn.getValue(ident),
-                                          brevdato = LocalDate.now())
+                                          navn = navn.getValue(ident))
     }
 
     fun sendFrittståendeBrev(frittståendeBrevDto: FrittståendeBrevDto) {
