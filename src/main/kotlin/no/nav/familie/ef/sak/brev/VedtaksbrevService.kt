@@ -18,7 +18,6 @@ import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 import java.util.UUID
 
 @Service
@@ -87,8 +86,7 @@ class VedtaksbrevService(private val brevClient: BrevClient,
         val request = FrittståendeBrevRequestDto(overskrift = frittståendeBrevDto.overskrift,
                                                  avsnitt = frittståendeBrevDto.avsnitt,
                                                  personIdent = ident,
-                                                 navn = navn[ident]!!,
-                                                 brevdato = LocalDate.now())
+                                                 navn = navn[ident]!!)
         val vedtaksbrev = lagreEllerOppdaterVedtaksbrev(behandlingId = frittståendeBrevDto.behandlingId,
                                                         brevrequest = objectMapper.writeValueAsString(request),
                                                         brevmal = FRITEKST,
