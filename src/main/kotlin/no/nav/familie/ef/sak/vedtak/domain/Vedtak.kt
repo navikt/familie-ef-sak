@@ -34,6 +34,7 @@ data class InntektWrapper(val inntekter: List<Inntektsperiode>)
 enum class VedtaksperiodeType {
     PERIODE_FØR_FØDSEL,
     HOVEDPERIODE,
+    UTVIDELSE,
 }
 
 enum class AktivitetType {
@@ -47,4 +48,6 @@ enum class AktivitetType {
     FORSØRGER_MANGLER_TILSYNSORDNING,
     FORSØRGER_ER_SYK,
     BARNET_ER_SYKT,
+    UTVIDELSE_FORSØRGER_I_UTDANNING,
+    UTVIDELSE_BARNET_SÆRLIG_TILSYNSKREVENDE,
 }
