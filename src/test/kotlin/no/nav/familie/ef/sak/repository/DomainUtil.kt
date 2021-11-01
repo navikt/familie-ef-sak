@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.beregning.Inntektsperiode
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
@@ -50,7 +51,9 @@ fun behandling(fagsak: Fagsak = fagsak(),
                resultat: BehandlingResultat = BehandlingResultat.IKKE_SATT,
                opprettetTid: LocalDateTime = SporbarUtils.now(),
                forrigeBehandlingId: UUID? = null,
-               årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD): Behandling =
+               årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
+               henlagtÅrsak: HenlagtÅrsak? = HenlagtÅrsak.FEILREGISTRERT
+): Behandling =
         Behandling(fagsakId = fagsak.id,
                    forrigeBehandlingId = forrigeBehandlingId,
                    id = id,
@@ -59,7 +62,9 @@ fun behandling(fagsak: Fagsak = fagsak(),
                    steg = steg,
                    resultat = resultat,
                    sporbar = Sporbar(opprettetTid = opprettetTid),
-                   årsak = årsak)
+                   årsak = årsak,
+                   henlagtÅrsak = henlagtÅrsak
+        )
 
 
 fun fagsak(identer: Set<FagsakPerson> = setOf(), stønadstype: Stønadstype = Stønadstype.OVERGANGSSTØNAD) =

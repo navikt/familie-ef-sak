@@ -5,6 +5,8 @@ import no.nav.familie.ef.sak.infrastruktur.config.IntegrasjonerConfig
 import no.nav.familie.ef.sak.infrastruktur.exception.IntegrasjonException
 import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.oppgave.FinnMappeRequest
+import no.nav.familie.kontrakter.felles.oppgave.FinnMappeResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
@@ -62,6 +64,12 @@ class OppgaveClient(@Qualifier("azure") restOperations: RestOperations,
         val uri = URI.create("$oppgaveUri/$oppgaveId/ferdigstill")
         val respons = patchForEntity<Ressurs<OppgaveResponse>>(uri, "")
         pakkUtRespons(respons, uri, "ferdigstillOppgave")
+    }
+
+    fun finnMapper(finnMappeRequest: FinnMappeRequest): FinnMappeResponseDto {
+        val uri = URI.create("$oppgaveUri/mappe")
+        val respons = postForEntity<Ressurs<FinnMappeResponseDto>>(uri, finnMappeRequest)
+        return pakkUtRespons(respons, uri, "finnMappe")
     }
 
     private fun <T> pakkUtRespons(respons: Ressurs<T>,

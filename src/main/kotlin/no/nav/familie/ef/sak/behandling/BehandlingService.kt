@@ -6,9 +6,11 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.domain.Behandlingsjournalpost
+import no.nav.familie.ef.sak.behandling.dto.HenlagtDto
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
+import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
@@ -20,7 +22,6 @@ import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import no.nav.familie.prosessering.internal.TaskService
-import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -119,14 +120,19 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
                                                                        journalpostType = journalposttype))
     }
 
-    fun henleggBehandling(behandlingId: UUID): Behandling {
+    fun henleggBehandling(behandlingId: UUID, henlagt: HenlagtDto): Behandling {
         val behandling = hentBehandling(behandlingId)
         validerAtBehandlingenKanHenlegges(behandling)
         behandling.status = BehandlingStatus.FERDIGSTILT
         behandling.resultat = BehandlingResultat.HENLAGT
         behandling.steg = StegType.BEHANDLING_FERDIGSTILT
-        behandlingshistorikkService.opprettHistorikkInnslag(behandling)
-        return behandlingRepository.update(behandling)
+
+        val henlagtBehandling = behandling.copy(henlagtÅrsak = henlagt.årsak)
+
+        behandlingshistorikkService.opprettHistorikkInnslag(behandling = henlagtBehandling,
+                                                            utfall = StegUtfall.HENLAGT,
+                                                            metadata = henlagt)
+        return behandlingRepository.update(henlagtBehandling)
     }
 
     private fun validerAtBehandlingenKanHenlegges(behandling: Behandling) {
