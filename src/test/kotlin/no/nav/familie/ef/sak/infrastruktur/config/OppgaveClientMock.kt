@@ -47,10 +47,13 @@ class OppgaveClientMock {
                                  mapper = listOf(
                                          MappeDto(
                                                  id = 123,
-                                                 navn = "EF Sak 01 - Uplassert lokal"),
+                                                 navn = "EF Sak - 01 Uplassert lokal"),
                                          MappeDto(
                                                  id = 1234,
-                                                 navn = "EF Sak 99 - testmappe lokal 99")))
+                                                 navn = "EF Sak - 70 Godkjenne vedtak"),
+                                         MappeDto(
+                                                 id = 1234,
+                                                 navn = "EF Sak - 99 testmappe lokal 99")))
         }
 
         every { oppgaveClient.opprettOppgave(any()) } answers {
