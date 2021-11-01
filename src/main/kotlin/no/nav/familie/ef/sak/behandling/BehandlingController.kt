@@ -39,6 +39,20 @@ class BehandlingController(private val behandlingService: BehandlingService,
         return Ressurs.success(behandlingId)
     }
 
+    @PostMapping("{behandlingId}/vent")
+    fun settPåVent(@PathVariable behandlingId: UUID): Ressurs<UUID> {
+        tilgangService.validerTilgangTilBehandling(behandlingId)
+        behandlingService.settPåVent(behandlingId)
+        return Ressurs.success(behandlingId)
+    }
+
+    @PostMapping("{behandlingId}/aktiver")
+    fun taAvVent(@PathVariable behandlingId: UUID): Ressurs<UUID> {
+        tilgangService.validerTilgangTilBehandling(behandlingId)
+        behandlingService.taAvVent(behandlingId)
+        return Ressurs.success(behandlingId)
+    }
+
     @PostMapping("{behandlingId}/annuller", "{behandlingId}/henlegg")
     fun henleggBehandling(@PathVariable behandlingId: UUID): Ressurs<BehandlingDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId)

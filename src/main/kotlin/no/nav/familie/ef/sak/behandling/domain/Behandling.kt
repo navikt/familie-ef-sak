@@ -59,6 +59,7 @@ enum class BehandlingStatus {
     FATTER_VEDTAK,
     IVERKSETTER_VEDTAK,
     FERDIGSTILT,
+    SATT_PÅ_VENT,
     ;
 
     fun behandlingErLåstForVidereRedigering(): Boolean =
