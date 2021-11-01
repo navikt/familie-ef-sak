@@ -11,9 +11,10 @@ internal class InfotrygdPeriodeUtilTest {
 
     @Test
     internal fun `skal sette tom-dato til opphør sitt dato hvis opphør sitt dato er før tom-dato`() {
-        val stønadFom = LocalDate.now().minusDays(1)
-        val stønadTom = LocalDate.now().plusDays(1)
-        val opphørdato = LocalDate.now()
+
+        val opphørdato = LocalDate.of(2021, 10, 31)
+        val stønadFom = opphørdato.minusDays(1)
+        val stønadTom = opphørdato.plusDays(1)
         val periode = lagInfotrygdPeriode(stønadFom = stønadFom,
                                           stønadTom = stønadTom,
                                           opphørdato = opphørdato)
