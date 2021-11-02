@@ -17,23 +17,17 @@ class MellomlagringBrevService(private val mellomlagerBrevRepository: Mellomlage
                                private val mellomlagerFritekstbrevRepository: MellomlagerFritekstbrevRepository) {
 
     fun mellomLagreBrev(behandlingId: UUID, brevverdier: String, brevmal: String, sanityVersjon: String): UUID {
-        mellomlagerFritekstbrevRepository.deleteById(behandlingId)
-        return when (val mellomlagretBrev = mellomlagerBrevRepository.findByIdOrNull(behandlingId)) {
-            null -> mellomlagerBrevRepository.insert(MellomlagretBrev(behandlingId,
-                                                                      brevverdier,
-                                                                      brevmal,
-                                                                      sanityVersjon,
-                                                                      LocalDate.now())).behandlingId
-            else ->
-                mellomlagerBrevRepository.update(mellomlagretBrev.copy(brevverdier = brevverdier,
-                                                                       brevmal = brevmal,
-                                                                       sanityVersjon = sanityVersjon)).behandlingId
-        }
-
+        slettMellomlagringHvisFinnes(behandlingId)
+        val mellomlagretBrev = MellomlagretBrev(behandlingId,
+                                                brevverdier,
+                                                brevmal,
+                                                sanityVersjon,
+                                                LocalDate.now())
+        return mellomlagerBrevRepository.insert(mellomlagretBrev).behandlingId
     }
 
     fun mellomlagreFritekstbrev(mellomlagretBrev: VedtaksbrevFritekstDto): UUID {
-        mellomlagerBrevRepository.deleteById(mellomlagretBrev.behandlingId)
+        slettMellomlagringHvisFinnes(mellomlagretBrev.behandlingId)
         val mellomlagretFritekstbrev = MellomlagretFritekstbrev(mellomlagretBrev.behandlingId,
                                                                 Fritekstbrev(overskrift = mellomlagretBrev.overskrift,
                                                                              avsnitt = mellomlagretBrev.avsnitt))
@@ -55,6 +49,9 @@ class MellomlagringBrevService(private val mellomlagerBrevRepository: Mellomlage
         return null
     }
 
-    fun slettMellomlagringHvisFinnes(behandlingId: UUID) = mellomlagerBrevRepository.deleteById(behandlingId)
+    fun slettMellomlagringHvisFinnes(behandlingId: UUID) {
+        mellomlagerBrevRepository.deleteById(behandlingId)
+        mellomlagerFritekstbrevRepository.deleteById(behandlingId)
+    }
 
 }
