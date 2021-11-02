@@ -22,6 +22,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
@@ -43,8 +44,9 @@ internal class BehandlingServiceTest {
     private val behandlingRepository: BehandlingRepository = mockk()
     private val behandlingshistorikkService: BehandlingshistorikkService = mockk(relaxed = true)
     private val taskService: TaskService = mockk(relaxed = true)
+    private val oppgaveService: OppgaveService = mockk(relaxed = true)
     private val behandlingService =
-            BehandlingService(mockk(), behandlingRepository, behandlingshistorikkService, taskService, mockk())
+            BehandlingService(mockk(), behandlingRepository, behandlingshistorikkService, taskService, mockk(), oppgaveService)
     private val behandlingSlot = slot<Behandling>()
 
     @BeforeAll
@@ -168,8 +170,6 @@ internal class BehandlingServiceTest {
 
             assertThat(feil.httpStatus).isEqualTo(HttpStatus.BAD_REQUEST)
         }
-
-
     }
 
     @Nested

@@ -27,15 +27,15 @@ data class Behandling(@Id
                       val versjon: Int = 0,
 
                       val type: BehandlingType,
-                      var status: BehandlingStatus,
-                      var steg: StegType,
+                      val status: BehandlingStatus,
+                      val steg: StegType,
                       @Column("arsak")
                       val årsak: BehandlingÅrsak,
                       val kravMottatt: LocalDate? = null,
 
                       @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                       val sporbar: Sporbar = Sporbar(),
-                      var resultat: BehandlingResultat,
+                      val resultat: BehandlingResultat,
                       @Column("henlagt_arsak")
                       val henlagtÅrsak: HenlagtÅrsak? = null) {
 

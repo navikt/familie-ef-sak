@@ -5,10 +5,10 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.*
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.CacheConfig
 import org.springframework.cache.annotation.Cacheable
@@ -31,9 +31,10 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
                      private val pdlClient: PdlClient,
                      @Value("\${FRONTEND_OPPGAVE_URL}") private val frontendOppgaveUrl: URI) {
 
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     fun opprettOppgave(behandlingId: UUID,
                        oppgavetype: Oppgavetype,
-                       enhetId: String? = null,
                        tilordnetNavIdent: String? = null,
                        beskrivelse: String? = null): Long {
         val fagsak = fagsakRepository.finnFagsakTilBehandling(behandlingId)
@@ -46,7 +47,7 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
         } else {
 
             val aktørId = pdlClient.hentAktørIder(fagsak.hentAktivIdent()).identer.first().ident
-            val enhetsnummer = arbeidsfordelingService.hentNavEnhet(fagsak.hentAktivIdent())
+            val enhetsnummer = arbeidsfordelingService.hentNavEnhet(fagsak.hentAktivIdent())?.enhetId
             val opprettOppgave =
                     OpprettOppgaveRequest(ident = OppgaveIdentV2(ident = aktørId, gruppe = IdentGruppe.AKTOERID),
                                           saksId = fagsak.eksternId.id.toString(),
@@ -54,10 +55,11 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
                                           oppgavetype = oppgavetype,
                                           fristFerdigstillelse = lagFristForOppgave(LocalDateTime.now()),
                                           beskrivelse = lagOppgaveTekst(beskrivelse),
-                                          enhetsnummer = enhetId ?: enhetsnummer?.enhetId,
+                                          enhetsnummer = enhetsnummer,
                                           behandlingstema = finnBehandlingstema(fagsak.stønadstype).value,
                                           tilordnetRessurs = tilordnetNavIdent,
-                                          behandlesAvApplikasjon = "familie-ef-sak"
+                                          behandlesAvApplikasjon = "familie-ef-sak",
+                                          mappeId = finnAktuellMappe(enhetsnummer, oppgavetype)
                     )
 
             val opprettetOppgaveId = oppgaveClient.opprettOppgave(opprettOppgave)
@@ -68,6 +70,20 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
             oppgaveRepository.insert(oppgave)
             opprettetOppgaveId
         }
+    }
+
+    private fun finnAktuellMappe(enhetsnummer: String?, oppgavetype: Oppgavetype): Long? {
+        if (enhetsnummer == "4489" && oppgavetype == Oppgavetype.GodkjenneVedtak) {
+            val mapper = finnMapper("4489")
+            val mappeIdForGodkjenneVedtak = mapper.find { it.navn.contains("EF Sak - 70 Godkjenne vedtak") }?.id?.toLong()
+            mappeIdForGodkjenneVedtak?.let {
+                logger.info("Legger oppgave i Godkjenne vedtak-mappe")
+            } ?: run {
+                logger.error("Fant ikke mappe for godkjenne vedtak: EF Sak - 70 Godkjenne vedtak")
+            }
+            return mappeIdForGodkjenneVedtak
+        }
+        return null
     }
 
     fun fordelOppgave(gsakOppgaveId: Long, saksbehandler: String): Long {
@@ -93,8 +109,18 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
     fun ferdigstillBehandleOppgave(behandlingId: UUID, oppgavetype: Oppgavetype) {
         val oppgave = oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
                       ?: error("Finner ikke oppgave for behandling $behandlingId")
-        ferdigstillOppgave(oppgave.gsakOppgaveId)
+        ferdigstillOppgaveOgSettEfOppgaveTilFerdig(oppgave)
+    }
 
+    fun ferdigstillOppgaveHvisOppgaveFinnes(behandlingId: UUID, oppgavetype: Oppgavetype) {
+        val oppgave = oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
+        oppgave?.let {
+            ferdigstillOppgaveOgSettEfOppgaveTilFerdig(oppgave)
+        }
+    }
+
+    private fun ferdigstillOppgaveOgSettEfOppgaveTilFerdig(oppgave: EfOppgave) {
+        ferdigstillOppgave(oppgave.gsakOppgaveId)
         oppgave.erFerdigstilt = true
         oppgaveRepository.update(oppgave)
     }
@@ -152,13 +178,15 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
     }
 
     @Cacheable("mapper")
-    fun finnMapper(tema: String, enhet: String): List<MappeDto> {
-        val mappeRespons = oppgaveClient.finnMapper(FinnMappeRequest(tema = listOf(tema),
+    fun finnMapper(enhet: String): List<MappeDto> {
+        logger.info("Henter mapper på nytt")
+        val mappeRespons = oppgaveClient.finnMapper(FinnMappeRequest(tema = listOf(),
                                                                      enhetsnr = enhet,
                                                                      opprettetFom = null,
                                                                      limit = 1000))
         if (mappeRespons.antallTreffTotalt > mappeRespons.mapper.size) {
-            secureLogger.error("Det finnes flere mapper [${mappeRespons.antallTreffTotalt}] enn vi har hentet ut [${mappeRespons.mapper.size}]. Sjekk limit. ")
+            logger.error("Det finnes flere mapper (${mappeRespons.antallTreffTotalt}) " +
+                         "enn vi har hentet ut (${mappeRespons.mapper.size}). Sjekk limit. ")
         }
         return mappeRespons.mapper
     }

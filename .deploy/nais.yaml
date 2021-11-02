@@ -37,12 +37,11 @@ spec:
   gcp:
     sqlInstances:
       - type: POSTGRES_12 # IF This is changed, all data will be lost. Read on nais.io how to upgrade
+        diskAutoresize: true
+        cascadingDelete: false
         databases:
           - name: familie-ef-sak
             envVarPrefix: DB
-            diskAutoresize: true
-            tier: db-g1-small
-            cascadingDelete: false
   accessPolicy:
     inbound:
       rules:

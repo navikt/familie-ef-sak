@@ -74,7 +74,7 @@ class OppgaveController(private val oppgaveService: OppgaveService,
 
     @GetMapping(path = ["/mapper"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentMapper(): Ressurs<List<MappeDto>> {
-        return Ressurs.success(oppgaveService.finnMapper(tema = "ENF", enhet = "4489"))
+        return Ressurs.success(oppgaveService.finnMapper(enhet = "4489"))
     }
 
 
@@ -91,38 +91,38 @@ private fun FinnOppgaveResponseDto.tilDto(): OppgaveResponseDto {
 }
 
 private fun Oppgave.tilDto(): OppgaveEfDto {
-    return OppgaveEfDto(id,
-                        identer,
-                        tildeltEnhetsnr,
-                        endretAvEnhetsnr,
-                        opprettetAvEnhetsnr,
-                        journalpostId,
-                        journalpostkilde,
-                        behandlesAvApplikasjon ?: "",
-                        saksreferanse,
-                        bnr,
-                        samhandlernr,
-                        aktoerId,
-                        orgnr,
-                        tilordnetRessurs,
-                        beskrivelse,
-                        temagruppe,
-                        tema,
-                        behandlingstema,
-                        oppgavetype,
-                        behandlingstype,
-                        versjon,
-                        mappeId,
-                        fristFerdigstillelse,
-                        aktivDato,
-                        opprettetTidspunkt,
-                        opprettetAv,
-                        endretAv,
-                        ferdigstiltTidspunkt,
-                        endretTidspunkt,
-                        prioritet,
-                        status
-    )
+    return OppgaveEfDto(id = id,
+                        identer = identer,
+                        tildeltEnhetsnr = tildeltEnhetsnr,
+                        endretAvEnhetsnr = endretAvEnhetsnr,
+                        opprettetAvEnhetsnr = opprettetAvEnhetsnr,
+                        journalpostId = journalpostId,
+                        journalpostkilde = journalpostkilde,
+                        behandlesAvApplikasjon = behandlesAvApplikasjon ?: "",
+                        saksreferanse = saksreferanse,
+                        bnr = bnr,
+                        samhandlernr = samhandlernr,
+                        aktoerId = aktoerId,
+                        orgnr = orgnr,
+                        tilordnetRessurs = tilordnetRessurs,
+                        beskrivelse = beskrivelse,
+                        temagruppe = temagruppe,
+                        tema = tema,
+                        behandlingstema = behandlingstema,
+                        oppgavetype = oppgavetype,
+                        behandlingstype = behandlingstype,
+                        versjon = versjon,
+                        mappeId = mappeId,
+                        fristFerdigstillelse = fristFerdigstillelse,
+                        aktivDato = aktivDato,
+                        opprettetTidspunkt = opprettetTidspunkt,
+                        opprettetAv = opprettetAv,
+                        endretAv = endretAv,
+                        ferdigstiltTidspunkt = ferdigstiltTidspunkt,
+                        endretTidspunkt = endretTidspunkt,
+                        prioritet = prioritet,
+                        status = status)
+
 }
 
 

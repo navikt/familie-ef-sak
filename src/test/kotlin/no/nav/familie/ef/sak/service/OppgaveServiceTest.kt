@@ -22,9 +22,11 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
+import no.nav.familie.kontrakter.felles.oppgave.FinnMappeResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
+import no.nav.familie.kontrakter.felles.oppgave.MappeDto
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
@@ -79,6 +81,63 @@ internal class OppgaveServiceTest {
         assertThat(slot.captured.beskrivelse).contains("https://ensligmorellerfar.intern.nav.no/oppgavebenk")
     }
 
+
+    @Test
+    fun `Skal legge i mappe når vi oppretter godkjenne vedtak-oppgave for 4489`() {
+        val aktørIdentFraPdl = "AKTØERIDENT"
+        every { fagsakRepository.finnFagsakTilBehandling(BEHANDLING_ID) } returns lagTestFagsak()
+        every { oppgaveRepository.insert(any()) } returns lagTestOppgave()
+        every {
+            oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any())
+        } returns null
+        every { arbeidsfordelingService.hentNavEnhet(any()) } returns Arbeidsfordelingsenhet(enhetId = ENHETSNUMMER,
+                                                                                             enhetNavn = ENHETSNAVN)
+        val slot = slot<OpprettOppgaveRequest>()
+        every { oppgaveClient.opprettOppgave(capture(slot)) } returns GSAK_OPPGAVE_ID
+        every { pdlClient.hentAktørIder(any()) } returns PdlIdenter(listOf(PdlIdent(aktørIdentFraPdl, false)))
+        every { oppgaveClient.finnMapper(any()) } returns FinnMappeResponseDto(antallTreffTotalt = 1, mapper = listOf(MappeDto(123, "EF Sak - 70 Godkjenne vedtak")))
+
+        oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.GodkjenneVedtak)
+
+        assertThat(slot.captured.enhetsnummer).isEqualTo(ENHETSNUMMER)
+        assertThat(slot.captured.mappeId).isNotNull()
+        assertThat(slot.captured.saksId).isEqualTo(FAGSAK_EKSTERN_ID.toString())
+        assertThat(slot.captured.ident).isEqualTo(OppgaveIdentV2(ident = aktørIdentFraPdl, gruppe = IdentGruppe.AKTOERID))
+        assertThat(slot.captured.behandlingstema).isEqualTo(Behandlingstema.Overgangsstønad.value)
+        assertThat(slot.captured.fristFerdigstillelse).isAfterOrEqualTo(LocalDate.now().plusDays(1))
+        assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())
+        assertThat(slot.captured.tema).isEqualTo(Tema.ENF)
+        assertThat(slot.captured.beskrivelse).contains("https://ensligmorellerfar.intern.nav.no/oppgavebenk")
+    }
+
+    @Test
+    fun `Skal ikke legge oppgave i mappe når det er godkjenne vedtak-oppgave for enhet ulik 4489`() {
+        val aktørIdentFraPdl = "AKTØERIDENT"
+        every { fagsakRepository.finnFagsakTilBehandling(BEHANDLING_ID) } returns lagTestFagsak()
+        every { oppgaveRepository.insert(any()) } returns lagTestOppgave()
+        every {
+            oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any())
+        } returns null
+        every { arbeidsfordelingService.hentNavEnhet(any()) } returns Arbeidsfordelingsenhet(enhetId = "1234",
+                                                                                             enhetNavn = ENHETSNAVN)
+        val slot = slot<OpprettOppgaveRequest>()
+        every { oppgaveClient.opprettOppgave(capture(slot)) } returns GSAK_OPPGAVE_ID
+        every { pdlClient.hentAktørIder(any()) } returns PdlIdenter(listOf(PdlIdent(aktørIdentFraPdl, false)))
+        every { oppgaveClient.finnMapper(any()) } returns FinnMappeResponseDto(antallTreffTotalt = 1, mapper = listOf(MappeDto(123, "EF Sak - 70 Godkjenne vedtak")))
+
+        oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.GodkjenneVedtak)
+
+        assertThat(slot.captured.enhetsnummer).isEqualTo("1234")
+        assertThat(slot.captured.mappeId).isNull()
+        assertThat(slot.captured.saksId).isEqualTo(FAGSAK_EKSTERN_ID.toString())
+        assertThat(slot.captured.ident).isEqualTo(OppgaveIdentV2(ident = aktørIdentFraPdl, gruppe = IdentGruppe.AKTOERID))
+        assertThat(slot.captured.behandlingstema).isEqualTo(Behandlingstema.Overgangsstønad.value)
+        assertThat(slot.captured.fristFerdigstillelse).isAfterOrEqualTo(LocalDate.now().plusDays(1))
+        assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())
+        assertThat(slot.captured.tema).isEqualTo(Tema.ENF)
+        assertThat(slot.captured.beskrivelse).contains("https://ensligmorellerfar.intern.nav.no/oppgavebenk")
+    }
+
     @Test
     fun `Skal kunne hente oppgave gitt en ID`() {
         every { oppgaveClient.finnOppgaveMedId(any()) } returns lagEksternTestOppgave()
@@ -109,6 +168,7 @@ internal class OppgaveServiceTest {
         assertThat(slot.captured).isEqualTo(GSAK_OPPGAVE_ID)
     }
 
+
     @Test
     fun `Ferdigstill oppgave feiler fordi den ikke finner oppgave på behandlingen`() {
         every {
@@ -120,6 +180,29 @@ internal class OppgaveServiceTest {
                 .hasMessage("Finner ikke oppgave for behandling $BEHANDLING_ID")
                 .isInstanceOf(java.lang.IllegalStateException::class.java)
     }
+
+
+    @Test
+    fun `Ferdigstill oppgave hvis oppgave ikke finnes - kaster ikke feil`() {
+        every {
+            oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any())
+        } returns null
+        oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(BEHANDLING_ID, Oppgavetype.BehandleSak)
+    }
+
+    @Test
+    fun `Ferdigstill oppgave - hvis oppgave finnes`() {
+        every {
+            oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any())
+        } returns lagTestOppgave()
+        every { oppgaveRepository.update(any()) } returns lagTestOppgave()
+        val slot = slot<Long>()
+        every { oppgaveClient.ferdigstillOppgave(capture(slot)) } just runs
+
+        oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(BEHANDLING_ID, Oppgavetype.BehandleSak)
+        assertThat(slot.captured).isEqualTo(GSAK_OPPGAVE_ID)
+    }
+
 
     @Test
     fun `Fordel oppgave skal tildele oppgave til saksbehandler`() {
@@ -192,7 +275,7 @@ internal class OppgaveServiceTest {
         private const val FAGSAK_EKSTERN_ID = 98765L
         private const val GSAK_OPPGAVE_ID = 12345L
         private val BEHANDLING_ID = UUID.fromString("1c4209bd-3217-4130-8316-8658fe300a84")
-        private const val ENHETSNUMMER = "enhetnr"
+        private const val ENHETSNUMMER = "4489"
         private const val ENHETSNAVN = "enhetsnavn"
         private const val FNR = "11223312345"
         private const val SAKSBEHANDLER_ID = "Z999999"
