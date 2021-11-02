@@ -1,8 +1,8 @@
 package no.nav.familie.ef.sak.inntekt
 
 import no.nav.familie.ef.sak.felles.kodeverk.CachedKodeverkService
-import no.nav.familie.ef.sak.inntekt.ekstern.Aktoer
-import no.nav.familie.ef.sak.inntekt.ekstern.AktoerType
+import no.nav.familie.ef.sak.inntekt.ekstern.Aktør
+import no.nav.familie.ef.sak.inntekt.ekstern.AktørType
 import no.nav.familie.ef.sak.inntekt.ekstern.HentInntektListeResponse
 import no.nav.familie.ef.sak.inntekt.ekstern.Inntekt
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.ereg.EregService
@@ -31,7 +31,7 @@ class InntektMapper(
                     identifikator = entry.key.identifikator,
                     navn = organisasjoner[entry.key.identifikator] ?: "Ukjent",
                     inntektPerMåned = entry.value.entries.associate { inntektEntry ->
-                        inntektEntry.key to InntektPerMånedDto(totalbeløp = inntektEntry.value.sumOf { it.beloep },
+                        inntektEntry.key to InntektPerMånedDto(totalbeløp = inntektEntry.value.sumOf { it.beløp },
                                                                inntekt = mapInntekt(inntektEntry.value))
                     }
             )
@@ -39,14 +39,14 @@ class InntektMapper(
     }
 
     private fun mapInntektresponseTilInntektPerVirksomhetOgPeriode(response: HentInntektListeResponse)
-            : MutableMap<Aktoer, MutableMap<YearMonth, MutableList<Inntekt>>> {
+            : MutableMap<Aktør, MutableMap<YearMonth, MutableList<Inntekt>>> {
 
-        val map: MutableMap<Aktoer, MutableMap<YearMonth, MutableList<Inntekt>>> = mutableMapOf()
-        response.arbeidsInntektMaaned?.let { arbeidsInntektMaaned ->
+        val map: MutableMap<Aktør, MutableMap<YearMonth, MutableList<Inntekt>>> = mutableMapOf()
+        response.arbeidsinntektMåned?.let { arbeidsInntektMaaned ->
             arbeidsInntektMaaned.forEach { inntektMaaned ->
                 inntektMaaned.arbeidsInntektInformasjon?.inntektListe?.forEach { inntekt ->
                     map.getOrPut(inntekt.virksomhet) { mutableMapOf() }
-                            .getOrPut(inntektMaaned.aarMaaned) { mutableListOf() }
+                            .getOrPut(inntektMaaned.årMåned) { mutableListOf() }
                             .add(inntekt)
                 }
             }
@@ -54,9 +54,9 @@ class InntektMapper(
         return map
     }
 
-    private fun hentOrganisasjoner(aktører: Set<Aktoer>): Map<String, String> {
+    private fun hentOrganisasjoner(aktører: Set<Aktør>): Map<String, String> {
         val organisasjonsnumre = aktører
-                .filter { it.aktoerType == AktoerType.ORGANISASJON }
+                .filter { it.aktørType == AktørType.ORGANISASJON }
                 .map { it.identifikator }
         return eregService.hentOrganisasjoner(organisasjonsnumre)
                 .associate { it.organisasjonsnummer to it.navn }
@@ -64,7 +64,7 @@ class InntektMapper(
 
     private fun mapInntekt(list: List<Inntekt>) = list.map { inntekt ->
         InntektDto(
-                beløp = inntekt.beloep,
+                beløp = inntekt.beløp,
                 beskrivelse = inntekt.beskrivelse?.let { hentMapping(mapInntektTypeTilKodeverkType(inntekt.inntektType), it) },
                 fordel = Fordel.fraVerdi(inntekt.fordel),
                 type = mapInntektType(inntekt.inntektType),
@@ -83,7 +83,7 @@ class InntektMapper(
     private fun mapInntektType(type: EksternInntektType): InntektType {
         return when (type) {
             EksternInntektType.LOENNSINNTEKT -> InntektType.LØNNSINNTEKT
-            EksternInntektType.NAERINGSINNTEKT -> InntektType.NAERINGSINNTEKT
+            EksternInntektType.NAERINGSINNTEKT -> InntektType.NÆRINGSINNTEKT
             EksternInntektType.PENSJON_ELLER_TRYGD -> InntektType.PENSJON_ELLER_TRYGD
             EksternInntektType.YTELSE_FRA_OFFENTLIGE -> InntektType.YTELSE_FRA_OFFENTLIGE
         }
@@ -100,7 +100,7 @@ class InntektMapper(
     }
 
     private fun mapAvvik(response: HentInntektListeResponse) =
-            response.arbeidsInntektMaaned
+            response.arbeidsinntektMåned
                     ?.flatMap { it.avvikListe ?: emptyList() }
                     ?.map { "${it.virksomhet.identifikator} (${it.avvikPeriode}) - ${it.tekst}" }
             ?: emptyList()

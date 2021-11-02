@@ -42,7 +42,7 @@ data class InntektDto(
 
 enum class InntektType {
     LØNNSINNTEKT,
-    NAERINGSINNTEKT,
+    NÆRINGSINNTEKT,
     PENSJON_ELLER_TRYGD,
     YTELSE_FRA_OFFENTLIGE
 }

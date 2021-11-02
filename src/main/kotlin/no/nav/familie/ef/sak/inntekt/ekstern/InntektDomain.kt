@@ -1,28 +1,32 @@
 package no.nav.familie.ef.sak.inntekt.ekstern
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import java.time.LocalDate
 import java.time.YearMonth
 
 data class HentInntektListeResponse(
-        val arbeidsInntektMaaned: List<ArbeidsInntektMaaned>?,
-        val ident: Aktoer
+        @JsonProperty("arbeidsInntektMaaned")
+        val arbeidsinntektMåned: List<ArbeidsinntektMåned>?,
+        val ident: Aktør
 )
 
-data class ArbeidsInntektMaaned(
-        val aarMaaned: YearMonth,// rapportert for den måneden
+data class ArbeidsinntektMåned(
+        @JsonProperty("aarMaaned")
+        val årMåned: YearMonth,// rapportert for den måneden
         val avvikListe: List<Avvik>?,
         val arbeidsInntektInformasjon: ArbeidsInntektInformasjon?
 )
 
-data class Aktoer(
+data class Aktør(
         val identifikator: String,
-        val aktoerType: AktoerType
+        @JsonProperty("aktoerType")
+        val aktørType: AktørType
 )
 
 data class Avvik(
-        val ident: Aktoer? = null,
-        val opplysningspliktig: Aktoer? = null,
-        val virksomhet: Aktoer,
+        val ident: Aktør? = null,
+        val opplysningspliktig: Aktør? = null,
+        val virksomhet: Aktør,
         val avvikPeriode: YearMonth? = null,
         val tekst: String? = null
 )
@@ -33,13 +37,14 @@ data class ArbeidsInntektInformasjon(
 
 data class Inntekt(
         val inntektType: InntektType,
-        val beloep: Int,
+        @JsonProperty("beloep")
+        val beløp: Int,
         val fordel: String, //kontantytese / etc
         val opptjeningsland: String? = null,
         val opptjeningsperiodeFom: LocalDate? = null,
         val opptjeningsperiodeTom: LocalDate? = null,
         val skattemessigBosattLand: String? = null,
-        val virksomhet: Aktoer,//? = null,
+        val virksomhet: Aktør,//? = null,
         val tilleggsinformasjon: Tilleggsinformasjon? = null,
         val beskrivelse: String? = null, // hentes fra kodeverk
 )
@@ -48,7 +53,7 @@ data class Tilleggsinformasjon(
         val kategori: String? = null, // Kodeverk -> EDAGTilleggsinfoKategorier
 )
 
-enum class AktoerType {
+enum class AktørType {
     AKTOER_ID,
     NATURLIG_IDENT,
     ORGANISASJON,

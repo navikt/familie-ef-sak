@@ -30,6 +30,6 @@ class KodeverkClient(@Qualifier("azure") restOperations: RestOperations,
     }
 
     fun hentKodeverkInntekt(): InntektKodeverkDto {
-        return getForEntity<Ressurs<InntektKodeverkDto>>(integrasjonerConfig.kodeverkPoststedUri).data!!
+        return getForEntity<Ressurs<InntektKodeverkDto>>(integrasjonerConfig.kodeverkInntektUri).data!!
     }
 }

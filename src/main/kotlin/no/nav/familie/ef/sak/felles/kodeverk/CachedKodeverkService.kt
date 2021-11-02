@@ -49,7 +49,7 @@ class KodeverkInitializer(private val cachedKodeverkService: CachedKodeverkServi
     }
 
     private fun sync() {
-        syncKodeverk("Lantkoder", cachedKodeverkService::hentLandkoder)
+        syncKodeverk("Landkoder", cachedKodeverkService::hentLandkoder)
         syncKodeverk("Poststed", cachedKodeverkService::hentPoststed)
         syncKodeverk("Inntekt", cachedKodeverkService::hentInntekt)
     }
