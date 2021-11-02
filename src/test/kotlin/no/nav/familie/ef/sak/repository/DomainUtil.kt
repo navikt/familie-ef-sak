@@ -43,7 +43,7 @@ fun oppgave(behandling: Behandling,
                 type = type,
                 erFerdigstilt = erFerdigstilt)
 
-fun behandling(fagsak: Fagsak,
+fun behandling(fagsak: Fagsak = fagsak(),
                status: BehandlingStatus = BehandlingStatus.OPPRETTET,
                steg: StegType = StegType.VILKÅR,
                id: UUID = UUID.randomUUID(),

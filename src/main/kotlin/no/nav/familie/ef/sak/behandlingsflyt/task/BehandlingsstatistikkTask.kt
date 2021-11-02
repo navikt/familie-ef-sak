@@ -11,8 +11,8 @@ import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
-import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.VedtakRepository
+import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.kontrakter.ef.felles.BehandlingType
 import no.nav.familie.kontrakter.ef.felles.StønadType
@@ -105,7 +105,8 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
 
     private fun finnSaksbehandler(hendelse: Hendelse, vedtak: Vedtak?, gjeldendeSaksbehandler: String?): String {
         return when (hendelse) {
-            Hendelse.MOTTATT, Hendelse.PÅBEGYNT -> gjeldendeSaksbehandler ?: error("Mangler saksbehandler for hendelse")
+            Hendelse.MOTTATT, Hendelse.PÅBEGYNT, Hendelse.VENTER -> gjeldendeSaksbehandler
+                                                                    ?: error("Mangler saksbehandler for hendelse")
             Hendelse.VEDTATT -> vedtak?.saksbehandlerIdent ?: error("Mangler saksbehandler på vedtaket")
             Hendelse.BESLUTTET, Hendelse.FERDIG -> vedtak?.beslutterIdent ?: error("Mangler beslutter på vedtaket")
         }
@@ -132,6 +133,12 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
         fun opprettPåbegyntTask(behandlingId: UUID): Task =
                 opprettTask(behandlingId = behandlingId,
                             hendelse = Hendelse.PÅBEGYNT,
+                            hendelseTidspunkt = LocalDateTime.now(),
+                            gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler(true))
+
+        fun opprettVenterTask(behandlingId: UUID): Task =
+                opprettTask(behandlingId = behandlingId,
+                            hendelse = Hendelse.VENTER,
                             hendelseTidspunkt = LocalDateTime.now(),
                             gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler(true))
 
@@ -162,24 +169,22 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
                 gjeldendeSaksbehandler: String? = null,
                 oppgaveId: Long? = null
         ): Task =
-                Task(
-                        type = TYPE,
-                        payload = objectMapper.writeValueAsString(
-                                BehandlingsstatistikkTaskPayload(
-                                        behandlingId,
-                                        hendelse,
-                                        hendelseTidspunkt,
-                                        gjeldendeSaksbehandler,
-                                        oppgaveId
-                                )
-                        ),
-                        properties = Properties().apply {
-                            this["saksbehandler"] = gjeldendeSaksbehandler ?: ""
-                            this["behandlingId"] = behandlingId.toString()
-                            this["hendelse"] = hendelse.name
-                            this["hendelseTidspunkt"] = hendelseTidspunkt.toString()
-                            this["oppgaveId"] = oppgaveId?.toString() ?: ""
-                        })
+                Task(type = TYPE,
+                     payload = objectMapper.writeValueAsString(
+                             BehandlingsstatistikkTaskPayload(
+                                     behandlingId,
+                                     hendelse,
+                                     hendelseTidspunkt,
+                                     gjeldendeSaksbehandler,
+                                     oppgaveId
+                             )),
+                     properties = Properties().apply {
+                         this["saksbehandler"] = gjeldendeSaksbehandler ?: ""
+                         this["behandlingId"] = behandlingId.toString()
+                         this["hendelse"] = hendelse.name
+                         this["hendelseTidspunkt"] = hendelseTidspunkt.toString()
+                         this["oppgaveId"] = oppgaveId?.toString() ?: ""
+                     })
 
 
         const val TYPE = "behandlingsstatistikkTask"
