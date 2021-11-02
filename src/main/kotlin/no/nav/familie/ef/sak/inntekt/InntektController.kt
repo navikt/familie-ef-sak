@@ -24,8 +24,8 @@ class InntektController(
 
     @GetMapping("fagsak/{fagsakId}")
     fun hentInntekt(@PathVariable("fagsakId") fagsakId: UUID,
-                    @RequestParam("fom", required = false) fom: YearMonth?,
-                    @RequestParam("tom", required = false) tom: YearMonth?): Ressurs<InntektResponseDto> {
+                    @RequestParam fom: YearMonth?,
+                    @RequestParam tom: YearMonth?): Ressurs<InntektResponseDto> {
         tilgangService.validerTilgangTilFagsak(fagsakId)
         val inntekt = inntektService.hentInntekt(fagsakId = fagsakId,
                                                  fom = fom ?: YearMonth.now().minusMonths(2),
