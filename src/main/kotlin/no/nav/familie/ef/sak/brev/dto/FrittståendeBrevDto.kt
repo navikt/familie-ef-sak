@@ -9,6 +9,6 @@ data class FrittståendeBrevDto(val overskrift: String,
                                val stønadType: StønadType,
                                val brevType: FrittståendeBrevKategori)
 
-data class FrittståendeBrevAvsnitt(val deloverskrift: String, val innhold: String)
+data class FrittståendeBrevAvsnitt(val deloverskrift: String, val innhold: String, val skalSkjulesIBrevbygger: Boolean? = false)
 
 
