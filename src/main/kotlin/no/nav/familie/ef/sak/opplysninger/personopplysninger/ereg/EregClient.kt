@@ -14,10 +14,15 @@ class EregClient(
     @Qualifier("azure")
     private val restOperations: RestOperations
 ) : AbstractPingableRestClient(restOperations, "familie.ef.iverksett") {
-    override val pingUri: URI = URI.create("$familieEfProxyUri/api/status")
 
     fun hentOrganisasjoner(organisasjonsnumre: List<String>) : List<OrganisasjonDto> {
         return postForEntity(URI.create("$familieEfProxyUri/api/ereg"), organisasjonsnumre)
+    }
+
+    override val pingUri = URI.create(familieEfProxyUri)
+
+    override fun ping() {
+        operations.optionsForAllow(pingUri)
     }
 
 }
