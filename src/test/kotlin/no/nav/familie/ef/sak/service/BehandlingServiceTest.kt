@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.slot
+import io.mockk.unmockkObject
 import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
@@ -29,6 +30,7 @@ import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.kontrakter.ef.iverksett.Hendelse
 import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -58,6 +60,11 @@ internal class BehandlingServiceTest {
             behandlingSlot.captured
         }
         every { SikkerhetContext.hentSaksbehandler(true) } returns "bob"
+    }
+
+    @AfterAll
+    fun tearDown() {
+        unmockkObject(SikkerhetContext)
     }
 
     @BeforeEach
