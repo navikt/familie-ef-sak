@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.infrastruktur.config
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.familie.ef.sak.brev.domain.Fritekstbrev
 import no.nav.familie.ef.sak.felles.domain.Endret
 import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.felles.domain.JsonWrapper
@@ -109,7 +110,9 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
                                             PGobjectTilDetaljertSimuleringResultat(),
                                             DetaljertSimuleringResultatTilPGobjectConverter(),
                                             PGobjectTilBeriketSimuleringsresultat(),
-                                            BeriketSimuleringsresultatTilPGobjectConverter()
+                                            BeriketSimuleringsresultatTilPGobjectConverter(),
+                                            PGObjectTilFritekstbrevConverter(),
+                                            FritekstbrevTilPGObjectConverter()
         ))
     }
 
@@ -338,6 +341,24 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
     class BeriketSimuleringsresultatTilPGobjectConverter : Converter<BeriketSimuleringsresultat, PGobject> {
 
         override fun convert(simuleringsresultat: BeriketSimuleringsresultat): PGobject =
+                PGobject().apply {
+                    type = "json"
+                    value = objectMapper.writeValueAsString(simuleringsresultat)
+                }
+    }
+
+    @ReadingConverter
+    class PGObjectTilFritekstbrevConverter : Converter<PGobject, Fritekstbrev?> {
+
+        override fun convert(pGobject: PGobject): Fritekstbrev? {
+            return pGobject.value?.let { objectMapper.readValue(it) }
+        }
+    }
+
+    @WritingConverter
+    class FritekstbrevTilPGObjectConverter : Converter<Fritekstbrev, PGobject> {
+
+        override fun convert(simuleringsresultat: Fritekstbrev): PGobject =
                 PGobject().apply {
                     type = "json"
                     value = objectMapper.writeValueAsString(simuleringsresultat)
