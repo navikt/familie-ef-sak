@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.inntekt
+package no.nav.familie.ef.sak.inntekt.ekstern
 
 import java.time.LocalDate
 import java.time.YearMonth
@@ -34,7 +34,7 @@ data class ArbeidsInntektInformasjon(
 data class Inntekt(
         val inntektType: InntektType,
         val beloep: Int,
-        val fordel: String? = null, //kontantytese / etc
+        val fordel: String, //kontantytese / etc
         val opptjeningsland: String? = null,
         val opptjeningsperiodeFom: LocalDate? = null,
         val opptjeningsperiodeTom: LocalDate? = null,
@@ -45,7 +45,7 @@ data class Inntekt(
 )
 
 data class Tilleggsinformasjon(
-        val kategori: String? = null, //  KodeverkEDAGTilleggsinfoKategorier
+        val kategori: String? = null, // Kodeverk -> EDAGTilleggsinfoKategorier
 )
 
 enum class AktoerType {
@@ -59,14 +59,4 @@ enum class InntektType {
     NAERINGSINNTEKT,
     PENSJON_ELLER_TRYGD,
     YTELSE_FRA_OFFENTLIGE
-}
-
-enum class TilleggsinformasjonDetaljerType {
-    ALDERSUFOEREETTERLATTEAVTALEFESTETOGKRIGSPENSJON,
-    BARNEPENSJONOGUNDERHOLDSBIDRAG,
-    BONUSFRAFORSVARET,
-    ETTERBETALINGSPERIODE,
-    INNTJENINGSFORHOLD,
-    REISEKOSTOGLOSJI,
-    SVALBARDINNTEKT
 }

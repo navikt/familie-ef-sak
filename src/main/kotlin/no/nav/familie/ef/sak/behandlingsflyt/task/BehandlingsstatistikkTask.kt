@@ -108,6 +108,7 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
             Hendelse.MOTTATT, Hendelse.PÅBEGYNT -> gjeldendeSaksbehandler ?: error("Mangler saksbehandler for hendelse")
             Hendelse.VEDTATT -> vedtak?.saksbehandlerIdent ?: error("Mangler saksbehandler på vedtaket")
             Hendelse.BESLUTTET, Hendelse.FERDIG -> vedtak?.beslutterIdent ?: error("Mangler beslutter på vedtaket")
+            else -> error("$hendelse er ikke håndtert i finnSaksbehandler")
         }
     }
 

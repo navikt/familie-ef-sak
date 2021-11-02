@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.inntekt
 
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.inntekt.ekstern.InntektClient
 import org.springframework.stereotype.Service
 import java.time.YearMonth
 import java.util.UUID
@@ -15,6 +16,6 @@ class InntektService(
     fun hentInntekt(fagsakId: UUID, fom: YearMonth, tom: YearMonth): InntektResponseDto {
         val aktivIdent = fagsakService.hentAktivIdent(fagsakId)
         val inntekt = inntektClient.hentInntekt(aktivIdent, fom, tom)
-        return inntektMapper.mapInntektTypeTilKodeverkType(inntekt)
+        return inntektMapper.mapInntekt(inntekt)
     }
 }

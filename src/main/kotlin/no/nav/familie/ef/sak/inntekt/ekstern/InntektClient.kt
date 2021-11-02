@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.inntekt
+package no.nav.familie.ef.sak.inntekt.ekstern
 
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.PersonIdent
