@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.domain.Behandlingsjournalpost
 import no.nav.familie.ef.sak.behandling.dto.HenlagtDto
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
+import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.BEHANDLING_FERDIGSTILT
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.VILKÅR
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
@@ -17,6 +18,7 @@ import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
@@ -25,7 +27,7 @@ import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import org.slf4j.Logger
+import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -38,10 +40,10 @@ import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad as SøknadOv
 class BehandlingService(private val behandlingsjournalpostRepository: BehandlingsjournalpostRepository,
                         private val behandlingRepository: BehandlingRepository,
                         private val behandlingshistorikkService: BehandlingshistorikkService,
+                        private val taskService: TaskService,
                         private val søknadService: SøknadService,
                         private val oppgaveService: OppgaveService) {
 
-    private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
 
@@ -157,4 +159,23 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
         return behandlingRepository.update(behandling.copy(resultat = behandlingResultat))
     }
 
+    @Transactional
+    fun settPåVent(behandlingId: UUID) {
+        val behandling = hentBehandling(behandlingId)
+        feilHvis(behandling.status.behandlingErLåstForVidereRedigering(),
+                 HttpStatus.BAD_REQUEST) { "Kan ikke sette behandling med status ${behandling.status} på vent" }
+
+        behandlingRepository.update(behandling.copy(status = BehandlingStatus.SATT_PÅ_VENT))
+        taskService.save(BehandlingsstatistikkTask.opprettVenterTask(behandlingId))
+    }
+
+
+    @Transactional
+    fun taAvVent(behandlingId: UUID) {
+        val behandling = hentBehandling(behandlingId)
+        feilHvis(behandling.status != BehandlingStatus.SATT_PÅ_VENT,
+                 HttpStatus.BAD_REQUEST) { "Kan ikke ta behandling med status ${behandling.status} av vent" }
+        behandlingRepository.update(behandling.copy(status = BehandlingStatus.UTREDES))
+        taskService.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId))
+    }
 }
