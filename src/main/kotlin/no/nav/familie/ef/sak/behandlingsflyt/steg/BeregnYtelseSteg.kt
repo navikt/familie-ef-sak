@@ -5,7 +5,6 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.beregning.BeregningService
 import no.nav.familie.ef.sak.beregning.tilInntektsperioder
-import no.nav.familie.ef.sak.brev.MellomlagringBrevService
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
@@ -29,7 +28,6 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                        private val beregningService: BeregningService,
                        private val simuleringService: SimuleringService,
                        private val vedtakService: VedtakService,
-                       private val mellomlagringBrevService: MellomlagringBrevService,
                        private val tilbakekrevingService: TilbakekrevingService) : BehandlingSteg<VedtakDto> {
 
 
@@ -65,7 +63,6 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
 
     private fun nullstillEksisterendeVedtakPåBehandling(behandlingId: UUID) {
         tilkjentYtelseService.slettTilkjentYtelseForBehandling(behandlingId)
-        mellomlagringBrevService.slettMellomlagringHvisFinnes(behandlingId)
         vedtakService.slettVedtakHvisFinnes(behandlingId)
     }
 

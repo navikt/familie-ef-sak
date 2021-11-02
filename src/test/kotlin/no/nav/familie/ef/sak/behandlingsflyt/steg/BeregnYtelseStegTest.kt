@@ -10,7 +10,6 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.beregning.Beløpsperiode
 import no.nav.familie.ef.sak.beregning.BeregningService
-import no.nav.familie.ef.sak.brev.MellomlagringBrevService
 import no.nav.familie.ef.sak.felles.dto.Periode
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.repository.behandling
@@ -45,7 +44,6 @@ internal class BeregnYtelseStegTest {
     private val beregningService = mockk<BeregningService>()
     private val vedtakService = mockk<VedtakService>(relaxed = true)
     private val simuleringService = mockk<SimuleringService>()
-    private val mellomlagringBrevService = mockk<MellomlagringBrevService>(relaxed = true)
     private val tilbakekrevingService = mockk<TilbakekrevingService>(relaxed = true)
 
     private val steg = BeregnYtelseSteg(tilkjentYtelseService,
@@ -53,7 +51,6 @@ internal class BeregnYtelseStegTest {
                                         beregningService,
                                         simuleringService,
                                         vedtakService,
-                                        mellomlagringBrevService,
                                         tilbakekrevingService)
 
     @BeforeEach
@@ -396,13 +393,6 @@ internal class BeregnYtelseStegTest {
         assertThat(feil.frontendFeilmelding).contains("Kan kun opphøre ved revurdering")
     }
 
-    @Test
-    internal fun `skal slette mellomlagret brev ved utførBeregnYtelseSteg`() {
-        every { beregningService.beregnYtelse(any(), any()) } returns listOf(lagBeløpsperiode(LocalDate.now(), LocalDate.now()))
-        utførSteg(BehandlingType.FØRSTEGANGSBEHANDLING)
-
-        verify { mellomlagringBrevService.slettMellomlagringHvisFinnes(any()) }
-    }
 
     @Test
     internal fun `skal slette tilbakekreving og simulering ved avslag`() {
