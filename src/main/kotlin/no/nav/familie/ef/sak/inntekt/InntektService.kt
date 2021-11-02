@@ -15,6 +15,6 @@ class InntektService(
     fun hentInntekt(fagsakId: UUID, fom: YearMonth, tom: YearMonth): InntektResponseDto {
         val aktivIdent = fagsakService.hentAktivIdent(fagsakId)
         val inntekt = inntektClient.hentInntekt(aktivIdent, fom, tom)
-        return inntektMapper.map(inntekt)
+        return inntektMapper.mapInntektTypeTilKodeverkType(inntekt)
     }
 }

@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.inntekt
 
+import java.time.LocalDate
 import java.time.YearMonth
 
 data class InntektResponseDto(
@@ -30,5 +31,8 @@ data class InntektDto(
         val beskrivelse: String?, // kodeverk
         val fordel: String?, // kontantytelse / Naturalytelse / Utgiftsgodtgjørelse
         val type: InntektType,
-        val kategori: String? // Kodeverk - EDAGTilleggsinfoKategorier
+        val kategori: String?, // Kodeverk - EDAGTilleggsinfoKategorier
+        val opptjeningsland: String? = null,
+        val opptjeningsperiodeFom: LocalDate? = null,
+        val opptjeningsperiodeTom: LocalDate? = null,
 )

@@ -28,25 +28,7 @@ data class Avvik(
 )
 
 data class ArbeidsInntektInformasjon(
-        val arbeidsforholdListe: List<ArbeidsforholdFrilanser>?, // mulig man bare burde si ifra om att X har arbeidsforhold som frilanser uten noen detaljer hvis det er relevant for saksbehandlere
         val inntektListe: List<Inntekt>?,
-)
-
-data class ArbeidsforholdFrilanser(
-        val antallTimerPerUkeSomEnFullStillingTilsvarer: Double? = null,
-        val arbeidstidsordning: String? = null,
-        val avloenningstype: String? = null,
-        val sisteDatoForStillingsprosentendring: LocalDate? = null,
-        val sisteLoennsendring: LocalDate? = null,
-        val frilansPeriodeFom: LocalDate? = null,
-        val frilansPeriodeTom: LocalDate? = null,
-        val stillingsprosent: Double? = null,
-        val yrke: String? = null,
-        val arbeidsforholdID: String? = null,
-        val arbeidsforholdIDnav: String? = null,
-        val arbeidsforholdstype: String? = null,
-        val arbeidsgiver: Aktoer? = null,
-        val arbeidstaker: Aktoer? = null
 )
 
 data class Inntekt(

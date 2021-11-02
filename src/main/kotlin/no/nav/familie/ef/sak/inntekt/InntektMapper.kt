@@ -10,7 +10,7 @@ class InntektMapper(
         private val kodeverkService: CachedKodeverkService,
 ) {
 
-    fun map(response: HentInntektListeResponse): InntektResponseDto {
+    fun mapInntektTypeTilKodeverkType(response: HentInntektListeResponse): InntektResponseDto {
         val map: MutableMap<Aktoer, MutableMap<YearMonth, MutableList<Inntekt>>> = mutableMapOf()
         val avvik = mapAvvik(response)
         response.arbeidsInntektMaaned?.let { arbeidsInntektMaaned ->
@@ -22,10 +22,8 @@ class InntektMapper(
                 }
             }
         }
-        // finn orgnr og kodeverk?
         return InntektResponseDto(organisasjoner = mapOrganisasjoner(map),
-                                  avvik = avvik
-        )
+                                  avvik = avvik)
 
     }
 
@@ -44,20 +42,22 @@ class InntektMapper(
     private fun mapInntekt(list: List<Inntekt>) = list.map { inntekt ->
         InntektDto(
                 beløp = inntekt.beloep,
-                beskrivelse = inntekt.beskrivelse?.let { hentMapping(map(inntekt.inntektType), it) },
+                beskrivelse = inntekt.beskrivelse?.let { hentMapping(mapInntektTypeTilKodeverkType(inntekt.inntektType), it) },
                 fordel = inntekt.fordel,
                 type = inntekt.inntektType,
                 kategori = inntekt.tilleggsinformasjon?.kategori?.let {
                     hentMapping(InntektKodeverkType.TILLEGSINFORMASJON_KATEGORI, it)
-                }
+                },
+                opptjeningsland = inntekt.opptjeningsland,
+                opptjeningsperiodeFom = inntekt.opptjeningsperiodeFom,
+                opptjeningsperiodeTom = inntekt.opptjeningsperiodeTom
         )
     }
 
-    // TODO burde man logge att vi mangler mapping?
     private fun hentMapping(type: InntektKodeverkType, verdi: String) =
-            kodeverkService.hentInntekt()[type]?.get(verdi) ?: "$verdi (savner mapping)"
+            kodeverkService.hentInntekt()[type]?.get(verdi) ?: "$verdi (savner verdi i kodeverk)"
 
-    private fun map(type: InntektType): InntektKodeverkType {
+    private fun mapInntektTypeTilKodeverkType(type: InntektType): InntektKodeverkType {
         return when (type) {
             InntektType.LOENNSINNTEKT -> InntektKodeverkType.LOENNSINNTEKT
             InntektType.NAERINGSINNTEKT -> InntektKodeverkType.NAERINGSINNTEKT
