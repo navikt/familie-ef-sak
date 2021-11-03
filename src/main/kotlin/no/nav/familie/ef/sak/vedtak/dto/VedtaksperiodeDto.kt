@@ -19,6 +19,7 @@ fun List<VedtaksperiodeDto>.tilPerioder(): List<Periode> =
             Periode(
                     fradato = it.årMånedFra.atDay(1),
                     tildato = it.årMånedTil.atEndOfMonth(),
+                    erOpphør = it.periodeType == VedtaksperiodeType.MIDLERTIDIG_OPPHØR
             )
         }
 

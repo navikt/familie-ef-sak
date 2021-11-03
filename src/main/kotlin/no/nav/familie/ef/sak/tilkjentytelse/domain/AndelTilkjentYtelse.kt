@@ -1,8 +1,9 @@
 package no.nav.familie.ef.sak.tilkjentytelse.domain
 
+import no.nav.familie.ef.sak.felles.dto.Periode
 import org.springframework.data.relational.core.mapping.Column
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 data class AndelTilkjentYtelse(@Column("belop")
                                val beløp: Int,
@@ -14,6 +15,9 @@ data class AndelTilkjentYtelse(@Column("belop")
                                val inntekt: Int,
                                val inntektsreduksjon: Int,
                                val samordningsfradrag: Int,
-                               val kildeBehandlingId: UUID)
+                               val kildeBehandlingId: UUID) {
 
-fun AndelTilkjentYtelse.erStønadOverlappende(fom: LocalDate): Boolean = this.stønadFom < fom && this.stønadTom >= fom
+    fun erStønadOverlappende(fom: LocalDate): Boolean = this.stønadFom < fom && this.stønadTom >= fom
+
+    val periode get() = Periode(stønadFom, stønadTom)
+}
