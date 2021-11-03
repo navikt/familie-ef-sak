@@ -42,14 +42,12 @@ class InntektMapper(
             : MutableMap<Aktør, MutableMap<YearMonth, MutableList<Inntekt>>> {
 
         val map: MutableMap<Aktør, MutableMap<YearMonth, MutableList<Inntekt>>> = mutableMapOf()
-        response.arbeidsinntektMåned?.let { arbeidsInntektMaaned ->
-            arbeidsInntektMaaned.forEach { inntektMaaned ->
-                inntektMaaned.arbeidsInntektInformasjon?.inntektListe?.forEach { inntekt ->
+        response.arbeidsinntektMåned?.forEach { arbeidsInntektMaaned ->
+            arbeidsInntektMaaned.arbeidsInntektInformasjon?.inntektListe?.forEach { inntekt ->
                     map.getOrPut(inntekt.virksomhet) { mutableMapOf() }
-                            .getOrPut(inntektMaaned.årMåned) { mutableListOf() }
+                            .getOrPut(arbeidsInntektMaaned.årMåned) { mutableListOf() }
                             .add(inntekt)
                 }
-            }
         }
         return map
     }
@@ -78,7 +76,7 @@ class InntektMapper(
     }
 
     private fun hentMapping(type: InntektKodeverkType, verdi: String) =
-            kodeverkService.hentInntekt()[type]?.get(verdi) ?: "$verdi (savner verdi i kodeverk)"
+            kodeverkService.hentInntekt()[type]?.get(verdi) ?: "$verdi (mangler verdi i kodeverk)"
 
     private fun mapInntektType(type: EksternInntektType): InntektType {
         return when (type) {
