@@ -22,8 +22,9 @@ class ApiExceptionHandler {
 
     @ExceptionHandler(Throwable::class)
     fun handleThrowable(throwable: Throwable): ResponseEntity<Ressurs<Nothing>> {
-        secureLogger.error("En feil har oppstått", throwable)
-        logger.error("En feil har oppstått: ${rootCause(throwable)} ")
+        val metodeSomFeiler = finnMetodeSomFeiler(throwable)
+        secureLogger.error("Uventet feil: $metodeSomFeiler ${rootCause(throwable)}", throwable)
+        logger.error("Uventet feil: $metodeSomFeiler ${rootCause(throwable)} ")
 
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -37,21 +38,21 @@ class ApiExceptionHandler {
 
     @ExceptionHandler(Feil::class)
     fun handleThrowable(feil: Feil): ResponseEntity<Ressurs<Nothing>> {
-        secureLogger.error("En håndtert feil har oppstått(${feil.httpStatus}): ${feil.frontendFeilmelding}", feil)
-        logger.info("En håndtert feil har oppstått(${feil.httpStatus}) exception=${rootCause(feil)}: ${feil.message} ")
+        secureLogger.warn("En håndtert feil har oppstått(${feil.httpStatus}): ${feil.frontendFeilmelding}", feil)
+        logger.warn("En håndtert feil har oppstått(${feil.httpStatus}) exception=${rootCause(feil)}: ${feil.message} ")
         return ResponseEntity.status(feil.httpStatus).body(Ressurs.failure(frontendFeilmelding = feil.frontendFeilmelding))
     }
 
     @ExceptionHandler(PdlNotFoundException::class)
     fun handleThrowable(feil: PdlNotFoundException): ResponseEntity<Ressurs<Nothing>> {
-        logger.info("Finner ikke personen i PDL")
+        logger.warn("Finner ikke personen i PDL")
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Ressurs.failure(frontendFeilmelding = "Finner ikke personen"))
     }
 
     @ExceptionHandler(ManglerTilgang::class)
     fun handleThrowable(manglerTilgang: ManglerTilgang): ResponseEntity<Ressurs<Nothing>> {
-        secureLogger.error("En håndtert tilgangsfeil har oppstått - ${manglerTilgang.melding}", manglerTilgang)
-        logger.info("En håndtert tilgangsfeil har oppstått")
+        secureLogger.warn("En håndtert tilgangsfeil har oppstått - ${manglerTilgang.melding}", manglerTilgang)
+        logger.warn("En håndtert tilgangsfeil har oppstått")
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(Ressurs(data = null,
                               status = Ressurs.Status.IKKE_TILGANG,
@@ -67,6 +68,17 @@ class ApiExceptionHandler {
         logger.error("Feil mot integrasjonsclienten har oppstått exception=${rootCause(feil)}")
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Ressurs.failure(frontendFeilmelding = feil.message))
+    }
+
+    fun finnMetodeSomFeiler(e: Throwable): String {
+        val firstElement = e.stackTrace.first {
+            it.className.startsWith("no.nav.familie.ef.sak")
+            && !it.className.contains("$")
+        }
+        if (firstElement != null) {
+            return "${firstElement.className}::${firstElement.methodName}(${firstElement.lineNumber})"
+        }
+        return e.cause?.let { finnMetodeSomFeiler(it) } ?: "(Ukjent metode som feiler)"
     }
 
 }
