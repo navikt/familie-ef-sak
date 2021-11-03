@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.inntekt
+package no.nav.familie.ef.sak.amelding
 
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -25,7 +25,7 @@ class InntektController(
     @GetMapping("fagsak/{fagsakId}")
     fun hentInntekt(@PathVariable("fagsakId") fagsakId: UUID,
                     @RequestParam fom: YearMonth?,
-                    @RequestParam tom: YearMonth?): Ressurs<InntektResponseDto> {
+                    @RequestParam tom: YearMonth?): Ressurs<AMeldingInntektDto> {
         tilgangService.validerTilgangTilFagsak(fagsakId)
         val inntekt = inntektService.hentInntekt(fagsakId = fagsakId,
                                                  fom = fom ?: YearMonth.now().minusMonths(2),

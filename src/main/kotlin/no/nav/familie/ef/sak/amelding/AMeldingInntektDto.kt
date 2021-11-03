@@ -1,9 +1,9 @@
-package no.nav.familie.ef.sak.inntekt
+package no.nav.familie.ef.sak.amelding
 
 import java.time.LocalDate
 import java.time.YearMonth
 
-data class InntektResponseDto(
+data class AMeldingInntektDto(
         val inntektPerVirksomhet: List<InntektForVirksomhetDto>,
         val avvik: List<String>
 )

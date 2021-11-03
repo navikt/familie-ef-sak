@@ -1,10 +1,10 @@
-package no.nav.familie.ef.sak.inntekt
+package no.nav.familie.ef.sak.amelding
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.felles.kodeverk.CachedKodeverkService
-import no.nav.familie.ef.sak.inntekt.ekstern.HentInntektListeResponse
+import no.nav.familie.ef.sak.amelding.ekstern.HentInntektListeResponse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.ereg.EregService
 import no.nav.familie.kontrakter.felles.kodeverk.InntektKodeverkType
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.YearMonth
 
-internal class InntektMapperTest {
+internal class AMeldingInntektMapperTest {
 
     private val kodeverkService = mockk<CachedKodeverkService>()
     private val eregService = mockk<EregService>()

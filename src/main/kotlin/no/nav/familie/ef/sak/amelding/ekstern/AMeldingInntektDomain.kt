@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.inntekt.ekstern
+package no.nav.familie.ef.sak.amelding.ekstern
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.time.LocalDate
@@ -32,10 +32,10 @@ data class Avvik(
 )
 
 data class ArbeidsInntektInformasjon(
-        val inntektListe: List<Inntekt>?,
+    val inntektListe: List<AMeldingInntekt>?
 )
 
-data class Inntekt(
+data class AMeldingInntekt(
         val inntektType: InntektType,
         @JsonProperty("beloep")
         val beløp: Int,

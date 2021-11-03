@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.inntekt.ekstern
+package no.nav.familie.ef.sak.amelding.ekstern
 
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.PersonIdent
@@ -11,7 +11,7 @@ import java.net.URI
 import java.time.YearMonth
 
 @Component
-class InntektClient(
+class AMeldingInntektClient(
         @Value("\${FAMILIE_EF_PROXY_URL}") private val uri: URI,
         @Qualifier("azure") restOperations: RestOperations
 ) : AbstractRestClient(restOperations, "inntekt") {

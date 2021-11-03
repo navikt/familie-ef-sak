@@ -1,15 +1,15 @@
-package no.nav.familie.ef.sak.inntekt
+package no.nav.familie.ef.sak.amelding
 
 import no.nav.familie.ef.sak.felles.kodeverk.CachedKodeverkService
-import no.nav.familie.ef.sak.inntekt.ekstern.Aktør
-import no.nav.familie.ef.sak.inntekt.ekstern.AktørType
-import no.nav.familie.ef.sak.inntekt.ekstern.HentInntektListeResponse
-import no.nav.familie.ef.sak.inntekt.ekstern.Inntekt
+import no.nav.familie.ef.sak.amelding.ekstern.Aktør
+import no.nav.familie.ef.sak.amelding.ekstern.AktørType
+import no.nav.familie.ef.sak.amelding.ekstern.HentInntektListeResponse
+import no.nav.familie.ef.sak.amelding.ekstern.AMeldingInntekt
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.ereg.EregService
 import no.nav.familie.kontrakter.felles.kodeverk.InntektKodeverkType
 import org.springframework.stereotype.Component
 import java.time.YearMonth
-import no.nav.familie.ef.sak.inntekt.ekstern.InntektType as EksternInntektType
+import no.nav.familie.ef.sak.amelding.ekstern.InntektType as EksternInntektType
 
 @Component
 class InntektMapper(
@@ -17,8 +17,8 @@ class InntektMapper(
         private val eregService: EregService
 ) {
 
-    fun mapInntekt(response: HentInntektListeResponse): InntektResponseDto {
-        return InntektResponseDto(inntektPerVirksomhet = mapOrganisasjoner(response),
+    fun mapInntekt(response: HentInntektListeResponse): AMeldingInntektDto {
+        return AMeldingInntektDto(inntektPerVirksomhet = mapOrganisasjoner(response),
                                   avvik = mapAvvik(response))
     }
 
@@ -39,9 +39,9 @@ class InntektMapper(
     }
 
     private fun mapInntektresponseTilInntektPerVirksomhetOgPeriode(response: HentInntektListeResponse)
-            : MutableMap<Aktør, MutableMap<YearMonth, MutableList<Inntekt>>> {
+            : MutableMap<Aktør, MutableMap<YearMonth, MutableList<AMeldingInntekt>>> {
 
-        val map: MutableMap<Aktør, MutableMap<YearMonth, MutableList<Inntekt>>> = mutableMapOf()
+        val map: MutableMap<Aktør, MutableMap<YearMonth, MutableList<AMeldingInntekt>>> = mutableMapOf()
         response.arbeidsinntektMåned?.forEach { arbeidsInntektMaaned ->
             arbeidsInntektMaaned.arbeidsInntektInformasjon?.inntektListe?.forEach { inntekt ->
                     map.getOrPut(inntekt.virksomhet) { mutableMapOf() }
@@ -60,7 +60,7 @@ class InntektMapper(
                 .associate { it.organisasjonsnummer to it.navn }
     }
 
-    private fun mapInntekt(list: List<Inntekt>) = list.map { inntekt ->
+    private fun mapInntekt(list: List<AMeldingInntekt>) = list.map { inntekt ->
         InntektDto(
                 beløp = inntekt.beløp,
                 beskrivelse = inntekt.beskrivelse?.let { hentMapping(mapInntektTypeTilKodeverkType(inntekt.inntektType), it) },
