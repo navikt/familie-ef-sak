@@ -7,7 +7,7 @@ data class Periode(val fradato: LocalDate,
                    val tildato: LocalDate) {
 
     init {
-        require(fradato < tildato) {"Fradato må kommer før tildato i enn periode."}
+        require(fradato <= tildato) {"Fradato må kommer før tildato i enn periode."}
     }
 
     fun inneholder(date: LocalDate): Boolean {
