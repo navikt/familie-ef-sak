@@ -148,19 +148,17 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
             } else if (opphørsperioder.any { periode -> periode.inneholder(tilkjentPeriode) }) {
                 listOf()
             } else {
-                val filter = opphørsperioder.first { periode -> periode.overlapper(tilkjentPeriode) }
+                val overlappendeOpphør = opphørsperioder.first { periode -> periode.overlapper(tilkjentPeriode) }
 
-                if (filter.overlapperIStartenAv(tilkjentPeriode)) {
-                    vurderPeriodeForOpphør(listOf(it.copy(stønadFom = filter.tildato.plusDays(1))), opphørsperioder)
-                } else if (filter.overlapperISluttenAv(tilkjentPeriode)) {
-                    vurderPeriodeForOpphør(listOf(it.copy(stønadTom = filter.fradato.minusDays(1))), opphørsperioder)
-                } else {
-//                    if (filter.deler(tilkjentPeriode)) {
-                    vurderPeriodeForOpphør(listOf(it.copy(stønadTom = filter.fradato.minusDays(1)),
-                                                  it.copy(stønadFom = filter.tildato.plusDays(1))), opphørsperioder)
+                if (overlappendeOpphør.overlapperIStartenAv(tilkjentPeriode)) {
+                    vurderPeriodeForOpphør(listOf(it.copy(stønadFom = overlappendeOpphør.tildato.plusDays(1))), opphørsperioder)
+                } else if (overlappendeOpphør.overlapperISluttenAv(tilkjentPeriode)) {
+                    vurderPeriodeForOpphør(listOf(it.copy(stønadTom = overlappendeOpphør.fradato.minusDays(1))), opphørsperioder)
+                } else { // periodew blir delt i to av opphold.
+                    vurderPeriodeForOpphør(listOf(it.copy(stønadTom = overlappendeOpphør.fradato.minusDays(1)),
+                                                  it.copy(stønadFom = overlappendeOpphør.tildato.plusDays(1))), opphørsperioder)
                 }
             }
-
         }.flatten()
     }
 
