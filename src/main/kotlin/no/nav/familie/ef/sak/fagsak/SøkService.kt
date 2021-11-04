@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.fagsak.dto.FagsakForSøkeresultat
 import no.nav.familie.ef.sak.fagsak.dto.PersonFraSøk
 import no.nav.familie.ef.sak.fagsak.dto.Søkeresultat
 import no.nav.familie.ef.sak.fagsak.dto.SøkeresultatPerson
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlPersonSøkHjelper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlSaksbehandlerClient
@@ -15,6 +16,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseMappe
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.KjønnMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonFraSøk
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -30,8 +32,7 @@ class SøkService(private val fagsakRepository: FagsakRepository,
         val fagsaker = fagsakRepository.findBySøkerIdent(personIdent)
 
         if (fagsaker.isEmpty()) {
-            throw Feil(message = "Finner ikke fagsak for søkte personen",
-                       frontendFeilmelding = "Finner ikke fagsak for søkte personen")
+            throw ApiFeil("Finner ikke fagsak for søkte personen", HttpStatus.BAD_REQUEST)
         }
 
         val personIdent = fagsaker.first().hentAktivIdent()
