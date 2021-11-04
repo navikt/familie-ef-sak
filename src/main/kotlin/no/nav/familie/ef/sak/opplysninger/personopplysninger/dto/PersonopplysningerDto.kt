@@ -80,11 +80,11 @@ data class AdresseDto(val visningsadresse: String?,
                       val gyldigTilOgMed: LocalDate?,
                       val angittFlyttedato: LocalDate? = null)
 
-enum class AdresseType {
-    BOSTEDADRESSE,
-    KONTAKTADRESSE,
-    KONTAKTADRESSE_UTLAND,
-    OPPHOLDSADRESSE
+enum class AdresseType(val sortOrder: Int) {
+    BOSTEDADRESSE(1),
+    OPPHOLDSADRESSE(2),
+    KONTAKTADRESSE(3),
+    KONTAKTADRESSE_UTLAND(4),
 }
 
 data class FullmaktDto(val gyldigFraOgMed: LocalDate,
