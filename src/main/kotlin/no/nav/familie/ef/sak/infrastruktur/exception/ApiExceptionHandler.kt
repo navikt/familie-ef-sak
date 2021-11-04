@@ -71,7 +71,7 @@ class ApiExceptionHandler {
     }
 
     fun finnMetodeSomFeiler(e: Throwable): String {
-        val firstElement = e.stackTrace.first {
+        val firstElement = e.stackTrace.firstOrNull {
             it.className.startsWith("no.nav.familie.ef.sak")
             && !it.className.contains("$")
         }
