@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.brev.MellomlagerBrevRepository
 import no.nav.familie.ef.sak.brev.domain.MellomlagretBrev
+import no.nav.familie.ef.sak.brev.dto.MellomlagretBrevSanity
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -15,7 +16,7 @@ import java.util.UUID
 internal class MellomlagringBrevServiceTest {
 
     private val mellomlagerBrevRepository = mockk<MellomlagerBrevRepository>()
-    private val mellomlagringBrevService = no.nav.familie.ef.sak.brev.MellomlagringBrevService(mellomlagerBrevRepository)
+    private val mellomlagringBrevService = no.nav.familie.ef.sak.brev.MellomlagringBrevService(mellomlagerBrevRepository, mockk())
 
 
     @Test
@@ -24,9 +25,9 @@ internal class MellomlagringBrevServiceTest {
         every { mellomlagerBrevRepository.findByIdOrNull(behandlingId) } returns mellomlagretBrev
 
         assertThat(mellomlagringBrevService.hentOgValiderMellomlagretBrev(behandlingId,
-                                                                          sanityVersjon)).usingRecursiveComparison()
-                .isEqualTo(mellomlagretBrev)
-
+                                                                          sanityVersjon))
+                .isEqualTo(MellomlagretBrevSanity(brevmal = mellomlagretBrev.brevmal,
+                                                  brevverdier = mellomlagretBrev.brevverdier))
     }
 
     @Test

@@ -13,9 +13,9 @@ class Feil(message: String,
             this(message, null, httpStatus, throwable)
 }
 
-inline fun feilHvis(boolean: Boolean, lazyMessage: () -> String) {
+inline fun feilHvis(boolean: Boolean, httpStatus: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR, lazyMessage: () -> String) {
     if (boolean) {
-        throw Feil(message = lazyMessage(), frontendFeilmelding = lazyMessage())
+        throw Feil(message = lazyMessage(), frontendFeilmelding = lazyMessage(), httpStatus)
     }
 }
 

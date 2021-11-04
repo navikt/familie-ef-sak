@@ -33,6 +33,7 @@ import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
 import no.nav.familie.kontrakter.felles.journalpost.RelevantDato
 import no.nav.familie.kontrakter.felles.kodeverk.BeskrivelseDto
 import no.nav.familie.kontrakter.felles.kodeverk.BetydningDto
+import no.nav.familie.kontrakter.felles.kodeverk.InntektKodeverkDto
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
@@ -69,6 +70,8 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                             .willReturn(okJson(objectMapper.writeValueAsString(kodeverkPoststed))),
                     get(urlEqualTo(integrasjonerConfig.kodeverkLandkoderUri.path))
                             .willReturn(okJson(objectMapper.writeValueAsString(kodeverkLand))),
+                    get(urlEqualTo(integrasjonerConfig.kodeverkInntektUri.path))
+                            .willReturn(okJson(objectMapper.writeValueAsString(kodeverkInntekt))),
                     post(urlEqualTo(integrasjonerConfig.arbeidsfordelingUri.path))
                             .willReturn(okJson(objectMapper.writeValueAsString(arbeidsfordeling))),
 
@@ -130,9 +133,10 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                                                                                                        "NORGE"))))))
         private val kodeverkPoststed = Ressurs.success(poststed)
         private val kodeverkLand = Ressurs.success(land)
+        private val kodeverkInntekt: Ressurs<InntektKodeverkDto> = Ressurs.success(emptyMap())
 
         private val arbeidsfordeling =
-                Ressurs.success(listOf(Arbeidsfordelingsenhet("1234", "nerd-enhet")))
+                Ressurs.success(listOf(Arbeidsfordelingsenhet("4489", "nerd-enhet")))
 
         private const val fnr = "23097825289"
         private val medl =

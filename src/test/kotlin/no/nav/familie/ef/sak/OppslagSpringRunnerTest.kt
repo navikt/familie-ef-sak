@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.behandling.domain.Behandlingsjournalpost
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.blankett.Blankett
 import no.nav.familie.ef.sak.brev.domain.MellomlagretBrev
+import no.nav.familie.ef.sak.brev.domain.MellomlagretFritekstbrev
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.database.DbContainerInitializer
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
@@ -53,6 +54,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
                 "mock-infotrygd-replika",
                 "mock-iverksett",
                 "mock-brev",
+                "mock-inntekt",
+                "mock-ereg",
                 "mock-tilbakekreving")
 @EnableMockOAuth2Server
 abstract class OppslagSpringRunnerTest {
@@ -106,6 +109,7 @@ abstract class OppslagSpringRunnerTest {
                 Blankett::class,
                 Vedtak::class,
                 MellomlagretBrev::class,
+                MellomlagretFritekstbrev::class,
                 Behandlingsjournalpost::class,
                 Grunnlagsdata::class,
                 Tilbakekreving::class,

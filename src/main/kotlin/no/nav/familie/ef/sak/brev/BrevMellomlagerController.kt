@@ -1,7 +1,8 @@
 package no.nav.familie.ef.sak.brev
 
 import no.nav.familie.ef.sak.brev.dto.MellomlagreBrevRequestDto
-import no.nav.familie.ef.sak.brev.dto.MellomlagretBrevResponseDto
+import no.nav.familie.ef.sak.brev.dto.MellomlagretBrevResponse
+import no.nav.familie.ef.sak.brev.dto.VedtaksbrevFritekstDto
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -33,10 +34,18 @@ class BrevMellomlagerController(private val tilgangService: TilgangService,
                                                                         mellomlagretBrev.versjon))
     }
 
+    @PostMapping("/fritekst")
+    fun mellomlagreFritekstbrev(@RequestBody mellomlagretBrev: VedtaksbrevFritekstDto): Ressurs<UUID> {
+        tilgangService.validerTilgangTilBehandling(mellomlagretBrev.behandlingId)
+        tilgangService.validerHarSaksbehandlerrolle()
+
+        return Ressurs.success(mellomlagringBrevService.mellomlagreFritekstbrev(mellomlagretBrev))
+    }
+
 
     @GetMapping("/{behandlingId}")
     fun hentMellomlagretBrevverdier(@PathVariable behandlingId: UUID,
-                                    @RequestParam sanityVersjon: String): Ressurs<MellomlagretBrevResponseDto?> {
+                                    @RequestParam sanityVersjon: String): Ressurs<MellomlagretBrevResponse?> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
 
         return Ressurs.success(mellomlagringBrevService.hentOgValiderMellomlagretBrev(behandlingId,

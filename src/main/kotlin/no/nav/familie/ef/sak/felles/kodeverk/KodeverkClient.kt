@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.felles.kodeverk
 import no.nav.familie.ef.sak.infrastruktur.config.IntegrasjonerConfig
 import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.kodeverk.InntektKodeverkDto
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -26,5 +27,9 @@ class KodeverkClient(@Qualifier("azure") restOperations: RestOperations,
 
     fun hentKodeverkPoststed(): KodeverkDto {
         return getForEntity<Ressurs<KodeverkDto>>(integrasjonerConfig.kodeverkPoststedUri).data!!
+    }
+
+    fun hentKodeverkInntekt(): InntektKodeverkDto {
+        return getForEntity<Ressurs<InntektKodeverkDto>>(integrasjonerConfig.kodeverkInntektUri).data!!
     }
 }

@@ -35,7 +35,6 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
 
     fun opprettOppgave(behandlingId: UUID,
                        oppgavetype: Oppgavetype,
-                       enhetId: String? = null,
                        tilordnetNavIdent: String? = null,
                        beskrivelse: String? = null): Long {
         val fagsak = fagsakRepository.finnFagsakTilBehandling(behandlingId)
@@ -48,7 +47,7 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
         } else {
 
             val aktørId = pdlClient.hentAktørIder(fagsak.hentAktivIdent()).identer.first().ident
-            val enhetsnummer = arbeidsfordelingService.hentNavEnhet(fagsak.hentAktivIdent())
+            val enhetsnummer = arbeidsfordelingService.hentNavEnhet(fagsak.hentAktivIdent())?.enhetId
             val opprettOppgave =
                     OpprettOppgaveRequest(ident = OppgaveIdentV2(ident = aktørId, gruppe = IdentGruppe.AKTOERID),
                                           saksId = fagsak.eksternId.id.toString(),
@@ -56,10 +55,11 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
                                           oppgavetype = oppgavetype,
                                           fristFerdigstillelse = lagFristForOppgave(LocalDateTime.now()),
                                           beskrivelse = lagOppgaveTekst(beskrivelse),
-                                          enhetsnummer = enhetId ?: enhetsnummer?.enhetId,
+                                          enhetsnummer = enhetsnummer,
                                           behandlingstema = finnBehandlingstema(fagsak.stønadstype).value,
                                           tilordnetRessurs = tilordnetNavIdent,
-                                          behandlesAvApplikasjon = "familie-ef-sak"
+                                          behandlesAvApplikasjon = "familie-ef-sak",
+                                          mappeId = finnAktuellMappe(enhetsnummer, oppgavetype)
                     )
 
             val opprettetOppgaveId = oppgaveClient.opprettOppgave(opprettOppgave)
@@ -70,6 +70,20 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
             oppgaveRepository.insert(oppgave)
             opprettetOppgaveId
         }
+    }
+
+    private fun finnAktuellMappe(enhetsnummer: String?, oppgavetype: Oppgavetype): Long? {
+        if (enhetsnummer == "4489" && oppgavetype == Oppgavetype.GodkjenneVedtak) {
+            val mapper = finnMapper("4489")
+            val mappeIdForGodkjenneVedtak = mapper.find { it.navn.contains("EF Sak - 70 Godkjenne vedtak") }?.id?.toLong()
+            mappeIdForGodkjenneVedtak?.let {
+                logger.info("Legger oppgave i Godkjenne vedtak-mappe")
+            } ?: run {
+                logger.error("Fant ikke mappe for godkjenne vedtak: EF Sak - 70 Godkjenne vedtak")
+            }
+            return mappeIdForGodkjenneVedtak
+        }
+        return null
     }
 
     fun fordelOppgave(gsakOppgaveId: Long, saksbehandler: String): Long {
@@ -165,13 +179,14 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
 
     @Cacheable("mapper")
     fun finnMapper(enhet: String): List<MappeDto> {
+        logger.info("Henter mapper på nytt")
         val mappeRespons = oppgaveClient.finnMapper(FinnMappeRequest(tema = listOf(),
                                                                      enhetsnr = enhet,
                                                                      opprettetFom = null,
                                                                      limit = 1000))
         if (mappeRespons.antallTreffTotalt > mappeRespons.mapper.size) {
             logger.error("Det finnes flere mapper (${mappeRespons.antallTreffTotalt}) " +
-                               "enn vi har hentet ut (${mappeRespons.mapper.size}). Sjekk limit. ")
+                         "enn vi har hentet ut (${mappeRespons.mapper.size}). Sjekk limit. ")
         }
         return mappeRespons.mapper
     }

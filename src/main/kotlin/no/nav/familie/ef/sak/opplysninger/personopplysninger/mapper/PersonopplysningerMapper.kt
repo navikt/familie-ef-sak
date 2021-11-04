@@ -59,7 +59,7 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                                   relatertVedSivilstand = it.relatertVedSivilstand,
                                   navn = it.navn,
                                   dødsdato = it.dødsfall?.dødsdato)
-                },
+                }.sortedBy { it.gyldigFraOgMed }.reversed(),
                 adresse = tilAdresser(søker),
                 fullmakt = søker.fullmakt.map {
                     FullmaktDto(gyldigFraOgMed = it.gyldigFraOgMed,

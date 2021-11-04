@@ -73,7 +73,6 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
                                                                                  steg = StegType.VILKÅR))
         val oppgaveId = oppgaveService.opprettOppgave(behandling.id,
                                                       Oppgavetype.BehandleSak,
-                                                      "4489",
                                                       SikkerhetContext.hentSaksbehandler(true),
                                                       "Dummy-oppgave opprettet i ny løsning")
         taskRepository.save(taskRepository.save(BehandlingsstatistikkTask.opprettMottattTask(behandlingId = behandling.id,
