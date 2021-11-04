@@ -16,18 +16,13 @@ data class VedtaksperiodeDto(
 
 fun List<VedtaksperiodeDto>.tilPerioder(): List<Periode> =
         this.map {
-            Periode(
-                    fradato = it.årMånedFra.atDay(1),
-                    tildato = it.årMånedTil.atEndOfMonth(),
-                    erOpphør = it.periodeType == VedtaksperiodeType.MIDLERTIDIG_OPPHØR
-            )
+            Periode(fradato = it.årMånedFra.atDay(1),
+                    tildato = it.årMånedTil.atEndOfMonth())
         }
 
 fun ÅrMånedPeriode.tilPerioder(): Periode =
-        Periode(
-                fradato = this.årMånedFra.atDay(1),
-                tildato = this.årMånedTil.atEndOfMonth(),
-        )
+        Periode(fradato = this.årMånedFra.atDay(1),
+                tildato = this.årMånedTil.atEndOfMonth())
 
 
 fun List<VedtaksperiodeDto>.tilDomene(): List<Vedtaksperiode> =

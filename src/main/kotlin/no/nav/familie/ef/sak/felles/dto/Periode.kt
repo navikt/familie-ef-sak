@@ -4,9 +4,7 @@ import java.time.LocalDate
 import java.time.Period
 
 data class Periode(val fradato: LocalDate,
-                   val tildato: LocalDate,
-                   val gyldig: Boolean? = null,
-                   val erOpphør: Boolean? = null) {
+                   val tildato: LocalDate) {
 
     init {
         require(fradato < tildato) {"Fradato må kommer før tildato i enn periode."}
