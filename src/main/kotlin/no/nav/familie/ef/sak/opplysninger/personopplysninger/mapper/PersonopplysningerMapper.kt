@@ -59,14 +59,14 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                                   relatertVedSivilstand = it.relatertVedSivilstand,
                                   navn = it.navn,
                                   dødsdato = it.dødsfall?.dødsdato)
-                }.sortedBy { it.gyldigFraOgMed }.reversed(),
+                }.sortedByDescending { it.gyldigFraOgMed },
                 adresse = tilAdresser(søker),
                 fullmakt = søker.fullmakt.map {
                     FullmaktDto(gyldigFraOgMed = it.gyldigFraOgMed,
                                 gyldigTilOgMed = it.gyldigTilOgMed,
                                 motpartsPersonident = it.motpartsPersonident,
                                 navn = it.navn)
-                },
+                }.sortedByDescending { it.gyldigFraOgMed },
                 egenAnsatt = egenAnsatt,
                 navEnhet = arbeidsfordelingService.hentNavEnhet(ident)
                                    ?.let { it.enhetId + " - " + it.enhetNavn } ?: "Ikke funnet",
@@ -75,7 +75,7 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                             ident,
                             søker.bostedsadresse,
                             annenForelderMap)
-                },
+                }.sortedBy { it.fødselsdato },
                 innflyttingTilNorge = søker.innflyttingTilNorge.map {
                     InnflyttingDto(it.fraflyttingsland?.let { land -> kodeverkService.hentLand(land, LocalDate.now()) },
                                    null,

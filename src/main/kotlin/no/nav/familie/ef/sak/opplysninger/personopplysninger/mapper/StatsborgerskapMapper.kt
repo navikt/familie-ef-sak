@@ -15,6 +15,6 @@ class StatsborgerskapMapper(private val kodeverkService: KodeverkService) {
             StatsborgerskapDto(land = land,
                                gyldigFraOgMedDato = it.gyldigFraOgMed,
                                gyldigTilOgMedDato = it.gyldigTilOgMed)
-        }
+        }.sortedByDescending { it.gyldigFraOgMedDato }
     }
 }

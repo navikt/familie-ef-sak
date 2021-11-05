@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper
 
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.AdresseDto
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.AdresseType
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import java.time.LocalDate
@@ -10,13 +9,8 @@ import java.time.LocalDate
 object AdresseHjelper {
 
     fun sorterAdresser(adresser: List<AdresseDto>): List<AdresseDto> {
-        val (historiskeAdresser, aktiveAdresser) = adresser
-                .sortedWith(compareByDescending<AdresseDto> { it.gyldigFraOgMed ?: LocalDate.MAX }.thenBy(AdresseDto::type))
-                .partition { it.gyldigTilOgMed != null }
-
-        val (bostedsadresse, aktivUtenBostedsadresse) = aktiveAdresser.partition { it.type == AdresseType.BOSTEDADRESSE }
-
-        return bostedsadresse + aktivUtenBostedsadresse + historiskeAdresser
+        return adresser.sortedWith(compareBy<AdresseDto> { it.type.rekkefølge }
+                                           .thenByDescending { it.angittFlyttedato ?: it.gyldigFraOgMed ?: LocalDate.MAX })
     }
 
     fun borPåSammeAdresse(barn: BarnMedIdent, bostedsadresserForelder: List<Bostedsadresse>): Boolean {
