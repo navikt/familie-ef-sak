@@ -9,7 +9,7 @@ import java.time.LocalDate
 object AdresseHjelper {
 
     fun sorterAdresser(adresser: List<AdresseDto>): List<AdresseDto> {
-        return adresser.sortedWith(compareBy<AdresseDto> { it.type.sortOrder }
+        return adresser.sortedWith(compareBy<AdresseDto> { it.type.rekkefølge }
                                            .thenByDescending { it.angittFlyttedato ?: it.gyldigFraOgMed ?: LocalDate.MAX })
     }
 

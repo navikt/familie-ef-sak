@@ -80,7 +80,7 @@ data class AdresseDto(val visningsadresse: String?,
                       val gyldigTilOgMed: LocalDate?,
                       val angittFlyttedato: LocalDate? = null)
 
-enum class AdresseType(val sortOrder: Int) {
+enum class AdresseType(val rekkefølge: Int) {
     BOSTEDADRESSE(1),
     OPPHOLDSADRESSE(2),
     KONTAKTADRESSE(3),
