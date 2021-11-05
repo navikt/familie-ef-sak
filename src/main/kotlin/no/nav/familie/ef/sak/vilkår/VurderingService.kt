@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.vilkår.dto.VilkårGrunnlagDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.tilDto
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
+import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår.opprettNyeVilkårsvurderinger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -72,4 +73,22 @@ class VurderingService(private val behandlingService: BehandlingService,
         }
         vilkårsvurderingRepository.insertAll(vurderingerKopi)
     }
+
+    private fun hentVilkårsresultat(behandlingId: UUID): List<Vilkårsresultat> {
+        val lagredeVilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(behandlingId)
+        val vilkårsresultat = lagredeVilkårsvurderinger.groupBy { it.type }.map {
+            if (it.key == VilkårType.ALENEOMSORG) {
+                OppdaterVilkår.utledResultatForAleneomsorg(it.value)
+            } else {
+                it.value.single().resultat
+            }
+        }
+        return vilkårsresultat
+    }
+
+    fun erAlleVilkårOppfylt(behandlingId: UUID): Boolean {
+        val vilkårsresultat = hentVilkårsresultat(behandlingId)
+        return vilkårsresultat.all { it == Vilkårsresultat.OPPFYLT || it == Vilkårsresultat.IKKE_AKTUELL }
+    }
+
 }

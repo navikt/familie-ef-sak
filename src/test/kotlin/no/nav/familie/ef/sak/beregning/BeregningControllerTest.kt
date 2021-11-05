@@ -2,21 +2,30 @@ package no.nav.familie.ef.sak.beregning
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
+import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
-import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.Avslå
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
+import no.nav.familie.ef.sak.vilkår.VilkårType
+import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
+import no.nav.familie.ef.sak.vilkår.VurderingService
+import no.nav.familie.ef.sak.vilkår.dto.VilkårsvurderingDto
+import no.nav.familie.kontrakter.ef.søknad.SøknadMedVedlegg
+import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -26,6 +35,7 @@ import org.springframework.boot.test.web.client.exchange
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
+import java.time.LocalDateTime
 import java.util.UUID
 
 class BeregningControllerTest : OppslagSpringRunnerTest() {
@@ -33,6 +43,9 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var fagsakRepository: FagsakRepository
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
     @Autowired private lateinit var vedtakService: VedtakService
+    @Autowired private lateinit var vilkårsvurderingService: VurderingService
+    @Autowired private lateinit var søknadService: SøknadService
+    @Autowired private lateinit var grunnlagsdataService: GrunnlagsdataService
 
     @BeforeEach
     fun setUp() {
@@ -76,10 +89,70 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
         assertThat(vedtakService.hentVedtak(respons.body.data!!)).isEqualTo(vedtak)
     }
 
+    @Test
+    internal fun `Skal ikke være mulig å fullføre vedtak med resultatet innvilget når --- `() {
+        val behandling = lagFagsakOgBehandling()
+
+
+        val vedtakDto = Innvilget(periodeBegrunnelse = "periode begrunnelse",
+                                  inntektBegrunnelse = "inntekt begrunnelse")
+//        val initDelvilkår = regel.initereDelvilkårsvurdering(HovedregelMetadata(søknad, Sivilstandstype.SKILT))
+//
+//        val vilkårsvurdering = Vilkårsvurdering(behandlingId = UUID.randomUUID(),
+//                                                resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+//                                                type = VilkårType.SIVILSTAND,
+//                                                delvilkårsvurdering = DelvilkårsvurderingWrapper(initDelvilkår))
+//        val vilkårsvurdering = Vilkårsvurdering(behandlingId = UUID.randomUUID(),
+//                                                resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+//                                                type = VilkårType.SIVILSTAND,
+//                                                delvilkårsvurdering = DelvilkårsvurderingWrapper(initDelvilkår))
+
+        val vilkårsvurdering = VilkårsvurderingDto(id = UUID.randomUUID(),
+                                                   behandlingId = behandling.id,
+                                                   resultat = Vilkårsresultat.OPPFYLT,
+                                                   vilkårType = VilkårType.AKTIVITET,
+                                                   barnId = null,
+                                                   endretAv = "wer",
+                                                   endretTid = LocalDateTime.now(),
+                                                   delvilkårsvurderinger = listOf())
+
+        vilkårsvurderingService.hentEllerOpprettVurderinger(behandlingId = behandling.id) // ingen ok.
+
+        val respons: ResponseEntity<Ressurs<UUID>> = fullførVedtak(behandling.id, vedtakDto)
+
+        assertThat(respons.body.frontendFeilmelding).isEqualTo("Kan ikke fullføre en behandling med resultat innvilget hvis ikke alle vilkår er oppfylt")
+
+    }
+
+    private fun lagFagsakOgBehandling(): Behandling {
+        val fagsak = fagsakRepository.insert(fagsak(identer = setOf(FagsakPerson(""))))
+        val behandling = behandlingRepository.insert(behandling(fagsak,
+                                                                steg = StegType.VEDTA_BLANKETT,
+                                                                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                                                                status = BehandlingStatus.UTREDES))
+
+        val søknad = SøknadMedVedlegg(Testsøknad.søknadOvergangsstønad, emptyList())
+
+
+        søknadService.lagreSøknadForOvergangsstønad(søknad.søknad, behandling.id, fagsak.id, "1234")
+        grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
+
+
+        return behandling
+    }
+
     private fun fatteVedtak(id: UUID, vedtakDto: VedtakDto): ResponseEntity<Ressurs<UUID>> {
         return restTemplate.exchange(localhost("/api/beregning/$id/lagre-blankettvedtak"),
                                      HttpMethod.POST,
                                      HttpEntity(vedtakDto, headers))
     }
+
+
+    private fun fullførVedtak(id: UUID, vedtakDto: VedtakDto): ResponseEntity<Ressurs<UUID>> {
+        return restTemplate.exchange(localhost("/api/beregning/$id/fullfor"),
+                                     HttpMethod.POST,
+                                     HttpEntity(vedtakDto, headers))
+    }
+
 
 }

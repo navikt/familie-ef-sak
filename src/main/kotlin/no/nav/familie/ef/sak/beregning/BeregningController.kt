@@ -2,11 +2,14 @@ package no.nav.familie.ef.sak.beregning
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
-import no.nav.familie.ef.sak.tilkjentytelse.tilBeløpsperiode
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
+import no.nav.familie.ef.sak.tilkjentytelse.tilBeløpsperiode
+import no.nav.familie.ef.sak.vedtak.dto.Innvilget
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
+import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
@@ -28,7 +31,8 @@ class BeregningController(private val stegService: StegService,
                           private val behandlingService: BehandlingService,
                           private val beregningService: BeregningService,
                           private val tilkjentYtelseService: TilkjentYtelseService,
-                          private val tilgangService: TilgangService) {
+                          private val tilgangService: TilgangService,
+                          private val vurderingService: VurderingService) {
 
     @PostMapping
     fun beregnYtelserForRequest(@RequestBody beregningRequest: BeregningRequest): Ressurs<List<Beløpsperiode>> {
@@ -40,8 +44,16 @@ class BeregningController(private val stegService: StegService,
     @PostMapping("/{behandlingId}/fullfor")
     fun lagreVedtak(@PathVariable behandlingId: UUID, @RequestBody vedtak: VedtakDto): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
+        validerAlleVilkårOppfyltDersomInvilgelse(vedtak, behandlingId)
         val behandling = behandlingService.hentBehandling(behandlingId)
         return Ressurs.success(stegService.håndterBeregnYtelseForStønad(behandling, vedtak).id)
+    }
+
+    private fun validerAlleVilkårOppfyltDersomInvilgelse(vedtak: VedtakDto,
+                                                         behandlingId: UUID) {
+        if (vedtak is Innvilget) {
+            feilHvis(!vurderingService.erAlleVilkårOppfylt(behandlingId)) { "Kan ikke fullføre en behandling med resultat innvilget hvis ikke alle vilkår er oppfylt" }
+        }
     }
 
     @PostMapping(value = ["/{behandlingId}/lagre-vedtak", "/{behandlingId}/lagre-blankettvedtak"])
