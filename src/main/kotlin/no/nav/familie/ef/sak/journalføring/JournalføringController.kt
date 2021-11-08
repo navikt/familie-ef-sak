@@ -10,7 +10,10 @@ import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -41,6 +44,21 @@ class JournalføringController(private val journalføringService: Journalføring
         val (_, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
         tilgangService.validerTilgangTilPersonMedBarn(personIdent)
         return Ressurs.success(journalføringService.hentDokument(journalpostId, dokumentInfoId))
+    }
+
+    @GetMapping("/{journalpostId}/dokument-pdf/{dokumentInfoId}")
+    fun hentDokumentSomPdf(@PathVariable journalpostId: String, @PathVariable dokumentInfoId: String): ResponseEntity<ByteArray> {
+        val (_, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
+        tilgangService.validerTilgangTilPersonMedBarn(personIdent)
+        val responseHeaders = HttpHeaders()
+        responseHeaders.contentType = MediaType.valueOf("application/pdf")
+        responseHeaders.add("Content-Disposition", "inline; filename=" + "dokument.pdf")
+
+        return ResponseEntity(
+                journalføringService.hentDokument(journalpostId, dokumentInfoId),
+                responseHeaders,
+                HttpStatus.OK
+        )
     }
 
     @PostMapping("/{journalpostId}/fullfor")
