@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelseType
+import no.nav.familie.ef.sak.tilkjentytelse.tilTilkjentYtelseMedMetaData
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
@@ -47,7 +48,7 @@ class BlankettSimuleringsService(val beregningService: BeregningService) {
                 type = TilkjentYtelseType.FØRSTEGANGSBEHANDLING)
 
         return tilkjentYtelseForBlankett
-                .tilIverksettMedMetaData(
+                .tilTilkjentYtelseMedMetaData(
                         saksbehandlerId = SikkerhetContext.hentSaksbehandler(),
                         stønadstype = fagsak.stønadstype,
                         eksternBehandlingId = behandling.eksternId.id,
