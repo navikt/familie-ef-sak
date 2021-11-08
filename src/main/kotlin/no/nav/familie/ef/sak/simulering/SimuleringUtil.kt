@@ -1,121 +1,27 @@
 package no.nav.familie.ef.sak.simulering
 
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
-import no.nav.familie.ef.sak.iverksett.tilIverksettDto
-import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
-import no.nav.familie.kontrakter.ef.felles.StønadType
-import no.nav.familie.kontrakter.ef.iverksett.TilkjentYtelseMedMetadata
-import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
-import no.nav.familie.kontrakter.felles.simulering.PosteringType
-import no.nav.familie.kontrakter.felles.simulering.SimuleringMottaker
 import no.nav.familie.kontrakter.felles.simulering.Simuleringsoppsummering
-import no.nav.familie.kontrakter.felles.simulering.SimulertPostering
-import no.nav.familie.kontrakter.felles.simulering.Simuleringsperiode
+import no.nav.familie.kontrakter.felles.tilbakekreving.Periode
 import java.math.BigDecimal
-import java.time.LocalDate
 
-fun tilSimuleringsoppsummering(detaljertSimuleringResultat: DetaljertSimuleringResultat,
-                              tidSimuleringHentet: LocalDate): Simuleringsoppsummering {
-    val perioder = grupperPosteringerEtterDato(detaljertSimuleringResultat.simuleringMottaker)
-
-    val framtidigePerioder =
-            perioder.filter {
-                it.fom > tidSimuleringHentet ||
-                (it.tom > tidSimuleringHentet && it.forfallsdato > tidSimuleringHentet)
+fun Simuleringsoppsummering.hentSammenhengendePerioderMedFeilutbetaling(): List<Periode> {
+    val perioderMedFeilutbetaling =
+            perioder.sortedBy { it.fom }.filter { it.feilutbetaling > BigDecimal(0) }.map {
+                Periode(it.fom, it.tom)
             }
 
-    val nestePeriode = framtidigePerioder.filter { it.feilutbetaling == BigDecimal.ZERO }.minByOrNull { it.fom }
-    val tomSisteUtbetaling = perioder.filter { nestePeriode == null || it.fom < nestePeriode.fom }.maxOfOrNull { it.tom }
+    return perioderMedFeilutbetaling.fold(mutableListOf()) { akkumulatorListe, nestePeriode ->
+        val gjeldendePeriode = akkumulatorListe.lastOrNull()
 
-    return Simuleringsoppsummering(
-            perioder = perioder,
-            fomDatoNestePeriode = nestePeriode?.fom,
-            etterbetaling = hentTotalEtterbetaling(perioder, nestePeriode?.fom),
-            feilutbetaling = hentTotalFeilutbetaling(perioder, nestePeriode?.fom),
-            fom = perioder.minOfOrNull { it.fom },
-            tomDatoNestePeriode = nestePeriode?.tom,
-            forfallsdatoNestePeriode = nestePeriode?.forfallsdato,
-            tidSimuleringHentet = tidSimuleringHentet,
-            tomSisteUtbetaling = tomSisteUtbetaling,
-    )
-}
-
-private fun grupperPosteringerEtterDato(mottakere: List<SimuleringMottaker>): List<Simuleringsperiode> {
-    val simuleringPerioder = mutableMapOf<LocalDate, MutableList<SimulertPostering>>()
-
-    mottakere.forEach {
-        it.simulertPostering.filter { postering ->
-            postering.posteringType == PosteringType.YTELSE || postering.posteringType == PosteringType.FEILUTBETALING
-        }.forEach { postering ->
-            if (simuleringPerioder.containsKey(postering.fom))
-                simuleringPerioder[postering.fom]?.add(postering)
-            else simuleringPerioder[postering.fom] = mutableListOf(postering)
+        if (gjeldendePeriode != null && erPerioderSammenhengende(gjeldendePeriode, nestePeriode)) {
+            val oppdatertGjeldendePeriode = Periode(fom = gjeldendePeriode.fom,tom=nestePeriode.tom)
+            akkumulatorListe.removeLast()
+            akkumulatorListe.add(oppdatertGjeldendePeriode)
+        } else {
+            akkumulatorListe.add(nestePeriode)
         }
-    }
-
-    return simuleringPerioder.map { (fom, posteringListe) ->
-        Simuleringsperiode(
-                fom,
-                posteringListe[0].tom,
-                posteringListe[0].forfallsdato,
-                nyttBeløp = hentNyttBeløpIPeriode(posteringListe),
-                tidligereUtbetalt = hentTidligereUtbetaltIPeriode(posteringListe),
-                resultat = hentResultatIPeriode(posteringListe),
-                feilutbetaling = hentFeilbetalingIPeriode(posteringListe),
-        )
+        akkumulatorListe
     }
 }
-
-
-fun hentNyttBeløpIPeriode(periode: List<SimulertPostering>): BigDecimal {
-    val sumPositiveYtelser = periode.filter { postering ->
-        postering.posteringType == PosteringType.YTELSE && postering.beløp > BigDecimal.ZERO
-    }.sumOf { it.beløp }
-    val feilutbetaling = hentFeilbetalingIPeriode(periode)
-    return if (feilutbetaling > BigDecimal.ZERO) sumPositiveYtelser - feilutbetaling else sumPositiveYtelser
-}
-
-fun hentFeilbetalingIPeriode(periode: List<SimulertPostering>) =
-        periode.filter { postering ->
-            postering.posteringType == PosteringType.FEILUTBETALING
-        }.sumOf { it.beløp }
-
-fun hentTidligereUtbetaltIPeriode(periode: List<SimulertPostering>): BigDecimal {
-    val sumNegativeYtelser = periode.filter { postering ->
-        (postering.posteringType === PosteringType.YTELSE && postering.beløp < BigDecimal.ZERO)
-    }.sumOf { -it.beløp }
-    val feilutbetaling = hentFeilbetalingIPeriode(periode)
-    return if (feilutbetaling < BigDecimal.ZERO) sumNegativeYtelser - feilutbetaling else sumNegativeYtelser
-}
-
-fun hentResultatIPeriode(periode: List<SimulertPostering>) =
-        if (periode.map { it.posteringType }.contains(PosteringType.FEILUTBETALING)) {
-            periode.filter {
-                it.posteringType == PosteringType.FEILUTBETALING
-            }.sumOf { -it.beløp }
-        } else
-            periode.sumOf { it.beløp }
-
-fun hentTotalEtterbetaling(simuleringPerioder: List<Simuleringsperiode>, fomDatoNestePeriode: LocalDate?) =
-        simuleringPerioder.filter {
-            it.resultat > BigDecimal.ZERO && (fomDatoNestePeriode == null || it.fom < fomDatoNestePeriode)
-        }.sumOf { it.resultat }
-
-
-fun hentTotalFeilutbetaling(simuleringPerioder: List<Simuleringsperiode>, fomDatoNestePeriode: LocalDate?) =
-        simuleringPerioder.filter { fomDatoNestePeriode == null || it.fom < fomDatoNestePeriode }.sumOf { it.feilutbetaling }
-
-fun TilkjentYtelse.tilIverksettMedMetaData(saksbehandlerId: String,
-                                           eksternBehandlingId: Long,
-                                           stønadstype: Stønadstype,
-                                           eksternFagsakId: Long): TilkjentYtelseMedMetadata {
-    return TilkjentYtelseMedMetadata(tilkjentYtelse = this.tilIverksettDto(),
-                                     saksbehandlerId = saksbehandlerId,
-                                     eksternBehandlingId = eksternBehandlingId,
-                                     stønadstype = StønadType.valueOf(stønadstype.name),
-                                     eksternFagsakId = eksternFagsakId,
-                                     personIdent = this.personident,
-                                     behandlingId = this.behandlingId,
-                                     vedtaksdato = this.vedtakstidspunkt.toLocalDate())
-}
-
+private fun erPerioderSammenhengende(gjeldendePeriode: Periode, nestePeriode: Periode) =
+        gjeldendePeriode.tom.plusDays(1) == nestePeriode.fom
