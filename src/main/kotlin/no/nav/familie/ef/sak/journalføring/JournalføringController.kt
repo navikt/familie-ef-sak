@@ -11,6 +11,7 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -41,6 +42,13 @@ class JournalføringController(private val journalføringService: Journalføring
         val (_, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
         tilgangService.validerTilgangTilPersonMedBarn(personIdent)
         return Ressurs.success(journalføringService.hentDokument(journalpostId, dokumentInfoId))
+    }
+
+    @GetMapping("/{journalpostId}/dokument-pdf/{dokumentInfoId}", produces = [MediaType.APPLICATION_PDF_VALUE])
+    fun hentDokumentSomPdf(@PathVariable journalpostId: String, @PathVariable dokumentInfoId: String): ByteArray {
+        val (_, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
+        tilgangService.validerTilgangTilPersonMedBarn(personIdent)
+        return journalføringService.hentDokument(journalpostId, dokumentInfoId)
     }
 
     @PostMapping("/{journalpostId}/fullfor")
