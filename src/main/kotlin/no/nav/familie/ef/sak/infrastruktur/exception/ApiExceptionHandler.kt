@@ -33,7 +33,8 @@ class ApiExceptionHandler {
 
     @ExceptionHandler(ApiFeil::class)
     fun handleThrowable(feil: ApiFeil): ResponseEntity<Ressurs<Nothing>> {
-        return ResponseEntity.status(feil.httpStatus).body(Ressurs.failure(frontendFeilmelding = feil.feil))
+        return ResponseEntity.status(feil.httpStatus).body(Ressurs.funksjonellFeil(frontendFeilmelding = feil.feil,
+                                                                                   melding = feil.feil))
     }
 
     @ExceptionHandler(Feil::class)
