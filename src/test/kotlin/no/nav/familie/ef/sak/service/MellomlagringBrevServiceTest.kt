@@ -16,7 +16,7 @@ import java.util.UUID
 internal class MellomlagringBrevServiceTest {
 
     private val mellomlagerBrevRepository = mockk<MellomlagerBrevRepository>()
-    private val mellomlagringBrevService = no.nav.familie.ef.sak.brev.MellomlagringBrevService(mellomlagerBrevRepository, mockk())
+    private val mellomlagringBrevService = no.nav.familie.ef.sak.brev.MellomlagringBrevService(mellomlagerBrevRepository, mockk(), mockk())
 
 
     @Test
