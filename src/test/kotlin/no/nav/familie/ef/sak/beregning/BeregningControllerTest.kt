@@ -20,10 +20,7 @@ import no.nav.familie.ef.sak.vedtak.dto.Avslå
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
-import no.nav.familie.ef.sak.vilkår.VilkårType
-import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.VurderingService
-import no.nav.familie.ef.sak.vilkår.dto.VilkårsvurderingDto
 import no.nav.familie.kontrakter.ef.søknad.SøknadMedVedlegg
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -35,7 +32,6 @@ import org.springframework.boot.test.web.client.exchange
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
-import java.time.LocalDateTime
 import java.util.UUID
 
 class BeregningControllerTest : OppslagSpringRunnerTest() {
@@ -90,31 +86,11 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `Skal ikke være mulig å fullføre vedtak med resultat innvilget når --- `() {
+    internal fun `Skal returnere riktig feilmelding i response når fullfør ikke er mulig pga valideringsfeil`() {
         val behandling = lagFagsakOgBehandling()
-
 
         val vedtakDto = Innvilget(periodeBegrunnelse = "periode begrunnelse",
                                   inntektBegrunnelse = "inntekt begrunnelse")
-//        val initDelvilkår = regel.initereDelvilkårsvurdering(HovedregelMetadata(søknad, Sivilstandstype.SKILT))
-//
-//        val vilkårsvurdering = Vilkårsvurdering(behandlingId = UUID.randomUUID(),
-//                                                resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-//                                                type = VilkårType.SIVILSTAND,
-//                                                delvilkårsvurdering = DelvilkårsvurderingWrapper(initDelvilkår))
-//        val vilkårsvurdering = Vilkårsvurdering(behandlingId = UUID.randomUUID(),
-//                                                resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-//                                                type = VilkårType.SIVILSTAND,
-//                                                delvilkårsvurdering = DelvilkårsvurderingWrapper(initDelvilkår))
-
-        val vilkårsvurdering = VilkårsvurderingDto(id = UUID.randomUUID(),
-                                                   behandlingId = behandling.id,
-                                                   resultat = Vilkårsresultat.OPPFYLT,
-                                                   vilkårType = VilkårType.AKTIVITET,
-                                                   barnId = null,
-                                                   endretAv = "wer",
-                                                   endretTid = LocalDateTime.now(),
-                                                   delvilkårsvurderinger = listOf())
 
         vilkårsvurderingService.hentEllerOpprettVurderinger(behandlingId = behandling.id) // ingen ok.
 
