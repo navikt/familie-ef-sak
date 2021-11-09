@@ -9,7 +9,6 @@ import no.nav.familie.ef.sak.brev.dto.MellomlagretBrevFritekst
 import no.nav.familie.ef.sak.brev.dto.MellomlagretBrevResponse
 import no.nav.familie.ef.sak.brev.dto.MellomlagretBrevSanity
 import no.nav.familie.ef.sak.brev.dto.VedtaksbrevFritekstDto
-import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -19,8 +18,7 @@ import java.util.UUID
 @Service
 class MellomlagringBrevService(private val mellomlagerBrevRepository: MellomlagerBrevRepository,
                                private val mellomlagerFritekstbrevRepository: MellomlagerFritekstbrevRepository,
-                               private val mellomlagerFrittståendeBrevRepository: MellomlagerFrittståendeBrevRepository,
-                               private val fagsakService: FagsakService) {
+                               private val mellomlagerFrittståendeBrevRepository: MellomlagerFrittståendeBrevRepository) {
 
     fun mellomLagreBrev(behandlingId: UUID, brevverdier: String, brevmal: String, sanityVersjon: String): UUID {
         slettMellomlagringHvisFinnes(behandlingId)

@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.brev
 
-import no.nav.familie.ef.sak.brev.domain.MellomlagretFrittståendeBrev
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevDto
 import no.nav.familie.ef.sak.brev.dto.MellomlagreBrevRequestDto
 import no.nav.familie.ef.sak.brev.dto.MellomlagretBrevResponse
