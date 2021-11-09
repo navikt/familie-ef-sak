@@ -19,4 +19,8 @@ inline fun feilHvis(boolean: Boolean, httpStatus: HttpStatus = HttpStatus.INTERN
     }
 }
 
+inline fun feilHvisIkke(boolean: Boolean, httpStatus: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR, lazyMessage: () -> String) {
+    feilHvis(!boolean) { lazyMessage() }
+}
+
 class ManglerTilgang(val melding: String) : RuntimeException(melding)

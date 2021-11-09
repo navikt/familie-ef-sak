@@ -90,7 +90,7 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `Skal ikke være mulig å fullføre vedtak med resultatet innvilget når --- `() {
+    internal fun `Skal ikke være mulig å fullføre vedtak med resultat innvilget når --- `() {
         val behandling = lagFagsakOgBehandling()
 
 

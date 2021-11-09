@@ -74,21 +74,9 @@ class VurderingService(private val behandlingService: BehandlingService,
         vilkårsvurderingRepository.insertAll(vurderingerKopi)
     }
 
-    private fun hentVilkårsresultat(behandlingId: UUID): List<Vilkårsresultat> {
-        val lagredeVilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(behandlingId)
-        val vilkårsresultat = lagredeVilkårsvurderinger.groupBy { it.type }.map {
-            if (it.key == VilkårType.ALENEOMSORG) {
-                OppdaterVilkår.utledResultatForAleneomsorg(it.value)
-            } else {
-                it.value.single().resultat
-            }
-        }
-        return vilkårsresultat
-    }
-
     fun erAlleVilkårOppfylt(behandlingId: UUID): Boolean {
-        val vilkårsresultat = hentVilkårsresultat(behandlingId)
-        return vilkårsresultat.all { it == Vilkårsresultat.OPPFYLT || it == Vilkårsresultat.IKKE_AKTUELL }
+        val lagredeVilkårsvurderinger: List<Vilkårsvurdering> = vilkårsvurderingRepository.findByBehandlingId(behandlingId)
+        return OppdaterVilkår.erAlleVilkårsvurderingerOppfylt(lagredeVilkårsvurderinger)
     }
 
 }

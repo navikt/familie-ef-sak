@@ -148,4 +148,49 @@ internal class VurderingServiceTest {
         assertThat(alleVilkårsvurderinger.map { it.id }).isEqualTo(vilkårsvurderinger.map { it.id })
     }
 
+
+    @Test
+    internal fun `Skal returnere ikke oppfylt hvis vilkårsvurderinger ikke inneholder alle vilkår`() {
+        val vilkårsvurderinger = listOf(vilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT,
+                                                         type = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
+                                                         behandlingId = behandlingId))
+        every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns vilkårsvurderinger
+        val erAlleVilkårOppfylt = vurderingService.erAlleVilkårOppfylt(behandlingId)
+        assertThat(erAlleVilkårOppfylt).isFalse
+    }
+
+    @Test
+    internal fun `Skal returnere oppfylt hvis alle vilkårsvurderinger er oppfylt`() {
+        val vilkårsvurderinger = lagVilkårsvurderinger(behandlingId, Vilkårsresultat.OPPFYLT)
+        every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns vilkårsvurderinger
+        val erAlleVilkårOppfylt = vurderingService.erAlleVilkårOppfylt(behandlingId)
+        assertThat(erAlleVilkårOppfylt).isTrue
+    }
+
+    @Test
+    internal fun `Skal returnere ikke oppfylt hvis noen vurderinger er skal ikke er vurderes`() {
+        val vilkårsvurderinger = lagVilkårsvurderingerMedSkalIkkeVurderes()
+        // Guard
+        assertThat((vilkårsvurderinger.map { it.type }.containsAll(VilkårType.hentVilkår()))).isTrue()
+        every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns vilkårsvurderinger
+
+
+        val erAlleVilkårOppfylt = vurderingService.erAlleVilkårOppfylt(behandlingId)
+        assertThat(erAlleVilkårOppfylt).isFalse
+    }
+
+    private fun lagVilkårsvurderingerMedSkalIkkeVurderes() =
+            lagVilkårsvurderinger(behandlingId, Vilkårsresultat.OPPFYLT).subList(fromIndex = 0, toIndex = 3) +
+            lagVilkårsvurderinger(behandlingId, Vilkårsresultat.SKAL_IKKE_VURDERES).subList(fromIndex = 3, toIndex = 10)
+
+    private fun lagVilkårsvurderinger(behandlingId: UUID,
+                                      resultat: Vilkårsresultat = Vilkårsresultat.OPPFYLT): List<Vilkårsvurdering> {
+        return VilkårType.hentVilkår().map {
+            vilkårsvurdering(behandlingId = behandlingId,
+                             resultat = resultat,
+                             type = it,
+                             delvilkårsvurdering = listOf())
+        }
+    }
+
 }
