@@ -1,131 +1,77 @@
-package no.nav.familie.ef.sak.simulering
+package no.nav.familie.ef.sak.no.nav.familie.ef.sak.simulering
 
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.simulering.SimuleringsposteringTestUtil.lagPosteringer
-import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
-import no.nav.familie.kontrakter.felles.simulering.MottakerType
-import no.nav.familie.kontrakter.felles.simulering.PosteringType
-import no.nav.familie.kontrakter.felles.simulering.SimuleringMottaker
-import org.assertj.core.api.Assertions.assertThat
+import no.nav.familie.ef.sak.simulering.hentSammenhengendePerioderMedFeilutbetaling
+import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.simulering.Simuleringsoppsummering
+import no.nav.familie.kontrakter.felles.simulering.Simuleringsperiode
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.time.temporal.TemporalAdjusters
+import java.time.YearMonth
 
-internal class SimuleringUtilTest {
+class SimuleringUtilTest {
+
+    private val januarStart = LocalDate.of(2021, 1, 1)
+    private val aprilSlutt = LocalDate.of(2021, 4, 30)
+    private val juniStart = LocalDate.of(2021, 6, 1)
+    private val augustSlutt = LocalDate.of(2021, 8, 31)
+    private val oktoberStart = LocalDate.of(2021, 10, 1)
+    private val oktoberSlutt = LocalDate.of(2021, 10, 31)
+
+    val simuleringsoppsummering = Simuleringsoppsummering(
+            perioder = listOf(
+                    lagSimuleringsperiode(YearMonth.of(2021, 1), nyttBeløp = -5000, tidligereUtbetalt = 0),
+                    lagSimuleringsperiode(YearMonth.of(2021, 2), nyttBeløp = -5000, tidligereUtbetalt = 0),
+                    lagSimuleringsperiode(YearMonth.of(2021, 3), nyttBeløp = -5000, tidligereUtbetalt = 0),
+                    lagSimuleringsperiode(YearMonth.of(2021, 4), nyttBeløp = -5000, tidligereUtbetalt = 0),
+                    lagSimuleringsperiode(YearMonth.of(2021, 5), nyttBeløp = 5000, tidligereUtbetalt = 0),
+                    lagSimuleringsperiode(YearMonth.of(2021, 6), nyttBeløp = -5000, tidligereUtbetalt = 0),
+                    lagSimuleringsperiode(YearMonth.of(2021, 7), nyttBeløp = -5000, tidligereUtbetalt = 0),
+                    lagSimuleringsperiode(YearMonth.of(2021, 8), nyttBeløp = -5000, tidligereUtbetalt = 0),
+                    lagSimuleringsperiode(YearMonth.of(2021, 10), nyttBeløp = -5000, tidligereUtbetalt = 0)
+            ),
+            fomDatoNestePeriode = null,
+            etterbetaling = BigDecimal.valueOf(5000),
+            feilutbetaling = BigDecimal.valueOf(40_000),
+            fom = LocalDate.of(2021, 1, 1),
+            tomDatoNestePeriode = null,
+            forfallsdatoNestePeriode = null,
+            tidSimuleringHentet = LocalDate.of(2021, 11, 1),
+            tomSisteUtbetaling = LocalDate.of(2021, 10, 31)
+    )
 
     @Test
-    internal fun `skal ikke mappe simuleringsdata for forskuddskatt, motp, justering og trekk `() {
-        val fraDato = LocalDate.of(2020, 1, 1)
-        val simuleringsmottakere = listOf(SimuleringMottaker(
-                simulertPostering = lagPosteringer(fraDato, posteringstype = PosteringType.MOTP)
-                                    + lagPosteringer(fraDato, posteringstype = PosteringType.FORSKUDSSKATT)
-                                    + lagPosteringer(fraDato, posteringstype = PosteringType.JUSTERING)
-                                    + lagPosteringer(fraDato, posteringstype = PosteringType.TREKK),
-                mottakerNummer = "12345678901",
-                mottakerType = MottakerType.BRUKER
-        ))
+    internal fun `skal slå sammen perioder som har feilutbetalinger til sammenhengende perioder`() {
+        println(objectMapper.writeValueAsString(simuleringsoppsummering))
 
-        val simuleringsresultatDto =
-                tilSimuleringsoppsummering(DetaljertSimuleringResultat(simuleringsmottakere), fraDato.plusMonths(12))
+        val sammenhengendePerioderMedFeilutbetaling = simuleringsoppsummering.hentSammenhengendePerioderMedFeilutbetaling()
+        Assertions.assertThat(sammenhengendePerioderMedFeilutbetaling).hasSize(3)
+        Assertions.assertThat(sammenhengendePerioderMedFeilutbetaling.first().fom).isEqualTo(januarStart)
+        Assertions.assertThat(sammenhengendePerioderMedFeilutbetaling.first().tom).isEqualTo(aprilSlutt)
 
-        assertThat(simuleringsresultatDto.perioder).isEmpty()
-        assertThat(simuleringsresultatDto.etterbetaling).isZero()
-        assertThat(simuleringsresultatDto.feilutbetaling).isZero()
+        Assertions.assertThat(sammenhengendePerioderMedFeilutbetaling.second().fom).isEqualTo(juniStart)
+        Assertions.assertThat(sammenhengendePerioderMedFeilutbetaling.second().tom).isEqualTo(augustSlutt)
+
+        Assertions.assertThat(sammenhengendePerioderMedFeilutbetaling.last().fom).isEqualTo(oktoberStart)
+        Assertions.assertThat(sammenhengendePerioderMedFeilutbetaling.last().tom).isEqualTo(oktoberSlutt)
     }
 
-    @Test
-    internal fun `skal mappe simuleringsdata for enkel ytelse`() {
-        val fraDato = LocalDate.of(2020, 1, 1)
-        val beløp = BigDecimal(5000)
-        val antallMåneder = 36
-        val simuleringsmottakere = listOf(SimuleringMottaker(
-                simulertPostering = lagPosteringer(fraDato,
-                                                   posteringstype = PosteringType.YTELSE,
-                                                   antallMåneder = antallMåneder,
-                                                   beløp = beløp),
-                mottakerNummer = "12345678901",
-                mottakerType = MottakerType.BRUKER
-        ))
+    fun lagSimuleringsperiode(mnd: YearMonth, nyttBeløp: Int, tidligereUtbetalt: Int): Simuleringsperiode {
+        val resultat = nyttBeløp - tidligereUtbetalt
 
-        val antallMånederEtterStart: Long = 12
-        val tidSimuleringHentet = fraDato.plusMonths(antallMånederEtterStart)
-        val simuleringsresultatDto =
-                tilSimuleringsoppsummering(DetaljertSimuleringResultat(simuleringsmottakere), tidSimuleringHentet)
-
-        val posteringerGruppert = simuleringsresultatDto.perioder
-        assertThat(posteringerGruppert).hasSize(antallMåneder)
-        assertThat(posteringerGruppert.sumOf { it.feilutbetaling }).isZero
-        assertThat(posteringerGruppert.sumOf { it.resultat }).isEqualTo(beløp.multiply(BigDecimal(antallMåneder)))
-        assertThat(posteringerGruppert.first().nyttBeløp).isEqualTo(beløp)
-        assertThat(posteringerGruppert.last().nyttBeløp).isEqualTo(beløp)
-        assertThat(posteringerGruppert.first().fom).isEqualTo(fraDato)
-        assertThat(posteringerGruppert.last().fom).isEqualTo(fraDato.plusMonths(antallMåneder.toLong() - 1))
-        assertThat(simuleringsresultatDto.etterbetaling).isEqualTo(beløp.multiply(antallMånederEtterStart.toBigDecimal()))
-        assertThat(simuleringsresultatDto.feilutbetaling).isZero
-        assertThat(simuleringsresultatDto.fom).isEqualTo(fraDato)
-        assertThat(simuleringsresultatDto.forfallsdatoNestePeriode)
-                .isEqualTo(tidSimuleringHentet.with(TemporalAdjusters.lastDayOfMonth()))
-    }
-
-
-    @Test
-    internal fun `skal mappe simuleringsdata for ytelse hvor bruker har fått for mye i 6 måneder`() {
-        val fraDato = LocalDate.of(2020, 1, 1)
-        val antallMåneder = 12
-        val antallMånederFeilutbetalt = 6
-        val fraDatoFeilutbetalt = fraDato.plusMonths(antallMånederFeilutbetalt.toLong())
-        val beløp = BigDecimal(5000)
-        val nyttBeløp = BigDecimal(3000)
-        val simuleringsmottakere = listOf(SimuleringMottaker(
-                simulertPostering = lagPosteringer(fraDato,
-                                                   posteringstype = PosteringType.YTELSE,
-                                                   antallMåneder = antallMåneder - antallMånederFeilutbetalt,
-                                                   beløp = beløp)
-                                    + lagPosteringer(fraDatoFeilutbetalt,
-                                                     posteringstype = PosteringType.FEILUTBETALING,
-                                                     antallMåneder = antallMånederFeilutbetalt,
-                                                     beløp = beløp.minus(nyttBeløp))
-                                    + lagPosteringer(fraDatoFeilutbetalt,
-                                                     posteringstype = PosteringType.YTELSE,
-                                                     antallMåneder = antallMånederFeilutbetalt,
-                                                     beløp = beløp.negate())
-                                    + lagPosteringer(fraDatoFeilutbetalt,
-                                                     posteringstype = PosteringType.YTELSE,
-                                                     antallMåneder = antallMånederFeilutbetalt + 1,
-                                                     beløp = nyttBeløp)
-                                    + lagPosteringer(fraDatoFeilutbetalt,
-                                                     posteringstype = PosteringType.YTELSE,
-                                                     antallMåneder = antallMånederFeilutbetalt,
-                                                     beløp = beløp.minus(nyttBeløp)),
-                mottakerNummer = "12345678901",
-                mottakerType = MottakerType.BRUKER
-        ))
-
-        val antallMånederEtterStart: Long = 12
-        val tidSimuleringHentet = fraDato.plusMonths(antallMånederEtterStart)
-        val simuleringsresultatDto =
-                tilSimuleringsoppsummering(DetaljertSimuleringResultat(simuleringsmottakere), tidSimuleringHentet)
-
-        val posteringerGruppert = simuleringsresultatDto.perioder
-        val totaltFeilutbetaltBeløp = beløp.minus(nyttBeløp).multiply(BigDecimal(antallMånederFeilutbetalt))
-
-        assertThat(posteringerGruppert).hasSize(antallMåneder + 1)
-        assertThat(posteringerGruppert.sumOf { it.feilutbetaling }).isEqualTo(totaltFeilutbetaltBeløp)
-        assertThat(posteringerGruppert.sumOf { it.nyttBeløp }).isEqualTo(nyttBeløp.plus(beløp.multiply(BigDecimal(antallMåneder))
-                                                                                                .minus(totaltFeilutbetaltBeløp)))
-        assertThat(posteringerGruppert.sumOf { it.resultat }).isEqualTo(nyttBeløp.plus(
-                beløp.multiply(BigDecimal(antallMåneder - antallMånederFeilutbetalt)).minus(totaltFeilutbetaltBeløp))
+        return Simuleringsperiode(
+                fom = mnd.atDay(1),
+                tom = mnd.atEndOfMonth(),
+                forfallsdato = mnd.atEndOfMonth(),
+                nyttBeløp = nyttBeløp.toBigDecimal(),
+                tidligereUtbetalt = tidligereUtbetalt.toBigDecimal(),
+                resultat = resultat.toBigDecimal(),
+                feilutbetaling = Integer.max(0 - resultat, 0).toBigDecimal()
         )
-        assertThat(posteringerGruppert.first().nyttBeløp).isEqualTo(beløp)
-        assertThat(posteringerGruppert.last().nyttBeløp).isEqualTo(nyttBeløp)
-        assertThat(posteringerGruppert.first().fom).isEqualTo(fraDato)
-        assertThat(posteringerGruppert.last().fom).isEqualTo(fraDato.plusMonths(antallMåneder.toLong()))
-        assertThat(simuleringsresultatDto.etterbetaling)
-                .isEqualTo(beløp.multiply(BigDecimal(antallMånederEtterStart - antallMånederFeilutbetalt)))
-        assertThat(simuleringsresultatDto.feilutbetaling).isEqualTo(totaltFeilutbetaltBeløp)
-        assertThat(simuleringsresultatDto.fom).isEqualTo(fraDato)
-        assertThat(simuleringsresultatDto.forfallsdatoNestePeriode)
-                .isEqualTo(tidSimuleringHentet.with(TemporalAdjusters.lastDayOfMonth()))
     }
 
+    private fun <E> List<E>.second(): E {
+        return this[1]
+    }
 }

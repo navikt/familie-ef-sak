@@ -10,6 +10,8 @@ import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevAvsnitt
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevDto
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevKategori
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
@@ -40,18 +42,18 @@ internal class FrittståendeBrevServiceTest {
 
 
     private val brevtyperTestData = listOf(
-            Pair(StønadType.OVERGANGSSTØNAD,
+            Pair(Stønadstype.OVERGANGSSTØNAD,
                  FrittståendeBrevKategori.INFORMASJONSBREV) to FrittståendeBrevType.INFOBREV_OVERGANGSSTØNAD,
-            Pair(StønadType.OVERGANGSSTØNAD,
+            Pair(Stønadstype.OVERGANGSSTØNAD,
                  FrittståendeBrevKategori.INNHENTING_AV_OPPLYSNINGER) to FrittståendeBrevType.MANGELBREV_OVERGANGSSTØNAD,
-            Pair(StønadType.OVERGANGSSTØNAD,
+            Pair(Stønadstype.OVERGANGSSTØNAD,
                  FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT) to FrittståendeBrevType.INFOBREV_OVERGANGSSTØNAD,
-            Pair(StønadType.SKOLEPENGER, FrittståendeBrevKategori.INFORMASJONSBREV) to FrittståendeBrevType.INFOBREV_SKOLEPENGER,
-            Pair(StønadType.SKOLEPENGER, FrittståendeBrevKategori.INNHENTING_AV_OPPLYSNINGER) to FrittståendeBrevType.MANGELBREV_SKOLEPENGER,
-            Pair(StønadType.SKOLEPENGER, FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT) to FrittståendeBrevType.INFOBREV_SKOLEPENGER,
-            Pair(StønadType.BARNETILSYN, FrittståendeBrevKategori.INFORMASJONSBREV) to FrittståendeBrevType.INFOBREV_BARNETILSYN,
-            Pair(StønadType.BARNETILSYN, FrittståendeBrevKategori.INNHENTING_AV_OPPLYSNINGER) to FrittståendeBrevType.MANGELBREV_BARNETILSYN,
-            Pair(StønadType.BARNETILSYN, FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT) to FrittståendeBrevType.INFOBREV_BARNETILSYN)
+            Pair(Stønadstype.SKOLEPENGER, FrittståendeBrevKategori.INFORMASJONSBREV) to FrittståendeBrevType.INFOBREV_SKOLEPENGER,
+            Pair(Stønadstype.SKOLEPENGER, FrittståendeBrevKategori.INNHENTING_AV_OPPLYSNINGER) to FrittståendeBrevType.MANGELBREV_SKOLEPENGER,
+            Pair(Stønadstype.SKOLEPENGER, FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT) to FrittståendeBrevType.INFOBREV_SKOLEPENGER,
+            Pair(Stønadstype.BARNETILSYN, FrittståendeBrevKategori.INFORMASJONSBREV) to FrittståendeBrevType.INFOBREV_BARNETILSYN,
+            Pair(Stønadstype.BARNETILSYN, FrittståendeBrevKategori.INNHENTING_AV_OPPLYSNINGER) to FrittståendeBrevType.MANGELBREV_BARNETILSYN,
+            Pair(Stønadstype.BARNETILSYN, FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT) to FrittståendeBrevType.INFOBREV_BARNETILSYN)
 
     @TestFactory
     fun `skal sende frittstående brev med riktig brevtype`() =
@@ -61,14 +63,13 @@ internal class FrittståendeBrevServiceTest {
                     mockAvhengigheter()
 
                     val frittståendeBrevSlot = slot<KontrakterFrittståendeBrevDto>()
-
+                    every { fagsakService.hentFagsak(any())} returns Fagsak(stønadstype = input.first)
                     every { iverksettClient.sendFrittståendeBrev(capture(frittståendeBrevSlot)) } just Runs
 
                     frittståendeBrevService.sendFrittståendeBrev(FrittståendeBrevDto("overskrift",
                                                                                      listOf(FrittståendeBrevAvsnitt("deloverskrift",
                                                                                                                     "innhold")),
-                                                                                     UUID.randomUUID(),
-                                                                                     input.first, input.second))
+                                                                                     UUID.randomUUID(), input.second))
 
                     assertThat(frittståendeBrevSlot.captured.brevtype).isEqualTo(forventetBrevtype)
                 }

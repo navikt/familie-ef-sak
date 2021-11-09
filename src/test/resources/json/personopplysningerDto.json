@@ -95,7 +95,7 @@
   } ],
   "utflyttingFraNorge" : [ {
     "tilflyttingsland" : "Sverige",
-    "dato" : null,
+    "dato" : "2021-01-01",
     "tilflyttingssted" : "Stockholm"
   } ],
   "oppholdstillatelse" : [ {

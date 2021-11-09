@@ -83,9 +83,9 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                 },
                 utflyttingFraNorge = søker.utflyttingFraNorge.map {
                     UtflyttingDto(it.tilflyttingsland?.let { land -> kodeverkService.hentLand(land, LocalDate.now()) },
-                                  null,
+                                  it.utflyttingsdato,
                                   it.tilflyttingsstedIUtlandet)
-                },
+                }.sortedByDescending { it.dato ?: LocalDate.MIN },
                 oppholdstillatelse = OppholdstillatelseMapper.map(søker.opphold),
                 vergemål = mapVergemål(søker)
         )
