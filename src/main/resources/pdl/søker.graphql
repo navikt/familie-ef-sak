@@ -237,6 +237,7 @@ query($ident: ID!){
         utflyttingFraNorge {
             tilflyttingsland
             tilflyttingsstedIUtlandet
+            utflyttingsdato
             folkeregistermetadata {
                 gyldighetstidspunkt
                 opphoerstidspunkt
