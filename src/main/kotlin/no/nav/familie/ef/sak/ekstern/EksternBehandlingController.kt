@@ -5,6 +5,8 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
+import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDate
 import java.util.UUID
 
 @RestController
@@ -28,7 +31,8 @@ import java.util.UUID
 @Validated
 class EksternBehandlingController(
     private val pdlClient: PdlClient,
-    private val behandlingRepository: BehandlingRepository
+    private val behandlingRepository: BehandlingRepository,
+    private val tilkjentYtelseService: TilkjentYtelseService
 ) {
 
 
@@ -64,24 +68,36 @@ class EksternBehandlingController(
 
     @GetMapping("hent/{personidenter}")
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
-    fun hentAlleBehandlingIDerAvPersonidenter(
+    fun erBehandlingerUtdaterteForPersonidenter(
         @PathVariable personidenter: Set<String>
-    ): Ressurs<Set<UUID>> {
-        return hentAlleBehandlingIDer(personidenter)
-    }
-
-    private fun hentAlleBehandlingIDer(personidenter: Set<String>): Ressurs<Set<UUID>> {
+    ): Ressurs<Boolean> {
         if (personidenter.isEmpty()) {
             return Ressurs.failure("Finner ikke identer til personen")
         }
         if (personidenter.any { it.length != 11 }) {
             return Ressurs.failure("Støtter kun identer av typen fnr/dnr")
         }
+
+        val behandlinger = hentAlleBehandlingIDer(personidenter)
+        if (behandlinger.isEmpty()) {
+            return Ressurs.failure("Det finnes ingen behandlinger for oppgitte personidenter")
+        }
+        return erBehandlingerUtdaterte(behandlinger)
+    }
+
+    private fun hentAlleBehandlingIDer(personidenter: Set<String>): Set<UUID> {
         var behandlinger = mutableSetOf<UUID>()
         Stønadstype.values().forEach {
             behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(it, personidenter)?.let { behandlinger.add(it.id) }
         }
-        return Ressurs.success(behandlinger)
+        return behandlinger
+    }
+
+    private fun erBehandlingerUtdaterte(behandlingIDer: Set<UUID>): Ressurs<Boolean> {
+        var tilkjenteYtelser = mutableSetOf<TilkjentYtelse>()
+        behandlingIDer.forEach { tilkjenteYtelser.add(tilkjentYtelseService.hentForBehandling(it)) }
+        val senesteTomDatoAvAndeler : LocalDate = tilkjenteYtelser.maxOf { it.andelerTilkjentYtelse.maxOf { it.stønadTom } }
+        return Ressurs.success(senesteTomDatoAvAndeler < LocalDate.now().minusYears(1))
     }
 
     private fun finnesBehandlingFor(
@@ -114,5 +130,6 @@ class EksternBehandlingController(
             it.type != BehandlingType.TEKNISK_OPPHØR
         } ?: false
     }
+
 
 }
