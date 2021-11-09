@@ -10,9 +10,7 @@ import no.nav.familie.ef.sak.brev.dto.MellomlagretBrevResponse
 import no.nav.familie.ef.sak.brev.dto.MellomlagretBrevSanity
 import no.nav.familie.ef.sak.brev.dto.VedtaksbrevFritekstDto
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
-import no.nav.familie.kontrakter.ef.felles.StønadType
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -52,19 +50,16 @@ class MellomlagringBrevService(private val mellomlagerBrevRepository: Mellomlage
                                                                                      avsnitt = mellomlagretBrev.avsnitt),
                                                                         brevType =
                                                                         mellomlagretBrev.brevType,
-                                                                        saksbehandlerIdent = saksbehandlerIdent,
-                                                                        stønadType = mellomlagretBrev.stønadType)
+                                                                        saksbehandlerIdent = saksbehandlerIdent)
         return mellomlagerFrittståendeBrevRepository.insert(mellomlagretFrittståendeBrev).fagsakId
     }
 
     fun hentMellomlagretFrittståendeBrev(fagsakId: UUID): FrittståendeBrevDto? {
         val saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(true)
-        val stønadstype = fagsakService.hentFagsak(fagsakId).stønadstype
         mellomlagerFrittståendeBrevRepository.findByFagsakIdAndSaksbehandlerIdent(fagsakId, saksbehandlerIdent)?.let {
             return FrittståendeBrevDto(it.brev.overskrift,
                                        it.brev.avsnitt,
                                        fagsakId,
-                                       mapStønadstypeTilStønadType(stønadstype),
                                        it.brevType)
         }
         return null
@@ -94,13 +89,4 @@ class MellomlagringBrevService(private val mellomlagerBrevRepository: Mellomlage
                                                                                   saksbehandlerIdent)
                 ?.let { mellomlagerFrittståendeBrevRepository.deleteById(it.id) }
     }
-
-    private fun mapStønadstypeTilStønadType(stønadstype: Stønadstype): StønadType {
-        when (stønadstype) {
-            Stønadstype.OVERGANGSSTØNAD -> return StønadType.OVERGANGSSTØNAD
-            Stønadstype.BARNETILSYN -> return StønadType.BARNETILSYN
-            Stønadstype.SKOLEPENGER -> return StønadType.SKOLEPENGER
-        }
-    }
-
 }

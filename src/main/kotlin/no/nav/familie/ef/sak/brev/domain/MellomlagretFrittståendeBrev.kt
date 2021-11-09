@@ -12,8 +12,6 @@ import java.util.UUID
 data class MellomlagretFrittståendeBrev(@Id val id: UUID = UUID.randomUUID(),
                                         val fagsakId: UUID,
                                         val brev: Fritekstbrev,
-                                        @Column("stonad_type")
-                                        val stønadType: StønadType,
                                         val brevType: FrittståendeBrevKategori,
                                         val saksbehandlerIdent: String,
                                         val tidspunktOpprettet: LocalDateTime = LocalDateTime.now())
