@@ -1,5 +1,7 @@
 package no.nav.familie.ef.sak.brev
 
+import no.nav.familie.ef.sak.brev.domain.MellomlagretFrittståendeBrev
+import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevDto
 import no.nav.familie.ef.sak.brev.dto.MellomlagreBrevRequestDto
 import no.nav.familie.ef.sak.brev.dto.MellomlagretBrevResponse
 import no.nav.familie.ef.sak.brev.dto.VedtaksbrevFritekstDto
@@ -42,6 +44,20 @@ class BrevMellomlagerController(private val tilgangService: TilgangService,
         return Ressurs.success(mellomlagringBrevService.mellomlagreFritekstbrev(mellomlagretBrev))
     }
 
+    @PostMapping("/frittstaende")
+    fun mellomlagreFrittstaendeBrev(@RequestBody mellomlagretBrev: FrittståendeBrevDto): Ressurs<UUID> {
+        tilgangService.validerTilgangTilFagsak(mellomlagretBrev.fagsakId)
+        tilgangService.validerHarSaksbehandlerrolle()
+
+        return Ressurs.success(mellomlagringBrevService.mellomlagreFrittståendeBrev(mellomlagretBrev))
+    }
+
+    @GetMapping("/frittstaende/{fagsakId}")
+    fun hentMellomlagretFrittstaendeBrev(@PathVariable fagsakId: UUID): Ressurs<FrittståendeBrevDto?> {
+        tilgangService.validerTilgangTilFagsak(fagsakId)
+        tilgangService.validerHarSaksbehandlerrolle()
+        return Ressurs.success(mellomlagringBrevService.hentMellomlagretFrittståendeBrev(fagsakId))
+    }
 
     @GetMapping("/{behandlingId}")
     fun hentMellomlagretBrevverdier(@PathVariable behandlingId: UUID,
