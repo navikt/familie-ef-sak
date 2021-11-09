@@ -58,7 +58,7 @@ object PdlTestdata {
 
     private val innflyttingTilNorge = listOf(InnflyttingTilNorge("", "", folkeregistermetadata))
 
-    private val utflyttingFraNorge = listOf(UtflyttingFraNorge("", "", folkeregistermetadata))
+    private val utflyttingFraNorge = listOf(UtflyttingFraNorge("", "", LocalDate.now(), folkeregistermetadata))
 
     val pdlSøkerData =
             PdlSøkerData(PdlSøker(adressebeskyttelse,
