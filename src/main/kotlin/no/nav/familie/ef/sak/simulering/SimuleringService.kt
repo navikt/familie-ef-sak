@@ -11,13 +11,12 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
+import no.nav.familie.ef.sak.tilkjentytelse.tilTilkjentYtelseMedMetaData
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.kontrakter.ef.iverksett.SimuleringDto
 import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
-import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import no.nav.familie.kontrakter.felles.simulering.Simuleringsoppsummering
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 import java.util.UUID
 
 @Service
@@ -53,13 +52,11 @@ class SimuleringService(private val iverksettClient: IverksettClient,
         tilgangService.validerHarSaksbehandlerrolle()
         val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
         simuleringsresultatRepository.deleteById(behandling.id)
-        val detaljertSimuleringResultat = simulerMedTilkjentYtelse(behandling, fagsak)
-        val simuleringsoppsummering =
-                tilSimuleringsoppsummering(detaljertSimuleringResultat, LocalDate.now())
+        val beriketSimuleringsresultat = simulerMedTilkjentYtelse(behandling, fagsak)
         return simuleringsresultatRepository.insert(Simuleringsresultat(
                 behandlingId = behandling.id,
-                data = detaljertSimuleringResultat,
-                beriketData = BeriketSimuleringsresultat(detaljertSimuleringResultat, simuleringsoppsummering)
+                data = beriketSimuleringsresultat.detaljer,
+                beriketData = beriketSimuleringsresultat
         ))
     }
 
@@ -73,14 +70,14 @@ class SimuleringService(private val iverksettClient: IverksettClient,
         return simuleringsresultat.beriketData.oppsummering
     }
 
-    private fun simulerMedTilkjentYtelse(behandling: Behandling, fagsak: Fagsak): DetaljertSimuleringResultat {
+    private fun simulerMedTilkjentYtelse(behandling: Behandling, fagsak: Fagsak): BeriketSimuleringsresultat {
         val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(behandling.id)
 
         val tilkjentYtelseMedMedtadata =
-                tilkjentYtelse.tilIverksettMedMetaData(saksbehandlerId = SikkerhetContext.hentSaksbehandler(),
-                                                       eksternBehandlingId = behandling.eksternId.id,
-                                                       stønadstype = fagsak.stønadstype,
-                                                       eksternFagsakId = fagsak.eksternId.id)
+                tilkjentYtelse.tilTilkjentYtelseMedMetaData(saksbehandlerId = SikkerhetContext.hentSaksbehandler(),
+                                                            eksternBehandlingId = behandling.eksternId.id,
+                                                            stønadstype = fagsak.stønadstype,
+                                                            eksternFagsakId = fagsak.eksternId.id)
 
         return iverksettClient.simuler(SimuleringDto(
                 nyTilkjentYtelseMedMetaData = tilkjentYtelseMedMedtadata,
@@ -97,6 +94,6 @@ class SimuleringService(private val iverksettClient: IverksettClient,
                 forrigeBehandlingId = null
 
         )
-        return tilSimuleringsoppsummering(iverksettClient.simuler(simuleringDto), LocalDate.now())
+        return iverksettClient.simuler(simuleringDto).oppsummering
     }
 }

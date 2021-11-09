@@ -41,7 +41,7 @@ internal class SøkControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `Gitt person uten fagsak når søk på personensident kallas skal det returneres RessursFeilet`() {
         val response = søkPerson("01010166666")
-        Assertions.assertThat(response.body.status).isEqualTo(Ressurs.Status.FEILET)
+        Assertions.assertThat(response.body.status).isEqualTo(Ressurs.Status.FUNKSJONELL_FEIL)
         Assertions.assertThat(response.body.frontendFeilmelding).isEqualTo("Finner ikke fagsak for søkte personen")
     }
 

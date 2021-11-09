@@ -210,7 +210,7 @@ internal class AdresseHjelperTest {
     }
 
     @Test
-    internal fun `sorter adresser`() {
+    internal fun `sortering av adresser skal sortere de per type først, og sen per startdato`() {
 
         val aktivBostedsadresse = lagAdresseDto(AdresseType.BOSTEDADRESSE, now().minusDays(5))
         val historiskBostedsadresse = lagAdresseDto(
@@ -218,11 +218,19 @@ internal class AdresseHjelperTest {
         val aktivOppholdsadresse = lagAdresseDto(AdresseType.OPPHOLDSADRESSE, now())
         val historiskKontaktadresse = lagAdresseDto(
                 AdresseType.KONTAKTADRESSE, now().minusDays(15), now().minusDays(14))
+        val historiskKontaktadresseUtland = lagAdresseDto(AdresseType.KONTAKTADRESSE_UTLAND, now(), now())
 
-        val adresser = listOf(historiskBostedsadresse, aktivOppholdsadresse, historiskKontaktadresse, aktivBostedsadresse)
-
+        val adresser = listOf(historiskBostedsadresse,
+                              historiskKontaktadresseUtland,
+                              aktivOppholdsadresse,
+                              historiskKontaktadresse,
+                              aktivBostedsadresse)
         assertThat(AdresseHjelper.sorterAdresser(adresser))
-                .containsExactly(aktivBostedsadresse, aktivOppholdsadresse, historiskKontaktadresse, historiskBostedsadresse)
+                .containsExactly(aktivBostedsadresse,
+                                 historiskBostedsadresse,
+                                 aktivOppholdsadresse,
+                                 historiskKontaktadresse,
+                                 historiskKontaktadresseUtland)
     }
 
     private fun lagAdresse(vegadresse: Vegadresse?,
