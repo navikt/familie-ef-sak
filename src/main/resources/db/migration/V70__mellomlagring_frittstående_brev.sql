@@ -1,4 +1,4 @@
-CREATE TABLE mellomlagret_fritstaende_brev (
+CREATE TABLE mellomlagret_frittstaende_brev (
     id                  UUID PRIMARY KEY            NOT NULL,
     fagsak_id           UUID REFERENCES fagsak (id) NOT NULL,
     brev                JSON                        NOT NULL,
