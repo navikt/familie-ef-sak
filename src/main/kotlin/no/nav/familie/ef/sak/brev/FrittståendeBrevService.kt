@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevKategori
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevRequestDto
 import no.nav.familie.ef.sak.brev.dto.VedtaksbrevDto
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
@@ -51,35 +52,35 @@ class FrittståendeBrevService(private val brevClient: BrevClient,
         val journalførendeEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(
                 ident)
         val saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(true)
-        val brevType = utledFrittståendeBrevType(frittståendeBrevDto)
+        val stønadstype = fagsakService.hentFagsak(frittståendeBrevDto.fagsakId).stønadstype
+        val brevType = utledFrittståendeBrevType(frittståendeBrevDto, stønadstype)
         iverksettClient.sendFrittståendeBrev(FrittståendeBrevDtoIverksetting(personIdent = ident,
                                                                              eksternFagsakId = eksternFagsakId,
-                                                                             stønadType = frittståendeBrevDto.stønadType,
                                                                              brevtype = brevType,
                                                                              fil = brev,
                                                                              journalførendeEnhet = journalførendeEnhet,
                                                                              saksbehandlerIdent = saksbehandlerIdent))
     }
 
-    private fun utledFrittståendeBrevType(frittståendeBrevDto: FrittståendeBrevDto) =
+    private fun utledFrittståendeBrevType(frittståendeBrevDto: FrittståendeBrevDto, stønadstype: Stønadstype) =
             when (frittståendeBrevDto.brevType) {
                 FrittståendeBrevKategori.INFORMASJONSBREV, FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT ->
-                    utledBrevtypeInfobrev(frittståendeBrevDto.stønadType)
-                FrittståendeBrevKategori.INNHENTING_AV_OPPLYSNINGER -> utledBrevtypeMangelbrev(frittståendeBrevDto.stønadType)
+                    utledBrevtypeInfobrev(stønadstype)
+                FrittståendeBrevKategori.INNHENTING_AV_OPPLYSNINGER -> utledBrevtypeMangelbrev(stønadstype)
             }
 
-    private fun utledBrevtypeInfobrev(stønadType: StønadType) =
-            when (stønadType) {
-                StønadType.OVERGANGSSTØNAD -> FrittståendeBrevType.INFOBREV_OVERGANGSSTØNAD
-                StønadType.BARNETILSYN -> FrittståendeBrevType.INFOBREV_BARNETILSYN
-                StønadType.SKOLEPENGER -> FrittståendeBrevType.INFOBREV_SKOLEPENGER
+    private fun utledBrevtypeInfobrev(stønadstype: Stønadstype) =
+            when (stønadstype) {
+                Stønadstype.OVERGANGSSTØNAD -> FrittståendeBrevType.INFOBREV_OVERGANGSSTØNAD
+                Stønadstype.BARNETILSYN -> FrittståendeBrevType.INFOBREV_BARNETILSYN
+                Stønadstype.SKOLEPENGER -> FrittståendeBrevType.INFOBREV_SKOLEPENGER
             }
 
-    private fun utledBrevtypeMangelbrev(stønadType: StønadType) =
-            when (stønadType) {
-                StønadType.OVERGANGSSTØNAD -> FrittståendeBrevType.MANGELBREV_OVERGANGSSTØNAD
-                StønadType.BARNETILSYN -> FrittståendeBrevType.MANGELBREV_BARNETILSYN
-                StønadType.SKOLEPENGER -> FrittståendeBrevType.MANGELBREV_SKOLEPENGER
+    private fun utledBrevtypeMangelbrev(stønadstype: Stønadstype) =
+            when (stønadstype) {
+                Stønadstype.OVERGANGSSTØNAD -> FrittståendeBrevType.MANGELBREV_OVERGANGSSTØNAD
+                Stønadstype.BARNETILSYN -> FrittståendeBrevType.MANGELBREV_BARNETILSYN
+                Stønadstype.SKOLEPENGER -> FrittståendeBrevType.MANGELBREV_SKOLEPENGER
             }
 
 
