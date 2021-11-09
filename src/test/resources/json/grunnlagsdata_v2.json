@@ -986,6 +986,11 @@
             "type" : "String",
             "nullable" : true
           },
+          "utflyttingsdato" : {
+            "name" : "utflyttingsdato",
+            "type" : "LocalDate",
+            "nullable" : true
+          },
           "folkeregistermetadata" : {
             "name" : "folkeregistermetadata",
             "type" : "Object",
@@ -1646,6 +1651,11 @@
           "tilflyttingsstedIUtlandet" : {
             "name" : "tilflyttingsstedIUtlandet",
             "type" : "String",
+            "nullable" : true
+          },
+          "utflyttingsdato" : {
+            "name" : "utflyttingsdato",
+            "type" : "LocalDate",
             "nullable" : true
           },
           "folkeregistermetadata" : {

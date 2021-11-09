@@ -72,7 +72,7 @@ class MedlemskapMapper(private val statsborgerskapMapper: StatsborgerskapMapper,
                 UtflyttingDto(tilflyttingsland = utflytting.tilflyttingsland?.let {
                     kodeverkService.hentLand(it, LocalDate.now()) ?: it
                 },
-                              dato = null)
+                              dato = utflytting.utflyttingsdato)
             }
 
 }
