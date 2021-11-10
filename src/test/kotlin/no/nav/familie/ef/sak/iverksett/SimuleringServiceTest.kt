@@ -93,7 +93,7 @@ internal class SimuleringServiceTest {
         val simulerSlot = slot<SimuleringDto>()
         every {
             iverksettClient.simuler(capture(simulerSlot))
-        } returns DetaljertSimuleringResultat(simuleringMottaker = emptyList())
+        } returns BeriketSimuleringsresultat(mockk(), mockk())
         simuleringService.simuler(behandling.id)
 
         assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.behandlingId).isEqualTo(tilkjentYtelse.behandlingId)
@@ -137,7 +137,7 @@ internal class SimuleringServiceTest {
         val simulerSlot = slot<SimuleringDto>()
         every {
             iverksettClient.simuler(capture(simulerSlot))
-        } returns DetaljertSimuleringResultat(simuleringMottaker = emptyList())
+        } returns BeriketSimuleringsresultat(mockk(), mockk())
 
         simuleringService.simuler(behandling.id)
 
@@ -191,7 +191,7 @@ internal class SimuleringServiceTest {
         val tilkjentYtelse = tilkjentYtelse(behandlingId = behandling.id, personIdent = personIdent)
 
         every { iverksettClient.simuler(any()) } returns
-                objectMapper.readValue(readFile("simuleringsresultat.json"))
+                objectMapper.readValue(readFile("simuleringsresultat_beriket.json"))
 
         every { behandlingService.hentBehandling(any()) } returns behandling
         every { tilkjentYtelseService.hentForBehandling(any()) } returns tilkjentYtelse

@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseMapper
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.InnflyttingUtflyttingMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.PersonopplysningerMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.StatsborgerskapMapper
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
@@ -43,8 +44,8 @@ internal class PersonopplysningerServiceTest {
         val personopplysningerMapper =
                 PersonopplysningerMapper(adresseMapper,
                                          StatsborgerskapMapper(kodeverkService),
-                                         arbeidsfordelingService,
-                                         kodeverkService)
+                                         InnflyttingUtflyttingMapper(kodeverkService),
+                                         arbeidsfordelingService)
         val personService = PersonService(pdlClient)
         personopplysningerService = PersonopplysningerService(personService,
                                                               søknadService,

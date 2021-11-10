@@ -285,6 +285,7 @@ data class InnflyttingTilNorge(val fraflyttingsland: String?,
 
 data class UtflyttingFraNorge(val tilflyttingsland: String?,
                               val tilflyttingsstedIUtlandet: String?,
+                              val utflyttingsdato: LocalDate?,
                               val folkeregistermetadata: Folkeregistermetadata)
 
 data class UtenlandskAdresse(val adressenavnNummer: String?,

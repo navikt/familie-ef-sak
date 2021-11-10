@@ -22,7 +22,7 @@ class IverksettClientMock {
     fun iverksettClient(): IverksettClient {
         val iverksettClient = mockk<IverksettClient>()
 
-        every { iverksettClient.simuler(any()) } returns objectMapper.readValue(readFile("simuleringsresultat.json"))
+        every { iverksettClient.simuler(any()) } returns objectMapper.readValue(readFile("simuleringsresultat_beriket.json"))
 
         every { iverksettClient.iverksett(any(), any()) } just Runs
         every { iverksettClient.iverksettTekniskOpphør(any()) } just Runs
