@@ -7,7 +7,6 @@ import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
-import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -64,11 +63,10 @@ class EksternBehandlingController(
         if (personidenter.any { it.length != 11 }) {
             return Ressurs.failure("Støtter kun identer av typen fnr/dnr")
         }
-        val finnesBehandling = eksternBehandlingService.finnesBehandlingFor(personidenter, stønadstype)
         if (stoenadSiste12Maaneder) {
-            return Ressurs.success(finnesBehandling && eksternBehandlingService.erBehandlingerUtdaterteFor(personidenter))
+            return Ressurs.success(eksternBehandlingService.erBehandlingerUtdaterteFor(personidenter))
         }
-        return Ressurs.success(finnesBehandling)
+        return Ressurs.success(eksternBehandlingService.finnesBehandlingFor(personidenter, stønadstype))
     }
 
 }
