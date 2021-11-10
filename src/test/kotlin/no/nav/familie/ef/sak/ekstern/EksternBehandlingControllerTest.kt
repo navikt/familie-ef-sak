@@ -21,7 +21,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.util.UUID
 
 internal class EksternBehandlingControllerTest {
 
@@ -89,22 +88,7 @@ internal class EksternBehandlingControllerTest {
 
     @Test
     internal fun `opprett ikke-utdaterte andeler som er maksimalt under ett år, forvent behandlinger utdaterte lik false`() {
-        val uuid1 = UUID.randomUUID()
-        val uuid2 = UUID.randomUUID()
-
-        every { eksternBehandlingService.finnesBehandlingFor(any(), any()) } returns true
-        every {
-            behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(Stønadstype.OVERGANGSSTØNAD, any())
-        } returns behandling(id = uuid1)
-        every {
-            behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(Stønadstype.BARNETILSYN, any())
-        } returns behandling(id = uuid2)
-        every {
-            behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(Stønadstype.SKOLEPENGER, any())
-        } returns null
-        every { tilkjentYtelseService.hentForBehandling(uuid1) } returns opprettIkkeUtdatertTilkjentYtelse()
-        every { tilkjentYtelseService.hentForBehandling(uuid2) } returns opprettIkkeUtdatertTilkjentYtelse()
-
+        mockBehandlingMedTilkjentYtelse(opprettIkkeUtdatertTilkjentYtelse())
         assertThat(eksternBehandlingController.finnesBehandlingForPersonIdenter(Stønadstype.OVERGANGSSTØNAD,
                                                                                 true,
                                                                                 setOf("12345678910")).data).isEqualTo(false)
@@ -112,25 +96,15 @@ internal class EksternBehandlingControllerTest {
 
     @Test
     internal fun `opprett utdaterte andeler som er maksimalt under ett år, forvent behandlinger utdaterte lik true`() {
-        val uuid1 = UUID.randomUUID()
-        val uuid2 = UUID.randomUUID()
-
-        every { eksternBehandlingService.finnesBehandlingFor(any(), any()) } returns true
-        every {
-            behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(Stønadstype.OVERGANGSSTØNAD, any())
-        } returns behandling(id = uuid1)
-        every {
-            behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(Stønadstype.BARNETILSYN, any())
-        } returns behandling(id = uuid2)
-        every {
-            behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(Stønadstype.SKOLEPENGER, any())
-        } returns null
-        every { tilkjentYtelseService.hentForBehandling(uuid1) } returns opprettUtdatertTilkjentYtelse()
-        every { tilkjentYtelseService.hentForBehandling(uuid2) } returns opprettUtdatertTilkjentYtelse()
-
+        mockBehandlingMedTilkjentYtelse(opprettUtdatertTilkjentYtelse())
         assertThat(eksternBehandlingController.finnesBehandlingForPersonIdenter(Stønadstype.OVERGANGSSTØNAD,
                                                                                 true,
-                                                                                setOf("12345678910")).data).isEqualTo(true)
+                                                                                setOf("12345678910")).data)
+                .isEqualTo(true)
+        assertThat(eksternBehandlingController.finnesBehandlingForPersonIdenter(Stønadstype.OVERGANGSSTØNAD,
+                                                                                false,
+                                                                                setOf("12345678910")).data)
+                .isEqualTo(true)
     }
 
     @Test
@@ -180,6 +154,16 @@ internal class EksternBehandlingControllerTest {
                         )
                 )
         )
+    }
+
+    private fun mockBehandlingMedTilkjentYtelse(tilkjentYtelse: TilkjentYtelse) {
+        val behandling = behandling()
+        every { eksternBehandlingService.finnesBehandlingFor(any(), any()) } returns true
+        every { behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(any(), any()) } returns null
+        every {
+            behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(Stønadstype.OVERGANGSSTØNAD, any())
+        } returns behandling
+        every { tilkjentYtelseService.hentForBehandling(behandling.id) } returns tilkjentYtelse
     }
 
 }

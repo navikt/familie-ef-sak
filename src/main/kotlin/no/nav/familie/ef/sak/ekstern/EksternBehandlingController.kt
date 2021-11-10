@@ -54,7 +54,7 @@ class EksternBehandlingController(
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
     fun finnesBehandlingForPersonIdenter(
             @RequestParam("type") stønadstype: Stønadstype?,
-            @RequestParam("stoenadSiste12Maaneder") stoenadSiste12Maaneder: Boolean,
+            @RequestParam("stoenadSiste12Maaneder") stønadSiste12Måneder: Boolean,
             @RequestBody personidenter: Set<String>
     ): Ressurs<Boolean> {
         if (personidenter.isEmpty()) {
@@ -63,7 +63,7 @@ class EksternBehandlingController(
         if (personidenter.any { it.length != 11 }) {
             return Ressurs.failure("Støtter kun identer av typen fnr/dnr")
         }
-        if (stoenadSiste12Maaneder) {
+        if (stønadSiste12Måneder) {
             return Ressurs.success(eksternBehandlingService.erBehandlingerUtdaterteFor(personidenter))
         }
         return Ressurs.success(eksternBehandlingService.finnesBehandlingFor(personidenter, stønadstype))
