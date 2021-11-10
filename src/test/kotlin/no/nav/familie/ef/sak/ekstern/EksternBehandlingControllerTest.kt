@@ -21,6 +21,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.util.UUID
 
 internal class EksternBehandlingControllerTest {
 
@@ -87,8 +88,8 @@ internal class EksternBehandlingControllerTest {
     }
 
     @Test
-    internal fun `opprett ikke-utdaterte andeler som er maksimalt under ett år, forvent behandlinger utdaterte lik false`() {
-        mockBehandlingMedTilkjentYtelse(opprettIkkeUtdatertTilkjentYtelse())
+    internal fun `opprett en ikke-utdaterte og en utdatert andele som er maksimalt under ett år, forvent behandlinger utdaterte lik false`() {
+        mockOpprettTilkjenteYtelser(opprettIkkeUtdatertTilkjentYtelse(), opprettUtdatertTilkjentYtelse())
         assertThat(eksternBehandlingController.finnesBehandlingForPersonIdenter(Stønadstype.OVERGANGSSTØNAD,
                                                                                 true,
                                                                                 setOf("12345678910")).data).isEqualTo(false)
@@ -96,15 +97,10 @@ internal class EksternBehandlingControllerTest {
 
     @Test
     internal fun `opprett utdaterte andeler som er maksimalt under ett år, forvent behandlinger utdaterte lik true`() {
-        mockBehandlingMedTilkjentYtelse(opprettUtdatertTilkjentYtelse())
+        mockOpprettTilkjenteYtelser(opprettUtdatertTilkjentYtelse(), opprettUtdatertTilkjentYtelse())
         assertThat(eksternBehandlingController.finnesBehandlingForPersonIdenter(Stønadstype.OVERGANGSSTØNAD,
                                                                                 true,
-                                                                                setOf("12345678910")).data)
-                .isEqualTo(true)
-        assertThat(eksternBehandlingController.finnesBehandlingForPersonIdenter(Stønadstype.OVERGANGSSTØNAD,
-                                                                                false,
-                                                                                setOf("12345678910")).data)
-                .isEqualTo(true)
+                                                                                setOf("12345678910")).data).isEqualTo(true)
     }
 
     @Test
@@ -156,14 +152,21 @@ internal class EksternBehandlingControllerTest {
         )
     }
 
-    private fun mockBehandlingMedTilkjentYtelse(tilkjentYtelse: TilkjentYtelse) {
-        val behandling = behandling()
+    private fun mockOpprettTilkjenteYtelser(tilkjentYtelse: TilkjentYtelse, annenTilkjentYtelse: TilkjentYtelse) {
+        val uuid1 = UUID.randomUUID()
+        val uuid2 = UUID.randomUUID()
+
         every { eksternBehandlingService.finnesBehandlingFor(any(), any()) } returns true
-        every { behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(any(), any()) } returns null
         every {
             behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(Stønadstype.OVERGANGSSTØNAD, any())
-        } returns behandling
-        every { tilkjentYtelseService.hentForBehandling(behandling.id) } returns tilkjentYtelse
+        } returns behandling(id = uuid1)
+        every {
+            behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(Stønadstype.BARNETILSYN, any())
+        } returns behandling(id = uuid2)
+        every {
+            behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(Stønadstype.SKOLEPENGER, any())
+        } returns null
+        every { tilkjentYtelseService.hentForBehandling(uuid1) } returns tilkjentYtelse
+        every { tilkjentYtelseService.hentForBehandling(uuid2) } returns annenTilkjentYtelse
     }
-
 }
