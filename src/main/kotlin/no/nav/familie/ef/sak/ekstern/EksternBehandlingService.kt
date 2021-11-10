@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
+import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -23,10 +24,11 @@ class EksternBehandlingService(val tilkjentYtelseService: TilkjentYtelseService,
 
     fun erBehandlingerUtdaterteFor(personidenter: Set<String>): Boolean {
         val behandlingIDer = hentAlleBehandlingIDer(personidenter)
-        val tilkjenteYtelser = mutableSetOf<TilkjentYtelse>()
-        behandlingIDer.forEach { tilkjenteYtelser.add(tilkjentYtelseService.hentForBehandling(it)) }
-        val senesteTomDatoAvAndeler: LocalDate = tilkjenteYtelser.maxOf { it.andelerTilkjentYtelse.maxOf { it.stønadTom } }
-        return senesteTomDatoAvAndeler < LocalDate.now().minusYears(1)
+        val sisteStønadsdato = behandlingIDer
+                                       .map(tilkjentYtelseService::hentForBehandling)
+                                       .mapNotNull { it.andelerTilkjentYtelse.maxOfOrNull(AndelTilkjentYtelse::stønadTom) }
+                                       .maxOfOrNull { it } ?: LocalDate.MIN
+        return sisteStønadsdato > LocalDate.now().minusYears(1)
     }
 
     /**
