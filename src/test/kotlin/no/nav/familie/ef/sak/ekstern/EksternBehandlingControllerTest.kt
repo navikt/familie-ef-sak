@@ -90,7 +90,7 @@ internal class EksternBehandlingControllerTest {
     internal fun `opprett ikke-utdaterte andeler som er maksimalt under ett år, forvent behandlinger utdaterte lik false`() {
         val uuid1 = UUID.randomUUID()
         val uuid2 = UUID.randomUUID()
-        val tilkjenteYtelser = opprettTilkjenteYtelser(false)
+        val tilkjenteYtelser = opprettTilkjenteYtelser(utdatert = false) 
         every {
             behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(Stønadstype.OVERGANGSSTØNAD, any())
         } returns behandling(id = uuid1)
