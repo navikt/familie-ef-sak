@@ -5,7 +5,6 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
-import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.UUID
@@ -28,7 +27,7 @@ class EksternBehandlingService(val tilkjentYtelseService: TilkjentYtelseService,
                                        .map(tilkjentYtelseService::hentForBehandling)
                                        .mapNotNull { it.andelerTilkjentYtelse.maxOfOrNull(AndelTilkjentYtelse::stønadTom) }
                                        .maxOfOrNull { it } ?: LocalDate.MIN
-        return sisteStønadsdato > LocalDate.now().minusYears(1)
+        return sisteStønadsdato < LocalDate.now().minusYears(1)
     }
 
     /**
