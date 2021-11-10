@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController
         consumes = [MediaType.APPLICATION_JSON_VALUE],
         produces = [MediaType.APPLICATION_JSON_VALUE]
 )
-@Validated
+
 class EksternBehandlingController(
         private val pdlClient: PdlClient,
         private val eksternBehandlingService: EksternBehandlingService
@@ -41,6 +41,9 @@ class EksternBehandlingController(
             @RequestBody request: PersonIdent
     ): Ressurs<Boolean> {
         val personidenter = pdlClient.hentPersonidenter(request.ident, historikk = true).identer()
+        if (personidenter.isEmpty()) {
+            return Ressurs.failure("Kunne ikke hente personidenter fra pdl")
+        }
         return Ressurs.success(eksternBehandlingService.finnesBehandlingFor(personidenter, stønadstype))
     }
 
