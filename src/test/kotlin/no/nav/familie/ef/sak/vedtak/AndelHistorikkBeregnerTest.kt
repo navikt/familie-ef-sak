@@ -1,6 +1,8 @@
 package no.nav.familie.ef.sak.vedtak
 
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
+import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.tilDto
@@ -75,7 +77,9 @@ object AndelHistorikkRunner {
 
         validerInput(grupper)
 
-        val output = AndelHistorikkBeregner.lagHistorikk(grupper.input, grupper.vedtaksliste)
+        val behandlinger = grupper.input.map { it.behandlingId }.distinct().map { behandling(id = it) }
+
+        val output = AndelHistorikkBeregner.lagHistorikk(grupper.input, grupper.vedtaksliste, behandlinger)
 
         assertThat(toString(output)).isEqualTo(toString(grupper.expectedOutput))
     }
@@ -264,6 +268,7 @@ object AndelHistorikkParser {
 
     private fun lagAndel(it: AndelHistorikkData) =
             AndelHistorikkDto(behandlingId = it.behandlingId,
+                              behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                               vedtakstidspunkt = LocalDateTime.now(), // burde denne testes? EKs att man oppretter vedtaksdato per behandlingId
                               saksbehandler = "",
                               andel = mapAndel(it).tilDto(),

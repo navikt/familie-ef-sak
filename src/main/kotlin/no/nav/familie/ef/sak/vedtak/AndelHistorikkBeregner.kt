@@ -1,5 +1,7 @@
 package no.nav.familie.ef.sak.vedtak
 
+import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.tilkjentytelse.AndelTilkjentYtelseDto
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
@@ -18,6 +20,7 @@ enum class EndringType {
 }
 
 data class AndelHistorikkDto(val behandlingId: UUID,
+                             val behandlingType: BehandlingType,
                              val vedtakstidspunkt: LocalDateTime,
                              val saksbehandler: String,
                              val andel: AndelTilkjentYtelseDto,
@@ -42,11 +45,15 @@ object AndelHistorikkBeregner {
                                        var vedtaksperiode: Vedtaksperiode,
                                        var kontrollert: UUID)
 
-    fun lagHistorikk(tilkjentYtelser: List<TilkjentYtelse>, vedtaksliste: List<Vedtak>): List<AndelHistorikkDto> {
+    fun lagHistorikk(tilkjentYtelser: List<TilkjentYtelse>,
+                     vedtaksliste: List<Vedtak>,
+                     behandlinger: List<Behandling>): List<AndelHistorikkDto> {
         val historikk = lagHistorikkHolders(sorterTilkjentYtelser(tilkjentYtelser), vedtaksliste)
+        val behandlingerPåId = behandlinger.associate { it.id to it.type }
 
         return historikk.map {
             AndelHistorikkDto(behandlingId = it.behandlingId,
+                              behandlingType = behandlingerPåId.getValue(it.behandlingId),
                               vedtakstidspunkt = it.vedtakstidspunkt,
                               saksbehandler = it.saksbehandler,
                               andel = it.andel.tilDto(),
@@ -56,7 +63,8 @@ object AndelHistorikkBeregner {
         }
     }
 
-    private fun lagHistorikkHolders(tilkjentYtelser: List<TilkjentYtelse>, vedtaksliste: List<Vedtak>): List<AndelHistorikkHolder> {
+    private fun lagHistorikkHolders(tilkjentYtelser: List<TilkjentYtelse>,
+                                    vedtaksliste: List<Vedtak>): List<AndelHistorikkHolder> {
         val historikk = mutableListOf<AndelHistorikkHolder>()
 
         val vedtaksperioderPåBehandling = vedtaksliste.associate {
