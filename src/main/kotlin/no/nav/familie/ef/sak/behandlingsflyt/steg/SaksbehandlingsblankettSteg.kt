@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillBehandlingTask
 import no.nav.familie.ef.sak.blankett.BlankettHelper.lagArkiverBlankettRequestMotNyLøsning
 import no.nav.familie.ef.sak.blankett.BlankettService
@@ -19,7 +20,6 @@ import org.springframework.stereotype.Service
 @Service
 class SaksbehandlingsblankettSteg(private val blankettService: BlankettService,
                                   private val taskRepository: TaskRepository,
-                                  private val behandlingRepository: BehandlingRepository,
                                   private val arbeidsfordelingService: ArbeidsfordelingService,
                                   private val totrinnskontrollService: TotrinnskontrollService,
                                   private val journalpostClient: JournalpostClient,
@@ -30,9 +30,15 @@ class SaksbehandlingsblankettSteg(private val blankettService: BlankettService,
 
     override fun utførSteg(behandling: Behandling, data: Void?) {
         val blankettPdf = blankettService.lagBlankett(behandling.id)
-        journalførSaksbehandlingsblankett(behandling, blankettPdf)
+        if (skalJournalføreBlankett(behandling)) {
+            logger.info("Journalfører blankett for behandling=${behandling.id}")
+            journalførSaksbehandlingsblankett(behandling, blankettPdf)
+        }
         opprettFerdigstillOppgave(behandling)
     }
+
+    private fun skalJournalføreBlankett(behandling: Behandling): Boolean =
+            behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING
 
     private fun journalførSaksbehandlingsblankett(behandling: Behandling, blankettPdf: ByteArray) {
         val arkiverDokumentRequest = opprettArkiverDokumentRequest(behandling, blankettPdf)
