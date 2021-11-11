@@ -1,14 +1,13 @@
 package no.nav.familie.ef.sak.vedtak
 
 import no.nav.familie.ef.sak.tilkjentytelse.AndelTilkjentYtelseDto
-import no.nav.familie.ef.sak.tilkjentytelse.tilDto
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.tilkjentytelse.tilDto
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -74,7 +73,7 @@ object AndelHistorikkBeregner {
                     val index = finnIndeksForNyAndel(historikk, andel)
                     historikk.add(index, lagNyAndel(tilkjentYtelse, andel, vedtaksperiode))
                 } else {
-                    val endringType = andelFraHistorikk.andel.finnEndringstype(andel)
+                    val endringType = andelFraHistorikk.finnEndringstype(andel, vedtaksperiode)
                     if (endringType != null) {
                         andelFraHistorikk.andel = andel
                         andelFraHistorikk.endring = lagEndring(endringType, tilkjentYtelse)
@@ -108,13 +107,18 @@ object AndelHistorikkBeregner {
                                  vedtaksperiode = vedtaksperiode,
                                  kontrollert = tilkjentYtelse.id)
 
-    private fun AndelTilkjentYtelse.finnEndringstype(andel: AndelTilkjentYtelse): EndringType? {
+    private fun AndelHistorikkHolder.finnEndringstype(andel: AndelTilkjentYtelse, vedtaksperiode: Vedtaksperiode): EndringType? {
         return when {
-            this.stønadTom != andel.stønadTom || this.beløp != andel.beløp -> EndringType.ENDRET
-            this.inntekt != andel.inntekt -> EndringType.ENDRING_I_INNTEKT
+            aktivitetEllerPeriodeTypeHarEndretSeg(vedtaksperiode) -> EndringType.ENDRET
+            this.andel.stønadTom != andel.stønadTom || this.andel.beløp != andel.beløp -> EndringType.ENDRET
+            this.andel.inntekt != andel.inntekt -> EndringType.ENDRING_I_INNTEKT
             else -> null
         }
     }
+
+    private fun AndelHistorikkHolder.aktivitetEllerPeriodeTypeHarEndretSeg(vedtaksperiode: Vedtaksperiode) =
+            this.vedtaksperiode.aktivitet != vedtaksperiode.aktivitet ||
+            this.vedtaksperiode.periodeType != vedtaksperiode.periodeType
 
     private fun lagEndring(type: EndringType, tilkjentYtelse: TilkjentYtelse) =
             HistorikkEndring(type = type,

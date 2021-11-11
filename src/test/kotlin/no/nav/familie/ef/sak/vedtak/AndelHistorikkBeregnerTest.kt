@@ -39,6 +39,11 @@ class AndelHistorikkBeregnerTest {
     }
 
     @Test
+    internal fun `aktivitet og vedtaksperiodetype endrer seg`() {
+        run("/økonomi/aktivitet_periodetype_endrer_seg.csv")
+    }
+
+    @Test
     internal fun `periode2_slettes`() {
         run("/økonomi/periode2_slettes.csv")
     }
