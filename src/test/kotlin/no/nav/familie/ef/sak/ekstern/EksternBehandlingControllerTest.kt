@@ -88,19 +88,15 @@ internal class EksternBehandlingControllerTest {
     }
 
     @Test
-    internal fun `opprett en ikke-utdaterte og en utdatert andeler, forvent behandlinger finnes lik true`() {
+    internal fun `opprett en ikke-utdaterte og en utdatert andeler, forvent at en stønad for det siste året finnes`() {
         mockOpprettTilkjenteYtelser(opprettIkkeUtdatertTilkjentYtelse(), opprettUtdatertTilkjentYtelse())
-        assertThat(eksternBehandlingController.finnesBehandlingForPersonIdenter(Stønadstype.OVERGANGSSTØNAD,
-                                                                                true,
-                                                                                setOf("12345678910")).data).isEqualTo(true)
+        assertThat(eksternBehandlingController.harStønadSiste12MånederForPersonidenter(setOf("12345678910")).data).isEqualTo(true)
     }
 
     @Test
-    internal fun `opprett utdaterte andeler, forvent behandlinger finnes lik false`() {
+    internal fun `opprett utdaterte andeler, forvent at stønad for det siste året ikke finnes`() {
         mockOpprettTilkjenteYtelser(opprettUtdatertTilkjentYtelse(), opprettUtdatertTilkjentYtelse())
-        assertThat(eksternBehandlingController.finnesBehandlingForPersonIdenter(Stønadstype.OVERGANGSSTØNAD,
-                                                                                true,
-                                                                                setOf("12345678910")).data).isEqualTo(false)
+        assertThat(eksternBehandlingController.harStønadSiste12MånederForPersonidenter(setOf("12345678910")).data).isEqualTo(false)
     }
 
     @Test
@@ -156,7 +152,6 @@ internal class EksternBehandlingControllerTest {
         val uuid1 = UUID.randomUUID()
         val uuid2 = UUID.randomUUID()
 
-        every { eksternBehandlingService.finnesBehandlingFor(any(), any()) } returns true
         every {
             behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(Stønadstype.OVERGANGSSTØNAD, any())
         } returns behandling(id = uuid1)

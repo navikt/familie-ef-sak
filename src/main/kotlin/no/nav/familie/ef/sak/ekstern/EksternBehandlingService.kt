@@ -21,13 +21,13 @@ class EksternBehandlingService(val tilkjentYtelseService: TilkjentYtelseService,
         }
     }
 
-    fun erBehandlingerUtdaterteFor(personidenter: Set<String>): Boolean {
+    fun harStønadSiste12Måneder(personidenter: Set<String>): Boolean {
         val behandlingIDer = hentAlleBehandlingIDer(personidenter)
         val sisteStønadsdato = behandlingIDer
                                        .map(tilkjentYtelseService::hentForBehandling)
                                        .mapNotNull { it.andelerTilkjentYtelse.maxOfOrNull(AndelTilkjentYtelse::stønadTom) }
                                        .maxOfOrNull { it } ?: LocalDate.MIN
-        return sisteStønadsdato < LocalDate.now().minusYears(1)
+        return sisteStønadsdato > LocalDate.now().minusYears(1)
     }
 
     /**
