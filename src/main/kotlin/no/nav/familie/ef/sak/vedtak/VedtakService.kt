@@ -25,6 +25,11 @@ class VedtakService(private val vedtakRepository: VedtakRepository) {
         return vedtakRepository.findByIdOrThrow(behandlingId)
     }
 
+    //TODO lag test, kast feil hvis vi ikke finner vedtak?
+    fun hentVedtakForBehandlinger(behandlingIder: Set<UUID>): List<Vedtak> {
+        return vedtakRepository.findAllById(behandlingIder).toList()
+    }
+
     fun hentVedtakHvisEksisterer(behandlingId: UUID): VedtakDto? {
         return vedtakRepository.findByIdOrNull(behandlingId)?.tilVedtakDto()
     }

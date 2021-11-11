@@ -58,7 +58,7 @@ object AndelHistorikkRunner {
     fun run(url: URL) {
         val grupper = AndelHistorikkParser.parseGroup(url)
 
-        val output = AndelHistorikkBeregner.lagHistorikk(grupper.input)
+        val output = AndelHistorikkBeregner.lagHistorikk(grupper.input, emptyList())
 
         assertThat(toString(output)).isEqualTo(toString(grupper.expectedOutput))
     }

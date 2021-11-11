@@ -98,6 +98,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                                                     aktivIdent: String) =
             beregningService.beregnYtelse(vedtak.perioder.tilPerioder(), vedtak.inntekter.tilInntektsperioder())
                     .map { beløpsperiode ->
+
                         AndelTilkjentYtelse(
                                 beløp = beløpsperiode.beløp.toInt(),
                                 stønadFom = beløpsperiode.periode.fradato,
