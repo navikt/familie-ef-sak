@@ -157,7 +157,7 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
         try {
             valider(behandling, stegType, saksbehandlerIdent, behandlingSteg)
             val nesteSteg = behandlingSteg.utførOgReturnerNesteSteg(behandling, data)
-            oppdaterHistorikk(behandlingSteg, behandling, saksbehandlerIdent)
+            oppdaterHistorikk(behandlingSteg, behandling.id, saksbehandlerIdent)
             oppdaterMetrikk(stegType, stegSuksessMetrics)
             validerNesteSteg(nesteSteg, behandling)
             logger.info("$stegType på behandling ${behandling.id} er håndtert")
@@ -192,12 +192,12 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
     }
 
     private fun <T> oppdaterHistorikk(behandlingSteg: BehandlingSteg<T>,
-                                      behandling: Behandling,
+                                      behandlingId: UUID,
                                       saksbehandlerIdent: String) {
         if (behandlingSteg.settInnHistorikk()) {
             behandlingshistorikkService.opprettHistorikkInnslag(
-                    Behandlingshistorikk(behandlingId = behandling.id,
-                                         steg = behandling.steg,
+                    Behandlingshistorikk(behandlingId = behandlingId,
+                                         steg = behandlingSteg.stegType(),
                                          opprettetAvNavn = SikkerhetContext.hentSaksbehandlerNavn(),
                                          opprettetAv = saksbehandlerIdent))
         }
