@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.vedtak
 
+import no.nav.familie.ef.sak.repository.findAllByIdOrThrow
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
@@ -25,9 +26,8 @@ class VedtakService(private val vedtakRepository: VedtakRepository) {
         return vedtakRepository.findByIdOrThrow(behandlingId)
     }
 
-    //TODO lag test, kast feil hvis vi ikke finner vedtak?
     fun hentVedtakForBehandlinger(behandlingIder: Set<UUID>): List<Vedtak> {
-        return vedtakRepository.findAllById(behandlingIder).toList()
+        return vedtakRepository.findAllByIdOrThrow(behandlingIder) { it.behandlingId }
     }
 
     fun hentVedtakHvisEksisterer(behandlingId: UUID): VedtakDto? {
