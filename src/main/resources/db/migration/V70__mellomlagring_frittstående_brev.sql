@@ -6,4 +6,9 @@ CREATE TABLE mellomlagret_frittstaende_brev (
     saksbehandler_ident VARCHAR                     NOT NULL,
     tidspunkt_opprettet TIMESTAMP(3)                NOT NULL,
     UNIQUE (fagsak_id, saksbehandler_ident)
-)
+);
+
+ALTER TABLE mellomlagret_fritekstbrev
+    ADD COLUMN brev_type VARCHAR;
+UPDATE mellomlagret_fritekstbrev
+SET brev_type = 'VEDTAK_INVILGELSE'

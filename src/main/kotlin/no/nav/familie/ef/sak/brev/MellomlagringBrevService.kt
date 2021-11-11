@@ -4,11 +4,11 @@ import no.nav.familie.ef.sak.brev.domain.Fritekstbrev
 import no.nav.familie.ef.sak.brev.domain.MellomlagretBrev
 import no.nav.familie.ef.sak.brev.domain.MellomlagretFritekstbrev
 import no.nav.familie.ef.sak.brev.domain.MellomlagretFrittståendeBrev
+import no.nav.familie.ef.sak.brev.dto.FritekstBrevDto
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevDto
 import no.nav.familie.ef.sak.brev.dto.MellomlagretBrevFritekst
 import no.nav.familie.ef.sak.brev.dto.MellomlagretBrevResponse
 import no.nav.familie.ef.sak.brev.dto.MellomlagretBrevSanity
-import no.nav.familie.ef.sak.brev.dto.VedtaksbrevFritekstDto
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -30,11 +30,12 @@ class MellomlagringBrevService(private val mellomlagerBrevRepository: Mellomlage
         return mellomlagerBrevRepository.insert(mellomlagretBrev).behandlingId
     }
 
-    fun mellomlagreFritekstbrev(mellomlagretBrev: VedtaksbrevFritekstDto): UUID {
+    fun mellomlagreFritekstbrev(mellomlagretBrev: FritekstBrevDto): UUID {
         slettMellomlagringHvisFinnes(mellomlagretBrev.behandlingId)
         val mellomlagretFritekstbrev = MellomlagretFritekstbrev(mellomlagretBrev.behandlingId,
                                                                 Fritekstbrev(overskrift = mellomlagretBrev.overskrift,
-                                                                             avsnitt = mellomlagretBrev.avsnitt))
+                                                                             avsnitt = mellomlagretBrev.avsnitt),
+                                                                brevType = mellomlagretBrev.brevType)
 
         return mellomlagerFritekstbrevRepository.insert(mellomlagretFritekstbrev).behandlingId
     }
@@ -72,7 +73,7 @@ class MellomlagringBrevService(private val mellomlagerBrevRepository: Mellomlage
             return null
         }
         mellomlagerFritekstbrevRepository.findByIdOrNull(behhandlingId)?.let {
-            return MellomlagretBrevFritekst(brev = it.brev)
+            return MellomlagretBrevFritekst(brev = it.brev, brevType = it.brevType)
         }
         return null
     }

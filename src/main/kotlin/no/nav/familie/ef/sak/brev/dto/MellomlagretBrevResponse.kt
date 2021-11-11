@@ -7,7 +7,10 @@ sealed class MellomlagretBrevResponse
 data class MellomlagretBrevSanity(val brevtype: Brevtype = Brevtype.SANITYBREV, val brevmal: String, val brevverdier: String?) :
         MellomlagretBrevResponse()
 
-data class MellomlagretBrevFritekst(val brevtype: Brevtype = Brevtype.FRITEKSTBREV, val brev: Fritekstbrev, val brevmal: String = "Fritekstbrev") :
+data class MellomlagretBrevFritekst(val brevtype: Brevtype = Brevtype.FRITEKSTBREV,
+                                    val brev: Fritekstbrev,
+                                    val brevType: FritekstBrevKategori,
+                                    val brevmal: String = "Fritekstbrev") :
         MellomlagretBrevResponse()
 
 enum class Brevtype {
