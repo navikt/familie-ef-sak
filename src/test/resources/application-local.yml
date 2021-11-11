@@ -13,9 +13,9 @@ spring:
 
 no.nav.security.jwt:
   issuer.azuread:
-    discoveryurl: https://login.microsoftonline.com/navq.onmicrosoft.com/v2.0/.well-known/openid-configuration
-    accepted_audience: ${AZURE_CLIENT_ID}
-    cookie_name: azure_token
+    discoveryurl: http://localhost:${mock-oauth2-server.port}/azuread/.well-known/openid-configuration
+    accepted_audience: aud-localhost
+    cookie_name: localhost-idtoken
     proxy_url: #Default satt, skal være null lokalt
 
 AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
@@ -29,6 +29,8 @@ FAMILIE_EF_PROXY_URL: http://localhost:8002
 AZURE_APP_TENANT_ID: navq.onmicrosoft.com
 AZURE_APP_CLIENT_ID: ${AZURE_CLIENT_ID}
 AZURE_APP_CLIENT_SECRET: ${AZURE_CLIENT_SECRET}
+AZURE_CLIENT_ID: dummy
+AZURE_CLIENT_SECRET: dummy
 
 CREDENTIAL_USERNAME: not-a-real-srvuser
 CREDENTIAL_PASSWORD: not-a-real-pw
