@@ -88,19 +88,19 @@ internal class EksternBehandlingControllerTest {
     }
 
     @Test
-    internal fun `opprett en ikke-utdaterte og en utdatert andele som er maksimalt under ett år, forvent behandlinger utdaterte lik false`() {
+    internal fun `opprett en ikke-utdaterte og en utdatert andeler, forvent behandlinger finnes lik true`() {
         mockOpprettTilkjenteYtelser(opprettIkkeUtdatertTilkjentYtelse(), opprettUtdatertTilkjentYtelse())
         assertThat(eksternBehandlingController.finnesBehandlingForPersonIdenter(Stønadstype.OVERGANGSSTØNAD,
                                                                                 true,
-                                                                                setOf("12345678910")).data).isEqualTo(false)
+                                                                                setOf("12345678910")).data).isEqualTo(true)
     }
 
     @Test
-    internal fun `opprett utdaterte andeler som er maksimalt under ett år, forvent behandlinger utdaterte lik true`() {
+    internal fun `opprett utdaterte andeler, forvent behandlinger finnes lik false`() {
         mockOpprettTilkjenteYtelser(opprettUtdatertTilkjentYtelse(), opprettUtdatertTilkjentYtelse())
         assertThat(eksternBehandlingController.finnesBehandlingForPersonIdenter(Stønadstype.OVERGANGSSTØNAD,
                                                                                 true,
-                                                                                setOf("12345678910")).data).isEqualTo(true)
+                                                                                setOf("12345678910")).data).isEqualTo(false)
     }
 
     @Test

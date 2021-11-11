@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController
         consumes = [MediaType.APPLICATION_JSON_VALUE],
         produces = [MediaType.APPLICATION_JSON_VALUE]
 )
-
 class EksternBehandlingController(
         private val pdlClient: PdlClient,
         private val eksternBehandlingService: EksternBehandlingService
@@ -63,10 +62,11 @@ class EksternBehandlingController(
         if (personidenter.any { it.length != 11 }) {
             return Ressurs.failure("Støtter kun identer av typen fnr/dnr")
         }
-        if (stønadSiste12Måneder) {
-            return Ressurs.success(eksternBehandlingService.erBehandlingerUtdaterteFor(personidenter))
+        val behandlingFinnes = eksternBehandlingService.finnesBehandlingFor(personidenter, stønadstype)
+        if (behandlingFinnes && stønadSiste12Måneder) {
+            return Ressurs.success(!eksternBehandlingService.erBehandlingerUtdaterteFor(personidenter))
         }
-        return Ressurs.success(eksternBehandlingService.finnesBehandlingFor(personidenter, stønadstype))
+        return Ressurs.success(behandlingFinnes)
     }
 
 }
