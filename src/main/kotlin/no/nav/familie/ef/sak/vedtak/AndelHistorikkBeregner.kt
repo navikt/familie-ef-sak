@@ -65,7 +65,7 @@ object AndelHistorikkBeregner {
         }
 
         tilkjentYtelser.forEach { tilkjentYtelse ->
-            val vedtaksperioder = vedtaksperioderPåBehandling.getValue(tilkjentYtelse.id)
+            val vedtaksperioder = vedtaksperioderPåBehandling.getValue(tilkjentYtelse.behandlingId)
 
             tilkjentYtelse.andelerTilkjentYtelse.forEach { andel ->
                 val andelFraHistorikk = finnTilsvarendeAndelIHistorikk(historikk, andel)
