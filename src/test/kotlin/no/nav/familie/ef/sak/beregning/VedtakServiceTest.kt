@@ -13,9 +13,11 @@ import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
+import java.util.UUID
 
 internal class VedtakServiceTest : OppslagSpringRunnerTest() {
 
@@ -120,5 +122,28 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
         val beslutterIdent = "B123456"
         vedtakService.oppdaterBeslutter(behandlingId = behandling.id, beslutterIdent = beslutterIdent)
         assertThat(vedtakService.hentVedtak(behandling.id).beslutterIdent).isEqualTo(beslutterIdent)
+    }
+
+    @Test
+    internal fun `hentVedtakForBehandlinger - skal kaste feil hvis vedtak ikke finnes`() {
+        assertThatThrownBy { vedtakService.hentVedtakForBehandlinger(setOf(UUID.randomUUID())) }
+                .isInstanceOf(IllegalArgumentException::class.java)
+                .hasMessageContaining("Finner ikke Vedtak for")
+    }
+
+    @Test
+    internal fun `hentVedtakForBehandlinger - skal returnere vedtak`() {
+        val fagsak = fagsakRepository.insert(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak)).id
+        val behandling2 = behandlingRepository.insert(behandling(fagsak)).id
+        val vedtakDto = Innvilget(resultatType = ResultatType.INNVILGE,
+                                  periodeBegrunnelse = "",
+                                  inntektBegrunnelse = "tomBegrunnelse",
+                                  perioder = emptyList(),
+                                  inntekter = emptyList())
+        vedtakService.lagreVedtak(vedtakDto, behandling)
+        vedtakService.lagreVedtak(vedtakDto, behandling2)
+
+        assertThat(vedtakService.hentVedtakForBehandlinger(setOf(behandling, behandling2))).hasSize(2)
     }
 }
