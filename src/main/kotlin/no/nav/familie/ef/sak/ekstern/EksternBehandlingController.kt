@@ -27,9 +27,6 @@ class EksternBehandlingController(private val pdlClient: PdlClient,
     fun finnesBehandlingForPerson(@RequestParam("type") stønadstype: Stønadstype?,
                                   @RequestBody request: PersonIdent): Ressurs<Boolean> {
         val personidenter = pdlClient.hentPersonidenter(request.ident, historikk = true).identer()
-        if (personidenter.isEmpty()) {
-            return Ressurs.failure("Kunne ikke hente personidenter fra pdl")
-        }
         return Ressurs.success(eksternBehandlingService.finnesBehandlingFor(personidenter, stønadstype))
     }
 
