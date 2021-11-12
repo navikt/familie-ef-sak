@@ -65,11 +65,11 @@ internal class SaksbehandlingsblankettStegTest {
     }
 
     @Test
-    internal fun `skal ikke journalføre blankett hvis det er revurdering`() {
+    internal fun `skal journalføre blankett hvis det er revurdering`() {
         val behandling = behandling(type = BehandlingType.REVURDERING)
         saksbehandlingsblankettSteg.utførSteg(behandling, null)
         verify(exactly = 1) { blankettServiceMock.lagBlankett(any()) }
-        verify(exactly = 0) { journalpostClientMock.arkiverDokument(any(), any()) }
+        verify(exactly = 1) { journalpostClientMock.arkiverDokument(any(), any()) }
     }
 
 }
