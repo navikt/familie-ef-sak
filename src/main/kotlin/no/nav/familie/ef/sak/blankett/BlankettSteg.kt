@@ -50,29 +50,13 @@ class BlankettSteg(
         }
 
         val arkiverDokumentRequest =
-                lagArkiverBlankettRequest(personIdent, blankettPdf, enhet, journalpostForBehandling.sak?.fagsakId)
+                BlankettHelper.lagArkiverBlankettRequestMotInfotrygd(personIdent, blankettPdf, enhet, journalpostForBehandling.sak?.fagsakId)
         val journalpostRespons = journalpostClient.arkiverDokument(arkiverDokumentRequest, beslutter)
         behandlingService.leggTilBehandlingsjournalpost(journalpostRespons.journalpostId, Journalposttype.N, behandling.id)
 
         ferdigstillBehandling(behandling)
     }
 
-    private fun lagArkiverBlankettRequest(personIdent: String,
-                                          pdf: ByteArray,
-                                          enhet: String,
-                                          fagsakId: String?): ArkiverDokumentRequest {
-        return ArkiverDokumentRequest(
-                fnr = personIdent,
-                forsøkFerdigstill = true,
-                hoveddokumentvarianter = listOf(Dokument(pdf,
-                                                         Filtype.PDFA,
-                                                         null,
-                                                         "Blankett for overgangsstønad",
-                                                         Dokumenttype.OVERGANGSSTØNAD_BLANKETT)),
-                vedleggsdokumenter = listOf(),
-                fagsakId = fagsakId,
-                journalførendeEnhet = enhet)
-    }
 
     private fun ferdigstillBehandling(behandling: Behandling) {
         taskRepository.save(FerdigstillBehandlingTask.opprettTask(behandling))
