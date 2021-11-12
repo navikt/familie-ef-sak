@@ -22,6 +22,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.ef.sak.repository.findAllByIdOrThrow
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
@@ -99,6 +100,9 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
 
     fun hentBehandlingPåEksternId(eksternBehandlingId: Long): Behandling = behandlingRepository.finnMedEksternId(
             eksternBehandlingId) ?: error("Kan ikke finne behandling med eksternId=$eksternBehandlingId")
+
+    fun hentBehandlinger(behandlingIder: Set<UUID>): List<Behandling> =
+            behandlingRepository.findAllByIdOrThrow(behandlingIder) { it.id }
 
     fun oppdaterStatusPåBehandling(behandlingId: UUID, status: BehandlingStatus): Behandling {
         val behandling = hentBehandling(behandlingId)
