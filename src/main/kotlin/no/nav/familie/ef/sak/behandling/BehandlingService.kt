@@ -98,6 +98,9 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
 
     fun hentBehandling(behandlingId: UUID): Behandling = behandlingRepository.findByIdOrThrow(behandlingId)
 
+    fun hentBehandlingPåEksternId(eksternBehandlingId: Long): Behandling = behandlingRepository.finnMedEksternId(
+            eksternBehandlingId) ?: error("Kan ikke finne behandling med eksternId=$eksternBehandlingId")
+
     fun hentBehandlinger(behandlingIder: Set<UUID>): List<Behandling> =
             behandlingRepository.findAllByIdOrThrow(behandlingIder) { it.id }
 
@@ -172,7 +175,6 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
         behandlingRepository.update(behandling.copy(status = BehandlingStatus.SATT_PÅ_VENT))
         taskService.save(BehandlingsstatistikkTask.opprettVenterTask(behandlingId))
     }
-
 
     @Transactional
     fun taAvVent(behandlingId: UUID) {
