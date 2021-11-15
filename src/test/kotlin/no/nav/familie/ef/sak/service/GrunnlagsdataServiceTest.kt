@@ -5,6 +5,8 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.infotrygd.InfotrygdService
+import no.nav.familie.ef.sak.infrastruktur.config.InfotrygdReplikaMock
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRepository
@@ -17,6 +19,7 @@ import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import org.assertj.core.api.Assertions.assertThat
@@ -35,6 +38,7 @@ internal class GrunnlagsdataServiceTest {
     private val pdlClient = PdlClientConfig().pdlClient()
     private val søknadService = mockk<SøknadService>()
     private val personopplysningerIntegrasjonerClient = mockk<PersonopplysningerIntegrasjonerClient>()
+    private val infotrygdReplikaClient = InfotrygdReplikaMock().infotrygdReplikaClient()
 
     private val søknad = SøknadsskjemaMapper.tilDomene(TestsøknadBuilder.Builder().setBarn(listOf(
             TestsøknadBuilder.Builder().defaultBarn("Navn1 navnesen", fødselTermindato = LocalDate.now().plusMonths(4)),
@@ -44,7 +48,8 @@ internal class GrunnlagsdataServiceTest {
     private val service = GrunnlagsdataService(pdlClient = pdlClient,
                                                grunnlagsdataRepository = grunnlagsdataRepository,
                                                søknadService = søknadService,
-                                               personopplysningerIntegrasjonerClient = personopplysningerIntegrasjonerClient)
+                                               personopplysningerIntegrasjonerClient = personopplysningerIntegrasjonerClient,
+                                               infotrygdService = InfotrygdService(infotrygdReplikaClient, pdlClient))
 
     @BeforeEach
     internal fun setUp() {
@@ -107,4 +112,18 @@ internal class GrunnlagsdataServiceTest {
         verify(exactly = 0) { pdlClient.hentPersonKortBolk(any()) }
     }
 
+    @Test
+    internal fun `skal sjekke om personen har historikk i infotrygd`() {
+        every { infotrygdReplikaClient.hentPerioder(any()) } returns InfotrygdPeriodeResponse(emptyList(),
+                                                                                              listOf(mockk()),
+                                                                                              emptyList())
+
+        val grunnlagsdata = service.hentGrunnlagsdataFraRegister("1", emptyList())
+
+        assertThat(grunnlagsdata.tidligereVedtaksperioder!!.infotrygd.overgangsstønad).isFalse
+        assertThat(grunnlagsdata.tidligereVedtaksperioder!!.infotrygd.barnetilsyn).isTrue
+        assertThat(grunnlagsdata.tidligereVedtaksperioder!!.infotrygd.skolepenger).isFalse
+
+        verify(exactly = 1) { infotrygdReplikaClient.hentPerioder(any()) }
+    }
 }

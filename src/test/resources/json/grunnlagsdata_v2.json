@@ -2289,5 +2289,34 @@
       }
     },
     "nullable" : false
+  },
+  "tidligereVedtaksperioder" : {
+    "name" : "tidligereVedtaksperioder",
+    "type" : "Object",
+    "fields" : {
+      "infotrygd" : {
+        "name" : "infotrygd",
+        "type" : "Object",
+        "fields" : {
+          "overgangsstønad" : {
+            "name" : "overgangsstønad",
+            "type" : "Boolean",
+            "nullable" : false
+          },
+          "barnetilsyn" : {
+            "name" : "barnetilsyn",
+            "type" : "Boolean",
+            "nullable" : false
+          },
+          "skolepenger" : {
+            "name" : "skolepenger",
+            "type" : "Boolean",
+            "nullable" : false
+          }
+        },
+        "nullable" : false
+      }
+    },
+    "nullable" : true
   }
 }

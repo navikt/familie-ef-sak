@@ -4,6 +4,8 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.arbeidsfordeling.Arbeidsfordelingsenhet
+import no.nav.familie.ef.sak.infotrygd.InfotrygdService
+import no.nav.familie.ef.sak.infrastruktur.config.InfotrygdReplikaMock
 import no.nav.familie.ef.sak.infrastruktur.config.KodeverkServiceMock
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
@@ -40,7 +42,12 @@ internal class PersonopplysningerServiceTest {
         søknadService = mockk()
 
         val pdlClient = PdlClientConfig().pdlClient()
-        grunnlagsdataService = GrunnlagsdataService(pdlClient, mockk(), søknadService, personopplysningerIntegrasjonerClient)
+        val infotrygdService = InfotrygdService(InfotrygdReplikaMock().infotrygdReplikaClient(),pdlClient)
+        grunnlagsdataService = GrunnlagsdataService(pdlClient = pdlClient,
+                                                grunnlagsdataRepository = mockk(),
+                                                søknadService = søknadService,
+                                                personopplysningerIntegrasjonerClient = personopplysningerIntegrasjonerClient,
+                                                infotrygdService = infotrygdService)
         val personopplysningerMapper =
                 PersonopplysningerMapper(adresseMapper,
                                          StatsborgerskapMapper(kodeverkService),

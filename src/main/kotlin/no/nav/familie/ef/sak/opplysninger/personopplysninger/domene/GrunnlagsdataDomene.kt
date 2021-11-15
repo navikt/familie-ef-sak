@@ -29,8 +29,12 @@ data class GrunnlagsdataMedMetadata(val grunnlagsdata: GrunnlagsdataDomene,
 data class GrunnlagsdataDomene(val søker: Søker,
                                val annenForelder: List<AnnenForelderMedIdent>,
                                val medlUnntak: Medlemskapsinfo,
-                               val barn: List<BarnMedIdent>
+                               val barn: List<BarnMedIdent>,
+                               val tidligereVedtaksperioder: TidligereVedtaksperioder?
 )
+
+
+
 
 data class Søker(val adressebeskyttelse: Adressebeskyttelse?, //Er en liste i PDLSøker
                  val bostedsadresse: List<Bostedsadresse>,
@@ -90,3 +94,8 @@ data class FullmaktMedNavn(val gyldigFraOgMed: LocalDate,
                            val gyldigTilOgMed: LocalDate,
                            val motpartsPersonident: String,
                            val navn: String?)
+
+data class TidligereVedtaksperioder(val infotrygd: FinnesTidligereVedtak)
+data class FinnesTidligereVedtak(val overgangsstønad: Boolean,
+                                 val barnetilsyn: Boolean,
+                                 val skolepenger: Boolean)

@@ -4,12 +4,15 @@ import no.nav.familie.ef.sak.opplysninger.mapper.BarnMedSamværMapper
 import no.nav.familie.ef.sak.opplysninger.mapper.SivilstandMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioder
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadsskjemaOvergangsstønad
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.AktivitetMapper
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.BosituasjonMapper
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SagtOppEllerRedusertStillingMapper
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SivilstandsplanerMapper
 import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværDto
+import no.nav.familie.ef.sak.vilkår.dto.FinnesTidligereVedtaksperioder
+import no.nav.familie.ef.sak.vilkår.dto.TidligereVedtaksperioderDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårGrunnlagDto
 import no.nav.familie.kontrakter.ef.søknad.Fødselsnummer
 import org.springframework.stereotype.Service
@@ -35,7 +38,8 @@ class VilkårGrunnlagService(private val medlemskapMapper: MedlemskapMapper,
         val sivilstandsplaner = SivilstandsplanerMapper.tilDto(sivilstandsplaner = søknad.sivilstandsplaner)
         val sagtOppEllerRedusertStilling = SagtOppEllerRedusertStillingMapper.tilDto(situasjon = søknad.situasjon)
 
-        return VilkårGrunnlagDto(medlemskap = medlemskap,
+        return VilkårGrunnlagDto(tidligereVedtaksperioder = mapTidligereVedtaksperioder(grunnlagsdata.tidligereVedtaksperioder),
+                                 medlemskap = medlemskap,
                                  sivilstand = sivilstand,
                                  bosituasjon = BosituasjonMapper.tilDto(søknad.bosituasjon),
                                  barnMedSamvær = barnMedSamvær,
@@ -43,6 +47,17 @@ class VilkårGrunnlagService(private val medlemskapMapper: MedlemskapMapper,
                                  aktivitet = aktivitet,
                                  sagtOppEllerRedusertStilling = sagtOppEllerRedusertStilling,
                                  lagtTilEtterFerdigstilling = registergrunnlagData.lagtTilEtterFerdigstilling)
+    }
+
+    private fun mapTidligereVedtaksperioder(tidligereVedtaksperioder: TidligereVedtaksperioder?): TidligereVedtaksperioderDto {
+        val infotrygd = tidligereVedtaksperioder?.infotrygd?.let {
+            FinnesTidligereVedtaksperioder(overgangsstønad = it.overgangsstønad,
+                                           barnetilsyn = it.barnetilsyn,
+                                           skolepenger = it.skolepenger)
+        }
+        return TidligereVedtaksperioderDto(
+                infotrygd = infotrygd
+        )
     }
 
     private fun mapBarnMedSamvær(grunnlagsdata: GrunnlagsdataDomene,
