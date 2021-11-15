@@ -40,7 +40,7 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
         return fagsakTilDto(hentFagsak(fagsakId))
     }
 
-    private fun fagsakTilDto(fagsak: Fagsak): FagsakDto {
+    fun fagsakTilDto(fagsak: Fagsak): FagsakDto {
         val behandlinger: List<Behandling> = behandlingService.hentBehandlinger(fagsak.id)
         val erLøpende = erLøpende(behandlinger)
         return fagsak.tilDto(behandlinger = behandlinger.map(Behandling::tilDto), erLøpende = erLøpende)
@@ -64,6 +64,9 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
     }
 
     fun hentEksternId(fagsakId: UUID): Long = fagsakRepository.findByIdOrThrow(fagsakId).eksternId.id
+
+    fun hentFagsakPåEksternId(eksternFagsakId: Long): Fagsak = fagsakRepository.finnMedEksternId(eksternFagsakId)
+                                                               ?: error("Kan ikke finne fagsak med eksternId=$eksternFagsakId")
 
     fun hentAktivIdent(fagsakId: UUID): String = fagsakRepository.finnAktivIdent(fagsakId)
 

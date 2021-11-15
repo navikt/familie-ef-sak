@@ -90,7 +90,7 @@
   } ],
   "innflyttingTilNorge" : [ {
     "fraflyttingsland" : "Sverige",
-    "dato" : null,
+    "dato" : "2010-08-30",
     "fraflyttingssted" : "Stockholm"
   } ],
   "utflyttingFraNorge" : [ {
