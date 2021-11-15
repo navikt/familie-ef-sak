@@ -11,7 +11,7 @@ import no.nav.familie.ef.sak.opplysninger.søknad.mapper.BosituasjonMapper
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SagtOppEllerRedusertStillingMapper
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SivilstandsplanerMapper
 import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværDto
-import no.nav.familie.ef.sak.vilkår.dto.FinnesTidligereVedtaksperioder
+import no.nav.familie.ef.sak.vilkår.dto.TidligereInnvilgetVedtakDto
 import no.nav.familie.ef.sak.vilkår.dto.TidligereVedtaksperioderDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårGrunnlagDto
 import no.nav.familie.kontrakter.ef.søknad.Fødselsnummer
@@ -51,13 +51,11 @@ class VilkårGrunnlagService(private val medlemskapMapper: MedlemskapMapper,
 
     private fun mapTidligereVedtaksperioder(tidligereVedtaksperioder: TidligereVedtaksperioder?): TidligereVedtaksperioderDto {
         val infotrygd = tidligereVedtaksperioder?.infotrygd?.let {
-            FinnesTidligereVedtaksperioder(overgangsstønad = it.overgangsstønad,
-                                           barnetilsyn = it.barnetilsyn,
-                                           skolepenger = it.skolepenger)
+            TidligereInnvilgetVedtakDto(harTidligereOvergangsstønad = it.harTidligereOvergangsstønad,
+                                        harTidligereBarnetilsyn = it.harTidligereBarnetilsyn,
+                                        harTidligereSkolepenger = it.harTidligereSkolepenger)
         }
-        return TidligereVedtaksperioderDto(
-                infotrygd = infotrygd
-        )
+        return TidligereVedtaksperioderDto(infotrygd = infotrygd)
     }
 
     private fun mapBarnMedSamvær(grunnlagsdata: GrunnlagsdataDomene,

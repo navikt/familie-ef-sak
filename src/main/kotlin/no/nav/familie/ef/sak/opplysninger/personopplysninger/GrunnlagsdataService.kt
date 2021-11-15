@@ -1,10 +1,10 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger
 
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.FinnesTidligereVedtak
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereInnvilgetVedtak
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioder
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.GrunnlagsdataMapper.mapAnnenForelder
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.GrunnlagsdataMapper.mapBarn
@@ -68,10 +68,10 @@ class GrunnlagsdataService(private val pdlClient: PdlClient,
 
     private fun hentTidligereVedtaksperioder(personIdent: String): TidligereVedtaksperioder {
         return infotrygdService.hentPerioder(personIdent).let {
-            val infotrygd = FinnesTidligereVedtak(
-                    overgangsstønad = it.overgangsstønad.isNotEmpty(),
-                    barnetilsyn = it.barnetilsyn.isNotEmpty(),
-                    skolepenger = it.skolepenger.isNotEmpty(),
+            val infotrygd = TidligereInnvilgetVedtak(
+                    harTidligereOvergangsstønad = it.overgangsstønad.isNotEmpty(),
+                    harTidligereBarnetilsyn = it.barnetilsyn.isNotEmpty(),
+                    harTidligereSkolepenger = it.skolepenger.isNotEmpty(),
             )
             TidligereVedtaksperioder(infotrygd = infotrygd)
         }

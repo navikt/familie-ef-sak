@@ -30,8 +30,7 @@ data class GrunnlagsdataDomene(val søker: Søker,
                                val annenForelder: List<AnnenForelderMedIdent>,
                                val medlUnntak: Medlemskapsinfo,
                                val barn: List<BarnMedIdent>,
-                               val tidligereVedtaksperioder: TidligereVedtaksperioder?
-)
+                               val tidligereVedtaksperioder: TidligereVedtaksperioder?)
 
 
 
@@ -95,7 +94,8 @@ data class FullmaktMedNavn(val gyldigFraOgMed: LocalDate,
                            val motpartsPersonident: String,
                            val navn: String?)
 
-data class TidligereVedtaksperioder(val infotrygd: FinnesTidligereVedtak)
-data class FinnesTidligereVedtak(val overgangsstønad: Boolean,
-                                 val barnetilsyn: Boolean,
-                                 val skolepenger: Boolean)
+data class TidligereVedtaksperioder(val infotrygd: TidligereInnvilgetVedtak)
+
+data class TidligereInnvilgetVedtak(val harTidligereOvergangsstønad: Boolean,
+                                    val harTidligereBarnetilsyn: Boolean,
+                                    val harTidligereSkolepenger: Boolean)

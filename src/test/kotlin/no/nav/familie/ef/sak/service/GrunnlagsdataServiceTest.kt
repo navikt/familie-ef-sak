@@ -120,9 +120,9 @@ internal class GrunnlagsdataServiceTest {
 
         val grunnlagsdata = service.hentGrunnlagsdataFraRegister("1", emptyList())
 
-        assertThat(grunnlagsdata.tidligereVedtaksperioder!!.infotrygd.overgangsstønad).isFalse
-        assertThat(grunnlagsdata.tidligereVedtaksperioder!!.infotrygd.barnetilsyn).isTrue
-        assertThat(grunnlagsdata.tidligereVedtaksperioder!!.infotrygd.skolepenger).isFalse
+        assertThat(grunnlagsdata.tidligereVedtaksperioder!!.infotrygd.harTidligereOvergangsstønad).isFalse
+        assertThat(grunnlagsdata.tidligereVedtaksperioder!!.infotrygd.harTidligereBarnetilsyn).isTrue
+        assertThat(grunnlagsdata.tidligereVedtaksperioder!!.infotrygd.harTidligereSkolepenger).isFalse
 
         verify(exactly = 1) { infotrygdReplikaClient.hentPerioder(any()) }
     }

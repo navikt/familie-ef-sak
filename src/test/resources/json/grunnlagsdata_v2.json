@@ -2298,18 +2298,18 @@
         "name" : "infotrygd",
         "type" : "Object",
         "fields" : {
-          "overgangsstønad" : {
-            "name" : "overgangsstønad",
+          "harTidligereOvergangsstønad" : {
+            "name" : "harTidligereOvergangsstønad",
             "type" : "Boolean",
             "nullable" : false
           },
-          "barnetilsyn" : {
-            "name" : "barnetilsyn",
+          "harTidligereBarnetilsyn" : {
+            "name" : "harTidligereBarnetilsyn",
             "type" : "Boolean",
             "nullable" : false
           },
-          "skolepenger" : {
-            "name" : "skolepenger",
+          "harTidligereSkolepenger" : {
+            "name" : "harTidligereSkolepenger",
             "type" : "Boolean",
             "nullable" : false
           }
