@@ -67,9 +67,7 @@ object AndelHistorikkBeregner {
                                     vedtaksliste: List<Vedtak>): List<AndelHistorikkHolder> {
         val historikk = mutableListOf<AndelHistorikkHolder>()
 
-        val vedtaksperioderPåBehandling = vedtaksliste.associate {
-            it.behandlingId to (it.perioder?.perioder ?: error("Finner ikke vedtaksperioder på behandling=${it.behandlingId}"))
-        }
+        val vedtaksperioderPåBehandling = lagVedtaksperioderPerBehandling(vedtaksliste, tilkjentYtelser)
 
         tilkjentYtelser.forEach { tilkjentYtelse ->
             val vedtaksperioder = vedtaksperioderPåBehandling.getValue(tilkjentYtelse.behandlingId)
@@ -94,6 +92,13 @@ object AndelHistorikkBeregner {
             markerAndelerSomErFjernet(historikk, tilkjentYtelse)
         }
         return historikk
+    }
+
+    // Pga vedtak ikke har dato for når det ble opprettet så matcher vi de sammen med tilkjent ytelse sin opprettetTid
+    private fun lagVedtaksperioderPerBehandling(vedtaksliste: List<Vedtak>,
+                                                tilkjentYtelser: List<TilkjentYtelse>): Map<UUID, List<Vedtaksperiode>> {
+        val datoPerBehandling = tilkjentYtelser.associate { it.behandlingId to it.sporbar.opprettetTid }
+        return VedtakHistorikkBeregner.lagVedtaksperioderPerBehandling(vedtaksliste, datoPerBehandling)
     }
 
     private fun finnVedtaksperiodeForAndel(andel: AndelTilkjentYtelse, vedtaksperioder: List<Vedtaksperiode>): Vedtaksperiode {
