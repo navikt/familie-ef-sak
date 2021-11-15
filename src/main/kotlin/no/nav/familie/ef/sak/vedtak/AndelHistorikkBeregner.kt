@@ -97,7 +97,7 @@ object AndelHistorikkBeregner {
     // Pga vedtak ikke har dato for når det ble opprettet så matcher vi de sammen med tilkjent ytelse sin opprettetTid
     private fun lagVedtaksperioderPerBehandling(vedtaksliste: List<Vedtak>,
                                                 tilkjentYtelser: List<TilkjentYtelse>): Map<UUID, List<Vedtaksperiode>> {
-        val datoPerBehandling = tilkjentYtelser.associate { it.behandlingId to it.sporbar.opprettetTid }
+        val datoPerBehandling = tilkjentYtelser.associate { it.behandlingId to it.vedtakstidspunkt }
         return VedtakHistorikkBeregner.lagVedtaksperioderPerBehandling(vedtaksliste, datoPerBehandling)
     }
 

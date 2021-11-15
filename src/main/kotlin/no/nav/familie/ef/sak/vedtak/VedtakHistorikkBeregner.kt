@@ -18,20 +18,16 @@ object VedtakHistorikkBeregner {
     private fun lagTotalbildeForNyttVedtak(vedtak: Vedtak,
                                            acc: List<Pair<UUID, List<Vedtaksperiode>>>): List<Vedtaksperiode> {
         val nyePerioder = vedtak.perioder!!.perioder
-        val sisteVedtak = acc.lastOrNull()
-        return if (sisteVedtak == null) {
-            nyePerioder
-        } else {
-            avkortTidligerePerioder(sisteVedtak, nyePerioder.first()) + nyePerioder
-        }
+        return avkortTidligerePerioder(acc.lastOrNull(), nyePerioder.first()) + nyePerioder
     }
 
     /**
      * Då ett nytt vedtak splitter tidligere vedtaksperioder,
      * så må vi avkorte tidligere periode, då det nye vedtaket overskrever det seneste
      */
-    private fun avkortTidligerePerioder(sisteVedtak: Pair<UUID, List<Vedtaksperiode>>,
+    private fun avkortTidligerePerioder(sisteVedtak: Pair<UUID, List<Vedtaksperiode>>?,
                                         førsteNyePeriode: Vedtaksperiode): List<Vedtaksperiode> {
+        if (sisteVedtak == null) return emptyList()
         return sisteVedtak.second.mapNotNull {
             if (it.datoFra >= førsteNyePeriode.datoFra) {
                 null
