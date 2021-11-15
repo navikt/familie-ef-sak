@@ -2,11 +2,10 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.brev
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
-import no.nav.familie.ef.sak.brev.MellomlagerBrevRepository
 import no.nav.familie.ef.sak.brev.MellomlagerFritekstbrevRepository
 import no.nav.familie.ef.sak.brev.domain.Fritekstbrev
-import no.nav.familie.ef.sak.brev.domain.MellomlagretBrev
 import no.nav.familie.ef.sak.brev.domain.MellomlagretFritekstbrev
+import no.nav.familie.ef.sak.brev.dto.FritekstBrevKategori
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevAvsnitt
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.repository.behandling
@@ -28,7 +27,8 @@ internal class MellomlagerFritekstbrevRepositoryTest : OppslagSpringRunnerTest()
         val mellomlagretBrev = MellomlagretFritekstbrev(behandlingId = behandling.id,
                                                         brev = Fritekstbrev(overskrift = "Et testbrev", avsnitt = listOf(
                                                                 FrittståendeBrevAvsnitt(deloverskrift = "En deloverskift",
-                                                                                        innhold = "Noe innhold"))))
+                                                                                        innhold = "Noe innhold"))),
+                                                        brevType = FritekstBrevKategori.VEDTAK_AVSLAG)
 
         mellomlagerFritekstbrevRepository.insert(mellomlagretBrev)
 

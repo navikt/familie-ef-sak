@@ -10,9 +10,11 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.util.UUID
 
 internal class BehandlingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
@@ -26,15 +28,21 @@ internal class BehandlingServiceIntegrationTest : OppslagSpringRunnerTest() {
         val fagsak = fagsakRepository.insert(fagsak())
         behandlingRepository.insert(behandling(fagsak = fagsak,
                                                status = BehandlingStatus.UTREDES))
-        assertThat(catchThrowable { behandlingService.opprettBehandling(BehandlingType.REVURDERING, fagsak.id, behandlingsårsak = behandlingÅrsak) })
-                .hasMessage("Det finnes en behandling på fagsaken som ikke er ferdigstilt")
+        assertThatThrownBy {
+            behandlingService.opprettBehandling(BehandlingType.REVURDERING,
+                                                fagsak.id,
+                                                behandlingsårsak = behandlingÅrsak)
+        }.hasMessage("Det finnes en behandling på fagsaken som ikke er ferdigstilt")
     }
 
     @Test
     internal fun `opprettBehandling - skal ikke være mulig å opprette en revurdering om det ikke finnes en behandling fra før`() {
         val fagsak = fagsakRepository.insert(fagsak())
-        assertThat(catchThrowable { behandlingService.opprettBehandling(BehandlingType.REVURDERING, fagsak.id, behandlingsårsak = behandlingÅrsak) })
-                .hasMessage("Det finnes ikke en tidligere behandling på fagsaken")
+        assertThatThrownBy {
+            behandlingService.opprettBehandling(BehandlingType.REVURDERING,
+                                                fagsak.id,
+                                                behandlingsårsak = behandlingÅrsak)
+        }.hasMessage("Det finnes ikke en tidligere behandling på fagsaken")
     }
 
     @Test
@@ -43,8 +51,11 @@ internal class BehandlingServiceIntegrationTest : OppslagSpringRunnerTest() {
         behandlingRepository.insert(behandling(fagsak = fagsak,
                                                status = BehandlingStatus.FERDIGSTILT,
                                                type = BehandlingType.BLANKETT))
-        assertThat(catchThrowable { behandlingService.opprettBehandling(BehandlingType.REVURDERING, fagsak.id, behandlingsårsak = behandlingÅrsak) })
-                .hasMessage("Siste behandling ble behandlet i infotrygd")
+        assertThatThrownBy {
+            behandlingService.opprettBehandling(BehandlingType.REVURDERING,
+                                                fagsak.id,
+                                                behandlingsårsak = behandlingÅrsak)
+        }.hasMessage("Siste behandling ble behandlet i infotrygd")
     }
 
     @Test
@@ -53,7 +64,27 @@ internal class BehandlingServiceIntegrationTest : OppslagSpringRunnerTest() {
         behandlingRepository.insert(behandling(fagsak = fagsak,
                                                status = BehandlingStatus.FERDIGSTILT,
                                                type = BehandlingType.TEKNISK_OPPHØR))
-        assertThat(catchThrowable { behandlingService.opprettBehandling(BehandlingType.REVURDERING, fagsak.id, behandlingsårsak = behandlingÅrsak) })
+        assertThat(catchThrowable {
+            behandlingService.opprettBehandling(BehandlingType.REVURDERING,
+                                                fagsak.id,
+                                                behandlingsårsak = behandlingÅrsak)
+        })
                 .hasMessage("Det er ikke mulig å lage en revurdering når siste behandlingen er teknisk opphør")
+    }
+
+    @Test
+    internal fun `hentBehandlinger - skal kaste feil hvis behandling ikke finnes`() {
+        assertThatThrownBy { behandlingService.hentBehandlinger(setOf(UUID.randomUUID())) }
+                .isInstanceOf(IllegalArgumentException::class.java)
+                .hasMessageContaining("Finner ikke Behandling for")
+    }
+
+    @Test
+    internal fun `hentBehandlinger - skal returnere behandlinger`() {
+        val fagsak = fagsakRepository.insert(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak))
+        val behandling2 = behandlingRepository.insert(behandling(fagsak))
+
+        assertThat(behandlingService.hentBehandlinger(setOf(behandling.id, behandling2.id))).hasSize(2)
     }
 }

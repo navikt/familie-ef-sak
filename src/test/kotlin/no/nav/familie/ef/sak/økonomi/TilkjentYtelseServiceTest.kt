@@ -21,6 +21,7 @@ class TilkjentYtelseServiceTest {
     private val behandlingService = mockk<BehandlingService>()
 
     private val tilkjentYtelseService = TilkjentYtelseService(behandlingService = behandlingService,
+                                                              vedtakService = mockk(),
                                                               tilkjentYtelseRepository = tilkjentYtelseRepository)
 
     private val datoForAvstemming = LocalDate.of(2021, 2, 1)

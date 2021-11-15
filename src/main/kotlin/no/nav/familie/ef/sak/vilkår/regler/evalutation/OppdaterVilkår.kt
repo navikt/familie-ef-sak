@@ -105,6 +105,23 @@ object OppdaterVilkår {
         }
     }
 
+    fun erAlleVilkårsvurderingerOppfylt(vilkårsvurderinger: List<Vilkårsvurdering>): Boolean {
+        val inneholderAlleTyperVilkår = vilkårsvurderinger.map { it.type }.containsAll(VilkårType.hentVilkår())
+        val vilkårsresultat = utledVilkårsresultat(vilkårsvurderinger)
+        return inneholderAlleTyperVilkår && vilkårsresultat.all { it == Vilkårsresultat.OPPFYLT }
+    }
+
+    private fun utledVilkårsresultat(lagredeVilkårsvurderinger: List<Vilkårsvurdering>): List<Vilkårsresultat> {
+        val vilkårsresultat = lagredeVilkårsvurderinger.groupBy { it.type }.map {
+            if (it.key == VilkårType.ALENEOMSORG) {
+                utledResultatForAleneomsorg(it.value)
+            } else {
+                it.value.single().resultat
+            }
+        }
+        return vilkårsresultat
+    }
+
     /**
      * [Vilkårsresultat.IKKE_OPPFYLT] er gyldig i kombinasjon med andre som er
      * [Vilkårsresultat.IKKE_OPPFYLT], [Vilkårsresultat.OPPFYLT] og [Vilkårsresultat.SKAL_IKKE_VURDERES]
@@ -141,5 +158,6 @@ object OppdaterVilkår {
                                 barnId = barnId,
                                 delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurdering))
     }
+
 
 }

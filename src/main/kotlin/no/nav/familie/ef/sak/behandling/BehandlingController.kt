@@ -62,4 +62,12 @@ class BehandlingController(private val behandlingService: BehandlingService,
         val henlagtBehandling = behandlingService.henleggBehandling(behandlingId, henlagt)
         return Ressurs.success(henlagtBehandling.tilDto())
     }
+
+    @GetMapping("/ekstern/{eksternBehandlingId}")
+    fun hentBehandling(@PathVariable eksternBehandlingId: Long): Ressurs<BehandlingDto> {
+        val behandling: Behandling = behandlingService.hentBehandlingPåEksternId(eksternBehandlingId)
+        tilgangService.validerTilgangTilBehandling(behandling.id)
+        val behandlingDto = behandling.tilDto()
+        return Ressurs.success(behandlingDto)
+    }
 }

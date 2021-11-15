@@ -90,12 +90,12 @@
   } ],
   "innflyttingTilNorge" : [ {
     "fraflyttingsland" : "Sverige",
-    "dato" : null,
+    "dato" : "2010-08-30",
     "fraflyttingssted" : "Stockholm"
   } ],
   "utflyttingFraNorge" : [ {
     "tilflyttingsland" : "Sverige",
-    "dato" : null,
+    "dato" : "2021-01-01",
     "tilflyttingssted" : "Stockholm"
   } ],
   "oppholdstillatelse" : [ {

@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.fagsak
 
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.dto.FagsakDto
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -30,5 +31,12 @@ class FagsakController(private val fagsakService: FagsakService, private val til
     fun hentFagsak(@PathVariable fagsakId: UUID): Ressurs<FagsakDto> {
         tilgangService.validerTilgangTilFagsak(fagsakId)
         return Ressurs.success(fagsakService.hentFagsakMedBehandlinger(fagsakId))
+    }
+
+    @GetMapping("/ekstern/{eksternFagsakId}")
+    fun hentFagsak(@PathVariable eksternFagsakId: Long): Ressurs<FagsakDto> {
+        val fagsak: Fagsak = fagsakService.hentFagsakPåEksternId(eksternFagsakId)
+        tilgangService.validerTilgangTilFagsak(fagsak.id)
+        return Ressurs.success(fagsakService.fagsakTilDto(fagsak))
     }
 }

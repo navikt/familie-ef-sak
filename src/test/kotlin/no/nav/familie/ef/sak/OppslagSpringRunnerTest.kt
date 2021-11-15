@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.blankett.Blankett
 import no.nav.familie.ef.sak.brev.domain.MellomlagretBrev
 import no.nav.familie.ef.sak.brev.domain.MellomlagretFritekstbrev
+import no.nav.familie.ef.sak.brev.domain.MellomlagretFrittståendeBrev
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.database.DbContainerInitializer
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
@@ -110,6 +111,7 @@ abstract class OppslagSpringRunnerTest {
                 Vedtak::class,
                 MellomlagretBrev::class,
                 MellomlagretFritekstbrev::class,
+                MellomlagretFrittståendeBrev::class,
                 Behandlingsjournalpost::class,
                 Grunnlagsdata::class,
                 Tilbakekreving::class,
