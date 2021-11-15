@@ -85,7 +85,7 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
         taskRepository.save(OpprettOppgaveTask.opprettTask(
                 OpprettOppgaveTaskData(behandlingId = behandling.id,
                                        oppgavetype = Oppgavetype.GodkjenneVedtak,
-                                       beskrivelse = "Sendt til godkjenning av ${SikkerhetContext.hentSaksbehandlerNavn(true)}")))
+                                       beskrivelse = "Sendt til godkjenning av ${SikkerhetContext.hentSaksbehandlerNavn(true)}.")))
     }
 
     override fun stegType(): StegType {
