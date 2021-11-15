@@ -140,24 +140,6 @@ internal class SendTilBeslutterStegTest {
         val frontendFeilmelding = assertThrows<Feil> { beslutteVedtakSteg.validerSteg(innvilgetBehandling) }.frontendFeilmelding
         val forvetetFeilmelding = "Kan ikke innvilge hvis ikke alle vilkår er oppfylt for behandlingId: ${innvilgetBehandling.id}"
         assertThat(frontendFeilmelding).isEqualTo(forvetetFeilmelding)
-
-    }
-
-    @Test
-    internal fun `Feil tilstand hvis ikke begge - behandling og vedtak er innvilget`() {
-        every { vedtakService.hentVedtak(any()) } returns lagVedtak(resultatType = ResultatType.OPPHØRT)
-        val innvilgetBehandling = behandling.copy(resultat = INNVILGET)
-        val frontendFeilmelding = assertThrows<Feil> { beslutteVedtakSteg.validerSteg(innvilgetBehandling) }.frontendFeilmelding
-        val forventet = "Resultat fra vilkårsvurdering og behandlingsresultattype korresponder ikke ${innvilgetBehandling.id}"
-        assertThat(frontendFeilmelding).isEqualTo(forventet)
-    }
-
-    @Test
-    internal fun `Feil tilstand hvis invilget og ikke alle er oppfylt`() {
-        every { vedtakService.hentVedtak(any()) } returns lagVedtak(resultatType = ResultatType.INNVILGE)
-        val frontendFeilmelding = assertThrows<Feil> { beslutteVedtakSteg.validerSteg(behandling) }.frontendFeilmelding
-        val forventet = "Resultat fra vilkårsvurdering og behandlingsresultattype korresponder ikke ${behandling.id}"
-        assertThat(frontendFeilmelding).isEqualTo(forventet)
     }
 
     @Test

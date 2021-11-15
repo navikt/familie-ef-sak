@@ -54,11 +54,7 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
 
     private fun validerRiktigTilstandVedInvilgelse(behandling: Behandling) {
         val vedtak = vedtakService.hentVedtak(behandling.id)
-        feilHvisIkke(erInnvilgetTilstandRiktig(behandlingresultat = behandling.resultat,
-                                               vedtakresultatType = vedtak.resultatType)) {
-            "Resultat fra vilkårsvurdering og behandlingsresultattype korresponder ikke ${behandling.id}"
-        }
-        if (behandling.resultat == INNVILGET) {
+        if (vedtak.resultatType == INNVILGE) {
             feilHvisIkke(vurderingService.erAlleVilkårOppfylt(behandling.id)) {
                 "Kan ikke innvilge hvis ikke alle vilkår er oppfylt for behandlingId: ${behandling.id}"
             }

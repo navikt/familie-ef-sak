@@ -5,8 +5,6 @@ import no.nav.familie.ef.sak.api.gui.VedtakControllerTest.Saksbehandler.BESLUTTE
 import no.nav.familie.ef.sak.api.gui.VedtakControllerTest.Saksbehandler.BESLUTTER_2
 import no.nav.familie.ef.sak.api.gui.VedtakControllerTest.Saksbehandler.SAKSBEHANDLER
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
-import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
-import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.AVSLÅTT
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
@@ -175,11 +173,9 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     }
 
     private fun opprettBehandling(status: BehandlingStatus = BehandlingStatus.UTREDES,
-                                  steg: StegType = StegType.SEND_TIL_BESLUTTER, resultat: BehandlingResultat = AVSLÅTT) {
-
+                                  steg: StegType = StegType.SEND_TIL_BESLUTTER) {
         val lagretBehandling = behandlingRepository.insert(behandling.copy(status = status,
-                                                                           steg = steg,
-                                                                           resultat = resultat))
+                                                                           steg = steg))
         vedtakRepository.insert(vedtak(lagretBehandling.id, ResultatType.AVSLÅ))
         tilkjentYtelseRepository.insert(tilkjentYtelse(behandlingId = lagretBehandling.id, fagsak.hentAktivIdent()))
         søknadService.lagreSøknadForOvergangsstønad(Testsøknad.søknadOvergangsstønad, lagretBehandling.id, fagsak.id, "1")
