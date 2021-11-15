@@ -33,12 +33,6 @@ class EksternBehandlingController(private val pdlClient: PdlClient,
     fun finnesBehandlingForPerson(@RequestParam("type") stønadstype: Stønadstype?,
                                   @RequestBody request: PersonIdent): Ressurs<Boolean> {
         val personidenter = pdlClient.hentPersonidenter(request.ident, historikk = true).identer()
-        if (personidenter.isEmpty()) {
-            return Ressurs.failure("Minst en ident påkrevd for søk")
-        }
-        if (personidenter.any { it.length != 11 }) {
-            return Ressurs.failure("Støtter kun identer av typen fnr/dnr")
-        }
         return Ressurs.success(eksternBehandlingService.finnesBehandlingFor(personidenter, stønadstype))
     }
 
