@@ -49,6 +49,7 @@ import no.nav.familie.kontrakter.felles.annotasjoner.Improvement
 import no.nav.familie.kontrakter.felles.tilbakekreving.Periode
 import org.springframework.stereotype.Component
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.familie.kontrakter.ef.felles.RegelId as RegelIdIverksett
 import no.nav.familie.kontrakter.ef.felles.VilkårType as VilkårTypeIverksett
@@ -143,6 +144,7 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
                                       tilbakekreving: TilbakekrevingDto?) =
             VedtaksdetaljerDto(resultat = vedtak.resultatType.tilVedtaksresultat(),
                                vedtaksdato = LocalDate.now(),
+                               vedtakstidspunkt = LocalDateTime.now(),
                                opphørÅrsak = null,
                                saksbehandlerId = saksbehandler,
                                beslutterId = beslutter,
