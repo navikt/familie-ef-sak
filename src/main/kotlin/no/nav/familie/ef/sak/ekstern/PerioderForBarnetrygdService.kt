@@ -18,7 +18,7 @@ class PerioderForBarnetrygdService(
 ) {
 
     fun hentPerioderMedFullOvergangsstønad(request: PersonIdent): PerioderOvergangsstønadResponse {
-        val perioder = periodeService.hentPerioderFraEfOgInfotrygd(request.ident)
+        val perioder = periodeService.hentPerioderForOvergangsstønadFraEfOgInfotrygd(request.ident)
                 .filter(InternPeriode::erFullOvergangsstønad)
                 .map(InternPeriode::tilEksternPeriodeOvergangsstønad)
 
