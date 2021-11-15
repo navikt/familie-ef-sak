@@ -46,4 +46,10 @@ class TilbakekrevingController(private val tilgangService: TilgangService,
         return Ressurs.success(tilbakekrevingService.hentTilbakekrevingBehandlinger(fagsakId))
     }
 
+    @GetMapping("/behandlinger/{behandlingId}")
+    fun hentTilbakekekrevingBrev(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
+        tilgangService.validerTilgangTilFagsak(behandlingId)
+        return Ressurs.success(tilbakekrevingService.hentBrev(behandlingId))
+    }
+
 }
