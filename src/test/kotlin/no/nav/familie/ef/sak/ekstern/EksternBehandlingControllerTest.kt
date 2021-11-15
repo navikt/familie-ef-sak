@@ -100,6 +100,13 @@ internal class EksternBehandlingControllerTest {
     }
 
     @Test
+    internal fun `tomme lister med andeler, forvent at stønad for det siste året ikke finnes`() {
+        mockOpprettTilkjenteYtelser(lagTilkjentYtelse(andelerTilkjentYtelse = emptyList()),
+                                    lagTilkjentYtelse(andelerTilkjentYtelse = emptyList()))
+        assertThat(eksternBehandlingController.harStønadSiste12MånederForPersonidenter(setOf("12345678910")).data).isEqualTo(false)
+    }
+
+    @Test
     internal fun `uten stønadstype - skal returnere true når det minimum en behandling`() {
         var counter = 0
         every { behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(any(), setOf(ident1, ident2)) } answers {
