@@ -45,15 +45,6 @@ internal class EksternBehandlingControllerTest {
     }
 
     @Test
-    internal fun `skal feile når den ikke finner identer til personen`() {
-        every { pdlClient.hentPersonidenter(ident1, true) } returns PdlIdenter(emptyList())
-        val finnesBehandlingForPerson =
-                eksternBehandlingController.finnesBehandlingForPerson(Stønadstype.OVERGANGSSTØNAD, PersonIdent(ident1))
-        assertThat(finnesBehandlingForPerson.status)
-                .isEqualTo(Ressurs.Status.FEILET)
-    }
-
-    @Test
     internal fun `skal returnere false når det ikke finnes en behandling`() {
         every {
             behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(Stønadstype.OVERGANGSSTØNAD, setOf(ident1, ident2))
@@ -85,6 +76,13 @@ internal class EksternBehandlingControllerTest {
         every { behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(any(), setOf(ident1, ident2)) } returns null
         assertThat(eksternBehandlingController.finnesBehandlingForPerson(null, PersonIdent(ident1)).data)
                 .isEqualTo(false)
+    }
+
+    @Test
+    internal fun `send tom liste med personidenter, forvent HttpStatus 400`() {
+        val finnesBehandlingForPerson =
+                eksternBehandlingController.harStønadSiste12MånederForPersonidenter(emptySet())
+        assertThat(finnesBehandlingForPerson.status).isEqualTo(Ressurs.Status.FEILET)
     }
 
     @Test
