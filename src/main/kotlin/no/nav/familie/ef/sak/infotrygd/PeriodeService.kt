@@ -24,15 +24,15 @@ class PeriodeService(
         private val replikaClient: InfotrygdReplikaClient
 ) {
 
-    fun hentPerioderFraEfOgInfotrygd(personIdent: String): List<InternPeriode> {
+    fun hentPerioderForOvergangsstønadFraEfOgInfotrygd(personIdent: String): List<InternPeriode> {
         val personIdenter = pdlClient.hentPersonidenter(personIdent, true).identer()
-        val perioderFraReplika = hentPerioderFraReplika(personIdenter)
-        val perioderFraEf = hentPerioderFraEf(personIdenter)
+        val perioderFraReplika = hentPerioderFraReplika(personIdenter).getValue(StønadType.OVERGANGSSTØNAD)
+        val perioderFraEf = hentPerioderForOvergangsstønadFraEf(personIdenter)
 
-        return InternPeriodeUtil.slåSammenPerioder(perioderFraEf + perioderFraReplika)
+        return InternPeriodeUtil.slåSammenPerioder(perioderFraEf, perioderFraReplika)
     }
 
-    private fun hentPerioderFraEf(personIdenter: Set<String>): List<InternPeriode> {
+    private fun hentPerioderForOvergangsstønadFraEf(personIdenter: Set<String>): List<InternPeriode> {
         return fagsakService.finnFagsak(personIdenter, Stønadstype.OVERGANGSSTØNAD)
                        ?.let { behandlingService.finnSisteIverksatteBehandling(it.id) }
                        ?.let { hentPerioderFraEf(it) }
@@ -42,9 +42,17 @@ class PeriodeService(
                ?: emptyList()
     }
 
-    private fun hentPerioderFraReplika(personIdenter: Set<String>): List<InternPeriode> {
-        val request = InfotrygdPeriodeRequest(personIdenter, setOf(StønadType.OVERGANGSSTØNAD))
-        val perioder = replikaClient.hentPerioder(request).overgangsstønad
+    private fun hentPerioderFraReplika(personIdenter: Set<String>, stønadstyper: Set<StønadType> = StønadType.values().toSet())
+            : Map<StønadType, List<InternPeriode>> {
+        require(stønadstyper.isNotEmpty()) { "Må sende med stønadstype" }
+        val request = InfotrygdPeriodeRequest(personIdenter, stønadstyper)
+        val perioder = replikaClient.hentPerioder(request)
+        return mapOf(StønadType.OVERGANGSSTØNAD to filtrerOgSlåSammenPerioder(perioder.overgangsstønad),
+                     StønadType.BARNETILSYN to filtrerOgSlåSammenPerioder(perioder.barnetilsyn),
+                     StønadType.SKOLEPENGER to filtrerOgSlåSammenPerioder(perioder.skolepenger))
+    }
+
+    private fun filtrerOgSlåSammenPerioder(perioder: List<InfotrygdPeriode>): List<InternPeriode> {
         val filtrertPerioder = InfotrygdPeriodeUtil.filtrerOgSorterPerioderFraInfotrygd(perioder)
                 .filter { it.kode != InfotrygdEndringKode.ANNULERT && it.kode != InfotrygdEndringKode.UAKTUELL }
         return InfotrygdPeriodeUtil.slåSammenInfotrygdperioder(filtrertPerioder)
