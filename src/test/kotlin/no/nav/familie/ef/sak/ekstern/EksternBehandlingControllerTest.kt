@@ -11,33 +11,37 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
+import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
+import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.util.UUID
 
 internal class EksternBehandlingControllerTest {
 
     private val pdlClient = mockk<PdlClient>()
     private val behandlingRepository = mockk<BehandlingRepository>()
-    private val eksternBehandlingController = EksternBehandlingController(pdlClient, behandlingRepository)
+    private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
+    private val eksternBehandlingService = EksternBehandlingService(tilkjentYtelseService, behandlingRepository)
+    private val eksternBehandlingController = EksternBehandlingController(pdlClient, eksternBehandlingService)
 
     private val ident1 = "11111111111"
     private val ident2 = "22222222222"
 
     @BeforeEach
     internal fun setUp() {
-        every { pdlClient.hentPersonidenter(ident1, true) } returns PdlIdenter(listOf(PdlIdent(ident1, true), PdlIdent(ident2, false)))
-    }
-
-    @Test
-    internal fun `skal feile når den ikke finner identer til personen`() {
-        every { pdlClient.hentPersonidenter(ident1, true) } returns PdlIdenter(emptyList())
-        val finnesBehandlingForPerson =
-                eksternBehandlingController.finnesBehandlingForPerson(Stønadstype.OVERGANGSSTØNAD, PersonIdent(ident1))
-        assertThat(finnesBehandlingForPerson.status)
-                .isEqualTo(Ressurs.Status.FEILET)
+        every { pdlClient.hentPersonidenter(ident1, true) } returns PdlIdenter(
+                listOf(
+                        PdlIdent(ident1, true),
+                        PdlIdent(ident2, false)
+                )
+        )
     }
 
     @Test
@@ -75,6 +79,32 @@ internal class EksternBehandlingControllerTest {
     }
 
     @Test
+    internal fun `send tom liste med personidenter, forvent HttpStatus 400`() {
+        val finnesBehandlingForPerson =
+                eksternBehandlingController.harStønadSiste12MånederForPersonidenter(emptySet())
+        assertThat(finnesBehandlingForPerson.status).isEqualTo(Ressurs.Status.FEILET)
+    }
+
+    @Test
+    internal fun `opprett en ikke-utdatert og en utdatert andelsliste, forvent at en stønad for det siste året finnes`() {
+        mockOpprettTilkjenteYtelser(opprettIkkeUtdatertTilkjentYtelse(), opprettUtdatertTilkjentYtelse())
+        assertThat(eksternBehandlingController.harStønadSiste12MånederForPersonidenter(setOf("12345678910")).data).isEqualTo(true)
+    }
+
+    @Test
+    internal fun `opprett bare utdaterte andeler, forvent at stønad for det siste året ikke finnes`() {
+        mockOpprettTilkjenteYtelser(opprettUtdatertTilkjentYtelse(), opprettUtdatertTilkjentYtelse())
+        assertThat(eksternBehandlingController.harStønadSiste12MånederForPersonidenter(setOf("12345678910")).data).isEqualTo(false)
+    }
+
+    @Test
+    internal fun `tomme lister med andeler, forvent at stønad for det siste året ikke finnes`() {
+        mockOpprettTilkjenteYtelser(lagTilkjentYtelse(andelerTilkjentYtelse = emptyList()),
+                                    lagTilkjentYtelse(andelerTilkjentYtelse = emptyList()))
+        assertThat(eksternBehandlingController.harStønadSiste12MånederForPersonidenter(setOf("12345678910")).data).isEqualTo(false)
+    }
+
+    @Test
     internal fun `uten stønadstype - skal returnere true når det minimum en behandling`() {
         var counter = 0
         every { behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(any(), setOf(ident1, ident2)) } answers {
@@ -87,5 +117,56 @@ internal class EksternBehandlingControllerTest {
         assertThat(eksternBehandlingController.finnesBehandlingForPerson(null, PersonIdent(ident1)).data)
                 .isEqualTo(true)
         verify(exactly = 2) { behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(any(), any()) }
+    }
+
+    private fun opprettIkkeUtdatertTilkjentYtelse(): TilkjentYtelse {
+        return lagTilkjentYtelse(
+                andelerTilkjentYtelse = listOf(
+                        lagAndelTilkjentYtelse(
+                                beløp = 1,
+                                fraOgMed = LocalDate.of(2019, 1, 1),
+                                tilOgMed = LocalDate.of(2019, 2, 1)
+                        ),
+                        lagAndelTilkjentYtelse(
+                                beløp = 1,
+                                fraOgMed = LocalDate.of(2020, 1, 1),
+                                tilOgMed = LocalDate.now().minusMonths(11)
+                        )
+                )
+        )
+    }
+
+    private fun opprettUtdatertTilkjentYtelse(): TilkjentYtelse {
+        return lagTilkjentYtelse(
+                andelerTilkjentYtelse = listOf(
+                        lagAndelTilkjentYtelse(
+                                beløp = 1,
+                                fraOgMed = LocalDate.of(2019, 1, 1),
+                                tilOgMed = LocalDate.of(2019, 2, 1)
+                        ),
+                        lagAndelTilkjentYtelse(
+                                beløp = 1,
+                                fraOgMed = LocalDate.now().minusMonths(14),
+                                tilOgMed = LocalDate.now().minusYears(1).minusMonths(1)
+                        )
+                )
+        )
+    }
+
+    private fun mockOpprettTilkjenteYtelser(tilkjentYtelse: TilkjentYtelse, annenTilkjentYtelse: TilkjentYtelse) {
+        val uuid1 = UUID.randomUUID()
+        val uuid2 = UUID.randomUUID()
+
+        every {
+            behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(Stønadstype.OVERGANGSSTØNAD, any())
+        } returns behandling(id = uuid1)
+        every {
+            behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(Stønadstype.BARNETILSYN, any())
+        } returns behandling(id = uuid2)
+        every {
+            behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(Stønadstype.SKOLEPENGER, any())
+        } returns null
+        every { tilkjentYtelseService.hentForBehandling(uuid1) } returns tilkjentYtelse
+        every { tilkjentYtelseService.hentForBehandling(uuid2) } returns annenTilkjentYtelse
     }
 }
