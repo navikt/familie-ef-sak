@@ -55,13 +55,12 @@ class MellomlagringBrevService(private val mellomlagerBrevRepository: Mellomlage
 
     fun hentMellomlagretFrittståendeBrev(fagsakId: UUID): FrittståendeBrevDto? {
         val saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(true)
-        mellomlagerFrittståendeBrevRepository.findByFagsakIdAndSaksbehandlerIdent(fagsakId, saksbehandlerIdent)?.let {
-            return FrittståendeBrevDto(it.brev.overskrift,
+        return mellomlagerFrittståendeBrevRepository.findByFagsakIdAndSaksbehandlerIdent(fagsakId, saksbehandlerIdent)?.let {
+             FrittståendeBrevDto(it.brev.overskrift,
                                        it.brev.avsnitt,
                                        fagsakId,
                                        it.brevType)
         }
-        return null
     }
 
     fun hentOgValiderMellomlagretBrev(behhandlingId: UUID, sanityVersjon: String): MellomlagretBrevResponse? {
@@ -72,10 +71,9 @@ class MellomlagringBrevService(private val mellomlagerBrevRepository: Mellomlage
             }
             return null
         }
-        mellomlagerFritekstbrevRepository.findByIdOrNull(behhandlingId)?.let {
-            return MellomlagretBrevFritekst(brev = it.brev, brevType = it.brevType)
+        return mellomlagerFritekstbrevRepository.findByIdOrNull(behhandlingId)?.let {
+             MellomlagretBrevFritekst(brev = it.brev, brevType = it.brevType)
         }
-        return null
     }
 
     fun slettMellomlagringHvisFinnes(behandlingId: UUID) {
