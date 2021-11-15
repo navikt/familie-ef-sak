@@ -36,7 +36,7 @@
         <felles.version>1.20211008153542_d279663</felles.version>
         <prosessering.version>1.20211025145734_17ac16f</prosessering.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>2.0_20211109134352_ef4e16b</kontrakter.version>
+        <kontrakter.version>2.0_20211115092706_a94dcc7</kontrakter.version>
 
 
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
