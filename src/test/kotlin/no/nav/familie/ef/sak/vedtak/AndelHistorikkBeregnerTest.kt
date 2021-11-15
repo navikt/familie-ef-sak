@@ -41,6 +41,11 @@ class AndelHistorikkBeregnerTest {
     }
 
     @Test
+    internal fun `når vi revurderer fra midt i en tidligere periode lagrer vi ikke ned hele vedtakshistorikken`() {
+            run("/økonomi/hele_vedtaket_blir_ikke_med.csv")
+    }
+
+    @Test
     internal fun `aktivitet og vedtaksperiodetype endrer seg`() {
         run("/økonomi/aktivitet_periodetype_endrer_seg.csv")
     }
@@ -86,23 +91,6 @@ object AndelHistorikkRunner {
 
     private fun validerInput(grupper: ParsetAndelHistorikkData) {
         validerVedtaksperioderIkkeOverlapper(grupper)
-        validerAndelerMåOverlappeMedVedtaksperioder(grupper)
-    }
-
-    private fun validerAndelerMåOverlappeMedVedtaksperioder(grupper: ParsetAndelHistorikkData) {
-        val vedtakPerBehandling = grupper.vedtaksliste.associate { it.behandlingId to it.perioder!!.perioder }
-        grupper.input.forEach { tilkjentYtelse ->
-            val vedtaksperioder = vedtakPerBehandling.getValue(tilkjentYtelse.behandlingId)
-            tilkjentYtelse.andelerTilkjentYtelse.forEach { andel ->
-                val antallOverlappendePerioder = vedtaksperioder.count {
-                    andel.stønadFom in it.datoFra..it.datoTil &&
-                    andel.stønadFom in it.datoFra..it.datoTil
-                }
-                require(antallOverlappendePerioder == 1) {
-                    "En andel må ha en periode som er innenfor ${hentBehandlingId(tilkjentYtelse.behandlingId)} vedtaket sin periode"
-                }
-            }
-        }
     }
 
     private fun validerVedtaksperioderIkkeOverlapper(grupper: ParsetAndelHistorikkData) {
