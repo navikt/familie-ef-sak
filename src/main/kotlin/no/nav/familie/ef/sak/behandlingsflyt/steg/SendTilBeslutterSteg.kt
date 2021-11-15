@@ -2,8 +2,6 @@ package no.nav.familie.ef.sak.behandlingsflyt.steg
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
-import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
-import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.INNVILGET
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
@@ -59,13 +57,6 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
                 "Kan ikke innvilge hvis ikke alle vilkår er oppfylt for behandlingId: ${behandling.id}"
             }
         }
-    }
-
-    private fun erInnvilgetTilstandRiktig(behandlingresultat: BehandlingResultat, vedtakresultatType: ResultatType): Boolean {
-        if (behandlingresultat == INNVILGET || vedtakresultatType == INNVILGE) {
-            return behandlingresultat == INNVILGET && vedtakresultatType == INNVILGE
-        }
-        return true
     }
 
     private fun saksbehandlerMåTaStilingTilTilbakekreving(behandling: Behandling): Boolean {
