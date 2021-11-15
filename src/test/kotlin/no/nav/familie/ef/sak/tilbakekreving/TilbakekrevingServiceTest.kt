@@ -23,7 +23,8 @@ internal class TilbakekrevingServiceTest {
 
     private val tilbakekrevingRepository = mockk<TilbakekrevingRepository>()
     private val behandlingService = mockk<BehandlingService>()
-    private val tilbakekrevingService = TilbakekrevingService(tilbakekrevingRepository, behandlingService, mockk(), mockk())
+    private val tilbakekrevingService =
+            TilbakekrevingService(tilbakekrevingRepository, behandlingService, mockk(), mockk(), mockk())
 
     @Test
     internal fun `skal ikke være mulig å lagre tilbakekreving for låst behandlig `() {
