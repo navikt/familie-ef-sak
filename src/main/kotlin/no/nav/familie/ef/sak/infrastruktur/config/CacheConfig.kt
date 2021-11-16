@@ -59,3 +59,6 @@ class CacheConfig {
 fun <T> CacheManager.getOrThrow(cache: String, key: String, valueLoader: () -> T) =
         (this.getCache(cache) ?: error("Finner ikke cache=$cache"))
                 .get(key, valueLoader) ?: error("Finner ikke cache for cache=$cache key=$key")
+
+fun <T> CacheManager.get(cache: String, key: String, valueLoader: () -> T?) =
+        (this.getCache(cache) ?: error("Finner ikke cache=$cache")).get(key, valueLoader)
