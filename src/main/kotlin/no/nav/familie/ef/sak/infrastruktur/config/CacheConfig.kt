@@ -40,15 +40,22 @@ class CacheConfig {
         }
     }
 
-    @Bean("oppgaveCache")
-    fun oppgaveCache(): CacheManager = object : ConcurrentMapCacheManager() {
+    @Bean("shortCache")
+    fun shortCache(): CacheManager = object : ConcurrentMapCacheManager() {
         override fun createConcurrentMapCache(name: String): Cache {
             val concurrentMap = Caffeine
                     .newBuilder()
                     .maximumSize(1000)
-                    .expireAfterWrite(1, TimeUnit.HOURS)
+                    .expireAfterWrite(10, TimeUnit.MINUTES)
                     .recordStats().build<Any, Any>().asMap()
             return ConcurrentMapCache(name, concurrentMap, true)
         }
     }
 }
+
+/**
+ * Forventer treff, skal ikke brukes hvis en cache inneholder nullverdi
+ */
+fun <T> CacheManager.getOrThrow(cache: String, key: String, valueLoader: () -> T) =
+        (this.getCache(cache) ?: error("Finner ikke cache=$cache"))
+                .get(key, valueLoader) ?: error("Finner ikke cache for cache=$cache key=$key")

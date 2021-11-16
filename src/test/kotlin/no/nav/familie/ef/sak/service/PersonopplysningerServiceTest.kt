@@ -2,10 +2,12 @@ package no.nav.familie.ef.sak.service
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.arbeidsfordeling.Arbeidsfordelingsenhet
 import no.nav.familie.ef.sak.infrastruktur.config.KodeverkServiceMock
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataHenterService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
@@ -20,10 +22,12 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager
 
 internal class PersonopplysningerServiceTest {
 
     private val kodeverkService = KodeverkServiceMock().kodeverkService()
+    private val pdlClient = PdlClientConfig().pdlClient()
 
     private lateinit var personopplysningerService: PersonopplysningerService
     private lateinit var personopplysningerIntegrasjonerClient: PersonopplysningerIntegrasjonerClient
@@ -34,13 +38,13 @@ internal class PersonopplysningerServiceTest {
 
     @BeforeEach
     internal fun setUp() {
-        personopplysningerIntegrasjonerClient = mockk()
+        personopplysningerIntegrasjonerClient = mockk(relaxed = true)
         adresseMapper = AdresseMapper(kodeverkService)
-        arbeidsfordelingService = mockk()
+        arbeidsfordelingService = mockk(relaxed = true)
         søknadService = mockk()
+        val grunnlagsdataHenterService = GrunnlagsdataHenterService(pdlClient, personopplysningerIntegrasjonerClient)
 
-        val pdlClient = PdlClientConfig().pdlClient()
-        grunnlagsdataService = GrunnlagsdataService(pdlClient, mockk(), søknadService, personopplysningerIntegrasjonerClient)
+        grunnlagsdataService = GrunnlagsdataService(mockk(), søknadService, grunnlagsdataHenterService)
         val personopplysningerMapper =
                 PersonopplysningerMapper(adresseMapper,
                                          StatsborgerskapMapper(kodeverkService),
@@ -51,7 +55,8 @@ internal class PersonopplysningerServiceTest {
                                                               søknadService,
                                                               personopplysningerIntegrasjonerClient,
                                                               grunnlagsdataService,
-                                                              personopplysningerMapper)
+                                                              personopplysningerMapper,
+                                                              ConcurrentMapCacheManager())
     }
 
     @Test
@@ -67,7 +72,17 @@ internal class PersonopplysningerServiceTest {
                 .isEqualToIgnoringWhitespace(readFile("/json/personopplysningerDto.json"))
     }
 
+    @Test
+    internal fun `skal cache egenAnsatt når man kaller med samme ident`() {
+        personopplysningerService.hentPersonopplysninger("1")
+        personopplysningerService.hentPersonopplysninger("1")
+        verify(exactly = 1) { personopplysningerIntegrasjonerClient.egenAnsatt(any()) }
+
+        personopplysningerService.hentPersonopplysninger("2")
+        verify(exactly = 2) { personopplysningerIntegrasjonerClient.egenAnsatt(any()) }
+    }
+
     private fun readFile(filnavn: String): String {
-        return this::class.java.getResource(filnavn).readText()
+        return this::class.java.getResource(filnavn)!!.readText()
     }
 }
