@@ -23,6 +23,11 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.VergemaalEllerF
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import java.time.LocalDate
 
+/**
+ * Endringer i denne filen burde godkjennes av 2 personer då denne er lagret som json i databasen og breaking changes kan være
+ * kritiske
+ */
+
 data class GrunnlagsdataMedMetadata(val grunnlagsdata: GrunnlagsdataDomene,
                                     val lagtTilEtterFerdigstilling: Boolean)
 
