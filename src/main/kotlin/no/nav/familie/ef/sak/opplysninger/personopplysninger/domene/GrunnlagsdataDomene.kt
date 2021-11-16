@@ -81,7 +81,7 @@ data class BarnMedIdent(
 data class SivilstandMedNavn(val type: Sivilstandstype,
                              val gyldigFraOgMed: LocalDate?,
                              val relatertVedSivilstand: String?,
-                             val bekreftelsesdato: String?,
+                             val bekreftelsesdato: LocalDate?,
                              val dødsfall: Dødsfall?, //Er en liste i PDLSøker
                              val navn: String?,
                              val metadata: Metadata)

@@ -263,7 +263,7 @@ enum class Oppholdstillatelse {
 data class Sivilstand(val type: Sivilstandstype,
                       val gyldigFraOgMed: LocalDate?,
                       val relatertVedSivilstand: String?,
-                      val bekreftelsesdato: String?,
+                      val bekreftelsesdato: LocalDate?,
                       val metadata: Metadata)
 
 enum class Sivilstandstype {
