@@ -26,13 +26,13 @@ class TilbakekrevingClient(@Qualifier("azure") restOperations: RestOperations,
             .build()
             .toUri()
 
-    private fun finnesÅpenBehandlingUri(fagsakExternId: Long) = UriComponentsBuilder.fromUri(familieTilbakeUri)
-            .pathSegment("api/fagsystem/${Fagsystem.EF}/fagsak/$fagsakExternId/finnesApenBehandling/v1")
+    private fun finnesÅpenBehandlingUri(eksternFagsakId: Long) = UriComponentsBuilder.fromUri(familieTilbakeUri)
+            .pathSegment("api/fagsystem/${Fagsystem.EF}/fagsak/$eksternFagsakId/finnesApenBehandling/v1")
             .build()
             .toUri()
 
-    private fun finnBehandlingerUri(fagsakExternId: Long) = UriComponentsBuilder.fromUri(familieTilbakeUri)
-            .pathSegment("api/fagsystem/${Fagsystem.EF}/fagsak/$fagsakExternId/behandlinger/v1")
+    private fun finnBehandlingerUri(eksternFagsakId: Long) = UriComponentsBuilder.fromUri(familieTilbakeUri)
+            .pathSegment("api/fagsystem/${Fagsystem.EF}/fagsak/$eksternFagsakId/behandlinger/v1")
             .build()
             .toUri()
 
@@ -48,8 +48,8 @@ class TilbakekrevingClient(@Qualifier("azure") restOperations: RestOperations,
         return response.getDataOrThrow().finnesÅpenBehandling
     }
 
-    fun finnBehandlinger(fagsakExternId: Long): List<Behandling> {
-        val response: Ressurs<List<Behandling>> = getForEntity(finnBehandlingerUri(fagsakExternId))
+    fun finnBehandlinger(eksternFagsakId: Long): List<Behandling> {
+        val response: Ressurs<List<Behandling>> = getForEntity(finnBehandlingerUri(eksternFagsakId))
         return response.getDataOrThrow()
     }
 
