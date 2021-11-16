@@ -10,8 +10,7 @@ class ArbeidsfordelingService(private val personService: PersonService,
                               private val personopplysningerIntegrasjonerClient: PersonopplysningerIntegrasjonerClient) {
 
     companion object {
-
-        private const val MASKINELL_JOURNALFOERENDE_ENHET = "9999"
+        const val MASKINELL_JOURNALFOERENDE_ENHET = "9999"
     }
 
     fun hentNavEnhet(ident: String): Arbeidsfordelingsenhet? {

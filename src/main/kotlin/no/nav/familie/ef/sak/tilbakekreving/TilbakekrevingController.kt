@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.tilbakekreving
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.tilbakekreving.domain.tilDto
 import no.nav.familie.ef.sak.tilbakekreving.dto.TilbakekrevingDto
+import no.nav.familie.ef.sak.tilbakekreving.dto.VarseltekstDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
@@ -50,6 +51,13 @@ class TilbakekrevingController(private val tilgangService: TilgangService,
     fun hentTilbakekekrevingBrev(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         return Ressurs.success(tilbakekrevingService.hentBrev(behandlingId))
+    }
+
+    @PostMapping("/{behandlingId}/brev/generer")
+    fun hentTilbakekekrevingBrev(@PathVariable behandlingId: UUID,
+                                 @RequestBody varseltekstDto: VarseltekstDto): Ressurs<ByteArray> {
+        tilgangService.validerTilgangTilBehandling(behandlingId)
+        return Ressurs.success(tilbakekrevingService.hentBrev(behandlingId, varseltekstDto.varseltekst))
     }
 
 }
