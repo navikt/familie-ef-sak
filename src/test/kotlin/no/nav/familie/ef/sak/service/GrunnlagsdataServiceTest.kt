@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infrastruktur.config.InfotrygdReplikaMock
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRegisterService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRepository
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
@@ -39,17 +40,19 @@ internal class GrunnlagsdataServiceTest {
     private val søknadService = mockk<SøknadService>()
     private val personopplysningerIntegrasjonerClient = mockk<PersonopplysningerIntegrasjonerClient>()
     private val infotrygdReplikaClient = InfotrygdReplikaMock().infotrygdReplikaClient()
+    private val infotrygdService = InfotrygdService(infotrygdReplikaClient, pdlClient)
+    private val grunnlagsdataRegisterService = GrunnlagsdataRegisterService(pdlClient,
+                                                                            personopplysningerIntegrasjonerClient,
+                                                                            infotrygdService)
 
     private val søknad = SøknadsskjemaMapper.tilDomene(TestsøknadBuilder.Builder().setBarn(listOf(
             TestsøknadBuilder.Builder().defaultBarn("Navn1 navnesen", fødselTermindato = LocalDate.now().plusMonths(4)),
             TestsøknadBuilder.Builder().defaultBarn("Navn2 navnesen", fødselTermindato = LocalDate.now().plusMonths(6))
     )).build().søknadOvergangsstønad)
 
-    private val service = GrunnlagsdataService(pdlClient = pdlClient,
-                                               grunnlagsdataRepository = grunnlagsdataRepository,
+    private val service = GrunnlagsdataService(grunnlagsdataRepository = grunnlagsdataRepository,
                                                søknadService = søknadService,
-                                               personopplysningerIntegrasjonerClient = personopplysningerIntegrasjonerClient,
-                                               infotrygdService = InfotrygdService(infotrygdReplikaClient, pdlClient))
+                                               grunnlagsdataRegisterService = grunnlagsdataRegisterService)
 
     @BeforeEach
     internal fun setUp() {
@@ -114,9 +117,8 @@ internal class GrunnlagsdataServiceTest {
 
     @Test
     internal fun `skal sjekke om personen har historikk i infotrygd`() {
-        every { infotrygdReplikaClient.hentPerioder(any()) } returns InfotrygdPeriodeResponse(emptyList(),
-                                                                                              listOf(mockk()),
-                                                                                              emptyList())
+        every { infotrygdService.hentPerioder(any()) } returns
+                InfotrygdPeriodeResponse(emptyList(), listOf(mockk()), emptyList())
 
         val grunnlagsdata = service.hentGrunnlagsdataFraRegister("1", emptyList())
 

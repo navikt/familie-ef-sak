@@ -1,24 +1,20 @@
 package no.nav.familie.ef.sak.infotrygd
 
-import no.nav.familie.ef.sak.felles.util.isEqualOrAfter
-
 object InternPeriodeUtil {
 
     /**
-     * Slår sammen perioder tvers kilder, viktig att EF-perioder
-     * Till forskjell mot [InfotrygdPeriodeUtil.slåSammenInfotrygdperioder] så skal ikke denne sjekke stønadId etc
+     * Slår sammen perioder tvers kilder
+     * Når vi skal slå sammen perioder fra infotrygd og EF så er det EF sine perioder som er de som skriver over infotrygd sine
      */
-    fun slåSammenPerioder(perioder: List<InternPeriode>): List<InternPeriode> {
-        val list = mutableListOf<InternPeriode>()
-
-        for (periode in perioder) {
-            val match = list.filter { it.erPeriodeOverlappende(periode) }.minByOrNull { it.stønadFom }
-            if (match != null && periode.stønadFom.isEqualOrAfter(match.stønadFom)) {
-                continue
+    fun slåSammenPerioder(efPerioder: List<InternPeriode>, infotrygdperioder: List<InternPeriode>): List<InternPeriode> {
+        val førstePerioden = efPerioder.minByOrNull { it.stønadFom } ?: return infotrygdperioder
+        val perioderFraInfotrygdSomBeholdes = infotrygdperioder.mapNotNull {
+            if (it.stønadFom >= førstePerioden.stønadFom) {
+                null
+            } else {
+                it.copy(stønadTom = førstePerioden.stønadFom.minusDays(1))
             }
-
-            list.add(periode.copy(stønadTom = match?.stønadFom?.minusDays(1) ?: periode.stønadTom))
         }
-        return list.reversed()
+        return efPerioder + perioderFraInfotrygdSomBeholdes
     }
 }

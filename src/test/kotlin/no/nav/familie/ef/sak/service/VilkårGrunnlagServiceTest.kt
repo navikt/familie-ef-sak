@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infrastruktur.config.InfotrygdReplikaMock
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRegisterService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRepository
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
@@ -34,11 +35,13 @@ internal class VilkårGrunnlagServiceTest {
     private val medlemskapMapper = MedlemskapMapper(mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true))
     private val infotrygdService = InfotrygdService(InfotrygdReplikaMock().infotrygdReplikaClient(), pdlClient)
 
-    private val grunnlagsdataService = GrunnlagsdataService(pdlClient,
-                                                            grunnlagsdataRepository,
+    private val grunnlagsdataRegisterService = GrunnlagsdataRegisterService(pdlClient,
+                                                                            personopplysningerIntegrasjonerClient,
+                                                                            infotrygdService)
+
+    private val grunnlagsdataService = GrunnlagsdataService(grunnlagsdataRepository,
                                                             søknadService,
-                                                            personopplysningerIntegrasjonerClient,
-                                                            infotrygdService)
+                                                            grunnlagsdataRegisterService)
 
     private val service = VilkårGrunnlagService(medlemskapMapper, grunnlagsdataService)
     private val behandling = behandling(fagsak())

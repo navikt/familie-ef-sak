@@ -85,7 +85,7 @@ object PdlTestdata {
                                   navn,
                                   opphold,
                                   oppholdsadresse,
-                                  listOf(Sivilstand(Sivilstandstype.GIFT, LocalDate.now(), "", "", metadataGjeldende)),
+                                  listOf(Sivilstand(Sivilstandstype.GIFT, LocalDate.now(), "", LocalDate.now(), metadataGjeldende)),
                                   statsborgerskap,
                                   listOf(Telefonnummer("", "", 1)),
                                   listOf(TilrettelagtKommunikasjon(Tolk(""), Tolk(""))),

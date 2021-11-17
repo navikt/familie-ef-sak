@@ -58,34 +58,55 @@ internal class PeriodeServiceTest {
     @Test
     internal fun `skal returnere tom liste hvis det ikke finnes en fagsak for personen`() {
         mockFagsak(null)
-        assertThat(service.hentPerioderFraEfOgInfotrygd(personIdent)).isEmpty()
+        assertThat(service.hentPerioderForOvergangsstønadFraEfOgInfotrygd(personIdent)).isEmpty()
     }
 
     @Test
     internal fun `skal returnere tom liste hvis det ikke finnes en behandling for personen`() {
         mockBehandling(null)
-        assertThat(service.hentPerioderFraEfOgInfotrygd(personIdent)).isEmpty()
+        assertThat(service.hentPerioderForOvergangsstønadFraEfOgInfotrygd(personIdent)).isEmpty()
     }
 
     @Test
-    internal fun `skal returnere perioder fra infotrygd og ef`() {
+    internal fun `perioder overlapper ikke - skal returnere perioder fra infotrygd og ef`() {
         mockBehandling()
-        val infotrygdFom = LocalDate.now().minusDays(10)
-        val infotrygdTom = LocalDate.now().minusDays(9)
-        val efFom = LocalDate.now()
-        val efTom = LocalDate.now().plusDays(1)
+        val infotrygdFom = LocalDate.of(2021,1,1)
+        val infotrygdTom = LocalDate.of(2021,1,31)
+        val efFom = LocalDate.of(2021,2,1)
+        val efTom = LocalDate.of(2021,3,31)
         mockTilkjentYtelse(lagAndelTilkjentYtelse(1, efFom, efTom))
         mockReplika(listOf(lagInfotrygdPeriode(stønadFom = infotrygdFom, stønadTom = infotrygdTom)))
-        val perioder = service.hentPerioderFraEfOgInfotrygd(personIdent)
+        val perioder = service.hentPerioderForOvergangsstønadFraEfOgInfotrygd(personIdent)
 
         assertThat(perioder).hasSize(2)
-        assertThat(perioder[0].datakilde).isEqualTo(PeriodeOvergangsstønad.Datakilde.INFOTRYGD)
-        assertThat(perioder[0].stønadFom).isEqualTo(infotrygdFom)
-        assertThat(perioder[0].stønadTom).isEqualTo(infotrygdTom)
+        assertThat(perioder[0].datakilde).isEqualTo(PeriodeOvergangsstønad.Datakilde.EF)
+        assertThat(perioder[0].stønadFom).isEqualTo(efFom)
+        assertThat(perioder[0].stønadTom).isEqualTo(efTom)
 
-        assertThat(perioder[1].datakilde).isEqualTo(PeriodeOvergangsstønad.Datakilde.EF)
-        assertThat(perioder[1].stønadFom).isEqualTo(efFom)
-        assertThat(perioder[1].stønadTom).isEqualTo(efTom)
+        assertThat(perioder[1].datakilde).isEqualTo(PeriodeOvergangsstønad.Datakilde.INFOTRYGD)
+        assertThat(perioder[1].stønadFom).isEqualTo(infotrygdFom)
+        assertThat(perioder[1].stønadTom).isEqualTo(infotrygdTom)
+    }
+
+    @Test
+    internal fun `perioden fra EF avkorter periode fra infotrygd`() {
+        mockBehandling()
+        val infotrygdFom = LocalDate.of(2021,1,1)
+        val infotrygdTom = LocalDate.of(2021,3,31)
+        val efFom = LocalDate.of(2021,2,1)
+        val efTom = LocalDate.of(2021,3,31)
+        mockTilkjentYtelse(lagAndelTilkjentYtelse(1, efFom, efTom))
+        mockReplika(listOf(lagInfotrygdPeriode(stønadFom = infotrygdFom, stønadTom = infotrygdTom)))
+        val perioder = service.hentPerioderForOvergangsstønadFraEfOgInfotrygd(personIdent)
+
+        assertThat(perioder).hasSize(2)
+        assertThat(perioder[0].datakilde).isEqualTo(PeriodeOvergangsstønad.Datakilde.EF)
+        assertThat(perioder[0].stønadFom).isEqualTo(efFom)
+        assertThat(perioder[0].stønadTom).isEqualTo(efTom)
+
+        assertThat(perioder[1].datakilde).isEqualTo(PeriodeOvergangsstønad.Datakilde.INFOTRYGD)
+        assertThat(perioder[1].stønadFom).isEqualTo(infotrygdFom)
+        assertThat(perioder[1].stønadTom).isEqualTo(efFom.minusDays(1))
     }
 
     @Test
@@ -95,7 +116,7 @@ internal class PeriodeServiceTest {
         val tom = LocalDate.now().plusDays(9)
         mockTilkjentYtelse(lagAndelTilkjentYtelse(1, fom, tom))
         mockReplika(listOf(lagInfotrygdPeriode(beløp = 2, stønadFom = fom, stønadTom = tom)))
-        val perioder = service.hentPerioderFraEfOgInfotrygd(personIdent)
+        val perioder = service.hentPerioderForOvergangsstønadFraEfOgInfotrygd(personIdent)
 
         assertThat(perioder).hasSize(1)
         assertThat(perioder[0].datakilde).isEqualTo(PeriodeOvergangsstønad.Datakilde.EF)
@@ -119,7 +140,7 @@ internal class PeriodeServiceTest {
                                                stønadTom = LocalDate.parse("2021-03-02"),
                                                beløp = 3,
                                                kode = InfotrygdEndringKode.UAKTUELL)))
-        val perioder = service.hentPerioderFraEfOgInfotrygd(personIdent)
+        val perioder = service.hentPerioderForOvergangsstønadFraEfOgInfotrygd(personIdent)
 
         assertThat(perioder).hasSize(1)
         assertThat(perioder[0].beløp).isEqualTo(2)

@@ -22,6 +22,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Familierelasjon
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import org.springframework.stereotype.Component
+import java.time.LocalDate
 
 @Component
 class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
@@ -51,7 +52,7 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                 statsborgerskap = statsborgerskapMapper.map(søker.statsborgerskap),
                 sivilstand = søker.sivilstand.map {
                     SivilstandDto(type = Sivilstandstype.valueOf(it.type.name),
-                                  gyldigFraOgMed = it.gyldigFraOgMed?.toString() ?: it.bekreftelsesdato,
+                                  gyldigFraOgMed = it.gyldigFraOgMed ?: it.bekreftelsesdato,
                                   relatertVedSivilstand = it.relatertVedSivilstand,
                                   navn = it.navn,
                                   dødsdato = it.dødsfall?.dødsdato)
