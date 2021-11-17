@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.service
 
+import io.mockk.CapturingSlot
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -32,7 +33,9 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager
 import java.net.URI
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -46,6 +49,7 @@ internal class OppgaveServiceTest {
     private val fagsakRepository = mockk<FagsakRepository>()
     private val oppgaveRepository = mockk<OppgaveRepository>()
     private val pdlClient = mockk<PdlClient>()
+    private val cacheManager = ConcurrentMapCacheManager()
 
     private val oppgaveService =
             OppgaveService(oppgaveClient,
@@ -53,21 +57,21 @@ internal class OppgaveServiceTest {
                            oppgaveRepository,
                            arbeidsfordelingService,
                            pdlClient,
+                           cacheManager,
                            URI.create("https://ensligmorellerfar.intern.nav.no/oppgavebenk"))
+
+    @BeforeEach
+    internal fun setUp() {
+        val finnMappeResponseDto = FinnMappeResponseDto(antallTreffTotalt = 1,
+                                                        mapper = listOf(MappeDto(123, "EF Sak - 70 Godkjenne vedtak")))
+        every { oppgaveClient.finnMapper(any()) } returns finnMappeResponseDto
+    }
 
     @Test
     fun `Opprett oppgave skal samle data og opprette en ny oppgave basert på fagsak, behandling, fnr og enhet`() {
         val aktørIdentFraPdl = "AKTØERIDENT"
-        every { fagsakRepository.finnFagsakTilBehandling(BEHANDLING_ID) } returns lagTestFagsak()
-        every { oppgaveRepository.insert(any()) } returns lagTestOppgave()
-        every {
-            oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any())
-        } returns null
-        every { arbeidsfordelingService.hentNavEnhet(any()) } returns Arbeidsfordelingsenhet(enhetId = ENHETSNUMMER,
-                                                                                             enhetNavn = ENHETSNAVN)
         val slot = slot<OpprettOppgaveRequest>()
-        every { oppgaveClient.opprettOppgave(capture(slot)) } returns GSAK_OPPGAVE_ID
-        every { pdlClient.hentAktørIder(any()) } returns PdlIdenter(listOf(PdlIdent(aktørIdentFraPdl, false)))
+        mockOpprettOppgave(slot, aktørIdentFraPdl)
 
         oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak)
 
@@ -81,21 +85,11 @@ internal class OppgaveServiceTest {
         assertThat(slot.captured.beskrivelse).contains("https://ensligmorellerfar.intern.nav.no/oppgavebenk")
     }
 
-
     @Test
     fun `Skal legge i mappe når vi oppretter godkjenne vedtak-oppgave for 4489`() {
         val aktørIdentFraPdl = "AKTØERIDENT"
-        every { fagsakRepository.finnFagsakTilBehandling(BEHANDLING_ID) } returns lagTestFagsak()
-        every { oppgaveRepository.insert(any()) } returns lagTestOppgave()
-        every {
-            oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any())
-        } returns null
-        every { arbeidsfordelingService.hentNavEnhet(any()) } returns Arbeidsfordelingsenhet(enhetId = ENHETSNUMMER,
-                                                                                             enhetNavn = ENHETSNAVN)
         val slot = slot<OpprettOppgaveRequest>()
-        every { oppgaveClient.opprettOppgave(capture(slot)) } returns GSAK_OPPGAVE_ID
-        every { pdlClient.hentAktørIder(any()) } returns PdlIdenter(listOf(PdlIdent(aktørIdentFraPdl, false)))
-        every { oppgaveClient.finnMapper(any()) } returns FinnMappeResponseDto(antallTreffTotalt = 1, mapper = listOf(MappeDto(123, "EF Sak - 70 Godkjenne vedtak")))
+        mockOpprettOppgave(slot, aktørIdentFraPdl)
 
         oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.GodkjenneVedtak)
 
@@ -123,7 +117,6 @@ internal class OppgaveServiceTest {
         val slot = slot<OpprettOppgaveRequest>()
         every { oppgaveClient.opprettOppgave(capture(slot)) } returns GSAK_OPPGAVE_ID
         every { pdlClient.hentAktørIder(any()) } returns PdlIdenter(listOf(PdlIdent(aktørIdentFraPdl, false)))
-        every { oppgaveClient.finnMapper(any()) } returns FinnMappeResponseDto(antallTreffTotalt = 1, mapper = listOf(MappeDto(123, "EF Sak - 70 Godkjenne vedtak")))
 
         oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.GodkjenneVedtak)
 
@@ -246,6 +239,41 @@ internal class OppgaveServiceTest {
             assertThat(oppgaveService.lagFristForOppgave(it.first)).isEqualTo(it.second)
         }
 
+    }
+
+    @Test
+    internal fun `finnMapper - skal cache mapper`() {
+        oppgaveService.finnMapper("1")
+        oppgaveService.finnMapper("1")
+
+        verify(exactly = 1) { oppgaveClient.finnMapper(any()) }
+        oppgaveService.finnMapper("11")
+        verify(exactly = 2) { oppgaveClient.finnMapper(any()) }
+    }
+
+    @Test
+    internal fun `skal cache mapper når man kaller på den indirekte`() {
+        val aktørIdentFraPdl = "AKTØERIDENT"
+        val slot = slot<OpprettOppgaveRequest>()
+        mockOpprettOppgave(slot, aktørIdentFraPdl)
+
+        oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.GodkjenneVedtak)
+        oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.GodkjenneVedtak)
+
+        verify(exactly = 1) { oppgaveClient.finnMapper(any()) }
+    }
+
+    private fun mockOpprettOppgave(slot: CapturingSlot<OpprettOppgaveRequest>,
+                                   aktørIdentFraPdl: String) {
+        every { fagsakRepository.finnFagsakTilBehandling(BEHANDLING_ID) } returns lagTestFagsak()
+        every { oppgaveRepository.insert(any()) } returns lagTestOppgave()
+        every {
+            oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any())
+        } returns null
+        every { arbeidsfordelingService.hentNavEnhet(any()) } returns Arbeidsfordelingsenhet(enhetId = ENHETSNUMMER,
+                                                                                             enhetNavn = ENHETSNAVN)
+        every { oppgaveClient.opprettOppgave(capture(slot)) } returns GSAK_OPPGAVE_ID
+        every { pdlClient.hentAktørIder(any()) } returns PdlIdenter(listOf(PdlIdent(aktørIdentFraPdl, false)))
     }
 
     private fun lagTestFagsak(): Fagsak {

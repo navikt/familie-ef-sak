@@ -226,7 +226,7 @@ class PdlClientConfig {
                 listOf(Sivilstand(type = Sivilstandstype.GIFT,
                                   gyldigFraOgMed = startdato,
                                   relatertVedSivilstand = "11111122222",
-                                  bekreftelsesdato = "2020-01-01",
+                                  bekreftelsesdato = LocalDate.of(2020,1,1),
                                   metadata = metadataGjeldende))
 
         private fun fullmakter(): List<Fullmakt> =
