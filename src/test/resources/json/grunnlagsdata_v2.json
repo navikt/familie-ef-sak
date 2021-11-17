@@ -828,7 +828,7 @@
           },
           "bekreftelsesdato" : {
             "name" : "bekreftelsesdato",
-            "type" : "String",
+            "type" : "LocalDate",
             "nullable" : true
           },
           "dødsfall" : {

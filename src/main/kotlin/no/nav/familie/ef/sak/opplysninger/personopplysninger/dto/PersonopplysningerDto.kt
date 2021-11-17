@@ -47,7 +47,7 @@ data class TelefonnummerDto(val landskode: String,
                             val nummer: String)
 
 data class SivilstandDto(val type: Sivilstandstype,
-                         val gyldigFraOgMed: String?,
+                         val gyldigFraOgMed: LocalDate?,
                          val relatertVedSivilstand: String?,
                          val navn: String?,
                          val dødsdato: LocalDate?)
