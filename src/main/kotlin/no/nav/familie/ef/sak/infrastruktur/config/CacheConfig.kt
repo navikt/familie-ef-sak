@@ -55,10 +55,14 @@ class CacheConfig {
 
 /**
  * Forventer treff, skal ikke brukes hvis en cache inneholder nullverdi
+ * this.getCache(cache) burde aldri kunne returnere null, då den lager en cache hvis den ikke finnes fra før
  */
-fun <T> CacheManager.getOrThrow(cache: String, key: String, valueLoader: () -> T) =
-        (this.getCache(cache) ?: error("Finner ikke cache=$cache"))
-                .get(key, valueLoader) ?: error("Finner ikke cache for cache=$cache key=$key")
+fun <T> CacheManager.getValue(cache: String, key: String, valueLoader: () -> T): T =
+        this.getNullable(cache, key, valueLoader) ?: error("Finner ikke cache for cache=$cache key=$key")
 
-fun <T> CacheManager.get(cache: String, key: String, valueLoader: () -> T?) =
+/**
+ * Kan inneholde
+ * this.getCache(cache) burde aldri kunne returnere null, då den lager en cache hvis den ikke finnes fra før
+ */
+fun <T> CacheManager.getNullable(cache: String, key: String, valueLoader: () -> T?): T? =
         (this.getCache(cache) ?: error("Finner ikke cache=$cache")).get(key, valueLoader)

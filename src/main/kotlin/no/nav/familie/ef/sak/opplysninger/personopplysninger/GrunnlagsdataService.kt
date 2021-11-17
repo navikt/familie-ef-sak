@@ -12,7 +12,7 @@ import java.util.UUID
 @Service
 class GrunnlagsdataService(private val grunnlagsdataRepository: GrunnlagsdataRepository,
                            private val søknadService: SøknadService,
-                           private val grunnlagsdataHenterService: GrunnlagsdataHenterService) {
+                           private val grunnlagsdataRegisterService: GrunnlagsdataRegisterService) {
 
     fun opprettGrunnlagsdata(behandlingId: UUID) {
         val grunnlagsdata = hentGrunnlagsdataFraRegister(behandlingId)
@@ -37,6 +37,6 @@ class GrunnlagsdataService(private val grunnlagsdataRepository: GrunnlagsdataRep
 
     fun hentGrunnlagsdataFraRegister(personIdent: String,
                                      barneforeldreFraSøknad: List<String>): GrunnlagsdataDomene {
-        return grunnlagsdataHenterService.hentGrunnlagsdataFraRegister(personIdent, barneforeldreFraSøknad)
+        return grunnlagsdataRegisterService.hentGrunnlagsdataFraRegister(personIdent, barneforeldreFraSøknad)
     }
 }

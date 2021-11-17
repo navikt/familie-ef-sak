@@ -4,7 +4,7 @@ import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
-import no.nav.familie.ef.sak.infrastruktur.config.getOrThrow
+import no.nav.familie.ef.sak.infrastruktur.config.getValue
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
@@ -178,7 +178,7 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
     }
 
     fun finnMapper(enhet: String): List<MappeDto> {
-        return cacheManager.getOrThrow("oppgave-mappe", enhet) {
+        return cacheManager.getValue("oppgave-mappe", enhet) {
             logger.info("Henter mapper på nytt")
             val mappeRespons = oppgaveClient.finnMapper(FinnMappeRequest(tema = listOf(),
                                                                          enhetsnr = enhet,

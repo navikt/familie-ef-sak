@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.arbeidsfordeling
 
-import no.nav.familie.ef.sak.infrastruktur.config.get
+import no.nav.familie.ef.sak.infrastruktur.config.getNullable
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
@@ -20,7 +20,7 @@ class ArbeidsfordelingService(private val personService: PersonService,
     }
 
     fun hentNavEnhet(ident: String): Arbeidsfordelingsenhet? {
-        return cacheManager.get("navEnhet", ident) {
+        return cacheManager.getNullable("navEnhet", ident) {
             val personMedRelasjoner = personService.hentPersonMedRelasjoner(ident)
             val søkerIdentMedAdressebeskyttelse =
                     IdentMedAdressebeskyttelse(personMedRelasjoner.søkerIdent,

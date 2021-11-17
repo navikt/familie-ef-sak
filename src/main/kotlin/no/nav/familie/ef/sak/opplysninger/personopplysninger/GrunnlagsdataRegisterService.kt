@@ -14,8 +14,8 @@ import org.springframework.stereotype.Service
 
 
 @Service
-class GrunnlagsdataHenterService(private val pdlClient: PdlClient,
-                                 private val personopplysningerIntegrasjonerClient: PersonopplysningerIntegrasjonerClient) {
+class GrunnlagsdataRegisterService(private val pdlClient: PdlClient,
+                                   private val personopplysningerIntegrasjonerClient: PersonopplysningerIntegrasjonerClient) {
 
     @Cacheable("registergrunnlag", cacheManager = "shortCache")
     fun hentGrunnlagsdataFraRegister(personIdent: String,

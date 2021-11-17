@@ -7,7 +7,7 @@ import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.arbeidsfordeling.Arbeidsfordelingsenhet
 import no.nav.familie.ef.sak.infrastruktur.config.KodeverkServiceMock
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataHenterService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRegisterService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
@@ -42,9 +42,9 @@ internal class PersonopplysningerServiceTest {
         adresseMapper = AdresseMapper(kodeverkService)
         arbeidsfordelingService = mockk(relaxed = true)
         søknadService = mockk()
-        val grunnlagsdataHenterService = GrunnlagsdataHenterService(pdlClient, personopplysningerIntegrasjonerClient)
+        val grunnlagsdataRegisterService = GrunnlagsdataRegisterService(pdlClient, personopplysningerIntegrasjonerClient)
 
-        grunnlagsdataService = GrunnlagsdataService(mockk(), søknadService, grunnlagsdataHenterService)
+        grunnlagsdataService = GrunnlagsdataService(mockk(), søknadService, grunnlagsdataRegisterService)
         val personopplysningerMapper =
                 PersonopplysningerMapper(adresseMapper,
                                          StatsborgerskapMapper(kodeverkService),

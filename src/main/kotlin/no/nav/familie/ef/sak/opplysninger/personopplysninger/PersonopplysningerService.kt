@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger
 
-import no.nav.familie.ef.sak.infrastruktur.config.getOrThrow
+import no.nav.familie.ef.sak.infrastruktur.config.getValue
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.PersonopplysningerDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.PersonopplysningerMapper
@@ -50,7 +50,7 @@ class PersonopplysningerService(private val personService: PersonService,
         )
     }
 
-    private fun egenAnsatt(personIdent: String) = cacheManager.getOrThrow("egenAnsatt", personIdent) {
+    private fun egenAnsatt(personIdent: String) = cacheManager.getValue("egenAnsatt", personIdent) {
         personopplysningerIntegrasjonerClient.egenAnsatt(personIdent)
     }
 

@@ -7,7 +7,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataHenterService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRegisterService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRepository
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
@@ -36,7 +36,7 @@ internal class GrunnlagsdataServiceTest {
     private val pdlClient = PdlClientConfig().pdlClient()
     private val søknadService = mockk<SøknadService>()
     private val personopplysningerIntegrasjonerClient = mockk<PersonopplysningerIntegrasjonerClient>()
-    private val grunnlagsdataHenterService = GrunnlagsdataHenterService(pdlClient, personopplysningerIntegrasjonerClient)
+    private val grunnlagsdataRegisterService = GrunnlagsdataRegisterService(pdlClient, personopplysningerIntegrasjonerClient)
 
     private val søknad = SøknadsskjemaMapper.tilDomene(TestsøknadBuilder.Builder().setBarn(listOf(
             TestsøknadBuilder.Builder().defaultBarn("Navn1 navnesen", fødselTermindato = LocalDate.now().plusMonths(4)),
@@ -45,7 +45,7 @@ internal class GrunnlagsdataServiceTest {
 
     private val service = GrunnlagsdataService(grunnlagsdataRepository = grunnlagsdataRepository,
                                                søknadService = søknadService,
-                                               grunnlagsdataHenterService = grunnlagsdataHenterService)
+                                               grunnlagsdataRegisterService = grunnlagsdataRegisterService)
 
     @BeforeEach
     internal fun setUp() {
