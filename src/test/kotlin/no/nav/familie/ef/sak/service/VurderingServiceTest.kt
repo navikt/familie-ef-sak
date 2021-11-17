@@ -71,6 +71,7 @@ internal class VurderingServiceTest {
         val sivilstand = SivilstandInngangsvilkårDto(mockk(relaxed = true),
                                                      SivilstandRegistergrunnlagDto(Sivilstandstype.GIFT, "Navn", null))
         every { vilkårGrunnlagService.hentGrunnlag(any(), any()) } returns VilkårGrunnlagDto(mockk(relaxed = true),
+                                                                                             mockk(relaxed = true),
                                                                                              sivilstand,
                                                                                              mockk(relaxed = true),
                                                                                              mockk(relaxed = true),

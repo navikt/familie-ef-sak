@@ -5,6 +5,8 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.arbeidsfordeling.Arbeidsfordelingsenhet
+import no.nav.familie.ef.sak.infotrygd.InfotrygdService
+import no.nav.familie.ef.sak.infrastruktur.config.InfotrygdReplikaMock
 import no.nav.familie.ef.sak.infrastruktur.config.KodeverkServiceMock
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRegisterService
@@ -27,7 +29,6 @@ import org.springframework.cache.concurrent.ConcurrentMapCacheManager
 internal class PersonopplysningerServiceTest {
 
     private val kodeverkService = KodeverkServiceMock().kodeverkService()
-    private val pdlClient = PdlClientConfig().pdlClient()
 
     private lateinit var personopplysningerService: PersonopplysningerService
     private lateinit var personopplysningerIntegrasjonerClient: PersonopplysningerIntegrasjonerClient
@@ -42,7 +43,12 @@ internal class PersonopplysningerServiceTest {
         adresseMapper = AdresseMapper(kodeverkService)
         arbeidsfordelingService = mockk(relaxed = true)
         søknadService = mockk()
-        val grunnlagsdataRegisterService = GrunnlagsdataRegisterService(pdlClient, personopplysningerIntegrasjonerClient)
+        val pdlClient = PdlClientConfig().pdlClient()
+
+        val infotrygdService = InfotrygdService(InfotrygdReplikaMock().infotrygdReplikaClient(), pdlClient)
+        val grunnlagsdataRegisterService = GrunnlagsdataRegisterService(pdlClient,
+                                                                        personopplysningerIntegrasjonerClient,
+                                                                        infotrygdService)
 
         grunnlagsdataService = GrunnlagsdataService(mockk(), søknadService, grunnlagsdataRegisterService)
         val personopplysningerMapper =
