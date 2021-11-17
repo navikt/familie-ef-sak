@@ -40,6 +40,7 @@ class GrunnlagsdataRegisterService(private val pdlClient: PdlClient,
         )
     }
 
+    // TODO endre om til å bruke identer fra pdlSøker, då dette blir et ekstra kall for å hente identer
     private fun hentTidligereVedtaksperioder(personIdent: String): TidligereVedtaksperioder {
         return infotrygdService.hentPerioder(personIdent).let {
             val infotrygd = TidligereInnvilgetVedtak(

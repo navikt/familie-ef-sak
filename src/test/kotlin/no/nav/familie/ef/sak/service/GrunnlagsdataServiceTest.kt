@@ -117,9 +117,6 @@ internal class GrunnlagsdataServiceTest {
 
     @Test
     internal fun `skal sjekke om personen har historikk i infotrygd`() {
-        every { infotrygdService.hentPerioder(any()) } returns
-                InfotrygdPeriodeResponse(emptyList(), listOf(mockk()), emptyList())
-
         val grunnlagsdata = service.hentGrunnlagsdataFraRegister("1", emptyList())
 
         assertThat(grunnlagsdata.tidligereVedtaksperioder!!.infotrygd.harTidligereOvergangsstønad).isFalse
