@@ -63,6 +63,7 @@ class VedleggService(private val behandlingService: BehandlingService,
                 tittel = dokumentInfo.tittel ?: "Tittel mangler",
                 journalpostId = journalpost.journalpostId,
                 dato = mestRelevanteDato(journalpost),
+                journalstatus = journalpost.journalstatus,
                 journalposttype = journalpost.journalposttype
         )
     }

@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.vedlegg
 
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
+import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
 import java.time.LocalDateTime
 
 data class JournalposterDto(
@@ -13,4 +14,5 @@ data class DokumentinfoDto(val dokumentinfoId: String,
                            val tittel: String,
                            val journalpostId: String,
                            val dato: LocalDateTime?,
+                           val journalstatus: Journalstatus,
                            val journalposttype: Journalposttype)

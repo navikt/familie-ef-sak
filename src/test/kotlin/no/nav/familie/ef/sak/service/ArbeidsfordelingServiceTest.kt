@@ -14,6 +14,7 @@ import no.nav.familie.ef.sak.testutil.pdlBarn
 import no.nav.familie.ef.sak.testutil.pdlSøker
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager
 
 internal class ArbeidsfordelingServiceTest {
 
@@ -26,7 +27,8 @@ internal class ArbeidsfordelingServiceTest {
         personService = mockk()
         personopplysningerIntegrasjonerClient = mockk()
         every { personopplysningerIntegrasjonerClient.hentNavEnhet(any()) } returns listOf()
-        arbeidsfordelingService = ArbeidsfordelingService(personService, personopplysningerIntegrasjonerClient)
+        val cacheManager = ConcurrentMapCacheManager()
+        arbeidsfordelingService = ArbeidsfordelingService(personService, personopplysningerIntegrasjonerClient, cacheManager)
     }
 
     @Test
@@ -49,8 +51,20 @@ internal class ArbeidsfordelingServiceTest {
         verify(exactly = 1) { personopplysningerIntegrasjonerClient.hentNavEnhet(IDENT_BARN) }
     }
 
-    private fun søkerMedBarn(graderingForelder: AdressebeskyttelseGradering,
-                             graderingBarn: AdressebeskyttelseGradering): SøkerMedBarn =
+    @Test
+    internal fun `hentNavEnhet - skal cache når man kaller på den indirekte`() {
+        every { personService.hentPersonMedRelasjoner(any()) } returns søkerMedBarn()
+
+        arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(IDENT_FORELDER)
+        arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(IDENT_FORELDER)
+        verify(exactly = 1) { personService.hentPersonMedRelasjoner(IDENT_FORELDER) }
+
+        arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(IDENT_BARN)
+        verify(exactly = 1) { personService.hentPersonMedRelasjoner(IDENT_BARN) }
+    }
+
+    private fun søkerMedBarn(graderingForelder: AdressebeskyttelseGradering = AdressebeskyttelseGradering.FORTROLIG,
+                             graderingBarn: AdressebeskyttelseGradering = AdressebeskyttelseGradering.FORTROLIG): SøkerMedBarn =
             SøkerMedBarn(IDENT_FORELDER,
                          pdlSøker(graderingForelder),
                          mapOf(IDENT_BARN to pdlBarn(adressebeskyttelse = adressebeskyttelse(graderingBarn))))

@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger
 
+import no.nav.familie.ef.sak.infrastruktur.config.getValue
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.PersonopplysningerDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.PersonopplysningerMapper
@@ -8,6 +9,8 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -17,7 +20,9 @@ class PersonopplysningerService(private val personService: PersonService,
                                 private val søknadService: SøknadService,
                                 private val personopplysningerIntegrasjonerClient: PersonopplysningerIntegrasjonerClient,
                                 private val grunnlagsdataService: GrunnlagsdataService,
-                                private val personopplysningerMapper: PersonopplysningerMapper) {
+                                private val personopplysningerMapper: PersonopplysningerMapper,
+                                @Qualifier("shortCache")
+                                private val cacheManager: CacheManager) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -25,8 +30,7 @@ class PersonopplysningerService(private val personService: PersonService,
         val søknad = søknadService.hentOvergangsstønad(behandlingId)
         val personIdent = søknad.fødselsnummer
         val grunnlagsdata = grunnlagsdataService.hentGrunnlagsdata(behandlingId)
-        val egenAnsatt = personopplysningerIntegrasjonerClient.egenAnsatt(personIdent)
-
+        val egenAnsatt = egenAnsatt(personIdent)
 
         return personopplysningerMapper.tilPersonopplysninger(
                 grunnlagsdata,
@@ -37,14 +41,17 @@ class PersonopplysningerService(private val personService: PersonService,
 
     fun hentPersonopplysninger(personIdent: String): PersonopplysningerDto {
         val grunnlagsdata = grunnlagsdataService.hentGrunnlagsdataFraRegister(personIdent, emptyList())
-        val egenAnsatt = personopplysningerIntegrasjonerClient.egenAnsatt(personIdent)
-
+        val egenAnsatt = egenAnsatt(personIdent)
 
         return personopplysningerMapper.tilPersonopplysninger(
                 GrunnlagsdataMedMetadata(grunnlagsdata, lagtTilEtterFerdigstilling = false),
                 egenAnsatt,
                 personIdent
         )
+    }
+
+    private fun egenAnsatt(personIdent: String) = cacheManager.getValue("egenAnsatt", personIdent) {
+        personopplysningerIntegrasjonerClient.egenAnsatt(personIdent)
     }
 
     fun hentGjeldeneNavn(identer: List<String>): Map<String, String> {
@@ -58,3 +65,4 @@ class PersonopplysningerService(private val personService: PersonService,
         return personopplysningerIntegrasjonerClient.hentNavKontor(ident)
     }
 }
+

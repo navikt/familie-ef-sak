@@ -4,7 +4,8 @@ package no.nav.familie.ef.sak.vilkår.dto
 data class VilkårDto(val vurderinger: List<VilkårsvurderingDto>,
                      val grunnlag: VilkårGrunnlagDto)
 
-data class VilkårGrunnlagDto(val medlemskap: MedlemskapDto,
+data class VilkårGrunnlagDto(val tidligereVedtaksperioder: TidligereVedtaksperioderDto,
+                             val medlemskap: MedlemskapDto,
                              val sivilstand: SivilstandInngangsvilkårDto,
                              val bosituasjon: BosituasjonDto,
                              val barnMedSamvær: List<BarnMedSamværDto>,

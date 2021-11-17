@@ -32,26 +32,6 @@ internal class InfotrygdServiceTest {
     }
 
     @Test
-    internal fun `hentPerioderForOvergangsstønad skal mappe perioder fra overgangsstønad`() {
-        every {
-            infotrygdReplikaClient.hentPerioder(InfotrygdPeriodeRequest(setOf(ident), setOf(StønadType.OVERGANGSSTØNAD)))
-        } returns InfotrygdPeriodeResponse(overgangsstønad = listOf(lagInfotrygdPeriode(ident)),
-                                           barnetilsyn = emptyList(),
-                                           skolepenger = emptyList())
-        assertThat(infotrygdService.hentPerioderForOvergangsstønad(ident)).hasSize(1)
-    }
-
-    @Test
-    internal fun `hentPerioderForOvergangsstønad skal ikke mappe perioder fra barnetilsyn eller skolepenger`() {
-        every {
-            infotrygdReplikaClient.hentPerioder(InfotrygdPeriodeRequest(setOf(ident), setOf(StønadType.OVERGANGSSTØNAD)))
-        } returns InfotrygdPeriodeResponse(overgangsstønad = emptyList(),
-                                           barnetilsyn = listOf(lagInfotrygdPeriode(ident)),
-                                           skolepenger = listOf(lagInfotrygdPeriode(ident)))
-        assertThat(infotrygdService.hentPerioderForOvergangsstønad(ident)).isEmpty()
-    }
-
-    @Test
     internal fun `person har treff i vedtak om overgangsstønad`() {
         every { infotrygdReplikaClient.hentInslagHosInfotrygd(any()) } answers {
             InfotrygdFinnesResponse(listOf(Vedtakstreff(ident, StønadType.OVERGANGSSTØNAD, false)), emptyList())

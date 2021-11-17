@@ -143,7 +143,6 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
                                       tilkjentYtelse: TilkjentYtelse?,
                                       tilbakekreving: TilbakekrevingDto?) =
             VedtaksdetaljerDto(resultat = vedtak.resultatType.tilVedtaksresultat(),
-                               vedtaksdato = LocalDate.now(),
                                vedtakstidspunkt = LocalDateTime.now(),
                                opphørÅrsak = null,
                                saksbehandlerId = saksbehandler,
