@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask.OpprettOppgaveTaskData
@@ -21,6 +22,7 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
+import java.util.UUID
 
 @Service
 class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
@@ -69,7 +71,12 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
         opprettGodkjennVedtakOppgave(behandling)
         ferdigstillOppgave(behandling, Oppgavetype.BehandleSak)
         ferdigstillOppgave(behandling, Oppgavetype.BehandleUnderkjentVedtak)
+        opprettTaskForBehandlingsstatistikk(behandling.id)
     }
+
+    private fun opprettTaskForBehandlingsstatistikk(behandlingId: UUID) =
+            taskRepository.save(BehandlingsstatistikkTask.opprettVedtattTask(behandlingId = behandlingId))
+
 
     private fun ferdigstillOppgave(behandling: Behandling, oppgavetype: Oppgavetype) {
         val aktivIdent = fagsakService.hentAktivIdent(behandling.fagsakId)
