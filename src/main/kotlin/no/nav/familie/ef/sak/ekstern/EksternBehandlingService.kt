@@ -22,8 +22,9 @@ class EksternBehandlingService(val tilkjentYtelseService: TilkjentYtelseService,
     }
 
     fun harStønadSiste12Måneder(personidenter: Set<String>): Boolean {
-        val behandlingIDer = hentAlleBehandlingIDer(personidenter)
-        val sisteStønadsdato = behandlingIDer
+        val fagsakIDer = hentAlleFagsakIder(personidenter)
+        val sisteStønadsdato = fagsakIDer
+                                       .mapNotNull { behandlingRepository.finnSisteIverksatteBehandling(it)?.id }
                                        .map(tilkjentYtelseService::hentForBehandling)
                                        .mapNotNull { it.andelerTilkjentYtelse.maxOfOrNull(AndelTilkjentYtelse::stønadTom) }
                                        .maxOfOrNull { it } ?: LocalDate.MIN
@@ -40,12 +41,12 @@ class EksternBehandlingService(val tilkjentYtelseService: TilkjentYtelseService,
         } ?: false
     }
 
-    private fun hentAlleBehandlingIDer(personidenter: Set<String>): Set<UUID> {
-        val behandlinger = mutableSetOf<UUID>()
+    private fun hentAlleFagsakIder(personidenter: Set<String>): Set<UUID> {
+        val fagsakIDer = mutableSetOf<UUID>()
         Stønadstype.values().forEach {
-            behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(it, personidenter)?.let { behandlinger.add(it.id) }
+            behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(it, personidenter)?.let { fagsakIDer.add(it.fagsakId) }
         }
-        return behandlinger
+        return fagsakIDer
     }
 
 }

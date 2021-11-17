@@ -93,7 +93,6 @@ internal class EksternBehandlingControllerTest {
 
     @Test
     internal fun `opprett bare utdaterte andeler, forvent at stønad for det siste året ikke finnes`() {
-        mockOpprettTilkjenteYtelser(opprettUtdatertTilkjentYtelse(), opprettUtdatertTilkjentYtelse())
         assertThat(eksternBehandlingController.harStønadSiste12MånederForPersonidenter(setOf("12345678910")).data).isEqualTo(false)
     }
 
@@ -156,13 +155,21 @@ internal class EksternBehandlingControllerTest {
     private fun mockOpprettTilkjenteYtelser(tilkjentYtelse: TilkjentYtelse, annenTilkjentYtelse: TilkjentYtelse) {
         val uuid1 = UUID.randomUUID()
         val uuid2 = UUID.randomUUID()
+        val behandling1 = behandling(id = uuid1)
+        val behandling2 = behandling(id = uuid2)
 
         every {
             behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(Stønadstype.OVERGANGSSTØNAD, any())
-        } returns behandling(id = uuid1)
+        } returns behandling1
+        every {
+            behandlingRepository.finnSisteIverksatteBehandling(behandling1.fagsakId)
+        } returns behandling1
         every {
             behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(Stønadstype.BARNETILSYN, any())
-        } returns behandling(id = uuid2)
+        } returns behandling2
+        every {
+            behandlingRepository.finnSisteIverksatteBehandling(behandling2.fagsakId)
+        } returns behandling2
         every {
             behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(Stønadstype.SKOLEPENGER, any())
         } returns null
