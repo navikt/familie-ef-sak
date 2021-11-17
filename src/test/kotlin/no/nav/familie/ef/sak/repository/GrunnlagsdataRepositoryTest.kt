@@ -47,4 +47,16 @@ internal class GrunnlagsdataRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(behandlinger.find { it.first == behandling.id }!!.second.let { BehandlingStatus.valueOf(it) })
                 .isEqualTo(BehandlingStatus.OPPRETTET)
     }
+
+    @Test
+    internal fun `bakåtkompatibilitet - tidligereVedtaksPerioder er null då den ikke finnes med i tidligere objekter`() {
+        val fagsak = fagsakRepository.insert(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak))
+
+        val grunnlagsdata = opprettGrunnlagsdata().copy(tidligereVedtaksperioder = null)
+        grunnlagsdataRepository.insert(Grunnlagsdata(behandling.id, grunnlagsdata))
+
+        assertThat(grunnlagsdataRepository.findByIdOrThrow(behandling.id).data).isEqualTo(grunnlagsdata)
+    }
+
 }
