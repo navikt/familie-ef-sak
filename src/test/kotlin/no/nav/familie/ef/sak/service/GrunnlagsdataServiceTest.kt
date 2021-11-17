@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRegisterService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRepository
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
@@ -35,16 +36,16 @@ internal class GrunnlagsdataServiceTest {
     private val pdlClient = PdlClientConfig().pdlClient()
     private val søknadService = mockk<SøknadService>()
     private val personopplysningerIntegrasjonerClient = mockk<PersonopplysningerIntegrasjonerClient>()
+    private val grunnlagsdataRegisterService = GrunnlagsdataRegisterService(pdlClient, personopplysningerIntegrasjonerClient)
 
     private val søknad = SøknadsskjemaMapper.tilDomene(TestsøknadBuilder.Builder().setBarn(listOf(
             TestsøknadBuilder.Builder().defaultBarn("Navn1 navnesen", fødselTermindato = LocalDate.now().plusMonths(4)),
             TestsøknadBuilder.Builder().defaultBarn("Navn2 navnesen", fødselTermindato = LocalDate.now().plusMonths(6))
     )).build().søknadOvergangsstønad)
 
-    private val service = GrunnlagsdataService(pdlClient = pdlClient,
-                                               grunnlagsdataRepository = grunnlagsdataRepository,
+    private val service = GrunnlagsdataService(grunnlagsdataRepository = grunnlagsdataRepository,
                                                søknadService = søknadService,
-                                               personopplysningerIntegrasjonerClient = personopplysningerIntegrasjonerClient)
+                                               grunnlagsdataRegisterService = grunnlagsdataRegisterService)
 
     @BeforeEach
     internal fun setUp() {
