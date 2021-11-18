@@ -1,0 +1,40 @@
+package no.nav.familie.ef.sak.no.nav.familie.ef.sak.infrastruktur.config
+
+import io.mockk.every
+import io.mockk.mockk
+import no.nav.familie.ef.sak.arbeidsforhold.ekstern.Ansettelsesperiode
+import no.nav.familie.ef.sak.arbeidsforhold.ekstern.Arbeidsavtaler
+import no.nav.familie.ef.sak.arbeidsforhold.ekstern.Arbeidsforhold
+import no.nav.familie.ef.sak.arbeidsforhold.ekstern.ArbeidsforholdClient
+import no.nav.familie.ef.sak.arbeidsforhold.ekstern.Arbeidsgiver
+import no.nav.familie.ef.sak.arbeidsforhold.ekstern.ArbeidsgiverType
+import no.nav.familie.ef.sak.arbeidsforhold.ekstern.Arbeidstaker
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Primary
+import org.springframework.context.annotation.Profile
+
+@Configuration
+class AaregClientMock {
+
+    @Profile("mock-aareg")
+    @Bean
+    @Primary
+    fun inntektClient(): ArbeidsforholdClient {
+        val mockk = mockk<ArbeidsforholdClient>()
+        val mockResponse = listOf(
+            Arbeidsforhold(
+            navArbeidsforholdId = 1L,
+            arbeidsforholdId = "1",
+            arbeidstaker = Arbeidstaker("type", "offentligIdent", "id"),
+            arbeidsgiver = Arbeidsgiver(ArbeidsgiverType.Organisasjon, "orgnummer", "offentligIdent"),
+            type = "type",
+            ansettelsesperiode = Ansettelsesperiode(),
+            arbeidsavtaler = listOf(Arbeidsavtaler())
+        )
+        )
+        every { mockk.hentArbeidsforhold(any(), any()) } returns mockResponse
+        return mockk
+    }
+
+}

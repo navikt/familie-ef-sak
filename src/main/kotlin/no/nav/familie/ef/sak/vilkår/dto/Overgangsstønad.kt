@@ -9,7 +9,7 @@ data class OvergangsstønadDto(val aktivitet: AktivitetDto,
                               val stønadsperiode: StønadsperiodeDto)
 
 data class AktivitetDto(val arbeidssituasjon: List<String>,
-                        val arbeidsforhold: List<ArbeidsforholdDto>,
+                        val arbeidsforhold: List<ArbeidsforholdSøknadDto>,
                         val selvstendig: List<SelvstendigDto>,
                         val aksjeselskap: List<AksjeselskapDto>,
                         val arbeidssøker: ArbeidssøkerDto?,
@@ -24,11 +24,11 @@ data class SagtOppEllerRedusertStillingDto(val sagtOppEllerRedusertStilling: Str
                                            val årsak: String?,
                                            val dato: LocalDate?)
 
-data class ArbeidsforholdDto(val arbeidsgivernavn: String,
-                             val arbeidsmengde: Int?,
-                             val fastEllerMidlertidig: String?,
-                             val harSluttdato: Boolean?,
-                             val sluttdato: LocalDate?)
+data class ArbeidsforholdSøknadDto(val arbeidsgivernavn: String,
+                                   val arbeidsmengde: Int?,
+                                   val fastEllerMidlertidig: String?,
+                                   val harSluttdato: Boolean?,
+                                   val sluttdato: LocalDate?)
 
 data class SelvstendigDto(val firmanavn: String,
                           val organisasjonsnummer: String,

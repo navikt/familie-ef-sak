@@ -11,7 +11,7 @@ import no.nav.familie.ef.sak.opplysninger.søknad.domain.TidligereUtdanning
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.UnderUtdanning
 import no.nav.familie.ef.sak.vilkår.dto.AksjeselskapDto
 import no.nav.familie.ef.sak.vilkår.dto.AktivitetDto
-import no.nav.familie.ef.sak.vilkår.dto.ArbeidsforholdDto
+import no.nav.familie.ef.sak.vilkår.dto.ArbeidsforholdSøknadDto
 import no.nav.familie.ef.sak.vilkår.dto.ArbeidssøkerDto
 import no.nav.familie.ef.sak.vilkår.dto.SelvstendigDto
 import no.nav.familie.ef.sak.vilkår.dto.SærligeTilsynsbehovDto
@@ -38,9 +38,9 @@ object AktivitetMapper {
         )
     }
 
-    private fun tilArbeidforholdDto(arbeidsgivere: Set<Arbeidsgiver>?): List<ArbeidsforholdDto> {
+    private fun tilArbeidforholdDto(arbeidsgivere: Set<Arbeidsgiver>?): List<ArbeidsforholdSøknadDto> {
         return arbeidsgivere?.map {
-            ArbeidsforholdDto(arbeidsgivernavn = it.arbeidsgivernavn,
+            ArbeidsforholdSøknadDto(arbeidsgivernavn = it.arbeidsgivernavn,
                               arbeidsmengde = it.arbeidsmengde,
                               fastEllerMidlertidig = it.fastEllerMidlertidig,
                               sluttdato = it.sluttdato,
