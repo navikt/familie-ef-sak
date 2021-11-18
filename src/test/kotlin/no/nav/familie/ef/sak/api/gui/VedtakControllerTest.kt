@@ -81,6 +81,15 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         validerBehandlingFatterVedtak()
     }
 
+
+    @Test
+    internal fun `skal sette behandling til fatter vedtak når man sendt til beslutter ved innvilgelse`() {
+        opprettBehandling(vedtakResultatType = ResultatType.INNVILGE)
+
+        sendTilBeslutter(SAKSBEHANDLER)
+        validerBehandlingFatterVedtak()
+    }
+
     @Test
     internal fun `skal sette behandling til iverksett når man godkjent totrinnskontroll`() {
         opprettBehandling()
@@ -173,10 +182,12 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     }
 
     private fun opprettBehandling(status: BehandlingStatus = BehandlingStatus.UTREDES,
-                                  steg: StegType = StegType.SEND_TIL_BESLUTTER) {
+                                  steg: StegType = StegType.SEND_TIL_BESLUTTER,
+                                  vedtakResultatType: ResultatType = ResultatType.AVSLÅ) {
         val lagretBehandling = behandlingRepository.insert(behandling.copy(status = status,
                                                                            steg = steg))
-        vedtakRepository.insert(vedtak(lagretBehandling.id, ResultatType.AVSLÅ))
+
+        vedtakRepository.insert(vedtak(lagretBehandling.id, vedtakResultatType))
         tilkjentYtelseRepository.insert(tilkjentYtelse(behandlingId = lagretBehandling.id, fagsak.hentAktivIdent()))
         søknadService.lagreSøknadForOvergangsstønad(Testsøknad.søknadOvergangsstønad, lagretBehandling.id, fagsak.id, "1")
         grunnlagsdataService.opprettGrunnlagsdata(lagretBehandling.id)
