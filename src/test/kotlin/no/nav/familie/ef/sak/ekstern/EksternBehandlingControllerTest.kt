@@ -5,6 +5,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
@@ -27,8 +28,9 @@ internal class EksternBehandlingControllerTest {
 
     private val pdlClient = mockk<PdlClient>()
     private val behandlingRepository = mockk<BehandlingRepository>()
+    private val fagsakRepository = mockk<FagsakRepository>()
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
-    private val eksternBehandlingService = EksternBehandlingService(tilkjentYtelseService, behandlingRepository)
+    private val eksternBehandlingService = EksternBehandlingService(tilkjentYtelseService, behandlingRepository, fagsakRepository)
     private val eksternBehandlingController = EksternBehandlingController(pdlClient, eksternBehandlingService)
 
     private val ident1 = "11111111111"
@@ -156,16 +158,14 @@ internal class EksternBehandlingControllerTest {
     private fun mockOpprettTilkjenteYtelser(tilkjentYtelse: TilkjentYtelse, annenTilkjentYtelse: TilkjentYtelse) {
         val uuid1 = UUID.randomUUID()
         val uuid2 = UUID.randomUUID()
+        val behandling1 = behandling(id = uuid1)
+        val behandling2 = behandling(id = uuid2)
 
+        every { fagsakRepository.findBySøkerIdent(any(), any()) } returns fagsak()
         every {
-            behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(Stønadstype.OVERGANGSSTØNAD, any())
-        } returns behandling(id = uuid1)
-        every {
-            behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(Stønadstype.BARNETILSYN, any())
-        } returns behandling(id = uuid2)
-        every {
-            behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(Stønadstype.SKOLEPENGER, any())
-        } returns null
+            behandlingRepository.finnSisteIverksatteBehandling(any())
+        } returns behandling1 andThen behandling2 andThen null
+
         every { tilkjentYtelseService.hentForBehandling(uuid1) } returns tilkjentYtelse
         every { tilkjentYtelseService.hentForBehandling(uuid2) } returns annenTilkjentYtelse
     }
