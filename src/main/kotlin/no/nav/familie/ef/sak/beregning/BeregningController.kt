@@ -2,10 +2,12 @@ package no.nav.familie.ef.sak.beregning
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
+import no.nav.familie.ef.sak.felles.dto.Periode
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
-import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
-import no.nav.familie.ef.sak.tilkjentytelse.tilBeløpsperiode
+import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
@@ -30,7 +32,7 @@ import java.util.UUID
 class BeregningController(private val stegService: StegService,
                           private val behandlingService: BehandlingService,
                           private val beregningService: BeregningService,
-                          private val tilkjentYtelseService: TilkjentYtelseService,
+                          private val vedtakService: VedtakService,
                           private val tilgangService: TilgangService,
                           private val vurderingService: VurderingService) {
 
@@ -65,9 +67,19 @@ class BeregningController(private val stegService: StegService,
     }
 
     @GetMapping("/{behandlingId}")
-    fun hentBeregnetBeløp(@PathVariable behandlingId: UUID): Ressurs<List<Beløpsperiode>> {
+    fun hentBeregnetBeløpForLagretVedtak(@PathVariable behandlingId: UUID): Ressurs<List<Beløpsperiode>> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
-        return Ressurs.success(tilkjentYtelseService.hentForBehandling(behandlingId).tilBeløpsperiode())
+
+        val vedtak = vedtakService.hentVedtak(behandlingId)
+
+        return Ressurs.success(beregnForVedtak(vedtak))
     }
+
+    private fun beregnForVedtak(vedtak: Vedtak): List<Beløpsperiode> =
+            beregningService.beregnYtelse(vedtak.perioder?.perioder?.map { Periode(it.datoFra, it.datoTil) }
+                                          ?: throw Feil("Kan ikke beregne for vedtak uten vedtaksperioder"),
+                                          vedtak.inntekter?.inntekter?.tilInntekt()?.tilInntektsperioder()
+                                          ?: throw Feil("Kan ikke beregne for vedtak uten inntektperioder"))
+
 
 }
