@@ -14,7 +14,7 @@ import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
-import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår.erAlleVilkårVurdert
+import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår.erAlleVilkårTattStillingTil
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår.utledResultatForAleneomsorg
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.SivilstandRegel
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
@@ -203,55 +203,55 @@ internal class OppdaterVilkårTest {
 
     @Test
     fun `erAlleVilkårVurdert - alle vilkåren er OPPFYLT`() {
-        assertThat(erAlleVilkårVurdert(listOf(Vilkårsresultat.OPPFYLT)))
+        assertThat(erAlleVilkårTattStillingTil(listOf(Vilkårsresultat.OPPFYLT)))
                 .isTrue
     }
 
     @Test
     fun `erAlleVilkårVurdert - kan ikke ha en kombinasjon av OPPFYLT og SKAL_IKKE_VURDERES`() {
-        assertThat(erAlleVilkårVurdert(listOf(Vilkårsresultat.OPPFYLT,
-                                              Vilkårsresultat.SKAL_IKKE_VURDERES)))
+        assertThat(erAlleVilkårTattStillingTil(listOf(Vilkårsresultat.OPPFYLT,
+                                                      Vilkårsresultat.SKAL_IKKE_VURDERES)))
                 .isFalse
     }
 
     @Test
     fun `erAlleVilkårVurdert - ett vilkår er IKKE_OPPFYLT og resten er gyldig`() {
-        assertThat(erAlleVilkårVurdert(listOf(Vilkårsresultat.IKKE_OPPFYLT,
-                                              Vilkårsresultat.OPPFYLT)))
+        assertThat(erAlleVilkårTattStillingTil(listOf(Vilkårsresultat.IKKE_OPPFYLT,
+                                                      Vilkårsresultat.OPPFYLT)))
                 .isTrue
-        assertThat(erAlleVilkårVurdert(listOf(Vilkårsresultat.IKKE_OPPFYLT,
-                                              Vilkårsresultat.SKAL_IKKE_VURDERES)))
+        assertThat(erAlleVilkårTattStillingTil(listOf(Vilkårsresultat.IKKE_OPPFYLT,
+                                                      Vilkårsresultat.SKAL_IKKE_VURDERES)))
                 .isTrue
-        assertThat(erAlleVilkårVurdert(listOf(Vilkårsresultat.IKKE_OPPFYLT,
-                                              Vilkårsresultat.IKKE_OPPFYLT)))
+        assertThat(erAlleVilkårTattStillingTil(listOf(Vilkårsresultat.IKKE_OPPFYLT,
+                                                      Vilkårsresultat.IKKE_OPPFYLT)))
                 .isTrue
     }
 
     @Test
     fun `erAlleVilkårVurdert - IKKE_TATT_STILLING_TIL skal gi false`() {
-        assertThat(erAlleVilkårVurdert(listOf(Vilkårsresultat.IKKE_OPPFYLT,
-                                              Vilkårsresultat.IKKE_TATT_STILLING_TIL)))
+        assertThat(erAlleVilkårTattStillingTil(listOf(Vilkårsresultat.IKKE_OPPFYLT,
+                                                      Vilkårsresultat.IKKE_TATT_STILLING_TIL)))
                 .isFalse
-        assertThat(erAlleVilkårVurdert(listOf(Vilkårsresultat.OPPFYLT,
-                                              Vilkårsresultat.IKKE_TATT_STILLING_TIL)))
+        assertThat(erAlleVilkårTattStillingTil(listOf(Vilkårsresultat.OPPFYLT,
+                                                      Vilkårsresultat.IKKE_TATT_STILLING_TIL)))
                 .isFalse
-        assertThat(erAlleVilkårVurdert(listOf(Vilkårsresultat.SKAL_IKKE_VURDERES,
-                                              Vilkårsresultat.IKKE_TATT_STILLING_TIL)))
+        assertThat(erAlleVilkårTattStillingTil(listOf(Vilkårsresultat.SKAL_IKKE_VURDERES,
+                                                      Vilkårsresultat.IKKE_TATT_STILLING_TIL)))
                 .isFalse
     }
 
     @Test
     fun `erAlleVilkårVurdert - SKAL_IKKE_VURDERES må være i en kombinasjon med IKKE_OPPFYLT`() {
-        assertThat(erAlleVilkårVurdert(listOf(Vilkårsresultat.SKAL_IKKE_VURDERES,
-                                              Vilkårsresultat.IKKE_OPPFYLT)))
+        assertThat(erAlleVilkårTattStillingTil(listOf(Vilkårsresultat.SKAL_IKKE_VURDERES,
+                                                      Vilkårsresultat.IKKE_OPPFYLT)))
                 .isTrue
 
-        assertThat(erAlleVilkårVurdert(listOf(Vilkårsresultat.SKAL_IKKE_VURDERES,
-                                              Vilkårsresultat.SKAL_IKKE_VURDERES)))
+        assertThat(erAlleVilkårTattStillingTil(listOf(Vilkårsresultat.SKAL_IKKE_VURDERES,
+                                                      Vilkårsresultat.SKAL_IKKE_VURDERES)))
                 .withFailMessage("Minimum ett vilkår må være satt til IKKE_OPPFYLT hvis man har SKAL_IKKE_VURDERES")
                 .isFalse
-        assertThat(erAlleVilkårVurdert(listOf(Vilkårsresultat.SKAL_IKKE_VURDERES,
-                                              Vilkårsresultat.OPPFYLT)))
+        assertThat(erAlleVilkårTattStillingTil(listOf(Vilkårsresultat.SKAL_IKKE_VURDERES,
+                                                      Vilkårsresultat.OPPFYLT)))
                 .withFailMessage("Minimum ett vilkår må være satt til IKKE_OPPFYLT hvis man har SKAL_IKKE_VURDERES")
                 .isFalse
     }
