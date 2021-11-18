@@ -10,7 +10,7 @@ object AdresseHjelper {
 
     fun sorterAdresser(adresser: List<AdresseDto>): List<AdresseDto> {
         return adresser.sortedWith(compareBy<AdresseDto> { it.type.rekkefølge }
-                                           .thenByDescending { it.angittFlyttedato ?: it.gyldigFraOgMed ?: LocalDate.MAX })
+                                           .thenByDescending { it.angittFlyttedato ?: it.gyldigFraOgMed })
     }
 
     fun borPåSammeAdresse(barn: BarnMedIdent, bostedsadresserForelder: List<Bostedsadresse>): Boolean {

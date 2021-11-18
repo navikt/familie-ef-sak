@@ -99,9 +99,9 @@ fun tilkjentYtelse(behandlingId: UUID, personIdent: String): TilkjentYtelse = Ti
                                     samordningsfradrag = 0,
                                     kildeBehandlingId = behandlingId)))
 
-fun vedtak(behandlingId: UUID): Vedtak =
+fun vedtak(behandlingId: UUID, resultatType: ResultatType = ResultatType.INNVILGE): Vedtak =
         Vedtak(behandlingId = behandlingId,
-               resultatType = ResultatType.INNVILGE,
+               resultatType = resultatType,
                periodeBegrunnelse = "OK",
                inntektBegrunnelse = "OK",
                avslåBegrunnelse = null,
