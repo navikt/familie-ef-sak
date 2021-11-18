@@ -12,6 +12,8 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.INNVILGET
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
+import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTaskPayload
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask.FerdigstillOppgaveTaskData
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
@@ -35,6 +37,7 @@ import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.ef.iverksett.Hendelse
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.simulering.Simuleringsoppsummering
@@ -178,11 +181,19 @@ internal class SendTilBeslutterStegTest {
     @Test
     internal fun `Skal avslutte oppgave BehandleSak hvis den finnes`() {
         utførOgVerifiserKall(Oppgavetype.BehandleSak)
+        verifiserVedtattBehandlingsstatistikkTask()
     }
 
     @Test
     internal fun `Skal avslutte oppgave BehandleUnderkjentVedtak hvis den finnes`() {
         utførOgVerifiserKall(Oppgavetype.BehandleUnderkjentVedtak)
+        verifiserVedtattBehandlingsstatistikkTask()
+    }
+
+    private fun verifiserVedtattBehandlingsstatistikkTask() {
+        assertThat(taskSlot[2].type).isEqualTo(BehandlingsstatistikkTask.TYPE)
+        assertThat(objectMapper.readValue<BehandlingsstatistikkTaskPayload>(taskSlot[2].payload).hendelse)
+                .isEqualTo(Hendelse.VEDTATT)
     }
 
 
