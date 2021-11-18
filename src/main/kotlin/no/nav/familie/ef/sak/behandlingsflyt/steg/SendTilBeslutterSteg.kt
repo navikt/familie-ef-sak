@@ -11,12 +11,15 @@ import no.nav.familie.ef.sak.brev.VedtaksbrevRepository
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.ef.sak.vedtak.dto.ResultatType.INNVILGE
+import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
@@ -30,7 +33,8 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
                            private val vedtaksbrevRepository: VedtaksbrevRepository,
                            private val vedtakService: VedtakService,
                            private val simuleringService: SimuleringService,
-                           private val tilbakekrevingService: TilbakekrevingService) : BehandlingSteg<Void?> {
+                           private val tilbakekrevingService: TilbakekrevingService,
+                           private val vurderingService: VurderingService) : BehandlingSteg<Void?> {
 
     override fun validerSteg(behandling: Behandling) {
         if (behandling.steg != stegType()) {
@@ -42,6 +46,16 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
         }
         feilHvis(saksbehandlerMåTaStilingTilTilbakekreving(behandling)) {
             "Feilutbetaling detektert. Må ta stilling til feilutbetalingsvarsel under simulering"
+        }
+        validerRiktigTilstandVedInvilgelse(behandling)
+    }
+
+    private fun validerRiktigTilstandVedInvilgelse(behandling: Behandling) {
+        val vedtak = vedtakService.hentVedtak(behandling.id)
+        if (vedtak.resultatType == INNVILGE) {
+            feilHvisIkke(vurderingService.erAlleVilkårOppfylt(behandling.id)) {
+                "Kan ikke innvilge hvis ikke alle vilkår er oppfylt for behandlingId: ${behandling.id}"
+            }
         }
     }
 
