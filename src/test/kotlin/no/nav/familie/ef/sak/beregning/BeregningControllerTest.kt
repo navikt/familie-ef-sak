@@ -57,7 +57,7 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
                                                                 type = BehandlingType.BLANKETT,
                                                                 status = BehandlingStatus.UTREDES))
         val vedtakDto = Avslå(avslåBegrunnelse = "avslår vedtaket", avslåÅrsak = AvslagÅrsak.VILKÅR_IKKE_OPPFYLT)
-        val vedtak = Vedtak(behandlingId = behandling.id, avslåBegrunnelse = "avslår vedtaket", resultatType = ResultatType.AVSLÅ)
+        val vedtak = Vedtak(behandlingId = behandling.id, avslåBegrunnelse = "avslår vedtaket", avslåÅrsak = AvslagÅrsak.VILKÅR_IKKE_OPPFYLT, resultatType = ResultatType.AVSLÅ)
         val respons: ResponseEntity<Ressurs<UUID>> = fatteVedtak(behandling.id, vedtakDto)
 
 

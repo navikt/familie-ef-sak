@@ -208,10 +208,10 @@ internal class OppdaterVilkårTest {
     }
 
     @Test
-    fun `erAlleVilkårVurdert - kan ikke ha en kombinasjon av OPPFYLT og SKAL_IKKE_VURDERES`() {
+    fun `erAlleVilkårVurdert - skal kunne ha en kombinasjon av OPPFYLT og SKAL_IKKE_VURDERES`() {
         assertThat(erAlleVilkårTattStillingTil(listOf(Vilkårsresultat.OPPFYLT,
                                                       Vilkårsresultat.SKAL_IKKE_VURDERES)))
-                .isFalse
+                .isTrue
     }
 
     @Test
@@ -248,12 +248,12 @@ internal class OppdaterVilkårTest {
 
         assertThat(erAlleVilkårTattStillingTil(listOf(Vilkårsresultat.SKAL_IKKE_VURDERES,
                                                       Vilkårsresultat.SKAL_IKKE_VURDERES)))
-                .withFailMessage("Minimum ett vilkår må være satt til IKKE_OPPFYLT hvis man har SKAL_IKKE_VURDERES")
-                .isFalse
+                .withFailMessage("Alle vilkår skal kunne være satt til SKAL_IKKE_VURDERES")
+                .isTrue
         assertThat(erAlleVilkårTattStillingTil(listOf(Vilkårsresultat.SKAL_IKKE_VURDERES,
                                                       Vilkårsresultat.OPPFYLT)))
-                .withFailMessage("Minimum ett vilkår må være satt til IKKE_OPPFYLT hvis man har SKAL_IKKE_VURDERES")
-                .isFalse
+                .withFailMessage("Alle vilkår skal kunne være satt til enten SKAL_IKKE_VURDERES eller OPPFYLT")
+                .isTrue
     }
 
     private fun aleneomsorg(vilkårsresultat: Vilkårsresultat) =
