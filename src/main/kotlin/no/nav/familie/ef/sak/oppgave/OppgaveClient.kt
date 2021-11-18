@@ -67,8 +67,12 @@ class OppgaveClient(@Qualifier("azure") restOperations: RestOperations,
     }
 
     fun finnMapper(finnMappeRequest: FinnMappeRequest): FinnMappeResponseDto {
-        val uri = URI.create("$oppgaveUri/mappe/sok")
-        val respons = postForEntity<Ressurs<FinnMappeResponseDto>>(uri, finnMappeRequest)
+        val uri = UriComponentsBuilder.fromUri(oppgaveUri)
+                .pathSegment("mappe", "sok")
+                .queryParams(finnMappeRequest.toQueryParams())
+                .build()
+                .toUri()
+        val respons = getForEntity<Ressurs<FinnMappeResponseDto>>(uri)
         return pakkUtRespons(respons, uri, "finnMappe")
     }
 
