@@ -28,7 +28,7 @@ class ArbeidsforholdController(
                            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
                            @RequestParam ansettelsesperiodeFom: LocalDate
     ): Ressurs<List<ArbeidsforholdDto>> {
-        tilgangService.validerTilgangTilFagsak(fagsakId)
+        //tilgangService.validerTilgangTilFagsak(fagsakId)
         val arbeidsforhold = arbeidsforholdService.hentArbeidsforhold(fagsakId, ansettelsesperiodeFom)
         return Ressurs.success(arbeidsforhold)
     }
