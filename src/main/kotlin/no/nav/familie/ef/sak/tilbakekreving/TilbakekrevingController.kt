@@ -48,16 +48,16 @@ class TilbakekrevingController(private val tilgangService: TilgangService,
     }
 
     @GetMapping("/{behandlingId}/brev")
-    fun hentTilbakekekrevingBrev(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
+    fun genererBrevMedEskisterendeVarseltekst(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
-        return Ressurs.success(tilbakekrevingService.hentBrev(behandlingId))
+        return Ressurs.success(tilbakekrevingService.genererBrevMedVarseltekstFraEksisterendeTilbakekreving(behandlingId))
     }
 
     @PostMapping("/{behandlingId}/brev/generer")
-    fun hentTilbakekekrevingBrev(@PathVariable behandlingId: UUID,
-                                 @RequestBody varseltekstDto: VarseltekstDto): Ressurs<ByteArray> {
+    fun genererTilbakekekrevingBrevMedVarseltekst(@PathVariable behandlingId: UUID,
+                                                  @RequestBody varseltekstDto: VarseltekstDto): Ressurs<ByteArray> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
-        return Ressurs.success(tilbakekrevingService.hentBrev(behandlingId, varseltekstDto.varseltekst))
+        return Ressurs.success(tilbakekrevingService.genererBrev(behandlingId, varseltekstDto.varseltekst))
     }
 
 }

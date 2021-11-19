@@ -131,31 +131,31 @@ internal class TilbakekrevingServiceTest {
 
     @Test
     internal fun `Varselbrev må lages med riktig varseltekst`() {
-        val (behandlingId, requestSlot) = mockHentDataForGenereringAvVarselbrev()
-        tilbakekrevingService.hentBrev(behandlingId, "Varsel, varsel")
+        val requestSlot = mockHentDataForGenereringAvVarselbrev()
+        tilbakekrevingService.genererBrev(UUID.randomUUID(), "Varsel, varsel")
         assertThat(requestSlot.captured.varseltekst).isEqualTo("Varsel, varsel")
     }
 
     @Test
     internal fun `Varselbrev feiler hvis behandling er låst`() {
         every { behandlingService.hentBehandling(any()) } returns behandling(fagsak = fagsak(), status = FERDIGSTILT)
-        val assertFails = assertFailsWith<Feil> { tilbakekrevingService.hentBrev(UUID.randomUUID(), "Varsel, varsel") }
+        val assertFails = assertFailsWith<Feil> { tilbakekrevingService.genererBrev(UUID.randomUUID(), "Varsel, varsel") }
         assertThat(assertFails.frontendFeilmelding).isEqualTo("Kan ikke generere forhåndsvisning av varselbrev på en ferdigstilt behandling.")
     }
 
-    private fun mockHentDataForGenereringAvVarselbrev(): Pair<UUID, CapturingSlot<ForhåndsvisVarselbrevRequest>> {
+    private fun mockHentDataForGenereringAvVarselbrev(): CapturingSlot<ForhåndsvisVarselbrevRequest> {
         val behandlingId = UUID.randomUUID()
 
         val fagsak = fagsak(identer = setOf(FagsakPerson("12345678901")))
         every { fagsakService.hentFagsakForBehandling(any()) } returns fagsak
         every { behandlingService.hentBehandling(any()) } returns behandling(fagsak = fagsak)
 
-        every { simuleringService.simuler(behandlingId) } returns simuleringsoppsummering
+        every { simuleringService.simuler(any()) } returns simuleringsoppsummering
         every { arbeidsfordelingService.hentNavEnhet(any()) } returns Arbeidsfordelingsenhet("123", "123")
 
         val request = slot<ForhåndsvisVarselbrevRequest>()
         every { tilbakekrevingClient.hentForhåndsvisningVarselbrev(capture(request)) } returns "bytearray".toByteArray()
-        return Pair(behandlingId, request)
+        return request
     }
 
     val simuleringsoppsummering = Simuleringsoppsummering(

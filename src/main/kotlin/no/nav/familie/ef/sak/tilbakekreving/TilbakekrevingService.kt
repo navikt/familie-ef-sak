@@ -77,7 +77,7 @@ class TilbakekrevingService(private val tilbakekrevingRepository: Tilbakekreving
         return tilbakekrevingRepository.existsById(behandlingsId)
     }
 
-    fun hentBrev(behandlingId: UUID, varseltekst: String): ByteArray {
+    fun genererBrev(behandlingId: UUID, varseltekst: String): ByteArray {
         validerIkkeFerdigstiltBehandling(behandlingId)
         val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
         val personIdent = fagsak.hentAktivIdent()
@@ -116,11 +116,11 @@ class TilbakekrevingService(private val tilbakekrevingRepository: Tilbakekreving
         return feilutbetaltePerioderDto
     }
 
-    fun hentBrev(behandlingId: UUID): ByteArray {
+    fun genererBrevMedVarseltekstFraEksisterendeTilbakekreving(behandlingId: UUID): ByteArray {
         val varseltekst = tilbakekrevingRepository.findByIdOrThrow(behandlingId).varseltekst
                           ?: throw Feil("Kan ikke finne varseltekst for behandlingId=$behandlingId",
                                         frontendFeilmelding = "Kan ikke finne varseltekst på tilbakekrevingsvalg")
-        return hentBrev(behandlingId, varseltekst)
+        return genererBrev(behandlingId, varseltekst)
     }
 
 }
