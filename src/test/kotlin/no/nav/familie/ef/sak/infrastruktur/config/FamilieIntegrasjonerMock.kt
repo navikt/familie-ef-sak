@@ -13,12 +13,6 @@ import com.github.tomakehurst.wiremock.client.WireMock.urlMatching
 import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
 import com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching
 import no.nav.familie.ef.sak.arbeidsfordeling.Arbeidsfordelingsenhet
-import no.nav.familie.ef.sak.arbeidsforhold.ekstern.Ansettelsesperiode
-import no.nav.familie.ef.sak.arbeidsforhold.ekstern.Arbeidsavtaler
-import no.nav.familie.ef.sak.arbeidsforhold.ekstern.Arbeidsforhold
-import no.nav.familie.ef.sak.arbeidsforhold.ekstern.Arbeidsgiver
-import no.nav.familie.ef.sak.arbeidsforhold.ekstern.ArbeidsgiverType
-import no.nav.familie.ef.sak.arbeidsforhold.ekstern.Arbeidstaker
 import no.nav.familie.ef.sak.felles.integration.dto.EgenAnsattResponse
 import no.nav.familie.ef.sak.felles.integration.dto.Tilgang
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.infrastruktur.config.pdfAsBase64String
@@ -80,8 +74,6 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                             .willReturn(okJson(objectMapper.writeValueAsString(kodeverkInntekt))),
                     post(urlEqualTo(integrasjonerConfig.arbeidsfordelingUri.path))
                             .willReturn(okJson(objectMapper.writeValueAsString(arbeidsfordeling))),
-                    post(urlEqualTo(integrasjonerConfig.arbeidsforholdUri.path))
-                            .willReturn(okJson(objectMapper.writeValueAsString(arbeidsforhold))),
 
                     get(urlPathEqualTo(integrasjonerConfig.journalPostUri.path))
                             .withQueryParam("journalpostId", equalTo("1234"))
@@ -145,17 +137,6 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
 
         private val arbeidsfordeling =
                 Ressurs.success(listOf(Arbeidsfordelingsenhet("4489", "nerd-enhet")))
-
-        private val arbeidsforhold =
-            listOf(Arbeidsforhold(
-                navArbeidsforholdId = 1L,
-                arbeidsforholdId = "1",
-                arbeidstaker = Arbeidstaker("type", "offentligIdent", "id"),
-                arbeidsgiver = Arbeidsgiver(ArbeidsgiverType.Organisasjon, "orgnummer", "offentligIdent"),
-                type = "type",
-                ansettelsesperiode = Ansettelsesperiode(),
-                arbeidsavtaler = listOf(Arbeidsavtaler())
-            ))
 
         private const val fnr = "23097825289"
         private val medl =

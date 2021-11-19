@@ -21,8 +21,7 @@ fun List<Arbeidsforhold>.tilDto() = this.map {
             it.ansettelsesperiode?.periode,
             it.ansettelsesperiode?.bruksperiode
         ),
-        arbeidsavtaler = it.arbeidsavtaler?.map {
-            arbeidsavtale ->
+        arbeidsavtaler = it.arbeidsavtaler?.map { arbeidsavtale ->
             ArbeidsavtaleDto(
                 arbeidstidsordning = arbeidsavtale.arbeidstidsordning,
                 yrke = arbeidsavtale.yrke,

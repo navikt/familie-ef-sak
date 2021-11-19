@@ -25,6 +25,8 @@ class ArbeidsforholdClient(
 }
 
 
-class ArbeidsforholdRequest(val personIdent: String,
-                            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-                            val ansettelsesperiodeFom: LocalDate)
+class ArbeidsforholdRequest(
+    val personIdent: String,
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    val ansettelsesperiodeFom: LocalDate
+)

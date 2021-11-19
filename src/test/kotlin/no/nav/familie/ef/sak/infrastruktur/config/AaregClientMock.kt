@@ -20,18 +20,18 @@ class AaregClientMock {
     @Profile("mock-aareg")
     @Bean
     @Primary
-    fun inntektClient(): ArbeidsforholdClient {
+    fun arbeidsforholdClient(): ArbeidsforholdClient {
         val mockk = mockk<ArbeidsforholdClient>()
         val mockResponse = listOf(
             Arbeidsforhold(
-            navArbeidsforholdId = 1L,
-            arbeidsforholdId = "1",
-            arbeidstaker = Arbeidstaker("type", "offentligIdent", "id"),
-            arbeidsgiver = Arbeidsgiver(ArbeidsgiverType.Organisasjon, "orgnummer", "offentligIdent"),
-            type = "type",
-            ansettelsesperiode = Ansettelsesperiode(),
-            arbeidsavtaler = listOf(Arbeidsavtaler())
-        )
+                navArbeidsforholdId = 1L,
+                arbeidsforholdId = "1",
+                arbeidstaker = Arbeidstaker("type", "offentligIdent", "id"),
+                arbeidsgiver = Arbeidsgiver(ArbeidsgiverType.Organisasjon, "orgnummer", "offentligIdent"),
+                type = "type",
+                ansettelsesperiode = Ansettelsesperiode(),
+                arbeidsavtaler = listOf(Arbeidsavtaler())
+            )
         )
         every { mockk.hentArbeidsforhold(any(), any()) } returns mockResponse
         return mockk

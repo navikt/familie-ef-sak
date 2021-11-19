@@ -53,15 +53,17 @@ internal class ArbeidsforholdMapperTest {
             arbeidsgiver = Arbeidsgiver(ArbeidsgiverType.Organisasjon, "orgnummer", "offentligIdent"),
             type = "type",
             ansettelsesperiode = Ansettelsesperiode(gyldighetsperiode, bruksperiode),
-            arbeidsavtaler = listOf(Arbeidsavtaler(
-                arbeidstidsordning = "arbeidstidsordning",
-                yrke = "yrke",
-                stillingsprosent = 20.0,
-                antallTimerPrUke = 37.5,
-                beregnetAntallTimerPrUke = 7.5,
-                bruksperiode = bruksperiode,
-                gyldighetsperiode = gyldighetsperiode
-            ))
+            arbeidsavtaler = listOf(
+                Arbeidsavtaler(
+                    arbeidstidsordning = "arbeidstidsordning",
+                    yrke = "yrke",
+                    stillingsprosent = 20.0,
+                    antallTimerPrUke = 37.5,
+                    beregnetAntallTimerPrUke = 7.5,
+                    bruksperiode = bruksperiode,
+                    gyldighetsperiode = gyldighetsperiode
+                )
+            )
         )
 
     private val arbeidsforhold2 =
