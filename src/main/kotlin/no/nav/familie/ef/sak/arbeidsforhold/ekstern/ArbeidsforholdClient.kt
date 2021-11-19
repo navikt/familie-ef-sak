@@ -4,7 +4,6 @@ import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
 import org.springframework.web.util.UriComponentsBuilder
@@ -28,6 +27,5 @@ class ArbeidsforholdClient(
 
 class ArbeidsforholdRequest(
     val personIdent: String,
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     val ansettelsesperiodeFom: LocalDate
 )
