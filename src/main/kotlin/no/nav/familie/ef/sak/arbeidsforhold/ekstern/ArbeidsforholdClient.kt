@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.arbeidsforhold.ekstern
 
 import no.nav.familie.http.client.AbstractRestClient
+import no.nav.familie.kontrakter.felles.Ressurs
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.format.annotation.DateTimeFormat
@@ -19,7 +20,7 @@ class ArbeidsforholdClient(
     private fun lagArbeidsforholdUri() =
         UriComponentsBuilder.fromUri(uri).pathSegment("api/aareg/arbeidsforhold").build().toUri()
 
-    fun hentArbeidsforhold(personIdent: String, ansettelsesperiodeFom: LocalDate): List<Arbeidsforhold> {
+    fun hentArbeidsforhold(personIdent: String, ansettelsesperiodeFom: LocalDate): Ressurs<List<Arbeidsforhold>> {
         return postForEntity(lagArbeidsforholdUri(), ArbeidsforholdRequest(personIdent, ansettelsesperiodeFom))
     }
 }

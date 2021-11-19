@@ -15,8 +15,8 @@ class ArbeidsforholdService(
 
     fun hentArbeidsforhold(fagsakId: UUID, ansettelsesperiodeFom: LocalDate): List<ArbeidsforholdDto> {
         val aktivIdent = fagsakService.hentAktivIdent(fagsakId)
-        val arbeidsforhold = arbeidsforholdClient.hentArbeidsforhold(aktivIdent, ansettelsesperiodeFom)
-        return arbeidsforhold.tilDto()
+        val arbeidsforholdResponse = arbeidsforholdClient.hentArbeidsforhold(aktivIdent, ansettelsesperiodeFom)
+        return arbeidsforholdResponse.data?.tilDto() ?: emptyList()
 
     }
 }

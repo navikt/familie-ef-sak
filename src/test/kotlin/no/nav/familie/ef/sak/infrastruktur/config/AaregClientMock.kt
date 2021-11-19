@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.arbeidsforhold.ekstern.ArbeidsforholdClient
 import no.nav.familie.ef.sak.arbeidsforhold.ekstern.Arbeidsgiver
 import no.nav.familie.ef.sak.arbeidsforhold.ekstern.ArbeidsgiverType
 import no.nav.familie.ef.sak.arbeidsforhold.ekstern.Arbeidstaker
+import no.nav.familie.kontrakter.felles.Ressurs
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
@@ -33,7 +34,7 @@ class AaregClientMock {
                 arbeidsavtaler = listOf(Arbeidsavtaler())
             )
         )
-        every { mockk.hentArbeidsforhold(any(), any()) } returns mockResponse
+        every { mockk.hentArbeidsforhold(any(), any()) } returns Ressurs.success(mockResponse)
         return mockk
     }
 
