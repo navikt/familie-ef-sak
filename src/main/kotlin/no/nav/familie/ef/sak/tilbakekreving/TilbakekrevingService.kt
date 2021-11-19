@@ -101,7 +101,7 @@ class TilbakekrevingService(private val tilbakekrevingRepository: Tilbakekreving
 
     private fun validerIkkeFerdigstiltBehandling(behandlingId: UUID) {
         feilHvis(behandlingService.hentBehandling(behandlingId).status == BehandlingStatus.FERDIGSTILT)
-        { "Kan ikke generere forhåndsvisning av varselbrev på en ferdigstilt behandling. Se dokumentoversikt, eller finn brevet i tilbakekrevingsapp" }
+        { "Kan ikke generere forhåndsvisning av varselbrev på en ferdigstilt behandling." }
     }
 
     private fun lagFeilutbetaltePerioderDto(behandlingId: UUID): FeilutbetaltePerioderDto {
