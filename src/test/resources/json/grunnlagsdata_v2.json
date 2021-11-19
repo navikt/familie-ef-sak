@@ -828,7 +828,7 @@
           },
           "bekreftelsesdato" : {
             "name" : "bekreftelsesdato",
-            "type" : "String",
+            "type" : "LocalDate",
             "nullable" : true
           },
           "dødsfall" : {
@@ -2289,5 +2289,34 @@
       }
     },
     "nullable" : false
+  },
+  "tidligereVedtaksperioder" : {
+    "name" : "tidligereVedtaksperioder",
+    "type" : "Object",
+    "fields" : {
+      "infotrygd" : {
+        "name" : "infotrygd",
+        "type" : "Object",
+        "fields" : {
+          "harTidligereOvergangsstønad" : {
+            "name" : "harTidligereOvergangsstønad",
+            "type" : "Boolean",
+            "nullable" : false
+          },
+          "harTidligereBarnetilsyn" : {
+            "name" : "harTidligereBarnetilsyn",
+            "type" : "Boolean",
+            "nullable" : false
+          },
+          "harTidligereSkolepenger" : {
+            "name" : "harTidligereSkolepenger",
+            "type" : "Boolean",
+            "nullable" : false
+          }
+        },
+        "nullable" : false
+      }
+    },
+    "nullable" : true
   }
 }

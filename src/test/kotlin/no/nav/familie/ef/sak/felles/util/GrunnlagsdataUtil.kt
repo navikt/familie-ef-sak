@@ -2,6 +2,8 @@ package no.nav.familie.ef.sak.felles.util
 
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Søker
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereInnvilgetVedtak
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioder
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.KjønnType
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
@@ -30,5 +32,8 @@ fun opprettGrunnlagsdata() = GrunnlagsdataDomene(
         ),
         emptyList(),
         Medlemskapsinfo("", emptyList(), emptyList(), emptyList()),
-        emptyList()
+        emptyList(),
+        TidligereVedtaksperioder(TidligereInnvilgetVedtak(harTidligereOvergangsstønad = false,
+                                                          harTidligereBarnetilsyn = true,
+                                                          harTidligereSkolepenger = false))
 )
