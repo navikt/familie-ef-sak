@@ -282,6 +282,9 @@
                     <compilerPlugins>
                         <plugin>spring</plugin>
                     </compilerPlugins>
+                    <args>
+                        <arg>-opt-in=kotlin.RequiresOptIn</arg>
+                    </args>
                 </configuration>
                 <executions>
                     <execution>
