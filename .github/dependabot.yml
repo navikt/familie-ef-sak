@@ -22,6 +22,6 @@ updates:
         versions:
           - 1.5.0-native-mt
   - package-ecosystem: "github-actions"
-      directory: "/"
-      schedule:
-        interval: "daily"
+    directory: "/"
+    schedule:
+      interval: "daily"
