@@ -39,6 +39,22 @@ class TilkjentYtelseServiceTest {
     }
 
     @Test
+    internal fun `konsistensavstemming - filtrer bort andeler som har 0-beløp`() {
+        val andelerTilkjentYtelse = listOf(andel2.copy(beløp = 0), andel3)
+        val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(behandling).copy(andelerTilkjentYtelse = andelerTilkjentYtelse)
+
+        every { behandlingService.hentEksterneIder(setOf(behandling.id)) } returns setOf(EksternId(behandling.id, 1, 1))
+        every {
+            tilkjentYtelseRepository.finnTilkjentYtelserTilKonsistensavstemming(setOf(behandling.id), any())
+        } returns listOf(tilkjentYtelse)
+
+        val tilkjentYtelser = tilkjentYtelseService.finnTilkjentYtelserTilKonsistensavstemming(stønadstype, datoForAvstemming)
+        assertThat(tilkjentYtelser).hasSize(1)
+        assertThat(tilkjentYtelser[0].andelerTilkjentYtelse).hasSize(1)
+        assertThat(tilkjentYtelser[0].andelerTilkjentYtelse.map { it.beløp }).containsExactlyInAnyOrder(3)
+    }
+
+    @Test
     internal fun `konsistensavstemming - filtrer andeler har tom dato som er lik eller etter dato for konsistensavstemming`() {
         val andelerTilkjentYtelse = listOf(andel1, andel2, andel3, andel4)
         val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(behandling).copy(andelerTilkjentYtelse = andelerTilkjentYtelse)
