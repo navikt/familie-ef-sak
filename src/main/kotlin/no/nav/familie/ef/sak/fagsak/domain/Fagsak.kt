@@ -25,6 +25,9 @@ data class Fagsak(@Id
     fun hentAlleIdenter(): List<String> {
         return søkerIdenter.map { it.ident }
     }
+
+    fun erAktivIdent(personIdent: String): Boolean = hentAktivIdent() == personIdent
+
 }
 
 enum class Stønadstype {

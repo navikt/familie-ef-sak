@@ -12,6 +12,8 @@ import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.fagsak.dto.FagsakDto
 import no.nav.familie.ef.sak.fagsak.dto.tilDto
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import org.springframework.stereotype.Service
@@ -20,6 +22,7 @@ import java.util.UUID
 @Service
 class FagsakService(private val fagsakRepository: FagsakRepository,
                     private val behandlingService: BehandlingService,
+                    private val pdlClient: PdlClient,
                     private val tilkjentYtelseService: TilkjentYtelseService) {
 
     fun hentEllerOpprettFagsakMedBehandlinger(personIdent: String, stønadstype: Stønadstype): FagsakDto {
@@ -28,9 +31,16 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
 
     fun hentEllerOpprettFagsak(personIdent: String,
                                stønadstype: Stønadstype): Fagsak {
-        return (fagsakRepository.findBySøkerIdent(setOf(personIdent), stønadstype)
-                ?: fagsakRepository.insert(Fagsak(stønadstype = stønadstype,
-                                                  søkerIdenter = setOf(FagsakPerson(ident = personIdent)))))
+        val personIdenter = pdlClient.hentPersonidenter(personIdent, true)
+        val gjeldendePersonIdent = personIdenter.gjeldende().ident
+        val fagsak = fagsakRepository.findBySøkerIdent(personIdenter.identer(), stønadstype)
+
+        return fagsak?.let {
+            return when {
+                fagsak.erAktivIdent(gjeldendePersonIdent) -> fagsak
+                else -> oppdaterPersonIdentPåFagsak(fagsak, gjeldendePersonIdent)
+            }
+        } ?: opprettFagsak(stønadstype, gjeldendePersonIdent)
     }
 
     fun finnFagsak(personIdenter: Set<String>, stønadstype: Stønadstype): Fagsak? =
@@ -69,5 +79,15 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
                                                                ?: error("Kan ikke finne fagsak med eksternId=$eksternFagsakId")
 
     fun hentAktivIdent(fagsakId: UUID): String = fagsakRepository.finnAktivIdent(fagsakId)
+
+    private fun oppdaterPersonIdentPåFagsak(fagsak: Fagsak,
+                                            personIdent: String): Fagsak {
+        val fagsakMedNyIdent = fagsak.copy(søkerIdenter = fagsak.søkerIdenter + FagsakPerson(ident = personIdent))
+        return fagsakRepository.update(fagsakMedNyIdent)
+    }
+
+    private fun opprettFagsak(stønadstype: Stønadstype, personIdent: String) =
+            fagsakRepository.insert(Fagsak(stønadstype = stønadstype, søkerIdenter = setOf(FagsakPerson(ident = personIdent))))
+
 
 }
