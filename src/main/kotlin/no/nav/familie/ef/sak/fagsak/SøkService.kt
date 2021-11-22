@@ -28,8 +28,8 @@ class SøkService(private val fagsakRepository: FagsakRepository,
                  private val adresseMapper: AdresseMapper,
                  private val fagsakService: FagsakService) {
 
-    fun søkPerson(personIdent: String): Søkeresultat {
-        val fagsaker = fagsakRepository.findBySøkerIdent(personIdent)
+    fun søkPerson(personIdentFraRequest: String): Søkeresultat {
+        val fagsaker = fagsakRepository.findBySøkerIdent(personIdentFraRequest)
 
         if (fagsaker.isEmpty()) {
             throw ApiFeil("Finner ikke fagsak for søkte personen", HttpStatus.BAD_REQUEST)

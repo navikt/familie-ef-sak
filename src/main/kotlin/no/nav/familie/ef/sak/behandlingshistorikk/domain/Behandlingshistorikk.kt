@@ -21,7 +21,7 @@ data class Behandlingshistorikk(@Id
                                 val opprettetAv: String = SikkerhetContext.hentSaksbehandler(),
                                 val endretTid: LocalDateTime = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS))
 
-inline fun Behandlingshistorikk.tilDto(): BehandlingshistorikkDto {
+fun Behandlingshistorikk.tilDto(): BehandlingshistorikkDto {
     return BehandlingshistorikkDto(behandlingId = this.behandlingId,
                                    steg = this.steg,
                                    endretAvNavn = this.opprettetAvNavn,
