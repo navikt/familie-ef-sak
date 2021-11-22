@@ -105,6 +105,21 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(result.map { it.behandlingId }).containsExactly(behandling2.id)
     }
 
+    @Test
+    internal fun `finnTilkjentYtelserTilKonsistensavstemming skal ikke få med tilkjent ytelser som kun har 0-beløp`() {
+        val beløp = 0
+        val fagsak = fagsakRepository.insert(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak, opprettetTid = LocalDate.of(2021, 1, 1).atStartOfDay()))
+        val andelerTilkjentYtelse = listOf(lagAndelTilkjentYtelse(beløp = beløp,
+                                                                  fraOgMed = LocalDate.now(),
+                                                                  tilOgMed = LocalDate.now().plusDays(1),
+                                                                  kildeBehandlingId = behandling.id))
+        repository.insert(DataGenerator.tilfeldigTilkjentYtelse(behandling).copy(andelerTilkjentYtelse = andelerTilkjentYtelse))
+
+        assertThat(repository.finnTilkjentYtelserTilKonsistensavstemming(setOf(behandling.id), LocalDate.now()))
+                .isEmpty()
+    }
+
     private fun opprettBehandling(): Behandling {
         val fagsak = fagsakRepository.insert(fagsak())
 
