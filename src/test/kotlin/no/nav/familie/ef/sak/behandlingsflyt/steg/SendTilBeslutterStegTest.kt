@@ -9,8 +9,11 @@ import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.INNVILGET
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
+import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTaskPayload
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask.FerdigstillOppgaveTaskData
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
@@ -32,7 +35,9 @@ import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.ef.iverksett.Hendelse
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.simulering.Simuleringsoppsummering
@@ -56,6 +61,7 @@ internal class SendTilBeslutterStegTest {
     private val vedtakService = mockk<VedtakService>()
     private val simuleringService = mockk<SimuleringService>()
     private val tilbakekrevingService = mockk<TilbakekrevingService>()
+    private val vurderingService = mockk<VurderingService>()
     private val simuleringsoppsummering = Simuleringsoppsummering(perioder = listOf(),
                                                                   fomDatoNestePeriode = null,
                                                                   etterbetaling = BigDecimal.ZERO,
@@ -74,7 +80,8 @@ internal class SendTilBeslutterStegTest {
                                  vedtaksbrevRepository,
                                  vedtakService,
                                  simuleringService,
-                                 tilbakekrevingService)
+                                 tilbakekrevingService,
+                                 vurderingService)
     private val fagsak = Fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD,
                                 søkerIdenter = setOf(FagsakPerson(ident = "12345678901")))
     private val vedtaksbrev = Vedtaksbrev(behandlingId = UUID.randomUUID(),
@@ -91,7 +98,7 @@ internal class SendTilBeslutterStegTest {
                                         resultat = BehandlingResultat.IKKE_SATT,
                                         årsak = BehandlingÅrsak.SØKNAD)
 
-    private val revurdering = behandling.copy(type = BehandlingType.REVURDERING)
+    private val revurdering = behandling.copy(type = BehandlingType.REVURDERING, resultat = INNVILGET)
 
     private lateinit var taskSlot: MutableList<Task>
 
@@ -112,6 +119,30 @@ internal class SendTilBeslutterStegTest {
         every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev
         every { vedtaksbrevRepository.update(any()) } returns vedtaksbrev
 
+        every { vurderingService.erAlleVilkårOppfylt(any()) } returns true
+
+        every { vedtaksbrevRepository.existsById(any()) } returns true
+        every { simuleringService.hentLagretSimuleringsresultat(any()) } returns simuleringsoppsummering
+
+        every { tilbakekrevingService.harSaksbehandlerTattStillingTilTilbakekreving(any()) } returns true
+        every { tilbakekrevingService.finnesÅpenTilbakekrevingsBehandling(any()) } returns true
+    }
+
+    @Test
+    internal fun `Innvilget behandling - alt ok`() {
+        val innvilgetBehandling = behandling.copy(resultat = INNVILGET)
+        every { vedtakService.hentVedtak(any()) } returns lagVedtak(ResultatType.INNVILGE)
+        beslutteVedtakSteg.validerSteg(innvilgetBehandling)
+    }
+
+    @Test
+    internal fun `Innvilget behandling - IKKE ok hvis erAlleVilkårOppfylt false`() {
+        every { vurderingService.erAlleVilkårOppfylt(any()) } returns false
+        val innvilgetBehandling = behandling.copy(resultat = INNVILGET)
+        every { vedtakService.hentVedtak(any()) } returns lagVedtak(ResultatType.INNVILGE)
+        val frontendFeilmelding = assertThrows<Feil> { beslutteVedtakSteg.validerSteg(innvilgetBehandling) }.frontendFeilmelding
+        val forvetetFeilmelding = "Kan ikke innvilge hvis ikke alle vilkår er oppfylt for behandlingId: ${innvilgetBehandling.id}"
+        assertThat(frontendFeilmelding).isEqualTo(forvetetFeilmelding)
     }
 
     @Test
@@ -150,11 +181,19 @@ internal class SendTilBeslutterStegTest {
     @Test
     internal fun `Skal avslutte oppgave BehandleSak hvis den finnes`() {
         utførOgVerifiserKall(Oppgavetype.BehandleSak)
+        verifiserVedtattBehandlingsstatistikkTask()
     }
 
     @Test
     internal fun `Skal avslutte oppgave BehandleUnderkjentVedtak hvis den finnes`() {
         utførOgVerifiserKall(Oppgavetype.BehandleUnderkjentVedtak)
+        verifiserVedtattBehandlingsstatistikkTask()
+    }
+
+    private fun verifiserVedtattBehandlingsstatistikkTask() {
+        assertThat(taskSlot[2].type).isEqualTo(BehandlingsstatistikkTask.TYPE)
+        assertThat(objectMapper.readValue<BehandlingsstatistikkTaskPayload>(taskSlot[2].payload).hendelse)
+                .isEqualTo(Hendelse.VEDTATT)
     }
 
 
@@ -192,25 +231,26 @@ internal class SendTilBeslutterStegTest {
     // behandling og vedtak er av relevant type og
     // saksbehandler ikke har tatt stilling til tilbakekrevingsvarsel.
     private fun mockTilbakekrevingValideringsfeil() {
-        every { vedtaksbrevRepository.existsById(any()) } returns true
         // tilbakekrevingService.
-        every { vedtakService.hentVedtak(any()) } returns Vedtak(
-                resultatType = ResultatType.INNVILGE,
-                behandlingId = revurdering.id,
-                periodeBegrunnelse = null,
-                inntektBegrunnelse = null,
-                avslåBegrunnelse = null,
-                perioder = null,
-                inntekter = null,
-                saksbehandlerIdent = null,
-                opphørFom = null,
-                beslutterIdent = null,
-        )
+        every { vedtakService.hentVedtak(any()) } returns lagVedtak(ResultatType.INNVILGE)
         every { simuleringService.hentLagretSimuleringsresultat(any()) } returns simuleringsoppsummering.copy(feilutbetaling = BigDecimal(
                 1000))
 
         every { tilbakekrevingService.harSaksbehandlerTattStillingTilTilbakekreving(any()) } returns false
         every { tilbakekrevingService.finnesÅpenTilbakekrevingsBehandling(any()) } returns false
     }
+
+    private fun lagVedtak(resultatType: ResultatType = ResultatType.INNVILGE) = Vedtak(
+            resultatType = resultatType,
+            behandlingId = revurdering.id,
+            periodeBegrunnelse = null,
+            inntektBegrunnelse = null,
+            avslåBegrunnelse = null,
+            perioder = null,
+            inntekter = null,
+            saksbehandlerIdent = null,
+            opphørFom = null,
+            beslutterIdent = null,
+    )
 
 }

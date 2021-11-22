@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
+import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTaskPayload
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.PollStatusFraIverksettTask
@@ -38,6 +39,7 @@ import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.ef.iverksett.Hendelse
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.Task
@@ -56,7 +58,6 @@ internal class BeslutteVedtakStegTest {
     private val totrinnskontrollService = mockk<TotrinnskontrollService>(relaxed = true)
     private val oppgaveService = mockk<OppgaveService>()
     private val vedtaksbrevRepository = mockk<VedtaksbrevRepository>()
-    private val behandlingshistorikkService = mockk<BehandlingshistorikkService>()
     private val iverksettingDtoMapper = mockk<IverksettingDtoMapper>()
     private val iverksett = mockk<IverksettClient>()
     private val vedtakService = mockk<VedtakService>()
@@ -69,7 +70,6 @@ internal class BeslutteVedtakStegTest {
                                                         iverksettingDtoMapper,
                                                         totrinnskontrollService,
                                                         vedtaksbrevRepository,
-                                                        behandlingshistorikkService,
                                                         behandlingService,
                                                         vedtakService)
     private val vedtaksbrev = Vedtaksbrev(UUID.randomUUID(),
@@ -133,16 +133,14 @@ internal class BeslutteVedtakStegTest {
         every { behandlingService.oppdaterResultatPåBehandling(any(), any()) } answers {
             behandling(fagsak, resultat = secondArg())
         }
-        every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any(), any()) } returns Behandlingshistorikk(
-                behandlingId = behandlingId,
-                steg = StegType.SEND_TIL_BESLUTTER,
-                opprettetAvNavn = "sb sb",
-                opprettetAv = "saksbehandler1")
+
         val nesteSteg = utførTotrinnskontroll(godkjent = true)
         assertThat(nesteSteg).isEqualTo(StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT)
         assertThat(taskSlot[0].type).isEqualTo(FerdigstillOppgaveTask.TYPE)
         assertThat(taskSlot[1].type).isEqualTo(PollStatusFraIverksettTask.TYPE)
         assertThat(taskSlot[2].type).isEqualTo(BehandlingsstatistikkTask.TYPE)
+        assertThat(objectMapper.readValue<BehandlingsstatistikkTaskPayload>(taskSlot[2].payload).hendelse)
+                .isEqualTo(Hendelse.BESLUTTET)
         verify(exactly = 1) { behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.INNVILGET) }
     }
 

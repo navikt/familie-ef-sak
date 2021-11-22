@@ -93,7 +93,7 @@ class VurderingStegService(private val behandlingService: BehandlingService,
             }
         }
 
-        if (behandling.steg == StegType.VILKÅR && OppdaterVilkår.erAlleVilkårVurdert(vilkårsresultat)) {
+        if (behandling.steg == StegType.VILKÅR && OppdaterVilkår.erAlleVilkårTattStillingTil(vilkårsresultat)) {
             stegService.håndterVilkår(behandling).id
         } else if (behandling.steg != StegType.VILKÅR && vilkårsresultat.any { it == Vilkårsresultat.IKKE_TATT_STILLING_TIL }) {
             stegService.resetSteg(behandling.id, StegType.VILKÅR)

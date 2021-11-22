@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.behandlingsflyt.task
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService.Companion.MASKINELL_JOURNALFOERENDE_ENHET
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType.FØRSTEGANGSBEHANDLING
@@ -71,8 +72,8 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
                 hendelse = hendelse,
                 behandlingResultat = behandling.resultat.name,
                 resultatBegrunnelse = resultatBegrunnelse,
-                opprettetEnhet = sisteOppgaveForBehandling.opprettetAvEnhetsnr ?: "9999",
-                ansvarligEnhet = sisteOppgaveForBehandling.tildeltEnhetsnr ?: "9999",
+                opprettetEnhet = sisteOppgaveForBehandling.opprettetAvEnhetsnr ?: MASKINELL_JOURNALFOERENDE_ENHET,
+                ansvarligEnhet = sisteOppgaveForBehandling.tildeltEnhetsnr ?: MASKINELL_JOURNALFOERENDE_ENHET,
                 strengtFortroligAdresse = søker.adressebeskyttelse?.erStrengtFortrolig() ?: false,
                 stønadstype = StønadType.valueOf(fagsak.stønadstype.name),
                 behandlingstype = BehandlingType.valueOf(behandling.type.name),
@@ -142,13 +143,10 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
                             hendelseTidspunkt = LocalDateTime.now(),
                             gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler(true))
 
-        fun opprettVedtattTask(behandlingId: UUID,
-                               hendelseTidspunkt: LocalDateTime,
-                               oppgaveId: Long?): Task =
+        fun opprettVedtattTask(behandlingId: UUID): Task =
                 opprettTask(behandlingId = behandlingId,
                             hendelse = Hendelse.VEDTATT,
-                            hendelseTidspunkt = hendelseTidspunkt,
-                            oppgaveId = oppgaveId)
+                            hendelseTidspunkt = LocalDateTime.now())
 
         fun opprettBesluttetTask(behandlingId: UUID,
                                  oppgaveId: Long?): Task =
