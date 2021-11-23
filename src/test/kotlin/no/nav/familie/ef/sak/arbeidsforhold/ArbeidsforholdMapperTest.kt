@@ -1,13 +1,13 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.arbeidsforhold
 
-import no.nav.familie.ef.sak.arbeidsforhold.ekstern.Ansettelsesperiode
-import no.nav.familie.ef.sak.arbeidsforhold.ekstern.Arbeidsavtaler
-import no.nav.familie.ef.sak.arbeidsforhold.ekstern.Arbeidsforhold
-import no.nav.familie.ef.sak.arbeidsforhold.ekstern.Arbeidsgiver
-import no.nav.familie.ef.sak.arbeidsforhold.ekstern.ArbeidsgiverType
-import no.nav.familie.ef.sak.arbeidsforhold.ekstern.Arbeidstaker
-import no.nav.familie.ef.sak.arbeidsforhold.ekstern.Periode
 import no.nav.familie.ef.sak.arbeidsforhold.tilDto
+import no.nav.familie.kontrakter.felles.arbeidsforhold.Ansettelsesperiode
+import no.nav.familie.kontrakter.felles.arbeidsforhold.Arbeidsavtaler
+import no.nav.familie.kontrakter.felles.arbeidsforhold.Arbeidsforhold
+import no.nav.familie.kontrakter.felles.arbeidsforhold.Arbeidsgiver
+import no.nav.familie.kontrakter.felles.arbeidsforhold.ArbeidsgiverType
+import no.nav.familie.kontrakter.felles.arbeidsforhold.Arbeidstaker
+import no.nav.familie.kontrakter.felles.arbeidsforhold.Periode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

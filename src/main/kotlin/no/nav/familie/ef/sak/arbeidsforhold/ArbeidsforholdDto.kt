@@ -1,8 +1,7 @@
 package no.nav.familie.ef.sak.arbeidsforhold
 
-import no.nav.familie.ef.sak.arbeidsforhold.ekstern.ArbeidsgiverType
-import no.nav.familie.ef.sak.arbeidsforhold.ekstern.Periode
-import java.time.LocalDate
+import no.nav.familie.kontrakter.felles.arbeidsforhold.ArbeidsgiverType
+import no.nav.familie.kontrakter.felles.arbeidsforhold.Periode
 
 class ArbeidsforholdDto(
     val navArbeidsforholdId: Long? = null,

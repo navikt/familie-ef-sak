@@ -2,14 +2,14 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.infrastruktur.config
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ef.sak.arbeidsforhold.ekstern.Ansettelsesperiode
-import no.nav.familie.ef.sak.arbeidsforhold.ekstern.Arbeidsavtaler
-import no.nav.familie.ef.sak.arbeidsforhold.ekstern.Arbeidsforhold
 import no.nav.familie.ef.sak.arbeidsforhold.ekstern.ArbeidsforholdClient
-import no.nav.familie.ef.sak.arbeidsforhold.ekstern.Arbeidsgiver
-import no.nav.familie.ef.sak.arbeidsforhold.ekstern.ArbeidsgiverType
-import no.nav.familie.ef.sak.arbeidsforhold.ekstern.Arbeidstaker
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.arbeidsforhold.Ansettelsesperiode
+import no.nav.familie.kontrakter.felles.arbeidsforhold.Arbeidsavtaler
+import no.nav.familie.kontrakter.felles.arbeidsforhold.Arbeidsforhold
+import no.nav.familie.kontrakter.felles.arbeidsforhold.Arbeidsgiver
+import no.nav.familie.kontrakter.felles.arbeidsforhold.ArbeidsgiverType
+import no.nav.familie.kontrakter.felles.arbeidsforhold.Arbeidstaker
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
