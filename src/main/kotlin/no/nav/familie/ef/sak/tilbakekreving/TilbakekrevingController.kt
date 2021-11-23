@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.tilbakekreving
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.tilbakekreving.domain.tilDto
 import no.nav.familie.ef.sak.tilbakekreving.dto.TilbakekrevingDto
+import no.nav.familie.ef.sak.tilbakekreving.dto.VarseltekstDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
@@ -44,6 +45,19 @@ class TilbakekrevingController(private val tilgangService: TilgangService,
     fun hentTilbakekekrevingBehandlinger(@PathVariable fagsakId: UUID): Ressurs<List<TilbakekrevingBehandling>> {
         tilgangService.validerTilgangTilFagsak(fagsakId)
         return Ressurs.success(tilbakekrevingService.hentTilbakekrevingBehandlinger(fagsakId))
+    }
+
+    @GetMapping("/{behandlingId}/brev")
+    fun genererBrevMedEskisterendeVarseltekst(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
+        tilgangService.validerTilgangTilBehandling(behandlingId)
+        return Ressurs.success(tilbakekrevingService.genererBrevMedVarseltekstFraEksisterendeTilbakekreving(behandlingId))
+    }
+
+    @PostMapping("/{behandlingId}/brev/generer")
+    fun genererTilbakekekrevingBrevMedVarseltekst(@PathVariable behandlingId: UUID,
+                                                  @RequestBody varseltekstDto: VarseltekstDto): Ressurs<ByteArray> {
+        tilgangService.validerTilgangTilBehandling(behandlingId)
+        return Ressurs.success(tilbakekrevingService.genererBrev(behandlingId, varseltekstDto.varseltekst))
     }
 
 }

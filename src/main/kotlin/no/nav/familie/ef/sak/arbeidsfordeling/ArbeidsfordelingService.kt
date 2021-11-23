@@ -15,7 +15,6 @@ class ArbeidsfordelingService(private val personService: PersonService,
                               private val cacheManager: CacheManager) {
 
     companion object {
-
         const val MASKINELL_JOURNALFOERENDE_ENHET = "9999"
     }
 
