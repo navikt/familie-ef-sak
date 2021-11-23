@@ -25,9 +25,7 @@ class TilkjentYtelseService(private val behandlingService: BehandlingService,
     }
 
     fun opprettTilkjentYtelse(nyTilkjentYtelse: TilkjentYtelse): TilkjentYtelse {
-        val andelerMedGodtykkligKildeId =
-                nyTilkjentYtelse.andelerTilkjentYtelse.map { it.copy(kildeBehandlingId = nyTilkjentYtelse.behandlingId) }
-        return tilkjentYtelseRepository.insert(nyTilkjentYtelse.copy(andelerTilkjentYtelse = andelerMedGodtykkligKildeId))
+        return tilkjentYtelseRepository.insert(nyTilkjentYtelse)
     }
 
     fun harLøpendeUtbetaling(behandlingId: UUID): Boolean {
