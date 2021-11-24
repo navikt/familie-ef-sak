@@ -2,9 +2,13 @@ package no.nav.familie.ef.sak.tilkjentytelse
 
 import no.nav.familie.ef.sak.beregning.Beløpsperiode
 import no.nav.familie.ef.sak.beregning.Beregningsgrunnlag
+import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.dto.Periode
+import no.nav.familie.ef.sak.iverksett.tilIverksettDto
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
+import no.nav.familie.kontrakter.ef.felles.StønadType
+import no.nav.familie.kontrakter.ef.iverksett.TilkjentYtelseMedMetadata
 
 fun TilkjentYtelse.tilDto(): TilkjentYtelseDto {
     return TilkjentYtelseDto(behandlingId = this.behandlingId,
@@ -32,3 +36,18 @@ fun TilkjentYtelse.tilBeløpsperiode(): List<Beløpsperiode> {
                       beløpFørSamordning = andel.beløp.plus(andel.samordningsfradrag).toBigDecimal())
     }
 }
+
+fun TilkjentYtelse.tilTilkjentYtelseMedMetaData(saksbehandlerId: String,
+                                                eksternBehandlingId: Long,
+                                                stønadstype: Stønadstype,
+                                                eksternFagsakId: Long): TilkjentYtelseMedMetadata {
+    return TilkjentYtelseMedMetadata(tilkjentYtelse = this.tilIverksettDto(),
+                                     saksbehandlerId = saksbehandlerId,
+                                     eksternBehandlingId = eksternBehandlingId,
+                                     stønadstype = StønadType.valueOf(stønadstype.name),
+                                     eksternFagsakId = eksternFagsakId,
+                                     personIdent = this.personident,
+                                     behandlingId = this.behandlingId,
+                                     vedtaksdato = this.vedtakstidspunkt.toLocalDate())
+}
+

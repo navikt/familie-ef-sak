@@ -2,15 +2,20 @@ package no.nav.familie.ef.sak.service
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.arbeidsfordeling.Arbeidsfordelingsenhet
+import no.nav.familie.ef.sak.infotrygd.InfotrygdService
+import no.nav.familie.ef.sak.infrastruktur.config.InfotrygdReplikaMock
 import no.nav.familie.ef.sak.infrastruktur.config.KodeverkServiceMock
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRegisterService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseMapper
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.InnflyttingUtflyttingMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.PersonopplysningerMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.StatsborgerskapMapper
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
@@ -19,6 +24,7 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager
 
 internal class PersonopplysningerServiceTest {
 
@@ -33,24 +39,30 @@ internal class PersonopplysningerServiceTest {
 
     @BeforeEach
     internal fun setUp() {
-        personopplysningerIntegrasjonerClient = mockk()
+        personopplysningerIntegrasjonerClient = mockk(relaxed = true)
         adresseMapper = AdresseMapper(kodeverkService)
-        arbeidsfordelingService = mockk()
+        arbeidsfordelingService = mockk(relaxed = true)
         søknadService = mockk()
-
         val pdlClient = PdlClientConfig().pdlClient()
-        grunnlagsdataService = GrunnlagsdataService(pdlClient, mockk(), søknadService, personopplysningerIntegrasjonerClient)
+
+        val infotrygdService = InfotrygdService(InfotrygdReplikaMock().infotrygdReplikaClient(), pdlClient)
+        val grunnlagsdataRegisterService = GrunnlagsdataRegisterService(pdlClient,
+                                                                        personopplysningerIntegrasjonerClient,
+                                                                        infotrygdService)
+
+        grunnlagsdataService = GrunnlagsdataService(mockk(), søknadService, grunnlagsdataRegisterService)
         val personopplysningerMapper =
                 PersonopplysningerMapper(adresseMapper,
                                          StatsborgerskapMapper(kodeverkService),
-                                         arbeidsfordelingService,
-                                         kodeverkService)
+                                         InnflyttingUtflyttingMapper(kodeverkService),
+                                         arbeidsfordelingService)
         val personService = PersonService(pdlClient)
         personopplysningerService = PersonopplysningerService(personService,
                                                               søknadService,
                                                               personopplysningerIntegrasjonerClient,
                                                               grunnlagsdataService,
-                                                              personopplysningerMapper)
+                                                              personopplysningerMapper,
+                                                              ConcurrentMapCacheManager())
     }
 
     @Test
@@ -66,7 +78,17 @@ internal class PersonopplysningerServiceTest {
                 .isEqualToIgnoringWhitespace(readFile("/json/personopplysningerDto.json"))
     }
 
+    @Test
+    internal fun `skal cache egenAnsatt når man kaller med samme ident`() {
+        personopplysningerService.hentPersonopplysninger("1")
+        personopplysningerService.hentPersonopplysninger("1")
+        verify(exactly = 1) { personopplysningerIntegrasjonerClient.egenAnsatt(any()) }
+
+        personopplysningerService.hentPersonopplysninger("2")
+        verify(exactly = 2) { personopplysningerIntegrasjonerClient.egenAnsatt(any()) }
+    }
+
     private fun readFile(filnavn: String): String {
-        return this::class.java.getResource(filnavn).readText()
+        return this::class.java.getResource(filnavn)!!.readText()
     }
 }

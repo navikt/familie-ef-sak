@@ -1,4 +1,4 @@
-FROM navikt/java:11
+FROM navikt/java:17
 COPY --from=redboxoss/scuttle:latest /scuttle /bin/scuttle
 
 ENV ENVOY_ADMIN_API=http://127.0.0.1:15000

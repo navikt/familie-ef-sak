@@ -125,7 +125,10 @@ class PdlClientConfig {
                          telefonnummer = listOf(Telefonnummer(landskode = "+47", nummer = "98999923", prioritet = 1)),
                          tilrettelagtKommunikasjon = listOf(),
                          innflyttingTilNorge = listOf(InnflyttingTilNorge("SWE", "Stockholm", folkeregistermetadata)),
-                         utflyttingFraNorge = listOf(UtflyttingFraNorge("SWE", "Stockholm", folkeregistermetadata)),
+                         utflyttingFraNorge = listOf(UtflyttingFraNorge(tilflyttingsland = "SWE",
+                                                                        tilflyttingsstedIUtlandet = "Stockholm",
+                                                                        utflyttingsdato = LocalDate.of(2021, 1, 1),
+                                                                        folkeregistermetadata = folkeregistermetadata)),
                          vergemaalEllerFremtidsfullmakt = vergemaalEllerFremtidsfullmakt()
                 )
 
@@ -223,7 +226,7 @@ class PdlClientConfig {
                 listOf(Sivilstand(type = Sivilstandstype.GIFT,
                                   gyldigFraOgMed = startdato,
                                   relatertVedSivilstand = "11111122222",
-                                  bekreftelsesdato = "2020-01-01",
+                                  bekreftelsesdato = LocalDate.of(2020,1,1),
                                   metadata = metadataGjeldende))
 
         private fun fullmakter(): List<Fullmakt> =

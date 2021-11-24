@@ -15,6 +15,8 @@ data class Vedtak(@Id
                   val inntektBegrunnelse: String? = null,
                   @Column("avsla_begrunnelse")
                   val avslåBegrunnelse: String? = null,
+                  @Column("avsla_arsak")
+                  val avslåÅrsak: AvslagÅrsak? = null,
                   val perioder: PeriodeWrapper? = null,
                   val inntekter: InntektWrapper? = null,
                   val saksbehandlerIdent: String? = null,
@@ -59,4 +61,11 @@ enum class AktivitetType {
     FORLENGELSE_STØNAD_PÅVENTE_TILSYNSORDNING,
     FORLENGELSE_STØNAD_PÅVENTE_UTDANNING,
     FORLENGELSE_STØNAD_UT_SKOLEÅRET,
+}
+
+enum class AvslagÅrsak {
+    VILKÅR_IKKE_OPPFYLT,
+    BARN_OVER_ÅTTE_ÅR,
+    STØNADSTID_OPPBRUKT,
+    MANGLENDE_OPPLYSNINGER,
 }

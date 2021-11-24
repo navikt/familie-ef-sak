@@ -24,6 +24,7 @@ import no.nav.familie.ef.sak.repository.vedtak
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.vedtak.VedtakRepository
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
+import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.TotrinnkontrollStatus
 import no.nav.familie.ef.sak.vedtak.dto.TotrinnskontrollStatusDto
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
@@ -175,7 +176,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
                                   steg: StegType = StegType.SEND_TIL_BESLUTTER) {
         val lagretBehandling = behandlingRepository.insert(behandling.copy(status = status,
                                                                            steg = steg))
-        vedtakRepository.insert(vedtak(lagretBehandling.id))
+        vedtakRepository.insert(vedtak(lagretBehandling.id, ResultatType.AVSLÅ))
         tilkjentYtelseRepository.insert(tilkjentYtelse(behandlingId = lagretBehandling.id, fagsak.hentAktivIdent()))
         søknadService.lagreSøknadForOvergangsstønad(Testsøknad.søknadOvergangsstønad, lagretBehandling.id, fagsak.id, "1")
         grunnlagsdataService.opprettGrunnlagsdata(lagretBehandling.id)

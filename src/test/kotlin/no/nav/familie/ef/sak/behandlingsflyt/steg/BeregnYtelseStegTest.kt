@@ -20,6 +20,7 @@ import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.domain.AvslagÅrsak
 import no.nav.familie.ef.sak.vedtak.dto.Avslå
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
 import no.nav.familie.ef.sak.vedtak.dto.Opphør
@@ -317,7 +318,7 @@ internal class BeregnYtelseStegTest {
             every { simuleringService.slettSimuleringForBehandling(any()) } just Runs
             every { tilbakekrevingService.slettTilbakekreving(any()) } just Runs
             utførSteg(type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                      vedtak = Avslå(avslåBegrunnelse = ""))
+                      vedtak = Avslå(avslåBegrunnelse = "", avslåÅrsak = AvslagÅrsak.VILKÅR_IKKE_OPPFYLT))
 
             verify { tilbakekrevingService.slettTilbakekreving(any()) }
             verify { simuleringService.slettSimuleringForBehandling(any()) }

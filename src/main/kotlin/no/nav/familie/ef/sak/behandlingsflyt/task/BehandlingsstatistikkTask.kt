@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.behandlingsflyt.task
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService.Companion.MASKINELL_JOURNALFOERENDE_ENHET
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType.FØRSTEGANGSBEHANDLING
@@ -68,11 +69,12 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
                 gjeldendeSaksbehandlerId = finnSaksbehandler(hendelse, vedtak, gjeldendeSaksbehandler),
                 eksternFagsakId = fagsak.eksternId.id.toString(),
                 hendelseTidspunkt = hendelseTidspunkt.atZone(zoneIdOslo),
+                behandlingOpprettetTidspunkt = behandling.sporbar.opprettetTid.atZone(zoneIdOslo),
                 hendelse = hendelse,
                 behandlingResultat = behandling.resultat.name,
                 resultatBegrunnelse = resultatBegrunnelse,
-                opprettetEnhet = sisteOppgaveForBehandling.opprettetAvEnhetsnr ?: "9999",
-                ansvarligEnhet = sisteOppgaveForBehandling.tildeltEnhetsnr ?: "9999",
+                opprettetEnhet = sisteOppgaveForBehandling.opprettetAvEnhetsnr ?: MASKINELL_JOURNALFOERENDE_ENHET,
+                ansvarligEnhet = sisteOppgaveForBehandling.tildeltEnhetsnr ?: MASKINELL_JOURNALFOERENDE_ENHET,
                 strengtFortroligAdresse = søker.adressebeskyttelse?.erStrengtFortrolig() ?: false,
                 stønadstype = StønadType.valueOf(fagsak.stønadstype.name),
                 behandlingstype = BehandlingType.valueOf(behandling.type.name),
@@ -107,7 +109,7 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
         return when (hendelse) {
             Hendelse.MOTTATT, Hendelse.PÅBEGYNT, Hendelse.VENTER -> gjeldendeSaksbehandler
                                                                     ?: error("Mangler saksbehandler for hendelse")
-            Hendelse.VEDTATT -> vedtak?.saksbehandlerIdent ?: error("Mangler saksbehandler på vedtaket")
+            Hendelse.VEDTATT, Hendelse.HENLAGT -> vedtak?.saksbehandlerIdent ?: error("Mangler saksbehandler på vedtaket")
             Hendelse.BESLUTTET, Hendelse.FERDIG -> vedtak?.beslutterIdent ?: error("Mangler beslutter på vedtaket")
         }
     }
@@ -115,7 +117,7 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
     private fun finnHenvendelsestidspunkt(behandling: Behandling): LocalDateTime {
         return when (behandling.type) {
             FØRSTEGANGSBEHANDLING -> søknadService.finnDatoMottattForSøknad(behandling.id)
-            REVURDERING -> LocalDateTime.now()
+            REVURDERING -> behandling.sporbar.opprettetTid
             else -> error("Støtter ikke uthenting av mottatt-dato for ${behandling.type}")
         }
     }
@@ -142,13 +144,10 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
                             hendelseTidspunkt = LocalDateTime.now(),
                             gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler(true))
 
-        fun opprettVedtattTask(behandlingId: UUID,
-                               hendelseTidspunkt: LocalDateTime,
-                               oppgaveId: Long?): Task =
+        fun opprettVedtattTask(behandlingId: UUID): Task =
                 opprettTask(behandlingId = behandlingId,
                             hendelse = Hendelse.VEDTATT,
-                            hendelseTidspunkt = hendelseTidspunkt,
-                            oppgaveId = oppgaveId)
+                            hendelseTidspunkt = LocalDateTime.now())
 
         fun opprettBesluttetTask(behandlingId: UUID,
                                  oppgaveId: Long?): Task =

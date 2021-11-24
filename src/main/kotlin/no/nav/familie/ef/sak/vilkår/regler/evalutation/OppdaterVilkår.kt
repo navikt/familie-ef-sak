@@ -81,8 +81,11 @@ object OppdaterVilkår {
         return vilkårsvurdering.delvilkårsvurdering.copy(delvilkårsvurderinger = delvilkårsvurderinger)
     }
 
-    fun erAlleVilkårVurdert(vilkårsresultat: List<Vilkårsresultat>): Boolean {
-        return if (vilkårsresultat.all { it == Vilkårsresultat.OPPFYLT }) {
+    /**
+     * Et vilkår skal anses som vurdert dersom det er oppfylt eller saksbehandler har valgt å ikke vurdere det
+     */
+    fun erAlleVilkårTattStillingTil(vilkårsresultat: List<Vilkårsresultat>): Boolean {
+        return if (vilkårsresultat.all { it == Vilkårsresultat.OPPFYLT || it == Vilkårsresultat.SKAL_IKKE_VURDERES }) {
             true
         } else {
             harNoenIkkeOppfyltOgRestenIkkeOppfyltEllerOppfyltEllerSkalIkkevurderes(vilkårsresultat)
@@ -103,6 +106,23 @@ object OppdaterVilkår {
             else -> throw Feil("Utled resultat for aleneomsorg - kombinasjon av resultat er ikke behandlet: " +
                                "${value.map { it.resultat }}")
         }
+    }
+
+    fun erAlleVilkårsvurderingerOppfylt(vilkårsvurderinger: List<Vilkårsvurdering>): Boolean {
+        val inneholderAlleTyperVilkår = vilkårsvurderinger.map { it.type }.containsAll(VilkårType.hentVilkår())
+        val vilkårsresultat = utledVilkårsresultat(vilkårsvurderinger)
+        return inneholderAlleTyperVilkår && vilkårsresultat.all { it == Vilkårsresultat.OPPFYLT }
+    }
+
+    private fun utledVilkårsresultat(lagredeVilkårsvurderinger: List<Vilkårsvurdering>): List<Vilkårsresultat> {
+        val vilkårsresultat = lagredeVilkårsvurderinger.groupBy { it.type }.map {
+            if (it.key == VilkårType.ALENEOMSORG) {
+                utledResultatForAleneomsorg(it.value)
+            } else {
+                it.value.single().resultat
+            }
+        }
+        return vilkårsresultat
     }
 
     /**
@@ -141,5 +161,6 @@ object OppdaterVilkår {
                                 barnId = barnId,
                                 delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurdering))
     }
+
 
 }

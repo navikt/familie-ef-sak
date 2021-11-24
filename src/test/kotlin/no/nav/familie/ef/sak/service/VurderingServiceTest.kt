@@ -20,6 +20,8 @@ import no.nav.familie.ef.sak.vilkår.DelvilkårsvurderingWrapper
 import no.nav.familie.ef.sak.vilkår.VilkårGrunnlagService
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
+import no.nav.familie.ef.sak.vilkår.Vilkårsresultat.OPPFYLT
+import no.nav.familie.ef.sak.vilkår.Vilkårsresultat.SKAL_IKKE_VURDERES
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.vilkår.VurderingService
@@ -69,6 +71,7 @@ internal class VurderingServiceTest {
         val sivilstand = SivilstandInngangsvilkårDto(mockk(relaxed = true),
                                                      SivilstandRegistergrunnlagDto(Sivilstandstype.GIFT, "Navn", null))
         every { vilkårGrunnlagService.hentGrunnlag(any(), any()) } returns VilkårGrunnlagDto(mockk(relaxed = true),
+                                                                                             mockk(relaxed = true),
                                                                                              sivilstand,
                                                                                              mockk(relaxed = true),
                                                                                              mockk(relaxed = true),
@@ -101,7 +104,7 @@ internal class VurderingServiceTest {
     @Test
     fun `skal ikke opprette nye Vilkårsvurderinger for behandlinger som allerede har vurderinger`() {
         every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns
-                listOf(vilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT,
+                listOf(vilkårsvurdering(resultat = OPPFYLT,
                                         type = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
                                         behandlingId = behandlingId))
 
@@ -136,7 +139,7 @@ internal class VurderingServiceTest {
 
     @Test
     internal fun `skal ikke opprette vilkårsvurderinger hvis behandling er låst for videre vurdering`() {
-        val vilkårsvurderinger = listOf(vilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT,
+        val vilkårsvurderinger = listOf(vilkårsvurdering(resultat = OPPFYLT,
                                                          type = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
                                                          behandlingId = behandlingId))
         every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns vilkårsvurderinger
@@ -146,6 +149,52 @@ internal class VurderingServiceTest {
         assertThat(alleVilkårsvurderinger).hasSize(1)
         verify(exactly = 0) { vilkårsvurderingRepository.insertAll(any()) }
         assertThat(alleVilkårsvurderinger.map { it.id }).isEqualTo(vilkårsvurderinger.map { it.id })
+    }
+
+
+    @Test
+    internal fun `Skal returnere ikke oppfylt hvis vilkårsvurderinger ikke inneholder alle vilkår`() {
+        val vilkårsvurderinger = listOf(vilkårsvurdering(resultat = OPPFYLT,
+                                                         type = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
+                                                         behandlingId = behandlingId))
+        every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns vilkårsvurderinger
+        val erAlleVilkårOppfylt = vurderingService.erAlleVilkårOppfylt(behandlingId)
+        assertThat(erAlleVilkårOppfylt).isFalse
+    }
+
+    @Test
+    internal fun `Skal returnere oppfylt hvis alle vilkårsvurderinger er oppfylt`() {
+        val vilkårsvurderinger = lagVilkårsvurderinger(behandlingId, OPPFYLT)
+        every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns vilkårsvurderinger
+        val erAlleVilkårOppfylt = vurderingService.erAlleVilkårOppfylt(behandlingId)
+        assertThat(erAlleVilkårOppfylt).isTrue
+    }
+
+    @Test
+    internal fun `Skal returnere ikke oppfylt hvis noen vurderinger er SKAL_IKKE_VURDERES`() {
+        val vilkårsvurderinger = lagVilkårsvurderingerMedResultat()
+        // Guard
+        assertThat((vilkårsvurderinger.map { it.type }.containsAll(VilkårType.hentVilkår()))).isTrue()
+        every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns vilkårsvurderinger
+
+
+        val erAlleVilkårOppfylt = vurderingService.erAlleVilkårOppfylt(behandlingId)
+        assertThat(erAlleVilkårOppfylt).isFalse
+    }
+
+    private fun lagVilkårsvurderingerMedResultat(resultat1: Vilkårsresultat = OPPFYLT,
+                                                 resultat2: Vilkårsresultat = SKAL_IKKE_VURDERES) =
+            lagVilkårsvurderinger(behandlingId, resultat1).subList(fromIndex = 0, toIndex = 3) +
+            lagVilkårsvurderinger(behandlingId, resultat2).subList(fromIndex = 3, toIndex = 10)
+
+    private fun lagVilkårsvurderinger(behandlingId: UUID,
+                                      resultat: Vilkårsresultat = OPPFYLT): List<Vilkårsvurdering> {
+        return VilkårType.hentVilkår().map {
+            vilkårsvurdering(behandlingId = behandlingId,
+                             resultat = resultat,
+                             type = it,
+                             delvilkårsvurdering = listOf())
+        }
     }
 
 }

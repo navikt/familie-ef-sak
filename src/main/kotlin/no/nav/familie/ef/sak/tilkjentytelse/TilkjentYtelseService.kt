@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.iverksett.tilIverksettDto
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkBeregner
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkDto
+import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.kontrakter.ef.iverksett.KonsistensavstemmingTilkjentYtelseDto
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -15,6 +16,7 @@ import java.util.UUID
 
 @Service
 class TilkjentYtelseService(private val behandlingService: BehandlingService,
+                            private val vedtakService: VedtakService,
                             private val tilkjentYtelseRepository: TilkjentYtelseRepository) {
 
     fun hentForBehandling(behandlingId: UUID): TilkjentYtelse {
@@ -23,9 +25,7 @@ class TilkjentYtelseService(private val behandlingService: BehandlingService,
     }
 
     fun opprettTilkjentYtelse(nyTilkjentYtelse: TilkjentYtelse): TilkjentYtelse {
-        val andelerMedGodtykkligKildeId =
-                nyTilkjentYtelse.andelerTilkjentYtelse.map { it.copy(kildeBehandlingId = nyTilkjentYtelse.behandlingId) }
-        return tilkjentYtelseRepository.insert(nyTilkjentYtelse.copy(andelerTilkjentYtelse = andelerMedGodtykkligKildeId))
+        return tilkjentYtelseRepository.insert(nyTilkjentYtelse)
     }
 
     fun harLøpendeUtbetaling(behandlingId: UUID): Boolean {
@@ -54,6 +54,7 @@ class TilkjentYtelseService(private val behandlingService: BehandlingService,
                             ?: error("Finner ikke eksterne id'er til behandling=${tilkjentYtelse.behandlingId}")
             val andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse
                     .filter { it.stønadTom.isEqualOrAfter(datoForAvstemming) }
+                    .filter { it.beløp > 0 }
                     .map { it.tilIverksettDto() }
             KonsistensavstemmingTilkjentYtelseDto(behandlingId = tilkjentYtelse.behandlingId,
                                                   eksternBehandlingId = eksternId.eksternBehandlingId,
@@ -72,7 +73,10 @@ class TilkjentYtelseService(private val behandlingService: BehandlingService,
 
     fun hentHistorikk(fagsakId: UUID): List<AndelHistorikkDto> {
         val tilkjenteYtelser = tilkjentYtelseRepository.finnAlleIverksatteForFagsak(fagsakId)
-        return AndelHistorikkBeregner.lagHistorikk(tilkjenteYtelser)
+        val behandlingIder = tilkjenteYtelser.map { it.behandlingId }.toSet()
+        val vedtakForBehandlinger = vedtakService.hentVedtakForBehandlinger(behandlingIder)
+        val behandlinger = behandlingService.hentBehandlinger(behandlingIder)
+        return AndelHistorikkBeregner.lagHistorikk(tilkjenteYtelser, vedtakForBehandlinger, behandlinger)
     }
 
 }

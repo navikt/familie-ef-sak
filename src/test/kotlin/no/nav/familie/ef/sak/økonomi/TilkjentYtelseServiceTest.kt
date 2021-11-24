@@ -21,6 +21,7 @@ class TilkjentYtelseServiceTest {
     private val behandlingService = mockk<BehandlingService>()
 
     private val tilkjentYtelseService = TilkjentYtelseService(behandlingService = behandlingService,
+                                                              vedtakService = mockk(),
                                                               tilkjentYtelseRepository = tilkjentYtelseRepository)
 
     private val datoForAvstemming = LocalDate.of(2021, 2, 1)
@@ -35,6 +36,22 @@ class TilkjentYtelseServiceTest {
     @BeforeEach
     internal fun setUp() {
         every { behandlingService.finnSisteIverksatteBehandlinger(any()) } returns setOf(behandling.id)
+    }
+
+    @Test
+    internal fun `konsistensavstemming - filtrer bort andeler som har 0-beløp`() {
+        val andelerTilkjentYtelse = listOf(andel2.copy(beløp = 0), andel3)
+        val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(behandling).copy(andelerTilkjentYtelse = andelerTilkjentYtelse)
+
+        every { behandlingService.hentEksterneIder(setOf(behandling.id)) } returns setOf(EksternId(behandling.id, 1, 1))
+        every {
+            tilkjentYtelseRepository.finnTilkjentYtelserTilKonsistensavstemming(setOf(behandling.id), any())
+        } returns listOf(tilkjentYtelse)
+
+        val tilkjentYtelser = tilkjentYtelseService.finnTilkjentYtelserTilKonsistensavstemming(stønadstype, datoForAvstemming)
+        assertThat(tilkjentYtelser).hasSize(1)
+        assertThat(tilkjentYtelser[0].andelerTilkjentYtelse).hasSize(1)
+        assertThat(tilkjentYtelser[0].andelerTilkjentYtelse.map { it.beløp }).containsExactlyInAnyOrder(3)
     }
 
     @Test

@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.vilkår.dto.VilkårGrunnlagDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.tilDto
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
+import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår.opprettNyeVilkårsvurderinger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -72,4 +73,10 @@ class VurderingService(private val behandlingService: BehandlingService,
         }
         vilkårsvurderingRepository.insertAll(vurderingerKopi)
     }
+
+    fun erAlleVilkårOppfylt(behandlingId: UUID): Boolean {
+        val lagredeVilkårsvurderinger: List<Vilkårsvurdering> = vilkårsvurderingRepository.findByBehandlingId(behandlingId)
+        return OppdaterVilkår.erAlleVilkårsvurderingerOppfylt(lagredeVilkårsvurderinger)
+    }
+
 }

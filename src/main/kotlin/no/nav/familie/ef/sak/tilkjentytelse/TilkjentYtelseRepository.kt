@@ -32,7 +32,9 @@ interface TilkjentYtelseRepository : RepositoryInterface<TilkjentYtelse, UUID>, 
             JOIN behandling b ON b.id = ty.behandling_id
         WHERE ty.behandling_id IN (:behandlingIder) 
          AND EXISTS (SELECT 1 FROM andel_tilkjent_ytelse aty 
-                        WHERE ty.id = aty.tilkjent_ytelse AND aty.stonad_tom >= :datoForAvstemming)
+                        WHERE ty.id = aty.tilkjent_ytelse
+                         AND aty.stonad_tom >= :datoForAvstemming
+                         AND aty.belop > 0)
           """)
     fun finnTilkjentYtelserTilKonsistensavstemming(behandlingIder: Set<UUID>, datoForAvstemming: LocalDate): List<TilkjentYtelse>
 

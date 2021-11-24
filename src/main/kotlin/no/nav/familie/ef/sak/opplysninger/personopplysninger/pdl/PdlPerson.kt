@@ -263,7 +263,7 @@ enum class Oppholdstillatelse {
 data class Sivilstand(val type: Sivilstandstype,
                       val gyldigFraOgMed: LocalDate?,
                       val relatertVedSivilstand: String?,
-                      val bekreftelsesdato: String?,
+                      val bekreftelsesdato: LocalDate?,
                       val metadata: Metadata)
 
 enum class Sivilstandstype {
@@ -285,6 +285,7 @@ data class InnflyttingTilNorge(val fraflyttingsland: String?,
 
 data class UtflyttingFraNorge(val tilflyttingsland: String?,
                               val tilflyttingsstedIUtlandet: String?,
+                              val utflyttingsdato: LocalDate?,
                               val folkeregistermetadata: Folkeregistermetadata)
 
 data class UtenlandskAdresse(val adressenavnNummer: String?,

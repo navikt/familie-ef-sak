@@ -33,7 +33,8 @@ class ApiExceptionHandler {
 
     @ExceptionHandler(ApiFeil::class)
     fun handleThrowable(feil: ApiFeil): ResponseEntity<Ressurs<Nothing>> {
-        return ResponseEntity.status(feil.httpStatus).body(Ressurs.failure(frontendFeilmelding = feil.feil))
+        return ResponseEntity.status(feil.httpStatus).body(Ressurs.funksjonellFeil(frontendFeilmelding = feil.feil,
+                                                                                   melding = feil.feil))
     }
 
     @ExceptionHandler(Feil::class)
@@ -77,7 +78,8 @@ class ApiExceptionHandler {
             !it.className.contains("InsertUpdateRepositoryImpl")
         }
         if (firstElement != null) {
-            return "${firstElement.className}::${firstElement.methodName}(${firstElement.lineNumber})"
+            val className = firstElement.className.split(".").lastOrNull()
+            return "$className::${firstElement.methodName}(${firstElement.lineNumber})"
         }
         return e.cause?.let { finnMetodeSomFeiler(it) } ?: "(Ukjent metode som feiler)"
     }

@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper
 
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
-import no.nav.familie.ef.sak.felles.kodeverk.KodeverkService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.AnnenForelderMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
@@ -12,13 +11,11 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.AnnenForelderMi
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.BarnDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Folkeregisterpersonstatus
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.FullmaktDto
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.InnflyttingDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.NavnDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.PersonopplysningerDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.SivilstandDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.TelefonnummerDto
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.UtflyttingDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.VergemålDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Familierelasjonsrolle
@@ -30,8 +27,8 @@ import java.time.LocalDate
 @Component
 class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                                private val statsborgerskapMapper: StatsborgerskapMapper,
-                               private val arbeidsfordelingService: ArbeidsfordelingService,
-                               private val kodeverkService: KodeverkService) {
+                               private val innflyttingUtflyttingMapper: InnflyttingUtflyttingMapper,
+                               private val arbeidsfordelingService: ArbeidsfordelingService) {
 
     fun tilPersonopplysninger(grunnlagsdataMedMetadata: GrunnlagsdataMedMetadata,
                               egenAnsatt: Boolean,
@@ -55,18 +52,18 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                 statsborgerskap = statsborgerskapMapper.map(søker.statsborgerskap),
                 sivilstand = søker.sivilstand.map {
                     SivilstandDto(type = Sivilstandstype.valueOf(it.type.name),
-                                  gyldigFraOgMed = it.gyldigFraOgMed?.toString() ?: it.bekreftelsesdato,
+                                  gyldigFraOgMed = it.gyldigFraOgMed ?: it.bekreftelsesdato,
                                   relatertVedSivilstand = it.relatertVedSivilstand,
                                   navn = it.navn,
                                   dødsdato = it.dødsfall?.dødsdato)
-                }.sortedBy { it.gyldigFraOgMed }.reversed(),
+                }.sortedByDescending { it.gyldigFraOgMed },
                 adresse = tilAdresser(søker),
                 fullmakt = søker.fullmakt.map {
                     FullmaktDto(gyldigFraOgMed = it.gyldigFraOgMed,
                                 gyldigTilOgMed = it.gyldigTilOgMed,
                                 motpartsPersonident = it.motpartsPersonident,
                                 navn = it.navn)
-                },
+                }.sortedByDescending { it.gyldigFraOgMed },
                 egenAnsatt = egenAnsatt,
                 navEnhet = arbeidsfordelingService.hentNavEnhet(ident)
                                    ?.let { it.enhetId + " - " + it.enhetNavn } ?: "Ikke funnet",
@@ -75,17 +72,9 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                             ident,
                             søker.bostedsadresse,
                             annenForelderMap)
-                },
-                innflyttingTilNorge = søker.innflyttingTilNorge.map {
-                    InnflyttingDto(it.fraflyttingsland?.let { land -> kodeverkService.hentLand(land, LocalDate.now()) },
-                                   null,
-                                   it.fraflyttingsstedIUtlandet)
-                },
-                utflyttingFraNorge = søker.utflyttingFraNorge.map {
-                    UtflyttingDto(it.tilflyttingsland?.let { land -> kodeverkService.hentLand(land, LocalDate.now()) },
-                                  null,
-                                  it.tilflyttingsstedIUtlandet)
-                },
+                }.sortedBy { it.fødselsdato },
+                innflyttingTilNorge = innflyttingUtflyttingMapper.mapInnflytting(søker.innflyttingTilNorge),
+                utflyttingFraNorge = innflyttingUtflyttingMapper.mapUtflytting(søker.utflyttingFraNorge),
                 oppholdstillatelse = OppholdstillatelseMapper.map(søker.opphold),
                 vergemål = mapVergemål(søker)
         )

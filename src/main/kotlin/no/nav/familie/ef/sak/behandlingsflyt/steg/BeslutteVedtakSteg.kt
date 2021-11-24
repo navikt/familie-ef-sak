@@ -9,7 +9,6 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask.OpprettOppgaveTaskData
 import no.nav.familie.ef.sak.behandlingsflyt.task.PollStatusFraIverksettTask
-import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.blankett.JournalførBlankettTask
 import no.nav.familie.ef.sak.brev.VedtaksbrevRepository
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
@@ -39,7 +38,6 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
                          private val iverksettingDtoMapper: IverksettingDtoMapper,
                          private val totrinnskontrollService: TotrinnskontrollService,
                          private val vedtaksbrevRepository: VedtaksbrevRepository,
-                         private val behandlingshistorikkService: BehandlingshistorikkService,
                          private val behandlingService: BehandlingService,
                          private val vedtakService: VedtakService) : BehandlingSteg<BeslutteVedtakDto> {
 
@@ -81,19 +79,9 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
         }
     }
 
-    private fun opprettTaskForBehandlingsstatistikk(behandlingId: UUID, oppgaveId: Long?) {
-        val vedtakstidspunkt =
-                behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId, StegType.SEND_TIL_BESLUTTER)?.endretTid
-                ?: error("Mangler behandlingshistorikk for vedtak") // TODO: Bruk vedtak.endretTid når det kommer på plass
-
-        taskRepository.save(BehandlingsstatistikkTask.opprettVedtattTask(behandlingId = behandlingId,
-                                                                         hendelseTidspunkt = vedtakstidspunkt,
-                                                                         oppgaveId = oppgaveId))
-
+    private fun opprettTaskForBehandlingsstatistikk(behandlingId: UUID, oppgaveId: Long?) =
         taskRepository.save(BehandlingsstatistikkTask.opprettBesluttetTask(behandlingId = behandlingId,
                                                                            oppgaveId = oppgaveId))
-
-    }
 
     fun oppdaterResultatPåBehandling(behandlingId: UUID) {
         val vedtak = vedtakService.hentVedtak(behandlingId)
