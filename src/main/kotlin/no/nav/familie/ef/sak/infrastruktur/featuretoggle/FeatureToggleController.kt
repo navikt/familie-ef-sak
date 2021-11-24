@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.RestController
 @Unprotected
 class FeatureToggleController(private val featureToggleService: FeatureToggleService) {
 
-    private val funksjonsbrytere = listOf("familie.ef.sak.journalfoer", "familie.ef.sak.tekniskopphor")
+    private val funksjonsbrytere = listOf("familie.ef.sak.journalfoer",
+                                          "familie.ef.sak.tekniskopphor",
+                                          "familie.ef.sak.frontend-vis-tilbakekreving-varsel")
 
     @GetMapping
     fun sjekkAlle(): Map<String, Boolean> {
