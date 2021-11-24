@@ -22,7 +22,7 @@ import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
 import org.springframework.stereotype.Service
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 @Service
 class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
@@ -133,7 +133,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
     fun slåSammenAndelerSomSkalVidereføres(beløpsperioder: List<AndelTilkjentYtelse>,
                                            forrigeTilkjentYtelse: TilkjentYtelse,
                                            opphørsperioder: List<Periode>): List<AndelTilkjentYtelse> {
-        val fom = beløpsperioder.first().stønadFom
+        val fom = beløpsperioder.firstOrNull()?.stønadFom ?: LocalDate.MAX
         val nyePerioderUtenOpphør = forrigeTilkjentYtelse.taMedAndelerFremTilDato(fom) + beløpsperioder
         return vurderPeriodeForOpphør(nyePerioderUtenOpphør, opphørsperioder)
 
