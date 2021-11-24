@@ -1,22 +1,18 @@
 package no.nav.familie.ef.sak.vedtak.uttrekk
 
-import no.nav.familie.ef.sak.felles.domain.Endret
 import no.nav.familie.ef.sak.repository.InsertUpdateRepository
 import no.nav.familie.ef.sak.repository.RepositoryInterface
-import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
-import org.springframework.data.annotation.Id
-import org.springframework.data.annotation.LastModifiedBy
 import org.springframework.data.jdbc.repository.query.Query
-import org.springframework.data.relational.core.mapping.Column
-import org.springframework.data.relational.core.mapping.Embedded
-import org.springframework.data.relational.core.mapping.Table
 import org.springframework.stereotype.Repository
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
 @Repository
-interface UttrekkVedtakRepository : RepositoryInterface<UttrekkArbeidssøkere, UUID>, InsertUpdateRepository<UttrekkArbeidssøkere> {
+interface UttrekkArbeidssøkerRepository : RepositoryInterface<UttrekkArbeidssøkere, UUID>,
+                                          InsertUpdateRepository<UttrekkArbeidssøkere> {
+
+    fun findAllByÅrMåned(årMåned: YearMonth): List<UttrekkArbeidssøkere>
 
     // language=PostgreSQL
     @Query("""
@@ -40,32 +36,3 @@ interface UttrekkVedtakRepository : RepositoryInterface<UttrekkArbeidssøkere, U
     """)
     fun hentArbeidssøkere(startdato: LocalDate, sluttdato: LocalDate): List<ArbeidsssøkereTilUttrekk>
 }
-
-@Table("uttrekk_arbeidssoker")
-data class UttrekkArbeidssøkere(
-        @Id
-        val id: UUID = UUID.randomUUID(),
-        val fagsakId: UUID,
-        val vedtakId: UUID,
-        @Column("maaned_aar")
-        val månedÅr: YearMonth,
-
-        @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL)
-        val kontrollert: Konntrollert? = null
-)
-
-data class Konntrollert(
-        @LastModifiedBy
-        @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-        val endret: Endret = Endret(),
-
-        val sjekket: Boolean
-)
-
-/**
- * Då vedtaket som er kilden til perioden som er aktuell, så trenger vi å joine [kilde_behandling_id] fra ATY med vedtak
- */
-data class ArbeidsssøkereTilUttrekk(val behandlingId: UUID,
-                                    val fagsakId: UUID,
-                                    val behandlingIdForVedtak: UUID,
-                                    val perioder: PeriodeWrapper)

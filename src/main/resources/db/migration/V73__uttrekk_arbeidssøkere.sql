@@ -1,11 +1,13 @@
-CREATE TABLE uttrekk_arbeidssøkere (
-    id         UUID PRIMARY KEY,
-    fagsak_id  UUID NOT NULL,
-    vedtak_id  UUID NOT NULL,
-    maaned_aar DATE NOT NULL,
-    endret_av  VARCHAR,
-    endret_tid TIMESTAMP(3),
-    sjekket    BOOLEAN
+CREATE TABLE uttrekk_arbeidssoker (
+    id            UUID PRIMARY KEY,
+    fagsak_id     UUID         NOT NULL,
+    vedtak_id     UUID         NOT NULL,
+    aar_maaned    DATE         NOT NULL,
+    sjekket       BOOLEAN,
+    opprettet_av  VARCHAR      NOT NULL DEFAULT 'VL',
+    opprettet_tid TIMESTAMP(3) NOT NULL DEFAULT LOCALTIMESTAMP,
+    endret_av     VARCHAR      NOT NULL,
+    endret_tid    TIMESTAMP    NOT NULL DEFAULT LOCALTIMESTAMP
 );
 
-create
+CREATE INDEX ON uttrekk_arbeidssoker (aar_maaned);

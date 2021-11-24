@@ -12,7 +12,6 @@ import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
-import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType.BARNET_ER_SYKT
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID_REELL_ARBEIDSSØKER
@@ -20,25 +19,24 @@ import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.jdbc.core.JdbcTemplate
 import java.math.BigDecimal
 import java.time.YearMonth
 
-internal class UttrekkVedtakServiceTest : OppslagSpringRunnerTest() {
+internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired private lateinit var fagsakRepository: FagsakRepository
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
     @Autowired private lateinit var beregnYtelseSteg: BeregnYtelseSteg
-    @Autowired private lateinit var tilkjentytelseRepository: TilkjentYtelseRepository
-    @Autowired private lateinit var uttrekkVedtakService: UttrekkVedtakService
-    @Autowired private lateinit var jdbcTemplate: JdbcTemplate
+    @Autowired private lateinit var service: UttrekkArbeidssøkerService
 
     private val fagsak = fagsak(fagsakpersoner(setOf("1")))
     private val behandling = behandling(fagsak)
-    private val behandling2 = behandling(fagsak, type = BehandlingType.REVURDERING, forrigeBehandlingId = behandling.id)
+    private val behandling2 = behandling(fagsak,
+                                         type = BehandlingType.REVURDERING,
+                                         forrigeBehandlingId = behandling.id,
+                                         opprettetTid = behandling.sporbar.opprettetTid.plusDays(1))
 
     private val januar2021 = YearMonth.of(2021, 1)
     private val februar2021 = YearMonth.of(2021, 2)
@@ -52,13 +50,13 @@ internal class UttrekkVedtakServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal kjøre query uten problemer`() {
-        assertThat(uttrekkVedtakService.hentArbeidssøkere()).isEmpty()
+        assertThat(service.hentArbeidssøkere()).isEmpty()
     }
 
     @Test
     internal fun `skal ikke finne andre aktivitettyper enn de som søker etter arbeid`() {
         opprettdata()
-        val arbeidssøkere = uttrekkVedtakService.hentArbeidssøkere(februar2021)
+        val arbeidssøkere = service.hentArbeidssøkere(februar2021)
         assertThat(arbeidssøkere).isEmpty()
     }
 
@@ -66,15 +64,76 @@ internal class UttrekkVedtakServiceTest : OppslagSpringRunnerTest() {
     internal fun `behandlingIdForVedtak skal peke til behandlingen der vedtaket ble opprettet`() {
         opprettdata()
 
-        val arbeidssøkereJan = uttrekkVedtakService.hentArbeidssøkere(januar2021)
+        val arbeidssøkereJan = service.hentArbeidssøkere(januar2021)
         assertThat(arbeidssøkereJan).hasSize(1)
         assertThat(arbeidssøkereJan[0].behandlingId).isEqualTo(behandling2.id)
         assertThat(arbeidssøkereJan[0].behandlingIdForVedtak).isEqualTo(behandling.id)
 
-        val arbeidssøkereMars = uttrekkVedtakService.hentArbeidssøkere(mars2021)
+        val arbeidssøkereMars = service.hentArbeidssøkere(mars2021)
         assertThat(arbeidssøkereMars).hasSize(1)
         assertThat(arbeidssøkereMars[0].behandlingId).isEqualTo(behandling2.id)
         assertThat(arbeidssøkereMars[0].behandlingIdForVedtak).isEqualTo(behandling2.id)
+    }
+
+    @Test
+    internal fun `hentUttrekkArbeidssøkere - finnes ikke noen arbeidssøkere valgt måned`() {
+        opprettdata()
+        service.opprettUttrekkArbeidssøkere(februar2021)
+        assertThat(service.hentUttrekkArbeidssøkere(februar2021).arbeidssøkere).isEmpty()
+    }
+
+    @Test
+    internal fun `hentUttrekkArbeidssøkere - skal opprette uttrekk for arbeidssøkere`() {
+        opprettdata()
+
+        service.opprettUttrekkArbeidssøkere(januar2021)
+
+        val uttrekk = service.hentUttrekkArbeidssøkere(januar2021).arbeidssøkere
+        assertThat(uttrekk).hasSize(1)
+        assertThat(uttrekk[0].fagsakId).isEqualTo(behandling.fagsakId)
+        assertThat(uttrekk[0].behandlingIdForVedtak).isEqualTo(behandling.id)
+        assertThat(uttrekk[0].sjekket).isFalse
+    }
+
+    @Test
+    internal fun `hentUttrekkArbeidssøkere - vedtaket skal peke til endringen sin behandling`() {
+        opprettdata()
+        service.opprettUttrekkArbeidssøkere(mars2021)
+
+        val uttrekk = service.hentUttrekkArbeidssøkere(mars2021).arbeidssøkere
+        assertThat(uttrekk).hasSize(1)
+        assertThat(uttrekk[0].fagsakId).isEqualTo(behandling.fagsakId)
+        assertThat(uttrekk[0].behandlingIdForVedtak).isEqualTo(behandling2.id)
+        assertThat(uttrekk[0].sjekket).isFalse
+    }
+
+    @Test
+    internal fun `hentUttrekkArbeidssøkere - ekstra fagsak`() {
+        opprettdata()
+        opprettEkstraFagsak()
+
+        service.opprettUttrekkArbeidssøkere(mars2021)
+
+        val uttrekk = service.hentUttrekkArbeidssøkere(mars2021).arbeidssøkere
+        assertThat(uttrekk).hasSize(2)
+    }
+
+    @Test
+    internal fun `settSjekket - sett arbeidssøker til sjekket`() {
+        opprettdata()
+        service.opprettUttrekkArbeidssøkere(mars2021)
+
+        service.settSjekket(service.hentUttrekkArbeidssøkere(mars2021).arbeidssøkere.single().id, true)
+
+        val oppdatertUttrekk = service.hentUttrekkArbeidssøkere(mars2021)
+        assertThat(oppdatertUttrekk.antallSjekket).isEqualTo(1)
+        assertThat(oppdatertUttrekk.antallTotalt).isEqualTo(1)
+        assertThat(oppdatertUttrekk.arbeidssøkere).hasSize(1)
+        assertThat(oppdatertUttrekk.arbeidssøkere[0].sjekket).isTrue
+
+        service.settSjekket(service.hentUttrekkArbeidssøkere(mars2021).arbeidssøkere.single().id, false)
+        val oppdatertUttrekk2 = service.hentUttrekkArbeidssøkere(mars2021)
+        assertThat(oppdatertUttrekk2.antallSjekket).isEqualTo(0)
     }
 
     private fun opprettdata() {
@@ -85,6 +144,19 @@ internal class UttrekkVedtakServiceTest : OppslagSpringRunnerTest() {
                 listOf(vedtaksperiode2, vedtaksperiode3),
                 listOf(Inntekt(februar2021, BigDecimal.ZERO, BigDecimal(10_000))))
         ferdigstillBehandling(behandling2)
+    }
+
+    private fun opprettEkstraFagsak() {
+        val fagsak = fagsakRepository.insert(fagsak(fagsakpersoner(setOf("1"))))
+        val behandling = behandlingRepository.insert(
+                behandling(fagsak = fagsak,
+                           type = BehandlingType.REVURDERING,
+                           forrigeBehandlingId = behandling2.id,
+                           opprettetTid = behandling2.sporbar.opprettetTid.plusDays(1)))
+        innvilg(behandling,
+                listOf(vedtaksperiode2, vedtaksperiode3),
+                listOf(Inntekt(februar2021, BigDecimal.ZERO, BigDecimal(15_000))))
+        ferdigstillBehandling(behandling)
     }
 
     fun ferdigstillBehandling(behandling: Behandling) {
