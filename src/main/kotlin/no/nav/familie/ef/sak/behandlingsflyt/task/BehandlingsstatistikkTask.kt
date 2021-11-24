@@ -69,6 +69,7 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
                 gjeldendeSaksbehandlerId = finnSaksbehandler(hendelse, vedtak, gjeldendeSaksbehandler),
                 eksternFagsakId = fagsak.eksternId.id.toString(),
                 hendelseTidspunkt = hendelseTidspunkt.atZone(zoneIdOslo),
+                behandlingOpprettetTidspunkt = behandling.sporbar.opprettetTid.atZone(zoneIdOslo),
                 hendelse = hendelse,
                 behandlingResultat = behandling.resultat.name,
                 resultatBegrunnelse = resultatBegrunnelse,
@@ -108,7 +109,7 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
         return when (hendelse) {
             Hendelse.MOTTATT, Hendelse.PÅBEGYNT, Hendelse.VENTER -> gjeldendeSaksbehandler
                                                                     ?: error("Mangler saksbehandler for hendelse")
-            Hendelse.VEDTATT -> vedtak?.saksbehandlerIdent ?: error("Mangler saksbehandler på vedtaket")
+            Hendelse.VEDTATT, Hendelse.HENLAGT -> vedtak?.saksbehandlerIdent ?: error("Mangler saksbehandler på vedtaket")
             Hendelse.BESLUTTET, Hendelse.FERDIG -> vedtak?.beslutterIdent ?: error("Mangler beslutter på vedtaket")
         }
     }
