@@ -36,10 +36,7 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
         val fagsak = fagsakRepository.findBySøkerIdent(personIdenter.identer(), stønadstype)
 
         return fagsak?.let {
-            return when {
-                fagsak.erAktivIdent(gjeldendePersonIdent) -> fagsak
-                else -> oppdaterPersonIdentPåFagsak(fagsak, gjeldendePersonIdent)
-            }
+            return fagsakMedOppdatertPersonIdent(fagsak, gjeldendePersonIdent)
         } ?: opprettFagsak(stønadstype, gjeldendePersonIdent)
     }
 
@@ -68,6 +65,12 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
 
     fun hentFagsak(fagsakId: UUID): Fagsak = fagsakRepository.findByIdOrThrow(fagsakId)
 
+    fun fagsakMedOppdatertPersonIdent(fagsakId: UUID): Fagsak {
+        val fagsak = fagsakRepository.findByIdOrThrow(fagsakId)
+        val gjeldendePersonIdent = pdlClient.hentPersonidenter(fagsak.hentAktivIdent(), true).gjeldende().ident
+        return fagsakMedOppdatertPersonIdent(fagsak, gjeldendePersonIdent)
+    }
+
     fun hentFagsakForBehandling(behandlingId: UUID): Fagsak {
         return fagsakRepository.finnFagsakTilBehandling(behandlingId)
                ?: throw Feil("Finner ikke fagsak til behandlingId=$behandlingId")
@@ -80,14 +83,17 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
 
     fun hentAktivIdent(fagsakId: UUID): String = fagsakRepository.finnAktivIdent(fagsakId)
 
-    private fun oppdaterPersonIdentPåFagsak(fagsak: Fagsak,
-                                            personIdent: String): Fagsak {
-        val fagsakMedNyIdent = fagsak.copy(søkerIdenter = fagsak.søkerIdenter + FagsakPerson(ident = personIdent))
-        return fagsakRepository.update(fagsakMedNyIdent)
+    private fun fagsakMedOppdatertPersonIdent(fagsak: Fagsak, gjeldendePersonIdent: String): Fagsak {
+        return when (fagsak.erAktivIdent(gjeldendePersonIdent)) {
+            true -> fagsak
+            false -> {
+                val fagsakMedNyIdent = fagsak.copy(søkerIdenter = fagsak.søkerIdenter + FagsakPerson(ident = gjeldendePersonIdent))
+                return fagsakRepository.update(fagsakMedNyIdent)
+            }
+        }
     }
 
     private fun opprettFagsak(stønadstype: Stønadstype, personIdent: String) =
             fagsakRepository.insert(Fagsak(stønadstype = stønadstype, søkerIdenter = setOf(FagsakPerson(ident = personIdent))))
-
 
 }
