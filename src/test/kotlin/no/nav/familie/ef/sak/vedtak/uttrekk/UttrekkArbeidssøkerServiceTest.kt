@@ -1,5 +1,8 @@
 package no.nav.familie.ef.sak.vedtak.uttrekk
 
+import io.mockk.every
+import io.mockk.justRun
+import io.mockk.mockk
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.Behandling
@@ -9,6 +12,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BeregnYtelseSteg
 import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
@@ -19,7 +23,9 @@ import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.time.YearMonth
@@ -28,8 +34,12 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired private lateinit var fagsakRepository: FagsakRepository
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
+    @Autowired private lateinit var uttrekkArbeidssøkerRepository: UttrekkArbeidssøkerRepository
     @Autowired private lateinit var beregnYtelseSteg: BeregnYtelseSteg
-    @Autowired private lateinit var service: UttrekkArbeidssøkerService
+
+    private val tilgangService = mockk<TilgangService>()
+
+    private lateinit var service: UttrekkArbeidssøkerService
 
     private val fagsak = fagsak(fagsakpersoner(setOf("1")))
     private val behandling = behandling(fagsak)
@@ -47,6 +57,12 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
                                                         aktivitetType = BARNET_ER_SYKT)
     private val vedtaksperiode3 = opprettVedtaksperiode(mars2021, mars2021,
                                                         aktivitetType = FORLENGELSE_STØNAD_PÅVENTE_ARBEID_REELL_ARBEIDSSØKER)
+
+    @BeforeEach
+    internal fun setUp() {
+        justRun { tilgangService.validerTilgangTilFagsak(any()) }
+        service = UttrekkArbeidssøkerService(tilgangService, uttrekkArbeidssøkerRepository)
+    }
 
     @Test
     internal fun `skal kjøre query uten problemer`() {
@@ -134,6 +150,18 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
         service.settKontrollert(service.hentUttrekkArbeidssøkere(mars2021).arbeidssøkere.single().id, false)
         val oppdatertUttrekk2 = service.hentUttrekkArbeidssøkere(mars2021)
         assertThat(oppdatertUttrekk2.antallKontrollert).isEqualTo(0)
+    }
+
+    @Test
+    internal fun `settKontrollert - har ikke tilgang til fagsak`() {
+        every { tilgangService.validerTilgangTilFagsak(any()) } throws RuntimeException("Har ikke tilgang")
+        opprettdata()
+
+        service.opprettUttrekkArbeidssøkere(mars2021)
+
+        assertThrows<RuntimeException> {
+            service.settKontrollert(service.hentUttrekkArbeidssøkere(mars2021).arbeidssøkere.single().id, true)
+        }
     }
 
     private fun opprettdata() {

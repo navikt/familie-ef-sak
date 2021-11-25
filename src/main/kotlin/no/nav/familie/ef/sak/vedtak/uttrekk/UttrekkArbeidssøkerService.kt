@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.vedtak.uttrekk
 
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
@@ -11,6 +12,7 @@ import java.util.UUID
 
 @Service
 class UttrekkArbeidssøkerService(
+        private val tilgangService: TilgangService,
         private val uttrekkArbeidssøkerRepository: UttrekkArbeidssøkerRepository,
 ) {
 
@@ -26,7 +28,9 @@ class UttrekkArbeidssøkerService(
     }
 
     fun settKontrollert(id: UUID, kontrollert: Boolean) {
-        uttrekkArbeidssøkerRepository.update(uttrekkArbeidssøkerRepository.findByIdOrThrow(id).copy(kontrollert = kontrollert))
+        val uttrekkArbeidssøkere = uttrekkArbeidssøkerRepository.findByIdOrThrow(id)
+        tilgangService.validerTilgangTilFagsak(uttrekkArbeidssøkere.fagsakId)
+        uttrekkArbeidssøkerRepository.update(uttrekkArbeidssøkere.copy(kontrollert = kontrollert))
     }
 
     fun hentUttrekkArbeidssøkere(årMåned: YearMonth = forrigeMåned().invoke()): UttrekkArbeidssøkereDto {
