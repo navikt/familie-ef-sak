@@ -37,7 +37,7 @@ class UttrekkArbeidssøkerService(
         val arbeidssøkere = uttrekkArbeidssøkerRepository.findAllByÅrMåned(årMåned)
         return UttrekkArbeidssøkereDto(årMåned = årMåned,
                                        antallTotalt = arbeidssøkere.size,
-                                       antallKontrollert = arbeidssøkere.count { it.kontrollert },
+                                       antallKontrollert = arbeidssøkere.count { it.kontrollert ?: false },
                                        arbeidssøkere = arbeidssøkere.map(UttrekkArbeidssøkere::tilDto))
     }
 

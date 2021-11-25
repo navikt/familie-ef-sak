@@ -22,13 +22,17 @@ class OpprettUttrekkArbeidssøkerTask(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    @Scheduled(fixedDelay = 60 * 1000)
+    private var opprettetFørsteTasken = false
+
+    @Scheduled(initialDelay = 30 * 1000, fixedDelay = 30 * 24 * 60 * 1000)
     fun opprettFørsteTasken() {
+        if (opprettetFørsteTasken) return
+        opprettetFørsteTasken = true
         try {
             opprettTaskForNesteMåned()
             logger.info("Opprettet task for å opprette uttrekk for arbeidssøker")
         } catch (e: Exception) {
-            logger.warn("Feilet opprettelse av task for å opprette uttrekk for arbeidssøker", e)
+            logger.warn("Feilet opprettelse av task for å opprette uttrekk for arbeidssøker - ${e.message}")
         }
     }
 

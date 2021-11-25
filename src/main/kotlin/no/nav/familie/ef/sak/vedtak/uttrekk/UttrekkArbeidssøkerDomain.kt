@@ -18,7 +18,7 @@ data class UttrekkArbeidssøkere(
         @Column("aar_maaned")
         val årMåned: YearMonth,
 
-        val kontrollert: Boolean = false,
+        val kontrollert: Boolean? = null,
 
         @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
         val sporbar: Sporbar = Sporbar()
