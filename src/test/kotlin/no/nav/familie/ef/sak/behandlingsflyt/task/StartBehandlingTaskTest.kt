@@ -1,15 +1,13 @@
 package no.nav.familie.ef.sak.behandlingsflyt.task
 
-import io.mockk.Runs
 import io.mockk.every
-import io.mockk.just
+import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
@@ -21,7 +19,7 @@ import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.kontrakter.ef.felles.StønadType
 import no.nav.familie.kontrakter.ef.infotrygd.OpprettStartBehandlingHendelseDto
 import no.nav.familie.prosessering.domene.Task
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -29,51 +27,49 @@ import java.util.Properties
 
 class StartBehandlingTaskTest : OppslagSpringRunnerTest() {
 
-    @Autowired
-    private lateinit var behandlingRepository: BehandlingRepository
-
-    @Autowired
-    private lateinit var fagsakRepository: FagsakRepository
+    @Autowired private lateinit var behandlingRepository: BehandlingRepository
+    @Autowired private lateinit var fagsakRepository: FagsakRepository
+    @Autowired private lateinit var fagsakService: FagsakService
 
     private val iverksettClient = mockk<IverksettClient>()
     private val pdlClient = mockk<PdlClient>()
-    private val fagsakService = mockk<FagsakService>()
+
+    private lateinit var startBehandlingTask: StartBehandlingTask
 
     private val opprettStartBehandlingHendelseDtoSlot = slot<OpprettStartBehandlingHendelseDto>()
     private val personIdent = "123456789012"
     private val fagsak = fagsak(identer = fagsakpersoner(setOf(personIdent)))
-    private val behandling = behandling(fagsak)
 
     @BeforeEach
     fun setup() {
-        every { fagsakService.hentFagsakForBehandling(behandling.id) } returns fagsak
+        fagsakRepository.insert(fagsak)
+
         every { pdlClient.hentPersonidenter(personIdent, true) } returns PdlIdenter(listOf(PdlIdent(personIdent, false)))
-        every { iverksettClient.startBehandling(capture(opprettStartBehandlingHendelseDtoSlot)) } just Runs
+        justRun { iverksettClient.startBehandling(capture(opprettStartBehandlingHendelseDtoSlot)) }
+
+        startBehandlingTask = StartBehandlingTask(iverksettClient, pdlClient, fagsakService, behandlingRepository)
     }
 
     @Test
     fun `skal sende StartBehandling da det ikke finnes tidligere iverksatt sak på person`() {
-        val startBehandlingTask = StartBehandlingTask(iverksettClient, pdlClient, fagsakService, behandlingRepository)
+        val behandling = behandling(fagsak)
+        behandlingRepository.insert(behandling)
+
         startBehandlingTask.doTask(Task("forrigeTask", behandling.id.toString(), Properties()))
 
-        Assertions.assertThat(opprettStartBehandlingHendelseDtoSlot.isCaptured).isEqualTo(true)
-        Assertions.assertThat(opprettStartBehandlingHendelseDtoSlot.captured.type).isEqualTo(StønadType.OVERGANGSSTØNAD)
-        Assertions.assertThat(opprettStartBehandlingHendelseDtoSlot.captured.personIdenter).isEqualTo(setOf(personIdent))
+        assertThat(opprettStartBehandlingHendelseDtoSlot.isCaptured).isEqualTo(true)
+        assertThat(opprettStartBehandlingHendelseDtoSlot.captured.type).isEqualTo(StønadType.OVERGANGSSTØNAD)
+        assertThat(opprettStartBehandlingHendelseDtoSlot.captured.personIdenter).isEqualTo(setOf(personIdent))
     }
 
     @Test
     fun `skal ikke sende StartBehandling da det finnes tidligere iverksatt sak på person`() {
-        val førstegangsbehandling = BehandlingOppsettUtil.iverksattFørstegangsbehandling
-        fagsakRepository.insert(fagsak(setOf(FagsakPerson(personIdent))).copy(id = førstegangsbehandling.fagsakId))
+        val behandling = BehandlingOppsettUtil.iverksattFørstegangsbehandling.copy(fagsakId = fagsak.id)
+        behandlingRepository.insert(behandling)
 
-        val behandlinger = BehandlingOppsettUtil.lagBehandlingerForSisteIverksatte()
-        behandlingRepository.insertAll(behandlinger)
-
-        val startBehandlingTask = StartBehandlingTask(iverksettClient, pdlClient, fagsakService, behandlingRepository)
         startBehandlingTask.doTask(Task("forrigeTask", behandling.id.toString(), Properties()))
 
-        Assertions.assertThat(opprettStartBehandlingHendelseDtoSlot.isCaptured).isEqualTo(false)
+        assertThat(opprettStartBehandlingHendelseDtoSlot.isCaptured).isEqualTo(false)
     }
-
 
 }
