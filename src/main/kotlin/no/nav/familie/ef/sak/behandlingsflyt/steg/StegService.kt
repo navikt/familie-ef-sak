@@ -164,7 +164,7 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
             return behandlingService.oppdaterStegPåBehandling(behandlingId = behandling.id, steg = nesteSteg)
         } catch (exception: Exception) {
             oppdaterMetrikk(stegType, stegFeiletMetrics)
-            logger.error("Håndtering av stegtype '$stegType' feilet på behandling ${behandling.id}.")
+            logger.warn("Håndtering av stegtype '$stegType' feilet på behandling ${behandling.id}.")
             throw exception
         }
     }
