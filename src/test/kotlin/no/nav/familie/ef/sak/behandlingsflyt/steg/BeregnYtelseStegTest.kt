@@ -462,18 +462,23 @@ internal class BeregnYtelseStegTest {
             assertThat(nyeAndeler[0].stønadFom).isEqualTo(forrigeAndelFom)
             assertThat(nyeAndeler[0].stønadTom).isEqualTo(forrigeAndelTom)
             assertThat(nyeAndeler[0].beløp).isEqualTo(50)
+            assertThat(nyeAndeler[0].kildeBehandlingId).isEqualTo(forrigeAndeler[0].kildeBehandlingId)
             assertThat(nyeAndeler[1].stønadFom).isEqualTo(nyAndelFom)
             assertThat(nyeAndeler[1].stønadTom).isEqualTo(opphør1.fradato.minusDays(1))
             assertThat(nyeAndeler[1].beløp).isEqualTo(100)
+            assertThat(nyeAndeler[1].kildeBehandlingId).isEqualTo(beløpsperioder[0].kildeBehandlingId)
             assertThat(nyeAndeler[2].stønadFom).isEqualTo(opphør1.tildato.plusDays(1))
             assertThat(nyeAndeler[2].stønadTom).isEqualTo(opphør2.fradato.minusDays(1))
             assertThat(nyeAndeler[2].beløp).isEqualTo(100)
+            assertThat(nyeAndeler[2].kildeBehandlingId).isEqualTo(beløpsperioder[0].kildeBehandlingId)
             assertThat(nyeAndeler[3].stønadFom).isEqualTo(opphør2.tildato.plusDays(1))
             assertThat(nyeAndeler[3].stønadTom).isEqualTo(opphør3.fradato.minusDays(1))
             assertThat(nyeAndeler[3].beløp).isEqualTo(100)
+            assertThat(nyeAndeler[3].kildeBehandlingId).isEqualTo(beløpsperioder[0].kildeBehandlingId)
             assertThat(nyeAndeler[4].stønadFom).isEqualTo(opphør3.tildato.plusDays(1))
             assertThat(nyeAndeler[4].stønadTom).isEqualTo(nyAndelTom)
             assertThat(nyeAndeler[4].beløp).isEqualTo(100)
+            assertThat(nyeAndeler[4].kildeBehandlingId).isEqualTo(beløpsperioder[0].kildeBehandlingId)
             assertThat(nyeAndeler[0].kildeBehandlingId).isNotEqualTo(nyeAndeler[1].kildeBehandlingId)
         }
 
@@ -493,15 +498,98 @@ internal class BeregnYtelseStegTest {
             assertThat(nyeAndeler[0].stønadFom).isEqualTo(forrigeAndelFom)
             assertThat(nyeAndeler[0].stønadTom).isEqualTo(opphør1.fradato.minusDays(1))
             assertThat(nyeAndeler[0].beløp).isEqualTo(50)
+            assertThat(nyeAndeler[0].kildeBehandlingId).isEqualTo(forrigeAndeler[0].kildeBehandlingId)
             assertThat(nyeAndeler[1].stønadFom).isEqualTo(opphør1.tildato.plusDays(1))
             assertThat(nyeAndeler[1].stønadTom).isEqualTo(opphør2.fradato.minusDays(1))
             assertThat(nyeAndeler[1].beløp).isEqualTo(50)
+            assertThat(nyeAndeler[1].kildeBehandlingId).isEqualTo(forrigeAndeler[0].kildeBehandlingId)
             assertThat(nyeAndeler[2].stønadFom).isEqualTo(opphør2.tildato.plusDays(1))
             assertThat(nyeAndeler[2].stønadTom).isEqualTo(opphør3.fradato.minusDays(1))
             assertThat(nyeAndeler[2].beløp).isEqualTo(50)
+            assertThat(nyeAndeler[2].kildeBehandlingId).isEqualTo(forrigeAndeler[0].kildeBehandlingId)
             assertThat(nyeAndeler[3].stønadFom).isEqualTo(opphør3.tildato.plusDays(1))
             assertThat(nyeAndeler[3].stønadTom).isEqualTo(forrigeAndelTom)
             assertThat(nyeAndeler[3].beløp).isEqualTo(50)
+        }
+
+        @Test
+        fun `lager opphold på slutten av forrige andel uten feil`() {
+            val forrigeAndelFom = LocalDate.of(2021, 1, 1)
+            val forrigeAndelTom = LocalDate.of(2021, 10, 31)
+            val nyAndelFom = LocalDate.of(2021, 10, 1)
+            val nyAndelTom = LocalDate.of(2022, 12, 31)
+            val opphør1 = Periode(LocalDate.of(2021, 9, 1), LocalDate.of(2021, 9, 30))
+            val opphørsperioder = listOf(opphør1)
+            val forrigeAndeler = listOf(lagAndelTilkjentYtelse(50, forrigeAndelFom, forrigeAndelTom))
+            val beløpsperioder = listOf(lagAndelTilkjentYtelse(100, nyAndelFom, nyAndelTom))
+
+            val nyeAndeler =
+                    steg.slåSammenAndelerSomSkalVidereføres(beløpsperioder, lagTilkjentYtelse(forrigeAndeler), opphørsperioder)
+
+            assertThat(nyeAndeler).hasSize(2)
+            assertThat(nyeAndeler[0].stønadFom).isEqualTo(forrigeAndelFom)
+            assertThat(nyeAndeler[0].stønadTom).isEqualTo(opphør1.fradato.minusDays(1))
+            assertThat(nyeAndeler[0].beløp).isEqualTo(50)
+            assertThat(nyeAndeler[0].kildeBehandlingId).isEqualTo(forrigeAndeler[0].kildeBehandlingId)
+            assertThat(nyeAndeler[1].stønadFom).isEqualTo(nyAndelFom)
+            assertThat(nyeAndeler[1].stønadTom).isEqualTo(nyAndelTom)
+            assertThat(nyeAndeler[1].beløp).isEqualTo(100)
+            assertThat(nyeAndeler[1].kildeBehandlingId).isNotEqualTo(forrigeAndeler[0].kildeBehandlingId)
+
+        }
+
+        @Test
+        fun `lager opphold på begynnelsen av ny andel uten feil`() {
+            val forrigeAndelFom = LocalDate.of(2021, 1, 1)
+            val forrigeAndelTom = LocalDate.of(2024, 10, 31)
+            val nyAndelFom1 = LocalDate.of(2021, 8, 1)
+            val nyAndelTom1 = LocalDate.of(2021, 9, 30)
+            val nyAndelFom2 = LocalDate.of(2021, 10, 1)
+            val nyAndelTom2 = LocalDate.of(2022, 12, 31)
+            val opphør1 = Periode(LocalDate.of(2021, 7, 1), LocalDate.of(2021, 7, 31))
+            val opphør2 = Periode(LocalDate.of(2021, 10, 1), LocalDate.of(2021, 10, 31))
+            val opphørsperioder = listOf(opphør1, opphør2)
+            val forrigeAndeler = listOf(lagAndelTilkjentYtelse(50, forrigeAndelFom, forrigeAndelTom))
+            val beløpsperioder = listOf(lagAndelTilkjentYtelse(200, nyAndelFom1, nyAndelTom1),
+                                        lagAndelTilkjentYtelse(100, nyAndelFom2, nyAndelTom2))
+
+            val nyeAndeler =
+                    steg.slåSammenAndelerSomSkalVidereføres(beløpsperioder, lagTilkjentYtelse(forrigeAndeler), opphørsperioder)
+
+            assertThat(nyeAndeler).hasSize(3)
+            assertThat(nyeAndeler[0].stønadFom).isEqualTo(forrigeAndelFom)
+            assertThat(nyeAndeler[0].stønadTom).isEqualTo(opphør1.fradato.minusDays(1))
+            assertThat(nyeAndeler[0].beløp).isEqualTo(50)
+            assertThat(nyeAndeler[0].kildeBehandlingId).isEqualTo(forrigeAndeler[0].kildeBehandlingId)
+            assertThat(nyeAndeler[1].stønadFom).isEqualTo(nyAndelFom1)
+            assertThat(nyeAndeler[1].stønadTom).isEqualTo(nyAndelTom1)
+            assertThat(nyeAndeler[1].beløp).isEqualTo(200)
+            assertThat(nyeAndeler[1].kildeBehandlingId).isNotEqualTo(forrigeAndeler[0].kildeBehandlingId)
+            assertThat(nyeAndeler[2].stønadFom).isEqualTo(opphør2.tildato.plusDays(1))
+            assertThat(nyeAndeler[2].stønadTom).isEqualTo(nyAndelTom2)
+            assertThat(nyeAndeler[2].beløp).isEqualTo(100)
+            assertThat(nyeAndeler[2].kildeBehandlingId).isNotEqualTo(forrigeAndeler[0].kildeBehandlingId)
+        }
+
+        @Test
+        fun `takler opphold som dekker en hel periode`() {
+            val forrigeAndelFom1 = LocalDate.of(2021, 1, 1)
+            val forrigeAndelTom1 = LocalDate.of(2021, 10, 31)
+            val forrigeAndelFom2 = LocalDate.of(2021, 12, 1)
+            val forrigeAndelTom2 = LocalDate.of(2021, 12, 31)
+            val opphør1 = Periode(LocalDate.of(2021, 7, 1), LocalDate.of(2021, 12, 31))
+            val opphørsperioder = listOf(opphør1)
+            val forrigeAndeler = listOf(lagAndelTilkjentYtelse(200, forrigeAndelFom1, forrigeAndelTom1),
+                                        lagAndelTilkjentYtelse(100, forrigeAndelFom2, forrigeAndelTom2))
+
+            val nyeAndeler = steg.slåSammenAndelerSomSkalVidereføres(listOf(), lagTilkjentYtelse(forrigeAndeler), opphørsperioder)
+
+            assertThat(nyeAndeler).hasSize(1)
+            assertThat(nyeAndeler[0].stønadFom).isEqualTo(forrigeAndelFom1)
+            assertThat(nyeAndeler[0].stønadTom).isEqualTo(opphør1.fradato.minusDays(1))
+            assertThat(nyeAndeler[0].beløp).isEqualTo(200)
+            assertThat(nyeAndeler[0].kildeBehandlingId).isEqualTo(forrigeAndeler[0].kildeBehandlingId)
+
         }
     }
 }

@@ -27,14 +27,14 @@ data class Periode(val fradato: LocalDate,
     }
 
     fun overlapperIStartenAv(annen: Periode) =
-            fradato < annen.fradato
+            fradato <= annen.fradato
             && tildato > annen.fradato
             && tildato < annen.tildato
 
     fun overlapperISluttenAv(annen: Periode) =
             fradato > annen.fradato
             && fradato < annen.tildato
-            && tildato > annen.tildato
+            && tildato >= annen.tildato
 
     private val lengde: Period = Period.between(fradato, tildato)
 }

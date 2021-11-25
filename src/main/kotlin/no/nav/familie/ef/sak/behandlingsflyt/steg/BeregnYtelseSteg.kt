@@ -155,7 +155,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                     vurderPeriodeForOpphør(listOf(it.copy(stønadFom = overlappendeOpphør.tildato.plusDays(1))), opphørsperioder)
                 } else if (overlappendeOpphør.overlapperISluttenAv(tilkjentPeriode)) {
                     vurderPeriodeForOpphør(listOf(it.copy(stønadTom = overlappendeOpphør.fradato.minusDays(1))), opphørsperioder)
-                } else { // periodew blir delt i to av opphold.
+                } else { // periode blir delt i to av opphold.
                     vurderPeriodeForOpphør(listOf(it.copy(stønadTom = overlappendeOpphør.fradato.minusDays(1)),
                                                   it.copy(stønadFom = overlappendeOpphør.tildato.plusDays(1))), opphørsperioder)
                 }
