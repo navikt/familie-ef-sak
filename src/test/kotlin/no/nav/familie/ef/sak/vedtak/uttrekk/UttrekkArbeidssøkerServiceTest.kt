@@ -92,7 +92,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
         assertThat(uttrekk).hasSize(1)
         assertThat(uttrekk[0].fagsakId).isEqualTo(behandling.fagsakId)
         assertThat(uttrekk[0].behandlingIdForVedtak).isEqualTo(behandling.id)
-        assertThat(uttrekk[0].sjekket).isFalse
+        assertThat(uttrekk[0].kontrollert).isFalse
     }
 
     @Test
@@ -104,7 +104,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
         assertThat(uttrekk).hasSize(1)
         assertThat(uttrekk[0].fagsakId).isEqualTo(behandling.fagsakId)
         assertThat(uttrekk[0].behandlingIdForVedtak).isEqualTo(behandling2.id)
-        assertThat(uttrekk[0].sjekket).isFalse
+        assertThat(uttrekk[0].kontrollert).isFalse
     }
 
     @Test
@@ -119,21 +119,21 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `settSjekket - sett arbeidssøker til sjekket`() {
+    internal fun `settKontrollert - sett arbeidssøker til kontrollert`() {
         opprettdata()
         service.opprettUttrekkArbeidssøkere(mars2021)
 
-        service.settSjekket(service.hentUttrekkArbeidssøkere(mars2021).arbeidssøkere.single().id, true)
+        service.settKontrollert(service.hentUttrekkArbeidssøkere(mars2021).arbeidssøkere.single().id, true)
 
         val oppdatertUttrekk = service.hentUttrekkArbeidssøkere(mars2021)
-        assertThat(oppdatertUttrekk.antallSjekket).isEqualTo(1)
+        assertThat(oppdatertUttrekk.antallKontrollert).isEqualTo(1)
         assertThat(oppdatertUttrekk.antallTotalt).isEqualTo(1)
         assertThat(oppdatertUttrekk.arbeidssøkere).hasSize(1)
-        assertThat(oppdatertUttrekk.arbeidssøkere[0].sjekket).isTrue
+        assertThat(oppdatertUttrekk.arbeidssøkere[0].kontrollert).isTrue
 
-        service.settSjekket(service.hentUttrekkArbeidssøkere(mars2021).arbeidssøkere.single().id, false)
+        service.settKontrollert(service.hentUttrekkArbeidssøkere(mars2021).arbeidssøkere.single().id, false)
         val oppdatertUttrekk2 = service.hentUttrekkArbeidssøkere(mars2021)
-        assertThat(oppdatertUttrekk2.antallSjekket).isEqualTo(0)
+        assertThat(oppdatertUttrekk2.antallKontrollert).isEqualTo(0)
     }
 
     private fun opprettdata() {

@@ -22,13 +22,13 @@ import java.util.UUID
 class UttrekkController(private val uttrekkVedtakService: UttrekkArbeidssøkerService) {
 
     @GetMapping("arbeidssoker")
-    fun hentArbeidssøkere(@RequestParam sjekket: Boolean = false): UttrekkArbeidssøkereDto {
+    fun hentArbeidssøkere(@RequestParam kontrollert: Boolean = false): UttrekkArbeidssøkereDto {
         return uttrekkVedtakService.hentUttrekkArbeidssøkere()
     }
 
-    @PostMapping("arbeidssoker/{id}/sjekket")
-    fun settSjekket(@PathVariable id: UUID,
-                    @RequestParam sjekket: Boolean = true) {
-        uttrekkVedtakService.settSjekket(id, sjekket)
+    @PostMapping("arbeidssoker/{id}/kontrollert")
+    fun settKontrollert(@PathVariable id: UUID,
+                    @RequestParam kontrollert: Boolean = true) {
+        uttrekkVedtakService.settKontrollert(id, kontrollert)
     }
 }

@@ -3,7 +3,7 @@ CREATE TABLE uttrekk_arbeidssoker (
     fagsak_id     UUID         NOT NULL,
     vedtak_id     UUID         NOT NULL,
     aar_maaned    DATE         NOT NULL,
-    sjekket       BOOLEAN,
+    kontrollert       BOOLEAN,
     opprettet_av  VARCHAR      NOT NULL DEFAULT 'VL',
     opprettet_tid TIMESTAMP(3) NOT NULL DEFAULT LOCALTIMESTAMP,
     endret_av     VARCHAR      NOT NULL,
