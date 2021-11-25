@@ -10,11 +10,6 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
-/**
- * Skal vi returnere en liste med FNR ? link til behandling?
- * Hvordan gjør vi med de som er kode 6/7?
- */
-
 @RestController
 @RequestMapping(path = ["/api/uttrekk"])
 @ProtectedWithClaims(issuer = "azuread")
@@ -28,7 +23,7 @@ class UttrekkController(private val uttrekkVedtakService: UttrekkArbeidssøkerSe
 
     @PostMapping("arbeidssoker/{id}/kontrollert")
     fun settKontrollert(@PathVariable id: UUID,
-                    @RequestParam kontrollert: Boolean = true) {
+                        @RequestParam kontrollert: Boolean = true) {
         uttrekkVedtakService.settKontrollert(id, kontrollert)
     }
 }
