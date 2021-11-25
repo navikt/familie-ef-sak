@@ -108,7 +108,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
         assertThat(uttrekk).hasSize(1)
         assertThat(uttrekk[0].fagsakId).isEqualTo(behandling.fagsakId)
         assertThat(uttrekk[0].behandlingIdForVedtak).isEqualTo(behandling.id)
-        assertThat(uttrekk[0].kontrollert).isNull()
+        assertThat(uttrekk[0].kontrollert).isFalse
     }
 
     @Test
@@ -120,7 +120,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
         assertThat(uttrekk).hasSize(1)
         assertThat(uttrekk[0].fagsakId).isEqualTo(behandling.fagsakId)
         assertThat(uttrekk[0].behandlingIdForVedtak).isEqualTo(behandling2.id)
-        assertThat(uttrekk[0].kontrollert).isNull()
+        assertThat(uttrekk[0].kontrollert).isFalse
     }
 
     @Test
