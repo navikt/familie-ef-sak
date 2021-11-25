@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.vedtak.uttrekk
 
+import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -23,7 +24,8 @@ class UttrekkController(private val uttrekkVedtakService: UttrekkArbeidssøkerSe
 
     @PostMapping("arbeidssoker/{id}/kontrollert")
     fun settKontrollert(@PathVariable id: UUID,
-                        @RequestParam kontrollert: Boolean = true) {
-        uttrekkVedtakService.settKontrollert(id, kontrollert)
+                        @RequestParam kontrollert: Boolean = true): Ressurs<UUID> {
+        uttrekkVedtakService.settKontrollert (id, kontrollert)
+        return Ressurs.Companion.success(id)
     }
 }
