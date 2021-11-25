@@ -17,7 +17,7 @@ class MålerService(private val målerRepository: MålerRepository) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    @Scheduled(initialDelay = 60 * 1000, fixedDelay = OPPDATERINGSFREKVENS)
+    @Scheduled(initialDelay = 60 * 1000L, fixedDelay = OPPDATERINGSFREKVENS)
     fun åpneBehandlingerPerUke() {
         val behandlinger = målerRepository.finnÅpneBehandlingerPerUke()
         logger.info("Åpne behandlinger per uke returnerte ${behandlinger.sumOf { it.antall }} fordelt på ${behandlinger.size} uker.")
@@ -30,7 +30,7 @@ class MålerService(private val målerRepository: MålerRepository) {
         åpneBehandlingerPerUkeGauge.register(rows, true)
     }
 
-    @Scheduled(initialDelay = 90 * 1000, fixedDelay = OPPDATERINGSFREKVENS)
+    @Scheduled(initialDelay = 90 * 1000L, fixedDelay = OPPDATERINGSFREKVENS)
     fun åpneBehandlinger() {
         val behandlinger = målerRepository.finnÅpneBehandlinger()
         logger.info("Åpne behandlinger returnerte ${behandlinger.sumOf { it.antall }} " +
@@ -44,7 +44,7 @@ class MålerService(private val målerRepository: MålerRepository) {
         åpneBehandlingerGauge.register(rows, true)
     }
 
-    @Scheduled(initialDelay = 180 * 1000, fixedDelay = OPPDATERINGSFREKVENS)
+    @Scheduled(initialDelay = 180 * 1000L, fixedDelay = OPPDATERINGSFREKVENS)
     fun vedtakPerUke() {
         val data = målerRepository.finnVedtakPerUke()
         logger.info("Vedtak returnerte ${data.sumOf { it.antall }} fordelt på ${data.size} typer/uker.")
