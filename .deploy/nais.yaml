@@ -8,7 +8,6 @@ metadata:
 
 spec:
   image: {{ image }}
-  leaderElection: true
   ingresses:
     - {{ingress}}
   liveness:

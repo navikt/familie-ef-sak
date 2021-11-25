@@ -4,7 +4,6 @@ import io.micrometer.core.instrument.Metrics
 import io.micrometer.core.instrument.MultiGauge
 import io.micrometer.core.instrument.Tags
 import no.nav.familie.ef.sak.metrics.domain.MålerRepository
-import no.nav.familie.leader.LeaderClient
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
@@ -20,7 +19,6 @@ class MålerService(private val målerRepository: MålerRepository) {
 
     @Scheduled(initialDelay = 60 * 1000, fixedDelay = OPPDATERINGSFREKVENS)
     fun åpneBehandlingerPerUke() {
-        if (LeaderClient.isLeader() != true) return
         val behandlinger = målerRepository.finnÅpneBehandlingerPerUke()
         logger.info("Åpne behandlinger per uke returnerte ${behandlinger.sumOf { it.antall }} fordelt på ${behandlinger.size} uker.")
         val rows = behandlinger.map {
@@ -34,7 +32,6 @@ class MålerService(private val målerRepository: MålerRepository) {
 
     @Scheduled(initialDelay = 90 * 1000, fixedDelay = OPPDATERINGSFREKVENS)
     fun åpneBehandlinger() {
-        if (LeaderClient.isLeader() != true) return
         val behandlinger = målerRepository.finnÅpneBehandlinger()
         logger.info("Åpne behandlinger returnerte ${behandlinger.sumOf { it.antall }} " +
                     "fordelt på ${behandlinger.size} statuser.")
@@ -49,7 +46,6 @@ class MålerService(private val målerRepository: MålerRepository) {
 
     @Scheduled(initialDelay = 180 * 1000, fixedDelay = OPPDATERINGSFREKVENS)
     fun vedtakPerUke() {
-        if (LeaderClient.isLeader() != true) return
         val data = målerRepository.finnVedtakPerUke()
         logger.info("Vedtak returnerte ${data.sumOf { it.antall }} fordelt på ${data.size} typer/uker.")
 
