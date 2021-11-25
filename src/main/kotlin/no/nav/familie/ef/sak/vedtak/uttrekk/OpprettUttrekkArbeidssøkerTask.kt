@@ -6,6 +6,7 @@ import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
+import org.springframework.context.annotation.Profile
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.time.YearMonth
@@ -24,6 +25,7 @@ class OpprettUttrekkArbeidssøkerTask(
 
     private var opprettetFørsteTasken = false
 
+    @Profile("!integrasjonstest")
     @Scheduled(initialDelay = 30 * 1000, fixedDelay = 30 * 24 * 60 * 1000)
     fun opprettFørsteTasken() {
         if (opprettetFørsteTasken) return
