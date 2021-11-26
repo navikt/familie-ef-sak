@@ -2,6 +2,8 @@ package no.nav.familie.ef.sak.vedtak.uttrekk
 
 import no.nav.familie.ef.sak.repository.InsertUpdateRepository
 import no.nav.familie.ef.sak.repository.RepositoryInterface
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.stereotype.Repository
 import java.time.LocalDate
@@ -12,7 +14,11 @@ import java.util.UUID
 interface UttrekkArbeidssøkerRepository : RepositoryInterface<UttrekkArbeidssøkere, UUID>,
                                           InsertUpdateRepository<UttrekkArbeidssøkere> {
 
-    fun findAllByÅrMåned(årMåned: YearMonth): List<UttrekkArbeidssøkere>
+    fun countByÅrMånedAndKontrollertIsTrue(årMåned: YearMonth): Int
+
+    fun findAllByÅrMåned(årMåned: YearMonth, pageable: Pageable): Page<UttrekkArbeidssøkere>
+
+    fun findAllByÅrMånedAndKontrollert(årMåned: YearMonth, kontrollert: Boolean, pageable: Pageable): Page<UttrekkArbeidssøkere>
 
     // language=PostgreSQL
     @Query("""

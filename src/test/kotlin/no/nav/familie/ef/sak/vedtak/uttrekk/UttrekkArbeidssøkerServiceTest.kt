@@ -135,6 +135,25 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    internal fun `hentUttrekkArbeidssøkere - skal hente alle som ikke er kontrollert`() {
+        opprettdata()
+        for (i in 1..20) {
+            val arbeidssøkere = UttrekkArbeidssøkere(fagsakId = fagsak.id, vedtakId = behandling.id, årMåned = mars2021)
+            uttrekkArbeidssøkerRepository.insert(arbeidssøkere)
+        }
+        for (i in 1..2) {
+            val arbeidssøkere =
+                    UttrekkArbeidssøkere(fagsakId = fagsak.id, vedtakId = behandling.id, årMåned = mars2021, kontrollert = true)
+            uttrekkArbeidssøkerRepository.insert(arbeidssøkere)
+        }
+
+        val uttrekk = service.hentUttrekkArbeidssøkere(mars2021, 1, visKontrollerte = false)
+        assertThat(uttrekk.antallTotalt).isEqualTo(2)
+        assertThat(uttrekk.antallKontrollert).isEqualTo(2)
+        assertThat(uttrekk.arbeidssøkere.size).isEqualTo(2)
+    }
+
+    @Test
     internal fun `settKontrollert - sett arbeidssøker til kontrollert`() {
         opprettdata()
         service.opprettUttrekkArbeidssøkere(mars2021)

@@ -1,9 +1,13 @@
 package no.nav.familie.ef.sak.vedtak.uttrekk
 
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -33,12 +37,29 @@ class UttrekkArbeidssøkerService(
         uttrekkArbeidssøkerRepository.update(uttrekkArbeidssøkere.medKontrollert(kontrollert = kontrollert))
     }
 
-    fun hentUttrekkArbeidssøkere(årMåned: YearMonth = forrigeMåned().invoke()): UttrekkArbeidssøkereDto {
-        val arbeidssøkere = uttrekkArbeidssøkerRepository.findAllByÅrMåned(årMåned)
+    fun hentUttrekkArbeidssøkere(årMåned: YearMonth = forrigeMåned().invoke(),
+                                 side: Int = 1,
+                                 visKontrollerte: Boolean = true): UttrekkArbeidssøkereDto {
+        val antallKontrollert = uttrekkArbeidssøkerRepository.countByÅrMånedAndKontrollertIsTrue(årMåned)
+        val arbeidssøkere = hentPaginerteArbeidssøkere(årMåned, side, visKontrollerte)
         return UttrekkArbeidssøkereDto(årMåned = årMåned,
-                                       antallTotalt = arbeidssøkere.size,
-                                       antallKontrollert = arbeidssøkere.count { it.kontrollert },
-                                       arbeidssøkere = arbeidssøkere.map(UttrekkArbeidssøkere::tilDto))
+                                       antallTotalt = arbeidssøkere.totalElements.toInt(),
+                                       antallKontrollert = antallKontrollert,
+                                       arbeidssøkere = arbeidssøkere.toList().map(UttrekkArbeidssøkere::tilDto))
+    }
+
+    private fun hentPaginerteArbeidssøkere(årMåned: YearMonth,
+                                           side: Int,
+                                           visKontrollerte: Boolean): Page<UttrekkArbeidssøkere> {
+        feilHvis(side < 1) {
+            "Side må være større enn 0, men var side=$side"
+        }
+        val pageable = PageRequest.of(side - 1, 20, Sort.by("id"))
+        return if (visKontrollerte) {
+            uttrekkArbeidssøkerRepository.findAllByÅrMåned(årMåned, pageable)
+        } else {
+            uttrekkArbeidssøkerRepository.findAllByÅrMånedAndKontrollert(årMåned, !visKontrollerte, pageable)
+        }
     }
 
     fun hentArbeidssøkere(årMåned: YearMonth = forrigeMåned().invoke()): List<VedtaksperioderForUttrekk> {
