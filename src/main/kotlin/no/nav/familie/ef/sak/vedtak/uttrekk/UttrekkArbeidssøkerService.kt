@@ -33,6 +33,8 @@ class UttrekkArbeidssøkerService(
 
     fun settKontrollert(id: UUID, kontrollert: Boolean) {
         val uttrekkArbeidssøkere = uttrekkArbeidssøkerRepository.findByIdOrThrow(id)
+        if (uttrekkArbeidssøkere.kontrollert == kontrollert) return
+
         tilgangService.validerTilgangTilFagsak(uttrekkArbeidssøkere.fagsakId)
         uttrekkArbeidssøkerRepository.update(uttrekkArbeidssøkere.medKontrollert(kontrollert = kontrollert))
     }
