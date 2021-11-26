@@ -30,14 +30,14 @@ class UttrekkArbeidssøkerService(
     fun settKontrollert(id: UUID, kontrollert: Boolean) {
         val uttrekkArbeidssøkere = uttrekkArbeidssøkerRepository.findByIdOrThrow(id)
         tilgangService.validerTilgangTilFagsak(uttrekkArbeidssøkere.fagsakId)
-        uttrekkArbeidssøkerRepository.update(uttrekkArbeidssøkere.copy(kontrollert = kontrollert))
+        uttrekkArbeidssøkerRepository.update(uttrekkArbeidssøkere.medKontrollert(kontrollert = kontrollert))
     }
 
     fun hentUttrekkArbeidssøkere(årMåned: YearMonth = forrigeMåned().invoke()): UttrekkArbeidssøkereDto {
         val arbeidssøkere = uttrekkArbeidssøkerRepository.findAllByÅrMåned(årMåned)
         return UttrekkArbeidssøkereDto(årMåned = årMåned,
                                        antallTotalt = arbeidssøkere.size,
-                                       antallKontrollert = arbeidssøkere.count { it.kontrollert ?: false },
+                                       antallKontrollert = arbeidssøkere.count { it.kontrollert },
                                        arbeidssøkere = arbeidssøkere.map(UttrekkArbeidssøkere::tilDto))
     }
 

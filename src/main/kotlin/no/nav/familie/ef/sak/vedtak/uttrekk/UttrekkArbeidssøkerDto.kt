@@ -16,16 +16,14 @@ data class UttrekkArbeidsssøkerDto(
         val fagsakId: UUID,
         val behandlingIdForVedtak: UUID,
         val kontrollert: Boolean,
-        val tidKontrollert: LocalDateTime?
+        val kontrollertTid: LocalDateTime?,
+        val kontrollertAv: String?
 )
 
 fun UttrekkArbeidssøkere.tilDto() =
         UttrekkArbeidsssøkerDto(id = this.id,
                                 fagsakId = this.fagsakId,
                                 behandlingIdForVedtak = this.vedtakId,
-                                kontrollert = this.kontrollert ?: false,
-                                tidKontrollert = tidKontrollert())
-
-private fun UttrekkArbeidssøkere.tidKontrollert(): LocalDateTime? {
-    return if (this.kontrollert != null) this.sporbar.endret.endretTid else null
-}
+                                kontrollert = this.kontrollert,
+                                kontrollertTid = this.kontrollertTid,
+                                kontrollertAv = this.kontrollertAv)

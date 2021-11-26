@@ -7,7 +7,7 @@ import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 object SikkerhetContext {
 
     private const val SYSTEM_NAVN = "System"
-    private const val SYSTEM_FORKORTELSE = "VL"
+    const val SYSTEM_FORKORTELSE = "VL"
 
     val NAVIDENT_REGEX = """^[a-zA-Z]\d{6}$""".toRegex()
 
