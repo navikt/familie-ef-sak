@@ -148,9 +148,9 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
         }
 
         val uttrekk = service.hentUttrekkArbeidssøkere(mars2021, 1, visKontrollerte = false)
-        assertThat(uttrekk.antallTotalt).isEqualTo(2)
+        assertThat(uttrekk.antallTotalt).isEqualTo(20)
         assertThat(uttrekk.antallKontrollert).isEqualTo(2)
-        assertThat(uttrekk.arbeidssøkere.size).isEqualTo(2)
+        assertThat(uttrekk.arbeidssøkere.size).isEqualTo(20)
     }
 
     @Test

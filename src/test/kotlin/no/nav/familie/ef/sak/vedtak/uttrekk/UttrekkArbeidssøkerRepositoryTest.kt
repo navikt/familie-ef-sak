@@ -72,8 +72,8 @@ internal class UttrekkArbeidssøkerRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal hente paginerte arbeidsssøkere som er kontrollert`() {
-        assertThat(repository.findAllByÅrMånedAndKontrollertIsFalse(årMåned, PageRequest.of(0, 100, sort))).hasSize(5)
-        assertThat(repository.findAllByÅrMånedAndKontrollertIsFalse(årMåned, PageRequest.of(2, 2, sort))).hasSize(1)
+        assertThat(repository.findAllByÅrMånedAndKontrollertIsFalse(årMåned, PageRequest.of(0, 100, sort))).hasSize(10)
+        assertThat(repository.findAllByÅrMånedAndKontrollertIsFalse(årMåned, PageRequest.of(1, 6, sort))).hasSize(4)
         assertThat(repository.findAllByÅrMånedAndKontrollertIsFalse(årMåned, PageRequest.of(100, 2, sort))).isEmpty()
     }
 
