@@ -20,8 +20,8 @@ class UttrekkController(private val uttrekkVedtakService: UttrekkArbeidssøkerSe
 
     @GetMapping("arbeidssoker")
     fun hentArbeidssøkere(@RequestParam(defaultValue = "1") side: Int,
-                          @RequestParam(defaultValue = "false") kontrollert: Boolean): Ressurs<UttrekkArbeidssøkereDto> {
-        return success(uttrekkVedtakService.hentUttrekkArbeidssøkere(side = side, visKontrollerte = kontrollert))
+                          @RequestParam(defaultValue = "false") visKontrollerte: Boolean): Ressurs<UttrekkArbeidssøkereDto> {
+        return success(uttrekkVedtakService.hentUttrekkArbeidssøkere(side = side, visKontrollerte = visKontrollerte))
     }
 
     @PostMapping("arbeidssoker/{id}/kontrollert")
