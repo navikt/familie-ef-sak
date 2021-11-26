@@ -34,7 +34,7 @@ data class UttrekkArbeidssøkere(
 /**
  * Då vedtaket som er kilden til perioden som er aktuell, så trenger vi å joine [kilde_behandling_id] fra ATY med vedtak
  */
-data class ArbeidsssøkereTilUttrekk(val behandlingId: UUID,
-                                    val fagsakId: UUID,
-                                    val behandlingIdForVedtak: UUID,
-                                    val perioder: PeriodeWrapper)
+data class VedtaksperioderForUttrekk(val fagsakId: UUID,
+                                     val behandlingId: UUID,
+                                     val behandlingIdForVedtak: UUID,
+                                     val perioder: PeriodeWrapper)

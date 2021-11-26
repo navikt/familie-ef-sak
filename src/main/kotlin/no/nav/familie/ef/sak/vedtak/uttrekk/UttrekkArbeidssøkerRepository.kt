@@ -21,7 +21,8 @@ interface UttrekkArbeidssøkerRepository : RepositoryInterface<UttrekkArbeidssø
             FROM behandling b
             JOIN fagsak f ON b.fagsak_id = f.id
             WHERE
-              b.type != 'BLANKETT'
+              f.stonadstype = 'OVERGANGSSTØNAD'
+              AND b.type != 'BLANKETT'
               AND b.resultat IN ('OPPHØRT', 'INNVILGET')
               AND b.status = 'FERDIGSTILT'
             )
@@ -34,5 +35,5 @@ interface UttrekkArbeidssøkerRepository : RepositoryInterface<UttrekkArbeidssø
         WHERE aty.stonad_tom >= :startdato AND aty.stonad_fom <= :sluttdato
           AND rn = 1
     """)
-    fun hentArbeidssøkere(startdato: LocalDate, sluttdato: LocalDate): List<ArbeidsssøkereTilUttrekk>
+    fun hentVedtaksperioderForSisteFerdigstilteBehandlinger(startdato: LocalDate, sluttdato: LocalDate): List<VedtaksperioderForUttrekk>
 }

@@ -41,14 +41,14 @@ class UttrekkArbeidssøkerService(
                                        arbeidssøkere = arbeidssøkere.map(UttrekkArbeidssøkere::tilDto))
     }
 
-    fun hentArbeidssøkere(årMåned: YearMonth = forrigeMåned().invoke()): List<ArbeidsssøkereTilUttrekk> {
+    fun hentArbeidssøkere(årMåned: YearMonth = forrigeMåned().invoke()): List<VedtaksperioderForUttrekk> {
         val startdato = årMåned.atDay(1)
         val sluttdato = årMåned.atEndOfMonth()
-        val arbeidssøkere = uttrekkArbeidssøkerRepository.hentArbeidssøkere(startdato, sluttdato)
+        val arbeidssøkere = uttrekkArbeidssøkerRepository.hentVedtaksperioderForSisteFerdigstilteBehandlinger(startdato, sluttdato)
         return arbeidssøkere.filter { harPeriodeSomArbeidssøker(it, startdato, sluttdato) }
     }
 
-    private fun harPeriodeSomArbeidssøker(it: ArbeidsssøkereTilUttrekk,
+    private fun harPeriodeSomArbeidssøker(it: VedtaksperioderForUttrekk,
                                           startdato: LocalDate,
                                           sluttdato: LocalDate) =
             it.perioder.perioder.any {
