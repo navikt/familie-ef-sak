@@ -127,7 +127,7 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
         if (behandling.status != BehandlingStatus.UTREDES) {
             error("Kan ikke endre steg når status=${behandling.status} behandling=$behandlingId")
         }
-        if (!behandling.steg.kommerEtter(steg, behandling.type)) {
+        if (!behandling.steg.kommerEtter(steg)) {
             error("Kan ikke sette behandling til steg=$steg når behandling allerede " +
                   "er på ${behandling.steg} behandling=$behandlingId")
         }
@@ -218,7 +218,7 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
             error("Behandlingen er avsluttet og stegprosessen kan ikke gjenåpnes")
         }
 
-        if (stegType.kommerEtter(behandling.steg, behandling.type)) {
+        if (stegType.kommerEtter(behandling.steg)) {
             error("$saksbehandlerIdent prøver å utføre steg '${stegType.displayName()}', " +
                   "men behandlingen er på steg '${behandling.steg.displayName()}'")
         }

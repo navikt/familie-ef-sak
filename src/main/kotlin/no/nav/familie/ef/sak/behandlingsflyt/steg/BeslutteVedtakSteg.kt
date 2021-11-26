@@ -98,7 +98,7 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
         feilHvis(vedtaksbrev.besluttersignatur != SikkerhetContext.hentSaksbehandlerNavn(strict = true)) {
             "En annen saksbehandler har signert vedtaksbrevet"
         }
-        return vedtaksbrev.beslutterPdf!!
+        return vedtaksbrev.beslutterPdf
     }
 
     private fun ferdigstillOppgave(behandling: Behandling): Long? {
