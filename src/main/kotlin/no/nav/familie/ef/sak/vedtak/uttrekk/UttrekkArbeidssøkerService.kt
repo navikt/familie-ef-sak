@@ -60,7 +60,7 @@ class UttrekkArbeidssøkerService(
         return if (visKontrollerte) {
             uttrekkArbeidssøkerRepository.findAllByÅrMåned(årMåned, pageable)
         } else {
-            uttrekkArbeidssøkerRepository.findAllByÅrMånedAndKontrollert(årMåned, !visKontrollerte, pageable)
+            uttrekkArbeidssøkerRepository.findAllByÅrMånedAndKontrollertIsFalse(årMåned, pageable)
         }
     }
 

@@ -18,7 +18,7 @@ interface UttrekkArbeidssøkerRepository : RepositoryInterface<UttrekkArbeidssø
 
     fun findAllByÅrMåned(årMåned: YearMonth, pageable: Pageable): Page<UttrekkArbeidssøkere>
 
-    fun findAllByÅrMånedAndKontrollert(årMåned: YearMonth, kontrollert: Boolean, pageable: Pageable): Page<UttrekkArbeidssøkere>
+    fun findAllByÅrMånedAndKontrollertIsFalse(årMåned: YearMonth, pageable: Pageable): Page<UttrekkArbeidssøkere>
 
     // language=PostgreSQL
     @Query("""
