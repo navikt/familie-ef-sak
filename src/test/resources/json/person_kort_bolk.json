@@ -5,6 +5,14 @@
         "ident": "11111122222",
         "code": "ok",
         "person": {
+          "adressebeskyttelse": [
+            {
+              "gradering": "UGRADERT",
+              "metadata":  {
+                "historisk": false
+              }
+            }
+          ],
           "doedsfall": [],
           "navn": [
             {
