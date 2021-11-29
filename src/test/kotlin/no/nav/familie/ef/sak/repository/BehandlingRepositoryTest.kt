@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype.BARNETILSYN
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype.OVERGANGSSTØNAD
+import no.nav.familie.ef.sak.felles.domain.Endret
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil
 import org.assertj.core.api.Assertions.assertThat
@@ -70,8 +71,8 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     internal fun `finnFnrForBehandlingId(sql) skal finne gjeldende fnr for behandlingsid`() {
         val fagsak = fagsakRepository.insert(fagsak(setOf(FagsakPerson(ident = "1"),
                                                           FagsakPerson(ident = "2",
-                                                                       sporbar = Sporbar(opprettetTid = LocalDateTime.now()
-                                                                               .plusDays(2))),
+                                                                       sporbar = Sporbar(endret = Endret(endretTid = LocalDateTime.now()
+                                                                               .plusDays(2)))),
                                                           FagsakPerson(ident = "3"))))
         val behandling = behandlingRepository.insert(behandling(fagsak))
         val fnr = behandlingRepository.finnAktivIdent(behandling.id)
