@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.fagsak.dto.FagsakDto
 import no.nav.familie.ef.sak.fagsak.dto.tilDto
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
@@ -23,7 +24,8 @@ import java.util.UUID
 class FagsakService(private val fagsakRepository: FagsakRepository,
                     private val behandlingService: BehandlingService,
                     private val pdlClient: PdlClient,
-                    private val tilkjentYtelseService: TilkjentYtelseService) {
+                    private val tilkjentYtelseService: TilkjentYtelseService,
+                    private val featureToggleService: FeatureToggleService) {
 
     fun hentEllerOpprettFagsakMedBehandlinger(personIdent: String, stønadstype: Stønadstype): FagsakDto {
         return fagsakTilDto(hentEllerOpprettFagsak(personIdent, stønadstype))
@@ -67,8 +69,12 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
 
     fun fagsakMedOppdatertPersonIdent(fagsakId: UUID): Fagsak {
         val fagsak = fagsakRepository.findByIdOrThrow(fagsakId)
-        val gjeldendePersonIdent = pdlClient.hentPersonidenter(fagsak.hentAktivIdent(), true).gjeldende().ident
-        return fagsakMedOppdatertPersonIdent(fagsak, gjeldendePersonIdent)
+        return if (featureToggleService.isEnabled("familie.ef.sak.synkroniser-personidenter")) {
+            val gjeldendePersonIdent = pdlClient.hentPersonidenter(fagsak.hentAktivIdent(), true).gjeldende().ident
+            fagsakMedOppdatertPersonIdent(fagsak, gjeldendePersonIdent)
+        } else {
+            fagsak
+        }
     }
 
     fun hentFagsakForBehandling(behandlingId: UUID): Fagsak {
@@ -87,7 +93,8 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
         return when (fagsak.erAktivIdent(gjeldendePersonIdent)) {
             true -> fagsak
             false -> {
-                val fagsakMedNyIdent = fagsak.copy(søkerIdenter = fagsak.søkerIdenter + FagsakPerson(ident = gjeldendePersonIdent))
+                val fagsakMedNyIdent =
+                        fagsak.copy(søkerIdenter = fagsak.søkerIdenter + FagsakPerson(ident = gjeldendePersonIdent))
                 return fagsakRepository.update(fagsakMedNyIdent)
             }
         }
