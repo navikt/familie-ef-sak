@@ -271,6 +271,14 @@ class PdlClientConfig {
                                                                         omfangetErInnenPersonligOmraade = false)),
                     VergemaalEllerFremtidsfullmakt(embete = null,
                                                    folkeregistermetadata = null,
+                                                   type = "voksen",
+                                                   vergeEllerFullmektig =
+                                                   VergeEllerFullmektig(motpartsPersonident = "20087813712",
+                                                                        navn = null,
+                                                                        omfang = "personligeOgOekonomiskeInteresser",
+                                                                        omfangetErInnenPersonligOmraade = false)),
+                    VergemaalEllerFremtidsfullmakt(embete = null,
+                                                   folkeregistermetadata = null,
                                                    type = "stadfestetFremtidsfullmakt",
                                                    vergeEllerFullmektig =
                                                    VergeEllerFullmektig(motpartsPersonident = annenForelderFnr,

@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.vedtak.domain
 
 import no.nav.familie.ef.sak.beregning.Inntektsperiode
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.kontrakter.ef.iverksett.Brevmottaker
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import java.time.LocalDate
@@ -22,7 +23,8 @@ data class Vedtak(@Id
                   val saksbehandlerIdent: String? = null,
                   @Column("opphor_fom")
                   val opphørFom: LocalDate? = null,
-                  val beslutterIdent: String? = null)
+                  val beslutterIdent: String? = null,
+                  val brevmottakere: BrevmottakereWrapper? = null)
 
 data class Vedtaksperiode(
         val datoFra: LocalDate,
@@ -32,6 +34,8 @@ data class Vedtaksperiode(
 
 data class PeriodeWrapper(val perioder: List<Vedtaksperiode>)
 data class InntektWrapper(val inntekter: List<Inntektsperiode>)
+data class BrevmottakereWrapper(val mottakere: List<Brevmottaker>)
+
 
 enum class VedtaksperiodeType {
     FORLENGELSE,

@@ -48,7 +48,6 @@ import no.nav.familie.kontrakter.ef.iverksett.VurderingDto
 import no.nav.familie.kontrakter.felles.annotasjoner.Improvement
 import no.nav.familie.kontrakter.felles.tilbakekreving.Periode
 import org.springframework.stereotype.Component
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.familie.kontrakter.ef.felles.RegelId as RegelIdIverksett
@@ -149,7 +148,8 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
                                beslutterId = beslutter,
                                tilkjentYtelse = tilkjentYtelse?.tilIverksettDto(),
                                vedtaksperioder = vedtak.perioder?.tilIverksettDto() ?: emptyList(),
-                               tilbakekreving = tilbakekreving
+                               tilbakekreving = tilbakekreving,
+                               brevmottakere = vedtak.brevmottakere?.mottakere ?: emptyList()
             )
 
     private fun mapSøkerDto(fagsak: Fagsak, behandling: Behandling): SøkerDto {

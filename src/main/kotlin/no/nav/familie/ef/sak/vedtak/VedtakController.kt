@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.TotrinnskontrollStatusDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
+import no.nav.familie.kontrakter.ef.iverksett.Brevmottaker
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
@@ -35,6 +36,14 @@ class VedtakController(private val stegService: StegService,
     @PostMapping("/{behandlingId}/send-til-beslutter")
     fun sendTilBeslutter(@PathVariable behandlingId: UUID): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
+        val behandling = behandlingService.hentBehandling(behandlingId)
+        return Ressurs.success(stegService.håndterSendTilBeslutter(behandling).id)
+    }
+
+    @PostMapping("/{behandlingId}/send-til-beslutter/verge")
+    fun sendTilBeslutterVerge(@PathVariable behandlingId: UUID, @RequestBody brevmottakere: List<Brevmottaker>): Ressurs<UUID> {
+        tilgangService.validerTilgangTilBehandling(behandlingId)
+        vedtakService.leggTilBrevmottakere(behandlingId, brevmottakere)
         val behandling = behandlingService.hentBehandling(behandlingId)
         return Ressurs.success(stegService.håndterSendTilBeslutter(behandling).id)
     }
