@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.fagsak.domain
 
+import no.nav.familie.ef.sak.felles.domain.Endret
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
@@ -19,15 +20,19 @@ data class Fagsak(@Id
                   val søkerIdenter: Set<FagsakPerson> = setOf()) {
 
     fun hentAktivIdent(): String {
-        return søkerIdenter.maxByOrNull { it.sporbar.opprettetTid }?.ident ?: error("Fant ingen ident på fagsak $id")
-    }
-
-    fun hentAlleIdenter(): List<String> {
-        return søkerIdenter.map { it.ident }
+        return søkerIdenter.maxByOrNull { it.sporbar.endret.endretTid }?.ident ?: error("Fant ingen ident på fagsak $id")
     }
 
     fun erAktivIdent(personIdent: String): Boolean = hentAktivIdent() == personIdent
 
+    fun fagsakMedOppdatertGjeldendeIdent(gjeldendePersonIdent: String): Fagsak {
+        val fagsakPersonForGjeldendeIdent: FagsakPerson = this.søkerIdenter.find { it.ident == gjeldendePersonIdent }?.let {
+            it.copy(sporbar = it.sporbar.copy(endret = Endret()))
+        } ?: FagsakPerson(ident = gjeldendePersonIdent)
+        val søkerIdenterUtenGjeldende = this.søkerIdenter.filter { it.ident != gjeldendePersonIdent }
+
+        return this.copy(søkerIdenter = søkerIdenterUtenGjeldende.toSet() + fagsakPersonForGjeldendeIdent)
+    }
 }
 
 enum class Stønadstype {

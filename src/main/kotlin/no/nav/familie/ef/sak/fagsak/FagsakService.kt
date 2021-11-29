@@ -38,7 +38,11 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
         val fagsak = fagsakRepository.findBySøkerIdent(personIdenter.identer(), stønadstype)
 
         return fagsak?.let {
-            return fagsakMedOppdatertPersonIdent(fagsak, gjeldendePersonIdent)
+            return if (featureToggleService.isEnabled("familie.ef.sak.synkroniser-personidenter")) {
+                fagsakMedOppdatertPersonIdent(fagsak, gjeldendePersonIdent)
+            } else {
+                fagsak
+            }
         } ?: opprettFagsak(stønadstype, gjeldendePersonIdent)
     }
 
@@ -92,11 +96,7 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
     private fun fagsakMedOppdatertPersonIdent(fagsak: Fagsak, gjeldendePersonIdent: String): Fagsak {
         return when (fagsak.erAktivIdent(gjeldendePersonIdent)) {
             true -> fagsak
-            false -> {
-                val fagsakMedNyIdent =
-                        fagsak.copy(søkerIdenter = fagsak.søkerIdenter + FagsakPerson(ident = gjeldendePersonIdent))
-                return fagsakRepository.update(fagsakMedNyIdent)
-            }
+            false -> fagsakRepository.update(fagsak.fagsakMedOppdatertGjeldendeIdent(gjeldendePersonIdent))
         }
     }
 

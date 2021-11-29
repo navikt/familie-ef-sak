@@ -9,16 +9,19 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
-import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.ef.sak.felles.domain.Endret
+import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.LocalDateTime
 
 internal class FagsakServiceTest : OppslagSpringRunnerTest() {
 
@@ -78,4 +81,55 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         assertThat(revurdering.type).isEqualTo(behandling2.type)
     }
 
+    @Test
+    internal fun `skal oppdatere personident på fagsak dersom personen har fått ny ident som er tidligere registrert`() {
+
+        val iGår = Sporbar(opprettetAv = "XY",
+                           opprettetTid = LocalDateTime.now().minusDays(1),
+                           endret = Endret(endretAv = "XY", endretTid = LocalDateTime.now().minusDays(1)))
+        val iDag = Sporbar(opprettetAv = "XY",
+                           opprettetTid = LocalDateTime.now().minusHours(1),
+                           endret = Endret(endretAv = "XY", endretTid = LocalDateTime.now().minusHours(1)))
+
+        val gjeldendeIdent = "12345678901"
+        val feilRegistrertIdent = "99988877712"
+        val fagsakMedFeilregistrertIdent = fagsakRepository.insert(Fagsak(eksternId = EksternFagsakId(id = 1234),
+                                                                         stønadstype = Stønadstype.OVERGANGSSTØNAD,
+                                                                         søkerIdenter = setOf(FagsakPerson(ident = gjeldendeIdent,
+                                                                                                           sporbar = iGår),
+                                                                                              FagsakPerson(ident = feilRegistrertIdent,
+                                                                                                           sporbar = iDag))))
+
+        assertThat(fagsakMedFeilregistrertIdent.hentAktivIdent()).isEqualTo(feilRegistrertIdent)
+
+        val oppdatertFagsak = fagsakService.hentEllerOpprettFagsak(gjeldendeIdent, Stønadstype.OVERGANGSSTØNAD)
+        assertThat(oppdatertFagsak.søkerIdenter.map { it.ident }).contains(feilRegistrertIdent)
+        assertThat(oppdatertFagsak.hentAktivIdent()).isEqualTo(gjeldendeIdent)
+        val fagsakEtterOppdatering = fagsakService.hentFagsak(fagsakMedFeilregistrertIdent.id).hentAktivIdent()
+        assertThat(fagsakEtterOppdatering).isEqualTo(gjeldendeIdent)
+    }
+
+    @Test
+    internal fun `skal oppdatere personident hvis fagsak har gammel ident`() {
+
+        val iGår = Sporbar(opprettetAv = "XY",
+                           opprettetTid = LocalDateTime.now().minusDays(1),
+                           endret = Endret(endretAv = "XY", endretTid = LocalDateTime.now().minusDays(1)))
+
+        val gjeldendeIdent = "12345678901"
+        val historiskIdent = "98765432109"
+        val fagsakMedHistoriskIdent = fagsakRepository.insert(Fagsak(eksternId = EksternFagsakId(id = 1234),
+                                                                     stønadstype = Stønadstype.OVERGANGSSTØNAD,
+                                                                     søkerIdenter = setOf(FagsakPerson(ident = historiskIdent,
+                                                                                                           sporbar = iGår))))
+
+        assertThat(fagsakMedHistoriskIdent.hentAktivIdent()).isEqualTo(historiskIdent)
+
+        val oppdatertFagsak = fagsakService.hentEllerOpprettFagsak(gjeldendeIdent, Stønadstype.OVERGANGSSTØNAD)
+        assertThat(oppdatertFagsak.søkerIdenter.map { it.ident }).contains(historiskIdent)
+        assertThat(oppdatertFagsak.hentAktivIdent()).isEqualTo(gjeldendeIdent)
+
+        val fagsakEtterOppdatering = fagsakService.hentFagsak(fagsakMedHistoriskIdent.id)
+        assertThat(fagsakEtterOppdatering.hentAktivIdent()).isEqualTo(gjeldendeIdent)
+    }
 }
