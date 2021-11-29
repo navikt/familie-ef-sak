@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.fagsak.dto.FagsakDto
 import no.nav.familie.ef.sak.fagsak.dto.tilDto
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
@@ -92,6 +93,14 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
                                                                ?: error("Kan ikke finne fagsak med eksternId=$eksternFagsakId")
 
     fun hentAktivIdent(fagsakId: UUID): String = fagsakRepository.finnAktivIdent(fagsakId)
+
+    fun hentAktiveIdenter(fagsakId: Set<UUID>): Map<UUID, String> {
+        val aktiveIdenter = fagsakRepository.finnAktivIdenter(fagsakId)
+        feilHvis(!aktiveIdenter.map { it.first }.containsAll(fagsakId)) {
+            "Finner ikke ident til fagsaker ${aktiveIdenter.map { it.first }.filterNot(fagsakId::contains)}"
+        }
+        return aktiveIdenter.associateBy({ it.first }, { it.second })
+    }
 
     private fun fagsakMedOppdatertPersonIdent(fagsak: Fagsak, gjeldendePersonIdent: String): Fagsak {
         return when (fagsak.erAktivIdent(gjeldendePersonIdent)) {

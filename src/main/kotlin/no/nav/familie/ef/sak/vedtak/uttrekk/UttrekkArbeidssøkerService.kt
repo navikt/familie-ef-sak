@@ -1,7 +1,13 @@
 package no.nav.familie.ef.sak.vedtak.uttrekk
 
+import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Adressebeskyttelse
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonKort
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
@@ -18,13 +24,15 @@ import java.util.UUID
 class UttrekkArbeidssøkerService(
         private val tilgangService: TilgangService,
         private val uttrekkArbeidssøkerRepository: UttrekkArbeidssøkerRepository,
+        private val fagsakService: FagsakService,
+        private val personService: PersonService
 ) {
 
     fun forrigeMåned(): () -> YearMonth = { YearMonth.now().minusMonths(1) }
 
     @Transactional
     fun opprettUttrekkArbeidssøkere(årMåned: YearMonth = forrigeMåned().invoke()) {
-        hentArbeidssøkere(årMåned).forEach {
+        hentArbeidssøkereForUttrekk(årMåned).forEach {
             uttrekkArbeidssøkerRepository.insert(UttrekkArbeidssøkere(fagsakId = it.fagsakId,
                                                                       vedtakId = it.behandlingIdForVedtak,
                                                                       årMåned = årMåned))
@@ -43,11 +51,41 @@ class UttrekkArbeidssøkerService(
                                  side: Int = 1,
                                  visKontrollerte: Boolean = true): UttrekkArbeidssøkereDto {
         val antallKontrollert = uttrekkArbeidssøkerRepository.countByÅrMånedAndKontrollertIsTrue(årMåned)
-        val arbeidssøkere = hentPaginerteArbeidssøkere(årMåned, side, visKontrollerte)
+        val paginerteArbeidssøkere = hentPaginerteArbeidssøkere(årMåned, side, visKontrollerte)
+        val arbeidsssøkere = paginerteArbeidssøkere.content
+        val filtrerteArbeidsssøkere = mapTilDtoOgFiltrer(arbeidsssøkere)
         return UttrekkArbeidssøkereDto(årMåned = årMåned,
-                                       antallTotalt = arbeidssøkere.totalElements.toInt(),
+                                       antallTotalt = paginerteArbeidssøkere.totalElements.toInt(),
                                        antallKontrollert = antallKontrollert,
-                                       arbeidssøkere = arbeidssøkere.toList().map(UttrekkArbeidssøkere::tilDto))
+                                       arbeidssøkere = filtrerteArbeidsssøkere,
+                                       antallManglerTilgang = arbeidsssøkere.size - filtrerteArbeidsssøkere.size)
+    }
+
+    /**
+     * Filtrerer vekk personer som man ikke har tilgang til
+     */
+    private fun mapTilDtoOgFiltrer(arbeidsssøkere: List<UttrekkArbeidssøkere>): List<UttrekkArbeidsssøkerDto> {
+        if (arbeidsssøkere.isEmpty()) return emptyList()
+        val arbeidsssøkereMedAdresseBeskyttelse = mapTilDto(arbeidsssøkere)
+        return tilgangService.filtrerUtFortroligDataForRolle(arbeidsssøkereMedAdresseBeskyttelse) { it.second }.map { it.first }
+    }
+
+    private fun mapTilDto(arbeidsssøkere: List<UttrekkArbeidssøkere>): List<Pair<UttrekkArbeidsssøkerDto, Adressebeskyttelse?>> {
+        val personDataPåFagsakId = hentPersondataTilFagsak(arbeidsssøkere)
+        return arbeidsssøkere.map {
+            val personKort = personDataPåFagsakId[it.fagsakId] ?: error("Finner ikke data til fagsak=${it.fagsakId}")
+            val dto = it.tilDto(personIdent = personKort.first, navn = personKort.second.navn.gjeldende().visningsnavn())
+            dto to personKort.second.adressebeskyttelse.gjeldende()
+        }
+    }
+
+    private fun hentPersondataTilFagsak(arbeidsssøkere: List<UttrekkArbeidssøkere>): Map<UUID, Pair<String, PdlPersonKort>> {
+        val personIdentPåFagsakId = fagsakService.hentAktiveIdenter(arbeidsssøkere.map { it.fagsakId }.toSet())
+        val personKortPåPersonIdent = personService.hentPdlPersonKort(personIdentPåFagsakId.values.toList())
+
+        return personIdentPåFagsakId.entries.associate {
+            it.key to (it.value to (personKortPåPersonIdent[it.value] ?: error("Finner ikke data til ident=${it.value}")))
+        }
     }
 
     private fun hentPaginerteArbeidssøkere(årMåned: YearMonth,
@@ -63,10 +101,11 @@ class UttrekkArbeidssøkerService(
         }
     }
 
-    fun hentArbeidssøkere(årMåned: YearMonth = forrigeMåned().invoke()): List<VedtaksperioderForUttrekk> {
+    fun hentArbeidssøkereForUttrekk(årMåned: YearMonth = forrigeMåned().invoke()): List<VedtaksperioderForUttrekk> {
         val startdato = årMåned.atDay(1)
         val sluttdato = årMåned.atEndOfMonth()
-        val arbeidssøkere = uttrekkArbeidssøkerRepository.hentVedtaksperioderForSisteFerdigstilteBehandlinger(startdato, sluttdato)
+        val arbeidssøkere =
+                uttrekkArbeidssøkerRepository.hentVedtaksperioderForSisteFerdigstilteBehandlinger(startdato, sluttdato)
         return arbeidssøkere.filter { harPeriodeSomArbeidssøker(it, startdato, sluttdato) }
     }
 

@@ -52,4 +52,11 @@ interface FagsakRepository : RepositoryInterface<Fagsak, UUID>, InsertUpdateRepo
                     LIMIT 1""")
     fun finnAktivIdent(id: UUID): String
 
+    // language=PostgreSQL
+    @Query("""
+        SELECT DISTINCT fagsak_id AS first, FIRST_VALUE(ident) OVER (PARTITION BY fagsak_id ORDER BY endret_tid DESC) AS second
+          FROM fagsak_person
+        WHERE fagsak_id IN (:ider)""")
+    fun finnAktivIdenter(ider: Set<UUID>): List<Pair<UUID, String>>
+
 }

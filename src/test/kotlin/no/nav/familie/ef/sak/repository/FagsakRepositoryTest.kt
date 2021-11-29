@@ -3,8 +3,10 @@ package no.nav.familie.ef.sak.repository
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
+import no.nav.familie.ef.sak.felles.domain.Endret
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -78,18 +80,14 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `finnAktivIdent - skal finne aktiv ident`() {
-        val fagsak = fagsak(setOf(FagsakPerson(ident = "1"),
-                                  FagsakPerson(ident = "2", sporbar = Sporbar(opprettetTid = LocalDateTime.now().plusDays(2))),
-                                  FagsakPerson(ident = "3")))
+        val fagsak = opprettFagsakMedFlereIdenter()
         fagsakRepository.insert(fagsak)
         assertThat(fagsakRepository.finnAktivIdent(fagsak.id)).isEqualTo("2")
     }
 
     @Test
     internal fun `skal hente fagsak på behandlingId`() {
-        var fagsak = fagsak(setOf(FagsakPerson(ident = "1"),
-                                  FagsakPerson(ident = "2", sporbar = Sporbar(opprettetTid = LocalDateTime.now().plusDays(2))),
-                                  FagsakPerson(ident = "3")))
+        var fagsak = opprettFagsakMedFlereIdenter()
         fagsak = fagsakRepository.insert(fagsak)
         val behandling = behandlingRepository.insert(behandling(fagsak))
 
@@ -104,5 +102,22 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
     internal fun `skal sette eksternId til 200_000_000 som default`() {
         val fagsak = fagsakRepository.insert(fagsak())
         assertThat(fagsak.eksternId.id).isGreaterThanOrEqualTo(200_000_000)
+    }
+
+    @Test
+    internal fun `skal hente siste identen for hver fagsak`() {
+        val fagsak = fagsakRepository.insert(opprettFagsakMedFlereIdenter())
+        val fagsak2 = fagsakRepository.insert(opprettFagsakMedFlereIdenter("4", "5", "6"))
+        val aktiveIdenterPerFagsak = fagsakRepository.finnAktivIdenter(setOf(fagsak.id, fagsak2.id))
+        assertThat(aktiveIdenterPerFagsak).hasSize(2)
+        assertThat(aktiveIdenterPerFagsak.single { it.first == fagsak.id }.second).isEqualTo("2")
+        assertThat(aktiveIdenterPerFagsak.single { it.first == fagsak2.id }.second).isEqualTo("5")
+    }
+
+    private fun opprettFagsakMedFlereIdenter(ident: String = "1", ident2: String = "2", ident3: String = "3"): Fagsak {
+        val endret2DagerSiden = Sporbar(endret = Endret(endretTid = LocalDateTime.now().plusDays(2)))
+        return fagsak(setOf(FagsakPerson(ident = ident),
+                            FagsakPerson(ident = ident2, sporbar = endret2DagerSiden),
+                            FagsakPerson(ident = ident3)))
     }
 }

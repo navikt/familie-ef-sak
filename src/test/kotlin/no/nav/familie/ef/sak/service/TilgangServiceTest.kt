@@ -169,8 +169,16 @@ internal class TilgangServiceTest {
         }
     }
 
+    @Test
+    internal fun `filtrerUtFortroligDataForRolle - skal ikke filtrere bort de uten adressebeskyttelse`() {
+        val uten = pdlSøker(emptyList())
+        testWithBrukerContext(groups = listOf()) {
+            assertThat(filtrer(listOf(uten))).containsExactly(uten)
+        }
+    }
+
     private fun filtrer(personer: List<PdlSøker>): List<PdlSøker> =
-            tilgangService.filtrerUtFortroligDataForRolle(personer) { it.adressebeskyttelse.gjeldende()!! }
+            tilgangService.filtrerUtFortroligDataForRolle(personer) { it.adressebeskyttelse.gjeldende() }
 
     private fun adresseBeskyttelse(gradering: AdressebeskyttelseGradering) =
             listOf(Adressebeskyttelse(gradering, Metadata(false)))
