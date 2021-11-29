@@ -53,9 +53,8 @@ class UttrekkArbeidssøkerService(
     private fun hentPaginerteArbeidssøkere(årMåned: YearMonth,
                                            side: Int,
                                            visKontrollerte: Boolean): Page<UttrekkArbeidssøkere> {
-        feilHvis(side < 1) {
-            "Side må være større enn 0, men var side=$side"
-        }
+        feilHvis(side < 1) { "Side må være større enn 0, men var side=$side" }
+
         val pageable = PageRequest.of(side - 1, 20, Sort.by("id"))
         return if (visKontrollerte) {
             uttrekkArbeidssøkerRepository.findAllByÅrMåned(årMåned, pageable)
