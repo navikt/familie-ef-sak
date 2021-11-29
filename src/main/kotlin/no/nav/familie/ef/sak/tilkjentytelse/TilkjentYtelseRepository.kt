@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.tilkjentytelse
 
+import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.InsertUpdateRepository
 import no.nav.familie.ef.sak.repository.RepositoryInterface
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
@@ -29,13 +30,12 @@ interface TilkjentYtelseRepository : RepositoryInterface<TilkjentYtelse, UUID>, 
     @Query("""
         SELECT ty.*
         FROM tilkjent_ytelse ty 
-            JOIN behandling b ON b.id = ty.behandling_id
-        WHERE ty.behandling_id IN (:behandlingIder) 
+        WHERE ty.behandling_id IN (SELECT id FROM sist_iverksatte_behandling WHERE stonadstype=:stønadstype) 
          AND EXISTS (SELECT 1 FROM andel_tilkjent_ytelse aty 
                         WHERE ty.id = aty.tilkjent_ytelse
                          AND aty.stonad_tom >= :datoForAvstemming
                          AND aty.belop > 0)
           """)
-    fun finnTilkjentYtelserTilKonsistensavstemming(behandlingIder: Set<UUID>, datoForAvstemming: LocalDate): List<TilkjentYtelse>
+    fun finnTilkjentYtelserTilKonsistensavstemming(stønadstype: Stønadstype, datoForAvstemming: LocalDate): List<TilkjentYtelse>
 
 }

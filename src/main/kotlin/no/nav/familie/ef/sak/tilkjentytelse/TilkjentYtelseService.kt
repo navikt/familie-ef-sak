@@ -35,17 +35,7 @@ class TilkjentYtelseService(private val behandlingService: BehandlingService,
 
     fun finnTilkjentYtelserTilKonsistensavstemming(stønadstype: Stønadstype,
                                                    datoForAvstemming: LocalDate): List<KonsistensavstemmingTilkjentYtelseDto> {
-        return behandlingService.finnSisteIverksatteBehandlinger(stønadstype)
-                .chunked(1000)
-                .map(List<UUID>::toSet)
-                .flatMap { behandlingIder -> finnTilkjentYtelserTilKonsistensavstemming(behandlingIder, datoForAvstemming) }
-    }
-
-    private fun finnTilkjentYtelserTilKonsistensavstemming(behandlingIder: Set<UUID>,
-                                                           datoForAvstemming: LocalDate)
-            : List<KonsistensavstemmingTilkjentYtelseDto> {
-        val tilkjentYtelser =
-                tilkjentYtelseRepository.finnTilkjentYtelserTilKonsistensavstemming(behandlingIder, datoForAvstemming)
+        val tilkjentYtelser = tilkjentYtelseRepository.finnTilkjentYtelserTilKonsistensavstemming(stønadstype, datoForAvstemming)
         val eksterneIder = behandlingService.hentEksterneIder(tilkjentYtelser.map { it.behandlingId }.toSet())
                 .associateBy { it.behandlingId }
 

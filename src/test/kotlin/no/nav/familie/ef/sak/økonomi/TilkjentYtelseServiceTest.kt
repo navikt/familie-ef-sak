@@ -26,17 +26,11 @@ class TilkjentYtelseServiceTest {
 
     private val datoForAvstemming = LocalDate.of(2021, 2, 1)
     private val stønadstype = Stønadstype.OVERGANGSSTØNAD
-    private val behandling = behandling(fagsak())
 
     private val andel1 = lagAndelTilkjentYtelse(1, LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 31))
     private val andel2 = lagAndelTilkjentYtelse(2, LocalDate.of(2021, 2, 1), LocalDate.of(2021, 2, 28))
     private val andel3 = lagAndelTilkjentYtelse(3, LocalDate.of(2021, 3, 1), LocalDate.of(2021, 3, 31))
     private val andel4 = lagAndelTilkjentYtelse(4, LocalDate.of(2021, 1, 1), LocalDate.of(2021, 3, 31))
-
-    @BeforeEach
-    internal fun setUp() {
-        every { behandlingService.finnSisteIverksatteBehandlinger(any()) } returns setOf(behandling.id)
-    }
 
     @Test
     internal fun `konsistensavstemming - filtrer bort andeler som har 0-beløp`() {
@@ -45,7 +39,7 @@ class TilkjentYtelseServiceTest {
 
         every { behandlingService.hentEksterneIder(setOf(behandling.id)) } returns setOf(EksternId(behandling.id, 1, 1))
         every {
-            tilkjentYtelseRepository.finnTilkjentYtelserTilKonsistensavstemming(setOf(behandling.id), any())
+            tilkjentYtelseRepository.finnTilkjentYtelserTilKonsistensavstemming(fagsak.stønadstype, any())
         } returns listOf(tilkjentYtelse)
 
         val tilkjentYtelser = tilkjentYtelseService.finnTilkjentYtelserTilKonsistensavstemming(stønadstype, datoForAvstemming)
@@ -61,7 +55,7 @@ class TilkjentYtelseServiceTest {
 
         every { behandlingService.hentEksterneIder(setOf(behandling.id)) } returns setOf(EksternId(behandling.id, 1, 1))
         every {
-            tilkjentYtelseRepository.finnTilkjentYtelserTilKonsistensavstemming(setOf(behandling.id), any())
+            tilkjentYtelseRepository.finnTilkjentYtelserTilKonsistensavstemming(fagsak.stønadstype, any())
         } returns listOf(tilkjentYtelse)
 
         val tilkjentYtelser = tilkjentYtelseService.finnTilkjentYtelserTilKonsistensavstemming(stønadstype, datoForAvstemming)
@@ -78,7 +72,7 @@ class TilkjentYtelseServiceTest {
 
         every { behandlingService.hentEksterneIder(any()) } returns emptySet()
         every {
-            tilkjentYtelseRepository.finnTilkjentYtelserTilKonsistensavstemming(setOf(behandling.id), any())
+            tilkjentYtelseRepository.finnTilkjentYtelserTilKonsistensavstemming(fagsak.stønadstype, any())
         } returns listOf(tilkjentYtelse)
 
         assertThat(catchThrowable {

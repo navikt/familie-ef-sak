@@ -3,10 +3,10 @@ package no.nav.familie.ef.sak.økonomi
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.Behandling
-import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.repository.innvilgetOgFerdigstilt
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -75,33 +75,36 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `finnTilkjentYtelserTilKonsistensAvstemming`() {
         val fagsak = fagsakRepository.insert(fagsak())
-        val behandling = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.FERDIGSTILT))
+        val behandling = behandlingRepository.insert(behandling(fagsak).innvilgetOgFerdigstilt())
 
         val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(behandling)
         val stønadFom = tilkjentYtelse.andelerTilkjentYtelse.minOf { it.stønadFom }
 
         repository.insert(tilkjentYtelse)
 
-        assertThat(repository.finnTilkjentYtelserTilKonsistensavstemming(setOf(behandling.id), stønadFom.minusDays(1)))
+        assertThat(repository.finnTilkjentYtelserTilKonsistensavstemming(fagsak.stønadstype, stønadFom.minusDays(1)))
+                .withFailMessage("Skal finne alle fremtidlige tilkjente ytelser")
                 .hasSize(1)
-        assertThat(repository.finnTilkjentYtelserTilKonsistensavstemming(setOf(behandling.id), stønadFom))
+        assertThat(repository.finnTilkjentYtelserTilKonsistensavstemming(fagsak.stønadstype, stønadFom))
                 .hasSize(1)
 
-        assertThat(repository.finnTilkjentYtelserTilKonsistensavstemming(setOf(behandling.id), stønadFom.plusDays(1)))
+        assertThat(repository.finnTilkjentYtelserTilKonsistensavstemming(fagsak.stønadstype, stønadFom.plusDays(1)))
                 .isEmpty()
     }
+
 
     @Test
     internal fun `skal kun finne siste behandlingen sin tilkjenteytelse`() {
         val fagsak = fagsakRepository.insert(fagsak())
-        val behandling = behandlingRepository.insert(behandling(fagsak, opprettetTid = LocalDate.of(2021, 1, 1).atStartOfDay()))
-        val behandling2 = behandlingRepository.insert(behandling(fagsak))
+        val opprettetTid = LocalDate.of(2021, 1, 1).atStartOfDay()
+        val behandling = behandlingRepository.insert(behandling(fagsak, opprettetTid = opprettetTid).innvilgetOgFerdigstilt())
+        val behandling2 = behandlingRepository.insert(behandling(fagsak).innvilgetOgFerdigstilt())
         repository.insert(DataGenerator.tilfeldigTilkjentYtelse(behandling))
         repository.insert(DataGenerator.tilfeldigTilkjentYtelse(behandling2))
 
         assertThat(repository.findAll().map { it.behandlingId }).containsExactlyInAnyOrder(behandling.id, behandling2.id)
 
-        val result = repository.finnTilkjentYtelserTilKonsistensavstemming(setOf(behandling2.id), LocalDate.now())
+        val result = repository.finnTilkjentYtelserTilKonsistensavstemming(fagsak.stønadstype, LocalDate.now())
         assertThat(result.map { it.behandlingId }).containsExactly(behandling2.id)
     }
 
@@ -109,14 +112,15 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
     internal fun `finnTilkjentYtelserTilKonsistensavstemming skal ikke få med tilkjent ytelser som kun har 0-beløp`() {
         val beløp = 0
         val fagsak = fagsakRepository.insert(fagsak())
-        val behandling = behandlingRepository.insert(behandling(fagsak, opprettetTid = LocalDate.of(2021, 1, 1).atStartOfDay()))
+        val behandling = behandlingRepository.insert(behandling(fagsak, opprettetTid = LocalDate.of(2021, 1, 1).atStartOfDay())
+                                                             .innvilgetOgFerdigstilt())
         val andelerTilkjentYtelse = listOf(lagAndelTilkjentYtelse(beløp = beløp,
                                                                   fraOgMed = LocalDate.now(),
                                                                   tilOgMed = LocalDate.now().plusDays(1),
                                                                   kildeBehandlingId = behandling.id))
         repository.insert(DataGenerator.tilfeldigTilkjentYtelse(behandling).copy(andelerTilkjentYtelse = andelerTilkjentYtelse))
 
-        assertThat(repository.finnTilkjentYtelserTilKonsistensavstemming(setOf(behandling.id), LocalDate.now()))
+        assertThat(repository.finnTilkjentYtelserTilKonsistensavstemming(fagsak.stønadstype, LocalDate.now()))
                 .isEmpty()
     }
 

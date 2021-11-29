@@ -12,6 +12,8 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BeregnYtelseSteg
 import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
@@ -74,6 +76,22 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
         opprettdata()
         val arbeidssøkere = service.hentArbeidssøkere(februar2021)
         assertThat(arbeidssøkere).isEmpty()
+    }
+
+    @Test
+    internal fun `skal ikke finne uttrekk for andre stønader enn overgangsstønad`() {
+        val identer = fagsakpersoner(setOf("1"))
+        val fagsak = fagsak(identer)
+        val faksakSkolepenger = fagsak(identer, Stønadstype.SKOLEPENGER)
+        listOf(fagsak, faksakSkolepenger).forEach {
+            val fagsak = fagsakRepository.insert(it)
+            val behandling = behandlingRepository.insert(behandling(fagsak))
+            innvilg(behandling, listOf(vedtaksperiode))
+            ferdigstillBehandling(behandling)
+        }
+        val uttrekk = service.hentArbeidssøkere(januar2021)
+        assertThat(uttrekk).hasSize(1)
+        assertThat(uttrekk.first().fagsakId).isEqualTo(fagsak.id)
     }
 
     @Test
