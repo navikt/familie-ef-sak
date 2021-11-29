@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
+import no.nav.familie.ef.sak.felles.domain.Endret
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -79,7 +80,7 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `finnAktivIdent - skal finne aktiv ident`() {
         val fagsak = fagsak(setOf(FagsakPerson(ident = "1"),
-                                  FagsakPerson(ident = "2", sporbar = Sporbar(opprettetTid = LocalDateTime.now().plusDays(2))),
+                                  FagsakPerson(ident = "2", sporbar = Sporbar(endret = Endret(endretTid = LocalDateTime.now().plusDays(2)))),
                                   FagsakPerson(ident = "3")))
         fagsakRepository.insert(fagsak)
         assertThat(fagsakRepository.finnAktivIdent(fagsak.id)).isEqualTo("2")
@@ -88,7 +89,7 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `skal hente fagsak på behandlingId`() {
         var fagsak = fagsak(setOf(FagsakPerson(ident = "1"),
-                                  FagsakPerson(ident = "2", sporbar = Sporbar(opprettetTid = LocalDateTime.now().plusDays(2))),
+                                  FagsakPerson(ident = "2", sporbar = Sporbar(endret = Endret(endretTid = LocalDateTime.now().minusDays(2)))),
                                   FagsakPerson(ident = "3")))
         fagsak = fagsakRepository.insert(fagsak)
         val behandling = behandlingRepository.insert(behandling(fagsak))
