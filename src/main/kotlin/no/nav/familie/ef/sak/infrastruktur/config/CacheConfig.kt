@@ -80,8 +80,10 @@ fun <T, R> CacheManager.getCachedOrLoad(cacheName: String,
     val previousValues: List<Pair<T, R?>> = values.distinct().map { it to cache.get(it)?.get() as R? }.toList()
 
     val cachedValues = previousValues.mapNotNull { if (it.second == null) null else it }.toMap() as Map<T, R>
-    val loadedValues: Map<T, R> = valueLoader(previousValues.filter { it.second == null }.map { it.first })
-
+    val valuesWithoutCache = previousValues.filter { it.second == null }.map { it.first }
+    val loadedValues: Map<T, R> = valuesWithoutCache
+                                          .takeIf { it.isNotEmpty() }
+                                          ?.let { valueLoader(it) } ?: emptyMap()
     loadedValues.forEach { cache.put(it.key, it.value) }
 
     return cachedValues + loadedValues
