@@ -16,6 +16,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseMappe
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.KjønnMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonFraSøk
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -29,13 +30,17 @@ class SøkService(private val fagsakRepository: FagsakRepository,
                  private val fagsakService: FagsakService) {
 
     fun søkPerson(personIdentFraRequest: String): Søkeresultat {
-        val fagsaker = fagsakRepository.findBySøkerIdent(personIdentFraRequest)
+        val personIdenter = personService.hentPersonIdenter(personIdentFraRequest)
+        if (personIdenter.identer.isEmpty()) {
+            throw ApiFeil("Finner ingen personer for søket", HttpStatus.BAD_REQUEST)
+        }
+        val fagsaker = fagsakRepository.findBySøkerIdent(personIdenter.identer())
 
         if (fagsaker.isEmpty()) {
             throw ApiFeil("Finner ikke fagsak for søkte personen", HttpStatus.BAD_REQUEST)
         }
 
-        val personIdent = fagsaker.first().hentAktivIdent()
+        val personIdent = personIdenter.gjeldende().ident
         val person = personService.hentSøker(personIdent)
 
         return Søkeresultat(personIdent = personIdent,
@@ -69,13 +74,13 @@ class SøkService(private val fagsakRepository: FagsakRepository,
         val søker = personService.hentSøker(aktivIdent)
         val aktuelleBostedsadresser = søker.bostedsadresse.filterNot { it.metadata.historisk }
         val bostedsadresse = aktuelleBostedsadresser.singleOrNull()
-            ?: throw Feil("Finner 0 eller fler enn 1 bostedsadresse")
+                             ?: throw Feil("Finner 0 eller fler enn 1 bostedsadresse")
 
         val søkeKriterier = PdlPersonSøkHjelper.lagPdlPersonSøkKriterier(bostedsadresse)
         if (søkeKriterier.isEmpty()) {
             throw Feil(
-                message = "Får ikke laget søkekriterer for bostedsadresse=$bostedsadresse",
-                frontendFeilmelding = "Klarer ikke av å lage søkekriterer for bostedsadressen til person"
+                    message = "Får ikke laget søkekriterer for bostedsadresse=$bostedsadresse",
+                    frontendFeilmelding = "Klarer ikke av å lage søkekriterer for bostedsadressen til person"
             )
         }
 

@@ -49,7 +49,7 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
         var fagsak2 = fagsak(identer = fagsakPerson, stønadstype = Stønadstype.SKOLEPENGER)
         fagsak1 = fagsakRepository.insert(fagsak1)
         fagsak2 = fagsakRepository.insert(fagsak2)
-        val fagsaker = fagsakRepository.findBySøkerIdent("12345678901")
+        val fagsaker = fagsakRepository.findBySøkerIdent(setOf("12345678901"))
 
         assertThat(fagsaker.forEach { fagsak ->
             assertThat(fagsak.søkerIdenter.size).isEqualTo(1)
