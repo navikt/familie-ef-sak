@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.beregning.BeregningService
 import no.nav.familie.ef.sak.beregning.tilInntektsperioder
+import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
@@ -28,7 +29,8 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                        private val beregningService: BeregningService,
                        private val simuleringService: SimuleringService,
                        private val vedtakService: VedtakService,
-                       private val tilbakekrevingService: TilbakekrevingService) : BehandlingSteg<VedtakDto> {
+                       private val tilbakekrevingService: TilbakekrevingService,
+                       private val fagsakService: FagsakService) : BehandlingSteg<VedtakDto> {
 
 
     override fun validerSteg(behandling: Behandling) {
@@ -40,7 +42,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
     }
 
     override fun utførSteg(behandling: Behandling, data: VedtakDto) {
-        val aktivIdent = behandlingService.hentAktivIdent(behandling.id)
+        val aktivIdent = fagsakService.fagsakMedOppdatertPersonIdent(behandling.fagsakId).hentAktivIdent()
         nullstillEksisterendeVedtakPåBehandling(behandling.id)
         vedtakService.lagreVedtak(vedtakDto = data, behandlingId = behandling.id)
 

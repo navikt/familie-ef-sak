@@ -49,9 +49,9 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
     }
 
     override fun utførOgReturnerNesteSteg(behandling: Behandling, data: BeslutteVedtakDto): StegType {
+        fagsakService.fagsakMedOppdatertPersonIdent(behandling.fagsakId)
         val saksbehandler = totrinnskontrollService.lagreTotrinnskontrollOgReturnerBehandler(behandling, data)
         val beslutter = SikkerhetContext.hentSaksbehandler(strict = true)
-
         val oppgaveId = ferdigstillOppgave(behandling)
 
         return if (data.godkjent) {

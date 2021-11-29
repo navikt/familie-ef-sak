@@ -18,6 +18,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlSøker
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlSøkerData
 import no.nav.familie.http.client.AbstractPingableRestClient
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestOperations
@@ -92,6 +93,7 @@ class PdlClient(val pdlConfig: PdlConfig,
      * @param historikk default false, tar med historikk hvis det er ønskelig
      * @return liste med folkeregisteridenter
      */
+    @Cacheable("personidenter", cacheManager = "shortCache")
     fun hentPersonidenter(ident: String, historikk: Boolean = false): PdlIdenter {
         val pdlPersonRequest = PdlIdentRequest(variables = PdlIdentRequestVariables(ident, "FOLKEREGISTERIDENT", historikk),
                                                query = PdlConfig.hentIdentQuery)
