@@ -36,10 +36,7 @@ class StartBehandlingTask(private val iverksettClient: IverksettClient,
     }
 
     private fun finnesEnIverksattBehandlingFor(fagsak: Fagsak) =
-            behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(
-                    fagsak.stønadstype,
-                    fagsak.søkerIdenter.map { it.ident }.toSet()
-            ) != null
+            behandlingRepository.finnSisteIverksatteBehandling(fagsak.id) != null
 
     companion object {
 

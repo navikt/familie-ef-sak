@@ -41,25 +41,24 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
         return StegType.BEREGNE_YTELSE
     }
 
-    override fun utførSteg(behandling: Behandling, vedtak: VedtakDto) {
+    override fun utførSteg(behandling: Behandling, data: VedtakDto) {
         val aktivIdent = fagsakService.fagsakMedOppdatertPersonIdent(behandling.fagsakId).hentAktivIdent()
         nullstillEksisterendeVedtakPåBehandling(behandling.id)
-        vedtakService.lagreVedtak(vedtakDto = vedtak, behandlingId = behandling.id)
+        vedtakService.lagreVedtak(vedtakDto = data, behandlingId = behandling.id)
 
-        when (vedtak) {
+        when (data) {
             is Innvilget -> {
-                opprettTilkjentYtelseForInnvilgetBehandling(vedtak, behandling, aktivIdent)
+                opprettTilkjentYtelseForInnvilgetBehandling(data, behandling, aktivIdent)
                 simuleringService.hentOgLagreSimuleringsresultat(behandling)
             }
             is Opphør -> {
-                opprettTilkjentYtelseForOpphørtBehandling(behandling, vedtak, aktivIdent)
+                opprettTilkjentYtelseForOpphørtBehandling(behandling, data, aktivIdent)
                 simuleringService.hentOgLagreSimuleringsresultat(behandling)
             }
             is Avslå -> {
                 simuleringService.slettSimuleringForBehandling(behandling.id)
                 tilbakekrevingService.slettTilbakekreving(behandling.id)
             }
-            else -> error("Kan ikke utføre steg ${stegType()} for behandling ${behandling.id}")
         }
     }
 

@@ -16,7 +16,7 @@ object DataGenerator {
     private fun flereTilfeldigeAndelerTilkjentYtelse(antall: Int, behandlingId: UUID): List<AndelTilkjentYtelse> =
             (1..antall).map { tilfeldigAndelTilkjentYtelse(behandlingId = behandlingId) }.toList()
 
-    private fun tilfeldigAndelTilkjentYtelse(beløp: Int = Random().nextInt(),
+    private fun tilfeldigAndelTilkjentYtelse(beløp: Int = Random().nextInt(20_000) + 1,
                                              stønadFom: LocalDate = LocalDate.now(),
                                              stønadTom: LocalDate = LocalDate.now(),
                                              behandlingId: UUID,

@@ -22,10 +22,9 @@ object BarnMedSamværMapper {
         val registergrunnlagPaaId = registergrunnlag.associateBy { it.id }
         return søknadsgrunnlag.map {
             val id = it.id
-            val registergrunnlag = registergrunnlagPaaId[id] ?: error("Savner registergrunnlag for barn=$id")
             BarnMedSamværDto(barnId = id,
                              søknadsgrunnlag = it,
-                             registergrunnlag = registergrunnlag)
+                             registergrunnlag = registergrunnlagPaaId[id] ?: error("Savner registergrunnlag for barn=$id"))
         }
     }
 

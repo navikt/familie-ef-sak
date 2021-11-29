@@ -74,7 +74,7 @@ enum class StegType(val rekkefølge: Int,
         return this.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() }
     }
 
-    fun kommerEtter(steg: StegType, behandlingType: BehandlingType): Boolean {
+    fun kommerEtter(steg: StegType): Boolean {
         return this.rekkefølge > steg.rekkefølge
     }
 

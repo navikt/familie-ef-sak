@@ -415,7 +415,7 @@ internal class BeregnYtelseStegTest {
     private fun utførSteg(type: BehandlingType,
                           vedtak: VedtakDto = Innvilget(periodeBegrunnelse = "", inntektBegrunnelse = ""),
                           forrigeBehandlingId: UUID? = null) {
-        steg.utførSteg(behandling(fagsak(), type = type, forrigeBehandlingId = forrigeBehandlingId), vedtak = vedtak)
+        steg.utførSteg(behandling(fagsak(), type = type, forrigeBehandlingId = forrigeBehandlingId), data = vedtak)
     }
 
     private fun lagBeløpsperiode(fom: LocalDate, tom: LocalDate) =
