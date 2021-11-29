@@ -48,7 +48,7 @@ interface FagsakRepository : RepositoryInterface<Fagsak, UUID>, InsertUpdateRepo
     // language=PostgreSQL
     @Query("""SELECT fp.ident FROM fagsak_person fp
                     WHERE fp.fagsak_id=:id
-                    ORDER BY fp.opprettet_tid DESC
+                    ORDER BY fp.endret_tid DESC
                     LIMIT 1""")
     fun finnAktivIdent(id: UUID): String
 
