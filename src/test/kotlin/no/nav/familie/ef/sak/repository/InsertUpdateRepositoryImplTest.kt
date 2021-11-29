@@ -68,14 +68,18 @@ internal class InsertUpdateRepositoryImplTest : OppslagSpringRunnerTest() {
      */
     @Test
     internal fun `skal oppdatere endretTid på rot-entitet, men ikke barne-entiteter `() {
-        val fagsak = fagsakRepository.insert(fagsak(stønadstype = Stønadstype.BARNETILSYN, identer = setOf(FagsakPerson("12345"))))
+        val personIdent = "12345"
+        val nyPersonIdent = "1234"
+        val fagsak = fagsakRepository.insert(fagsak(stønadstype = Stønadstype.BARNETILSYN,
+                                                    identer = setOf(FagsakPerson(personIdent))))
         Thread.sleep(200)
         val oppdatertFagsak = fagsakRepository.update(
                 fagsak.copy(stønadstype = Stønadstype.OVERGANGSSTØNAD,
-                            søkerIdenter = fagsak.søkerIdenter.map { it.copy(ident = "1234") }.toSet())
+                            søkerIdenter = fagsak.søkerIdenter.map { it.copy(ident = nyPersonIdent) }
+                                                   .toSet() + FagsakPerson("99999"))
         )
-        val oppdatertSøkerIdent = oppdatertFagsak.søkerIdenter.first()
-        val originalSøkerIdent = fagsak.søkerIdenter.first()
+        val oppdatertSøkerIdent = oppdatertFagsak.søkerIdenter.first { it.ident == nyPersonIdent }
+        val originalSøkerIdent = fagsak.søkerIdenter.first { it.ident == personIdent }
 
         assertThat(fagsak.sporbar.endret.endretTid).isBefore(oppdatertFagsak.sporbar.endret.endretTid)
         assertThat(oppdatertFagsak.sporbar.opprettetTid).isBefore(oppdatertFagsak.sporbar.endret.endretTid)
