@@ -14,7 +14,7 @@ object BrukerContextUtil {
         RequestContextHolder.resetRequestAttributes()
     }
 
-    fun mockBrukerContext(preferredUsername: String) {
+    fun mockBrukerContext(preferredUsername: String = "A", groups: List<String> = emptyList()) {
         val tokenValidationContext = mockk<TokenValidationContext>()
         val jwtTokenClaims = mockk<JwtTokenClaims>()
         val requestAttributes = mockk<RequestAttributes>()
@@ -27,5 +27,16 @@ object BrukerContextUtil {
         every { jwtTokenClaims.get("preferred_username") } returns preferredUsername
         every { jwtTokenClaims.get("NAVident") } returns preferredUsername
         every { jwtTokenClaims.get("name") } returns preferredUsername
+        every { jwtTokenClaims.get("groups") } returns groups
+    }
+
+    fun testWithBrukerContext(preferredUsername: String = "A", groups: List<String> = emptyList(), fn: () -> Unit) {
+        mockBrukerContext()
+        try {
+            mockBrukerContext(preferredUsername, groups)
+            fn()
+        } finally {
+            clearBrukerContext()
+        }
     }
 }

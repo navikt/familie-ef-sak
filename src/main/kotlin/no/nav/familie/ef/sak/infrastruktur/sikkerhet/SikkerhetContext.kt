@@ -42,7 +42,7 @@ object SikkerhetContext {
                       onFailure = { if (strict) error("Finner ikke navn på innlogget bruker") else SYSTEM_NAVN })
     }
 
-    private fun hentGruppeFraToken(): List<String> {
+    fun hentGrupperFraToken(): List<String> {
         return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
                 .fold(onSuccess = {
                     @Suppress("UNCHECKED_CAST")
@@ -52,7 +52,7 @@ object SikkerhetContext {
     }
 
     fun harTilgangTilGittRolle(rolleConfig: RolleConfig, minimumsrolle: BehandlerRolle): Boolean {
-        val rollerFraToken = hentGruppeFraToken()
+        val rollerFraToken = hentGrupperFraToken()
         val rollerForBruker = when {
             hentSaksbehandler() == SYSTEM_FORKORTELSE -> listOf(BehandlerRolle.SYSTEM,
                                                                 BehandlerRolle.BESLUTTER,
