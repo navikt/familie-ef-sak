@@ -66,25 +66,27 @@ class UttrekkArbeidssøkerService(
      */
     private fun mapTilDtoOgFiltrer(arbeidsssøkere: List<UttrekkArbeidssøkere>): List<UttrekkArbeidsssøkerDto> {
         if (arbeidsssøkere.isEmpty()) return emptyList()
-        val arbeidsssøkereMedAdresseBeskyttelse = mapTilDto(arbeidsssøkere)
+        val arbeidsssøkereMedAdresseBeskyttelse = tilDtoMedAdressebeskyttelse(arbeidsssøkere)
         return tilgangService.filtrerUtFortroligDataForRolle(arbeidsssøkereMedAdresseBeskyttelse) { it.second }.map { it.first }
     }
 
-    private fun mapTilDto(arbeidsssøkere: List<UttrekkArbeidssøkere>): List<Pair<UttrekkArbeidsssøkerDto, Adressebeskyttelse?>> {
-        val personDataPåFagsakId = hentPersondataTilFagsak(arbeidsssøkere)
+    private fun tilDtoMedAdressebeskyttelse(arbeidsssøkere: List<UttrekkArbeidssøkere>)
+            : List<Pair<UttrekkArbeidsssøkerDto, Adressebeskyttelse?>> {
+        val persondataPåFagsak = hentPersondataTilFagsak(arbeidsssøkere)
         return arbeidsssøkere.map {
-            val personKort = personDataPåFagsakId[it.fagsakId] ?: error("Finner ikke data til fagsak=${it.fagsakId}")
-            val dto = it.tilDto(personIdent = personKort.first, navn = personKort.second.navn.gjeldende().visningsnavn())
-            dto to personKort.second.adressebeskyttelse.gjeldende()
+            val persondata = persondataPåFagsak[it.fagsakId] ?: error("Finner ikke data til fagsak=${it.fagsakId}")
+            val pdlPersonKort = persondata.pdlPersonKort
+            val dto = it.tilDto(personIdent = persondata.personIdent, navn = pdlPersonKort.navn.gjeldende().visningsnavn())
+            dto to pdlPersonKort.adressebeskyttelse.gjeldende()
         }
     }
 
-    private fun hentPersondataTilFagsak(arbeidsssøkere: List<UttrekkArbeidssøkere>): Map<UUID, Pair<String, PdlPersonKort>> {
-        val personIdentPåFagsakId = fagsakService.hentAktiveIdenter(arbeidsssøkere.map { it.fagsakId }.toSet())
-        val personKortPåPersonIdent = personService.hentPdlPersonKort(personIdentPåFagsakId.values.toList())
+    private fun hentPersondataTilFagsak(arbeidsssøkere: List<UttrekkArbeidssøkere>): Map<UUID, Persondata> {
+        val personIdentPåFagsak = fagsakService.hentAktiveIdenter(arbeidsssøkere.map { it.fagsakId }.toSet())
+        val personKortPåPersonIdent = personService.hentPdlPersonKort(personIdentPåFagsak.values.toList())
 
-        return personIdentPåFagsakId.entries.associate {
-            it.key to (it.value to (personKortPåPersonIdent[it.value] ?: error("Finner ikke data til ident=${it.value}")))
+        return personIdentPåFagsak.entries.associateBy({ it.key }) {
+            Persondata(it.value, personKortPåPersonIdent[it.value] ?: error("Finner ikke data til ident=${it.value}"))
         }
     }
 
@@ -122,4 +124,5 @@ class UttrekkArbeidssøkerService(
             (it.aktivitet == AktivitetType.FORSØRGER_REELL_ARBEIDSSØKER
              || it.aktivitet == AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID_REELL_ARBEIDSSØKER)
 
+    private data class Persondata(val personIdent: String, val pdlPersonKort: PdlPersonKort)
 }
