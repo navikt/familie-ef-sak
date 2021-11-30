@@ -3,6 +3,8 @@ package no.nav.familie.ef.sak.opplysninger.personopplysninger
 import no.nav.familie.ef.sak.infrastruktur.config.getCachedOrLoad
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.SøkerMedBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Familierelasjonsrolle
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonKort
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlSøker
 import org.springframework.beans.factory.annotation.Qualifier
@@ -26,6 +28,8 @@ class PersonService(
                 .map { it.relatertPersonsIdent }
         return SøkerMedBarn(ident, søker, pdlClient.hentBarn(barnIdentifikatorer))
     }
+
+    fun hentPersonIdenter(ident: String): PdlIdenter = pdlClient.hentPersonidenter(ident = ident, historikk = true)
 
     /**
      * PDL gjør ingen tilgangskontroll i bolkoppslag, så bruker av denne metode må ha gjort tilgangskontroll

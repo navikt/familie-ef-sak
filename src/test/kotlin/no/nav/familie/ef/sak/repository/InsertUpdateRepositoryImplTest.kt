@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.repository
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
+import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
@@ -57,6 +58,35 @@ internal class InsertUpdateRepositoryImplTest : OppslagSpringRunnerTest() {
         fagsakRepository.findAll().forEach {
             assertThat(it.stønadstype).isEqualTo(Stønadstype.OVERGANGSSTØNAD)
         }
+    }
+
+
+    /**
+     * Dersom denne testen slutter å fungere og endretTid oppdateres for alle søkerIdenter ved endring av fagsak/søkerIdenter
+     * må vi endre bruken av aktivIdent til å sjekke på opprettetTid - samt jukse med opprettetTid
+     * dersom en gammel personIdent gjenbrukes
+     */
+    @Test
+    internal fun `skal oppdatere endretTid på rot-entitet, men ikke barne-entiteter `() {
+        val personIdent = "12345"
+        val nyPersonIdent = "1234"
+        val fagsak = fagsakRepository.insert(fagsak(stønadstype = Stønadstype.BARNETILSYN,
+                                                    identer = setOf(FagsakPerson(personIdent))))
+        Thread.sleep(200)
+        val oppdatertFagsak = fagsakRepository.update(
+                fagsak.copy(stønadstype = Stønadstype.OVERGANGSSTØNAD,
+                            søkerIdenter = fagsak.søkerIdenter.map { it.copy(ident = nyPersonIdent) }
+                                                   .toSet() + FagsakPerson("99999"))
+        )
+        val oppdatertSøkerIdent = oppdatertFagsak.søkerIdenter.first { it.ident == nyPersonIdent }
+        val originalSøkerIdent = fagsak.søkerIdenter.first { it.ident == personIdent }
+
+        assertThat(fagsak.sporbar.endret.endretTid).isBefore(oppdatertFagsak.sporbar.endret.endretTid)
+        assertThat(oppdatertFagsak.sporbar.opprettetTid).isBefore(oppdatertFagsak.sporbar.endret.endretTid)
+        assertThat(oppdatertFagsak.sporbar.opprettetTid).isEqualTo(fagsak.sporbar.opprettetTid)
+
+        assertThat(originalSøkerIdent.sporbar.endret.endretTid).isEqualTo(oppdatertSøkerIdent.sporbar.endret.endretTid)
+        assertThat(originalSøkerIdent.sporbar.opprettetTid).isEqualTo(oppdatertSøkerIdent.sporbar.opprettetTid)
     }
 
     @Test

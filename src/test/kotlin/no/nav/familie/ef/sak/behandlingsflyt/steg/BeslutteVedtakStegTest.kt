@@ -99,6 +99,9 @@ internal class BeslutteVedtakStegTest {
             fagsakService.hentAktivIdent(any())
         } returns fagsak.hentAktivIdent()
         every {
+            fagsakService.fagsakMedOppdatertPersonIdent(any())
+        } returns fagsak
+        every {
             taskRepository.save(capture(taskSlot))
         } returns Task("", "", Properties())
         every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(any(), any()) } returns oppgave
