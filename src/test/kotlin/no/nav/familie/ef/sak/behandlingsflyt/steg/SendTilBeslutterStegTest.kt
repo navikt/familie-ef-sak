@@ -32,6 +32,7 @@ import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
+import no.nav.familie.ef.sak.vedtak.VedtakRepository
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
@@ -59,6 +60,7 @@ internal class SendTilBeslutterStegTest {
     private val behandlingService = mockk<BehandlingService>(relaxed = true)
     private val vedtaksbrevRepository = mockk<VedtaksbrevRepository>()
     private val vedtakService = mockk<VedtakService>()
+    private val vedtakRepository = mockk<VedtakRepository>(relaxed = true)
     private val simuleringService = mockk<SimuleringService>()
     private val tilbakekrevingService = mockk<TilbakekrevingService>()
     private val vurderingService = mockk<VurderingService>()
@@ -79,6 +81,7 @@ internal class SendTilBeslutterStegTest {
                                  behandlingService,
                                  vedtaksbrevRepository,
                                  vedtakService,
+                                 vedtakRepository,
                                  simuleringService,
                                  tilbakekrevingService,
                                  vurderingService)

@@ -43,9 +43,8 @@ class VedtakController(private val stegService: StegService,
     @PostMapping("/{behandlingId}/send-til-beslutter/verge")
     fun sendTilBeslutterVerge(@PathVariable behandlingId: UUID, @RequestBody brevmottakere: List<Brevmottaker>): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
-        vedtakService.leggTilBrevmottakere(behandlingId, brevmottakere)
         val behandling = behandlingService.hentBehandling(behandlingId)
-        return Ressurs.success(stegService.håndterSendTilBeslutter(behandling).id)
+        return Ressurs.success(stegService.håndterSendTilBeslutter(behandling, brevmottakere).id)
     }
 
     @PostMapping("/{behandlingId}/beslutte-vedtak")

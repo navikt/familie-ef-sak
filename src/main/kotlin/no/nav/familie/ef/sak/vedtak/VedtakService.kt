@@ -1,14 +1,11 @@
 package no.nav.familie.ef.sak.vedtak
 
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.repository.findAllByIdOrThrow
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
-import no.nav.familie.ef.sak.vedtak.domain.BrevmottakereWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtak
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtakDto
-import no.nav.familie.kontrakter.ef.iverksett.Brevmottaker
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -47,23 +44,6 @@ class VedtakService(private val vedtakRepository: VedtakRepository) {
         val vedtak = hentVedtak(behandlingId)
         val oppdatertVedtak = vedtak.copy(beslutterIdent = beslutterIdent)
         vedtakRepository.update(oppdatertVedtak)
-    }
-
-    fun leggTilBrevmottakere(behandlingId: UUID, brevmottakere: List<Brevmottaker>) {
-        val vedtak = hentVedtak(behandlingId)
-
-        validerAntallBrevmottakere(brevmottakere)
-
-        vedtakRepository.update(vedtak.copy(brevmottakere = BrevmottakereWrapper(brevmottakere)))
-    }
-
-    private fun validerAntallBrevmottakere(brevmottakere: List<Brevmottaker>) {
-        feilHvis(brevmottakere.isEmpty()) {
-            "Vedtaksbrevet må ha minst 1 mottaker"
-        }
-        feilHvis(brevmottakere.size > 2) {
-            "Vedtaksbrevet kan ikke ha mer enn 2 mottakere"
-        }
     }
 
 }

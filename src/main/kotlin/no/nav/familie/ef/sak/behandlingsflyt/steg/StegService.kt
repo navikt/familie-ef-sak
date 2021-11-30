@@ -25,6 +25,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
+import no.nav.familie.kontrakter.ef.iverksett.Brevmottaker
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -64,10 +65,10 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
     }
 
     @Transactional
-    fun håndterSendTilBeslutter(behandling: Behandling): Behandling {
+    fun håndterSendTilBeslutter(behandling: Behandling, brevmottakere: List<Brevmottaker>? = null): Behandling {
         val behandlingSteg: SendTilBeslutterSteg = hentBehandlingSteg(SEND_TIL_BESLUTTER)
 
-        return håndterSteg(behandling, behandlingSteg, null)
+        return håndterSteg(behandling, behandlingSteg, brevmottakere)
     }
 
     @Transactional
