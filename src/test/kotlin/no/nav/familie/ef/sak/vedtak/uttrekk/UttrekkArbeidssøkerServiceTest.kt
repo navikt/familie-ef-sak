@@ -151,7 +151,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `hentUttrekkArbeidssøkere - skal hente alle som ikke er kontrollert`() {
+    internal fun `hentUttrekkArbeidssøkere - skal hente alle som ikke er kontrollert paginert`() {
         opprettdata()
         for (i in 1..20) {
             val arbeidssøkere = UttrekkArbeidssøkere(fagsakId = fagsak.id, vedtakId = behandling.id, årMåned = mars2021)
@@ -167,6 +167,11 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
         assertThat(uttrekk.antallTotalt).isEqualTo(22)
         assertThat(uttrekk.antallKontrollert).isEqualTo(2)
         assertThat(uttrekk.arbeidssøkere.size).isEqualTo(20)
+
+        val uttrekk2 = service.hentUttrekkArbeidssøkere(mars2021, 2, visKontrollerte = false)
+        assertThat(uttrekk2.antallTotalt).isEqualTo(22)
+        assertThat(uttrekk2.antallKontrollert).isEqualTo(2)
+        assertThat(uttrekk2.arbeidssøkere.size).isEqualTo(2)
     }
 
     @Nested
