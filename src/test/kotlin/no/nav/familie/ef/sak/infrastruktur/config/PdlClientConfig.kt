@@ -75,9 +75,7 @@ class PdlClientConfig {
 
         every { pdlClient.ping() } just runs
 
-        every { pdlClient.hentPersonKortBolk(any()) } answers {
-            (firstArg() as List<String>).associate { it to PdlPersonKort(lagNavn(fornavn = it), emptyList()) }
-        }
+        every { pdlClient.hentPersonKortBolk(any()) } answers { firstArg<List<String>>().associate { it to lagPersonKort(it) } }
 
         every { pdlClient.hentSøker(any()) } returns opprettPdlSøker()
 
@@ -103,6 +101,12 @@ class PdlClientConfig {
         private const val annenForelderFnr = "17097926735"
         private const val fnrPåAdresseSøk = "01012067050"
         private val metadataGjeldende = Metadata(historisk = false)
+
+        fun lagPersonKort(it: String) =
+                PdlPersonKort(listOf(Adressebeskyttelse(gradering = AdressebeskyttelseGradering.UGRADERT,
+                                                        metadata = metadataGjeldende)),
+                              lagNavn(fornavn = it),
+                              emptyList())
 
         fun opprettPdlSøker() =
                 PdlSøker(adressebeskyttelse = listOf(Adressebeskyttelse(gradering = AdressebeskyttelseGradering.UGRADERT,
@@ -226,7 +230,7 @@ class PdlClientConfig {
                 listOf(Sivilstand(type = Sivilstandstype.GIFT,
                                   gyldigFraOgMed = startdato,
                                   relatertVedSivilstand = "11111122222",
-                                  bekreftelsesdato = LocalDate.of(2020,1,1),
+                                  bekreftelsesdato = LocalDate.of(2020, 1, 1),
                                   metadata = metadataGjeldende))
 
         private fun fullmakter(): List<Fullmakt> =

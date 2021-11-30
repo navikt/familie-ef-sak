@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.beregning.BeregningService
 import no.nav.familie.ef.sak.beregning.tilInntektsperioder
+import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
@@ -28,7 +29,8 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                        private val beregningService: BeregningService,
                        private val simuleringService: SimuleringService,
                        private val vedtakService: VedtakService,
-                       private val tilbakekrevingService: TilbakekrevingService) : BehandlingSteg<VedtakDto> {
+                       private val tilbakekrevingService: TilbakekrevingService,
+                       private val fagsakService: FagsakService) : BehandlingSteg<VedtakDto> {
 
 
     override fun validerSteg(behandling: Behandling) {
@@ -39,25 +41,24 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
         return StegType.BEREGNE_YTELSE
     }
 
-    override fun utførSteg(behandling: Behandling, vedtak: VedtakDto) {
-        val aktivIdent = behandlingService.hentAktivIdent(behandling.id)
+    override fun utførSteg(behandling: Behandling, data: VedtakDto) {
+        val aktivIdent = fagsakService.fagsakMedOppdatertPersonIdent(behandling.fagsakId).hentAktivIdent()
         nullstillEksisterendeVedtakPåBehandling(behandling.id)
-        vedtakService.lagreVedtak(vedtakDto = vedtak, behandlingId = behandling.id)
+        vedtakService.lagreVedtak(vedtakDto = data, behandlingId = behandling.id)
 
-        when (vedtak) {
+        when (data) {
             is Innvilget -> {
-                opprettTilkjentYtelseForInnvilgetBehandling(vedtak, behandling, aktivIdent)
+                opprettTilkjentYtelseForInnvilgetBehandling(data, behandling, aktivIdent)
                 simuleringService.hentOgLagreSimuleringsresultat(behandling)
             }
             is Opphør -> {
-                opprettTilkjentYtelseForOpphørtBehandling(behandling, vedtak, aktivIdent)
+                opprettTilkjentYtelseForOpphørtBehandling(behandling, data, aktivIdent)
                 simuleringService.hentOgLagreSimuleringsresultat(behandling)
             }
             is Avslå -> {
                 simuleringService.slettSimuleringForBehandling(behandling.id)
                 tilbakekrevingService.slettTilbakekreving(behandling.id)
             }
-            else -> error("Kan ikke utføre steg ${stegType()} for behandling ${behandling.id}")
         }
     }
 

@@ -30,7 +30,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
                     JOIN behandling b ON f.id = b.fagsak_id
                     JOIN fagsak_person fp ON b.fagsak_id=fp.fagsak_id
                     WHERE b.id = :behandlingId
-                    ORDER BY fp.opprettet_tid DESC 
+                    ORDER BY fp.endret_tid DESC 
                     LIMIT 1
                     """)
     fun finnAktivIdent(behandlingId: UUID): String

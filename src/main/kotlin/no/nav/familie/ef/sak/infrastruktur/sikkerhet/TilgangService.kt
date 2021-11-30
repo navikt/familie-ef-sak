@@ -5,7 +5,12 @@ import no.nav.familie.ef.sak.behandlingsflyt.steg.BehandlerRolle
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.infrastruktur.exception.ManglerTilgang
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext.hentGrupperFraToken
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Adressebeskyttelse
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.AdressebeskyttelseGradering.FORTROLIG
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.AdressebeskyttelseGradering.STRENGT_FORTROLIG
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND
 import org.springframework.cache.CacheManager
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -72,6 +77,22 @@ class TilgangService(private val personopplysningerIntegrasjonerClient: Personop
 
     fun harTilgangTilRolle(minimumsrolle: BehandlerRolle): Boolean {
         return SikkerhetContext.harTilgangTilGittRolle(rolleConfig, minimumsrolle)
+    }
+
+    /**
+     * Filtrerer data basert på om man har tilgang til den eller ikke
+     * Filtrer ikke på egen ansatt
+     */
+    fun <T> filtrerUtFortroligDataForRolle(values: List<T>, fn: (T) -> Adressebeskyttelse): List<T> {
+        val grupper = hentGrupperFraToken()
+        return values.filter {
+            val adressebeskyttelse = fn(it)
+            when (adressebeskyttelse.gradering) {
+                FORTROLIG -> grupper.contains(rolleConfig.kode7)
+                STRENGT_FORTROLIG, STRENGT_FORTROLIG_UTLAND, -> grupper.contains(rolleConfig.kode6)
+                else -> true
+            }
+        }
     }
 
     /**

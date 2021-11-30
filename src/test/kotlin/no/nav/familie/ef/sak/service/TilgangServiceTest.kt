@@ -9,13 +9,21 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.integration.dto.Tilgang
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
+import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.testWithBrukerContext
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.infrastruktur.exception.ManglerTilgang
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Adressebeskyttelse
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.AdressebeskyttelseGradering
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlSøker
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
+import no.nav.familie.ef.sak.testutil.pdlSøker
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -29,11 +37,14 @@ internal class TilgangServiceTest {
     private val behandlingService: BehandlingService = mockk()
     private val fagsakService: FagsakService = mockk()
     private val cacheManager = ConcurrentMapCacheManager()
+    private val kode6Gruppe = "kode6"
+    private val kode7Gruppe = "kode7"
+    private val rolleConfig = RolleConfig("", "", "", kode6 = kode6Gruppe, kode7 = kode7Gruppe)
     private val tilgangService =
             TilgangService(personopplysningerIntegrasjonerClient = personopplysningerIntegrajsonerClient,
                            behandlingService = behandlingService,
                            fagsakService = fagsakService,
-                           rolleConfig = RolleConfig("", "", ""),
+                           rolleConfig = rolleConfig,
                            cacheManager = cacheManager)
     private val mocketPersonIdent = "12345"
 
@@ -138,4 +149,29 @@ internal class TilgangServiceTest {
         }
     }
 
+    @Test
+    internal fun `skal filtrere ut de roller som man har tilgang til`() {
+        val ugradert = pdlSøker(adresseBeskyttelse(AdressebeskyttelseGradering.UGRADERT))
+        val fortrolig = pdlSøker(adresseBeskyttelse(AdressebeskyttelseGradering.FORTROLIG))
+        val strengtFortrolig = pdlSøker(adresseBeskyttelse(AdressebeskyttelseGradering.STRENGT_FORTROLIG))
+        val strengtFortroligUtland = pdlSøker(adresseBeskyttelse(AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND))
+        val personer = listOf(ugradert, fortrolig, strengtFortrolig, strengtFortroligUtland)
+
+        testWithBrukerContext(groups = listOf()) { assertThat(filtrer(personer)).containsExactly(ugradert) }
+        testWithBrukerContext(groups = listOf(rolleConfig.kode7)) {
+            assertThat(filtrer(personer)).containsExactly(ugradert, fortrolig)
+        }
+        testWithBrukerContext(groups = listOf(rolleConfig.kode6)) {
+            assertThat(filtrer(personer)).containsExactly(ugradert, strengtFortrolig, strengtFortroligUtland)
+        }
+        testWithBrukerContext(groups = listOf(rolleConfig.kode6, rolleConfig.kode7)) {
+            assertThat(filtrer(personer)).containsAll(personer)
+        }
+    }
+
+    private fun filtrer(personer: List<PdlSøker>): List<PdlSøker> =
+            tilgangService.filtrerUtFortroligDataForRolle(personer) { it.adressebeskyttelse.gjeldende()!! }
+
+    private fun adresseBeskyttelse(gradering: AdressebeskyttelseGradering) =
+            listOf(Adressebeskyttelse(gradering, Metadata(false)))
 }

@@ -49,9 +49,9 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
     }
 
     override fun utførOgReturnerNesteSteg(behandling: Behandling, data: BeslutteVedtakDto): StegType {
+        fagsakService.fagsakMedOppdatertPersonIdent(behandling.fagsakId)
         val saksbehandler = totrinnskontrollService.lagreTotrinnskontrollOgReturnerBehandler(behandling, data)
         val beslutter = SikkerhetContext.hentSaksbehandler(strict = true)
-
         val oppgaveId = ferdigstillOppgave(behandling)
 
         return if (data.godkjent) {
@@ -98,7 +98,7 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
         feilHvis(vedtaksbrev.besluttersignatur != SikkerhetContext.hentSaksbehandlerNavn(strict = true)) {
             "En annen saksbehandler har signert vedtaksbrevet"
         }
-        return vedtaksbrev.beslutterPdf!!
+        return vedtaksbrev.beslutterPdf
     }
 
     private fun ferdigstillOppgave(behandling: Behandling): Long? {
