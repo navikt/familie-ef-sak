@@ -85,12 +85,13 @@ class TilgangService(private val personopplysningerIntegrasjonerClient: Personop
      */
     fun <T> filtrerUtFortroligDataForRolle(values: List<T>, fn: (T) -> Adressebeskyttelse?): List<T> {
         val grupper = hentGrupperFraToken()
+        val kode6gruppe = grupper.contains(rolleConfig.kode6)
+        val kode7Gruppe = grupper.contains(rolleConfig.kode7)
         return values.filter {
-            val adressebeskyttelse = fn(it) ?: return@filter true
-            when (adressebeskyttelse.gradering) {
-                FORTROLIG -> grupper.contains(rolleConfig.kode7)
-                STRENGT_FORTROLIG, STRENGT_FORTROLIG_UTLAND, -> grupper.contains(rolleConfig.kode6)
-                else -> true
+            when (fn(it)?.gradering) {
+                FORTROLIG -> kode7Gruppe
+                STRENGT_FORTROLIG, STRENGT_FORTROLIG_UTLAND -> kode6gruppe
+                else -> (!kode6gruppe)
             }
         }
     }

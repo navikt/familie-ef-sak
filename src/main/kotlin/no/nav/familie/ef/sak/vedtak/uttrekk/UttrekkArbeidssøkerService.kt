@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.vedtak.uttrekk
 
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.felles.util.PagineringUtil.paginer
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
@@ -11,9 +12,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -47,18 +45,18 @@ class UttrekkArbeidssøkerService(
         uttrekkArbeidssøkerRepository.update(uttrekkArbeidssøkere.medKontrollert(kontrollert = kontrollert))
     }
 
+    // TODO jeg tenker vi håndterer visKontrollerte/ikke i frontend for å unngå rar rendering av sider, eks der man har kontrollert alle på en side og går til neste..
     fun hentUttrekkArbeidssøkere(årMåned: YearMonth = forrigeMåned().invoke(),
                                  side: Int = 1,
                                  visKontrollerte: Boolean = true): UttrekkArbeidssøkereDto {
-        val antallKontrollert = uttrekkArbeidssøkerRepository.countByÅrMånedAndKontrollertIsTrue(årMåned)
-        val paginerteArbeidssøkere = hentPaginerteArbeidssøkere(årMåned, side, visKontrollerte)
-        val arbeidsssøkere = paginerteArbeidssøkere.content
-        val filtrerteArbeidsssøkere = mapTilDtoOgFiltrer(arbeidsssøkere)
+        feilHvis(side < 1) { "Side må være større enn 0, men var side=$side" }
+        val arbeidssøkere = uttrekkArbeidssøkerRepository.findAllByÅrMåned(årMåned)
+        val filtrerteArbeidsssøkere = mapTilDtoOgFiltrer(arbeidssøkere)
+        val paginerteArbeidssøkere = paginer(filtrerteArbeidsssøkere, side, PAGE_SIZE)
         return UttrekkArbeidssøkereDto(årMåned = årMåned,
-                                       antallTotalt = paginerteArbeidssøkere.totalElements.toInt(),
-                                       antallKontrollert = antallKontrollert,
-                                       arbeidssøkere = filtrerteArbeidsssøkere,
-                                       antallManglerTilgang = arbeidsssøkere.size - filtrerteArbeidsssøkere.size)
+                                       antallTotalt = filtrerteArbeidsssøkere.size,
+                                       antallKontrollert = filtrerteArbeidsssøkere.count { it.kontrollert },
+                                       arbeidssøkere = paginerteArbeidssøkere)
     }
 
     /**
@@ -76,8 +74,11 @@ class UttrekkArbeidssøkerService(
         return arbeidsssøkere.map {
             val persondata = persondataPåFagsak[it.fagsakId] ?: error("Finner ikke data til fagsak=${it.fagsakId}")
             val pdlPersonKort = persondata.pdlPersonKort
-            val dto = it.tilDto(personIdent = persondata.personIdent, navn = pdlPersonKort.navn.gjeldende().visningsnavn())
-            dto to pdlPersonKort.adressebeskyttelse.gjeldende()
+            val adressebeskyttelse = pdlPersonKort.adressebeskyttelse.gjeldende()
+            val dto = it.tilDto(personIdent = persondata.personIdent,
+                                navn = pdlPersonKort.navn.gjeldende().visningsnavn(),
+                                adressebeskyttelse = adressebeskyttelse)
+            dto to adressebeskyttelse
         }
     }
 
@@ -87,19 +88,6 @@ class UttrekkArbeidssøkerService(
 
         return personIdentPåFagsak.entries.associateBy({ it.key }) {
             Persondata(it.value, personKortPåPersonIdent[it.value] ?: error("Finner ikke data til ident=${it.value}"))
-        }
-    }
-
-    private fun hentPaginerteArbeidssøkere(årMåned: YearMonth,
-                                           side: Int,
-                                           visKontrollerte: Boolean): Page<UttrekkArbeidssøkere> {
-        feilHvis(side < 1) { "Side må være større enn 0, men var side=$side" }
-
-        val pageable = PageRequest.of(side - 1, 20, Sort.by("id"))
-        return if (visKontrollerte) {
-            uttrekkArbeidssøkerRepository.findAllByÅrMåned(årMåned, pageable)
-        } else {
-            uttrekkArbeidssøkerRepository.findAllByÅrMånedAndKontrollertIsFalse(årMåned, pageable)
         }
     }
 
@@ -125,4 +113,9 @@ class UttrekkArbeidssøkerService(
              || it.aktivitet == AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID_REELL_ARBEIDSSØKER)
 
     private data class Persondata(val personIdent: String, val pdlPersonKort: PdlPersonKort)
+
+    companion object {
+
+        const val PAGE_SIZE = 20
+    }
 }

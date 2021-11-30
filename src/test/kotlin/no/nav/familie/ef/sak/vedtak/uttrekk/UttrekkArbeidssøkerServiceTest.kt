@@ -39,6 +39,7 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.time.YearMonth
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Adressebeskyttelse as DtoAdressebeskyttelse
 
 internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
 
@@ -163,7 +164,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
         }
 
         val uttrekk = service.hentUttrekkArbeidssøkere(mars2021, 1, visKontrollerte = false)
-        assertThat(uttrekk.antallTotalt).isEqualTo(20)
+        assertThat(uttrekk.antallTotalt).isEqualTo(22)
         assertThat(uttrekk.antallKontrollert).isEqualTo(2)
         assertThat(uttrekk.arbeidssøkere.size).isEqualTo(20)
     }
@@ -202,21 +203,46 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
             testWithBrukerContext {
                 val uttrekk = service.hentUttrekkArbeidssøkere(mars2021)
                 validerInneholderIdenter(uttrekk, expected)
-                assertThat(uttrekk.antallManglerTilgang).isEqualTo(3)
-                assertThat(uttrekk.antallTotalt).isEqualTo(5)
+                assertThat(uttrekk.antallTotalt).isEqualTo(2)
+                validateAdressebeskyttelse(uttrekk, IDENT_UGRADERT, DtoAdressebeskyttelse.UGRADERT)
+                validateAdressebeskyttelse(uttrekk, IDENT_UTEN_GRADERING, null)
             }
         }
 
         @Test
         internal fun `hentUttrekkArbeidssøkere - kode 6 tilgang`() {
-            val expected = listOf(IDENT_UGRADERT, IDENT_UTEN_GRADERING, IDENT_STRENGT_FORTROLIG, IDENT_STRENGT_FORTROLIG_UTLAND)
+            val expected = listOf(IDENT_STRENGT_FORTROLIG, IDENT_STRENGT_FORTROLIG_UTLAND)
             testWithBrukerContext(groups = listOf(rolleConfig.kode6)) {
                 val uttrekk = service.hentUttrekkArbeidssøkere(mars2021)
 
                 validerInneholderIdenter(uttrekk, expected)
-                assertThat(uttrekk.antallManglerTilgang).isEqualTo(1)
-                assertThat(uttrekk.antallTotalt).isEqualTo(5)
+                assertThat(uttrekk.antallTotalt).isEqualTo(2)
+                validateAdressebeskyttelse(uttrekk, IDENT_STRENGT_FORTROLIG, DtoAdressebeskyttelse.STRENGT_FORTROLIG)
+                validateAdressebeskyttelse(uttrekk,
+                                           IDENT_STRENGT_FORTROLIG_UTLAND,
+                                           DtoAdressebeskyttelse.STRENGT_FORTROLIG_UTLAND)
             }
+        }
+
+        @Test
+        internal fun `hentUttrekkArbeidssøkere - kode 7 tilgang`() {
+            val expected = listOf(IDENT_UGRADERT, IDENT_UTEN_GRADERING, IDENT_FORTROLIG)
+            testWithBrukerContext(groups = listOf(rolleConfig.kode7)) {
+                val uttrekk = service.hentUttrekkArbeidssøkere(mars2021)
+
+                validerInneholderIdenter(uttrekk, expected)
+                assertThat(uttrekk.antallTotalt).isEqualTo(3)
+                validateAdressebeskyttelse(uttrekk, IDENT_FORTROLIG, DtoAdressebeskyttelse.FORTROLIG)
+                validateAdressebeskyttelse(uttrekk, IDENT_UGRADERT, DtoAdressebeskyttelse.UGRADERT)
+                validateAdressebeskyttelse(uttrekk, IDENT_UTEN_GRADERING, null)
+            }
+        }
+
+        private fun validateAdressebeskyttelse(uttrekk: UttrekkArbeidssøkereDto,
+                                               ident: String,
+                                               adressebeskyttelse: DtoAdressebeskyttelse?) {
+            assertThat(uttrekk.arbeidssøkere.filter { it.personIdent == ident }.map { it.adressebeskyttelse })
+                    .containsExactly(adressebeskyttelse)
         }
 
         private fun validerInneholderIdenter(uttrekk: UttrekkArbeidssøkereDto, identer: List<String>) {

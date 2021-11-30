@@ -1,20 +1,16 @@
 package no.nav.familie.ef.sak.vedtak.uttrekk
 
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Adressebeskyttelse
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Adressebeskyttelse as PdlAdressebeskyttelse
 
-/**
- * @param antallTotalt er antallet for selve queryn(visKontrollerte), så hvis man har 2 kontrollerte og 3 som ikke er,
- * så blir [antallTotalt] 3 hvis visKontrollerte=false, og 5 hvis true
- * @param antallManglerTilgang er kun antallet for denne side, den gir ikke antall som mangler totalt
- */
 data class UttrekkArbeidssøkereDto(
         val årMåned: YearMonth,
         val antallTotalt: Int,
         val antallKontrollert: Int,
-        val arbeidssøkere: List<UttrekkArbeidsssøkerDto>,
-        val antallManglerTilgang: Int
+        val arbeidssøkere: List<UttrekkArbeidsssøkerDto>
 )
 
 data class UttrekkArbeidsssøkerDto(
@@ -23,17 +19,19 @@ data class UttrekkArbeidsssøkerDto(
         val behandlingIdForVedtak: UUID,
         val personIdent: String,
         val navn: String,
+        val adressebeskyttelse: Adressebeskyttelse?,
         val kontrollert: Boolean,
         val kontrollertTid: LocalDateTime?,
         val kontrollertAv: String?
 )
 
-fun UttrekkArbeidssøkere.tilDto(personIdent: String, navn: String) =
+fun UttrekkArbeidssøkere.tilDto(personIdent: String, navn: String, adressebeskyttelse: PdlAdressebeskyttelse?) =
         UttrekkArbeidsssøkerDto(id = this.id,
                                 fagsakId = this.fagsakId,
                                 behandlingIdForVedtak = this.vedtakId,
                                 personIdent = personIdent,
                                 navn = navn,
+                                adressebeskyttelse = adressebeskyttelse?.let { Adressebeskyttelse.valueOf(it.gradering.name) },
                                 kontrollert = this.kontrollert,
                                 kontrollertTid = this.kontrollertTid,
                                 kontrollertAv = this.kontrollertAv)
