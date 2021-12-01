@@ -2,6 +2,8 @@ package no.nav.familie.ef.sak.vedtak
 
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
+import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -17,8 +19,14 @@ object VedtakHistorikkBeregner {
 
     private fun lagTotalbildeForNyttVedtak(vedtak: Vedtak,
                                            acc: List<Pair<UUID, List<Vedtaksperiode>>>): List<Vedtaksperiode> {
-        val nyePerioder = vedtak.perioder!!.perioder
-        return avkortTidligerePerioder(acc.lastOrNull(), nyePerioder.first()) + nyePerioder
+        return if (vedtak.resultatType == ResultatType.INNVILGE) {
+            val nyePerioder = vedtak.perioder?.perioder ?: error("Finner ikke perioder på vedtak=${vedtak.behandlingId}")
+            val førsteFraDato = nyePerioder.first().datoFra
+            avkortTidligerePerioder(acc.lastOrNull(), førsteFraDato) + nyePerioder
+        } else {
+            val opphørFom = vedtak.opphørFom ?: error("Mangler dato for opphør på vedtak=${vedtak.behandlingId}")
+            avkortTidligerePerioder(acc.lastOrNull(), opphørFom)
+        }
     }
 
     /**
@@ -26,15 +34,15 @@ object VedtakHistorikkBeregner {
      * så må vi avkorte tidligere periode, då det nye vedtaket overskrever det seneste
      */
     private fun avkortTidligerePerioder(sisteVedtak: Pair<UUID, List<Vedtaksperiode>>?,
-                                        førsteNyePeriode: Vedtaksperiode): List<Vedtaksperiode> {
+                                        datoSomTidligerePeriodeOpphør: LocalDate): List<Vedtaksperiode> {
         if (sisteVedtak == null) return emptyList()
         return sisteVedtak.second.mapNotNull {
-            if (it.datoFra >= førsteNyePeriode.datoFra) {
+            if (it.datoFra >= datoSomTidligerePeriodeOpphør) {
                 null
-            } else if (it.datoTil < førsteNyePeriode.datoFra) {
+            } else if (it.datoTil < datoSomTidligerePeriodeOpphør) {
                 it
             } else {
-                it.copy(datoTil = førsteNyePeriode.datoFra.minusDays(1))
+                it.copy(datoTil = datoSomTidligerePeriodeOpphør.minusDays(1))
             }
         }
     }
