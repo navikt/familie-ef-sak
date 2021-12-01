@@ -56,7 +56,7 @@ internal class PersonopplysningerServiceTest {
                                          StatsborgerskapMapper(kodeverkService),
                                          InnflyttingUtflyttingMapper(kodeverkService),
                                          arbeidsfordelingService)
-        val personService = PersonService(pdlClient)
+        val personService = PersonService(pdlClient, ConcurrentMapCacheManager())
         personopplysningerService = PersonopplysningerService(personService,
                                                               søknadService,
                                                               personopplysningerIntegrasjonerClient,

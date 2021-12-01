@@ -49,8 +49,8 @@ class SivilstandRegel : Vilkårsregel(vilkårType = VilkårType.SIVILSTAND,
         }.regelId
 
         return hovedregler.map {
-            val resultat = if (it == hovedregel) resultat else Vilkårsresultat.IKKE_AKTUELL
-            Delvilkårsvurdering(resultat = resultat, listOf(Vurdering(it)))
+            val resultatForDelvilkår = if (it == hovedregel) resultat else Vilkårsresultat.IKKE_AKTUELL
+            Delvilkårsvurdering(resultat = resultatForDelvilkår, listOf(Vurdering(it)))
         }
     }
 

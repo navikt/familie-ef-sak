@@ -23,7 +23,7 @@ fun List<Inntekt>.tilInntektsperioder() = this.mapIndexed { index, inntektsperio
                             .minusDays(1) else LocalDate.MAX)
 }
 
-fun List<Inntektsperiode>.tilInntekt() = this.mapIndexed { index, inntektsperiode ->
+fun List<Inntektsperiode>.tilInntekt() = this.map { inntektsperiode ->
     Inntekt(forventetInntekt = inntektsperiode.inntekt,
             samordningsfradrag = inntektsperiode.samordningsfradrag,
             årMånedFra = YearMonth.from(inntektsperiode.startDato))

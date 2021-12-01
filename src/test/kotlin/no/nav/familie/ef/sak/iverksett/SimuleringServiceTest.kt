@@ -70,6 +70,7 @@ internal class SimuleringServiceTest {
     @BeforeEach
     internal fun setUp() {
         every { fagsakService.hentFagsak(any()) } returns fagsak
+        every { fagsakService.fagsakMedOppdatertPersonIdent(any()) } returns fagsak
         every { tilgangService.validerHarSaksbehandlerrolle() } just Runs
         every { tilgangService.harTilgangTilRolle(any()) } returns true
     }

@@ -50,7 +50,7 @@ class SimuleringService(private val iverksettClient: IverksettClient,
 
     fun hentOgLagreSimuleringsresultat(behandling: Behandling): Simuleringsresultat {
         tilgangService.validerHarSaksbehandlerrolle()
-        val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
+        val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(behandling.fagsakId)
         simuleringsresultatRepository.deleteById(behandling.id)
         val beriketSimuleringsresultat = simulerMedTilkjentYtelse(behandling, fagsak)
         return simuleringsresultatRepository.insert(Simuleringsresultat(
