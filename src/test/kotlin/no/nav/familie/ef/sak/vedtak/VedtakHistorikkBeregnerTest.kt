@@ -20,6 +20,18 @@ internal class VedtakHistorikkBeregnerTest {
     private val førsteVedtak = lagVedtak(perioder = listOf(førstePeriode))
 
     @Test
+    internal fun `opphør har ikke periodeWrapper inne på vedtak`() {
+        val andreVedtak = lagVedtak(perioder = null, opphørFom = LocalDate.of(2021, 2, 1))
+
+        val vedtaksperioderPerBehandling = lagVedtaksperioderPerBehandling(listOf(førsteVedtak, andreVedtak))
+
+        validerFørsteVedtakErUendret(vedtaksperioderPerBehandling)
+        validerPeriode(vedtaksperioderPerBehandling,
+                       andreVedtak.behandlingId,
+                       listOf(førstePeriode.copy(datoTil = LocalDate.of(2021, 1, 31))))
+    }
+
+    @Test
     internal fun `vedtak uten revurdering skal ikke endre noe på historikken`() {
         val vedtaksperioderPerBehandling = lagVedtaksperioderPerBehandling(listOf(førsteVedtak))
         validerFørsteVedtakErUendret(vedtaksperioderPerBehandling)
@@ -104,15 +116,19 @@ internal class VedtakHistorikkBeregnerTest {
                            aktivitet = AktivitetType.BARNET_ER_SYKT,
                            periodeType = VedtaksperiodeType.PERIODE_FØR_FØDSEL)
 
-    private fun lagVedtak(behandlingId: UUID = UUID.randomUUID(), perioder: List<Vedtaksperiode>) =
-            Vedtak(behandlingId = behandlingId,
-                   resultatType = ResultatType.INNVILGE,
-                   periodeBegrunnelse = null,
-                   inntektBegrunnelse = null,
-                   avslåBegrunnelse = null,
-                   perioder = PeriodeWrapper(perioder.toList()),
-                   inntekter = null,
-                   saksbehandlerIdent = null,
-                   opphørFom = null,
-                   beslutterIdent = null)
+    private fun lagVedtak(behandlingId: UUID = UUID.randomUUID(),
+                          perioder: List<Vedtaksperiode>?,
+                          opphørFom: LocalDate? = null): Vedtak {
+        require((perioder == null) xor (opphørFom == null)) { "Må definiere perioder eller opphørFom" }
+        return Vedtak(behandlingId = behandlingId,
+                      resultatType = if (opphørFom == null) ResultatType.INNVILGE else ResultatType.OPPHØRT,
+                      periodeBegrunnelse = null,
+                      inntektBegrunnelse = null,
+                      avslåBegrunnelse = null,
+                      perioder = perioder?.let { PeriodeWrapper(it.toList()) },
+                      inntekter = null,
+                      saksbehandlerIdent = null,
+                      opphørFom = opphørFom,
+                      beslutterIdent = null)
+    }
 }
