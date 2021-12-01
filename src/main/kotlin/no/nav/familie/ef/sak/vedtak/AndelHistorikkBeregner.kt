@@ -16,6 +16,7 @@ import java.util.UUID
 enum class EndringType {
     FJERNET,
     ENDRET,
+    AVKORTET,
     ENDRING_I_INNTEKT // mindre endring i inntekt som ikke endrer beløp
 }
 
@@ -84,14 +85,16 @@ object AndelHistorikkBeregner {
                     val endringType = andelFraHistorikk.finnEndringstype(andel, vedtaksperiode)
                     if (endringType != null) {
                         val andelHistorikk = andelFraHistorikk.andel
-                        if (andelHistorikk.stønadTom > andel.stønadTom) {
+                        if (endringType == EndringType.AVKORTET) {
                             historikk.add(index,
                                           andelFraHistorikk.copy(andel = andelHistorikk.copy(stønadFom = andel.stønadTom.plusDays(1)),
                                                                  endring = lagEndring(EndringType.FJERNET, tilkjentYtelse)))
                             andelFraHistorikk.andel = andelHistorikk.copy(stønadTom = andel.stønadTom)
+                        } else {
+                            historikk.add(index, lagNyAndel(tilkjentYtelse, andel, vedtaksperiode))
                         }
                         andelFraHistorikk.endring = lagEndring(endringType, tilkjentYtelse)
-                        andelFraHistorikk.vedtaksperiode = vedtaksperiode
+                        //andelFraHistorikk.vedtaksperiode = vedtaksperiode
                     }
                     andelFraHistorikk.kontrollert = tilkjentYtelse.id
                 }
@@ -130,9 +133,10 @@ object AndelHistorikkBeregner {
 
     private fun AndelHistorikkHolder.finnEndringstype(andel: AndelTilkjentYtelse, vedtaksperiode: Vedtaksperiode): EndringType? {
         return when {
-            aktivitetEllerPeriodeTypeHarEndretSeg(vedtaksperiode) -> EndringType.ENDRET
-            this.andel.stønadTom != andel.stønadTom || this.andel.beløp != andel.beløp -> EndringType.ENDRET
-            this.andel.inntekt != andel.inntekt -> EndringType.ENDRING_I_INNTEKT
+            aktivitetEllerPeriodeTypeHarEndretSeg(vedtaksperiode) -> EndringType.FJERNET
+            this.andel.beløp != andel.beløp -> EndringType.FJERNET
+            this.andel.stønadTom > andel.stønadTom  -> EndringType.AVKORTET
+            this.andel.inntekt != andel.inntekt -> EndringType.ENDRING_I_INNTEKT // TODO hvordan påvirker denne?
             else -> null
         }
     }

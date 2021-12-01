@@ -67,7 +67,7 @@ class AndelHistorikkBeregnerTest {
     }
 
     @Test
-    internal fun `periode_splittes`() {
+    internal fun `periode_splittes_g_omregning`() {
         run("/økonomi/periode_splittes_g_omregning.csv")
     }
 
@@ -82,12 +82,17 @@ class AndelHistorikkBeregnerTest {
     }
 
     @Test
-    internal fun `periode_splittes 2`() {
+    internal fun `periode_splittes`() {
         run("/økonomi/periode_splittes.csv")
     }
 
+    @Test
+    internal fun `periode forlenges`() {
+        run("/økonomi/periode_forlenges.csv")
+    }
+
     private fun run(filnavn: String) {
-        AndelHistorikkRunner.run(javaClass.getResource(filnavn))
+        AndelHistorikkRunner.run(javaClass.getResource(filnavn)!!)
     }
 }
 
