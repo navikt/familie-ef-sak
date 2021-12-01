@@ -163,12 +163,12 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
             uttrekkArbeidssøkerRepository.insert(arbeidssøkere)
         }
 
-        val uttrekk = service.hentUttrekkArbeidssøkere(mars2021, 1, visKontrollerte = false)
+        val uttrekk = service.hentUttrekkArbeidssøkere(mars2021, visKontrollerte = false)
         assertThat(uttrekk.antallTotalt).isEqualTo(22)
         assertThat(uttrekk.antallKontrollert).isEqualTo(2)
         assertThat(uttrekk.arbeidssøkere.size).isEqualTo(20)
 
-        val uttrekk2 = service.hentUttrekkArbeidssøkere(mars2021, 2, visKontrollerte = false)
+        val uttrekk2 = service.hentUttrekkArbeidssøkere(mars2021, visKontrollerte = false)
         assertThat(uttrekk2.antallTotalt).isEqualTo(22)
         assertThat(uttrekk2.antallKontrollert).isEqualTo(2)
         assertThat(uttrekk2.arbeidssøkere.size).isEqualTo(2)

@@ -10,10 +10,10 @@ data class UttrekkArbeidssøkereDto(
         val årMåned: YearMonth,
         val antallTotalt: Int,
         val antallKontrollert: Int,
-        val arbeidssøkere: List<UttrekkArbeidsssøkerDto>
+        val arbeidssøkere: List<UttrekkArbeidssøkerDto>
 )
 
-data class UttrekkArbeidsssøkerDto(
+data class UttrekkArbeidssøkerDto(
         val id: UUID,
         val fagsakId: UUID,
         val behandlingIdForVedtak: UUID,
@@ -26,12 +26,12 @@ data class UttrekkArbeidsssøkerDto(
 )
 
 fun UttrekkArbeidssøkere.tilDto(personIdent: String, navn: String, adressebeskyttelse: PdlAdressebeskyttelse?) =
-        UttrekkArbeidsssøkerDto(id = this.id,
-                                fagsakId = this.fagsakId,
-                                behandlingIdForVedtak = this.vedtakId,
-                                personIdent = personIdent,
-                                navn = navn,
-                                adressebeskyttelse = adressebeskyttelse?.let { Adressebeskyttelse.valueOf(it.gradering.name) },
-                                kontrollert = this.kontrollert,
-                                kontrollertTid = this.kontrollertTid,
-                                kontrollertAv = this.kontrollertAv)
+        UttrekkArbeidssøkerDto(id = this.id,
+                               fagsakId = this.fagsakId,
+                               behandlingIdForVedtak = this.vedtakId,
+                               personIdent = personIdent,
+                               navn = navn,
+                               adressebeskyttelse = adressebeskyttelse?.let { Adressebeskyttelse.valueOf(it.gradering.name) },
+                               kontrollert = this.kontrollert,
+                               kontrollertTid = this.kontrollertTid,
+                               kontrollertAv = this.kontrollertAv)

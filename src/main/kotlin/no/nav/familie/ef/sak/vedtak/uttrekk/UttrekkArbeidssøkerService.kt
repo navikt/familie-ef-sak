@@ -1,8 +1,6 @@
 package no.nav.familie.ef.sak.vedtak.uttrekk
 
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.felles.util.PagineringUtil.paginer
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Adressebeskyttelse
@@ -37,49 +35,52 @@ class UttrekkArbeidssøkerService(
         }
     }
 
-    fun settKontrollert(id: UUID, kontrollert: Boolean) {
+    fun settKontrollert(id: UUID, kontrollert: Boolean): UttrekkArbeidssøkerDto {
         val uttrekkArbeidssøkere = uttrekkArbeidssøkerRepository.findByIdOrThrow(id)
-        if (uttrekkArbeidssøkere.kontrollert == kontrollert) return
-
         tilgangService.validerTilgangTilFagsak(uttrekkArbeidssøkere.fagsakId)
-        uttrekkArbeidssøkerRepository.update(uttrekkArbeidssøkere.medKontrollert(kontrollert = kontrollert))
+
+        val oppdatertArbeidssøker = if (uttrekkArbeidssøkere.kontrollert == kontrollert) {
+            uttrekkArbeidssøkere
+        } else {
+            uttrekkArbeidssøkerRepository.update(uttrekkArbeidssøkere.medKontrollert(kontrollert = kontrollert))
+        }
+        return tilDtoMedAdressebeskyttelse(oppdatertArbeidssøker, hentPersondataTilFagsak(listOf(oppdatertArbeidssøker))).first
     }
 
-    // TODO jeg tenker vi håndterer visKontrollerte/ikke i frontend for å unngå rar rendering av sider, eks der man har kontrollert alle på en side og går til neste..
     fun hentUttrekkArbeidssøkere(årMåned: YearMonth = forrigeMåned().invoke(),
-                                 side: Int = 1,
                                  visKontrollerte: Boolean = true): UttrekkArbeidssøkereDto {
-        feilHvis(side < 1) { "Side må være større enn 0, men var side=$side" }
         val arbeidssøkere = uttrekkArbeidssøkerRepository.findAllByÅrMåned(årMåned)
         val filtrerteArbeidsssøkere = mapTilDtoOgFiltrer(arbeidssøkere)
-        val paginerteArbeidssøkere = paginer(filtrerteArbeidsssøkere, side, PAGE_SIZE)
         return UttrekkArbeidssøkereDto(årMåned = årMåned,
                                        antallTotalt = filtrerteArbeidsssøkere.size,
                                        antallKontrollert = filtrerteArbeidsssøkere.count { it.kontrollert },
-                                       arbeidssøkere = paginerteArbeidssøkere)
+                                       arbeidssøkere = filtrerteArbeidsssøkere)
     }
 
     /**
      * Filtrerer vekk personer som man ikke har tilgang til
      */
-    private fun mapTilDtoOgFiltrer(arbeidsssøkere: List<UttrekkArbeidssøkere>): List<UttrekkArbeidsssøkerDto> {
+    private fun mapTilDtoOgFiltrer(arbeidsssøkere: List<UttrekkArbeidssøkere>): List<UttrekkArbeidssøkerDto> {
         if (arbeidsssøkere.isEmpty()) return emptyList()
         val arbeidsssøkereMedAdresseBeskyttelse = tilDtoMedAdressebeskyttelse(arbeidsssøkere)
         return tilgangService.filtrerUtFortroligDataForRolle(arbeidsssøkereMedAdresseBeskyttelse) { it.second }.map { it.first }
     }
 
     private fun tilDtoMedAdressebeskyttelse(arbeidsssøkere: List<UttrekkArbeidssøkere>)
-            : List<Pair<UttrekkArbeidsssøkerDto, Adressebeskyttelse?>> {
+            : List<Pair<UttrekkArbeidssøkerDto, Adressebeskyttelse?>> {
         val persondataPåFagsak = hentPersondataTilFagsak(arbeidsssøkere)
-        return arbeidsssøkere.map {
-            val persondata = persondataPåFagsak[it.fagsakId] ?: error("Finner ikke data til fagsak=${it.fagsakId}")
-            val pdlPersonKort = persondata.pdlPersonKort
-            val adressebeskyttelse = pdlPersonKort.adressebeskyttelse.gjeldende()
-            val dto = it.tilDto(personIdent = persondata.personIdent,
-                                navn = pdlPersonKort.navn.gjeldende().visningsnavn(),
-                                adressebeskyttelse = adressebeskyttelse)
-            dto to adressebeskyttelse
-        }
+        return arbeidsssøkere.map { tilDtoMedAdressebeskyttelse(it, persondataPåFagsak) }
+    }
+
+    private fun tilDtoMedAdressebeskyttelse(it: UttrekkArbeidssøkere,
+                                            persondataPåFagsak: Map<UUID, Persondata>): Pair<UttrekkArbeidssøkerDto, Adressebeskyttelse?> {
+        val persondata = persondataPåFagsak[it.fagsakId] ?: error("Finner ikke data til fagsak=${it.fagsakId}")
+        val pdlPersonKort = persondata.pdlPersonKort
+        val adressebeskyttelse = pdlPersonKort.adressebeskyttelse.gjeldende()
+        val dto = it.tilDto(personIdent = persondata.personIdent,
+                            navn = pdlPersonKort.navn.gjeldende().visningsnavn(),
+                            adressebeskyttelse = adressebeskyttelse)
+        return dto to adressebeskyttelse
     }
 
     private fun hentPersondataTilFagsak(arbeidsssøkere: List<UttrekkArbeidssøkere>): Map<UUID, Persondata> {
