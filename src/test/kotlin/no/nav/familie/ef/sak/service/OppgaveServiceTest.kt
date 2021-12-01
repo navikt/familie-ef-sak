@@ -63,7 +63,9 @@ internal class OppgaveServiceTest {
     @BeforeEach
     internal fun setUp() {
         val finnMappeResponseDto = FinnMappeResponseDto(antallTreffTotalt = 1,
-                                                        mapper = listOf(MappeDto(123, "EF Sak - 70 Godkjenne vedtak")))
+                                                        mapper = listOf(MappeDto(123,
+                                                                                 "EF Sak - 70 Godkjenne vedtak",
+                                                                                 enhetsnr = "4489")))
         every { oppgaveClient.finnMapper(any()) } returns finnMappeResponseDto
     }
 
