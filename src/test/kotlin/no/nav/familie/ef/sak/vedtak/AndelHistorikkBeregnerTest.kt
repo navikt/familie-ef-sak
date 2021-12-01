@@ -70,6 +70,11 @@ class AndelHistorikkBeregnerTest {
         run("/økonomi/periode_splittes_g_omregning.csv")
     }
 
+    @Test
+    internal fun `periode_splittes 2`() {
+        run("/økonomi/periode_splittes.csv")
+    }
+
     private fun run(filnavn: String) {
         AndelHistorikkRunner.run(javaClass.getResource(filnavn))
     }
@@ -152,7 +157,7 @@ private enum class AndelHistorikkHeader(val key: String,
                                         val value: (AndelHistorikkDto) -> Any?,
                                         val minHeaderValue: Int = key.length) {
 
-    TEST_TYPE("type", {}),
+    TEST_TYPE("type", {""}),
     FOM("fom", { it.andel.stønadFra }, 11),
     TOM("tom", { it.andel.stønadTil }, 11),
     BELØP("beløp", { it.andel.beløp }, 8),

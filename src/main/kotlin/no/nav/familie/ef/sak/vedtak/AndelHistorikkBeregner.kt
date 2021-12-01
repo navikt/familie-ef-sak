@@ -37,13 +37,15 @@ object AndelHistorikkBeregner {
     /**
      * @param kontrollert brukes for å sjekke om en andel er fjernet eller ikke
      */
-    private class AndelHistorikkHolder(val behandlingId: UUID,
-                                       val vedtakstidspunkt: LocalDateTime,
-                                       val saksbehandler: String,
-                                       var andel: AndelTilkjentYtelse,
-                                       var endring: HistorikkEndring?,
-                                       var vedtaksperiode: Vedtaksperiode,
-                                       var kontrollert: UUID)
+    private data class AndelHistorikkHolder(
+            val behandlingId: UUID,
+            val vedtakstidspunkt: LocalDateTime,
+            val saksbehandler: String,
+            var andel: AndelTilkjentYtelse,
+            var endring: HistorikkEndring?,
+            var vedtaksperiode: Vedtaksperiode,
+            var kontrollert: UUID
+    )
 
     fun lagHistorikk(tilkjentYtelser: List<TilkjentYtelse>,
                      vedtaksliste: List<Vedtak>,
@@ -75,13 +77,19 @@ object AndelHistorikkBeregner {
             tilkjentYtelse.andelerTilkjentYtelse.forEach { andel ->
                 val andelFraHistorikk = finnTilsvarendeAndelIHistorikk(historikk, andel)
                 val vedtaksperiode = finnVedtaksperiodeForAndel(andel, vedtaksperioder)
+                val index = finnIndeksForNyAndel(historikk, andel)
                 if (andelFraHistorikk == null) {
-                    val index = finnIndeksForNyAndel(historikk, andel)
                     historikk.add(index, lagNyAndel(tilkjentYtelse, andel, vedtaksperiode))
                 } else {
                     val endringType = andelFraHistorikk.finnEndringstype(andel, vedtaksperiode)
                     if (endringType != null) {
-                        andelFraHistorikk.andel = andel
+                        val andelHistorikk = andelFraHistorikk.andel
+                        if (andelHistorikk.stønadTom > andel.stønadTom) {
+                            historikk.add(index,
+                                          andelFraHistorikk.copy(andel = andelHistorikk.copy(stønadFom = andel.stønadTom.plusDays(1)),
+                                                                 endring = lagEndring(EndringType.FJERNET, tilkjentYtelse)))
+                            andelFraHistorikk.andel = andelHistorikk.copy(stønadTom = andel.stønadTom)
+                        }
                         andelFraHistorikk.endring = lagEndring(endringType, tilkjentYtelse)
                         andelFraHistorikk.vedtaksperiode = vedtaksperiode
                     }
