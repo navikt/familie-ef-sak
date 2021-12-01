@@ -195,7 +195,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     private fun sendTilBeslutter(saksbehandler: Saksbehandler,
                                  validator: (ResponseEntity<Ressurs<UUID>>) -> Unit = responseOK()) {
         headers.setBearerAuth(token(saksbehandler))
-        lagSaksbehandlerBrev()
+        lagSaksbehandlerBrev(saksbehandler.name)
         val response = restTemplate.exchange<Ressurs<UUID>>(localhost("/api/vedtak/${behandling.id}/send-til-beslutter"),
                                                             HttpMethod.POST,
                                                             HttpEntity<Any>(headers))
@@ -274,9 +274,9 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         return onBehalfOfToken(role = rolle, saksbehandler = saksbehandler.name)
     }
 
-    private fun lagSaksbehandlerBrev() {
+    private fun lagSaksbehandlerBrev(saksbehandlerSignatur: String) {
         val brevRequest = objectMapper.readTree("123")
-        mockBrukerContext("saksbehandlernavn")
+        mockBrukerContext(saksbehandlerSignatur)
         vedtaksbrevService.lagSaksbehandlerBrev(behandling.id, brevRequest, "brevMal")
         clearBrukerContext()
     }
