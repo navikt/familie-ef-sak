@@ -44,6 +44,7 @@ import no.nav.familie.kontrakter.felles.simulering.Simuleringsoppsummering
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -84,10 +85,11 @@ internal class SendTilBeslutterStegTest {
                                  vurderingService)
     private val fagsak = Fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD,
                                 søkerIdenter = setOf(FagsakPerson(ident = "12345678901")))
+    private val saksbehandlerNavn = "saksbehandlernavn"
     private val vedtaksbrev = Vedtaksbrev(behandlingId = UUID.randomUUID(),
                                           saksbehandlerBrevrequest = "",
                                           brevmal = "",
-                                          "",
+                                          saksbehandlersignatur = saksbehandlerNavn,
                                           "",
                                           null)
 
@@ -126,6 +128,12 @@ internal class SendTilBeslutterStegTest {
 
         every { tilbakekrevingService.harSaksbehandlerTattStillingTilTilbakekreving(any()) } returns true
         every { tilbakekrevingService.finnesÅpenTilbakekrevingsBehandling(any()) } returns true
+        mockBrukerContext(saksbehandlerNavn)
+    }
+
+    @AfterEach
+    internal fun tearDown(){
+        clearBrukerContext()
     }
 
     @Test
@@ -188,6 +196,17 @@ internal class SendTilBeslutterStegTest {
     internal fun `Skal avslutte oppgave BehandleUnderkjentVedtak hvis den finnes`() {
         utførOgVerifiserKall(Oppgavetype.BehandleUnderkjentVedtak)
         verifiserVedtattBehandlingsstatistikkTask()
+    }
+
+    @Test
+    internal fun `Skal feile hvis saksbehandlersignatur i vedtaksbrev er ulik saksbehandleren som sendte til beslutter`() {
+        every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev.copy(saksbehandlersignatur = "Saksbehandler A")
+        every { vedtakService.hentVedtak(any()) } returns lagVedtak(ResultatType.INNVILGE)
+        mockBrukerContext("Saksbehandler B")
+
+        assertThrows<Feil> { beslutteVedtakSteg.validerSteg(behandling) }
+
+        clearBrukerContext()
     }
 
     private fun verifiserVedtattBehandlingsstatistikkTask() {

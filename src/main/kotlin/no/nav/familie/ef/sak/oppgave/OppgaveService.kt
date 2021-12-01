@@ -73,8 +73,8 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
     }
 
     private fun finnAktuellMappe(enhetsnummer: String?, oppgavetype: Oppgavetype): Long? {
-        if (enhetsnummer == "4489" && oppgavetype == Oppgavetype.GodkjenneVedtak) {
-            val mapper = finnMapper("4489")
+        if ((enhetsnummer == "4489" || enhetsnummer == "4483") && oppgavetype == Oppgavetype.GodkjenneVedtak) {
+            val mapper = finnMapper(enhetsnummer)
             val mappeIdForGodkjenneVedtak = mapper.find { it.navn.contains("EF Sak - 70 Godkjenne vedtak") }?.id?.toLong()
             mappeIdForGodkjenneVedtak?.let {
                 logger.info("Legger oppgave i Godkjenne vedtak-mappe")
@@ -175,6 +175,10 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
             DayOfWeek.SUNDAY -> frist.plusDays(1)
             else -> frist
         }
+    }
+
+    fun finnMapper(enheter: List<String>): List<MappeDto> {
+        return enheter.flatMap {finnMapper(it)}
     }
 
     fun finnMapper(enhet: String): List<MappeDto> {
