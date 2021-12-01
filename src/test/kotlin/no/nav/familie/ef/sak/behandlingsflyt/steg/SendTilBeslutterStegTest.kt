@@ -190,6 +190,17 @@ internal class SendTilBeslutterStegTest {
         verifiserVedtattBehandlingsstatistikkTask()
     }
 
+    @Test
+    internal fun `Skal feile hvis saksbehandlersignatur i vedtaksbrev er ulik saksbehandleren som sendte til beslutter`(){
+        every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev.copy(saksbehandlersignatur = "Saksbehandler A")
+        every { vedtakService.hentVedtak(any()) } returns lagVedtak(ResultatType.INNVILGE)
+        mockBrukerContext("Saksbehandler B")
+
+        assertThrows<Feil> {  beslutteVedtakSteg.validerSteg(behandling) }
+
+        clearBrukerContext()
+    }
+
     private fun verifiserVedtattBehandlingsstatistikkTask() {
         assertThat(taskSlot[2].type).isEqualTo(BehandlingsstatistikkTask.TYPE)
         assertThat(objectMapper.readValue<BehandlingsstatistikkTaskPayload>(taskSlot[2].payload).hendelse)
