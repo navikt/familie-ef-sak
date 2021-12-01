@@ -19,8 +19,8 @@ import java.util.UUID
 class UttrekkController(private val uttrekkVedtakService: UttrekkArbeidssøkerService) {
 
     @GetMapping("arbeidssoker")
-    fun hentArbeidssøkere(@RequestParam(defaultValue = "false") visKontrollerte: Boolean): Ressurs<UttrekkArbeidssøkereDto> {
-        return success(uttrekkVedtakService.hentUttrekkArbeidssøkere(visKontrollerte = visKontrollerte))
+    fun hentArbeidssøkere(): Ressurs<UttrekkArbeidssøkereDto> {
+        return success(uttrekkVedtakService.hentUttrekkArbeidssøkere())
     }
 
     @PostMapping("arbeidssoker/{id}/kontrollert")

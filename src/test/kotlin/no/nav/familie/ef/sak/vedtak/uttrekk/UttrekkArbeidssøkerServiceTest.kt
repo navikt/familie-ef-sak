@@ -151,7 +151,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `hentUttrekkArbeidssøkere - skal hente alle som ikke er kontrollert paginert`() {
+    internal fun `hentUttrekkArbeidssøkere - skal inkludere de som er kontrollert og`() {
         opprettdata()
         for (i in 1..20) {
             val arbeidssøkere = UttrekkArbeidssøkere(fagsakId = fagsak.id, vedtakId = behandling.id, årMåned = mars2021)
@@ -163,15 +163,10 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
             uttrekkArbeidssøkerRepository.insert(arbeidssøkere)
         }
 
-        val uttrekk = service.hentUttrekkArbeidssøkere(mars2021, visKontrollerte = false)
+        val uttrekk = service.hentUttrekkArbeidssøkere(mars2021)
         assertThat(uttrekk.antallTotalt).isEqualTo(22)
         assertThat(uttrekk.antallKontrollert).isEqualTo(2)
-        assertThat(uttrekk.arbeidssøkere.size).isEqualTo(20)
-
-        val uttrekk2 = service.hentUttrekkArbeidssøkere(mars2021, visKontrollerte = false)
-        assertThat(uttrekk2.antallTotalt).isEqualTo(22)
-        assertThat(uttrekk2.antallKontrollert).isEqualTo(2)
-        assertThat(uttrekk2.arbeidssøkere.size).isEqualTo(2)
+        assertThat(uttrekk.arbeidssøkere.size).isEqualTo(22)
     }
 
     @Nested
@@ -208,7 +203,8 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
             testWithBrukerContext {
                 val uttrekk = service.hentUttrekkArbeidssøkere(mars2021)
                 validerInneholderIdenter(uttrekk, expected)
-                assertThat(uttrekk.antallTotalt).isEqualTo(2)
+                assertThat(uttrekk.antallTotalt).isEqualTo(5)
+                assertThat(uttrekk.arbeidssøkere).hasSize(2)
                 validateAdressebeskyttelse(uttrekk, IDENT_UGRADERT, DtoAdressebeskyttelse.UGRADERT)
                 validateAdressebeskyttelse(uttrekk, IDENT_UTEN_GRADERING, null)
             }
@@ -221,7 +217,8 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
                 val uttrekk = service.hentUttrekkArbeidssøkere(mars2021)
 
                 validerInneholderIdenter(uttrekk, expected)
-                assertThat(uttrekk.antallTotalt).isEqualTo(2)
+                assertThat(uttrekk.antallTotalt).isEqualTo(5)
+                assertThat(uttrekk.arbeidssøkere).hasSize(2)
                 validateAdressebeskyttelse(uttrekk, IDENT_STRENGT_FORTROLIG, DtoAdressebeskyttelse.STRENGT_FORTROLIG)
                 validateAdressebeskyttelse(uttrekk,
                                            IDENT_STRENGT_FORTROLIG_UTLAND,
@@ -236,7 +233,8 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
                 val uttrekk = service.hentUttrekkArbeidssøkere(mars2021)
 
                 validerInneholderIdenter(uttrekk, expected)
-                assertThat(uttrekk.antallTotalt).isEqualTo(3)
+                assertThat(uttrekk.antallTotalt).isEqualTo(5)
+                assertThat(uttrekk.arbeidssøkere).hasSize(3)
                 validateAdressebeskyttelse(uttrekk, IDENT_FORTROLIG, DtoAdressebeskyttelse.FORTROLIG)
                 validateAdressebeskyttelse(uttrekk, IDENT_UGRADERT, DtoAdressebeskyttelse.UGRADERT)
                 validateAdressebeskyttelse(uttrekk, IDENT_UTEN_GRADERING, null)
