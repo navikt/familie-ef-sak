@@ -5,5 +5,5 @@ ANDEL  ,1            ,2021-01,2021-03,1000 ,0      ,0                ,0         
 VEDTAK ,2            ,2021-01,2021-04,     ,       ,                 ,                  ,BARN_UNDER_ETT_ÅR,HOVEDPERIODE,            ,
 ANDEL  ,2            ,2021-01,2021-04,1000 ,0      ,0                ,0                 ,                 ,            ,            ,
 !OUTPUT,             ,       ,       ,     ,       ,                 ,                  ,                 ,            ,            ,
-OUTPUT ,1            ,2021-01,2021-03,1000 ,0      ,0                ,0                 ,BARN_UNDER_ETT_ÅR,HOVEDPERIODE,FJERNET     ,2
+OUTPUT ,1            ,2021-01,2021-03,1000 ,0      ,0                ,0                 ,BARN_UNDER_ETT_ÅR,HOVEDPERIODE,ERSTATT     ,2
 OUTPUT ,2            ,2021-01,2021-04,1000 ,0      ,0                ,0                 ,BARN_UNDER_ETT_ÅR,HOVEDPERIODE,            ,

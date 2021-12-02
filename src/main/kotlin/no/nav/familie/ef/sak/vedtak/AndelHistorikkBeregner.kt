@@ -15,9 +15,8 @@ import java.util.UUID
 
 enum class EndringType {
     FJERNET,
-    ENDRET,
+    ERSTATT,
     AVKORTET,
-    ENDRING_I_INNTEKT // mindre endring i inntekt som ikke endrer beløp
 }
 
 data class AndelHistorikkDto(val behandlingId: UUID,
@@ -87,14 +86,14 @@ object AndelHistorikkBeregner {
                         val andelHistorikk = andelFraHistorikk.andel
                         if (endringType == EndringType.AVKORTET) {
                             historikk.add(index,
-                                          andelFraHistorikk.copy(andel = andelHistorikk.copy(stønadFom = andel.stønadTom.plusDays(1)),
+                                          andelFraHistorikk.copy(andel = andelHistorikk.copy(stønadFom = andel.stønadTom.plusDays(
+                                                  1)),
                                                                  endring = lagEndring(EndringType.FJERNET, tilkjentYtelse)))
                             andelFraHistorikk.andel = andelHistorikk.copy(stønadTom = andel.stønadTom)
                         } else {
                             historikk.add(index, lagNyAndel(tilkjentYtelse, andel, vedtaksperiode))
                         }
                         andelFraHistorikk.endring = lagEndring(endringType, tilkjentYtelse)
-                        //andelFraHistorikk.vedtaksperiode = vedtaksperiode
                     }
                     andelFraHistorikk.kontrollert = tilkjentYtelse.id
                 }
@@ -131,12 +130,14 @@ object AndelHistorikkBeregner {
                                  vedtaksperiode = vedtaksperiode,
                                  kontrollert = tilkjentYtelse.id)
 
-    private fun AndelHistorikkHolder.finnEndringstype(andel: AndelTilkjentYtelse, vedtaksperiode: Vedtaksperiode): EndringType? {
+    private fun AndelHistorikkHolder.finnEndringstype(tidligereAndel: AndelTilkjentYtelse,
+                                                      vedtaksperiode: Vedtaksperiode): EndringType? {
         return when {
-            aktivitetEllerPeriodeTypeHarEndretSeg(vedtaksperiode) -> EndringType.FJERNET
-            this.andel.beløp != andel.beløp -> EndringType.FJERNET
-            this.andel.stønadTom > andel.stønadTom  -> EndringType.AVKORTET
-            this.andel.inntekt != andel.inntekt -> EndringType.ENDRING_I_INNTEKT // TODO hvordan påvirker denne?
+            aktivitetEllerPeriodeTypeHarEndretSeg(vedtaksperiode) -> EndringType.ERSTATT
+            this.andel.beløp != tidligereAndel.beløp -> EndringType.ERSTATT
+            this.andel.inntekt != tidligereAndel.inntekt -> EndringType.ERSTATT
+            this.andel.stønadTom < tidligereAndel.stønadTom -> EndringType.ERSTATT
+            this.andel.stønadTom > tidligereAndel.stønadTom -> EndringType.AVKORTET
             else -> null
         }
     }
@@ -177,5 +178,7 @@ object AndelHistorikkBeregner {
 
     private fun erAlleredeFjernetEllerKontrollert(historikk: AndelHistorikkHolder,
                                                   tilkjentYtelse: TilkjentYtelse) =
-            historikk.endring?.type == EndringType.FJERNET || historikk.kontrollert == tilkjentYtelse.id
+            historikk.endring?.type == EndringType.FJERNET ||
+            historikk.endring?.type == EndringType.ERSTATT ||
+            historikk.kontrollert == tilkjentYtelse.id
 }

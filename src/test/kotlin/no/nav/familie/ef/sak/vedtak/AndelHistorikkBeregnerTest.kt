@@ -87,6 +87,11 @@ class AndelHistorikkBeregnerTest {
     }
 
     @Test
+    internal fun `periode_splittes_og_sen_fjernes`() {
+        run("/økonomi/periode_splittes_og_sen_fjernes.csv")
+    }
+
+    @Test
     internal fun `periode forlenges`() {
         run("/økonomi/periode_forlenges.csv")
     }
