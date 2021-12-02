@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
+import no.nav.familie.ef.sak.vedtak.domain.Brevmottaker
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.TotrinnskontrollStatusDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
@@ -37,6 +38,13 @@ class VedtakController(private val stegService: StegService,
         tilgangService.validerTilgangTilBehandling(behandlingId)
         val behandling = behandlingService.hentBehandling(behandlingId)
         return Ressurs.success(stegService.håndterSendTilBeslutter(behandling).id)
+    }
+
+    @PostMapping("/{behandlingId}/send-til-beslutter/verge")
+    fun sendTilBeslutterVerge(@PathVariable behandlingId: UUID, @RequestBody brevmottakere: List<Brevmottaker>): Ressurs<UUID> {
+        tilgangService.validerTilgangTilBehandling(behandlingId)
+        val behandling = behandlingService.hentBehandling(behandlingId)
+        return Ressurs.success(stegService.håndterSendTilBeslutter(behandling, brevmottakere).id)
     }
 
     @PostMapping("/{behandlingId}/beslutte-vedtak")
