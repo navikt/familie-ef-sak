@@ -17,11 +17,10 @@ class ArbeidssøkerClient(@Value("\${ARBEIDSSØKER_URL}")
 
     fun hentPerioder(personIdent: String, fraOgMed: LocalDate, tilOgMed: LocalDate): ArbeidssøkerResponse {
         val queryUri = UriComponentsBuilder.fromUri(uri).path("arbeidssoker")
-                .queryParam("fnr", personIdent)
                 .queryParam("fraOgMed", fraOgMed)
                 .queryParam("tilOgMed", tilOgMed)
                 .build().toUri()
-        return getForEntity(queryUri)
+        return postForEntity(queryUri, mapOf("fnr" to personIdent))
     }
 
 }
