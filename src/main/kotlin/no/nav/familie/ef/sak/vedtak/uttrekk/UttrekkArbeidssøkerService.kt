@@ -47,14 +47,25 @@ class UttrekkArbeidssøkerService(
         return tilDtoMedAdressebeskyttelse(oppdatertArbeidssøker, hentPersondataTilFagsak(listOf(oppdatertArbeidssøker))).first
     }
 
-    fun hentUttrekkArbeidssøkere(årMåned: YearMonth = forrigeMåned().invoke(), visKontrollerte: Boolean = false): UttrekkArbeidssøkereDto {
+    fun hentUttrekkArbeidssøkere(årMåned: YearMonth = forrigeMåned().invoke(),
+                                 visKontrollerte: Boolean = false): UttrekkArbeidssøkereDto {
         val arbeidssøkere = uttrekkArbeidssøkerRepository.findAllByÅrMåned(årMåned)
-        val filtrerteKontrollert = if (visKontrollerte) arbeidssøkere else arbeidssøkere.filter { !it.kontrollert }
-        val filtrerteArbeidsssøkere = mapTilDtoOgFiltrer(filtrerteKontrollert)
-        return UttrekkArbeidssøkereDto(årMåned = årMåned,
-                                       antallTotalt = arbeidssøkere.size,
-                                       antallKontrollert = arbeidssøkere.count { it.kontrollert },
-                                       arbeidssøkere = filtrerteArbeidsssøkere)
+        val filtrerteArbeidsssøkere = mapTilDtoOgFiltrer(arbeidssøkere)
+
+        val totaltAntallUkontrollerte = arbeidssøkere.count { !it.kontrollert }
+        val antallKontrollert = filtrerteArbeidsssøkere.count { it.kontrollert }
+        val antallManglerKontrollUtenTilgang = totaltAntallUkontrollerte - (filtrerteArbeidsssøkere.size - antallKontrollert)
+
+        val filtrerteKontrollert =
+                if (visKontrollerte) filtrerteArbeidsssøkere else filtrerteArbeidsssøkere.filter { !it.kontrollert }
+
+        return UttrekkArbeidssøkereDto(
+                årMåned = årMåned,
+                antallTotalt = filtrerteArbeidsssøkere.size,
+                antallKontrollert = antallKontrollert,
+                antallManglerKontrollUtenTilgang = antallManglerKontrollUtenTilgang,
+                arbeidssøkere = filtrerteKontrollert
+        )
     }
 
     /**

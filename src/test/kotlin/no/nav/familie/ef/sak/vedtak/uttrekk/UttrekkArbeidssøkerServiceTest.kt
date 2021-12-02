@@ -208,7 +208,8 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
             testWithBrukerContext {
                 val uttrekk = service.hentUttrekkArbeidssøkere(mars2021)
                 validerInneholderIdenter(uttrekk, expected)
-                assertThat(uttrekk.antallTotalt).isEqualTo(5)
+                assertThat(uttrekk.antallTotalt).isEqualTo(2)
+                assertThat(uttrekk.antallManglerKontrollUtenTilgang).isEqualTo(3)
                 assertThat(uttrekk.arbeidssøkere).hasSize(2)
                 validateAdressebeskyttelse(uttrekk, IDENT_UGRADERT, DtoAdressebeskyttelse.UGRADERT)
                 validateAdressebeskyttelse(uttrekk, IDENT_UTEN_GRADERING, null)
@@ -222,7 +223,8 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
                 val uttrekk = service.hentUttrekkArbeidssøkere(mars2021)
 
                 validerInneholderIdenter(uttrekk, expected)
-                assertThat(uttrekk.antallTotalt).isEqualTo(5)
+                assertThat(uttrekk.antallTotalt).isEqualTo(2)
+                assertThat(uttrekk.antallManglerKontrollUtenTilgang).isEqualTo(3)
                 assertThat(uttrekk.arbeidssøkere).hasSize(2)
                 validateAdressebeskyttelse(uttrekk, IDENT_STRENGT_FORTROLIG, DtoAdressebeskyttelse.STRENGT_FORTROLIG)
                 validateAdressebeskyttelse(uttrekk,
@@ -238,9 +240,28 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
                 val uttrekk = service.hentUttrekkArbeidssøkere(mars2021)
 
                 validerInneholderIdenter(uttrekk, expected)
-                assertThat(uttrekk.antallTotalt).isEqualTo(5)
+                assertThat(uttrekk.antallTotalt).isEqualTo(3)
+                assertThat(uttrekk.antallManglerKontrollUtenTilgang).isEqualTo(2)
                 assertThat(uttrekk.arbeidssøkere).hasSize(3)
                 validateAdressebeskyttelse(uttrekk, IDENT_FORTROLIG, DtoAdressebeskyttelse.FORTROLIG)
+                validateAdressebeskyttelse(uttrekk, IDENT_UGRADERT, DtoAdressebeskyttelse.UGRADERT)
+                validateAdressebeskyttelse(uttrekk, IDENT_UTEN_GRADERING, null)
+            }
+        }
+
+        @Test
+        internal fun `hentUttrekkArbeidssøkere - uten rolle og en kode6-arbeidsøker er kontrollert`() {
+            val expected = listOf(IDENT_UGRADERT, IDENT_UTEN_GRADERING)
+            fagsakRepository.findBySøkerIdent(setOf(IDENT_STRENGT_FORTROLIG))
+                    .single()
+                    .let { fagsak -> uttrekkArbeidssøkerRepository.findAllByÅrMåned(mars2021).single { it.fagsakId == fagsak.id } }
+                    .let { uttrekkArbeidssøkerRepository.update(it.copy(kontrollert = true)) }
+            testWithBrukerContext {
+                val uttrekk = service.hentUttrekkArbeidssøkere(mars2021)
+                validerInneholderIdenter(uttrekk, expected)
+                assertThat(uttrekk.antallTotalt).isEqualTo(2)
+                assertThat(uttrekk.antallManglerKontrollUtenTilgang).isEqualTo(2)
+                assertThat(uttrekk.arbeidssøkere).hasSize(2)
                 validateAdressebeskyttelse(uttrekk, IDENT_UGRADERT, DtoAdressebeskyttelse.UGRADERT)
                 validateAdressebeskyttelse(uttrekk, IDENT_UTEN_GRADERING, null)
             }

@@ -6,10 +6,16 @@ import java.time.YearMonth
 import java.util.UUID
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Adressebeskyttelse as PdlAdressebeskyttelse
 
+/**
+ * @param antallTotalt antall totalt av de man har tilgang til
+ * @param antallKontrollert antall kontrollert av de man har tilgang til
+ * @param antallManglerKontrollUtenTilgang antall av de som man ikke har tilgang til som ikke er kontrollerte
+ */
 data class UttrekkArbeidssøkereDto(
         val årMåned: YearMonth,
         val antallTotalt: Int,
         val antallKontrollert: Int,
+        val antallManglerKontrollUtenTilgang: Int,
         val arbeidssøkere: List<UttrekkArbeidssøkerDto>
 )
 
