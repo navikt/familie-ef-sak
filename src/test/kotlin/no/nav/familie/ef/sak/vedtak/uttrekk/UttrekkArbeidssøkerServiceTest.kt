@@ -166,7 +166,12 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
         val uttrekk = service.hentUttrekkArbeidssøkere(mars2021)
         assertThat(uttrekk.antallTotalt).isEqualTo(22)
         assertThat(uttrekk.antallKontrollert).isEqualTo(2)
-        assertThat(uttrekk.arbeidssøkere.size).isEqualTo(22)
+        assertThat(uttrekk.arbeidssøkere.size).isEqualTo(20)
+
+        val uttrekkMedKontrollerte = service.hentUttrekkArbeidssøkere(mars2021, visKontrollerte = true)
+        assertThat(uttrekkMedKontrollerte.antallTotalt).isEqualTo(22)
+        assertThat(uttrekkMedKontrollerte.antallKontrollert).isEqualTo(2)
+        assertThat(uttrekkMedKontrollerte.arbeidssøkere.size).isEqualTo(22)
     }
 
     @Nested
@@ -261,7 +266,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
 
         testWithBrukerContext { service.settKontrollert(id, true) }
 
-        val oppdatertUttrekk = service.hentUttrekkArbeidssøkere(mars2021)
+        val oppdatertUttrekk = service.hentUttrekkArbeidssøkere(mars2021, visKontrollerte = true)
         assertThat(oppdatertUttrekk.antallKontrollert).isEqualTo(1)
         assertThat(oppdatertUttrekk.antallTotalt).isEqualTo(1)
         assertThat(oppdatertUttrekk.arbeidssøkere).hasSize(1)

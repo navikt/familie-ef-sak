@@ -47,9 +47,10 @@ class UttrekkArbeidssøkerService(
         return tilDtoMedAdressebeskyttelse(oppdatertArbeidssøker, hentPersondataTilFagsak(listOf(oppdatertArbeidssøker))).first
     }
 
-    fun hentUttrekkArbeidssøkere(årMåned: YearMonth = forrigeMåned().invoke()): UttrekkArbeidssøkereDto {
+    fun hentUttrekkArbeidssøkere(årMåned: YearMonth = forrigeMåned().invoke(), visKontrollerte: Boolean = false): UttrekkArbeidssøkereDto {
         val arbeidssøkere = uttrekkArbeidssøkerRepository.findAllByÅrMåned(årMåned)
-        val filtrerteArbeidsssøkere = mapTilDtoOgFiltrer(arbeidssøkere)
+        val filtrerteKontrollert = if (visKontrollerte) arbeidssøkere else arbeidssøkere.filter { !it.kontrollert }
+        val filtrerteArbeidsssøkere = mapTilDtoOgFiltrer(filtrerteKontrollert)
         return UttrekkArbeidssøkereDto(årMåned = årMåned,
                                        antallTotalt = arbeidssøkere.size,
                                        antallKontrollert = arbeidssøkere.count { it.kontrollert },
