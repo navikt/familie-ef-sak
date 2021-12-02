@@ -162,7 +162,9 @@ object AndelHistorikkBeregner {
 
     private fun finnTilsvarendeAndelIHistorikk(historikk: List<AndelHistorikkHolder>,
                                                andel: AndelTilkjentYtelse): AndelHistorikkHolder? =
-            historikk.findLast { it.endring?.type != EndringType.FJERNET && it.andel.stønadFom == andel.stønadFom }
+            historikk.findLast { it.endring?.type != EndringType.FJERNET &&
+                                 it.endring?.type != EndringType.ERSTATT &&
+                                 it.andel.stønadFom == andel.stønadFom }
 
     /**
      * Hvis en [tilkjentYtelse] sin behandlingId ikke er lik andelene i historikk sine verdier for kontrollert,

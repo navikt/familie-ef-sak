@@ -96,6 +96,11 @@ class AndelHistorikkBeregnerTest {
         run("/økonomi/periode_forlenges.csv")
     }
 
+    @Test
+    internal fun `periode_erstatt_og_senere_fjernet_på_nytt`() {
+        run("/økonomi/periode_erstatt_og_senere_fjernet_på_nytt.csv")
+    }
+
     private fun run(filnavn: String) {
         AndelHistorikkRunner.run(javaClass.getResource(filnavn)!!)
     }
