@@ -29,24 +29,26 @@ class PersonopplysningerService(private val personService: PersonService,
     fun hentPersonopplysninger(behandlingId: UUID): PersonopplysningerDto {
         val søknad = søknadService.hentOvergangsstønad(behandlingId)
         val personIdent = søknad.fødselsnummer
+        val søkerIdenter = personService.hentPersonIdenter(personIdent)
         val grunnlagsdata = grunnlagsdataService.hentGrunnlagsdata(behandlingId)
         val egenAnsatt = egenAnsatt(personIdent)
 
         return personopplysningerMapper.tilPersonopplysninger(
                 grunnlagsdata,
                 egenAnsatt,
-                personIdent
+                søkerIdenter
         )
     }
 
     fun hentPersonopplysninger(personIdent: String): PersonopplysningerDto {
         val grunnlagsdata = grunnlagsdataService.hentGrunnlagsdataFraRegister(personIdent, emptyList())
         val egenAnsatt = egenAnsatt(personIdent)
+        val identerFraPdl = personService.hentPersonIdenter(personIdent)
 
         return personopplysningerMapper.tilPersonopplysninger(
                 GrunnlagsdataMedMetadata(grunnlagsdata, lagtTilEtterFerdigstilling = false),
                 egenAnsatt,
-                personIdent
+                identerFraPdl
         )
     }
 

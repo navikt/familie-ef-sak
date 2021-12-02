@@ -42,9 +42,10 @@ class SwaggerDocumentationConfig {
     }
 
     private fun securityContext(): List<SecurityContext> {
+        val pathRegex = """/api.*""".toRegex()
         return listOf(SecurityContext.builder()
                               .securityReferences(defaultAuth())
-                              .forPaths(PathSelectors.regex("/api.*"))
+                              .operationSelector { pathRegex.matches(it.requestMappingPattern()) }
                               .build())
     }
 

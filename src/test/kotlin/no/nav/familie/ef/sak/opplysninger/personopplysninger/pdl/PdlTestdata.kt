@@ -85,7 +85,11 @@ object PdlTestdata {
                                   navn,
                                   opphold,
                                   oppholdsadresse,
-                                  listOf(Sivilstand(Sivilstandstype.GIFT, LocalDate.now(), "", LocalDate.now(), metadataGjeldende)),
+                                  listOf(Sivilstand(Sivilstandstype.GIFT,
+                                                    LocalDate.now(),
+                                                    "",
+                                                    LocalDate.now(),
+                                                    metadataGjeldende)),
                                   statsborgerskap,
                                   listOf(Telefonnummer("", "", 1)),
                                   listOf(TilrettelagtKommunikasjon(Tolk(""), Tolk(""))),
@@ -124,7 +128,8 @@ object PdlTestdata {
                                                                                    utflyttingFraNorge))))
 
     val pdlPersonKortBolk = PersonBolk(listOf(PersonDataBolk("11111122222", "ok",
-                                                             PdlPersonKort(navn,
+                                                             PdlPersonKort(adressebeskyttelse,
+                                                                           navn,
                                                                            dødsfall))))
 
     val pdlPersonSøk = PersonSøk(

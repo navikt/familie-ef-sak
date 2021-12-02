@@ -12,6 +12,8 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.INNVILGET
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
+import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTaskPayload
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask.FerdigstillOppgaveTaskData
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
@@ -35,12 +37,14 @@ import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.ef.iverksett.Hendelse
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.simulering.Simuleringsoppsummering
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -81,10 +85,11 @@ internal class SendTilBeslutterStegTest {
                                  vurderingService)
     private val fagsak = Fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD,
                                 søkerIdenter = setOf(FagsakPerson(ident = "12345678901")))
+    private val saksbehandlerNavn = "saksbehandlernavn"
     private val vedtaksbrev = Vedtaksbrev(behandlingId = UUID.randomUUID(),
                                           saksbehandlerBrevrequest = "",
                                           brevmal = "",
-                                          "",
+                                          saksbehandlersignatur = saksbehandlerNavn,
                                           "",
                                           null)
 
@@ -123,6 +128,12 @@ internal class SendTilBeslutterStegTest {
 
         every { tilbakekrevingService.harSaksbehandlerTattStillingTilTilbakekreving(any()) } returns true
         every { tilbakekrevingService.finnesÅpenTilbakekrevingsBehandling(any()) } returns true
+        mockBrukerContext(saksbehandlerNavn)
+    }
+
+    @AfterEach
+    internal fun tearDown(){
+        clearBrukerContext()
     }
 
     @Test
@@ -178,11 +189,30 @@ internal class SendTilBeslutterStegTest {
     @Test
     internal fun `Skal avslutte oppgave BehandleSak hvis den finnes`() {
         utførOgVerifiserKall(Oppgavetype.BehandleSak)
+        verifiserVedtattBehandlingsstatistikkTask()
     }
 
     @Test
     internal fun `Skal avslutte oppgave BehandleUnderkjentVedtak hvis den finnes`() {
         utførOgVerifiserKall(Oppgavetype.BehandleUnderkjentVedtak)
+        verifiserVedtattBehandlingsstatistikkTask()
+    }
+
+    @Test
+    internal fun `Skal feile hvis saksbehandlersignatur i vedtaksbrev er ulik saksbehandleren som sendte til beslutter`() {
+        every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev.copy(saksbehandlersignatur = "Saksbehandler A")
+        every { vedtakService.hentVedtak(any()) } returns lagVedtak(ResultatType.INNVILGE)
+        mockBrukerContext("Saksbehandler B")
+
+        assertThrows<Feil> { beslutteVedtakSteg.validerSteg(behandling) }
+
+        clearBrukerContext()
+    }
+
+    private fun verifiserVedtattBehandlingsstatistikkTask() {
+        assertThat(taskSlot[2].type).isEqualTo(BehandlingsstatistikkTask.TYPE)
+        assertThat(objectMapper.readValue<BehandlingsstatistikkTaskPayload>(taskSlot[2].payload).hendelse)
+                .isEqualTo(Hendelse.VEDTATT)
     }
 
 

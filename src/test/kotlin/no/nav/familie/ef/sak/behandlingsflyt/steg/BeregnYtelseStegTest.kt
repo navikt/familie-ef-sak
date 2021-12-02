@@ -10,16 +10,19 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.beregning.Beløpsperiode
 import no.nav.familie.ef.sak.beregning.BeregningService
+import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.dto.Periode
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.simulering.Simuleringsresultat
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.domain.AvslagÅrsak
 import no.nav.familie.ef.sak.vedtak.dto.Avslå
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
 import no.nav.familie.ef.sak.vedtak.dto.Opphør
@@ -45,17 +48,20 @@ internal class BeregnYtelseStegTest {
     private val vedtakService = mockk<VedtakService>(relaxed = true)
     private val simuleringService = mockk<SimuleringService>()
     private val tilbakekrevingService = mockk<TilbakekrevingService>(relaxed = true)
+    private val fagsakService = mockk<FagsakService>(relaxed = true)
 
     private val steg = BeregnYtelseSteg(tilkjentYtelseService,
                                         behandlingService,
                                         beregningService,
                                         simuleringService,
                                         vedtakService,
-                                        tilbakekrevingService)
+                                        tilbakekrevingService,
+                                        fagsakService)
 
     @BeforeEach
     internal fun setUp() {
         every { behandlingService.hentAktivIdent(any()) } returns "123"
+        every { fagsakService.fagsakMedOppdatertPersonIdent(any()) } returns fagsak(fagsakpersoner(setOf("123")))
         every { simuleringService.hentOgLagreSimuleringsresultat(any()) }
                 .returns(Simuleringsresultat(behandlingId = UUID.randomUUID(),
                                              data = DetaljertSimuleringResultat(emptyList()),
@@ -399,7 +405,7 @@ internal class BeregnYtelseStegTest {
         every { simuleringService.slettSimuleringForBehandling(any()) } just Runs
         every { tilbakekrevingService.slettTilbakekreving(any()) } just Runs
         utførSteg(type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                  vedtak = Avslå(avslåBegrunnelse = ""))
+                  vedtak = Avslå(avslåBegrunnelse = "", avslåÅrsak = AvslagÅrsak.VILKÅR_IKKE_OPPFYLT))
 
         verify { tilbakekrevingService.slettTilbakekreving(any()) }
         verify { simuleringService.slettSimuleringForBehandling(any()) }
@@ -409,7 +415,7 @@ internal class BeregnYtelseStegTest {
     private fun utførSteg(type: BehandlingType,
                           vedtak: VedtakDto = Innvilget(periodeBegrunnelse = "", inntektBegrunnelse = ""),
                           forrigeBehandlingId: UUID? = null) {
-        steg.utførSteg(behandling(fagsak(), type = type, forrigeBehandlingId = forrigeBehandlingId), vedtak = vedtak)
+        steg.utførSteg(behandling(fagsak(), type = type, forrigeBehandlingId = forrigeBehandlingId), data = vedtak)
     }
 
     private fun lagBeløpsperiode(fom: LocalDate, tom: LocalDate) =

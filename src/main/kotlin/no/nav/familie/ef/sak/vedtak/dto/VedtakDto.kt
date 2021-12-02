@@ -9,9 +9,11 @@ import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.beregning.tilInntekt
 import no.nav.familie.ef.sak.beregning.tilInntektsperioder
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.vedtak.domain.AvslagÅrsak
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.felles.Vedtaksresultat
 import no.nav.familie.kontrakter.felles.annotasjoner.Improvement
 import org.springframework.http.HttpStatus
@@ -42,6 +44,7 @@ class Innvilget(val resultatType: ResultatType = ResultatType.INNVILGE,
                 val inntekter: List<Inntekt> = emptyList()) : VedtakDto()
 
 class Avslå(val resultatType: ResultatType = ResultatType.AVSLÅ,
+            val avslåÅrsak: AvslagÅrsak?,
             val avslåBegrunnelse: String?) : VedtakDto()
 
 class Opphør(val resultatType: ResultatType = ResultatType.OPPHØRT,
@@ -50,6 +53,7 @@ class Opphør(val resultatType: ResultatType = ResultatType.OPPHØRT,
 
 fun VedtakDto.tilVedtak(behandlingId: UUID): Vedtak = when (this) {
     is Avslå -> Vedtak(behandlingId = behandlingId,
+                       avslåÅrsak = this.avslåÅrsak,
                        avslåBegrunnelse = this.avslåBegrunnelse,
                        resultatType = ResultatType.AVSLÅ)
     is Innvilget -> Vedtak(
@@ -76,7 +80,8 @@ fun Vedtak.tilVedtakDto(): VedtakDto =
                     inntekter = (this.inntekter ?: InntektWrapper(emptyList())).inntekter.tilInntekt())
             ResultatType.AVSLÅ -> Avslå(
                     resultatType = this.resultatType,
-                    avslåBegrunnelse = this.avslåBegrunnelse
+                    avslåBegrunnelse = this.avslåBegrunnelse,
+                    avslåÅrsak = this.avslåÅrsak,
             )
             ResultatType.OPPHØRT -> Opphør(
                     resultatType = this.resultatType,

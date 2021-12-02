@@ -1,5 +1,6 @@
 springProfile: prod
 ingress: https://familie-ef-sak.intern.nav.no
+db_highAvailability: true
 inboundApplications:
   - familie-ef-mottak
 inboundApplicationsExternal:

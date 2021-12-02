@@ -15,7 +15,7 @@ class VentePåTekniskOpphørStatus(private val iverksettClient: IverksettClient,
         return iverksettClient.hentStatus(behandling.id).let {
             when (it) {
                 IverksettStatus.OK_MOT_OPPDRAG -> opprettFerdigstillOppgave(behandling)
-                else -> throw error("Mottok status $it fra iverksett for behandlingId=${behandling.id}")
+                else -> error("Mottok status $it fra iverksett for behandlingId=${behandling.id}")
             }
         }
     }

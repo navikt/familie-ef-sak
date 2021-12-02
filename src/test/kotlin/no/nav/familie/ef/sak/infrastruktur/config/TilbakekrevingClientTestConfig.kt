@@ -36,6 +36,9 @@ class TilbakekrevingClientTestConfig {
                                                                                          vedtaksdato = null,
                                                                                          resultat = null))
 
+        val dummyPdf = this::class.java.classLoader.getResource("dummy/pdf_dummy.pdf")!!.readBytes()
+        every { tilbakekrevingClient.hentForhåndsvisningVarselbrev(any()) } returns dummyPdf
+
         return tilbakekrevingClient
     }
 }

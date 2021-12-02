@@ -3,6 +3,12 @@ query($identer: [ID!]!){
         code
         ident
         person {
+            adressebeskyttelse {
+                gradering
+                metadata {
+                    historisk
+                }
+            }
             doedsfall {
                 doedsdato
             }

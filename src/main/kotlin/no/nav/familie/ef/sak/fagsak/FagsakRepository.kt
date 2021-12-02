@@ -35,8 +35,8 @@ interface FagsakRepository : RepositoryInterface<Fagsak, UUID>, InsertUpdateRepo
                     JOIN fagsak_ekstern fe ON fe.fagsak_id = f.id
                     LEFT JOIN fagsak_person fp 
                         ON fp.fagsak_id = f.id 
-                     WHERE ident = :ident""")
-    fun findBySøkerIdent(ident: String): List<Fagsak>
+                     WHERE ident in (:personIdenter)""")
+    fun findBySøkerIdent(personIdenter: Set<String>): List<Fagsak>
 
     // language=PostgreSQL
     @Query("""SELECT f.*, fe.id AS eksternid_id         
@@ -48,7 +48,7 @@ interface FagsakRepository : RepositoryInterface<Fagsak, UUID>, InsertUpdateRepo
     // language=PostgreSQL
     @Query("""SELECT fp.ident FROM fagsak_person fp
                     WHERE fp.fagsak_id=:id
-                    ORDER BY fp.opprettet_tid DESC
+                    ORDER BY fp.endret_tid DESC
                     LIMIT 1""")
     fun finnAktivIdent(id: UUID): String
 

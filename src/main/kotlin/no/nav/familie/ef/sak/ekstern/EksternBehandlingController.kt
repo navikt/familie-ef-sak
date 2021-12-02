@@ -40,22 +40,6 @@ class EksternBehandlingController(private val pdlClient: PdlClient,
      * Hvis man har alle identer til en person så kan man sende inn alle direkte, for å unngå oppslag mot pdl
      * Dette er alltså ikke ett bolk-oppslag for flere ulike personer
      */
-    @PostMapping("finnes/flere-identer")
-    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
-    fun finnesBehandligFor(@RequestBody personidenter: Set<String>): Ressurs<Boolean> {
-        if (personidenter.isEmpty()) {
-            return Ressurs.failure("Minst en ident påkrevd for søk")
-        }
-        if (personidenter.any { it.length != 11 }) {
-            return Ressurs.failure("Støtter kun identer av typen fnr/dnr")
-        }
-        return Ressurs.success(eksternBehandlingService.harStønadSiste12Måneder(personidenter))
-    }
-
-    /**
-     * Hvis man har alle identer til en person så kan man sende inn alle direkte, for å unngå oppslag mot pdl
-     * Dette er alltså ikke ett bolk-oppslag for flere ulike personer
-     */
     @PostMapping("harstoenad/flere-identer")
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
     fun harStønadSiste12MånederForPersonidenter(@RequestBody personidenter: Set<String>): Ressurs<Boolean> {

@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
+import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
@@ -23,9 +24,11 @@ class RevurderingService(private val søknadService: SøknadService,
                          private val oppgaveService: OppgaveService,
                          private val vurderingService: VurderingService,
                          private val grunnlagsdataService: GrunnlagsdataService,
-                         private val taskRepository: TaskRepository) {
+                         private val taskRepository: TaskRepository,
+                         private val fagsakService: FagsakService) {
 
     fun opprettRevurderingManuelt(revurderingInnhold: RevurderingDto): Behandling {
+        fagsakService.fagsakMedOppdatertPersonIdent(revurderingInnhold.fagsakId)
         val revurdering = behandlingService.opprettBehandling(BehandlingType.REVURDERING,
                                                               revurderingInnhold.fagsakId,
                                                               BehandlingStatus.UTREDES,

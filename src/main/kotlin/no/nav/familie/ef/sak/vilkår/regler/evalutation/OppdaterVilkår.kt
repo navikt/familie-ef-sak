@@ -81,8 +81,11 @@ object OppdaterVilkår {
         return vilkårsvurdering.delvilkårsvurdering.copy(delvilkårsvurderinger = delvilkårsvurderinger)
     }
 
-    fun erAlleVilkårVurdert(vilkårsresultat: List<Vilkårsresultat>): Boolean {
-        return if (vilkårsresultat.all { it == Vilkårsresultat.OPPFYLT }) {
+    /**
+     * Et vilkår skal anses som vurdert dersom det er oppfylt eller saksbehandler har valgt å ikke vurdere det
+     */
+    fun erAlleVilkårTattStillingTil(vilkårsresultat: List<Vilkårsresultat>): Boolean {
+        return if (vilkårsresultat.all { it == Vilkårsresultat.OPPFYLT || it == Vilkårsresultat.SKAL_IKKE_VURDERES }) {
             true
         } else {
             harNoenIkkeOppfyltOgRestenIkkeOppfyltEllerOppfyltEllerSkalIkkevurderes(vilkårsresultat)
