@@ -126,8 +126,4 @@ class UttrekkArbeidssøkerService(
 
     private data class Persondata(val personIdent: String, val pdlPersonKort: PdlPersonKort)
 
-    companion object {
-
-        const val PAGE_SIZE = 20
-    }
 }
