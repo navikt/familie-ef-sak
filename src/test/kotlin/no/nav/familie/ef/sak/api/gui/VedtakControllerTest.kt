@@ -96,7 +96,6 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         }
     }
 
-
     @Test
     internal fun `skal kaste feil ved innvilgelse hvis en ikke er innvilget`() {
         val behandlingId = opprettBehandling(vedtakResultatType = ResultatType.INNVILGE)
@@ -109,24 +108,12 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal sette behandling til fatter vedtak når man sendt til beslutter ved innvilgelse`() {
-        // Gitt
         val behandlingId = opprettBehandling(vedtakResultatType = ResultatType.INNVILGE)
         lagVilkårsvurderinger(behandlingId, Vilkårsresultat.OPPFYLT)
-        sendTilBeslutter(SAKSBEHANDLER)
-        // Da skal alt være ok
-        validerBehandlingFatterVedtak()
-    }
 
-    private fun lagVilkårsvurderinger(behandlingId: UUID,
-                                      resultat: Vilkårsresultat = Vilkårsresultat.OPPFYLT,
-                                      ikkeLag: Int = 0) {
-        val vilkårsvurderinger = VilkårType.hentVilkår().map {
-            vilkårsvurdering(behandlingId = behandlingId,
-                             resultat = resultat,
-                             type = it,
-                             delvilkårsvurdering = listOf())
-        }.dropLast(ikkeLag)
-        vilkårsvurderingRepository.insertAll(vilkårsvurderinger)
+        sendTilBeslutter(SAKSBEHANDLER)
+
+        validerBehandlingFatterVedtak()
     }
 
     @Test
@@ -243,15 +230,6 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         assertThat(it.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
-    private fun sendTilBeslutterMedResponse(saksbehandler: Saksbehandler): ResponseEntity<Ressurs<UUID>> {
-        headers.setBearerAuth(token(saksbehandler))
-        lagSaksbehandlerBrev(saksbehandler.name)
-        return restTemplate.exchange(localhost("/api/vedtak/${behandling.id}/send-til-beslutter"),
-                                     HttpMethod.POST,
-                                     HttpEntity<Any>(headers))
-
-    }
-
     private fun sendTilBeslutter(saksbehandler: Saksbehandler,
                                  validator: (ResponseEntity<Ressurs<UUID>>) -> Unit = responseOK()) {
         headers.setBearerAuth(token(saksbehandler))
@@ -349,6 +327,18 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
             // Ønsker ikke å kaste feil fra denne hvis det eks er "feil steg", feil steg ønsker vi å teste i beslutteVedtak
         }
         clearBrukerContext()
+    }
+
+    private fun lagVilkårsvurderinger(behandlingId: UUID,
+                                      resultat: Vilkårsresultat = Vilkårsresultat.OPPFYLT,
+                                      ikkeLag: Int = 0) {
+        val vilkårsvurderinger = VilkårType.hentVilkår().map {
+            vilkårsvurdering(behandlingId = behandlingId,
+                             resultat = resultat,
+                             type = it,
+                             delvilkårsvurdering = listOf())
+        }.dropLast(ikkeLag)
+        vilkårsvurderingRepository.insertAll(vilkårsvurderinger)
     }
 
 }
