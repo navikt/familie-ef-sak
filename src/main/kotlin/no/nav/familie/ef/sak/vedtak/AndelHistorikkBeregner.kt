@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.vedtak
 
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.tilkjentytelse.AndelTilkjentYtelseDto
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
@@ -49,7 +50,36 @@ object AndelHistorikkBeregner {
 
     fun lagHistorikk(tilkjentYtelser: List<TilkjentYtelse>,
                      vedtaksliste: List<Vedtak>,
-                     behandlinger: List<Behandling>): List<AndelHistorikkDto> {
+                     behandlinger: List<Behandling>,
+                     tomBehandlingId: UUID?): List<AndelHistorikkDto> {
+        return if (tomBehandlingId == null) {
+            lagHistorikk(tilkjentYtelser, vedtaksliste, behandlinger)
+        } else {
+            lagHistorikkTilBehandlingId(tilkjentYtelser, vedtaksliste, behandlinger, tomBehandlingId)
+        }
+    }
+
+    /**
+     * Filtrerer vekk data som kommer etter behandlingen som man sender inn
+     */
+    private fun lagHistorikkTilBehandlingId(tilkjentYtelser: List<TilkjentYtelse>,
+                                            vedtaksliste: List<Vedtak>,
+                                            behandlinger: List<Behandling>,
+                                            tomBehandlingId: UUID?): List<AndelHistorikkDto> {
+        val filtrertBehandlinger = behandlinger.firstOrNull { it.id == tomBehandlingId }?.let { tomBehandling ->
+            behandlinger.filter { it.sporbar.opprettetTid < tomBehandling.sporbar.opprettetTid } + tomBehandling
+        } ?: throw Feil("Finner ikke behandling $tomBehandlingId i listen over behandlinger")
+
+        val filtrerteBehandlingId = filtrertBehandlinger.map { it.id }.toSet()
+        val filtrerteVedtak = vedtaksliste.filter { filtrerteBehandlingId.contains(it.behandlingId) }
+        val filtrerteTilkjentYtelse = tilkjentYtelser.filter { filtrerteBehandlingId.contains(it.behandlingId) }
+
+        return AndelHistorikkBeregner.lagHistorikk(filtrerteTilkjentYtelse, filtrerteVedtak, filtrertBehandlinger)
+    }
+
+    private fun lagHistorikk(tilkjentYtelser: List<TilkjentYtelse>,
+                             vedtaksliste: List<Vedtak>,
+                             behandlinger: List<Behandling>): List<AndelHistorikkDto> {
         val historikk = lagHistorikkHolders(sorterTilkjentYtelser(tilkjentYtelser), vedtaksliste)
         val behandlingerPåId = behandlinger.associate { it.id to it.type }
 
