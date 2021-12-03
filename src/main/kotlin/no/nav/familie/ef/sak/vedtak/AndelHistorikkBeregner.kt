@@ -15,8 +15,8 @@ import java.util.UUID
 
 enum class EndringType {
     FJERNET,
-    ERSTATT,
-    AVKORTET,
+    ERSTATTET,
+    SPLITTET,
 }
 
 data class AndelHistorikkDto(val behandlingId: UUID,
@@ -108,7 +108,7 @@ object AndelHistorikkBeregner {
             val andelHistorikk = andelFraHistorikk.andel
             andelFraHistorikk.endring = lagEndring(endringType, tilkjentYtelse)
 
-            return if (endringType == EndringType.AVKORTET) {
+            return if (endringType == EndringType.SPLITTET) {
                 andelFraHistorikk.andel = andelHistorikk.copy(stønadTom = andel.stønadTom)
                 andelFraHistorikk.copy(andel = andelHistorikk.copy(stønadFom = andel.stønadTom.plusDays(1)),
                                        endring = lagEndring(EndringType.FJERNET, tilkjentYtelse))
@@ -147,11 +147,11 @@ object AndelHistorikkBeregner {
     private fun AndelHistorikkHolder.finnEndringstype(tidligereAndel: AndelTilkjentYtelse,
                                                       vedtaksperiode: Vedtaksperiode): EndringType? {
         return when {
-            aktivitetEllerPeriodeTypeHarEndretSeg(vedtaksperiode) -> EndringType.ERSTATT
-            this.andel.beløp != tidligereAndel.beløp -> EndringType.ERSTATT
-            this.andel.inntekt != tidligereAndel.inntekt -> EndringType.ERSTATT
-            this.andel.stønadTom < tidligereAndel.stønadTom -> EndringType.ERSTATT
-            this.andel.stønadTom > tidligereAndel.stønadTom -> EndringType.AVKORTET
+            aktivitetEllerPeriodeTypeHarEndretSeg(vedtaksperiode) -> EndringType.ERSTATTET
+            this.andel.beløp != tidligereAndel.beløp -> EndringType.ERSTATTET
+            this.andel.inntekt != tidligereAndel.inntekt -> EndringType.ERSTATTET
+            this.andel.stønadTom < tidligereAndel.stønadTom -> EndringType.ERSTATTET
+            this.andel.stønadTom > tidligereAndel.stønadTom -> EndringType.SPLITTET
             else -> null // Uendret
         }
     }
@@ -178,7 +178,7 @@ object AndelHistorikkBeregner {
                                                andel: AndelTilkjentYtelse): AndelHistorikkHolder? =
             historikk.findLast {
                 it.endring?.type != EndringType.FJERNET &&
-                it.endring?.type != EndringType.ERSTATT &&
+                it.endring?.type != EndringType.ERSTATTET &&
                 it.andel.stønadFom == andel.stønadFom
             }
 
@@ -197,6 +197,6 @@ object AndelHistorikkBeregner {
     private fun erAlleredeFjernetEllerKontrollert(historikk: AndelHistorikkHolder,
                                                   tilkjentYtelse: TilkjentYtelse) =
             historikk.endring?.type == EndringType.FJERNET ||
-            historikk.endring?.type == EndringType.ERSTATT ||
+            historikk.endring?.type == EndringType.ERSTATTET ||
             historikk.kontrollert == tilkjentYtelse.id
 }
