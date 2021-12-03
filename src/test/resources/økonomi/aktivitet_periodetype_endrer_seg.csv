@@ -5,5 +5,5 @@ ANDEL  ,1            ,2021-01,2021-01,1000 ,1      ,0                ,0         
 VEDTAK ,2            ,2021-01,2021-01,     ,       ,                 ,                  ,FORSØRGER_I_ARBEID,UTVIDELSE   ,            ,
 ANDEL  ,2            ,2021-01,2021-01,1000 ,1      ,0                ,0                 ,                  ,            ,            ,
 !OUTPUT,             ,       ,       ,     ,       ,                 ,                  ,                  ,            ,            ,
-OUTPUT ,1            ,2021-01,2021-01,1000 ,1      ,0                ,0                 ,BARN_UNDER_ETT_ÅR ,HOVEDPERIODE,ERSTATTET     ,2
+OUTPUT ,1            ,2021-01,2021-01,1000 ,1      ,0                ,0                 ,BARN_UNDER_ETT_ÅR ,HOVEDPERIODE,ERSTATTET   ,2
 OUTPUT ,2            ,2021-01,2021-01,1000 ,1      ,0                ,0                 ,FORSØRGER_I_ARBEID,UTVIDELSE   ,            ,

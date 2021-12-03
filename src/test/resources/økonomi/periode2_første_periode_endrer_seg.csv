@@ -7,7 +7,7 @@ VEDTAK ,2            ,2021-01,2021-02,     ,       ,                 ,          
 ANDEL  ,2            ,2021-01,2021-01,500  ,0      ,0                ,0                 ,                 ,            ,            ,
 ANDEL  ,2            ,2021-02,2021-02,1000 ,0      ,0                ,0                 ,                 ,            ,            ,
 !OUTPUT,             ,       ,       ,     ,       ,                 ,                  ,                 ,            ,            ,
-OUTPUT ,1            ,2021-01,2021-01,1000 ,0      ,0                ,0                 ,BARN_UNDER_ETT_ÅR,HOVEDPERIODE,ERSTATTET     ,2
+OUTPUT ,1            ,2021-01,2021-01,1000 ,0      ,0                ,0                 ,BARN_UNDER_ETT_ÅR,HOVEDPERIODE,ERSTATTET   ,2
 OUTPUT ,2            ,2021-01,2021-01,500  ,0      ,0                ,0                 ,BARN_UNDER_ETT_ÅR,HOVEDPERIODE,            ,
-OUTPUT ,1            ,2021-02,2021-02,1000 ,0      ,0                ,0                 ,BARN_UNDER_ETT_ÅR,HOVEDPERIODE,ERSTATTET     ,2
+OUTPUT ,1            ,2021-02,2021-02,1000 ,0      ,0                ,0                 ,BARN_UNDER_ETT_ÅR,HOVEDPERIODE,ERSTATTET   ,2
 OUTPUT ,2            ,2021-02,2021-02,1000 ,0      ,0                ,0                 ,BARN_UNDER_ETT_ÅR,HOVEDPERIODE,            ,
