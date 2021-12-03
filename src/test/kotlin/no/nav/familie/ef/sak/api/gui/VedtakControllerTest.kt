@@ -101,11 +101,10 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     internal fun `skal kaste feil ved innvilgelse hvis en ikke er innvilget`() {
         val behandlingId = opprettBehandling(vedtakResultatType = ResultatType.INNVILGE)
         lagVilkårsvurderinger(behandlingId, Vilkårsresultat.IKKE_OPPFYLT)
-        // Når
-        val response = sendTilBeslutterMedResponse(SAKSBEHANDLER)
-        // Da skal
-        val forventetFeilmelding = "Kan ikke innvilge hvis ikke alle vilkår er oppfylt for behandlingId: $behandlingId"
-        assertThat(response.body.frontendFeilmelding).isEqualTo(forventetFeilmelding)
+        sendTilBeslutter(SAKSBEHANDLER) { response ->
+            assertThat(response.body.frontendFeilmelding)
+                    .isEqualTo("Kan ikke innvilge hvis ikke alle vilkår er oppfylt for behandlingId: $behandlingId")
+        }
     }
 
     @Test
