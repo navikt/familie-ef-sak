@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.infrastruktur.config
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.familie.ef.sak.vedtak.domain.BrevmottakereWrapper
 import no.nav.familie.ef.sak.brev.domain.Fritekstbrev
 import no.nav.familie.ef.sak.felles.domain.Endret
 import no.nav.familie.ef.sak.felles.domain.Fil
@@ -112,7 +113,9 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
                                             PGobjectTilBeriketSimuleringsresultat(),
                                             BeriketSimuleringsresultatTilPGobjectConverter(),
                                             PGObjectTilFritekstbrevConverter(),
-                                            FritekstbrevTilPGObjectConverter()
+                                            FritekstbrevTilPGObjectConverter(),
+                                            PGobjectTilBrevmottakere(),
+                                            BrevmottakereTilPGobjectConverter()
         ))
     }
 
@@ -363,5 +366,24 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
                     type = "json"
                     value = objectMapper.writeValueAsString(simuleringsresultat)
                 }
+    }
+
+    @ReadingConverter
+    class PGobjectTilBrevmottakere : Converter<PGobject, BrevmottakereWrapper> {
+
+        override fun convert(pGobject: PGobject): BrevmottakereWrapper {
+            return BrevmottakereWrapper(pGobject.value?.let { objectMapper.readValue(it) } ?: emptyList())
+        }
+    }
+
+    @WritingConverter
+    class BrevmottakereTilPGobjectConverter : Converter<BrevmottakereWrapper, PGobject> {
+
+        override fun convert(mottakere: BrevmottakereWrapper): PGobject =
+                PGobject().apply {
+                    type = "json"
+                    value = objectMapper.writeValueAsString(mottakere.mottakere)
+                }
+
     }
 }
