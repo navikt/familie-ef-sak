@@ -152,6 +152,7 @@ object AndelHistorikkBeregner {
             this.andel.inntekt != tidligereAndel.inntekt -> EndringType.ERSTATTET
             this.andel.stønadTom < tidligereAndel.stønadTom -> EndringType.ERSTATTET
             this.andel.stønadTom > tidligereAndel.stønadTom -> EndringType.SPLITTET
+            this.andel.kildeBehandlingId != tidligereAndel.kildeBehandlingId -> EndringType.FJERNET
             else -> null // Uendret
         }
     }
