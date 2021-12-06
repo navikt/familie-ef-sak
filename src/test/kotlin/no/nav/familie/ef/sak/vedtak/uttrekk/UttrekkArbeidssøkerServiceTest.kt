@@ -17,6 +17,9 @@ import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.infrastruktur.exception.ManglerTilgang
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.arbeidssøker.ArbeidssøkerClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.arbeidssøker.ArbeidssøkerPeriode
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.arbeidssøker.ArbeidssøkerResponse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Adressebeskyttelse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.AdressebeskyttelseGradering
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
@@ -52,6 +55,8 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var rolleConfig: RolleConfig
 
     private lateinit var service: UttrekkArbeidssøkerService
+
+    private val arbeidssøkerClient = mockk<ArbeidssøkerClient>()
     private val personService = mockk<PersonService>()
 
     private val fagsak = fagsak(fagsakpersoner(setOf("1")))
@@ -74,10 +79,15 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     internal fun setUp() {
+        every { arbeidssøkerClient.hentPerioder(any(), any(), any()) } returns ArbeidssøkerResponse(listOf())
         every { personService.hentPdlPersonKort(any()) } answers {
             firstArg<List<String>>().associateWith { lagPersonKort() }
         }
-        service = UttrekkArbeidssøkerService(tilgangService, uttrekkArbeidssøkerRepository, fagsakService, personService)
+        service = UttrekkArbeidssøkerService(tilgangService,
+                                             uttrekkArbeidssøkerRepository,
+                                             fagsakService,
+                                             personService,
+                                             arbeidssøkerClient)
     }
 
     @Test
@@ -125,6 +135,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
         assertThat(uttrekk[0].fagsakId).isEqualTo(behandling.fagsakId)
         assertThat(uttrekk[0].behandlingIdForVedtak).isEqualTo(behandling.id)
         assertThat(uttrekk[0].kontrollert).isFalse
+        assertThat(uttrekk[0].registertArbeidssøker).isFalse
     }
 
     @Test
@@ -148,6 +159,44 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
 
         val uttrekk = service.hentUttrekkArbeidssøkere(mars2021).arbeidssøkere
         assertThat(uttrekk).hasSize(2)
+    }
+
+    @Nested
+    inner class `Registrert som arbeidssøkere` {
+
+        @Test
+        internal fun `hentUttrekkArbeidssøkere - er registrert som arbeidssøker hvis det finnes periode siste dagen i måneden`() {
+            listOf(ArbeidssøkerPeriode(mars2021.atDay(1), mars2021.atEndOfMonth()),
+                   ArbeidssøkerPeriode(mars2021.atEndOfMonth(), mars2021.atEndOfMonth()),
+                   ArbeidssøkerPeriode(mars2021.atEndOfMonth(), mars2021.atEndOfMonth().plusDays(1))).forEach {
+                every { arbeidssøkerClient.hentPerioder(any(), any(), any()) } returns ArbeidssøkerResponse(listOf(it))
+
+                opprettdata()
+
+                service.opprettUttrekkArbeidssøkere(mars2021)
+
+                val uttrekk = service.hentUttrekkArbeidssøkere(mars2021).arbeidssøkere
+                assertThat(uttrekk[0].registertArbeidssøker).isTrue
+                reset()
+            }
+        }
+
+        @Test
+        internal fun `hentUttrekkArbeidssøkere - er ikke registrert hvis det ikke finnes periode siste dagen i måneden`() {
+            listOf(ArbeidssøkerPeriode(mars2021.atDay(1), mars2021.atEndOfMonth().minusDays(1)),
+                   ArbeidssøkerPeriode(mars2021.atEndOfMonth().plusDays(1), mars2021.atEndOfMonth().plusMonths(1))).forEach {
+                every { arbeidssøkerClient.hentPerioder(any(), any(), any()) } returns ArbeidssøkerResponse(listOf(it))
+
+                opprettdata()
+
+                service.opprettUttrekkArbeidssøkere(mars2021)
+
+                val uttrekk = service.hentUttrekkArbeidssøkere(mars2021).arbeidssøkere
+                assertThat(uttrekk[0].registertArbeidssøker).isFalse
+                reset()
+            }
+        }
+
     }
 
     @Test
@@ -254,7 +303,10 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
             val expected = listOf(IDENT_UGRADERT, IDENT_UTEN_GRADERING)
             fagsakRepository.findBySøkerIdent(setOf(IDENT_STRENGT_FORTROLIG))
                     .single()
-                    .let { fagsak -> uttrekkArbeidssøkerRepository.findAllByÅrMåned(mars2021).single { it.fagsakId == fagsak.id } }
+                    .let { fagsak ->
+                        uttrekkArbeidssøkerRepository.findAllByÅrMåned(mars2021)
+                                .single { it.fagsakId == fagsak.id }
+                    }
                     .let { uttrekkArbeidssøkerRepository.update(it.copy(kontrollert = true)) }
             testWithBrukerContext {
                 val uttrekk = service.hentUttrekkArbeidssøkere(mars2021)

@@ -61,4 +61,7 @@ Applikasjonen vil deployes til produksjon ved ny commit på master-branchen. Det
 Testbrukeren som opprettes i IDA må ha minst en av følgende roller:
 - 0000-GA-Enslig-Forsorger-Beslutter
 - 0000-GA-Enslig-Forsorger-Saksbehandler
+
+## Testdata
+- Registering av arbeidssøker - https://arbeidssokerregistrering.dev.nav.no/
   

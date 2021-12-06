@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.vedtak.uttrekk
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.arbeidssøker.ArbeidssøkerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Adressebeskyttelse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonKort
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
@@ -21,17 +22,25 @@ class UttrekkArbeidssøkerService(
         private val tilgangService: TilgangService,
         private val uttrekkArbeidssøkerRepository: UttrekkArbeidssøkerRepository,
         private val fagsakService: FagsakService,
-        private val personService: PersonService
+        private val personService: PersonService,
+        private val arbeidssøkerClient: ArbeidssøkerClient
 ) {
 
     fun forrigeMåned(): () -> YearMonth = { YearMonth.now().minusMonths(1) }
 
     @Transactional
     fun opprettUttrekkArbeidssøkere(årMåned: YearMonth = forrigeMåned().invoke()) {
-        hentArbeidssøkereForUttrekk(årMåned).forEach {
+        val uttrekk = hentArbeidssøkereForUttrekk(årMåned)
+        val aktiveIdenter = fagsakService.hentAktiveIdenter(uttrekk.map { it.fagsakId }.toSet())
+        val registertSomArbeidssøkerPåFagsak = hentRegistertSomArbeidssøker(aktiveIdenter, årMåned)
+
+        uttrekk.forEach {
+            val registertSomArbeidssøker = registertSomArbeidssøkerPåFagsak[it.fagsakId]
+                                           ?: error("Finner ikke status om registert arbeidssøker for fagsak=${it.fagsakId}")
             uttrekkArbeidssøkerRepository.insert(UttrekkArbeidssøkere(fagsakId = it.fagsakId,
                                                                       vedtakId = it.behandlingIdForVedtak,
-                                                                      årMåned = årMåned))
+                                                                      årMåned = årMåned,
+                                                                      registrertArbeidssøker = registertSomArbeidssøker))
         }
     }
 
@@ -66,6 +75,16 @@ class UttrekkArbeidssøkerService(
                 antallManglerKontrollUtenTilgang = antallManglerKontrollUtenTilgang,
                 arbeidssøkere = filtrerteKontrollert
         )
+    }
+
+    private fun hentRegistertSomArbeidssøker(aktiveIdenter: Map<UUID, String>, årMåned: YearMonth): Map<UUID, Boolean> {
+        val fraOgMed = årMåned.atDay(1)
+        val tilOgMed = årMåned.atEndOfMonth()
+        return aktiveIdenter.entries.associate { entry ->
+            val perioder = arbeidssøkerClient.hentPerioder(entry.value, fraOgMed, tilOgMed).perioder
+            val arbeidssøkerISluttetPåMåneden = perioder.any { it.fraOgMedDato <= tilOgMed && it.tilOgMedDato >= tilOgMed }
+            entry.key to arbeidssøkerISluttetPåMåneden
+        }
     }
 
     /**

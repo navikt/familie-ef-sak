@@ -18,6 +18,9 @@ data class UttrekkArbeidssøkere(
         val vedtakId: UUID,
         @Column("aar_maaned")
         val årMåned: YearMonth,
+        @Column("registert_arbeidssoker")
+        val registrertArbeidssøker: Boolean? = null,
+
         val opprettetTid: LocalDateTime = SporbarUtils.now(),
         val kontrollert: Boolean = false,
         val kontrollertTid: LocalDateTime? = null,
