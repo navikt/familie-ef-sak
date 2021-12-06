@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.vilkår
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.vilkår.dto.VilkårDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårGrunnlagDto
@@ -19,13 +20,15 @@ import java.util.UUID
 class VurderingService(private val behandlingService: BehandlingService,
                        private val søknadService: SøknadService,
                        private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-                       private val vilkårGrunnlagService: VilkårGrunnlagService) {
+                       private val vilkårGrunnlagService: VilkårGrunnlagService,
+                       private val grunnlagsdataService: GrunnlagsdataService) {
 
     @Transactional
     fun hentEllerOpprettVurderinger(behandlingId: UUID): VilkårDto {
         val (grunnlag, metadata) = hentGrunnlagOgMetadata(behandlingId)
         val vurderinger = hentEllerOpprettVurderinger(behandlingId, metadata)
-        return VilkårDto(vurderinger = vurderinger, grunnlag = grunnlag)
+        val opprettetTid = grunnlagsdataService.hentOpprettetTidForGrunnlagsdata(behandlingId)
+        return VilkårDto(vurderinger = vurderinger, grunnlag = grunnlag, opprettetTid = opprettetTid)
     }
 
     private fun hentGrunnlagOgMetadata(behandlingId: UUID): Pair<VilkårGrunnlagDto, HovedregelMetadata> {

@@ -1,8 +1,11 @@
 package no.nav.familie.ef.sak.vilkår.dto
 
+import java.time.LocalDateTime
+
 
 data class VilkårDto(val vurderinger: List<VilkårsvurderingDto>,
-                     val grunnlag: VilkårGrunnlagDto)
+                     val grunnlag: VilkårGrunnlagDto,
+                     val opprettetTid: LocalDateTime)
 
 data class VilkårGrunnlagDto(val tidligereVedtaksperioder: TidligereVedtaksperioderDto,
                              val medlemskap: MedlemskapDto,

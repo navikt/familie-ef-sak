@@ -3,9 +3,11 @@ package no.nav.familie.ef.sak.opplysninger.personopplysninger
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedOpprettetTid
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 import java.util.UUID
 
 
@@ -24,8 +26,18 @@ class GrunnlagsdataService(private val grunnlagsdataRepository: GrunnlagsdataRep
         return GrunnlagsdataMedMetadata(grunnlagsdata.data, grunnlagsdata.lagtTilEtterFerdigstilling)
     }
 
+    fun hentGrunnlagsdataMedOpprettetTid(behandlingId: UUID): GrunnlagsdataMedOpprettetTid {
+        val opprettet_tid = grunnlagsdataRepository.finnOpprettetTid(behandlingId)
+        val grunnlagsdata = hentLagretGrunnlagsdata(behandlingId)
+        return GrunnlagsdataMedOpprettetTid(grunnlagsdata, opprettet_tid)
+    }
+
     private fun hentLagretGrunnlagsdata(behandlingId: UUID): Grunnlagsdata {
         return grunnlagsdataRepository.findByIdOrThrow(behandlingId)
+    }
+
+    fun hentOpprettetTidForGrunnlagsdata(behandlingId: UUID): LocalDateTime {
+        return grunnlagsdataRepository.finnOpprettetTid(behandlingId)
     }
 
     private fun hentGrunnlagsdataFraRegister(behandlingId: UUID): GrunnlagsdataDomene {

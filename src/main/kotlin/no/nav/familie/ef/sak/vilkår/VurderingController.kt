@@ -71,4 +71,10 @@ class VurderingController(private val vurderingService: VurderingService,
         tilgangService.validerTilgangTilBehandling(behandlingId)
         return Ressurs.success(vurderingService.hentEllerOpprettVurderinger(behandlingId))
     }
+
+    @GetMapping("{behandlingId}/oppdater")
+    fun oppdaterRegisterdata(@PathVariable behandlingId: UUID): Ressurs<VilkårDto> {
+        tilgangService.validerTilgangTilBehandling(behandlingId)
+        return Ressurs.success(vurderingService.hentEllerOpprettVurderinger(behandlingId))
+    }
 }
