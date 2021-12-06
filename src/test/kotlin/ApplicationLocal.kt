@@ -14,6 +14,7 @@ fun main(args: Array<String>) {
     SpringApplicationBuilder(ApplicationConfig::class.java)
             .initializers(DbContainerInitializer())
             .profiles("local",
+                      "mock-arbeidssøker",
                       "mock-integrasjoner",
                       "mock-pdl",
                       "mock-infotrygd-replika",
