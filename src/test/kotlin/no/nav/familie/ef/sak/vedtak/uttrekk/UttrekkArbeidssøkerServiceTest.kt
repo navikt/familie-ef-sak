@@ -135,7 +135,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
         assertThat(uttrekk[0].fagsakId).isEqualTo(behandling.fagsakId)
         assertThat(uttrekk[0].behandlingIdForVedtak).isEqualTo(behandling.id)
         assertThat(uttrekk[0].kontrollert).isFalse
-        assertThat(uttrekk[0].registertArbeidssøker).isFalse
+        assertThat(uttrekk[0].registrertArbeidssøker).isFalse
     }
 
     @Test
@@ -176,7 +176,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
                 service.opprettUttrekkArbeidssøkere(mars2021)
 
                 val uttrekk = service.hentUttrekkArbeidssøkere(mars2021).arbeidssøkere
-                assertThat(uttrekk[0].registertArbeidssøker).isTrue
+                assertThat(uttrekk[0].registrertArbeidssøker).isTrue
                 reset()
             }
         }
@@ -192,7 +192,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
                 service.opprettUttrekkArbeidssøkere(mars2021)
 
                 val uttrekk = service.hentUttrekkArbeidssøkere(mars2021).arbeidssøkere
-                assertThat(uttrekk[0].registertArbeidssøker).isFalse
+                assertThat(uttrekk[0].registrertArbeidssøker).isFalse
                 reset()
             }
         }
