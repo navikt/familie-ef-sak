@@ -78,11 +78,10 @@ class UttrekkArbeidssøkerService(
     }
 
     private fun hentRegistertSomArbeidssøker(aktiveIdenter: Map<UUID, String>, årMåned: YearMonth): Map<UUID, Boolean> {
-        val fraOgMed = årMåned.atDay(1)
-        val tilOgMed = årMåned.atEndOfMonth()
+        val sisteIMåneden = årMåned.atEndOfMonth()
         return aktiveIdenter.entries.associate { entry ->
-            val perioder = arbeidssøkerClient.hentPerioder(entry.value, fraOgMed, tilOgMed).perioder
-            val arbeidssøkerISluttetPåMåneden = perioder.any { it.fraOgMedDato <= tilOgMed && it.tilOgMedDato >= tilOgMed }
+            val perioder = arbeidssøkerClient.hentPerioder(entry.value, sisteIMåneden, sisteIMåneden).perioder
+            val arbeidssøkerISluttetPåMåneden = perioder.any { it.fraOgMedDato <= sisteIMåneden && it.tilOgMedDato >= sisteIMåneden }
             entry.key to arbeidssøkerISluttetPåMåneden
         }
     }
