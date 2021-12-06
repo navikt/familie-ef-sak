@@ -24,7 +24,6 @@ externalHosts:
   - familie-integrasjoner.dev-fss-pub.nais.io
   - infotrygd-enslig-forsoerger.dev-fss-pub.nais.io
   - familie-ef-proxy.dev-fss-pub.nais.io
-  - veilarbregistrering.dev-fss-pub.nais.io
 fssCluster: dev-fss
 tenant: trygdeetaten.no
 claimGroups:

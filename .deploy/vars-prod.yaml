@@ -20,7 +20,6 @@ externalHosts:
   - familie-integrasjoner.prod-fss-pub.nais.io
   - infotrygd-enslig-forsoerger.prod-fss-pub.nais.io
   - familie-ef-proxy.prod-fss-pub.nais.io
-  - veilarbregistrering.prod-fss-pub.nais.io
 fssCluster: prod-fss
 
 tenant: nav.no
