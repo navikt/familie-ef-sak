@@ -57,9 +57,6 @@ enum class BehandlingType(val visningsnavn: String) {
     FØRSTEGANGSBEHANDLING("Førstegangsbehandling"),
     BLANKETT("Blankett"),
     REVURDERING("Revurdering"),
-
-    // Klage burde bli en årsak til revurdering for å unngå klage som lever lenge, kanskje flyttes til egen tabell?
-    //KLAGE("Klage"),
     TEKNISK_OPPHØR("Teknisk opphør")
 }
 

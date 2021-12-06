@@ -1,5 +1,6 @@
 springProfile: dev
 ingress: https://familie-ef-sak.dev.intern.nav.no
+db_highAvailability: false
 inboundApplications:
   - familie-ef-sak-frontend-lokal
   - familie-ef-mottak

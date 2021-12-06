@@ -74,10 +74,8 @@ class OppgaveController(private val oppgaveService: OppgaveService,
 
     @GetMapping(path = ["/mapper"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentMapper(): Ressurs<List<MappeDto>> {
-        return Ressurs.success(oppgaveService.finnMapper(enhet = "4489"))
+        return Ressurs.success(oppgaveService.finnMapper(enheter = listOf("4489", "4483")))
     }
-
-
 }
 
 private fun FinnOppgaveResponseDto.tilDto(): OppgaveResponseDto {
