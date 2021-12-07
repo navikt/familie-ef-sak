@@ -17,6 +17,7 @@ import no.nav.familie.ef.sak.tilbakekreving.domain.Tilbakekrevingsvalg
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.domain.BrevmottakereWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
@@ -48,12 +49,12 @@ import no.nav.familie.kontrakter.ef.iverksett.VurderingDto
 import no.nav.familie.kontrakter.felles.annotasjoner.Improvement
 import no.nav.familie.kontrakter.felles.tilbakekreving.Periode
 import org.springframework.stereotype.Component
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.familie.kontrakter.ef.felles.RegelId as RegelIdIverksett
 import no.nav.familie.kontrakter.ef.felles.VilkårType as VilkårTypeIverksett
 import no.nav.familie.kontrakter.ef.felles.Vilkårsresultat as VilkårsresultatIverksett
+import no.nav.familie.kontrakter.ef.iverksett.Brevmottaker as BrevmottakerIverksett
 import no.nav.familie.kontrakter.ef.iverksett.SvarId as SvarIdIverksett
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg as TilbakekrevingsvalgKontrakter
 
@@ -149,7 +150,8 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
                                beslutterId = beslutter,
                                tilkjentYtelse = tilkjentYtelse?.tilIverksettDto(),
                                vedtaksperioder = vedtak.perioder?.tilIverksettDto() ?: emptyList(),
-                               tilbakekreving = tilbakekreving
+                               tilbakekreving = tilbakekreving,
+                               brevmottakere = vedtak.brevmottakere?.tilIverksettDto() ?: emptyList()
             )
 
     private fun mapSøkerDto(fagsak: Fagsak, behandling: Behandling): SøkerDto {
@@ -208,5 +210,11 @@ fun PeriodeWrapper.tilIverksettDto(): List<VedtaksperiodeDto> = this.perioder.ma
                       aktivitet = AktivitetType.valueOf(it.aktivitet.name),
                       periodeType = VedtaksperiodeType.valueOf(it.periodeType.name)
     )
+}
+
+fun BrevmottakereWrapper.tilIverksettDto(): List<BrevmottakerIverksett> = this.mottakere.map {
+    BrevmottakerIverksett(it.personIdent,
+                          it.navn,
+                          mottakerRolle = BrevmottakerIverksett.MottakerRolle.valueOf(it.mottakerRolle.name))
 }
 

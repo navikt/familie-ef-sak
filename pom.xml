@@ -33,10 +33,10 @@
         <kotlin-coroutines.version>1.5.2</kotlin-coroutines.version>
         <springfox.version>3.0.0</springfox.version>
         <mockk.version>1.12.1</mockk.version>
-        <felles.version>1.20211008153542_d279663</felles.version>
+        <felles.version>1.20211202083100_64f46dd</felles.version>
         <prosessering.version>1.20211125150647_a7c6f64</prosessering.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>2.0_20211130093638_3c364eb</kontrakter.version>
+        <kontrakter.version>2.0_20211130102051_80f114f</kontrakter.version>
 
 
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
@@ -156,7 +156,7 @@
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
             <artifactId>wiremock-jre8</artifactId>
-            <version>2.31.0</version>
+            <version>2.32.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>

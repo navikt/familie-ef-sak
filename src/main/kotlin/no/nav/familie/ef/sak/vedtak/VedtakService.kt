@@ -45,4 +45,5 @@ class VedtakService(private val vedtakRepository: VedtakRepository) {
         val oppdatertVedtak = vedtak.copy(beslutterIdent = beslutterIdent)
         vedtakRepository.update(oppdatertVedtak)
     }
+
 }
