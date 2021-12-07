@@ -31,6 +31,12 @@ class VurderingService(private val behandlingService: BehandlingService,
         return VilkårDto(vurderinger = vurderinger, grunnlag = grunnlag, opprettetTid = opprettetTid)
     }
 
+    @Transactional
+    fun oppdaterGrunnlagsdataOgHentEllerOpprettVurderinger(behandlingId: UUID): VilkårDto {
+        grunnlagsdataService.oppdaterOgHentNyGrunnlagsdata(behandlingId)
+        return hentEllerOpprettVurderinger(behandlingId)
+    }
+
     private fun hentGrunnlagOgMetadata(behandlingId: UUID): Pair<VilkårGrunnlagDto, HovedregelMetadata> {
         val søknad = søknadService.hentOvergangsstønad(behandlingId)
         val grunnlag = vilkårGrunnlagService.hentGrunnlag(behandlingId, søknad)

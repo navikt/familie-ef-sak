@@ -26,10 +26,15 @@ class GrunnlagsdataService(private val grunnlagsdataRepository: GrunnlagsdataRep
         return GrunnlagsdataMedMetadata(grunnlagsdata.data, grunnlagsdata.lagtTilEtterFerdigstilling)
     }
 
-    fun hentGrunnlagsdataMedOpprettetTid(behandlingId: UUID): GrunnlagsdataMedOpprettetTid {
-        val opprettet_tid = grunnlagsdataRepository.finnOpprettetTid(behandlingId)
-        val grunnlagsdata = hentLagretGrunnlagsdata(behandlingId)
-        return GrunnlagsdataMedOpprettetTid(grunnlagsdata, opprettet_tid)
+    fun oppdaterOgHentNyGrunnlagsdata(behandlingId: UUID): GrunnlagsdataMedMetadata {
+        slettGrunnlagsdataHvisFinnes(behandlingId)
+        opprettGrunnlagsdata(behandlingId)
+        return hentGrunnlagsdata(behandlingId)
+
+    }
+
+    private fun slettGrunnlagsdataHvisFinnes(behandlingId: UUID) {
+        grunnlagsdataRepository.deleteById(behandlingId)
     }
 
     private fun hentLagretGrunnlagsdata(behandlingId: UUID): Grunnlagsdata {
