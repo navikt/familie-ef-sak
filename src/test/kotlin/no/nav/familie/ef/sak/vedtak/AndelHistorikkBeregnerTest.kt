@@ -108,23 +108,23 @@ class AndelHistorikkBeregnerTest {
 
     @Test
     internal fun `tomBehandling_er_andre_behandlingen`() {
-        run("/økonomi/tomBehandling_er_andre_behandlingen.csv", tomBehandlingId = 2)
+        run("/økonomi/tomBehandling_er_andre_behandlingen.csv", tilOgMedBehandlingId = 2)
     }
 
-    private fun run(filnavn: String, tomBehandlingId: Int? = null) {
-        AndelHistorikkRunner.run(javaClass.getResource(filnavn)!!, tomBehandlingId)
+    private fun run(filnavn: String, tilOgMedBehandlingId: Int? = null) {
+        AndelHistorikkRunner.run(javaClass.getResource(filnavn)!!, tilOgMedBehandlingId)
     }
 }
 
 object AndelHistorikkRunner {
 
-    fun run(url: URL, tomBehandlingId: Int?) {
+    fun run(url: URL, tilOgMedBehandlingId: Int?) {
         val grupper = AndelHistorikkParser.parseGroup(url)
 
         validerInput(grupper)
 
         val behandlinger = grupper.input.map { it.behandlingId }.distinct().map { behandling(id = it) }
-        val behandlingId = tomBehandlingId?.let { generateBehandlingId(it)}
+        val behandlingId = tilOgMedBehandlingId?.let { generateBehandlingId(it)}
 
         val output = AndelHistorikkBeregner.lagHistorikk(grupper.input, grupper.vedtaksliste, behandlinger, behandlingId)
 

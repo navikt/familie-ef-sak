@@ -71,7 +71,7 @@ class TilkjentYtelseService(private val behandlingService: BehandlingService,
         tilkjentYtelseRepository.findByBehandlingId(behandlingId)?.let { tilkjentYtelseRepository.deleteById(it.id) }
     }
 
-    fun hentHistorikk(fagsakId: UUID, tomBehandlingId: UUID?): List<AndelHistorikkDto> {
+    fun hentHistorikk(fagsakId: UUID, tilOgMedBehandlingId: UUID?): List<AndelHistorikkDto> {
         val tilkjenteYtelser = tilkjentYtelseRepository.finnAlleIverksatteForFagsak(fagsakId)
         if (tilkjenteYtelser.isEmpty()) {
             return emptyList()
@@ -80,7 +80,7 @@ class TilkjentYtelseService(private val behandlingService: BehandlingService,
         val behandlingIder = tilkjenteYtelser.map { it.behandlingId }.toSet()
         val vedtakForBehandlinger = vedtakService.hentVedtakForBehandlinger(behandlingIder)
         val behandlinger = behandlingService.hentBehandlinger(behandlingIder)
-        return AndelHistorikkBeregner.lagHistorikk(tilkjenteYtelser, vedtakForBehandlinger, behandlinger, tomBehandlingId)
+        return AndelHistorikkBeregner.lagHistorikk(tilkjenteYtelser, vedtakForBehandlinger, behandlinger, tilOgMedBehandlingId)
     }
 
 }

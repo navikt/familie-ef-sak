@@ -51,11 +51,11 @@ object AndelHistorikkBeregner {
     fun lagHistorikk(tilkjentYtelser: List<TilkjentYtelse>,
                      vedtaksliste: List<Vedtak>,
                      behandlinger: List<Behandling>,
-                     tomBehandlingId: UUID?): List<AndelHistorikkDto> {
-        return if (tomBehandlingId == null) {
+                     tilOgMedBehandlingId: UUID?): List<AndelHistorikkDto> {
+        return if (tilOgMedBehandlingId == null) {
             lagHistorikk(tilkjentYtelser, vedtaksliste, behandlinger)
         } else {
-            lagHistorikkTilBehandlingId(tilkjentYtelser, vedtaksliste, behandlinger, tomBehandlingId)
+            lagHistorikkTilBehandlingId(tilkjentYtelser, vedtaksliste, behandlinger, tilOgMedBehandlingId)
         }
     }
 
@@ -65,10 +65,10 @@ object AndelHistorikkBeregner {
     private fun lagHistorikkTilBehandlingId(tilkjentYtelser: List<TilkjentYtelse>,
                                             vedtaksliste: List<Vedtak>,
                                             behandlinger: List<Behandling>,
-                                            tomBehandlingId: UUID?): List<AndelHistorikkDto> {
-        val filtrertBehandlinger = behandlinger.firstOrNull { it.id == tomBehandlingId }?.let { tomBehandling ->
+                                            tilOgMedBehandlingId: UUID?): List<AndelHistorikkDto> {
+        val filtrertBehandlinger = behandlinger.firstOrNull { it.id == tilOgMedBehandlingId }?.let { tomBehandling ->
             behandlinger.filter { it.sporbar.opprettetTid < tomBehandling.sporbar.opprettetTid } + tomBehandling
-        } ?: throw Feil("Finner ikke behandling $tomBehandlingId i listen over behandlinger")
+        } ?: throw Feil("Finner ikke behandling $tilOgMedBehandlingId i listen over behandlinger")
 
         val filtrerteBehandlingId = filtrertBehandlinger.map { it.id }.toSet()
         val filtrerteVedtak = vedtaksliste.filter { filtrerteBehandlingId.contains(it.behandlingId) }
