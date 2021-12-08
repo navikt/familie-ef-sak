@@ -74,7 +74,7 @@ object AndelHistorikkBeregner {
         val filtrerteVedtak = vedtaksliste.filter { filtrerteBehandlingId.contains(it.behandlingId) }
         val filtrerteTilkjentYtelse = tilkjentYtelser.filter { filtrerteBehandlingId.contains(it.behandlingId) }
 
-        return AndelHistorikkBeregner.lagHistorikk(filtrerteTilkjentYtelse, filtrerteVedtak, filtrertBehandlinger)
+        return lagHistorikk(filtrerteTilkjentYtelse, filtrerteVedtak, filtrertBehandlinger)
     }
 
     private fun lagHistorikk(tilkjentYtelser: List<TilkjentYtelse>,
