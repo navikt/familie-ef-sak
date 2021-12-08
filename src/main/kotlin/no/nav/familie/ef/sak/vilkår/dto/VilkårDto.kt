@@ -4,8 +4,7 @@ import java.time.LocalDateTime
 
 
 data class VilkårDto(val vurderinger: List<VilkårsvurderingDto>,
-                     val grunnlag: VilkårGrunnlagDto,
-                     val opprettetTid: LocalDateTime)
+                     val grunnlag: VilkårGrunnlagDto)
 
 data class VilkårGrunnlagDto(val tidligereVedtaksperioder: TidligereVedtaksperioderDto,
                              val medlemskap: MedlemskapDto,
@@ -15,4 +14,5 @@ data class VilkårGrunnlagDto(val tidligereVedtaksperioder: TidligereVedtaksperi
                              val sivilstandsplaner: SivilstandsplanerDto,
                              val aktivitet: AktivitetDto,
                              val sagtOppEllerRedusertStilling: SagtOppEllerRedusertStillingDto,
-                             val lagtTilEtterFerdigstilling: Boolean)
+                             val lagtTilEtterFerdigstilling: Boolean,
+                             val registeropplysningerOpprettetTid: LocalDateTime)

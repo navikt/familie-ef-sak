@@ -3,11 +3,10 @@ package no.nav.familie.ef.sak.opplysninger.personopplysninger
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedOpprettetTid
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
+import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 
@@ -23,9 +22,12 @@ class GrunnlagsdataService(private val grunnlagsdataRepository: GrunnlagsdataRep
 
     fun hentGrunnlagsdata(behandlingId: UUID): GrunnlagsdataMedMetadata {
         val grunnlagsdata = hentLagretGrunnlagsdata(behandlingId)
-        return GrunnlagsdataMedMetadata(grunnlagsdata.data, grunnlagsdata.lagtTilEtterFerdigstilling)
+        return GrunnlagsdataMedMetadata(grunnlagsdata.data,
+                                        grunnlagsdata.lagtTilEtterFerdigstilling,
+                                        grunnlagsdata.sporbar.opprettetTid)
     }
 
+    @Transactional
     fun oppdaterOgHentNyGrunnlagsdata(behandlingId: UUID): GrunnlagsdataMedMetadata {
         slettGrunnlagsdataHvisFinnes(behandlingId)
         opprettGrunnlagsdata(behandlingId)
@@ -39,10 +41,6 @@ class GrunnlagsdataService(private val grunnlagsdataRepository: GrunnlagsdataRep
 
     private fun hentLagretGrunnlagsdata(behandlingId: UUID): Grunnlagsdata {
         return grunnlagsdataRepository.findByIdOrThrow(behandlingId)
-    }
-
-    fun hentOpprettetTidForGrunnlagsdata(behandlingId: UUID): LocalDateTime {
-        return grunnlagsdataRepository.finnOpprettetTid(behandlingId)
     }
 
     private fun hentGrunnlagsdataFraRegister(behandlingId: UUID): GrunnlagsdataDomene {

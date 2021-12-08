@@ -99,7 +99,8 @@ internal class VurderingStegServiceTest {
                                                                                              mockk(relaxed = true),
                                                                                              mockk(relaxed = true),
                                                                                              mockk(relaxed = true),
-                                                                                             false)
+                                                                                             false,
+                                                                                             mockk(relaxed = true))
 
         BrukerContextUtil.mockBrukerContext("saksbehandlernavn")
     }

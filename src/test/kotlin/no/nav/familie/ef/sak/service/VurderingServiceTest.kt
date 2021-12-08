@@ -36,7 +36,6 @@ import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
 import java.util.UUID
 
 
@@ -82,13 +81,13 @@ internal class VurderingServiceTest {
                                                                                              mockk(relaxed = true),
                                                                                              mockk(relaxed = true),
                                                                                              mockk(relaxed = true),
-                                                                                             false)
+                                                                                             false,
+                                                                                             mockk(relaxed = true))
     }
 
     @Test
     fun `skal opprette nye Vilkårsvurdering for alle vilkår dersom ingen vurderinger finnes`() {
         every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns emptyList()
-        every {grunnlagsdataService.hentOpprettetTidForGrunnlagsdata(any()) } returns LocalDateTime.now()
 
         val nyeVilkårsvurderinger = slot<List<Vilkårsvurdering>>()
         every { vilkårsvurderingRepository.insertAll(capture(nyeVilkårsvurderinger)) } answers
@@ -113,7 +112,6 @@ internal class VurderingServiceTest {
                 listOf(vilkårsvurdering(resultat = OPPFYLT,
                                         type = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
                                         behandlingId = behandlingId))
-        every {grunnlagsdataService.hentOpprettetTidForGrunnlagsdata(any()) } returns LocalDateTime.now()
 
         vurderingService.hentEllerOpprettVurderinger(behandlingId)
 
@@ -130,7 +128,6 @@ internal class VurderingServiceTest {
                 listOf(Vilkårsvurdering(behandlingId = behandlingId,
                                         type = VilkårType.SIVILSTAND,
                                         delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurdering)))
-        every {grunnlagsdataService.hentOpprettetTidForGrunnlagsdata(any()) } returns LocalDateTime.now()
 
         val vilkår = vurderingService.hentEllerOpprettVurderinger(behandlingId)
 
@@ -151,7 +148,6 @@ internal class VurderingServiceTest {
                                                          type = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
                                                          behandlingId = behandlingId))
         every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns vilkårsvurderinger
-        every {grunnlagsdataService.hentOpprettetTidForGrunnlagsdata(any()) } returns LocalDateTime.now()
 
         val alleVilkårsvurderinger = vurderingService.hentEllerOpprettVurderinger(behandlingId).vurderinger
 

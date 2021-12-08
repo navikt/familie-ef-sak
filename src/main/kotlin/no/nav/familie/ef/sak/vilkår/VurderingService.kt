@@ -27,8 +27,7 @@ class VurderingService(private val behandlingService: BehandlingService,
     fun hentEllerOpprettVurderinger(behandlingId: UUID): VilkårDto {
         val (grunnlag, metadata) = hentGrunnlagOgMetadata(behandlingId)
         val vurderinger = hentEllerOpprettVurderinger(behandlingId, metadata)
-        val opprettetTid = grunnlagsdataService.hentOpprettetTidForGrunnlagsdata(behandlingId)
-        return VilkårDto(vurderinger = vurderinger, grunnlag = grunnlag, opprettetTid = opprettetTid)
+        return VilkårDto(vurderinger = vurderinger, grunnlag = grunnlag)
     }
 
     @Transactional
