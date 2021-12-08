@@ -16,9 +16,13 @@ import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.vedtak.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
+import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.domene.TaskRepository
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.slf4j.MDC
+import java.util.UUID
 
 internal class SaksbehandlingsblankettStegTest {
 
@@ -43,6 +47,7 @@ internal class SaksbehandlingsblankettStegTest {
 
     @BeforeEach
     internal fun setUp() {
+        MDC.put(MDCConstants.MDC_CALL_ID, UUID.randomUUID().toString())
         every { blankettServiceMock.lagBlankett(any()) } returns "123".toByteArray()
         every { fagsakServiceMock.hentFagsak(any()) } returns fagsak(fagsakpersoner(setOf("12345678912")))
         val arkiverDokumentResponse =
@@ -55,6 +60,10 @@ internal class SaksbehandlingsblankettStegTest {
 
     }
 
+    @AfterEach
+    internal fun tearDown() {
+        MDC.remove(MDCConstants.MDC_CALL_ID)
+    }
 
     @Test
     internal fun `skal opprette, lagre og arkivere blankett for førstegangsbehandling`() {

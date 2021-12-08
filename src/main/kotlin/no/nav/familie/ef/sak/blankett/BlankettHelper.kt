@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.blankett
 
+import no.nav.familie.ef.sak.felles.util.MDCUtils.getCallId
 import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Dokument
@@ -39,7 +40,9 @@ object BlankettHelper {
                 hoveddokumentvarianter = listOf(dokument),
                 vedleggsdokumenter = listOf(),
                 fagsakId = fagsakId,
-                journalførendeEnhet = enhet)
+                journalførendeEnhet = enhet,
+                eksternReferanseId = "${getCallId()}-blankett"
+        )
     }
 
 }
