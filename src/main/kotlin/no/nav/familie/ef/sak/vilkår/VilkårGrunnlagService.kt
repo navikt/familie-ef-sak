@@ -46,7 +46,8 @@ class VilkårGrunnlagService(private val medlemskapMapper: MedlemskapMapper,
                                  sivilstandsplaner = sivilstandsplaner,
                                  aktivitet = aktivitet,
                                  sagtOppEllerRedusertStilling = sagtOppEllerRedusertStilling,
-                                 lagtTilEtterFerdigstilling = registergrunnlagData.lagtTilEtterFerdigstilling)
+                                 lagtTilEtterFerdigstilling = registergrunnlagData.lagtTilEtterFerdigstilling,
+                                 registeropplysningerOpprettetTid = registergrunnlagData.opprettetTidspunkt)
     }
 
     private fun mapTidligereVedtaksperioder(tidligereVedtaksperioder: TidligereVedtaksperioder?): TidligereVedtaksperioderDto {

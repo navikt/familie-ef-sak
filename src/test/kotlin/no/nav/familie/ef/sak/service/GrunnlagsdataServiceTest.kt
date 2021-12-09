@@ -20,7 +20,6 @@ import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
-import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import org.assertj.core.api.Assertions.assertThat
@@ -52,7 +51,8 @@ internal class GrunnlagsdataServiceTest {
 
     private val service = GrunnlagsdataService(grunnlagsdataRepository = grunnlagsdataRepository,
                                                søknadService = søknadService,
-                                               grunnlagsdataRegisterService = grunnlagsdataRegisterService)
+                                               grunnlagsdataRegisterService = grunnlagsdataRegisterService,
+                                               behandlingService = behandlingService)
 
     @BeforeEach
     internal fun setUp() {

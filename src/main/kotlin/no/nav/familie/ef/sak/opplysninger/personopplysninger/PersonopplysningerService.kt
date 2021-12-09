@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -46,7 +47,9 @@ class PersonopplysningerService(private val personService: PersonService,
         val identerFraPdl = personService.hentPersonIdenter(personIdent)
 
         return personopplysningerMapper.tilPersonopplysninger(
-                GrunnlagsdataMedMetadata(grunnlagsdata, lagtTilEtterFerdigstilling = false),
+                GrunnlagsdataMedMetadata(grunnlagsdata,
+                                         lagtTilEtterFerdigstilling = false,
+                                         opprettetTidspunkt = LocalDateTime.now()),
                 egenAnsatt,
                 identerFraPdl
         )

@@ -16,7 +16,8 @@ class FeatureToggleController(private val featureToggleService: FeatureToggleSer
     private val funksjonsbrytere = listOf("familie.ef.sak.journalfoer",
                                           "familie.ef.sak.tekniskopphor",
                                           "familie.ef.sak.frontend-vis-tilbakekreving-varsel",
-                                          "familie.ef.sak.frontend-vis-ikke-publiserte-brevmaler")
+                                          "familie.ef.sak.frontend-vis-ikke-publiserte-brevmaler",
+                                          "familie.ef.sak.frontend-vis-oppdatering-av-registeropplysninger")
 
     @GetMapping
     fun sjekkAlle(): Map<String, Boolean> {

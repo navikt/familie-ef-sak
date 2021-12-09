@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.service
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infrastruktur.config.InfotrygdReplikaMock
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
@@ -34,6 +35,7 @@ internal class VilkårGrunnlagServiceTest {
     private val featureToggleService = mockk<FeatureToggleService>()
     private val medlemskapMapper = MedlemskapMapper(mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true))
     private val infotrygdService = InfotrygdService(InfotrygdReplikaMock().infotrygdReplikaClient(), pdlClient)
+    private val behandlingService = mockk<BehandlingService>()
 
     private val grunnlagsdataRegisterService = GrunnlagsdataRegisterService(pdlClient,
                                                                             personopplysningerIntegrasjonerClient,
@@ -41,7 +43,8 @@ internal class VilkårGrunnlagServiceTest {
 
     private val grunnlagsdataService = GrunnlagsdataService(grunnlagsdataRepository,
                                                             søknadService,
-                                                            grunnlagsdataRegisterService)
+                                                            grunnlagsdataRegisterService,
+                                                            behandlingService)
 
     private val service = VilkårGrunnlagService(medlemskapMapper, grunnlagsdataService)
     private val behandling = behandling(fagsak())

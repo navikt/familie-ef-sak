@@ -5,6 +5,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.arbeidsfordeling.Arbeidsfordelingsenhet
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infrastruktur.config.InfotrygdReplikaMock
 import no.nav.familie.ef.sak.infrastruktur.config.KodeverkServiceMock
@@ -36,10 +37,12 @@ internal class PersonopplysningerServiceTest {
     private lateinit var arbeidsfordelingService: ArbeidsfordelingService
     private lateinit var grunnlagsdataService: GrunnlagsdataService
     private lateinit var søknadService: SøknadService
+    private lateinit var behandlingService: BehandlingService
 
     @BeforeEach
     internal fun setUp() {
         personopplysningerIntegrasjonerClient = mockk(relaxed = true)
+        behandlingService = mockk(relaxed = true)
         adresseMapper = AdresseMapper(kodeverkService)
         arbeidsfordelingService = mockk(relaxed = true)
         søknadService = mockk()
@@ -50,7 +53,10 @@ internal class PersonopplysningerServiceTest {
                                                                         personopplysningerIntegrasjonerClient,
                                                                         infotrygdService)
 
-        grunnlagsdataService = GrunnlagsdataService(mockk(), søknadService, grunnlagsdataRegisterService)
+        grunnlagsdataService = GrunnlagsdataService(mockk(),
+                                                    søknadService,
+                                                    grunnlagsdataRegisterService,
+                                                    behandlingService)
         val personopplysningerMapper =
                 PersonopplysningerMapper(adresseMapper,
                                          StatsborgerskapMapper(kodeverkService),
