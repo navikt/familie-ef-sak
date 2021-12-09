@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.arbeidssøker
 
 import no.nav.familie.http.client.AbstractRestClient
+import no.nav.familie.kontrakter.felles.PersonIdent
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -20,7 +21,7 @@ class ArbeidssøkerClient(@Value("\${FAMILIE_EF_PROXY_URL}")
                 .queryParam("fraOgMed", fraOgMed)
         tilOgMed?.let { uriBuilder.queryParam("tilOgMed", tilOgMed) }
 
-        return postForEntity(uriBuilder.build().toUri(), mapOf("fnr" to personIdent))
+        return postForEntity(uriBuilder.build().toUri(), PersonIdent(personIdent))
     }
 
 }
