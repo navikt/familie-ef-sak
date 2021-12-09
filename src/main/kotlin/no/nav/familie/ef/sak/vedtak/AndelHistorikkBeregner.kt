@@ -49,7 +49,43 @@ object AndelHistorikkBeregner {
 
     fun lagHistorikk(tilkjentYtelser: List<TilkjentYtelse>,
                      vedtaksliste: List<Vedtak>,
-                     behandlinger: List<Behandling>): List<AndelHistorikkDto> {
+                     behandlinger: List<Behandling>,
+                     tilOgMedBehandlingId: UUID?): List<AndelHistorikkDto> {
+        return if (tilOgMedBehandlingId == null) {
+            lagHistorikk(tilkjentYtelser, vedtaksliste, behandlinger)
+        } else {
+            lagHistorikkTilBehandlingId(tilkjentYtelser, vedtaksliste, behandlinger, tilOgMedBehandlingId)
+        }
+    }
+
+    /**
+     * Filtrerer vekk data som kommer etter behandlingen som man sender inn
+     */
+    private fun lagHistorikkTilBehandlingId(tilkjentYtelser: List<TilkjentYtelse>,
+                                            vedtaksliste: List<Vedtak>,
+                                            behandlinger: List<Behandling>,
+                                            tilOgMedBehandlingId: UUID?): List<AndelHistorikkDto> {
+        val filtrerteBehandlinger = filtrerBehandlinger(behandlinger, tilOgMedBehandlingId)
+
+        val filtrerteBehandlingId = filtrerteBehandlinger.map { it.id }.toSet()
+        val filtrerteVedtak = vedtaksliste.filter { filtrerteBehandlingId.contains(it.behandlingId) }
+        val filtrerteTilkjentYtelse = tilkjentYtelser.filter { filtrerteBehandlingId.contains(it.behandlingId) }
+
+        return lagHistorikk(filtrerteTilkjentYtelse, filtrerteVedtak, filtrerteBehandlinger)
+    }
+
+    private fun filtrerBehandlinger(behandlinger: List<Behandling>,
+                                    tilOgMedBehandlingId: UUID?): List<Behandling> {
+        val tilOgMedBehandling = behandlinger.firstOrNull { it.id == tilOgMedBehandlingId }
+                                 ?: error("Finner ikke behandling $tilOgMedBehandlingId")
+        return tilOgMedBehandling.let { tomBehandling ->
+            behandlinger.filter { it.sporbar.opprettetTid < tomBehandling.sporbar.opprettetTid } + tomBehandling
+        }
+    }
+
+    private fun lagHistorikk(tilkjentYtelser: List<TilkjentYtelse>,
+                             vedtaksliste: List<Vedtak>,
+                             behandlinger: List<Behandling>): List<AndelHistorikkDto> {
         val historikk = lagHistorikkHolders(sorterTilkjentYtelser(tilkjentYtelser), vedtaksliste)
         val behandlingerPåId = behandlinger.associate { it.id to it.type }
 
