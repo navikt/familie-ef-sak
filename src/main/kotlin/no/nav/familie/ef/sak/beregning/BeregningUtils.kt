@@ -18,11 +18,13 @@ class BeregningUtils {
                 val fullOvergangsStønadPerMåned =
                         it.beløp.multiply(BigDecimal(2.25)).divide(BigDecimal(12)).setScale(0, RoundingMode.HALF_EVEN)
 
-                val beløpFørSamordning =
+                val beløpFørSamordningUtenAvrunding =
                         fullOvergangsStønadPerMåned.subtract(avkortningPerMåned).setScale(0, RoundingMode.HALF_UP)
 
-                val utbetaling = beløpFørSamordning.subtract(samordningsfradrag).setScale(0, RoundingMode.HALF_UP)
+                val utbetaling = beløpFørSamordningUtenAvrunding.subtract(samordningsfradrag).setScale(0, RoundingMode.HALF_UP)
 
+                val beløpFørSamordning =
+                        if (beløpFørSamordningUtenAvrunding <= BigDecimal.ZERO) BigDecimal.ZERO else beløpFørSamordningUtenAvrunding
 
                 val beløpTilUtbetalning = if (utbetaling <= BigDecimal.ZERO) BigDecimal.ZERO else utbetaling
 
