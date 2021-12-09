@@ -11,10 +11,6 @@ import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.journalføring.JournalpostClient
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.vedtak.TotrinnskontrollService
-import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
-import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
-import no.nav.familie.kontrakter.felles.dokarkiv.v2.Dokument
-import no.nav.familie.kontrakter.felles.dokarkiv.v2.Filtype
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
@@ -49,8 +45,11 @@ class BlankettSteg(
             logger.info("steg=${stegType()} fant ikke beslutter på behandling=$behandling")
         }
 
-        val arkiverDokumentRequest =
-                BlankettHelper.lagArkiverBlankettRequestMotInfotrygd(personIdent, blankettPdf, enhet, journalpostForBehandling.sak?.fagsakId)
+        val arkiverDokumentRequest = BlankettHelper.lagArkiverBlankettRequestMotInfotrygd(personIdent,
+                                                                                          blankettPdf,
+                                                                                          enhet,
+                                                                                          journalpostForBehandling.sak?.fagsakId,
+                                                                                          behandling.id)
         val journalpostRespons = journalpostClient.arkiverDokument(arkiverDokumentRequest, beslutter)
         behandlingService.leggTilBehandlingsjournalpost(journalpostRespons.journalpostId, Journalposttype.N, behandling.id)
 
