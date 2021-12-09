@@ -95,6 +95,8 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
     fun hentAktivIdent(fagsakId: UUID): String = fagsakRepository.finnAktivIdent(fagsakId)
 
     fun hentAktiveIdenter(fagsakId: Set<UUID>): Map<UUID, String> {
+        if (fagsakId.isEmpty()) return emptyMap()
+        
         val aktiveIdenter = fagsakRepository.finnAktivIdenter(fagsakId)
         feilHvis(!aktiveIdenter.map { it.first }.containsAll(fagsakId)) {
             "Finner ikke ident til fagsaker ${aktiveIdenter.map { it.first }.filterNot(fagsakId::contains)}"
