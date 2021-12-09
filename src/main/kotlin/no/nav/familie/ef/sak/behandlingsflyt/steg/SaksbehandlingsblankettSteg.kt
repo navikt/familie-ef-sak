@@ -47,7 +47,7 @@ class SaksbehandlingsblankettSteg(private val blankettService: BlankettService,
         val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
         val personIdent = fagsak.hentAktivIdent()
         val enhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(personIdent)
-        return lagArkiverBlankettRequestMotNyLøsning(personIdent, blankettPdf, enhet, fagsak.eksternId.id)
+        return lagArkiverBlankettRequestMotNyLøsning(personIdent, blankettPdf, enhet, fagsak.eksternId.id, behandling.id)
     }
 
     override fun stegType(): StegType {
