@@ -38,7 +38,6 @@ import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
 import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
@@ -98,11 +97,8 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                             .willReturn(okJson(objectMapper.writeValueAsString(medl))),
                     post(urlEqualTo(integrasjonerConfig.navKontorUri.path))
                             .willReturn(okJson(objectMapper.writeValueAsString(navKontorEnhet))),
-
                     post(urlEqualTo(integrasjonerConfig.infotrygdVedtaksperioder.path))
-                            .willReturn(okJson(objectMapper.writeValueAsString(infotrygdPerioder))),
-                    get(urlEqualTo(integrasjonerConfig.organisasjonURI.path))
-                            .willReturn(okJson(objectMapper.writeValueAsString(organisasjon)))
+                            .willReturn(okJson(objectMapper.writeValueAsString(infotrygdPerioder)))
 
             )
 
@@ -212,7 +208,5 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                                                                     status = "Aktiv"))
 
         private val infotrygdPerioder = Ressurs.success(PerioderOvergangsstønadResponse(emptyList()))
-        val organisasjon = Ressurs.success(Organisasjon(organisasjonsnummer = "123456789",
-                                                    navn = "Julenissens Gavefabrikk AS"))
     }
 }

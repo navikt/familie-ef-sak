@@ -10,4 +10,10 @@ class EregService(private val eregClient: EregClient) {
         val organisasjoner = eregClient.hentOrganisasjoner(organisasjonsnumre)
         return mapEregResultat(organisasjoner)
     }
+
+    fun hentOrganisasjon(organisasjonsnummer: String): Organisasjon{
+        val organisasjon = eregClient.hentOrganisasjoner(listOf(organisasjonsnummer)).firstOrNull()
+
+        return organisasjon?.let { mapOrganisasjonDto(it) } ?: error("Fant ikke organisasjon")
+    }
 }
