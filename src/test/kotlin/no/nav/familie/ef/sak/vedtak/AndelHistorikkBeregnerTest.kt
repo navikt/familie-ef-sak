@@ -107,8 +107,8 @@ class AndelHistorikkBeregnerTest {
     }
 
     @Test
-    internal fun `tomBehandling_er_andre_behandlingen`() {
-        run("/økonomi/tomBehandling_er_andre_behandlingen.csv", tilOgMedBehandlingId = 2)
+    internal fun `filtrering på tilOgMedBehandling på andre behandlingen`() {
+        run("/økonomi/filtrer_tilOgMedBehandling_er_andre_behandlingen.csv", tilOgMedBehandlingId = 2)
     }
 
     private fun run(filnavn: String, tilOgMedBehandlingId: Int? = null) {
@@ -123,7 +123,10 @@ object AndelHistorikkRunner {
 
         validerInput(grupper)
 
-        val behandlinger = grupper.input.map { it.behandlingId }.distinct().map { behandling(id = it) }
+        val now = LocalDateTime.now()
+        val behandlinger = grupper.input.map { it.behandlingId }.distinct().mapIndexed { index, id ->
+            behandling(id = id, opprettetTid = now.plusMinutes(index.toLong()))
+        }
         val behandlingId = tilOgMedBehandlingId?.let { generateBehandlingId(it)}
 
         val output = AndelHistorikkBeregner.lagHistorikk(grupper.input, grupper.vedtaksliste, behandlinger, behandlingId)
