@@ -46,7 +46,7 @@ object BlankettHelper {
                 vedleggsdokumenter = listOf(),
                 fagsakId = fagsakId,
                 journalførendeEnhet = enhet,
-                eksternReferanseId = "${behandlingId}-blankett"
+                eksternReferanseId = "$behandlingId-blankett"
         )
     }
 
