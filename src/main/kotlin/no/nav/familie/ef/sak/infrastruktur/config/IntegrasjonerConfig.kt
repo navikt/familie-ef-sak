@@ -42,8 +42,6 @@ class IntegrasjonerConfig(@Value("\${FAMILIE_INTEGRASJONER_URL}") private val in
 
     val navKontorUri: URI = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_NAV_KONTOR).build().toUri()
 
-    val organisasjonURI: URI = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_ORGANISASJON).build().toUri()
-
     companion object {
 
         private const val PATH_PING = "api/ping"
@@ -60,7 +58,6 @@ class IntegrasjonerConfig(@Value("\${FAMILIE_INTEGRASJONER_URL}") private val in
         private const val PATH_DOKARKIV = "api/arkiv"
         private const val PATH_MEDLEMSKAP = "api/medlemskap/v3"
         private const val PATH_NAV_KONTOR = "api/arbeidsfordeling/nav-kontor/ENF"
-        private const val PATH_ORGANISASJON = "api/organisasjon"
 
 
     }
