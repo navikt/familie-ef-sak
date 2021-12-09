@@ -37,16 +37,12 @@ import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
 import no.nav.familie.kontrakter.felles.journalpost.Sak
-import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.slf4j.MDC
 import java.util.Properties
-import java.util.UUID
 
 class JournalførBlankettStegTest {
 
@@ -104,7 +100,6 @@ class JournalførBlankettStegTest {
 
     @BeforeEach
     internal fun setup() {
-        MDC.put(MDCConstants.MDC_CALL_ID, UUID.randomUUID().toString())
 
         every {
             journalpostClient.hentJournalpost(any())
@@ -131,11 +126,6 @@ class JournalførBlankettStegTest {
         } returns "1234"
 
         every { behandlingService.hentBehandlingsjournalposter(behandling.id) } returns listOf(behandlingJournalpost)
-    }
-
-    @AfterEach
-    internal fun tearDown() {
-        MDC.remove(MDCConstants.MDC_CALL_ID)
     }
 
     @Test
