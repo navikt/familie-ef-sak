@@ -67,7 +67,7 @@ class AndelHistorikkBeregnerTest {
     }
 
     @Test
-    internal fun `periode_splittes`() {
+    internal fun `periode_splittes_g_omregning`() {
         run("/økonomi/periode_splittes_g_omregning.csv")
     }
 
@@ -81,8 +81,33 @@ class AndelHistorikkBeregnerTest {
         run("/økonomi/opphør_midt_i_periode.csv")
     }
 
+    @Test
+    internal fun `periode_splittes`() {
+        run("/økonomi/periode_splittes.csv")
+    }
+
+    @Test
+    internal fun `periode_splittes_og_sen_fjernes`() {
+        run("/økonomi/periode_splittes_og_sen_fjernes.csv")
+    }
+
+    @Test
+    internal fun `periode forlenges`() {
+        run("/økonomi/periode_forlenges.csv")
+    }
+
+    @Test
+    internal fun `periode_erstatt_og_senere_fjernet_på_nytt`() {
+        run("/økonomi/periode_erstatt_og_senere_fjernet_på_nytt.csv")
+    }
+
+    @Test
+    internal fun `periode2_første_periode_endrer_seg`() {
+        run("/økonomi/periode2_første_periode_endrer_seg.csv")
+    }
+
     private fun run(filnavn: String) {
-        AndelHistorikkRunner.run(javaClass.getResource(filnavn))
+        AndelHistorikkRunner.run(javaClass.getResource(filnavn)!!)
     }
 }
 
@@ -121,7 +146,7 @@ object AndelHistorikkRunner {
     private val headerString = values().joinToString(", ") { mapValue(it, it.key) }
 
     private fun mapValue(key: AndelHistorikkHeader, value: Any?): String {
-        return String.format("%-${key.minHeaderValue}s", value)
+        return String.format("%-${key.minHeaderValue}s", value ?: "")
     }
 
     private fun toString(andeler: List<AndelHistorikkDto>): String {
@@ -159,18 +184,21 @@ private val oppdragIdn = mutableMapOf<Int, UUID>()
 private fun generateBehandlingId(behandlingId: String): UUID = oppdragIdn.getOrPut(behandlingId.toInt()) { UUID.randomUUID() }
 private fun hentBehandlingId(behandlingId: UUID) = oppdragIdn.entries.first { it.value == behandlingId }.key
 
+/**
+ * [ENDRET_I] kan brukes for å overstyre kildeBehandlingId
+ */
 private enum class AndelHistorikkHeader(val key: String,
                                         val value: (AndelHistorikkDto) -> Any?,
                                         val minHeaderValue: Int = key.length) {
 
-    TEST_TYPE("type", {}),
-    FOM("fom", { it.andel.stønadFra }, 11),
-    TOM("tom", { it.andel.stønadTil }, 11),
+    TEST_TYPE("type", {""}),
+    BEHANDLING("behandling_id", { hentBehandlingId(it.behandlingId) }),
+    FOM("fom", { YearMonth.from(it.andel.stønadFra) }, 11),
+    TOM("tom", { YearMonth.from(it.andel.stønadTil) }, 11),
     BELØP("beløp", { it.andel.beløp }, 8),
     INNTEKT("inntekt", { it.andel.inntekt }, 10),
     INNTEKTSREDUKSJON("inntektsreduksjon", { it.andel.inntektsreduksjon }),
     SAMORDNINGSFRADRAG("samordningsfradrag", { it.andel.samordningsfradrag }),
-    BEHANDLING("behandling_id", { hentBehandlingId(it.behandlingId) }),
     AKTIVITET("aktivitet", { it.aktivitet }),
     PERIODE_TYPE("periode", { it.periodeType }),
     TYPE_ENDRING("type_endring", { it.endring?.type }),
