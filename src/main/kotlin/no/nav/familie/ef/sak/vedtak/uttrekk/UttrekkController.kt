@@ -19,15 +19,13 @@ import java.util.UUID
 class UttrekkController(private val uttrekkVedtakService: UttrekkArbeidssøkerService) {
 
     @GetMapping("arbeidssoker")
-    fun hentArbeidssøkere(@RequestParam(defaultValue = "1") side: Int,
-                          @RequestParam(defaultValue = "false") visKontrollerte: Boolean): Ressurs<UttrekkArbeidssøkereDto> {
-        return success(uttrekkVedtakService.hentUttrekkArbeidssøkere(side = side, visKontrollerte = visKontrollerte))
+    fun hentArbeidssøkere(@RequestParam(defaultValue = "false") visKontrollerte: Boolean): Ressurs<UttrekkArbeidssøkereDto> {
+        return success(uttrekkVedtakService.hentUttrekkArbeidssøkere(visKontrollerte = visKontrollerte))
     }
 
     @PostMapping("arbeidssoker/{id}/kontrollert")
     fun settKontrollert(@PathVariable id: UUID,
-                        @RequestParam(defaultValue = "true") kontrollert: Boolean): Ressurs<UUID> {
-        uttrekkVedtakService.settKontrollert(id, kontrollert)
-        return success(id)
+                        @RequestParam(defaultValue = "true") kontrollert: Boolean): Ressurs<UttrekkArbeidssøkerDto> {
+        return success(uttrekkVedtakService.settKontrollert(id, kontrollert))
     }
 }
