@@ -36,7 +36,7 @@ class PersonService(
      */
     fun hentPdlPersonKort(identer: List<String>): Map<String, PdlPersonKort> {
         return cacheManager.getCachedOrLoad("pdl-person-kort-bulk", identer.distinct()) { identerUtenCache ->
-            identerUtenCache.chunked(100).map { pdlClient.hentPersonKortBolk(it) }.reduce { acc, it -> acc + it }
+            identerUtenCache.chunked(50).map { pdlClient.hentPersonKortBolk(it) }.reduce { acc, it -> acc + it }
         }
     }
 }

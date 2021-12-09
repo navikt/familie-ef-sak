@@ -150,27 +150,44 @@ internal class TilgangServiceTest {
     }
 
     @Test
-    internal fun `skal filtrere ut de roller som man har tilgang til`() {
+    internal fun `filtrerUtFortroligDataForRolle - skal filtrere ut de roller som man har tilgang til`() {
+        val uten = pdlSøker(emptyList())
+        val ugradert = pdlSøker(adresseBeskyttelse(AdressebeskyttelseGradering.UGRADERT))
+        val fortrolig = pdlSøker(adresseBeskyttelse(AdressebeskyttelseGradering.FORTROLIG))
+        val strengtFortrolig = pdlSøker(adresseBeskyttelse(AdressebeskyttelseGradering.STRENGT_FORTROLIG))
+        val strengtFortroligUtland = pdlSøker(adresseBeskyttelse(AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND))
+        val personer = listOf(uten, ugradert, fortrolig, strengtFortrolig, strengtFortroligUtland)
+
+        testWithBrukerContext(groups = listOf()) { assertThat(filtrer(personer)).containsExactly(uten, ugradert) }
+        testWithBrukerContext(groups = listOf(rolleConfig.kode7)) {
+            assertThat(filtrer(personer)).containsExactly(uten, ugradert, fortrolig)
+        }
+
+    }
+
+    @Test
+    internal fun `filtrerUtFortroligDataForRolle - kode 6 skal kun returnere kode 6`() {
         val ugradert = pdlSøker(adresseBeskyttelse(AdressebeskyttelseGradering.UGRADERT))
         val fortrolig = pdlSøker(adresseBeskyttelse(AdressebeskyttelseGradering.FORTROLIG))
         val strengtFortrolig = pdlSøker(adresseBeskyttelse(AdressebeskyttelseGradering.STRENGT_FORTROLIG))
         val strengtFortroligUtland = pdlSøker(adresseBeskyttelse(AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND))
         val personer = listOf(ugradert, fortrolig, strengtFortrolig, strengtFortroligUtland)
 
-        testWithBrukerContext(groups = listOf()) { assertThat(filtrer(personer)).containsExactly(ugradert) }
-        testWithBrukerContext(groups = listOf(rolleConfig.kode7)) {
-            assertThat(filtrer(personer)).containsExactly(ugradert, fortrolig)
-        }
         testWithBrukerContext(groups = listOf(rolleConfig.kode6)) {
-            assertThat(filtrer(personer)).containsExactly(ugradert, strengtFortrolig, strengtFortroligUtland)
+            assertThat(filtrer(personer)).containsExactly(strengtFortrolig, strengtFortroligUtland)
         }
-        testWithBrukerContext(groups = listOf(rolleConfig.kode6, rolleConfig.kode7)) {
-            assertThat(filtrer(personer)).containsAll(personer)
+    }
+
+    @Test
+    internal fun `filtrerUtFortroligDataForRolle - skal ikke filtrere bort de uten adressebeskyttelse`() {
+        val uten = pdlSøker(emptyList())
+        testWithBrukerContext(groups = listOf()) {
+            assertThat(filtrer(listOf(uten))).containsExactly(uten)
         }
     }
 
     private fun filtrer(personer: List<PdlSøker>): List<PdlSøker> =
-            tilgangService.filtrerUtFortroligDataForRolle(personer) { it.adressebeskyttelse.gjeldende()!! }
+            tilgangService.filtrerUtFortroligDataForRolle(personer) { it.adressebeskyttelse.gjeldende() }
 
     private fun adresseBeskyttelse(gradering: AdressebeskyttelseGradering) =
             listOf(Adressebeskyttelse(gradering, Metadata(false)))
