@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.vedtak
 
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.tilkjentytelse.AndelTilkjentYtelseDto
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
@@ -66,15 +65,22 @@ object AndelHistorikkBeregner {
                                             vedtaksliste: List<Vedtak>,
                                             behandlinger: List<Behandling>,
                                             tilOgMedBehandlingId: UUID?): List<AndelHistorikkDto> {
-        val filtrertBehandlinger = behandlinger.firstOrNull { it.id == tilOgMedBehandlingId }?.let { tomBehandling ->
-            behandlinger.filter { it.sporbar.opprettetTid < tomBehandling.sporbar.opprettetTid } + tomBehandling
-        } ?: throw Feil("Finner ikke behandling $tilOgMedBehandlingId i listen over behandlinger")
+        val filtrerteBehandlinger = filtrerBehandlinger(behandlinger, tilOgMedBehandlingId)
 
-        val filtrerteBehandlingId = filtrertBehandlinger.map { it.id }.toSet()
+        val filtrerteBehandlingId = filtrerteBehandlinger.map { it.id }.toSet()
         val filtrerteVedtak = vedtaksliste.filter { filtrerteBehandlingId.contains(it.behandlingId) }
         val filtrerteTilkjentYtelse = tilkjentYtelser.filter { filtrerteBehandlingId.contains(it.behandlingId) }
 
-        return lagHistorikk(filtrerteTilkjentYtelse, filtrerteVedtak, filtrertBehandlinger)
+        return lagHistorikk(filtrerteTilkjentYtelse, filtrerteVedtak, filtrerteBehandlinger)
+    }
+
+    private fun filtrerBehandlinger(behandlinger: List<Behandling>,
+                                    tilOgMedBehandlingId: UUID?): List<Behandling> {
+        val tilOgMedBehandling = behandlinger.firstOrNull { it.id == tilOgMedBehandlingId }
+                                 ?: error("Finner ikke behandling $tilOgMedBehandlingId")
+        return tilOgMedBehandling.let { tomBehandling ->
+            behandlinger.filter { it.sporbar.opprettetTid < tomBehandling.sporbar.opprettetTid } + tomBehandling
+        }
     }
 
     private fun lagHistorikk(tilkjentYtelser: List<TilkjentYtelse>,
