@@ -45,8 +45,13 @@ class PersonopplysningerIntegrasjonerClient(@Qualifier("azure") restOperations: 
         return postForEntity<Ressurs<Medlemskapsinfo>>(integrasjonerConfig.medlemskapUri, PersonIdent(ident)).data!!
     }
 
-    fun hentNavEnhet(ident: String): List<Arbeidsfordelingsenhet> {
-        val uri = integrasjonerConfig.arbeidsfordelingUri
+    fun hentNavEnhetForPersonMedRelasjoner(ident: String): List<Arbeidsfordelingsenhet> {
+        val uri = integrasjonerConfig.arbeidsfordelingMedRelasjonerUri
+        return hentArbeidsfordelingEnhet(uri, ident)
+    }
+
+    private fun hentArbeidsfordelingEnhet(uri: URI,
+                                          ident: String): List<Arbeidsfordelingsenhet> {
         return try {
             val response = postForEntity<Ressurs<List<Arbeidsfordelingsenhet>>>(uri, PersonIdent(ident))
             response.data ?: throw Feil("Objektet fra integrasjonstjenesten mot arbeidsfordeling er tomt uri=$uri")
