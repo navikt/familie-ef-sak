@@ -22,7 +22,13 @@ class AMeldingInntektClient(
                     .queryParam("tom", tom)
                     .build().toUri()
 
+    private val genererUrlUri = UriComponentsBuilder.fromUri(uri).pathSegment("api/ainntekt/generer-url").build().toUri()
+
     fun hentInntekt(personIdent: String, fom: YearMonth, tom: YearMonth): HentInntektListeResponse {
         return postForEntity(lagInntektUri(fom, tom), PersonIdent(personIdent))
+    }
+
+    fun genererAInntektUrl(personIdent: String): String {
+        return postForEntity(genererUrlUri, PersonIdent(personIdent))
     }
 }
