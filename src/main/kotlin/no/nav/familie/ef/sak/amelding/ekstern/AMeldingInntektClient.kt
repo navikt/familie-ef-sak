@@ -4,6 +4,8 @@ import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.PersonIdent
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
 import org.springframework.web.util.UriComponentsBuilder
@@ -22,7 +24,15 @@ class AMeldingInntektClient(
                     .queryParam("tom", tom)
                     .build().toUri()
 
+    private val genererUrlUri = UriComponentsBuilder.fromUri(uri).pathSegment("api/ainntekt/generer-url").build().toUri()
+
     fun hentInntekt(personIdent: String, fom: YearMonth, tom: YearMonth): HentInntektListeResponse {
         return postForEntity(lagInntektUri(fom, tom), PersonIdent(personIdent))
+    }
+
+    fun genererAInntektUrl(personIdent: String): String {
+        return postForEntity(genererUrlUri, PersonIdent(personIdent), HttpHeaders().apply {
+            accept = listOf(MediaType.TEXT_PLAIN)
+        })
     }
 }

@@ -2,8 +2,8 @@ package no.nav.familie.ef.sak.amelding
 
 import io.mockk.verify
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.amelding.ekstern.AMeldingInntektClient
+import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -38,6 +38,17 @@ internal class AMeldingInntektControllerTest : OppslagSpringRunnerTest() {
         assertThat(inntekt.body!!.getDataOrThrow()).isNotNull
         verify { aMeldingInntektClient.hentInntekt(any(), YearMonth.of(2021, 1), YearMonth.of(2021, 2)) }
     }
+
+    @Test
+    internal fun `skal generere url til a-inntekt`() {
+        val response = kallGenererUrl()
+        assertThat(response.body!!.getDataOrThrow()).isEqualTo("https://ainntekt")
+    }
+
+    private fun kallGenererUrl(): ResponseEntity<Ressurs<String>> =
+            restTemplate.exchange(localhost("/api/inntekt/fagsak/${fagsak.id}/generer-url"),
+                                  HttpMethod.GET,
+                                  HttpEntity<Ressurs<String>>(headers))
 
     private fun hentInntekt(fagsakId: UUID): ResponseEntity<Ressurs<AMeldingInntektDto>> =
             restTemplate.exchange(localhost("/api/inntekt/fagsak/$fagsakId?fom=2021-01&tom=2021-02"),
