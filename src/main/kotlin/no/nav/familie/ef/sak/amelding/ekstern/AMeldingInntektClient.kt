@@ -4,6 +4,8 @@ import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.PersonIdent
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
 import org.springframework.web.util.UriComponentsBuilder
@@ -29,6 +31,8 @@ class AMeldingInntektClient(
     }
 
     fun genererAInntektUrl(personIdent: String): String {
-        return postForEntity(genererUrlUri, PersonIdent(personIdent))
+        return postForEntity(genererUrlUri, PersonIdent(personIdent), HttpHeaders().apply {
+            accept = listOf(MediaType.TEXT_PLAIN)
+        })
     }
 }
