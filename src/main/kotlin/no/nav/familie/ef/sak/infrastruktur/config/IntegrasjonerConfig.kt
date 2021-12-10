@@ -54,7 +54,7 @@ class IntegrasjonerConfig(@Value("\${FAMILIE_INTEGRASJONER_URL}") private val in
         private const val PATH_TILGANG_PERSON = "api/tilgang/v2/personer"
         private const val PATH_EGEN_ANSATT = "api/egenansatt"
         private const val PATH_ARBEIDSFORDELING = "api/arbeidsfordeling/enhet/ENF"
-        private const val PATH_BEHANDLENDE_ENHET_MED_RELASJONER = "arbeidsfordeling/enhet/ENF/med-relasjoner/ENF"
+        private const val PATH_BEHANDLENDE_ENHET_MED_RELASJONER = "arbeidsfordeling/enhet/ENF/med-relasjoner"
         private const val PATH_ARBEIDSFORHOLD = "api/aareg/arbeidsforhold"
         private const val PATH_OPPGAVE = "api/oppgave"
         private const val PATH_JOURNALPOST = "api/journalpost"
