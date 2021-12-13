@@ -11,6 +11,8 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -26,6 +28,9 @@ class UttrekkArbeidssøkerService(
         private val arbeidssøkerClient: ArbeidssøkerClient
 ) {
 
+    private val logger: Logger = LoggerFactory.getLogger(javaClass)
+    private val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
+
     fun forrigeMåned(): () -> YearMonth = { YearMonth.now().minusMonths(1) }
 
     @Transactional
@@ -33,6 +38,7 @@ class UttrekkArbeidssøkerService(
         val uttrekk = hentArbeidssøkereForUttrekk(årMåned)
         val aktiveIdenter = fagsakService.hentAktiveIdenter(uttrekk.map { it.fagsakId }.toSet())
         val registertSomArbeidssøkerPåFagsak = hentRegistertSomArbeidssøker(aktiveIdenter, årMåned)
+        loggAntallFeilet(registertSomArbeidssøkerPåFagsak)
 
         uttrekk.forEach {
             val registertSomArbeidssøker = registertSomArbeidssøkerPåFagsak[it.fagsakId]
@@ -41,6 +47,19 @@ class UttrekkArbeidssøkerService(
                                                                       vedtakId = it.behandlingIdForVedtak,
                                                                       årMåned = årMåned,
                                                                       registrertArbeidssøker = registertSomArbeidssøker))
+        }
+    }
+
+    private fun loggAntallFeilet(registertSomArbeidssøkerPåFagsak: Map<UUID, Boolean?>) {
+        val antallTotalt = registertSomArbeidssøkerPåFagsak.values.size
+        if (antallTotalt == 0) return
+
+        val antallNull = registertSomArbeidssøkerPåFagsak.values.count { it == null }
+        if (antallNull > (antallTotalt / 2)) { // sjekker om andelen er fler enn 50%
+            throw RuntimeException("For mange oppslag mot register for arbeidssøkere feilet " +
+                                   "antallTotalt=$antallTotalt antallFeilet=$antallNull")
+        } else if (antallNull > 0) {
+            logger.error("Feilet sjekk av arbeidssøker mot arbeidssøkerregisteret")
         }
     }
 
@@ -77,13 +96,22 @@ class UttrekkArbeidssøkerService(
         )
     }
 
-    private fun hentRegistertSomArbeidssøker(aktiveIdenter: Map<UUID, String>, årMåned: YearMonth): Map<UUID, Boolean> {
+    private fun hentRegistertSomArbeidssøker(aktiveIdenter: Map<UUID, String>, årMåned: YearMonth): Map<UUID, Boolean?> {
         val sisteIMåneden = årMåned.atEndOfMonth()
         return aktiveIdenter.entries.associate { entry ->
+            entry.key to erAreidssøker(entry, sisteIMåneden)
+        }
+    }
+
+    private fun erAreidssøker(entry: Map.Entry<UUID, String>,
+                              sisteIMåneden: LocalDate): Boolean? {
+        return try {
             val perioder = arbeidssøkerClient.hentPerioder(entry.value, sisteIMåneden, sisteIMåneden).perioder
-            val arbeidssøkerISluttetPåMåneden =
-                    perioder.any { it.fraOgMedDato <= sisteIMåneden && it.tilOgMedDato >= sisteIMåneden }
-            entry.key to arbeidssøkerISluttetPåMåneden
+            perioder.any { it.fraOgMedDato <= sisteIMåneden && it.tilOgMedDato >= sisteIMåneden }
+        } catch (e: Exception) {
+            logger.warn("Feilet sjekk av arbeidssøker for fagsakId=${entry.key}")
+            secureLogger.warn("Feilet sjekk av arbeidssøker ident=${entry.key} message=${e.message}")
+            null
         }
     }
 

@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.vedtak.uttrekk
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.Behandling
@@ -34,7 +35,9 @@ import no.nav.familie.ef.sak.vedtak.domain.AktivitetType.FORLENGELSE_STØNAD_PÅ
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
+import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -159,6 +162,19 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
 
         val uttrekk = service.hentUttrekkArbeidssøkere(mars2021).arbeidssøkere
         assertThat(uttrekk).hasSize(2)
+    }
+
+    @Test
+    internal fun `hentUttrekkArbeidssøkere - feiler når for mange kall mot arbeidssøkerregisteret feiler`() {
+        every { arbeidssøkerClient.hentPerioder(any(), any(), any()) } throws RuntimeException("Feil")
+        opprettdata()
+        opprettEkstraFagsak()
+
+        assertThatThrownBy { service.opprettUttrekkArbeidssøkere(mars2021) }
+                .hasMessageContaining("For mange oppslag mot register for arbeidssøkere feilet")
+
+        val uttrekk = service.hentUttrekkArbeidssøkere(mars2021).arbeidssøkere
+        assertThat(uttrekk).hasSize(0)
     }
 
     @Nested
