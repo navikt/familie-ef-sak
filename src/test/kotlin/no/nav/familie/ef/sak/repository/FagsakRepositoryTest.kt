@@ -114,6 +114,16 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(aktiveIdenterPerFagsak.single { it.first == fagsak2.id }.second).isEqualTo("5")
     }
 
+    @Test
+    internal fun `skal kunne søke opp fagsak basert på forskjellige personidenter - kun ett treff per fagsak`() {
+        val fagsakMedFlereIdenter = fagsakRepository.insert(opprettFagsakMedFlereIdenter("4", "5", "6"))
+
+        assertThat(fagsakMedFlereIdenter.søkerIdenter).hasSize(3)
+        assertThat(fagsakRepository.findBySøkerIdent(fagsakMedFlereIdenter.søkerIdenter.map { it.ident }.toSet(), Stønadstype.OVERGANGSSTØNAD)).isNotNull
+        assertThat(fagsakRepository.findBySøkerIdent(setOf(fagsakMedFlereIdenter.søkerIdenter.map { it.ident }.first()))).hasSize(1)
+        assertThat(fagsakRepository.findBySøkerIdent(fagsakMedFlereIdenter.søkerIdenter.map { it.ident }.toSet())).hasSize(1)
+    }
+
     private fun opprettFagsakMedFlereIdenter(ident: String = "1", ident2: String = "2", ident3: String = "3"): Fagsak {
         val endret2DagerSiden = Sporbar(endret = Endret(endretTid = LocalDateTime.now().plusDays(2)))
         return fagsak(setOf(FagsakPerson(ident = ident),

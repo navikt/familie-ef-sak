@@ -12,7 +12,7 @@ import java.util.UUID
 interface FagsakRepository : RepositoryInterface<Fagsak, UUID>, InsertUpdateRepository<Fagsak> {
 
     // language=PostgreSQL
-    @Query("""SELECT f.*, fe.id AS eksternid_id
+    @Query("""SELECT distinct f.*, fe.id AS eksternid_id
                     FROM fagsak f 
                     JOIN fagsak_ekstern fe ON fe.fagsak_id = f.id
                     LEFT JOIN fagsak_person fp 
@@ -31,7 +31,7 @@ interface FagsakRepository : RepositoryInterface<Fagsak, UUID>, InsertUpdateRepo
     fun finnFagsakTilBehandling(behandlingId: UUID): Fagsak?
 
     // language=PostgreSQL
-    @Query("""SELECT f.*, fe.id AS eksternid_id FROM fagsak f 
+    @Query("""SELECT distinct f.*, fe.id AS eksternid_id FROM fagsak f 
                     JOIN fagsak_ekstern fe ON fe.fagsak_id = f.id
                     LEFT JOIN fagsak_person fp 
                         ON fp.fagsak_id = f.id 
