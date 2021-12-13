@@ -48,6 +48,7 @@ enum class VedtaksperiodeType {
     HOVEDPERIODE,
     PERIODE_FØR_FØDSEL,
     UTVIDELSE,
+    MIDLERTIDIG_OPPHØR
 }
 
 enum class AktivitetType {
