@@ -112,9 +112,6 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(aktiveIdenterPerFagsak).hasSize(2)
         assertThat(aktiveIdenterPerFagsak.single { it.first == fagsak.id }.second).isEqualTo("2")
         assertThat(aktiveIdenterPerFagsak.single { it.first == fagsak2.id }.second).isEqualTo("5")
-
-        assertThat(fagsakRepository.findBySøkerIdent(fagsak2.søkerIdenter.map { it.ident }.toSet())).hasSize(1)
-        assertThat(fagsakRepository.findBySøkerIdent(fagsak2.søkerIdenter.map { it.ident }.toSet(), Stønadstype.OVERGANGSSTØNAD)).isNotNull
     }
 
     @Test
