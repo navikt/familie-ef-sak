@@ -112,6 +112,19 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(aktiveIdenterPerFagsak).hasSize(2)
         assertThat(aktiveIdenterPerFagsak.single { it.first == fagsak.id }.second).isEqualTo("2")
         assertThat(aktiveIdenterPerFagsak.single { it.first == fagsak2.id }.second).isEqualTo("5")
+
+        assertThat(fagsakRepository.findBySøkerIdent(fagsak2.søkerIdenter.map { it.ident }.toSet())).hasSize(1)
+        assertThat(fagsakRepository.findBySøkerIdent(fagsak2.søkerIdenter.map { it.ident }.toSet(), Stønadstype.OVERGANGSSTØNAD)).isNotNull
+    }
+
+    @Test
+    internal fun `skal kunne søke opp fagsak basert på forskjellige personidenter - kun ett treff per fagsak`() {
+        val fagsakMedFlereIdenter = fagsakRepository.insert(opprettFagsakMedFlereIdenter("4", "5", "6"))
+
+        assertThat(fagsakMedFlereIdenter.søkerIdenter).hasSize(3)
+        assertThat(fagsakRepository.findBySøkerIdent(fagsakMedFlereIdenter.søkerIdenter.map { it.ident }.toSet(), Stønadstype.OVERGANGSSTØNAD)).isNotNull
+        assertThat(fagsakRepository.findBySøkerIdent(setOf(fagsakMedFlereIdenter.søkerIdenter.map { it.ident }.first()))).hasSize(1)
+        assertThat(fagsakRepository.findBySøkerIdent(fagsakMedFlereIdenter.søkerIdenter.map { it.ident }.toSet())).hasSize(1)
     }
 
     private fun opprettFagsakMedFlereIdenter(ident: String = "1", ident2: String = "2", ident3: String = "3"): Fagsak {
