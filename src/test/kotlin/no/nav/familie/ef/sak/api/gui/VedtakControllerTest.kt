@@ -21,12 +21,16 @@ import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.repository.tilkjentYtelse
 import no.nav.familie.ef.sak.repository.vedtak
+import no.nav.familie.ef.sak.repository.vilkårsvurdering
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.vedtak.VedtakRepository
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.TotrinnkontrollStatus
 import no.nav.familie.ef.sak.vedtak.dto.TotrinnskontrollStatusDto
+import no.nav.familie.ef.sak.vilkår.VilkårType
+import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
+import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -51,6 +55,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
     @Autowired private lateinit var søknadService: SøknadService
     @Autowired private lateinit var grunnlagsdataService: GrunnlagsdataService
+    @Autowired private lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
 
 
     private val fagsak = fagsak(setOf(FagsakPerson("")))
@@ -78,6 +83,36 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         opprettBehandling()
 
         sendTilBeslutter(SAKSBEHANDLER)
+        validerBehandlingFatterVedtak()
+    }
+
+    @Test
+    internal fun `skal kaste feil ved innvilgelse hvis vilkårsvurderinger mangler`() {
+        val behandlingId = opprettBehandling(vedtakResultatType = ResultatType.INNVILGE)
+        lagVilkårsvurderinger(behandlingId, ikkeLag = 1)
+        sendTilBeslutter(SAKSBEHANDLER) { response ->
+            assertThat(response.body.frontendFeilmelding)
+                    .isEqualTo("Kan ikke innvilge hvis ikke alle vilkår er oppfylt for behandlingId: $behandlingId")
+        }
+    }
+
+    @Test
+    internal fun `skal kaste feil ved innvilgelse hvis en ikke er innvilget`() {
+        val behandlingId = opprettBehandling(vedtakResultatType = ResultatType.INNVILGE)
+        lagVilkårsvurderinger(behandlingId, Vilkårsresultat.IKKE_OPPFYLT)
+        sendTilBeslutter(SAKSBEHANDLER) { response ->
+            assertThat(response.body.frontendFeilmelding)
+                    .isEqualTo("Kan ikke innvilge hvis ikke alle vilkår er oppfylt for behandlingId: $behandlingId")
+        }
+    }
+
+    @Test
+    internal fun `skal sette behandling til fatter vedtak når man sendt til beslutter ved innvilgelse`() {
+        val behandlingId = opprettBehandling(vedtakResultatType = ResultatType.INNVILGE)
+        lagVilkårsvurderinger(behandlingId, Vilkårsresultat.OPPFYLT)
+
+        sendTilBeslutter(SAKSBEHANDLER)
+
         validerBehandlingFatterVedtak()
     }
 
@@ -173,14 +208,17 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     }
 
     private fun opprettBehandling(status: BehandlingStatus = BehandlingStatus.UTREDES,
-                                  steg: StegType = StegType.SEND_TIL_BESLUTTER) {
+                                  steg: StegType = StegType.SEND_TIL_BESLUTTER,
+                                  vedtakResultatType: ResultatType = ResultatType.AVSLÅ): UUID {
         val lagretBehandling = behandlingRepository.insert(behandling.copy(status = status,
                                                                            steg = steg))
-        vedtakRepository.insert(vedtak(lagretBehandling.id, ResultatType.AVSLÅ))
+
+
+        vedtakRepository.insert(vedtak(lagretBehandling.id, vedtakResultatType))
         tilkjentYtelseRepository.insert(tilkjentYtelse(behandlingId = lagretBehandling.id, fagsak.hentAktivIdent()))
         søknadService.lagreSøknadForOvergangsstønad(Testsøknad.søknadOvergangsstønad, lagretBehandling.id, fagsak.id, "1")
         grunnlagsdataService.opprettGrunnlagsdata(lagretBehandling.id)
-
+        return lagretBehandling.id
     }
 
     private fun <T> responseOK(): (ResponseEntity<Ressurs<T>>) -> Unit = {
@@ -289,6 +327,18 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
             // Ønsker ikke å kaste feil fra denne hvis det eks er "feil steg", feil steg ønsker vi å teste i beslutteVedtak
         }
         clearBrukerContext()
+    }
+
+    private fun lagVilkårsvurderinger(behandlingId: UUID,
+                                      resultat: Vilkårsresultat = Vilkårsresultat.OPPFYLT,
+                                      ikkeLag: Int = 0) {
+        val vilkårsvurderinger = VilkårType.hentVilkår().map {
+            vilkårsvurdering(behandlingId = behandlingId,
+                             resultat = resultat,
+                             type = it,
+                             delvilkårsvurdering = listOf())
+        }.dropLast(ikkeLag)
+        vilkårsvurderingRepository.insertAll(vilkårsvurderinger)
     }
 
 }
