@@ -50,6 +50,7 @@ class UttrekkArbeidssøkerService(
         }
     }
 
+    // Hvis fler enn 50 % feiler så feiler uttrekket
     private fun loggAntallFeilet(registertSomArbeidssøkerPåFagsak: Map<UUID, Boolean?>) {
         val antallTotalt = registertSomArbeidssøkerPåFagsak.values.size
         if (antallTotalt == 0) return
