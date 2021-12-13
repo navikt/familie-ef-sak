@@ -89,6 +89,12 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         assertThrows<Feil> { fagsakService.hentAktiveIdenter(setOf(UUID.randomUUID())) }
     }
 
+
+    @Test
+    internal fun name() {
+        fagsakService.test()
+    }
+
     @Test
     internal fun `skal oppdatere personident på fagsak dersom personen har fått ny ident som er tidligere registrert`() {
 
