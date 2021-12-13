@@ -19,6 +19,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
@@ -93,6 +94,16 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
                                                                ?: error("Kan ikke finne fagsak med eksternId=$eksternFagsakId")
 
     fun hentAktivIdent(fagsakId: UUID): String = fagsakRepository.finnAktivIdent(fagsakId)
+
+    @Transactional
+    fun test() {
+        test2()
+    }
+
+    @Transactional
+    private fun test2() {
+
+    }
 
     fun hentAktiveIdenter(fagsakId: Set<UUID>): Map<UUID, String> {
         if (fagsakId.isEmpty()) return emptyMap()

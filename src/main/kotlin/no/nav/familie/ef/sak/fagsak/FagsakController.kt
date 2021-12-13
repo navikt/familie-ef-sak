@@ -39,4 +39,12 @@ class FagsakController(private val fagsakService: FagsakService, private val til
         tilgangService.validerTilgangTilFagsak(fagsak.id)
         return Ressurs.success(fagsakService.fagsakTilDto(fagsak))
     }
+
+    @GetMapping("/test/{eksternFagsakId}")
+    fun test(@PathVariable eksternFagsakId: Long): Ressurs<String> {
+        val fagsak: Fagsak = fagsakService.hentFagsakPåEksternId(eksternFagsakId)
+        tilgangService.validerTilgangTilFagsak(fagsak.id)
+        fagsakService.test()
+        return Ressurs.success("ok")
+    }
 }
