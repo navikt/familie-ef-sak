@@ -62,5 +62,6 @@ class IntegrasjonerConfig(@Value("\${FAMILIE_INTEGRASJONER_URL}") private val in
         private const val PATH_MEDLEMSKAP = "api/medlemskap/v3"
         private const val PATH_NAV_KONTOR = "api/arbeidsfordeling/nav-kontor/ENF"
 
+
     }
 }

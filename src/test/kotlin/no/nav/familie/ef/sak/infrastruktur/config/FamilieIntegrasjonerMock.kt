@@ -99,7 +99,6 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                             .willReturn(okJson(objectMapper.writeValueAsString(medl))),
                     post(urlEqualTo(integrasjonerConfig.navKontorUri.path))
                             .willReturn(okJson(objectMapper.writeValueAsString(navKontorEnhet))),
-
                     post(urlEqualTo(integrasjonerConfig.infotrygdVedtaksperioder.path))
                             .willReturn(okJson(objectMapper.writeValueAsString(infotrygdPerioder)))
 
