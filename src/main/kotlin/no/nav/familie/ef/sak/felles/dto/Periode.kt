@@ -10,16 +10,16 @@ data class Periode(val fradato: LocalDate,
         require(fradato <= tildato) {"Fradato må kommer før tildato i enn periode."}
     }
 
-    fun inneholder(date: LocalDate): Boolean {
+    fun omslutter(date: LocalDate): Boolean {
         return date in fradato..tildato
     }
 
-    fun inneholder(annen: Periode): Boolean {
+    fun omslutter(annen: Periode): Boolean {
         return annen.fradato >= fradato && annen.tildato <= tildato
     }
 
     fun overlapper(annen: Periode): Boolean {
-        return inneholder(annen.fradato) || inneholder(annen.tildato) || annen.inneholder(fradato)
+        return omslutter(annen.fradato) || omslutter(annen.tildato) || annen.omslutter(fradato)
     }
 
     fun omsluttesAv(annen: Periode): Boolean {

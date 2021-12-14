@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.behandlingsflyt.steg
 
-import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.beregning.BeregningService
@@ -27,7 +26,6 @@ import java.util.UUID
 
 @Service
 class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
-                       private val behandlingService: BehandlingService,
                        private val beregningService: BeregningService,
                        private val simuleringService: SimuleringService,
                        private val vedtakService: VedtakService,
@@ -147,7 +145,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
             val tilkjentPeriode = it.periode
             if (opphørsperioder.none { periode -> periode.overlapper(tilkjentPeriode) }) {
                 listOf(it)
-            } else if (opphørsperioder.any { periode -> periode.inneholder(tilkjentPeriode) }) {
+            } else if (opphørsperioder.any { periode -> periode.omslutter(tilkjentPeriode) }) {
                 listOf()
             } else {
                 val overlappendeOpphør = opphørsperioder.first { periode -> periode.overlapper(tilkjentPeriode) }
