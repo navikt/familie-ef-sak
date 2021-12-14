@@ -37,7 +37,7 @@ internal class BehandlingshistorikkServiceTest : OppslagSpringRunnerTest() {
                                                                            opprettetAv = SikkerhetContext.hentSaksbehandler()))
 
         /** Hent */
-        val innslag: Behandlingshistorikk = behandlingshistorikkService.finnBehandlingshistorikk(behandling.id)[0]
+        val innslag: Behandlingshistorikk = behandlingshistorikkService.finnHendelseshistorikk(behandling.id)[0]
 
         assertThat(innslag).isEqualTo(behandlingHistorikk)
     }

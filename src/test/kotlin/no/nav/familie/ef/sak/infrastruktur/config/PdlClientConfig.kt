@@ -180,7 +180,7 @@ class PdlClientConfig {
                 PdlAnnenForelder(
                         adressebeskyttelse = emptyList(),
                         bostedsadresse = bostedsadresse(),
-                        dødsfall = listOf(Dødsfall(LocalDate.of(2021, 9, 22))),
+                        dødsfall = emptyList(),
                         fødsel = fødsel(1994, 11, 1),
                         navn = listOf(Navn("Bob", "", "Burger", metadataGjeldende)),
                         opphold = emptyList(),
