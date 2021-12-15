@@ -6,6 +6,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.ManglerTilgang
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.oppgave.dto.FinnOppgaveRequestDto
@@ -17,6 +18,7 @@ import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.util.UUID
@@ -30,6 +32,21 @@ internal class OppgaveControllerTest {
 
     private val oppgaveController: OppgaveController = OppgaveController(oppgaveService, tilgangService, pdlClient)
 
+
+    @Test
+    internal fun `skal kaste feil hvis ident ikke er på gyldig format`() {
+        every { pdlClient.hentAktørIder(any()) } returns PdlIdenter(listOf(PdlIdent("1234", false)))
+        every { oppgaveService.hentOppgaver(any()) } returns FinnOppgaveResponseDto(0, listOf())
+
+        oppgaveController.hentOppgaver(FinnOppgaveRequestDto(ident = null))
+        oppgaveController.hentOppgaver(FinnOppgaveRequestDto(ident = ""))
+        oppgaveController.hentOppgaver(FinnOppgaveRequestDto(ident = "12345678901"))
+
+        listOf("1", "ab", "1234567890", "123456789012").forEach {
+            assertThatThrownBy { oppgaveController.hentOppgaver(FinnOppgaveRequestDto(ident = it)) }
+        }
+    }
+
     @Test
     internal fun `skal sende med aktoerId i request `() {
         val finnOppgaveRequestSlot = slot<FinnOppgaveRequest>()
@@ -39,7 +56,6 @@ internal class OppgaveControllerTest {
         oppgaveController.hentOppgaver(FinnOppgaveRequestDto(ident = "4321"))
         assertThat(finnOppgaveRequestSlot.captured.aktørId).isEqualTo("1234")
     }
-
 
     @Test
     internal fun `skal ikke feile hvis ident er tom`() {
