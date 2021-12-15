@@ -36,13 +36,12 @@ class GrunnlagsdataService(private val grunnlagsdataRepository: GrunnlagsdataRep
         val behandling = behandlingService.hentBehandling(behandlingId)
         feilHvis(behandling.status.behandlingErLåstForVidereRedigering(),
                  HttpStatus.BAD_REQUEST) { "Kan ikke laste inn nye grunnlagsdata for behandling med status ${behandling.status}" }
-        privTransactional(behandlingId)
+        slettGrunnlagsdataHvisFinnes(behandlingId)
         opprettGrunnlagsdata(behandlingId)
         return hentGrunnlagsdata(behandlingId)
     }
 
-    @Transactional
-    fun privTransactional(behandlingId: UUID) {
+    private fun slettGrunnlagsdataHvisFinnes(behandlingId: UUID) {
         grunnlagsdataRepository.deleteById(behandlingId)
     }
 
