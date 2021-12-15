@@ -86,7 +86,7 @@ object BarnMedSamværMapper {
                     AdresseHjelper.borPåSammeAdresse(it, søkerAdresse)
                 },
                 forelder = pdlAnnenForelder?.let { tilAnnenForelderDto(it, annenForelderFnr) },
-                dødsdato = matchetBarn.barn?.dødsfall?.elementAt(0)?.dødsdato,
+                dødsdato = matchetBarn.barn?.dødsfall?.firstOrNull {it != null}?.dødsdato,
         )
     }
 
