@@ -30,7 +30,8 @@ class OppgaveClientMock {
     fun oppgaveClient(): OppgaveClient {
         val oppgaveClient: OppgaveClient = mockk()
 
-        val oppgaver: MutableMap<Long, Oppgave> = listOf(oppgave1, oppgave2, oppgave3).associateBy { it.id!! }.toMutableMap()
+        val oppgaver: MutableMap<Long, Oppgave> =
+                listOf(oppgave1, oppgave2, oppgave3, tilbakekreving1).associateBy { it.id!! }.toMutableMap()
         var maxId: Long = oppgaver.values.maxOf { it.id!! }
         every {
             oppgaveClient.hentOppgaver(any())
@@ -122,24 +123,32 @@ class OppgaveClientMock {
         return oppgaveClient
     }
 
-    private val oppgave1 = lagOppgave(1L, Oppgavetype.Journalføring, "Z999999")
-    private val oppgave2 = lagOppgave(2L, Oppgavetype.BehandleSak, "Z999999")
-    private val oppgave3 = lagOppgave(3L, Oppgavetype.Journalføring, beskivelse = "")
+    private val oppgave1 = lagOppgave(1L, Oppgavetype.Journalføring, "Z999999", behandlesAvApplikasjon = "familie-ef-sak")
+    private val oppgave2 = lagOppgave(2L, Oppgavetype.BehandleSak, "Z999999", behandlesAvApplikasjon = "familie-ef-sak")
+    private val oppgave3 = lagOppgave(3L, Oppgavetype.Journalføring, beskivelse = "", behandlesAvApplikasjon = "familie-ef-sak")
+    private val tilbakekreving1 = lagOppgave(4L,
+                                             Oppgavetype.BehandleSak,
+                                             beskivelse = "",
+                                             behandlingstype = "ae0161",
+                                             behandlesAvApplikasjon = "familie-tilbake")
 
     private fun lagOppgave(oppgaveId: Long,
                            oppgavetype: Oppgavetype,
                            tildeltRessurs: String? = null,
                            beskivelse: String? = "Beskrivelse av oppgaven. " +
                                                  "Denne teksten kan jo være lang, kort eller ikke inneholde noenting. ",
-                           journalpostId: String? = "1234"): Oppgave {
+                           journalpostId: String? = "1234",
+                           behandlingstype: String? = null,
+                           behandlesAvApplikasjon: String): Oppgave {
         return Oppgave(id = oppgaveId,
                        aktoerId = "1234",
                        identer = listOf(OppgaveIdentV2("11111111111", IdentGruppe.FOLKEREGISTERIDENT)),
                        journalpostId = journalpostId,
                        tildeltEnhetsnr = "4408",
                        tilordnetRessurs = tildeltRessurs,
+                       behandlingstype = behandlingstype,
                        mappeId = 123,
-                       behandlesAvApplikasjon = "FS22",
+                       behandlesAvApplikasjon = behandlesAvApplikasjon,
                        beskrivelse = beskivelse,
                        tema = Tema.ENF,
                        behandlingstema = "ab0071",
