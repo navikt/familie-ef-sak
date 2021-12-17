@@ -50,6 +50,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @SpringBootTest(classes = [ApplicationLocal::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("integrasjonstest",
+                "mock-arbeidssøker",
                 "mock-oauth",
                 "mock-pdl",
                 "mock-integrasjoner",

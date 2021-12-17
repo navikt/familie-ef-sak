@@ -9,6 +9,7 @@ import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.blankett.BlankettRepository
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
@@ -46,10 +47,12 @@ internal class VurderingServiceTest {
     private val personopplysningerIntegrasjonerClient = mockk<PersonopplysningerIntegrasjonerClient>()
     private val blankettRepository = mockk<BlankettRepository>()
     private val vilkårGrunnlagService = mockk<VilkårGrunnlagService>()
+    private val grunnlagsdataService = mockk<GrunnlagsdataService>()
     private val vurderingService = VurderingService(behandlingService = behandlingService,
                                                     søknadService = søknadService,
                                                     vilkårsvurderingRepository = vilkårsvurderingRepository,
-                                                    vilkårGrunnlagService = vilkårGrunnlagService)
+                                                    vilkårGrunnlagService = vilkårGrunnlagService,
+                                                    grunnlagsdataService = grunnlagsdataService)
     private val søknad = SøknadsskjemaMapper.tilDomene(TestsøknadBuilder.Builder().setBarn(listOf(
             TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "13071489536"),
             TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "01012067050")
@@ -78,7 +81,8 @@ internal class VurderingServiceTest {
                                                                                              mockk(relaxed = true),
                                                                                              mockk(relaxed = true),
                                                                                              mockk(relaxed = true),
-                                                                                             false)
+                                                                                             false,
+                                                                                             mockk(relaxed = true))
     }
 
     @Test
@@ -89,6 +93,7 @@ internal class VurderingServiceTest {
         every { vilkårsvurderingRepository.insertAll(capture(nyeVilkårsvurderinger)) } answers
                 { it.invocation.args.first() as List<Vilkårsvurdering> }
         val vilkår = VilkårType.hentVilkår()
+
 
         vurderingService.hentEllerOpprettVurderinger(behandlingId)
 

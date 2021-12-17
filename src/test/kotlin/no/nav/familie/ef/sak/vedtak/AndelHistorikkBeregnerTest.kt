@@ -67,7 +67,7 @@ class AndelHistorikkBeregnerTest {
     }
 
     @Test
-    internal fun `periode_splittes`() {
+    internal fun `periode_splittes_g_omregning`() {
         run("/økonomi/periode_splittes_g_omregning.csv")
     }
 
@@ -81,21 +81,55 @@ class AndelHistorikkBeregnerTest {
         run("/økonomi/opphør_midt_i_periode.csv")
     }
 
-    private fun run(filnavn: String) {
-        AndelHistorikkRunner.run(javaClass.getResource(filnavn))
+    @Test
+    internal fun `periode_splittes`() {
+        run("/økonomi/periode_splittes.csv")
+    }
+
+    @Test
+    internal fun `periode_splittes_og_sen_fjernes`() {
+        run("/økonomi/periode_splittes_og_sen_fjernes.csv")
+    }
+
+    @Test
+    internal fun `periode forlenges`() {
+        run("/økonomi/periode_forlenges.csv")
+    }
+
+    @Test
+    internal fun `periode_erstatt_og_senere_fjernet_på_nytt`() {
+        run("/økonomi/periode_erstatt_og_senere_fjernet_på_nytt.csv")
+    }
+
+    @Test
+    internal fun `periode2_første_periode_endrer_seg`() {
+        run("/økonomi/periode2_første_periode_endrer_seg.csv")
+    }
+
+    @Test
+    internal fun `filtrering på tilOgMedBehandling på andre behandlingen`() {
+        run("/økonomi/filtrer_tilOgMedBehandling_er_andre_behandlingen.csv", tilOgMedBehandlingId = 2)
+    }
+
+    private fun run(filnavn: String, tilOgMedBehandlingId: Int? = null) {
+        AndelHistorikkRunner.run(javaClass.getResource(filnavn)!!, tilOgMedBehandlingId)
     }
 }
 
 object AndelHistorikkRunner {
 
-    fun run(url: URL) {
+    fun run(url: URL, tilOgMedBehandlingId: Int?) {
         val grupper = AndelHistorikkParser.parseGroup(url)
 
         validerInput(grupper)
 
-        val behandlinger = grupper.input.map { it.behandlingId }.distinct().map { behandling(id = it) }
+        val now = LocalDateTime.now()
+        val behandlinger = grupper.input.map { it.behandlingId }.distinct().mapIndexed { index, id ->
+            behandling(id = id, opprettetTid = now.plusMinutes(index.toLong()))
+        }
+        val behandlingId = tilOgMedBehandlingId?.let { generateBehandlingId(it)}
 
-        val output = AndelHistorikkBeregner.lagHistorikk(grupper.input, grupper.vedtaksliste, behandlinger)
+        val output = AndelHistorikkBeregner.lagHistorikk(grupper.input, grupper.vedtaksliste, behandlinger, behandlingId)
 
         assertThat(toString(output)).isEqualTo(toString(grupper.expectedOutput))
     }
@@ -121,7 +155,7 @@ object AndelHistorikkRunner {
     private val headerString = values().joinToString(", ") { mapValue(it, it.key) }
 
     private fun mapValue(key: AndelHistorikkHeader, value: Any?): String {
-        return String.format("%-${key.minHeaderValue}s", value)
+        return String.format("%-${key.minHeaderValue}s", value ?: "")
     }
 
     private fun toString(andeler: List<AndelHistorikkDto>): String {
@@ -156,21 +190,24 @@ data class ParsetAndelHistorikkData(val vedtaksliste: List<Vedtak>,
                                     val expectedOutput: List<AndelHistorikkDto>)
 
 private val oppdragIdn = mutableMapOf<Int, UUID>()
-private fun generateBehandlingId(behandlingId: String): UUID = oppdragIdn.getOrPut(behandlingId.toInt()) { UUID.randomUUID() }
+private fun generateBehandlingId(behandlingId: Int): UUID = oppdragIdn.getOrPut(behandlingId) { UUID.randomUUID() }
 private fun hentBehandlingId(behandlingId: UUID) = oppdragIdn.entries.first { it.value == behandlingId }.key
 
+/**
+ * [ENDRET_I] kan brukes for å overstyre kildeBehandlingId
+ */
 private enum class AndelHistorikkHeader(val key: String,
                                         val value: (AndelHistorikkDto) -> Any?,
                                         val minHeaderValue: Int = key.length) {
 
-    TEST_TYPE("type", {}),
-    FOM("fom", { it.andel.stønadFra }, 11),
-    TOM("tom", { it.andel.stønadTil }, 11),
+    TEST_TYPE("type", {""}),
+    BEHANDLING("behandling_id", { hentBehandlingId(it.behandlingId) }),
+    FOM("fom", { YearMonth.from(it.andel.stønadFra) }, 11),
+    TOM("tom", { YearMonth.from(it.andel.stønadTil) }, 11),
     BELØP("beløp", { it.andel.beløp }, 8),
     INNTEKT("inntekt", { it.andel.inntekt }, 10),
     INNTEKTSREDUKSJON("inntektsreduksjon", { it.andel.inntektsreduksjon }),
     SAMORDNINGSFRADRAG("samordningsfradrag", { it.andel.samordningsfradrag }),
-    BEHANDLING("behandling_id", { hentBehandlingId(it.behandlingId) }),
     AKTIVITET("aktivitet", { it.aktivitet }),
     PERIODE_TYPE("periode", { it.periodeType }),
     TYPE_ENDRING("type_endring", { it.endring?.type }),
@@ -191,10 +228,10 @@ object AndelHistorikkParser {
                 .map { row -> row.entries.associate { it.key.trim() to it.value.trim() } }
                 .mapIndexed { index, row ->
                     try {
-                        val behandlingIdStr = row.getValue(BEHANDLING.key)
+                        val behandlingIdInt = row.getValue(BEHANDLING.key).toInt()
                         val type = TestType.valueOf(row.getValue(TEST_TYPE.key))
 
-                        val behandlingId = generateBehandlingId(behandlingIdStr)
+                        val behandlingId = generateBehandlingId(behandlingIdInt)
                         mapRow(type, behandlingId, row)
                     } catch (e: Exception) {
                         throw RuntimeException("Feilet håndtering av rowIndex=$index - $row", e)
@@ -216,7 +253,7 @@ object AndelHistorikkParser {
                                aktivitet = row.getOptionalValue(AKTIVITET)?.let { AktivitetType.valueOf(it) },
                                periodeType = row.getOptionalValue(PERIODE_TYPE)?.let { VedtaksperiodeType.valueOf(it) },
                                type = row.getOptionalValue(TYPE_ENDRING)?.let { EndringType.valueOf(it) },
-                               endretI = row.getOptionalValue(ENDRET_I)?.let { generateBehandlingId(it) })
+                               endretI = row.getOptionalInt(ENDRET_I)?.let { generateBehandlingId(it) })
 
     private fun mapAndel(andel: AndelHistorikkData): AndelTilkjentYtelse =
             AndelTilkjentYtelse(beløp = andel.beløp!!,

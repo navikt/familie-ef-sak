@@ -9,8 +9,7 @@ import org.springframework.cache.CacheManager
 import org.springframework.stereotype.Component
 
 @Component
-class ArbeidsfordelingService(private val personService: PersonService,
-                              private val personopplysningerIntegrasjonerClient: PersonopplysningerIntegrasjonerClient,
+class ArbeidsfordelingService(private val personopplysningerIntegrasjonerClient: PersonopplysningerIntegrasjonerClient,
                               @Qualifier("shortCache")
                               private val cacheManager: CacheManager) {
 
@@ -20,17 +19,7 @@ class ArbeidsfordelingService(private val personService: PersonService,
 
     fun hentNavEnhet(ident: String): Arbeidsfordelingsenhet? {
         return cacheManager.getNullable("navEnhet", ident) {
-            val personMedRelasjoner = personService.hentPersonMedRelasjoner(ident)
-            val søkerIdentMedAdressebeskyttelse =
-                    IdentMedAdressebeskyttelse(personMedRelasjoner.søkerIdent,
-                                               personMedRelasjoner.søker.adressebeskyttelse.gjeldende()?.gradering)
-            val identerMedAdressebeskyttelse = listOf(søkerIdentMedAdressebeskyttelse) +
-                                               personMedRelasjoner.barn.map {
-                                                   IdentMedAdressebeskyttelse(it.key,
-                                                                              it.value.adressebeskyttelse.gjeldende()?.gradering)
-                                               }
-            val identMedStrengeste = finnPersonMedStrengesteAdressebeskyttelse(identerMedAdressebeskyttelse)
-            personopplysningerIntegrasjonerClient.hentNavEnhet(identMedStrengeste ?: ident).firstOrNull()
+            personopplysningerIntegrasjonerClient.hentNavEnhetForPersonMedRelasjoner(ident).firstOrNull()
         }
     }
 

@@ -1,5 +1,7 @@
 package no.nav.familie.ef.sak.vilkår.dto
 
+import java.time.LocalDateTime
+
 
 data class VilkårDto(val vurderinger: List<VilkårsvurderingDto>,
                      val grunnlag: VilkårGrunnlagDto)
@@ -12,4 +14,5 @@ data class VilkårGrunnlagDto(val tidligereVedtaksperioder: TidligereVedtaksperi
                              val sivilstandsplaner: SivilstandsplanerDto,
                              val aktivitet: AktivitetDto,
                              val sagtOppEllerRedusertStilling: SagtOppEllerRedusertStillingDto,
-                             val lagtTilEtterFerdigstilling: Boolean)
+                             val lagtTilEtterFerdigstilling: Boolean,
+                             val registeropplysningerOpprettetTid: LocalDateTime)

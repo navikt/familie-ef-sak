@@ -27,6 +27,8 @@ class IntegrasjonerConfig(@Value("\${FAMILIE_INTEGRASJONER_URL}") private val in
 
     val arbeidsfordelingUri: URI = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_ARBEIDSFORDELING).build().toUri()
 
+    val arbeidsfordelingMedRelasjonerUri: URI = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_BEHANDLENDE_ENHET_MED_RELASJONER).build() .toUri()
+
     val arbeidsforholdUri: URI = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_ARBEIDSFORHOLD).build().toUri()
 
     val oppgaveUri: URI = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_OPPGAVE).build().toUri()
@@ -52,12 +54,14 @@ class IntegrasjonerConfig(@Value("\${FAMILIE_INTEGRASJONER_URL}") private val in
         private const val PATH_TILGANG_PERSON = "api/tilgang/v2/personer"
         private const val PATH_EGEN_ANSATT = "api/egenansatt"
         private const val PATH_ARBEIDSFORDELING = "api/arbeidsfordeling/enhet/ENF"
+        private const val PATH_BEHANDLENDE_ENHET_MED_RELASJONER = "api/arbeidsfordeling/enhet/ENF/med-relasjoner"
         private const val PATH_ARBEIDSFORHOLD = "api/aareg/arbeidsforhold"
         private const val PATH_OPPGAVE = "api/oppgave"
         private const val PATH_JOURNALPOST = "api/journalpost"
         private const val PATH_DOKARKIV = "api/arkiv"
         private const val PATH_MEDLEMSKAP = "api/medlemskap/v3"
         private const val PATH_NAV_KONTOR = "api/arbeidsfordeling/nav-kontor/ENF"
+
 
     }
 }

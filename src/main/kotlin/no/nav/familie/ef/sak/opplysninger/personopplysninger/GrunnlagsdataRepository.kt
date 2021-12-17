@@ -18,4 +18,5 @@ interface GrunnlagsdataRepository : RepositoryInterface<Grunnlagsdata, UUID>, In
             WHERE g.data IS NULL
             """)
     fun finnBehandlingerSomManglerGrunnlagsdata(): List<Pair<UUID, String>>
+
 }

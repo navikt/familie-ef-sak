@@ -22,6 +22,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.UtflyttingFraNo
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.VergemaalEllerFremtidsfullmakt
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 /**
  * Endringer i denne filen burde godkjennes av 2 personer då denne er lagret som json i databasen og breaking changes kan være
@@ -29,15 +30,14 @@ import java.time.LocalDate
  */
 
 data class GrunnlagsdataMedMetadata(val grunnlagsdata: GrunnlagsdataDomene,
-                                    val lagtTilEtterFerdigstilling: Boolean)
+                                    val lagtTilEtterFerdigstilling: Boolean,
+                                    val opprettetTidspunkt: LocalDateTime)
 
 data class GrunnlagsdataDomene(val søker: Søker,
                                val annenForelder: List<AnnenForelderMedIdent>,
                                val medlUnntak: Medlemskapsinfo,
                                val barn: List<BarnMedIdent>,
                                val tidligereVedtaksperioder: TidligereVedtaksperioder?)
-
-
 
 
 data class Søker(val adressebeskyttelse: Adressebeskyttelse?, //Er en liste i PDLSøker
@@ -67,11 +67,6 @@ data class AnnenForelderMedIdent(
         val dødsfall: List<Dødsfall>,
         val fødsel: List<Fødsel>,
         val navn: Navn,
-        val opphold: List<Opphold>,
-        val oppholdsadresse: List<Oppholdsadresse>,
-        val statsborgerskap: List<Statsborgerskap>,
-        val innflyttingTilNorge: List<InnflyttingTilNorge>,
-        val utflyttingFraNorge: List<UtflyttingFraNorge>,
         val personIdent: String
 )
 

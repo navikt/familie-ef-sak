@@ -2,8 +2,6 @@ package no.nav.familie.ef.sak.vedtak.uttrekk
 
 import no.nav.familie.ef.sak.repository.InsertUpdateRepository
 import no.nav.familie.ef.sak.repository.RepositoryInterface
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
 import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.stereotype.Repository
 import java.time.LocalDate
@@ -14,11 +12,7 @@ import java.util.UUID
 interface UttrekkArbeidssøkerRepository : RepositoryInterface<UttrekkArbeidssøkere, UUID>,
                                           InsertUpdateRepository<UttrekkArbeidssøkere> {
 
-    fun countByÅrMånedAndKontrollertIsTrue(årMåned: YearMonth): Int
-
-    fun findAllByÅrMåned(årMåned: YearMonth, pageable: Pageable): Page<UttrekkArbeidssøkere>
-
-    fun findAllByÅrMånedAndKontrollertIsFalse(årMåned: YearMonth, pageable: Pageable): Page<UttrekkArbeidssøkere>
+    fun findAllByÅrMåned(årMåned: YearMonth): List<UttrekkArbeidssøkere>
 
     // language=PostgreSQL
     @Query("""
@@ -41,5 +35,6 @@ interface UttrekkArbeidssøkerRepository : RepositoryInterface<UttrekkArbeidssø
         WHERE aty.stonad_tom >= :startdato AND aty.stonad_fom <= :sluttdato
           AND rn = 1
     """)
-    fun hentVedtaksperioderForSisteFerdigstilteBehandlinger(startdato: LocalDate, sluttdato: LocalDate): List<VedtaksperioderForUttrekk>
+    fun hentVedtaksperioderForSisteFerdigstilteBehandlinger(startdato: LocalDate,
+                                                            sluttdato: LocalDate): List<VedtaksperioderForUttrekk>
 }
