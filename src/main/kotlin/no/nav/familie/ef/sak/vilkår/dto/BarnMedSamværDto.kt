@@ -36,6 +36,7 @@ data class BarnMedSamværRegistergrunnlagDto(
         val fødselsnummer: String?,
         val harSammeAdresse: Boolean?,
         val forelder: AnnenForelderDto?,
+        val dødsdato: LocalDate? = null,
 )
 
 data class AnnenForelderDto(
