@@ -165,6 +165,47 @@ internal class BeregnYtelseStegTest {
         }
 
         @Test
+        internal fun `skal feile innvilge med opphør hvis det er en førstegangsbehandling`() {
+            val opphørFom = YearMonth.of(2021, 6)
+            val opphørTom = YearMonth.of(2021, 8)
+            val innvilgetFom = YearMonth.of(2021, 9)
+            val innvilgetTom = YearMonth.of(2022, 3)
+            val forrigeAndelFom = LocalDate.of(2021, 1, 1)
+            val forrigeAndelTom = LocalDate.of(2021, 12, 31)
+
+            val slot = slot<TilkjentYtelse>()
+            every { tilkjentYtelseService.opprettTilkjentYtelse(capture(slot)) } answers { firstArg() }
+            every { tilkjentYtelseService.hentForBehandling(any()) } returns
+                    lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, forrigeAndelFom, forrigeAndelTom)))
+            every { beregningService.beregnYtelse(any(), any()) } answers {
+                firstArg<List<Periode>>().map { lagBeløpsperiode(it.fradato, it.tildato) }
+            }
+
+            val opphørsperiode = VedtaksperiodeDto(årMånedFra = opphørFom,
+                                                   årMånedTil = opphørTom,
+                                                   aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
+                                                   periodeType = VedtaksperiodeType.MIDLERTIDIG_OPPHØR)
+            val innvilgetPeriode = VedtaksperiodeDto(årMånedFra = innvilgetFom,
+                                                     årMånedTil = innvilgetTom,
+                                                     aktivitet = AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID,
+                                                     periodeType = VedtaksperiodeType.HOVEDPERIODE)
+            assertThrows<Feil> {
+                utførSteg(BehandlingType.FØRSTEGANGSBEHANDLING,
+                      Innvilget(resultatType = ResultatType.INNVILGE_MED_OPPHØR,
+                                perioder = listOf(opphørsperiode, innvilgetPeriode),
+                                inntekter = listOf(Inntekt(innvilgetFom,
+                                                           BigDecimal(100000),
+                                                           samordningsfradrag = BigDecimal.ZERO)),
+                                inntektBegrunnelse = "null",
+                                periodeBegrunnelse = "null"
+                      ),
+                      forrigeBehandlingId = UUID.randomUUID())
+
+            }
+        }
+
+
+        @Test
         internal fun `skal innvilge med opphør som første periode`() {
             val opphørFom = YearMonth.of(2021, 6)
             val opphørTom = YearMonth.of(2021, 8)
