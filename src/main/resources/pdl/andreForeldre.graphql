@@ -73,67 +73,6 @@ query($identer: [ID!]!){
                     historisk
                 }
             }
-            opphold(historikk: true) {
-                type
-                oppholdFra
-                oppholdTil
-            }
-            oppholdsadresse(historikk: true) {
-                gyldigFraOgMed
-                gyldigTilOgMed
-                coAdressenavn
-                utenlandskAdresse {
-                    adressenavnNummer
-                    bygningEtasjeLeilighet
-                    bySted
-                    postkode
-                    landkode
-                    postboksNummerNavn
-                    regionDistriktOmraade
-                }
-                vegadresse {
-                    husnummer
-                    husbokstav
-                    bruksenhetsnummer
-                    adressenavn
-                    kommunenummer
-                    tilleggsnavn
-                    postnummer
-                    koordinater {
-                        x
-                        y
-                        z
-                        kvalitet
-                    }
-                    matrikkelId
-                }
-                oppholdAnnetSted
-                metadata {
-                  historisk
-                }
-            }
-            statsborgerskap(historikk: true) {
-                land
-                gyldigFraOgMed
-                gyldigTilOgMed
-            }
-            innflyttingTilNorge {
-                fraflyttingsland
-                fraflyttingsstedIUtlandet
-                folkeregistermetadata {
-                    gyldighetstidspunkt
-                    opphoerstidspunkt
-                }
-            }
-            utflyttingFraNorge {
-                tilflyttingsland
-                tilflyttingsstedIUtlandet
-                utflyttingsdato
-                folkeregistermetadata {
-                    gyldighetstidspunkt
-                    opphoerstidspunkt
-                }
-            }
         }
     }
 }

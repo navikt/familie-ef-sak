@@ -67,11 +67,6 @@ data class AnnenForelderMedIdent(
         val dødsfall: List<Dødsfall>,
         val fødsel: List<Fødsel>,
         val navn: Navn,
-        val opphold: List<Opphold>,
-        val oppholdsadresse: List<Oppholdsadresse>,
-        val statsborgerskap: List<Statsborgerskap>,
-        val innflyttingTilNorge: List<InnflyttingTilNorge>,
-        val utflyttingFraNorge: List<UtflyttingFraNorge>,
         val personIdent: String
 )
 

@@ -89,12 +89,7 @@ data class PdlAnnenForelder(val adressebeskyttelse: List<Adressebeskyttelse>,
                             override val bostedsadresse: List<Bostedsadresse>,
                             @JsonProperty("doedsfall") val dødsfall: List<Dødsfall>,
                             @JsonProperty("foedsel") override val fødsel: List<Fødsel>,
-                            val navn: List<Navn>,
-                            val opphold: List<Opphold>,
-                            val oppholdsadresse: List<Oppholdsadresse>,
-                            val statsborgerskap: List<Statsborgerskap>,
-                            val innflyttingTilNorge: List<InnflyttingTilNorge>,
-                            val utflyttingFraNorge: List<UtflyttingFraNorge>) : PdlPerson
+                            val navn: List<Navn>) : PdlPerson
 
 data class Metadata(val historisk: Boolean)
 

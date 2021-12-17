@@ -39,12 +39,7 @@ object GrunnlagsdataMapper {
                         fødsel = it.value.fødsel,
                         bostedsadresse = it.value.bostedsadresse,
                         dødsfall = it.value.dødsfall,
-                        innflyttingTilNorge = it.value.innflyttingTilNorge,
-                        navn = it.value.navn.gjeldende(),
-                        opphold = it.value.opphold,
-                        oppholdsadresse = it.value.oppholdsadresse,
-                        statsborgerskap = it.value.statsborgerskap,
-                        utflyttingFraNorge = it.value.utflyttingFraNorge
+                        navn = it.value.navn.gjeldende()
                 )
             }
 

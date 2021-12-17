@@ -183,11 +183,6 @@ class PdlClientConfig {
                         dødsfall = emptyList(),
                         fødsel = fødsel(1994, 11, 1),
                         navn = listOf(Navn("Bob", "", "Burger", metadataGjeldende)),
-                        opphold = emptyList(),
-                        oppholdsadresse = emptyList(),
-                        statsborgerskap = statsborgerskap(),
-                        innflyttingTilNorge = emptyList(),
-                        utflyttingFraNorge = emptyList(),
                 )
 
         private fun forelderBarnRelasjoner(): List<ForelderBarnRelasjon> =
