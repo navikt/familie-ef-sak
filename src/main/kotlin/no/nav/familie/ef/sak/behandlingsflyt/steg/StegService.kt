@@ -23,7 +23,6 @@ import no.nav.familie.ef.sak.blankett.VedtaBlankettSteg
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
-import no.nav.familie.ef.sak.vedtak.domain.Brevmottaker
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import org.slf4j.Logger
@@ -65,10 +64,10 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
     }
 
     @Transactional
-    fun håndterSendTilBeslutter(behandling: Behandling, brevmottakere: List<Brevmottaker>? = null): Behandling {
+    fun håndterSendTilBeslutter(behandling: Behandling): Behandling {
         val behandlingSteg: SendTilBeslutterSteg = hentBehandlingSteg(SEND_TIL_BESLUTTER)
 
-        return håndterSteg(behandling, behandlingSteg, brevmottakere)
+        return håndterSteg(behandling, behandlingSteg, null)
     }
 
     @Transactional

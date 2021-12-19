@@ -20,8 +20,6 @@ import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ef.sak.vedtak.VedtakRepository
 import no.nav.familie.ef.sak.vedtak.VedtakService
-import no.nav.familie.ef.sak.vedtak.domain.Brevmottaker
-import no.nav.familie.ef.sak.vedtak.domain.BrevmottakereWrapper
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType.INNVILGE
 import no.nav.familie.ef.sak.vilkår.VurderingService
@@ -41,7 +39,7 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
                            private val vedtakRepository: VedtakRepository,
                            private val simuleringService: SimuleringService,
                            private val tilbakekrevingService: TilbakekrevingService,
-                           private val vurderingService: VurderingService) : BehandlingSteg<List<Brevmottaker>?> {
+                           private val vurderingService: VurderingService) : BehandlingSteg<Void?> {
 
     override fun validerSteg(behandling: Behandling) {
         if (behandling.steg != stegType()) {
@@ -86,25 +84,15 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
         return behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING || behandling.type == BehandlingType.BLANKETT || resultatType == ResultatType.AVSLÅ || resultatType == ResultatType.HENLEGGE
     }
 
-    override fun utførSteg(behandling: Behandling, data: List<Brevmottaker>?) {
+    override fun utførSteg(behandling: Behandling, data: Void?) {
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.FATTER_VEDTAK)
         vedtakService.oppdaterSaksbehandler(behandling.id, SikkerhetContext.hentSaksbehandler(strict = true))
-        leggTilBrevmottakereHvisFinnes(data, behandling)
         opprettGodkjennVedtakOppgave(behandling)
         ferdigstillOppgave(behandling, Oppgavetype.BehandleSak)
         ferdigstillOppgave(behandling, Oppgavetype.BehandleUnderkjentVedtak)
         opprettTaskForBehandlingsstatistikk(behandling.id)
     }
 
-    private fun leggTilBrevmottakereHvisFinnes(brevmottakere: List<Brevmottaker>?,
-                                               behandling: Behandling) {
-        if (brevmottakere != null) {
-            val vedtak = vedtakService.hentVedtak(behandling.id)
-            validerAntallBrevmottakere(brevmottakere)
-
-            vedtakRepository.update(vedtak.copy(brevmottakere = BrevmottakereWrapper(brevmottakere)))
-        }
-    }
 
     private fun opprettTaskForBehandlingsstatistikk(behandlingId: UUID) =
             taskRepository.save(BehandlingsstatistikkTask.opprettVedtattTask(behandlingId = behandlingId))
@@ -136,15 +124,6 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
 
     override fun stegType(): StegType {
         return StegType.SEND_TIL_BESLUTTER
-    }
-
-    private fun validerAntallBrevmottakere(brevmottakere: List<Brevmottaker>) {
-        feilHvis(brevmottakere.isEmpty()) {
-            "Vedtaksbrevet må ha minst 1 mottaker"
-        }
-        feilHvis(brevmottakere.size > 2) {
-            "Vedtaksbrevet kan ikke ha mer enn 2 mottakere"
-        }
     }
 
 }

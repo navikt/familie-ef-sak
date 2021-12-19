@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.infrastruktur.config
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.familie.ef.sak.vedtak.domain.BrevmottakereWrapper
 import no.nav.familie.ef.sak.brev.domain.Fritekstbrev
 import no.nav.familie.ef.sak.felles.domain.Endret
 import no.nav.familie.ef.sak.felles.domain.Fil
@@ -10,6 +9,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdat
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Arbeidssituasjon
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Dokumentasjon
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.GjelderDeg
+import no.nav.familie.ef.sak.behandling.domain.Brevmottakere
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.vilkår.DelvilkårsvurderingWrapper
@@ -369,20 +369,20 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
     }
 
     @ReadingConverter
-    class PGobjectTilBrevmottakere : Converter<PGobject, BrevmottakereWrapper> {
+    class PGobjectTilBrevmottakere : Converter<PGobject, Brevmottakere> {
 
-        override fun convert(pGobject: PGobject): BrevmottakereWrapper {
-            return BrevmottakereWrapper(pGobject.value?.let { objectMapper.readValue(it) } ?: emptyList())
+        override fun convert(pGobject: PGobject): Brevmottakere? {
+            return pGobject.value?.let { objectMapper.readValue(it) }
         }
     }
 
     @WritingConverter
-    class BrevmottakereTilPGobjectConverter : Converter<BrevmottakereWrapper, PGobject> {
+    class BrevmottakereTilPGobjectConverter : Converter<Brevmottakere, PGobject> {
 
-        override fun convert(mottakere: BrevmottakereWrapper): PGobject =
+        override fun convert(mottakere: Brevmottakere): PGobject =
                 PGobject().apply {
                     type = "json"
-                    value = objectMapper.writeValueAsString(mottakere.mottakere)
+                    value = objectMapper.writeValueAsString(mottakere)
                 }
 
     }

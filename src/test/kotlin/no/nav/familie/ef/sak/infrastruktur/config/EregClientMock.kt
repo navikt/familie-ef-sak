@@ -37,7 +37,7 @@ class EregClientMock {
     private fun lagNavn() =
             Navn(bruksperiode = null,
                  gyldighetsperiode = null,
-                 navnelinje1 = "Litet selskap",
+                 navnelinje1 = "Julenissens Gavefabrikk AS",
                  navnelinje2 = null,
                  navnelinje3 = null,
                  navnelinje4 = null,

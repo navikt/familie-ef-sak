@@ -22,8 +22,7 @@ data class Vedtak(@Id
                   val saksbehandlerIdent: String? = null,
                   @Column("opphor_fom")
                   val opphørFom: LocalDate? = null,
-                  val beslutterIdent: String? = null,
-                  val brevmottakere: BrevmottakereWrapper? = null)
+                  val beslutterIdent: String? = null)
 
 data class Vedtaksperiode(
         val datoFra: LocalDate,
@@ -33,15 +32,6 @@ data class Vedtaksperiode(
 
 data class PeriodeWrapper(val perioder: List<Vedtaksperiode>)
 data class InntektWrapper(val inntekter: List<Inntektsperiode>)
-
-data class Brevmottaker(val personIdent: String, val navn: String, val mottakerRolle: MottakerRolle){
-    enum class MottakerRolle {
-        BRUKER,
-        VERGE,
-        FULLMEKTIG
-    }
-}
-data class BrevmottakereWrapper(val mottakere: List<Brevmottaker>)
 
 enum class VedtaksperiodeType {
     FORLENGELSE,

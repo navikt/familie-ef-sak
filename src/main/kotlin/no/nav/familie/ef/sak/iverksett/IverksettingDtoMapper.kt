@@ -17,7 +17,6 @@ import no.nav.familie.ef.sak.tilbakekreving.domain.Tilbakekrevingsvalg
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakService
-import no.nav.familie.ef.sak.vedtak.domain.BrevmottakereWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
@@ -151,7 +150,7 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
                                tilkjentYtelse = tilkjentYtelse?.tilIverksettDto(),
                                vedtaksperioder = vedtak.perioder?.tilIverksettDto() ?: emptyList(),
                                tilbakekreving = tilbakekreving,
-                               brevmottakere = vedtak.brevmottakere?.tilIverksettDto() ?: emptyList()
+                               brevmottakere = emptyList() // TODO
             )
 
     private fun mapSøkerDto(fagsak: Fagsak, behandling: Behandling): SøkerDto {
@@ -210,11 +209,5 @@ fun PeriodeWrapper.tilIverksettDto(): List<VedtaksperiodeDto> = this.perioder.ma
                       aktivitet = AktivitetType.valueOf(it.aktivitet.name),
                       periodeType = VedtaksperiodeType.valueOf(it.periodeType.name)
     )
-}
-
-fun BrevmottakereWrapper.tilIverksettDto(): List<BrevmottakerIverksett> = this.mottakere.map {
-    BrevmottakerIverksett(it.personIdent,
-                          it.navn,
-                          mottakerRolle = BrevmottakerIverksett.MottakerRolle.valueOf(it.mottakerRolle.name))
 }
 
