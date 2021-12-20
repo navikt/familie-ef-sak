@@ -37,12 +37,6 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `skal ikke være mulig22 å legge inn en behandling med referanse til en behandling som ikke eksisterer`() {
-        val fagsak = fagsak()
-        behandlingRepository.insert(behandling(fagsak, forrigeBehandlingId = UUID.randomUUID()))
-    }
-
-    @Test
     internal fun findByFagsakId() {
         val fagsak = fagsakRepository.insert(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
