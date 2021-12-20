@@ -29,7 +29,7 @@ enum class ResultatType {
 }
 
 fun ResultatType.tilVedtaksresultat(): Vedtaksresultat = when (this) {
-    ResultatType.INNVILGE, ResultatType.INNVILGE_MED_OPPHØR -> Vedtaksresultat.INNVILGET // TODO: Når skal vi ha delvis innvilget og opphørt
+    ResultatType.INNVILGE, ResultatType.INNVILGE_MED_OPPHØR -> Vedtaksresultat.INNVILGET
     ResultatType.HENLEGGE -> error("Vedtaksresultat kan ikke være henlegge")
     ResultatType.AVSLÅ -> Vedtaksresultat.AVSLÅTT
     ResultatType.OPPHØRT -> Vedtaksresultat.OPPHØRT
