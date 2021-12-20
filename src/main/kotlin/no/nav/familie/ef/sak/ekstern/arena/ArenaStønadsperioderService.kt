@@ -71,7 +71,7 @@ class ArenaStønadsperioderService(private val infotrygdReplikaClient: Infotrygd
     }
 
     private fun hentPerioderFraEf(request: PerioderOvergangsstønadRequest): List<PeriodeOvergangsstønad> {
-        // det er slik Arena ønsker det, det er samme i appen infotrygd-enslig-forsoerger
+        // det er slik Arena ønsker det, det er samme i appen familie-ef-infotrygd
         val fom = request.fomDato ?: LocalDate.now()
         val tom = request.tomDato ?: LocalDate.now()
         val personIdenter = hentPersonIdenter(request)
