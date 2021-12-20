@@ -13,14 +13,17 @@ import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.AvslagÅrsak
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
+import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Avslå
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
+import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.ef.søknad.SøknadMedVedlegg
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
@@ -33,6 +36,7 @@ import org.springframework.boot.test.web.client.exchange
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
+import java.time.YearMonth
 import java.util.UUID
 
 class BeregningControllerTest : OppslagSpringRunnerTest() {
@@ -71,7 +75,8 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
                                                                 steg = StegType.VEDTA_BLANKETT,
                                                                 type = BehandlingType.BLANKETT,
                                                                 status = BehandlingStatus.UTREDES))
-        val vedtakDto = Innvilget(periodeBegrunnelse = "periode begrunnelse",
+        val vedtakDto = Innvilget(resultatType = ResultatType.INNVILGE,
+                                  periodeBegrunnelse = "periode begrunnelse",
                                   inntektBegrunnelse = "inntekt begrunnelse")
 
         val respons: ResponseEntity<Ressurs<UUID>> = fatteVedtak(behandling.id, vedtakDto)
@@ -90,7 +95,8 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
     internal fun `Skal returnere riktig feilmelding i response når fullfør ikke er mulig pga valideringsfeil`() {
         val behandling = lagFagsakOgBehandling()
 
-        val vedtakDto = Innvilget(periodeBegrunnelse = "periode begrunnelse",
+        val vedtakDto = Innvilget(resultatType = ResultatType.INNVILGE,
+                                  periodeBegrunnelse = "periode begrunnelse",
                                   inntektBegrunnelse = "inntekt begrunnelse")
 
         vilkårsvurderingService.hentEllerOpprettVurderinger(behandlingId = behandling.id) // ingen ok.
@@ -98,6 +104,24 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
         val respons: ResponseEntity<Ressurs<UUID>> = fullførVedtak(behandling.id, vedtakDto)
 
         assertThat(respons.body.frontendFeilmelding).isEqualTo("Kan ikke fullføre en behandling med resultat innvilget hvis ikke alle vilkår er oppfylt")
+
+    }
+
+    @Test
+    internal fun `Skal returnere riktig feilmelding i response når fullfør ikke er mulig pga feil valg av periodetype`() {
+        val behandling = lagFagsakOgBehandling()
+
+        val vedtakDto = Innvilget(resultatType = ResultatType.INNVILGE,
+                                  periodeBegrunnelse = "periode begrunnelse",
+                                  inntektBegrunnelse = "inntekt begrunnelse",
+                                  perioder = listOf(VedtaksperiodeDto(YearMonth.now(), YearMonth.now().plusMonths(12), AktivitetType.IKKE_AKTIVITETSPLIKT, VedtaksperiodeType.MIDLERTIDIG_OPPHØR))
+        )
+
+        vilkårsvurderingService.hentEllerOpprettVurderinger(behandlingId = behandling.id) // ingen ok.
+
+        val respons: ResponseEntity<Ressurs<UUID>> = fullførVedtak(behandling.id, vedtakDto)
+
+        assertThat(respons.body.frontendFeilmelding).isEqualTo("Kan ikke ha opphørsperioder for et innvilget vedtak, velg Innvilge med opphør")
 
     }
 

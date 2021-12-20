@@ -2,16 +2,23 @@ package no.nav.familie.ef.sak.beregning
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
+import no.nav.familie.ef.sak.felles.dto.Periode
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.tilBeløpsperiode
+import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
+import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -32,25 +39,42 @@ class BeregningController(private val stegService: StegService,
                           private val beregningService: BeregningService,
                           private val tilkjentYtelseService: TilkjentYtelseService,
                           private val tilgangService: TilgangService,
-                          private val vurderingService: VurderingService) {
+                          private val vurderingService: VurderingService,
+                          private val featureToggleService: FeatureToggleService) {
 
     @PostMapping
     fun beregnYtelserForRequest(@RequestBody beregningRequest: BeregningRequest): Ressurs<List<Beløpsperiode>> {
-        val vedtaksperioder = beregningRequest.vedtaksperioder.map(ÅrMånedPeriode::tilPerioder)
+        val vedtaksperioder: List<Periode> = beregningRequest.vedtaksperioder
+                .filter { it.periodeType != VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
+                .tilPerioder()
+
         val inntektsperioder = beregningRequest.inntekt.tilInntektsperioder()
         return Ressurs.success(beregningService.beregnYtelse(vedtaksperioder, inntektsperioder))
     }
 
     @PostMapping("/{behandlingId}/fullfor")
     fun lagreVedtak(@PathVariable behandlingId: UUID, @RequestBody vedtak: VedtakDto): Ressurs<UUID> {
+        if (!featureToggleService.isEnabled("familie.ef.sak.innvilge-med-opphoer") && vedtak.erInnvilgeMedOpphør()) {
+            throw Feil("Vedtakstypen Innvilget med opphør er ikke tilgjengelig",
+                       "Vedtakstypen Innvilget med opphør er ikke tilgjengelig",
+                       HttpStatus.BAD_REQUEST)
+        }
         tilgangService.validerTilgangTilBehandling(behandlingId)
+        validerGyldigPeriodetype(vedtak)
         validerAlleVilkårOppfyltDersomInvilgelse(vedtak, behandlingId)
         val behandling = behandlingService.hentBehandling(behandlingId)
         return Ressurs.success(stegService.håndterBeregnYtelseForStønad(behandling, vedtak).id)
     }
 
-    private fun validerAlleVilkårOppfyltDersomInvilgelse(vedtak: VedtakDto,
-                                                         behandlingId: UUID) {
+    private fun validerGyldigPeriodetype(vedtak: VedtakDto) {
+        if (vedtak is Innvilget && vedtak.resultatType == ResultatType.INNVILGE) {
+            feilHvis(vedtak.perioder.any { it.periodeType == VedtaksperiodeType.MIDLERTIDIG_OPPHØR }) {
+                "Kan ikke ha opphørsperioder for et innvilget vedtak, velg Innvilge med opphør"
+            }
+        }
+    }
+
+    private fun validerAlleVilkårOppfyltDersomInvilgelse(vedtak: VedtakDto, behandlingId: UUID) {
         if (vedtak is Innvilget) {
             feilHvisIkke(vurderingService.erAlleVilkårOppfylt(behandlingId)) { "Kan ikke fullføre en behandling med resultat innvilget hvis ikke alle vilkår er oppfylt" }
         }

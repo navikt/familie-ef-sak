@@ -24,6 +24,7 @@ import no.nav.familie.ef.sak.vedtak.domain.Brevmottaker
 import no.nav.familie.ef.sak.vedtak.domain.BrevmottakereWrapper
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType.INNVILGE
+import no.nav.familie.ef.sak.vedtak.dto.ResultatType.INNVILGE_MED_OPPHØR
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -61,7 +62,7 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
 
     private fun validerRiktigTilstandVedInvilgelse(behandling: Behandling) {
         val vedtak = vedtakService.hentVedtak(behandling.id)
-        if (vedtak.resultatType == INNVILGE) {
+        if (vedtak.resultatType == INNVILGE || vedtak.resultatType == INNVILGE_MED_OPPHØR) {
             feilHvisIkke(vurderingService.erAlleVilkårOppfylt(behandling.id)) {
                 "Kan ikke innvilge hvis ikke alle vilkår er oppfylt for behandlingId: ${behandling.id}"
             }
