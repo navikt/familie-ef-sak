@@ -22,7 +22,7 @@ externalHosts:
   - unleash.nais.io
   - familie-oppdrag.dev-fss-pub.nais.io
   - familie-integrasjoner.dev-fss-pub.nais.io
-  - infotrygd-enslig-forsoerger.dev-fss-pub.nais.io
+  - familie-ef-infotrygd.dev-fss-pub.nais.io
   - familie-ef-proxy.dev-fss-pub.nais.io
 fssCluster: dev-fss
 tenant: trygdeetaten.no

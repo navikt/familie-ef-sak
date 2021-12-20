@@ -230,13 +230,15 @@ fun Vilkårsvurdering.tilIverksettDto(): VilkårsvurderingDto = Vilkårsvurderin
         }
 )
 
-fun PeriodeWrapper.tilIverksettDto(): List<VedtaksperiodeDto> = this.perioder.map {
-    VedtaksperiodeDto(fraOgMed = it.datoFra,
-                      tilOgMed = it.datoTil,
-                      aktivitet = AktivitetType.valueOf(it.aktivitet.name),
-                      periodeType = VedtaksperiodeType.valueOf(it.periodeType.name)
-    )
-}
+fun PeriodeWrapper.tilIverksettDto(): List<VedtaksperiodeDto> = this.perioder
+        .filter { it.periodeType != no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
+        .map {
+            VedtaksperiodeDto(fraOgMed = it.datoFra,
+                              tilOgMed = it.datoTil,
+                              aktivitet = AktivitetType.valueOf(it.aktivitet.name),
+                              periodeType = VedtaksperiodeType.valueOf(it.periodeType.name)
+            )
+        }
 
 fun MottakerRolle.tilIverksettDto(): Brevmottaker.MottakerRolle =
         when (this) {

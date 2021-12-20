@@ -18,6 +18,7 @@ import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Avslå
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
 import no.nav.familie.ef.sak.vedtak.dto.Opphør
+import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
 import org.springframework.stereotype.Service
@@ -42,6 +43,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
     }
 
     override fun utførSteg(behandling: Behandling, data: VedtakDto) {
+        validerGyldigeVedtaksperioder(behandling, data)
         val aktivIdent = fagsakService.fagsakMedOppdatertPersonIdent(behandling.fagsakId).hentAktivIdent()
         nullstillEksisterendeVedtakPåBehandling(behandling.id)
         vedtakService.lagreVedtak(vedtakDto = data, behandlingId = behandling.id)
@@ -60,6 +62,22 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                 tilbakekrevingService.slettTilbakekreving(behandling.id)
             }
         }
+    }
+
+    private fun validerGyldigeVedtaksperioder(behandling: Behandling, data: VedtakDto) {
+        if (data is Innvilget) {
+            val harOpphørsperioder = data.perioder.any { it.periodeType == VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
+            val harInnvilgedePerioder = data.perioder.any { it.periodeType != VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
+            feilHvis(harOpphørsperioder && !harInnvilgedePerioder) {
+                "Må ha innvilgelsesperioder i tillegg til opphørsperioder"
+            }
+        }
+        if (data is Innvilget && data.resultatType == ResultatType.INNVILGE_MED_OPPHØR) {
+            feilHvis(behandling.type != BehandlingType.REVURDERING) {
+                "For å innvilge med opphørsperioder må behandlingen være en revurdering"
+            }
+        }
+
     }
 
     private fun nullstillEksisterendeVedtakPåBehandling(behandlingId: UUID) {

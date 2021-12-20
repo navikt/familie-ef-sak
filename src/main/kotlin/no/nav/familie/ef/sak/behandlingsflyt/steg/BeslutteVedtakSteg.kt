@@ -86,7 +86,7 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
     fun oppdaterResultatPåBehandling(behandlingId: UUID) {
         val vedtak = vedtakService.hentVedtak(behandlingId)
         when (vedtak.resultatType) {
-            ResultatType.INNVILGE -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.INNVILGET)
+            ResultatType.INNVILGE, ResultatType.INNVILGE_MED_OPPHØR -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.INNVILGET)
             ResultatType.OPPHØRT -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.OPPHØRT)
             ResultatType.AVSLÅ -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.AVSLÅTT)
             else -> error("Støtter ikke resultattypen=${vedtak.resultatType}")
