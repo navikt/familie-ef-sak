@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkRepository
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
+import no.nav.familie.ef.sak.behandlingshistorikk.dto.HendelseshistorikkDto
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.repository.behandling
@@ -37,7 +38,7 @@ internal class BehandlingshistorikkServiceTest : OppslagSpringRunnerTest() {
                                                                            opprettetAv = SikkerhetContext.hentSaksbehandler()))
 
         /** Hent */
-        val innslag: Behandlingshistorikk = behandlingshistorikkService.finnHendelseshistorikk(behandling.id)[0]
+        val innslag: HendelseshistorikkDto = behandlingshistorikkService.finnHendelseshistorikk(behandling.id)[0]
 
         assertThat(innslag).isEqualTo(behandlingHistorikk)
     }
