@@ -26,24 +26,6 @@ internal class BehandlingshistorikkServiceTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var fagsakRepository: FagsakRepository
 
     @Test
-    fun `lagre og hent behandling, forvent likhet`() {
-
-        /** Lagre */
-        val fagsak = fagsakRepository.insert(fagsak())
-        val behandling = behandlingRepository.insert(behandling(fagsak))
-        val behandlingHistorikk =
-                behandlingshistorikkRepository.insert(Behandlingshistorikk(behandlingId = behandling.id,
-                                                                           steg = behandling.steg,
-                                                                           opprettetAvNavn = "Saksbehandlernavn",
-                                                                           opprettetAv = SikkerhetContext.hentSaksbehandler()))
-
-        /** Hent */
-        val innslag: HendelseshistorikkDto = behandlingshistorikkService.finnHendelseshistorikk(behandling.id)[0]
-
-        assertThat(innslag).isEqualTo(behandlingHistorikk)
-    }
-
-    @Test
     internal fun `finn seneste behandlinghistorikk`() {
         val fagsak = fagsakRepository.insert(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))

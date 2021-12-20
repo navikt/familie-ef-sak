@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkRepository
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.behandlingshistorikk.dto.BehandlingshistorikkDto
+import no.nav.familie.ef.sak.behandlingshistorikk.dto.HendelseshistorikkDto
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.felles.domain.JsonWrapper
@@ -57,7 +58,7 @@ internal class BehandlingshistorikkControllerTest : OppslagSpringRunnerTest() {
         leggInnHistorikk(behandling, "3", LocalDateTime.now().plusDays(1))
 
         val respons = hentHistorikk(behandling.id)
-        assertThat(respons.body.data!!.map { it.endretAv }).containsExactly("3", "1", "2")
+        assertThat(respons.body?.data!!.map { it.endretAvNavn }).containsExactly("3", "1", "2")
     }
 
     @Test
@@ -79,10 +80,11 @@ internal class BehandlingshistorikkControllerTest : OppslagSpringRunnerTest() {
         behandlingshistorikkRepository.insert(Behandlingshistorikk(behandlingId = behandling.id,
                                                                    steg = behandling.steg,
                                                                    opprettetAv = opprettetAv,
+                                                                   opprettetAvNavn= opprettetAv,
                                                                    endretTid = endretTid))
     }
 
-    private fun hentHistorikk(id: UUID): ResponseEntity<Ressurs<List<BehandlingshistorikkDto>>> {
+    private fun hentHistorikk(id: UUID): ResponseEntity<Ressurs<List<HendelseshistorikkDto>>> {
         return restTemplate.exchange(localhost("/api/behandlingshistorikk/$id"),
                                      HttpMethod.GET,
                                      HttpEntity<Ressurs<List<BehandlingshistorikkDto>>>(headers))
