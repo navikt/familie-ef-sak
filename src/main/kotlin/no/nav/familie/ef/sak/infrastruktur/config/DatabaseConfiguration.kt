@@ -9,7 +9,9 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdat
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Arbeidssituasjon
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Dokumentasjon
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.GjelderDeg
-import no.nav.familie.ef.sak.behandling.domain.Brevmottakere
+import no.nav.familie.ef.sak.brev.domain.Brevmottakere
+import no.nav.familie.ef.sak.brev.domain.OrganisasjonerWrapper
+import no.nav.familie.ef.sak.brev.domain.PersonerWrapper
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.vilkår.DelvilkårsvurderingWrapper
@@ -114,8 +116,10 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
                                             BeriketSimuleringsresultatTilPGobjectConverter(),
                                             PGObjectTilFritekstbrevConverter(),
                                             FritekstbrevTilPGObjectConverter(),
-                                            PGobjectTilBrevmottakere(),
-                                            BrevmottakereTilPGobjectConverter()
+                                            PGobjectTilBrevmottakerPersoner(),
+                                            BrevmottakerePersonerTilPGobjectConverter(),
+                                            PGobjectTilBrevmottakerOrganisasjoner(),
+                                            BrevmottakereOrganisasjonerTilPGobjectConverter(),
         ))
     }
 
@@ -369,17 +373,36 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
     }
 
     @ReadingConverter
-    class PGobjectTilBrevmottakere : Converter<PGobject, Brevmottakere> {
+    class PGobjectTilBrevmottakerPersoner : Converter<PGobject, PersonerWrapper> {
 
-        override fun convert(pGobject: PGobject): Brevmottakere? {
+        override fun convert(pGobject: PGobject): PersonerWrapper? {
             return pGobject.value?.let { objectMapper.readValue(it) }
         }
     }
 
     @WritingConverter
-    class BrevmottakereTilPGobjectConverter : Converter<Brevmottakere, PGobject> {
+    class BrevmottakerePersonerTilPGobjectConverter : Converter<PersonerWrapper, PGobject> {
 
-        override fun convert(mottakere: Brevmottakere): PGobject =
+        override fun convert(mottakere: PersonerWrapper): PGobject =
+                PGobject().apply {
+                    type = "json"
+                    value = objectMapper.writeValueAsString(mottakere)
+                }
+
+    }
+
+    @ReadingConverter
+    class PGobjectTilBrevmottakerOrganisasjoner : Converter<PGobject, OrganisasjonerWrapper> {
+
+        override fun convert(pGobject: PGobject): OrganisasjonerWrapper? {
+            return pGobject.value?.let { objectMapper.readValue(it) }
+        }
+    }
+
+    @WritingConverter
+    class BrevmottakereOrganisasjonerTilPGobjectConverter : Converter<OrganisasjonerWrapper, PGobject> {
+
+        override fun convert(mottakere: OrganisasjonerWrapper): PGobject =
                 PGobject().apply {
                     type = "json"
                     value = objectMapper.writeValueAsString(mottakere)

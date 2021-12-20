@@ -37,8 +37,7 @@ data class Behandling(@Id
                       val sporbar: Sporbar = Sporbar(),
                       val resultat: BehandlingResultat,
                       @Column("henlagt_arsak")
-                      val henlagtÅrsak: HenlagtÅrsak? = null,
-                      val brevmottakere: Brevmottakere? = null) {
+                      val henlagtÅrsak: HenlagtÅrsak? = null) {
 
     fun kanHenlegges(): Boolean = !status.behandlingErLåstForVidereRedigering()
 
@@ -82,15 +81,3 @@ enum class BehandlingStatus {
             setOf(FATTER_VEDTAK, IVERKSETTER_VEDTAK, FERDIGSTILT).contains(this)
 }
 
-data class Brevmottakere(val personer: List<BrevmottakerPerson>, val organisasjoner: List<BrevmottakerOrganisasjon>) {
-    enum class MottakerRolle {
-        BRUKER,
-        VERGE,
-        FULLMAKT
-    }
-
-    data class BrevmottakerPerson(val personIdent: String, val navn: String, val mottakerRolle: MottakerRolle)
-    data class BrevmottakerOrganisasjon(val organisasjonsnummer: String,
-                                        val navnHosOrganisasjon: String,
-                                        val mottakerRolle: MottakerRolle)
-}

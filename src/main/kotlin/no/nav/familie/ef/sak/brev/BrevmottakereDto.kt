@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.brev
 
-import no.nav.familie.ef.sak.behandling.domain.Brevmottakere
+import no.nav.familie.ef.sak.brev.domain.BrevmottakerOrganisasjon
+import no.nav.familie.ef.sak.brev.domain.BrevmottakerPerson
 
-data class BrevmottakereDto(val personer: List<Brevmottakere.BrevmottakerPerson>,
-                            val organisasjoner: List<Brevmottakere.BrevmottakerOrganisasjon>)
+data class BrevmottakereDto(val personer: List<BrevmottakerPerson>,
+                            val organisasjoner: List<BrevmottakerOrganisasjon>)

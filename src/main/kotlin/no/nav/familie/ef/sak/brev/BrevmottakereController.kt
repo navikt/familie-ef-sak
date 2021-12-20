@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.brev
 
-import no.nav.familie.ef.sak.behandling.domain.Brevmottakere
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims

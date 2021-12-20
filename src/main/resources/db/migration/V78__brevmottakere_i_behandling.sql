@@ -1,5 +1,8 @@
 ALTER TABLE vedtak
     DROP COLUMN brevmottakere;
 
-ALTER TABLE behandling
-    ADD COLUMN brevmottakere json;
+CREATE TABLE brevmottakere (
+    behandling_id  UUID PRIMARY KEY REFERENCES behandling (id),
+    personer       JSON,
+    organisasjoner JSON
+);
