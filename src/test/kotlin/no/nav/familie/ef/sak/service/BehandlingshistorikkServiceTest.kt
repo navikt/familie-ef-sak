@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkRepository
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
+import no.nav.familie.ef.sak.behandlingshistorikk.domain.tilHendelseshistorikkDto
 import no.nav.familie.ef.sak.behandlingshistorikk.dto.HendelseshistorikkDto
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
@@ -24,6 +25,26 @@ internal class BehandlingshistorikkServiceTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
     @Autowired private lateinit var behandlingshistorikkRepository: BehandlingshistorikkRepository
     @Autowired private lateinit var fagsakRepository: FagsakRepository
+
+    @Test
+    fun `lagre behandling og hent historikk`() {
+
+        /** Lagre */
+        val fagsak = fagsakRepository.insert(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak))
+        val behandlingHistorikk =
+                behandlingshistorikkRepository.insert(Behandlingshistorikk(behandlingId = behandling.id,
+                                                                           steg = behandling.steg,
+                                                                           opprettetAvNavn = "Saksbehandlernavn",
+                                                                           opprettetAv = SikkerhetContext.hentSaksbehandler()))
+        val hendelseshistorikkDto = behandlingHistorikk.tilHendelseshistorikkDto()
+
+
+        /** Hent */
+        val innslag: HendelseshistorikkDto = behandlingshistorikkService.finnHendelseshistorikk(behandling.id)[0]
+
+        assertThat(innslag).isEqualTo(hendelseshistorikkDto)
+    }
 
     @Test
     internal fun `finn seneste behandlinghistorikk`() {
