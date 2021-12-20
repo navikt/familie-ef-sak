@@ -2,7 +2,7 @@
 App for saksbehandling av stønadene for enslige forsørgere.
 
 ## Swagger
-http://localhost:8093/swagger-ui/index.html
+http://localhost:8093/swagger-ui.html
 
 ## Bygging lokalt
 Appen kjører på JRE 11. Bygging gjøres ved å kjøre `mvn clean install`. 
