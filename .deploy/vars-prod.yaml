@@ -18,7 +18,7 @@ externalHosts:
   - unleash.nais.io
   - familie-oppdrag.prod-fss-pub.nais.io
   - familie-integrasjoner.prod-fss-pub.nais.io
-  - infotrygd-enslig-forsoerger.prod-fss-pub.nais.io
+  - familie-ef-infotrygd.prod-fss-pub.nais.io
   - familie-ef-proxy.prod-fss-pub.nais.io
 fssCluster: prod-fss
 

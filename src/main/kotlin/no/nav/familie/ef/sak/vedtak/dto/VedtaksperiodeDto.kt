@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.vedtak.dto
 
-import no.nav.familie.ef.sak.beregning.ÅrMånedPeriode
 import no.nav.familie.ef.sak.felles.dto.Periode
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
@@ -19,10 +18,6 @@ fun List<VedtaksperiodeDto>.tilPerioder(): List<Periode> =
             Periode(fradato = it.årMånedFra.atDay(1),
                     tildato = it.årMånedTil.atEndOfMonth())
         }
-
-fun ÅrMånedPeriode.tilPerioder(): Periode =
-        Periode(fradato = this.årMånedFra.atDay(1),
-                tildato = this.årMånedTil.atEndOfMonth())
 
 
 fun List<VedtaksperiodeDto>.tilDomene(): List<Vedtaksperiode> =

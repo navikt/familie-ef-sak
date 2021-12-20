@@ -19,7 +19,7 @@ object VedtakHistorikkBeregner {
 
     private fun lagTotalbildeForNyttVedtak(vedtak: Vedtak,
                                            acc: List<Pair<UUID, List<Vedtaksperiode>>>): List<Vedtaksperiode> {
-        return if (vedtak.resultatType == ResultatType.INNVILGE) {
+        return if (vedtak.resultatType == ResultatType.INNVILGE || vedtak.resultatType == ResultatType.INNVILGE_MED_OPPHØR) {
             val nyePerioder = vedtak.perioder?.perioder ?: error("Finner ikke perioder på vedtak=${vedtak.behandlingId}")
             val førsteFraDato = nyePerioder.first().datoFra
             avkortTidligerePerioder(acc.lastOrNull(), førsteFraDato) + nyePerioder

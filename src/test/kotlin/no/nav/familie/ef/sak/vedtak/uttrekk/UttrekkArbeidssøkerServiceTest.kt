@@ -33,6 +33,7 @@ import no.nav.familie.ef.sak.vedtak.domain.AktivitetType.BARNET_ER_SYKT
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID_REELL_ARBEIDSSØKER
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
+import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -401,7 +402,8 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
     private fun innvilg(behandling: Behandling,
                         vedtaksperioder: List<VedtaksperiodeDto>,
                         inntekter: List<Inntekt> = listOf(Inntekt(vedtaksperioder.first().årMånedFra, null, null))) {
-        val vedtak = Innvilget(perioder = vedtaksperioder,
+        val vedtak = Innvilget(resultatType = ResultatType.INNVILGE,
+                               perioder = vedtaksperioder,
                                inntekter = inntekter,
                                periodeBegrunnelse = null,
                                inntektBegrunnelse = null)
