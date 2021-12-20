@@ -12,7 +12,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlAnnenForelde
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonKort
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlSøker
-import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 
 
@@ -21,7 +20,6 @@ class GrunnlagsdataRegisterService(private val pdlClient: PdlClient,
                                    private val personopplysningerIntegrasjonerClient: PersonopplysningerIntegrasjonerClient,
                                    private val infotrygdService: InfotrygdService) {
 
-    @Cacheable("registergrunnlag", cacheManager = "shortCache")
     fun hentGrunnlagsdataFraRegister(personIdent: String,
                                      barneforeldreFraSøknad: List<String>): GrunnlagsdataDomene {
         val pdlSøker = pdlClient.hentSøker(personIdent)
