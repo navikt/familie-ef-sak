@@ -6,7 +6,6 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.beregning.Beløpsperiode
 import no.nav.familie.ef.sak.beregning.BeregningService
@@ -44,7 +43,6 @@ import java.util.UUID
 internal class BeregnYtelseStegTest {
 
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>(relaxed = true)
-    private val behandlingService = mockk<BehandlingService>()
     private val beregningService = mockk<BeregningService>()
     private val vedtakService = mockk<VedtakService>(relaxed = true)
     private val simuleringService = mockk<SimuleringService>()
@@ -52,7 +50,6 @@ internal class BeregnYtelseStegTest {
     private val fagsakService = mockk<FagsakService>(relaxed = true)
 
     private val steg = BeregnYtelseSteg(tilkjentYtelseService,
-                                        behandlingService,
                                         beregningService,
                                         simuleringService,
                                         vedtakService,
@@ -61,7 +58,6 @@ internal class BeregnYtelseStegTest {
 
     @BeforeEach
     internal fun setUp() {
-        every { behandlingService.hentAktivIdent(any()) } returns "123"
         every { fagsakService.fagsakMedOppdatertPersonIdent(any()) } returns fagsak(fagsakpersoner(setOf("123")))
         every { simuleringService.hentOgLagreSimuleringsresultat(any()) }
                 .returns(Simuleringsresultat(behandlingId = UUID.randomUUID(),
@@ -594,6 +590,44 @@ internal class BeregnYtelseStegTest {
             assertThat(nyeAndeler[0].stønadTom).isEqualTo(opphør1.fradato.minusDays(1))
             assertThat(nyeAndeler[0].beløp).isEqualTo(200)
             assertThat(nyeAndeler[0].kildeBehandlingId).isEqualTo(forrigeAndeler[0].kildeBehandlingId)
+
+        }
+
+
+        @Test
+        fun `takler opphold som dekker flere perioder`() {
+            val forrigeAndelFom1 = LocalDate.of(2021, 1, 1)
+            val forrigeAndelTom1 = LocalDate.of(2021, 12, 31)
+            val opphør1 = Periode(LocalDate.of(2021, 3, 1), LocalDate.of(2021, 6, 30))
+            val opphør2 = Periode(LocalDate.of(2021, 8, 1), LocalDate.of(2021, 11, 30))
+            val opphørsperioder = listOf(opphør2,opphør1)
+            val forrigeAndeler = listOf(lagAndelTilkjentYtelse(200, forrigeAndelFom1, forrigeAndelTom1))
+
+            val nyeAndeler = steg.slåSammenAndelerSomSkalVidereføres(listOf(), lagTilkjentYtelse(forrigeAndeler), opphørsperioder)
+
+            assertThat(nyeAndeler).hasSize(3)
+            assertThat(nyeAndeler[0].stønadFom).isEqualTo(LocalDate.of(2021, 1, 1))
+            assertThat(nyeAndeler[0].stønadTom).isEqualTo(LocalDate.of(2021, 2, 28))
+            assertThat(nyeAndeler[1].stønadFom).isEqualTo(LocalDate.of(2021, 7, 1))
+            assertThat(nyeAndeler[1].stønadTom).isEqualTo(LocalDate.of(2021, 7, 31))
+            assertThat(nyeAndeler[2].stønadFom).isEqualTo(LocalDate.of(2021, 12, 1))
+            assertThat(nyeAndeler[2].stønadTom).isEqualTo(LocalDate.of(2021, 12, 31))
+
+        }
+
+
+        @Test
+        fun `takler to opphørsperioder som i praksis omslutter hele andelen`() {
+            val forrigeAndelFom1 = LocalDate.of(2021, 1, 1)
+            val forrigeAndelTom1 = LocalDate.of(2021, 12, 31)
+            val opphør1 = Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 6, 30))
+            val opphør2 = Periode(LocalDate.of(2021, 7, 1), LocalDate.of(2021, 12, 31))
+            val opphørsperioder = listOf(opphør1, opphør2)
+            val forrigeAndeler = listOf(lagAndelTilkjentYtelse(200, forrigeAndelFom1, forrigeAndelTom1))
+
+            val nyeAndeler = steg.slåSammenAndelerSomSkalVidereføres(listOf(), lagTilkjentYtelse(forrigeAndeler), opphørsperioder)
+
+            assertThat(nyeAndeler).hasSize(0)
 
         }
     }
