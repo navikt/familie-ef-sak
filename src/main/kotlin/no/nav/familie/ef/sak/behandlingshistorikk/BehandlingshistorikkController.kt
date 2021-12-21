@@ -1,7 +1,5 @@
 package no.nav.familie.ef.sak.behandlingshistorikk
 
-import no.nav.familie.ef.sak.behandlingshistorikk.domain.tilDto
-import no.nav.familie.ef.sak.behandlingshistorikk.dto.BehandlingshistorikkDto
 import no.nav.familie.ef.sak.behandlingshistorikk.dto.HendelseshistorikkDto
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
