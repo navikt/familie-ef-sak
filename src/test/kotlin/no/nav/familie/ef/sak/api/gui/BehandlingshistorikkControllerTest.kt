@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.api.gui
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkRepository
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.behandlingshistorikk.dto.BehandlingshistorikkDto
@@ -49,7 +50,7 @@ internal class BehandlingshistorikkControllerTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `skal returnere sortert historikk, sist opprettet først`() {
+    internal fun `skal kun returnere den første hendelsen av typen OPPRETTET - etterfølgende hendelser av denne typen skal lukes vekk`() {
         val fagsak = fagsakRepository.insert(fagsak(identer = setOf(FagsakPerson(""))))
         val behandling = behandlingRepository.insert(behandling(fagsak))
 
@@ -59,6 +60,25 @@ internal class BehandlingshistorikkControllerTest : OppslagSpringRunnerTest() {
 
         val respons = hentHistorikk(behandling.id)
         assertThat(respons.body?.data!!.map { it.endretAvNavn }).containsExactly("2")
+    }
+
+    @Test
+    internal fun `skal returnere hendelser av alle typer i riktig rekkefølge `() {
+        val fagsak = fagsakRepository.insert(fagsak(identer = setOf(FagsakPerson(""))))
+        val behandling = behandlingRepository.insert(behandling(fagsak))
+
+        leggInnHistorikk(behandling, "1", LocalDateTime.now(), StegType.VILKÅR)
+        leggInnHistorikk(behandling, "2", LocalDateTime.now().plusDays(1), StegType.BEREGNE_YTELSE)
+        leggInnHistorikk(behandling, "3", LocalDateTime.now().plusDays(2), StegType.SEND_TIL_BESLUTTER)
+        leggInnHistorikk(behandling, "4", LocalDateTime.now().plusDays(3), StegType.BESLUTTE_VEDTAK)
+        leggInnHistorikk(behandling, "5", LocalDateTime.now().plusDays(4), StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT)
+        leggInnHistorikk(behandling, "6", LocalDateTime.now().plusDays(5), StegType.LAG_SAKSBEHANDLINGSBLANKETT)
+        leggInnHistorikk(behandling, "7", LocalDateTime.now().plusDays(6), StegType.FERDIGSTILLE_BEHANDLING)
+        leggInnHistorikk(behandling, "8", LocalDateTime.now().plusDays(7), StegType.PUBLISER_VEDTAKSHENDELSE)
+        leggInnHistorikk(behandling, "9", LocalDateTime.now().plusDays(8), StegType.BEHANDLING_FERDIGSTILT)
+
+        val respons = hentHistorikk(behandling.id)
+        assertThat(respons.body?.data!!.map { it.endretAvNavn }).containsExactly("9", "4","3","1")
     }
 
     @Test
@@ -76,9 +96,9 @@ internal class BehandlingshistorikkControllerTest : OppslagSpringRunnerTest() {
         assertThat(respons.body.data!!.first().metadata).isEqualTo(jsonMap)
     }
 
-    private fun leggInnHistorikk(behandling: Behandling, opprettetAv: String, endretTid: LocalDateTime) {
+    private fun leggInnHistorikk(behandling: Behandling, opprettetAv: String, endretTid: LocalDateTime, steg: StegType? = null) {
         behandlingshistorikkRepository.insert(Behandlingshistorikk(behandlingId = behandling.id,
-                                                                   steg = behandling.steg,
+                                                                   steg = steg ?: behandling.steg,
                                                                    opprettetAv = opprettetAv,
                                                                    opprettetAvNavn= opprettetAv,
                                                                    endretTid = endretTid))
