@@ -114,7 +114,7 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
                             bosattINorge = false,
                             land = "Sverige",
                             personMinimum = TestsøknadBuilder.Builder()
-                                    .defaultPersonMinimum("Bob Burger", fødselsnummer = "29064227244"),
+                                    .defaultPersonMinimum("Bob Burger", LocalDate.of(1979, 9, 17)),
                     ),
                     samvær = TestsøknadBuilder.Builder().defaultSamvær(
                             beskrivSamværUtenBarn = "Har sjelden sett noe til han",
