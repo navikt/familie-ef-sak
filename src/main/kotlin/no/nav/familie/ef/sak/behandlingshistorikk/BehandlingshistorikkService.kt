@@ -16,11 +16,11 @@ import java.util.UUID
 class BehandlingshistorikkService(private val behandlingshistorikkRepository: BehandlingshistorikkRepository) {
 
     fun finnHendelseshistorikk(behandlingId: UUID): List<HendelseshistorikkDto> {
-        return behandlingshistorikkRepository.findByBehandlingIdOrderByEndretTidDesc(behandlingId).map {
+        return behandlingshistorikkRepository.findByBehandlingIdOrderByEndretTidAsc(behandlingId).map {
             it.tilHendelseshistorikkDto()
         }.filter {
             it.hendelse != Hendelse.UKJENT
-        }
+        }.distinctBy { it.hendelse == Hendelse.OPPRETTET }.sortedByDescending { it.endretTid }
     }
 
     fun finnSisteBehandlingshistorikk(behandlingId: UUID): Behandlingshistorikk {
