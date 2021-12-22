@@ -86,7 +86,7 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
         val forrigeBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
         validerKanOppretteNyBehandling(behandlingType, tidligereBehandlinger, forrigeBehandling)
 
-        return behandlingRepository.insert(Behandling(fagsakId = fagsakId,
+        val behandling = behandlingRepository.insert(Behandling(fagsakId = fagsakId,
                                                       forrigeBehandlingId = forrigeBehandling?.id,
                                                       type = behandlingType,
                                                       steg = stegType,
@@ -94,6 +94,10 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
                                                       resultat = BehandlingResultat.IKKE_SATT,
                                                       årsak = behandlingsårsak,
                                                       kravMottatt = kravMottatt))
+
+        behandlingshistorikkService.opprettHistorikkInnslag(behandling)
+
+        return behandling
     }
 
     fun hentBehandling(behandlingId: UUID): Behandling = behandlingRepository.findByIdOrThrow(behandlingId)

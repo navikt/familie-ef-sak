@@ -13,6 +13,8 @@ interface BehandlingshistorikkRepository : RepositoryInterface<Behandlingshistor
 
     fun findByBehandlingIdOrderByEndretTidDesc(behandlingId: UUID): List<Behandlingshistorikk>
 
+    fun findByBehandlingIdOrderByEndretTidAsc(behandlingId: UUID): List<Behandlingshistorikk>
+
     fun findTopByBehandlingIdOrderByEndretTidDesc(behandlingId: UUID): Behandlingshistorikk
 
     fun findTopByBehandlingIdAndStegOrderByEndretTidDesc(behandlingId: UUID, steg: StegType): Behandlingshistorikk?
