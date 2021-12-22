@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkRepository
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
+import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
 import no.nav.familie.ef.sak.behandlingshistorikk.dto.BehandlingshistorikkDto
 import no.nav.familie.ef.sak.behandlingshistorikk.dto.HendelseshistorikkDto
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
@@ -54,9 +55,9 @@ internal class BehandlingshistorikkControllerTest : OppslagSpringRunnerTest() {
         val fagsak = fagsakRepository.insert(fagsak(identer = setOf(FagsakPerson(""))))
         val behandling = behandlingRepository.insert(behandling(fagsak))
 
-        leggInnHistorikk(behandling, "1", LocalDateTime.now())
-        leggInnHistorikk(behandling, "2", LocalDateTime.now().minusDays(1))
-        leggInnHistorikk(behandling, "3", LocalDateTime.now().plusDays(1))
+        leggInnHistorikk(behandling, "1", LocalDateTime.now(), StegType.VILKÅR)
+        leggInnHistorikk(behandling, "2", LocalDateTime.now().minusDays(1), StegType.VILKÅR)
+        leggInnHistorikk(behandling, "3", LocalDateTime.now().plusDays(1), StegType.VILKÅR)
 
         val respons = hentHistorikk(behandling.id)
         assertThat(respons.body?.data!!.map { it.endretAvNavn }).containsExactly("2")
@@ -78,7 +79,31 @@ internal class BehandlingshistorikkControllerTest : OppslagSpringRunnerTest() {
         leggInnHistorikk(behandling, "9", LocalDateTime.now().plusDays(8), StegType.BEHANDLING_FERDIGSTILT)
 
         val respons = hentHistorikk(behandling.id)
-        assertThat(respons.body?.data!!.map { it.endretAvNavn }).containsExactly("9", "4","3","1")
+        assertThat(respons.body?.data!!.map { it.endretAvNavn }).containsExactly("9", "4", "3", "1")
+    }
+
+    @Test
+    internal fun `skal returnere alle hendelser dersom en behandling blir underkjent i totrinnskontroll, deretter sendt til beslutter på nytt og deretter godkjent`() {
+        val fagsak = fagsakRepository.insert(fagsak(identer = setOf(FagsakPerson(""))))
+        val behandling = behandlingRepository.insert(behandling(fagsak))
+
+        leggInnHistorikk(behandling, "1", LocalDateTime.now(), StegType.VILKÅR)
+        leggInnHistorikk(behandling, "2", LocalDateTime.now().plusDays(1), StegType.BEREGNE_YTELSE)
+        leggInnHistorikk(behandling, "3", LocalDateTime.now().plusDays(2), StegType.SEND_TIL_BESLUTTER)
+        leggInnHistorikk(behandling,
+                         "4",
+                         LocalDateTime.now().plusDays(3),
+                         StegType.BESLUTTE_VEDTAK,
+                         stegUtfall = StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT)
+        leggInnHistorikk(behandling, "5", LocalDateTime.now().plusDays(4), StegType.SEND_TIL_BESLUTTER)
+        leggInnHistorikk(behandling,
+                         "6",
+                         LocalDateTime.now().plusDays(5),
+                         StegType.BESLUTTE_VEDTAK,
+                         stegUtfall = StegUtfall.BESLUTTE_VEDTAK_GODKJENT)
+
+        val respons = hentHistorikk(behandling.id)
+        assertThat(respons.body?.data!!.map { it.endretAvNavn }).containsExactly("6","5","4", "3", "1")
     }
 
     @Test
@@ -96,11 +121,16 @@ internal class BehandlingshistorikkControllerTest : OppslagSpringRunnerTest() {
         assertThat(respons.body.data!!.first().metadata).isEqualTo(jsonMap)
     }
 
-    private fun leggInnHistorikk(behandling: Behandling, opprettetAv: String, endretTid: LocalDateTime, steg: StegType? = null) {
+    private fun leggInnHistorikk(behandling: Behandling,
+                                 opprettetAv: String,
+                                 endretTid: LocalDateTime,
+                                 steg: StegType? = null,
+                                 stegUtfall: StegUtfall? = null) {
         behandlingshistorikkRepository.insert(Behandlingshistorikk(behandlingId = behandling.id,
                                                                    steg = steg ?: behandling.steg,
+                                                                   utfall = stegUtfall,
                                                                    opprettetAv = opprettetAv,
-                                                                   opprettetAvNavn= opprettetAv,
+                                                                   opprettetAvNavn = opprettetAv,
                                                                    endretTid = endretTid))
     }
 
