@@ -21,7 +21,9 @@ class BehandlingshistorikkService(private val behandlingshistorikkRepository: Be
         }.filter {
             it.hendelse != Hendelse.UKJENT
         }.partition { it.hendelse == Hendelse.OPPRETTET }
-        return  andreHendelser + hendelserOpprettet.last()
+        val sisteOpprettetHendelse = hendelserOpprettet.lastOrNull()
+        return if (sisteOpprettetHendelse != null) andreHendelser + sisteOpprettetHendelse
+        else andreHendelser
     }
 
     fun finnSisteBehandlingshistorikk(behandlingId: UUID): Behandlingshistorikk {
