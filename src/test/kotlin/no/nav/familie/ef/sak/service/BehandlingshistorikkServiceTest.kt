@@ -47,6 +47,20 @@ internal class BehandlingshistorikkServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    fun `Finn hendelseshistorikk på behandling uten historikk`() {
+
+        /** Lagre */
+        val fagsak = fagsakRepository.insert(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak))
+
+        /** Hent */
+        val list = behandlingshistorikkService.finnHendelseshistorikk(behandling.id)
+
+        assertThat(list.isEmpty()).isTrue
+    }
+
+
+    @Test
     internal fun `finn seneste behandlinghistorikk`() {
         val fagsak = fagsakRepository.insert(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
