@@ -82,7 +82,7 @@ class UttrekkArbeidssøkerService(
         return aktiveIdenter.entries.associate { entry ->
             val perioder = arbeidssøkerClient.hentPerioder(entry.value, sisteIMåneden, sisteIMåneden).perioder
             val arbeidssøkerISluttetPåMåneden =
-                    perioder.any { it.fraOgMedDato <= sisteIMåneden && it.tilOgMedDato >= sisteIMåneden }
+                    perioder.any { it.fraOgMedDato <= sisteIMåneden && (it.tilOgMedDato == null || it.tilOgMedDato >= sisteIMåneden) }
             entry.key to arbeidssøkerISluttetPåMåneden
         }
     }
