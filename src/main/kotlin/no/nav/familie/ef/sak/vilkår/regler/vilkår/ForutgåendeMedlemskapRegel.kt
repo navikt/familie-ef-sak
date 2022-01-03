@@ -31,7 +31,7 @@ class ForutgåendeMedlemskapRegel : Vilkårsregel(vilkårType = VilkårType.FORU
 
         private val SØKER_MEDLEM_I_FOLKETRYGDEN =
                 RegelSteg(regelId = RegelId.SØKER_MEDLEM_I_FOLKETRYGDEN,
-                          svarMapping = jaNeiSvarRegel(hvisJa = SluttSvarRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
+                          svarMapping = jaNeiSvarRegel(hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
                                                        hvisNei = NesteRegel(MEDLEMSKAP_UNNTAK.regelId)))
     }
 
