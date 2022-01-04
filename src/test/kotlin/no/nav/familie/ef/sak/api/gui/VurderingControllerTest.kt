@@ -147,7 +147,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
                              behandlingId = it.behandlingId,
                              delvilkårsvurderinger = it.delvilkårsvurderinger.map {
                                  it.copy(vurderinger = it.vurderinger.map { vurderingDto ->
-                                     vurderingDto.copy(svar = SvarId.JA)
+                                     vurderingDto.copy(svar = SvarId.JA, begrunnelse = "En begrunnelse")
                                  })
                              })
 
