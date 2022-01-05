@@ -19,6 +19,7 @@ class FeatureToggleController(private val featureToggleService: FeatureToggleSer
                                           "familie.ef.sak.frontend-vis-ikke-publiserte-brevmaler",
                                           "familie.ef.sak.frontend-vis-oppdatering-av-registeropplysninger",
                                           "familie.ef.sak.innvilge-med-opphoer",
+                                          "familie.ef.sak.brevmottakere-verge-og-fullmakt",
                                           "familie.ef.sak.endringslogg")
 
     @GetMapping
