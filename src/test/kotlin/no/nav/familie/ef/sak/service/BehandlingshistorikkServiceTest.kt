@@ -37,11 +37,11 @@ internal class BehandlingshistorikkServiceTest : OppslagSpringRunnerTest() {
                                                                            steg = behandling.steg,
                                                                            opprettetAvNavn = "Saksbehandlernavn",
                                                                            opprettetAv = SikkerhetContext.hentSaksbehandler()))
-        val hendelseshistorikkDto = behandlingHistorikk.tilHendelseshistorikkDto()
+        val hendelseshistorikkDto = behandlingHistorikk.tilHendelseshistorikkDto(behandling)
 
 
         /** Hent */
-        val innslag: HendelseshistorikkDto = behandlingshistorikkService.finnHendelseshistorikk(behandling.id)[0]
+        val innslag: HendelseshistorikkDto = behandlingshistorikkService.finnHendelseshistorikk(behandling)[0]
 
         assertThat(innslag).isEqualTo(hendelseshistorikkDto)
     }
@@ -54,7 +54,7 @@ internal class BehandlingshistorikkServiceTest : OppslagSpringRunnerTest() {
         val behandling = behandlingRepository.insert(behandling(fagsak))
 
         /** Hent */
-        val list = behandlingshistorikkService.finnHendelseshistorikk(behandling.id)
+        val list = behandlingshistorikkService.finnHendelseshistorikk(behandling)
 
         assertThat(list.isEmpty()).isTrue
     }

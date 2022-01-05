@@ -37,13 +37,6 @@ class BehandlingshistorikkService(private val behandlingshistorikkRepository: Be
         behandlingshistorikkRepository.insert(behandlingshistorikk)
     }
 
-    fun opprettHistorikkInnslag(behandling: Behandling) {
-        behandlingshistorikkRepository.insert(Behandlingshistorikk(
-                behandlingId = behandling.id,
-                steg = behandling.steg,
-        ))
-    }
-
     /**
      * @param metadata json object that will be serialized
      */
