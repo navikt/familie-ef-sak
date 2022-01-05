@@ -1,6 +1,8 @@
 package no.nav.familie.ef.sak.behandlingshistorikk.domain
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingshistorikk.dto.BehandlingshistorikkDto
 import no.nav.familie.ef.sak.behandlingshistorikk.dto.Hendelse
@@ -37,16 +39,25 @@ fun Behandlingshistorikk.tilDto(): BehandlingshistorikkDto {
     )
 }
 
-fun Behandlingshistorikk.tilHendelseshistorikkDto(): HendelseshistorikkDto {
+fun Behandlingshistorikk.tilHendelseshistorikkDto(behandling: Behandling): HendelseshistorikkDto {
 
     val hendelse: Hendelse = when (this.steg) {
         StegType.VILKÅR -> Hendelse.OPPRETTET
         StegType.SEND_TIL_BESLUTTER -> Hendelse.SENDT_TIL_BESLUTTER
-        StegType.BEHANDLING_FERDIGSTILT -> Hendelse.VEDTAK_IVERKSATT
+        StegType.BEHANDLING_FERDIGSTILT -> when (behandling.resultat) {
+            BehandlingResultat.HENLAGT -> Hendelse.HENLAGT
+            else -> Hendelse.UKJENT
+        }
+        StegType.FERDIGSTILLE_BEHANDLING -> when (behandling.resultat) {
+            BehandlingResultat.INNVILGET, BehandlingResultat.OPPHØRT -> Hendelse.VEDTAK_IVERKSATT
+            BehandlingResultat.AVSLÅTT -> Hendelse.VEDTAK_AVSLÅTT
+            else -> Hendelse.UKJENT
+        }
         StegType.BESLUTTE_VEDTAK -> when (this.utfall) {
             StegUtfall.BESLUTTE_VEDTAK_GODKJENT -> Hendelse.VEDTAK_GODKJENT
             StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT -> Hendelse.VEDTAK_UNDERKJENT
-            else -> Hendelse.HENLAGT
+            StegUtfall.HENLAGT -> Hendelse.HENLAGT
+            else -> Hendelse.UKJENT
         }
         else -> Hendelse.UKJENT
     }
