@@ -27,7 +27,8 @@ internal class IverksettingDtoMapperTest {
                                   tilbakekrevingService = tilbakekrevingService,
                                   tilkjentYtelseService = mockk(),
                                   vedtakService = mockk(),
-                                  vilkårsvurderingRepository = mockk())
+                                  vilkårsvurderingRepository = mockk(),
+                                  brevmottakereRepository = mockk())
 
 
     @Test
