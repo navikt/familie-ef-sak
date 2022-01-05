@@ -25,7 +25,7 @@ class BrevmottakereController(private val tilgangService: TilgangService,
     fun hentBrevmottakere(@PathVariable behandlingId: UUID): Ressurs<BrevmottakereDto?> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
 
-        return Ressurs.Companion.success(brevmottakereService.hentBrevmottakere(behandlingId))
+        return Ressurs.success(brevmottakereService.hentBrevmottakere(behandlingId))
     }
 
     @PostMapping("/{behandlingId}")
@@ -38,7 +38,7 @@ class BrevmottakereController(private val tilgangService: TilgangService,
                        httpStatus = HttpStatus.BAD_REQUEST)
         }
 
-        return Ressurs.Companion.success(brevmottakereService.lagreBrevmottakere(behandlingId, brevmottakere))
+        return Ressurs.success(brevmottakereService.lagreBrevmottakere(behandlingId, brevmottakere))
     }
 
 }
