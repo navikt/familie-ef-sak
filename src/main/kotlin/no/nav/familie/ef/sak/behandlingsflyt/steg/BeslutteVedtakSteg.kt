@@ -94,7 +94,7 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
     }
 
     private fun utledVedtaksbrev(vedtaksbrev: Vedtaksbrev): Fil {
-        feilHvis(vedtaksbrev.beslutterPdf == null) { "For å iverksette må vedtaksbrevet signeres" }
+        feilHvis(vedtaksbrev.beslutterPdf == null) { "For å godkjenne må du som beslutter først kontrollere brevet." }
         feilHvis(vedtaksbrev.besluttersignatur != SikkerhetContext.hentSaksbehandlerNavn(strict = true)) {
             "En annen saksbehandler har signert vedtaksbrevet"
         }
