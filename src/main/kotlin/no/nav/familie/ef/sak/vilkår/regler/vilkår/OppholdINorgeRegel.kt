@@ -26,7 +26,7 @@ class OppholdINorgeRegel : Vilkårsregel(vilkårType = VilkårType.LOVLIG_OPPHOL
 
         private val BOR_OG_OPPHOLDER_SEG_I_NORGE =
                 RegelSteg(regelId = RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE,
-                          svarMapping = jaNeiSvarRegel(hvisJa = SluttSvarRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
+                          svarMapping = jaNeiSvarRegel(hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
                                                        hvisNei = NesteRegel(OPPHOLD_UNNTAK.regelId)))
     }
 }

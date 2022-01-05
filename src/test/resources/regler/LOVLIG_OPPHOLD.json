@@ -5,7 +5,7 @@
       "regelId" : "BOR_OG_OPPHOLDER_SEG_I_NORGE",
       "svarMapping" : {
         "JA" : {
-          "begrunnelseType" : "VALGFRI",
+          "begrunnelseType" : "PÅKREVD",
           "regelId" : "SLUTT_NODE"
         },
         "NEI" : {

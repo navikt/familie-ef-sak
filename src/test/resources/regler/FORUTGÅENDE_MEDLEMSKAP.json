@@ -5,7 +5,7 @@
       "regelId" : "SØKER_MEDLEM_I_FOLKETRYGDEN",
       "svarMapping" : {
         "JA" : {
-          "begrunnelseType" : "VALGFRI",
+          "begrunnelseType" : "PÅKREVD",
           "regelId" : "SLUTT_NODE"
         },
         "NEI" : {

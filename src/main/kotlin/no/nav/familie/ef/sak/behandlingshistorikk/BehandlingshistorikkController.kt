@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.behandlingshistorikk
 
-import no.nav.familie.ef.sak.behandlingshistorikk.domain.tilDto
-import no.nav.familie.ef.sak.behandlingshistorikk.dto.BehandlingshistorikkDto
+import no.nav.familie.ef.sak.behandlingshistorikk.dto.HendelseshistorikkDto
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -18,10 +17,9 @@ class BehandlingshistorikkController(private val behandlingshistorikkService: Be
                                      private val tilgangService: TilgangService) {
 
     @GetMapping("{behandlingId}")
-    fun hentBehandlingshistorikk(@PathVariable behandlingId: UUID): Ressurs<List<BehandlingshistorikkDto>> {
+    fun hentBehandlingshistorikk(@PathVariable behandlingId: UUID): Ressurs<List<HendelseshistorikkDto>> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
-        val behandlingHistorikk = (behandlingshistorikkService.finnBehandlingshistorikk(behandlingId)).map { it.tilDto() }
+        val behandlingHistorikk = behandlingshistorikkService.finnHendelseshistorikk(behandlingId)
         return Ressurs.success(behandlingHistorikk)
     }
-
 }
