@@ -10,6 +10,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 internal class VilkårsvurderingRepositoryTest : OppslagSpringRunnerTest() {
@@ -39,7 +40,7 @@ internal class VilkårsvurderingRepositoryTest : OppslagSpringRunnerTest() {
         val vilkårsvurdering = vilkårsvurderingRepository.insert(vilkårsvurdering(behandling.id,
                                                                                   Vilkårsresultat.IKKE_TATT_STILLING_TIL,
                                                                                   VilkårType.FORUTGÅENDE_MEDLEMSKAP))
-        val nyttTidspunkt = LocalDateTime.now().minusDays(1)
+        val nyttTidspunkt = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.MILLIS)
 
         vilkårsvurderingRepository.oppdaterEndretTid(vilkårsvurdering.id, nyttTidspunkt)
 
