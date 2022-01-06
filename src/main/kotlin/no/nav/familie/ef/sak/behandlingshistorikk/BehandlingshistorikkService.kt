@@ -15,9 +15,9 @@ import java.util.UUID
 @Service
 class BehandlingshistorikkService(private val behandlingshistorikkRepository: BehandlingshistorikkRepository) {
 
-    fun finnHendelseshistorikk(behandlingId: UUID): List<HendelseshistorikkDto> {
-        val (hendelserOpprettet, andreHendelser) = behandlingshistorikkRepository.findByBehandlingIdOrderByEndretTidDesc(behandlingId).map {
-            it.tilHendelseshistorikkDto()
+    fun finnHendelseshistorikk(behandling: Behandling): List<HendelseshistorikkDto> {
+        val (hendelserOpprettet, andreHendelser) = behandlingshistorikkRepository.findByBehandlingIdOrderByEndretTidDesc(behandling.id).map {
+            it.tilHendelseshistorikkDto(behandling)
         }.filter {
             it.hendelse != Hendelse.UKJENT
         }.partition { it.hendelse == Hendelse.OPPRETTET }
@@ -35,13 +35,6 @@ class BehandlingshistorikkService(private val behandlingshistorikkRepository: Be
 
     fun opprettHistorikkInnslag(behandlingshistorikk: Behandlingshistorikk) {
         behandlingshistorikkRepository.insert(behandlingshistorikk)
-    }
-
-    fun opprettHistorikkInnslag(behandling: Behandling) {
-        behandlingshistorikkRepository.insert(Behandlingshistorikk(
-                behandlingId = behandling.id,
-                steg = behandling.steg,
-        ))
     }
 
     /**

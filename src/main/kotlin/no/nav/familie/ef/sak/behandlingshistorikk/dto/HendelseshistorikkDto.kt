@@ -15,6 +15,7 @@ enum class Hendelse {
     VEDTAK_GODKJENT,
     VEDTAK_UNDERKJENT,
     VEDTAK_IVERKSATT,
+    VEDTAK_AVSLÅTT,
     HENLAGT,
     UKJENT
 }

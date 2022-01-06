@@ -1,6 +1,8 @@
 package no.nav.familie.ef.sak.behandlingshistorikk.domain
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingshistorikk.dto.BehandlingshistorikkDto
 import no.nav.familie.ef.sak.behandlingshistorikk.dto.Hendelse
@@ -37,17 +39,14 @@ fun Behandlingshistorikk.tilDto(): BehandlingshistorikkDto {
     )
 }
 
-fun Behandlingshistorikk.tilHendelseshistorikkDto(): HendelseshistorikkDto {
+fun Behandlingshistorikk.tilHendelseshistorikkDto(behandling: Behandling): HendelseshistorikkDto {
 
     val hendelse: Hendelse = when (this.steg) {
         StegType.VILKÅR -> Hendelse.OPPRETTET
         StegType.SEND_TIL_BESLUTTER -> Hendelse.SENDT_TIL_BESLUTTER
-        StegType.BEHANDLING_FERDIGSTILT -> Hendelse.VEDTAK_IVERKSATT
-        StegType.BESLUTTE_VEDTAK -> when (this.utfall) {
-            StegUtfall.BESLUTTE_VEDTAK_GODKJENT -> Hendelse.VEDTAK_GODKJENT
-            StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT -> Hendelse.VEDTAK_UNDERKJENT
-            else -> Hendelse.HENLAGT
-        }
+        StegType.BEHANDLING_FERDIGSTILT -> mapFraFerdigstiltTilHendelse(behandling.resultat)
+        StegType.FERDIGSTILLE_BEHANDLING -> mapFraFerdigstilleTilHendelse(behandling.resultat)
+        StegType.BESLUTTE_VEDTAK -> mapFraBeslutteTilHendelse(this.utfall)
         else -> Hendelse.UKJENT
     }
 
@@ -58,6 +57,30 @@ fun Behandlingshistorikk.tilHendelseshistorikkDto(): HendelseshistorikkDto {
         endretTid = this.endretTid,
         metadata = this.metadata.tilJson()
     )
+}
+
+fun mapFraFerdigstiltTilHendelse(resultat: BehandlingResultat): Hendelse {
+    return when (resultat) {
+        BehandlingResultat.HENLAGT -> Hendelse.HENLAGT
+        else -> Hendelse.UKJENT
+    }
+}
+
+fun mapFraFerdigstilleTilHendelse(resultat: BehandlingResultat): Hendelse {
+    return when (resultat) {
+        BehandlingResultat.INNVILGET, BehandlingResultat.OPPHØRT -> Hendelse.VEDTAK_IVERKSATT
+        BehandlingResultat.AVSLÅTT -> Hendelse.VEDTAK_AVSLÅTT
+        else -> Hendelse.UKJENT
+    }
+}
+
+fun mapFraBeslutteTilHendelse(utfall: StegUtfall?): Hendelse {
+    return when (utfall) {
+        StegUtfall.BESLUTTE_VEDTAK_GODKJENT -> Hendelse.VEDTAK_GODKJENT
+        StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT -> Hendelse.VEDTAK_UNDERKJENT
+        StegUtfall.HENLAGT -> Hendelse.HENLAGT
+        else -> Hendelse.UKJENT
+    }
 }
 
 fun JsonWrapper?.tilJson(): Map<String, Any>? {

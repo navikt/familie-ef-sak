@@ -14,6 +14,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.BEHANDLING_FERDIGSTIL
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.VILKÅR
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
+import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.domain.Sporbar
@@ -87,15 +88,17 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
         validerKanOppretteNyBehandling(behandlingType, tidligereBehandlinger, forrigeBehandling)
 
         val behandling = behandlingRepository.insert(Behandling(fagsakId = fagsakId,
-                                                      forrigeBehandlingId = forrigeBehandling?.id,
-                                                      type = behandlingType,
-                                                      steg = stegType,
-                                                      status = status,
-                                                      resultat = BehandlingResultat.IKKE_SATT,
-                                                      årsak = behandlingsårsak,
-                                                      kravMottatt = kravMottatt))
+                                                                forrigeBehandlingId = forrigeBehandling?.id,
+                                                                type = behandlingType,
+                                                                steg = stegType,
+                                                                status = status,
+                                                                resultat = BehandlingResultat.IKKE_SATT,
+                                                                årsak = behandlingsårsak,
+                                                                kravMottatt = kravMottatt))
 
-        behandlingshistorikkService.opprettHistorikkInnslag(behandling)
+        behandlingshistorikkService.opprettHistorikkInnslag(
+                behandlingshistorikk = Behandlingshistorikk(behandlingId = behandling.id,
+                                                            steg = VILKÅR))
 
         return behandling
     }
