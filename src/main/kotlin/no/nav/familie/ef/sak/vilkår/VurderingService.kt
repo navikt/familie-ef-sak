@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.vilkår
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.felles.domain.Endret
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
@@ -76,10 +77,14 @@ class VurderingService(private val behandlingService: BehandlingService,
             val melding = "Tidligere behandling=$eksisterendeBehandlingId har ikke noen vilkår"
             throw Feil(melding, melding)
         }
-        val vurderingerKopi: List<Vilkårsvurdering> = vurderinger.map {
-            it.copy(id = UUID.randomUUID(), behandlingId = nyBehandlingsId, sporbar = Sporbar())
+        val tidligereVurderinger = vurderinger.associateBy { it.id }
+        val vurderingerKopi: Map<UUID, Vilkårsvurdering> = vurderinger.associate {
+            it.id to it.copy(id = UUID.randomUUID(), behandlingId = nyBehandlingsId, sporbar = Sporbar())
         }
-        vilkårsvurderingRepository.insertAll(vurderingerKopi)
+        vilkårsvurderingRepository.insertAll(vurderingerKopi.values.toList())
+        vurderingerKopi.forEach { forrigeId, vurdering ->
+            vilkårsvurderingRepository.oppdaterEndretTid(vurdering.id, tidligereVurderinger.getValue(forrigeId).sporbar.endret.endretTid)
+        }
     }
 
     fun erAlleVilkårOppfylt(behandlingId: UUID): Boolean {
