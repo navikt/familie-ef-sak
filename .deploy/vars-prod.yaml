@@ -30,3 +30,5 @@ claimGroups:
   - "87190cf3-b278-457d-8ab7-1a5c55a9edd7" # Group_87190cf3-b278-457d-8ab7-1a5c55a9edd7 gir tilgang til prosessering
   - "847e3d72-9dc1-41c3-80ff-f5d4acdd5d46" # 0000-GA-Barnetrygd # Brukes for å hente perioder til utvidet barnetrygd
   - "7a271f87-39fb-468b-a9ee-6cf3c070f548" # 0000-GA-Barnetrygd-Beslutter # Brukes for å hente perioder til utvidet barnetrygd
+  - "ad7b87a6-9180-467c-affc-20a566b0fec0" # 0000-GA-Strengt_Fortrolig_Adresse
+  - "9ec6487d-f37a-4aad-a027-cd221c1ac32b" # 0000-GA-Fortrolig_Adresse

@@ -80,3 +80,4 @@ enum class BehandlingStatus {
     fun behandlingErLåstForVidereRedigering(): Boolean =
             setOf(FATTER_VEDTAK, IVERKSETTER_VEDTAK, FERDIGSTILT).contains(this)
 }
+
