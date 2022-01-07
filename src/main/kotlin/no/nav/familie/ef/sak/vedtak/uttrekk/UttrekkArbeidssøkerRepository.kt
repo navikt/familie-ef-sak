@@ -16,24 +16,14 @@ interface UttrekkArbeidssøkerRepository : RepositoryInterface<UttrekkArbeidssø
 
     // language=PostgreSQL
     @Query("""
-        WITH q AS (
-            SELECT b.id behandling_id, b.fagsak_id, ROW_NUMBER() OVER (PARTITION BY b.fagsak_id ORDER BY b.opprettet_tid DESC) rn
-            FROM behandling b
-            JOIN fagsak f ON b.fagsak_id = f.id
-            WHERE
-              f.stonadstype = 'OVERGANGSSTØNAD'
-              AND b.type != 'BLANKETT'
-              AND b.resultat IN ('OPPHØRT', 'INNVILGET')
-              AND b.status = 'FERDIGSTILT'
-            )
         SELECT DISTINCT ON (v.behandling_id) -- Trenger ikke å hente samme vedtak flere ganger 
-               q1.behandling_id, q1.fagsak_id, v.behandling_id behandling_id_for_vedtak, v.perioder 
-          FROM q q1
-          JOIN tilkjent_ytelse ty ON ty.behandling_id = q1.behandling_id
+               gib.id behandling_id, gib.fagsak_id, v.behandling_id behandling_id_for_vedtak, v.perioder 
+          FROM gjeldende_iverksatte_behandlinger gib
+          JOIN tilkjent_ytelse ty ON ty.behandling_id = gib.id
           JOIN andel_tilkjent_ytelse aty ON ty.id = aty.tilkjent_ytelse
           JOIN vedtak v ON v.behandling_id = aty.kilde_behandling_id
         WHERE aty.stonad_tom >= :startdato AND aty.stonad_fom <= :sluttdato
-          AND rn = 1
+          AND gib.stonadstype = 'OVERGANGSSTØNAD'
     """)
     fun hentVedtaksperioderForSisteFerdigstilteBehandlinger(startdato: LocalDate,
                                                             sluttdato: LocalDate): List<VedtaksperioderForUttrekk>

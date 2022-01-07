@@ -53,9 +53,6 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
 
     fun hentEksterneIder(behandlingIder: Set<UUID>) = behandlingRepository.finnEksterneIder(behandlingIder)
 
-    fun finnSisteIverksatteBehandlinger(stønadstype: Stønadstype) =
-            behandlingRepository.finnSisteIverksatteBehandlingerSomIkkeErTekniskOpphør(stønadstype)
-
     fun finnSisteIverksatteBehandling(fagsakId: UUID) =
             behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
 

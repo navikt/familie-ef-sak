@@ -66,6 +66,10 @@ fun behandling(fagsak: Fagsak = fagsak(),
                    henlagtÅrsak = henlagtÅrsak
         )
 
+fun Behandling.innvilgetOgFerdigstilt() =
+        this.copy(resultat = BehandlingResultat.INNVILGET,
+                  status = BehandlingStatus.FERDIGSTILT)
+
 
 fun fagsak(identer: Set<FagsakPerson> = setOf(), stønadstype: Stønadstype = Stønadstype.OVERGANGSSTØNAD) =
         Fagsak(stønadstype = stønadstype, søkerIdenter = identer)
