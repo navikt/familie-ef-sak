@@ -30,7 +30,7 @@ interface TilkjentYtelseRepository : RepositoryInterface<TilkjentYtelse, UUID>, 
     @Query("""
         SELECT ty.*
         FROM tilkjent_ytelse ty 
-        WHERE ty.behandling_id IN (SELECT id FROM sist_iverksatte_behandling WHERE stonadstype=:stønadstype) 
+        WHERE ty.behandling_id IN (SELECT id FROM gjeldende_iverksatte_behandlinger WHERE stonadstype=:stønadstype) 
          AND EXISTS (SELECT 1 FROM andel_tilkjent_ytelse aty 
                         WHERE ty.id = aty.tilkjent_ytelse
                          AND aty.stonad_tom >= :datoForAvstemming

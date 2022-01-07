@@ -72,7 +72,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
     fun finnEksterneIder(behandlingId: Set<UUID>): Set<EksternId>
 
     // language=PostgreSQL
-    @Query("""SELECT id FROM sist_iverksatte_behandling WHERE stonadstype=:stønadstype""")
+    @Query("""SELECT id FROM gjeldende_iverksatte_behandlinger WHERE stonadstype=:stønadstype""")
     fun finnSisteIverksatteBehandlinger(stønadstype: Stønadstype): Set<UUID>
 
 }

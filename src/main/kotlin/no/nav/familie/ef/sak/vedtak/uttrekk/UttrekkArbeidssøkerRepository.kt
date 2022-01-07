@@ -17,13 +17,13 @@ interface UttrekkArbeidssøkerRepository : RepositoryInterface<UttrekkArbeidssø
     // language=PostgreSQL
     @Query("""
         SELECT DISTINCT ON (v.behandling_id) -- Trenger ikke å hente samme vedtak flere ganger 
-               sib.id behandling_id, sib.fagsak_id, v.behandling_id behandling_id_for_vedtak, v.perioder 
-          FROM sist_iverksatte_behandling sib
-          JOIN tilkjent_ytelse ty ON ty.behandling_id = sib.id
+               gib.id behandling_id, gib.fagsak_id, v.behandling_id behandling_id_for_vedtak, v.perioder 
+          FROM gjeldende_iverksatte_behandlinger gib
+          JOIN tilkjent_ytelse ty ON ty.behandling_id = gib.id
           JOIN andel_tilkjent_ytelse aty ON ty.id = aty.tilkjent_ytelse
           JOIN vedtak v ON v.behandling_id = aty.kilde_behandling_id
         WHERE aty.stonad_tom >= :startdato AND aty.stonad_fom <= :sluttdato
-          AND sib.stonadstype = 'OVERGANGSSTØNAD'
+          AND gib.stonadstype = 'OVERGANGSSTØNAD'
     """)
     fun hentVedtaksperioderForSisteFerdigstilteBehandlinger(startdato: LocalDate,
                                                             sluttdato: LocalDate): List<VedtaksperioderForUttrekk>

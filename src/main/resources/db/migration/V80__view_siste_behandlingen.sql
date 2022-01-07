@@ -1,4 +1,8 @@
-CREATE OR REPLACE VIEW sist_iverksatte_behandling AS
+/**
+  View som returnerer alle gjeldende iverksatte behandlinger
+  Husk å filtrere på stønadstype ved behov
+ */
+CREATE OR REPLACE VIEW gjeldende_iverksatte_behandlinger AS
 SELECT *
 FROM (SELECT b.*,
              f.stonadstype,
