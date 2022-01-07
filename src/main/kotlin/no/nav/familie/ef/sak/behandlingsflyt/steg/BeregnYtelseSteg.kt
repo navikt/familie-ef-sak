@@ -45,7 +45,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
     }
 
     override fun utførSteg(behandling: Behandling, data: VedtakDto) {
-        validerGyldigeVedtaksperioder(behandling, data)
+        validerGyldigeVedtaksperioder(data)
         val aktivIdent = fagsakService.fagsakMedOppdatertPersonIdent(behandling.fagsakId).hentAktivIdent()
         nullstillEksisterendeVedtakPåBehandling(behandling.id)
         vedtakService.lagreVedtak(vedtakDto = data, behandlingId = behandling.id)
@@ -66,7 +66,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
         }
     }
 
-    private fun validerGyldigeVedtaksperioder(behandling: Behandling, data: VedtakDto) {
+    private fun validerGyldigeVedtaksperioder(data: VedtakDto) {
         if (data is Innvilget) {
             val harOpphørsperioder = data.perioder.any { it.periodeType == VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
             val harInnvilgedePerioder = data.perioder.any { it.periodeType != VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
