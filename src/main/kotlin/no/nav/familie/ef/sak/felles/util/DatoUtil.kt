@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.felles.util
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 
 object DatoFormat {
@@ -19,3 +20,5 @@ fun min(dato1: LocalDateTime?, dato2: LocalDateTime?): LocalDateTime? =
 
 fun LocalDate.isEqualOrBefore(other: LocalDate) = this == other || this.isBefore(other)
 fun LocalDate.isEqualOrAfter(other: LocalDate) = this == other || this.isAfter(other)
+
+fun YearMonth.erPåfølgende(påfølgende: YearMonth): Boolean = this.plusMonths(1) == påfølgende

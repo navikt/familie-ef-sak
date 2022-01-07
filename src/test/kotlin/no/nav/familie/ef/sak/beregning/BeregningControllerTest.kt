@@ -107,24 +107,6 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
 
     }
 
-    @Test
-    internal fun `Skal returnere riktig feilmelding i response når fullfør ikke er mulig pga feil valg av periodetype`() {
-        val behandling = lagFagsakOgBehandling()
-
-        val vedtakDto = Innvilget(resultatType = ResultatType.INNVILGE,
-                                  periodeBegrunnelse = "periode begrunnelse",
-                                  inntektBegrunnelse = "inntekt begrunnelse",
-                                  perioder = listOf(VedtaksperiodeDto(YearMonth.now(), YearMonth.now().plusMonths(12), AktivitetType.IKKE_AKTIVITETSPLIKT, VedtaksperiodeType.MIDLERTIDIG_OPPHØR))
-        )
-
-        vilkårsvurderingService.hentEllerOpprettVurderinger(behandlingId = behandling.id) // ingen ok.
-
-        val respons: ResponseEntity<Ressurs<UUID>> = fullførVedtak(behandling.id, vedtakDto)
-
-        assertThat(respons.body.frontendFeilmelding).isEqualTo("Kan ikke ha opphørsperioder for et innvilget vedtak, velg Innvilge med opphør")
-
-    }
-
     private fun lagFagsakOgBehandling(): Behandling {
         val fagsak = fagsakRepository.insert(fagsak(identer = setOf(FagsakPerson(""))))
         val behandling = behandlingRepository.insert(behandling(fagsak,

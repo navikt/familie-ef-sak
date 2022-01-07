@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.beregning.tilInntektsperioder
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.dto.Periode
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
@@ -18,8 +19,8 @@ import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Avslå
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
 import no.nav.familie.ef.sak.vedtak.dto.Opphør
-import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
+import no.nav.familie.ef.sak.vedtak.dto.erSammenhengende
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -31,7 +32,8 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                        private val simuleringService: SimuleringService,
                        private val vedtakService: VedtakService,
                        private val tilbakekrevingService: TilbakekrevingService,
-                       private val fagsakService: FagsakService) : BehandlingSteg<VedtakDto> {
+                       private val fagsakService: FagsakService,
+                       private val featureToggleService: FeatureToggleService) : BehandlingSteg<VedtakDto> {
 
 
     override fun validerSteg(behandling: Behandling) {
@@ -72,11 +74,6 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                 "Må ha innvilgelsesperioder i tillegg til opphørsperioder"
             }
         }
-        if (data is Innvilget && data.resultatType == ResultatType.INNVILGE_MED_OPPHØR) {
-            feilHvis(behandling.type != BehandlingType.REVURDERING) {
-                "For å innvilge med opphørsperioder må behandlingen være en revurdering"
-            }
-        }
 
     }
 
@@ -99,6 +96,10 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                                                             behandling: Behandling,
                                                             aktivIdent: String) {
 
+
+        if (featureToggleService.isEnabled("familie.ef.sak.innvilge-med-opphoer")) {
+            feilHvis(!vedtak.perioder.erSammenhengende()) { "Periodene må være sammenhengende" }
+        }
 
         val andelerTilkjentYtelse: List<AndelTilkjentYtelse> = lagBeløpsperioderForInnvilgetVedtak(vedtak, behandling, aktivIdent)
         feilHvis(andelerTilkjentYtelse.isEmpty()) { "Innvilget vedtak må ha minimum en beløpsperiode" }
@@ -150,8 +151,9 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
     fun slåSammenAndelerSomSkalVidereføres(beløpsperioder: List<AndelTilkjentYtelse>,
                                            forrigeTilkjentYtelse: TilkjentYtelse,
                                            opphørsperioder: List<Periode>): List<AndelTilkjentYtelse> {
-        val fom = beløpsperioder.firstOrNull()?.stønadFom ?: LocalDate.MAX
-        val nyePerioderUtenOpphør = forrigeTilkjentYtelse.taMedAndelerFremTilDato(fom) + beløpsperioder
+        val fomPerioder = beløpsperioder.firstOrNull()?.stønadFom ?: LocalDate.MAX
+        val fomOpphørPerioder = opphørsperioder.firstOrNull()?.fradato ?: LocalDate.MAX
+        val nyePerioderUtenOpphør = forrigeTilkjentYtelse.taMedAndelerFremTilDato(minOf(fomPerioder, fomOpphørPerioder)) + beløpsperioder
         return vurderPeriodeForOpphør(nyePerioderUtenOpphør, opphørsperioder)
 
     }

@@ -60,18 +60,9 @@ class BeregningController(private val stegService: StegService,
                        HttpStatus.BAD_REQUEST)
         }
         tilgangService.validerTilgangTilBehandling(behandlingId)
-        validerGyldigPeriodetype(vedtak)
         validerAlleVilkårOppfyltDersomInvilgelse(vedtak, behandlingId)
         val behandling = behandlingService.hentBehandling(behandlingId)
         return Ressurs.success(stegService.håndterBeregnYtelseForStønad(behandling, vedtak).id)
-    }
-
-    private fun validerGyldigPeriodetype(vedtak: VedtakDto) {
-        if (vedtak is Innvilget && vedtak.resultatType == ResultatType.INNVILGE) {
-            feilHvis(vedtak.perioder.any { it.periodeType == VedtaksperiodeType.MIDLERTIDIG_OPPHØR }) {
-                "Kan ikke ha opphørsperioder for et innvilget vedtak, velg Innvilge med opphør"
-            }
-        }
     }
 
     private fun validerAlleVilkårOppfyltDersomInvilgelse(vedtak: VedtakDto, behandlingId: UUID) {

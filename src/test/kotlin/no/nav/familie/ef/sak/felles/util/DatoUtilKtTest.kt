@@ -4,6 +4,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 
 internal class DatoUtilKtTest {
 
@@ -40,5 +41,14 @@ internal class DatoUtilKtTest {
         assertThat(første.isEqualOrAfter(første)).isTrue
         assertThat(første.isEqualOrAfter(siste)).isFalse
         assertThat(siste.isEqualOrAfter(første)).isTrue
+    }
+
+    @Test
+    internal fun `er påfølgende måned`() {
+        val gjeldende = YearMonth.of(2020, 12)
+        val påfølgende = YearMonth.of(2021, 1)
+        val ikkePåfølgende = YearMonth.of(2021, 2)
+        assertThat(gjeldende.erPåfølgende(påfølgende)).isTrue
+        assertThat(gjeldende.erPåfølgende(ikkePåfølgende)).isFalse
     }
 }
