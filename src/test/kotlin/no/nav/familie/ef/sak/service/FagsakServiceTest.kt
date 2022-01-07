@@ -16,12 +16,15 @@ import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.domain.Endret
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDateTime
+import java.util.UUID
 
 internal class FagsakServiceTest : OppslagSpringRunnerTest() {
 
@@ -79,6 +82,11 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         val revurdering = fagsak.behandlinger.single { it.type == BehandlingType.REVURDERING }
         assertThat(revurdering.status).isEqualTo(behandling2.status)
         assertThat(revurdering.type).isEqualTo(behandling2.type)
+    }
+
+    @Test
+    internal fun `finnAktiveIdenter - skal kaste feil hvis den ikke finner ident til fagsak`() {
+        assertThrows<Feil> { fagsakService.hentAktiveIdenter(setOf(UUID.randomUUID())) }
     }
 
     @Test

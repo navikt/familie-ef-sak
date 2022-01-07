@@ -1,12 +1,11 @@
 package no.nav.familie.ef.sak.beregning
 
+import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
-data class ÅrMånedPeriode(val årMånedFra: YearMonth, val årMånedTil: YearMonth)
-
-data class BeregningRequest(val inntekt: List<Inntekt>, val vedtaksperioder: List<ÅrMånedPeriode>)
+data class BeregningRequest(val inntekt: List<Inntekt>, val vedtaksperioder: List<VedtaksperiodeDto>)
 
 data class Inntekt(val årMånedFra: YearMonth, val forventetInntekt: BigDecimal?, val samordningsfradrag: BigDecimal?)
 data class Inntektsperiode(val startDato: LocalDate,

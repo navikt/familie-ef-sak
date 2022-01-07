@@ -32,4 +32,10 @@ class InntektController(
                                                  tom = tom ?: YearMonth.now())
         return success(inntekt)
     }
+
+    @GetMapping("fagsak/{fagsakId}/generer-url")
+    fun genererAInntektUrl(@PathVariable("fagsakId") fagsakId: UUID): Ressurs<String> {
+        tilgangService.validerTilgangTilFagsak(fagsakId)
+        return success(inntektService.genererAInntektUrl(fagsakId))
+    }
 }

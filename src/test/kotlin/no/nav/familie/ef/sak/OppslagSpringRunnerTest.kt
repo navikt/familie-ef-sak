@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.Behandlingsjournalpost
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.blankett.Blankett
+import no.nav.familie.ef.sak.brev.domain.Brevmottakere
 import no.nav.familie.ef.sak.brev.domain.MellomlagretBrev
 import no.nav.familie.ef.sak.brev.domain.MellomlagretFritekstbrev
 import no.nav.familie.ef.sak.brev.domain.MellomlagretFrittståendeBrev
@@ -50,6 +51,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @SpringBootTest(classes = [ApplicationLocal::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("integrasjonstest",
+                "mock-arbeidssøker",
                 "mock-oauth",
                 "mock-pdl",
                 "mock-integrasjoner",
@@ -110,6 +112,7 @@ abstract class OppslagSpringRunnerTest {
                 Vilkårsvurdering::class,
                 Behandlingshistorikk::class,
                 Vedtaksbrev::class,
+                Brevmottakere::class,
                 Blankett::class,
                 Vedtak::class,
                 MellomlagretBrev::class,

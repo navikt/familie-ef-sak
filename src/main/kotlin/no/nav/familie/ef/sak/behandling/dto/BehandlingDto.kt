@@ -11,6 +11,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 data class BehandlingDto(val id: UUID,
+                         val fagsakId: UUID,
                          val steg: StegType,
                          val type: BehandlingType,
                          val status: BehandlingStatus,
@@ -21,6 +22,7 @@ data class BehandlingDto(val id: UUID,
 
 fun Behandling.tilDto(): BehandlingDto =
         BehandlingDto(id = this.id,
+                      fagsakId = this.fagsakId,
                       steg = this.steg,
                       type = this.type,
                       status = this.status,

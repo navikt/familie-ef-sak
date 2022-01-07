@@ -4,6 +4,8 @@ import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
+import no.nav.familie.ef.sak.brev.BrevmottakereRepository
+import no.nav.familie.ef.sak.brev.domain.MottakerRolle
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
@@ -32,6 +34,7 @@ import no.nav.familie.kontrakter.ef.iverksett.AktivitetType
 import no.nav.familie.kontrakter.ef.iverksett.AndelTilkjentYtelseDto
 import no.nav.familie.kontrakter.ef.iverksett.BarnDto
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingsdetaljerDto
+import no.nav.familie.kontrakter.ef.iverksett.Brevmottaker
 import no.nav.familie.kontrakter.ef.iverksett.DelvilkårsvurderingDto
 import no.nav.familie.kontrakter.ef.iverksett.FagsakdetaljerDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettDto
@@ -47,8 +50,8 @@ import no.nav.familie.kontrakter.ef.iverksett.VilkårsvurderingDto
 import no.nav.familie.kontrakter.ef.iverksett.VurderingDto
 import no.nav.familie.kontrakter.felles.annotasjoner.Improvement
 import no.nav.familie.kontrakter.felles.tilbakekreving.Periode
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Component
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.familie.kontrakter.ef.felles.RegelId as RegelIdIverksett
@@ -67,7 +70,8 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
                             private val fagsakService: FagsakService,
                             private val simuleringService: SimuleringService,
                             private val tilbakekrevingService: TilbakekrevingService,
-                            private val grunnlagsdataService: GrunnlagsdataService) {
+                            private val grunnlagsdataService: GrunnlagsdataService,
+                            private val brevmottakereRepository: BrevmottakereRepository) {
 
     fun tilDto(behandling: Behandling, beslutter: String): IverksettDto {
 
@@ -84,7 +88,8 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
         val fagsakdetaljerDto = mapFagsakdetaljer(fagsak)
         val søkerDto = mapSøkerDto(fagsak, behandling)
         val tilbakekreving = mapTilbakekreving(behandling.id)
-        val vedtakDto = mapVedtaksdetaljerDto(vedtak, saksbehandler, beslutter, tilkjentYtelse, tilbakekreving)
+        val brevmottakere = mapBrevmottakere(behandling.id)
+        val vedtakDto = mapVedtaksdetaljerDto(vedtak, saksbehandler, beslutter, tilkjentYtelse, tilbakekreving, brevmottakere)
 
         return IverksettDto(behandling = behandlingsdetaljer,
                             fagsak = fagsakdetaljerDto,
@@ -133,15 +138,15 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
                                    eksternId = behandling.eksternId.id,
                                    vilkårsvurderinger = vilkårsvurderinger.map { it.tilIverksettDto() },
                                    forrigeBehandlingId = behandling.forrigeBehandlingId,
-                                   kravMottatt = behandling.kravMottatt,
-            )
+                                   kravMottatt = behandling.kravMottatt)
 
     @Improvement("Opphørårsak må utledes ved revurdering")
     private fun mapVedtaksdetaljerDto(vedtak: Vedtak,
                                       saksbehandler: String,
                                       beslutter: String,
                                       tilkjentYtelse: TilkjentYtelse?,
-                                      tilbakekreving: TilbakekrevingDto?) =
+                                      tilbakekreving: TilbakekrevingDto?,
+                                      brevmottakere: List<Brevmottaker>) =
             VedtaksdetaljerDto(resultat = vedtak.resultatType.tilVedtaksresultat(),
                                vedtakstidspunkt = LocalDateTime.now(),
                                opphørÅrsak = null,
@@ -149,8 +154,8 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
                                beslutterId = beslutter,
                                tilkjentYtelse = tilkjentYtelse?.tilIverksettDto(),
                                vedtaksperioder = vedtak.perioder?.tilIverksettDto() ?: emptyList(),
-                               tilbakekreving = tilbakekreving
-            )
+                               tilbakekreving = tilbakekreving,
+                               brevmottakere = brevmottakere)
 
     private fun mapSøkerDto(fagsak: Fagsak, behandling: Behandling): SøkerDto {
         val søknad = søknadService.hentOvergangsstønad(behandling.id)
@@ -166,6 +171,29 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
                         navEnhet,
                         grunnlagsdata.søker.adressebeskyttelse?.let { AdressebeskyttelseGradering.valueOf(it.gradering.name) })
     }
+
+    private fun mapBrevmottakere(behandlingId: UUID): List<Brevmottaker> {
+        return brevmottakereRepository.findByIdOrNull(behandlingId)?.let {
+            val personer = it.personer.personer.map { mottaker ->
+                Brevmottaker(ident = mottaker.personIdent,
+                             navn = mottaker.navn,
+                             mottakerRolle = mottaker.mottakerRolle.tilIverksettDto(),
+                             identType = Brevmottaker.IdentType.PERSONIDENT)
+            }
+
+            val organisasjoner = it.organisasjoner.organisasjoner.map { mottaker ->
+                Brevmottaker(ident = mottaker.organisasjonsnummer,
+                             navn = mottaker.navnHosOrganisasjon,
+                             mottakerRolle = mottaker.mottakerRolle.tilIverksettDto(),
+                             identType = Brevmottaker.IdentType.ORGANISASJONSNUMMER)
+            }
+
+            personer + organisasjoner
+        } ?: emptyList()
+
+    }
+
+
 }
 
 
@@ -202,11 +230,20 @@ fun Vilkårsvurdering.tilIverksettDto(): VilkårsvurderingDto = Vilkårsvurderin
         }
 )
 
-fun PeriodeWrapper.tilIverksettDto(): List<VedtaksperiodeDto> = this.perioder.map {
-    VedtaksperiodeDto(fraOgMed = it.datoFra,
-                      tilOgMed = it.datoTil,
-                      aktivitet = AktivitetType.valueOf(it.aktivitet.name),
-                      periodeType = VedtaksperiodeType.valueOf(it.periodeType.name)
-    )
-}
+fun PeriodeWrapper.tilIverksettDto(): List<VedtaksperiodeDto> = this.perioder
+        .filter { it.periodeType != no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
+        .map {
+            VedtaksperiodeDto(fraOgMed = it.datoFra,
+                              tilOgMed = it.datoTil,
+                              aktivitet = AktivitetType.valueOf(it.aktivitet.name),
+                              periodeType = VedtaksperiodeType.valueOf(it.periodeType.name)
+            )
+        }
+
+fun MottakerRolle.tilIverksettDto(): Brevmottaker.MottakerRolle =
+        when (this) {
+            MottakerRolle.FULLMAKT -> Brevmottaker.MottakerRolle.FULLMEKTIG
+            MottakerRolle.VERGE -> Brevmottaker.MottakerRolle.VERGE
+            MottakerRolle.BRUKER -> Brevmottaker.MottakerRolle.BRUKER
+        }
 

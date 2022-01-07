@@ -13,16 +13,15 @@ import no.nav.familie.ef.sak.vedtak.domain.AvslagÅrsak
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
-import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.felles.Vedtaksresultat
 import no.nav.familie.kontrakter.felles.annotasjoner.Improvement
-import org.springframework.http.HttpStatus
 import java.time.YearMonth
 import java.util.UUID
 
 @Improvement("Bytt til Innvilget, Avslått og Henlagt")
 enum class ResultatType {
 
+    INNVILGE_MED_OPPHØR,
     INNVILGE,
     AVSLÅ,
     HENLEGGE,
@@ -30,14 +29,19 @@ enum class ResultatType {
 }
 
 fun ResultatType.tilVedtaksresultat(): Vedtaksresultat = when (this) {
-    ResultatType.INNVILGE -> Vedtaksresultat.INNVILGET // TODO: Når skal vi ha delvis innvilget og opphørt
+    ResultatType.INNVILGE, ResultatType.INNVILGE_MED_OPPHØR -> Vedtaksresultat.INNVILGET
     ResultatType.HENLEGGE -> error("Vedtaksresultat kan ikke være henlegge")
     ResultatType.AVSLÅ -> Vedtaksresultat.AVSLÅTT
     ResultatType.OPPHØRT -> Vedtaksresultat.OPPHØRT
 }
 
-sealed class VedtakDto
-class Innvilget(val resultatType: ResultatType = ResultatType.INNVILGE,
+sealed class VedtakDto {
+    fun erInnvilgeMedOpphør(): Boolean {
+        return this is Innvilget && this.resultatType == ResultatType.INNVILGE_MED_OPPHØR
+    }
+}
+
+class Innvilget(val resultatType: ResultatType,
                 val periodeBegrunnelse: String?,
                 val inntektBegrunnelse: String?,
                 val perioder: List<VedtaksperiodeDto> = emptyList(),
@@ -60,7 +64,7 @@ fun VedtakDto.tilVedtak(behandlingId: UUID): Vedtak = when (this) {
             behandlingId = behandlingId,
             periodeBegrunnelse = this.periodeBegrunnelse,
             inntektBegrunnelse = this.inntektBegrunnelse,
-            resultatType = ResultatType.INNVILGE,
+            resultatType = this.resultatType,
             perioder = PeriodeWrapper(perioder = this.perioder.tilDomene()),
             inntekter = InntektWrapper(inntekter = this.inntekter.tilInntektsperioder()))
     is Opphør -> Vedtak(behandlingId = behandlingId,
@@ -72,7 +76,7 @@ fun VedtakDto.tilVedtak(behandlingId: UUID): Vedtak = when (this) {
 
 fun Vedtak.tilVedtakDto(): VedtakDto =
         when (this.resultatType) {
-            ResultatType.INNVILGE -> Innvilget(
+            ResultatType.INNVILGE, ResultatType.INNVILGE_MED_OPPHØR -> Innvilget(
                     resultatType = this.resultatType,
                     periodeBegrunnelse = this.periodeBegrunnelse,
                     inntektBegrunnelse = this.inntektBegrunnelse,
@@ -99,7 +103,7 @@ private class VedtakDtoDeserializer : StdDeserializer<VedtakDto>(VedtakDto::clas
         val mapper = p.codec as ObjectMapper
         val node: JsonNode = mapper.readTree(p)
         return when (ResultatType.valueOf(node.get("resultatType").asText())) {
-            ResultatType.INNVILGE -> mapper.treeToValue(node, Innvilget::class.java)
+            ResultatType.INNVILGE, ResultatType.INNVILGE_MED_OPPHØR -> mapper.treeToValue(node, Innvilget::class.java)
             ResultatType.AVSLÅ -> mapper.treeToValue(node, Avslå::class.java)
             ResultatType.OPPHØRT -> mapper.treeToValue(node, Opphør::class.java)
             else -> throw Feil("Kunde ikke deserialisera vedtakdto")

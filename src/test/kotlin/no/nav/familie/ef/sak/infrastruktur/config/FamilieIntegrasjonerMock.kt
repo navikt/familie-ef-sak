@@ -74,6 +74,8 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                             .willReturn(okJson(objectMapper.writeValueAsString(kodeverkInntekt))),
                     post(urlEqualTo(integrasjonerConfig.arbeidsfordelingUri.path))
                             .willReturn(okJson(objectMapper.writeValueAsString(arbeidsfordeling))),
+                    post(urlEqualTo(integrasjonerConfig.arbeidsfordelingMedRelasjonerUri.path))
+                            .willReturn(okJson(objectMapper.writeValueAsString(arbeidsfordeling))),
 
                     get(urlPathEqualTo(integrasjonerConfig.journalPostUri.path))
                             .withQueryParam("journalpostId", equalTo("1234"))
@@ -97,7 +99,6 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                             .willReturn(okJson(objectMapper.writeValueAsString(medl))),
                     post(urlEqualTo(integrasjonerConfig.navKontorUri.path))
                             .willReturn(okJson(objectMapper.writeValueAsString(navKontorEnhet))),
-
                     post(urlEqualTo(integrasjonerConfig.infotrygdVedtaksperioder.path))
                             .willReturn(okJson(objectMapper.writeValueAsString(infotrygdPerioder)))
 

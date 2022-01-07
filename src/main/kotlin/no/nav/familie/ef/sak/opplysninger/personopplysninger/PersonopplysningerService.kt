@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -29,24 +30,29 @@ class PersonopplysningerService(private val personService: PersonService,
     fun hentPersonopplysninger(behandlingId: UUID): PersonopplysningerDto {
         val søknad = søknadService.hentOvergangsstønad(behandlingId)
         val personIdent = søknad.fødselsnummer
+        val søkerIdenter = personService.hentPersonIdenter(personIdent)
         val grunnlagsdata = grunnlagsdataService.hentGrunnlagsdata(behandlingId)
         val egenAnsatt = egenAnsatt(personIdent)
 
         return personopplysningerMapper.tilPersonopplysninger(
                 grunnlagsdata,
                 egenAnsatt,
-                personIdent
+                søkerIdenter
         )
     }
 
+    @Cacheable("personopplysninger", cacheManager = "shortCache")
     fun hentPersonopplysninger(personIdent: String): PersonopplysningerDto {
         val grunnlagsdata = grunnlagsdataService.hentGrunnlagsdataFraRegister(personIdent, emptyList())
         val egenAnsatt = egenAnsatt(personIdent)
+        val identerFraPdl = personService.hentPersonIdenter(personIdent)
 
         return personopplysningerMapper.tilPersonopplysninger(
-                GrunnlagsdataMedMetadata(grunnlagsdata, lagtTilEtterFerdigstilling = false),
+                GrunnlagsdataMedMetadata(grunnlagsdata,
+                                         lagtTilEtterFerdigstilling = false,
+                                         opprettetTidspunkt = LocalDateTime.now()),
                 egenAnsatt,
-                personIdent
+                identerFraPdl
         )
     }
 

@@ -2,7 +2,7 @@
 App for saksbehandling av stønadene for enslige forsørgere.
 
 ## Swagger
-http://localhost:8093/swagger-ui/index.html
+http://localhost:8093/swagger-ui.html
 
 ## Bygging lokalt
 Appen kjører på JRE 11. Bygging gjøres ved å kjøre `mvn clean install`. 
@@ -61,4 +61,7 @@ Applikasjonen vil deployes til produksjon ved ny commit på master-branchen. Det
 Testbrukeren som opprettes i IDA må ha minst en av følgende roller:
 - 0000-GA-Enslig-Forsorger-Beslutter
 - 0000-GA-Enslig-Forsorger-Saksbehandler
+
+## Testdata
+- Registering av arbeidssøker - https://arbeidssokerregistrering.dev.nav.no/
   

@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.oppgave
 
+import no.nav.familie.ef.sak.felles.util.FnrUtil.validerOptionalIdent
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.oppgave.dto.FinnOppgaveRequestDto
@@ -38,6 +39,7 @@ class OppgaveController(private val oppgaveService: OppgaveService,
                  consumes = [MediaType.APPLICATION_JSON_VALUE],
                  produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentOppgaver(@RequestBody finnOppgaveRequest: FinnOppgaveRequestDto): Ressurs<OppgaveResponseDto> {
+        validerOptionalIdent(finnOppgaveRequest.ident)
 
         val aktørId = finnOppgaveRequest.ident.takeUnless { it.isNullOrBlank() }
                 ?.let { pdlClient.hentAktørIder(it).identer.first().ident }
@@ -74,10 +76,8 @@ class OppgaveController(private val oppgaveService: OppgaveService,
 
     @GetMapping(path = ["/mapper"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentMapper(): Ressurs<List<MappeDto>> {
-        return Ressurs.success(oppgaveService.finnMapper(enhet = "4489"))
+        return Ressurs.success(oppgaveService.finnMapper(enheter = listOf("4489", "4483")))
     }
-
-
 }
 
 private fun FinnOppgaveResponseDto.tilDto(): OppgaveResponseDto {

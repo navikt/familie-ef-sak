@@ -86,7 +86,7 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
     fun oppdaterResultatPåBehandling(behandlingId: UUID) {
         val vedtak = vedtakService.hentVedtak(behandlingId)
         when (vedtak.resultatType) {
-            ResultatType.INNVILGE -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.INNVILGET)
+            ResultatType.INNVILGE, ResultatType.INNVILGE_MED_OPPHØR -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.INNVILGET)
             ResultatType.OPPHØRT -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.OPPHØRT)
             ResultatType.AVSLÅ -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.AVSLÅTT)
             else -> error("Støtter ikke resultattypen=${vedtak.resultatType}")
@@ -94,7 +94,7 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
     }
 
     private fun utledVedtaksbrev(vedtaksbrev: Vedtaksbrev): Fil {
-        feilHvis(vedtaksbrev.beslutterPdf == null) { "For å iverksette må vedtaksbrevet signeres" }
+        feilHvis(vedtaksbrev.beslutterPdf == null) { "For å godkjenne må du som beslutter først kontrollere brevet." }
         feilHvis(vedtaksbrev.besluttersignatur != SikkerhetContext.hentSaksbehandlerNavn(strict = true)) {
             "En annen saksbehandler har signert vedtaksbrevet"
         }

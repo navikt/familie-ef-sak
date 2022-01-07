@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.service
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
@@ -49,9 +50,18 @@ internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
         assertThat(vilkårForBehandling.id).isNotEqualTo(vilkårForRevurdering.id)
         assertThat(vilkårForBehandling.behandlingId).isNotEqualTo(vilkårForRevurdering.behandlingId)
         assertThat(vilkårForBehandling.sporbar.opprettetTid).isNotEqualTo(vilkårForRevurdering.sporbar.opprettetTid)
+        assertThat(vilkårForBehandling.sporbar.endret).isEqualTo(vilkårForRevurdering.sporbar.endret)
 
         assertThat(vilkårForBehandling).usingRecursiveComparison().ignoringFields("id", "sporbar", "behandlingId")
                 .isEqualTo(vilkårForRevurdering)
+    }
+
+    @Test
+    internal fun `oppdaterGrunnlagsdataOgHentEllerOpprettVurderinger - skal kaste feil dersom behandlingen er låst for videre behandling`() {
+        val fagsak = fagsakRepository.insert(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.FERDIGSTILT))
+        assertThat(catchThrowable { vurderingService.oppdaterGrunnlagsdataOgHentEllerOpprettVurderinger(behandling.id) })
+                .hasMessage("Kan ikke laste inn nye grunnlagsdata for behandling med status ${behandling.status}")
     }
 
     @Test

@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.behandlingshistorikk
 
-import no.nav.familie.ef.sak.behandlingshistorikk.domain.tilDto
-import no.nav.familie.ef.sak.behandlingshistorikk.dto.BehandlingshistorikkDto
+import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandlingshistorikk.dto.HendelseshistorikkDto
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -15,13 +15,14 @@ import java.util.UUID
 @RequestMapping(path = ["/api/behandlingshistorikk"])
 @ProtectedWithClaims(issuer = "azuread")
 class BehandlingshistorikkController(private val behandlingshistorikkService: BehandlingshistorikkService,
-                                     private val tilgangService: TilgangService) {
+                                     private val tilgangService: TilgangService,
+                                     private val behandlingService: BehandlingService) {
 
     @GetMapping("{behandlingId}")
-    fun hentBehandlingshistorikk(@PathVariable behandlingId: UUID): Ressurs<List<BehandlingshistorikkDto>> {
+    fun hentBehandlingshistorikk(@PathVariable behandlingId: UUID): Ressurs<List<HendelseshistorikkDto>> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
-        val behandlingHistorikk = (behandlingshistorikkService.finnBehandlingshistorikk(behandlingId)).map { it.tilDto() }
+        val behandling = behandlingService.hentBehandling(behandlingId)
+        val behandlingHistorikk = behandlingshistorikkService.finnHendelseshistorikk(behandling)
         return Ressurs.success(behandlingHistorikk)
     }
-
 }

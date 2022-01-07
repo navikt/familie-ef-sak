@@ -19,10 +19,11 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.TelefonnummerDt
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.VergemålDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Familierelasjonsrolle
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import org.springframework.stereotype.Component
-import java.time.LocalDate
 
 @Component
 class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
@@ -32,11 +33,12 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
 
     fun tilPersonopplysninger(grunnlagsdataMedMetadata: GrunnlagsdataMedMetadata,
                               egenAnsatt: Boolean,
-                              ident: String): PersonopplysningerDto {
+                              søkerIdenter: PdlIdenter): PersonopplysningerDto {
         val grunnlagsdata = grunnlagsdataMedMetadata.grunnlagsdata
         val søker = grunnlagsdata.søker
         val annenForelderMap = grunnlagsdata.annenForelder.associateBy { it.personIdent }
 
+        val gjeldendePersonIdent = søkerIdenter.gjeldende().ident
         return PersonopplysningerDto(
                 lagtTilEtterFerdigstilling = grunnlagsdataMedMetadata.lagtTilEtterFerdigstilling,
                 adressebeskyttelse = søker.adressebeskyttelse
@@ -46,7 +48,7 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                 dødsdato = søker.dødsfall?.dødsdato,
                 navn = NavnDto.fraNavn(søker.navn),
                 kjønn = KjønnMapper.tilKjønn(søker.kjønn),
-                personIdent = ident,
+                personIdent = gjeldendePersonIdent,
                 telefonnummer = søker.telefonnummer.find { it.prioritet == 1 }
                         ?.let { TelefonnummerDto(it.landskode, it.nummer) },
                 statsborgerskap = statsborgerskapMapper.map(søker.statsborgerskap),
@@ -65,11 +67,11 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
                                 navn = it.navn)
                 }.sortedByDescending { it.gyldigFraOgMed },
                 egenAnsatt = egenAnsatt,
-                navEnhet = arbeidsfordelingService.hentNavEnhet(ident)
+                navEnhet = arbeidsfordelingService.hentNavEnhet(gjeldendePersonIdent)
                                    ?.let { it.enhetId + " - " + it.enhetNavn } ?: "Ikke funnet",
                 barn = grunnlagsdata.barn.map {
                     mapBarn(it,
-                            ident,
+                            søkerIdenter.identer(),
                             søker.bostedsadresse,
                             annenForelderMap)
                 }.sortedBy { it.fødselsdato },
@@ -99,12 +101,12 @@ class PersonopplysningerMapper(private val adresseMapper: AdresseMapper,
     }
 
     fun mapBarn(barn: BarnMedIdent,
-                søkerIdent: String,
+                søkerIdenter: Set<String>,
                 bostedsadresserForelder: List<Bostedsadresse>,
                 annenForelderMap: Map<String, AnnenForelderMedIdent>): BarnDto {
 
         val annenForelderIdent = barn.forelderBarnRelasjon.find {
-            it.relatertPersonsIdent != søkerIdent && it.relatertPersonsRolle != Familierelasjonsrolle.BARN
+            !søkerIdenter.contains(it.relatertPersonsIdent) && it.relatertPersonsRolle != Familierelasjonsrolle.BARN
         }?.relatertPersonsIdent
         return BarnDto(personIdent = barn.personIdent,
                        navn = barn.navn.visningsnavn(),

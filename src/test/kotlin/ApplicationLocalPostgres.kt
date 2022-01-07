@@ -17,6 +17,7 @@ fun main(args: Array<String>) {
 
     SpringApplicationBuilder(ApplicationLocalPostgres::class.java)
             .profiles("local",
+                      "mock-arbeidssøker",
                       "mock-integrasjoner",
                       "mock-pdl",
                       "mock-infotrygd-replika",

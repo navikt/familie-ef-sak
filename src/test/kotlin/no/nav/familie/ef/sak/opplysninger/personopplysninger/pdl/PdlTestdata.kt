@@ -120,12 +120,7 @@ object PdlTestdata {
                                                                                    bostedsadresse,
                                                                                    dødsfall,
                                                                                    fødsel,
-                                                                                   navn,
-                                                                                   opphold,
-                                                                                   oppholdsadresse,
-                                                                                   statsborgerskap,
-                                                                                   innflyttingTilNorge,
-                                                                                   utflyttingFraNorge))))
+                                                                                   navn))))
 
     val pdlPersonKortBolk = PersonBolk(listOf(PersonDataBolk("11111122222", "ok",
                                                              PdlPersonKort(adressebeskyttelse,

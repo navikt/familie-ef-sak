@@ -15,11 +15,14 @@ import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
+import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
+import no.nav.familie.ef.sak.vedtak.VedtakRepository
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType.INNVILGE
+import no.nav.familie.ef.sak.vedtak.dto.ResultatType.INNVILGE_MED_OPPHØR
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -34,6 +37,7 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
                            private val behandlingService: BehandlingService,
                            private val vedtaksbrevRepository: VedtaksbrevRepository,
                            private val vedtakService: VedtakService,
+                           private val vedtakRepository: VedtakRepository,
                            private val simuleringService: SimuleringService,
                            private val tilbakekrevingService: TilbakekrevingService,
                            private val vurderingService: VurderingService) : BehandlingSteg<Void?> {
@@ -50,11 +54,13 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
             "Feilutbetaling detektert. Må ta stilling til feilutbetalingsvarsel under simulering"
         }
         validerRiktigTilstandVedInvilgelse(behandling)
+        validerSaksbehandlersignatur(behandling)
+
     }
 
     private fun validerRiktigTilstandVedInvilgelse(behandling: Behandling) {
         val vedtak = vedtakService.hentVedtak(behandling.id)
-        if (vedtak.resultatType == INNVILGE) {
+        if (vedtak.resultatType == INNVILGE || vedtak.resultatType == INNVILGE_MED_OPPHØR) {
             feilHvisIkke(vurderingService.erAlleVilkårOppfylt(behandling.id)) {
                 "Kan ikke innvilge hvis ikke alle vilkår er oppfylt for behandlingId: ${behandling.id}"
             }
@@ -88,9 +94,9 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
         opprettTaskForBehandlingsstatistikk(behandling.id)
     }
 
+
     private fun opprettTaskForBehandlingsstatistikk(behandlingId: UUID) =
             taskRepository.save(BehandlingsstatistikkTask.opprettVedtattTask(behandlingId = behandlingId))
-
 
     private fun ferdigstillOppgave(behandling: Behandling, oppgavetype: Oppgavetype) {
         val aktivIdent = fagsakService.hentAktivIdent(behandling.fagsakId)
@@ -102,11 +108,19 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
         }
     }
 
+
     private fun opprettGodkjennVedtakOppgave(behandling: Behandling) {
         taskRepository.save(OpprettOppgaveTask.opprettTask(
                 OpprettOppgaveTaskData(behandlingId = behandling.id,
                                        oppgavetype = Oppgavetype.GodkjenneVedtak,
                                        beskrivelse = "Sendt til godkjenning av ${SikkerhetContext.hentSaksbehandlerNavn(true)}.")))
+    }
+
+    private fun validerSaksbehandlersignatur(behandling: Behandling) {
+        val vedtaksbrev = vedtaksbrevRepository.findByIdOrThrow(behandling.id)
+        feilHvis(vedtaksbrev.saksbehandlersignatur != SikkerhetContext.hentSaksbehandlerNavn(strict = true)) {
+            "En annen saksbehandler har signert vedtaksbrevet"
+        }
     }
 
     override fun stegType(): StegType {

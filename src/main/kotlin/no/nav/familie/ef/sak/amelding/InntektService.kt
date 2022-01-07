@@ -18,4 +18,9 @@ class InntektService(
         val inntekt = aMeldingInntektClient.hentInntekt(aktivIdent, fom, tom)
         return inntektMapper.mapInntekt(inntekt)
     }
+
+    fun genererAInntektUrl(fagsakId: UUID): String {
+        val personIdent = fagsakService.hentAktivIdent(fagsakId)
+        return aMeldingInntektClient.genererAInntektUrl(personIdent)
+    }
 }

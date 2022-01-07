@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.5.6</version>
+        <version>2.6.2</version>
     </parent>
     <repositories>
         <repository>
@@ -30,13 +30,13 @@
         <changelist>-SNAPSHOT</changelist>
         <java.version>17</java.version>
         <kotlin.version>1.6.0</kotlin.version>
-        <kotlin-coroutines.version>1.5.2</kotlin-coroutines.version>
-        <springfox.version>3.0.0</springfox.version>
-        <mockk.version>1.12.1</mockk.version>
-        <felles.version>1.20211008153542_d279663</felles.version>
+        <kotlin-coroutines.version>1.6.0</kotlin-coroutines.version>
+        <springdoc.version>1.6.1</springdoc.version>
+        <mockk.version>1.12.2</mockk.version>
+        <felles.version>1.20211202083100_64f46dd</felles.version>
         <prosessering.version>1.20211125150647_a7c6f64</prosessering.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>2.0_20211124090411_b1b2f13</kontrakter.version>
+        <kontrakter.version>2.0_20220105105400_27e0fb4</kontrakter.version>
 
 
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
@@ -100,9 +100,14 @@
             <artifactId>jackson-module-kotlin</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-boot-starter</artifactId>
-            <version>${springfox.version}</version>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-ui</artifactId>
+            <version>${springdoc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-kotlin</artifactId>
+            <version>${springdoc.version}</version>
         </dependency>
         <!-- Logging og metrikker -->
         <dependency>
@@ -156,7 +161,7 @@
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
             <artifactId>wiremock-jre8</artifactId>
-            <version>2.31.0</version>
+            <version>2.32.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
