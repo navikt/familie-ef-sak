@@ -27,21 +27,22 @@ class VilkårGrunnlagService(private val medlemskapMapper: MedlemskapMapper,
 
 
     fun hentGrunnlag(behandlingId: UUID,
-                     søknad: SøknadsskjemaOvergangsstønad): VilkårGrunnlagDto {
+                     søknad: SøknadsskjemaOvergangsstønad?): VilkårGrunnlagDto {
         val registergrunnlagData = grunnlagsdataService.hentGrunnlagsdata(behandlingId)
         val grunnlagsdata = registergrunnlagData.grunnlagsdata
 
-        val aktivitet = AktivitetMapper.tilDto(aktivitet = søknad.aktivitet, situasjon = søknad.situasjon, barn = søknad.barn)
-        val barnMedSamvær = mapBarnMedSamvær(grunnlagsdata, søknad)
-        val medlemskap = medlemskapMapper.tilDto(grunnlagsdata, søknad.medlemskap)
-        val sivilstand = SivilstandMapper.tilDto(grunnlagsdata, søknad.sivilstand)
-        val sivilstandsplaner = SivilstandsplanerMapper.tilDto(sivilstandsplaner = søknad.sivilstandsplaner)
-        val sagtOppEllerRedusertStilling = SagtOppEllerRedusertStillingMapper.tilDto(situasjon = søknad.situasjon)
+        val aktivitet = søknad?.let { AktivitetMapper.tilDto(aktivitet = it.aktivitet, situasjon = it.situasjon, barn = it.barn) }
+        // TODO barn må kanskje legges til i en revurdering av migrering på noen måte?
+        val barnMedSamvær = søknad?.let { mapBarnMedSamvær(grunnlagsdata, it) } ?: emptyList()
+        val medlemskap = medlemskapMapper.tilDto(grunnlagsdata, søknad?.medlemskap)
+        val sivilstand = SivilstandMapper.tilDto(grunnlagsdata, søknad?.sivilstand)
+        val sivilstandsplaner = SivilstandsplanerMapper.tilDto(sivilstandsplaner = søknad?.sivilstandsplaner)
+        val sagtOppEllerRedusertStilling = søknad?.let { SagtOppEllerRedusertStillingMapper.tilDto(situasjon = it.situasjon) }
 
         return VilkårGrunnlagDto(tidligereVedtaksperioder = mapTidligereVedtaksperioder(grunnlagsdata.tidligereVedtaksperioder),
                                  medlemskap = medlemskap,
                                  sivilstand = sivilstand,
-                                 bosituasjon = BosituasjonMapper.tilDto(søknad.bosituasjon),
+                                 bosituasjon = søknad?.let { BosituasjonMapper.tilDto(it.bosituasjon) },
                                  barnMedSamvær = barnMedSamvær,
                                  sivilstandsplaner = sivilstandsplaner,
                                  aktivitet = aktivitet,

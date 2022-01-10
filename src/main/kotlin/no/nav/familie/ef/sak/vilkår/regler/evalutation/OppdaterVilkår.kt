@@ -138,10 +138,11 @@ object OppdaterVilkår {
             }
 
     fun opprettNyeVilkårsvurderinger(behandlingId: UUID,
-                                     metadata: HovedregelMetadata): List<Vilkårsvurdering> {
+                                     metadata: HovedregelMetadata,
+                                     erMigrering: Boolean = false): List<Vilkårsvurdering> {
         return alleVilkårsregler
                 .flatMap { vilkårsregel ->
-                    if (vilkårsregel.vilkårType == VilkårType.ALENEOMSORG) {
+                    if (vilkårsregel.vilkårType == VilkårType.ALENEOMSORG && metadata.søknad != null) {
                         metadata.søknad.barn.map {
                             lagNyVilkårsvurdering(vilkårsregel, metadata, behandlingId, it.id)
                         }

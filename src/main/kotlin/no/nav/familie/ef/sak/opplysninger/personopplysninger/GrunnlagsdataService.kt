@@ -51,9 +51,13 @@ class GrunnlagsdataService(private val grunnlagsdataRepository: GrunnlagsdataRep
 
     private fun hentGrunnlagsdataFraRegister(behandlingId: UUID): GrunnlagsdataDomene {
         val søknad = søknadService.hentOvergangsstønad(behandlingId)
-        val personIdent = søknad.fødselsnummer
-        val barneforeldreFraSøknad = søknad.barn.mapNotNull { it.annenForelder?.person?.fødselsnummer }
-        return hentGrunnlagsdataFraRegister(personIdent, barneforeldreFraSøknad)
+        return if(søknad == null) {
+            hentGrunnlagsdataFraRegister(behandlingService.hentAktivIdent(behandlingId), emptyList())
+        } else {
+            val personIdent = søknad.fødselsnummer
+            val barneforeldreFraSøknad = søknad.barn.mapNotNull { it.annenForelder?.person?.fødselsnummer }
+            hentGrunnlagsdataFraRegister(personIdent, barneforeldreFraSøknad)
+        }
     }
 
     fun hentGrunnlagsdataFraRegister(personIdent: String,

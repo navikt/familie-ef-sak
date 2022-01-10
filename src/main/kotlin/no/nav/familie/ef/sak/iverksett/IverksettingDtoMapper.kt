@@ -65,7 +65,7 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
                             private val vilkårsvurderingRepository: VilkårsvurderingRepository,
                             private val søknadService: SøknadService,
                             private val vedtakService: VedtakService,
-                            private val behandlinghistorikkService: BehandlingshistorikkService,
+                            private val behandlingshistorikkService: BehandlingshistorikkService,
                             private val tilkjentYtelseService: TilkjentYtelseService,
                             private val fagsakService: FagsakService,
                             private val simuleringService: SimuleringService,
@@ -78,7 +78,7 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
         val fagsak = fagsakService.hentFagsakForBehandling(behandling.id)
         val vedtak = vedtakService.hentVedtak(behandling.id)
         val saksbehandler =
-                behandlinghistorikkService.finnSisteBehandlingshistorikk(behandling.id, StegType.SEND_TIL_BESLUTTER)?.opprettetAv
+                behandlingshistorikkService.finnSisteBehandlingshistorikk(behandling.id, StegType.SEND_TIL_BESLUTTER)?.opprettetAv
                 ?: error("Kan ikke finne saksbehandler på behandlingen")
         val tilkjentYtelse =
                 if (vedtak.resultatType != ResultatType.AVSLÅ) tilkjentYtelseService.hentForBehandling(behandling.id) else null
@@ -159,6 +159,7 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
 
     private fun mapSøkerDto(fagsak: Fagsak, behandling: Behandling): SøkerDto {
         val søknad = søknadService.hentOvergangsstønad(behandling.id)
+                     ?: return mapSøkerUtenSøknad(fagsak)
         val (grunnlagsdata) = grunnlagsdataService.hentGrunnlagsdata(behandling.id)
         val alleBarn = BarnMatcher.kobleSøknadsbarnOgRegisterBarn(søknad.barn, grunnlagsdata.barn)
         val navEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(søknad.fødselsnummer)
@@ -170,6 +171,11 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
                         },
                         navEnhet,
                         grunnlagsdata.søker.adressebeskyttelse?.let { AdressebeskyttelseGradering.valueOf(it.gradering.name) })
+    }
+
+    private fun mapSøkerUtenSøknad(fagsak: Fagsak): SøkerDto {
+        val tilhørendeEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(fagsak.hentAktivIdent())
+        return SøkerDto(fagsak.hentAktivIdent(), emptyList(), tilhørendeEnhet, AdressebeskyttelseGradering.UGRADERT)
     }
 
     private fun mapBrevmottakere(behandlingId: UUID): List<Brevmottaker> {
