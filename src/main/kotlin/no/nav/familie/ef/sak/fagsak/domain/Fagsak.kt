@@ -14,6 +14,7 @@ data class Fagsak(@Id
                   val eksternId: EksternFagsakId = EksternFagsakId(),
                   @Column("stonadstype")
                   val stønadstype: Stønadstype,
+                  val migrert: Boolean = false,
                   @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                   val sporbar: Sporbar = Sporbar(),
                   @MappedCollection(idColumn = "fagsak_id")

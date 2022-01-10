@@ -16,10 +16,10 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
@@ -44,7 +44,8 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
                         private val behandlingshistorikkService: BehandlingshistorikkService,
                         private val taskService: TaskService,
                         private val søknadService: SøknadService,
-                        private val oppgaveService: OppgaveService) {
+                        private val oppgaveService: OppgaveService,
+                        private val featureToggleService: FeatureToggleService) {
 
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
@@ -74,15 +75,27 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
         return behandlingsjournalpostRepository.findAllByBehandlingId(behandlingId)
     }
 
+    fun opprettMigrering(fagsakId: UUID): Behandling {
+        return opprettBehandling(behandlingType = BehandlingType.REVURDERING,
+                                 fagsakId = fagsakId,
+                                 behandlingsårsak = BehandlingÅrsak.SØKNAD, // TODO ??
+                                 erMigrering = true)
+    }
+
     fun opprettBehandling(behandlingType: BehandlingType,
                           fagsakId: UUID,
                           status: BehandlingStatus = BehandlingStatus.OPPRETTET,
                           stegType: StegType = VILKÅR,
                           behandlingsårsak: BehandlingÅrsak,
-                          kravMottatt: LocalDate? = null): Behandling {
+                          kravMottatt: LocalDate? = null,
+                          erMigrering: Boolean = false): Behandling {
+        feilHvis(erMigrering && !featureToggleService.isEnabled("familie.ef.sak.migrering")) {
+            "Feature toggle for migrering er disabled"
+        }
+
         val tidligereBehandlinger = behandlingRepository.findByFagsakId(fagsakId)
         val forrigeBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
-        validerKanOppretteNyBehandling(behandlingType, tidligereBehandlinger, forrigeBehandling)
+        validerKanOppretteNyBehandling(behandlingType, tidligereBehandlinger, forrigeBehandling, erMigrering)
 
         val behandling = behandlingRepository.insert(Behandling(fagsakId = fagsakId,
                                                                 forrigeBehandlingId = forrigeBehandling?.id,
