@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.brev.BrevmottakereRepository
 import no.nav.familie.ef.sak.brev.domain.MottakerRolle
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
@@ -65,7 +66,7 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
                             private val vilkårsvurderingRepository: VilkårsvurderingRepository,
                             private val søknadService: SøknadService,
                             private val vedtakService: VedtakService,
-                            private val behandlinghistorikkService: BehandlingshistorikkService,
+                            private val behandlingshistorikkService: BehandlingshistorikkService,
                             private val tilkjentYtelseService: TilkjentYtelseService,
                             private val fagsakService: FagsakService,
                             private val simuleringService: SimuleringService,
@@ -74,12 +75,21 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
                             private val brevmottakereRepository: BrevmottakereRepository) {
 
     fun tilDto(behandling: Behandling, beslutter: String): IverksettDto {
+        val saksbehandler =
+                behandlingshistorikkService.finnSisteBehandlingshistorikk(behandling.id, StegType.SEND_TIL_BESLUTTER)?.opprettetAv
+                ?: error("Kan ikke finne saksbehandler på behandlingen")
+        return tilDto(behandling, saksbehandler, beslutter)
+    }
 
+    fun tilMigreringDto(behandling: Behandling): IverksettDto {
+        return tilDto(behandling, SikkerhetContext.SYSTEM_FORKORTELSE, SikkerhetContext.SYSTEM_FORKORTELSE)
+    }
+
+    private fun tilDto(behandling: Behandling,
+                       saksbehandler: String,
+                       beslutter: String): IverksettDto {
         val fagsak = fagsakService.hentFagsakForBehandling(behandling.id)
         val vedtak = vedtakService.hentVedtak(behandling.id)
-        val saksbehandler =
-                behandlinghistorikkService.finnSisteBehandlingshistorikk(behandling.id, StegType.SEND_TIL_BESLUTTER)?.opprettetAv
-                ?: error("Kan ikke finne saksbehandler på behandlingen")
         val tilkjentYtelse =
                 if (vedtak.resultatType != ResultatType.AVSLÅ) tilkjentYtelseService.hentForBehandling(behandling.id) else null
         val vilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(behandling.id)

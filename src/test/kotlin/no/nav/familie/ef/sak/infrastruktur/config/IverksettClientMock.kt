@@ -20,15 +20,10 @@ class IverksettClientMock {
     @Bean
     @Primary
     fun iverksettClient(): IverksettClient {
-        val iverksettClient = mockk<IverksettClient>()
+        val iverksettClient = mockk<IverksettClient>(relaxed = true)
 
         every { iverksettClient.simuler(any()) } returns objectMapper.readValue(readFile("simuleringsresultat_beriket.json"))
-
-        every { iverksettClient.iverksett(any(), any()) } just Runs
-        every { iverksettClient.iverksettTekniskOpphør(any()) } just Runs
         every { iverksettClient.hentStatus(any()) } returns IverksettStatus.OK
-        every { iverksettClient.sendBehandlingsstatistikk(any()) } just Runs
-        every { iverksettClient.sendFrittståendeBrev(any()) } just Runs
 
         return iverksettClient
     }

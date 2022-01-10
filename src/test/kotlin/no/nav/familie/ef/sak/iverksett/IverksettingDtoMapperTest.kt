@@ -19,7 +19,7 @@ internal class IverksettingDtoMapperTest {
     val simuleringService = mockk<SimuleringService>()
     val iverksettingDtoMapper =
             IverksettingDtoMapper(arbeidsfordelingService = mockk(),
-                                  behandlinghistorikkService = mockk(),
+                                  behandlingshistorikkService = mockk(),
                                   fagsakService = mockk(),
                                   grunnlagsdataService = mockk(),
                                   simuleringService = simuleringService,

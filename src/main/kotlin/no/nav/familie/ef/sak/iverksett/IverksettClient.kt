@@ -67,6 +67,11 @@ class IverksettClient(@Value("\${FAMILIE_EF_IVERKSETT_URL}")
         postForEntity<Any>(url, request, headers)
     }
 
+    fun iverksettMigrering(iverksettDto: IverksettDto) {
+        val url = URI.create("$familieEfIverksettUri/api/iverksett/migrering")
+        postForEntity<Any>(url, iverksettDto)
+    }
+
     fun iverksettTekniskOpphør(tekniskOpphørDto: TekniskOpphørDto) {
         val url = URI.create("$familieEfIverksettUri/api/tekniskopphor")
         postForEntity<Any>(url, tekniskOpphørDto, HttpHeaders().medContentTypeJsonUTF8())
