@@ -78,7 +78,7 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
     fun opprettMigrering(fagsakId: UUID): Behandling {
         return opprettBehandling(behandlingType = BehandlingType.REVURDERING,
                                  fagsakId = fagsakId,
-                                 behandlingsårsak = BehandlingÅrsak.SØKNAD, // TODO ??
+                                 behandlingsårsak = BehandlingÅrsak.MIGRERING,
                                  erMigrering = true)
     }
 
