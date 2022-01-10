@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 internal class OpprettBehandlingUtilTest {
@@ -99,7 +100,7 @@ internal class OpprettBehandlingUtilTest {
                                                              type = BehandlingType.BLANKETT,
                                                              henlagtÅrsak = HenlagtÅrsak.BEHANDLES_I_GOSYS,
                                                              status = BehandlingStatus.FERDIGSTILT)), null)
-        }).hasMessage("Siste behandling ble behandlet i infotrygd")
+        }).hasMessage("Siste behandling ble behandlet i infotrygd, denne må migreres")
     }
 
     @Test
@@ -143,6 +144,34 @@ internal class OpprettBehandlingUtilTest {
             validerKanOppretteNyBehandling(BehandlingType.TEKNISK_OPPHØR,
                                            listOf(BehandlingOppsettUtil.henlagtRevurdering), null)
         }).hasMessage("Det finnes ikke en tidligere behandling for fagsaken")
+    }
+
+    @Nested
+    inner class Migrering {
+
+        @Test
+        internal fun `skal kunne opprette en migrering uten tidligere behandlinger`() {
+            validerKanOppretteNyBehandling(BehandlingType.REVURDERING, listOf(), null, erMigrering = true)
+        }
+
+        @Test
+        internal fun `skal kunne opprette en migrering når tidligere behanding er blankett`() {
+            validerKanOppretteNyBehandling(BehandlingType.REVURDERING,
+                                           listOf(BehandlingOppsettUtil.ferdigstiltBlankett),
+                                           null,
+                                           erMigrering = true)
+        }
+
+        @Test
+        internal fun `kan ikke opprette en migrering når tidligere behanding ikke er blankett`() {
+            listOf(iverksattFørstegangsbehandling, iverksattRevurdering).forEach {
+                assertThat(catchThrowable {
+                    validerKanOppretteNyBehandling(BehandlingType.REVURDERING,
+                                                   listOf(it), null,
+                                                   erMigrering = true)
+                }).hasMessage("Det er ikke mulig å opprette en migrering når det finnes en behandling fra før")
+            }
+        }
     }
 
 }

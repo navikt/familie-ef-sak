@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import org.springframework.http.HttpStatus
 
 object OpprettBehandlingUtil {
@@ -14,18 +15,26 @@ object OpprettBehandlingUtil {
      */
     fun validerKanOppretteNyBehandling(behandlingType: BehandlingType,
                                        tidligereBehandlinger: List<Behandling>,
-                                       sistIverksatteBehandling: Behandling?) {
+                                       sistIverksatteBehandling: Behandling?,
+                                       erMigrering: Boolean = false) {
         val sisteBehandling = tidligereBehandlinger
                 .filter { it.resultat != BehandlingResultat.HENLAGT && it.status == BehandlingStatus.FERDIGSTILT }
                 .maxByOrNull { it.sporbar.opprettetTid }
 
         validerTidligereBehandlingerErFerdigstilte(tidligereBehandlinger)
+        validerMigreringErRevurdering(behandlingType, erMigrering)
 
         when (behandlingType) {
             BehandlingType.BLANKETT -> validerKanOppretteBlankett(tidligereBehandlinger)
             BehandlingType.FØRSTEGANGSBEHANDLING -> validerKanOppretteFørstegangsbehandling(sisteBehandling)
-            BehandlingType.REVURDERING -> validerKanOppretteRevurdering(sisteBehandling)
+            BehandlingType.REVURDERING -> validerKanOppretteRevurdering(sisteBehandling, erMigrering)
             BehandlingType.TEKNISK_OPPHØR -> validerTekniskOpphør(sisteBehandling, sistIverksatteBehandling)
+        }
+    }
+
+    private fun validerMigreringErRevurdering(behandlingType: BehandlingType, erMigrering: Boolean) {
+        feilHvis(erMigrering && behandlingType != BehandlingType.REVURDERING) {
+            "Det er ikke mulig å lage en migrering av annet enn revurdering"
         }
     }
 
@@ -63,14 +72,17 @@ object OpprettBehandlingUtil {
         }
     }
 
-    private fun validerKanOppretteRevurdering(sisteBehandling: Behandling?) {
-        if (sisteBehandling == null) {
+    private fun validerKanOppretteRevurdering(sisteBehandling: Behandling?, erMigrering: Boolean) {
+        if (sisteBehandling == null && !erMigrering) {
             throw ApiFeil("Det finnes ikke en tidligere behandling på fagsaken", HttpStatus.BAD_REQUEST)
         }
-        if (sisteBehandling.type == BehandlingType.BLANKETT) { // Hvordan blir migrerte behandlinger behandlet?
-            throw ApiFeil("Siste behandling ble behandlet i infotrygd", HttpStatus.BAD_REQUEST)
+        if (!erMigrering && sisteBehandling?.type == BehandlingType.BLANKETT) {
+            throw ApiFeil("Siste behandling ble behandlet i infotrygd, denne må migreres", HttpStatus.BAD_REQUEST)
         }
-        if (sisteBehandling.type == BehandlingType.TEKNISK_OPPHØR) {
+        if(erMigrering && sisteBehandling != null && sisteBehandling.type != BehandlingType.BLANKETT) {
+            throw ApiFeil("Det er ikke mulig å opprette en migrering når det finnes en behandling fra før", HttpStatus.BAD_REQUEST)
+        }
+        if (sisteBehandling?.type == BehandlingType.TEKNISK_OPPHØR) {
             throw ApiFeil("Det er ikke mulig å lage en revurdering når siste behandlingen er teknisk opphør",
                           HttpStatus.BAD_REQUEST)
         }

@@ -55,7 +55,7 @@ internal class BehandlingServiceIntegrationTest : OppslagSpringRunnerTest() {
             behandlingService.opprettBehandling(BehandlingType.REVURDERING,
                                                 fagsak.id,
                                                 behandlingsårsak = behandlingÅrsak)
-        }.hasMessage("Siste behandling ble behandlet i infotrygd")
+        }.hasMessage("Siste behandling ble behandlet i infotrygd, denne må migreres")
     }
 
     @Test
