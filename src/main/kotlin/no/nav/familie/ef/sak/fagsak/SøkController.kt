@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.fagsak
 
+import no.nav.familie.ef.sak.fagsak.dto.SøkeresultatUtenFagsak
 import no.nav.familie.ef.sak.fagsak.dto.Søkeresultat
 import no.nav.familie.ef.sak.fagsak.dto.SøkeresultatPerson
 import no.nav.familie.ef.sak.felles.dto.PersonIdentDto
@@ -25,6 +26,13 @@ class SøkController(private val søkService: SøkService, private val tilgangSe
     fun søkPerson(@RequestBody personIdentRequest: PersonIdentDto): Ressurs<Søkeresultat> {
         tilgangService.validerTilgangTilPersonMedBarn(personIdentRequest.personIdent)
         return Ressurs.success(søkService.søkPerson(personIdentRequest.personIdent))
+    }
+
+    @PostMapping("/uten-fagsak")
+    fun søkPersonUtenFagsak(@RequestBody personIdentRequest: PersonIdentDto): Ressurs<SøkeresultatUtenFagsak> {
+        tilgangService.validerTilgangTilPerson(personIdentRequest.personIdent)
+
+        return Ressurs.success(søkService.søkPersonUtenFagsak(personIdentRequest.personIdent))
     }
 
     @GetMapping("{behandlingId}/samme-adresse")
