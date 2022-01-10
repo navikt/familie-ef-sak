@@ -40,12 +40,15 @@ class BrevClient(@Value("\${FAMILIE_BREV_API_URL}")
                              HttpHeaders().medContentTypeJsonUTF8())
     }
 
-    fun genererBrev(fritekstBrev: FrittståendeBrevRequestDto, saksbehandlersignatur: String): ByteArray {
+    fun genererBrev(fritekstBrev: FrittståendeBrevRequestDto,
+                    saksbehandlerNavn: String,
+                    enhet: String = "NAV Arbeid og ytelser"): ByteArray {
         val url = URI.create("$familieBrevUri/api/fritekst-brev")
         return postForEntity(url,
                              FritekstBrevRequestMedSignatur(fritekstBrev,
-                                                            saksbehandlersignatur,
-                                                            null),
+                                                            saksbehandlerNavn,
+                                                            null,
+                                                            enhet),
                              HttpHeaders().medContentTypeJsonUTF8())
     }
 
@@ -62,4 +65,5 @@ data class BrevRequestMedSignaturer(val brevFraSaksbehandler: JsonNode,
 
 data class FritekstBrevRequestMedSignatur(val brevFraSaksbehandler: FrittståendeBrevRequestDto,
                                           val saksbehandlersignatur: String,
-                                          val besluttersignatur: String?)
+                                          val besluttersignatur: String?,
+                                          val enhet: String)

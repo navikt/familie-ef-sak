@@ -16,7 +16,6 @@ import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevType
-import no.nav.familie.kontrakter.ef.felles.StønadType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.DynamicTest
@@ -49,11 +48,15 @@ internal class FrittståendeBrevServiceTest {
             Pair(Stønadstype.OVERGANGSSTØNAD,
                  FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT) to FrittståendeBrevType.INFOBREV_OVERGANGSSTØNAD,
             Pair(Stønadstype.SKOLEPENGER, FrittståendeBrevKategori.INFORMASJONSBREV) to FrittståendeBrevType.INFOBREV_SKOLEPENGER,
-            Pair(Stønadstype.SKOLEPENGER, FrittståendeBrevKategori.INNHENTING_AV_OPPLYSNINGER) to FrittståendeBrevType.MANGELBREV_SKOLEPENGER,
-            Pair(Stønadstype.SKOLEPENGER, FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT) to FrittståendeBrevType.INFOBREV_SKOLEPENGER,
+            Pair(Stønadstype.SKOLEPENGER,
+                 FrittståendeBrevKategori.INNHENTING_AV_OPPLYSNINGER) to FrittståendeBrevType.MANGELBREV_SKOLEPENGER,
+            Pair(Stønadstype.SKOLEPENGER,
+                 FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT) to FrittståendeBrevType.INFOBREV_SKOLEPENGER,
             Pair(Stønadstype.BARNETILSYN, FrittståendeBrevKategori.INFORMASJONSBREV) to FrittståendeBrevType.INFOBREV_BARNETILSYN,
-            Pair(Stønadstype.BARNETILSYN, FrittståendeBrevKategori.INNHENTING_AV_OPPLYSNINGER) to FrittståendeBrevType.MANGELBREV_BARNETILSYN,
-            Pair(Stønadstype.BARNETILSYN, FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT) to FrittståendeBrevType.INFOBREV_BARNETILSYN)
+            Pair(Stønadstype.BARNETILSYN,
+                 FrittståendeBrevKategori.INNHENTING_AV_OPPLYSNINGER) to FrittståendeBrevType.MANGELBREV_BARNETILSYN,
+            Pair(Stønadstype.BARNETILSYN,
+                 FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT) to FrittståendeBrevType.INFOBREV_BARNETILSYN)
 
     @TestFactory
     fun `skal sende frittstående brev med riktig brevtype`() =
@@ -63,7 +66,7 @@ internal class FrittståendeBrevServiceTest {
                     mockAvhengigheter()
 
                     val frittståendeBrevSlot = slot<KontrakterFrittståendeBrevDto>()
-                    every { fagsakService.hentFagsak(any())} returns Fagsak(stønadstype = input.first)
+                    every { fagsakService.hentFagsak(any()) } returns Fagsak(stønadstype = input.first)
                     every { iverksettClient.sendFrittståendeBrev(capture(frittståendeBrevSlot)) } just Runs
 
                     frittståendeBrevService.sendFrittståendeBrev(FrittståendeBrevDto("overskrift",
@@ -77,7 +80,7 @@ internal class FrittståendeBrevServiceTest {
 
     private fun mockAvhengigheter() {
         BrukerContextUtil.mockBrukerContext("Saksbehandler")
-        every { brevClient.genererBrev(any(), any()) } returns "123".toByteArray()
+        every { brevClient.genererBrev(any(), any(), "NAV Arbeid og ytelser") } returns "123".toByteArray()
         every { fagsakService.hentAktivIdent(any()) } returns "12345678910"
         every { fagsakService.hentEksternId(any()) } returns Long.MAX_VALUE
         every { personopplysningerService.hentGjeldeneNavn(any()) } returns mapOf("12345678910" to "Navn Navnesen")

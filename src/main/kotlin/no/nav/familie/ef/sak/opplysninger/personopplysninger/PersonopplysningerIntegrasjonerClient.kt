@@ -15,6 +15,7 @@ import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
 import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
+import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Component
@@ -48,6 +49,12 @@ class PersonopplysningerIntegrasjonerClient(@Qualifier("azure") restOperations: 
     fun hentNavEnhetForPersonMedRelasjoner(ident: String): List<Arbeidsfordelingsenhet> {
         val uri = integrasjonerConfig.arbeidsfordelingMedRelasjonerUri
         return hentArbeidsfordelingEnhet(uri, ident)
+    }
+
+    fun hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(personIdent: String): ADRESSEBESKYTTELSEGRADERING {
+        return postForEntity(integrasjonerConfig.adressebeskyttelse, PersonIdent(personIdent), HttpHeaders().also {
+            it.set(HEADER_NAV_TEMA, HEADER_NAV_TEMA_ENF)
+        })
     }
 
     private fun hentArbeidsfordelingEnhet(uri: URI,

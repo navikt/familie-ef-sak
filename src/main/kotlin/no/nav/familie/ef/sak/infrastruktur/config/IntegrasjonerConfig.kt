@@ -14,6 +14,9 @@ class IntegrasjonerConfig(@Value("\${FAMILIE_INTEGRASJONER_URL}") private val in
             UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_TILGANG_RELASJONER).build().toUri()
     val tilgangPersonUri: URI = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_TILGANG_PERSON).build().toUri()
 
+    val adressebeskyttelse: URI =
+            UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_ADRESSEBESKYTTELSE).build().toUri()
+
     val kodeverkLandkoderUri: URI =
             UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_KODEVERK_LANDKODER).build().toUri()
 
@@ -27,7 +30,8 @@ class IntegrasjonerConfig(@Value("\${FAMILIE_INTEGRASJONER_URL}") private val in
 
     val arbeidsfordelingUri: URI = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_ARBEIDSFORDELING).build().toUri()
 
-    val arbeidsfordelingMedRelasjonerUri: URI = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_BEHANDLENDE_ENHET_MED_RELASJONER).build() .toUri()
+    val arbeidsfordelingMedRelasjonerUri: URI =
+            UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_BEHANDLENDE_ENHET_MED_RELASJONER).build().toUri()
 
     val arbeidsforholdUri: URI = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_ARBEIDSFORHOLD).build().toUri()
 
@@ -52,6 +56,7 @@ class IntegrasjonerConfig(@Value("\${FAMILIE_INTEGRASJONER_URL}") private val in
         private const val PATH_KODEVERK_INNTEKT = "api/kodeverk/inntekt"
         private const val PATH_TILGANG_RELASJONER = "api/tilgang/person-med-relasjoner"
         private const val PATH_TILGANG_PERSON = "api/tilgang/v2/personer"
+        private const val PATH_ADRESSEBESKYTTELSE = "/api/personopplysning/strengeste-adressebeskyttelse/"
         private const val PATH_EGEN_ANSATT = "api/egenansatt"
         private const val PATH_ARBEIDSFORDELING = "api/arbeidsfordeling/enhet/ENF"
         private const val PATH_BEHANDLENDE_ENHET_MED_RELASJONER = "api/arbeidsfordeling/enhet/ENF/med-relasjoner"
