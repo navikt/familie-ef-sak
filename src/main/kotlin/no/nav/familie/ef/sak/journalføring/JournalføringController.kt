@@ -58,10 +58,7 @@ class JournalføringController(private val journalføringService: Journalføring
         val (_, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
         tilgangService.validerTilgangTilPersonMedBarn(personIdent)
         tilgangService.validerHarSaksbehandlerrolle()
-        if (featureToggleService.isEnabled("familie.ef.sak.journalfoer")) {
-            return Ressurs.success(journalføringService.fullførJournalpost(journalføringRequest, journalpostId))
-        }
-        throw ApiFeil("Toggelen familie.ef.sak.journalfoer er ikke aktivert", HttpStatus.BAD_REQUEST)
+        return Ressurs.success(journalføringService.fullførJournalpost(journalføringRequest, journalpostId))
     }
 
     fun finnJournalpostOgPersonIdent(journalpostId: String): Pair<Journalpost, String> {

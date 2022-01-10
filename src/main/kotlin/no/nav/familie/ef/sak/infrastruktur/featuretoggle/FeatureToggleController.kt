@@ -13,9 +13,7 @@ import org.springframework.web.bind.annotation.RestController
 @Unprotected
 class FeatureToggleController(private val featureToggleService: FeatureToggleService) {
 
-    private val funksjonsbrytere = listOf("familie.ef.sak.journalfoer",
-                                          "familie.ef.sak.tekniskopphor",
-                                          "familie.ef.sak.frontend-vis-tilbakekreving-varsel",
+    private val funksjonsbrytere = listOf("familie.ef.sak.tekniskopphor",
                                           "familie.ef.sak.frontend-vis-ikke-publiserte-brevmaler",
                                           "familie.ef.sak.frontend-vis-oppdatering-av-registeropplysninger",
                                           "familie.ef.sak.innvilge-med-opphoer",

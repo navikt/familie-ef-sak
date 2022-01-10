@@ -24,10 +24,6 @@ class RevurderingsController(
 
     @PostMapping("{fagsakId}")
     fun startRevurdering(@RequestBody revurderingInnhold: RevurderingDto): Ressurs<UUID> {
-        if (!featureToggleService.isEnabled("familie.ef.sak.start-revurdering")) {
-            throw Feil("Toggle for start revurdering er skrudd av",
-                       "Kan ikke opprette revurdering da den er skrudd av")
-        }
         tilgangService.validerTilgangTilFagsak(revurderingInnhold.fagsakId)
         tilgangService.validerHarSaksbehandlerrolle()
         val revurdering = revurderingService.opprettRevurderingManuelt(revurderingInnhold)
