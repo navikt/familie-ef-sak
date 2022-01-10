@@ -1,7 +1,5 @@
 package no.nav.familie.ef.sak.journalføring
 
-import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequest
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringResponse
@@ -10,7 +8,6 @@ import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -27,8 +24,7 @@ import org.springframework.web.bind.annotation.RestController
 @Validated
 class JournalføringController(private val journalføringService: JournalføringService,
                               private val pdlClient: PdlClient,
-                              private val tilgangService: TilgangService,
-                              private val featureToggleService: FeatureToggleService) {
+                              private val tilgangService: TilgangService) {
 
     @GetMapping("/{journalpostId}")
     fun hentJournalPost(@PathVariable journalpostId: String): Ressurs<JournalføringResponse> {
