@@ -9,7 +9,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdat
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Arbeidssituasjon
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Dokumentasjon
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.GjelderDeg
-import no.nav.familie.ef.sak.brev.domain.Brevmottakere
 import no.nav.familie.ef.sak.brev.domain.OrganisasjonerWrapper
 import no.nav.familie.ef.sak.brev.domain.PersonerWrapper
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
