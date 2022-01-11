@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadsskjemaOvergangsstønad
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.simulering.hentSammenhengendePerioderMedFeilutbetaling
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
@@ -160,22 +161,29 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
     private fun mapSøkerDto(fagsak: Fagsak, behandling: Behandling): SøkerDto {
         val søknad = søknadService.hentOvergangsstønad(behandling.id)
                      ?: return mapSøkerUtenSøknad(fagsak)
+        return mapSøkerMedSøknad(fagsak, behandling, søknad)
+    }
+
+    private fun mapSøkerUtenSøknad(fagsak: Fagsak): SøkerDto {
+        val tilhørendeEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(fagsak.hentAktivIdent())
+        return SøkerDto(fagsak.hentAktivIdent(), emptyList(), tilhørendeEnhet, AdressebeskyttelseGradering.UGRADERT)
+    }
+
+    private fun mapSøkerMedSøknad(fagsak: Fagsak,
+                                  behandling: Behandling,
+                                  søknad: SøknadsskjemaOvergangsstønad): SøkerDto {
+        val personIdent = fagsak.hentAktivIdent()
         val (grunnlagsdata) = grunnlagsdataService.hentGrunnlagsdata(behandling.id)
         val alleBarn = BarnMatcher.kobleSøknadsbarnOgRegisterBarn(søknad.barn, grunnlagsdata.barn)
-        val navEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(søknad.fødselsnummer)
+        val navEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(personIdent)
 
-        return SøkerDto(fagsak.hentAktivIdent(),
+        return SøkerDto(personIdent,
                         alleBarn.map {
                             BarnDto(personIdent = it.fødselsnummer,
                                     termindato = it.søknadsbarn.fødselTermindato)
                         },
                         navEnhet,
                         grunnlagsdata.søker.adressebeskyttelse?.let { AdressebeskyttelseGradering.valueOf(it.gradering.name) })
-    }
-
-    private fun mapSøkerUtenSøknad(fagsak: Fagsak): SøkerDto {
-        val tilhørendeEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(fagsak.hentAktivIdent())
-        return SøkerDto(fagsak.hentAktivIdent(), emptyList(), tilhørendeEnhet, AdressebeskyttelseGradering.UGRADERT)
     }
 
     private fun mapBrevmottakere(behandlingId: UUID): List<Brevmottaker> {

@@ -7,7 +7,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Personopplysnin
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.PersonopplysningerMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
-import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
