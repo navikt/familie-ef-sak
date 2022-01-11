@@ -22,14 +22,13 @@ import java.util.UUID
  * En kjøring som er for tidlig ute skal få f.o.m i dag, og en som kjøres for sent skal få en f.o.m dato som er den første dagen
  * etter den forrige perioden.
  */
-internal class OpprettOppgaveForBarnServiceTest {
+internal class ForberedOppgaveForBarnServiceTest {
 
     val behandlingRepository = mockk<BehandlingRepository>()
     val iverksettClient = mockk<IverksettClient>()
     val opprettOppgaveForBarnService = ForberedOppgaveForBarnService(behandlingRepository, iverksettClient)
 
     val SISTE_KJØRING_EN_UKE_SIDEN = LocalDate.now().minusWeeks(1)
-    val INNEN_ANTALL_UKER = 1L
 
     @BeforeEach
     fun init() {
@@ -43,7 +42,7 @@ internal class OpprettOppgaveForBarnServiceTest {
         every {
             behandlingRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, any())
         } returns listOf(opprettBarn(fødselsnummer = generateFnr(fødselsdato)))
-        opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAar(INNEN_ANTALL_UKER, SISTE_KJØRING_EN_UKE_SIDEN)
+        opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(SISTE_KJØRING_EN_UKE_SIDEN)
         verify { OppgaveBeskrivelse.beskrivelseBarnBlirSeksMnd() }
         verify(exactly = 0) { OppgaveBeskrivelse.beskrivelseBarnFyllerEttÅr() }
     }
@@ -54,7 +53,7 @@ internal class OpprettOppgaveForBarnServiceTest {
         every {
             behandlingRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, any())
         } returns listOf(opprettBarn(fødselsnummer = generateFnr(fødselsdato)))
-        opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAar(INNEN_ANTALL_UKER, SISTE_KJØRING_EN_UKE_SIDEN)
+        opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(SISTE_KJØRING_EN_UKE_SIDEN)
         verify(exactly = 1) { OppgaveBeskrivelse.beskrivelseBarnBlirSeksMnd() }
         verify(exactly = 0) { OppgaveBeskrivelse.beskrivelseBarnFyllerEttÅr() }
     }
@@ -66,7 +65,7 @@ internal class OpprettOppgaveForBarnServiceTest {
         every {
             behandlingRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, any())
         } returns listOf(opprettBarn(fødselsnummer = generateFnr(fødselsdato)))
-        opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAar(INNEN_ANTALL_UKER, SISTE_KJØRING_EN_UKE_SIDEN)
+        opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(SISTE_KJØRING_EN_UKE_SIDEN)
         verify { OppgaveBeskrivelse.beskrivelseBarnBlirSeksMnd() }
         verify(exactly = 0) { OppgaveBeskrivelse.beskrivelseBarnFyllerEttÅr() }
     }
@@ -77,7 +76,7 @@ internal class OpprettOppgaveForBarnServiceTest {
         every {
             behandlingRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, any())
         } returns listOf(opprettBarn(fødselsnummer = generateFnr(fødselsdato)))
-        opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAar(INNEN_ANTALL_UKER, SISTE_KJØRING_EN_UKE_SIDEN)
+        opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(SISTE_KJØRING_EN_UKE_SIDEN)
         verify { OppgaveBeskrivelse.beskrivelseBarnBlirSeksMnd() }
         verify(exactly = 0) { OppgaveBeskrivelse.beskrivelseBarnFyllerEttÅr() }
     }
@@ -88,7 +87,7 @@ internal class OpprettOppgaveForBarnServiceTest {
         every {
             behandlingRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, any())
         } returns listOf(opprettBarn(fødselsnummer = generateFnr(fødselsdato)))
-        opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAar(INNEN_ANTALL_UKER, SISTE_KJØRING_EN_UKE_SIDEN)
+        opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(SISTE_KJØRING_EN_UKE_SIDEN)
         verify(exactly = 0) { OppgaveBeskrivelse.beskrivelseBarnBlirSeksMnd() }
         verify(exactly = 0) { OppgaveBeskrivelse.beskrivelseBarnFyllerEttÅr() }
     }
@@ -99,7 +98,7 @@ internal class OpprettOppgaveForBarnServiceTest {
         every {
             behandlingRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, any())
         } returns fødselsdatoer.map { opprettBarn(generateFnr(it)) }
-        opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAar(INNEN_ANTALL_UKER, SISTE_KJØRING_EN_UKE_SIDEN)
+        opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(SISTE_KJØRING_EN_UKE_SIDEN)
         verify(exactly = 0) { OppgaveBeskrivelse.beskrivelseBarnFyllerEttÅr() }
         verify(exactly = 8) { OppgaveBeskrivelse.beskrivelseBarnBlirSeksMnd() }
     }
@@ -110,7 +109,7 @@ internal class OpprettOppgaveForBarnServiceTest {
         every {
             behandlingRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, any())
         } returns fødselsdatoer.map { opprettBarn(generateFnr(it)) }
-        opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAar(INNEN_ANTALL_UKER, SISTE_KJØRING_EN_UKE_SIDEN)
+        opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(SISTE_KJØRING_EN_UKE_SIDEN)
         verify(exactly = 8) { OppgaveBeskrivelse.beskrivelseBarnFyllerEttÅr() }
         verify(exactly = 0) { OppgaveBeskrivelse.beskrivelseBarnBlirSeksMnd() }
     }
@@ -121,7 +120,7 @@ internal class OpprettOppgaveForBarnServiceTest {
         every {
             behandlingRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, any())
         } returns listOf(opprettBarn(fødselsnummer = generateFnr(fødselsdato)))
-        opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAar(INNEN_ANTALL_UKER, SISTE_KJØRING_EN_UKE_SIDEN)
+        opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(SISTE_KJØRING_EN_UKE_SIDEN)
         verify(exactly = 0) { OppgaveBeskrivelse.beskrivelseBarnBlirSeksMnd() }
         verify { OppgaveBeskrivelse.beskrivelseBarnFyllerEttÅr() }
     }
@@ -132,7 +131,7 @@ internal class OpprettOppgaveForBarnServiceTest {
         every {
             behandlingRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, any())
         } returns listOf(opprettBarn(fødselsnummer = generateFnr(fødselsdato)))
-        opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAar(INNEN_ANTALL_UKER, SISTE_KJØRING_EN_UKE_SIDEN)
+        opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(SISTE_KJØRING_EN_UKE_SIDEN)
         verify(exactly = 0) { OppgaveBeskrivelse.beskrivelseBarnBlirSeksMnd() }
         verify(exactly = 1) { OppgaveBeskrivelse.beskrivelseBarnFyllerEttÅr() }
     }
@@ -143,7 +142,7 @@ internal class OpprettOppgaveForBarnServiceTest {
         every {
             behandlingRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, any())
         } returns listOf(opprettBarn(fødselsnummer = generateFnr(fødselsdato)))
-        opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAar(INNEN_ANTALL_UKER, SISTE_KJØRING_EN_UKE_SIDEN)
+        opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(SISTE_KJØRING_EN_UKE_SIDEN)
         verify(exactly = 0) { OppgaveBeskrivelse.beskrivelseBarnBlirSeksMnd() }
         verify { OppgaveBeskrivelse.beskrivelseBarnFyllerEttÅr() }
     }
@@ -154,8 +153,7 @@ internal class OpprettOppgaveForBarnServiceTest {
         every {
             behandlingRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, any())
         } returns listOf(opprettBarn(fødselsnummer = generateFnr(fødselsdato)))
-        opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAar(INNEN_ANTALL_UKER,
-                                                                             SISTE_KJØRING_EN_UKE_SIDEN.minusDays(2))
+        opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(SISTE_KJØRING_EN_UKE_SIDEN.minusDays(2))
         verify(exactly = 0) { OppgaveBeskrivelse.beskrivelseBarnBlirSeksMnd() }
         verify { OppgaveBeskrivelse.beskrivelseBarnFyllerEttÅr() }
     }
@@ -166,8 +164,7 @@ internal class OpprettOppgaveForBarnServiceTest {
         every {
             behandlingRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, any())
         } returns listOf(opprettBarn(fødselsnummer = generateFnr(fødselsdato)))
-        opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAar(INNEN_ANTALL_UKER,
-                                                                             SISTE_KJØRING_EN_UKE_SIDEN.minusDays(2))
+        opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(SISTE_KJØRING_EN_UKE_SIDEN.minusDays(2))
         verify(exactly = 0) { OppgaveBeskrivelse.beskrivelseBarnBlirSeksMnd() }
         verify(exactly = 0) { OppgaveBeskrivelse.beskrivelseBarnFyllerEttÅr() }
     }
@@ -178,8 +175,7 @@ internal class OpprettOppgaveForBarnServiceTest {
         every {
             behandlingRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, any())
         } returns listOf(opprettBarn(fødselsnummer = generateFnr(fødselsdato)))
-        opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAar(INNEN_ANTALL_UKER,
-                                                                             SISTE_KJØRING_EN_UKE_SIDEN.minusDays(7))
+        opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(SISTE_KJØRING_EN_UKE_SIDEN.minusDays(7))
         verify(exactly = 0) { OppgaveBeskrivelse.beskrivelseBarnBlirSeksMnd() }
         verify(exactly = 1) { OppgaveBeskrivelse.beskrivelseBarnFyllerEttÅr() }
     }

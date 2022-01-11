@@ -12,16 +12,16 @@ import java.time.temporal.ChronoUnit
 class ForberedOppgaveForBarnService(private val behandlingRepository: BehandlingRepository,
                                     private val iverksettClient: IverksettClient) {
 
-    fun forberedOppgaverForAlleBarnSomFyllerAar(innenAntallUker: Long, sisteKjøring: LocalDate) {
-        val referanseDato = referanseDato(innenAntallUker, sisteKjøring)
+    fun forberedOppgaverForAlleBarnSomFyllerAarNesteUke(sisteKjøring: LocalDate) {
+        val referanseDato = referanseDato(sisteKjøring)
         val gjeldendeBarn =
                 behandlingRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, referanseDato)
         val oppgaver = mutableListOf<OppgaveForBarn>()
         gjeldendeBarn.forEach { barn ->
             val fødselsdato = fødselsdato(barn)
-            if (barnBlirEttÅr(innenAntallUker, referanseDato, fødselsdato)) {
+            if (barnBlirEttÅr(referanseDato, fødselsdato)) {
                 oppgaver.add(oppgaveForBarn(barn, OppgaveBeskrivelse.beskrivelseBarnFyllerEttÅr()))
-            } else if (barnBlirSeksMnd(innenAntallUker, referanseDato, fødselsdato)) {
+            } else if (barnBlirSeksMnd(referanseDato, fødselsdato)) {
                 oppgaver.add(oppgaveForBarn(barn, OppgaveBeskrivelse.beskrivelseBarnBlirSeksMnd()))
             }
         }
@@ -48,22 +48,22 @@ class ForberedOppgaveForBarnService(private val behandlingRepository: Behandling
         } ?: gjeldendeBarn.termindatoBarn ?: error("Ingen datoer for barn funnet")
     }
 
-    private fun barnBlirEttÅr(innenAntallUker: Long, referanseDato: LocalDate, fødselsdato: LocalDate): Boolean {
+    private fun barnBlirEttÅr(referanseDato: LocalDate, fødselsdato: LocalDate): Boolean {
         return barnErUnder(12L, referanseDato, fødselsdato)
-               && LocalDate.now().plusWeeks(innenAntallUker) >= fødselsdato.plusYears(1)
+               && LocalDate.now().plusWeeks(1) >= fødselsdato.plusYears(1)
     }
 
-    private fun barnBlirSeksMnd(innenAntallUker: Long, referanseDato: LocalDate, fødselsdato: LocalDate): Boolean {
+    private fun barnBlirSeksMnd(referanseDato: LocalDate, fødselsdato: LocalDate): Boolean {
         return barnErUnder(6L, referanseDato, fødselsdato)
-               && LocalDate.now().plusWeeks(innenAntallUker) >= fødselsdato.plusMonths(6L)
+               && LocalDate.now().plusWeeks(1) >= fødselsdato.plusMonths(6L)
     }
 
     private fun barnErUnder(antallMnd: Long, referanseDato: LocalDate, fødselsdato: LocalDate): Boolean {
         return referanseDato <= fødselsdato.plusMonths(antallMnd)
     }
 
-    private fun referanseDato(innenAntallUker: Long, sisteKjøring: LocalDate): LocalDate {
-        val periodeGap = ChronoUnit.DAYS.between(sisteKjøring, LocalDate.now()) - innenAntallUker * 7
+    private fun referanseDato(sisteKjøring: LocalDate): LocalDate {
+        val periodeGap = ChronoUnit.DAYS.between(sisteKjøring, LocalDate.now()) - 7
         if (periodeGap > 0) {
             return LocalDate.now().minusDays(periodeGap)
         }

@@ -25,12 +25,11 @@ class ForberedOppgaverForBarnTask(val taskRepository: TaskRepository,
     private val logger = LoggerFactory.getLogger(javaClass)
 
     val DATE_FORMAT_ISO_YEAR_MONTH_DAY = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-    val INNEN_ANTALL_UKER = 1L
 
     override fun doTask(task: Task) {
         if (featureToggleService.isEnabled("familie.ef.iverksett.opprett-oppgaver-barnsomfylleraar")) {
             val sisteKjøring = objectMapper.readValue<LocalDate>(task.payload).minusWeeks(1)
-            forberedOppgaverForBarnService.forberedOppgaverForAlleBarnSomFyllerAar(INNEN_ANTALL_UKER, sisteKjøring)
+            forberedOppgaverForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(sisteKjøring)
         } else {
             logger.warn("Feature toggle opprett-oppgaver-barnsomfylleraar er ikke enablet")
         }
