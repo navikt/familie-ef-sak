@@ -103,6 +103,30 @@ fun tilkjentYtelse(behandlingId: UUID, personIdent: String): TilkjentYtelse = Ti
                                     samordningsfradrag = 0,
                                     kildeBehandlingId = behandlingId)))
 
+fun tilkjentYtelse(behandlingId: UUID,
+                   personIdent: String = "12345678910",
+                   andelTilkjentYtelse: List<AndelTilkjentYtelse>): TilkjentYtelse = TilkjentYtelse(
+        behandlingId = behandlingId,
+        personident = personIdent,
+        vedtakstidspunkt = LocalDateTime.now(),
+        andelerTilkjentYtelse = andelTilkjentYtelse)
+
+fun andelTilkjentYtelse(behandlingId: UUID,
+                        personIdent: String = "12345678910",
+                        beløp: Int = 9500,
+                        stønadFom: LocalDate = LocalDate.of(2021, 1, 1),
+                        stønadTom: LocalDate = LocalDate.of(2021, 12, 31),
+                        inntektsReduksjon: Int = 0,
+                        inntekt: Int = 0,
+                        samordningsfradrag: Int = 0) = AndelTilkjentYtelse(beløp = beløp,
+                                                                           stønadFom = stønadFom,
+                                                                           stønadTom = stønadTom,
+                                                                           personIdent = personIdent,
+                                                                           inntektsreduksjon = inntektsReduksjon,
+                                                                           inntekt = inntekt,
+                                                                           samordningsfradrag = samordningsfradrag,
+                                                                           kildeBehandlingId = behandlingId)
+
 fun vedtak(behandlingId: UUID, resultatType: ResultatType = ResultatType.INNVILGE): Vedtak =
         Vedtak(behandlingId = behandlingId,
                resultatType = resultatType,
