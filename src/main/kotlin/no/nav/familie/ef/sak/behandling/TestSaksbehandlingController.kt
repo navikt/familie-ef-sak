@@ -70,7 +70,9 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
         }
 
 
-        grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
+        if (!behandling.erMigrering()) {
+            grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
+        }
         behandlingshistorikkService.opprettHistorikkInnslag(Behandlingshistorikk(behandlingId = behandling.id,
                                                                                  steg = StegType.VILKÅR))
         val oppgaveId = oppgaveService.opprettOppgave(behandling.id,

@@ -5,16 +5,32 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
+import no.nav.familie.ef.sak.behandlingsflyt.steg.BeregnYtelseSteg
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillBehandlingTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.LagSaksbehandlingsblankettTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.PollStatusFraIverksettTask
+import no.nav.familie.ef.sak.beregning.Inntekt
+import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.testWithBrukerContext
+import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.simulering.SimuleringsresultatRepository
+import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
+import no.nav.familie.ef.sak.tilbakekreving.domain.Tilbakekrevingsvalg
+import no.nav.familie.ef.sak.tilbakekreving.dto.TilbakekrevingDto
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
+import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
+import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
+import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
+import no.nav.familie.ef.sak.vedtak.dto.Innvilget
+import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.prosessering.internal.TaskWorker
 import org.assertj.core.api.Assertions.assertThat
@@ -34,9 +50,12 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var tilkjentYtelseService: TilkjentYtelseService
     @Autowired private lateinit var taskRepository: TaskRepository
     @Autowired private lateinit var taskWorker: TaskWorker
-    @Autowired private lateinit var pollStatusFraIverksettTask: PollStatusFraIverksettTask
-    @Autowired private lateinit var ferdigstillBehandlingTask: FerdigstillBehandlingTask
     @Autowired private lateinit var simuleringsresultatRepository: SimuleringsresultatRepository
+    @Autowired private lateinit var beregnYtelseSteg: BeregnYtelseSteg
+    @Autowired private lateinit var vedtaksbrevService: VedtaksbrevService
+    @Autowired private lateinit var stegService: StegService
+    @Autowired private lateinit var tilbakekrevingService: TilbakekrevingService
+    @Autowired private lateinit var rolleConfig: RolleConfig
 
     private val fra = YearMonth.now() // TODO
     private val til = YearMonth.now().plusMonths(1) // TODO
@@ -66,24 +85,62 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         val revurderingDto = RevurderingDto(fagsakId = migrering.fagsakId,
                                             behandlingsårsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
                                             kravMottatt = LocalDate.now())
-        testWithBrukerContext { revurderingService.opprettRevurderingManuelt(revurderingDto) }
+        val revurdering = testWithBrukerContext { revurderingService.opprettRevurderingManuelt(revurderingDto) }
+        innvilgOgSendTilBeslutter(revurdering)
+        godkjennTotrinnskontroll(revurdering)
+        kjørTasks()
+    }
+
+    private fun innvilgOgSendTilBeslutter(behandling: Behandling) {
+        val vedtaksperiode = VedtaksperiodeDto(årMånedFra = fra,
+                                               årMånedTil = til,
+                                               aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
+                                               periodeType = VedtaksperiodeType.HOVEDPERIODE)
+
+        val inntekt = Inntekt(fra, forventetInntekt = forventetInntekt, samordningsfradrag = samordningsfradrag)
+        val innvilget = Innvilget(resultatType = ResultatType.INNVILGE,
+                                  periodeBegrunnelse = null,
+                                  inntektBegrunnelse = null,
+                                  perioder = listOf(vedtaksperiode),
+                                  inntekter = listOf(inntekt))
+        val brevrequest = objectMapper.readTree("123")
+        testWithBrukerContext(groups = listOf(rolleConfig.saksbehandlerRolle)) {
+            stegService.håndterBeregnYtelseForStønad(behandling, innvilget)
+            tilbakekrevingService.lagreTilbakekreving(TilbakekrevingDto(Tilbakekrevingsvalg.AVVENT, begrunnelse = ""),
+                                                      behandling.id)
+            vedtaksbrevService.lagSaksbehandlerBrev(behandling.id, brevrequest, "brevMal")
+            stegService.håndterSendTilBeslutter(behandlingService.hentBehandling(behandling.id))
+        }
+    }
+
+    private fun godkjennTotrinnskontroll(behandling: Behandling) {
+        testWithBrukerContext(preferredUsername = "Beslutter", groups = listOf(rolleConfig.beslutterRolle)) {
+            vedtaksbrevService.lagBeslutterBrev(behandling.id)
+            stegService.håndterBeslutteVedtak(behandlingService.hentBehandling(behandling.id), BeslutteVedtakDto(true))
+        }
     }
 
     private fun opprettOgIverksettMigrering(): Behandling {
         val fagsak = fagsakService.hentEllerOpprettFagsak("1", Stønadstype.OVERGANGSSTØNAD)
         val behandling = migreringService.opprettMigrering(fagsak, fra, til, forventetInntekt, samordningsfradrag)
 
+        kjørTasks()
+        return behandling
+    }
+
+    private fun kjørTasks() {
         listOf(PollStatusFraIverksettTask.TYPE,
                LagSaksbehandlingsblankettTask.TYPE,
                FerdigstillBehandlingTask.TYPE).forEach { type ->
             try {
-                val task = taskRepository.findAll().single { it.type == type }
+                val task = taskRepository.findAll()
+                        .filter { it.status == Status.KLAR_TIL_PLUKK || it.status == Status.UBEHANDLET }
+                        .single { it.type == type }
                 taskWorker.markerPlukket(task.id)
                 taskWorker.doActualWork(task.id)
             } catch (e: Exception) {
                 throw RuntimeException("Feilet håntering av $type", e)
             }
         }
-        return behandling
     }
 }

@@ -30,11 +30,11 @@ object BrukerContextUtil {
         every { jwtTokenClaims.get("groups") } returns groups
     }
 
-    fun testWithBrukerContext(preferredUsername: String = "A", groups: List<String> = emptyList(), fn: () -> Unit) {
+    fun <T> testWithBrukerContext(preferredUsername: String = "A", groups: List<String> = emptyList(), fn: () -> T): T {
         mockBrukerContext()
         try {
             mockBrukerContext(preferredUsername, groups)
-            fn()
+            return fn()
         } finally {
             clearBrukerContext()
         }

@@ -53,6 +53,10 @@ import org.junit.jupiter.api.Test
 import org.springframework.data.repository.findByIdOrNull
 import java.util.UUID
 
+class A(val a: String)
+data class Aa(val a: String)
+
+val aa = Aa("").a
 
 internal class VurderingStegServiceTest {
 
