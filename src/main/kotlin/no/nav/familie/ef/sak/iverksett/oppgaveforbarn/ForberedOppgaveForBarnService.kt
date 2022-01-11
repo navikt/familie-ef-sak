@@ -45,7 +45,7 @@ class ForberedOppgaveForBarnService(private val behandlingRepository: Behandling
     private fun fødselsdato(gjeldendeBarn: GjeldendeBarn): LocalDate {
         return gjeldendeBarn.fodselsnummerBarn?.let {
             Fødselsnummer(it).fødselsdato
-        } ?: LocalDate.parse(gjeldendeBarn.fodselsnummerBarn)
+        } ?: gjeldendeBarn.termindatoBarn ?: error("Ingen datoer for barn funnet")
     }
 
     private fun barnBlirEttÅr(innenAntallUker: Long, referanseDato: LocalDate, fødselsdato: LocalDate): Boolean {
