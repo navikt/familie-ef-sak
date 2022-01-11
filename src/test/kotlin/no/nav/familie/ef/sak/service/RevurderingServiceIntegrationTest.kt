@@ -158,7 +158,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
     private fun lagreSøknad(behandling: Behandling): SøknadsskjemaOvergangsstønad {
         søknadService.lagreSøknadForOvergangsstønad(Testsøknad.søknadOvergangsstønad, behandling.id, behandling.fagsakId, "1L")
-        return søknadService.hentOvergangsstønad(behandling.id)
+        return søknadService.hentOvergangsstønad(behandling.id)!!
     }
 
     private fun opprettVilkår(behandling: Behandling,

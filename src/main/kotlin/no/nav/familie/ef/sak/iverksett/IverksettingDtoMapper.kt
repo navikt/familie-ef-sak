@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadsskjemaOvergangsstønad
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.simulering.hentSammenhengendePerioderMedFeilutbetaling
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
@@ -65,7 +66,7 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
                             private val vilkårsvurderingRepository: VilkårsvurderingRepository,
                             private val søknadService: SøknadService,
                             private val vedtakService: VedtakService,
-                            private val behandlinghistorikkService: BehandlingshistorikkService,
+                            private val behandlingshistorikkService: BehandlingshistorikkService,
                             private val tilkjentYtelseService: TilkjentYtelseService,
                             private val fagsakService: FagsakService,
                             private val simuleringService: SimuleringService,
@@ -78,7 +79,7 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
         val fagsak = fagsakService.hentFagsakForBehandling(behandling.id)
         val vedtak = vedtakService.hentVedtak(behandling.id)
         val saksbehandler =
-                behandlinghistorikkService.finnSisteBehandlingshistorikk(behandling.id, StegType.SEND_TIL_BESLUTTER)?.opprettetAv
+                behandlingshistorikkService.finnSisteBehandlingshistorikk(behandling.id, StegType.SEND_TIL_BESLUTTER)?.opprettetAv
                 ?: error("Kan ikke finne saksbehandler på behandlingen")
         val tilkjentYtelse =
                 if (vedtak.resultatType != ResultatType.AVSLÅ) tilkjentYtelseService.hentForBehandling(behandling.id) else null
@@ -159,11 +160,24 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
 
     private fun mapSøkerDto(fagsak: Fagsak, behandling: Behandling): SøkerDto {
         val søknad = søknadService.hentOvergangsstønad(behandling.id)
+                     ?: return mapSøkerUtenSøknad(fagsak)
+        return mapSøkerMedSøknad(fagsak, behandling, søknad)
+    }
+
+    private fun mapSøkerUtenSøknad(fagsak: Fagsak): SøkerDto {
+        val tilhørendeEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(fagsak.hentAktivIdent())
+        return SøkerDto(fagsak.hentAktivIdent(), emptyList(), tilhørendeEnhet, AdressebeskyttelseGradering.UGRADERT)
+    }
+
+    private fun mapSøkerMedSøknad(fagsak: Fagsak,
+                                  behandling: Behandling,
+                                  søknad: SøknadsskjemaOvergangsstønad): SøkerDto {
+        val personIdent = fagsak.hentAktivIdent()
         val (grunnlagsdata) = grunnlagsdataService.hentGrunnlagsdata(behandling.id)
         val alleBarn = BarnMatcher.kobleSøknadsbarnOgRegisterBarn(søknad.barn, grunnlagsdata.barn)
-        val navEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(søknad.fødselsnummer)
+        val navEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(personIdent)
 
-        return SøkerDto(fagsak.hentAktivIdent(),
+        return SøkerDto(personIdent,
                         alleBarn.map {
                             BarnDto(personIdent = it.fødselsnummer,
                                     termindato = it.søknadsbarn.fødselTermindato)

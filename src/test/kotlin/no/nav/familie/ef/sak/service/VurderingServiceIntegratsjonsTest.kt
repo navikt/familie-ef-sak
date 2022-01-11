@@ -90,7 +90,7 @@ internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
     private fun lagreSøknad(behandling: Behandling,
                             fagsak: Fagsak): SøknadsskjemaOvergangsstønad {
         søknadService.lagreSøknadForOvergangsstønad(Testsøknad.søknadOvergangsstønad, behandling.id, fagsak.id, "1L")
-        return søknadService.hentOvergangsstønad(behandling.id)
+        return søknadService.hentOvergangsstønad(behandling.id)!!
     }
 
 }
