@@ -61,7 +61,7 @@ internal class OpprettOppgaveForBarnServiceTest {
 
 
     @Test
-    fun `barn blir seks mnd om 1 uker minus en dag, sjekk om fyller innen 1 uke, forvent kall til beskrivelseBarnBlirSeksMnd`() {
+    fun `barn blir seks mnd om 1 uke minus en dag, sjekk om fyller innen 1 uke, forvent kall til beskrivelseBarnBlirSeksMnd`() {
         val fødselsdato = LocalDate.now().minusMonths(6).plusWeeks(1).minusDays(1)
         every {
             behandlingRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, any())
