@@ -4,10 +4,12 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.dto.EksternId
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
+import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.GjeldendeBarn
 import no.nav.familie.ef.sak.repository.InsertUpdateRepository
 import no.nav.familie.ef.sak.repository.RepositoryInterface
 import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.stereotype.Repository
+import java.time.LocalDate
 import java.util.UUID
 
 @Repository
@@ -74,5 +76,19 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
     // language=PostgreSQL
     @Query("""SELECT id FROM gjeldende_iverksatte_behandlinger WHERE stonadstype=:stønadstype""")
     fun finnSisteIverksatteBehandlinger(stønadstype: Stønadstype): Set<UUID>
+
+    // language=PostgreSQL
+    @Query("""
+        SELECT b.id, s.fodselsnummer, b2.fodselsnummer, b2.fodsel_termindato FROM gjeldende_iverksatte_behandlinger b
+            JOIN grunnlag_soknad gs ON gs.behandling_id = b.id
+            JOIN soknadsskjema s ON gs.soknadsskjema_id = s.id
+            JOIN barn b2 ON s.id = b2.soknadsskjema_id
+        WHERE  b.stonadstype=:stønadstype AND EXISTS(SELECT 1 FROM andel_tilkjent_ytelse aty
+            JOIN tilkjent_ytelse ty ON aty.tilkjent_ytelse = ty.id
+            WHERE ty.id = aty.tilkjent_ytelse
+          AND aty.stonad_tom >= :dato
+          AND aty.belop > 0)
+        """)
+    fun finnBarnAvGjeldendeIverksatteBehandlinger(stønadstype: Stønadstype, dato: LocalDate): List<GjeldendeBarn>
 
 }
