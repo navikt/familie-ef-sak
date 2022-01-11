@@ -39,6 +39,7 @@ import no.nav.familie.ef.sak.vilkår.dto.VurderingDto
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
+import no.nav.familie.ef.sak.vilkår.regler.alleVilkårsregler
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår.opprettNyeVilkårsvurderinger
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
@@ -211,6 +212,15 @@ internal class VurderingStegServiceTest {
                                                                  delvilkårsvurderinger = delvilkårDto))
 
         verify(exactly = 0) { behandlingService.oppdaterStatusPåBehandling(any(), BehandlingStatus.UTREDES) }
+    }
+
+    @Test
+    internal fun `behandlingen uten søknad skal likevel opprette et vilkår for aleneomsorg`() {
+        val vilkårsvurderinger =
+                opprettNyeVilkårsvurderinger(behandlingId, HovedregelMetadata(null, Sivilstandstype.UGIFT))
+
+        assertThat(vilkårsvurderinger).hasSize(alleVilkårsregler.size)
+        assertThat(vilkårsvurderinger.count { it.type == VilkårType.ALENEOMSORG }).isEqualTo(1)
     }
 
     //KUN FOR Å TESTE OPPDATERSTEG
