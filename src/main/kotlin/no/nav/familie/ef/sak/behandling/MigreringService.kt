@@ -44,16 +44,17 @@ class MigreringService(
 
     /**
      * Henter data fra infotrygd og oppretter migrering
-     */
+
     @Transactional
     fun opprettMigrering(personIdent: String) {
         val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, Stønadstype.OVERGANGSSTØNAD)
-        val fra = YearMonth.now() // TODO hent
-        val til = YearMonth.now().plusMonths(1) // TODO
-        val forventetInntekt = BigDecimal.ZERO // TODO
-        val samordningsfradrag = BigDecimal.ZERO // TODO
+        val fra = YearMonth.now()
+        val til = YearMonth.now().plusMonths(1)
+        val forventetInntekt = BigDecimal.ZERO
+        val samordningsfradrag = BigDecimal.ZERO
         opprettMigrering(fagsak, fra, til, forventetInntekt, samordningsfradrag)
     }
+    */
 
     @Transactional
     fun opprettMigrering(fagsak: Fagsak,
