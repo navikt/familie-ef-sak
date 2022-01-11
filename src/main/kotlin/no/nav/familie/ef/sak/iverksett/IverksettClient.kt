@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.iverksett
 
 import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.felles.util.medContentTypeJsonUTF8
+import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.OppgaverForBarnDto
 import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.http.client.MultipartBuilder
 import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevDto
@@ -14,7 +15,6 @@ import no.nav.familie.kontrakter.ef.iverksett.SimuleringDto
 import no.nav.familie.kontrakter.ef.iverksett.TekniskOpphørDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
-import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
@@ -41,12 +41,16 @@ class IverksettClient(@Value("\${FAMILIE_EF_IVERKSETT_URL}")
         val url = URI.create("$familieEfIverksettUri/api/simulering/v2")
 
         return postForEntity<Ressurs<BeriketSimuleringsresultat>>(url,
-                                                                   simuleringRequest,
-                                                                   HttpHeaders().medContentTypeJsonUTF8()).data!!
+                                                                  simuleringRequest,
+                                                                  HttpHeaders().medContentTypeJsonUTF8()).data!!
     }
 
     fun startBehandling(request: OpprettStartBehandlingHendelseDto) {
         postForEntity<Any>(URI.create("$familieEfIverksettUri/api/start-behandling"), request)
+    }
+
+    fun sendOppgaverForBarn(oppgaverForBarn: OppgaverForBarnDto) {
+        postForEntity<Any>(URI.create("$familieEfIverksettUri/api/oppgaverforbarn"), oppgaverForBarn)
     }
 
     fun sendBehandlingsstatistikk(request: BehandlingsstatistikkDto) {
