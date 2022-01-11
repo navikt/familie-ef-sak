@@ -1,18 +1,15 @@
 package no.nav.familie.ef.sak.brev
 
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
-import no.nav.familie.ef.sak.brev.domain.FRITEKST
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevDto
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevKategori
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevRequestDto
-import no.nav.familie.ef.sak.brev.dto.VedtaksbrevDto
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevType
-import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG_UTLAND
 import org.springframework.stereotype.Service
@@ -25,34 +22,17 @@ class FrittståendeBrevService(private val brevClient: BrevClient,
                               private val arbeidsfordelingService: ArbeidsfordelingService,
                               private val iverksettClient: IverksettClient) {
 
-    fun lagFrittståendeBrev(frittståendeBrevDto: FrittståendeBrevDto): ByteArray {
+    fun forhåndsvisFrittståendeBrev(frittståendeBrevDto: FrittståendeBrevDto): ByteArray {
         val ident = fagsakService.hentAktivIdent(frittståendeBrevDto.fagsakId)
-        val request = lagFrittståendeBrevRequest(frittståendeBrevDto, ident)
-
-        val vedtaksbrev = VedtaksbrevDto(saksbehandlerBrevrequest = objectMapper.writeValueAsString(request),
-                                         brevmal = FRITEKST,
-                                         saksbehandlersignatur = SikkerhetContext.hentSaksbehandlerNavn(true),
-                                         besluttersignatur = null)
-
-        return brevClient.genererBrev(vedtaksbrev = vedtaksbrev)
-    }
-
-    private fun lagFrittståendeBrevRequest(frittståendeBrevDto: FrittståendeBrevDto, ident: String): FrittståendeBrevRequestDto {
-        val navn = personopplysningerService.hentGjeldeneNavn(listOf(ident))
-        return FrittståendeBrevRequestDto(overskrift = frittståendeBrevDto.overskrift,
-                                          avsnitt = frittståendeBrevDto.avsnitt,
-                                          personIdent = ident,
-                                          navn = navn.getValue(ident))
+        return lagFrittståendeBrevMedSignatur(frittståendeBrevDto, ident)
     }
 
     fun sendFrittståendeBrev(frittståendeBrevDto: FrittståendeBrevDto) {
         val ident = fagsakService.hentAktivIdent(frittståendeBrevDto.fagsakId)
-        val request = lagFrittståendeBrevRequest(frittståendeBrevDto, ident)
-        val signatur = lagSignaturMedEnhet(ident)
-        val brev = brevClient.genererBrev(request, signatur.navn, signatur.enhet)
+        val brev = lagFrittståendeBrevMedSignatur(frittståendeBrevDto, ident)
         val eksternFagsakId = fagsakService.hentEksternId(frittståendeBrevDto.fagsakId)
         val journalførendeEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(
-                ident)
+            ident)
         val saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(true)
         val stønadstype = fagsakService.hentFagsak(frittståendeBrevDto.fagsakId).stønadstype
         val brevType = utledFrittståendeBrevType(frittståendeBrevDto, stønadstype)
@@ -64,13 +44,32 @@ class FrittståendeBrevService(private val brevClient: BrevClient,
                                                                              saksbehandlerIdent = saksbehandlerIdent))
     }
 
+    private fun lagFrittståendeBrevRequest(frittståendeBrevDto: FrittståendeBrevDto, ident: String): FrittståendeBrevRequestDto {
+        val navn = personopplysningerService.hentGjeldeneNavn(listOf(ident))
+        return FrittståendeBrevRequestDto(overskrift = frittståendeBrevDto.overskrift,
+                                          avsnitt = frittståendeBrevDto.avsnitt,
+                                          personIdent = ident,
+                                          navn = navn.getValue(ident))
+    }
+
+    private fun lagFrittståendeBrevMedSignatur(
+        frittståendeBrevDto: FrittståendeBrevDto,
+        ident: String
+    ): ByteArray {
+        val request = lagFrittståendeBrevRequest(frittståendeBrevDto, ident)
+        val signatur = lagSignaturMedEnhet(ident)
+        val brev = brevClient.genererBrev(request, signatur.navn, signatur.enhet)
+        return brev
+    }
+
+
     private fun lagSignaturMedEnhet(ident: String): SignaturDto {
         val harStrengtFortroligAdresse: Boolean =
                 personopplysningerService.hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(ident)
                         .let { it == STRENGT_FORTROLIG || it == STRENGT_FORTROLIG_UTLAND }
 
         return if (harStrengtFortroligAdresse) {
-            SignaturDto("NAV anonym", "Nav Vikafossen")
+            SignaturDto("NAV anonym", "NAV Vikafossen")
         } else {
             SignaturDto(SikkerhetContext.hentSaksbehandlerNavn(true), "NAV Arbeid og ytelser")
         }

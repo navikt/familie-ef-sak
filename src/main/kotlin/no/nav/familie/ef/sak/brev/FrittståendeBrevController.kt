@@ -17,7 +17,7 @@ class FrittståendeBrevController(private val frittståendeBrevService: Frittst�
 
     @PostMapping("")
     fun forhåndsvisFrittståendeBrev(@RequestBody brevInnhold: FrittståendeBrevDto): Ressurs<ByteArray> {
-        return Ressurs.success(frittståendeBrevService.lagFrittståendeBrev(brevInnhold))
+        return Ressurs.success(frittståendeBrevService.forhåndsvisFrittståendeBrev(brevInnhold))
     }
 
     @PostMapping("/send")
