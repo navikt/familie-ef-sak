@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.blankett.BlankettRepository
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
@@ -63,15 +64,17 @@ internal class VurderingStegServiceTest {
     private val vilkårGrunnlagService = mockk<VilkårGrunnlagService>()
     private val stegService = mockk<StegService>()
     private val taskRepository = mockk<TaskRepository>()
-    private val vurderingService = mockk<VurderingService>()
+    private val grunnlagsdataService = mockk<GrunnlagsdataService>()
+    private val vurderingService = VurderingService(behandlingService, søknadService, vilkårsvurderingRepository,
+                                                    vilkårGrunnlagService, grunnlagsdataService)
 
     private val vurderingStegService = VurderingStegService(behandlingService = behandlingService,
                                                             vurderingService = vurderingService,
                                                             vilkårsvurderingRepository = vilkårsvurderingRepository,
                                                             blankettRepository = blankettRepository,
                                                             stegService = stegService,
-                                                            taskRepository = taskRepository
-    )
+                                                            taskRepository = taskRepository)
+
     private val søknad = SøknadsskjemaMapper.tilDomene(TestsøknadBuilder.Builder().setBarn(listOf(
             TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "13071489536"),
             TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "01012067050")

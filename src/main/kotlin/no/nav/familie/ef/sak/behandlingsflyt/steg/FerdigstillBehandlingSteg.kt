@@ -25,7 +25,7 @@ class FerdigstillBehandlingSteg(private val behandlingService: BehandlingService
         when (behandling.type) {
             BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingType.REVURDERING -> {
                 taskRepository.save(PubliserVedtakshendelseTask.opprettTask(behandling.id))
-                if (behandling.erMigrering()) {
+                if (!behandling.erMigrering()) {
                     taskRepository.save(BehandlingsstatistikkTask.opprettFerdigTask(behandlingId = behandling.id))
                 }
             }

@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillBehandlingTask
+import no.nav.familie.ef.sak.behandlingsflyt.task.LagSaksbehandlingsblankettTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.PollStatusFraIverksettTask
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
@@ -15,6 +16,7 @@ import no.nav.familie.ef.sak.simulering.SimuleringsresultatRepository
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskWorker
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -31,6 +33,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var migreringService: MigreringService
     @Autowired private lateinit var tilkjentYtelseService: TilkjentYtelseService
     @Autowired private lateinit var taskRepository: TaskRepository
+    @Autowired private lateinit var taskWorker: TaskWorker
     @Autowired private lateinit var pollStatusFraIverksettTask: PollStatusFraIverksettTask
     @Autowired private lateinit var ferdigstillBehandlingTask: FerdigstillBehandlingTask
     @Autowired private lateinit var simuleringsresultatRepository: SimuleringsresultatRepository
@@ -70,8 +73,17 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         val fagsak = fagsakService.hentEllerOpprettFagsak("1", Stønadstype.OVERGANGSSTØNAD)
         val behandling = migreringService.opprettMigrering(fagsak, fra, til, forventetInntekt, samordningsfradrag)
 
-        pollStatusFraIverksettTask.doTask(taskRepository.findAll().single { it.type == PollStatusFraIverksettTask.TYPE })
-        ferdigstillBehandlingTask.doTask(taskRepository.findAll().single { it.type == FerdigstillBehandlingTask.TYPE })
+        listOf(PollStatusFraIverksettTask.TYPE,
+               LagSaksbehandlingsblankettTask.TYPE,
+               FerdigstillBehandlingTask.TYPE).forEach { type ->
+            try {
+                val task = taskRepository.findAll().single { it.type == type }
+                taskWorker.markerPlukket(task.id)
+                taskWorker.doActualWork(task.id)
+            } catch (e: Exception) {
+                throw RuntimeException("Feilet håntering av $type", e)
+            }
+        }
         return behandling
     }
 }
