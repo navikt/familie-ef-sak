@@ -241,7 +241,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `finnSisteIverksatteBehandlinger med fremtidig andel, forvent barn fra behandling med fremtidig andel `() {
+    internal fun `finnBarnAvGjeldendeIverksatteBehandlinger med fremtidig andel, forvent barn fra behandling med fremtidig andel `() {
         val fagsak = fagsakRepository.insert(fagsak())
         val behandlingMedTidligereAndel = behandlingRepository.insert(behandling(fagsak,
                                                                                  status = FERDIGSTILT,
