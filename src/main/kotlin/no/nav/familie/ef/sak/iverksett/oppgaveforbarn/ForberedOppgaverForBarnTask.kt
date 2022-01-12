@@ -28,7 +28,7 @@ class ForberedOppgaverForBarnTask(val taskRepository: TaskRepository,
 
     override fun doTask(task: Task) {
         if (featureToggleService.isEnabled("familie.ef.iverksett.opprett-oppgaver-barnsomfylleraar")) {
-            val sisteKjøring = objectMapper.readValue<LocalDate>(task.payload).minusWeeks(1)
+            val sisteKjøring = objectMapper.readValue<LocalDate>(task.payload)
             forberedOppgaverForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(sisteKjøring)
         } else {
             logger.warn("Feature toggle opprett-oppgaver-barnsomfylleraar er ikke enablet")
@@ -42,7 +42,7 @@ class ForberedOppgaverForBarnTask(val taskRepository: TaskRepository,
     fun opprettTaskForNesteUke() {
         val nesteUke = LocalDate.now().plusWeeks(1)
         val triggerTid = nesteUke.atTime(5, 0)
-        taskRepository.save(Task(TYPE, nesteUke.format(DATE_FORMAT_ISO_YEAR_MONTH_DAY)).medTriggerTid(triggerTid))
+        taskRepository.save(Task(TYPE, LocalDate.now().format(DATE_FORMAT_ISO_YEAR_MONTH_DAY)).medTriggerTid(triggerTid))
     }
 
     companion object {
