@@ -9,13 +9,13 @@ import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
 @Service
-class ForberedOppgaveForBarnService(private val behandlingRepository: BehandlingRepository,
+class ForberedOppgaveForBarnService(private val gjeldendeBarnRepository: GjeldendeBarnRepository,
                                     private val iverksettClient: IverksettClient) {
 
     fun forberedOppgaverForAlleBarnSomFyllerAarNesteUke(sisteKjøring: LocalDate) {
         val referanseDato = referanseDato(sisteKjøring)
         val gjeldendeBarn =
-                behandlingRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, referanseDato)
+                gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, referanseDato)
         val oppgaver = mutableListOf<OppgaveForBarn>()
         gjeldendeBarn.forEach { barn ->
             val fødselsdato = fødselsdato(barn)
@@ -35,7 +35,7 @@ class ForberedOppgaveForBarnService(private val behandlingRepository: Behandling
     }
 
     private fun oppgaveForBarn(gjeldendeBarn: GjeldendeBarn, beskrivelse: String): OppgaveForBarn {
-        return OppgaveForBarn(gjeldendeBarn.id,
+        return OppgaveForBarn(gjeldendeBarn.behandlingId,
                               beskrivelse,
                               gjeldendeBarn.fødselsnummerSøker,
                               gjeldendeBarn.fodselsnummerBarn,

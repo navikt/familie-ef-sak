@@ -17,6 +17,8 @@ import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadOvergangsstønadRepository
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
+import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
+import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.util.FnrGenerator
 import org.assertj.core.api.Assertions.assertThat
@@ -238,43 +240,5 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         behandlingRepository.insert(behandling(fagsak, status = FERDIGSTILT, resultat = BehandlingResultat.HENLAGT))
         assertThat(behandlingRepository.finnSisteIverksatteBehandlinger(OVERGANGSSTØNAD)).containsExactly(
                 behandling.id)
-    }
-
-    @Test
-    internal fun `finnBarnAvGjeldendeIverksatteBehandlinger med fremtidig andel, forvent barn fra behandling med fremtidig andel `() {
-        val fagsak = fagsakRepository.insert(fagsak())
-        val behandlingMedTidligereAndel = behandlingRepository.insert(behandling(fagsak,
-                                                                                 status = FERDIGSTILT,
-                                                                                 resultat = BehandlingResultat.INNVILGET,
-                                                                                 opprettetTid = LocalDateTime.now().minusDays(2)))
-        val tidligereAndel = andelTilkjentYtelse(behandlingId = behandlingMedTidligereAndel.id,
-                                                 stønadTom = LocalDate.now().minusMonths(1))
-        tilkjentYtelseRepository.insert(tilkjentYtelse(behandlingId = behandlingMedTidligereAndel.id,
-                                                       andelTilkjentYtelse = listOf(tidligereAndel)))
-
-        val behandlingMedFremtidigAndel = behandlingRepository.insert(behandling(fagsak,
-                                                                                 status = FERDIGSTILT,
-                                                                                 resultat = BehandlingResultat.INNVILGET,
-                                                                                 opprettetTid = LocalDateTime.now().minusDays(2)))
-        val fremtidigAndel = andelTilkjentYtelse(behandlingId = behandlingMedFremtidigAndel.id,
-                                                 stønadTom = LocalDate.now().plusMonths(1))
-        tilkjentYtelseRepository.insert(tilkjentYtelse(behandlingId = behandlingMedFremtidigAndel.id,
-                                                       andelTilkjentYtelse = listOf(fremtidigAndel)))
-
-        val søknad = TestsøknadBuilder.Builder()
-                .setPersonalia("Navn", FnrGenerator.generer(1985, 1, 1, false))
-                .setBarn(listOf(
-                        TestsøknadBuilder.Builder().defaultBarn("Barn1", fødselTermindato = LocalDate.now().plusMonths(4)),
-                        TestsøknadBuilder.Builder().defaultBarn("Barn2", fødselTermindato = LocalDate.now().plusMonths(6))
-                )).build().søknadOvergangsstønad
-
-        søknadService.lagreSøknadForOvergangsstønad(søknad, behandlingMedFremtidigAndel.id, fagsak.id, "journalpostId")
-        søknadService.lagreSøknadForOvergangsstønad(søknad, behandlingMedTidligereAndel.id, fagsak.id, "journalPostId")
-
-        val behandlinger = behandlingRepository.finnBarnAvGjeldendeIverksatteBehandlinger(
-                OVERGANGSSTØNAD,
-                LocalDate.now())
-        assertThat(behandlinger.size).isEqualTo(2)
-        behandlinger.forEach { assertThat(it.id).isEqualTo(behandlingMedFremtidigAndel.id) }
     }
 }
