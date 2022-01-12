@@ -11,9 +11,6 @@ data class GjeldendeBarn(@Id
                          val termindatoBarn: LocalDate?)
 
 data class OppgaveForBarn(val behandlingId: UUID,
-                          val beskrivelse: String,
-                          val fødselsnummerSøker: String?,
-                          val fødselsnummer: String?,
-                          val termindato: LocalDate?)
+                          val beskrivelse: String)
 
 data class OppgaverForBarnDto(val oppgaverForBarn: List<OppgaveForBarn>)

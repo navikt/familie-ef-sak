@@ -6,6 +6,7 @@ import no.nav.familie.kontrakter.ef.søknad.Fødselsnummer
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
+import java.util.UUID
 
 @Service
 class ForberedOppgaveForBarnService(private val gjeldendeBarnRepository: GjeldendeBarnRepository,
@@ -19,9 +20,9 @@ class ForberedOppgaveForBarnService(private val gjeldendeBarnRepository: Gjelden
         gjeldendeBarn.forEach { barn ->
             val fødselsdato = fødselsdato(barn)
             if (barnBlirEttÅr(referanseDato, fødselsdato)) {
-                oppgaver.add(oppgaveForBarn(barn, OppgaveBeskrivelse.beskrivelseBarnFyllerEttÅr()))
+                oppgaver.add(oppgaveForBarn(barn.behandlingId, OppgaveBeskrivelse.beskrivelseBarnFyllerEttÅr()))
             } else if (barnBlirSeksMnd(referanseDato, fødselsdato)) {
-                oppgaver.add(oppgaveForBarn(barn, OppgaveBeskrivelse.beskrivelseBarnBlirSeksMnd()))
+                oppgaver.add(oppgaveForBarn(barn.behandlingId, OppgaveBeskrivelse.beskrivelseBarnBlirSeksMnd()))
             }
         }
         if (oppgaver.isNotEmpty()) {
@@ -33,12 +34,9 @@ class ForberedOppgaveForBarnService(private val gjeldendeBarnRepository: Gjelden
         iverksettClient.sendOppgaverForBarn(OppgaverForBarnDto(oppgaver))
     }
 
-    private fun oppgaveForBarn(gjeldendeBarn: GjeldendeBarn, beskrivelse: String): OppgaveForBarn {
-        return OppgaveForBarn(gjeldendeBarn.behandlingId,
-                              beskrivelse,
-                              gjeldendeBarn.fødselsnummerSøker,
-                              gjeldendeBarn.fodselsnummerBarn,
-                              gjeldendeBarn.termindatoBarn)
+    private fun oppgaveForBarn(behandlingId: UUID, beskrivelse: String): OppgaveForBarn {
+        return OppgaveForBarn(behandlingId,
+                              beskrivelse)
     }
 
     private fun fødselsdato(gjeldendeBarn: GjeldendeBarn): LocalDate {
