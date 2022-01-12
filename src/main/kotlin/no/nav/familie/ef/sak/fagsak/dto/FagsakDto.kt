@@ -9,6 +9,7 @@ data class FagsakDto(val id: UUID,
                      val personIdent: String,
                      val stønadstype: Stønadstype,
                      val erLøpende: Boolean,
+                     val erMigrert: Boolean,
                      val behandlinger: List<BehandlingDto>,
                      val eksternId: Long)
 
@@ -17,5 +18,6 @@ fun Fagsak.tilDto(behandlinger: List<BehandlingDto>, erLøpende: Boolean): Fagsa
                   personIdent = this.hentAktivIdent(),
                   stønadstype = this.stønadstype,
                   erLøpende = erLøpende,
+                  erMigrert = this.migrert,
                   behandlinger = behandlinger,
                   eksternId = this.eksternId.id)
