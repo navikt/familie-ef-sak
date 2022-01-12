@@ -161,7 +161,6 @@ management:
 
 DEPLOY_ENV: prod
 ON_PREM_URL_ENV: prod
-GATEWAY_PREFIX: api-gw
 
 AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/oauth2/v2.0/token
 
