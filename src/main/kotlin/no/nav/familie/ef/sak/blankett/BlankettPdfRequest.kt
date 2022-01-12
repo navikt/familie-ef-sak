@@ -8,7 +8,7 @@ data class BlankettPdfRequest(
         val personopplysninger: PersonopplysningerDto,
         val vilkår: VilkårDto,
         val vedtak: VedtakDto,
-        val søknadsdatoer: SøknadDatoerDto
+        val søknadsdatoer: SøknadDatoerDto?
 )
 
 data class PersonopplysningerDto(

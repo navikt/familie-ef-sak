@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillBehandlingTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.LagSaksbehandlingsblankettTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.PollStatusFraIverksettTask
+import no.nav.familie.ef.sak.behandlingsflyt.task.PubliserVedtakshendelseTask
 import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.fagsak.FagsakService
@@ -51,7 +52,6 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var taskRepository: TaskRepository
     @Autowired private lateinit var taskWorker: TaskWorker
     @Autowired private lateinit var simuleringsresultatRepository: SimuleringsresultatRepository
-    @Autowired private lateinit var beregnYtelseSteg: BeregnYtelseSteg
     @Autowired private lateinit var vedtaksbrevService: VedtaksbrevService
     @Autowired private lateinit var stegService: StegService
     @Autowired private lateinit var tilbakekrevingService: TilbakekrevingService
@@ -74,7 +74,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         with(behandlingService.hentBehandling(migrering.id)) {
             assertThat(this.status).isEqualTo(BehandlingStatus.FERDIGSTILT)
             assertThat(this.resultat).isEqualTo(BehandlingResultat.INNVILGET)
-            assertThat(this.steg).isEqualTo(StegType.PUBLISER_VEDTAKSHENDELSE)
+            assertThat(this.steg).isEqualTo(StegType.BEHANDLING_FERDIGSTILT)
         }
         assertThat(simuleringsresultatRepository.findByIdOrNull(migrering.id)).isNotNull
     }
@@ -82,6 +82,12 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `skal opprette revurering på migrering`() {
         val migrering = opprettOgIverksettMigrering()
+        val revurdering = opprettRevurderingOgIverksett(migrering)
+
+        verifiserBehandlingErFerdigstilt(revurdering)
+    }
+
+    private fun opprettRevurderingOgIverksett(migrering: Behandling): Behandling {
         val revurderingDto = RevurderingDto(fagsakId = migrering.fagsakId,
                                             behandlingsårsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
                                             kravMottatt = LocalDate.now())
@@ -89,6 +95,14 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         innvilgOgSendTilBeslutter(revurdering)
         godkjennTotrinnskontroll(revurdering)
         kjørTasks()
+        return revurdering
+    }
+
+    private fun verifiserBehandlingErFerdigstilt(revurdering: Behandling) {
+        val oppdatertRevurdering = behandlingService.hentBehandling(revurdering.id)
+        assertThat(oppdatertRevurdering.status).isEqualTo(BehandlingStatus.FERDIGSTILT)
+        assertThat(oppdatertRevurdering.resultat).isEqualTo(BehandlingResultat.INNVILGET)
+        assertThat(oppdatertRevurdering.steg).isEqualTo(StegType.BEHANDLING_FERDIGSTILT)
     }
 
     private fun innvilgOgSendTilBeslutter(behandling: Behandling) {
@@ -131,7 +145,8 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     private fun kjørTasks() {
         listOf(PollStatusFraIverksettTask.TYPE,
                LagSaksbehandlingsblankettTask.TYPE,
-               FerdigstillBehandlingTask.TYPE).forEach { type ->
+               FerdigstillBehandlingTask.TYPE,
+               PubliserVedtakshendelseTask.TYPE).forEach { type ->
             try {
                 val task = taskRepository.findAll()
                         .filter { it.status == Status.KLAR_TIL_PLUKK || it.status == Status.UBEHANDLET }

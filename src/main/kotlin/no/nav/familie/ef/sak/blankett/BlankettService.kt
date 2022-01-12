@@ -81,9 +81,8 @@ class BlankettService(private val tilgangService: TilgangService,
 
     private fun hentVilkårDto(behandlingId: UUID) = vurderingService.hentEllerOpprettVurderinger(behandlingId)
 
-    private fun lagSøknadsdatoer(behandlingId: UUID): SøknadDatoerDto {
-        val overgangsstønad = søknadService.hentOvergangsstønad(behandlingId)
-        feilHvis(overgangsstønad == null) { "Kan ikke hente søknad til behandlingen" }
+    private fun lagSøknadsdatoer(behandlingId: UUID): SøknadDatoerDto? {
+        val overgangsstønad = søknadService.hentOvergangsstønad(behandlingId) ?: return null
         return SøknadDatoerDto(
                 søknadsdato = overgangsstønad.datoMottatt,
                 søkerStønadFra = overgangsstønad.søkerFra
