@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.iverksett.oppgaveforbarn
 
-import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.kontrakter.ef.søknad.Fødselsnummer
