@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.iverksett.oppgaveforbarn
 
 import no.nav.familie.prosessering.domene.Task
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
