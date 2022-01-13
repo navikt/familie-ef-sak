@@ -57,10 +57,10 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var tilbakekrevingService: TilbakekrevingService
     @Autowired private lateinit var rolleConfig: RolleConfig
 
-    private val fra = YearMonth.now() // TODO
-    private val til = YearMonth.now().plusMonths(1) // TODO
-    private val forventetInntekt = BigDecimal.ZERO // TODO
-    private val samordningsfradrag = BigDecimal.ZERO // TODO
+    private val fra = YearMonth.now()
+    private val til = YearMonth.now().plusMonths(1)
+    private val forventetInntekt = BigDecimal.ZERO
+    private val samordningsfradrag = BigDecimal.ZERO
 
     @Test
     internal fun `skal opprette migrering og sende til iverksett`() {
