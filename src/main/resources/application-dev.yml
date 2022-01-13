@@ -3,7 +3,18 @@ spring:
 
 DEPLOY_ENV: dev
 ON_PREM_URL_ENV: dev
-GATEWAY_PREFIX: api-gw-q1
+
+# Q1
+FAMILIE_INTEGRASJONER_URL: https://familie-integrasjoner-q1.dev-fss-pub.nais.io
+PDL_URL: https://pdl-api-q1.dev-fss-pub.nais.io
+PDL_SCOPE: api://dev-fss.pdl.pdl-api-q1/.default
+no.nav.security.jwt:
+  client:
+    registration:
+      familie-integrasjoner:
+        scope: api://dev-fss.teamfamilie.familie-integrasjoner-q1/.default
+      familie-integrasjoner-clientcredentials:
+        scope: api://dev-fss.teamfamilie.familie-integrasjoner-q1/.default
 
 FRONTEND_OPPGAVE_URL: https://ensligmorellerfar.dev.intern.nav.no/oppgavebenk
 

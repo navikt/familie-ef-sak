@@ -12,7 +12,7 @@ import no.nav.familie.ef.sak.vilkår.Vurdering
 /**
  * Brukes for å utlede hvilke delvilkår som må besvares
  */
-data class HovedregelMetadata(val søknad: SøknadsskjemaOvergangsstønad,
+data class HovedregelMetadata(val søknad: SøknadsskjemaOvergangsstønad?,
                               val sivilstandstype: Sivilstandstype)
 
 abstract class Vilkårsregel(val vilkårType: VilkårType,

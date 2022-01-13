@@ -23,8 +23,8 @@ class MedlemskapMapper(private val statsborgerskapMapper: StatsborgerskapMapper,
                        private val adresseMapper: AdresseMapper) {
 
     fun tilDto(grunnlagsdata: GrunnlagsdataDomene,
-               medlemskapsdetaljer: Medlemskap): MedlemskapDto {
-        return MedlemskapDto(søknadsgrunnlag = mapSøknadsgrunnlag(medlemskapsdetaljer),
+               medlemskapsdetaljer: Medlemskap?): MedlemskapDto {
+        return MedlemskapDto(søknadsgrunnlag = medlemskapsdetaljer?.let { mapSøknadsgrunnlag(it) },
                              registergrunnlag = mapRegistergrunnlag(grunnlagsdata.søker, grunnlagsdata.medlUnntak))
     }
 

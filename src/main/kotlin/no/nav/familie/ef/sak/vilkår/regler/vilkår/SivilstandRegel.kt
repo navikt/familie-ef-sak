@@ -30,15 +30,16 @@ class SivilstandRegel : Vilkårsregel(vilkårType = VilkårType.SIVILSTAND,
                                                              UNNTAK)) {
 
     override fun initereDelvilkårsvurdering(metadata: HovedregelMetadata, resultat: Vilkårsresultat): List<Delvilkårsvurdering> {
-        val (søknad: SøknadsskjemaOvergangsstønad, sivilstandstype: Sivilstandstype) = metadata
+        val (søknad: SøknadsskjemaOvergangsstønad?, sivilstandstype: Sivilstandstype) = metadata
 
         val hovedregel: RegelId = when {
             sivilstandstype.erUgiftEllerUoppgitt()
+            && søknad != null
             && (søknad.sivilstand.erUformeltGift == true || søknad.sivilstand.erUformeltSeparertEllerSkilt == true) ->
                 KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE
             sivilstandstype.erUgiftEllerUoppgitt() -> KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE
 
-            sivilstandstype.erGift() && søknad.sivilstand.søktOmSkilsmisseSeparasjon == true ->
+            sivilstandstype.erGift() && søknad != null && søknad.sivilstand.søktOmSkilsmisseSeparasjon == true ->
                 SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON
             sivilstandstype.erGift() -> KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE
 
