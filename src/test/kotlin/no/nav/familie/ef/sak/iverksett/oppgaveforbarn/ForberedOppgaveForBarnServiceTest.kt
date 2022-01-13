@@ -179,6 +179,17 @@ internal class ForberedOppgaveForBarnServiceTest {
         verify(exactly = 1) { OppgaveBeskrivelse.beskrivelseBarnFyllerEttÅr() }
     }
 
+    @Test
+    fun `barn med bare termindato fyller 1 år i morgen, forvent kall til beskrivelseBarnFyllerEttÅr og ingen unntak`() {
+        val termindato = LocalDate.now().minusYears(1).plusDays(7)
+        every {
+            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, any())
+        } returns listOf(opprettBarn(fødselsnummer = null, termindato = termindato))
+        opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(SISTE_KJØRING_EN_UKE_SIDEN)
+        verify(exactly = 0) { OppgaveBeskrivelse.beskrivelseBarnBlirSeksMnd() }
+        verify(exactly = 1) { OppgaveBeskrivelse.beskrivelseBarnFyllerEttÅr() }
+    }
+
     private fun generateFnr(localDate: LocalDate): String {
         return FnrGenerator.generer(localDate.year, localDate.month.value, localDate.dayOfMonth, false)
     }
