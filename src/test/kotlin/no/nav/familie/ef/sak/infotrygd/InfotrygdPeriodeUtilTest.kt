@@ -17,7 +17,7 @@ internal class InfotrygdPeriodeUtilTest {
         val stønadTom = opphørdato.plusDays(1)
         val periode = lagInfotrygdPeriode(stønadFom = stønadFom,
                                           stønadTom = stønadTom,
-                                          opphørdato = opphørdato)
+                                          opphørsdato = opphørdato)
         val nyePerioder = filtrerOgSorterPerioderFraInfotrygd(listOf(periode))
         assertThat(nyePerioder).hasSize(1)
         assertThat(nyePerioder[0].stønadFom).isEqualTo(stønadFom)
@@ -32,7 +32,7 @@ internal class InfotrygdPeriodeUtilTest {
         val opphørdato = LocalDate.now().plusDays(10)
         val periode = lagInfotrygdPeriode(stønadFom = stønadFom,
                                           stønadTom = stønadTom,
-                                          opphørdato = opphørdato)
+                                          opphørsdato = opphørdato)
         val input = listOf(periode)
         val nyePerioder = filtrerOgSorterPerioderFraInfotrygd(input)
         assertThat(nyePerioder).isEqualTo(input)
@@ -46,7 +46,7 @@ internal class InfotrygdPeriodeUtilTest {
         val opphøsdato = fom.plusMonths(1)
         val periode1 = lagInfotrygdPeriode(stønadFom = fom,
                                            stønadTom = tom,
-                                           opphørdato = opphøsdato)
+                                           opphørsdato = opphøsdato)
         val nyePerioder = filtrerOgSorterPerioderFraInfotrygd(listOf(periode1))
 
         assertThat(nyePerioder).hasSize(1)
@@ -62,7 +62,7 @@ internal class InfotrygdPeriodeUtilTest {
         val opphørdato = LocalDate.now().minusDays(10)
         val periode = lagInfotrygdPeriode(stønadFom = stønadFom,
                                           stønadTom = stønadTom,
-                                          opphørdato = opphørdato)
+                                          opphørsdato = opphørdato)
         val nyePerioder = filtrerOgSorterPerioderFraInfotrygd(listOf(periode))
         assertThat(nyePerioder).isEmpty()
     }
@@ -74,7 +74,7 @@ internal class InfotrygdPeriodeUtilTest {
         val opphørdato = null
         val periode = lagInfotrygdPeriode(stønadFom = stønadFom,
                                           stønadTom = stønadTom,
-                                          opphørdato = opphørdato)
+                                          opphørsdato = opphørdato)
         val nyePerioder = filtrerOgSorterPerioderFraInfotrygd(listOf(periode))
         assertThat(nyePerioder).isEmpty()
     }
