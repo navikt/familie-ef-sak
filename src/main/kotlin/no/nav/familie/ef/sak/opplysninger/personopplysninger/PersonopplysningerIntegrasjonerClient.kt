@@ -52,9 +52,11 @@ class PersonopplysningerIntegrasjonerClient(@Qualifier("azure") restOperations: 
     }
 
     fun hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(personIdent: String): ADRESSEBESKYTTELSEGRADERING {
-        return postForEntity(integrasjonerConfig.adressebeskyttelse, PersonIdent(personIdent), HttpHeaders().also {
-            it.set(HEADER_NAV_TEMA, HEADER_NAV_TEMA_ENF)
-        })
+        return postForEntity<Ressurs<ADRESSEBESKYTTELSEGRADERING>>(integrasjonerConfig.adressebeskyttelse,
+                                                                   PersonIdent(personIdent),
+                                                                   HttpHeaders().also {
+                                                                       it.set(HEADER_NAV_TEMA, HEADER_NAV_TEMA_ENF)
+                                                                   }).getDataOrThrow()
     }
 
     private fun hentArbeidsfordelingEnhet(uri: URI,

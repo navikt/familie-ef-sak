@@ -100,13 +100,13 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                             .willReturn(okJson(objectMapper.writeValueAsString(medl))),
                     post(urlEqualTo(integrasjonerConfig.navKontorUri.path))
                             .willReturn(okJson(objectMapper.writeValueAsString(navKontorEnhet))),
-                post(urlEqualTo(integrasjonerConfig.infotrygdVedtaksperioder.path))
+                    post(urlEqualTo(integrasjonerConfig.infotrygdVedtaksperioder.path))
                             .willReturn(okJson(objectMapper.writeValueAsString(infotrygdPerioder))),
-                post(urlEqualTo(integrasjonerConfig.adressebeskyttelse.path))
-                            .willReturn(okJson(objectMapper.writeValueAsString(ADRESSEBESKYTTELSEGRADERING.UGRADERT))),
+                    post(urlEqualTo(integrasjonerConfig.adressebeskyttelse.path))
+                            .willReturn(okJson(objectMapper.writeValueAsString(Ressurs.success(ADRESSEBESKYTTELSEGRADERING.UGRADERT)))),
 
 
-            )
+                    )
 
     private fun lagIkkeTilgangResponse() = Tilgang(false,
                                                    "Mock sier: Du har " +
