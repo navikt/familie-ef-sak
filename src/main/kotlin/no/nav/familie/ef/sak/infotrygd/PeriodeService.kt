@@ -8,7 +8,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
-import no.nav.familie.kontrakter.ef.felles.StønadType
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import org.springframework.stereotype.Component
