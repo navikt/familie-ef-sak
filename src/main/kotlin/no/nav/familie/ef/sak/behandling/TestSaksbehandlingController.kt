@@ -60,7 +60,6 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
 
     @PostMapping(path = ["fagsak"], consumes = [MediaType.APPLICATION_JSON_VALUE])
     fun opprettFagsakForTestperson(@RequestBody testFagsakRequest: TestFagsakRequest): Ressurs<UUID> {
-        val erMigrering = testFagsakRequest.behandlingsType == TestBehandlingsType.MIGRERING
         val fagsak = fagsakService.hentEllerOpprettFagsak(testFagsakRequest.personIdent, Stønadstype.OVERGANGSSTØNAD)
         val søknad: SøknadOvergangsstønad = lagSøknad(testFagsakRequest.personIdent)
         val behandling: Behandling = when (testFagsakRequest.behandlingsType) {
@@ -70,7 +69,7 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
         }
 
 
-        if (!behandling.erMigrering()) {
+        if (!behandling.erMigrering()) { // opprettGrunnlagsdata håndteres i migreringservice
             grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
         }
         behandlingshistorikkService.opprettHistorikkInnslag(Behandlingshistorikk(behandlingId = behandling.id,
