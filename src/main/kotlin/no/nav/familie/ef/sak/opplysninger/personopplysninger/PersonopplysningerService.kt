@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.Personopplys
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
+import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.cache.CacheManager
@@ -68,6 +69,10 @@ class PersonopplysningerService(private val personService: PersonService,
     @Cacheable("navKontor")
     fun hentNavKontor(ident: String): NavKontorEnhet {
         return personopplysningerIntegrasjonerClient.hentNavKontor(ident)
+    }
+
+    fun hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(personIdent: String): ADRESSEBESKYTTELSEGRADERING {
+        return personopplysningerIntegrasjonerClient.hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(personIdent)
     }
 }
 

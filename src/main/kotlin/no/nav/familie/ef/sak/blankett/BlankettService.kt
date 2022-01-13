@@ -61,10 +61,13 @@ class BlankettService(private val tilgangService: TilgangService,
     }
 
     fun lagBlankett(behandlingId: UUID): ByteArray {
-        val blankettPdfRequest = BlankettPdfRequest(lagPersonopplysningerDto(behandlingId),
-                                                    hentVilkårDto(behandlingId),
-                                                    hentVedtak(behandlingId),
-                                                    lagSøknadsdatoer(behandlingId)
+        val behandling = behandlingService.hentBehandling(behandlingId)
+        val blankettPdfRequest = BlankettPdfRequest(
+                BlankettPdfBehandling(årsak = behandling.årsak),
+                lagPersonopplysningerDto(behandlingId),
+                hentVilkårDto(behandlingId),
+                hentVedtak(behandlingId),
+                lagSøknadsdatoer(behandlingId)
         )
         val blankettPdfAsByteArray = blankettClient.genererBlankett(blankettPdfRequest)
         oppdaterEllerOpprettBlankett(behandlingId, blankettPdfAsByteArray)

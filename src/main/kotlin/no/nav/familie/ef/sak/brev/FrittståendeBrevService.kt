@@ -1,19 +1,17 @@
 package no.nav.familie.ef.sak.brev
 
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
-import no.nav.familie.ef.sak.brev.domain.FRITEKST
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevDto
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevKategori
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevRequestDto
-import no.nav.familie.ef.sak.brev.dto.VedtaksbrevDto
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevType
-import no.nav.familie.kontrakter.ef.felles.StønadType
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG
+import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG_UTLAND
 import org.springframework.stereotype.Service
 import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevDto as FrittståendeBrevDtoIverksetting
 
@@ -24,33 +22,17 @@ class FrittståendeBrevService(private val brevClient: BrevClient,
                               private val arbeidsfordelingService: ArbeidsfordelingService,
                               private val iverksettClient: IverksettClient) {
 
-    fun lagFrittståendeBrev(frittståendeBrevDto: FrittståendeBrevDto): ByteArray {
-        val request = lagFrittståendeBrevRequest(frittståendeBrevDto)
-
-        val vedtaksbrev = VedtaksbrevDto(saksbehandlerBrevrequest = objectMapper.writeValueAsString(request),
-                                         brevmal = FRITEKST,
-                                         saksbehandlersignatur = SikkerhetContext.hentSaksbehandlerNavn(true),
-                                         besluttersignatur = null)
-
-        return brevClient.genererBrev(vedtaksbrev = vedtaksbrev)
-    }
-
-    private fun lagFrittståendeBrevRequest(frittståendeBrevDto: FrittståendeBrevDto): FrittståendeBrevRequestDto {
+    fun forhåndsvisFrittståendeBrev(frittståendeBrevDto: FrittståendeBrevDto): ByteArray {
         val ident = fagsakService.hentAktivIdent(frittståendeBrevDto.fagsakId)
-        val navn = personopplysningerService.hentGjeldeneNavn(listOf(ident))
-        return FrittståendeBrevRequestDto(overskrift = frittståendeBrevDto.overskrift,
-                                          avsnitt = frittståendeBrevDto.avsnitt,
-                                          personIdent = ident,
-                                          navn = navn.getValue(ident))
+        return lagFrittståendeBrevMedSignatur(frittståendeBrevDto, ident)
     }
 
     fun sendFrittståendeBrev(frittståendeBrevDto: FrittståendeBrevDto) {
-        val request = lagFrittståendeBrevRequest(frittståendeBrevDto)
-        val brev = brevClient.genererBrev(request, SikkerhetContext.hentSaksbehandlerNavn(true))
         val ident = fagsakService.hentAktivIdent(frittståendeBrevDto.fagsakId)
+        val brev = lagFrittståendeBrevMedSignatur(frittståendeBrevDto, ident)
         val eksternFagsakId = fagsakService.hentEksternId(frittståendeBrevDto.fagsakId)
         val journalførendeEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(
-                ident)
+            ident)
         val saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(true)
         val stønadstype = fagsakService.hentFagsak(frittståendeBrevDto.fagsakId).stønadstype
         val brevType = utledFrittståendeBrevType(frittståendeBrevDto, stønadstype)
@@ -61,6 +43,38 @@ class FrittståendeBrevService(private val brevClient: BrevClient,
                                                                              journalførendeEnhet = journalførendeEnhet,
                                                                              saksbehandlerIdent = saksbehandlerIdent))
     }
+
+    private fun lagFrittståendeBrevRequest(frittståendeBrevDto: FrittståendeBrevDto, ident: String): FrittståendeBrevRequestDto {
+        val navn = personopplysningerService.hentGjeldeneNavn(listOf(ident))
+        return FrittståendeBrevRequestDto(overskrift = frittståendeBrevDto.overskrift,
+                                          avsnitt = frittståendeBrevDto.avsnitt,
+                                          personIdent = ident,
+                                          navn = navn.getValue(ident))
+    }
+
+    private fun lagFrittståendeBrevMedSignatur(
+        frittståendeBrevDto: FrittståendeBrevDto,
+        ident: String
+    ): ByteArray {
+        val request = lagFrittståendeBrevRequest(frittståendeBrevDto, ident)
+        val signatur = lagSignaturMedEnhet(ident)
+        val brev = brevClient.genererBrev(request, signatur.navn, signatur.enhet)
+        return brev
+    }
+
+
+    private fun lagSignaturMedEnhet(ident: String): SignaturDto {
+        val harStrengtFortroligAdresse: Boolean =
+                personopplysningerService.hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(ident)
+                        .let { it == STRENGT_FORTROLIG || it == STRENGT_FORTROLIG_UTLAND }
+
+        return if (harStrengtFortroligAdresse) {
+            SignaturDto(NAV_ANONYM_NAVN, ENHET_VIKAFOSSEN)
+        } else {
+            SignaturDto(SikkerhetContext.hentSaksbehandlerNavn(true), ENHET_NAY)
+        }
+    }
+
 
     private fun utledFrittståendeBrevType(frittståendeBrevDto: FrittståendeBrevDto, stønadstype: Stønadstype) =
             when (frittståendeBrevDto.brevType) {
@@ -83,5 +97,15 @@ class FrittståendeBrevService(private val brevClient: BrevClient,
                 Stønadstype.SKOLEPENGER -> FrittståendeBrevType.MANGELBREV_SKOLEPENGER
             }
 
+    companion object {
+
+        val NAV_ANONYM_NAVN = "NAV anonym"
+        val ENHET_VIKAFOSSEN = "NAV Vikafossen"
+        val ENHET_NAY = "NAV Arbeid og ytelser"
+    }
 
 }
+
+
+
+data class SignaturDto(val navn: String, val enhet: String)
