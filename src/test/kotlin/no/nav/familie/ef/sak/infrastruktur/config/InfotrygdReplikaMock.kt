@@ -2,10 +2,10 @@ package no.nav.familie.ef.sak.infrastruktur.config
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeTestUtil.lagInfotrygdPeriode
 import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdEndringKode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdFinnesResponse
-import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeRequest
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPerioderArenaResponse
@@ -34,18 +34,13 @@ class InfotrygdReplikaMock {
     }
 
     private fun lagInfotrygdPeriode(personIdent: String) =
-            InfotrygdPeriode(personIdent = personIdent,
-                             kode = InfotrygdEndringKode.NY,
-                             brukerId = "k000000",
-                             stønadId = 1L,
-                             vedtakId = 1L,
-                             stønadBeløp = 100,
-                             inntektsreduksjon = 10,
-                             samordningsfradrag = 20,
-                             beløp = 10,
-                             startDato = LocalDate.of(2021, 1, 1),
-                             stønadFom = LocalDate.of(2021, 1, 1),
-                             stønadTom = LocalDate.of(2021, 1, 31),
-                             opphørsdato = null)
+            lagInfotrygdPeriode(personIdent = personIdent,
+                                kode = InfotrygdEndringKode.NY,
+                                inntektsreduksjon = 10,
+                                samordningsfradrag = 20,
+                                beløp = 10,
+                                stønadFom = LocalDate.of(2021, 1, 1),
+                                stønadTom = LocalDate.of(2021, 1, 31),
+                                opphørsdato = null)
 
 }
