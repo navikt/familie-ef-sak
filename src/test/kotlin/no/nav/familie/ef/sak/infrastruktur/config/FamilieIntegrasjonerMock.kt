@@ -38,6 +38,7 @@ import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
@@ -100,9 +101,12 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                     post(urlEqualTo(integrasjonerConfig.navKontorUri.path))
                             .willReturn(okJson(objectMapper.writeValueAsString(navKontorEnhet))),
                     post(urlEqualTo(integrasjonerConfig.infotrygdVedtaksperioder.path))
-                            .willReturn(okJson(objectMapper.writeValueAsString(infotrygdPerioder)))
+                            .willReturn(okJson(objectMapper.writeValueAsString(infotrygdPerioder))),
+                    post(urlEqualTo(integrasjonerConfig.adressebeskyttelse.path))
+                            .willReturn(okJson(objectMapper.writeValueAsString(Ressurs.success(ADRESSEBESKYTTELSEGRADERING.UGRADERT)))),
 
-            )
+
+                    )
 
     private fun lagIkkeTilgangResponse() = Tilgang(false,
                                                    "Mock sier: Du har " +
