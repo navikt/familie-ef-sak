@@ -69,9 +69,9 @@ class FrittståendeBrevService(private val brevClient: BrevClient,
                         .let { it == STRENGT_FORTROLIG || it == STRENGT_FORTROLIG_UTLAND }
 
         return if (harStrengtFortroligAdresse) {
-            SignaturDto("NAV anonym", "NAV Vikafossen")
+            SignaturDto(NAV_ANONYM_NAVN, ENHET_VIKAFOSSEN)
         } else {
-            SignaturDto(SikkerhetContext.hentSaksbehandlerNavn(true), "NAV Arbeid og ytelser")
+            SignaturDto(SikkerhetContext.hentSaksbehandlerNavn(true), ENHET_NAY)
         }
     }
 
@@ -97,7 +97,15 @@ class FrittståendeBrevService(private val brevClient: BrevClient,
                 Stønadstype.SKOLEPENGER -> FrittståendeBrevType.MANGELBREV_SKOLEPENGER
             }
 
+    companion object {
+
+        val NAV_ANONYM_NAVN = "NAV anonym"
+        val ENHET_VIKAFOSSEN = "NAV Vikafossen"
+        val ENHET_NAY = "NAV Arbeid og ytelser"
+    }
 
 }
+
+
 
 data class SignaturDto(val navn: String, val enhet: String)
