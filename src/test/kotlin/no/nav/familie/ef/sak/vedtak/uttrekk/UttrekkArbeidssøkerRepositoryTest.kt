@@ -19,7 +19,6 @@ internal class UttrekkArbeidssøkerRepositoryTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var repository: UttrekkArbeidssøkerRepository
 
     private val årMåned = YearMonth.of(2021, 1)
-    private val sort = Sort.by("id")
 
     @BeforeEach
     internal fun setUp() {
@@ -28,22 +27,30 @@ internal class UttrekkArbeidssøkerRepositoryTest : OppslagSpringRunnerTest() {
         for (i in 1..10) {
             repository.insert(UttrekkArbeidssøkere(fagsakId = fagsak.id,
                                                    vedtakId = behandling.id,
-                                                   årMåned = årMåned))
+                                                   årMåned = årMåned,
+                                                   registrertArbeidssøker = false))
         }
 
         for (i in 1..5) {
             repository.insert(UttrekkArbeidssøkere(fagsakId = fagsak.id,
                                                    vedtakId = behandling.id,
                                                    årMåned = årMåned.plusMonths(1),
-                                                   kontrollert = true))
+                                                   kontrollert = true,
+                                                   registrertArbeidssøker = false))
+        }
+        for (i in 1..2) {
+            repository.insert(UttrekkArbeidssøkere(fagsakId = fagsak.id,
+                                                   vedtakId = behandling.id,
+                                                   årMåned = årMåned.plusMonths(1),
+                                                   registrertArbeidssøker = true))
         }
     }
 
     @Test
     internal fun `skal hente uttrekk for gitt måned`() {
-        assertThat(repository.findAllByÅrMåned(årMåned.minusMonths(1))).isEmpty()
-        assertThat(repository.findAllByÅrMåned(årMåned)).hasSize(10)
-        assertThat(repository.findAllByÅrMåned(årMåned.plusMonths(1))).hasSize(5)
-        assertThat(repository.findAllByÅrMåned(årMåned.plusMonths(2))).isEmpty()
+        assertThat(repository.findAllByÅrMånedAndRegistrertArbeidssøkerIsFalse(årMåned.minusMonths(1))).isEmpty()
+        assertThat(repository.findAllByÅrMånedAndRegistrertArbeidssøkerIsFalse(årMåned)).hasSize(10)
+        assertThat(repository.findAllByÅrMånedAndRegistrertArbeidssøkerIsFalse(årMåned.plusMonths(1))).hasSize(5)
+        assertThat(repository.findAllByÅrMånedAndRegistrertArbeidssøkerIsFalse(årMåned.plusMonths(2))).isEmpty()
     }
 }

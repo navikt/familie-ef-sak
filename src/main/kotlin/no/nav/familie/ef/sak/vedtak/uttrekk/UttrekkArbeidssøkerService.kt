@@ -45,6 +45,7 @@ class UttrekkArbeidssøkerService(
     }
 
     fun settKontrollert(id: UUID, kontrollert: Boolean): UttrekkArbeidssøkerDto {
+        tilgangService.validerHarSaksbehandlerrolle()
         val uttrekkArbeidssøkere = uttrekkArbeidssøkerRepository.findByIdOrThrow(id)
         tilgangService.validerTilgangTilFagsak(uttrekkArbeidssøkere.fagsakId)
 
@@ -58,7 +59,8 @@ class UttrekkArbeidssøkerService(
 
     fun hentUttrekkArbeidssøkere(årMåned: YearMonth = forrigeMåned().invoke(),
                                  visKontrollerte: Boolean = false): UttrekkArbeidssøkereDto {
-        val arbeidssøkere = uttrekkArbeidssøkerRepository.findAllByÅrMåned(årMåned)
+        tilgangService.validerHarSaksbehandlerrolle()
+        val arbeidssøkere = uttrekkArbeidssøkerRepository.findAllByÅrMånedAndRegistrertArbeidssøkerIsFalse(årMåned)
         val filtrerteArbeidsssøkere = mapTilDtoOgFiltrer(arbeidssøkere)
 
         val totaltAntallUkontrollerte = arbeidssøkere.count { !it.kontrollert }
