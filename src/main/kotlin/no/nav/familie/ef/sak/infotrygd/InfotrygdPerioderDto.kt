@@ -28,7 +28,7 @@ fun InternPeriode.tilSummertInfotrygdperiodeDto(): SummertInfotrygdPeriode =
                 stønadFom = this.stønadFom,
                 stønadTom = this.stønadTom,
                 opphørsdato = this.opphørsdato,
-                inntektsreduksjon = this.inntektsreduksjon, // TODO burde denne egentlige endres til inntekt til dto?
+                inntektsreduksjon = this.inntektsreduksjon,
                 samordningsfradrag = this.samordningsfradrag,
                 beløp = this.beløp
         )
