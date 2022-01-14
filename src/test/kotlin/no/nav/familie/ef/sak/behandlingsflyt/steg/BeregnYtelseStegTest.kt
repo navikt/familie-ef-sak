@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.dto.Periode
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
@@ -53,16 +54,19 @@ internal class BeregnYtelseStegTest {
     private val simuleringService = mockk<SimuleringService>()
     private val tilbakekrevingService = mockk<TilbakekrevingService>(relaxed = true)
     private val fagsakService = mockk<FagsakService>(relaxed = true)
+    private val featureToggleService = mockk<FeatureToggleService>(relaxed = true)
 
     private val steg = BeregnYtelseSteg(tilkjentYtelseService,
                                         beregningService,
                                         simuleringService,
                                         vedtakService,
                                         tilbakekrevingService,
-                                        fagsakService)
+                                        fagsakService,
+                                        featureToggleService)
 
     @BeforeEach
     internal fun setUp() {
+        every { featureToggleService.isEnabled(any()) } returns true
         every { fagsakService.fagsakMedOppdatertPersonIdent(any()) } returns fagsak(fagsakpersoner(setOf("123")))
         every { simuleringService.hentOgLagreSimuleringsresultat(any()) }
                 .returns(Simuleringsresultat(behandlingId = UUID.randomUUID(),
@@ -165,10 +169,58 @@ internal class BeregnYtelseStegTest {
         }
 
         @Test
-        internal fun `skal feile innvilge med opphør hvis det er en førstegangsbehandling`() {
+        internal fun `skal kunne ha ingen stønadsperiode for en førstegangsbehandling`() {
+            val innvilgetFom1 = YearMonth.of(2021, 1)
+            val innvilgetTom1 = YearMonth.of(2021, 5)
             val opphørFom = YearMonth.of(2021, 6)
             val opphørTom = YearMonth.of(2021, 8)
-            val innvilgetFom = YearMonth.of(2021, 9)
+            val innvilgetFom2 = YearMonth.of(2021, 9)
+            val innvilgetTom2 = YearMonth.of(2022, 3)
+
+            val slot = slot<TilkjentYtelse>()
+            every { tilkjentYtelseService.opprettTilkjentYtelse(capture(slot)) } answers { firstArg() }
+//            every { tilkjentYtelseService.hentForBehandling(any()) } returns
+//                    lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, forrigeAndelFom, forrigeAndelTom)))
+            every { beregningService.beregnYtelse(any(), any()) } answers {
+                firstArg<List<Periode>>().map { lagBeløpsperiode(it.fradato, it.tildato) }
+            }
+
+            val opphørsperiode = VedtaksperiodeDto(årMånedFra = opphørFom,
+                                                   årMånedTil = opphørTom,
+                                                   aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
+                                                   periodeType = VedtaksperiodeType.MIDLERTIDIG_OPPHØR)
+            val innvilgetPeriode1 = VedtaksperiodeDto(årMånedFra = innvilgetFom1,
+                                                     årMånedTil = innvilgetTom1,
+                                                     aktivitet = AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID,
+                                                     periodeType = VedtaksperiodeType.HOVEDPERIODE)
+            val innvilgetPeriode2 = VedtaksperiodeDto(årMånedFra = innvilgetFom2,
+                                                     årMånedTil = innvilgetTom2,
+                                                     aktivitet = AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID,
+                                                     periodeType = VedtaksperiodeType.HOVEDPERIODE)
+
+            utførSteg(BehandlingType.FØRSTEGANGSBEHANDLING,
+                      Innvilget(resultatType = ResultatType.INNVILGE,
+                                perioder = listOf(innvilgetPeriode1, opphørsperiode, innvilgetPeriode2),
+                                inntekter = listOf(Inntekt(innvilgetFom1,
+                                                           BigDecimal(100000),
+                                                           samordningsfradrag = BigDecimal.ZERO)),
+                                inntektBegrunnelse = "null",
+                                periodeBegrunnelse = "null"
+                      ),
+                      forrigeBehandlingId = UUID.randomUUID())
+            assertThat(slot.captured.andelerTilkjentYtelse.size).isEqualTo(2)
+            assertThat(slot.captured.andelerTilkjentYtelse.firstOrNull()?.stønadFom).isEqualTo(innvilgetFom1.atDay(1))
+            assertThat(slot.captured.andelerTilkjentYtelse.firstOrNull()?.stønadTom).isEqualTo(opphørFom.minusMonths(1).atEndOfMonth())
+            assertThat(slot.captured.andelerTilkjentYtelse.lastOrNull()?.stønadFom).isEqualTo(innvilgetFom2.atDay(1))
+            assertThat(slot.captured.andelerTilkjentYtelse.lastOrNull()?.stønadTom).isEqualTo(innvilgetTom2.atEndOfMonth())
+        }
+
+
+        @Test
+        internal fun `skal feile hvis nye perioder ikke er sammenhengende`() {
+            val opphørFom = YearMonth.of(2021, 6)
+            val opphørTom = YearMonth.of(2021, 8)
+            val innvilgetFom = YearMonth.of(2021, 10)
             val innvilgetTom = YearMonth.of(2022, 3)
             val forrigeAndelFom = LocalDate.of(2021, 1, 1)
             val forrigeAndelTom = LocalDate.of(2021, 12, 31)
@@ -190,8 +242,8 @@ internal class BeregnYtelseStegTest {
                                                      aktivitet = AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID,
                                                      periodeType = VedtaksperiodeType.HOVEDPERIODE)
             assertThrows<Feil> {
-                utførSteg(BehandlingType.FØRSTEGANGSBEHANDLING,
-                      Innvilget(resultatType = ResultatType.INNVILGE_MED_OPPHØR,
+                utførSteg(BehandlingType.REVURDERING,
+                      Innvilget(resultatType = ResultatType.INNVILGE,
                                 perioder = listOf(opphørsperiode, innvilgetPeriode),
                                 inntekter = listOf(Inntekt(innvilgetFom,
                                                            BigDecimal(100000),
@@ -236,7 +288,7 @@ internal class BeregnYtelseStegTest {
                                                      aktivitet = AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID,
                                                      periodeType = VedtaksperiodeType.HOVEDPERIODE)
             utførSteg(BehandlingType.REVURDERING,
-                      Innvilget(resultatType = ResultatType.INNVILGE_MED_OPPHØR,
+                      Innvilget(resultatType = ResultatType.INNVILGE,
                                 perioder = listOf(opphørsperiode, innvilgetPeriode),
                                 inntekter = listOf(Inntekt(innvilgetFom,
                                                            BigDecimal(100000),
@@ -293,7 +345,7 @@ internal class BeregnYtelseStegTest {
                                                      aktivitet = AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID,
                                                      periodeType = VedtaksperiodeType.HOVEDPERIODE)
             utførSteg(BehandlingType.REVURDERING,
-                      Innvilget(resultatType = ResultatType.INNVILGE_MED_OPPHØR,
+                      Innvilget(resultatType = ResultatType.INNVILGE,
                                 perioder = listOf(innvilgetPeriode1, opphørsperiode, innvilgetPeriode2),
                                 inntekter = listOf(Inntekt(innvilgetFom1,
                                                            BigDecimal(100000),
@@ -639,33 +691,36 @@ internal class BeregnYtelseStegTest {
         }
 
         @Test
-        internal fun `lager opphold i eksisterende andel`() {
+        internal fun `lager opphold i eksisterende andel, ny beløpsperiode med nytt opphold`() {
             val forrigeAndelFom = LocalDate.of(2021, 1, 1)
             val forrigeAndelTom = LocalDate.of(2025, 10, 31)
             val opphør1 = Periode(LocalDate.of(2021, 12, 1), LocalDate.of(2021, 12, 31))
-            val opphør2 = Periode(LocalDate.of(2022, 2, 1), LocalDate.of(2022, 3, 31))
-            val opphør3 = Periode(LocalDate.of(2022, 6, 1), LocalDate.of(2022, 8, 31))
-            val opphørsperioder = listOf(opphør1, opphør2, opphør3)
+            val nyAndelFom1 = LocalDate.of(2022, 1, 1)
+            val nyAndelTom1 = LocalDate.of(2022, 3, 31)
+            val opphør2 = Periode(LocalDate.of(2022, 4, 1), LocalDate.of(2022, 8, 31))
+            val nyAndelFom2 = LocalDate.of(2022, 9, 1)
+            val nyAndelTom2 = LocalDate.of(2022, 9, 30)
+            val opphørsperioder = listOf(opphør1, opphør2)
             val forrigeAndeler = listOf(lagAndelTilkjentYtelse(50, forrigeAndelFom, forrigeAndelTom))
+            val beløpsperioder = listOf(lagAndelTilkjentYtelse(100, nyAndelFom1, nyAndelTom1),
+                                        lagAndelTilkjentYtelse(150, nyAndelFom2, nyAndelTom2))
 
-            val nyeAndeler = steg.slåSammenAndelerSomSkalVidereføres(listOf(), lagTilkjentYtelse(forrigeAndeler), opphørsperioder)
+            val nyeAndeler = steg.slåSammenAndelerSomSkalVidereføres(beløpsperioder, lagTilkjentYtelse(forrigeAndeler), opphørsperioder)
 
-            assertThat(nyeAndeler).hasSize(4)
+            assertThat(nyeAndeler).hasSize(3)
             assertThat(nyeAndeler[0].stønadFom).isEqualTo(forrigeAndelFom)
             assertThat(nyeAndeler[0].stønadTom).isEqualTo(opphør1.fradato.minusDays(1))
             assertThat(nyeAndeler[0].beløp).isEqualTo(50)
             assertThat(nyeAndeler[0].kildeBehandlingId).isEqualTo(forrigeAndeler[0].kildeBehandlingId)
-            assertThat(nyeAndeler[1].stønadFom).isEqualTo(opphør1.tildato.plusDays(1))
-            assertThat(nyeAndeler[1].stønadTom).isEqualTo(opphør2.fradato.minusDays(1))
-            assertThat(nyeAndeler[1].beløp).isEqualTo(50)
-            assertThat(nyeAndeler[1].kildeBehandlingId).isEqualTo(forrigeAndeler[0].kildeBehandlingId)
-            assertThat(nyeAndeler[2].stønadFom).isEqualTo(opphør2.tildato.plusDays(1))
-            assertThat(nyeAndeler[2].stønadTom).isEqualTo(opphør3.fradato.minusDays(1))
-            assertThat(nyeAndeler[2].beløp).isEqualTo(50)
-            assertThat(nyeAndeler[2].kildeBehandlingId).isEqualTo(forrigeAndeler[0].kildeBehandlingId)
-            assertThat(nyeAndeler[3].stønadFom).isEqualTo(opphør3.tildato.plusDays(1))
-            assertThat(nyeAndeler[3].stønadTom).isEqualTo(forrigeAndelTom)
-            assertThat(nyeAndeler[3].beløp).isEqualTo(50)
+            assertThat(nyeAndeler[1].stønadFom).isEqualTo(nyAndelFom1)
+            assertThat(nyeAndeler[1].stønadTom).isEqualTo(nyAndelTom1)
+            assertThat(nyeAndeler[1].beløp).isEqualTo(100)
+            assertThat(nyeAndeler[1].kildeBehandlingId).isNotEqualTo(forrigeAndeler[0].kildeBehandlingId)
+            assertThat(nyeAndeler[2].stønadFom).isEqualTo(nyAndelFom2)
+            assertThat(nyeAndeler[2].stønadTom).isEqualTo(nyAndelTom2)
+            assertThat(nyeAndeler[2].beløp).isEqualTo(150)
+            assertThat(nyeAndeler[2].kildeBehandlingId).isNotEqualTo(forrigeAndeler[0].kildeBehandlingId)
+
         }
 
         @Test
@@ -755,19 +810,14 @@ internal class BeregnYtelseStegTest {
             val forrigeAndelTom1 = LocalDate.of(2021, 12, 31)
             val opphør1 = Periode(LocalDate.of(2021, 3, 1), LocalDate.of(2021, 6, 30))
             val opphør2 = Periode(LocalDate.of(2021, 8, 1), LocalDate.of(2021, 11, 30))
-            val opphørsperioder = listOf(opphør2, opphør1)
+            val opphørsperioder = listOf(opphør1, opphør2)
             val forrigeAndeler = listOf(lagAndelTilkjentYtelse(200, forrigeAndelFom1, forrigeAndelTom1))
 
             val nyeAndeler = steg.slåSammenAndelerSomSkalVidereføres(listOf(), lagTilkjentYtelse(forrigeAndeler), opphørsperioder)
 
-            assertThat(nyeAndeler).hasSize(3)
+            assertThat(nyeAndeler).hasSize(1)
             assertThat(nyeAndeler[0].stønadFom).isEqualTo(LocalDate.of(2021, 1, 1))
             assertThat(nyeAndeler[0].stønadTom).isEqualTo(LocalDate.of(2021, 2, 28))
-            assertThat(nyeAndeler[1].stønadFom).isEqualTo(LocalDate.of(2021, 7, 1))
-            assertThat(nyeAndeler[1].stønadTom).isEqualTo(LocalDate.of(2021, 7, 31))
-            assertThat(nyeAndeler[2].stønadFom).isEqualTo(LocalDate.of(2021, 12, 1))
-            assertThat(nyeAndeler[2].stønadTom).isEqualTo(LocalDate.of(2021, 12, 31))
-
         }
 
 

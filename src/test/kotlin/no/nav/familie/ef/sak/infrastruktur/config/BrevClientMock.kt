@@ -18,7 +18,7 @@ class BrevClientMock {
         val brevClient: BrevClient = mockk()
         val dummyPdf = this::class.java.classLoader.getResource("dummy/pdf_dummy.pdf")!!.readBytes()
         every { brevClient.genererBrev(any()) } returns dummyPdf
-        every { brevClient.genererBrev(any(), any()) } returns dummyPdf
+        every { brevClient.genererBrev(any(), any(), "NAV Arbeid og ytelser") } returns dummyPdf
         return brevClient
     }
 }

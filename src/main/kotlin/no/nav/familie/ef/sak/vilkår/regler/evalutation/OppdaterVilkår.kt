@@ -141,7 +141,7 @@ object OppdaterVilkår {
                                      metadata: HovedregelMetadata): List<Vilkårsvurdering> {
         return alleVilkårsregler
                 .flatMap { vilkårsregel ->
-                    if (vilkårsregel.vilkårType == VilkårType.ALENEOMSORG) {
+                    if (vilkårsregel.vilkårType == VilkårType.ALENEOMSORG && metadata.søknad != null) {
                         metadata.søknad.barn.map {
                             lagNyVilkårsvurdering(vilkårsregel, metadata, behandlingId, it.id)
                         }

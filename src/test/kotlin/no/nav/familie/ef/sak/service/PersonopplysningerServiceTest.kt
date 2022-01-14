@@ -64,7 +64,7 @@ internal class PersonopplysningerServiceTest {
                                          arbeidsfordelingService)
         val personService = PersonService(pdlClient, ConcurrentMapCacheManager())
         personopplysningerService = PersonopplysningerService(personService,
-                                                              søknadService,
+                                                              behandlingService,
                                                               personopplysningerIntegrasjonerClient,
                                                               grunnlagsdataService,
                                                               personopplysningerMapper,

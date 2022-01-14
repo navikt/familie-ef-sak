@@ -1,13 +1,13 @@
 package no.nav.familie.ef.sak.infrastruktur.config
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.mockk.Runs
+import io.mockk.clearMocks
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.kontrakter.ef.iverksett.IverksettStatus
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
@@ -20,20 +20,20 @@ class IverksettClientMock {
     @Bean
     @Primary
     fun iverksettClient(): IverksettClient {
-        val iverksettClient = mockk<IverksettClient>()
-
-        every { iverksettClient.simuler(any()) } returns objectMapper.readValue(readFile("simuleringsresultat_beriket.json"))
-
-        every { iverksettClient.iverksett(any(), any()) } just Runs
-        every { iverksettClient.iverksettTekniskOpphør(any()) } just Runs
-        every { iverksettClient.hentStatus(any()) } returns IverksettStatus.OK
-        every { iverksettClient.sendBehandlingsstatistikk(any()) } just Runs
-        every { iverksettClient.sendFrittståendeBrev(any()) } just Runs
-
+        val iverksettClient = mockk<IverksettClient>(relaxed = true)
+        clearMock(iverksettClient)
         return iverksettClient
     }
 
-    private fun readFile(filnavn: String): String {
-        return this::class.java.getResource("/json/$filnavn").readText()
+    companion object {
+
+        private val simuleringsresultat = objectMapper.readValue<BeriketSimuleringsresultat>(
+                this::class.java.getResource("/json/simuleringsresultat_beriket.json")!!.readText())
+
+        fun clearMock(iverksettClient: IverksettClient) {
+            clearMocks(iverksettClient)
+            every { iverksettClient.simuler(any()) } returns simuleringsresultat
+            every { iverksettClient.hentStatus(any()) } returns IverksettStatus.OK
+        }
     }
 }

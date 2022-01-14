@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.domain.Fil
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.journalføring.JournalføringService
 import no.nav.familie.ef.sak.oppgave.Oppgave
@@ -60,10 +61,13 @@ class BlankettService(private val tilgangService: TilgangService,
     }
 
     fun lagBlankett(behandlingId: UUID): ByteArray {
-        val blankettPdfRequest = BlankettPdfRequest(lagPersonopplysningerDto(behandlingId),
-                                                    hentVilkårDto(behandlingId),
-                                                    hentVedtak(behandlingId),
-                                                    lagSøknadsdatoer(behandlingId)
+        val behandling = behandlingService.hentBehandling(behandlingId)
+        val blankettPdfRequest = BlankettPdfRequest(
+                BlankettPdfBehandling(årsak = behandling.årsak),
+                lagPersonopplysningerDto(behandlingId),
+                hentVilkårDto(behandlingId),
+                hentVedtak(behandlingId),
+                lagSøknadsdatoer(behandlingId)
         )
         val blankettPdfAsByteArray = blankettClient.genererBlankett(blankettPdfRequest)
         oppdaterEllerOpprettBlankett(behandlingId, blankettPdfAsByteArray)
@@ -82,6 +86,7 @@ class BlankettService(private val tilgangService: TilgangService,
 
     private fun lagSøknadsdatoer(behandlingId: UUID): SøknadDatoerDto {
         val overgangsstønad = søknadService.hentOvergangsstønad(behandlingId)
+        feilHvis(overgangsstønad == null) { "Kan ikke hente søknad til behandlingen" }
         return SøknadDatoerDto(
                 søknadsdato = overgangsstønad.datoMottatt,
                 søkerStønadFra = overgangsstønad.søkerFra

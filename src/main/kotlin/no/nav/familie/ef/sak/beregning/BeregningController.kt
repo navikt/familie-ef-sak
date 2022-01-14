@@ -4,7 +4,6 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.felles.dto.Periode
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
@@ -12,7 +11,6 @@ import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.tilBeløpsperiode
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
-import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
 import no.nav.familie.ef.sak.vilkår.VurderingService
@@ -60,18 +58,9 @@ class BeregningController(private val stegService: StegService,
                        HttpStatus.BAD_REQUEST)
         }
         tilgangService.validerTilgangTilBehandling(behandlingId)
-        validerGyldigPeriodetype(vedtak)
         validerAlleVilkårOppfyltDersomInvilgelse(vedtak, behandlingId)
         val behandling = behandlingService.hentBehandling(behandlingId)
         return Ressurs.success(stegService.håndterBeregnYtelseForStønad(behandling, vedtak).id)
-    }
-
-    private fun validerGyldigPeriodetype(vedtak: VedtakDto) {
-        if (vedtak is Innvilget && vedtak.resultatType == ResultatType.INNVILGE) {
-            feilHvis(vedtak.perioder.any { it.periodeType == VedtaksperiodeType.MIDLERTIDIG_OPPHØR }) {
-                "Kan ikke ha opphørsperioder for et innvilget vedtak, velg Innvilge med opphør"
-            }
-        }
     }
 
     private fun validerAlleVilkårOppfyltDersomInvilgelse(vedtak: VedtakDto, behandlingId: UUID) {

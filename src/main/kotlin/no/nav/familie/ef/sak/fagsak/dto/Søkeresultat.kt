@@ -25,3 +25,5 @@ data class SøkeresultatPerson(
         val pageNumber: Int,
         val totalPages: Int
 )
+
+data class SøkeresultatUtenFagsak(val personIdent: String, val navn: String)

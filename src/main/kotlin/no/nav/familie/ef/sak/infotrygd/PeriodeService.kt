@@ -8,10 +8,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
-import no.nav.familie.kontrakter.ef.felles.StønadType
-import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdEndringKode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
-import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeRequest
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import org.springframework.stereotype.Component
 
@@ -21,12 +18,12 @@ class PeriodeService(
         private val fagsakService: FagsakService,
         private val behandlingService: BehandlingService,
         private val tilkjentYtelseService: TilkjentYtelseService,
-        private val replikaClient: InfotrygdReplikaClient
+        private val infotrygdService: InfotrygdService
 ) {
 
     fun hentPerioderForOvergangsstønadFraEfOgInfotrygd(personIdent: String): List<InternPeriode> {
         val personIdenter = pdlClient.hentPersonidenter(personIdent, true).identer()
-        val perioderFraReplika = hentPerioderFraReplika(personIdenter).getValue(StønadType.OVERGANGSSTØNAD)
+        val perioderFraReplika = infotrygdService.hentSummertePerioder(personIdenter).overgangsstønad
         val perioderFraEf = hentPerioderForOvergangsstønadFraEf(personIdenter)
 
         return InternPeriodeUtil.slåSammenPerioder(perioderFraEf, perioderFraReplika)
@@ -40,22 +37,6 @@ class PeriodeService(
                        // då vi ønsker de sortert på siste hendelsen først
                        ?.sortedWith(compareBy<InternPeriode> { it.stønadFom }.reversed())
                ?: emptyList()
-    }
-
-    private fun hentPerioderFraReplika(personIdenter: Set<String>, stønadstyper: Set<StønadType> = StønadType.values().toSet())
-            : Map<StønadType, List<InternPeriode>> {
-        require(stønadstyper.isNotEmpty()) { "Må sende med stønadstype" }
-        val request = InfotrygdPeriodeRequest(personIdenter, stønadstyper)
-        val perioder = replikaClient.hentPerioder(request)
-        return mapOf(StønadType.OVERGANGSSTØNAD to filtrerOgSlåSammenPerioder(perioder.overgangsstønad),
-                     StønadType.BARNETILSYN to filtrerOgSlåSammenPerioder(perioder.barnetilsyn),
-                     StønadType.SKOLEPENGER to filtrerOgSlåSammenPerioder(perioder.skolepenger))
-    }
-
-    private fun filtrerOgSlåSammenPerioder(perioder: List<InfotrygdPeriode>): List<InternPeriode> {
-        val filtrertPerioder = InfotrygdPeriodeUtil.filtrerOgSorterPerioderFraInfotrygd(perioder)
-                .filter { it.kode != InfotrygdEndringKode.ANNULERT && it.kode != InfotrygdEndringKode.UAKTUELL }
-        return InfotrygdPeriodeUtil.slåSammenInfotrygdperioder(filtrertPerioder)
     }
 
     private fun hentPerioderFraEf(it: Behandling): List<InternPeriode> =

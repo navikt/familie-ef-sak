@@ -21,6 +21,7 @@ import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak.TRUKKET_TILBAKE
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
+import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
@@ -48,7 +49,13 @@ internal class BehandlingServiceTest {
     private val taskService: TaskService = mockk(relaxed = true)
     private val oppgaveService: OppgaveService = mockk(relaxed = true)
     private val behandlingService =
-            BehandlingService(mockk(), behandlingRepository, behandlingshistorikkService, taskService, mockk(), oppgaveService)
+            BehandlingService(mockk(),
+                              behandlingRepository,
+                              behandlingshistorikkService,
+                              taskService,
+                              mockk(),
+                              oppgaveService,
+                              mockFeatureToggleService())
     private val behandlingSlot = slot<Behandling>()
 
     @BeforeAll

@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
 import no.nav.familie.kontrakter.ef.søknad.SøknadSkolepenger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
@@ -24,18 +25,20 @@ class SøknadService(
         private val søknadBarnetilsynRepository: SøknadBarnetilsynRepository,
 ) {
 
-    fun hentOvergangsstønad(behandlingId: UUID): SøknadsskjemaOvergangsstønad {
-        val søknad = hentSøknad(behandlingId)
+    private val logger = LoggerFactory.getLogger(javaClass)
+
+    fun hentOvergangsstønad(behandlingId: UUID): SøknadsskjemaOvergangsstønad? {
+        val søknad = hentSøknad(behandlingId) ?: return null
         return søknadOvergangsstønadRepository.findByIdOrThrow(søknad.soknadsskjemaId)
     }
 
-    fun hentSkolepenger(behandlingId: UUID): SøknadsskjemaSkolepenger {
-        val søknad = hentSøknad(behandlingId)
+    fun hentSkolepenger(behandlingId: UUID): SøknadsskjemaSkolepenger? {
+        val søknad = hentSøknad(behandlingId) ?: return null
         return søknadSkolepengerRepository.findByIdOrThrow(søknad.soknadsskjemaId)
     }
 
-    fun hentBarnetilsyn(behandlingId: UUID): SøknadsskjemaBarnetilsyn {
-        val søknad = hentSøknad(behandlingId)
+    fun hentBarnetilsyn(behandlingId: UUID): SøknadsskjemaBarnetilsyn? {
+        val søknad = hentSøknad(behandlingId) ?: return null
         return søknadBarnetilsynRepository.findByIdOrThrow(søknad.soknadsskjemaId)
     }
 
@@ -49,6 +52,10 @@ class SøknadService(
     @Transactional
     fun kopierSøknad(forrigeBehandlingId: UUID, nyBehandlingId: UUID) {
         val søknad = hentSøknad(forrigeBehandlingId)
+        if (søknad == null) {
+            logger.info("Finner ingen søknad på forrige behandling=$forrigeBehandlingId")
+            return
+        }
         søknadRepository.insert(søknad.copy(id = UUID.randomUUID(),
                                             behandlingId = nyBehandlingId,
                                             sporbar = Sporbar()))
@@ -78,9 +85,8 @@ class SøknadService(
         søknadRepository.insert(SøknadMapper.toDomain(journalpostId, søknadsskjema, behandlingId))
     }
 
-    private fun hentSøknad(behandlingId: UUID): Søknad {
+    private fun hentSøknad(behandlingId: UUID): Søknad? {
         return søknadRepository.findByBehandlingId(behandlingId)
-               ?: error("Finner ikke søknad til behandling: $behandlingId")
     }
 
 }

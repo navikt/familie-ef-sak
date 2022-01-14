@@ -62,12 +62,15 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
         val resultatBegrunnelse = finnResultatBegrunnelse(hendelse, vedtak)
         val søker = grunnlagsdataService.hentGrunnlagsdata(behandlingId).grunnlagsdata.søker
         val henvendelseTidspunkt = finnHenvendelsestidspunkt(behandling)
+        val relatertEksternBehandlingId =
+                behandling.forrigeBehandlingId?.let { behandlingService.hentBehandling(it).eksternId.id }
 
         val behandlingsstatistikkDto = BehandlingsstatistikkDto(
                 behandlingId = behandlingId,
+                eksternBehandlingId = behandling.eksternId.id,
                 personIdent = personIdent,
                 gjeldendeSaksbehandlerId = finnSaksbehandler(hendelse, vedtak, gjeldendeSaksbehandler),
-                eksternFagsakId = fagsak.eksternId.id.toString(),
+                eksternFagsakId = fagsak.eksternId.id,
                 hendelseTidspunkt = hendelseTidspunkt.atZone(zoneIdOslo),
                 behandlingOpprettetTidspunkt = behandling.sporbar.opprettetTid.atZone(zoneIdOslo),
                 hendelse = hendelse,
@@ -79,7 +82,8 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
                 stønadstype = StønadType.valueOf(fagsak.stønadstype.name),
                 behandlingstype = BehandlingType.valueOf(behandling.type.name),
                 henvendelseTidspunkt = henvendelseTidspunkt.atZone(zoneIdOslo),
-                relatertBehandlingId = behandling.forrigeBehandlingId
+                relatertEksternBehandlingId = relatertEksternBehandlingId,
+                relatertBehandlingId = null
         )
 
         iverksettClient.sendBehandlingsstatistikk(behandlingsstatistikkDto)
@@ -96,7 +100,7 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
             Hendelse.PÅBEGYNT, Hendelse.MOTTATT -> null
             else -> {
                 return when (vedtak?.resultatType) {
-                    ResultatType.INNVILGE, ResultatType.INNVILGE_MED_OPPHØR -> vedtak.periodeBegrunnelse
+                    ResultatType.INNVILGE -> vedtak.periodeBegrunnelse
                     ResultatType.AVSLÅ, ResultatType.OPPHØRT -> vedtak.avslåBegrunnelse
                     ResultatType.HENLEGGE -> error("Ikke implementert")
                     else -> error("Mangler vedtak")

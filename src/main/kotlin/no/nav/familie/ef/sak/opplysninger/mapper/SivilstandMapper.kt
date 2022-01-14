@@ -12,8 +12,8 @@ import no.nav.familie.ef.sak.vilkår.dto.SivilstandSøknadsgrunnlagDto
 
 object SivilstandMapper {
 
-    fun tilDto(grunnlagsdata: GrunnlagsdataDomene, sivilstand: Sivilstand): SivilstandInngangsvilkårDto {
-        return SivilstandInngangsvilkårDto(søknadsgrunnlag = mapSøknadsgrunnlag(sivilstand),
+    fun tilDto(grunnlagsdata: GrunnlagsdataDomene, sivilstand: Sivilstand?): SivilstandInngangsvilkårDto {
+        return SivilstandInngangsvilkårDto(søknadsgrunnlag = sivilstand?.let { mapSøknadsgrunnlag(it) },
                                            registergrunnlag = mapRegistergrunnlag(grunnlagsdata.søker))
     }
 

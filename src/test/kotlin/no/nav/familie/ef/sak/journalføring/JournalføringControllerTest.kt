@@ -5,7 +5,6 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import no.nav.familie.ef.sak.infrastruktur.exception.ManglerTilgang
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringBehandling
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequest
@@ -33,9 +32,7 @@ internal class JournalføringControllerTest {
     private val journalføringService = mockk<JournalføringService>()
     private val pdlClient = mockk<PdlClient>()
     private val tilgangService: TilgangService = mockk()
-    private val featureToggleService: FeatureToggleService = mockk()
-    private val journalføringController =
-            JournalføringController(journalføringService, pdlClient, tilgangService, featureToggleService)
+    private val journalføringController = JournalføringController(journalføringService, pdlClient, tilgangService)
 
     @Test
     internal fun `skal hente journalpost med personident utledet fra pdl`() {

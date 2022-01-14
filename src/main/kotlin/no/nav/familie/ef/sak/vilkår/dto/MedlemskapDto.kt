@@ -9,7 +9,7 @@ import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import no.nav.familie.kontrakter.felles.medlemskap.PeriodeInfo
 import java.time.LocalDate
 
-data class MedlemskapDto(val søknadsgrunnlag: MedlemskapSøknadsgrunnlagDto,
+data class MedlemskapDto(val søknadsgrunnlag: MedlemskapSøknadsgrunnlagDto?,
                          val registergrunnlag: MedlemskapRegistergrunnlagDto)
 
 data class MedlemskapSøknadsgrunnlagDto(val bosattNorgeSisteÅrene: Boolean,

@@ -15,6 +15,7 @@ import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
+import no.nav.familie.ef.sak.infrastruktur.config.IverksettClientMock
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
@@ -56,6 +57,7 @@ internal class TekniskOpphørTest : OppslagSpringRunnerTest() {
     @AfterEach
     internal fun tearDown() {
         clearBrukerContext()
+        IverksettClientMock.clearMock(iverksettClient)
     }
 
     @Test

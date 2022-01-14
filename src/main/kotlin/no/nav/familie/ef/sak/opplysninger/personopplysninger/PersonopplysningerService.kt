@@ -1,13 +1,14 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger
 
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.infrastruktur.config.getValue
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.PersonopplysningerDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.PersonopplysningerMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
-import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
+import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.cache.CacheManager
@@ -18,7 +19,7 @@ import java.util.UUID
 
 @Service
 class PersonopplysningerService(private val personService: PersonService,
-                                private val søknadService: SøknadService,
+                                private val behandlingService: BehandlingService,
                                 private val personopplysningerIntegrasjonerClient: PersonopplysningerIntegrasjonerClient,
                                 private val grunnlagsdataService: GrunnlagsdataService,
                                 private val personopplysningerMapper: PersonopplysningerMapper,
@@ -28,8 +29,7 @@ class PersonopplysningerService(private val personService: PersonService,
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun hentPersonopplysninger(behandlingId: UUID): PersonopplysningerDto {
-        val søknad = søknadService.hentOvergangsstønad(behandlingId)
-        val personIdent = søknad.fødselsnummer
+        val personIdent = behandlingService.hentAktivIdent(behandlingId)
         val søkerIdenter = personService.hentPersonIdenter(personIdent)
         val grunnlagsdata = grunnlagsdataService.hentGrunnlagsdata(behandlingId)
         val egenAnsatt = egenAnsatt(personIdent)
@@ -69,6 +69,10 @@ class PersonopplysningerService(private val personService: PersonService,
     @Cacheable("navKontor")
     fun hentNavKontor(ident: String): NavKontorEnhet {
         return personopplysningerIntegrasjonerClient.hentNavKontor(ident)
+    }
+
+    fun hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(personIdent: String): ADRESSEBESKYTTELSEGRADERING {
+        return personopplysningerIntegrasjonerClient.hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(personIdent)
     }
 }
 

@@ -59,7 +59,7 @@ internal class SøknadControllerTest : OppslagSpringRunnerTest() {
         val behandlingÅrsak = BehandlingÅrsak.SØKNAD
         val behandling = behandlingService.opprettBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, fagsak.id, behandlingsårsak = behandlingÅrsak)
         søknadService.lagreSøknadForOvergangsstønad(søknad.søknad, behandling.id, fagsak.id, "1234")
-        val søknadSkjema = søknadService.hentOvergangsstønad(behandling.id)
+        val søknadSkjema = søknadService.hentOvergangsstønad(behandling.id)!!
         val respons: ResponseEntity<Ressurs<SøknadDatoerDto>> = hentSøknadData(behandling.id)
 
         Assertions.assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)

@@ -3,6 +3,8 @@ package no.nav.familie.ef.sak.infotrygd
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.kontrakter.ef.felles.StønadType
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdEndringKode
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeRequest
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSøkRequest
@@ -25,15 +27,47 @@ class InfotrygdService(private val infotrygdReplikaClient: InfotrygdReplikaClien
         return harVedtak || harSak
     }
 
-    fun hentPerioder(personIdent: String): InfotrygdPeriodeResponse {
-        return hentPerioder(personIdent, emptySet())
+    fun hentDtoPerioder(personIdent: String): InfotrygdPerioderDto {
+        val perioder = hentPerioderFraReplika(personIdent)
+        return InfotrygdPerioderDto(
+                overgangsstønad = mapPerioder(perioder.overgangsstønad),
+                barnetilsyn = mapPerioder(perioder.barnetilsyn),
+                skolepenger = mapPerioder(perioder.skolepenger)
+        )
     }
 
-    private fun hentPerioder(personIdent: String,
-                             stønadstyper: Set<StønadType>): InfotrygdPeriodeResponse {
-        val identer = hentPersonIdenter(personIdent)
+    /**
+     * Returnerer perioder uten å slå de sammen, brukes når man eks kun ønsker å se om det finnes innslag i infotrygd fra før
+     */
+    fun hentPerioderFraReplika(personIdent: String): InfotrygdPeriodeResponse {
+        val personIdenter = hentPersonIdenter(personIdent)
+        return hentPerioderFraReplika(personIdenter)
+    }
+
+    /**
+     * Filtrerer og slår sammen perioder fra infotrygd for å få en bedre totalbilde om hva som er gjeldende
+     */
+    fun hentSummertePerioder(personIdenter: Set<String>): InternePerioder {
+        val perioder = hentPerioderFraReplika(personIdenter)
+        return InternePerioder(overgangsstønad = filtrerOgSlåSammenPerioder(perioder.overgangsstønad),
+                               barnetilsyn = filtrerOgSlåSammenPerioder(perioder.barnetilsyn),
+                               skolepenger = filtrerOgSlåSammenPerioder(perioder.skolepenger))
+    }
+
+    private fun mapPerioder(perioder: List<InfotrygdPeriode>) =
+            InfotrygdPerioder(perioder, filtrerOgSlåSammenPerioder(perioder).map { it.tilSummertInfotrygdperiodeDto() })
+
+    private fun hentPerioderFraReplika(identer: Set<String>,
+                                       stønadstyper: Set<StønadType> = StønadType.values().toSet()): InfotrygdPeriodeResponse {
+        require(stønadstyper.isNotEmpty()) { "Må sende med stønadstype" }
         val request = InfotrygdPeriodeRequest(identer, stønadstyper)
         return infotrygdReplikaClient.hentPerioder(request)
+    }
+
+    private fun filtrerOgSlåSammenPerioder(perioder: List<InfotrygdPeriode>): List<InternPeriode> {
+        val filtrertPerioder = InfotrygdPeriodeUtil.filtrerOgSorterPerioderFraInfotrygd(perioder)
+                .filter { it.kode != InfotrygdEndringKode.ANNULERT && it.kode != InfotrygdEndringKode.UAKTUELL }
+        return InfotrygdPeriodeUtil.slåSammenInfotrygdperioder(filtrertPerioder)
     }
 
     private fun hentPersonIdenter(personIdent: String): Set<String> {

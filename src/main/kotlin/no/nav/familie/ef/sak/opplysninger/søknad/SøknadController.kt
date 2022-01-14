@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.opplysninger.søknad
 
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -22,6 +23,7 @@ class SøknadController(private val søknadService: SøknadService,
     fun hentSøknadDatoer(@PathVariable behandlingId: UUID): Ressurs<SøknadDatoerDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         val overgangsstønad = søknadService.hentOvergangsstønad(behandlingId)
+        feilHvis(overgangsstønad == null) { "Kan ikke hente søknad til behandlingen" }
         return Ressurs.success(SøknadDatoerDto(søknadsdato = overgangsstønad.datoMottatt,
                                                søkerStønadFra = overgangsstønad.søkerFra))
     }
