@@ -1,9 +1,8 @@
 package no.nav.familie.ef.sak.infrastruktur.config
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.mockk.Runs
+import io.mockk.clearMocks
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.kontrakter.ef.iverksett.IverksettStatus
@@ -30,6 +29,7 @@ class IverksettClientMock {
         private val simuleringsresultat = objectMapper.readValue<BeriketSimuleringsresultat>(
                 this::class.java.getResource("/json/simuleringsresultat_beriket.json")!!.readText())
         fun clearMock() {
+            clearMocks(iverksettClient)
             every { iverksettClient.simuler(any()) } returns simuleringsresultat
             every { iverksettClient.hentStatus(any()) } returns IverksettStatus.OK
         }
