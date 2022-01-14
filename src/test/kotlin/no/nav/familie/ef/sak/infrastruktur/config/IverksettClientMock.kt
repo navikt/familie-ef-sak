@@ -27,7 +27,8 @@ class IverksettClientMock {
     companion object {
         private val iverksettClient = mockk<IverksettClient>(relaxed = true)
         private val simuleringsresultat = objectMapper.readValue<BeriketSimuleringsresultat>(
-                this::class.java.getResource("/json/simuleringsresultat_beriket.json")!!.readText())
+                this::class.java.classLoader.getResource("/json/simuleringsresultat_beriket.json")!!.readText())
+
         fun clearMock() {
             clearMocks(iverksettClient)
             every { iverksettClient.simuler(any()) } returns simuleringsresultat
