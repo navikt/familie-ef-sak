@@ -66,14 +66,13 @@ internal class VurderingStegServiceTest {
     private val grunnlagsdataService = mockk<GrunnlagsdataService>()
     private val vurderingService = VurderingService(behandlingService, søknadService, vilkårsvurderingRepository,
                                                     vilkårGrunnlagService, grunnlagsdataService)
-
     private val vurderingStegService = VurderingStegService(behandlingService = behandlingService,
                                                             vurderingService = vurderingService,
                                                             vilkårsvurderingRepository = vilkårsvurderingRepository,
                                                             blankettRepository = blankettRepository,
                                                             stegService = stegService,
-                                                            taskRepository = taskRepository)
-
+                                                            taskRepository = taskRepository
+    )
     private val søknad = SøknadsskjemaMapper.tilDomene(TestsøknadBuilder.Builder().setBarn(listOf(
             TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "13071489536"),
             TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "01012067050")

@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.infrastruktur.config
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.iverksett.IverksettClient
@@ -19,15 +20,18 @@ class IverksettClientMock {
     @Bean
     @Primary
     fun iverksettClient(): IverksettClient {
-        clearMock()
+        val iverksettClient = mockk<IverksettClient>(relaxed = true)
+        clearMock(iverksettClient)
         return iverksettClient
     }
 
     companion object {
-        private val iverksettClient = mockk<IverksettClient>(relaxed = true)
+
         private val simuleringsresultat = objectMapper.readValue<BeriketSimuleringsresultat>(
-                this::class.java.getResource("/json/simuleringsresultat_beriket.json").readText())
-        fun clearMock() {
+                this::class.java.getResource("/json/simuleringsresultat_beriket.json")!!.readText())
+
+        fun clearMock(iverksettClient: IverksettClient) {
+            clearMocks(iverksettClient)
             every { iverksettClient.simuler(any()) } returns simuleringsresultat
             every { iverksettClient.hentStatus(any()) } returns IverksettStatus.OK
         }

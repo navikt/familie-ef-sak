@@ -57,7 +57,7 @@ internal class TekniskOpphørTest : OppslagSpringRunnerTest() {
     @AfterEach
     internal fun tearDown() {
         clearBrukerContext()
-        IverksettClientMock.clearMock()
+        IverksettClientMock.clearMock(iverksettClient)
     }
 
     @Test
