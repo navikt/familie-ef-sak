@@ -82,7 +82,7 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
     }
 
     private fun lagSøknad(personIdent: String): SøknadOvergangsstønad {
-        val søkerMedBarn = personService.hentPersonMedRelasjoner(personIdent)
+        val søkerMedBarn = personService.hentPersonMedBarn(personIdent)
         val barneListe: List<Barn> = mapSøkersBarn(søkerMedBarn)
         return TestsøknadBuilder.Builder()
                 .setPersonalia(søkerMedBarn.søker.navn.gjeldende().visningsnavn(), søkerMedBarn.søkerIdent)

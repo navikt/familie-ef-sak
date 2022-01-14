@@ -3,7 +3,6 @@ package no.nav.familie.ef.sak.opplysninger.personopplysninger
 import no.nav.familie.ef.sak.infrastruktur.config.getCachedOrLoad
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.SøkerMedBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Familierelasjonsrolle
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonKort
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlSøker
@@ -22,7 +21,7 @@ class PersonService(
         return pdlClient.hentSøker(ident)
     }
 
-    fun hentPersonMedRelasjoner(ident: String): SøkerMedBarn {
+    fun hentPersonMedBarn(ident: String): SøkerMedBarn {
         val søker = hentSøker(ident)
         val barnIdentifikatorer = søker.forelderBarnRelasjon.filter { it.relatertPersonsRolle == Familierelasjonsrolle.BARN }
                 .map { it.relatertPersonsIdent }
