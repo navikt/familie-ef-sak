@@ -11,9 +11,9 @@ import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 @Service
-class ForberedOppgaveForBarnService(private val gjeldendeBarnRepository: GjeldendeBarnRepository,
-                                    private val behandlingRepository: BehandlingRepository,
-                                    private val iverksettClient: IverksettClient) {
+class ForberedOppgaverForBarnService(private val gjeldendeBarnRepository: GjeldendeBarnRepository,
+                                     private val behandlingRepository: BehandlingRepository,
+                                     private val iverksettClient: IverksettClient) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 

@@ -19,7 +19,7 @@ import java.time.format.DateTimeFormatter
 
         )
 class ForberedOppgaverForBarnTask(val taskRepository: TaskRepository,
-                                  val forberedOppgaverForBarnService: ForberedOppgaveForBarnService,
+                                  val forberedOppgaverForBarnService: ForberedOppgaverForBarnService,
                                   val featureToggleService: FeatureToggleService) : AsyncTaskStep {
 
     private val logger = LoggerFactory.getLogger(javaClass)

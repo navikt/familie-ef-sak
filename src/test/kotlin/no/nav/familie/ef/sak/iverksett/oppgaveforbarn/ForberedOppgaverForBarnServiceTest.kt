@@ -24,13 +24,13 @@ import java.util.UUID
  * En kjøring som er for tidlig ute skal få f.o.m i dag, og en som kjøres for sent skal få en f.o.m dato som er den første dagen
  * etter den forrige perioden.
  */
-internal class ForberedOppgaveForBarnServiceTest {
+internal class ForberedOppgaverForBarnServiceTest {
 
     val gjeldendeBarnRepository = mockk<GjeldendeBarnRepository>()
     val iverksettClient = mockk<IverksettClient>()
     val behandlingRepository = mockk<BehandlingRepository>()
     val opprettOppgaveForBarnService =
-            ForberedOppgaveForBarnService(gjeldendeBarnRepository, behandlingRepository, iverksettClient)
+            ForberedOppgaverForBarnService(gjeldendeBarnRepository, behandlingRepository, iverksettClient)
 
     val SISTE_KJØRING_EN_UKE_SIDEN = LocalDate.now().minusWeeks(1)
 
