@@ -36,7 +36,7 @@ class VurderingService(private val behandlingService: BehandlingService,
         return hentEllerOpprettVurderinger(behandlingId)
     }
 
-    private fun hentGrunnlagOgMetadata(behandlingId: UUID): Pair<VilkårGrunnlagDto, HovedregelMetadata> {
+    fun hentGrunnlagOgMetadata(behandlingId: UUID): Pair<VilkårGrunnlagDto, HovedregelMetadata> {
         val søknad = søknadService.hentOvergangsstønad(behandlingId)
         val grunnlag = vilkårGrunnlagService.hentGrunnlag(behandlingId, søknad)
         val metadata = HovedregelMetadata(sivilstandstype = grunnlag.sivilstand.registergrunnlag.type,
