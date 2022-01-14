@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.brev.BrevClient
+import no.nav.familie.ef.sak.brev.BrevsignaturService
 import no.nav.familie.ef.sak.brev.VedtaksbrevRepository
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
@@ -35,9 +36,14 @@ internal class VedtaksbrevServiceTest {
     private val vedtaksbrevRepository = mockk<VedtaksbrevRepository>()
     private val behandlingService = mockk<BehandlingService>()
     private val personopplysningerService = mockk<PersonopplysningerService>()
+    private val brevsignaturService = mockk<BrevsignaturService>()
 
     private val vedtaksbrevService =
-            VedtaksbrevService(brevClient, vedtaksbrevRepository, behandlingService, personopplysningerService)
+            VedtaksbrevService(brevClient,
+                               vedtaksbrevRepository,
+                               behandlingService,
+                               personopplysningerService,
+                               brevsignaturService)
 
     private val vedtaksbrev: Vedtaksbrev = lagVedtaksbrev("malnavn")
 

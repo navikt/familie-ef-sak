@@ -24,7 +24,8 @@ import java.util.UUID
 class VedtaksbrevService(private val brevClient: BrevClient,
                          private val brevRepository: VedtaksbrevRepository,
                          private val behandlingService: BehandlingService,
-                         private val personopplysningerService: PersonopplysningerService) {
+                         private val personopplysningerService: PersonopplysningerService,
+                         private val brevsignaturService: BrevsignaturService) {
 
     fun hentBeslutterbrevEllerRekonstruerSaksbehandlerBrev(behandlingId: UUID): ByteArray {
         val vedtaksbrev = brevRepository.findByIdOrThrow(behandlingId)
@@ -38,8 +39,11 @@ class VedtaksbrevService(private val brevClient: BrevClient,
     fun lagSaksbehandlerBrev(behandlingId: UUID, brevrequest: JsonNode, brevmal: String): ByteArray {
         val behandling = behandlingService.hentBehandling(behandlingId)
         validerRedigerbarBehandling(behandling)
-        val saksbehandlersignatur = SikkerhetContext.hentSaksbehandlerNavn(strict = true)
-        val vedtaksbrev = lagreEllerOppdaterVedtaksbrev(behandlingId, brevrequest.toString(), brevmal, saksbehandlersignatur)
+
+        val aktivIdent = behandlingService.hentAktivIdent(behandlingId)
+        val saksbehandlersignatur = brevsignaturService.lagSignaturMedEnhet(aktivIdent)
+
+        val vedtaksbrev = lagreEllerOppdaterVedtaksbrev(behandlingId, brevrequest.toString(), brevmal, saksbehandlersignatur.navn)
 
         return brevClient.genererBrev(vedtaksbrev.tilDto())
     }
@@ -58,6 +62,7 @@ class VedtaksbrevService(private val brevClient: BrevClient,
             false -> brevRepository.insert(vedtaksbrev)
         }
     }
+
 
     fun lagBeslutterBrev(behandlingId: UUID): ByteArray {
         val behandling = behandlingService.hentBehandling(behandlingId)

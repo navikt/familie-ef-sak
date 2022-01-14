@@ -10,8 +10,6 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevType
-import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG
-import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG_UTLAND
 import org.springframework.stereotype.Service
 import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevDto as FrittståendeBrevDtoIverksetting
 
@@ -20,7 +18,8 @@ class FrittståendeBrevService(private val brevClient: BrevClient,
                               private val fagsakService: FagsakService,
                               private val personopplysningerService: PersonopplysningerService,
                               private val arbeidsfordelingService: ArbeidsfordelingService,
-                              private val iverksettClient: IverksettClient) {
+                              private val iverksettClient: IverksettClient,
+                              private val brevsignaturService: BrevsignaturService) {
 
     fun forhåndsvisFrittståendeBrev(frittståendeBrevDto: FrittståendeBrevDto): ByteArray {
         val ident = fagsakService.hentAktivIdent(frittståendeBrevDto.fagsakId)
@@ -57,22 +56,9 @@ class FrittståendeBrevService(private val brevClient: BrevClient,
         ident: String
     ): ByteArray {
         val request = lagFrittståendeBrevRequest(frittståendeBrevDto, ident)
-        val signatur = lagSignaturMedEnhet(ident)
+        val signatur = brevsignaturService.lagSignaturMedEnhet(ident)
         val brev = brevClient.genererBrev(request, signatur.navn, signatur.enhet)
         return brev
-    }
-
-
-    private fun lagSignaturMedEnhet(ident: String): SignaturDto {
-        val harStrengtFortroligAdresse: Boolean =
-                personopplysningerService.hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(ident)
-                        .let { it == STRENGT_FORTROLIG || it == STRENGT_FORTROLIG_UTLAND }
-
-        return if (harStrengtFortroligAdresse) {
-            SignaturDto(NAV_ANONYM_NAVN, ENHET_VIKAFOSSEN)
-        } else {
-            SignaturDto(SikkerhetContext.hentSaksbehandlerNavn(true), ENHET_NAY)
-        }
     }
 
 
@@ -108,4 +94,3 @@ class FrittståendeBrevService(private val brevClient: BrevClient,
 
 
 
-data class SignaturDto(val navn: String, val enhet: String)

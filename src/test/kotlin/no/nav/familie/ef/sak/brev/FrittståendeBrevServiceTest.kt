@@ -34,13 +34,17 @@ internal class FrittståendeBrevServiceTest {
     val personopplysningerService = mockk<PersonopplysningerService>()
     val arbeidsfordelingService = mockk<ArbeidsfordelingService>()
     val iverksettClient = mockk<IverksettClient>()
+    val brevsignaturService = mockk<BrevsignaturService>()
 
     val frittståendeBrevService =
             FrittståendeBrevService(brevClient,
                                     fagsakService,
                                     personopplysningerService,
                                     arbeidsfordelingService,
-                                    iverksettClient)
+                                    iverksettClient,
+                                    brevsignaturService
+
+            )
 
     val frittståendeBrevDto = FrittståendeBrevDto("overskrift",
                                                   listOf(FrittståendeBrevAvsnitt("deloverskrift",
