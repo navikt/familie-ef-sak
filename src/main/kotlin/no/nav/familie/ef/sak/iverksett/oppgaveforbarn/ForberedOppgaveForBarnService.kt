@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.kontrakter.ef.søknad.Fødselsnummer
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -14,6 +15,8 @@ class ForberedOppgaveForBarnService(private val gjeldendeBarnRepository: Gjelden
                                     private val behandlingRepository: BehandlingRepository,
                                     private val iverksettClient: IverksettClient) {
 
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     fun forberedOppgaverForAlleBarnSomFyllerAarNesteUke(sisteKjøring: LocalDate) {
         val referanseDato = referanseDato(sisteKjøring)
         val gjeldendeBarn =
@@ -21,6 +24,7 @@ class ForberedOppgaveForBarnService(private val gjeldendeBarnRepository: Gjelden
         val barnSomFyllerAar = barnSomFyllerAar(gjeldendeBarn, referanseDato)
         val oppgaver = lagOppgaverForBarn(barnSomFyllerAar)
         if (oppgaver.isNotEmpty()) {
+            logger.info("Fant ${oppgaver.size} oppgaver som skal opprettes ved forbereding av oppgaver for barn som fyller år")
             sendOppgaverTilIverksett(oppgaver)
         }
     }
