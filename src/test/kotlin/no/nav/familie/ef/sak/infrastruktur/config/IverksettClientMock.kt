@@ -20,16 +20,17 @@ class IverksettClientMock {
     @Bean
     @Primary
     fun iverksettClient(): IverksettClient {
-        clearMock()
+        val iverksettClient = mockk<IverksettClient>(relaxed = true)
+        clearMock(iverksettClient)
         return iverksettClient
     }
 
     companion object {
-        private val iverksettClient = mockk<IverksettClient>(relaxed = true)
-        private val simuleringsresultat = objectMapper.readValue<BeriketSimuleringsresultat>(
-                this::class.java.classLoader.getResource("/json/simuleringsresultat_beriket.json")!!.readText())
 
-        fun clearMock() {
+        private val simuleringsresultat = objectMapper.readValue<BeriketSimuleringsresultat>(
+                this::class.java.getResource("/json/simuleringsresultat_beriket.json")!!.readText())
+
+        fun clearMock(iverksettClient: IverksettClient) {
             clearMocks(iverksettClient)
             every { iverksettClient.simuler(any()) } returns simuleringsresultat
             every { iverksettClient.hentStatus(any()) } returns IverksettStatus.OK
