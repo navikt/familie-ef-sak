@@ -9,7 +9,8 @@ import java.time.LocalDate
 import java.util.UUID
 
 @Repository
-interface GjeldendeBarnRepository : RepositoryInterface<BarnTilUplukkForOppgave, UUID>, InsertUpdateRepository<BarnTilUplukkForOppgave> {
+interface GjeldendeBarnRepository : RepositoryInterface<BarnTilUplukkForOppgave, UUID>,
+                                    InsertUpdateRepository<BarnTilUplukkForOppgave> {
 
     // language=PostgreSQL
     @Query("""
@@ -20,7 +21,8 @@ interface GjeldendeBarnRepository : RepositoryInterface<BarnTilUplukkForOppgave,
             JOIN barn b2 ON s.id = b2.soknadsskjema_id
         WHERE  b.stonadstype=:stønadstype AND EXISTS(SELECT 1 FROM andel_tilkjent_ytelse aty
             JOIN tilkjent_ytelse ty ON aty.tilkjent_ytelse = ty.id
-            WHERE ty.id = aty.tilkjent_ytelse
+            WHERE ty.id = aty.tilkjent_ytelse 
+            AND ty.behandling_id = b.id
           AND aty.stonad_tom >= :dato
           AND aty.belop > 0)
         """)

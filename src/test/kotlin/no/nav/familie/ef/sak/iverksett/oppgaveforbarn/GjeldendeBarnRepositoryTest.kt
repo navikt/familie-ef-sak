@@ -21,7 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-class BarnTilUplukkForOppgaveRepositoryTest : OppslagSpringRunnerTest() {
+class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
 
     @Autowired private lateinit var gjeldendeBarnRepository: GjeldendeBarnRepository
     @Autowired private lateinit var fagsakRepository: FagsakRepository
@@ -67,10 +67,63 @@ class BarnTilUplukkForOppgaveRepositoryTest : OppslagSpringRunnerTest() {
         søknadService.lagreSøknadForOvergangsstønad(søknad, behandlingMedFremtidigAndel.id, fagsak.id, "journalpostId")
         søknadService.lagreSøknadForOvergangsstønad(søknad, behandlingMedTidligereAndel.id, fagsak.id, "journalPostId")
 
-        val behandlinger = gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(
+        val barnForUtplukk = gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(
                 Stønadstype.OVERGANGSSTØNAD,
                 LocalDate.now())
-        assertThat(behandlinger.size).isEqualTo(2)
-        behandlinger.forEach { assertThat(it.behandlingId).isEqualTo(behandlingMedFremtidigAndel.id) }
+        assertThat(barnForUtplukk.size).isEqualTo(2)
+        barnForUtplukk.forEach { assertThat(it.behandlingId).isEqualTo(behandlingMedFremtidigAndel.id) }
+    }
+
+    @Test
+    internal fun `finnBarnAvGjeldendeIverksatteBehandlinger med fremtidig andel fra to forskjellige fagsaker, forvent barn fra behandling med fremtidig andel`() {
+        val fagsakForTidligereAndel = fagsakRepository.insert(fagsak())
+        val fagsakForFremtidigAndel = fagsakRepository.insert(fagsak())
+
+        val behandlingMedTidligereAndel = behandlingRepository.insert(behandling(fagsakForTidligereAndel,
+                                                                                 status = BehandlingStatus.FERDIGSTILT,
+                                                                                 resultat = BehandlingResultat.INNVILGET,
+                                                                                 opprettetTid = LocalDateTime.now().minusDays(2)))
+
+        val tidligereAndel = lagAndelTilkjentYtelse(beløp = 1,
+                                                    kildeBehandlingId = behandlingMedTidligereAndel.id,
+                                                    fraOgMed = LocalDate.now().minusMonths(2),
+                                                    tilOgMed = LocalDate.now().minusMonths(1))
+
+        tilkjentYtelseRepository.insert(lagTilkjentYtelse(behandlingId = behandlingMedTidligereAndel.id,
+                                                          andelerTilkjentYtelse = listOf(tidligereAndel)))
+
+        val behandlingMedFremtidigAndel = behandlingRepository.insert(behandling(fagsakForFremtidigAndel,
+                                                                                 status = BehandlingStatus.FERDIGSTILT,
+                                                                                 resultat = BehandlingResultat.INNVILGET,
+                                                                                 opprettetTid = LocalDateTime.now().minusDays(2)))
+
+        val fremtidigAndel = lagAndelTilkjentYtelse(beløp = 1, kildeBehandlingId = behandlingMedFremtidigAndel.id,
+                                                    fraOgMed = LocalDate.now().minusMonths(1),
+                                                    tilOgMed = LocalDate.now().plusMonths(1))
+
+        tilkjentYtelseRepository.insert(lagTilkjentYtelse(behandlingId = behandlingMedFremtidigAndel.id,
+                                                          andelerTilkjentYtelse = listOf(fremtidigAndel)))
+
+        val søknad = TestsøknadBuilder.Builder()
+                .setPersonalia("Navn", FnrGenerator.generer(1985, 1, 1, false))
+                .setBarn(listOf(
+                        TestsøknadBuilder.Builder().defaultBarn("Barn1", fødselTermindato = LocalDate.now().plusMonths(4)),
+                        TestsøknadBuilder.Builder().defaultBarn("Barn2", fødselTermindato = LocalDate.now().plusMonths(6))
+                )).build().søknadOvergangsstønad
+
+        søknadService.lagreSøknadForOvergangsstønad(søknad,
+                                                    behandlingMedFremtidigAndel.id,
+                                                    fagsakForFremtidigAndel.id,
+                                                    "journalpostId")
+        søknadService.lagreSøknadForOvergangsstønad(søknad,
+                                                    behandlingMedTidligereAndel.id,
+                                                    fagsakForTidligereAndel.id,
+                                                    "journalPostId")
+
+        val barnForUtplukk = gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(
+                Stønadstype.OVERGANGSSTØNAD,
+                LocalDate.now())
+        assertThat(barnForUtplukk.size).isEqualTo(2)
+        barnForUtplukk.forEach { assertThat(it.behandlingId).isEqualTo(behandlingMedFremtidigAndel.id) }
     }
 }
