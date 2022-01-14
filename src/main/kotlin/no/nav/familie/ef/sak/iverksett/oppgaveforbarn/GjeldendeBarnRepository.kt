@@ -9,7 +9,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 @Repository
-interface GjeldendeBarnRepository : RepositoryInterface<GjeldendeBarn, UUID>, InsertUpdateRepository<GjeldendeBarn> {
+interface GjeldendeBarnRepository : RepositoryInterface<BarnTilUplukkForOppgave, UUID>, InsertUpdateRepository<BarnTilUplukkForOppgave> {
 
     // language=PostgreSQL
     @Query("""
@@ -24,5 +24,5 @@ interface GjeldendeBarnRepository : RepositoryInterface<GjeldendeBarn, UUID>, In
           AND aty.stonad_tom >= :dato
           AND aty.belop > 0)
         """)
-    fun finnBarnAvGjeldendeIverksatteBehandlinger(stønadstype: Stønadstype, dato: LocalDate): List<GjeldendeBarn>
+    fun finnBarnAvGjeldendeIverksatteBehandlinger(stønadstype: Stønadstype, dato: LocalDate): List<BarnTilUplukkForOppgave>
 }

@@ -231,8 +231,8 @@ internal class ForberedOppgaverForBarnServiceTest {
 
     private fun opprettBarn(behandlingId: UUID = UUID.randomUUID(),
                             fødselsnummer: String? = null,
-                            termindato: LocalDate? = null): GjeldendeBarn {
-        return GjeldendeBarn(behandlingId, "12345678910", fødselsnummer, termindato)
+                            termindato: LocalDate? = null): BarnTilUplukkForOppgave {
+        return BarnTilUplukkForOppgave(behandlingId, "12345678910", fødselsnummer, termindato)
     }
 
 

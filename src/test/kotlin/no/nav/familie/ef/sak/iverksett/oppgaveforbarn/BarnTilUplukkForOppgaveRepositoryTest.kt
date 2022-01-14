@@ -21,7 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
+class BarnTilUplukkForOppgaveRepositoryTest : OppslagSpringRunnerTest() {
 
     @Autowired private lateinit var gjeldendeBarnRepository: GjeldendeBarnRepository
     @Autowired private lateinit var fagsakRepository: FagsakRepository

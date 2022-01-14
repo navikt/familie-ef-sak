@@ -29,7 +29,7 @@ class ForberedOppgaverForBarnService(private val gjeldendeBarnRepository: Gjelde
         }
     }
 
-    private fun lagOppgaverForBarn(barnSomFyllerAar: Map<UUID, Pair<GjeldendeBarn, String>>): List<OppgaveForBarn> {
+    private fun lagOppgaverForBarn(barnSomFyllerAar: Map<UUID, Pair<BarnTilUplukkForOppgave, String>>): List<OppgaveForBarn> {
         return behandlingRepository.finnEksterneIder(barnSomFyllerAar.map { it.key }.toSet()).map {
             OppgaveForBarn(it.behandlingId,
                            it.eksternFagsakId,
@@ -40,10 +40,10 @@ class ForberedOppgaverForBarnService(private val gjeldendeBarnRepository: Gjelde
         }
     }
 
-    private fun barnSomFyllerAar(gjeldendeBarn: List<GjeldendeBarn>,
-                                 referanseDato: LocalDate): Map<UUID, Pair<GjeldendeBarn, String>> {
-        val barnSomFyllerAar = mutableMapOf<UUID, Pair<GjeldendeBarn, String>>()
-        gjeldendeBarn.forEach { barn ->
+    private fun barnSomFyllerAar(barnTilUplukkForOppgave: List<BarnTilUplukkForOppgave>,
+                                 referanseDato: LocalDate): Map<UUID, Pair<BarnTilUplukkForOppgave, String>> {
+        val barnSomFyllerAar = mutableMapOf<UUID, Pair<BarnTilUplukkForOppgave, String>>()
+        barnTilUplukkForOppgave.forEach { barn ->
             val fødselsdato = fødselsdato(barn)
             if (barnBlirEttÅr(referanseDato, fødselsdato)) {
                 barnSomFyllerAar[barn.behandlingId] = Pair(barn, OppgaveBeskrivelse.beskrivelseBarnFyllerEttÅr())
@@ -58,10 +58,10 @@ class ForberedOppgaverForBarnService(private val gjeldendeBarnRepository: Gjelde
         iverksettClient.sendOppgaverForBarn(OppgaverForBarnDto(oppgaver))
     }
 
-    private fun fødselsdato(gjeldendeBarn: GjeldendeBarn): LocalDate {
-        return gjeldendeBarn.fodselsnummerBarn?.let {
+    private fun fødselsdato(barnTilUplukkForOppgave: BarnTilUplukkForOppgave): LocalDate {
+        return barnTilUplukkForOppgave.fodselsnummerBarn?.let {
             Fødselsnummer(it).fødselsdato
-        } ?: gjeldendeBarn.termindatoBarn ?: error("Ingen datoer for barn funnet")
+        } ?: barnTilUplukkForOppgave.termindatoBarn ?: error("Ingen datoer for barn funnet")
     }
 
     private fun barnBlirEttÅr(referanseDato: LocalDate, fødselsdato: LocalDate): Boolean {
