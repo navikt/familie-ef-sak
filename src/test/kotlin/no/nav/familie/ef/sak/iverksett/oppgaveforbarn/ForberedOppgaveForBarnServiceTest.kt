@@ -5,10 +5,13 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.runs
+import io.mockk.slot
 import io.mockk.verify
+import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.util.FnrGenerator
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -25,7 +28,9 @@ internal class ForberedOppgaveForBarnServiceTest {
 
     val gjeldendeBarnRepository = mockk<GjeldendeBarnRepository>()
     val iverksettClient = mockk<IverksettClient>()
-    val opprettOppgaveForBarnService = ForberedOppgaveForBarnService(gjeldendeBarnRepository, iverksettClient)
+    val behandlingRepository = mockk<BehandlingRepository>()
+    val opprettOppgaveForBarnService =
+            ForberedOppgaveForBarnService(gjeldendeBarnRepository, behandlingRepository, iverksettClient)
 
     val SISTE_KJØRING_EN_UKE_SIDEN = LocalDate.now().minusWeeks(1)
 
@@ -33,6 +38,7 @@ internal class ForberedOppgaveForBarnServiceTest {
     fun init() {
         mockkObject(OppgaveBeskrivelse)
         every { iverksettClient.sendOppgaverForBarn(any()) } just runs
+        every { behandlingRepository.finnEksterneIder(any()) } returns emptySet()
     }
 
     @Test
@@ -96,7 +102,7 @@ internal class ForberedOppgaveForBarnServiceTest {
         val fødselsdatoer = (0..14).asSequence().map { LocalDate.now().minusMonths(6).plusDays(it.toLong()) }.toList()
         every {
             gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, any())
-        } returns fødselsdatoer.map { opprettBarn(generateFnr(it)) }
+        } returns fødselsdatoer.map { opprettBarn(fødselsnummer = generateFnr(it)) }
         opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(SISTE_KJØRING_EN_UKE_SIDEN)
         verify(exactly = 0) { OppgaveBeskrivelse.beskrivelseBarnFyllerEttÅr() }
         verify(exactly = 8) { OppgaveBeskrivelse.beskrivelseBarnBlirSeksMnd() }
@@ -107,7 +113,7 @@ internal class ForberedOppgaveForBarnServiceTest {
         val fødselsdatoer = (0..14).asSequence().map { LocalDate.now().minusYears(1).plusDays(it.toLong()) }.toList()
         every {
             gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, any())
-        } returns fødselsdatoer.map { opprettBarn(generateFnr(it)) }
+        } returns fødselsdatoer.map { opprettBarn(fødselsnummer = generateFnr(it)) }
         opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(SISTE_KJØRING_EN_UKE_SIDEN)
         verify(exactly = 8) { OppgaveBeskrivelse.beskrivelseBarnFyllerEttÅr() }
         verify(exactly = 0) { OppgaveBeskrivelse.beskrivelseBarnBlirSeksMnd() }
@@ -190,12 +196,43 @@ internal class ForberedOppgaveForBarnServiceTest {
         verify(exactly = 1) { OppgaveBeskrivelse.beskrivelseBarnFyllerEttÅr() }
     }
 
+    @Test
+    fun `to barn som fyller år på samme behandling, forvent at bare en oppgave er gjeldende`() {
+        val termindato = LocalDate.now().minusYears(1).plusDays(7)
+        val slotGjeldendeBehandlingIDer = slot<Set<UUID>>()
+        val behandlingId = UUID.randomUUID()
+
+        every {
+            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, any())
+        } returns listOf(opprettBarn(behandlingId = behandlingId, fødselsnummer = null, termindato = termindato),
+                         opprettBarn(behandlingId = behandlingId, fødselsnummer = null, termindato = termindato))
+        every { behandlingRepository.finnEksterneIder(capture(slotGjeldendeBehandlingIDer)) } returns emptySet()
+        opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(SISTE_KJØRING_EN_UKE_SIDEN)
+        assertThat(slotGjeldendeBehandlingIDer.captured.size).isEqualTo(1)
+    }
+
+    @Test
+    fun `to barn som fyller år på forskjellige behandlinger, forvent at to oppgaver er gjeldende`() {
+        val termindato = LocalDate.now().minusYears(1).plusDays(7)
+        val slotGjeldendeBehandlingIDer = slot<Set<UUID>>()
+
+        every {
+            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, any())
+        } returns listOf(opprettBarn(behandlingId = UUID.randomUUID(), fødselsnummer = null, termindato = termindato),
+                         opprettBarn(behandlingId = UUID.randomUUID(), fødselsnummer = null, termindato = termindato))
+        every { behandlingRepository.finnEksterneIder(capture(slotGjeldendeBehandlingIDer)) } returns emptySet()
+        opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(SISTE_KJØRING_EN_UKE_SIDEN)
+        assertThat(slotGjeldendeBehandlingIDer.captured.size).isEqualTo(2)
+    }
+
     private fun generateFnr(localDate: LocalDate): String {
         return FnrGenerator.generer(localDate.year, localDate.month.value, localDate.dayOfMonth, false)
     }
 
-    private fun opprettBarn(fødselsnummer: String? = null, termindato: LocalDate? = null): GjeldendeBarn {
-        return GjeldendeBarn(UUID.randomUUID(), null, fødselsnummer, termindato)
+    private fun opprettBarn(behandlingId: UUID = UUID.randomUUID(),
+                            fødselsnummer: String? = null,
+                            termindato: LocalDate? = null): GjeldendeBarn {
+        return GjeldendeBarn(behandlingId, "12345678910", fødselsnummer, termindato)
     }
 
 

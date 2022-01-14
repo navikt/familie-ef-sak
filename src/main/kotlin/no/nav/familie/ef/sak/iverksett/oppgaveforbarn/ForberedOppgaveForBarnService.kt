@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.iverksett.oppgaveforbarn
 
+import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.kontrakter.ef.søknad.Fødselsnummer
@@ -10,33 +11,47 @@ import java.util.UUID
 
 @Service
 class ForberedOppgaveForBarnService(private val gjeldendeBarnRepository: GjeldendeBarnRepository,
+                                    private val behandlingRepository: BehandlingRepository,
                                     private val iverksettClient: IverksettClient) {
 
     fun forberedOppgaverForAlleBarnSomFyllerAarNesteUke(sisteKjøring: LocalDate) {
         val referanseDato = referanseDato(sisteKjøring)
         val gjeldendeBarn =
                 gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, referanseDato)
-        val oppgaver = mutableListOf<OppgaveForBarn>()
-        gjeldendeBarn.forEach { barn ->
-            val fødselsdato = fødselsdato(barn)
-            if (barnBlirEttÅr(referanseDato, fødselsdato)) {
-                oppgaver.add(oppgaveForBarn(barn.behandlingId, OppgaveBeskrivelse.beskrivelseBarnFyllerEttÅr()))
-            } else if (barnBlirSeksMnd(referanseDato, fødselsdato)) {
-                oppgaver.add(oppgaveForBarn(barn.behandlingId, OppgaveBeskrivelse.beskrivelseBarnBlirSeksMnd()))
-            }
-        }
+        val barnSomFyllerAar = barnSomFyllerAar(gjeldendeBarn, referanseDato)
+        val oppgaver = lagOppgaverForBarn(barnSomFyllerAar)
         if (oppgaver.isNotEmpty()) {
             sendOppgaverTilIverksett(oppgaver)
         }
     }
 
-    private fun sendOppgaverTilIverksett(oppgaver: List<OppgaveForBarn>) {
-        iverksettClient.sendOppgaverForBarn(OppgaverForBarnDto(oppgaver))
+    private fun lagOppgaverForBarn(barnSomFyllerAar: Map<UUID, Pair<GjeldendeBarn, String>>): List<OppgaveForBarn> {
+        return behandlingRepository.finnEksterneIder(barnSomFyllerAar.map { it.key }.toSet()).map {
+            OppgaveForBarn(it.behandlingId,
+                           it.eksternFagsakId,
+                           barnSomFyllerAar[it.behandlingId]!!.first.fødselsnummerSøker
+                           ?: error("Fant ikke noe fødselsnummer for søker"),
+                           Stønadstype.OVERGANGSSTØNAD.name,
+                           barnSomFyllerAar[it.behandlingId]!!.second)
+        }
     }
 
-    private fun oppgaveForBarn(behandlingId: UUID, beskrivelse: String): OppgaveForBarn {
-        return OppgaveForBarn(behandlingId,
-                              beskrivelse)
+    private fun barnSomFyllerAar(gjeldendeBarn: List<GjeldendeBarn>,
+                                 referanseDato: LocalDate): Map<UUID, Pair<GjeldendeBarn, String>> {
+        val barnSomFyllerAar = mutableMapOf<UUID, Pair<GjeldendeBarn, String>>()
+        gjeldendeBarn.forEach { barn ->
+            val fødselsdato = fødselsdato(barn)
+            if (barnBlirEttÅr(referanseDato, fødselsdato)) {
+                barnSomFyllerAar[barn.behandlingId] = Pair(barn, OppgaveBeskrivelse.beskrivelseBarnFyllerEttÅr())
+            } else if (barnBlirSeksMnd(referanseDato, fødselsdato)) {
+                barnSomFyllerAar[barn.behandlingId] = Pair(barn, OppgaveBeskrivelse.beskrivelseBarnBlirSeksMnd())
+            }
+        }
+        return barnSomFyllerAar
+    }
+
+    private fun sendOppgaverTilIverksett(oppgaver: List<OppgaveForBarn>) {
+        iverksettClient.sendOppgaverForBarn(OppgaverForBarnDto(oppgaver))
     }
 
     private fun fødselsdato(gjeldendeBarn: GjeldendeBarn): LocalDate {
