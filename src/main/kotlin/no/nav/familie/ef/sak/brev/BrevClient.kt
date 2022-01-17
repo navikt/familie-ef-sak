@@ -36,7 +36,8 @@ class BrevClient(@Value("\${FAMILIE_BREV_API_URL}")
         return postForEntity(url,
                              BrevRequestMedSignaturer(objectMapper.readTree(vedtaksbrev.saksbehandlerBrevrequest),
                                                       vedtaksbrev.saksbehandlersignatur,
-                                                      vedtaksbrev.besluttersignatur),
+                                                      vedtaksbrev.besluttersignatur,
+                                                      vedtaksbrev.enhet),
                              HttpHeaders().medContentTypeJsonUTF8())
     }
 
@@ -61,7 +62,8 @@ class BrevClient(@Value("\${FAMILIE_BREV_API_URL}")
 
 data class BrevRequestMedSignaturer(val brevFraSaksbehandler: JsonNode,
                                     val saksbehandlersignatur: String,
-                                    val besluttersignatur: String?)
+                                    val besluttersignatur: String?,
+                                    val enhet: String?)
 
 data class FritekstBrevRequestMedSignatur(val brevFraSaksbehandler: FrittståendeBrevRequestDto,
                                           val saksbehandlersignatur: String,
