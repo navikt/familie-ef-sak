@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.brev.domain.tilDto
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevRequestDto
 import no.nav.familie.ef.sak.brev.dto.VedtaksbrevFritekstDto
+import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
@@ -25,7 +26,8 @@ class VedtaksbrevService(private val brevClient: BrevClient,
                          private val brevRepository: VedtaksbrevRepository,
                          private val behandlingService: BehandlingService,
                          private val personopplysningerService: PersonopplysningerService,
-                         private val brevsignaturService: BrevsignaturService) {
+                         private val brevsignaturService: BrevsignaturService,
+                         private val fagsakService: FagsakService) {
 
     fun hentBeslutterbrevEllerRekonstruerSaksbehandlerBrev(behandlingId: UUID): ByteArray {
         val vedtaksbrev = brevRepository.findByIdOrThrow(behandlingId)
@@ -36,14 +38,20 @@ class VedtaksbrevService(private val brevClient: BrevClient,
         }
     }
 
-    fun lagSaksbehandlerBrev(behandlingId: UUID, brevrequest: JsonNode, brevmal: String): ByteArray {
+    fun lagSaksbehandlerSanitybrev(behandlingId: UUID, brevrequest: JsonNode, brevmal: String): ByteArray {
         val behandling = behandlingService.hentBehandling(behandlingId)
         validerRedigerbarBehandling(behandling)
 
-        val aktivIdent = behandlingService.hentAktivIdent(behandlingId)
-        val saksbehandlersignatur = brevsignaturService.lagSignaturMedEnhet(aktivIdent)
+        val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
+        val saksbehandlersignatur = brevsignaturService.lagSignaturMedEnhet(fagsak)
 
-        val vedtaksbrev = lagreEllerOppdaterVedtaksbrev(behandlingId, brevrequest.toString(), brevmal, saksbehandlersignatur.navn)
+        val vedtaksbrev = lagreEllerOppdaterVedtaksbrev(
+            behandlingId,
+            brevrequest.toString(),
+            brevmal,
+            saksbehandlersignatur.navn,
+            saksbehandlersignatur.enhet
+        )
 
         return brevClient.genererBrev(vedtaksbrev.tilDto())
     }
@@ -51,7 +59,8 @@ class VedtaksbrevService(private val brevClient: BrevClient,
     private fun lagreEllerOppdaterVedtaksbrev(behandlingId: UUID,
                                               brevrequest: String,
                                               brevmal: String,
-                                              saksbehandlersignatur: String): Vedtaksbrev {
+                                              saksbehandlersignatur: String,
+                                              enhet: String): Vedtaksbrev {
         val vedtaksbrev = Vedtaksbrev(behandlingId,
                                       brevrequest,
                                       brevmal,
@@ -95,7 +104,8 @@ class VedtaksbrevService(private val brevClient: BrevClient,
         val vedtaksbrev = lagreEllerOppdaterVedtaksbrev(behandlingId = frittståendeBrevDto.behandlingId,
                                                         brevrequest = objectMapper.writeValueAsString(request),
                                                         brevmal = FRITEKST,
-                                                        saksbehandlersignatur = SikkerhetContext.hentSaksbehandlerNavn(true))
+                                                        saksbehandlersignatur = SikkerhetContext.hentSaksbehandlerNavn(true),
+                                                        enhet = throw NotImplementedError()) // TODO
 
         return brevClient.genererBrev(vedtaksbrev = vedtaksbrev.tilDto())
     }

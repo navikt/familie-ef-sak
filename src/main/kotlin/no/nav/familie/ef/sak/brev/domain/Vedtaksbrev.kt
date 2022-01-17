@@ -12,11 +12,13 @@ data class Vedtaksbrev(@Id
                        val brevmal: String,
                        val saksbehandlersignatur: String,
                        val besluttersignatur: String? = null,
-                       val beslutterPdf: Fil? = null)
+                       val beslutterPdf: Fil? = null,
+                       val enhet: String? = null)
 
 fun Vedtaksbrev.tilDto(): VedtaksbrevDto = VedtaksbrevDto(saksbehandlerBrevrequest = this.saksbehandlerBrevrequest,
                                                           brevmal = this.brevmal,
                                                           saksbehandlersignatur = this.saksbehandlersignatur,
-                                                          besluttersignatur = this.besluttersignatur)
+                                                          besluttersignatur = this.besluttersignatur,
+                                                          enhet = this.enhet)
 
 const val FRITEKST = "fritekst"

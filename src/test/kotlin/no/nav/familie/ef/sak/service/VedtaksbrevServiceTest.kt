@@ -14,6 +14,7 @@ import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevAvsnitt
 import no.nav.familie.ef.sak.brev.dto.VedtaksbrevFritekstDto
+import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
@@ -37,13 +38,15 @@ internal class VedtaksbrevServiceTest {
     private val behandlingService = mockk<BehandlingService>()
     private val personopplysningerService = mockk<PersonopplysningerService>()
     private val brevsignaturService = mockk<BrevsignaturService>()
+    private val fagsakService = mockk<FagsakService>()
 
     private val vedtaksbrevService =
             VedtaksbrevService(brevClient,
                                vedtaksbrevRepository,
                                behandlingService,
                                personopplysningerService,
-                               brevsignaturService)
+                               brevsignaturService,
+                               fagsakService)
 
     private val vedtaksbrev: Vedtaksbrev = lagVedtaksbrev("malnavn")
 
@@ -130,7 +133,7 @@ internal class VedtaksbrevServiceTest {
     internal fun `lagSaksbehandlerBrev skal kaste feil når behandling er låst for videre behandling`() {
         every { behandlingService.hentBehandling(any()) } returns lagBehandlingForBeslutter()
                 .copy(status = BehandlingStatus.FERDIGSTILT)
-        assertThrows<Feil> { vedtaksbrevService.lagSaksbehandlerBrev(behandling.id, TextNode(""), "") }
+        assertThrows<Feil> { vedtaksbrevService.lagSaksbehandlerSanitybrev(behandling.id, TextNode(""), "") }
     }
 
     private fun lagBehandlingForBeslutter() = behandling(fagsak(),

@@ -22,13 +22,12 @@ class FrittståendeBrevService(private val brevClient: BrevClient,
                               private val brevsignaturService: BrevsignaturService) {
 
     fun forhåndsvisFrittståendeBrev(frittståendeBrevDto: FrittståendeBrevDto): ByteArray {
-        val ident = fagsakService.hentAktivIdent(frittståendeBrevDto.fagsakId)
-        return lagFrittståendeBrevMedSignatur(frittståendeBrevDto, ident)
+        return lagFrittståendeBrevMedSignatur(frittståendeBrevDto)
     }
 
     fun sendFrittståendeBrev(frittståendeBrevDto: FrittståendeBrevDto) {
         val ident = fagsakService.hentAktivIdent(frittståendeBrevDto.fagsakId)
-        val brev = lagFrittståendeBrevMedSignatur(frittståendeBrevDto, ident)
+        val brev = lagFrittståendeBrevMedSignatur(frittståendeBrevDto)
         val eksternFagsakId = fagsakService.hentEksternId(frittståendeBrevDto.fagsakId)
         val journalførendeEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(
             ident)
@@ -52,11 +51,12 @@ class FrittståendeBrevService(private val brevClient: BrevClient,
     }
 
     private fun lagFrittståendeBrevMedSignatur(
-        frittståendeBrevDto: FrittståendeBrevDto,
-        ident: String
+        frittståendeBrevDto: FrittståendeBrevDto
     ): ByteArray {
-        val request = lagFrittståendeBrevRequest(frittståendeBrevDto, ident)
-        val signatur = brevsignaturService.lagSignaturMedEnhet(ident)
+        val fagsak = fagsakService.hentFagsak(frittståendeBrevDto.fagsakId)
+        val aktivIdent = fagsak.hentAktivIdent()
+        val request = lagFrittståendeBrevRequest(frittståendeBrevDto, aktivIdent)
+        val signatur = brevsignaturService.lagSignaturMedEnhet(fagsak)
         val brev = brevClient.genererBrev(request, signatur.navn, signatur.enhet)
         return brev
     }
