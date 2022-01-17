@@ -1,6 +1,8 @@
 package no.nav.familie.ef.sak.infotrygd
 
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdAktivitetstype
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdEndringKode
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdOvergangsstønadKode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakstype
 import java.time.LocalDate
@@ -19,10 +21,15 @@ object InfotrygdPeriodeTestUtil {
                             inntektsreduksjon: Int = 1,
                             samordningsfradrag: Int = 1,
                             kode: InfotrygdEndringKode = InfotrygdEndringKode.NY,
-                            sakstype: InfotrygdSakstype = InfotrygdSakstype.SØKNAD): InfotrygdPeriode {
+                            sakstype: InfotrygdSakstype = InfotrygdSakstype.SØKNAD,
+                            aktivitetstype: InfotrygdAktivitetstype = InfotrygdAktivitetstype.BRUKERKONTAKT,
+                            kodeOvergangsstønad: InfotrygdOvergangsstønadKode? = InfotrygdOvergangsstønadKode.BARN_UNDER_1_3_ÅR
+    ): InfotrygdPeriode {
         return InfotrygdPeriode(personIdent = personIdent,
                                 kode = kode,
                                 sakstype = sakstype,
+                                kodeOvergangsstønad = kodeOvergangsstønad,
+                                aktivitetstype = aktivitetstype,
                                 brukerId = "k40123",
                                 stønadId = stønadId.toLong(),
                                 vedtakId = vedtakId.toLong(),
