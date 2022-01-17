@@ -27,10 +27,14 @@ class SaksbehandlingsblankettSteg(private val blankettService: BlankettService,
     private val logger = LoggerFactory.getLogger(javaClass)
 
     override fun utførSteg(behandling: Behandling, data: Void?) {
-        val blankettPdf = blankettService.lagBlankett(behandling.id)
-        logger.info("Journalfører blankett for behandling=${behandling.id}")
-        journalførSaksbehandlingsblankett(behandling, blankettPdf)
-        opprettFerdigstillOppgave(behandling)
+        if (behandling.erMigrering()) {
+            logger.info("Oppretter ikke saksbehandlingsblankett for behandling=${behandling.id}, behandling er migrering")
+        } else {
+            val blankettPdf = blankettService.lagBlankett(behandling.id)
+            logger.info("Journalfører blankett for behandling=${behandling.id}")
+            journalførSaksbehandlingsblankett(behandling, blankettPdf)
+        }
+        opprettFerdigstillBehandlingTask(behandling)
     }
 
     private fun journalførSaksbehandlingsblankett(behandling: Behandling, blankettPdf: ByteArray) {
@@ -54,7 +58,7 @@ class SaksbehandlingsblankettSteg(private val blankettService: BlankettService,
         return StegType.LAG_SAKSBEHANDLINGSBLANKETT
     }
 
-    fun opprettFerdigstillOppgave(behandling: Behandling) {
+    private fun opprettFerdigstillBehandlingTask(behandling: Behandling) {
         taskRepository.save(FerdigstillBehandlingTask.opprettTask(behandling))
     }
 

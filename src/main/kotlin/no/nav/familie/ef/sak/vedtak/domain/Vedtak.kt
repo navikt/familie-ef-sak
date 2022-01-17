@@ -34,6 +34,7 @@ data class PeriodeWrapper(val perioder: List<Vedtaksperiode>)
 data class InntektWrapper(val inntekter: List<Inntektsperiode>)
 
 enum class VedtaksperiodeType {
+    MIGRERING,
     FORLENGELSE,
     HOVEDPERIODE,
     PERIODE_FØR_FØDSEL,
@@ -42,6 +43,7 @@ enum class VedtaksperiodeType {
 }
 
 enum class AktivitetType {
+    MIGRERING,
     IKKE_AKTIVITETSPLIKT,
     BARN_UNDER_ETT_ÅR,
     FORSØRGER_I_ARBEID,

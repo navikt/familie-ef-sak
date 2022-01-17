@@ -47,6 +47,14 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
         } ?: opprettFagsak(stønadstype, gjeldendePersonIdent)
     }
 
+    fun settFagsakTilMigrert(fagsakId: UUID): Fagsak {
+        val fagsak = fagsakRepository.findByIdOrThrow(fagsakId)
+        feilHvis(fagsak.migrert) {
+            "Fagsak er allerede migrert"
+        }
+        return fagsakRepository.update(fagsak.copy(migrert = true))
+    }
+
     fun finnFagsak(personIdenter: Set<String>, stønadstype: Stønadstype): Fagsak? =
             fagsakRepository.findBySøkerIdent(personIdenter, stønadstype)
 

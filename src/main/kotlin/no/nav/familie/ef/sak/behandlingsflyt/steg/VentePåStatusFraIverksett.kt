@@ -9,13 +9,14 @@ import no.nav.familie.prosessering.error.TaskExceptionUtenStackTrace
 import org.springframework.stereotype.Service
 
 @Service
-class VentePåStatusFraIverksett(private val iverksettClient: IverksettClient, private val taskRepository: TaskRepository) :
-        BehandlingSteg<Void?> {
+class VentePåStatusFraIverksett(private val iverksettClient: IverksettClient,
+                                private val taskRepository: TaskRepository) : BehandlingSteg<Void?> {
 
     override fun utførSteg(behandling: Behandling, data: Void?) {
-        return iverksettClient.hentStatus(behandling.id).let {
-            when (it) {
-                IverksettStatus.OK -> opprettLagSaksbehandlingsblankettTask(behandling)
+        iverksettClient.hentStatus(behandling.id).let {
+            when {
+                behandling.erMigrering() && it == IverksettStatus.OK_MOT_OPPDRAG -> opprettLagSaksbehandlingsblankettTask(behandling)
+                it == IverksettStatus.OK -> opprettLagSaksbehandlingsblankettTask(behandling)
                 else -> throw TaskExceptionUtenStackTrace("Mottok status $it fra iverksett for behandlingId=${behandling.id}")
             }
         }

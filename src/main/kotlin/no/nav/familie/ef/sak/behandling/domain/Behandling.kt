@@ -41,6 +41,8 @@ data class Behandling(@Id
 
     fun kanHenlegges(): Boolean = !status.behandlingErLåstForVidereRedigering()
 
+    fun erMigrering(): Boolean = årsak == BehandlingÅrsak.MIGRERING
+
     init {
         if (resultat == BehandlingResultat.HENLAGT) {
             feilHvis(henlagtÅrsak == null) { "Kan ikke henlegge behandling uten en årsak" }

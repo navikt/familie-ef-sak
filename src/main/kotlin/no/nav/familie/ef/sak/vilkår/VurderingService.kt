@@ -1,8 +1,11 @@
 package no.nav.familie.ef.sak.vilkår
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.vilkår.dto.VilkårDto
@@ -34,6 +37,18 @@ class VurderingService(private val behandlingService: BehandlingService,
     fun oppdaterGrunnlagsdataOgHentEllerOpprettVurderinger(behandlingId: UUID): VilkårDto {
         grunnlagsdataService.oppdaterOgHentNyGrunnlagsdata(behandlingId)
         return hentEllerOpprettVurderinger(behandlingId)
+    }
+
+    @Transactional
+    fun opprettMaskielltOpprettedeVurderinger(behandling: Behandling) {
+        feilHvisIkke(behandling.erMigrering()) { "Kan kun opprette maskinellt opprettede vurderinger på migreringer" }
+        feilHvis(behandling.status.behandlingErLåstForVidereRedigering()) { "Behandling er låst for videre redigering" }
+        feilHvis(vilkårsvurderingRepository.findByBehandlingId(behandling.id).isNotEmpty()) { "Vilkår finnes allerede" }
+        val (_, metadata) = hentGrunnlagOgMetadata(behandling.id)
+
+        val nyeVilkårsvurderinger: List<Vilkårsvurdering> = opprettNyeVilkårsvurderinger(behandling.id, metadata)
+                .map { it.copy(resultat = Vilkårsresultat.OPPFYLT) } // TODO oppfylt maskinellt
+        vilkårsvurderingRepository.insertAll(nyeVilkårsvurderinger)
     }
 
     fun hentGrunnlagOgMetadata(behandlingId: UUID): Pair<VilkårGrunnlagDto, HovedregelMetadata> {
