@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.infrastruktur.config
 
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeTestUtil.lagInfotrygdPeriode
@@ -25,26 +26,22 @@ class InfotrygdReplikaMock {
     @Primary
     fun infotrygdReplikaClient(): InfotrygdReplikaClient {
         val client = mockk<InfotrygdReplikaClient>()
-        every { client.hentPerioder(any()) } answers {
-            val firstArg = firstArg<InfotrygdPeriodeRequest>()
-            val personIdent = firstArg.personIdenter.first()
-            InfotrygdPeriodeResponse(emptyList(), listOf(lagInfotrygdPeriode(personIdent)), emptyList())
-        }
-        every { client.hentPerioderArena(any()) } returns InfotrygdPerioderArenaResponse(emptyList())
-        every { client.hentInslagHosInfotrygd(any()) } answers {
-            InfotrygdFinnesResponse(emptyList(), listOf(Saktreff("", StønadType.OVERGANGSSTØNAD)))
-        }
+        clearMock(client)
         return client
     }
 
-    private fun lagInfotrygdPeriode(personIdent: String) =
-            lagInfotrygdPeriode(personIdent = personIdent,
-                                kode = InfotrygdEndringKode.NY,
-                                inntektsreduksjon = 10,
-                                samordningsfradrag = 20,
-                                beløp = 10,
-                                stønadFom = LocalDate.of(2021, 1, 1),
-                                stønadTom = LocalDate.of(2021, 1, 31),
-                                opphørsdato = null)
+    companion object {
+
+        fun clearMock(client: InfotrygdReplikaClient) {
+            clearMocks(client)
+            every { client.hentPerioder(any()) } answers {
+                val firstArg = firstArg<InfotrygdPeriodeRequest>()
+                val personIdent = firstArg.personIdenter.first()
+                InfotrygdPeriodeResponse(emptyList(), listOf(lagInfotrygdPeriode(personIdent)), emptyList())
+            }
+            every { client.hentPerioderArena(any()) } returns InfotrygdPerioderArenaResponse(emptyList())
+            every { client.hentInslagHosInfotrygd(any()) } answers { InfotrygdFinnesResponse(emptyList(), emptyList()) }
+        }
+    }
 
 }
