@@ -2,11 +2,14 @@ package no.nav.familie.ef.sak.fagsak
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.fagsak.dto.FagsakForSøkeresultat
 import no.nav.familie.ef.sak.fagsak.dto.PersonFraSøk
-import no.nav.familie.ef.sak.fagsak.dto.SøkeresultatUtenFagsak
 import no.nav.familie.ef.sak.fagsak.dto.Søkeresultat
 import no.nav.familie.ef.sak.fagsak.dto.SøkeresultatPerson
+import no.nav.familie.ef.sak.fagsak.dto.SøkeresultatUtenFagsak
+import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlPersonSøkHjelper
@@ -25,29 +28,26 @@ import java.util.UUID
 
 @Service
 class SøkService(
-    private val fagsakRepository: FagsakRepository,
-    private val behandlingService: BehandlingService,
-    private val personService: PersonService,
-    private val pdlSaksbehandlerClient: PdlSaksbehandlerClient,
-    private val adresseMapper: AdresseMapper,
-    private val fagsakService: FagsakService
+        private val fagsakRepository: FagsakRepository,
+        private val behandlingService: BehandlingService,
+        private val personService: PersonService,
+        private val pdlSaksbehandlerClient: PdlSaksbehandlerClient,
+        private val adresseMapper: AdresseMapper,
+        private val fagsakService: FagsakService,
+        private val infotrygdService: InfotrygdService,
 ) {
 
     fun søkPerson(personIdentFraRequest: String): Søkeresultat {
         val personIdenter = personService.hentPersonIdenter(personIdentFraRequest)
+        val gjeldendePersonIdent = personIdenter.gjeldende().ident
         if (personIdenter.identer.isEmpty()) {
             throw ApiFeil("Finner ingen personer for søket", HttpStatus.BAD_REQUEST)
         }
-        val fagsaker = fagsakRepository.findBySøkerIdent(personIdenter.identer())
+        val fagsaker = finnFagsakEllerOpprettHvisPersonFinnesIInfotrygd(personIdenter.identer(), gjeldendePersonIdent)
 
-        if (fagsaker.isEmpty()) {
-            throw ApiFeil("Finner ikke fagsak for søkte personen", HttpStatus.BAD_REQUEST)
-        }
+        val person = personService.hentSøker(gjeldendePersonIdent)
 
-        val personIdent = personIdenter.gjeldende().ident
-        val person = personService.hentSøker(personIdent)
-
-        return Søkeresultat(personIdent = personIdent,
+        return Søkeresultat(personIdent = gjeldendePersonIdent,
                             kjønn = KjønnMapper.tilKjønn(person.kjønn.first().kjønn),
                             visningsnavn = NavnDto.fraNavn(person.navn.gjeldende()).visningsnavn,
                             fagsaker = fagsaker.map {
@@ -58,6 +58,19 @@ class SøkService(
                                 FagsakForSøkeresultat(fagsakId = it.id, stønadstype = it.stønadstype, erLøpende = erLøpende)
                             }
         )
+    }
+
+    private fun finnFagsakEllerOpprettHvisPersonFinnesIInfotrygd(personIdenter: Set<String>,
+                                                                 gjeldendePersonIdent: String): List<Fagsak> {
+        val fagsaker = fagsakRepository.findBySøkerIdent(personIdenter)
+
+        if (fagsaker.isEmpty()) {
+            if (infotrygdService.eksisterer(gjeldendePersonIdent)) {
+                return listOf(fagsakService.hentEllerOpprettFagsak(gjeldendePersonIdent, Stønadstype.OVERGANGSSTØNAD))
+            }
+            throw ApiFeil("Finner ikke fagsak for søkte personen", HttpStatus.BAD_REQUEST)
+        }
+        return fagsaker
     }
 
     // Denne trenger ikke en tilgangskontroll då den ikke returnerer noe fra behandlingen.
@@ -78,42 +91,42 @@ class SøkService(
         val søker = personService.hentSøker(aktivIdent)
         val aktuelleBostedsadresser = søker.bostedsadresse.filterNot { it.metadata.historisk }
         val bostedsadresse = aktuelleBostedsadresser.singleOrNull()
-            ?: throw Feil("Finner 0 eller fler enn 1 bostedsadresse")
+                             ?: throw Feil("Finner 0 eller fler enn 1 bostedsadresse")
 
         val søkeKriterier = PdlPersonSøkHjelper.lagPdlPersonSøkKriterier(bostedsadresse)
         if (søkeKriterier.isEmpty()) {
             throw Feil(
-                message = "Får ikke laget søkekriterer for bostedsadresse=$bostedsadresse",
-                frontendFeilmelding = "Klarer ikke av å lage søkekriterer for bostedsadressen til person"
+                    message = "Får ikke laget søkekriterer for bostedsadresse=$bostedsadresse",
+                    frontendFeilmelding = "Klarer ikke av å lage søkekriterer for bostedsadressen til person"
             )
         }
 
         val personSøkResultat = pdlSaksbehandlerClient.søkPersonerMedSammeAdresse(søkeKriterier)
 
         return SøkeresultatPerson(
-            hits = personSøkResultat.hits.map { tilPersonFraSøk(it.person) },
-            totalHits = personSøkResultat.totalHits,
-            pageNumber = personSøkResultat.pageNumber,
-            totalPages = personSøkResultat.totalPages
+                hits = personSøkResultat.hits.map { tilPersonFraSøk(it.person) },
+                totalHits = personSøkResultat.totalHits,
+                pageNumber = personSøkResultat.pageNumber,
+                totalPages = personSøkResultat.totalPages
         )
     }
 
     fun søkPersonUtenFagsak(personIdent: String): SøkeresultatUtenFagsak {
         return personService.hentPdlPersonKort(listOf(personIdent))[personIdent]?.let {
             SøkeresultatUtenFagsak(
-                personIdent = personIdent,
-                navn = it.navn.gjeldende().visningsnavn()
+                    personIdent = personIdent,
+                    navn = it.navn.gjeldende().visningsnavn()
             )
         }
-            ?: throw ApiFeil("Finner ingen personer for søket", HttpStatus.BAD_REQUEST)
+               ?: throw ApiFeil("Finner ingen personer for søket", HttpStatus.BAD_REQUEST)
     }
 
     private fun tilPersonFraSøk(person: PdlPersonFraSøk): PersonFraSøk {
         return PersonFraSøk(
-            personIdent = person.folkeregisteridentifikator.gjeldende().identifikasjonsnummer,
-            visningsadresse = person.bostedsadresse.gjeldende()
-                ?.let { adresseMapper.tilAdresse(it).visningsadresse },
-            visningsnavn = NavnDto.fraNavn(person.navn.gjeldende()).visningsnavn
+                personIdent = person.folkeregisteridentifikator.gjeldende().identifikasjonsnummer,
+                visningsadresse = person.bostedsadresse.gjeldende()
+                        ?.let { adresseMapper.tilAdresse(it).visningsadresse },
+                visningsnavn = NavnDto.fraNavn(person.navn.gjeldende()).visningsnavn
         )
     }
 
