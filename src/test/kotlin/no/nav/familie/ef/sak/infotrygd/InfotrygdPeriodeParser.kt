@@ -60,6 +60,8 @@ object InfotrygdPeriodeParser {
                              brukerId = "",
                              kode = InfotrygdEndringKode.ENDRING_BEREGNINGSGRUNNLAG,
                              sakstype = InfotrygdSakstype.SØKNAD,
+                             kodeOvergangsstønad = null,
+                             aktivitetstype = null,
                              startDato = LocalDate.now(),
                              vedtakstidspunkt = LocalDateTime.now(),
                              stønadBeløp = 0 // kanskje fjerne ?
