@@ -65,7 +65,8 @@ class VedtaksbrevService(private val brevClient: BrevClient,
                                       brevrequest,
                                       brevmal,
                                       saksbehandlersignatur,
-                                      beslutterPdf = null)
+                                      beslutterPdf = null,
+                                      enhet = enhet)
         return when (brevRepository.existsById(behandlingId)) {
             true -> brevRepository.update(vedtaksbrev)
             false -> brevRepository.insert(vedtaksbrev)
@@ -101,11 +102,13 @@ class VedtaksbrevService(private val brevClient: BrevClient,
                                                  avsnitt = frittståendeBrevDto.avsnitt,
                                                  personIdent = ident,
                                                  navn = navn[ident]!!)
+
+        val signaturMedEnhet = brevsignaturService.lagSignaturMedEnhet(fagsakService.hentFagsak(behandling.fagsakId))
         val vedtaksbrev = lagreEllerOppdaterVedtaksbrev(behandlingId = frittståendeBrevDto.behandlingId,
                                                         brevrequest = objectMapper.writeValueAsString(request),
                                                         brevmal = FRITEKST,
-                                                        saksbehandlersignatur = SikkerhetContext.hentSaksbehandlerNavn(true),
-                                                        enhet = throw NotImplementedError()) // TODO
+                                                        saksbehandlersignatur = signaturMedEnhet.navn,
+                                                        enhet = signaturMedEnhet.enhet)
 
         return brevClient.genererBrev(vedtaksbrev = vedtaksbrev.tilDto())
     }

@@ -83,12 +83,7 @@ class FrittståendeBrevService(private val brevClient: BrevClient,
                 Stønadstype.SKOLEPENGER -> FrittståendeBrevType.MANGELBREV_SKOLEPENGER
             }
 
-    companion object {
 
-        val NAV_ANONYM_NAVN = "NAV anonym"
-        val ENHET_VIKAFOSSEN = "NAV Vikafossen"
-        val ENHET_NAY = "NAV Arbeid og ytelser"
-    }
 
 }
 

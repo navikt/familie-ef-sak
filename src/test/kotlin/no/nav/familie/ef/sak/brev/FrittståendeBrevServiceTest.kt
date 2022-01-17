@@ -11,7 +11,6 @@ import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevDto
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevKategori
 import no.nav.familie.ef.sak.brev.dto.SignaturDto
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import no.nav.familie.ef.sak.iverksett.IverksettClient
@@ -23,9 +22,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADE
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.DynamicTest
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
-import java.util.UUID
 import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevDto as KontrakterFrittståendeBrevDto
 
 
@@ -92,28 +89,6 @@ internal class FrittståendeBrevServiceTest {
                 assertThat(frittståendeBrevSlot.captured.brevtype).isEqualTo(forventetBrevtype)
             }
         }
-
-    @Test
-    fun `skal sende frittstående brev med NAV Vikafossen signatur`() {
-        val enhet = slot<String>()
-        val signatur = slot<String>()
-
-        mockAvhengigheter()
-
-        every {
-            personopplysningerService.hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(any())
-        } returns ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG
-
-        every { brevsignaturService.lagSignaturMedEnhet(any()) } returns SignaturDto("Navn Navnesen", "En enhet")
-
-        every { brevClient.genererBrev(any(), capture(signatur), capture(enhet)) } returns "123".toByteArray()
-
-        frittståendeBrevService.sendFrittståendeBrev(frittståendeBrevDto)
-
-        val signaturNavn = "NAV Vikafossen"
-        assertThat(enhet.captured).isEqualTo(signaturNavn)
-        assertThat(signatur.captured).isEqualTo("NAV anonym")
-    }
 
     private fun mockAvhengigheter() {
         BrukerContextUtil.mockBrukerContext("Saksbehandler")
