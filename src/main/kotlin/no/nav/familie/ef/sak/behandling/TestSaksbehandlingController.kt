@@ -69,17 +69,17 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
         }
 
 
-        if (!behandling.erMigrering()) { // opprettGrunnlagsdata håndteres i migreringservice
-            grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
+        if (!behandling.erMigrering()) {
+            grunnlagsdataService.opprettGrunnlagsdata(behandling.id) // opprettGrunnlagsdata håndteres i migreringservice
+            behandlingshistorikkService.opprettHistorikkInnslag(Behandlingshistorikk(behandlingId = behandling.id,
+                                                                                     steg = StegType.VILKÅR))
+            val oppgaveId = oppgaveService.opprettOppgave(behandling.id,
+                                                          Oppgavetype.BehandleSak,
+                                                          SikkerhetContext.hentSaksbehandler(true),
+                                                          "Dummy-oppgave opprettet i ny løsning")
+            taskRepository.save(taskRepository.save(BehandlingsstatistikkTask.opprettMottattTask(behandlingId = behandling.id,
+                                                                                                 oppgaveId = oppgaveId)))
         }
-        behandlingshistorikkService.opprettHistorikkInnslag(Behandlingshistorikk(behandlingId = behandling.id,
-                                                                                 steg = StegType.VILKÅR))
-        val oppgaveId = oppgaveService.opprettOppgave(behandling.id,
-                                                      Oppgavetype.BehandleSak,
-                                                      SikkerhetContext.hentSaksbehandler(true),
-                                                      "Dummy-oppgave opprettet i ny løsning")
-        taskRepository.save(taskRepository.save(BehandlingsstatistikkTask.opprettMottattTask(behandlingId = behandling.id,
-                                                                                             oppgaveId = oppgaveId)))
 
         return Ressurs.success(behandling.id)
     }
