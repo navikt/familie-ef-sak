@@ -1,11 +1,11 @@
 package no.nav.familie.ef.sak.behandling
 
+import io.mockk.every
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
-import no.nav.familie.ef.sak.behandlingsflyt.steg.BeregnYtelseSteg
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillBehandlingTask
@@ -17,7 +17,9 @@ import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.testWithBrukerContext
+import no.nav.familie.ef.sak.infrastruktur.config.IverksettClientMock
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
+import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.simulering.SimuleringsresultatRepository
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ef.sak.tilbakekreving.domain.Tilbakekrevingsvalg
@@ -30,17 +32,22 @@ import no.nav.familie.ef.sak.vedtak.dto.Innvilget
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.ef.iverksett.IverksettStatus
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.prosessering.internal.TaskWorker
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
+import java.util.LinkedList
+import java.util.Queue
 
 internal class MigreringServiceTest : OppslagSpringRunnerTest() {
 
@@ -56,11 +63,26 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var stegService: StegService
     @Autowired private lateinit var tilbakekrevingService: TilbakekrevingService
     @Autowired private lateinit var rolleConfig: RolleConfig
+    @Autowired private lateinit var iverksettClient: IverksettClient
 
     private val fra = YearMonth.now()
     private val til = YearMonth.now().plusMonths(1)
     private val forventetInntekt = BigDecimal.ZERO
     private val samordningsfradrag = BigDecimal.ZERO
+
+    @BeforeEach
+    internal fun setUp() {
+        //Vid migrering forventer vi OK_MOT_OPPDRAG, vid revurdering forventer vi OK
+        val responseFraInfotrygd: Queue<IverksettStatus> = LinkedList(listOf(IverksettStatus.OK_MOT_OPPDRAG, IverksettStatus.OK))
+        every { iverksettClient.hentStatus(any()) } answers {
+            responseFraInfotrygd.poll()
+        }
+    }
+
+    @AfterEach
+    internal fun tearDown() {
+        IverksettClientMock.clearMock(iverksettClient)
+    }
 
     @Test
     internal fun `skal opprette migrering og sende til iverksett`() {

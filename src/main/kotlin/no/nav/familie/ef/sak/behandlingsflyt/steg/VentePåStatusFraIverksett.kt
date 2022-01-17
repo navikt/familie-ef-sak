@@ -14,8 +14,9 @@ class VentePåStatusFraIverksett(private val iverksettClient: IverksettClient,
 
     override fun utførSteg(behandling: Behandling, data: Void?) {
         iverksettClient.hentStatus(behandling.id).let {
-            when (it) {
-                IverksettStatus.OK -> opprettLagSaksbehandlingsblankettTask(behandling)
+            when {
+                behandling.erMigrering() && it == IverksettStatus.OK_MOT_OPPDRAG -> opprettLagSaksbehandlingsblankettTask(behandling)
+                it == IverksettStatus.OK -> opprettLagSaksbehandlingsblankettTask(behandling)
                 else -> throw TaskExceptionUtenStackTrace("Mottok status $it fra iverksett for behandlingId=${behandling.id}")
             }
         }
