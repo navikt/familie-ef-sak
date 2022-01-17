@@ -15,6 +15,7 @@ import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.taMedAndelerFremTilDato
 import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Avslå
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
@@ -45,7 +46,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
     }
 
     override fun utførSteg(behandling: Behandling, data: VedtakDto) {
-        validerGyldigeVedtaksperioder(data)
+        validerGyldigeVedtaksperioder(behandling, data)
         val aktivIdent = fagsakService.fagsakMedOppdatertPersonIdent(behandling.fagsakId).hentAktivIdent()
         nullstillEksisterendeVedtakPåBehandling(behandling.id)
         vedtakService.lagreVedtak(vedtakDto = data, behandlingId = behandling.id)
@@ -66,16 +67,22 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
         }
     }
 
-    private fun validerGyldigeVedtaksperioder(data: VedtakDto) {
+    private fun validerGyldigeVedtaksperioder(behandling: Behandling, data: VedtakDto) {
         if (data is Innvilget) {
             val harOpphørsperioder = data.perioder.any { it.periodeType == VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
             val harInnvilgedePerioder = data.perioder.any { it.periodeType != VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
             feilHvis(harOpphørsperioder && !harInnvilgedePerioder) {
                 "Må ha innvilgelsesperioder i tillegg til opphørsperioder"
             }
+            feilHvis(!behandling.erMigrering() && harPeriodeEllerAktivitetMigrering(data)) {
+                "Kan ikke inneholde aktivitet eller periode av type migrering"
+            }
         }
 
     }
+
+    private fun harPeriodeEllerAktivitetMigrering(data: Innvilget) =
+            data.perioder.any { it.periodeType == VedtaksperiodeType.MIGRERING || it.aktivitet == AktivitetType.MIGRERING }
 
     private fun nullstillEksisterendeVedtakPåBehandling(behandlingId: UUID) {
         tilkjentYtelseService.slettTilkjentYtelseForBehandling(behandlingId)

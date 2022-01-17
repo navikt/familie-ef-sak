@@ -73,8 +73,8 @@ class MigreringService(
 
         val vedtaksperiode = VedtaksperiodeDto(årMånedFra = fra,
                                                årMånedTil = til,
-                                               aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
-                                               periodeType = VedtaksperiodeType.HOVEDPERIODE) // TODO ??
+                                               aktivitet = AktivitetType.MIGRERING,
+                                               periodeType = VedtaksperiodeType.MIGRERING)
 
         val inntekt = Inntekt(fra, forventetInntekt = forventetInntekt, samordningsfradrag = samordningsfradrag)
         beregnYtelseSteg.utførSteg(behandling, Innvilget(resultatType = ResultatType.INNVILGE,
