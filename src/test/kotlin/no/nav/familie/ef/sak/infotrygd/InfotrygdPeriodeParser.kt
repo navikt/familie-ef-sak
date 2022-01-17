@@ -3,8 +3,10 @@ package no.nav.familie.ef.sak.infotrygd
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdEndringKode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakstype
 import java.net.URL
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 object InfotrygdPeriodeParser {
@@ -43,6 +45,7 @@ object InfotrygdPeriodeParser {
     private fun parseInfotrygdPeriode(row: Map<String, String>) =
             InfotrygdPeriode(stønadId = getValue(row, KEY_STØNAD_ID)!!.toLong(),
                              vedtakId = getValue(row, KEY_VEDTAK_ID)!!.toLong(),
+                             inntektsgrunnlag = 0,
                              inntektsreduksjon = getValue(row, KEY_INNT_FRADRAG)!!.toInt(),
                              samordningsfradrag = getValue(row, KEY_SUM_FRADRAG)!!.toInt(),
                              beløp = getValue(row, KEY_NETTO_BELØP)!!.toInt(),
@@ -56,7 +59,11 @@ object InfotrygdPeriodeParser {
                              personIdent = "",
                              brukerId = "",
                              kode = InfotrygdEndringKode.ENDRING_BEREGNINGSGRUNNLAG,
+                             sakstype = InfotrygdSakstype.SØKNAD,
+                             kodeOvergangsstønad = null,
+                             aktivitetstype = null,
                              startDato = LocalDate.now(),
+                             vedtakstidspunkt = LocalDateTime.now(),
                              stønadBeløp = 0 // kanskje fjerne ?
             )
 

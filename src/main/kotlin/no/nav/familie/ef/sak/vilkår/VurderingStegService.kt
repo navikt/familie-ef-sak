@@ -28,9 +28,8 @@ import java.util.UUID
 
 @Service
 class VurderingStegService(private val behandlingService: BehandlingService,
-                           private val søknadService: SøknadService,
+                           private val vurderingService: VurderingService,
                            private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-                           private val vilkårGrunnlagService: VilkårGrunnlagService,
                            private val stegService: StegService,
                            private val taskRepository: TaskRepository,
                            private val blankettRepository: BlankettRepository) {
@@ -133,15 +132,7 @@ class VurderingStegService(private val behandlingService: BehandlingService,
                                                                        delvilkårsvurdering = delvilkårsvurdering)).tilDto()
     }
 
-    private fun hentGrunnlagOgMetadata(behandlingId: UUID): Pair<VilkårGrunnlagDto, HovedregelMetadata> {
-        val søknad = søknadService.hentOvergangsstønad(behandlingId)
-        val grunnlag = vilkårGrunnlagService.hentGrunnlag(behandlingId, søknad)
-        val metadata = HovedregelMetadata(sivilstandstype = grunnlag.sivilstand.registergrunnlag.type,
-                                          søknad = søknad)
-        return Pair(grunnlag, metadata)
-    }
-
-    private fun hentHovedregelMetadata(behandlingId: UUID) = hentGrunnlagOgMetadata(behandlingId).second
+    private fun hentHovedregelMetadata(behandlingId: UUID) = vurderingService.hentGrunnlagOgMetadata(behandlingId).second
 
     private fun validerLåstForVidereRedigering(behandlingId: UUID) {
         if (behandlingErLåstForVidereRedigering(behandlingId)) {

@@ -138,8 +138,7 @@ object OppdaterVilkår {
             }
 
     fun opprettNyeVilkårsvurderinger(behandlingId: UUID,
-                                     metadata: HovedregelMetadata,
-                                     erMigrering: Boolean = false): List<Vilkårsvurdering> {
+                                     metadata: HovedregelMetadata): List<Vilkårsvurdering> {
         return alleVilkårsregler
                 .flatMap { vilkårsregel ->
                     if (vilkårsregel.vilkårType == VilkårType.ALENEOMSORG && metadata.søknad != null) {

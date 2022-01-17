@@ -12,7 +12,7 @@ import java.util.UUID
 interface UttrekkArbeidssøkerRepository : RepositoryInterface<UttrekkArbeidssøkere, UUID>,
                                           InsertUpdateRepository<UttrekkArbeidssøkere> {
 
-    fun findAllByÅrMåned(årMåned: YearMonth): List<UttrekkArbeidssøkere>
+    fun findAllByÅrMånedAndRegistrertArbeidssøkerIsFalse(årMåned: YearMonth): List<UttrekkArbeidssøkere>
 
     // language=PostgreSQL
     @Query("""

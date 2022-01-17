@@ -39,7 +39,7 @@ internal class PeriodeServiceTest {
             fagsakService = fagsakService,
             behandlingService = behandlingService,
             tilkjentYtelseService = tilkjentYtelseService,
-            replikaClient = replikaClient
+            infotrygdService = InfotrygdService(replikaClient, pdlClient)
     )
 
     private val personIdent = "123"

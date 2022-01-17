@@ -175,9 +175,12 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
                 opprettdata()
 
                 service.opprettUttrekkArbeidssøkere(mars2021)
+                assertThat(uttrekkArbeidssøkerRepository.findAll().single().registrertArbeidssøker).isTrue
 
-                val uttrekk = service.hentUttrekkArbeidssøkere(mars2021).arbeidssøkere
-                assertThat(uttrekk[0].registrertArbeidssøker).isTrue
+                testWithSaksbehandlerContext {
+                    val uttrekk = service.hentUttrekkArbeidssøkere(mars2021).arbeidssøkere
+                    assertThat(uttrekk).isEmpty()
+                }
                 reset()
             }
         }
@@ -192,8 +195,10 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
 
                 service.opprettUttrekkArbeidssøkere(mars2021)
 
-                val uttrekk = service.hentUttrekkArbeidssøkere(mars2021).arbeidssøkere
-                assertThat(uttrekk[0].registrertArbeidssøker).isFalse
+                testWithSaksbehandlerContext {
+                    val uttrekk = service.hentUttrekkArbeidssøkere(mars2021).arbeidssøkere
+                    assertThat(uttrekk[0].registrertArbeidssøker).isFalse
+                }
                 reset()
             }
         }
@@ -204,24 +209,33 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
     internal fun `hentUttrekkArbeidssøkere - skal inkludere de som er kontrollert og`() {
         opprettdata()
         for (i in 1..20) {
-            val arbeidssøkere = UttrekkArbeidssøkere(fagsakId = fagsak.id, vedtakId = behandling.id, årMåned = mars2021)
+            val arbeidssøkere = UttrekkArbeidssøkere(fagsakId = fagsak.id,
+                                                     vedtakId = behandling.id,
+                                                     årMåned = mars2021,
+                                                     registrertArbeidssøker = false)
             uttrekkArbeidssøkerRepository.insert(arbeidssøkere)
         }
         for (i in 1..2) {
             val arbeidssøkere =
-                    UttrekkArbeidssøkere(fagsakId = fagsak.id, vedtakId = behandling.id, årMåned = mars2021, kontrollert = true)
+                    UttrekkArbeidssøkere(fagsakId = fagsak.id,
+                                         vedtakId = behandling.id,
+                                         årMåned = mars2021,
+                                         kontrollert = true,
+                                         registrertArbeidssøker = false)
             uttrekkArbeidssøkerRepository.insert(arbeidssøkere)
         }
 
-        val uttrekk = service.hentUttrekkArbeidssøkere(mars2021)
-        assertThat(uttrekk.antallTotalt).isEqualTo(22)
-        assertThat(uttrekk.antallKontrollert).isEqualTo(2)
-        assertThat(uttrekk.arbeidssøkere.size).isEqualTo(20)
+        testWithSaksbehandlerContext {
+            val uttrekk = service.hentUttrekkArbeidssøkere(mars2021)
+            assertThat(uttrekk.antallTotalt).isEqualTo(22)
+            assertThat(uttrekk.antallKontrollert).isEqualTo(2)
+            assertThat(uttrekk.arbeidssøkere.size).isEqualTo(20)
 
-        val uttrekkMedKontrollerte = service.hentUttrekkArbeidssøkere(mars2021, visKontrollerte = true)
-        assertThat(uttrekkMedKontrollerte.antallTotalt).isEqualTo(22)
-        assertThat(uttrekkMedKontrollerte.antallKontrollert).isEqualTo(2)
-        assertThat(uttrekkMedKontrollerte.arbeidssøkere.size).isEqualTo(22)
+            val uttrekkMedKontrollerte = service.hentUttrekkArbeidssøkere(mars2021, visKontrollerte = true)
+            assertThat(uttrekkMedKontrollerte.antallTotalt).isEqualTo(22)
+            assertThat(uttrekkMedKontrollerte.antallKontrollert).isEqualTo(2)
+            assertThat(uttrekkMedKontrollerte.arbeidssøkere.size).isEqualTo(22)
+        }
     }
 
     @Nested
@@ -247,7 +261,10 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
             identer.forEach {
                 val fagsak = fagsakRepository.insert(fagsak(fagsakpersoner(setOf(it.first))))
                 val behandling = behandlingRepository.insert(behandling(fagsak))
-                val arbeidssøkere = UttrekkArbeidssøkere(fagsakId = fagsak.id, vedtakId = behandling.id, årMåned = mars2021)
+                val arbeidssøkere = UttrekkArbeidssøkere(fagsakId = fagsak.id,
+                                                         vedtakId = behandling.id,
+                                                         årMåned = mars2021,
+                                                         registrertArbeidssøker = false)
                 uttrekkArbeidssøkerRepository.insert(arbeidssøkere)
             }
         }
@@ -255,7 +272,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
         @Test
         internal fun `hentUttrekkArbeidssøkere - uten rolle filtrerer vekk personer som man ikke har tilgang til`() {
             val expected = listOf(IDENT_UGRADERT, IDENT_UTEN_GRADERING)
-            testWithBrukerContext {
+            testWithSaksbehandlerContext {
                 val uttrekk = service.hentUttrekkArbeidssøkere(mars2021)
                 validerInneholderIdenter(uttrekk, expected)
                 assertThat(uttrekk.antallTotalt).isEqualTo(2)
@@ -269,7 +286,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
         @Test
         internal fun `hentUttrekkArbeidssøkere - kode 6 tilgang`() {
             val expected = listOf(IDENT_STRENGT_FORTROLIG, IDENT_STRENGT_FORTROLIG_UTLAND)
-            testWithBrukerContext(groups = listOf(rolleConfig.kode6)) {
+            testWithSaksbehandlerContext(groups = listOf(rolleConfig.kode6)) {
                 val uttrekk = service.hentUttrekkArbeidssøkere(mars2021)
 
                 validerInneholderIdenter(uttrekk, expected)
@@ -286,7 +303,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
         @Test
         internal fun `hentUttrekkArbeidssøkere - kode 7 tilgang`() {
             val expected = listOf(IDENT_UGRADERT, IDENT_UTEN_GRADERING, IDENT_FORTROLIG)
-            testWithBrukerContext(groups = listOf(rolleConfig.kode7)) {
+            testWithSaksbehandlerContext(groups = listOf(rolleConfig.kode7)) {
                 val uttrekk = service.hentUttrekkArbeidssøkere(mars2021)
 
                 validerInneholderIdenter(uttrekk, expected)
@@ -305,11 +322,11 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
             fagsakRepository.findBySøkerIdent(setOf(IDENT_STRENGT_FORTROLIG))
                     .single()
                     .let { fagsak ->
-                        uttrekkArbeidssøkerRepository.findAllByÅrMåned(mars2021)
+                        uttrekkArbeidssøkerRepository.findAllByÅrMånedAndRegistrertArbeidssøkerIsFalse(mars2021)
                                 .single { it.fagsakId == fagsak.id }
                     }
                     .let { uttrekkArbeidssøkerRepository.update(it.copy(kontrollert = true)) }
-            testWithBrukerContext {
+            testWithSaksbehandlerContext {
                 val uttrekk = service.hentUttrekkArbeidssøkere(mars2021)
                 validerInneholderIdenter(uttrekk, expected)
                 assertThat(uttrekk.antallTotalt).isEqualTo(2)
@@ -338,7 +355,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
         service.opprettUttrekkArbeidssøkere(mars2021)
         val id = service.hentUttrekkArbeidssøkere(mars2021).arbeidssøkere.single().id
 
-        testWithBrukerContext { service.settKontrollert(id, true) }
+        testWithSaksbehandlerContext { service.settKontrollert(id, true) }
 
         val oppdatertUttrekk = service.hentUttrekkArbeidssøkere(mars2021, visKontrollerte = true)
         assertThat(oppdatertUttrekk.antallKontrollert).isEqualTo(1)
@@ -346,7 +363,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
         assertThat(oppdatertUttrekk.arbeidssøkere).hasSize(1)
         assertThat(oppdatertUttrekk.arbeidssøkere[0].kontrollert).isTrue
 
-        testWithBrukerContext { service.settKontrollert(id, false) }
+        testWithSaksbehandlerContext { service.settKontrollert(id, false) }
         val oppdatertUttrekk2 = service.hentUttrekkArbeidssøkere(mars2021)
         assertThat(oppdatertUttrekk2.antallKontrollert).isEqualTo(0)
         assertThat(oppdatertUttrekk2.arbeidssøkere[0].kontrollert).isFalse
@@ -360,7 +377,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
         val uttrekk = uttrekkArbeidssøkerRepository.insert(uttrekkArbeidssøkere)
 
         assertThrows<ManglerTilgang> {
-            testWithBrukerContext {
+            testWithSaksbehandlerContext {
                 service.settKontrollert(uttrekk.id, true)
             }
         }
@@ -420,4 +437,8 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
             PdlPersonKort(gradering?.let { listOf(Adressebeskyttelse(it, Metadata(false))) } ?: emptyList(),
                           listOf(navn),
                           emptyList())
+
+    fun testWithSaksbehandlerContext(groups: List<String> = emptyList(), fn: () -> Unit) {
+        testWithBrukerContext(groups = groups + rolleConfig.saksbehandlerRolle, fn = fn)
+    }
 }
