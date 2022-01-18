@@ -16,7 +16,7 @@ inboundApplicationsExternal:
     cluster: dev-fss
   - application: familie-ba-sak
     namespace: teamfamilie
-    cluster: dev-fss
+    cluster: dev-gcp
 externalHosts:
   - api-gw-q1.oera.no
   - unleash.nais.io
