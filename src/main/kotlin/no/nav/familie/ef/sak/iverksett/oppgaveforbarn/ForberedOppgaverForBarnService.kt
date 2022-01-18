@@ -33,8 +33,11 @@ class ForberedOppgaverForBarnService(private val gjeldendeBarnRepository: Gjelde
         return behandlingRepository.finnEksterneIder(barnSomFyllerAar.map { it.key }.toSet()).map {
             OppgaveForBarn(it.behandlingId,
                            it.eksternFagsakId,
-                           barnSomFyllerAar[it.behandlingId]!!.first.fødselsnummerSøker
-                           ?: error("Fant ikke noe fødselsnummer for søker"),
+                           barnSomFyllerAar[it.behandlingId]?.let {
+                               it.first.fødselsnummerSøker
+                               ?: error("Kunne ikke finne igjen den mappede behandlingen for barn som fyller år. Dette skal ikke skje")
+                           }
+                           ?: error("Kunne ikke finne fødselsnummer for søker"),
                            Stønadstype.OVERGANGSSTØNAD.name,
                            barnSomFyllerAar[it.behandlingId]!!.second)
         }
