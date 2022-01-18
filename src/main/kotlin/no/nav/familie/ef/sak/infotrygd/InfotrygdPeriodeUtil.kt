@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.infotrygd
 
 import no.nav.familie.ef.sak.felles.util.isEqualOrAfter
+import no.nav.familie.ef.sak.felles.util.isEqualOrBefore
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
 import java.time.LocalDate
 
@@ -39,16 +40,16 @@ object InfotrygdPeriodeUtil {
     /**
      * Slår sammen perioder fra infotrygd, disse skal ikke slås sammen tvers ulike stønadId'er
      */
-    fun slåSammenInfotrygdperioder(infotrygdperioder: List<InfotrygdPeriode>): List<InternPeriode> {
+    fun slåSammenInfotrygdperioder(infotrygdperioder: List<InfotrygdPeriode>): List<InfotrygdPeriode> {
         return infotrygdperioder
-                .groupBy({ it.stønadId }, { it.tilInternPeriode() })
+                .groupBy { it.stønadId }
                 .values
                 .flatMap(this::slåSammenPerioder)
                 .sortedBy { it.stønadFom }
     }
 
-    private fun slåSammenPerioder(perioder: List<InternPeriode>): MutableList<InternPeriode> {
-        val list = mutableListOf<InternPeriode>()
+    private fun slåSammenPerioder(perioder: List<InfotrygdPeriode>): MutableList<InfotrygdPeriode> {
+        val list = mutableListOf<InfotrygdPeriode>()
 
         for (periode in perioder) {
             val minStønadFom = list.minByOrNull { it.stønadFom }
@@ -62,5 +63,17 @@ object InfotrygdPeriodeUtil {
         }
         return list
     }
+
+    private fun InfotrygdPeriode.erDatoInnenforPeriode(dato: LocalDate): Boolean {
+        return dato.isEqualOrBefore(stønadTom) && dato.isEqualOrAfter(stønadFom)
+    }
+
+    fun InfotrygdPeriode.erPeriodeOverlappende(periode: InfotrygdPeriode): Boolean {
+        return (erDatoInnenforPeriode(periode.stønadFom) || erDatoInnenforPeriode(periode.stønadTom))
+               || omslutter(periode)
+    }
+
+    private fun InfotrygdPeriode.omslutter(periode: InfotrygdPeriode) =
+            periode.stønadFom.isBefore(stønadFom) && periode.stønadTom.isAfter(stønadTom)
 
 }
