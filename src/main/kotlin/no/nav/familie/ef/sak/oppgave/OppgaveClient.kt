@@ -64,7 +64,7 @@ class OppgaveClient(@Qualifier("azure") restOperations: RestOperations,
             return pakkUtRespons(respons, uri, "fordelOppgave").oppgaveId
         } catch (e: HttpClientErrorException.BadRequest) {
             if (e.responseBodyAsString.contains("allerede er ferdigstilt")) {
-                throw ApiFeil("Oppgaven med id=$oppgaveId er allerede ferdigstilt", HttpStatus.BAD_REQUEST)
+                throw ApiFeil("Oppgaven med id=$oppgaveId er allerede ferdigstilt. Prøv å hente oppgaver på nytt.", HttpStatus.BAD_REQUEST)
             }
             throw e
         }
