@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask.OpprettOppgaveTaskData
 import no.nav.familie.ef.sak.behandlingsflyt.task.PollStatusFraIverksettTask
 import no.nav.familie.ef.sak.blankett.JournalførBlankettTask
+import no.nav.familie.ef.sak.brev.BrevsignaturService
 import no.nav.familie.ef.sak.brev.VedtaksbrevRepository
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.fagsak.FagsakService
@@ -95,9 +96,15 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
 
     private fun utledVedtaksbrev(vedtaksbrev: Vedtaksbrev): Fil {
         feilHvis(vedtaksbrev.beslutterPdf == null) { "For å godkjenne må du som beslutter først kontrollere brevet." }
-        feilHvis(vedtaksbrev.besluttersignatur != SikkerhetContext.hentSaksbehandlerNavn(strict = true)) {
-            "En annen saksbehandler har signert vedtaksbrevet"
+
+        when (vedtaksbrev.saksbehandlersignatur) {
+            BrevsignaturService.ENHET_VIKAFOSSEN -> feilHvis(false) { "en annen saksbehandler" } // TODO - valider beslutter-ident er lik ident lagret på vedtak?
+            BrevsignaturService.ENHET_NAY -> feilHvis(vedtaksbrev.besluttersignatur != SikkerhetContext.hentSaksbehandlerNavn(
+                    strict = true)) {
+                "En annen saksbehandler har signert vedtaksbrevet"
+            }
         }
+
         return vedtaksbrev.beslutterPdf
     }
 

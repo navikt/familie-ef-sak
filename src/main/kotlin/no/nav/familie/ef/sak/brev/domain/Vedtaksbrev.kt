@@ -13,7 +13,9 @@ data class Vedtaksbrev(@Id
                        val saksbehandlersignatur: String,
                        val besluttersignatur: String? = null,
                        val beslutterPdf: Fil? = null,
-                       val enhet: String? = null)
+                       val enhet: String? = null,
+                       val saksbehandlerident: String? = null,
+                       val beslutterident: String? = null)
 
 fun Vedtaksbrev.tilDto(): VedtaksbrevDto = VedtaksbrevDto(saksbehandlerBrevrequest = this.saksbehandlerBrevrequest,
                                                           brevmal = this.brevmal,

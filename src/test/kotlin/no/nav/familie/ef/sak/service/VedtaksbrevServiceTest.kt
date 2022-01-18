@@ -149,7 +149,7 @@ internal class VedtaksbrevServiceTest {
                                                               brevmal,
                                                               "Saksbehandler Signatur",
                                                               null,
-                                                              null)
+                                                              null, "", "", "")
 
     private fun lagVedtaksbrevFritekstDto() = VedtaksbrevFritekstDto("Innvilget",
                                                                      listOf(FrittståendeBrevAvsnitt("Deloverskrift", "Innhold")),

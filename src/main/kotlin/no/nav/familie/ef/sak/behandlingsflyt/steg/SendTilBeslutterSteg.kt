@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask.OpprettOppgaveTaskData
+import no.nav.familie.ef.sak.brev.BrevsignaturService
 import no.nav.familie.ef.sak.brev.VedtaksbrevRepository
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
@@ -117,9 +118,14 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
 
     private fun validerSaksbehandlersignatur(behandling: Behandling) {
         val vedtaksbrev = vedtaksbrevRepository.findByIdOrThrow(behandling.id)
-        feilHvis(vedtaksbrev.saksbehandlersignatur != SikkerhetContext.hentSaksbehandlerNavn(strict = true)) {
-            "En annen saksbehandler har signert vedtaksbrevet"
+        when (vedtaksbrev.enhet) {
+            BrevsignaturService.ENHET_VIKAFOSSEN -> return // TODO - valider saksbehandler-ident er lik ?
+            BrevsignaturService.ENHET_NAY -> feilHvis(vedtaksbrev.saksbehandlersignatur != SikkerhetContext.hentSaksbehandlerNavn(
+                    strict = true)) {
+                "En annen saksbehandler har signert vedtaksbrevet"
+            }
         }
+
     }
 
     override fun stegType(): StegType {

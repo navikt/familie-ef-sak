@@ -94,7 +94,7 @@ internal class SendTilBeslutterStegTest {
                                           brevmal = "",
                                           saksbehandlersignatur = saksbehandlerNavn,
                                           "",
-                                          null)
+                                          null, "", "", "")
 
     private val behandling = Behandling(fagsakId = fagsak.id,
                                         type = BehandlingType.FØRSTEGANGSBEHANDLING,
