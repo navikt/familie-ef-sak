@@ -4,30 +4,32 @@ import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
 import java.time.LocalDate
 
 data class InfotrygdPerioderDto(
-        val overgangsstønad: InfotrygdPerioder,
-        val barnetilsyn: InfotrygdPerioder,
-        val skolepenger: InfotrygdPerioder
+        val overgangsstønad: InfotrygdStønadPerioderDto,
+        val barnetilsyn: InfotrygdStønadPerioderDto,
+        val skolepenger: InfotrygdStønadPerioderDto
 )
 
-data class InfotrygdPerioder(
+data class InfotrygdStønadPerioderDto(
         val perioder: List<InfotrygdPeriode>,
-        val summert: List<SummertInfotrygdPeriode>
+        val summert: List<SummertInfotrygdPeriodeDto>
 )
 
-data class SummertInfotrygdPeriode(
+data class SummertInfotrygdPeriodeDto(
         val stønadFom: LocalDate,
         val stønadTom: LocalDate,
         val opphørsdato: LocalDate?,
+        val inntektsgrunnlag: Int,
         val inntektsreduksjon: Int,
         val samordningsfradrag: Int,
         val beløp: Int
 )
 
-fun InternPeriode.tilSummertInfotrygdperiodeDto(): SummertInfotrygdPeriode =
-        SummertInfotrygdPeriode(
+fun InfotrygdPeriode.tilSummertInfotrygdperiodeDto(): SummertInfotrygdPeriodeDto =
+        SummertInfotrygdPeriodeDto(
                 stønadFom = this.stønadFom,
                 stønadTom = this.stønadTom,
                 opphørsdato = this.opphørsdato,
+                inntektsgrunnlag = this.inntektsgrunnlag,
                 inntektsreduksjon = this.inntektsreduksjon,
                 samordningsfradrag = this.samordningsfradrag,
                 beløp = this.beløp
