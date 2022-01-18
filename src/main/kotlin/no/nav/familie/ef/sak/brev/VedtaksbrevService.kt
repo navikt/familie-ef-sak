@@ -85,10 +85,14 @@ class VedtaksbrevService(private val brevClient: BrevClient,
         }
 
         val vedtaksbrev = brevRepository.findByIdOrThrow(behandlingId)
-        val besluttersignatur = SikkerhetContext.hentSaksbehandlerNavn(strict = true)
-        val besluttervedtaksbrev = vedtaksbrev.copy(besluttersignatur = besluttersignatur)
+        val signaturMedEnhet = brevsignaturService.lagSignaturMedEnhet(fagsakService.hentFagsak(behandling.fagsakId))
+        val besluttervedtaksbrev = vedtaksbrev.copy(
+            besluttersignatur = signaturMedEnhet.navn,
+            enhet = signaturMedEnhet.enhet,
+            beslutterident = SikkerhetContext.hentSaksbehandler(true)
+        )
 
-        validerBeslutterIkkeErLikSaksbehandler(vedtaksbrev, besluttersignatur)
+        validerBeslutterIkkeErLikSaksbehandler(vedtaksbrev)
 
         val beslutterPdf = Fil(brevClient.genererBrev(besluttervedtaksbrev.tilDto()))
         val besluttervedtaksbrevMedPdf = besluttervedtaksbrev.copy(beslutterPdf = beslutterPdf)
@@ -123,9 +127,14 @@ class VedtaksbrevService(private val brevClient: BrevClient,
         }
     }
 
-    private fun validerBeslutterIkkeErLikSaksbehandler(vedtaksbrev: Vedtaksbrev,
-                                                       besluttersignatur: String) {
-        if (vedtaksbrev.saksbehandlersignatur == besluttersignatur) {
+    private fun validerBeslutterIkkeErLikSaksbehandler(vedtaksbrev: Vedtaksbrev) {
+        if(vedtaksbrev.saksbehandlerident == "IKKE_SATT"){
+            if (vedtaksbrev.saksbehandlersignatur == vedtaksbrev.besluttersignatur) {
+                throw Feil(message = "Beslutter er lik behandler",
+                           frontendFeilmelding = "Beslutter kan ikke behandle en behandling som den selv har sendt til beslutter")
+            }
+        }
+        else if (vedtaksbrev.saksbehandlerident == vedtaksbrev.beslutterident) {
             throw Feil(message = "Beslutter er lik behandler",
                        frontendFeilmelding = "Beslutter kan ikke behandle en behandling som den selv har sendt til beslutter")
         }

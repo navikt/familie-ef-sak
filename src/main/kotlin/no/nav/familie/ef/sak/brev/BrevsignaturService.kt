@@ -19,9 +19,9 @@ class BrevsignaturService(val personopplysningerService: PersonopplysningerServi
                         .let { it == STRENGT_FORTROLIG || it == STRENGT_FORTROLIG_UTLAND }
 
         return if (harStrengtFortroligAdresse) {
-            SignaturDto(NAV_ANONYM_NAVN, ENHET_VIKAFOSSEN)
+            SignaturDto(NAV_ANONYM_NAVN, ENHET_VIKAFOSSEN, true)
         } else {
-            SignaturDto(SikkerhetContext.hentSaksbehandlerNavn(true), ENHET_NAY)
+            SignaturDto(SikkerhetContext.hentSaksbehandlerNavn(true), ENHET_NAY, false)
         }
     }
 
