@@ -97,7 +97,7 @@ internal class InfotrygdPeriodeUtilCsvTest {
     fun lagPerioder(perioder: List<InfotrygdPeriode>): List<InternPeriode> {
         val filtrertPerioder = InfotrygdPeriodeUtil.filtrerOgSorterPerioderFraInfotrygd(perioder)
 
-        return InfotrygdPeriodeUtil.slåSammenInfotrygdperioder(filtrertPerioder)
+        return InfotrygdPeriodeUtil.slåSammenInfotrygdperioder(filtrertPerioder).map { it.tilInternPeriode() }
     }
 
     private fun parseFil(fil: String) = InfotrygdPeriodeParser.parse(this::class.java.classLoader.getResource(fil)!!)
