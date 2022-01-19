@@ -8,8 +8,9 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask.OpprettOppgaveTaskData
-import no.nav.familie.ef.sak.brev.BrevsignaturService
 import no.nav.familie.ef.sak.brev.VedtaksbrevRepository
+import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
+import no.nav.familie.ef.sak.brev.domain.VedtaksbrevKonstanter.IKKE_SATT_IDENT_PÅ_GAMLE_VEDTAKSBREV
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
@@ -118,14 +119,23 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
 
     private fun validerSaksbehandlersignatur(behandling: Behandling) {
         val vedtaksbrev = vedtaksbrevRepository.findByIdOrThrow(behandling.id)
-        when (vedtaksbrev.enhet) {
-            BrevsignaturService.ENHET_VIKAFOSSEN -> return // TODO - valider saksbehandler-ident er lik ?
-            BrevsignaturService.ENHET_NAY -> feilHvis(vedtaksbrev.saksbehandlersignatur != SikkerhetContext.hentSaksbehandlerNavn(
-                    strict = true)) {
-                "En annen saksbehandler har signert vedtaksbrevet"
-            }
+
+        when (vedtaksbrev.saksbehandlerident) {
+            IKKE_SATT_IDENT_PÅ_GAMLE_VEDTAKSBREV -> validerSammeSignatur(vedtaksbrev)
+            else -> validerSammeIdent(vedtaksbrev)
         }
 
+    }
+
+    private fun validerSammeIdent(vedtaksbrev: Vedtaksbrev) {
+        feilHvis(vedtaksbrev.saksbehandlerident != SikkerhetContext.hentSaksbehandler(true)) { "En annen saksbehandler har signert vedtaksbrevet" }
+    }
+
+    private fun validerSammeSignatur(vedtaksbrev: Vedtaksbrev) {
+        feilHvis(vedtaksbrev.saksbehandlersignatur != SikkerhetContext.hentSaksbehandlerNavn(
+                strict = true)) {
+            "En annen saksbehandler har signert vedtaksbrevet"
+        }
     }
 
     override fun stegType(): StegType {

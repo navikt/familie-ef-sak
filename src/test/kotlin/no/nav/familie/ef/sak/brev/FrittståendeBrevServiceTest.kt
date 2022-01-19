@@ -100,7 +100,7 @@ internal class FrittståendeBrevServiceTest {
         every { personopplysningerService.hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(any()) } returns ADRESSEBESKYTTELSEGRADERING.UGRADERT
         every { arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(any()) } returns "123"
         every { iverksettClient.sendFrittståendeBrev(any()) } just Runs
-        every { brevsignaturService.lagSignaturMedEnhet(any()) } returns SignaturDto("Navn Navnesen", "En enhet")
+        every { brevsignaturService.lagSignaturMedEnhet(any()) } returns SignaturDto("Navn Navnesen", "En enhet", false)
     }
 
     companion object {

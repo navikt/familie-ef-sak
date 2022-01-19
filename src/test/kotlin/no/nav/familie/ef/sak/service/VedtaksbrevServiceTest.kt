@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.brev.VedtaksbrevRepository
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevAvsnitt
+import no.nav.familie.ef.sak.brev.dto.SignaturDto
 import no.nav.familie.ef.sak.brev.dto.VedtaksbrevFritekstDto
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
@@ -57,16 +58,19 @@ internal class VedtaksbrevServiceTest {
         every { behandlingService.hentBehandling(any()) } returns lagBehandlingForBeslutter()
         val vedtaksbrevSlot = slot<Vedtaksbrev>()
 
-        val saksbehandlerNavn = "Saksbehandler Saksbehandlersen"
+        val saksbehandlerNavn = "123"
         mockBrukerContext(saksbehandlerNavn)
         every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev
-        every { brevClient.genererBrev(any()) } returns "123".toByteArray()
+        every { brevClient.genererBrev(any()) } returns "enPdf".toByteArray()
         every { vedtaksbrevRepository.update(capture(vedtaksbrevSlot)) } returns vedtaksbrev
+        every { fagsakService.hentFagsak(any()) } returns fagsak
+        val signaturDto = SignaturDto(saksbehandlerNavn, "enhet", false)
+        every { brevsignaturService.lagSignaturMedEnhet(any()) } returns signaturDto
 
         vedtaksbrevService.lagBeslutterBrev(behandling.id)
         assertThat(vedtaksbrevSlot.captured.besluttersignatur).isEqualTo(saksbehandlerNavn)
         assertThat(vedtaksbrevSlot.captured).usingRecursiveComparison()
-                .ignoringFields("besluttersignatur", "beslutterPdf")
+                .ignoringFields("besluttersignatur", "beslutterPdf", "beslutterident", "enhet")
                 .isEqualTo(vedtaksbrev)
 
         clearBrukerContext()
@@ -144,12 +148,14 @@ internal class VedtaksbrevServiceTest {
                                                              status = BehandlingStatus.UTREDES,
                                                              steg = StegType.SEND_TIL_BESLUTTER)
 
-    private fun lagVedtaksbrev(brevmal: String) = Vedtaksbrev(behandling.id,
-                                                              "123",
-                                                              brevmal,
-                                                              "Saksbehandler Signatur",
-                                                              null,
-                                                              null, "", "", "")
+    private fun lagVedtaksbrev(brevmal: String, saksbehandlerIdent: String = "123") = Vedtaksbrev(behandling.id,
+                                                                                                  "123",
+                                                                                                  brevmal,
+                                                                                                  "Saksbehandler Signatur",
+                                                                                                  null,
+                                                                                                  null, "",
+                                                                                                  saksbehandlerIdent,
+                                                                                                  "")
 
     private fun lagVedtaksbrevFritekstDto() = VedtaksbrevFritekstDto("Innvilget",
                                                                      listOf(FrittståendeBrevAvsnitt("Deloverskrift", "Innhold")),

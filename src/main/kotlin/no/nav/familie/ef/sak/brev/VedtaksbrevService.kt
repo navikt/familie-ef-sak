@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.brev.domain.FRITEKST
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
+import no.nav.familie.ef.sak.brev.domain.VedtaksbrevKonstanter.IKKE_SATT_IDENT_PÅ_GAMLE_VEDTAKSBREV
 import no.nav.familie.ef.sak.brev.domain.tilDto
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevRequestDto
 import no.nav.familie.ef.sak.brev.dto.VedtaksbrevFritekstDto
@@ -34,7 +35,8 @@ class VedtaksbrevService(private val brevClient: BrevClient,
         return if (vedtaksbrev.beslutterPdf != null) {
             vedtaksbrev.beslutterPdf.bytes
         } else {
-            brevClient.genererBrev(vedtaksbrev.tilDto())
+            // Besluttersignatur er ikke laget ennå skjulBeslutterSignatur vil ikke ha noen betydning.
+            brevClient.genererBrev(vedtaksbrev.tilDto(true))
         }
     }
 
@@ -53,7 +55,7 @@ class VedtaksbrevService(private val brevClient: BrevClient,
                 saksbehandlersignatur.enhet
         )
 
-        return brevClient.genererBrev(vedtaksbrev.tilDto())
+        return brevClient.genererBrev(vedtaksbrev.tilDto(saksbehandlersignatur.skjulBeslutter))
     }
 
     private fun lagreEllerOppdaterSaksbehandlerVedtaksbrev(behandlingId: UUID,
@@ -87,14 +89,14 @@ class VedtaksbrevService(private val brevClient: BrevClient,
         val vedtaksbrev = brevRepository.findByIdOrThrow(behandlingId)
         val signaturMedEnhet = brevsignaturService.lagSignaturMedEnhet(fagsakService.hentFagsak(behandling.fagsakId))
         val besluttervedtaksbrev = vedtaksbrev.copy(
-            besluttersignatur = signaturMedEnhet.navn,
-            enhet = signaturMedEnhet.enhet,
-            beslutterident = SikkerhetContext.hentSaksbehandler(true)
+                besluttersignatur = signaturMedEnhet.navn,
+                enhet = signaturMedEnhet.enhet,
+                beslutterident = SikkerhetContext.hentSaksbehandler(true)
         )
 
         validerBeslutterIkkeErLikSaksbehandler(vedtaksbrev)
 
-        val beslutterPdf = Fil(brevClient.genererBrev(besluttervedtaksbrev.tilDto()))
+        val beslutterPdf = Fil(brevClient.genererBrev(besluttervedtaksbrev.tilDto(signaturMedEnhet.skjulBeslutter)))
         val besluttervedtaksbrevMedPdf = besluttervedtaksbrev.copy(beslutterPdf = beslutterPdf)
         brevRepository.update(besluttervedtaksbrevMedPdf)
         return beslutterPdf.bytes
@@ -117,7 +119,7 @@ class VedtaksbrevService(private val brevClient: BrevClient,
                                                                      saksbehandlersignatur = signaturMedEnhet.navn,
                                                                      enhet = signaturMedEnhet.enhet)
 
-        return brevClient.genererBrev(vedtaksbrev = vedtaksbrev.tilDto())
+        return brevClient.genererBrev(vedtaksbrev = vedtaksbrev.tilDto(signaturMedEnhet.skjulBeslutter))
     }
 
     private fun validerRedigerbarBehandling(behandling: Behandling) {
@@ -128,13 +130,21 @@ class VedtaksbrevService(private val brevClient: BrevClient,
     }
 
     private fun validerBeslutterIkkeErLikSaksbehandler(vedtaksbrev: Vedtaksbrev) {
-        if(vedtaksbrev.saksbehandlerident == "IKKE_SATT"){
-            if (vedtaksbrev.saksbehandlersignatur == vedtaksbrev.besluttersignatur) {
-                throw Feil(message = "Beslutter er lik behandler",
-                           frontendFeilmelding = "Beslutter kan ikke behandle en behandling som den selv har sendt til beslutter")
-            }
+        when (vedtaksbrev.saksbehandlerident) {
+            IKKE_SATT_IDENT_PÅ_GAMLE_VEDTAKSBREV -> validerUlikeSignaturnavn(vedtaksbrev)
+            else -> validerUlikeIdenter(vedtaksbrev)
         }
-        else if (vedtaksbrev.saksbehandlerident == vedtaksbrev.beslutterident) {
+    }
+
+    private fun validerUlikeSignaturnavn(vedtaksbrev: Vedtaksbrev) {
+        if (vedtaksbrev.saksbehandlersignatur == vedtaksbrev.besluttersignatur) {
+            throw Feil(message = "Beslutter er lik behandler",
+                       frontendFeilmelding = "Beslutter kan ikke behandle en behandling som den selv har sendt til beslutter")
+        }
+    }
+
+    private fun validerUlikeIdenter(vedtaksbrev: Vedtaksbrev) {
+        if (vedtaksbrev.saksbehandlerident == vedtaksbrev.beslutterident) {
             throw Feil(message = "Beslutter er lik behandler",
                        frontendFeilmelding = "Beslutter kan ikke behandle en behandling som den selv har sendt til beslutter")
         }

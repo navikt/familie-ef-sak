@@ -10,11 +10,10 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask.OpprettOppgaveTaskData
 import no.nav.familie.ef.sak.behandlingsflyt.task.PollStatusFraIverksettTask
 import no.nav.familie.ef.sak.blankett.JournalførBlankettTask
-import no.nav.familie.ef.sak.brev.BrevsignaturService
 import no.nav.familie.ef.sak.brev.VedtaksbrevRepository
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
+import no.nav.familie.ef.sak.brev.domain.VedtaksbrevKonstanter.IKKE_SATT_IDENT_PÅ_GAMLE_VEDTAKSBREV
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
@@ -64,7 +63,8 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
                 }
                 else -> {
                     val vedtaksbrev = vedtaksbrevRepository.findByIdOrThrow(behandling.id)
-                    val fil = utledVedtaksbrev(vedtaksbrev)
+                    validerBeslutterVedtaksbrev(vedtaksbrev)
+                    val fil = vedtaksbrev.beslutterPdf ?: throw Feil("Beslutter-pdf er null, beslutter må kontrollere brevet.")
                     val iverksettDto = iverksettingDtoMapper.tilDto(behandling, beslutter)
                     oppdaterResultatPåBehandling(behandling.id)
                     opprettPollForStatusOppgave(behandling.id)
@@ -81,8 +81,8 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
     }
 
     private fun opprettTaskForBehandlingsstatistikk(behandlingId: UUID, oppgaveId: Long?) =
-        taskRepository.save(BehandlingsstatistikkTask.opprettBesluttetTask(behandlingId = behandlingId,
-                                                                           oppgaveId = oppgaveId))
+            taskRepository.save(BehandlingsstatistikkTask.opprettBesluttetTask(behandlingId = behandlingId,
+                                                                               oppgaveId = oppgaveId))
 
     fun oppdaterResultatPåBehandling(behandlingId: UUID) {
         val vedtak = vedtakService.hentVedtak(behandlingId)
@@ -94,18 +94,27 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
         }
     }
 
-    private fun utledVedtaksbrev(vedtaksbrev: Vedtaksbrev): Fil {
-        feilHvis(vedtaksbrev.beslutterPdf == null) { "For å godkjenne må du som beslutter først kontrollere brevet." }
+    // TODO mattis -> hva skjer egentlig her, Validerer vi når vi skal se på den allerede genererte pdf'en?
+    private fun validerBeslutterVedtaksbrev(vedtaksbrev: Vedtaksbrev) {
+        // IKKE SATT = kun på gamle saker. Disse er heller ikke anonymisert, så her burde det være mulig å sammenlikne navn i signatur.
 
-        when (vedtaksbrev.saksbehandlersignatur) {
-            BrevsignaturService.ENHET_VIKAFOSSEN -> feilHvis(false) { "en annen saksbehandler" } // TODO - valider beslutter-ident er lik ident lagret på vedtak?
-            BrevsignaturService.ENHET_NAY -> feilHvis(vedtaksbrev.besluttersignatur != SikkerhetContext.hentSaksbehandlerNavn(
-                    strict = true)) {
-                "En annen saksbehandler har signert vedtaksbrevet"
-            }
+
+        when (vedtaksbrev.beslutterident) {
+            IKKE_SATT_IDENT_PÅ_GAMLE_VEDTAKSBREV -> validerSammebeslutterSignaturnavn(vedtaksbrev)
+            else -> validerSammeBeslutterIdent(vedtaksbrev)
         }
 
-        return vedtaksbrev.beslutterPdf
+
+    }
+
+    private fun validerSammeBeslutterIdent(vedtaksbrev: Vedtaksbrev) {
+        feilHvis(vedtaksbrev.beslutterident != SikkerhetContext.hentSaksbehandler(true)) { "En annen saksbehandler har signert vedtaksbrevet" }
+    }
+
+    private fun validerSammebeslutterSignaturnavn(vedtaksbrev: Vedtaksbrev) {
+        feilHvis(vedtaksbrev.besluttersignatur != SikkerhetContext.hentSaksbehandlerNavn(strict = true)) {
+            "En annen saksbehandler har signert vedtaksbrevet"
+        }
     }
 
     private fun ferdigstillOppgave(behandling: Behandling): Long? {

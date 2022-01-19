@@ -103,7 +103,7 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                     post(urlEqualTo(integrasjonerConfig.infotrygdVedtaksperioder.path))
                             .willReturn(okJson(objectMapper.writeValueAsString(infotrygdPerioder))),
                     post(urlEqualTo(integrasjonerConfig.adressebeskyttelse.path))
-                            .willReturn(okJson(objectMapper.writeValueAsString(Ressurs.success(ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG)))),
+                            .willReturn(okJson(objectMapper.writeValueAsString(Ressurs.success(ADRESSEBESKYTTELSEGRADERING.UGRADERT)))),
 
 
                     )
