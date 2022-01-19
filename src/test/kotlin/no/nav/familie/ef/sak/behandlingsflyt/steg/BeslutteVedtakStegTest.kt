@@ -70,12 +70,17 @@ internal class BeslutteVedtakStegTest {
                                                         vedtaksbrevRepository,
                                                         behandlingService,
                                                         vedtakService)
-    private val vedtaksbrev = Vedtaksbrev(UUID.randomUUID(),
-                                          "123",
-                                          "mal",
-                                          "sign1",
-                                          "sign2",
-                                          Fil("123".toByteArray()), "enhet", "saksbIdent", "")
+
+    private val innloggetBeslutter = "sign2"
+    private val vedtaksbrev = Vedtaksbrev(behandlingId = UUID.randomUUID(),
+                                          saksbehandlerBrevrequest = "123",
+                                          brevmal = "mal",
+                                          saksbehandlersignatur = "sign1",
+                                          besluttersignatur = innloggetBeslutter,
+                                          beslutterPdf = Fil("123".toByteArray()),
+                                          enhet = "enhet",
+                                          saksbehandlerident = "saksbIdent",
+                                          beslutterident = innloggetBeslutter)
 
     private val fagsak = Fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD,
                                 søkerIdenter = setOf(FagsakPerson(ident = "12345678901")))
@@ -91,7 +96,7 @@ internal class BeslutteVedtakStegTest {
 
     @BeforeEach
     internal fun setUp() {
-        mockBrukerContext("sign2")
+        mockBrukerContext(innloggetBeslutter)
         taskSlot = mutableListOf()
         every {
             fagsakService.hentAktivIdent(any())

@@ -108,12 +108,12 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
     }
 
     private fun validerSammeBeslutterIdent(vedtaksbrev: Vedtaksbrev) {
-        feilHvis(vedtaksbrev.beslutterident != SikkerhetContext.hentSaksbehandler(true)) { "En annen saksbehandler har signert vedtaksbrevet" }
+        feilHvis(vedtaksbrev.beslutterident != SikkerhetContext.hentSaksbehandler(true)) { "En annen beslutter har signert vedtaksbrevet" }
     }
 
     private fun validerSammebeslutterSignaturnavn(vedtaksbrev: Vedtaksbrev) {
         feilHvis(vedtaksbrev.besluttersignatur != SikkerhetContext.hentSaksbehandlerNavn(strict = true)) {
-            "En annen saksbehandler har signert vedtaksbrevet"
+            "En annen beslutter har signert vedtaksbrevet"
         }
     }
 

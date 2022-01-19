@@ -58,22 +58,23 @@ internal class VedtaksbrevServiceTest {
         every { behandlingService.hentBehandling(any()) } returns lagBehandlingForBeslutter()
         val vedtaksbrevSlot = slot<Vedtaksbrev>()
 
-        val saksbehandlerNavn = "123"
-        mockBrukerContext(saksbehandlerNavn)
+        val beslutterNavn = "456"
         every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev
         every { brevClient.genererBrev(any()) } returns "enPdf".toByteArray()
         every { vedtaksbrevRepository.update(capture(vedtaksbrevSlot)) } returns vedtaksbrev
         every { fagsakService.hentFagsak(any()) } returns fagsak
-        val signaturDto = SignaturDto(saksbehandlerNavn, "enhet", false)
+        val signaturDto = SignaturDto(beslutterNavn, "enhet", false)
         every { brevsignaturService.lagSignaturMedEnhet(any()) } returns signaturDto
 
+        mockBrukerContext(beslutterNavn)
         vedtaksbrevService.lagBeslutterBrev(behandling.id)
-        assertThat(vedtaksbrevSlot.captured.besluttersignatur).isEqualTo(saksbehandlerNavn)
+        clearBrukerContext()
+
+        assertThat(vedtaksbrevSlot.captured.besluttersignatur).isEqualTo(beslutterNavn)
         assertThat(vedtaksbrevSlot.captured).usingRecursiveComparison()
                 .ignoringFields("besluttersignatur", "beslutterPdf", "beslutterident", "enhet")
                 .isEqualTo(vedtaksbrev)
 
-        clearBrukerContext()
     }
 
     @Test
@@ -92,6 +93,9 @@ internal class VedtaksbrevServiceTest {
         every { vedtaksbrevRepository.existsById(any()) } returns true
         every { vedtaksbrevRepository.update(capture(vedtaksbrevSlot)) } returns vedtaksbrev
         every { brevClient.genererBrev(any()) } returns "123".toByteArray()
+        every { fagsakService.hentFagsak(any()) } returns fagsak
+        val signaturDto = SignaturDto(saksbehandlerNavn, "enhet", false)
+        every { brevsignaturService.lagSignaturMedEnhet(any()) } returns signaturDto
 
         vedtaksbrevService.lagSaksbehandlerFritekstbrev(fritekstBrevDto)
         assertThat(vedtaksbrevSlot.captured.saksbehandlersignatur).isEqualTo(saksbehandlerNavn)
@@ -105,15 +109,6 @@ internal class VedtaksbrevServiceTest {
 
         val feil = assertThrows<Feil> { vedtaksbrevService.lagSaksbehandlerFritekstbrev(fritekstBrevDto) }
         assertThat(feil.message).contains("Behandling er i feil steg")
-    }
-
-    @Test
-    internal fun `skal feile når signatur ikke finnes`() {
-        every { behandlingService.hentBehandling(any()) } returns lagBehandlingForBeslutter()
-        every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev
-        every { vedtaksbrevRepository.update(any()) } returns vedtaksbrev
-
-        assertThrows<IllegalStateException> { vedtaksbrevService.lagBeslutterBrev(behandling.id) }
     }
 
     @Test

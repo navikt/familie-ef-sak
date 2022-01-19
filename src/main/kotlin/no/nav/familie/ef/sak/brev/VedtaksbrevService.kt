@@ -14,6 +14,7 @@ import no.nav.familie.ef.sak.brev.dto.VedtaksbrevFritekstDto
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
@@ -94,7 +95,7 @@ class VedtaksbrevService(private val brevClient: BrevClient,
                 beslutterident = SikkerhetContext.hentSaksbehandler(true)
         )
 
-        validerBeslutterIkkeErLikSaksbehandler(vedtaksbrev)
+        validerBeslutterIkkeErLikSaksbehandler(besluttervedtaksbrev)
 
         val beslutterPdf = Fil(brevClient.genererBrev(besluttervedtaksbrev.tilDto(signaturMedEnhet.skjulBeslutter)))
         val besluttervedtaksbrevMedPdf = besluttervedtaksbrev.copy(beslutterPdf = beslutterPdf)
@@ -130,6 +131,9 @@ class VedtaksbrevService(private val brevClient: BrevClient,
     }
 
     private fun validerBeslutterIkkeErLikSaksbehandler(vedtaksbrev: Vedtaksbrev) {
+        feilHvis(vedtaksbrev.beslutterident.isNullOrBlank()){
+            "Vedtaksbrevet er ikke signert av beslutter"
+        }
         when (vedtaksbrev.saksbehandlerident) {
             IKKE_SATT_IDENT_PÅ_GAMLE_VEDTAKSBREV -> validerUlikeSignaturnavn(vedtaksbrev)
             else -> validerUlikeIdenter(vedtaksbrev)
