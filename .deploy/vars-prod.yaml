@@ -12,7 +12,7 @@ inboundApplicationsExternal:
     cluster: prod-fss
   - application: familie-ba-sak
     namespace: teamfamilie
-    cluster: prod-fss
+    cluster: prod-gcp
 externalHosts:
   - api-gw.oera.no
   - unleash.nais.io
