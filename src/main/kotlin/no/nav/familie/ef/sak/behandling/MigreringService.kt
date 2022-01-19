@@ -69,7 +69,7 @@ class MigreringService(
         iverksettService.startBehandling(behandling, fagsak)
 
         grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
-        vurderingService.opprettMaskielltOpprettedeVurderinger(behandling)
+        vurderingService.opprettVilkårForMigrering(behandling)
 
         val vedtaksperiode = VedtaksperiodeDto(årMånedFra = fra,
                                                årMånedTil = til,
