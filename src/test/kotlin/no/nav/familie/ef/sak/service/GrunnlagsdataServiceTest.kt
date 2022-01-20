@@ -119,7 +119,7 @@ internal class GrunnlagsdataServiceTest {
     internal fun `skal sjekke om personen har historikk i infotrygd`() {
         val grunnlagsdata = service.hentGrunnlagsdataFraRegister("1", emptyList())
 
-        assertThat(grunnlagsdata.tidligereVedtaksperioder!!.infotrygd.harTidligereOvergangsstønad).isFalse
+        assertThat(grunnlagsdata.tidligereVedtaksperioder!!.infotrygd.harTidligereOvergangsstønad).isTrue
         assertThat(grunnlagsdata.tidligereVedtaksperioder!!.infotrygd.harTidligereBarnetilsyn).isTrue
         assertThat(grunnlagsdata.tidligereVedtaksperioder!!.infotrygd.harTidligereSkolepenger).isFalse
 
