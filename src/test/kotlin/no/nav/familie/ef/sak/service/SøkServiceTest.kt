@@ -3,11 +3,13 @@ package no.nav.familie.ef.sak.service
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.infrastruktur.config.KodeverkServiceMock
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
+import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.SøkService
 import no.nav.familie.ef.sak.fagsak.dto.PersonFraSøk
 import no.nav.familie.ef.sak.fagsak.dto.SøkeresultatPerson
+import no.nav.familie.ef.sak.infotrygd.InfotrygdService
+import no.nav.familie.ef.sak.infrastruktur.config.KodeverkServiceMock
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlSaksbehandlerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseMapper
@@ -21,7 +23,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PersonSøkTreff
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.UkjentBosted
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Vegadresse
 import no.nav.familie.ef.sak.testutil.pdlSøker
-import no.nav.familie.ef.sak.fagsak.FagsakService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -30,13 +31,20 @@ import java.util.UUID
 
 internal class SøkServiceTest {
 
-    private val pdlSaksbehandlerClient: PdlSaksbehandlerClient = mockk()
-    private val personService: PersonService = mockk()
-    private val fagsakService: FagsakService = mockk()
-    private val fagsakRepository: FagsakRepository = mockk()
+    private val pdlSaksbehandlerClient = mockk<PdlSaksbehandlerClient>()
+    private val personService = mockk<PersonService>()
+    private val fagsakService = mockk<FagsakService>()
+    private val fagsakRepository = mockk<FagsakRepository>()
     private val adresseMapper: AdresseMapper = AdresseMapper(KodeverkServiceMock().kodeverkService())
-    private val behandlingService: BehandlingService = mockk()
-    private val søkService = SøkService(fagsakRepository, behandlingService, personService, pdlSaksbehandlerClient, adresseMapper, fagsakService)
+    private val behandlingService = mockk<BehandlingService>()
+    private val infotrygdService = mockk<InfotrygdService>()
+    private val søkService = SøkService(fagsakRepository,
+                                        behandlingService,
+                                        personService,
+                                        pdlSaksbehandlerClient,
+                                        adresseMapper,
+                                        fagsakService,
+                                        infotrygdService)
 
     @Test
     fun `skal finne personIdent, navn og adresse gitt bostedsadresse`() {
