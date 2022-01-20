@@ -40,15 +40,19 @@ class VurderingService(private val behandlingService: BehandlingService,
     }
 
     @Transactional
-    fun opprettMaskielltOpprettedeVurderinger(behandling: Behandling) {
+    fun opprettVilkårForMigrering(behandling: Behandling) {
         feilHvisIkke(behandling.erMigrering()) { "Kan kun opprette maskinellt opprettede vurderinger på migreringer" }
         feilHvis(behandling.status.behandlingErLåstForVidereRedigering()) { "Behandling er låst for videre redigering" }
         feilHvis(vilkårsvurderingRepository.findByBehandlingId(behandling.id).isNotEmpty()) { "Vilkår finnes allerede" }
         val (_, metadata) = hentGrunnlagOgMetadata(behandling.id)
 
-        val nyeVilkårsvurderinger: List<Vilkårsvurdering> = opprettNyeVilkårsvurderinger(behandling.id, metadata)
-                .map { it.copy(resultat = Vilkårsresultat.OPPFYLT) } // TODO oppfylt maskinellt
+        val nyeVilkårsvurderinger = opprettNyeVilkårsvurderinger(behandling.id,
+                                                                 metadata.copy(erMigrering = true))
+                .map { it.copy(resultat = Vilkårsresultat.OPPFYLT) }
         vilkårsvurderingRepository.insertAll(nyeVilkårsvurderinger)
+        nyeVilkårsvurderinger.forEach {
+            vilkårsvurderingRepository.settMaskinelltOpprettet(it.id)
+        }
     }
 
     fun hentGrunnlagOgMetadata(behandlingId: UUID): Pair<VilkårGrunnlagDto, HovedregelMetadata> {
@@ -102,8 +106,9 @@ class VurderingService(private val behandlingService: BehandlingService,
             it.id to it.copy(id = UUID.randomUUID(), behandlingId = nyBehandlingsId, sporbar = Sporbar())
         }
         vilkårsvurderingRepository.insertAll(vurderingerKopi.values.toList())
-        vurderingerKopi.forEach { forrigeId, vurdering ->
-            vilkårsvurderingRepository.oppdaterEndretTid(vurdering.id, tidligereVurderinger.getValue(forrigeId).sporbar.endret.endretTid)
+        vurderingerKopi.forEach { (forrigeId, vurdering) ->
+            vilkårsvurderingRepository.oppdaterEndretTid(vurdering.id,
+                                                         tidligereVurderinger.getValue(forrigeId).sporbar.endret.endretTid)
         }
     }
 

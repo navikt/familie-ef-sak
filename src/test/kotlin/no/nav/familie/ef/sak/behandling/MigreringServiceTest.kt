@@ -17,11 +17,12 @@ import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.testWithBrukerContext
-import no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeTestUtil.lagInfotrygdPeriode
+import no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeTestUtil
 import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
 import no.nav.familie.ef.sak.infrastruktur.config.InfotrygdReplikaMock
 import no.nav.familie.ef.sak.infrastruktur.config.IverksettClientMock
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.simulering.SimuleringsresultatRepository
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
@@ -34,6 +35,7 @@ import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
+import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
 import no.nav.familie.kontrakter.ef.iverksett.IverksettStatus
@@ -64,6 +66,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var taskWorker: TaskWorker
     @Autowired private lateinit var simuleringsresultatRepository: SimuleringsresultatRepository
     @Autowired private lateinit var vedtaksbrevService: VedtaksbrevService
+    @Autowired private lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
     @Autowired private lateinit var stegService: StegService
     @Autowired private lateinit var tilbakekrevingService: TilbakekrevingService
     @Autowired private lateinit var rolleConfig: RolleConfig
@@ -105,6 +108,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
             assertThat(this.steg).isEqualTo(StegType.BEHANDLING_FERDIGSTILT)
         }
         assertThat(simuleringsresultatRepository.findByIdOrNull(migrering.id)).isNotNull
+        verifiserVurderinger(migrering)
     }
 
     @Test
@@ -130,9 +134,13 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `hentMigreringInfo - har fler enn 1 perioder fra neste måned i infotrygd`() {
         val stønadTom = YearMonth.now().plusMonths(4).atEndOfMonth()
-        val infotrygdPeriode = lagInfotrygdPeriode(stønadTom = stønadTom, beløp = 1)
+        val infotrygdPeriode = InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(stønadTom = stønadTom, beløp = 1)
         val infotrygdPeriode2 =
-                lagInfotrygdPeriode(stønadFom = stønadTom.plusDays(1), stønadTom = LocalDate.now().plusMonths(6), beløp = 2)
+            InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(
+                stønadFom = stønadTom.plusDays(1),
+                stønadTom = LocalDate.now().plusMonths(6),
+                beløp = 2
+            )
         every { infotrygdReplikaClient.hentPerioder(any()) } returns
                 InfotrygdPeriodeResponse(listOf(infotrygdPeriode, infotrygdPeriode2), emptyList(), emptyList())
         val fagsak = fagsakService.hentEllerOpprettFagsak("1", Stønadstype.OVERGANGSSTØNAD)
@@ -146,7 +154,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `hentMigreringInfo - har kun perioder til og med denne måned i infotrygd`() {
         every { infotrygdReplikaClient.hentPerioder(any()) } returns
-                InfotrygdPeriodeResponse(listOf(lagInfotrygdPeriode()), emptyList(), emptyList())
+                InfotrygdPeriodeResponse(listOf(InfotrygdPeriodeTestUtil.lagInfotrygdPeriode()), emptyList(), emptyList())
         val fagsak = fagsakService.hentEllerOpprettFagsak("1", Stønadstype.OVERGANGSSTØNAD)
 
         val migreringInfo = migreringService.hentMigreringInfo(fagsak.id)
@@ -162,7 +170,12 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         val stønadFom = nå.minusMonths(1).atDay(1)
         val stønadTom = nesteMåned.atEndOfMonth()
         val infotrygdPeriode =
-                lagInfotrygdPeriode(stønadFom = stønadFom, stønadTom = stønadTom, inntektsgrunnlag = 10, samordningsfradrag = 5)
+            InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(
+                stønadFom = stønadFom,
+                stønadTom = stønadTom,
+                inntektsgrunnlag = 10,
+                samordningsfradrag = 5
+            )
         every { infotrygdReplikaClient.hentPerioder(any()) } returns
                 InfotrygdPeriodeResponse(listOf(infotrygdPeriode), emptyList(), emptyList())
         val fagsak = fagsakService.hentEllerOpprettFagsak("1", Stønadstype.OVERGANGSSTØNAD)
@@ -182,6 +195,17 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         assertThat(beløpsperiode.beløp.toInt()).isEqualTo(18998)
         assertThat(beløpsperiode.periode.fradato).isEqualTo(forventetStønadFom)
         assertThat(beløpsperiode.periode.tildato).isEqualTo(stønadTom)
+    }
+
+    private fun verifiserVurderinger(migrering: Behandling) {
+        val vilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(migrering.id)
+        val alleVurderingerManglerSvar = vilkårsvurderinger.flatMap { it.delvilkårsvurdering.delvilkårsvurderinger }
+                .flatMap { it.vurderinger }
+                .all { it.svar == null }
+        val erOpprettetAvSystem = vilkårsvurderinger.flatMap { listOf(it.sporbar.opprettetAv, it.sporbar.endret.endretAv) }
+                .all { it == SikkerhetContext.SYSTEM_FORKORTELSE }
+        assertThat(alleVurderingerManglerSvar).isTrue
+        assertThat(erOpprettetAvSystem).isTrue
     }
 
     private fun opprettRevurderingOgIverksett(migrering: Behandling): Behandling {
@@ -233,7 +257,9 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
 
     private fun opprettOgIverksettMigrering(): Behandling {
         val fagsak = fagsakService.hentEllerOpprettFagsak("1", Stønadstype.OVERGANGSSTØNAD)
-        val behandling = migreringService.opprettMigrering(fagsak, fra, til, forventetInntekt.toInt(), samordningsfradrag.toInt())
+        val behandling = testWithBrukerContext(groups = listOf(rolleConfig.beslutterRolle)) {
+            migreringService.opprettMigrering(fagsak, fra, til, forventetInntekt.toInt(), samordningsfradrag.toInt())
+        }
 
         kjørTasks()
         return behandling

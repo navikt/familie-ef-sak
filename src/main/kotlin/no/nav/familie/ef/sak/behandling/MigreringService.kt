@@ -104,7 +104,7 @@ class MigreringService(
         iverksettService.startBehandling(behandling, fagsak)
 
         grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
-        vurderingService.opprettMaskielltOpprettedeVurderinger(behandling)
+        vurderingService.opprettVilkårForMigrering(behandling)
 
         val vedtaksperioder = vedtaksperioder(fra, til)
         val inntekter = inntekter(fra, inntektsgrunnlag, samordningsfradrag)
