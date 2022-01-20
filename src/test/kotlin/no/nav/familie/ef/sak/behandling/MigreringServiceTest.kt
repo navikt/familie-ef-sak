@@ -37,7 +37,11 @@ import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.ef.felles.StønadType
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSak
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResponse
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResultat
 import no.nav.familie.kontrakter.ef.iverksett.IverksettStatus
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Status
@@ -136,11 +140,11 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         val stønadTom = YearMonth.now().plusMonths(4).atEndOfMonth()
         val infotrygdPeriode = InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(stønadTom = stønadTom, beløp = 1)
         val infotrygdPeriode2 =
-            InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(
-                stønadFom = stønadTom.plusDays(1),
-                stønadTom = LocalDate.now().plusMonths(6),
-                beløp = 2
-            )
+                InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(
+                        stønadFom = stønadTom.plusDays(1),
+                        stønadTom = LocalDate.now().plusMonths(6),
+                        beløp = 2
+                )
         every { infotrygdReplikaClient.hentPerioder(any()) } returns
                 InfotrygdPeriodeResponse(listOf(infotrygdPeriode, infotrygdPeriode2), emptyList(), emptyList())
         val fagsak = fagsakService.hentEllerOpprettFagsak("1", Stønadstype.OVERGANGSSTØNAD)
@@ -164,18 +168,46 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    internal fun `hentMigreringInfo - sak inneholder annen ident`() {
+        every { infotrygdReplikaClient.hentSaker(any()) } returns
+                InfotrygdSakResponse(listOf(InfotrygdSak("2",
+                                                         stønadType = StønadType.OVERGANGSSTØNAD,
+                                                         resultat = InfotrygdSakResultat.INNVILGET)))
+        val fagsak = fagsakService.hentEllerOpprettFagsak("1", Stønadstype.OVERGANGSSTØNAD)
+
+        val migreringInfo = migreringService.hentMigreringInfo(fagsak.id)
+
+        assertThat(migreringInfo.kanMigreres).isFalse
+        assertThat(migreringInfo.årsak).contains("Finnes sak med annen personIdent for personen")
+    }
+
+    @Test
+    internal fun `hentMigreringInfo - sak er åpen`() {
+        every { infotrygdReplikaClient.hentSaker(any()) } returns
+                InfotrygdSakResponse(listOf(InfotrygdSak("1",
+                                                         stønadType = StønadType.OVERGANGSSTØNAD,
+                                                         resultat = InfotrygdSakResultat.ÅPEN_SAK)))
+        val fagsak = fagsakService.hentEllerOpprettFagsak("1", Stønadstype.OVERGANGSSTØNAD)
+
+        val migreringInfo = migreringService.hentMigreringInfo(fagsak.id)
+
+        assertThat(migreringInfo.kanMigreres).isFalse
+        assertThat(migreringInfo.årsak).contains("Har åpen sak")
+    }
+
+    @Test
     internal fun `hentMigreringInfo - har perioder til og med neste måned i infotrygd`() {
         val nå = YearMonth.of(2021, 1)
         val nesteMåned = nå.plusMonths(1)
         val stønadFom = nå.minusMonths(1).atDay(1)
         val stønadTom = nesteMåned.atEndOfMonth()
         val infotrygdPeriode =
-            InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(
-                stønadFom = stønadFom,
-                stønadTom = stønadTom,
-                inntektsgrunnlag = 10,
-                samordningsfradrag = 5
-            )
+                InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(
+                        stønadFom = stønadFom,
+                        stønadTom = stønadTom,
+                        inntektsgrunnlag = 10,
+                        samordningsfradrag = 5
+                )
         every { infotrygdReplikaClient.hentPerioder(any()) } returns
                 InfotrygdPeriodeResponse(listOf(infotrygdPeriode), emptyList(), emptyList())
         val fagsak = fagsakService.hentEllerOpprettFagsak("1", Stønadstype.OVERGANGSSTØNAD)

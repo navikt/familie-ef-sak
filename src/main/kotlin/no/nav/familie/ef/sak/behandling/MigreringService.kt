@@ -29,6 +29,9 @@ import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
 import no.nav.familie.ef.sak.vilkår.VurderingService
+import no.nav.familie.kontrakter.ef.felles.StønadType
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSak
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResultat
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -56,6 +59,7 @@ class MigreringService(
 
     fun hentMigreringInfo(fagsakId: UUID, kjøremåned: YearMonth = kjøremåned()): MigreringInfo {
         val periode = try {
+            validerSakerIInfotrygd(fagsakId)
             hentGjeldendePeriodeOgValiderState(fagsakId, kjøremåned)
         } catch (e: MigreringException) {
             return MigreringInfo(kanMigreres = false, e.årsak)
@@ -82,6 +86,7 @@ class MigreringService(
         val personIdent = fagsakService.hentAktivIdent(fagsakId)
         val kjøremåned = kjøremåned()
         val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, Stønadstype.OVERGANGSSTØNAD)
+        validerSakerIInfotrygd(fagsakId)
         val periode = hentGjeldendePeriodeOgValiderState(fagsakId, kjøremåned)
         opprettMigrering(fagsak = fagsak,
                          fra = fra(kjøremåned, periode),
@@ -90,6 +95,9 @@ class MigreringService(
                          samordningsfradrag = periode.samordningsfradrag)
     }
 
+    /**
+     * Skal kun kalles direkte fra denne klassen eller [TestSaksbehandlingController]
+     */
     @Transactional
     fun opprettMigrering(fagsak: Fagsak,
                          fra: YearMonth,
@@ -123,17 +131,16 @@ class MigreringService(
         iverksettClient.iverksettMigrering(iverksettDto)
         taskRepository.save(PollStatusFraIverksettTask.opprettTask(behandling.id))
 
+        // TODO opprett task som sjekker om den har fått riktig status i Infotrygd
+
         return behandlingService.hentBehandling(behandling.id)
     }
 
-    /**
-     * TODO sjekk om personen har åpen sak i infotrygd
-     */
     private fun hentGjeldendePeriodeOgValiderState(fagsakId: UUID, kjøremåned: YearMonth): SummertInfotrygdPeriodeDto {
         val fagsak = fagsakService.hentFagsak(fagsakId)
         val personIdent = fagsak.hentAktivIdent()
         validerFagsakOgBehandling(fagsak)
-        val gjeldendePerioder = hentGjeldendePerioderFraInfotrygd(personIdent, kjøremåned)
+        val gjeldendePerioder = hentGjeldendePerioderFraInfotrygdOgValider(personIdent, kjøremåned)
         if (gjeldendePerioder.isEmpty()) {
             throw MigreringException("Har 0 aktive perioder")
         } else if (gjeldendePerioder.size > 1) {
@@ -146,6 +153,27 @@ class MigreringService(
         return periode
     }
 
+    private fun validerSakerIInfotrygd(fagsakId: UUID): List<InfotrygdSak> {
+        val fagsak = fagsakService.hentFagsak(fagsakId)
+        val personIdent = fagsak.hentAktivIdent()
+        val sakerForOvergangsstønad =
+                infotrygdService.hentSaker(personIdent).saker.filter { it.stønadType == StønadType.OVERGANGSSTØNAD }
+        sakerForOvergangsstønad.find { it.resultat == InfotrygdSakResultat.ÅPEN_SAK }?.let {
+            throw MigreringException("Har åpen sak. ${lagSakFeilinfo(it)}")
+        }
+        sakerForOvergangsstønad.find { it.personIdent != personIdent }?.let {
+            throw MigreringException("Finnes sak med annen personIdent for personen. ${lagSakFeilinfo(it)} " +
+                                     "personIdent=${it.personIdent}. " +
+                                     "Disse sakene må oppdateres med aktivt fnr i Infotrygd")
+        }
+        return sakerForOvergangsstønad
+    }
+
+    private fun lagSakFeilinfo(sak: InfotrygdSak): String {
+        return "saksblokk=${sak.saksblokk} saksnr=${sak.saksnr} " +
+               "registrertDato=${sak.registrertDato} mottattDato=${sak.mottattDato}"
+    }
+
     private fun validerFagsakOgBehandling(fagsak: Fagsak) {
         if (fagsak.stønadstype != Stønadstype.OVERGANGSSTØNAD) {
             throw MigreringException("Håndterer ikke andre stønadstyper enn overgangsstønad")
@@ -156,11 +184,16 @@ class MigreringService(
         }
     }
 
-    private fun hentGjeldendePerioderFraInfotrygd(personIdent: String,
-                                                  kjøremåned: YearMonth): List<SummertInfotrygdPeriodeDto> {
+    private fun hentGjeldendePerioderFraInfotrygdOgValider(personIdent: String,
+                                                           kjøremåned: YearMonth): List<SummertInfotrygdPeriodeDto> {
 
-        val perioder = infotrygdService.hentDtoPerioder(personIdent)
-        return perioder.overgangsstønad.summert.filter { it.stønadTom >= førsteDagenINesteMåned(kjøremåned) }
+        val allePerioder = infotrygdService.hentDtoPerioder(personIdent)
+        val perioderForOvergangsstønad = allePerioder.overgangsstønad
+        perioderForOvergangsstønad.perioder.find { it.personIdent != personIdent }?.let {
+            throw MigreringException("Det finnes perioder som inneholder annet fnr=${it.personIdent}. " +
+                                     "Disse vedtaken må endres til aktivt fnr i Infotrygd")
+        }
+        return perioderForOvergangsstønad.summert.filter { it.stønadTom >= førsteDagenINesteMåned(kjøremåned) }
     }
 
     private fun kjøremåned() = YearMonth.now()
