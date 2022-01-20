@@ -1,14 +1,21 @@
 package no.nav.familie.ef.sak.api.gui
 
+import io.mockk.every
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.fagsak.dto.Søkeresultat
 import no.nav.familie.ef.sak.felles.dto.PersonIdentDto
+import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
+import no.nav.familie.ef.sak.infrastruktur.config.InfotrygdReplikaMock
 import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.kontrakter.ef.felles.StønadType
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdFinnesResponse
+import no.nav.familie.kontrakter.ef.infotrygd.Saktreff
 import no.nav.familie.kontrakter.felles.Ressurs
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -21,10 +28,16 @@ import org.springframework.http.ResponseEntity
 internal class SøkControllerTest : OppslagSpringRunnerTest() {
 
     @Autowired private lateinit var fagsakRepository: FagsakRepository
+    @Autowired private lateinit var infotrygdReplikaClient: InfotrygdReplikaClient
 
     @BeforeEach
     fun setUp() {
         headers.setBearerAuth(lokalTestToken)
+    }
+
+    @AfterEach
+    internal fun tearDown() {
+        InfotrygdReplikaMock.resetMock(infotrygdReplikaClient)
     }
 
     @Test
@@ -32,17 +45,30 @@ internal class SøkControllerTest : OppslagSpringRunnerTest() {
         fagsakRepository.insert(fagsak(identer = setOf(FagsakPerson("01010199999"))))
 
         val response = søkPerson("01010199999")
-        Assertions.assertThat(response.statusCode).isEqualTo(
+        assertThat(response.statusCode).isEqualTo(
                 HttpStatus.OK)
-        Assertions.assertThat(response.body?.data?.personIdent).isEqualTo("01010199999")
-        Assertions.assertThat(response.body?.data?.fagsaker?.first()?.stønadstype).isEqualTo(Stønadstype.OVERGANGSSTØNAD)
+        assertThat(response.body?.data?.personIdent).isEqualTo("01010199999")
+        assertThat(response.body?.data?.fagsaker?.first()?.stønadstype).isEqualTo(Stønadstype.OVERGANGSSTØNAD)
     }
 
     @Test
     internal fun `Gitt person uten fagsak når søk på personensident kallas skal det returneres RessursFeilet`() {
         val response = søkPerson("01010166666")
-        Assertions.assertThat(response.body.status).isEqualTo(Ressurs.Status.FUNKSJONELL_FEIL)
-        Assertions.assertThat(response.body.frontendFeilmelding).isEqualTo("Finner ikke fagsak for søkte personen")
+        assertThat(response.body.status).isEqualTo(Ressurs.Status.FUNKSJONELL_FEIL)
+        assertThat(response.body.frontendFeilmelding).isEqualTo("Finner ikke fagsak for søkte personen")
+    }
+
+    @Test
+    internal fun `Skal opprette fagsak når personen finne i infotrygd`() {
+        val personIdent = "01010199999"
+        every { infotrygdReplikaClient.hentInslagHosInfotrygd(any()) } returns
+                InfotrygdFinnesResponse(emptyList(), listOf(Saktreff(personIdent, StønadType.OVERGANGSSTØNAD)))
+        val response = søkPerson(personIdent)
+        assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+        val data = response.body!!.data!!
+        assertThat(data.personIdent).isEqualTo(personIdent)
+        assertThat(data.fagsaker.first().stønadstype).isEqualTo(Stønadstype.OVERGANGSSTØNAD)
+        assertThat(fagsakRepository.findBySøkerIdent(setOf(personIdent))).hasSize(1)
     }
 
     private fun søkPerson(personIdent: String): ResponseEntity<Ressurs<Søkeresultat>> {

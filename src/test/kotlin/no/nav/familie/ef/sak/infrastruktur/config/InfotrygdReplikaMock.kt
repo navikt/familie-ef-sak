@@ -13,7 +13,6 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
-import java.time.YearMonth
 
 @Configuration
 @Profile("mock-infotrygd-replika")
@@ -34,9 +33,11 @@ class InfotrygdReplikaMock {
             every { client.hentPerioder(any()) } answers {
                 val firstArg = firstArg<InfotrygdPeriodeRequest>()
                 val personIdent = firstArg.personIdenter.first()
-                InfotrygdPeriodeResponse(listOf(lagInfotrygdPeriode()),
-                                         listOf(lagInfotrygdPeriode(personIdent)),
-                                         emptyList())
+                InfotrygdPeriodeResponse(
+                    listOf(lagInfotrygdPeriode()),
+                    listOf(lagInfotrygdPeriode(personIdent)),
+                    emptyList()
+                )
             }
             every { client.hentPerioderArena(any()) } returns InfotrygdPerioderArenaResponse(emptyList())
             every { client.hentInslagHosInfotrygd(any()) } answers { InfotrygdFinnesResponse(emptyList(), emptyList()) }
