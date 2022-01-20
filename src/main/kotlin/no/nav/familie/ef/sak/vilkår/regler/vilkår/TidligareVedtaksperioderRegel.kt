@@ -21,9 +21,10 @@ class TidligareVedtaksperioderRegel : Vilkårsregel(vilkårType = VilkårType.TI
 
     override fun initereDelvilkårsvurdering(metadata: HovedregelMetadata,
                                             resultat: Vilkårsresultat): List<Delvilkårsvurdering> {
+        val harTidligereMotattOvergangsstønad = if (metadata.erMigrering) null else SvarId.NEI
         return listOf(Delvilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT,
                                           listOf(Vurdering(regelId = RegelId.HAR_TIDLIGERE_MOTTATT_OVERGANSSTØNAD,
-                                                           svar = SvarId.NEI))),
+                                                           svar = harTidligereMotattOvergangsstønad))),
                       Delvilkårsvurdering(resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
                                           listOf(Vurdering(regelId = RegelId.HAR_TIDLIGERE_ANDRE_STØNADER_SOM_HAR_BETYDNING))))
     }

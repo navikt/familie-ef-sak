@@ -19,6 +19,7 @@ import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.testWithBrukerContext
 import no.nav.familie.ef.sak.infrastruktur.config.IverksettClientMock
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.simulering.SimuleringsresultatRepository
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
@@ -31,6 +32,7 @@ import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
+import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.iverksett.IverksettStatus
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -60,6 +62,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var taskWorker: TaskWorker
     @Autowired private lateinit var simuleringsresultatRepository: SimuleringsresultatRepository
     @Autowired private lateinit var vedtaksbrevService: VedtaksbrevService
+    @Autowired private lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
     @Autowired private lateinit var stegService: StegService
     @Autowired private lateinit var tilbakekrevingService: TilbakekrevingService
     @Autowired private lateinit var rolleConfig: RolleConfig
@@ -99,6 +102,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
             assertThat(this.steg).isEqualTo(StegType.BEHANDLING_FERDIGSTILT)
         }
         assertThat(simuleringsresultatRepository.findByIdOrNull(migrering.id)).isNotNull
+        verifiserVurderinger(migrering)
     }
 
     @Test
@@ -107,6 +111,17 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         val revurdering = opprettRevurderingOgIverksett(migrering)
 
         verifiserBehandlingErFerdigstilt(revurdering)
+    }
+
+    private fun verifiserVurderinger(migrering: Behandling) {
+        val vilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(migrering.id)
+        val alleVurderingerManglerSvar = vilkårsvurderinger.flatMap { it.delvilkårsvurdering.delvilkårsvurderinger }
+                .flatMap { it.vurderinger }
+                .all { it.svar == null }
+        val erOpprettetAvSystem = vilkårsvurderinger.flatMap { listOf(it.sporbar.opprettetAv, it.sporbar.endret.endretAv) }
+                .all { it == SikkerhetContext.SYSTEM_FORKORTELSE }
+        assertThat(alleVurderingerManglerSvar).isTrue
+        assertThat(erOpprettetAvSystem).isTrue
     }
 
     private fun opprettRevurderingOgIverksett(migrering: Behandling): Behandling {
@@ -158,7 +173,9 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
 
     private fun opprettOgIverksettMigrering(): Behandling {
         val fagsak = fagsakService.hentEllerOpprettFagsak("1", Stønadstype.OVERGANGSSTØNAD)
-        val behandling = migreringService.opprettMigrering(fagsak, fra, til, forventetInntekt, samordningsfradrag)
+        val behandling = testWithBrukerContext(groups = listOf(rolleConfig.beslutterRolle)) {
+            migreringService.opprettMigrering(fagsak, fra, til, forventetInntekt, samordningsfradrag)
+        }
 
         kjørTasks()
         return behandling
