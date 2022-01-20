@@ -96,10 +96,8 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
     // TODO mattis -> hva skjer egentlig her, Validerer vi når vi skal se på den allerede genererte pdf'en?
     private fun validerBeslutterVedtaksbrev(vedtaksbrev: Vedtaksbrev) {
 
-        feilHvis(vedtaksbrev.beslutterident == null || vedtaksbrev.beslutterident.isBlank())
-        {
-            "Beklager. Pga oppdatering av saksbehandlingsapplikasjon må vi lage signatur på brevet på nytt. " +
-            "Gå til brevfanen og sjekk at besluttersignatur er ok før du godkjenner på nytt."
+        feilHvis(vedtaksbrev.beslutterident == null || vedtaksbrev.beslutterident.isBlank()) {
+            "Beklager. Det har skjedd en feil. Last brevsiden på nytt, kontroller brevet og prøv igjen."
         }
 
         validerSammeBeslutterIdent(vedtaksbrev)
