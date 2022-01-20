@@ -16,4 +16,8 @@ interface VilkårsvurderingRepository : RepositoryInterface<Vilkårsvurdering, U
     @Modifying
     @Query("UPDATE vilkarsvurdering SET endret_tid = :nyttTidspunkt WHERE id = :id")
     fun oppdaterEndretTid(id: UUID, nyttTidspunkt: LocalDateTime)
+
+    @Modifying
+    @Query("UPDATE vilkarsvurdering SET opprettet_av = 'VL', endret_av = 'VL' WHERE id = :id")
+    fun settMaskinelltOpprettet(id: UUID)
 }

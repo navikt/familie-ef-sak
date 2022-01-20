@@ -2,6 +2,7 @@ springProfile: dev
 ingress: https://familie-ef-sak.dev.intern.nav.no
 db_highAvailability: false
 inboundApplications:
+  - familie-prosessering-lokal
   - familie-ef-sak-frontend-lokal
   - familie-ef-mottak
 inboundApplicationsExternal:
@@ -16,7 +17,7 @@ inboundApplicationsExternal:
     cluster: dev-fss
   - application: familie-ba-sak
     namespace: teamfamilie
-    cluster: dev-fss
+    cluster: dev-gcp
 externalHosts:
   - api-gw-q1.oera.no
   - unleash.nais.io

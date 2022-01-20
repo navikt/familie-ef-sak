@@ -14,8 +14,10 @@ interface BehandlingSteg<T> {
      */
     fun utførOgReturnerNesteSteg(behandling: Behandling, data: T): StegType {
         utførSteg(behandling, data)
-        return stegType().hentNesteSteg(behandling.type)
+        return nesteSteg(behandling)
     }
+
+    fun nesteSteg(behandling: Behandling) = stegType().hentNesteSteg(behandling.type)
 
     fun utførSteg(behandling: Behandling, data: T)
 

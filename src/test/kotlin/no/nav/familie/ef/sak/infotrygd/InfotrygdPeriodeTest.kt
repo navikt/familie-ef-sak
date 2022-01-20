@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.infotrygd
 
+import no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeUtil.erPeriodeOverlappende
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -20,58 +21,58 @@ internal class InfotrygdPeriodeTest {
 
     }
 
-    private val startperiode = lagInternPeriode(FOM, TOM)
+    private val startperiode = lagPeriode(FOM, TOM)
 
     @Test
     internal fun `erInfotrygdPeriodeOverlappende - ikke overlappende`() {
-        assertThat(startperiode.erPeriodeOverlappende(lagInternPeriode(FØR_STARTDATO_FOM, FØR_STARTDATO_TOM)))
+        assertThat(startperiode.erPeriodeOverlappende(lagPeriode(FØR_STARTDATO_FOM, FØR_STARTDATO_TOM)))
                 .withFailMessage("Perioden starter og slutter før startperioden")
                 .isFalse
 
-        assertThat(startperiode.erPeriodeOverlappende(lagInternPeriode(ETTER_SLUTDATO_FOM, ETTER_SLUTTDATO_TOM)))
+        assertThat(startperiode.erPeriodeOverlappende(lagPeriode(ETTER_SLUTDATO_FOM, ETTER_SLUTTDATO_TOM)))
                 .withFailMessage("Perioden starter og slutter etter startperioden")
                 .isFalse
     }
 
     @Test
     internal fun `erInfotrygdPeriodeOverlappende - overlappende startdato starter før`() {
-        assertThat(startperiode.erPeriodeOverlappende(lagInternPeriode(FØR_STARTDATO_FOM, MIDT_I_TOM)))
+        assertThat(startperiode.erPeriodeOverlappende(lagPeriode(FØR_STARTDATO_FOM, MIDT_I_TOM)))
                 .withFailMessage("Perioden starter før og slutter midt i")
                 .isTrue
-        assertThat(startperiode.erPeriodeOverlappende(lagInternPeriode(FØR_STARTDATO_FOM, TOM)))
+        assertThat(startperiode.erPeriodeOverlappende(lagPeriode(FØR_STARTDATO_FOM, TOM)))
                 .withFailMessage("Perioden starter før og slutter samtidig")
                 .isTrue
-        assertThat(startperiode.erPeriodeOverlappende(lagInternPeriode(FØR_STARTDATO_FOM, ETTER_SLUTTDATO_TOM)))
+        assertThat(startperiode.erPeriodeOverlappende(lagPeriode(FØR_STARTDATO_FOM, ETTER_SLUTTDATO_TOM)))
                 .withFailMessage("Perioden starter før og slutter etter")
                 .isTrue
     }
 
     @Test
     internal fun `erInfotrygdPeriodeOverlappende - overlappende startdato starter samtidig`() {
-        assertThat(startperiode.erPeriodeOverlappende(lagInternPeriode(FOM, MIDT_I_TOM)))
+        assertThat(startperiode.erPeriodeOverlappende(lagPeriode(FOM, MIDT_I_TOM)))
                 .withFailMessage("Perioden starter samtidig og slutter midt i")
                 .isTrue
-        assertThat(startperiode.erPeriodeOverlappende(lagInternPeriode(FOM, TOM)))
+        assertThat(startperiode.erPeriodeOverlappende(lagPeriode(FOM, TOM)))
                 .withFailMessage("Perioden starter og slutter samtidig")
                 .isTrue
-        assertThat(startperiode.erPeriodeOverlappende(lagInternPeriode(FOM, ETTER_SLUTTDATO_TOM)))
+        assertThat(startperiode.erPeriodeOverlappende(lagPeriode(FOM, ETTER_SLUTTDATO_TOM)))
                 .withFailMessage("Perioden starter og slutter etter")
                 .isTrue
     }
 
     @Test
     internal fun `erInfotrygdPeriodeOverlappende - overlappende startdato starter midt i`() {
-        assertThat(startperiode.erPeriodeOverlappende(lagInternPeriode(MIDT_I_FOM, MIDT_I_TOM)))
+        assertThat(startperiode.erPeriodeOverlappende(lagPeriode(MIDT_I_FOM, MIDT_I_TOM)))
                 .withFailMessage("Perioden starter midt i og slutter midt i")
                 .isTrue
-        assertThat(startperiode.erPeriodeOverlappende(lagInternPeriode(MIDT_I_FOM, TOM)))
+        assertThat(startperiode.erPeriodeOverlappende(lagPeriode(MIDT_I_FOM, TOM)))
                 .withFailMessage("Perioden starter midt i og slutter samtidig")
                 .isTrue
-        assertThat(startperiode.erPeriodeOverlappende(lagInternPeriode(MIDT_I_FOM, ETTER_SLUTTDATO_TOM)))
+        assertThat(startperiode.erPeriodeOverlappende(lagPeriode(MIDT_I_FOM, ETTER_SLUTTDATO_TOM)))
                 .withFailMessage("Perioden starter midt i og slutter etter")
                 .isTrue
     }
 
-    private fun lagInternPeriode(fom: LocalDate, tom: LocalDate) =
-            InternPeriodeTestUtil.lagInternPeriode(stønadFom = fom, stønadTom = tom)
+    private fun lagPeriode(fom: LocalDate, tom: LocalDate) =
+            InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(stønadFom = fom, stønadTom = tom)
 }

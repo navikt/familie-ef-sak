@@ -53,7 +53,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.data.repository.findByIdOrNull
 import java.util.UUID
 
-
 internal class VurderingStegServiceTest {
 
     private val behandlingService = mockk<BehandlingService>()

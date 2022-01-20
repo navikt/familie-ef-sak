@@ -47,15 +47,15 @@ class InfotrygdService(private val infotrygdReplikaClient: InfotrygdReplikaClien
     /**
      * Filtrerer og slår sammen perioder fra infotrygd for å få en bedre totalbilde om hva som er gjeldende
      */
-    fun hentSummertePerioder(personIdenter: Set<String>): InternePerioder {
+    fun hentSammenslåttePerioderSomInternPerioder(personIdenter: Set<String>): InternePerioder {
         val perioder = hentPerioderFraReplika(personIdenter)
-        return InternePerioder(overgangsstønad = filtrerOgSlåSammenPerioder(perioder.overgangsstønad),
-                               barnetilsyn = filtrerOgSlåSammenPerioder(perioder.barnetilsyn),
-                               skolepenger = filtrerOgSlåSammenPerioder(perioder.skolepenger))
+        return InternePerioder(overgangsstønad = filtrerOgSlåSammenPerioder(perioder.overgangsstønad).map { it.tilInternPeriode() },
+                               barnetilsyn = filtrerOgSlåSammenPerioder(perioder.barnetilsyn).map { it.tilInternPeriode() },
+                               skolepenger = filtrerOgSlåSammenPerioder(perioder.skolepenger).map { it.tilInternPeriode() })
     }
 
     private fun mapPerioder(perioder: List<InfotrygdPeriode>) =
-            InfotrygdPerioder(perioder, filtrerOgSlåSammenPerioder(perioder).map { it.tilSummertInfotrygdperiodeDto() })
+            InfotrygdStønadPerioderDto(perioder, filtrerOgSlåSammenPerioder(perioder).map { it.tilSummertInfotrygdperiodeDto() })
 
     private fun hentPerioderFraReplika(identer: Set<String>,
                                        stønadstyper: Set<StønadType> = StønadType.values().toSet()): InfotrygdPeriodeResponse {
@@ -64,7 +64,7 @@ class InfotrygdService(private val infotrygdReplikaClient: InfotrygdReplikaClien
         return infotrygdReplikaClient.hentPerioder(request)
     }
 
-    private fun filtrerOgSlåSammenPerioder(perioder: List<InfotrygdPeriode>): List<InternPeriode> {
+    private fun filtrerOgSlåSammenPerioder(perioder: List<InfotrygdPeriode>): List<InfotrygdPeriode> {
         val filtrertPerioder = InfotrygdPeriodeUtil.filtrerOgSorterPerioderFraInfotrygd(perioder)
                 .filter { it.kode != InfotrygdEndringKode.ANNULERT && it.kode != InfotrygdEndringKode.UAKTUELL }
         return InfotrygdPeriodeUtil.slåSammenInfotrygdperioder(filtrertPerioder)
