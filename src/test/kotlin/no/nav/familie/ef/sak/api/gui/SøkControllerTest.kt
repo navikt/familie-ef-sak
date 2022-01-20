@@ -37,7 +37,7 @@ internal class SøkControllerTest : OppslagSpringRunnerTest() {
 
     @AfterEach
     internal fun tearDown() {
-        InfotrygdReplikaMock.clearMock(infotrygdReplikaClient)
+        InfotrygdReplikaMock.resetMock(infotrygdReplikaClient)
     }
 
     @Test

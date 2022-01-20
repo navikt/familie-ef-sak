@@ -5,18 +5,14 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeTestUtil.lagInfotrygdPeriode
 import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
-import no.nav.familie.kontrakter.ef.felles.StønadType
-import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdEndringKode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdFinnesResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeRequest
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPerioderArenaResponse
-import no.nav.familie.kontrakter.ef.infotrygd.Saktreff
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
-import java.time.LocalDate
 
 @Configuration
 @Profile("mock-infotrygd-replika")
@@ -26,18 +22,22 @@ class InfotrygdReplikaMock {
     @Primary
     fun infotrygdReplikaClient(): InfotrygdReplikaClient {
         val client = mockk<InfotrygdReplikaClient>()
-        clearMock(client)
+        resetMock(client)
         return client
     }
 
     companion object {
 
-        fun clearMock(client: InfotrygdReplikaClient) {
+        fun resetMock(client: InfotrygdReplikaClient) {
             clearMocks(client)
             every { client.hentPerioder(any()) } answers {
                 val firstArg = firstArg<InfotrygdPeriodeRequest>()
                 val personIdent = firstArg.personIdenter.first()
-                InfotrygdPeriodeResponse(emptyList(), listOf(lagInfotrygdPeriode(personIdent)), emptyList())
+                InfotrygdPeriodeResponse(
+                    listOf(lagInfotrygdPeriode()),
+                    listOf(lagInfotrygdPeriode(personIdent)),
+                    emptyList()
+                )
             }
             every { client.hentPerioderArena(any()) } returns InfotrygdPerioderArenaResponse(emptyList())
             every { client.hentInslagHosInfotrygd(any()) } answers { InfotrygdFinnesResponse(emptyList(), emptyList()) }
