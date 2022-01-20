@@ -12,7 +12,6 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.PollStatusFraIverksettTask
 import no.nav.familie.ef.sak.blankett.JournalførBlankettTask
 import no.nav.familie.ef.sak.brev.VedtaksbrevRepository
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
-import no.nav.familie.ef.sak.brev.domain.VedtaksbrevKonstanter.IKKE_SATT_IDENT_PÅ_GAMLE_VEDTAKSBREV
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
@@ -96,14 +95,14 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
 
     // TODO mattis -> hva skjer egentlig her, Validerer vi når vi skal se på den allerede genererte pdf'en?
     private fun validerBeslutterVedtaksbrev(vedtaksbrev: Vedtaksbrev) {
-        // IKKE SATT = kun på gamle saker. Disse er heller ikke anonymisert, så her burde det være mulig å sammenlikne navn i signatur.
 
-
-        when (vedtaksbrev.beslutterident) {
-            IKKE_SATT_IDENT_PÅ_GAMLE_VEDTAKSBREV -> validerSammebeslutterSignaturnavn(vedtaksbrev)
-            else -> validerSammeBeslutterIdent(vedtaksbrev)
+        feilHvis(vedtaksbrev.beslutterident == null || vedtaksbrev.beslutterident.isBlank())
+        {
+            "Beklager. Pga oppdatering av saksbehandlingsapplikasjon må vi lage signatur på brevet på nytt. " +
+            "Gå til brevfanen og sjekk at besluttersignatur er ok før du godkjenner på nytt."
         }
 
+        validerSammeBeslutterIdent(vedtaksbrev)
 
     }
 

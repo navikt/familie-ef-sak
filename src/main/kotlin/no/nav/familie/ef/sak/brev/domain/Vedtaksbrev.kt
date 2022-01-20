@@ -14,14 +14,13 @@ data class Vedtaksbrev(@Id
                        val besluttersignatur: String? = null,
                        val beslutterPdf: Fil? = null,
                        val enhet: String? = null,
-                       val saksbehandlerident: String? = null,
+                       val saksbehandlerident: String,
                        val beslutterident: String? = null) {
 
 
 }
 
 object VedtaksbrevKonstanter {
-
     const val IKKE_SATT_IDENT_PÅ_GAMLE_VEDTAKSBREV = "IKKE_SATT"
 }
 
