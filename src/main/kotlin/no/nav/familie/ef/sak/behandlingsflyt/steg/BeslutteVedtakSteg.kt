@@ -80,8 +80,8 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
     }
 
     private fun opprettTaskForBehandlingsstatistikk(behandlingId: UUID, oppgaveId: Long?) =
-            taskRepository.save(BehandlingsstatistikkTask.opprettBesluttetTask(behandlingId = behandlingId,
-                                                                               oppgaveId = oppgaveId))
+        taskRepository.save(BehandlingsstatistikkTask.opprettBesluttetTask(behandlingId = behandlingId,
+                                                                           oppgaveId = oppgaveId))
 
     fun oppdaterResultatPåBehandling(behandlingId: UUID) {
         val vedtak = vedtakService.hentVedtak(behandlingId)
