@@ -38,7 +38,8 @@ class InfotrygdService(private val infotrygdReplikaClient: InfotrygdReplikaClien
     }
 
     fun hentSaker(personIdent: String): InfotrygdSakResponse {
-        return infotrygdReplikaClient.hentSaker(InfotrygdSøkRequest(hentPersonIdenter(personIdent)))
+        val response = infotrygdReplikaClient.hentSaker(InfotrygdSøkRequest(hentPersonIdenter(personIdent)))
+        return response.copy(saker = response.saker.sortedByDescending { it.mottattDato })
     }
 
     /**
