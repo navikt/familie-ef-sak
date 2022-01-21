@@ -64,15 +64,13 @@ class VedtaksbrevService(private val brevClient: BrevClient,
                                                            brevmal: String,
                                                            saksbehandlersignatur: String,
                                                            enhet: String): Vedtaksbrev {
-        val vedtaksbrev = Vedtaksbrev(behandlingId,
-                                      brevrequest,
-                                      brevmal,
-                                      saksbehandlersignatur,
-                                      beslutterPdf = null,
+        val vedtaksbrev = Vedtaksbrev(behandlingId = behandlingId,
+                                      saksbehandlerBrevrequest = brevrequest,
+                                      brevmal = brevmal,
+                                      saksbehandlersignatur = saksbehandlersignatur,
                                       enhet = enhet,
-                                      saksbehandlerident = SikkerhetContext.hentSaksbehandler(true),
-                                      beslutterident = ""
-        )
+                                      saksbehandlerident = SikkerhetContext.hentSaksbehandler(true))
+
         return when (brevRepository.existsById(behandlingId)) {
             true -> brevRepository.update(vedtaksbrev)
             false -> brevRepository.insert(vedtaksbrev)
