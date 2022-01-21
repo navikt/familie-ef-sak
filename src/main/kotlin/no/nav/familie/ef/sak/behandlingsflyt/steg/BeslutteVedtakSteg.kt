@@ -93,7 +93,6 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
         }
     }
 
-    // TODO mattis -> hva skjer egentlig her, Validerer vi når vi skal se på den allerede genererte pdf'en?
     private fun validerBeslutterVedtaksbrev(vedtaksbrev: Vedtaksbrev) {
 
         feilHvis(vedtaksbrev.beslutterident == null || vedtaksbrev.beslutterident.isBlank()) {
