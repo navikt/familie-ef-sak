@@ -47,6 +47,10 @@ class FeatureToggleConfig(private val enabled: Boolean,
             override fun isEnabled(toggleId: String, defaultValue: Boolean): Boolean {
                 return unleash.isEnabled(toggleId, defaultValue)
             }
+
+            override fun shutdown() {
+                unleash.shutdown()
+            }
         }
     }
 

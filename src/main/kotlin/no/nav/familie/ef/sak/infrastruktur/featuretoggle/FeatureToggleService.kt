@@ -7,4 +7,6 @@ interface FeatureToggleService {
     }
 
     fun isEnabled(toggleId: String, defaultValue: Boolean): Boolean
+
+    fun shutdown() {}
 }
