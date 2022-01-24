@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController
 class BarnController(val barnService: BarnService) {
 
     @GetMapping("{personident}")
-    fun hentFnrForAlleBarn(@PathVariable personIdent: String): Ressurs<List<String>> {
-        return Ressurs.success(barnService.hentFnrForAlleBarn(personIdent))
+    fun hentFnrForRegisterbarnISisteIverksatteBehandling(@PathVariable personIdent: String): Ressurs<List<String>> {
+        return Ressurs.success(barnService.hentFnrForRegisterbarnISisteIverksatteBehandling(personIdent))
     }
 }
