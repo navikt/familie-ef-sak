@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillBehandlingTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.LagSaksbehandlingsblankettTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.PollStatusFraIverksettTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.PubliserVedtakshendelseTask
+import no.nav.familie.ef.sak.behandlingsflyt.task.SjekkMigrertStatusIInfotrygdTask
 import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.fagsak.FagsakService
@@ -46,8 +47,10 @@ import no.nav.familie.kontrakter.ef.iverksett.IverksettStatus
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.error.TaskExceptionUtenStackTrace
 import no.nav.familie.prosessering.internal.TaskWorker
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -77,6 +80,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var iverksettClient: IverksettClient
     @Autowired private lateinit var infotrygdReplikaClient: InfotrygdReplikaClient
 
+    private val periodeFraMåned = YearMonth.now().minusMonths(1)
     private val fra = YearMonth.now()
     private val til = YearMonth.now().plusMonths(1)
     private val forventetInntekt = BigDecimal.ZERO
@@ -121,6 +125,13 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         val revurdering = opprettRevurderingOgIverksett(migrering)
 
         verifiserBehandlingErFerdigstilt(revurdering)
+    }
+
+    @Test
+    internal fun `migrert behandling er ikke opphørt i Infotrygd`() {
+        assertThatThrownBy { opprettOgIverksettMigrering(opphørsdato = null) }
+                .hasMessageContaining(SjekkMigrertStatusIInfotrygdTask.TYPE)
+                .hasCauseInstanceOf(TaskExceptionUtenStackTrace::class.java)
     }
 
     @Test
@@ -247,7 +258,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         val revurdering = testWithBrukerContext { revurderingService.opprettRevurderingManuelt(revurderingDto) }
         innvilgOgSendTilBeslutter(revurdering)
         godkjennTotrinnskontroll(revurdering)
-        kjørTasks()
+        kjørTasks(erMigrering = false)
         return revurdering
     }
 
@@ -287,7 +298,14 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         }
     }
 
-    private fun opprettOgIverksettMigrering(): Behandling {
+    private fun opprettOgIverksettMigrering(opphørsdato: YearMonth? = fra): Behandling {
+        val periode = InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(stønadFom = periodeFraMåned.atDay(1),
+                                                                   stønadTom = til.atEndOfMonth())
+        val periodeForKallNr2 = periode.copy(opphørsdato = opphørsdato?.atEndOfMonth())
+        every { infotrygdReplikaClient.hentPerioder(any()) } returns
+                InfotrygdPeriodeResponse(listOf(periode), emptyList(), emptyList()) andThen
+                InfotrygdPeriodeResponse(listOf(periodeForKallNr2), emptyList(), emptyList())
+
         val fagsak = fagsakService.hentEllerOpprettFagsak("1", Stønadstype.OVERGANGSSTØNAD)
         val behandling = testWithBrukerContext(groups = listOf(rolleConfig.beslutterRolle)) {
             migreringService.opprettMigrering(fagsak, fra, til, forventetInntekt.toInt(), samordningsfradrag.toInt())
@@ -297,11 +315,12 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         return behandling
     }
 
-    private fun kjørTasks() {
-        listOf(PollStatusFraIverksettTask.TYPE,
-               LagSaksbehandlingsblankettTask.TYPE,
-               FerdigstillBehandlingTask.TYPE,
-               PubliserVedtakshendelseTask.TYPE).forEach { type ->
+    private fun kjørTasks(erMigrering: Boolean = true) {
+        listOfNotNull(PollStatusFraIverksettTask.TYPE,
+                      if (erMigrering) SjekkMigrertStatusIInfotrygdTask.TYPE else null,
+                      LagSaksbehandlingsblankettTask.TYPE,
+                      FerdigstillBehandlingTask.TYPE,
+                      PubliserVedtakshendelseTask.TYPE).forEach { type ->
             try {
                 val task = taskRepository.findAll()
                         .filter { it.status == Status.KLAR_TIL_PLUKK || it.status == Status.UBEHANDLET }
