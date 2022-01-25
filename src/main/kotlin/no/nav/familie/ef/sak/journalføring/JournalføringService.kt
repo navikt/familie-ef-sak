@@ -213,10 +213,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
                                     eksternFagsakId: Long,
                                     saksbehandler: String) {
         val oppdatertJournalpost =
-                OppdaterJournalpostRequest(bruker = journalpost.bruker?.let {
-                    DokarkivBruker(idType = BrukerIdType.valueOf(it.type.toString()), id = it.id)
-                },
-                                           tema = journalpost.tema?.let { Tema.valueOf(it) }, // TODO: Funker dette?
+                OppdaterJournalpostRequest(tema = journalpost.tema?.let { Tema.valueOf(it) }, // TODO: Funker dette?
                                            // TODO: Funker dette?
                                            behandlingstema = journalpost.behandlingstema?.let { Behandlingstema.fromValue(it) },
                                            tittel = journalpost.tittel,
