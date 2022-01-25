@@ -14,6 +14,7 @@ import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
+import no.nav.familie.ef.sak.infrastruktur.exception.IntegrasjonException
 import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.oppgave.OppgaveClient
 import no.nav.familie.ef.sak.oppgave.OppgaveRepository
@@ -35,6 +36,7 @@ import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager
 import java.net.URI
 import java.time.LocalDate
@@ -86,6 +88,29 @@ internal class OppgaveServiceTest {
         assertThat(slot.captured.tema).isEqualTo(Tema.ENF)
         assertThat(slot.captured.beskrivelse).contains("https://ensligmorellerfar.intern.nav.no/oppgavebenk")
     }
+
+    @Test
+    fun `Opprett oppgave som feiler med fordeling skal prøve på nytt med 4489`() {
+        val aktørIdentFraPdl = "AKTØERIDENT"
+        val slot = slot<OpprettOppgaveRequest>()
+        mockOpprettOppgave(slot, aktørIdentFraPdl)
+        every { arbeidsfordelingService.hentNavEnhet(any()) } returns null
+        oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak)
+
+        verify(exactly = 2) { oppgaveClient.opprettOppgave(any()) }
+    }
+
+    @Test
+    fun `Opprett oppgave som feiler på en ukjent måte skal bare kaste feil videre`() {
+        val aktørIdentFraPdl = "AKTØERIDENT"
+        val slot = slot<OpprettOppgaveRequest>()
+        mockOpprettOppgave(slot, aktørIdentFraPdl)
+        every { oppgaveClient.opprettOppgave(any()) } throws IntegrasjonException("En merkelig feil vi ikke kjenner til")
+        assertThrows<IntegrasjonException> {
+            oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak)
+        }
+    }
+
 
     @Test
     fun `Skal legge i mappe når vi oppretter godkjenne vedtak-oppgave for 4489`() {
@@ -274,7 +299,14 @@ internal class OppgaveServiceTest {
         } returns null
         every { arbeidsfordelingService.hentNavEnhet(any()) } returns Arbeidsfordelingsenhet(enhetId = ENHETSNUMMER,
                                                                                              enhetNavn = ENHETSNAVN)
-        every { oppgaveClient.opprettOppgave(capture(slot)) } returns GSAK_OPPGAVE_ID
+        every { oppgaveClient.opprettOppgave(capture(slot)) } answers {
+            val oppgaveRequest: OpprettOppgaveRequest = firstArg()
+            if (oppgaveRequest.enhetsnummer == null) {
+                throw IntegrasjonException("Fant ingen gyldig arbeidsfordeling for oppgaven")
+            } else {
+                GSAK_OPPGAVE_ID
+            }
+        }
         every { pdlClient.hentAktørIder(any()) } returns PdlIdenter(listOf(PdlIdent(aktørIdentFraPdl, false)))
     }
 
