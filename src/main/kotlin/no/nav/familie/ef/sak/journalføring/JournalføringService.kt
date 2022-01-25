@@ -35,6 +35,7 @@ import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariantformat
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
+import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
@@ -107,7 +108,10 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         knyttJournalpostTilBehandling(journalpost, behandling)
         grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
 
-        oppdaterJournalpost(journalpost, journalføringRequest.dokumentTitler, fagsak.eksternId.id, saksbehandler)
+        if (journalpost.journalstatus != Journalstatus.JOURNALFOERT) {
+            oppdaterJournalpost(journalpost, journalføringRequest.dokumentTitler, fagsak.eksternId.id, saksbehandler)
+        }
+
         ferdigstillJournalføring(journalpostId, journalføringRequest.journalførendeEnhet, saksbehandler)
         ferdigstillJournalføringsoppgave(journalføringRequest)
         opprettBehandlingsstatistikkTask(behandling.id, journalføringRequest.oppgaveId.toLong())

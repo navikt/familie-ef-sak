@@ -67,6 +67,8 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
             val opprettetOppgaveId = try {
                 oppgaveClient.opprettOppgave(opprettOppgave)
             } catch (e: IntegrasjonException) {
+                logger.info("Kunne ikke opprette oppgave - er det ugyldig arbeidsfordeling?: ${finnerIkkeGyldigArbeidsfordeling(e)}")
+                logger.info("Feilmelding: ${e.message}")
                 if (finnerIkkeGyldigArbeidsfordeling(e)) {
                     oppgaveClient.opprettOppgave(opprettOppgave.copy(enhetsnummer = ENHET_NAY))
                 } else {
