@@ -110,9 +110,9 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
 
         if (journalpost.journalstatus != Journalstatus.JOURNALFOERT) {
             oppdaterJournalpost(journalpost, journalføringRequest.dokumentTitler, fagsak.eksternId.id, saksbehandler)
+            ferdigstillJournalføring(journalpostId, journalføringRequest.journalførendeEnhet, saksbehandler)
         }
 
-        ferdigstillJournalføring(journalpostId, journalføringRequest.journalførendeEnhet, saksbehandler)
         ferdigstillJournalføringsoppgave(journalføringRequest)
         opprettBehandlingsstatistikkTask(behandling.id, journalføringRequest.oppgaveId.toLong())
 
