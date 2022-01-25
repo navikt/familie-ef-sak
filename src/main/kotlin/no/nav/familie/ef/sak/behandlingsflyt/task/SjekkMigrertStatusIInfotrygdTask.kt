@@ -25,32 +25,29 @@ import java.util.UUID
                      triggerTidVedFeilISekunder = 120L,
                      beskrivelse = "Sjekker status for migrert sak")
 
-class SjekkMigrertStatusIInfotrygdTask(private val taskRepository: TaskRepository,
-                                       private val migreringService: MigreringService) : AsyncTaskStep {
+class SjekkMigrertStatusIInfotrygdTask(private val migreringService: MigreringService) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
-        val (behandlingId, kjøremåned) = objectMapper.readValue<SjekkMigrertStatusIInfotrygdData>(task.payload)
+        val (behandlingId, opphørsmåned) = objectMapper.readValue<SjekkMigrertStatusIInfotrygdData>(task.payload)
 
-        if (migreringService.erOpphørtIInfotrygd(behandlingId, kjøremåned)) {
-            taskRepository.save(LagSaksbehandlingsblankettTask.opprettTask(behandlingId))
-        } else {
+        if (!migreringService.erOpphørtIInfotrygd(behandlingId, opphørsmåned)) {
             throw TaskExceptionUtenStackTrace("Er ikke opphørt i infotrygd")
         }
     }
 
     companion object {
 
-        fun opprettTask(behandlingId: UUID): Task =
+        fun opprettTask(behandlingId: UUID, opphørsmåned: YearMonth): Task =
                 Task(type = TYPE,
-                     payload = objectMapper.writeValueAsString(SjekkMigrertStatusIInfotrygdData(behandlingId, YearMonth.now())),
+                     payload = objectMapper.writeValueAsString(SjekkMigrertStatusIInfotrygdData(behandlingId, opphørsmåned)),
                      properties = Properties().apply {
                          this["behandlingId"] = behandlingId.toString()
-                     }).copy(triggerTid = LocalDateTime.now().plusMinutes(2))
+                     }).copy(triggerTid = LocalDateTime.now().plusMinutes(16))
 
 
         const val TYPE = "sjekkMigrertStatus"
     }
 
-    data class SjekkMigrertStatusIInfotrygdData(val behandlingId: UUID, val kjøremåned: YearMonth)
+    data class SjekkMigrertStatusIInfotrygdData(val behandlingId: UUID, val opphørsmåned: YearMonth)
 
 }

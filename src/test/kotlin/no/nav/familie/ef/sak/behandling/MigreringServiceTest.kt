@@ -317,10 +317,10 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
 
     private fun kjørTasks(erMigrering: Boolean = true) {
         listOfNotNull(PollStatusFraIverksettTask.TYPE,
-                      if (erMigrering) SjekkMigrertStatusIInfotrygdTask.TYPE else null,
                       LagSaksbehandlingsblankettTask.TYPE,
                       FerdigstillBehandlingTask.TYPE,
-                      PubliserVedtakshendelseTask.TYPE).forEach { type ->
+                      PubliserVedtakshendelseTask.TYPE,
+                      if (erMigrering) SjekkMigrertStatusIInfotrygdTask.TYPE else null).forEach { type ->
             try {
                 val task = taskRepository.findAll()
                         .filter { it.status == Status.KLAR_TIL_PLUKK || it.status == Status.UBEHANDLET }

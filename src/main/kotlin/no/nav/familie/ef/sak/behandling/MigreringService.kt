@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BeregnYtelseSteg
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.task.PollStatusFraIverksettTask
+import no.nav.familie.ef.sak.behandlingsflyt.task.SjekkMigrertStatusIInfotrygdTask
 import no.nav.familie.ef.sak.beregning.BeregningService
 import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.beregning.tilInntektsperioder
@@ -128,29 +129,27 @@ class MigreringService(
                                                          perioder = vedtaksperioder,
                                                          inntekter = inntekter))
 
-        // TODO burde vi sjekke att simulere ikke gir diff? Ikke sikkert den gir noe riktig beløp for neste måned?
-
         behandlingService.oppdaterResultatPåBehandling(behandling.id, BehandlingResultat.INNVILGET)
         behandlingService.oppdaterStegPåBehandling(behandling.id, StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT)
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
         val iverksettDto = iverksettingDtoMapper.tilMigreringDto(behandling)
         iverksettClient.iverksettMigrering(iverksettDto)
         taskRepository.save(PollStatusFraIverksettTask.opprettTask(behandling.id))
-
-        // TODO opprett task som sjekker om den har fått riktig status i Infotrygd
+        taskRepository.save(SjekkMigrertStatusIInfotrygdTask.opprettTask(behandling.id, fra))
 
         return behandlingService.hentBehandling(behandling.id)
     }
 
-    fun erOpphørtIInfotrygd(behandlingId: UUID, kjøremåned: YearMonth): Boolean {
+    fun erOpphørtIInfotrygd(behandlingId: UUID, opphørsmåned: YearMonth): Boolean {
         val personIdent = behandlingService.hentAktivIdent(behandlingId)
         val perioder = hentPerioder(personIdent)
         val perioderStønadTom = filtrerOgSorterPerioderFraInfotrygd(perioder.perioder).first().stønadTom
         val maxStønadTom = perioder.summert.maxOf { it.stønadTom }
-        val erLike = perioderStønadTom == maxStønadTom && YearMonth.of(maxStønadTom.year, maxStønadTom.month) == kjøremåned
+        val erLike = perioderStønadTom == maxStønadTom && YearMonth.of(maxStønadTom.year, maxStønadTom.month) == opphørsmåned
         if (!erLike) {
-            logger.info("erOpphørtIInfotrygd - Datoer ikke like behandling=$behandlingId " +
-                        "sistePeriodenTom=$perioderStønadTom summertMaxTom=$maxStønadTom")
+            logger.warn("erOpphørtIInfotrygd - Datoer ikke like behandling=$behandlingId " +
+                        "sistePeriodenTom=$perioderStønadTom summertMaxTom=$maxStønadTom " +
+                        "opphørsmåned=$opphørsmåned")
         }
         return erLike
     }
