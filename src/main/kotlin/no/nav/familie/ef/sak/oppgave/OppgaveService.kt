@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.CacheManager
 import org.springframework.stereotype.Service
+import org.springframework.web.client.HttpServerErrorException
 import java.net.URI
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -66,9 +67,7 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
 
             val opprettetOppgaveId = try {
                 oppgaveClient.opprettOppgave(opprettOppgave)
-            } catch (e: IntegrasjonException) {
-                logger.info("Kunne ikke opprette oppgave - er det ugyldig arbeidsfordeling?: ${finnerIkkeGyldigArbeidsfordeling(e)}")
-                logger.info("Feilmelding: ${e.message}")
+            } catch (e: Exception) {
                 if (finnerIkkeGyldigArbeidsfordeling(e)) {
                     oppgaveClient.opprettOppgave(opprettOppgave.copy(enhetsnummer = ENHET_NAY))
                 } else {
