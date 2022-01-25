@@ -242,6 +242,29 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         assertThat(beløpsperiode.periode.tildato).isEqualTo(stønadTom)
     }
 
+    @Test
+    internal fun `hentMigreringInfo - har periode frem i tiden`() {
+        val nå = YearMonth.of(2021, 1)
+        val stønadFom = nå.plusMonths(10)
+        val stønadTom = nå.plusMonths(10)
+        val infotrygdPeriode =
+                InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(
+                        stønadFom = stønadFom.atDay(1),
+                        stønadTom = stønadTom.atEndOfMonth(),
+                        inntektsgrunnlag = 10,
+                        samordningsfradrag = 5
+                )
+        every { infotrygdReplikaClient.hentPerioder(any()) } returns
+                InfotrygdPeriodeResponse(listOf(infotrygdPeriode), emptyList(), emptyList())
+        val fagsak = fagsakService.hentEllerOpprettFagsak("1", Stønadstype.OVERGANGSSTØNAD)
+
+        val migreringInfo = migreringService.hentMigreringInfo(fagsak.id, nå)
+
+        assertThat(migreringInfo.kanMigreres).isTrue
+        assertThat(migreringInfo.stønadFom).isEqualTo(stønadFom)
+        assertThat(migreringInfo.stønadFom).isEqualTo(stønadTom)
+    }
+
     private fun verifiserVurderinger(migrering: Behandling) {
         val vilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(migrering.id)
         val alleVurderingerManglerSvar = vilkårsvurderinger.flatMap { it.delvilkårsvurdering.delvilkårsvurderinger }

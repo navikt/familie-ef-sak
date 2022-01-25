@@ -176,7 +176,7 @@ class MigreringService(
         }
         val periode = gjeldendePerioder.single()
         if (periode.opphørsdato != null) { // Håndterer ikke denne nå
-            throw MigreringException("Har opphørsdatp (${periode.opphørsdato}) i perioden")
+            throw MigreringException("Har opphørsdato (${periode.opphørsdato}) i perioden")
         }
         return periode
     }
