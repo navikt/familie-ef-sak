@@ -33,6 +33,7 @@ import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.ef.felles.StønadType
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdEndringKode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSak
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResultat
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -140,10 +141,15 @@ class MigreringService(
         return behandlingService.hentBehandling(behandling.id)
     }
 
+    /**
+     * Sjekker att perioden som har kode [InfotrygdEndringKode.OVERTFØRT_NY_LØSNING] har opphør i måneden jobbet blir kjørt.
+     * Den sjekker også att de summerte periodene sin max(stønadFom) går til den samme måneden
+     */
     fun erOpphørtIInfotrygd(behandlingId: UUID, opphørsmåned: YearMonth): Boolean {
         val personIdent = behandlingService.hentAktivIdent(behandlingId)
         val perioder = hentPerioder(personIdent)
-        val perioderStønadTom = filtrerOgSorterPerioderFraInfotrygd(perioder.perioder).first().stønadTom
+        val perioderStønadTom = filtrerOgSorterPerioderFraInfotrygd(perioder.perioder)
+                .find { it.kode == InfotrygdEndringKode.OVERTFØRT_NY_LØSNING }?.opphørsdato
         val maxStønadTom = perioder.summert.maxOf { it.stønadTom }
         val erLike = perioderStønadTom == maxStønadTom && YearMonth.of(maxStønadTom.year, maxStønadTom.month) == opphørsmåned
         if (!erLike) {

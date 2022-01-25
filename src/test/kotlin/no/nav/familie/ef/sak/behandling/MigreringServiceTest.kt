@@ -39,6 +39,7 @@ import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.felles.StønadType
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdEndringKode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSak
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResponse
@@ -299,12 +300,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     }
 
     private fun opprettOgIverksettMigrering(opphørsdato: YearMonth? = fra): Behandling {
-        val periode = InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(stønadFom = periodeFraMåned.atDay(1),
-                                                                   stønadTom = til.atEndOfMonth())
-        val periodeForKallNr2 = periode.copy(opphørsdato = opphørsdato?.atEndOfMonth())
-        every { infotrygdReplikaClient.hentPerioder(any()) } returns
-                InfotrygdPeriodeResponse(listOf(periode), emptyList(), emptyList()) andThen
-                InfotrygdPeriodeResponse(listOf(periodeForKallNr2), emptyList(), emptyList())
+        mockPerioder(opphørsdato)
 
         val fagsak = fagsakService.hentEllerOpprettFagsak("1", Stønadstype.OVERGANGSSTØNAD)
         val behandling = testWithBrukerContext(groups = listOf(rolleConfig.beslutterRolle)) {
@@ -313,6 +309,22 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
 
         kjørTasks()
         return behandling
+    }
+
+    /**
+     * Mocker 2 vedtak, hvor vedtakId2 har høyest precedence, og setter opphørsdato på denne hvis det er type opphør
+     */
+    private fun mockPerioder(opphørsdato: YearMonth?) {
+        val periode = InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(vedtakId = 1,
+                                                                   stønadFom = periodeFraMåned.atDay(1),
+                                                                   stønadTom = til.atEndOfMonth())
+        val kodePeriode2 = opphørsdato?.let { InfotrygdEndringKode.OVERTFØRT_NY_LØSNING } ?: InfotrygdEndringKode.NY
+        val periodeForKallNr2 = periode.copy(vedtakId = 2,
+                                             opphørsdato = opphørsdato?.atEndOfMonth(),
+                                             kode = kodePeriode2)
+        every { infotrygdReplikaClient.hentPerioder(any()) } returns
+                InfotrygdPeriodeResponse(listOf(periode), emptyList(), emptyList()) andThen
+                InfotrygdPeriodeResponse(listOf(periodeForKallNr2), emptyList(), emptyList())
     }
 
     private fun kjørTasks(erMigrering: Boolean = true) {
