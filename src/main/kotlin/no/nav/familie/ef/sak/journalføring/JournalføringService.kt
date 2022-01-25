@@ -25,6 +25,7 @@ import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Tema
+import no.nav.familie.kontrakter.felles.dokarkiv.DokarkivBruker
 import no.nav.familie.kontrakter.felles.dokarkiv.DokumentInfo
 import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.Sak
@@ -36,6 +37,7 @@ import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerReques
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -50,6 +52,8 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
                            private val iverksettService: IverksettService,
                            private val taskRepository: TaskRepository,
                            private val oppgaveService: OppgaveService) {
+
+    private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     fun hentJournalpost(journalpostId: String): Journalpost {
         return journalpostClient.hentJournalpost(journalpostId)
@@ -212,7 +216,10 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
                                     eksternFagsakId: Long,
                                     saksbehandler: String) {
         val oppdatertJournalpost =
-                OppdaterJournalpostRequest(tema = journalpost.tema?.let { Tema.valueOf(it) }, // TODO: Funker dette?
+                OppdaterJournalpostRequest(bruker = journalpost.bruker?.let {
+                    DokarkivBruker(idType = BrukerIdType.valueOf(it.type.toString()), id = it.id)
+                },
+                                           tema = journalpost.tema?.let { Tema.valueOf(it) }, // TODO: Funker dette?
                                            // TODO: Funker dette?
                                            behandlingstema = journalpost.behandlingstema?.let { Behandlingstema.fromValue(it) },
                                            tittel = journalpost.tittel,
@@ -228,6 +235,8 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
                                                                 brevkode = dokumentInfo.brevkode)
                                                }
                                            })
+
+        secureLogger.info("Oppdaterer journalpost med oppdatertJournalpost=$oppdatertJournalpost")
         journalpostClient.oppdaterJournalpost(oppdatertJournalpost, journalpost.journalpostId, saksbehandler)
     }
 
