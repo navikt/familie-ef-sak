@@ -136,7 +136,7 @@ class MigreringService(
         val iverksettDto = iverksettingDtoMapper.tilMigreringDto(behandling)
         iverksettClient.iverksettMigrering(iverksettDto)
         taskRepository.save(PollStatusFraIverksettTask.opprettTask(behandling.id))
-        taskRepository.save(SjekkMigrertStatusIInfotrygdTask.opprettTask(behandling.id, fra))
+        taskRepository.save(SjekkMigrertStatusIInfotrygdTask.opprettTask(behandling.id, fra.minusMonths(1)))
 
         return behandlingService.hentBehandling(behandling.id)
     }
@@ -151,13 +151,17 @@ class MigreringService(
         val perioderStønadTom = filtrerOgSorterPerioderFraInfotrygd(perioder.perioder)
                 .find { it.kode == InfotrygdEndringKode.OVERTFØRT_NY_LØSNING }?.opphørsdato
         val maxStønadTom = perioder.summert.maxOf { it.stønadTom }
-        val erLike = perioderStønadTom == maxStønadTom && YearMonth.of(maxStønadTom.year, maxStønadTom.month) == opphørsmåned
-        if (!erLike) {
+        val stønadTomErLike =
+                perioderStønadTom == maxStønadTom // liten ekstrasjekk, som verifiserer att summertePerioder er riktig
+        val stønadTomErFørEllerLikOpphørsmåned = YearMonth.of(maxStønadTom.year, maxStønadTom.month) <= opphørsmåned
+        val erOpphørtIInfotrygd = stønadTomErLike && stønadTomErFørEllerLikOpphørsmåned
+        if (!erOpphørtIInfotrygd) {
             logger.warn("erOpphørtIInfotrygd - Datoer ikke like behandling=$behandlingId " +
-                        "sistePeriodenTom=$perioderStønadTom summertMaxTom=$maxStønadTom " +
+                        "sistePeriodenTom=$perioderStønadTom " +
+                        "summertMaxTom=$maxStønadTom " +
                         "opphørsmåned=$opphørsmåned")
         }
-        return erLike
+        return erOpphørtIInfotrygd
     }
 
     private fun hentGjeldendePeriodeOgValiderState(fagsakId: UUID, kjøremåned: YearMonth): SummertInfotrygdPeriodeDto {

@@ -81,8 +81,9 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var iverksettClient: IverksettClient
     @Autowired private lateinit var infotrygdReplikaClient: InfotrygdReplikaClient
 
-    private val periodeFraMåned = YearMonth.now().minusMonths(1)
-    private val fra = YearMonth.now()
+    private val periodeFraMåned = YearMonth.now().minusMonths(10)
+    private val opphørsmåned = YearMonth.now()
+    private val migrerFraDato = YearMonth.now().plusMonths(1)
     private val til = YearMonth.now().plusMonths(1)
     private val forventetInntekt = BigDecimal.ZERO
     private val samordningsfradrag = BigDecimal.ZERO
@@ -108,7 +109,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
 
         with(tilkjentYtelseService.hentForBehandling(migrering.id).andelerTilkjentYtelse) {
             assertThat(this).hasSize(1)
-            assertThat(this[0].stønadFom).isEqualTo(fra.atDay(1))
+            assertThat(this[0].stønadFom).isEqualTo(migrerFraDato.atDay(1))
             assertThat(this[0].stønadTom).isEqualTo(til.atEndOfMonth())
         }
         with(behandlingService.hentBehandling(migrering.id)) {
@@ -271,12 +272,12 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     }
 
     private fun innvilgOgSendTilBeslutter(behandling: Behandling) {
-        val vedtaksperiode = VedtaksperiodeDto(årMånedFra = fra,
+        val vedtaksperiode = VedtaksperiodeDto(årMånedFra = migrerFraDato,
                                                årMånedTil = til,
                                                aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
                                                periodeType = VedtaksperiodeType.HOVEDPERIODE)
 
-        val inntekt = Inntekt(fra, forventetInntekt = forventetInntekt, samordningsfradrag = samordningsfradrag)
+        val inntekt = Inntekt(migrerFraDato, forventetInntekt = forventetInntekt, samordningsfradrag = samordningsfradrag)
         val innvilget = Innvilget(resultatType = ResultatType.INNVILGE,
                                   periodeBegrunnelse = null,
                                   inntektBegrunnelse = null,
@@ -299,12 +300,12 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         }
     }
 
-    private fun opprettOgIverksettMigrering(opphørsdato: YearMonth? = fra): Behandling {
+    private fun opprettOgIverksettMigrering(opphørsdato: YearMonth? = opphørsmåned): Behandling {
         mockPerioder(opphørsdato)
 
         val fagsak = fagsakService.hentEllerOpprettFagsak("1", Stønadstype.OVERGANGSSTØNAD)
         val behandling = testWithBrukerContext(groups = listOf(rolleConfig.beslutterRolle)) {
-            migreringService.opprettMigrering(fagsak, fra, til, forventetInntekt.toInt(), samordningsfradrag.toInt())
+            migreringService.opprettMigrering(fagsak, migrerFraDato, til, forventetInntekt.toInt(), samordningsfradrag.toInt())
         }
 
         kjørTasks()
