@@ -15,31 +15,31 @@ interface IBarn {
 }
 
 @Table("soknad_barn")
-data class Barn(@Id
-                val id: UUID = UUID.randomUUID(),
-                val navn: String? = null,
-                @Column("fodselsnummer")
-                override val fødselsnummer: String? = null,
-                val harSkalHaSammeAdresse: Boolean,
-                @Column("skal_bo_hos_soker")
-                val skalBoHosSøker: String? = null,
-                @Column("ikke_registrert_pa_sokers_adresse_beskrivelse")
-                val ikkeRegistrertPåSøkersAdresseBeskrivelse: String?,
-                @Column("er_barnet_fodt")
-                val erBarnetFødt: Boolean,
-                @Column("fodsel_termindato")
-                val fødselTermindato: LocalDate? = null,
-                val terminbekreftelse: Dokumentasjon? = null,
-                @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "annen_forelder_")
-                override val annenForelder: AnnenForelder? = null,
-                @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "samver_")
-                val samvær: Samvær? = null,
-                val skalHaBarnepass: Boolean? = null,
-                @Column("serlige_tilsynsbehov")
-                val særligeTilsynsbehov: String? = null,
-                @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "barnepass_")
-                val barnepass: Barnepass? = null,
-                val lagtTilManuelt: Boolean) : IBarn
+data class SøknadBarn(@Id
+                      val id: UUID = UUID.randomUUID(),
+                      val navn: String? = null,
+                      @Column("fodselsnummer")
+                      override val fødselsnummer: String? = null,
+                      val harSkalHaSammeAdresse: Boolean,
+                      @Column("skal_bo_hos_soker")
+                      val skalBoHosSøker: String? = null,
+                      @Column("ikke_registrert_pa_sokers_adresse_beskrivelse")
+                      val ikkeRegistrertPåSøkersAdresseBeskrivelse: String?,
+                      @Column("er_barnet_fodt")
+                      val erBarnetFødt: Boolean,
+                      @Column("fodsel_termindato")
+                      val fødselTermindato: LocalDate? = null,
+                      val terminbekreftelse: Dokumentasjon? = null,
+                      @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "annen_forelder_")
+                      override val annenForelder: AnnenForelder? = null,
+                      @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "samver_")
+                      val samvær: Samvær? = null,
+                      val skalHaBarnepass: Boolean? = null,
+                      @Column("serlige_tilsynsbehov")
+                      val særligeTilsynsbehov: String? = null,
+                      @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "barnepass_")
+                      val barnepass: Barnepass? = null,
+                      val lagtTilManuelt: Boolean) : IBarn
 
 interface IAnnenForelder {
 

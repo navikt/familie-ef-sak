@@ -8,7 +8,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Familierelasjon
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.AnnenForelder
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.Barn
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadsskjemaOvergangsstønad
 import no.nav.familie.ef.sak.vilkår.dto.AnnenForelderDto
 import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværDto
@@ -28,11 +28,11 @@ object BarnMedSamværMapper {
         }
     }
 
-    fun mapSøknadsgrunnlag(barn: Set<Barn>): List<BarnMedSamværSøknadsgrunnlagDto> {
-        return barn.map(this::mapSøknadsgrunnlag)
+    fun mapSøknadsgrunnlag(søknadBarn: Set<SøknadBarn>): List<BarnMedSamværSøknadsgrunnlagDto> {
+        return søknadBarn.map(this::mapSøknadsgrunnlag)
     }
 
-    private fun mapSøknadsgrunnlag(søknadsbarn: Barn): BarnMedSamværSøknadsgrunnlagDto {
+    private fun mapSøknadsgrunnlag(søknadsbarn: SøknadBarn): BarnMedSamværSøknadsgrunnlagDto {
         val samvær = søknadsbarn.samvær
         return BarnMedSamværSøknadsgrunnlagDto(
                 id = søknadsbarn.id,
