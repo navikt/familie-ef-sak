@@ -7,7 +7,7 @@ import org.springframework.data.relational.core.mapping.MappedCollection
 import org.springframework.data.relational.core.mapping.Table
 import java.util.UUID
 
-@Table("grunnlag_soknad")
+@Table("soknad_grunnlag")
 data class Søknad(@Id
                   val id: UUID = UUID.randomUUID(),
                   val behandlingId: UUID,
