@@ -4,6 +4,7 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.MappedCollection
+import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDate
 import java.util.UUID
 
@@ -13,6 +14,7 @@ interface IBarn {
     val annenForelder: IAnnenForelder?
 }
 
+@Table("soknad_barn")
 data class Barn(@Id
                 val id: UUID = UUID.randomUUID(),
                 val navn: String? = null,
