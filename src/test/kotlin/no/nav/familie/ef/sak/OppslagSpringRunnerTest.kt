@@ -4,6 +4,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
 import com.github.tomakehurst.wiremock.WireMockServer
 import no.nav.familie.ef.sak.avstemming.KonsistensavstemmingJobb
+import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.Behandlingsjournalpost
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
@@ -106,6 +107,7 @@ abstract class OppslagSpringRunnerTest {
                 UttrekkArbeidssøkere::class,
                 KonsistensavstemmingJobb::class,
                 Simuleringsresultat::class,
+                BehandlingBarn::class,
                 Søknad::class,
                 SøknadsskjemaOvergangsstønad::class,
                 TilkjentYtelse::class,

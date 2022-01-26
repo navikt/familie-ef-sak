@@ -1,3 +1,10 @@
-ALTER TABLE soker RENAME TO soknad_soker;
-ALTER TABLE utenlandsopphold RENAME TO soknad_utenlandsopphold;
-ALTER TABLE barn RENAME TO soknad_barn;
+CREATE TABLE behandling_barn (
+    id                UUID PRIMARY KEY,
+    behandling_id     UUID REFERENCES behandling (id),
+    soknad_barn_id    UUID,
+    navn              VARCHAR,
+    personident       VARCHAR,
+    fodsel_termindato DATE
+);
+
+CREATE INDEX ON behandling_barn (behandling_id);
