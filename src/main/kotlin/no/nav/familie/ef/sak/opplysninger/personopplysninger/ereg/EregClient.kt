@@ -16,7 +16,7 @@ class EregClient(
 ) : AbstractPingableRestClient(restOperations, "familie.ef.iverksett") {
 
     fun hentOrganisasjoner(organisasjonsnumre: List<String>) : List<OrganisasjonDto> {
-        return postForEntity(URI.create("$familieEfProxyUri/api/ereg"), organisasjonsnumre)
+        return getForEntity(URI.create("$familieEfProxyUri/api/ereg?organisasjonsnumre=$organisasjonsnumre"))
     }
 
     override val pingUri = URI.create(familieEfProxyUri)
