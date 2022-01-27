@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.vedtak.dto.TotrinnskontrollStatusDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -66,7 +67,7 @@ class VedtakController(private val stegService: StegService,
     }
 
     @GetMapping("/eksternid/{eksternId}")
-    fun hentForventetInntektForEksternId(@PathVariable eksternId: Long, dato: LocalDate = LocalDate.now()): Ressurs<Int> {
+    fun hentForventetInntektForEksternId(@PathVariable eksternId: Long, @DateTimeFormat(pattern = "yyyy-MM-dd") dato: LocalDate = LocalDate.now()): Ressurs<Int> {
         val behandlingId = behandlingService.hentBehandlingPåEksternId(eksternId).id
 
         val forventetInntekt = vedtakService.hentForventetInntektForVedtakOgDato(behandlingId, dato)
