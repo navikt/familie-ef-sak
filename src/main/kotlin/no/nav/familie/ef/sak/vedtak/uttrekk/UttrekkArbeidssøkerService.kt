@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.vedtak.uttrekk
 
+import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
@@ -47,7 +48,7 @@ class UttrekkArbeidssøkerService(
     fun settKontrollert(id: UUID, kontrollert: Boolean): UttrekkArbeidssøkerDto {
         tilgangService.validerHarSaksbehandlerrolle()
         val uttrekkArbeidssøkere = uttrekkArbeidssøkerRepository.findByIdOrThrow(id)
-        tilgangService.validerTilgangTilFagsak(uttrekkArbeidssøkere.fagsakId)
+        tilgangService.validerTilgangTilFagsak(uttrekkArbeidssøkere.fagsakId, AuditLoggerEvent.UPDATE)
 
         val oppdatertArbeidssøker = if (uttrekkArbeidssøkere.kontrollert == kontrollert) {
             uttrekkArbeidssøkere

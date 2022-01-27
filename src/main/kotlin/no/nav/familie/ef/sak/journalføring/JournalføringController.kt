@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.journalføring
 
+import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequest
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringResponse
@@ -29,21 +30,21 @@ class JournalføringController(private val journalføringService: Journalføring
     @GetMapping("/{journalpostId}")
     fun hentJournalPost(@PathVariable journalpostId: String): Ressurs<JournalføringResponse> {
         val (journalpost, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
-        tilgangService.validerTilgangTilPersonMedBarn(personIdent)
+        tilgangService.validerTilgangTilPersonMedBarn(personIdent, AuditLoggerEvent.ACCESS)
         return Ressurs.success(JournalføringResponse(journalpost, personIdent))
     }
 
     @GetMapping("/{journalpostId}/dokument/{dokumentInfoId}")
     fun hentDokument(@PathVariable journalpostId: String, @PathVariable dokumentInfoId: String): Ressurs<ByteArray> {
         val (_, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
-        tilgangService.validerTilgangTilPersonMedBarn(personIdent)
+        tilgangService.validerTilgangTilPersonMedBarn(personIdent, AuditLoggerEvent.ACCESS)
         return Ressurs.success(journalføringService.hentDokument(journalpostId, dokumentInfoId))
     }
 
     @GetMapping("/{journalpostId}/dokument-pdf/{dokumentInfoId}", produces = [MediaType.APPLICATION_PDF_VALUE])
     fun hentDokumentSomPdf(@PathVariable journalpostId: String, @PathVariable dokumentInfoId: String): ByteArray {
         val (_, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
-        tilgangService.validerTilgangTilPersonMedBarn(personIdent)
+        tilgangService.validerTilgangTilPersonMedBarn(personIdent, AuditLoggerEvent.ACCESS)
         return journalføringService.hentDokument(journalpostId, dokumentInfoId)
     }
 
@@ -52,7 +53,7 @@ class JournalføringController(private val journalføringService: Journalføring
                            @RequestBody journalføringRequest: JournalføringRequest
     ): Ressurs<Long> {
         val (_, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
-        tilgangService.validerTilgangTilPersonMedBarn(personIdent)
+        tilgangService.validerTilgangTilPersonMedBarn(personIdent, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
         return Ressurs.success(journalføringService.fullførJournalpost(journalføringRequest, journalpostId))
     }

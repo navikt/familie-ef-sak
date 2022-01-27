@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.behandling
 
+import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.dto.BehandlingDto
 import no.nav.familie.ef.sak.behandling.dto.HenlagtDto
@@ -28,7 +29,7 @@ class BehandlingController(private val behandlingService: BehandlingService,
 
     @GetMapping("{behandlingId}")
     fun hentBehandling(@PathVariable behandlingId: UUID): Ressurs<BehandlingDto> {
-        tilgangService.validerTilgangTilBehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         val behandling: Behandling = behandlingService.hentBehandling(behandlingId)
         val behandlingDto = behandling.tilDto()
         return Ressurs.success(behandlingDto)
@@ -36,28 +37,28 @@ class BehandlingController(private val behandlingService: BehandlingService,
 
     @PostMapping("{behandlingId}/reset/{steg}")
     fun resetSteg(@PathVariable behandlingId: UUID, @PathVariable steg: StegType): Ressurs<UUID> {
-        tilgangService.validerTilgangTilBehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         stegService.resetSteg(behandlingId, steg)
         return Ressurs.success(behandlingId)
     }
 
     @PostMapping("{behandlingId}/vent")
     fun settPåVent(@PathVariable behandlingId: UUID): Ressurs<UUID> {
-        tilgangService.validerTilgangTilBehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         behandlingService.settPåVent(behandlingId)
         return Ressurs.success(behandlingId)
     }
 
     @PostMapping("{behandlingId}/aktiver")
     fun taAvVent(@PathVariable behandlingId: UUID): Ressurs<UUID> {
-        tilgangService.validerTilgangTilBehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         behandlingService.taAvVent(behandlingId)
         return Ressurs.success(behandlingId)
     }
 
     @PostMapping("{behandlingId}/henlegg")
     fun henleggBehandling(@PathVariable behandlingId: UUID, @RequestBody henlagt: HenlagtDto): Ressurs<BehandlingDto> {
-        tilgangService.validerTilgangTilBehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
         val henlagtBehandling = behandlingService.henleggBehandling(behandlingId, henlagt)
         return Ressurs.success(henlagtBehandling.tilDto())
@@ -66,7 +67,7 @@ class BehandlingController(private val behandlingService: BehandlingService,
     @GetMapping("/ekstern/{eksternBehandlingId}")
     fun hentBehandling(@PathVariable eksternBehandlingId: Long): Ressurs<BehandlingDto> {
         val behandling: Behandling = behandlingService.hentBehandlingPåEksternId(eksternBehandlingId)
-        tilgangService.validerTilgangTilBehandling(behandling.id)
+        tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS)
         val behandlingDto = behandling.tilDto()
         return Ressurs.success(behandlingDto)
     }

@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.fagsak
 
+import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.MigreringService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.dto.BehandlingDto
@@ -29,13 +30,13 @@ class MigreringController(private val migreringService: MigreringService,
 
     @GetMapping("{fagsakId}")
     fun hentBehandling(@PathVariable fagsakId: UUID): Ressurs<MigreringInfo> {
-        tilgangService.validerTilgangTilFagsak(fagsakId)
+        tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(migreringService.hentMigreringInfo(fagsakId))
     }
 
     @PostMapping("{fagsakId}")
     fun resetSteg(@PathVariable fagsakId: UUID): Ressurs<String> {
-        tilgangService.validerTilgangTilFagsak(fagsakId)
+        tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.CREATE)
         migreringService.migrerFagsak(fagsakId)
         return Ressurs.success("OK")
     }

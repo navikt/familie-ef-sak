@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.beregning
 
+import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.felles.dto.Periode
@@ -57,7 +58,7 @@ class BeregningController(private val stegService: StegService,
                        "Vedtakstypen Innvilget med opphør er ikke tilgjengelig",
                        HttpStatus.BAD_REQUEST)
         }
-        tilgangService.validerTilgangTilBehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         validerAlleVilkårOppfyltDersomInvilgelse(vedtak, behandlingId)
         val behandling = behandlingService.hentBehandling(behandlingId)
         return Ressurs.success(stegService.håndterBeregnYtelseForStønad(behandling, vedtak).id)
@@ -71,7 +72,7 @@ class BeregningController(private val stegService: StegService,
 
     @PostMapping(value = ["/{behandlingId}/lagre-vedtak", "/{behandlingId}/lagre-blankettvedtak"])
     fun lagreBlankettVedtak(@PathVariable behandlingId: UUID, @RequestBody vedtak: VedtakDto): Ressurs<UUID> {
-        tilgangService.validerTilgangTilBehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         val behandling = behandlingService.hentBehandling(behandlingId)
 
         return Ressurs.success(stegService.håndterVedtaBlankett(behandling, vedtak).id)
@@ -79,7 +80,7 @@ class BeregningController(private val stegService: StegService,
 
     @GetMapping("/{behandlingId}")
     fun hentBeregnetBeløp(@PathVariable behandlingId: UUID): Ressurs<List<Beløpsperiode>> {
-        tilgangService.validerTilgangTilBehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         return Ressurs.success(tilkjentYtelseService.hentForBehandling(behandlingId).tilBeløpsperiode())
     }
 

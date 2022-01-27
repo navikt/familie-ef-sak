@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger
 
+import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.dto.PersonIdentDto
@@ -30,33 +31,33 @@ class PersonopplysningerController(private val personopplysningerService: Person
 
     @PostMapping
     fun personopplysninger(@RequestBody personIdent: PersonIdentDto): Ressurs<PersonopplysningerDto> {
-        tilgangService.validerTilgangTilPersonMedBarn(personIdent.personIdent)
+        tilgangService.validerTilgangTilPersonMedBarn(personIdent.personIdent, AuditLoggerEvent.ACCESS)
         return Ressurs.success(personopplysningerService.hentPersonopplysninger(personIdent.personIdent))
     }
 
     @GetMapping("/behandling/{behandlingId}")
     fun personopplysninger(@PathVariable behandlingId: UUID): Ressurs<PersonopplysningerDto> {
-        tilgangService.validerTilgangTilBehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(personopplysningerService.hentPersonopplysninger(behandlingId))
     }
 
     @GetMapping("/fagsak/{fagsakId}")
     fun personopplysningerFraFagsakId(@PathVariable fagsakId: UUID): Ressurs<PersonopplysningerDto> {
-        tilgangService.validerTilgangTilFagsak(fagsakId)
+        tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
         val aktivIdent = fagsakService.hentAktivIdent(fagsakId)
         return Ressurs.success(personopplysningerService.hentPersonopplysninger(aktivIdent))
     }
 
     @GetMapping("/nav-kontor/behandling/{behandlingId}")
     fun hentNavKontor(@PathVariable behandlingId: UUID): Ressurs<NavKontorEnhet> {
-        tilgangService.validerTilgangTilBehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         val aktivIdent = behandlingService.hentAktivIdent(behandlingId)
         return Ressurs.success(personopplysningerService.hentNavKontor(aktivIdent))
     }
 
     @PostMapping("/nav-kontor")
     fun hentNavKontorTilFagsak(@RequestBody personIdent: PersonIdentDto): Ressurs<NavKontorEnhet> {
-        tilgangService.validerTilgangTilPersonMedBarn(personIdent.personIdent)
+        tilgangService.validerTilgangTilPersonMedBarn(personIdent.personIdent, AuditLoggerEvent.ACCESS)
         return Ressurs.success(personopplysningerService.hentNavKontor(personIdent.personIdent))
     }
 
