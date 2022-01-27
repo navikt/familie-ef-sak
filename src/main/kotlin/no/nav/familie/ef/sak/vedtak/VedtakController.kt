@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDate
 import java.util.UUID
 
 
@@ -61,5 +62,14 @@ class VedtakController(private val stegService: StegService,
     fun hentVedtak(@PathVariable behandlingId: UUID): Ressurs<VedtakDto?> {
         tilgangService.validerTilgangTilBehandling(behandlingId)
         return Ressurs.success(vedtakService.hentVedtakHvisEksisterer(behandlingId))
+    }
+
+    @GetMapping("/eksternid/{eksternId}")
+    fun hentForventetInntektForEksternId(@PathVariable eksternId: Long, dato: LocalDate = LocalDate.now()): Ressurs<Int> {
+        val behandlingId = behandlingService.hentBehandlingPåEksternId(eksternId).id
+
+        val forventetInntekt = vedtakService.hentForventetInntektForVedtakOgDato(behandlingId, dato)
+                              ?: return Ressurs.funksjonellFeil("Fant ingen forventet inntekt for behandling $behandlingId og gitt dato $dato")
+        return Ressurs.success(forventetInntekt)
     }
 }
