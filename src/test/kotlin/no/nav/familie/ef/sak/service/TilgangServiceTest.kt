@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.service
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.fagsak.FagsakService
@@ -45,7 +46,8 @@ internal class TilgangServiceTest {
                            behandlingService = behandlingService,
                            fagsakService = fagsakService,
                            rolleConfig = rolleConfig,
-                           cacheManager = cacheManager)
+                           cacheManager = cacheManager,
+                           auditLogger = mockk(relaxed = true))
     private val mocketPersonIdent = "12345"
 
     private val fagsak = fagsak(fagsakpersoner(setOf(mocketPersonIdent)))
@@ -69,28 +71,30 @@ internal class TilgangServiceTest {
     internal fun `skal kaste ManglerTilgang dersom saksbehandler ikke har tilgang til person eller dets barn`() {
         every { personopplysningerIntegrajsonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns Tilgang(false)
 
-        assertFailsWith<ManglerTilgang> { tilgangService.validerTilgangTilPersonMedBarn(mocketPersonIdent) }
+        assertFailsWith<ManglerTilgang> {
+            tilgangService.validerTilgangTilPersonMedBarn(mocketPersonIdent, AuditLoggerEvent.ACCESS)
+        }
     }
 
     @Test
     internal fun `skal ikke feile når saksbehandler har tilgang til person og dets barn`() {
         every { personopplysningerIntegrajsonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns Tilgang(true)
 
-        tilgangService.validerTilgangTilPersonMedBarn(mocketPersonIdent)
+        tilgangService.validerTilgangTilPersonMedBarn(mocketPersonIdent, AuditLoggerEvent.ACCESS)
     }
 
     @Test
     internal fun `skal kaste ManglerTilgang dersom saksbehandler ikke har tilgang til behandling`() {
         every { personopplysningerIntegrajsonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns Tilgang(false)
 
-        assertFailsWith<ManglerTilgang> { tilgangService.validerTilgangTilBehandling(behandling.id) }
+        assertFailsWith<ManglerTilgang> { tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS) }
     }
 
     @Test
     internal fun `skal ikke feile når saksbehandler har tilgang til behandling`() {
         every { personopplysningerIntegrajsonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns Tilgang(true)
 
-        tilgangService.validerTilgangTilBehandling(behandling.id)
+        tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS)
     }
 
     @Test
@@ -98,8 +102,8 @@ internal class TilgangServiceTest {
         every { personopplysningerIntegrajsonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns Tilgang(true)
 
         mockBrukerContext("A")
-        tilgangService.validerTilgangTilPersonMedBarn(olaIdent)
-        tilgangService.validerTilgangTilPersonMedBarn(olaIdent)
+        tilgangService.validerTilgangTilPersonMedBarn(olaIdent, AuditLoggerEvent.ACCESS)
+        tilgangService.validerTilgangTilPersonMedBarn(olaIdent, AuditLoggerEvent.ACCESS)
         verify(exactly = 1) {
             personopplysningerIntegrajsonerClient.sjekkTilgangTilPersonMedRelasjoner(any())
         }
@@ -110,26 +114,11 @@ internal class TilgangServiceTest {
         every { personopplysningerIntegrajsonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns Tilgang(true)
 
         mockBrukerContext("A")
-        tilgangService.validerTilgangTilPersonMedBarn(olaIdent)
+        tilgangService.validerTilgangTilPersonMedBarn(olaIdent, AuditLoggerEvent.ACCESS)
         mockBrukerContext("B")
-        tilgangService.validerTilgangTilPersonMedBarn(olaIdent)
+        tilgangService.validerTilgangTilPersonMedBarn(olaIdent, AuditLoggerEvent.ACCESS)
 
         verify(exactly = 2) {
-            personopplysningerIntegrajsonerClient.sjekkTilgangTilPersonMedRelasjoner(any())
-        }
-    }
-
-    @Test
-    internal fun `validerTilgangTilBehandling - hvis to ulike saksbehandler kaller skal den sjekke tilgang på nytt`() {
-        every { personopplysningerIntegrajsonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns Tilgang(true)
-
-        mockBrukerContext("A")
-
-        tilgangService.validerTilgangTilBehandling(behandling.id)
-        tilgangService.validerTilgangTilBehandling(behandling.id)
-
-        verify(exactly = 1) {
-            behandlingService.hentAktivIdent(behandling.id)
             personopplysningerIntegrajsonerClient.sjekkTilgangTilPersonMedRelasjoner(any())
         }
     }
@@ -139,12 +128,26 @@ internal class TilgangServiceTest {
         every { personopplysningerIntegrajsonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns Tilgang(true)
 
         mockBrukerContext("A")
-        tilgangService.validerTilgangTilBehandling(behandling.id)
+
+        tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS)
+        tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS)
+
+        verify(exactly = 1) {
+            behandlingService.hentAktivIdent(behandling.id)
+            personopplysningerIntegrajsonerClient.sjekkTilgangTilPersonMedRelasjoner(any())
+        }
+    }
+
+    @Test
+    internal fun `validerTilgangTilBehandling - hvis to ulike saksbehandler kaller skal den sjekke tilgang på nytt`() {
+        every { personopplysningerIntegrajsonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns Tilgang(true)
+
+        mockBrukerContext("A")
+        tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS)
         mockBrukerContext("B")
-        tilgangService.validerTilgangTilBehandling(behandling.id)
+        tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS)
 
         verify(exactly = 2) {
-            behandlingService.hentAktivIdent(behandling.id)
             personopplysningerIntegrajsonerClient.sjekkTilgangTilPersonMedRelasjoner(any())
         }
     }

@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.vedtak
 
+import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
@@ -35,7 +36,7 @@ class VedtakController(private val stegService: StegService,
 
     @PostMapping("/{behandlingId}/send-til-beslutter")
     fun sendTilBeslutter(@PathVariable behandlingId: UUID): Ressurs<UUID> {
-        tilgangService.validerTilgangTilBehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         val behandling = behandlingService.hentBehandling(behandlingId)
         return Ressurs.success(stegService.håndterSendTilBeslutter(behandling).id)
     }
@@ -43,7 +44,7 @@ class VedtakController(private val stegService: StegService,
     @PostMapping("/{behandlingId}/beslutte-vedtak")
     fun beslutteVedtak(@PathVariable behandlingId: UUID,
                        @RequestBody request: BeslutteVedtakDto): Ressurs<UUID> {
-        tilgangService.validerTilgangTilBehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         if (!request.godkjent && request.begrunnelse.isNullOrBlank()) {
             throw ApiFeil("Mangler begrunnelse", HttpStatus.BAD_REQUEST)
         }
@@ -53,14 +54,14 @@ class VedtakController(private val stegService: StegService,
 
     @GetMapping("{behandlingId}/totrinnskontroll")
     fun hentTotrinnskontroll(@PathVariable behandlingId: UUID): ResponseEntity<Ressurs<TotrinnskontrollStatusDto>> {
-        tilgangService.validerTilgangTilBehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         val totrinnskontroll = totrinnskontrollService.hentTotrinnskontrollStatus(behandlingId)
         return ResponseEntity.ok(Ressurs.success(totrinnskontroll))
     }
 
     @GetMapping("{behandlingId}")
     fun hentVedtak(@PathVariable behandlingId: UUID): Ressurs<VedtakDto?> {
-        tilgangService.validerTilgangTilBehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(vedtakService.hentVedtakHvisEksisterer(behandlingId))
     }
 

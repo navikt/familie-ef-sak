@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.vedlegg
 
+import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -19,12 +20,13 @@ class VedleggController(private val vedleggService: VedleggService,
 
     @GetMapping("/{behandlingId}")
     fun finnVedleggForBehandling(@PathVariable behandlingId: UUID): Ressurs<JournalposterDto> {
-        tilgangService.validerTilgangTilBehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(vedleggService.finnJournalposter(behandlingId))
     }
 
     @GetMapping("/person/{personIdent}")
     fun finnVedleggForPerson(@PathVariable personIdent: String): Ressurs<List<DokumentinfoDto>> {
+        tilgangService.validerTilgangTilPerson(personIdent, AuditLoggerEvent.ACCESS)
         return Ressurs.success(vedleggService.finnDokumentInfo(personIdent))
     }
 }

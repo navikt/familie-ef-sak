@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.simulering
 
+import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.simulering.Simuleringsoppsummering
@@ -24,7 +25,7 @@ class SimuleringController(
 
     @GetMapping("/{behandlingId}")
     fun simulerForBehandling(@PathVariable behandlingId: UUID): Ressurs<Simuleringsoppsummering> {
-        tilgangService.validerTilgangTilBehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         return Ressurs.success(simuleringService.simuler(behandlingId))
     }
 }

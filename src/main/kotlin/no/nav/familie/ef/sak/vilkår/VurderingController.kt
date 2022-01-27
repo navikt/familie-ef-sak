@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.vilkår
 
+import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.vilkår.dto.OppdaterVilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.SvarPåVurderingerDto
@@ -39,7 +40,7 @@ class VurderingController(private val vurderingService: VurderingService,
     @PostMapping("vilkar")
     fun oppdaterVurderingVilkår(@RequestBody vilkårsvurdering: SvarPåVurderingerDto)
             : Ressurs<VilkårsvurderingDto> {
-        tilgangService.validerTilgangTilBehandling(vilkårsvurdering.behandlingId)
+        tilgangService.validerTilgangTilBehandling(vilkårsvurdering.behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
         try {
             return Ressurs.success(vurderingStegService.oppdaterVilkår(vilkårsvurdering))
@@ -54,27 +55,27 @@ class VurderingController(private val vurderingService: VurderingService,
 
     @PostMapping("nullstill")
     fun nullstillVilkår(@RequestBody request: OppdaterVilkårsvurderingDto): Ressurs<VilkårsvurderingDto> {
-        tilgangService.validerTilgangTilBehandling(request.behandlingId)
+        tilgangService.validerTilgangTilBehandling(request.behandlingId, AuditLoggerEvent.DELETE)
         tilgangService.validerHarSaksbehandlerrolle()
         return Ressurs.success(vurderingStegService.nullstillVilkår(request))
     }
 
     @PostMapping("ikkevurder")
     fun settVilkårTilSkalIkkeVurderes(@RequestBody request: OppdaterVilkårsvurderingDto): Ressurs<VilkårsvurderingDto> {
-        tilgangService.validerTilgangTilBehandling(request.behandlingId)
+        tilgangService.validerTilgangTilBehandling(request.behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
         return Ressurs.success(vurderingStegService.settVilkårTilSkalIkkeVurderes(request))
     }
 
     @GetMapping("{behandlingId}/vilkar")
     fun getVilkår(@PathVariable behandlingId: UUID): Ressurs<VilkårDto> {
-        tilgangService.validerTilgangTilBehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(vurderingService.hentEllerOpprettVurderinger(behandlingId))
     }
 
     @GetMapping("{behandlingId}/oppdater")
     fun oppdaterRegisterdata(@PathVariable behandlingId: UUID): Ressurs<VilkårDto> {
-        tilgangService.validerTilgangTilBehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         return Ressurs.success(vurderingService.oppdaterGrunnlagsdataOgHentEllerOpprettVurderinger(behandlingId))
     }
 }

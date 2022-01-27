@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.blankett
 
+import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
@@ -32,7 +33,7 @@ class BlankettController(private val tilgangService: TilgangService,
 
     @GetMapping("{behandlingId}")
     fun hentBlankettPdf(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
-        tilgangService.validerTilgangTilBehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         return blankettService.hentBlankettPdf(behandlingId)?.let {
             Ressurs.success(it.pdf.bytes)
         } ?: lagBlankettPdf(behandlingId)

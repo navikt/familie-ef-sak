@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.amelding
 
+import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
@@ -26,7 +27,7 @@ class InntektController(
     fun hentInntekt(@PathVariable("fagsakId") fagsakId: UUID,
                     @RequestParam fom: YearMonth?,
                     @RequestParam tom: YearMonth?): Ressurs<AMeldingInntektDto> {
-        tilgangService.validerTilgangTilFagsak(fagsakId)
+        tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
         val inntekt = inntektService.hentInntekt(fagsakId = fagsakId,
                                                  fom = fom ?: YearMonth.now().minusMonths(2),
                                                  tom = tom ?: YearMonth.now())
@@ -35,7 +36,7 @@ class InntektController(
 
     @GetMapping("fagsak/{fagsakId}/generer-url")
     fun genererAInntektUrl(@PathVariable("fagsakId") fagsakId: UUID): Ressurs<String> {
-        tilgangService.validerTilgangTilFagsak(fagsakId)
+        tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
         return success(inntektService.genererAInntektUrl(fagsakId))
     }
 }

@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.brev
 
+import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
@@ -23,7 +24,7 @@ class BrevmottakereController(private val tilgangService: TilgangService,
 
     @GetMapping("/{behandlingId}")
     fun hentBrevmottakere(@PathVariable behandlingId: UUID): Ressurs<BrevmottakereDto?> {
-        tilgangService.validerTilgangTilBehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
 
         return Ressurs.success(brevmottakereService.hentBrevmottakere(behandlingId))
     }
@@ -31,7 +32,7 @@ class BrevmottakereController(private val tilgangService: TilgangService,
     @PostMapping("/{behandlingId}")
     fun velgBrevmottakere(@PathVariable behandlingId: UUID,
                           @RequestBody brevmottakere: BrevmottakereDto): Ressurs<UUID> {
-        tilgangService.validerTilgangTilBehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
         if (!featureToggleService.isEnabled("familie.ef.sak.brevmottakere-verge-og-fullmakt")) {
             throw Feil("Brevmottaker-funksjonaliteten er ikke tilgjengelig",
