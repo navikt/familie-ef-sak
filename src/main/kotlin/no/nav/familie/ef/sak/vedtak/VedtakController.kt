@@ -67,10 +67,10 @@ class VedtakController(private val stegService: StegService,
     }
 
     @GetMapping("/eksternid/{eksternId}")
-    fun hentForventetInntektForEksternId(@PathVariable eksternId: Long, @DateTimeFormat(pattern = "yyyy-MM-dd") dato: LocalDate = LocalDate.now()): Ressurs<Int> {
+    fun hentForventetInntektForEksternId(@PathVariable eksternId: Long, @DateTimeFormat(pattern = "yyyy-MM-dd") dato: LocalDate?): Ressurs<Int> {
         val behandlingId = behandlingService.hentBehandlingPåEksternId(eksternId).id
 
-        val forventetInntekt = vedtakService.hentForventetInntektForVedtakOgDato(behandlingId, dato)
+        val forventetInntekt = vedtakService.hentForventetInntektForVedtakOgDato(behandlingId, dato ?: LocalDate.now())
                               ?: return Ressurs.funksjonellFeil("Fant ingen forventet inntekt for behandling $behandlingId og gitt dato $dato")
         return Ressurs.success(forventetInntekt)
     }
