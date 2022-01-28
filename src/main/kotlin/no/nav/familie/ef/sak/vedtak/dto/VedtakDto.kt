@@ -69,7 +69,8 @@ fun VedtakDto.tilVedtak(behandlingId: UUID): Vedtak = when (this) {
             inntektBegrunnelse = this.inntektBegrunnelse,
             resultatType = this.resultatType,
             perioder = PeriodeWrapper(perioder = this.perioder.tilDomene()),
-            inntekter = InntektWrapper(inntekter = this.inntekter.tilInntektsperioder()))
+            inntekter = InntektWrapper(inntekter = this.inntekter.tilInntektsperioder()),
+            samordningsfradragType = this.samordningsfradragType)
     is Opphør -> Vedtak(behandlingId = behandlingId,
                         avslåBegrunnelse = begrunnelse,
                         resultatType = ResultatType.OPPHØRT,
