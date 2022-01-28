@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BeregnYtelseSteg
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.task.PollStatusFraIverksettTask
+import no.nav.familie.ef.sak.behandlingsflyt.task.SjekkMigrertStatusIInfotrygdTask
 import no.nav.familie.ef.sak.beregning.BeregningService
 import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.beregning.tilInntektsperioder
@@ -14,7 +15,9 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.fagsak.dto.MigreringInfo
+import no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeUtil.filtrerOgSorterPerioderFraInfotrygd
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
+import no.nav.familie.ef.sak.infotrygd.InfotrygdStønadPerioderDto
 import no.nav.familie.ef.sak.infotrygd.SummertInfotrygdPeriodeDto
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
@@ -30,9 +33,11 @@ import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.ef.felles.StønadType
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdEndringKode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSak
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResultat
 import no.nav.familie.prosessering.domene.TaskRepository
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -54,6 +59,8 @@ class MigreringService(
         private val infotrygdService: InfotrygdService,
         private val beregningService: BeregningService
 ) {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     private class MigreringException(val årsak: String) : RuntimeException()
 
@@ -109,6 +116,7 @@ class MigreringService(
         }
         fagsakService.settFagsakTilMigrert(fagsak.id)
         val behandling = behandlingService.opprettMigrering(fagsak.id)
+        logger.info("Migrerer fagsak=${fagsak.id} behandling=$behandling fra=$fra til=$til")
         iverksettService.startBehandling(behandling, fagsak)
 
         grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
@@ -122,18 +130,38 @@ class MigreringService(
                                                          perioder = vedtaksperioder,
                                                          inntekter = inntekter))
 
-        // TODO burde vi sjekke att simulere ikke gir diff? Ikke sikkert den gir noe riktig beløp for neste måned?
-
         behandlingService.oppdaterResultatPåBehandling(behandling.id, BehandlingResultat.INNVILGET)
         behandlingService.oppdaterStegPåBehandling(behandling.id, StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT)
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
         val iverksettDto = iverksettingDtoMapper.tilMigreringDto(behandling)
         iverksettClient.iverksettMigrering(iverksettDto)
         taskRepository.save(PollStatusFraIverksettTask.opprettTask(behandling.id))
-
-        // TODO opprett task som sjekker om den har fått riktig status i Infotrygd
+        taskRepository.save(SjekkMigrertStatusIInfotrygdTask.opprettTask(behandling.id, fra.minusMonths(1)))
 
         return behandlingService.hentBehandling(behandling.id)
+    }
+
+    /**
+     * Sjekker att perioden som har kode [InfotrygdEndringKode.OVERTFØRT_NY_LØSNING] har opphør i måneden jobbet blir kjørt.
+     * Den sjekker også att de summerte periodene sin max(stønadFom) går til den samme måneden
+     */
+    fun erOpphørtIInfotrygd(behandlingId: UUID, opphørsmåned: YearMonth): Boolean {
+        val personIdent = behandlingService.hentAktivIdent(behandlingId)
+        val perioder = hentPerioder(personIdent)
+        val perioderStønadTom = filtrerOgSorterPerioderFraInfotrygd(perioder.perioder)
+                .find { it.kode == InfotrygdEndringKode.OVERTFØRT_NY_LØSNING }?.opphørsdato
+        val maxStønadTom = perioder.summert.maxOf { it.stønadTom }
+        val stønadTomErLike =
+                perioderStønadTom == maxStønadTom // liten ekstrasjekk, som verifiserer att summertePerioder er riktig
+        val stønadTomErFørEllerLikOpphørsmåned = YearMonth.of(maxStønadTom.year, maxStønadTom.month) <= opphørsmåned
+        val erOpphørtIInfotrygd = stønadTomErLike && stønadTomErFørEllerLikOpphørsmåned
+        if (!erOpphørtIInfotrygd) {
+            logger.warn("erOpphørtIInfotrygd - Datoer ikke like behandling=$behandlingId " +
+                        "sistePeriodenTom=$perioderStønadTom " +
+                        "summertMaxTom=$maxStønadTom " +
+                        "opphørsmåned=$opphørsmåned")
+        }
+        return erOpphørtIInfotrygd
     }
 
     private fun hentGjeldendePeriodeOgValiderState(fagsakId: UUID, kjøremåned: YearMonth): SummertInfotrygdPeriodeDto {
@@ -148,7 +176,7 @@ class MigreringService(
         }
         val periode = gjeldendePerioder.single()
         if (periode.opphørsdato != null) { // Håndterer ikke denne nå
-            throw MigreringException("Har opphørsdatp (${periode.opphørsdato}) i perioden")
+            throw MigreringException("Har opphørsdato (${periode.opphørsdato}) i perioden")
         }
         return periode
     }
@@ -187,13 +215,17 @@ class MigreringService(
     private fun hentGjeldendePerioderFraInfotrygdOgValider(personIdent: String,
                                                            kjøremåned: YearMonth): List<SummertInfotrygdPeriodeDto> {
 
-        val allePerioder = infotrygdService.hentDtoPerioder(personIdent)
-        val perioderForOvergangsstønad = allePerioder.overgangsstønad
-        perioderForOvergangsstønad.perioder.find { it.personIdent != personIdent }?.let {
+        val perioder = hentPerioder(personIdent)
+        perioder.perioder.find { it.personIdent != personIdent }?.let {
             throw MigreringException("Det finnes perioder som inneholder annet fnr=${it.personIdent}. " +
                                      "Disse vedtaken må endres til aktivt fnr i Infotrygd")
         }
-        return perioderForOvergangsstønad.summert.filter { it.stønadTom >= førsteDagenINesteMåned(kjøremåned) }
+        return perioder.summert.filter { it.stønadTom >= førsteDagenINesteMåned(kjøremåned) }
+    }
+
+    private fun hentPerioder(personIdent: String): InfotrygdStønadPerioderDto {
+        val allePerioder = infotrygdService.hentDtoPerioder(personIdent)
+        return allePerioder.overgangsstønad
     }
 
     private fun kjøremåned() = YearMonth.now()

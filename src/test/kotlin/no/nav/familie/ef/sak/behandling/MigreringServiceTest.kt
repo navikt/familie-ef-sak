@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillBehandlingTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.LagSaksbehandlingsblankettTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.PollStatusFraIverksettTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.PubliserVedtakshendelseTask
+import no.nav.familie.ef.sak.behandlingsflyt.task.SjekkMigrertStatusIInfotrygdTask
 import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.fagsak.FagsakService
@@ -38,6 +39,7 @@ import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.felles.StønadType
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdEndringKode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSak
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResponse
@@ -46,8 +48,10 @@ import no.nav.familie.kontrakter.ef.iverksett.IverksettStatus
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.error.TaskExceptionUtenStackTrace
 import no.nav.familie.prosessering.internal.TaskWorker
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -77,7 +81,9 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var iverksettClient: IverksettClient
     @Autowired private lateinit var infotrygdReplikaClient: InfotrygdReplikaClient
 
-    private val fra = YearMonth.now()
+    private val periodeFraMåned = YearMonth.now().minusMonths(10)
+    private val opphørsmåned = YearMonth.now()
+    private val migrerFraDato = YearMonth.now().plusMonths(1)
     private val til = YearMonth.now().plusMonths(1)
     private val forventetInntekt = BigDecimal.ZERO
     private val samordningsfradrag = BigDecimal.ZERO
@@ -103,7 +109,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
 
         with(tilkjentYtelseService.hentForBehandling(migrering.id).andelerTilkjentYtelse) {
             assertThat(this).hasSize(1)
-            assertThat(this[0].stønadFom).isEqualTo(fra.atDay(1))
+            assertThat(this[0].stønadFom).isEqualTo(migrerFraDato.atDay(1))
             assertThat(this[0].stønadTom).isEqualTo(til.atEndOfMonth())
         }
         with(behandlingService.hentBehandling(migrering.id)) {
@@ -121,6 +127,13 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         val revurdering = opprettRevurderingOgIverksett(migrering)
 
         verifiserBehandlingErFerdigstilt(revurdering)
+    }
+
+    @Test
+    internal fun `migrert behandling er ikke opphørt i Infotrygd`() {
+        assertThatThrownBy { opprettOgIverksettMigrering(opphørsdato = null) }
+                .hasMessageContaining(SjekkMigrertStatusIInfotrygdTask.TYPE)
+                .hasCauseInstanceOf(TaskExceptionUtenStackTrace::class.java)
     }
 
     @Test
@@ -229,6 +242,29 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         assertThat(beløpsperiode.periode.tildato).isEqualTo(stønadTom)
     }
 
+    @Test
+    internal fun `hentMigreringInfo - har periode frem i tiden`() {
+        val nå = YearMonth.of(2021, 1)
+        val stønadFom = nå.plusMonths(10)
+        val stønadTom = nå.plusMonths(10)
+        val infotrygdPeriode =
+                InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(
+                        stønadFom = stønadFom.atDay(1),
+                        stønadTom = stønadTom.atEndOfMonth(),
+                        inntektsgrunnlag = 10,
+                        samordningsfradrag = 5
+                )
+        every { infotrygdReplikaClient.hentPerioder(any()) } returns
+                InfotrygdPeriodeResponse(listOf(infotrygdPeriode), emptyList(), emptyList())
+        val fagsak = fagsakService.hentEllerOpprettFagsak("1", Stønadstype.OVERGANGSSTØNAD)
+
+        val migreringInfo = migreringService.hentMigreringInfo(fagsak.id, nå)
+
+        assertThat(migreringInfo.kanMigreres).isTrue
+        assertThat(migreringInfo.stønadFom).isEqualTo(stønadFom)
+        assertThat(migreringInfo.stønadFom).isEqualTo(stønadTom)
+    }
+
     private fun verifiserVurderinger(migrering: Behandling) {
         val vilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(migrering.id)
         val alleVurderingerManglerSvar = vilkårsvurderinger.flatMap { it.delvilkårsvurdering.delvilkårsvurderinger }
@@ -247,7 +283,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         val revurdering = testWithBrukerContext { revurderingService.opprettRevurderingManuelt(revurderingDto) }
         innvilgOgSendTilBeslutter(revurdering)
         godkjennTotrinnskontroll(revurdering)
-        kjørTasks()
+        kjørTasks(erMigrering = false)
         return revurdering
     }
 
@@ -259,12 +295,12 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     }
 
     private fun innvilgOgSendTilBeslutter(behandling: Behandling) {
-        val vedtaksperiode = VedtaksperiodeDto(årMånedFra = fra,
+        val vedtaksperiode = VedtaksperiodeDto(årMånedFra = migrerFraDato,
                                                årMånedTil = til,
                                                aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
                                                periodeType = VedtaksperiodeType.HOVEDPERIODE)
 
-        val inntekt = Inntekt(fra, forventetInntekt = forventetInntekt, samordningsfradrag = samordningsfradrag)
+        val inntekt = Inntekt(migrerFraDato, forventetInntekt = forventetInntekt, samordningsfradrag = samordningsfradrag)
         val innvilget = Innvilget(resultatType = ResultatType.INNVILGE,
                                   periodeBegrunnelse = null,
                                   inntektBegrunnelse = null,
@@ -287,21 +323,40 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         }
     }
 
-    private fun opprettOgIverksettMigrering(): Behandling {
+    private fun opprettOgIverksettMigrering(opphørsdato: YearMonth? = opphørsmåned): Behandling {
+        mockPerioder(opphørsdato)
+
         val fagsak = fagsakService.hentEllerOpprettFagsak("1", Stønadstype.OVERGANGSSTØNAD)
         val behandling = testWithBrukerContext(groups = listOf(rolleConfig.beslutterRolle)) {
-            migreringService.opprettMigrering(fagsak, fra, til, forventetInntekt.toInt(), samordningsfradrag.toInt())
+            migreringService.opprettMigrering(fagsak, migrerFraDato, til, forventetInntekt.toInt(), samordningsfradrag.toInt())
         }
 
         kjørTasks()
         return behandling
     }
 
-    private fun kjørTasks() {
-        listOf(PollStatusFraIverksettTask.TYPE,
-               LagSaksbehandlingsblankettTask.TYPE,
-               FerdigstillBehandlingTask.TYPE,
-               PubliserVedtakshendelseTask.TYPE).forEach { type ->
+    /**
+     * Mocker 2 vedtak, hvor vedtakId2 har høyest precedence, og setter opphørsdato på denne hvis det er type opphør
+     */
+    private fun mockPerioder(opphørsdato: YearMonth?) {
+        val periode = InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(vedtakId = 1,
+                                                                   stønadFom = periodeFraMåned.atDay(1),
+                                                                   stønadTom = til.atEndOfMonth())
+        val kodePeriode2 = opphørsdato?.let { InfotrygdEndringKode.OVERTFØRT_NY_LØSNING } ?: InfotrygdEndringKode.NY
+        val periodeForKallNr2 = periode.copy(vedtakId = 2,
+                                             opphørsdato = opphørsdato?.atEndOfMonth(),
+                                             kode = kodePeriode2)
+        every { infotrygdReplikaClient.hentPerioder(any()) } returns
+                InfotrygdPeriodeResponse(listOf(periode), emptyList(), emptyList()) andThen
+                InfotrygdPeriodeResponse(listOf(periodeForKallNr2), emptyList(), emptyList())
+    }
+
+    private fun kjørTasks(erMigrering: Boolean = true) {
+        listOfNotNull(PollStatusFraIverksettTask.TYPE,
+                      LagSaksbehandlingsblankettTask.TYPE,
+                      FerdigstillBehandlingTask.TYPE,
+                      PubliserVedtakshendelseTask.TYPE,
+                      if (erMigrering) SjekkMigrertStatusIInfotrygdTask.TYPE else null).forEach { type ->
             try {
                 val task = taskRepository.findAll()
                         .filter { it.status == Status.KLAR_TIL_PLUKK || it.status == Status.UBEHANDLET }
