@@ -31,7 +31,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal håndtere en ny søknad`() {
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.UTREDES))
 
         stegService.håndterVilkår(behandling)
@@ -39,7 +39,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal legge inn historikkinnslag for beregn ytelse selv om behandlingen står på send til beslutter`() {
-        val fagsak = fagsakRepository.insert(fagsak(fagsakpersoner(setOf("0101017227"))))
+        val fagsak = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(setOf("0101017227"))))
         val behandling = behandlingRepository.insert(behandling(fagsak,
                                                                 status = BehandlingStatus.UTREDES,
                                                                 steg = StegType.SEND_TIL_BESLUTTER))
@@ -64,7 +64,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal feile håndtering av ny søknad hvis en behandling er ferdigstilt`() {
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak, steg = StegType.BEHANDLING_FERDIGSTILT))
 
         assertThrows<IllegalStateException> {
@@ -74,7 +74,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal feile håndtering av ny søknad hvis en behandling er sendt til beslutter`() {
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak, steg = StegType.BESLUTTE_VEDTAK))
 
         assertThrows<IllegalStateException> {

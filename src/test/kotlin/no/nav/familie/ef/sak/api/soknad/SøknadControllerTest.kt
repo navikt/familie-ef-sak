@@ -4,7 +4,6 @@ import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
@@ -29,7 +28,6 @@ import java.util.UUID
 
 internal class SøknadControllerTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var fagsakRepository: FagsakRepository
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
     @Autowired lateinit var behandlingService: BehandlingService
     @Autowired lateinit var fagsakService: FagsakService
@@ -42,7 +40,7 @@ internal class SøknadControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `Skal returnere 200 OK med status IKKE_TILGANG dersom man ikke har tilgang til brukeren`() {
-        val fagsak = fagsakRepository.insert(fagsak(identer = setOf(FagsakPerson("ikkeTilgang"))))
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(FagsakPerson("ikkeTilgang"))))
         val behandling = behandlingRepository.insert(behandling(fagsak))
         val respons = hentSøknadData(behandling.id)
 

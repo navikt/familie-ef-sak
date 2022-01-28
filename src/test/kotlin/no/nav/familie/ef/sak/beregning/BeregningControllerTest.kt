@@ -55,7 +55,7 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `Skal klare å inserte ett vedtak med resultatet avslå`() {
-        val fagsak = fagsakRepository.insert(fagsak(identer = setOf(FagsakPerson(""))))
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(FagsakPerson(""))))
         val behandling = behandlingRepository.insert(behandling(fagsak,
                                                                 steg = StegType.VEDTA_BLANKETT,
                                                                 type = BehandlingType.BLANKETT,
@@ -70,7 +70,7 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `Skal klare å inserte ett vedtak med resultatet innvilge`() {
-        val fagsak = fagsakRepository.insert(fagsak(identer = setOf(FagsakPerson(""))))
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(FagsakPerson(""))))
         val behandling = behandlingRepository.insert(behandling(fagsak,
                                                                 steg = StegType.VEDTA_BLANKETT,
                                                                 type = BehandlingType.BLANKETT,
@@ -108,7 +108,7 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
     }
 
     private fun lagFagsakOgBehandling(): Behandling {
-        val fagsak = fagsakRepository.insert(fagsak(identer = setOf(FagsakPerson(""))))
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(FagsakPerson(""))))
         val behandling = behandlingRepository.insert(behandling(fagsak,
                                                                 steg = StegType.VEDTA_BLANKETT,
                                                                 type = BehandlingType.FØRSTEGANGSBEHANDLING,

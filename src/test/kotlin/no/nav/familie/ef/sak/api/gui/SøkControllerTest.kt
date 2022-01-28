@@ -42,7 +42,7 @@ internal class SøkControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `Gitt person med fagsak når søk på personensident kallas skal det returneres 200 OK med Søkeresultat`() {
-        fagsakRepository.insert(fagsak(identer = setOf(FagsakPerson("01010199999"))))
+        testoppsettService.lagreFagsak(fagsak(identer = setOf(FagsakPerson("01010199999"))))
 
         val response = søkPerson("01010199999")
         assertThat(response.statusCode).isEqualTo(
