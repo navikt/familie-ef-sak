@@ -47,7 +47,7 @@ internal class JournalføringControllerTest {
         } returns journalpostMedAktørId
 
         every {
-            tilgangService.validerTilgangTilPersonMedBarn(any())
+            tilgangService.validerTilgangTilPersonMedBarn(any(), any())
         } just Runs
 
         val journalpostResponse = journalføringController.hentJournalPost("1234")
@@ -63,7 +63,7 @@ internal class JournalføringControllerTest {
         } returns journalpostMedFødselsnummer
 
         every {
-            tilgangService.validerTilgangTilPersonMedBarn(any())
+            tilgangService.validerTilgangTilPersonMedBarn(any(), any())
         } just Runs
 
         val journalpostResponse = journalføringController.hentJournalPost("1234")
@@ -79,7 +79,7 @@ internal class JournalføringControllerTest {
         } returns journalpostMedFødselsnummer
 
         every {
-            tilgangService.validerTilgangTilPersonMedBarn(any())
+            tilgangService.validerTilgangTilPersonMedBarn(any(), any())
         } throws ManglerTilgang("Ingen tilgang")
 
         assertFailsWith<ManglerTilgang> {
@@ -113,7 +113,7 @@ internal class JournalføringControllerTest {
         } returns journalpostMedFødselsnummer
 
         every {
-            tilgangService.validerTilgangTilPersonMedBarn(any())
+            tilgangService.validerTilgangTilPersonMedBarn(any(), any())
         } just Runs
 
         every {

@@ -5,7 +5,7 @@ import no.nav.familie.kontrakter.ef.søknad.Søknadsfelt
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 
-@Table("soker")
+@Table("soknad_soker")
 data class Søker(@Column("fodselsnummer")
                  val fødselsnummer: String,
                  val navn: String)

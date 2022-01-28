@@ -16,7 +16,7 @@ interface SøknadRepository : RepositoryInterface<Søknad, UUID>, InsertUpdateRe
 
     // language=PostgreSQL
     @Query("""SELECT ss.dato_mottatt
-                    FROM grunnlag_soknad soknad
+                    FROM soknad_grunnlag soknad
                     JOIN soknadsskjema ss ON soknad.soknadsskjema_id = ss.id
                     WHERE soknad.behandling_id = :behandlingId""")
     fun finnDatoMottattForSøknad(behandlingId: UUID): LocalDateTime

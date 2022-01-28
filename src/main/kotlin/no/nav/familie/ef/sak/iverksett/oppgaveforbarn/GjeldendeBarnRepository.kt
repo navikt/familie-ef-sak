@@ -16,9 +16,9 @@ interface GjeldendeBarnRepository : RepositoryInterface<BarnTilUtplukkForOppgave
     @Query("""
         SELECT b.id behandling_id, s.fodselsnummer fodselsnummer_soker, b2.fodselsnummer fodselsnummer_barn, b2.fodsel_termindato 
         FROM gjeldende_iverksatte_behandlinger b
-            JOIN grunnlag_soknad gs ON gs.behandling_id = b.id
+            JOIN soknad_grunnlag gs ON gs.behandling_id = b.id
             JOIN soknadsskjema s ON gs.soknadsskjema_id = s.id
-            JOIN barn b2 ON s.id = b2.soknadsskjema_id
+            JOIN soknad_barn b2 ON s.id = b2.soknadsskjema_id
         WHERE  b.stonadstype=:stønadstype AND EXISTS(SELECT 1 FROM andel_tilkjent_ytelse aty
             JOIN tilkjent_ytelse ty ON aty.tilkjent_ytelse = ty.id
             WHERE ty.id = aty.tilkjent_ytelse 

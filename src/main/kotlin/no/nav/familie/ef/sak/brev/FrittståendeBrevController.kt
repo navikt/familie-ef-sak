@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.brev
 
+import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevDto
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -17,12 +18,13 @@ class FrittståendeBrevController(private val frittståendeBrevService: Frittst�
 
     @PostMapping("")
     fun forhåndsvisFrittståendeBrev(@RequestBody brevInnhold: FrittståendeBrevDto): Ressurs<ByteArray> {
+        tilgangService.validerTilgangTilFagsak(brevInnhold.fagsakId, AuditLoggerEvent.UPDATE)
         return Ressurs.success(frittståendeBrevService.forhåndsvisFrittståendeBrev(brevInnhold))
     }
 
     @PostMapping("/send")
     fun sendFrittståendeBrev(@RequestBody brevInnhold: FrittståendeBrevDto): Ressurs<Unit> {
-        tilgangService.validerTilgangTilFagsak(brevInnhold.fagsakId)
+        tilgangService.validerTilgangTilFagsak(brevInnhold.fagsakId, AuditLoggerEvent.CREATE)
         tilgangService.validerHarSaksbehandlerrolle()
         return Ressurs.success(frittståendeBrevService.sendFrittståendeBrev(brevInnhold))
     }

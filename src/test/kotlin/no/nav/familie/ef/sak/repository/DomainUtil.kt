@@ -103,7 +103,9 @@ fun tilkjentYtelse(behandlingId: UUID, personIdent: String): TilkjentYtelse = Ti
                                     samordningsfradrag = 0,
                                     kildeBehandlingId = behandlingId)))
 
-fun vedtak(behandlingId: UUID, resultatType: ResultatType = ResultatType.INNVILGE): Vedtak =
+fun vedtak(behandlingId: UUID,
+           resultatType: ResultatType = ResultatType.INNVILGE,
+           inntekter: InntektWrapper = InntektWrapper(listOf(inntektsperiode()))): Vedtak =
         Vedtak(behandlingId = behandlingId,
                resultatType = resultatType,
                periodeBegrunnelse = "OK",
@@ -113,7 +115,10 @@ fun vedtak(behandlingId: UUID, resultatType: ResultatType = ResultatType.INNVILG
                                                                datoTil = LocalDate.of(2021, 12, 31),
                                                                aktivitet = AktivitetType.BARN_UNDER_ETT_ÅR,
                                                                periodeType = VedtaksperiodeType.HOVEDPERIODE))),
-               inntekter = InntektWrapper(listOf(Inntektsperiode(startDato = LocalDate.of(2021, 1, 1),
-                                                                 sluttDato = LocalDate.of(2021, 12, 1),
-                                                                 inntekt = BigDecimal.valueOf(100000),
-                                                                 samordningsfradrag = BigDecimal.valueOf(500)))))
+               inntekter = inntekter)
+
+fun inntektsperiode(startDato: LocalDate = LocalDate.of(2021, 1, 1),
+                    sluttDato: LocalDate = LocalDate.of(2021, 12, 1),
+                    inntekt: BigDecimal = BigDecimal.valueOf(100000),
+                    samordningsfradrag: BigDecimal = BigDecimal.valueOf(500)) =
+        Inntektsperiode(startDato, sluttDato, inntekt, samordningsfradrag)

@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.vedtak.dto.tilVedtak
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtakDto
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.util.UUID
 
 @Service
@@ -46,4 +47,18 @@ class VedtakService(private val vedtakRepository: VedtakRepository) {
         vedtakRepository.update(oppdatertVedtak)
     }
 
+    fun hentForventetInntektForVedtakOgDato(behandlingId: UUID, dato: LocalDate): Int? {
+        val vedtak = hentVedtak(behandlingId)
+
+        return vedtak.inntekter?.inntekter?.firstOrNull {
+            dato.isEqualOrAfter(it.startDato) && dato.isEqualOrBefore(it.sluttDato)
+        }?.inntekt?.toInt()
+    }
+
+    fun hentHarAktivtVedtak(behandlingId: UUID, localDate: LocalDate = LocalDate.now()): Boolean {
+        return hentVedtak(behandlingId).perioder?.perioder?.any { it.datoFra.isEqualOrBefore(localDate) && it.datoTil.isEqualOrAfter(localDate) } ?: false
+    }
 }
+
+fun LocalDate.isEqualOrAfter(dato: LocalDate) = this.equals(dato) || this.isAfter(dato)
+fun LocalDate.isEqualOrBefore(dato: LocalDate) = this.equals(dato) || this.isBefore(dato)

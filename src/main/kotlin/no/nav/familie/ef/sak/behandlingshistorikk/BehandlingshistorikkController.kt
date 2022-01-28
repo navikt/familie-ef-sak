@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.behandlingshistorikk
 
+import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandlingshistorikk.dto.HendelseshistorikkDto
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
@@ -20,7 +21,7 @@ class BehandlingshistorikkController(private val behandlingshistorikkService: Be
 
     @GetMapping("{behandlingId}")
     fun hentBehandlingshistorikk(@PathVariable behandlingId: UUID): Ressurs<List<HendelseshistorikkDto>> {
-        tilgangService.validerTilgangTilBehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         val behandling = behandlingService.hentBehandling(behandlingId)
         val behandlingHistorikk = behandlingshistorikkService.finnHendelseshistorikk(behandling)
         return Ressurs.success(behandlingHistorikk)
