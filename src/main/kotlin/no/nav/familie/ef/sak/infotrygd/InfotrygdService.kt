@@ -7,6 +7,7 @@ import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdEndringKode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeRequest
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSøkRequest
 import org.springframework.stereotype.Service
 
@@ -34,6 +35,11 @@ class InfotrygdService(private val infotrygdReplikaClient: InfotrygdReplikaClien
                 barnetilsyn = mapPerioder(perioder.barnetilsyn),
                 skolepenger = mapPerioder(perioder.skolepenger)
         )
+    }
+
+    fun hentSaker(personIdent: String): InfotrygdSakResponse {
+        val response = infotrygdReplikaClient.hentSaker(InfotrygdSøkRequest(hentPersonIdenter(personIdent)))
+        return response.copy(saker = response.saker.sortedByDescending { it.mottattDato })
     }
 
     /**

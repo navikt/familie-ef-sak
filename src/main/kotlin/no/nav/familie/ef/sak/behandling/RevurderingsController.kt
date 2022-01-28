@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.behandling
 
+import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -20,7 +21,7 @@ class RevurderingsController(
 
     @PostMapping("{fagsakId}")
     fun startRevurdering(@RequestBody revurderingInnhold: RevurderingDto): Ressurs<UUID> {
-        tilgangService.validerTilgangTilFagsak(revurderingInnhold.fagsakId)
+        tilgangService.validerTilgangTilFagsak(revurderingInnhold.fagsakId, AuditLoggerEvent.CREATE)
         tilgangService.validerHarSaksbehandlerrolle()
         val revurdering = revurderingService.opprettRevurderingManuelt(revurderingInnhold)
         return Ressurs.success(revurdering.id)

@@ -31,7 +31,7 @@ class VilkårGrunnlagService(private val medlemskapMapper: MedlemskapMapper,
         val registergrunnlagData = grunnlagsdataService.hentGrunnlagsdata(behandlingId)
         val grunnlagsdata = registergrunnlagData.grunnlagsdata
 
-        val aktivitet = søknad?.let { AktivitetMapper.tilDto(aktivitet = it.aktivitet, situasjon = it.situasjon, barn = it.barn) }
+        val aktivitet = søknad?.let { AktivitetMapper.tilDto(aktivitet = it.aktivitet, situasjon = it.situasjon, søknadBarn = it.barn) }
         // TODO barn må kanskje legges til i en revurdering av migrering på noen måte?
         val barnMedSamvær = søknad?.let { mapBarnMedSamvær(grunnlagsdata, it) } ?: emptyList()
         val medlemskap = medlemskapMapper.tilDto(grunnlagsdata, søknad?.medlemskap)

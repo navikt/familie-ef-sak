@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.tilbakekreving
 
+import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.tilbakekreving.domain.tilDto
 import no.nav.familie.ef.sak.tilbakekreving.dto.TilbakekrevingDto
@@ -24,7 +25,7 @@ class TilbakekrevingController(private val tilgangService: TilgangService,
 
     @PostMapping("/{behandlingId}")
     fun lagreTilbakekreving(@PathVariable behandlingId: UUID, @RequestBody tilbakekrevingDto: TilbakekrevingDto): Ressurs<UUID> {
-        tilgangService.validerTilgangTilBehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
         tilbakekrevingService.lagreTilbakekreving(tilbakekrevingDto, behandlingId)
         return Ressurs.success(behandlingId)
@@ -37,26 +38,26 @@ class TilbakekrevingController(private val tilgangService: TilgangService,
 
     @GetMapping("/{behandlingId}")
     fun hentTilbakekreving(@PathVariable behandlingId: UUID): Ressurs<TilbakekrevingDto?> {
-        tilgangService.validerTilgangTilBehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(tilbakekrevingService.hentTilbakekreving(behandlingId)?.tilDto())
     }
 
     @GetMapping("/behandlinger/{fagsakId}")
     fun hentTilbakekekrevingBehandlinger(@PathVariable fagsakId: UUID): Ressurs<List<TilbakekrevingBehandling>> {
-        tilgangService.validerTilgangTilFagsak(fagsakId)
+        tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(tilbakekrevingService.hentTilbakekrevingBehandlinger(fagsakId))
     }
 
     @GetMapping("/{behandlingId}/brev")
     fun genererBrevMedEskisterendeVarseltekst(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
-        tilgangService.validerTilgangTilBehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         return Ressurs.success(tilbakekrevingService.genererBrevMedVarseltekstFraEksisterendeTilbakekreving(behandlingId))
     }
 
     @PostMapping("/{behandlingId}/brev/generer")
     fun genererTilbakekekrevingBrevMedVarseltekst(@PathVariable behandlingId: UUID,
                                                   @RequestBody varseltekstDto: VarseltekstDto): Ressurs<ByteArray> {
-        tilgangService.validerTilgangTilBehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         return Ressurs.success(tilbakekrevingService.genererBrev(behandlingId, varseltekstDto.varseltekst))
     }
 

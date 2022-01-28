@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.tilkjentytelse
 
+import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -18,7 +19,7 @@ class TilkjentYtelseController(private val tilkjentYtelseService: TilkjentYtelse
 
     @GetMapping("/behandling/{behandlingId}")
     fun hentTilkjentYtelseForBehandling(@PathVariable behandlingId: UUID): Ressurs<TilkjentYtelseDto> {
-        tilgangService.validerTilgangTilBehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(tilkjentYtelseService.hentForBehandling(behandlingId).tilDto())
     }
 }

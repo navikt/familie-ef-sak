@@ -160,8 +160,8 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
         return migreringService.opprettMigrering(fagsak = fagsak,
                                                  fra = YearMonth.now(),
                                                  til = YearMonth.now().plusMonths(1),
-                                                 forventetInntekt = BigDecimal.ZERO,
-                                                 samordningsfradrag = BigDecimal.ZERO)
+                                                 inntektsgrunnlag = 0,
+                                                 samordningsfradrag = 0)
     }
 
     private fun arkiver(fnr: String): String {

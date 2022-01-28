@@ -5,7 +5,7 @@ import no.nav.familie.ef.sak.opplysninger.søknad.domain.Aktivitet
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Arbeidsgiver
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Arbeidssituasjon
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Arbeidssøker
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.Barn
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Dokumentasjon
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.GjelderDeg
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Selvstendig
@@ -105,21 +105,21 @@ internal class AktivitetMapperTest {
                          ønskerDuMinst50ProsentStilling = true,
                          ikkeVilligTilÅTaImotTilbudOmArbeidDokumentasjon = dokumentliste())
 
-    private fun barn(): Set<Barn> =
-            setOf(Barn(id = UUID.randomUUID(),
-                       navn = "navn",
-                       fødselsnummer = null,
-                       harSkalHaSammeAdresse = false,
-                       skalBoHosSøker = null,
-                       ikkeRegistrertPåSøkersAdresseBeskrivelse = null,
-                       erBarnetFødt = false,
-                       fødselTermindato = LocalDate.now().plusMonths(1),
-                       terminbekreftelse = dokumentliste(),
-                       annenForelder = null,
-                       samvær = null,
-                       skalHaBarnepass = false,
-                       særligeTilsynsbehov = "Ja",
-                       barnepass = null,
-                       lagtTilManuelt = true
+    private fun barn(): Set<SøknadBarn> =
+            setOf(SøknadBarn(id = UUID.randomUUID(),
+                             navn = "navn",
+                             fødselsnummer = null,
+                             harSkalHaSammeAdresse = false,
+                             skalBoHosSøker = null,
+                             ikkeRegistrertPåSøkersAdresseBeskrivelse = null,
+                             erBarnetFødt = false,
+                             fødselTermindato = LocalDate.now().plusMonths(1),
+                             terminbekreftelse = dokumentliste(),
+                             annenForelder = null,
+                             samvær = null,
+                             skalHaBarnepass = false,
+                             særligeTilsynsbehov = "Ja",
+                             barnepass = null,
+                             lagtTilManuelt = true
             ))
 }

@@ -4,7 +4,7 @@ import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.Barn
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn
 import no.nav.familie.util.FnrGenerator
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -139,12 +139,12 @@ internal class BarnMatcherTest {
 
 
     private fun søknadsbarn(terminDato: LocalDate? = null, fnr: String? = null) =
-            Barn(fødselsnummer = fnr,
-                 fødselTermindato = terminDato,
-                 erBarnetFødt = true,
-                 harSkalHaSammeAdresse = true,
-                 ikkeRegistrertPåSøkersAdresseBeskrivelse = "",
-                 lagtTilManuelt = false)
+            SøknadBarn(fødselsnummer = fnr,
+                       fødselTermindato = terminDato,
+                       erBarnetFødt = true,
+                       harSkalHaSammeAdresse = true,
+                       ikkeRegistrertPåSøkersAdresseBeskrivelse = "",
+                       lagtTilManuelt = false)
 
     private fun pdlBarn(fnr: String) =
             BarnMedIdent(emptyList(),

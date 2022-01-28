@@ -36,7 +36,7 @@
         <felles.version>1.20211217154554_3bb883e</felles.version>
         <prosessering.version>1.20211125150647_a7c6f64</prosessering.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>2.0_20220117145439_46f7761</kontrakter.version>
+        <kontrakter.version>2.0_20220120144339_cc21190</kontrakter.version>
 
 
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
@@ -117,6 +117,11 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.papertrailapp</groupId>
+            <artifactId>logback-syslog4j</artifactId>
+            <version>1.0.0</version> <!-- August, 2014, men det er den som blir brukt på NAV -->
         </dependency>
         <dependency>
             <groupId>no.nav.familie.felles</groupId>

@@ -14,11 +14,19 @@ import no.nav.familie.ef.sak.fagsak.domain.Stønadstype.OVERGANGSSTØNAD
 import no.nav.familie.ef.sak.felles.domain.Endret
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil
+import no.nav.familie.ef.sak.opplysninger.søknad.SøknadOvergangsstønadRepository
+import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
+import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
+import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
+import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
+import no.nav.familie.util.FnrGenerator
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.relational.core.conversion.DbActionExecutionException
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -26,6 +34,9 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
 
     @Autowired private lateinit var fagsakRepository: FagsakRepository
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
+    @Autowired private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
+    @Autowired private lateinit var søknadOvergangsstønadRepository: SøknadOvergangsstønadRepository
+    @Autowired private lateinit var søknadService: SøknadService
 
     private val ident = "123"
 

@@ -7,12 +7,13 @@ import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakstype
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 
 object InfotrygdPeriodeTestUtil {
 
     fun lagInfotrygdPeriode(personIdent: String = "1",
-                            stønadFom: LocalDate = LocalDate.now(),
-                            stønadTom: LocalDate = LocalDate.now().plusDays(1),
+                            stønadFom: LocalDate = YearMonth.now().atDay(1),
+                            stønadTom: LocalDate = YearMonth.now().atEndOfMonth(),
                             opphørsdato: LocalDate? = null,
                             stønadId: Int = 1,
                             vedtakId: Int = 1,

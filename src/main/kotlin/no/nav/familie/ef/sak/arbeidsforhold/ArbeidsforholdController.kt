@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.arbeidsforhold
 
+import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.arbeidsforhold.ekstern.ArbeidsforholdService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -28,7 +29,7 @@ class ArbeidsforholdController(
                            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
                            @RequestParam ansettelsesperiodeFom: LocalDate
     ): Ressurs<List<ArbeidsforholdDto>> {
-        tilgangService.validerTilgangTilFagsak(fagsakId)
+        tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
         val arbeidsforhold = arbeidsforholdService.hentArbeidsforhold(fagsakId, ansettelsesperiodeFom)
         return Ressurs.success(arbeidsforhold)
     }

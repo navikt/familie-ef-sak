@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.brev
 
+import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.brev.dto.FritekstBrevDto
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevDto
 import no.nav.familie.ef.sak.brev.dto.MellomlagreBrevRequestDto
@@ -26,7 +27,7 @@ class BrevMellomlagerController(private val tilgangService: TilgangService,
     fun mellomlagreBrevverdier(@PathVariable behandlingId: UUID,
                                @RequestBody mellomlagretBrev: MellomlagreBrevRequestDto
     ): Ressurs<UUID> {
-        tilgangService.validerTilgangTilBehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
 
         return Ressurs.success(mellomlagringBrevService.mellomLagreBrev(behandlingId,
@@ -37,7 +38,7 @@ class BrevMellomlagerController(private val tilgangService: TilgangService,
 
     @PostMapping("/fritekst")
     fun mellomlagreFritekstbrev(@RequestBody mellomlagretBrev: FritekstBrevDto): Ressurs<UUID> {
-        tilgangService.validerTilgangTilBehandling(mellomlagretBrev.behandlingId)
+        tilgangService.validerTilgangTilBehandling(mellomlagretBrev.behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
 
         return Ressurs.success(mellomlagringBrevService.mellomlagreFritekstbrev(mellomlagretBrev))
@@ -45,7 +46,7 @@ class BrevMellomlagerController(private val tilgangService: TilgangService,
 
     @PostMapping("/frittstaende")
     fun mellomlagreFrittstaendeBrev(@RequestBody mellomlagretBrev: FrittståendeBrevDto): Ressurs<UUID> {
-        tilgangService.validerTilgangTilFagsak(mellomlagretBrev.fagsakId)
+        tilgangService.validerTilgangTilFagsak(mellomlagretBrev.fagsakId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
 
         return Ressurs.success(mellomlagringBrevService.mellomlagreFrittståendeBrev(mellomlagretBrev))
@@ -53,7 +54,7 @@ class BrevMellomlagerController(private val tilgangService: TilgangService,
 
     @GetMapping("/frittstaende/{fagsakId}")
     fun hentMellomlagretFrittstaendeBrev(@PathVariable fagsakId: UUID): Ressurs<FrittståendeBrevDto?> {
-        tilgangService.validerTilgangTilFagsak(fagsakId)
+        tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
         tilgangService.validerHarSaksbehandlerrolle()
         return Ressurs.success(mellomlagringBrevService.hentMellomlagretFrittståendeBrev(fagsakId))
     }
@@ -61,7 +62,7 @@ class BrevMellomlagerController(private val tilgangService: TilgangService,
     @GetMapping("/{behandlingId}")
     fun hentMellomlagretBrevverdier(@PathVariable behandlingId: UUID,
                                     @RequestParam sanityVersjon: String): Ressurs<MellomlagretBrevResponse?> {
-        tilgangService.validerTilgangTilBehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
 
         return Ressurs.success(mellomlagringBrevService.hentOgValiderMellomlagretBrev(behandlingId,
                                                                                       sanityVersjon))

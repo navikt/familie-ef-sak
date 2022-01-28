@@ -6,7 +6,7 @@ import no.nav.familie.ef.sak.opplysninger.søknad.domain.AnnenForelder
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Arbeidsgiver
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Arbeidssituasjon
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Arbeidssøker
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.Barn
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Barnepass
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Barnepassordning
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.BarnetilsynDokumentasjon
@@ -169,22 +169,22 @@ object SøknadsskjemaMapper {
                               fraDato = sivilstandsplaner?.fraDato?.verdi,
                               vordendeSamboerEktefelle = tilDomene(sivilstandsplaner?.vordendeSamboerEktefelle?.verdi))
 
-    private fun tilDomene(list: List<KontraktBarn>): Set<Barn> =
+    private fun tilDomene(list: List<KontraktBarn>): Set<SøknadBarn> =
             list.map {
-                Barn(navn = it.navn?.verdi,
-                     fødselsnummer = it.fødselsnummer?.verdi?.verdi,
-                     harSkalHaSammeAdresse = it.harSkalHaSammeAdresse.verdi,
-                     ikkeRegistrertPåSøkersAdresseBeskrivelse = it.ikkeRegistrertPåSøkersAdresseBeskrivelse?.verdi,
-                     erBarnetFødt = it.erBarnetFødt.verdi,
-                     fødselTermindato = it.fødselTermindato?.verdi,
-                     terminbekreftelse = tilDomene(it.terminbekreftelse?.verdi),
-                     annenForelder = tilDomene(it.annenForelder?.verdi),
-                     samvær = tilDomene(it.samvær?.verdi),
-                     skalHaBarnepass = it.skalHaBarnepass?.verdi,
-                     særligeTilsynsbehov = it.særligeTilsynsbehov?.verdi,
-                     barnepass = tilDomene(it.barnepass?.verdi),
-                     skalBoHosSøker = it.skalBarnetBoHosSøker?.svarId,
-                     lagtTilManuelt = it.lagtTilManuelt ?: false)
+                SøknadBarn(navn = it.navn?.verdi,
+                           fødselsnummer = it.fødselsnummer?.verdi?.verdi,
+                           harSkalHaSammeAdresse = it.harSkalHaSammeAdresse.verdi,
+                           ikkeRegistrertPåSøkersAdresseBeskrivelse = it.ikkeRegistrertPåSøkersAdresseBeskrivelse?.verdi,
+                           erBarnetFødt = it.erBarnetFødt.verdi,
+                           fødselTermindato = it.fødselTermindato?.verdi,
+                           terminbekreftelse = tilDomene(it.terminbekreftelse?.verdi),
+                           annenForelder = tilDomene(it.annenForelder?.verdi),
+                           samvær = tilDomene(it.samvær?.verdi),
+                           skalHaBarnepass = it.skalHaBarnepass?.verdi,
+                           særligeTilsynsbehov = it.særligeTilsynsbehov?.verdi,
+                           barnepass = tilDomene(it.barnepass?.verdi),
+                           skalBoHosSøker = it.skalBarnetBoHosSøker?.svarId,
+                           lagtTilManuelt = it.lagtTilManuelt ?: false)
 
             }.toSet()
 
