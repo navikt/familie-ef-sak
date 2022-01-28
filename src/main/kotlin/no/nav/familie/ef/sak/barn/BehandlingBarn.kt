@@ -6,10 +6,11 @@ import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDate
 import java.util.UUID
 
-@Table("behandling_barn")
 data class BehandlingBarn(@Id
                           val id: UUID = UUID.randomUUID(),
                           val behandlingId: UUID,
+                          @Column("soknad_barn_id")
+                          val søknadBarnId: UUID,
                           val personIdent: String?,
                           val navn: String?,
                           @Column("fodsel_termindato")

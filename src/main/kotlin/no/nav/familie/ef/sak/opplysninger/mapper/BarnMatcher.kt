@@ -7,7 +7,7 @@ import kotlin.math.abs
 
 object BarnMatcher {
 
-    fun kobleSøknadsbarnOgRegisterBarn(søknadsbarn: Set<SøknadBarn>, barn: List<BarnMedIdent>): List<MatchetBarn> {
+    fun kobleSøknadsbarnOgRegisterBarn(søknadsbarn: Collection<SøknadBarn>, barn: List<BarnMedIdent>): List<MatchetBarn> {
         val barnMap = barn.associateBy { it.personIdent }
         val søknadsbarnMedFnrMatchetTilPdlBarn =
                 søknadsbarn.map {

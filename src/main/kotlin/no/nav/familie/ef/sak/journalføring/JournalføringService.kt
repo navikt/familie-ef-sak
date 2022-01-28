@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.journalføring
 
+import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
@@ -53,6 +54,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
                            private val grunnlagsdataService: GrunnlagsdataService,
                            private val iverksettService: IverksettService,
                            private val taskRepository: TaskRepository,
+                           private val barnService: BarnService,
                            private val oppgaveService: OppgaveService) {
 
     fun hentJournalpost(journalpostId: String): Journalpost {
@@ -111,6 +113,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         settSøknadPåBehandling(journalpostId, fagsak, behandling.id)
         knyttJournalpostTilBehandling(journalpost, behandling)
         grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
+        barnService.opprettBarnPåBehandlingMedSøknadsdata(behandling.id, fagsak.id)
 
         if (journalpost.journalstatus != Journalstatus.JOURNALFOERT) {
             oppdaterJournalpost(journalpost, journalføringRequest.dokumentTitler, fagsak.eksternId.id, saksbehandler)

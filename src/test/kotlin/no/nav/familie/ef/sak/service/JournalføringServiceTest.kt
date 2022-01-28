@@ -7,6 +7,7 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
@@ -55,6 +56,7 @@ internal class JournalføringServiceTest {
     private val fagsakService = mockk<FagsakService>()
     private val pdlClient = mockk<PdlClient>()
     private val taskRepository = mockk<TaskRepository>()
+    private val barnService = mockk<BarnService>()
     private val iverksettService = mockk<IverksettService>(relaxed = true)
 
     private val journalføringService =
@@ -66,7 +68,9 @@ internal class JournalføringServiceTest {
                                  grunnlagsdataService = mockk(relaxed = true),
                                  iverksettService = iverksettService,
                                  oppgaveService = oppgaveService,
-                                 taskRepository = taskRepository)
+                                 taskRepository = taskRepository,
+                                 barnService = barnService,
+            )
 
     private val fagsakId: UUID = UUID.randomUUID()
     private val fagsakEksternId = 12345L
@@ -106,6 +110,8 @@ internal class JournalføringServiceTest {
                                      tittel = "Søknad om overgangsstønad"))
 
         every { fagsakService.hentEksternId(any()) } returns fagsakEksternId
+
+        every { barnService.opprettBarnPåBehandlingMedSøknadsdata(any(), any()) } just Runs
 
         every { behandlingService.hentBehandling(behandlingId) }
                 .returns(Behandling(id = behandlingId,
