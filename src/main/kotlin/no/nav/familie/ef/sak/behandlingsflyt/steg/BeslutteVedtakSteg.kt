@@ -107,12 +107,6 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
         feilHvis(vedtaksbrev.beslutterident != SikkerhetContext.hentSaksbehandler(true)) { "En annen beslutter har signert vedtaksbrevet" }
     }
 
-    private fun validerSammebeslutterSignaturnavn(vedtaksbrev: Vedtaksbrev) {
-        feilHvis(vedtaksbrev.besluttersignatur != SikkerhetContext.hentSaksbehandlerNavn(strict = true)) {
-            "En annen beslutter har signert vedtaksbrevet"
-        }
-    }
-
     private fun ferdigstillOppgave(behandling: Behandling): Long? {
         val oppgavetype = Oppgavetype.GodkjenneVedtak
         val aktivIdent = fagsakService.hentAktivIdent(behandling.fagsakId)
