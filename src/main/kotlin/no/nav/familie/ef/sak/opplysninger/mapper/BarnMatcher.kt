@@ -56,11 +56,11 @@ object BarnMatcher {
 
     }
 
-    fun forsøkMatchPåFødselsdato(fødselTermindato: LocalDate, pdlBarnIkkeISøknad: List<BarnMedIdent>): BarnMedIdent? {
+    fun forsøkMatchPåFødselsdato(fødselTermindato: LocalDate, barnFraPdlMenIkkeIBehandlingen: List<BarnMedIdent>): BarnMedIdent? {
         val uke20 = fødselTermindato.minusWeeks(20)
         val uke44 = fødselTermindato.plusWeeks(4)
 
-        val nærmesteMatch = pdlBarnIkkeISøknad.filter {
+        val nærmesteMatch = barnFraPdlMenIkkeIBehandlingen.filter {
             val fødselsdato = it.fødsel.gjeldende().fødselsdato ?: Fødselsnummer(it.personIdent).fødselsdato
             fødselsdato.isBefore(uke44) and fødselsdato.isAfter(uke20)
         }.minByOrNull {
@@ -69,7 +69,6 @@ object BarnMatcher {
             val epochDayTermindato = fødselTermindato.toEpochDay()
             abs(epochDayForFødsel - epochDayTermindato)
         }
-
         return nærmesteMatch
     }
 
