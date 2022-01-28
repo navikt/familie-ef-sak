@@ -8,7 +8,6 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
-import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
@@ -39,7 +38,6 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
     @Autowired lateinit var revurderingService: RevurderingService
     @Autowired lateinit var behandlingRepository: BehandlingRepository
-    @Autowired lateinit var fagsakRepository: FagsakRepository
     @Autowired lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
     @Autowired lateinit var søknadService: SøknadService
     @Autowired lateinit var søknadRepository: SøknadRepository
@@ -55,7 +53,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
     fun setUp() {
         BrukerContextUtil.mockBrukerContext("Heider")
         val identer = fagsakpersoner(setOf(personIdent))
-        fagsak = fagsakRepository.insert(fagsak(identer = identer))
+        fagsak = testoppsettService.lagreFagsak(fagsak(identer = identer))
         revurderingDto = RevurderingDto(fagsak.id, behandlingsårsak, kravMottatt)
     }
 

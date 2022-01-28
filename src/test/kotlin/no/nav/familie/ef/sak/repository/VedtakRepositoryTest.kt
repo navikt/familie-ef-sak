@@ -3,12 +3,11 @@ package no.nav.familie.ef.sak.repository
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.beregning.Inntektsperiode
-import no.nav.familie.ef.sak.fagsak.FagsakRepository
+import no.nav.familie.ef.sak.vedtak.VedtakRepository
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
-import no.nav.familie.ef.sak.vedtak.VedtakRepository
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
@@ -21,12 +20,11 @@ import java.time.LocalDate
 internal class VedtakRepositoryTest : OppslagSpringRunnerTest() {
 
     @Autowired private lateinit var vedtakRepository: VedtakRepository
-    @Autowired private lateinit var fagsakRepository: FagsakRepository
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
 
     @Test
     internal fun `skal lagre vedtak med riktige felter`() {
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
 
         val vedtak = Vedtak(behandlingId = behandling.id,

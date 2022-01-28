@@ -6,7 +6,6 @@ import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
-import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil
 import no.nav.familie.ef.sak.iverksett.IverksettClient
@@ -28,7 +27,6 @@ import java.util.Properties
 class StartBehandlingTaskTest : OppslagSpringRunnerTest() {
 
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
-    @Autowired private lateinit var fagsakRepository: FagsakRepository
     @Autowired private lateinit var fagsakService: FagsakService
 
     private val iverksettClient = mockk<IverksettClient>()
@@ -42,7 +40,7 @@ class StartBehandlingTaskTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun setup() {
-        fagsakRepository.insert(fagsak)
+        testoppsettService.lagreFagsak(fagsak)
 
         every { pdlClient.hentPersonidenter(personIdent, true) } returns PdlIdenter(listOf(PdlIdent(personIdent, false)))
         justRun { iverksettClient.startBehandling(capture(opprettStartBehandlingHendelseDtoSlot)) }

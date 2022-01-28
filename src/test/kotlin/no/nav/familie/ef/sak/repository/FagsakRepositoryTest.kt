@@ -21,7 +21,7 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun findByFagsakId() {
-        val fagsakPersistert = fagsakRepository.insert(fagsak(fagsakpersoner(setOf("12345678901", "98765432109"))))
+        val fagsakPersistert = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(setOf("12345678901", "98765432109"))))
         val fagsak = fagsakRepository.findByIdOrNull(fagsakPersistert.id) ?: error("Finner ikke fagsak med id")
 
         assertThat(fagsak).isNotNull
@@ -32,7 +32,7 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun findBySøkerIdent() {
-        fagsakRepository.insert(fagsak(fagsakpersoner(setOf("12345678901", "98765432109"))))
+        testoppsettService.lagreFagsak(fagsak(fagsakpersoner(setOf("12345678901", "98765432109"))))
         val fagsakHentetFinnesIkke = fagsakRepository.findBySøkerIdent(setOf("0"), Stønadstype.OVERGANGSSTØNAD)
 
         assertThat(fagsakHentetFinnesIkke).isNull()
@@ -49,8 +49,8 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
         val fagsakPerson = fagsakpersoner(setOf("12345678901"))
         var fagsak1 = fagsak(identer = fagsakPerson, stønadstype = Stønadstype.OVERGANGSSTØNAD)
         var fagsak2 = fagsak(identer = fagsakPerson, stønadstype = Stønadstype.SKOLEPENGER)
-        fagsak1 = fagsakRepository.insert(fagsak1)
-        fagsak2 = fagsakRepository.insert(fagsak2)
+        fagsak1 = testoppsettService.lagreFagsak(fagsak1)
+        fagsak2 = testoppsettService.lagreFagsak(fagsak2)
         val fagsaker = fagsakRepository.findBySøkerIdent(setOf("12345678901"))
 
         assertThat(fagsaker.forEach { fagsak ->
@@ -65,7 +65,7 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun finnMedEksternId() {
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val findByEksternId = fagsakRepository.finnMedEksternId(fagsak.eksternId.id)
                               ?: throw error("Fagsak med ekstern id ${fagsak.eksternId} finnes ikke")
 
@@ -81,14 +81,14 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `finnAktivIdent - skal finne aktiv ident`() {
         val fagsak = opprettFagsakMedFlereIdenter()
-        fagsakRepository.insert(fagsak)
+        testoppsettService.lagreFagsak(fagsak)
         assertThat(fagsakRepository.finnAktivIdent(fagsak.id)).isEqualTo("2")
     }
 
     @Test
     internal fun `skal hente fagsak på behandlingId`() {
         var fagsak = opprettFagsakMedFlereIdenter()
-        fagsak = fagsakRepository.insert(fagsak)
+        fagsak = testoppsettService.lagreFagsak(fagsak)
         val behandling = behandlingRepository.insert(behandling(fagsak))
 
         val finnFagsakTilBehandling = fagsakRepository.finnFagsakTilBehandling(behandling.id)!!
@@ -100,14 +100,14 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal sette eksternId til 200_000_000 som default`() {
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         assertThat(fagsak.eksternId.id).isGreaterThanOrEqualTo(200_000_000)
     }
 
     @Test
     internal fun `skal hente siste identen for hver fagsak`() {
-        val fagsak = fagsakRepository.insert(opprettFagsakMedFlereIdenter())
-        val fagsak2 = fagsakRepository.insert(opprettFagsakMedFlereIdenter("4", "5", "6"))
+        val fagsak = testoppsettService.lagreFagsak(opprettFagsakMedFlereIdenter())
+        val fagsak2 = testoppsettService.lagreFagsak(opprettFagsakMedFlereIdenter("4", "5", "6"))
         val aktiveIdenterPerFagsak = fagsakRepository.finnAktivIdenter(setOf(fagsak.id, fagsak2.id))
         assertThat(aktiveIdenterPerFagsak).hasSize(2)
         assertThat(aktiveIdenterPerFagsak.single { it.first == fagsak.id }.second).isEqualTo("2")
@@ -116,7 +116,7 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal kunne søke opp fagsak basert på forskjellige personidenter - kun ett treff per fagsak`() {
-        val fagsakMedFlereIdenter = fagsakRepository.insert(opprettFagsakMedFlereIdenter("4", "5", "6"))
+        val fagsakMedFlereIdenter = testoppsettService.lagreFagsak(opprettFagsakMedFlereIdenter("4", "5", "6"))
 
         assertThat(fagsakMedFlereIdenter.søkerIdenter).hasSize(3)
         assertThat(fagsakRepository.findBySøkerIdent(fagsakMedFlereIdenter.søkerIdenter.map { it.ident }.toSet(), Stønadstype.OVERGANGSSTØNAD)).isNotNull

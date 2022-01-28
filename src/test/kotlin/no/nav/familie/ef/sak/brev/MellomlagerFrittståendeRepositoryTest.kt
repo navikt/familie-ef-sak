@@ -21,7 +21,7 @@ internal class MellomlagerFrittståendeRepositoryTest : OppslagSpringRunnerTest(
 
     @Test
     internal fun `skal lagre mellomlagret brev`() {
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val mellomlagretBrev = MellomlagretFrittståendeBrev(fagsakId = fagsak.id,
                                                             brev = Fritekstbrev(overskrift = "Et testbrev",
                                                                                 avsnitt = listOf(FrittståendeBrevAvsnitt(
@@ -42,7 +42,7 @@ internal class MellomlagerFrittståendeRepositoryTest : OppslagSpringRunnerTest(
     @Test
     internal fun `skal finne igjen mellomlagret brev fra fagsakId og saksbehandlers ident`() {
         val saksbehandlerIdent = "12345678910"
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val mellomlagretBrev = MellomlagretFrittståendeBrev(fagsakId = fagsak.id,
                                                             brev = Fritekstbrev(overskrift = "Et testbrev",
                                                                                 avsnitt = listOf(FrittståendeBrevAvsnitt(

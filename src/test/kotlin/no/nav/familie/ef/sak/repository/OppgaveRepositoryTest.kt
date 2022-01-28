@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.repository
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
-import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.oppgave.OppgaveRepository
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
@@ -17,12 +16,11 @@ import java.util.UUID
 internal class OppgaveRepositoryTest : OppslagSpringRunnerTest() {
 
     @Autowired private lateinit var oppgaveRepository: OppgaveRepository
-    @Autowired private lateinit var fagsakRepository: FagsakRepository
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
 
     @Test
     internal fun findByBehandlingIdAndTypeAndErFerdigstiltIsFalse() {
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
         val oppgave = oppgaveRepository.insert(oppgave(behandling, erFerdigstilt = true))
 
@@ -40,7 +38,7 @@ internal class OppgaveRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal finne nyeste oppgave for behandling`() {
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
         val sporbar = Sporbar(opprettetTid = LocalDateTime.now().plusDays(1))
         oppgaveRepository.insert(oppgave(behandling, erFerdigstilt = true, gsakOppgaveId = 1))
@@ -56,7 +54,7 @@ internal class OppgaveRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal finne nyeste oppgave for riktig behandling`() {
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
         val behandling2 = behandlingRepository.insert(behandling(fagsak))
 
@@ -71,7 +69,7 @@ internal class OppgaveRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal feile hvis det ikke finnes en oppgave for behandlingen`() {
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
 
         assertThrows<EmptyResultDataAccessException> {
