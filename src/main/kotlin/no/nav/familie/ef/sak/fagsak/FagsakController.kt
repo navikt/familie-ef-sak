@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.fagsak
 
+import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.dto.FagsakDto
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
@@ -22,21 +23,21 @@ class FagsakController(private val fagsakService: FagsakService, private val til
 
     @PostMapping
     fun hentEllerOpprettFagsakForPerson(@RequestBody fagsakRequest: FagsakRequest): Ressurs<FagsakDto> {
-        tilgangService.validerTilgangTilPersonMedBarn(fagsakRequest.personIdent)
+        tilgangService.validerTilgangTilPersonMedBarn(fagsakRequest.personIdent, AuditLoggerEvent.CREATE) // TODO dele opp denne?
         return Ressurs.success(fagsakService.hentEllerOpprettFagsakMedBehandlinger(fagsakRequest.personIdent,
                                                                                    fagsakRequest.stønadstype))
     }
 
     @GetMapping("{fagsakId}")
     fun hentFagsak(@PathVariable fagsakId: UUID): Ressurs<FagsakDto> {
-        tilgangService.validerTilgangTilFagsak(fagsakId)
+        tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(fagsakService.hentFagsakMedBehandlinger(fagsakId))
     }
 
     @GetMapping("/ekstern/{eksternFagsakId}")
     fun hentFagsak(@PathVariable eksternFagsakId: Long): Ressurs<FagsakDto> {
         val fagsak: Fagsak = fagsakService.hentFagsakPåEksternId(eksternFagsakId)
-        tilgangService.validerTilgangTilFagsak(fagsak.id)
+        tilgangService.validerTilgangTilFagsak(fagsak.id, AuditLoggerEvent.ACCESS)
         return Ressurs.success(fagsakService.fagsakTilDto(fagsak))
     }
 }

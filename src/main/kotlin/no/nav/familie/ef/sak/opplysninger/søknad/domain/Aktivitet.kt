@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.opplysninger.søknad.domain
 
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.MappedCollection
+import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDate
 
 data class Aktivitet(val hvordanErArbeidssituasjonen: Arbeidssituasjon = Arbeidssituasjon(emptyList()),
@@ -23,12 +24,14 @@ data class Aktivitet(val hvordanErArbeidssituasjonen: Arbeidssituasjon = Arbeids
                      val tidligereUtdanninger: Set<TidligereUtdanning> = emptySet()
 )
 
+@Table("soknad_arbeidsgiver")
 data class Arbeidsgiver(val arbeidsgivernavn: String,
                         val arbeidsmengde: Int? = null,
                         val fastEllerMidlertidig: String? = null,
                         val harSluttdato: Boolean?,
                         val sluttdato: LocalDate? = null)
 
+@Table("soknad_selvstendig")
 data class Selvstendig(val firmanavn: String,
                        val organisasjonsnummer: String,
                        val etableringsdato: LocalDate,
@@ -38,6 +41,7 @@ data class Selvstendig(val firmanavn: String,
 data class Virksomhet(val virksomhetsbeskrivelse: String,
                       val dokumentasjon: Dokumentasjon? = null)
 
+@Table("soknad_aksjeselskap")
 data class Aksjeselskap(val navn: String,
                         val arbeidsmengde: Int? = null)
 

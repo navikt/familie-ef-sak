@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.vedtak
 
+import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseDto
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
@@ -23,14 +24,14 @@ class PeriodeController(private val tilgangService: TilgangService,
 
     @GetMapping("/{behandlingId}")
     fun hentPerioder(@PathVariable behandlingId: UUID): Ressurs<TilkjentYtelseDto> {
-        tilgangService.validerTilgangTilBehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(tilkjentYtelseService.hentForBehandling(behandlingId).tilDto())
     }
 
     @GetMapping("/fagsak/{fagsakId}/historikk")
     fun hentHistorikk(@PathVariable fagsakId: UUID,
                       @RequestParam tilOgMedBehandlingId: UUID? = null): Ressurs<List<AndelHistorikkDto>> {
-        tilgangService.validerTilgangTilFagsak(fagsakId)
+        tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(tilkjentYtelseService.hentHistorikk(fagsakId, tilOgMedBehandlingId).reversed())
     }
 }

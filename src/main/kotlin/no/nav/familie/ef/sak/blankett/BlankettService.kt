@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.blankett
 
+import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
@@ -43,7 +44,7 @@ class BlankettService(private val tilgangService: TilgangService,
     fun opprettBlankettBehandling(journalpostId: String, oppgaveId: Long): Behandling {
         val journalpost = journalføringService.hentJournalpost(journalpostId)
         val personIdent = journalføringService.hentIdentForJournalpost(journalpost)
-        tilgangService.validerTilgangTilPersonMedBarn(personIdent)
+        tilgangService.validerTilgangTilPersonMedBarn(personIdent, AuditLoggerEvent.CREATE)
         val søknad = journalføringService.hentSøknadFraJournalpostForOvergangsstønad(journalpostId)
         val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, Stønadstype.OVERGANGSSTØNAD)
         val behandling = behandlingService.opprettBehandlingForBlankett(BehandlingType.BLANKETT, fagsak.id, søknad, journalpost)

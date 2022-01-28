@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.ekstern
 
+import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.ekstern.arena.ArenaStønadsperioderService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
@@ -44,8 +45,9 @@ class EksternStønadsperioderController(private val arenaStønadsperioderService
      */
     @PostMapping("full-overgangsstonad")
     fun hentPerioderForOvergangsstonad(@RequestBody request: PersonIdent): Ressurs<PerioderOvergangsstønadResponse> {
+
         if (!SikkerhetContext.erMaskinTilMaskinToken()) {
-            tilgangService.validerTilgangTilPerson(request.ident)
+            tilgangService.validerTilgangTilPerson(request.ident, AuditLoggerEvent.ACCESS)
         }
         return Ressurs.success(perioderForBarnetrygdService.hentPerioderMedFullOvergangsstønad(request))
     }

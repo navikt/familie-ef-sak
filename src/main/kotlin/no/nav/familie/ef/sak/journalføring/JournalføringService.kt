@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettService
 import no.nav.familie.ef.sak.journalføring.dto.DokumentVariantformat
@@ -35,8 +36,10 @@ import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariantformat
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
+import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
+import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -88,8 +91,10 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         val journalpost = hentJournalpost(journalpostId)
         val fagsak = fagsakService.hentFagsak(journalføringRequest.fagsakId)
         knyttJournalpostTilBehandling(journalpost, behandling)
-        oppdaterJournalpost(journalpost, journalføringRequest.dokumentTitler, fagsak.eksternId.id, saksbehandler)
-        ferdigstillJournalføring(journalpostId, journalføringRequest.journalførendeEnhet, saksbehandler)
+        if (journalpost.journalstatus != Journalstatus.JOURNALFOERT) {
+            oppdaterJournalpost(journalpost, journalføringRequest.dokumentTitler, fagsak.eksternId.id, saksbehandler)
+            ferdigstillJournalføring(journalpostId, journalføringRequest.journalførendeEnhet, saksbehandler)
+        }
         ferdigstillJournalføringsoppgave(journalføringRequest)
         return journalføringRequest.oppgaveId.toLong()
     }
@@ -107,8 +112,11 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         knyttJournalpostTilBehandling(journalpost, behandling)
         grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
 
-        oppdaterJournalpost(journalpost, journalføringRequest.dokumentTitler, fagsak.eksternId.id, saksbehandler)
-        ferdigstillJournalføring(journalpostId, journalføringRequest.journalførendeEnhet, saksbehandler)
+        if (journalpost.journalstatus != Journalstatus.JOURNALFOERT) {
+            oppdaterJournalpost(journalpost, journalføringRequest.dokumentTitler, fagsak.eksternId.id, saksbehandler)
+            ferdigstillJournalføring(journalpostId, journalføringRequest.journalførendeEnhet, saksbehandler)
+        }
+
         ferdigstillJournalføringsoppgave(journalføringRequest)
         opprettBehandlingsstatistikkTask(behandling.id, journalføringRequest.oppgaveId.toLong())
 
@@ -147,11 +155,12 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
     private fun hentOriginaldokument(journalpostId: String,
                                      dokumentBrevkode: DokumentBrevkode)
             : no.nav.familie.kontrakter.felles.journalpost.DokumentInfo {
-        return hentJournalpost(journalpostId).dokumenter
-                       ?.first {
-                           dokumentBrevkode == DokumentBrevkode.fraBrevkode(it.brevkode.toString()) && harOriginalDokument(
-                                   it)
-                       } ?: error("Fant ingen søknad")
+        val dokumenter = hentJournalpost(journalpostId).dokumenter ?: error("Fant ingen dokumenter på journalposten")
+        return dokumenter.firstOrNull {
+            DokumentBrevkode.erGyldigBrevkode(it.brevkode.toString())
+            && dokumentBrevkode == DokumentBrevkode.fraBrevkode(it.brevkode.toString())
+            && harOriginalDokument(it)
+        } ?: throw ApiFeil("Det finnes ingen søknad i journalposten for å opprette en ny behandling", BAD_REQUEST)
     }
 
     private fun ferdigstillJournalføring(journalpostId: String, journalførendeEnhet: String, saksbehandler: String) {
@@ -217,7 +226,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
                     DokarkivBruker(idType = BrukerIdType.valueOf(it.type.toString()), id = it.id)
                 },
                                            tema = journalpost.tema?.let { Tema.valueOf(it) }, // TODO: Funker dette?
-                                           // TODO: Funker dette?
+                        // TODO: Funker dette?
                                            behandlingstema = journalpost.behandlingstema?.let { Behandlingstema.fromValue(it) },
                                            tittel = journalpost.tittel,
                                            journalfoerendeEnhet = journalpost.journalforendeEnhet,
