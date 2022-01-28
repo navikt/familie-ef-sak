@@ -96,7 +96,8 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
         val nyeAndeler = andelerForOpphør(behandling, vedtak.opphørFom.atDay(1))
         tilkjentYtelseService.opprettTilkjentYtelse(TilkjentYtelse(personident = aktivIdent,
                                                                    behandlingId = behandling.id,
-                                                                   andelerTilkjentYtelse = nyeAndeler))
+                                                                   andelerTilkjentYtelse = nyeAndeler,
+                                                                   samordningsfradagType = null))
     }
 
     private fun opprettTilkjentYtelseForInnvilgetBehandling(vedtak: Innvilget,
@@ -122,7 +123,8 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
 
         tilkjentYtelseService.opprettTilkjentYtelse(TilkjentYtelse(personident = aktivIdent,
                                                                    behandlingId = behandling.id,
-                                                                   andelerTilkjentYtelse = nyeAndeler))
+                                                                   andelerTilkjentYtelse = nyeAndeler,
+                                                                   samordningsfradagType = vedtak.samordningsfradagType))
     }
 
     private fun finnOpphørsperioder(vedtak: Innvilget) =
@@ -160,7 +162,8 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                                            opphørsperioder: List<Periode>): List<AndelTilkjentYtelse> {
         val fomPerioder = beløpsperioder.firstOrNull()?.stønadFom ?: LocalDate.MAX
         val fomOpphørPerioder = opphørsperioder.firstOrNull()?.fradato ?: LocalDate.MAX
-        val nyePerioderUtenOpphør = forrigeTilkjentYtelse.taMedAndelerFremTilDato(minOf(fomPerioder, fomOpphørPerioder)) + beløpsperioder
+        val nyePerioderUtenOpphør =
+                forrigeTilkjentYtelse.taMedAndelerFremTilDato(minOf(fomPerioder, fomOpphørPerioder)) + beløpsperioder
         return vurderPeriodeForOpphør(nyePerioderUtenOpphør, opphørsperioder)
 
     }
