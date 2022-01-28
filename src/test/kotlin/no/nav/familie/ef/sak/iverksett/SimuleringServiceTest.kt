@@ -25,6 +25,7 @@ import no.nav.familie.ef.sak.simulering.SimuleringsresultatRepository
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
+import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradagType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
@@ -124,7 +125,8 @@ internal class SimuleringServiceTest {
                                                                    periodeType = VedtaksperiodeType.HOVEDPERIODE)),
                                inntekter = listOf(Inntekt(årMånedFra = årMånedFraStart,
                                                           forventetInntekt = BigDecimal(300000),
-                                                          samordningsfradrag = BigDecimal(300)))
+                                                          samordningsfradrag = BigDecimal(300))),
+                               samordningsfradagType = SamordningsfradagType.UFØRETRYGD
 
         )
 

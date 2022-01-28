@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
+import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradagType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
@@ -55,7 +56,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
                                                                                 periodeBegrunnelse = "ok",
                                                                                 inntektBegrunnelse = "okok",
                                                                                 perioder = listOf(vedtaksperiode),
-                                                                                inntekter = listOf(inntek)))
+                                                                                inntekter = listOf(inntek),
+                                                                                samordningsfradagType = SamordningsfradagType.UFØRETRYGD))
 
         assertThat(behandlingshistorikkRepository.findByBehandlingIdOrderByEndretTidDesc(behandling.id).first().steg)
                 .isEqualTo(StegType.BEREGNE_YTELSE)

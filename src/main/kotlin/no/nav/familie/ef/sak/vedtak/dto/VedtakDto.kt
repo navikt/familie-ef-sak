@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.vedtak.domain.AvslagÅrsak
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
+import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradagType
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.kontrakter.ef.felles.Vedtaksresultat
@@ -36,6 +37,7 @@ fun ResultatType.tilVedtaksresultat(): Vedtaksresultat = when (this) {
 }
 
 sealed class VedtakDto {
+
     fun erInnvilgeMedOpphør(): Boolean {
         return this is Innvilget && this.perioder.any { it.periodeType == VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
     }
@@ -45,7 +47,8 @@ class Innvilget(val resultatType: ResultatType,
                 val periodeBegrunnelse: String?,
                 val inntektBegrunnelse: String?,
                 val perioder: List<VedtaksperiodeDto> = emptyList(),
-                val inntekter: List<Inntekt> = emptyList()) : VedtakDto()
+                val inntekter: List<Inntekt> = emptyList(),
+                val samordningsfradagType: SamordningsfradagType? = null) : VedtakDto()
 
 class Avslå(val resultatType: ResultatType = ResultatType.AVSLÅ,
             val avslåÅrsak: AvslagÅrsak?,
@@ -81,7 +84,8 @@ fun Vedtak.tilVedtakDto(): VedtakDto =
                     periodeBegrunnelse = this.periodeBegrunnelse,
                     inntektBegrunnelse = this.inntektBegrunnelse,
                     perioder = (this.perioder ?: PeriodeWrapper(emptyList())).perioder.fraDomene(),
-                    inntekter = (this.inntekter ?: InntektWrapper(emptyList())).inntekter.tilInntekt())
+                    inntekter = (this.inntekter ?: InntektWrapper(emptyList())).inntekter.tilInntekt(),
+                    samordningsfradagType = this.samordningsfradagType)
             ResultatType.AVSLÅ -> Avslå(
                     resultatType = this.resultatType,
                     avslåBegrunnelse = this.avslåBegrunnelse,
