@@ -11,7 +11,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.Grunnlagsdat
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.Barn
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn
 import no.nav.familie.kontrakter.felles.PersonIdent
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -57,7 +57,7 @@ class BarnService(private val behandlingService: BehandlingService,
                 }
     }
 
-    private fun personIdenterForTerminbarn(barnFraSøknaden: Set<Barn>,
+    private fun personIdenterForTerminbarn(barnFraSøknaden: Set<SøknadBarn>,
                                            barnFraPdlMenIkkeIBehandlingen: List<BarnMedIdent>): List<String> {
         return barnFraSøknaden.filter { !it.erBarnetFødt }
                 .mapNotNull { it.fødselTermindato }

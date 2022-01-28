@@ -18,7 +18,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlBarn
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.Barn
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadsskjemaOvergangsstønad
 import no.nav.familie.kontrakter.felles.PersonIdent
 import org.assertj.core.api.Assertions.assertThat
@@ -125,11 +125,11 @@ class BarnServiceTest {
     }
 
     private fun søknadsbarn(terminDato: LocalDate? = null, fnr: String? = null, erBarnetFødt: Boolean = true) =
-            Barn(fødselsnummer = fnr,
-                 fødselTermindato = terminDato,
-                 erBarnetFødt = erBarnetFødt,
-                 harSkalHaSammeAdresse = true,
-                 ikkeRegistrertPåSøkersAdresseBeskrivelse = "",
-                 lagtTilManuelt = false)
+            SøknadBarn(fødselsnummer = fnr,
+                       fødselTermindato = terminDato,
+                       erBarnetFødt = erBarnetFødt,
+                       harSkalHaSammeAdresse = true,
+                       ikkeRegistrertPåSøkersAdresseBeskrivelse = "",
+                       lagtTilManuelt = false)
 
 }
