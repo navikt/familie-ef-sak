@@ -27,7 +27,7 @@ data class SøknadsskjemaBarnetilsyn(@Id
                                     @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "sivilstandsplaner_")
                                     val sivilstandsplaner: Sivilstandsplaner? = null,
                                     @MappedCollection(idColumn = "soknadsskjema_id")
-                                    override val barn: Set<Barn>,
+                                    override val barn: Set<SøknadBarn>,
                                     @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "aktivitet_")
                                     val aktivitet: Aktivitet,
                                     @Column("soker_fra")

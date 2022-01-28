@@ -1,13 +1,13 @@
 package no.nav.familie.ef.sak.opplysninger.mapper
 
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.Barn
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn
 import no.nav.familie.kontrakter.ef.søknad.Fødselsnummer
 import kotlin.math.abs
 
 object BarnMatcher {
 
-    fun kobleSøknadsbarnOgRegisterBarn(søknadsbarn: Set<Barn>, barn: List<BarnMedIdent>): List<MatchetBarn> {
+    fun kobleSøknadsbarnOgRegisterBarn(søknadsbarn: Set<SøknadBarn>, barn: List<BarnMedIdent>): List<MatchetBarn> {
         val barnMap = barn.associateBy { it.personIdent }
         val søknadsbarnMedFnrMatchetTilPdlBarn =
                 søknadsbarn.map {
@@ -56,4 +56,4 @@ object BarnMatcher {
 
 }
 
-data class MatchetBarn(val fødselsnummer: String?, val barn: BarnMedIdent?, val søknadsbarn: Barn)
+data class MatchetBarn(val fødselsnummer: String?, val barn: BarnMedIdent?, val søknadsbarn: SøknadBarn)
