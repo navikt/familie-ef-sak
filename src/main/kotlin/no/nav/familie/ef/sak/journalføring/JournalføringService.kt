@@ -91,8 +91,10 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         val journalpost = hentJournalpost(journalpostId)
         val fagsak = fagsakService.hentFagsak(journalføringRequest.fagsakId)
         knyttJournalpostTilBehandling(journalpost, behandling)
-        oppdaterJournalpost(journalpost, journalføringRequest.dokumentTitler, fagsak.eksternId.id, saksbehandler)
-        ferdigstillJournalføring(journalpostId, journalføringRequest.journalførendeEnhet, saksbehandler)
+        if (journalpost.journalstatus != Journalstatus.JOURNALFOERT) {
+            oppdaterJournalpost(journalpost, journalføringRequest.dokumentTitler, fagsak.eksternId.id, saksbehandler)
+            ferdigstillJournalføring(journalpostId, journalføringRequest.journalførendeEnhet, saksbehandler)
+        }
         ferdigstillJournalføringsoppgave(journalføringRequest)
         return journalføringRequest.oppgaveId.toLong()
     }
