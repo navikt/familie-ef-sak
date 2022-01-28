@@ -4,7 +4,6 @@ import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
-import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
@@ -31,13 +30,12 @@ internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
 
     @Autowired lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
     @Autowired lateinit var behandlingRepository: BehandlingRepository
-    @Autowired lateinit var fagsakRepository: FagsakRepository
     @Autowired lateinit var vurderingService: VurderingService
     @Autowired lateinit var søknadService: SøknadService
 
     @Test
     internal fun `kopierVurderingerTilNyBehandling - skal kopiere vurderinger til ny behandling`() {
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
         val revurdering = behandlingRepository.insert(behandling(fagsak))
         val søknadskjema = lagreSøknad(behandling, fagsak)
@@ -58,7 +56,7 @@ internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `oppdaterGrunnlagsdataOgHentEllerOpprettVurderinger - skal kaste feil dersom behandlingen er låst for videre behandling`() {
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.FERDIGSTILT))
         assertThat(catchThrowable { vurderingService.oppdaterGrunnlagsdataOgHentEllerOpprettVurderinger(behandling.id) })
                 .hasMessage("Kan ikke laste inn nye grunnlagsdata for behandling med status ${behandling.status}")
@@ -67,7 +65,7 @@ internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `kopierVurderingerTilNyBehandling - skal kaste feil hvis det ikke finnes noen vurderinger`() {
         val tidligereBehandlingId = UUID.randomUUID()
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val revurdering = behandlingRepository.insert(behandling(fagsak))
 
         assertThat(catchThrowable { vurderingService.kopierVurderingerTilNyBehandling(tidligereBehandlingId, revurdering.id) })

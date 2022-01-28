@@ -4,7 +4,6 @@ import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
-import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.GjeldendeBarnRepository
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
@@ -24,14 +23,13 @@ import java.time.LocalDateTime
 class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
 
     @Autowired private lateinit var gjeldendeBarnRepository: GjeldendeBarnRepository
-    @Autowired private lateinit var fagsakRepository: FagsakRepository
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
     @Autowired private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
     @Autowired private lateinit var søknadService: SøknadService
 
     @Test
     internal fun `finnBarnAvGjeldendeIverksatteBehandlinger med fremtidig andel, forvent barn fra behandling med fremtidig andel `() {
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandlingMedTidligereAndel = behandlingRepository.insert(behandling(fagsak,
                                                                                  status = BehandlingStatus.FERDIGSTILT,
                                                                                  resultat = BehandlingResultat.INNVILGET,
@@ -76,8 +74,8 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `finnBarnAvGjeldendeIverksatteBehandlinger med fremtidig andel fra to forskjellige fagsaker, forvent barn fra behandling med fremtidig andel`() {
-        val fagsakForTidligereAndel = fagsakRepository.insert(fagsak())
-        val fagsakForFremtidigAndel = fagsakRepository.insert(fagsak())
+        val fagsakForTidligereAndel = testoppsettService.lagreFagsak(fagsak())
+        val fagsakForFremtidigAndel = testoppsettService.lagreFagsak(fagsak())
 
         val behandlingMedTidligereAndel = behandlingRepository.insert(behandling(fagsakForTidligereAndel,
                                                                                  status = BehandlingStatus.FERDIGSTILT,

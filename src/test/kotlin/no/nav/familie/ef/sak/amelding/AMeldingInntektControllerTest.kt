@@ -3,7 +3,6 @@ package no.nav.familie.ef.sak.amelding
 import io.mockk.verify
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.amelding.ekstern.AMeldingInntektClient
-import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -21,7 +20,6 @@ import java.util.UUID
 
 internal class AMeldingInntektControllerTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var fagsakRepository: FagsakRepository
     @Autowired private lateinit var aMeldingInntektClient: AMeldingInntektClient
 
     private val fagsak = fagsak(identer = fagsakpersoner(setOf("1")))
@@ -29,7 +27,7 @@ internal class AMeldingInntektControllerTest : OppslagSpringRunnerTest() {
     @BeforeEach
     fun setUp() {
         headers.setBearerAuth(lokalTestToken)
-        fagsakRepository.insert(fagsak)
+        testoppsettService.lagreFagsak(fagsak)
     }
 
     @Test

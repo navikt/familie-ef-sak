@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.infrastruktur.config.getValue
+import no.nav.familie.ef.sak.infrastruktur.exception.IntegrasjonException
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
@@ -13,6 +14,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.CacheManager
 import org.springframework.stereotype.Service
+import org.springframework.web.client.HttpServerErrorException
 import java.net.URI
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -32,6 +34,7 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
                      @Value("\${FRONTEND_OPPGAVE_URL}") private val frontendOppgaveUrl: URI) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
+    val ENHET_NAY = "4489"
 
     fun opprettOppgave(behandlingId: UUID,
                        oppgavetype: Oppgavetype,
@@ -62,7 +65,15 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
                                           mappeId = finnAktuellMappe(enhetsnummer, oppgavetype)
                     )
 
-            val opprettetOppgaveId = oppgaveClient.opprettOppgave(opprettOppgave)
+            val opprettetOppgaveId = try {
+                oppgaveClient.opprettOppgave(opprettOppgave)
+            } catch (e: Exception) {
+                if (finnerIkkeGyldigArbeidsfordeling(e)) {
+                    oppgaveClient.opprettOppgave(opprettOppgave.copy(enhetsnummer = ENHET_NAY))
+                } else {
+                    throw e
+                }
+            }
 
             val oppgave = EfOppgave(gsakOppgaveId = opprettetOppgaveId,
                                     behandlingId = behandlingId,
@@ -71,6 +82,9 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
             opprettetOppgaveId
         }
     }
+
+    private fun finnerIkkeGyldigArbeidsfordeling(e: Exception): Boolean =
+            e.message?.contains("Fant ingen gyldig arbeidsfordeling for oppgaven") ?: false
 
     private fun finnAktuellMappe(enhetsnummer: String?, oppgavetype: Oppgavetype): Long? {
         if ((enhetsnummer == "4489" || enhetsnummer == "4483") && oppgavetype == Oppgavetype.GodkjenneVedtak) {
@@ -178,7 +192,7 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
     }
 
     fun finnMapper(enheter: List<String>): List<MappeDto> {
-        return enheter.flatMap {finnMapper(it)}
+        return enheter.flatMap { finnMapper(it) }
     }
 
     fun finnMapper(enhet: String): List<MappeDto> {

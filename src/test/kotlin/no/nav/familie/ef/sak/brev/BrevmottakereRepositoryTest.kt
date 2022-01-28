@@ -9,7 +9,6 @@ import no.nav.familie.ef.sak.brev.domain.Brevmottakere
 import no.nav.familie.ef.sak.brev.domain.MottakerRolle
 import no.nav.familie.ef.sak.brev.domain.OrganisasjonerWrapper
 import no.nav.familie.ef.sak.brev.domain.PersonerWrapper
-import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import org.assertj.core.api.Assertions
@@ -18,13 +17,12 @@ import org.springframework.beans.factory.annotation.Autowired
 
 internal class BrevmottakereRepositoryTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var fagsakRepository: FagsakRepository
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
     @Autowired private lateinit var brevmottakereRepository: BrevmottakereRepository
 
     @Test
     internal fun `skal lagre brevmottaker`() {
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
         val brevmottakere = Brevmottakere(behandlingId = behandling.id,
                                           personer = PersonerWrapper(listOf(BrevmottakerPerson(personIdent = "12345678910",

@@ -7,7 +7,6 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
-import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
@@ -29,7 +28,6 @@ import java.util.UUID
 internal class FagsakServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired lateinit var fagsakService: FagsakService
-    @Autowired lateinit var fagsakRepository: FagsakRepository
     @Autowired lateinit var behandlingRepository: BehandlingRepository
 
     @AfterEach
@@ -52,7 +50,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
 
         val fagsakRequest = Fagsak(stønadstype = Stønadstype.BARNETILSYN,
                                    søkerIdenter = setOf(FagsakPerson(ident = personIdent)))
-        val fagsakDB = fagsakRepository.insert(fagsakRequest)
+        val fagsakDB = testoppsettService.lagreFagsak(fagsakRequest)
 
         val behandling1 = Behandling(fagsakId = fagsakDB.id,
                                      type = BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -101,7 +99,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
 
         val gjeldendeIdent = "12345678901"
         val feilRegistrertIdent = "99988877712"
-        val fagsakMedFeilregistrertIdent = fagsakRepository.insert(Fagsak(eksternId = EksternFagsakId(id = 1234),
+        val fagsakMedFeilregistrertIdent = testoppsettService.lagreFagsak(Fagsak(eksternId = EksternFagsakId(id = 1234),
                                                                          stønadstype = Stønadstype.OVERGANGSSTØNAD,
                                                                          søkerIdenter = setOf(FagsakPerson(ident = gjeldendeIdent,
                                                                                                            sporbar = iGår),
@@ -126,7 +124,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
 
         val gjeldendeIdent = "12345678901"
         val historiskIdent = "98765432109"
-        val fagsakMedHistoriskIdent = fagsakRepository.insert(Fagsak(eksternId = EksternFagsakId(id = 1234),
+        val fagsakMedHistoriskIdent = testoppsettService.lagreFagsak(Fagsak(eksternId = EksternFagsakId(id = 1234),
                                                                      stønadstype = Stønadstype.OVERGANGSSTØNAD,
                                                                      søkerIdenter = setOf(FagsakPerson(ident = historiskIdent,
                                                                                                            sporbar = iGår))))

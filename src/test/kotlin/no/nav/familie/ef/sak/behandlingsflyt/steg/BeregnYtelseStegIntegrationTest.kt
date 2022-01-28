@@ -8,7 +8,6 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BeregnYtelseSteg
 import no.nav.familie.ef.sak.beregning.Inntekt
-import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
@@ -28,7 +27,6 @@ import java.util.UUID
 
 internal class BeregnYtelseStegIntegrationTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var fagsakRepository: FagsakRepository
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
     @Autowired private lateinit var beregnYtelseSteg: BeregnYtelseSteg
     @Autowired private lateinit var tilkjentytelseRepository: TilkjentYtelseRepository
@@ -97,7 +95,7 @@ internal class BeregnYtelseStegIntegrationTest : OppslagSpringRunnerTest() {
     }
 
     fun opprettBehandlinger() {
-        fagsakRepository.insert(fagsak)
+        testoppsettService.lagreFagsak(fagsak)
         behandlingRepository.insert(behandling)
         behandlingRepository.insert(behandling2)
     }

@@ -10,7 +10,6 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillBehandlingTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.PollStatusTekniskOpphør
-import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
@@ -31,7 +30,6 @@ import org.springframework.beans.factory.annotation.Autowired
 internal class TekniskOpphørTest : OppslagSpringRunnerTest() {
 
     @Autowired lateinit var tekniskOpphørService: TekniskOpphørService
-    @Autowired lateinit var fagsakRepository: FagsakRepository
     @Autowired lateinit var behandlingRepository: BehandlingRepository
     @Autowired lateinit var taskRepository: TaskRepository
     @Autowired lateinit var pollStatusTekniskOpphør: PollStatusTekniskOpphør
@@ -48,7 +46,7 @@ internal class TekniskOpphørTest : OppslagSpringRunnerTest() {
         mockBrukerContext("saksbehandler")
         every { iverksettClient.hentStatus(any()) } returns IverksettStatus.OK_MOT_OPPDRAG
 
-        fagsak = fagsakRepository.insert(fagsak(identer = setOf(FagsakPerson(ident = ident))))
+        fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(FagsakPerson(ident = ident))))
         behandling = behandlingRepository.insert(behandling(fagsak,
                                                             status = BehandlingStatus.FERDIGSTILT,
                                                             resultat = BehandlingResultat.INNVILGET))

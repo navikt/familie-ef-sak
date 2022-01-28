@@ -1,0 +1,9 @@
+ALTER TABLE soker RENAME TO soknad_soker;
+ALTER TABLE utenlandsopphold RENAME TO soknad_utenlandsopphold;
+ALTER TABLE barn RENAME TO soknad_barn;
+ALTER TABLE grunnlag_soknad RENAME TO soknad_grunnlag;
+ALTER TABLE tidligere_utdanning RENAME TO soknad_tidligere_utdanning;
+ALTER TABLE selvstendig RENAME TO soknad_selvstendig;
+ALTER TABLE arbeidsgiver RENAME TO soknad_arbeidsgiver;
+ALTER TABLE aksjeselskap RENAME TO soknad_aksjeselskap;
+ALTER TABLE barnepassordning RENAME TO soknad_barnepassordning;
