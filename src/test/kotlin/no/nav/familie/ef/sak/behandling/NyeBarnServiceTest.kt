@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.behandling
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ef.sak.behandling.BarnService
+import no.nav.familie.ef.sak.behandling.NyeBarnService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.fagsak.FagsakService
@@ -27,14 +27,14 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.UUID
 
-class BarnServiceTest {
+class NyeBarnServiceTest {
 
     val behandlingService = mockk<BehandlingService>()
     val fagsakService = mockk<FagsakService>()
     val søknadService = mockk<SøknadService>()
     val personService = mockk<PersonService>()
     val grunnlagsdataService = mockk<GrunnlagsdataService>()
-    val barnService = BarnService(behandlingService, fagsakService, søknadService, personService, grunnlagsdataService)
+    val nyeBarnService = NyeBarnService(behandlingService, fagsakService, søknadService, personService, grunnlagsdataService)
 
     val grunnlagsdataMedMetadata = mockk<GrunnlagsdataMedMetadata>()
     val fagsak = mockk<Fagsak>()
@@ -62,7 +62,7 @@ class BarnServiceTest {
         every { søknadService.hentOvergangsstønad(any()) } returns null
         every { søkerMedBarn.barn } returns mapOf("fnr for barn" to pdlBarn(fødsel(fødselsdato = LocalDate.now())),
                                                   "fnr for nytt barn" to pdlBarn(fødsel(fødselsdato = LocalDate.now())))
-        val barn = barnService.finnNyeBarnSidenGjeldendeBehandlingForPersonIdent(PersonIdent("fnr til søker"))
+        val barn = nyeBarnService.finnNyeBarnSidenGjeldendeBehandlingForPersonIdent(PersonIdent("fnr til søker"))
         assertThat(barn.size).isEqualTo(1)
         assertThat(barn.first()).isEqualTo("fnr for nytt barn")
     }
@@ -73,7 +73,7 @@ class BarnServiceTest {
         every { barnMedIdent.personIdent } returns "fnr for barn"
         every { søknadService.hentOvergangsstønad(any()) } returns null
         every { søkerMedBarn.barn } returns mapOf("fnr for barn" to pdlBarn(fødsel(fødselsdato = LocalDate.now())))
-        val barn = barnService.finnNyeBarnSidenGjeldendeBehandlingForPersonIdent(PersonIdent("fnr til søker"))
+        val barn = nyeBarnService.finnNyeBarnSidenGjeldendeBehandlingForPersonIdent(PersonIdent("fnr til søker"))
         assertThat(barn.size).isEqualTo(0)
     }
 
@@ -85,7 +85,7 @@ class BarnServiceTest {
         every { søkerMedBarn.barn } returns mapOf("fnr for barn" to pdlBarn(fødsel(fødselsdato = LocalDate.now())),
                                                   "fnr for voksent barn" to pdlBarn(fødsel(fødselsdato = LocalDate.now()
                                                           .minusYears(18))))
-        val barn = barnService.finnNyeBarnSidenGjeldendeBehandlingForPersonIdent(PersonIdent("fnr til søker"))
+        val barn = nyeBarnService.finnNyeBarnSidenGjeldendeBehandlingForPersonIdent(PersonIdent("fnr til søker"))
         assertThat(barn.size).isEqualTo(0)
     }
 
@@ -98,7 +98,7 @@ class BarnServiceTest {
         every { søknadService.hentOvergangsstønad(any())?.barn } returns setOf(terminbarn)
         every { søkerMedBarn.barn } returns mapOf("fnr for barn" to pdlBarn(fødsel(fødselsdato = LocalDate.now())),
                                                   "fnr for terminbarn" to pdlBarn(fødsel(fødselsdato = LocalDate.now())))
-        val barn = barnService.finnNyeBarnSidenGjeldendeBehandlingForPersonIdent(PersonIdent("fnr til søker"))
+        val barn = nyeBarnService.finnNyeBarnSidenGjeldendeBehandlingForPersonIdent(PersonIdent("fnr til søker"))
         assertThat(barn.size).isEqualTo(0)
     }
 

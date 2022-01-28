@@ -17,11 +17,11 @@ import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
-class BarnService(private val behandlingService: BehandlingService,
-                  private val fagsakService: FagsakService,
-                  private val søknadService: SøknadService,
-                  private val personService: PersonService,
-                  private val grunnlagsdataService: GrunnlagsdataService) {
+class NyeBarnService(private val behandlingService: BehandlingService,
+                     private val fagsakService: FagsakService,
+                     private val søknadService: SøknadService,
+                     private val personService: PersonService,
+                     private val grunnlagsdataService: GrunnlagsdataService) {
 
     fun finnNyeBarnSidenGjeldendeBehandlingForPersonIdent(personIdent: PersonIdent): List<String> {
         val fagsak = fagsakService.finnFagsak(setOf(personIdent.ident), Stønadstype.OVERGANGSSTØNAD)
