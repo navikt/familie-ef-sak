@@ -39,7 +39,7 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `Opprett og hent andeler tilkjent ytelse`() {
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak = fagsak))
         val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(opprettBehandling(), 2)
 
@@ -74,7 +74,7 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `finnTilkjentYtelserTilKonsistensAvstemming`() {
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak).innvilgetOgFerdigstilt())
 
         val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(behandling)
@@ -95,7 +95,7 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal kun finne siste behandlingen sin tilkjenteytelse`() {
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val opprettetTid = LocalDate.of(2021, 1, 1).atStartOfDay()
         val behandling = behandlingRepository.insert(behandling(fagsak, opprettetTid = opprettetTid).innvilgetOgFerdigstilt())
         val behandling2 = behandlingRepository.insert(behandling(fagsak).innvilgetOgFerdigstilt())
@@ -111,7 +111,7 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `finnTilkjentYtelserTilKonsistensavstemming skal ikke få med tilkjent ytelser som kun har 0-beløp`() {
         val beløp = 0
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak, opprettetTid = LocalDate.of(2021, 1, 1).atStartOfDay())
                                                              .innvilgetOgFerdigstilt())
         val andelerTilkjentYtelse = listOf(lagAndelTilkjentYtelse(beløp = beløp,
@@ -125,7 +125,7 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     private fun opprettBehandling(): Behandling {
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
 
         return behandlingRepository.insert(behandling(fagsak))
     }

@@ -259,7 +259,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
                 identer.associate { it.first to lagPersonKort(it.second) }
             }
             identer.forEach {
-                val fagsak = fagsakRepository.insert(fagsak(fagsakpersoner(setOf(it.first))))
+                val fagsak = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(setOf(it.first))))
                 val behandling = behandlingRepository.insert(behandling(fagsak))
                 val arbeidssøkere = UttrekkArbeidssøkere(fagsakId = fagsak.id,
                                                          vedtakId = behandling.id,
@@ -371,7 +371,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `settKontrollert - har ikke tilgang til fagsak`() {
-        val fagsak = fagsakRepository.insert(fagsak(fagsakpersoner(setOf("ikkeTilgang"))))
+        val fagsak = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(setOf("ikkeTilgang"))))
         val behandling = behandlingRepository.insert(behandling(fagsak))
         val uttrekkArbeidssøkere = UttrekkArbeidssøkere(fagsakId = fagsak.id, vedtakId = behandling.id, årMåned = mars2021)
         val uttrekk = uttrekkArbeidssøkerRepository.insert(uttrekkArbeidssøkere)
@@ -394,7 +394,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
     }
 
     private fun opprettEkstraFagsak() {
-        val fagsak = fagsakRepository.insert(fagsak(fagsakpersoner(setOf("1"))))
+        val fagsak = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(setOf("1"))))
         val behandling = behandlingRepository.insert(
                 behandling(fagsak = fagsak,
                            type = BehandlingType.REVURDERING,
@@ -428,7 +428,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
     }
 
     fun opprettBehandlinger() {
-        fagsakRepository.insert(fagsak)
+        testoppsettService.lagreFagsak(fagsak)
         behandlingRepository.insert(behandling)
         behandlingRepository.insert(behandling2)
     }

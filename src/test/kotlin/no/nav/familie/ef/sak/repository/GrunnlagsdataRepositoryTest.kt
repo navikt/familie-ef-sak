@@ -4,7 +4,6 @@ import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.felles.util.opprettGrunnlagsdata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRepository
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdata
@@ -14,13 +13,12 @@ import org.springframework.beans.factory.annotation.Autowired
 
 internal class GrunnlagsdataRepositoryTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var fagsakRepository: FagsakRepository
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
     @Autowired private lateinit var grunnlagsdataRepository: GrunnlagsdataRepository
 
     @Test
     internal fun `hente data går OK`() {
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
 
         val grunnlagsdata = opprettGrunnlagsdata()
@@ -31,7 +29,7 @@ internal class GrunnlagsdataRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `finnBehandlingerSomManglerGrunnlagsdata skal finne behandlinger som har status OPPRETTET`() {
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak,
                                                                 status = BehandlingStatus.OPPRETTET,
                                                                 type = BehandlingType.BLANKETT))
@@ -50,7 +48,7 @@ internal class GrunnlagsdataRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `bakåtkompatibilitet - tidligereVedtaksPerioder er null då den ikke finnes med i tidligere objekter`() {
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
 
         val grunnlagsdata = opprettGrunnlagsdata().copy(tidligereVedtaksperioder = null)

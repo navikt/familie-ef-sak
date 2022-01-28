@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.repository
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
-import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.testWithBrukerContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.vilkår.VilkårType
@@ -19,12 +18,11 @@ import java.util.UUID
 internal class VilkårsvurderingRepositoryTest : OppslagSpringRunnerTest() {
 
     @Autowired private lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
-    @Autowired private lateinit var fagsakRepository: FagsakRepository
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
 
     @Test
     internal fun findByBehandlingId() {
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
 
         val vilkårsvurdering = vilkårsvurderingRepository.insert(vilkårsvurdering(behandling.id,
@@ -37,7 +35,7 @@ internal class VilkårsvurderingRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun oppdaterEndretTid() {
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
 
         val vilkårsvurdering = vilkårsvurderingRepository.insert(vilkårsvurdering(behandling.id,
@@ -54,7 +52,7 @@ internal class VilkårsvurderingRepositoryTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `setter maskinellt opprettet på vilkår`() {
         val saksbehandler = "C000"
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
 
         val vilkårsvurdering: Vilkårsvurdering = testWithBrukerContext(preferredUsername = saksbehandler) {
