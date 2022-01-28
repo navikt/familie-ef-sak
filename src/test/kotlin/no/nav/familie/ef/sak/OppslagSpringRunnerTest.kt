@@ -23,6 +23,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdat
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknad
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadsskjemaOvergangsstønad
 import no.nav.familie.ef.sak.simulering.Simuleringsresultat
+import no.nav.familie.ef.sak.testutil.TestoppsettService
 import no.nav.familie.ef.sak.tilbakekreving.domain.Tilbakekreving
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
@@ -78,6 +79,7 @@ abstract class OppslagSpringRunnerTest {
     @Autowired @Qualifier("kodeverkCache") private lateinit var cacheManagerKodeverk: CacheManager
     @Autowired private lateinit var rolleConfig: RolleConfig
     @Autowired private lateinit var mockOAuth2Server: MockOAuth2Server
+    @Autowired lateinit var testoppsettService: TestoppsettService
 
     @LocalServerPort
     private var port: Int? = 0

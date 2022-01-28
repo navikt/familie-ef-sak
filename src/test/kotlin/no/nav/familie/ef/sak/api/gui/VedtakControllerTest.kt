@@ -8,7 +8,6 @@ import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
-import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
@@ -47,7 +46,6 @@ import java.util.UUID
 
 internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var fagsakRepository: FagsakRepository
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
     @Autowired private lateinit var rolleConfig: RolleConfig
     @Autowired private lateinit var vedtaksbrevService: VedtaksbrevService
@@ -69,7 +67,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     internal fun setUp() {
-        fagsakRepository.insert(fagsak)
+        testoppsettService.lagreFagsak(fagsak)
     }
 
     @Test

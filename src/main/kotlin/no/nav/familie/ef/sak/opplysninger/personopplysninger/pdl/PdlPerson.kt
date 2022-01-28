@@ -45,6 +45,7 @@ interface PdlPerson {
 data class PdlIdent(val ident: String, val historisk: Boolean)
 
 data class PdlIdenter(val identer: List<PdlIdent>) {
+
     fun gjeldende(): PdlIdent = this.identer.first { !it.historisk }
 }
 
@@ -187,7 +188,12 @@ data class Fødsel(@JsonProperty("foedselsaar") val fødselsår: Int?,
                   @JsonProperty("foedeland") val fødeland: String?,
                   @JsonProperty("foedested") val fødested: String?,
                   @JsonProperty("foedekommune") val fødekommune: String?,
-                  val metadata: Metadata)
+                  val metadata: Metadata) {
+
+    fun erUnder18År() = this.fødselsdato?.let { LocalDate.now() < it.plusYears(18) }
+                        ?: this.fødselsår?.let { LocalDate.now() < LocalDate.of(it, 1, 1).plusYears(18) }
+                        ?: true
+}
 
 data class Dødsfall(@JsonProperty("doedsdato") val dødsdato: LocalDate?)
 

@@ -31,7 +31,7 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
     fun `lagre og hent vedtak, lagre igjen - da skal første slettes`() {
 
         /** Pre */
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak,
                                                                 steg = StegType.VILKÅR,
                                                                 status = BehandlingStatus.UTREDES,
@@ -70,7 +70,7 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `skal hente lagret vedtak hvis finnes`() {
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak,
                                                                 steg = StegType.VILKÅR,
                                                                 status = BehandlingStatus.UTREDES,
@@ -88,7 +88,7 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal oppdatere saksbehandler på vedtaket`() {
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak,
                                                                 steg = StegType.VILKÅR,
                                                                 status = BehandlingStatus.UTREDES,
@@ -107,7 +107,7 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal oppdatere beslutter på vedtaket`() {
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak,
                                                                 steg = StegType.VILKÅR,
                                                                 status = BehandlingStatus.UTREDES,
@@ -133,7 +133,7 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `hentVedtakForBehandlinger - skal returnere vedtak`() {
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak)).id
         val behandling2 = behandlingRepository.insert(behandling(fagsak)).id
         val vedtakDto = Innvilget(resultatType = ResultatType.INNVILGE,
