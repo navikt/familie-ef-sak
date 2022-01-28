@@ -67,6 +67,7 @@ class VedtakController(private val stegService: StegService,
     }
 
     @GetMapping("/eksternid/{eksternId}/inntekt")
+    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) //Familie-ef-personhendelse bruker denne
     fun hentForventetInntektForEksternId(@PathVariable eksternId: Long, @DateTimeFormat(pattern = "yyyy-MM-dd") dato: LocalDate?): Ressurs<Int?> {
         val behandlingId = behandlingService.hentBehandlingPåEksternId(eksternId).id
 
@@ -75,6 +76,7 @@ class VedtakController(private val stegService: StegService,
     }
 
     @GetMapping("/eksternid/{eksternId}/harAktivtVedtak")
+    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) //Familie-ef-personhendelse bruker denne
     fun hentHarAktivStonad(@PathVariable eksternId: Long, @DateTimeFormat(pattern = "yyyy-MM-dd") dato: LocalDate?): Ressurs<Boolean> {
         val behandlingId = behandlingService.hentBehandlingPåEksternId(eksternId).id
 
