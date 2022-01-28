@@ -54,6 +54,10 @@ class VedtakService(private val vedtakRepository: VedtakRepository) {
             dato.isEqualOrAfter(it.startDato) && dato.isEqualOrBefore(it.sluttDato)
         }?.inntekt?.toInt()
     }
+
+    fun hentHarAktivtVedtak(behandlingId: UUID, localDate: LocalDate = LocalDate.now()): Boolean {
+        return hentVedtak(behandlingId).perioder?.perioder?.any { it.datoFra.isEqualOrBefore(localDate) && it.datoTil.isEqualOrAfter(localDate) } ?: false
+    }
 }
 
 fun LocalDate.isEqualOrAfter(dato: LocalDate) = this.equals(dato) || this.isAfter(dato)

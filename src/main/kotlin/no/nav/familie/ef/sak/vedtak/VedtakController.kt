@@ -66,12 +66,19 @@ class VedtakController(private val stegService: StegService,
         return Ressurs.success(vedtakService.hentVedtakHvisEksisterer(behandlingId))
     }
 
-    @GetMapping("/eksternid/{eksternId}")
-    fun hentForventetInntektForEksternId(@PathVariable eksternId: Long, @DateTimeFormat(pattern = "yyyy-MM-dd") dato: LocalDate?): Ressurs<Int> {
+    @GetMapping("/eksternid/{eksternId}/inntekt")
+    fun hentForventetInntektForEksternId(@PathVariable eksternId: Long, @DateTimeFormat(pattern = "yyyy-MM-dd") dato: LocalDate?): Ressurs<Int?> {
         val behandlingId = behandlingService.hentBehandlingPåEksternId(eksternId).id
 
         val forventetInntekt = vedtakService.hentForventetInntektForVedtakOgDato(behandlingId, dato ?: LocalDate.now())
-                              ?: return Ressurs.funksjonellFeil("Fant ingen forventet inntekt for behandling $behandlingId og gitt dato $dato")
+        return Ressurs.success(forventetInntekt)
+    }
+
+    @GetMapping("/eksternid/{eksternId}/harAktivtVedtak")
+    fun hentHarAktivStonad(@PathVariable eksternId: Long, @DateTimeFormat(pattern = "yyyy-MM-dd") dato: LocalDate?): Ressurs<Boolean> {
+        val behandlingId = behandlingService.hentBehandlingPåEksternId(eksternId).id
+
+        val forventetInntekt = vedtakService.hentHarAktivtVedtak(behandlingId, dato ?: LocalDate.now())
         return Ressurs.success(forventetInntekt)
     }
 }
