@@ -19,7 +19,7 @@ data class Vedtak(@Id
                   val avslåÅrsak: AvslagÅrsak? = null,
                   val perioder: PeriodeWrapper? = null,
                   val inntekter: InntektWrapper? = null,
-                  val samordningsfradagType: SamordningsfradagType? = null,
+                  val samordningsfradragType: SamordningsfradragType? = null,
                   val saksbehandlerIdent: String? = null,
                   @Column("opphor_fom")
                   val opphørFom: LocalDate? = null,
@@ -73,7 +73,7 @@ enum class AvslagÅrsak {
     MANGLENDE_OPPLYSNINGER,
 }
 
-enum class SamordningsfradagType {
+enum class SamordningsfradragType {
     GJENLEVENDEPENSJON,
     UFØRETRYGD,
 }

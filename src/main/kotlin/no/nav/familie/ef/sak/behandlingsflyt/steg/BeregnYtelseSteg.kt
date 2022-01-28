@@ -97,7 +97,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
         tilkjentYtelseService.opprettTilkjentYtelse(TilkjentYtelse(personident = aktivIdent,
                                                                    behandlingId = behandling.id,
                                                                    andelerTilkjentYtelse = nyeAndeler,
-                                                                   samordningsfradagType = null))
+                                                                   samordningsfradragType = null))
     }
 
     private fun opprettTilkjentYtelseForInnvilgetBehandling(vedtak: Innvilget,
@@ -124,7 +124,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
         tilkjentYtelseService.opprettTilkjentYtelse(TilkjentYtelse(personident = aktivIdent,
                                                                    behandlingId = behandling.id,
                                                                    andelerTilkjentYtelse = nyeAndeler,
-                                                                   samordningsfradagType = vedtak.samordningsfradagType))
+                                                                   samordningsfradragType = vedtak.samordningsfradragType))
     }
 
     private fun finnOpphørsperioder(vedtak: Innvilget) =

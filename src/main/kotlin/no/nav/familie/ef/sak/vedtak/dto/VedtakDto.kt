@@ -12,7 +12,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.vedtak.domain.AvslagÅrsak
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
-import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradagType
+import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradragType
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.kontrakter.ef.felles.Vedtaksresultat
@@ -48,7 +48,7 @@ class Innvilget(val resultatType: ResultatType,
                 val inntektBegrunnelse: String?,
                 val perioder: List<VedtaksperiodeDto> = emptyList(),
                 val inntekter: List<Inntekt> = emptyList(),
-                val samordningsfradagType: SamordningsfradagType? = null) : VedtakDto()
+                val samordningsfradragType: SamordningsfradragType? = null) : VedtakDto()
 
 class Avslå(val resultatType: ResultatType = ResultatType.AVSLÅ,
             val avslåÅrsak: AvslagÅrsak?,
@@ -85,7 +85,7 @@ fun Vedtak.tilVedtakDto(): VedtakDto =
                     inntektBegrunnelse = this.inntektBegrunnelse,
                     perioder = (this.perioder ?: PeriodeWrapper(emptyList())).perioder.fraDomene(),
                     inntekter = (this.inntekter ?: InntektWrapper(emptyList())).inntekter.tilInntekt(),
-                    samordningsfradagType = this.samordningsfradagType)
+                    samordningsfradragType = this.samordningsfradragType)
             ResultatType.AVSLÅ -> Avslå(
                     resultatType = this.resultatType,
                     avslåBegrunnelse = this.avslåBegrunnelse,

@@ -14,7 +14,7 @@ fun TilkjentYtelse.tilDto(): TilkjentYtelseDto {
     return TilkjentYtelseDto(behandlingId = this.behandlingId,
                              vedtakstidspunkt = this.vedtakstidspunkt,
                              andeler = this.andelerTilkjentYtelse.map { andel -> andel.tilDto() },
-                             samordningsfradagType = this.samordningsfradagType)
+                             samordningsfradragType = this.samordningsfradragType)
 }
 
 fun AndelTilkjentYtelse.tilDto(): AndelTilkjentYtelseDto {
