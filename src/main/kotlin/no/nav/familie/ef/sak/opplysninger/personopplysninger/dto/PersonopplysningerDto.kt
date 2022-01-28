@@ -39,6 +39,10 @@ data class BarnDto(val personIdent: String,
                    val fødselsdato: LocalDate?,
                    val dødsdato: LocalDate?)
 
+data class BarnMinimumDto(val personIdent: String,
+                          val navn: String,
+                          val fødselsdato: LocalDate?)
+
 data class AnnenForelderMinimumDto(val personIdent: String,
                                    val navn: String,
                                    val dødsdato: LocalDate?)
