@@ -6,7 +6,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.ereg.EregClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.ereg.Navn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.ereg.OrganisasjonDetaljer
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.ereg.OrganisasjonDto
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.ereg.VirksomhetDetaljer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
@@ -49,7 +48,6 @@ class EregClientMock {
             OrganisasjonDto(organisasjonsnummer = "123456789",
                             type = "type",
                             navn = navn,
-                            organisasjonDetaljer = organisasjonDetaljer,
-                            virksomhetDetaljer = VirksomhetDetaljer(null))
+                            organisasjonDetaljer = organisasjonDetaljer)
 
 }
