@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.infrastruktur.exception
 
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.security.token.support.core.exceptions.JwtTokenMissingException
 import org.slf4j.LoggerFactory
 import org.springframework.core.NestedExceptionUtils
 import org.springframework.http.HttpStatus
@@ -29,6 +30,14 @@ class ApiExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Ressurs.failure(errorMessage = "Uventet feil", frontendFeilmelding = "En uventet feil oppstod."))
+    }
+
+    @ExceptionHandler(JwtTokenMissingException::class)
+    fun handleJwtTokenMissingException(jwtTokenMissingException: JwtTokenMissingException): ResponseEntity<Ressurs<Nothing>> {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(Ressurs.failure(errorMessage = "401 Unauthorized JwtTokenMissingException",
+                                      frontendFeilmelding = "En uventet feil oppstod: Kall ikke autorisert"))
     }
 
     @ExceptionHandler(ApiFeil::class)
