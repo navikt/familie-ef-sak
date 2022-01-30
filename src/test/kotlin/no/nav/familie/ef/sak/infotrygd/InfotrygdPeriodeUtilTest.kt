@@ -91,9 +91,9 @@ internal class InfotrygdPeriodeUtilTest {
 
     @Test
     internal fun `skal sortere perioder etter stønadId`() {
-        val periode1 = lagInfotrygdPeriode(stønadId = 1, vedtakId = 1, stønadFom = LocalDate.now())
-        val periode2 = lagInfotrygdPeriode(stønadId = 2, vedtakId = 1, stønadFom = LocalDate.now())
-        val periode3 = lagInfotrygdPeriode(stønadId = 3, vedtakId = 1, stønadFom = LocalDate.now())
+        val periode1 = lagInfotrygdPeriode(stønadId = 1, vedtakId = 1)
+        val periode2 = lagInfotrygdPeriode(stønadId = 2, vedtakId = 1)
+        val periode3 = lagInfotrygdPeriode(stønadId = 3, vedtakId = 1)
 
         val nyePerioder = filtrerOgSorterPerioderFraInfotrygd(listOf(periode2, periode1, periode3))
 
@@ -102,9 +102,9 @@ internal class InfotrygdPeriodeUtilTest {
 
     @Test
     internal fun `skal sortere perioder etter vedtakId`() {
-        val periode1 = lagInfotrygdPeriode(stønadId = 1, vedtakId = 1, stønadFom = LocalDate.now())
-        val periode2 = lagInfotrygdPeriode(stønadId = 1, vedtakId = 2, stønadFom = LocalDate.now())
-        val periode3 = lagInfotrygdPeriode(stønadId = 1, vedtakId = 3, stønadFom = LocalDate.now())
+        val periode1 = lagInfotrygdPeriode(stønadId = 1, vedtakId = 1)
+        val periode2 = lagInfotrygdPeriode(stønadId = 1, vedtakId = 2)
+        val periode3 = lagInfotrygdPeriode(stønadId = 1, vedtakId = 3)
 
         val nyePerioder = filtrerOgSorterPerioderFraInfotrygd(listOf(periode2, periode1, periode3))
 
@@ -124,10 +124,10 @@ internal class InfotrygdPeriodeUtilTest {
 
     @Test
     internal fun `skal sortere perioder etter stønadId, vedtakId og stønadTom`() {
-        val periode1 = lagInfotrygdPeriode(stønadId = 1, vedtakId = 1, stønadFom = LocalDate.now())
-        val periode2 = lagInfotrygdPeriode(stønadId = 1, vedtakId = 2, stønadFom = LocalDate.now())
-        val periode3 = lagInfotrygdPeriode(stønadId = 2, vedtakId = 1, stønadFom = LocalDate.now().minusDays(1))
-        val periode4 = lagInfotrygdPeriode(stønadId = 2, vedtakId = 1, stønadFom = LocalDate.now())
+        val periode1 = lagInfotrygdPeriode(stønadId = 1, vedtakId = 1, stønadFom = LocalDate.now().withDayOfMonth(2))
+        val periode2 = lagInfotrygdPeriode(stønadId = 1, vedtakId = 2, stønadFom = LocalDate.now().withDayOfMonth(2))
+        val periode3 = lagInfotrygdPeriode(stønadId = 2, vedtakId = 1, stønadFom = LocalDate.now().withDayOfMonth(1))
+        val periode4 = lagInfotrygdPeriode(stønadId = 2, vedtakId = 1, stønadFom = LocalDate.now().withDayOfMonth(2))
 
         val nyePerioder = filtrerOgSorterPerioderFraInfotrygd(listOf(periode2, periode1, periode4, periode3))
 
