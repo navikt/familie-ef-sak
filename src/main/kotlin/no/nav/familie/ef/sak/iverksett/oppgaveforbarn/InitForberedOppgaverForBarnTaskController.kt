@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.iverksett.oppgaveforbarn
 
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
@@ -25,7 +26,7 @@ class InitForberedOppgaverForBarnTaskController(private val forberedOppgaverForB
     @PostMapping("/initialiser")
     fun opprettTask(): ResponseEntity<Unit> {
         forberedOppgaverForBarnTask.doTask(Task(ForberedOppgaverForBarnTask.TYPE,
-                                                LocalDate.now().minusWeeks(1).format(DATE_FORMAT_ISO_YEAR_MONTH_DAY),
+                                                objectMapper.writeValueAsString(LocalDate.now().minusWeeks(1).format(DATE_FORMAT_ISO_YEAR_MONTH_DAY)),
                                                 Properties()))
         return ResponseEntity(HttpStatus.OK)
     }
