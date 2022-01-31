@@ -311,7 +311,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
             stegService.håndterBeregnYtelseForStønad(behandling, innvilget)
             tilbakekrevingService.lagreTilbakekreving(TilbakekrevingDto(Tilbakekrevingsvalg.AVVENT, begrunnelse = ""),
                                                       behandling.id)
-            vedtaksbrevService.lagSaksbehandlerBrev(behandling.id, brevrequest, "brevMal")
+            vedtaksbrevService.lagSaksbehandlerSanitybrev(behandling.id, brevrequest, "brevMal")
             stegService.håndterSendTilBeslutter(behandlingService.hentBehandling(behandling.id))
         }
     }
