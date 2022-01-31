@@ -3,7 +3,7 @@ CREATE TABLE behandling_barn (
     behandling_id     UUID NOT NULL REFERENCES behandling (id),
     soknad_barn_id    UUID,
     navn              VARCHAR,
-    personident       VARCHAR,
+    person_ident      VARCHAR,
     fodsel_termindato DATE
 );
 

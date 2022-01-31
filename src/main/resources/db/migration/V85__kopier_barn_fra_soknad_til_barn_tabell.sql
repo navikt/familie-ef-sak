@@ -1,5 +1,5 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-INSERT INTO behandling_barn(id, behandling_id, navn, personident, fodsel_termindato, soknad_barn_id)
+INSERT INTO behandling_barn(id, behandling_id, navn, person_ident, fodsel_termindato, soknad_barn_id)
 SELECT uuid_generate_v4(),
        soknad_grunnlag.behandling_id,
        soknad_barn.navn,
