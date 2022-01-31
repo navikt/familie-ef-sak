@@ -7,6 +7,7 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
@@ -21,6 +22,7 @@ import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.vilkårsvurdering
+import no.nav.familie.ef.sak.testutil.søknadsBarnTilBehandlingBarn
 import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårGrunnlagService
 import no.nav.familie.ef.sak.vilkår.VilkårType
@@ -58,13 +60,14 @@ internal class VurderingStegServiceTest {
     private val behandlingService = mockk<BehandlingService>()
     private val søknadService = mockk<SøknadService>()
     private val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
+    private val barnService = mockk<BarnService>()
     private val personopplysningerIntegrasjonerClient = mockk<PersonopplysningerIntegrasjonerClient>()
     private val blankettRepository = mockk<BlankettRepository>()
     private val vilkårGrunnlagService = mockk<VilkårGrunnlagService>()
     private val stegService = mockk<StegService>()
     private val taskRepository = mockk<TaskRepository>()
     private val grunnlagsdataService = mockk<GrunnlagsdataService>()
-    private val vurderingService = VurderingService(behandlingService, søknadService, vilkårsvurderingRepository,
+    private val vurderingService = VurderingService(behandlingService, søknadService, vilkårsvurderingRepository, barnService,
                                                     vilkårGrunnlagService, grunnlagsdataService)
     private val vurderingStegService = VurderingStegService(behandlingService = behandlingService,
                                                             vurderingService = vurderingService,
@@ -77,6 +80,7 @@ internal class VurderingStegServiceTest {
             TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "13071489536"),
             TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "01012067050")
     )).build().søknadOvergangsstønad)
+    private val barn = søknadsBarnTilBehandlingBarn(søknad.barn)
     private val behandling = behandling(fagsak(), BehandlingStatus.OPPRETTET)
     private val behandlingId = UUID.randomUUID()
 
@@ -95,7 +99,7 @@ internal class VurderingStegServiceTest {
         every { vilkårsvurderingRepository.insertAll(any()) } answers { firstArg() }
         val sivilstand = SivilstandInngangsvilkårDto(mockk(relaxed = true),
                                                      SivilstandRegistergrunnlagDto(Sivilstandstype.GIFT, "Navn", null))
-        every { vilkårGrunnlagService.hentGrunnlag(any(), any()) } returns VilkårGrunnlagDto(mockk(relaxed = true),
+        every { vilkårGrunnlagService.hentGrunnlag(any(), any(), any(), any()) } returns VilkårGrunnlagDto(mockk(relaxed = true),
                                                                                              mockk(relaxed = true),
                                                                                              sivilstand,
                                                                                              mockk(relaxed = true),
@@ -218,7 +222,7 @@ internal class VurderingStegServiceTest {
     @Test
     internal fun `behandlingen uten søknad skal likevel opprette et vilkår for aleneomsorg`() {
         val vilkårsvurderinger =
-                opprettNyeVilkårsvurderinger(behandlingId, HovedregelMetadata(null, Sivilstandstype.UGIFT))
+                opprettNyeVilkårsvurderinger(behandlingId, HovedregelMetadata(null, Sivilstandstype.UGIFT, barn = barn))
 
         assertThat(vilkårsvurderinger).hasSize(alleVilkårsregler.size)
         assertThat(vilkårsvurderinger.count { it.type == VilkårType.ALENEOMSORG }).isEqualTo(1)
@@ -233,7 +237,8 @@ internal class VurderingStegServiceTest {
                                  listOf(Delvilkårsvurdering(Vilkårsresultat.OPPFYLT,
                                                             listOf(Vurdering(RegelId.SØKER_MEDLEM_I_FOLKETRYGDEN)))))
         val vilkårsvurderinger =
-                opprettNyeVilkårsvurderinger(behandlingId, HovedregelMetadata(søknad, Sivilstandstype.UGIFT))
+                opprettNyeVilkårsvurderinger(behandlingId,
+                                             HovedregelMetadata(søknad.sivilstand, Sivilstandstype.UGIFT, barn = barn))
                         .map { if (it.type == vilkårsvurdering.type) vilkårsvurdering else it }
 
         every { vilkårsvurderingRepository.findByIdOrNull(vilkårsvurdering.id) } returns vilkårsvurdering

@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.vilkår.regler.vilkår
 
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadsskjemaOvergangsstønad
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Sivilstand
 import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
@@ -30,16 +30,16 @@ class SivilstandRegel : Vilkårsregel(vilkårType = VilkårType.SIVILSTAND,
                                                              UNNTAK)) {
 
     override fun initereDelvilkårsvurdering(metadata: HovedregelMetadata, resultat: Vilkårsresultat): List<Delvilkårsvurdering> {
-        val (søknad: SøknadsskjemaOvergangsstønad?, sivilstandstype: Sivilstandstype) = metadata
+        val (sivilstandSøknad: Sivilstand?, sivilstandstype: Sivilstandstype) = metadata
 
         val hovedregel: RegelId = when {
             sivilstandstype.erUgiftEllerUoppgitt()
-            && søknad != null
-            && (søknad.sivilstand.erUformeltGift == true || søknad.sivilstand.erUformeltSeparertEllerSkilt == true) ->
+            && sivilstandSøknad != null
+            && (sivilstandSøknad.erUformeltGift == true || sivilstandSøknad.erUformeltSeparertEllerSkilt == true) ->
                 KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE
             sivilstandstype.erUgiftEllerUoppgitt() -> KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE
 
-            sivilstandstype.erGift() && søknad != null && søknad.sivilstand.søktOmSkilsmisseSeparasjon == true ->
+            sivilstandstype.erGift() && sivilstandSøknad != null && sivilstandSøknad.søktOmSkilsmisseSeparasjon == true ->
                 SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON
             sivilstandstype.erGift() -> KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE
 

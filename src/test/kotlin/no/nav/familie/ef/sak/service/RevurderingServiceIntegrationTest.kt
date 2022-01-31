@@ -163,8 +163,9 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
                               søknad: SøknadsskjemaOvergangsstønad) {
         val barnId = søknad.barn.first().id
         val delvilkårsvurdering =
-                SivilstandRegel().initereDelvilkårsvurdering(HovedregelMetadata(søknad,
-                                                                                Sivilstandstype.ENKE_ELLER_ENKEMANN))
+                SivilstandRegel().initereDelvilkårsvurdering(HovedregelMetadata(søknad.sivilstand,
+                                                                                Sivilstandstype.ENKE_ELLER_ENKEMANN,
+                                                                                barn = emptyList()))
         vilkårsvurderingRepository.insert(vilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT,
                                                            type = VilkårType.SIVILSTAND,
                                                            behandlingId = behandling.id,

@@ -1,6 +1,9 @@
 package no.nav.familie.ef.sak.iverksett
 
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ef.sak.barn.BarnService
+import no.nav.familie.ef.sak.barn.BehandlingBarn
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
@@ -65,8 +68,8 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg as Ti
 @Component
 class IverksettingDtoMapper(private val arbeidsfordelingService: ArbeidsfordelingService,
                             private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-                            private val søknadService: SøknadService,
                             private val vedtakService: VedtakService,
+                            private val barnService: BarnService,
                             private val behandlingshistorikkService: BehandlingshistorikkService,
                             private val tilkjentYtelseService: TilkjentYtelseService,
                             private val fagsakService: FagsakService,
@@ -169,28 +172,16 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
                                brevmottakere = brevmottakere)
 
     private fun mapSøkerDto(fagsak: Fagsak, behandling: Behandling): SøkerDto {
-        val søknad = søknadService.hentOvergangsstønad(behandling.id)
-                     ?: return mapSøkerUtenSøknad(fagsak)
-        return mapSøkerMedSøknad(fagsak, behandling, søknad)
-    }
-
-    private fun mapSøkerUtenSøknad(fagsak: Fagsak): SøkerDto {
-        val tilhørendeEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(fagsak.hentAktivIdent())
-        return SøkerDto(fagsak.hentAktivIdent(), emptyList(), tilhørendeEnhet, AdressebeskyttelseGradering.UGRADERT)
-    }
-
-    private fun mapSøkerMedSøknad(fagsak: Fagsak,
-                                  behandling: Behandling,
-                                  søknad: SøknadsskjemaOvergangsstønad): SøkerDto {
         val personIdent = fagsak.hentAktivIdent()
+        val barn = barnService.finnBarnPåBehandling(behandling.id)
         val (grunnlagsdata) = grunnlagsdataService.hentGrunnlagsdata(behandling.id)
-        val alleBarn = BarnMatcher.kobleSøknadsbarnOgRegisterBarn(søknad.barn, grunnlagsdata.barn)
+        val alleBarn = BarnMatcher.kobleBehandlingBarnOgRegisterBarn(barn, grunnlagsdata.barn)
         val navEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(personIdent)
 
         return SøkerDto(personIdent,
                         alleBarn.map {
                             BarnDto(personIdent = it.fødselsnummer,
-                                    termindato = it.søknadsbarn.fødselTermindato)
+                                    termindato = it.behandlingBarn.fødselTermindato)
                         },
                         navEnhet,
                         grunnlagsdata.søker.adressebeskyttelse?.let { AdressebeskyttelseGradering.valueOf(it.gradering.name) })

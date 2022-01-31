@@ -19,9 +19,13 @@ class GrunnlagsdataService(private val grunnlagsdataRepository: GrunnlagsdataRep
                            private val grunnlagsdataRegisterService: GrunnlagsdataRegisterService,
                            private val behandlingService: BehandlingService) {
 
-    fun opprettGrunnlagsdata(behandlingId: UUID) {
-        val grunnlagsdata = hentGrunnlagsdataFraRegister(behandlingId)
-        grunnlagsdataRepository.insert(Grunnlagsdata(behandlingId = behandlingId, data = grunnlagsdata))
+    fun opprettGrunnlagsdata(behandlingId: UUID): GrunnlagsdataMedMetadata {
+        val grunnlagsdataDomene = hentGrunnlagsdataFraRegister(behandlingId)
+        val grunnlagsdata = Grunnlagsdata(behandlingId = behandlingId, data = grunnlagsdataDomene)
+        grunnlagsdataRepository.insert(grunnlagsdata)
+        return GrunnlagsdataMedMetadata(grunnlagsdata.data,
+                                        grunnlagsdata.lagtTilEtterFerdigstilling,
+                                        grunnlagsdata.sporbar.opprettetTid)
     }
 
     fun hentGrunnlagsdata(behandlingId: UUID): GrunnlagsdataMedMetadata {
@@ -51,7 +55,7 @@ class GrunnlagsdataService(private val grunnlagsdataRepository: GrunnlagsdataRep
 
     private fun hentGrunnlagsdataFraRegister(behandlingId: UUID): GrunnlagsdataDomene {
         val søknad = søknadService.hentOvergangsstønad(behandlingId)
-        return if(søknad == null) {
+        return if (søknad == null) {
             hentGrunnlagsdataFraRegister(behandlingService.hentAktivIdent(behandlingId), emptyList())
         } else {
             val personIdent = søknad.fødselsnummer

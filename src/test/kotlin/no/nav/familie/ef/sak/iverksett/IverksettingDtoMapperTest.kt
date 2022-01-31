@@ -4,13 +4,13 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.brev.BrevmottakereRepository
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
-import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
@@ -35,7 +35,7 @@ internal class IverksettingDtoMapperTest {
     private val fagsakService = mockk<FagsakService>()
     private val vedtakService = mockk<VedtakService>()
     private val behandlingshistorikkService = mockk<BehandlingshistorikkService>()
-    private val søknadService = mockk<SøknadService>()
+    private val barnService = mockk<BarnService>()
     private val grunnlagsdataService = mockk<GrunnlagsdataService>()
     private val brevmottakereRepository = mockk<BrevmottakereRepository>()
     private val arbeidsfordelingService = mockk<ArbeidsfordelingService>(relaxed = true)
@@ -46,7 +46,7 @@ internal class IverksettingDtoMapperTest {
                                   fagsakService = fagsakService,
                                   grunnlagsdataService = grunnlagsdataService,
                                   simuleringService = simuleringService,
-                                  søknadService = søknadService,
+                                  barnService = barnService,
                                   tilbakekrevingService = tilbakekrevingService,
                                   tilkjentYtelseService = mockk(relaxed = true),
                                   vedtakService = vedtakService,
@@ -97,8 +97,8 @@ internal class IverksettingDtoMapperTest {
     }
 
     @Test
-    internal fun `tilDto - skal kunne mappe person uten søknad`() {
-        every { søknadService.hentOvergangsstønad(any()) } returns null
+    internal fun `tilDto - skal kunne mappe person uten barn`() {
+        every { barnService.finnBarnPåBehandling(any()) } returns emptyList()
         iverksettingDtoMapper.tilDto(behandling, "bes")
 
         verify(exactly = 0) { grunnlagsdataService.hentGrunnlagsdata(any()) }

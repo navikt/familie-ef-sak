@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadsskjemaOvergangs
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.vilkårsvurdering
+import no.nav.familie.ef.sak.testutil.søknadsBarnTilBehandlingBarn
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
@@ -40,8 +41,11 @@ internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
         val revurdering = behandlingRepository.insert(behandling(fagsak))
         val søknadskjema = lagreSøknad(behandling, fagsak)
         val vilkårForBehandling = opprettVilkårsvurderinger(søknadskjema, behandling).first()
-
-        vurderingService.kopierVurderingerTilNyBehandling(behandling.id, revurdering.id)
+        val metadata = HovedregelMetadata(søknadskjema.sivilstand,
+                                          Sivilstandstype.SKILT,
+                                          false,
+                                          søknadsBarnTilBehandlingBarn(søknadskjema.barn))
+        vurderingService.kopierVurderingerTilNyBehandling(behandling.id, revurdering.id, metadata)
 
         val vilkårForRevurdering = vilkårsvurderingRepository.findByBehandlingId(revurdering.id).first()
 
@@ -67,15 +71,23 @@ internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
         val tidligereBehandlingId = UUID.randomUUID()
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val revurdering = behandlingRepository.insert(behandling(fagsak))
-
-        assertThat(catchThrowable { vurderingService.kopierVurderingerTilNyBehandling(tidligereBehandlingId, revurdering.id) })
+        val metadata = HovedregelMetadata(null,
+                                          Sivilstandstype.SKILT,
+                                          false,
+                                          emptyList())
+        assertThat(catchThrowable {
+            vurderingService.kopierVurderingerTilNyBehandling(tidligereBehandlingId,
+                                                              revurdering.id,
+                                                              metadata)
+        })
                 .hasMessage("Tidligere behandling=$tidligereBehandlingId har ikke noen vilkår")
     }
 
     private fun opprettVilkårsvurderinger(søknadskjema: SøknadsskjemaOvergangsstønad,
                                           behandling: Behandling): List<Vilkårsvurdering> {
         val barnId = søknadskjema.barn.first().id
-        val hovedregelMetadata = HovedregelMetadata(søknadskjema, Sivilstandstype.ENKE_ELLER_ENKEMANN)
+        val hovedregelMetadata =
+                HovedregelMetadata(søknadskjema.sivilstand, Sivilstandstype.ENKE_ELLER_ENKEMANN, barn = emptyList())
         val delvilkårsvurdering = SivilstandRegel().initereDelvilkårsvurdering(hovedregelMetadata)
         val vilkårsvurderinger = listOf(vilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT,
                                                          type = VilkårType.SIVILSTAND,

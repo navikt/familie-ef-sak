@@ -1,5 +1,7 @@
 package no.nav.familie.ef.sak.vilkår
 
+import no.nav.familie.ef.sak.barn.BarnService
+import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.felles.domain.Sporbar
@@ -23,6 +25,7 @@ import java.util.UUID
 class VurderingService(private val behandlingService: BehandlingService,
                        private val søknadService: SøknadService,
                        private val vilkårsvurderingRepository: VilkårsvurderingRepository,
+                       private val barnService: BarnService,
                        private val vilkårGrunnlagService: VilkårGrunnlagService,
                        private val grunnlagsdataService: GrunnlagsdataService) {
 
@@ -57,9 +60,12 @@ class VurderingService(private val behandlingService: BehandlingService,
 
     fun hentGrunnlagOgMetadata(behandlingId: UUID): Pair<VilkårGrunnlagDto, HovedregelMetadata> {
         val søknad = søknadService.hentOvergangsstønad(behandlingId)
-        val grunnlag = vilkårGrunnlagService.hentGrunnlag(behandlingId, søknad)
+        val personIdent = behandlingService.hentAktivIdent(behandlingId)
+        val barn = barnService.finnBarnPåBehandling(behandlingId)
+        val grunnlag = vilkårGrunnlagService.hentGrunnlag(behandlingId, søknad, personIdent, barn)
         val metadata = HovedregelMetadata(sivilstandstype = grunnlag.sivilstand.registergrunnlag.type,
-                                          søknad = søknad)
+                                          sivilstandSøknad = søknad?.sivilstand,
+                                          barn = barn)
         return Pair(grunnlag, metadata)
     }
 
@@ -95,17 +101,28 @@ class VurderingService(private val behandlingService: BehandlingService,
      * For å omgå dette problemet lagres først de kopierte vilkårsvurderingene til databasen. Til slutt
      * vil oppdaterEndretTid() manuelt overskrive verdiene for endretTid til korrekte verdier.
      */
-    fun kopierVurderingerTilNyBehandling(eksisterendeBehandlingId: UUID, nyBehandlingsId: UUID) {
+    fun kopierVurderingerTilNyBehandling(eksisterendeBehandlingId: UUID, nyBehandlingsId: UUID, metadata: HovedregelMetadata) {
+        val barnPåForrigeBehandling = barnService.finnBarnPåBehandling(eksisterendeBehandlingId)
+        val barnPåGjeldendeBehandling = metadata.barn
         val vurderinger = vilkårsvurderingRepository.findByBehandlingId(eksisterendeBehandlingId)
         if (vurderinger.isEmpty()) {
             val melding = "Tidligere behandling=$eksisterendeBehandlingId har ikke noen vilkår"
             throw Feil(melding, melding)
         }
         val tidligereVurderinger = vurderinger.associateBy { it.id }
-        val vurderingerKopi: Map<UUID, Vilkårsvurdering> = vurderinger.associate {
-            it.id to it.copy(id = UUID.randomUUID(), behandlingId = nyBehandlingsId, sporbar = Sporbar())
+        val vurderingerKopi: Map<UUID, Vilkårsvurdering> = vurderinger.associate { vurdering ->
+            val barnId = utledBarnId(vurdering.barnId, barnPåForrigeBehandling, barnPåGjeldendeBehandling)
+            vurdering.id to vurdering.copy(id = UUID.randomUUID(),
+                                           behandlingId = nyBehandlingsId,
+                                           sporbar = Sporbar(),
+                                           barnId = barnId)
         }
-        vilkårsvurderingRepository.insertAll(vurderingerKopi.values.toList())
+
+        val nyeVurderinger = barnPåGjeldendeBehandling
+                .filter { barn -> vurderingerKopi.none { it.value.barnId == barn.id } }
+                .map { OppdaterVilkår.lagVilkårsvurderingForNyttBarn(metadata, nyBehandlingsId, it.id) }
+
+        vilkårsvurderingRepository.insertAll(vurderingerKopi.values.toList() + nyeVurderinger)
         vurderingerKopi.forEach { (forrigeId, vurdering) ->
             vilkårsvurderingRepository.oppdaterEndretTid(vurdering.id,
                                                          tidligereVurderinger.getValue(forrigeId).sporbar.endret.endretTid)
@@ -117,4 +134,15 @@ class VurderingService(private val behandlingService: BehandlingService,
         return OppdaterVilkår.erAlleVilkårsvurderingerOppfylt(lagredeVilkårsvurderinger)
     }
 
+    fun utledBarnId(barnId: UUID?,
+                    alleBarnPåForrigeBehandling: List<BehandlingBarn>,
+                    alleBarnPåGjeldendeBehandling: List<BehandlingBarn>): UUID? =
+            barnId?.let { barnIdPåForrigeVurdering ->
+                val barnFraTidligereVurdering = alleBarnPåForrigeBehandling.first { it.id == barnIdPåForrigeVurdering }
+                val barnForGjeldendeVurdering = alleBarnPåGjeldendeBehandling.first {
+                    (barnFraTidligereVurdering.personIdent != null && it.personIdent == barnFraTidligereVurdering.personIdent) ||
+                    (barnFraTidligereVurdering.søknadBarnId != null && it.søknadBarnId == barnFraTidligereVurdering.søknadBarnId)
+                }
+                barnForGjeldendeVurdering.id
+            }
 }
