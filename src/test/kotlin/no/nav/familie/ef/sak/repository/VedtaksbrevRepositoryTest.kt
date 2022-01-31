@@ -22,7 +22,7 @@ internal class VedtaksbrevRepositoryTest : OppslagSpringRunnerTest() {
                                       brevmal = "brevmalnavn",
                                       saksbehandlersignatur = "Sakliga Behandlersen",
                                       besluttersignatur = "",
-                                      beslutterPdf = null)
+                                      beslutterPdf = null, "", "", "")
 
         vedtaksbrevRepository.insert(vedtaksbrev)
 

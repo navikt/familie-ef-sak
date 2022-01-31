@@ -8,11 +8,14 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.brev.BrevClient
+import no.nav.familie.ef.sak.brev.BrevsignaturService
 import no.nav.familie.ef.sak.brev.VedtaksbrevRepository
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevAvsnitt
+import no.nav.familie.ef.sak.brev.dto.SignaturDto
 import no.nav.familie.ef.sak.brev.dto.VedtaksbrevFritekstDto
+import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
@@ -35,9 +38,16 @@ internal class VedtaksbrevServiceTest {
     private val vedtaksbrevRepository = mockk<VedtaksbrevRepository>()
     private val behandlingService = mockk<BehandlingService>()
     private val personopplysningerService = mockk<PersonopplysningerService>()
+    private val brevsignaturService = mockk<BrevsignaturService>()
+    private val fagsakService = mockk<FagsakService>()
 
     private val vedtaksbrevService =
-            VedtaksbrevService(brevClient, vedtaksbrevRepository, behandlingService, personopplysningerService)
+            VedtaksbrevService(brevClient,
+                               vedtaksbrevRepository,
+                               behandlingService,
+                               personopplysningerService,
+                               brevsignaturService,
+                               fagsakService)
 
     private val vedtaksbrev: Vedtaksbrev = lagVedtaksbrev("malnavn")
 
@@ -48,19 +58,23 @@ internal class VedtaksbrevServiceTest {
         every { behandlingService.hentBehandling(any()) } returns lagBehandlingForBeslutter()
         val vedtaksbrevSlot = slot<Vedtaksbrev>()
 
-        val saksbehandlerNavn = "Saksbehandler Saksbehandlersen"
-        mockBrukerContext(saksbehandlerNavn)
+        val beslutterNavn = "456"
         every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev
-        every { brevClient.genererBrev(any()) } returns "123".toByteArray()
+        every { brevClient.genererBrev(any()) } returns "enPdf".toByteArray()
         every { vedtaksbrevRepository.update(capture(vedtaksbrevSlot)) } returns vedtaksbrev
+        every { fagsakService.hentFagsak(any()) } returns fagsak
+        val signaturDto = SignaturDto(beslutterNavn, "enhet", false)
+        every { brevsignaturService.lagSignaturMedEnhet(any()) } returns signaturDto
 
+        mockBrukerContext(beslutterNavn)
         vedtaksbrevService.lagBeslutterBrev(behandling.id)
-        assertThat(vedtaksbrevSlot.captured.besluttersignatur).isEqualTo(saksbehandlerNavn)
+        clearBrukerContext()
+
+        assertThat(vedtaksbrevSlot.captured.besluttersignatur).isEqualTo(beslutterNavn)
         assertThat(vedtaksbrevSlot.captured).usingRecursiveComparison()
-                .ignoringFields("besluttersignatur", "beslutterPdf")
+                .ignoringFields("besluttersignatur", "beslutterPdf", "beslutterident", "enhet")
                 .isEqualTo(vedtaksbrev)
 
-        clearBrukerContext()
     }
 
     @Test
@@ -79,6 +93,9 @@ internal class VedtaksbrevServiceTest {
         every { vedtaksbrevRepository.existsById(any()) } returns true
         every { vedtaksbrevRepository.update(capture(vedtaksbrevSlot)) } returns vedtaksbrev
         every { brevClient.genererBrev(any()) } returns "123".toByteArray()
+        every { fagsakService.hentFagsak(any()) } returns fagsak
+        val signaturDto = SignaturDto(saksbehandlerNavn, "enhet", false)
+        every { brevsignaturService.lagSignaturMedEnhet(any()) } returns signaturDto
 
         vedtaksbrevService.lagSaksbehandlerFritekstbrev(fritekstBrevDto)
         assertThat(vedtaksbrevSlot.captured.saksbehandlersignatur).isEqualTo(saksbehandlerNavn)
@@ -92,15 +109,6 @@ internal class VedtaksbrevServiceTest {
 
         val feil = assertThrows<Feil> { vedtaksbrevService.lagSaksbehandlerFritekstbrev(fritekstBrevDto) }
         assertThat(feil.message).contains("Behandling er i feil steg")
-    }
-
-    @Test
-    internal fun `skal feile når signatur ikke finnes`() {
-        every { behandlingService.hentBehandling(any()) } returns lagBehandlingForBeslutter()
-        every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev
-        every { vedtaksbrevRepository.update(any()) } returns vedtaksbrev
-
-        assertThrows<IllegalStateException> { vedtaksbrevService.lagBeslutterBrev(behandling.id) }
     }
 
     @Test
@@ -124,7 +132,7 @@ internal class VedtaksbrevServiceTest {
     internal fun `lagSaksbehandlerBrev skal kaste feil når behandling er låst for videre behandling`() {
         every { behandlingService.hentBehandling(any()) } returns lagBehandlingForBeslutter()
                 .copy(status = BehandlingStatus.FERDIGSTILT)
-        assertThrows<Feil> { vedtaksbrevService.lagSaksbehandlerBrev(behandling.id, TextNode(""), "") }
+        assertThrows<Feil> { vedtaksbrevService.lagSaksbehandlerSanitybrev(behandling.id, TextNode(""), "") }
     }
 
     private fun lagBehandlingForBeslutter() = behandling(fagsak(),
@@ -135,12 +143,14 @@ internal class VedtaksbrevServiceTest {
                                                              status = BehandlingStatus.UTREDES,
                                                              steg = StegType.SEND_TIL_BESLUTTER)
 
-    private fun lagVedtaksbrev(brevmal: String) = Vedtaksbrev(behandling.id,
-                                                              "123",
-                                                              brevmal,
-                                                              "Saksbehandler Signatur",
-                                                              null,
-                                                              null)
+    private fun lagVedtaksbrev(brevmal: String, saksbehandlerIdent: String = "123") = Vedtaksbrev(behandling.id,
+                                                                                                  "123",
+                                                                                                  brevmal,
+                                                                                                  "Saksbehandler Signatur",
+                                                                                                  null,
+                                                                                                  null, "",
+                                                                                                  saksbehandlerIdent,
+                                                                                                  "")
 
     private fun lagVedtaksbrevFritekstDto() = VedtaksbrevFritekstDto("Innvilget",
                                                                      listOf(FrittståendeBrevAvsnitt("Deloverskrift", "Innhold")),

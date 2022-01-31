@@ -13,7 +13,6 @@ import no.nav.familie.ef.sak.blankett.JournalførBlankettTask
 import no.nav.familie.ef.sak.brev.VedtaksbrevRepository
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
@@ -63,7 +62,8 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
                 }
                 else -> {
                     val vedtaksbrev = vedtaksbrevRepository.findByIdOrThrow(behandling.id)
-                    val fil = utledVedtaksbrev(vedtaksbrev)
+                    validerBeslutterVedtaksbrev(vedtaksbrev)
+                    val fil = vedtaksbrev.beslutterPdf ?: throw Feil("Beslutter-pdf er null, beslutter må kontrollere brevet.")
                     val iverksettDto = iverksettingDtoMapper.tilDto(behandling, beslutter)
                     oppdaterResultatPåBehandling(behandling.id)
                     opprettPollForStatusOppgave(behandling.id)
@@ -93,12 +93,18 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
         }
     }
 
-    private fun utledVedtaksbrev(vedtaksbrev: Vedtaksbrev): Fil {
-        feilHvis(vedtaksbrev.beslutterPdf == null) { "For å godkjenne må du som beslutter først kontrollere brevet." }
-        feilHvis(vedtaksbrev.besluttersignatur != SikkerhetContext.hentSaksbehandlerNavn(strict = true)) {
-            "En annen saksbehandler har signert vedtaksbrevet"
+    private fun validerBeslutterVedtaksbrev(vedtaksbrev: Vedtaksbrev) {
+
+        feilHvis(vedtaksbrev.beslutterident == null || vedtaksbrev.beslutterident.isBlank()) {
+            "Beklager. Det har skjedd en feil. Last brevsiden på nytt, kontroller brevet og prøv igjen."
         }
-        return vedtaksbrev.beslutterPdf
+
+        validerSammeBeslutterIdent(vedtaksbrev)
+
+    }
+
+    private fun validerSammeBeslutterIdent(vedtaksbrev: Vedtaksbrev) {
+        feilHvis(vedtaksbrev.beslutterident != SikkerhetContext.hentSaksbehandler(true)) { "En annen beslutter har signert vedtaksbrevet" }
     }
 
     private fun ferdigstillOppgave(behandling: Behandling): Long? {
