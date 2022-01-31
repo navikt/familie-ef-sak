@@ -110,6 +110,7 @@ class VurderingService(private val behandlingService: BehandlingService,
             throw Feil(melding, melding)
         }
         val tidligereVurderinger = vurderinger.associateBy { it.id }
+        // TODO: Ikke kopier tomme aleneomsorgvurderinger dersom det finnes nye barn i revurderingen
         val vurderingerKopi: Map<UUID, Vilkårsvurdering> = vurderinger.associate { vurdering ->
             val barnId = utledBarnId(vurdering.barnId, barnPåForrigeBehandling, barnPåGjeldendeBehandling)
             vurdering.id to vurdering.copy(id = UUID.randomUUID(),
@@ -138,11 +139,11 @@ class VurderingService(private val behandlingService: BehandlingService,
                     alleBarnPåForrigeBehandling: List<BehandlingBarn>,
                     alleBarnPåGjeldendeBehandling: List<BehandlingBarn>): UUID? =
             barnId?.let { barnIdPåForrigeVurdering ->
-                val barnFraTidligereVurdering = alleBarnPåForrigeBehandling.first { it.id == barnIdPåForrigeVurdering }
-                val barnForGjeldendeVurdering = alleBarnPåGjeldendeBehandling.first {
-                    (barnFraTidligereVurdering.personIdent != null && it.personIdent == barnFraTidligereVurdering.personIdent) ||
-                    (barnFraTidligereVurdering.søknadBarnId != null && it.søknadBarnId == barnFraTidligereVurdering.søknadBarnId)
+                val barnFraTidligereVurdering = alleBarnPåForrigeBehandling.firstOrNull { it.id == barnIdPåForrigeVurdering }
+                val barnForGjeldendeVurdering = alleBarnPåGjeldendeBehandling.firstOrNull {
+                    (barnFraTidligereVurdering?.personIdent != null && it.personIdent == barnFraTidligereVurdering.personIdent) ||
+                    (barnFraTidligereVurdering?.søknadBarnId != null && it.søknadBarnId == barnFraTidligereVurdering.søknadBarnId)
                 }
-                barnForGjeldendeVurdering.id
+                barnForGjeldendeVurdering?.id
             }
 }

@@ -87,6 +87,7 @@ internal class VurderingStegServiceTest {
     @BeforeEach
     fun setUp() {
         every { behandlingService.hentBehandling(behandlingId) } returns behandling
+        every { behandlingService.hentAktivIdent(behandlingId) } returns søknad.fødselsnummer
         every { behandlingService.oppdaterStatusPåBehandling(any(), any()) } returns behandling
         every { søknadService.hentOvergangsstønad(any()) }.returns(søknad)
         every { blankettRepository.deleteById(any()) } just runs
@@ -154,6 +155,7 @@ internal class VurderingStegServiceTest {
 
     @Test
     internal fun `skal oppdatere vilkårsvurdering med resultat SKAL_IKKE_VURDERES`() {
+        every { barnService.finnBarnPåBehandling(behandlingId) } returns barn
         val oppdatertVurdering = slot<Vilkårsvurdering>()
         val vilkårsvurdering = initiererVurderinger(oppdatertVurdering)
 
@@ -220,9 +222,9 @@ internal class VurderingStegServiceTest {
     }
 
     @Test
-    internal fun `behandlingen uten søknad skal likevel opprette et vilkår for aleneomsorg`() {
+    internal fun `behandlingen uten barn skal likevel opprette et vilkår for aleneomsorg`() {
         val vilkårsvurderinger =
-                opprettNyeVilkårsvurderinger(behandlingId, HovedregelMetadata(null, Sivilstandstype.UGIFT, barn = barn))
+                opprettNyeVilkårsvurderinger(behandlingId, HovedregelMetadata(null, Sivilstandstype.UGIFT, barn = emptyList()))
 
         assertThat(vilkårsvurderinger).hasSize(alleVilkårsregler.size)
         assertThat(vilkårsvurderinger.count { it.type == VilkårType.ALENEOMSORG }).isEqualTo(1)

@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
+import no.nav.familie.ef.sak.barn.BarnRepository
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.RevurderingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
@@ -13,12 +14,14 @@ import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadRepository
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadsskjemaOvergangsstønad
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.repository.vilkårsvurdering
+import no.nav.familie.ef.sak.testutil.søknadsBarnTilBehandlingBarn
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
@@ -40,6 +43,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
     @Autowired lateinit var behandlingRepository: BehandlingRepository
     @Autowired lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
     @Autowired lateinit var søknadService: SøknadService
+    @Autowired lateinit var barnRepository: BarnRepository
     @Autowired lateinit var søknadRepository: SøknadRepository
 
     private lateinit var fagsak: Fagsak
@@ -128,12 +132,15 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         val revurdering = revurderingService.opprettRevurderingManuelt(revurderingDto)
         val vilkårForBehandling = vilkårsvurderingRepository.findByBehandlingId(behandling.id)[0]
         val vilkårForRevurdering = vilkårsvurderingRepository.findByBehandlingId(revurdering.id)[0]
+        val barnPåBehandling = barnRepository.findByBehandlingId(revurdering.id).first()
 
         assertThat(vilkårForBehandling.id).isNotEqualTo(vilkårForRevurdering.id)
+        assertThat(vilkårForBehandling.barnId).isNotEqualTo(vilkårForRevurdering.barnId)
         assertThat(vilkårForBehandling.behandlingId).isNotEqualTo(vilkårForRevurdering.behandlingId)
         assertThat(vilkårForBehandling.sporbar.opprettetTid).isNotEqualTo(vilkårForRevurdering.sporbar.opprettetTid)
+        assertThat(vilkårForRevurdering.barnId).isEqualTo(barnPåBehandling.id)
 
-        assertThat(vilkårForBehandling).usingRecursiveComparison().ignoringFields("id", "sporbar", "behandlingId")
+        assertThat(vilkårForBehandling).usingRecursiveComparison().ignoringFields("id", "sporbar", "behandlingId", "barnId")
                 .isEqualTo(vilkårForRevurdering)
     }
 
@@ -155,13 +162,16 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
             søknadRepository.findByBehandlingId(revurdering1.id)!!.soknadsskjemaId
 
     private fun lagreSøknad(behandling: Behandling): SøknadsskjemaOvergangsstønad {
-        søknadService.lagreSøknadForOvergangsstønad(Testsøknad.søknadOvergangsstønad, behandling.id, behandling.fagsakId, "1L")
+        val søknad = Testsøknad.søknadOvergangsstønad
+        søknadService.lagreSøknadForOvergangsstønad(søknad, behandling.id, behandling.fagsakId, "1L")
+        val barn: Set<SøknadBarn> = søknadService.hentOvergangsstønad(behandling.id)?.barn ?: emptySet()
+        barnRepository.insertAll(søknadsBarnTilBehandlingBarn(barn, behandling.id))
         return søknadService.hentOvergangsstønad(behandling.id)!!
     }
 
     private fun opprettVilkår(behandling: Behandling,
                               søknad: SøknadsskjemaOvergangsstønad) {
-        val barnId = søknad.barn.first().id
+        val barnId = barnRepository.findByBehandlingId(behandling.id).first().id
         val delvilkårsvurdering =
                 SivilstandRegel().initereDelvilkårsvurdering(HovedregelMetadata(søknad.sivilstand,
                                                                                 Sivilstandstype.ENKE_ELLER_ENKEMANN,

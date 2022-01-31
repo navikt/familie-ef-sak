@@ -10,7 +10,9 @@ import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.brev.BrevmottakereRepository
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.felles.util.opprettGrunnlagsdata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
@@ -27,6 +29,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.data.repository.findByIdOrNull
 import java.math.BigDecimal
+import java.time.LocalDateTime
 
 internal class IverksettingDtoMapperTest {
 
@@ -99,10 +102,12 @@ internal class IverksettingDtoMapperTest {
     @Test
     internal fun `tilDto - skal kunne mappe person uten barn`() {
         every { barnService.finnBarnPåBehandling(any()) } returns emptyList()
+        every { grunnlagsdataService.hentGrunnlagsdata(any()) } returns GrunnlagsdataMedMetadata(opprettGrunnlagsdata(), false, LocalDateTime.now())
         iverksettingDtoMapper.tilDto(behandling, "bes")
 
-        verify(exactly = 0) { grunnlagsdataService.hentGrunnlagsdata(any()) }
+        verify(exactly = 1) { grunnlagsdataService.hentGrunnlagsdata(any()) }
         verify(exactly = 1) { arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(any()) }
     }
+
 }
 

@@ -17,7 +17,7 @@ class BarnService(
 ) {
 
     fun opprettBarnPåBehandlingMedSøknadsdata(behandlingId: UUID, fagsakId: UUID, grunnlagsdataBarn: List<BarnMedIdent>) {
-        val barnFraSøknad = finnSøknadsbarnSomBehandlingBarn(fagsakId)
+        val barnFraSøknad = finnSøknadsbarnSomBehandlingBarn(behandlingId = behandlingId, fagsakId = fagsakId)
         val barnPåBehandlingen = BarnMatcher.kobleBehandlingBarnOgRegisterBarn(barnFraSøknad, grunnlagsdataBarn)
                 .map {
                     BehandlingBarn(id = it.behandlingBarn.id,
@@ -31,8 +31,8 @@ class BarnService(
         barnRepository.insertAll(barnPåBehandlingen)
     }
 
-    private fun finnSøknadsbarnSomBehandlingBarn(behandlingId: UUID): List<BehandlingBarn> {
-        val fagsak = fagsakService.hentFagsak(behandlingId)
+    private fun finnSøknadsbarnSomBehandlingBarn(behandlingId: UUID, fagsakId: UUID): List<BehandlingBarn> {
+        val fagsak = fagsakService.hentFagsak(fagsakId)
         val barnFraSøknad = when (fagsak.stønadstype) {
                                 Stønadstype.OVERGANGSSTØNAD -> søknadService.hentOvergangsstønad(behandlingId)?.barn
                                 Stønadstype.BARNETILSYN -> søknadService.hentBarnetilsyn(behandlingId)?.barn

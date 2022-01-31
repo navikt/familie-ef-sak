@@ -115,8 +115,8 @@ fun søknad(personalia: Søknadsfelt<Personalia> = mockk(),
                               stønadsstart)
 
 
-fun søknadsBarnTilBehandlingBarn(barn: Set<SøknadBarn>): List<BehandlingBarn> = barn.map {
-    BehandlingBarn(behandlingId = UUID.randomUUID(),
+fun søknadsBarnTilBehandlingBarn(barn: Set<SøknadBarn>, behandlingId: UUID = UUID.randomUUID()): List<BehandlingBarn> = barn.map {
+    BehandlingBarn(behandlingId = behandlingId,
                    søknadBarnId = it.id,
                    personIdent = it.fødselsnummer,
                    navn = it.navn,
