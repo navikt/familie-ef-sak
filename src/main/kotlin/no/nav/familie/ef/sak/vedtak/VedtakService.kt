@@ -48,9 +48,9 @@ class VedtakService(private val vedtakRepository: VedtakRepository) {
     }
 
     fun hentForventetInntektForVedtakOgDato(behandlingId: UUID, dato: LocalDate): Int? {
-        val vedtak = hentVedtak(behandlingId)
+        val vedtak = vedtakRepository.findByIdOrNull(behandlingId)
 
-        return vedtak.inntekter?.inntekter?.firstOrNull {
+        return vedtak?.inntekter?.inntekter?.firstOrNull {
             dato.isEqualOrAfter(it.startDato) && dato.isEqualOrBefore(it.sluttDato)
         }?.inntekt?.toInt()
     }

@@ -12,11 +12,24 @@ data class Vedtaksbrev(@Id
                        val brevmal: String,
                        val saksbehandlersignatur: String,
                        val besluttersignatur: String? = null,
-                       val beslutterPdf: Fil? = null)
+                       val beslutterPdf: Fil? = null,
+                       val enhet: String? = null,
+                       val saksbehandlerident: String,
+                       val beslutterident: String? = null) {
 
-fun Vedtaksbrev.tilDto(): VedtaksbrevDto = VedtaksbrevDto(saksbehandlerBrevrequest = this.saksbehandlerBrevrequest,
-                                                          brevmal = this.brevmal,
-                                                          saksbehandlersignatur = this.saksbehandlersignatur,
-                                                          besluttersignatur = this.besluttersignatur)
+
+}
+
+object VedtaksbrevKonstanter {
+    const val IKKE_SATT_IDENT_PÅ_GAMLE_VEDTAKSBREV = "IKKE_SATT"
+}
+
+fun Vedtaksbrev.tilDto(skjulBeslutterSignatur: Boolean): VedtaksbrevDto = VedtaksbrevDto(saksbehandlerBrevrequest = this.saksbehandlerBrevrequest,
+                                                                                         brevmal = this.brevmal,
+                                                                                         saksbehandlersignatur = this.saksbehandlersignatur,
+                                                                                         besluttersignatur = this.besluttersignatur,
+                                                                                         enhet = this.enhet,
+                                                                                         skjulBeslutterSignatur = skjulBeslutterSignatur
+)
 
 const val FRITEKST = "fritekst"

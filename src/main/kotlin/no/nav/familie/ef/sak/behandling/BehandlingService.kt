@@ -16,6 +16,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
+import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
@@ -56,6 +57,9 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
 
     fun finnSisteIverksatteBehandling(fagsakId: UUID) =
             behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
+
+    fun finnGjeldendeIverksatteBehandlinger(stonadstype: Stønadstype) =
+            behandlingRepository.finnSisteIverksatteBehandlinger(stonadstype)
 
     @Transactional
     fun opprettBehandlingForBlankett(behandlingType: BehandlingType,

@@ -17,6 +17,7 @@ import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
@@ -29,6 +30,7 @@ class RevurderingService(private val søknadService: SøknadService,
                          private val barnService: BarnService,
                          private val fagsakService: FagsakService) {
 
+    @Transactional
     fun opprettRevurderingManuelt(revurderingInnhold: RevurderingDto): Behandling {
         fagsakService.fagsakMedOppdatertPersonIdent(revurderingInnhold.fagsakId)
         val revurdering = behandlingService.opprettBehandling(BehandlingType.REVURDERING,
