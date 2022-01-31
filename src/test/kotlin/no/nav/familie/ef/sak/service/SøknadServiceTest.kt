@@ -3,7 +3,6 @@ package no.nav.familie.ef.sak.service
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.Behandling
-import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadRepository
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
@@ -18,13 +17,12 @@ import org.springframework.beans.factory.annotation.Autowired
 internal class SøknadServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired lateinit var behandlingRepository: BehandlingRepository
-    @Autowired lateinit var fagsakRepository: FagsakRepository
     @Autowired lateinit var søknadRepository: SøknadRepository
     @Autowired lateinit var søknadService: SøknadService
 
     @Test
     internal fun `skal kopiere søknadskjema til ny behandling`() {
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
         val revurdering = behandlingRepository.insert(behandling(fagsak))
 
@@ -36,7 +34,7 @@ internal class SøknadServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal opprette ny søknad til grunnlag som bruker den samme søknadsskjemaet`() {
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
         val revurdering = behandlingRepository.insert(behandling(fagsak))
 

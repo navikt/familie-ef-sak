@@ -144,9 +144,6 @@ class EregClientTest {
                         }
                     ],
                     "sistEndret": "2021-06-02"
-                },
-                "virksomhetDetaljer": {
-                    "enhetstype": "BEDR"
                 }
             },
             {
@@ -220,9 +217,6 @@ class EregClientTest {
                         }
                     ],
                     "sistEndret": "2021-06-02"
-                },
-                "virksomhetDetaljer": {
-                    "enhetstype": "BEDR"
                 }
             }
         ]

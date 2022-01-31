@@ -4,7 +4,6 @@ import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
-import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.log.mdc.MDCConstants
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -17,7 +16,7 @@ import org.springframework.mock.web.MockHttpServletRequest
 
 internal class AuditLoggerTest {
 
-    private val auditLogger = AuditLogger("familie-ef-sak", mockFeatureToggleService())
+    private val auditLogger = AuditLogger("familie-ef-sak")
     private val navIdent = "Z1234567"
     private val method = "POST"
     private val requestUri = "/api/test/123"
