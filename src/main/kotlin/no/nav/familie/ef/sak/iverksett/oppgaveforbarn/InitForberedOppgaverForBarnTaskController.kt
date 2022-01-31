@@ -26,7 +26,7 @@ class InitForberedOppgaverForBarnTaskController(private val forberedOppgaverForB
     @PostMapping("/initialiser")
     fun opprettTask(): ResponseEntity<Unit> {
         forberedOppgaverForBarnTask.doTask(Task(ForberedOppgaverForBarnTask.TYPE,
-                                                objectMapper.writeValueAsString(LocalDate.now().minusWeeks(1).format(DATE_FORMAT_ISO_YEAR_MONTH_DAY)),
+                                                LocalDate.now().minusWeeks(1).format(DATE_FORMAT_ISO_YEAR_MONTH_DAY),
                                                 Properties()))
         return ResponseEntity(HttpStatus.OK)
     }
