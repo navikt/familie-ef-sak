@@ -9,13 +9,13 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
-import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.domain.Endret
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -48,8 +48,8 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
     internal fun `skal hente fagsak med tilhørende behandlinger som finnes fra før`() {
         val personIdent = "23118612345"
 
-        val fagsakRequest = Fagsak(stønadstype = Stønadstype.BARNETILSYN,
-                                   søkerIdenter = setOf(FagsakPerson(ident = personIdent)))
+        val fagsakRequest = fagsak(stønadstype = Stønadstype.BARNETILSYN,
+                                   identer = setOf(FagsakPerson(ident = personIdent)))
         val fagsakDB = testoppsettService.lagreFagsak(fagsakRequest)
 
         val behandling1 = Behandling(fagsakId = fagsakDB.id,
@@ -99,12 +99,12 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
 
         val gjeldendeIdent = "12345678901"
         val feilRegistrertIdent = "99988877712"
-        val fagsakMedFeilregistrertIdent = testoppsettService.lagreFagsak(Fagsak(eksternId = EksternFagsakId(id = 1234),
-                                                                         stønadstype = Stønadstype.OVERGANGSSTØNAD,
-                                                                         søkerIdenter = setOf(FagsakPerson(ident = gjeldendeIdent,
-                                                                                                           sporbar = iGår),
-                                                                                              FagsakPerson(ident = feilRegistrertIdent,
-                                                                                                           sporbar = iDag))))
+        val fagsakMedFeilregistrertIdent = testoppsettService.lagreFagsak(fagsak(eksternId = EksternFagsakId(id = 1234),
+                                                                                 stønadstype = Stønadstype.OVERGANGSSTØNAD,
+                                                                                 identer = setOf(FagsakPerson(ident = gjeldendeIdent,
+                                                                                                              sporbar = iGår),
+                                                                                                 FagsakPerson(ident = feilRegistrertIdent,
+                                                                                                              sporbar = iDag))))
 
         assertThat(fagsakMedFeilregistrertIdent.hentAktivIdent()).isEqualTo(feilRegistrertIdent)
 
@@ -124,10 +124,10 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
 
         val gjeldendeIdent = "12345678901"
         val historiskIdent = "98765432109"
-        val fagsakMedHistoriskIdent = testoppsettService.lagreFagsak(Fagsak(eksternId = EksternFagsakId(id = 1234),
-                                                                     stønadstype = Stønadstype.OVERGANGSSTØNAD,
-                                                                     søkerIdenter = setOf(FagsakPerson(ident = historiskIdent,
-                                                                                                           sporbar = iGår))))
+        val fagsakMedHistoriskIdent = testoppsettService.lagreFagsak(fagsak(eksternId = EksternFagsakId(id = 1234),
+                                                                            stønadstype = Stønadstype.OVERGANGSSTØNAD,
+                                                                            identer = setOf(FagsakPerson(ident = historiskIdent,
+                                                                                                         sporbar = iGår))))
 
         assertThat(fagsakMedHistoriskIdent.hentAktivIdent()).isEqualTo(historiskIdent)
 

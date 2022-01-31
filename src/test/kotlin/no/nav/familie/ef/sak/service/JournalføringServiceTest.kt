@@ -15,7 +15,6 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
-import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import no.nav.familie.ef.sak.iverksett.IverksettService
@@ -186,7 +185,7 @@ internal class JournalføringServiceTest {
 
     @Test
     internal fun `skal fullføre manuell journalføring på ny behandling`() {
-        every { fagsakService.hentFagsak(fagsakId) } returns Fagsak(id = fagsakId,
+        every { fagsakService.hentFagsak(fagsakId) } returns fagsak(id = fagsakId,
                                                                     eksternId = EksternFagsakId(id = fagsakEksternId),
                                                                     stønadstype = Stønadstype.OVERGANGSSTØNAD)
 

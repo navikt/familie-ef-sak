@@ -19,7 +19,6 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.PollStatusFraIverksettTask
 import no.nav.familie.ef.sak.brev.VedtaksbrevRepository
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.domain.Fil
@@ -30,6 +29,7 @@ import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
 import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.behandling
+import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.vedtak.TotrinnskontrollService
 import no.nav.familie.ef.sak.vedtak.VedtakService
@@ -82,8 +82,8 @@ internal class BeslutteVedtakStegTest {
                                           saksbehandlerident = "saksbIdent",
                                           beslutterident = innloggetBeslutter)
 
-    private val fagsak = Fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD,
-                                søkerIdenter = setOf(FagsakPerson(ident = "12345678901")))
+    private val fagsak = fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD,
+                                identer = setOf(FagsakPerson(ident = "12345678901")))
     private val behandlingId = UUID.randomUUID()
 
     private val oppgave = Oppgave(id = UUID.randomUUID(),

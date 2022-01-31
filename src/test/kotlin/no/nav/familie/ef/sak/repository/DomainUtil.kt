@@ -7,7 +7,9 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.beregning.Inntektsperiode
+import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.fagsak.domain.FagsakDao
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.domain.Sporbar
@@ -71,8 +73,26 @@ fun Behandling.innvilgetOgFerdigstilt() =
                   status = BehandlingStatus.FERDIGSTILT)
 
 
-fun fagsak(identer: Set<FagsakPerson> = setOf(), stønadstype: Stønadstype = Stønadstype.OVERGANGSSTØNAD) =
-        Fagsak(stønadstype = stønadstype, søkerIdenter = identer)
+fun fagsak(identer: Set<FagsakPerson> = setOf(),
+           stønadstype: Stønadstype = Stønadstype.OVERGANGSSTØNAD,
+           id: UUID = UUID.randomUUID(),
+           eksternId: EksternFagsakId = EksternFagsakId(),
+           sporbar: Sporbar = Sporbar()) =
+        Fagsak(id = id,
+               stønadstype = stønadstype,
+               søkerIdenter = identer,
+               eksternId = eksternId,
+               migrert = false,
+               sporbar = sporbar)
+
+fun fagsakDao(id: UUID = UUID.randomUUID(),
+              identer: Set<FagsakPerson> = emptySet(),
+              stønadstype: Stønadstype = Stønadstype.OVERGANGSSTØNAD,
+              eksternId: EksternFagsakId = EksternFagsakId()): FagsakDao =
+        FagsakDao(id = id,
+                  søkerIdenter = identer,
+                  stønadstype = stønadstype,
+                  eksternId = eksternId)
 
 fun vilkårsvurdering(behandlingId: UUID,
                      resultat: Vilkårsresultat,

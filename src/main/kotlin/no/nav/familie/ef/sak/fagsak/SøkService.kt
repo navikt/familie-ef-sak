@@ -3,7 +3,9 @@ package no.nav.familie.ef.sak.fagsak
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.fagsak.domain.FagsakDao
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
+import no.nav.familie.ef.sak.fagsak.domain.tilFagsak
 import no.nav.familie.ef.sak.fagsak.dto.FagsakForSøkeresultat
 import no.nav.familie.ef.sak.fagsak.dto.PersonFraSøk
 import no.nav.familie.ef.sak.fagsak.dto.Søkeresultat
@@ -70,7 +72,7 @@ class SøkService(
             }
             throw ApiFeil("Finner ikke fagsak for søkte personen", HttpStatus.BAD_REQUEST)
         }
-        return fagsaker
+        return fagsaker.map(FagsakDao::tilFagsak)
     }
 
     // Denne trenger ikke en tilgangskontroll då den ikke returnerer noe fra behandlingen.

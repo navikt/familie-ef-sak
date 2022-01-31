@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.repository.fagsakDao
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
@@ -161,7 +162,7 @@ internal class EksternBehandlingControllerTest {
         val behandling1 = behandling(id = uuid1)
         val behandling2 = behandling(id = uuid2)
 
-        every { fagsakRepository.findBySøkerIdent(any(), any()) } returns fagsak()
+        every { fagsakRepository.findBySøkerIdent(any(), any()) } returns fagsakDao()
         every {
             behandlingRepository.finnSisteIverksatteBehandling(any())
         } returns behandling1 andThen behandling2 andThen null

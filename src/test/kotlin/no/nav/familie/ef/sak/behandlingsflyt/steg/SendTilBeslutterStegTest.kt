@@ -21,7 +21,6 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask.OpprettOppg
 import no.nav.familie.ef.sak.brev.VedtaksbrevRepository
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
@@ -29,6 +28,7 @@ import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.oppgave.OppgaveService
+import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
@@ -86,8 +86,8 @@ internal class SendTilBeslutterStegTest {
                                  simuleringService,
                                  tilbakekrevingService,
                                  vurderingService)
-    private val fagsak = Fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD,
-                                søkerIdenter = setOf(FagsakPerson(ident = "12345678901")))
+    private val fagsak = fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD,
+                                identer = setOf(FagsakPerson(ident = "12345678901")))
     private val saksbehandlerNavn = "saksbehandlernavn"
     private val vedtaksbrev = Vedtaksbrev(behandlingId = UUID.randomUUID(),
                                           saksbehandlerBrevrequest = "",
@@ -136,7 +136,7 @@ internal class SendTilBeslutterStegTest {
     }
 
     @AfterEach
-    internal fun tearDown(){
+    internal fun tearDown() {
         clearBrukerContext()
     }
 
