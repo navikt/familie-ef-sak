@@ -24,8 +24,7 @@ class BarnService(
 
         val barnPåBehandlingen = BarnMatcher.kobleSøknadsbarnOgRegisterBarn(barnFraSøknad, grunnlagsdata.grunnlagsdata.barn)
                 .map {
-                    BehandlingBarn(id = it.søknadsbarn.id,
-                                   behandlingId = behandlingId,
+                    BehandlingBarn(behandlingId = behandlingId,
                                    personIdent = it.barn?.personIdent,
                                    søknadBarnId = it.søknadsbarn.id,
                                    navn = it.barn?.navn?.visningsnavn(),
