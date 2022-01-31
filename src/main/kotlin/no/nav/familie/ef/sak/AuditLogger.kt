@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak
 
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.log.mdc.MDCConstants
 import org.slf4j.LoggerFactory
@@ -34,18 +33,12 @@ enum class AuditLoggerEvent(val type: String) {
 data class CustomKeyValue(val key: String, val value: String)
 
 @Component
-class AuditLogger(@Value("\${NAIS_APP_NAME}")
-                  private val applicationName: String,
-                  private val featureToggleService: FeatureToggleService) {
+class AuditLogger(@Value("\${NAIS_APP_NAME}") private val applicationName: String) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
     private val audit = LoggerFactory.getLogger("auditLogger")
 
     fun log(data: Sporingsdata) {
-        if (!featureToggleService.isEnabled("familie.ef.sak.auditlogging")) {
-            logger.info("Logger ikke audit pga featuretoggle")
-            return
-        }
         val request = getRequest() ?: throw IllegalArgumentException("Ikke brukt i context av en HTTP request")
 
         if (!SikkerhetContext.erMaskinTilMaskinToken()) {
