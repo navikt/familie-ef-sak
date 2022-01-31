@@ -123,11 +123,11 @@ internal class InfotrygdPeriodeUtilTest {
     }
 
     @Test
-    internal fun `skal sortere perioder etter stønadId, vedtakId og stønadFom`() {
-        val periode1 = lagInfotrygdPeriode(stønadId = 1, vedtakId = 1, stønadFom = YearMonth.now().atDay(2))
-        val periode2 = lagInfotrygdPeriode(stønadId = 1, vedtakId = 2, stønadFom = YearMonth.now().atDay(2))
-        val periode3 = lagInfotrygdPeriode(stønadId = 2, vedtakId = 1, stønadFom = YearMonth.now().atDay(1))
-        val periode4 = lagInfotrygdPeriode(stønadId = 2, vedtakId = 1, stønadFom = YearMonth.now().atDay(2))
+    internal fun `skal sortere perioder etter stønadId, vedtakId og stønadTom`() {
+        val periode1 = lagInfotrygdPeriode(stønadId = 1, vedtakId = 1, stønadFom = LocalDate.now().withDayOfMonth(2))
+        val periode2 = lagInfotrygdPeriode(stønadId = 1, vedtakId = 2, stønadFom = LocalDate.now().withDayOfMonth(2))
+        val periode3 = lagInfotrygdPeriode(stønadId = 2, vedtakId = 1, stønadFom = LocalDate.now().withDayOfMonth(1))
+        val periode4 = lagInfotrygdPeriode(stønadId = 2, vedtakId = 1, stønadFom = LocalDate.now().withDayOfMonth(2))
 
         val nyePerioder = filtrerOgSorterPerioderFraInfotrygd(listOf(periode2, periode1, periode4, periode3))
 
