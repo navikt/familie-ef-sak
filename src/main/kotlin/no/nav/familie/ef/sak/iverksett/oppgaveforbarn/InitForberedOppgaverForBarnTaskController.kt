@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.iverksett.oppgaveforbarn
 
-import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
