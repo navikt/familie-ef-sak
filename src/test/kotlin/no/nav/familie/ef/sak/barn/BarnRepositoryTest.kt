@@ -30,11 +30,10 @@ class BarnRepositoryTest : OppslagSpringRunnerTest() {
                                       fødselTermindato = null)
         barnRepository.insert(nyttBarn)
         val barnet = barnRepository.findByIdOrThrow(nyttBarn.id)
-        assertThat(barnet).isEqualTo(nyttBarn)
+        assertThat(barnet).usingRecursiveComparison().ignoringFields("sporbar").isEqualTo(nyttBarn)
 
         val barnForBehandling = barnRepository.findByBehandlingId(nyttBarn.behandlingId)
         assertThat(barnForBehandling).hasSize(1)
-        assertThat(barnForBehandling.first()).isEqualTo(nyttBarn)
-
+        assertThat(barnForBehandling.first()).usingRecursiveComparison().ignoringFields("sporbar").isEqualTo(nyttBarn)
     }
 }
