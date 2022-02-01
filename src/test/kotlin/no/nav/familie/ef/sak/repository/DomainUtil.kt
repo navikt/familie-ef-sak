@@ -33,6 +33,7 @@ import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import org.assertj.core.api.Assertions.assertThat
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -79,15 +80,17 @@ fun fagsak(identer: Set<FagsakPersonOld> = setOf(),
            id: UUID = UUID.randomUUID(),
            person: Person = Person(identer = identer.map { PersonIdent(it.ident, it.sporbar) }.toSet()),
            eksternId: EksternFagsakId = EksternFagsakId(),
-           sporbar: Sporbar = Sporbar()) =
-        Fagsak(id = id,
-               personId = person.id,
-               personIdenter = person.identer,
-               stønadstype = stønadstype,
-               søkerIdenter = identer,
-               eksternId = eksternId,
-               migrert = false,
-               sporbar = sporbar)
+           sporbar: Sporbar = Sporbar()): Fagsak {
+    assertThat(identer.map { it.ident }).containsExactlyInAnyOrderElementsOf(person.identer.map { it.ident })
+    return Fagsak(id = id,
+                  personId = person.id,
+                  personIdenter = person.identer,
+                  stønadstype = stønadstype,
+                  søkerIdenter = identer,
+                  eksternId = eksternId,
+                  migrert = false,
+                  sporbar = sporbar)
+}
 
 fun fagsakDao(id: UUID = UUID.randomUUID(),
               identer: Set<FagsakPersonOld> = emptySet(),

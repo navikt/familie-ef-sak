@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.fagsak
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.fagsak.domain.Person
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -72,6 +73,7 @@ internal class FagsakPersonServiceTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `hentIdenter - skal kaste feil når person ikke finnes`() {
         assertThatThrownBy { fagsakPersonService.hentIdenter(UUID.randomUUID()) }
-                .isInstanceOf(IllegalStateException::class.java)
+                .isInstanceOf(Feil::class.java)
+                .hasMessageContaining("Finner ikke personidenter")
     }
 }

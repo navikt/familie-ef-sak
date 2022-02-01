@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.domain.Endret
 import no.nav.familie.ef.sak.felles.domain.Sporbar
+import no.nav.familie.ef.sak.testutil.hasCauseMessageContaining
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
@@ -34,7 +35,7 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
         Stønadstype.values().forEach {
             assertThatThrownBy { fagsakRepository.insert(fagsakDao(personId = person.id, stønadstype = it)) }
                     .hasRootCauseInstanceOf(PSQLException::class.java)
-                    .hasRootCauseMessage("ERROR: duplicate key value violates unique constraint \"fagsak_person_unique\"")
+                    .has(hasCauseMessageContaining("ERROR: duplicate key value violates unique constraint \"fagsak_person_unique\""))
         }
     }
 
@@ -73,14 +74,20 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal returnere en liste med fagsaker hvis stønadstypen ikke satt`() {
-        val fagsakPerson = fagsakpersoner(setOf("12345678901"))
-        val fagsak1 = testoppsettService.lagreFagsak(fagsak(identer = fagsakPerson, stønadstype = Stønadstype.OVERGANGSSTØNAD))
-        val fagsak2 = testoppsettService.lagreFagsak(fagsak(identer = fagsakPerson, stønadstype = Stønadstype.SKOLEPENGER))
-        val fagsaker = fagsakRepository.findBySøkerIdent(setOf("12345678901"))
+        val ident = "12345678901"
+        val person = testoppsettService.opprettPerson(ident)
+        val fagsakPerson = fagsakpersoner(setOf(ident))
+        val fagsak1 = testoppsettService.lagreFagsak(fagsak(person = person,
+                                                            identer = fagsakPerson,
+                                                            stønadstype = Stønadstype.OVERGANGSSTØNAD))
+        val fagsak2 = testoppsettService.lagreFagsak(fagsak(person = person,
+                                                            identer = fagsakPerson,
+                                                            stønadstype = Stønadstype.SKOLEPENGER))
+        val fagsaker = fagsakRepository.findBySøkerIdent(setOf(ident))
 
         assertThat(fagsaker.forEach { fagsak ->
             assertThat(fagsak.søkerIdenter.size).isEqualTo(1)
-            assertThat(fagsak.søkerIdenter.map { it.ident }).contains("12345678901")
+            assertThat(fagsak.søkerIdenter.map { it.ident }).contains(ident)
         })
 
         assertThat(fagsaker.map { it.stønadstype }).contains(Stønadstype.SKOLEPENGER)
