@@ -11,6 +11,8 @@ import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakDao
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPersonOld
+import no.nav.familie.ef.sak.fagsak.domain.Person
+import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.felles.domain.SporbarUtils
@@ -72,13 +74,15 @@ fun Behandling.innvilgetOgFerdigstilt() =
         this.copy(resultat = BehandlingResultat.INNVILGET,
                   status = BehandlingStatus.FERDIGSTILT)
 
-
 fun fagsak(identer: Set<FagsakPersonOld> = setOf(),
            stønadstype: Stønadstype = Stønadstype.OVERGANGSSTØNAD,
            id: UUID = UUID.randomUUID(),
+           person: Person = Person(identer = identer.map { PersonIdent(it.ident, it.sporbar) }.toSet()),
            eksternId: EksternFagsakId = EksternFagsakId(),
            sporbar: Sporbar = Sporbar()) =
         Fagsak(id = id,
+               personId = person.id,
+               personIdenter = person.identer,
                stønadstype = stønadstype,
                søkerIdenter = identer,
                eksternId = eksternId,
@@ -88,11 +92,21 @@ fun fagsak(identer: Set<FagsakPersonOld> = setOf(),
 fun fagsakDao(id: UUID = UUID.randomUUID(),
               identer: Set<FagsakPersonOld> = emptySet(),
               stønadstype: Stønadstype = Stønadstype.OVERGANGSSTØNAD,
+              personId: UUID = UUID.randomUUID(),
               eksternId: EksternFagsakId = EksternFagsakId()): FagsakDao =
         FagsakDao(id = id,
+                  personId = personId,
                   søkerIdenter = identer,
                   stønadstype = stønadstype,
                   eksternId = eksternId)
+
+fun Fagsak.tilFagsakDao() =
+        FagsakDao(id = id,
+                  personId = personId,
+                  søkerIdenter = søkerIdenter,
+                  stønadstype = stønadstype,
+                  eksternId = eksternId,
+                  sporbar = sporbar)
 
 fun vilkårsvurdering(behandlingId: UUID,
                      resultat: Vilkårsresultat,
