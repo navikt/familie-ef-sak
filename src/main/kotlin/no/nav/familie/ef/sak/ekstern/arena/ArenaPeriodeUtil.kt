@@ -20,8 +20,8 @@ object ArenaPeriodeUtil {
     fun slåSammenPerioderFraEfOgInfotrygd(request: PerioderOvergangsstønadRequest,
                                           perioder: InternePerioder): List<PeriodeOvergangsstønad> {
         val måneder = finnUnikeÅrMånedForPerioder(perioder)
-        val sammenslåddeÅrMåneder = slåSammenÅrMåneder(måneder)
-        return sammenslåddeÅrMåneder.map {
+        val sammenslåtteÅrMåneder = slåSammenÅrMåneder(måneder)
+        return sammenslåtteÅrMåneder.map {
             PeriodeOvergangsstønad(personIdent = request.personIdent,
                                    fomDato = it.first.atDay(1),
                                    tomDato = it.second.atEndOfMonth(),
