@@ -18,6 +18,3 @@ interface PersonRepository : RepositoryInterface<Person, UUID>, InsertUpdateRepo
     fun findPersonIdenter(personId: UUID): Set<PersonIdent>
 
 }
-
-@Repository
-interface PersonIdentRepository : RepositoryInterface<PersonIdent, UUID>, InsertUpdateRepository<PersonIdent>
