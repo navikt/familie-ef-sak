@@ -104,11 +104,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                                                             behandling: Behandling,
                                                             aktivIdent: String) {
 
-
-        if (featureToggleService.isEnabled("familie.ef.sak.innvilge-med-opphoer")) {
-            feilHvis(!vedtak.perioder.erSammenhengende()) { "Periodene må være sammenhengende" }
-        }
-
+        feilHvis(!vedtak.perioder.erSammenhengende()) { "Periodene må være sammenhengende" }
         val andelerTilkjentYtelse: List<AndelTilkjentYtelse> = lagBeløpsperioderForInnvilgetVedtak(vedtak, behandling, aktivIdent)
         feilHvis(andelerTilkjentYtelse.isEmpty()) { "Innvilget vedtak må ha minimum en beløpsperiode" }
 

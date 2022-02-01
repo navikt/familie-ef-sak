@@ -4,7 +4,6 @@ import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.felles.dto.Periode
-import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
@@ -17,7 +16,6 @@ import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -53,11 +51,6 @@ class BeregningController(private val stegService: StegService,
 
     @PostMapping("/{behandlingId}/fullfor")
     fun lagreVedtak(@PathVariable behandlingId: UUID, @RequestBody vedtak: VedtakDto): Ressurs<UUID> {
-        if (!featureToggleService.isEnabled("familie.ef.sak.innvilge-med-opphoer") && vedtak.erInnvilgeMedOpphør()) {
-            throw Feil("Vedtakstypen Innvilget med opphør er ikke tilgjengelig",
-                       "Vedtakstypen Innvilget med opphør er ikke tilgjengelig",
-                       HttpStatus.BAD_REQUEST)
-        }
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         validerAlleVilkårOppfyltDersomInvilgelse(vedtak, behandlingId)
         val behandling = behandlingService.hentBehandling(behandlingId)
