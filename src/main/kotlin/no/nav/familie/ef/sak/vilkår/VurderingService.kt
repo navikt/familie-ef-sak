@@ -119,11 +119,11 @@ class VurderingService(private val behandlingService: BehandlingService,
                                            barnId = barnId)
         }
 
-        val nyeVurderinger = barnPåGjeldendeBehandling
+        val nyeBarnVurderinger = barnPåGjeldendeBehandling
                 .filter { barn -> vurderingerKopi.none { it.value.barnId == barn.id } }
                 .map { OppdaterVilkår.lagVilkårsvurderingForNyttBarn(metadata, nyBehandlingsId, it.id) }
 
-        vilkårsvurderingRepository.insertAll(vurderingerKopi.values.toList() + nyeVurderinger)
+        vilkårsvurderingRepository.insertAll(vurderingerKopi.values.toList() + nyeBarnVurderinger)
         vurderingerKopi.forEach { (forrigeId, vurdering) ->
             vilkårsvurderingRepository.oppdaterEndretTid(vurdering.id,
                                                          tidligereVurderinger.getValue(forrigeId).sporbar.endret.endretTid)
