@@ -1,13 +1,13 @@
 package no.nav.familie.ef.sak.blankett
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
+import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.domain.Fil
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.journalføring.JournalføringService
 import no.nav.familie.ef.sak.oppgave.Oppgave
@@ -37,6 +37,7 @@ class BlankettService(private val tilgangService: TilgangService,
                       private val fagsakService: FagsakService,
                       private val personopplysningerService: PersonopplysningerService,
                       private val oppgaveRepository: OppgaveRepository,
+                      private val barnService: BarnService,
                       private val grunnlagsdataService: GrunnlagsdataService,
                       private val vedtakService: VedtakService) {
 
@@ -51,6 +52,7 @@ class BlankettService(private val tilgangService: TilgangService,
         opprettEfOppgave(behandling.id, oppgaveId)
         grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
 
+        barnService.opprettBarnPåBehandlingMedSøknadsdata(behandling.id, fagsak.id)
         return behandling
     }
 

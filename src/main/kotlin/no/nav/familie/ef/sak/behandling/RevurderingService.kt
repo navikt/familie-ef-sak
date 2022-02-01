@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.behandling
 
+import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
@@ -26,6 +27,7 @@ class RevurderingService(private val søknadService: SøknadService,
                          private val vurderingService: VurderingService,
                          private val grunnlagsdataService: GrunnlagsdataService,
                          private val taskRepository: TaskRepository,
+                         private val barnService: BarnService,
                          private val fagsakService: FagsakService) {
 
     @Transactional
@@ -42,6 +44,9 @@ class RevurderingService(private val søknadService: SøknadService,
 
         søknadService.kopierSøknad(forrigeBehandlingId, revurdering.id)
         grunnlagsdataService.opprettGrunnlagsdata(revurdering.id)
+
+        // TODO: Må kunne ta imot en liste med barn
+        barnService.opprettBarnPåBehandlingMedSøknadsdata(revurdering.id, revurdering.fagsakId)
         vurderingService.kopierVurderingerTilNyBehandling(forrigeBehandlingId, revurdering.id)
         val oppgaveId = oppgaveService.opprettOppgave(behandlingId = revurdering.id,
                                                       oppgavetype = Oppgavetype.BehandleSak,
