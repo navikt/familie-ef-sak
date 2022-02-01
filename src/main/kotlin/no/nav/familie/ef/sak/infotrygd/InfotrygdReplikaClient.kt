@@ -4,8 +4,6 @@ import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdFinnesResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeRequest
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
-import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPerioderArenaRequest
-import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPerioderArenaResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSøkRequest
 import org.springframework.beans.factory.annotation.Qualifier
@@ -22,21 +20,14 @@ class InfotrygdReplikaClient(@Value("\${INFOTRYGD_REPLIKA_API_URL}")
                              restOperations: RestOperations)
     : AbstractPingableRestClient(restOperations, "infotrygd.replika") {
 
-    private val perioderArenaUri: URI =
-            UriComponentsBuilder.fromUri(infotrygdReplikaUri).pathSegment("api/perioder/arena").build().toUri()
-
     private val perioderUri: URI =
-        UriComponentsBuilder.fromUri(infotrygdReplikaUri).pathSegment("api/perioder").build().toUri()
+            UriComponentsBuilder.fromUri(infotrygdReplikaUri).pathSegment("api/perioder").build().toUri()
 
     private val finnSakerUri: URI =
-        UriComponentsBuilder.fromUri(infotrygdReplikaUri).pathSegment("api/saker/finn").build().toUri()
+            UriComponentsBuilder.fromUri(infotrygdReplikaUri).pathSegment("api/saker/finn").build().toUri()
 
     private val eksistererUri: URI =
             UriComponentsBuilder.fromUri(infotrygdReplikaUri).pathSegment("api/stonad/eksisterer").build().toUri()
-
-    fun hentPerioderArena(request: InfotrygdPerioderArenaRequest): InfotrygdPerioderArenaResponse {
-        return postForEntity(perioderArenaUri, request)
-    }
 
     fun hentPerioder(request: InfotrygdPeriodeRequest): InfotrygdPeriodeResponse {
         return postForEntity(perioderUri, request)

@@ -17,16 +17,16 @@ import java.util.UUID
 @RequestMapping(path = ["/api/behandling/barn"])
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class BarnController(val barnService: BarnService) {
+class BarnController(val nyeBarnService: NyeBarnService) {
 
     @PostMapping("nye-barn")
     fun finnNyeBarnSidenGjeldendeBehandlingForPerson(@RequestBody personIdent: PersonIdent): Ressurs<List<String>> {
-        return Ressurs.success(barnService.finnNyeBarnSidenGjeldendeBehandlingForPersonIdent(personIdent))
+        return Ressurs.success(nyeBarnService.finnNyeBarnSidenGjeldendeBehandlingForPersonIdent(personIdent))
     }
 
     @GetMapping("fagsak/{fagsakId}/nye-barn")
     fun finnNyeBarnSidenGjeldendeBehandlingForFagsak(@PathVariable("fagsakId")
                                                      fagsakId: UUID): Ressurs<List<BarnMinimumDto>> {
-        return Ressurs.success(barnService.finnNyeBarnSidenGjeldendeBehandlingForFagsak(fagsakId))
+        return Ressurs.success(nyeBarnService.finnNyeBarnSidenGjeldendeBehandlingForFagsak(fagsakId))
     }
 }

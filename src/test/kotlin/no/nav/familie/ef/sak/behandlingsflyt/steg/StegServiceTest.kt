@@ -6,11 +6,11 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkRepository
 import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
-import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
+import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradragType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
@@ -55,7 +55,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
                                                                                 periodeBegrunnelse = "ok",
                                                                                 inntektBegrunnelse = "okok",
                                                                                 perioder = listOf(vedtaksperiode),
-                                                                                inntekter = listOf(inntek)))
+                                                                                inntekter = listOf(inntek),
+                                                                                samordningsfradragType = SamordningsfradragType.UFØRETRYGD))
 
         assertThat(behandlingshistorikkRepository.findByBehandlingIdOrderByEndretTidDesc(behandling.id).first().steg)
                 .isEqualTo(StegType.BEREGNE_YTELSE)
