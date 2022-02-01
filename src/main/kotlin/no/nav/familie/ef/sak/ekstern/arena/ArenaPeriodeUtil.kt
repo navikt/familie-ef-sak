@@ -1,78 +1,66 @@
 package no.nav.familie.ef.sak.ekstern.arena
 
-import no.nav.familie.ef.sak.ekstern.tilEksternPeriodeOvergangsstønad
-import no.nav.familie.ef.sak.felles.util.isEqualOrAfter
-import no.nav.familie.ef.sak.felles.util.isEqualOrBefore
-import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
-import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdArenaPeriode
-import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPerioderArenaResponse
+import no.nav.familie.ef.sak.infotrygd.InternePerioder
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
-import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad.Datakilde
+import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadRequest
 import java.time.LocalDate
 import java.time.YearMonth
-import java.util.Stack
 
+/**
+ * Denne erstatter tjenesten som Arena kaller idag i Infotrygd.
+ * https://confluence.adeo.no/pages/viewpage.action?pageId=395741283#
+ * Denne tjenesten henter perioder fra de ulike stønadene og slår sammen de,
+ * tvers stønadstyper og returnerer perioder som overlapper datoer i input
+ *
+ * Den tjenesten filtrerte tidligere ut perioder som har stønadsbeløp > 0,
+ * dette har vi blitt enige om å ikke gjøre i denne, nye tjenesten
+ */
 object ArenaPeriodeUtil {
 
-    /**
-     * Skal filtrere bort de som har beløp = 0
-     * Skal filtere bort de som har tomdato < fomDato || opphørdato < tomDato
-     */
-    fun mapOgFiltrer(infotrygdPerioder: InfotrygdPerioderArenaResponse) =
-            infotrygdPerioder.perioder.filter { it.beløp > 0 }.map {
-                PeriodeOvergangsstønad(personIdent = it.personIdent,
-                                       fomDato = it.fomDato,
-                                       tomDato = it.opphørsdatoEllerTomDato(),
-                                       datakilde = Datakilde.INFOTRYGD)
-            }.filterNot { it.tomDato.isBefore(it.fomDato) }
-
-    fun mapOgFiltrer(andeler: List<AndelTilkjentYtelse>) =
-            andeler.filter { it.beløp > 0 }
-                    .map(AndelTilkjentYtelse::tilEksternPeriodeOvergangsstønad)
-
-    private fun InfotrygdArenaPeriode.opphørsdatoEllerTomDato(): LocalDate {
-        val opphørsdato = this.opphørsdato
-        return if (opphørsdato != null && opphørsdato.isBefore(tomDato)) {
-            opphørsdato
-        } else {
-            tomDato
-        }
+    fun slåSammenPerioderFraEfOgInfotrygd(request: PerioderOvergangsstønadRequest,
+                                          perioder: InternePerioder): List<PeriodeOvergangsstønad> {
+        val måneder = finnUnikeÅrMånedForPerioder(perioder)
+        val sammenslåtteÅrMåneder = slåSammenÅrMåneder(måneder)
+        return sammenslåtteÅrMåneder.map {
+            PeriodeOvergangsstønad(personIdent = request.personIdent,
+                                   fomDato = it.first.atDay(1),
+                                   tomDato = it.second.atEndOfMonth(),
+                                   datakilde = PeriodeOvergangsstønad.Datakilde.EF)
+        }.filter { overlapper(request, it) }
     }
 
-    /**
-     * Slår sammen perioder som er sammenhengende og overlappende.
-     * Dette er noe som idag gjøres i infotrygd men er ikke sikkert burde gjøres når vi henter perioder fra vår egen database
-     */
-    fun slåSammenPerioder(perioder: List<PeriodeOvergangsstønad>): List<PeriodeOvergangsstønad> {
-        val mergedePerioder = Stack<PeriodeOvergangsstønad>()
-        perioder.sortedBy { it.fomDato }.forEach { period ->
-            if (mergedePerioder.isEmpty()) {
-                mergedePerioder.push(period)
-            }
-            val last = mergedePerioder.peek()
-            if (erSammenhengendeEllerOverlappende(last, period)) {
-                mergedePerioder.push(mergedePerioder.pop().copy(fomDato = minOf(last.fomDato, period.fomDato),
-                                                                tomDato = maxOf(last.tomDato, period.tomDato)))
+    private fun overlapper(request: PerioderOvergangsstønadRequest, periode: PeriodeOvergangsstønad): Boolean {
+        val requestFom = request.fomDato ?: LocalDate.now() // Arena sender alltid fom/tom-datoer, burde endre kontraktet
+        val requestTom = request.tomDato ?: LocalDate.now()
+        val range = periode.fomDato..periode.tomDato
+        return requestFom in range
+               || requestTom in range
+               || (requestFom < periode.fomDato && requestTom > periode.tomDato) // omslutter
+    }
+
+    private fun slåSammenÅrMåneder(måneder: MutableSet<YearMonth>): MutableList<Pair<YearMonth, YearMonth>> {
+        return måneder.toList().sorted().fold(mutableListOf()) { acc, yearMonth ->
+            val last = acc.lastOrNull()
+            if (last == null || last.second.plusMonths(1) != yearMonth) {
+                acc.add(Pair(yearMonth, yearMonth))
             } else {
-                mergedePerioder.push(period)
+                acc.removeLast()
+                acc.add(last.copy(second = yearMonth))
+            }
+            acc
+        }
+    }
+
+    private fun finnUnikeÅrMånedForPerioder(perioder: InternePerioder): MutableSet<YearMonth> {
+        val måneder = mutableSetOf<YearMonth>()
+        (perioder.overgangsstønad + perioder.barnetilsyn + perioder.skolepenger).forEach {
+            var start: LocalDate = it.stønadFom
+            while (start <= it.stønadTom) {
+                måneder.add(YearMonth.from(start))
+                start = start.plusMonths(1)
             }
         }
-        return mergedePerioder
+        return måneder
     }
 
-    private fun erSammenhengendeEllerOverlappende(last: PeriodeOvergangsstønad,
-                                                  period: PeriodeOvergangsstønad) =
-            sammenhengendePeriode(last, period) || erOverlappende(last, period)
-
-    /**
-     * En periode er sammenhengende hvis perioden er i den samme måneden, eller om måned + 1 er lik
-     */
-    private fun sammenhengendePeriode(first: PeriodeOvergangsstønad, second: PeriodeOvergangsstønad): Boolean {
-        val firstTomDato = YearMonth.from(first.tomDato)
-        val secondFom = YearMonth.from(second.fomDato)
-        return firstTomDato == secondFom || firstTomDato.plusMonths(1) == secondFom
-    }
-
-    private fun erOverlappende(mergedPeriode: PeriodeOvergangsstønad, period: PeriodeOvergangsstønad) =
-            mergedPeriode.fomDato.isEqualOrBefore(period.tomDato) && mergedPeriode.tomDato.isEqualOrAfter(period.fomDato)
 }

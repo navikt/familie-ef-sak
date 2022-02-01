@@ -93,7 +93,7 @@ class VedtakController(private val stegService: StegService,
         val behandlingIds = behandlingService.finnGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD)
         val identToForventetInntektMap = mutableMapOf<String, Int?>()
         for (behandlingId in behandlingIds) {
-            val forventetInntekt = vedtakService.hentForventetInntektForVedtakOgDato(behandlingId, LocalDate.now())
+            val forventetInntekt = vedtakService.hentForventetInntektForVedtakOgDato(behandlingId, LocalDate.now().minusMonths(1))
             val ident = behandlingService.hentAktivIdent(behandlingId)
             identToForventetInntektMap.put(ident, forventetInntekt)
         }

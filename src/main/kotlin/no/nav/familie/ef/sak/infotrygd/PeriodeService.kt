@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
+import no.nav.familie.ef.sak.infotrygd.InternPeriodeUtil.slåSammenPerioder
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
@@ -21,16 +22,30 @@ class PeriodeService(
         private val infotrygdService: InfotrygdService
 ) {
 
+    fun hentPerioderFraEfOgInfotrygd(personIdent: String): InternePerioder {
+        val personIdenter = pdlClient.hentPersonidenter(personIdent, true).identer()
+        val perioderFraReplika = infotrygdService.hentSammenslåttePerioderSomInternPerioder(personIdenter)
+
+        return InternePerioder(
+                overgangsstønad = slåSammenPerioder(hentPerioderFraEf(personIdenter, Stønadstype.OVERGANGSSTØNAD),
+                                                    perioderFraReplika.overgangsstønad),
+                barnetilsyn = slåSammenPerioder(hentPerioderFraEf(personIdenter, Stønadstype.BARNETILSYN),
+                                                perioderFraReplika.barnetilsyn),
+                skolepenger = slåSammenPerioder(hentPerioderFraEf(personIdenter, Stønadstype.SKOLEPENGER),
+                                                perioderFraReplika.skolepenger)
+        )
+    }
+
     fun hentPerioderForOvergangsstønadFraEfOgInfotrygd(personIdent: String): List<InternPeriode> {
         val personIdenter = pdlClient.hentPersonidenter(personIdent, true).identer()
         val perioderFraReplika = infotrygdService.hentSammenslåttePerioderSomInternPerioder(personIdenter).overgangsstønad
-        val perioderFraEf = hentPerioderForOvergangsstønadFraEf(personIdenter)
+        val perioderFraEf = hentPerioderFraEf(personIdenter, Stønadstype.OVERGANGSSTØNAD)
 
-        return InternPeriodeUtil.slåSammenPerioder(perioderFraEf, perioderFraReplika)
+        return slåSammenPerioder(perioderFraEf, perioderFraReplika)
     }
 
-    private fun hentPerioderForOvergangsstønadFraEf(personIdenter: Set<String>): List<InternPeriode> {
-        return fagsakService.finnFagsak(personIdenter, Stønadstype.OVERGANGSSTØNAD)
+    private fun hentPerioderFraEf(personIdenter: Set<String>, stønadstype: Stønadstype): List<InternPeriode> {
+        return fagsakService.finnFagsak(personIdenter, stønadstype)
                        ?.let { behandlingService.finnSisteIverksatteBehandling(it.id) }
                        ?.let { hentPerioderFraEf(it) }
                        // trenger å sortere de revers pga filtrerOgSorterPerioderFraInfotrygd gjør det,

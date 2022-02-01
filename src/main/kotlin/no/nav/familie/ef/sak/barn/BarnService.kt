@@ -30,7 +30,6 @@ class BarnService(
 
         barnRepository.insertAll(barnPåBehandlingen)
     }
-
     private fun finnSøknadsbarnSomBehandlingBarn(behandlingId: UUID, fagsakId: UUID): List<BehandlingBarn> {
         val fagsak = fagsakService.hentFagsak(fagsakId)
         val barnFraSøknad = when (fagsak.stønadstype) {
