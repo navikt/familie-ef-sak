@@ -27,9 +27,6 @@ class MålerRepositoryTest : OppslagSpringRunnerTest() {
     @Autowired
     lateinit var behandlingRepository: BehandlingRepository
 
-    @Autowired
-    lateinit var fagsakRepository: FagsakRepository
-
     private val år = LocalDate.now().get(IsoFields.WEEK_BASED_YEAR)
     private val uke = LocalDate.now().get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)
 
@@ -40,7 +37,7 @@ class MålerRepositoryTest : OppslagSpringRunnerTest() {
         val fagsakSkolepenger = fagsak(stønadstype = Stønadstype.SKOLEPENGER)
         val fagsaker = listOf(fagsakBarneTilsyn, fagsakOvergangsstønad, fagsakSkolepenger)
 
-        fagsaker.forEach(fagsakRepository::insert)
+        fagsaker.forEach(testoppsettService::lagreFagsak)
 
         repeat(3) { // 3 behandlinger
             fagsaker.forEach { fagsak -> // per stønadstype

@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
+import no.nav.familie.ef.sak.fagsak.domain.tilFagsak
 import no.nav.familie.ef.sak.felles.domain.Endret
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import org.assertj.core.api.Assertions.assertThat
@@ -47,11 +48,9 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `skal returnere en liste med fagsaker hvis stønadstypen ikke satt`() {
         val fagsakPerson = fagsakpersoner(setOf("12345678901"))
-        var fagsak1 = fagsak(identer = fagsakPerson, stønadstype = Stønadstype.OVERGANGSSTØNAD)
-        var fagsak2 = fagsak(identer = fagsakPerson, stønadstype = Stønadstype.SKOLEPENGER)
-        fagsak1 = testoppsettService.lagreFagsak(fagsak1)
-        fagsak2 = testoppsettService.lagreFagsak(fagsak2)
-        val fagsaker = fagsakRepository.findBySøkerIdent(setOf("12345678901"))
+        var fagsak1 = testoppsettService.lagreFagsak(fagsak(identer = fagsakPerson, stønadstype = Stønadstype.OVERGANGSSTØNAD))
+        var fagsak2 = testoppsettService.lagreFagsak(fagsak(identer = fagsakPerson, stønadstype = Stønadstype.SKOLEPENGER))
+        val fagsaker = fagsakRepository.findBySøkerIdent(setOf("12345678901")).map { it.tilFagsak() }
 
         assertThat(fagsaker.forEach { fagsak ->
             assertThat(fagsak.søkerIdenter.size).isEqualTo(1)
@@ -66,7 +65,7 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
     @Test
     internal fun finnMedEksternId() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
-        val findByEksternId = fagsakRepository.finnMedEksternId(fagsak.eksternId.id)
+        val findByEksternId = fagsakRepository.finnMedEksternId(fagsak.eksternId.id)?.tilFagsak()
                               ?: throw error("Fagsak med ekstern id ${fagsak.eksternId} finnes ikke")
 
         assertThat(findByEksternId).isEqualTo(fagsak)
