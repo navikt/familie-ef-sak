@@ -13,7 +13,8 @@ import no.nav.familie.kontrakter.ef.iverksett.TilkjentYtelseMedMetadata
 fun TilkjentYtelse.tilDto(): TilkjentYtelseDto {
     return TilkjentYtelseDto(behandlingId = this.behandlingId,
                              vedtakstidspunkt = this.vedtakstidspunkt,
-                             andeler = this.andelerTilkjentYtelse.map { andel -> andel.tilDto() })
+                             andeler = this.andelerTilkjentYtelse.map { andel -> andel.tilDto() },
+                             samordningsfradragType = this.samordningsfradragType)
 }
 
 fun AndelTilkjentYtelse.tilDto(): AndelTilkjentYtelseDto {
