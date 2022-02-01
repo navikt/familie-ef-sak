@@ -16,8 +16,6 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTaskPaylo
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.PollStatusFraIverksettTask
-import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
-import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.brev.VedtaksbrevRepository
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.fagsak.FagsakService
@@ -34,8 +32,8 @@ import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.vedtak.TotrinnskontrollService
-import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
@@ -72,12 +70,17 @@ internal class BeslutteVedtakStegTest {
                                                         vedtaksbrevRepository,
                                                         behandlingService,
                                                         vedtakService)
-    private val vedtaksbrev = Vedtaksbrev(UUID.randomUUID(),
-                                          "123",
-                                          "mal",
-                                          "sign1",
-                                          "sign2",
-                                          Fil("123".toByteArray()))
+
+    private val innloggetBeslutter = "sign2"
+    private val vedtaksbrev = Vedtaksbrev(behandlingId = UUID.randomUUID(),
+                                          saksbehandlerBrevrequest = "123",
+                                          brevmal = "mal",
+                                          saksbehandlersignatur = "sign1",
+                                          besluttersignatur = innloggetBeslutter,
+                                          beslutterPdf = Fil("123".toByteArray()),
+                                          enhet = "enhet",
+                                          saksbehandlerident = "saksbIdent",
+                                          beslutterident = innloggetBeslutter)
 
     private val fagsak = Fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD,
                                 søkerIdenter = setOf(FagsakPerson(ident = "12345678901")))
@@ -93,7 +96,7 @@ internal class BeslutteVedtakStegTest {
 
     @BeforeEach
     internal fun setUp() {
-        mockBrukerContext("sign2")
+        mockBrukerContext(innloggetBeslutter)
         taskSlot = mutableListOf()
         every {
             fagsakService.hentAktivIdent(any())

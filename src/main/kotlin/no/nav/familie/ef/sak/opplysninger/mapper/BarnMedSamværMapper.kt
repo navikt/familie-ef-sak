@@ -28,7 +28,7 @@ object BarnMedSamværMapper {
         }
     }
 
-    fun mapSøknadsgrunnlag(søknadBarn: Set<SøknadBarn>): List<BarnMedSamværSøknadsgrunnlagDto> {
+    fun mapSøknadsgrunnlag(søknadBarn: Collection<SøknadBarn>): List<BarnMedSamværSøknadsgrunnlagDto> {
         return søknadBarn.map(this::mapSøknadsgrunnlag)
     }
 
@@ -55,17 +55,18 @@ object BarnMedSamværMapper {
         )
     }
 
-    fun mapRegistergrunnlag(barnMedIdent: List<BarnMedIdent>,
+    fun mapRegistergrunnlag(personIdentSøker:String,
+                            barnMedIdent: List<BarnMedIdent>,
                             barneforeldre: List<AnnenForelderMedIdent>,
-                            søknad: SøknadsskjemaOvergangsstønad,
+                            søknadsbarn: Collection<SøknadBarn>,
                             søkerAdresse: List<Bostedsadresse>): List<BarnMedSamværRegistergrunnlagDto> {
 
-        val alleBarn: List<MatchetBarn> = BarnMatcher.kobleSøknadsbarnOgRegisterBarn(søknad.barn, barnMedIdent)
+        val alleBarn: List<MatchetBarn> = BarnMatcher.kobleSøknadsbarnOgRegisterBarn(søknadsbarn, barnMedIdent)
         val forelderMap = barneforeldre.associateBy { it.personIdent }
 
         return alleBarn.map { barn ->
             val fnr = barn.barn?.forelderBarnRelasjon?.firstOrNull {
-                it.relatertPersonsIdent != søknad.fødselsnummer && it.relatertPersonsRolle != Familierelasjonsrolle.BARN
+                it.relatertPersonsIdent != personIdentSøker && it.relatertPersonsRolle != Familierelasjonsrolle.BARN
             }?.relatertPersonsIdent
                       ?: barn.søknadsbarn.annenForelder?.person?.fødselsnummer
             val pdlAnnenForelder = forelderMap[fnr]

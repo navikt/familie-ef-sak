@@ -313,7 +313,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     private fun lagSaksbehandlerBrev(saksbehandlerSignatur: String) {
         val brevRequest = objectMapper.readTree("123")
         mockBrukerContext(saksbehandlerSignatur)
-        vedtaksbrevService.lagSaksbehandlerBrev(behandling.id, brevRequest, "brevMal")
+        vedtaksbrevService.lagSaksbehandlerSanitybrev(behandling.id, brevRequest, "brevMal")
         clearBrukerContext()
     }
 

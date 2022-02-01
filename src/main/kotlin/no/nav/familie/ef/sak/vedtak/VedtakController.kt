@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.vedtak
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
+import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
@@ -68,7 +69,8 @@ class VedtakController(private val stegService: StegService,
 
     @GetMapping("/eksternid/{eksternId}/inntekt")
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) //Familie-ef-personhendelse bruker denne
-    fun hentForventetInntektForEksternId(@PathVariable eksternId: Long, @DateTimeFormat(pattern = "yyyy-MM-dd") dato: LocalDate?): Ressurs<Int?> {
+    fun hentForventetInntektForEksternId(@PathVariable eksternId: Long,
+                                         @DateTimeFormat(pattern = "yyyy-MM-dd") dato: LocalDate?): Ressurs<Int?> {
         val behandlingId = behandlingService.hentBehandlingPåEksternId(eksternId).id
 
         val forventetInntekt = vedtakService.hentForventetInntektForVedtakOgDato(behandlingId, dato ?: LocalDate.now())
@@ -77,10 +79,24 @@ class VedtakController(private val stegService: StegService,
 
     @GetMapping("/eksternid/{eksternId}/harAktivtVedtak")
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) //Familie-ef-personhendelse bruker denne
-    fun hentHarAktivStonad(@PathVariable eksternId: Long, @DateTimeFormat(pattern = "yyyy-MM-dd") dato: LocalDate?): Ressurs<Boolean> {
+    fun hentHarAktivStonad(@PathVariable eksternId: Long,
+                           @DateTimeFormat(pattern = "yyyy-MM-dd") dato: LocalDate?): Ressurs<Boolean> {
         val behandlingId = behandlingService.hentBehandlingPåEksternId(eksternId).id
 
         val forventetInntekt = vedtakService.hentHarAktivtVedtak(behandlingId, dato ?: LocalDate.now())
         return Ressurs.success(forventetInntekt)
+    }
+
+    @GetMapping("/gjeldendeIverksatteBehandlingerMedInntekt")
+    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) //Familie-ef-personhendelse bruker denne
+    fun hentPersonerMedAktivStonadOgForventetInntekt(): Ressurs<Map<String, Int?>> {
+        val behandlingIds = behandlingService.finnGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD)
+        val identToForventetInntektMap = mutableMapOf<String, Int?>()
+        for (behandlingId in behandlingIds) {
+            val forventetInntekt = vedtakService.hentForventetInntektForVedtakOgDato(behandlingId, LocalDate.now().minusMonths(1))
+            val ident = behandlingService.hentAktivIdent(behandlingId)
+            identToForventetInntektMap.put(ident, forventetInntekt)
+        }
+        return Ressurs.success(identToForventetInntektMap)
     }
 }
