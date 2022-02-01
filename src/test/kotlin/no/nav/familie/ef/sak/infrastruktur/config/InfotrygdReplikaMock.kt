@@ -40,7 +40,6 @@ class InfotrygdReplikaMock {
                     emptyList()
                 )
             }
-            every { client.hentPerioderArena(any()) } returns InfotrygdPerioderArenaResponse(emptyList())
             every { client.hentSaker(any()) } returns InfotrygdSakResponse(emptyList())
             every { client.hentInslagHosInfotrygd(any()) } answers { InfotrygdFinnesResponse(emptyList(), emptyList()) }
         }
