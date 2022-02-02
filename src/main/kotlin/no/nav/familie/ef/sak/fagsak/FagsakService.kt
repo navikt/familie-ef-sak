@@ -9,7 +9,7 @@ import no.nav.familie.ef.sak.behandling.dto.tilDto
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakDao
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPersonOld
-import no.nav.familie.ef.sak.fagsak.domain.Person
+import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.fagsak.domain.tilFagsak
@@ -92,7 +92,7 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
 
     fun fagsakMedOppdatertPersonIdent(fagsakId: UUID): Fagsak {
         val fagsak = fagsakRepository.findByIdOrThrow(fagsakId)
-        var person = fagsakPersonService.hentPerson(fagsak.personId)
+        var person = fagsakPersonService.hentPerson(fagsak.fagsakPersonId)
         val oppdatertFagsak = if (featureToggleService.isEnabled("familie.ef.sak.synkroniser-personidenter")) {
             val gjeldendePersonIdent = pdlClient.hentPersonidenter(fagsak.hentAktivIdent(), true).gjeldende().ident
             person = fagsakPersonService.oppdaterIdent(person, gjeldendePersonIdent)
@@ -133,13 +133,13 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
         }
     }
 
-    private fun opprettFagsak(stønadstype: Stønadstype, person: Person, gjeldendePersonIdent: String): FagsakDao {
+    private fun opprettFagsak(stønadstype: Stønadstype, fagsakPerson: FagsakPerson, gjeldendePersonIdent: String): FagsakDao {
         return fagsakRepository.insert(FagsakDao(stønadstype = stønadstype,
-                                                 personId = person.id,
+                                                 fagsakPersonId = fagsakPerson.id,
                                                  søkerIdenter = setOf(FagsakPersonOld(ident = gjeldendePersonIdent))))
     }
 
-    fun FagsakDao.tilFagsakMedPerson(personIdenter: Set<PersonIdent> = fagsakPersonService.hentIdenter(this.personId)): Fagsak {
+    fun FagsakDao.tilFagsakMedPerson(personIdenter: Set<PersonIdent> = fagsakPersonService.hentIdenter(this.fagsakPersonId)): Fagsak {
         return this.tilFagsak(personIdenter)
     }
 

@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.fagsak
 
-import no.nav.familie.ef.sak.fagsak.domain.Person
+import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
@@ -9,32 +9,29 @@ import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
-class FagsakPersonService(private val personRepository: PersonRepository) {
+class FagsakPersonService(private val fagsakPersonRepository: FagsakPersonRepository) {
 
-    fun hentPerson(personId: UUID): Person = personRepository.findByIdOrThrow(personId)
+    fun hentPerson(personId: UUID): FagsakPerson = fagsakPersonRepository.findByIdOrThrow(personId)
 
     fun hentIdenter(personId: UUID): Set<PersonIdent> {
-        val personIdenter = personRepository.findPersonIdenter(personId)
+        val personIdenter = fagsakPersonRepository.findPersonIdenter(personId)
         feilHvis(personIdenter.isEmpty()) { "Finner ikke personidenter til person=$personId" }
         return personIdenter
     }
 
-    fun hentEllerOpprettPerson(personIdenter: Set<String>, gjeldendePersonIdent: String): Person {
+    fun hentEllerOpprettPerson(personIdenter: Set<String>, gjeldendePersonIdent: String): FagsakPerson {
         feilHvisIkke(personIdenter.contains(gjeldendePersonIdent)) {
             "Liste med personidenter inneholder ikke gjelende personident"
         }
-        val person =
-                (personRepository.findByIdent(personIdenter) // TODO hvis gjeldendePersonIdent ikke er det som person mener er aktivIdent?
-                 ?: personRepository.insert(Person(identer = setOf(PersonIdent(gjeldendePersonIdent)))))
-        // TODO oppdater ident?
-        return person
+        return (fagsakPersonRepository.findByIdent(personIdenter)
+                ?: fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent(gjeldendePersonIdent)))))
     }
 
-    fun oppdaterIdent(person: Person, gjeldendePersonIdent: String): Person {
-        return if (person.hentAktivIdent() != gjeldendePersonIdent) {
-            personRepository.update(person.medOppdatertGjeldendeIdent(gjeldendePersonIdent))
+    fun oppdaterIdent(fagsakPerson: FagsakPerson, gjeldendePersonIdent: String): FagsakPerson {
+        return if (fagsakPerson.hentAktivIdent() != gjeldendePersonIdent) {
+            fagsakPersonRepository.update(fagsakPerson.medOppdatertGjeldendeIdent(gjeldendePersonIdent))
         } else {
-            person
+            fagsakPerson
         }
     }
 }

@@ -11,7 +11,7 @@ import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakDao
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPersonOld
-import no.nav.familie.ef.sak.fagsak.domain.Person
+import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.domain.Sporbar
@@ -78,12 +78,12 @@ fun Behandling.innvilgetOgFerdigstilt() =
 fun fagsak(identer: Set<FagsakPersonOld> = setOf(),
            stønadstype: Stønadstype = Stønadstype.OVERGANGSSTØNAD,
            id: UUID = UUID.randomUUID(),
-           person: Person = Person(identer = identer.map { PersonIdent(it.ident, it.sporbar) }.toSet()),
+           person: FagsakPerson = FagsakPerson(identer = identer.map { PersonIdent(it.ident, it.sporbar) }.toSet()),
            eksternId: EksternFagsakId = EksternFagsakId(),
            sporbar: Sporbar = Sporbar()): Fagsak {
     assertThat(identer.map { it.ident }).containsExactlyInAnyOrderElementsOf(person.identer.map { it.ident })
     return Fagsak(id = id,
-                  personId = person.id,
+                  fagsakPersonId = person.id,
                   personIdenter = person.identer,
                   stønadstype = stønadstype,
                   søkerIdenter = identer,
@@ -98,14 +98,14 @@ fun fagsakDao(id: UUID = UUID.randomUUID(),
               personId: UUID = UUID.randomUUID(),
               eksternId: EksternFagsakId = EksternFagsakId()): FagsakDao =
         FagsakDao(id = id,
-                  personId = personId,
+                  fagsakPersonId = personId,
                   søkerIdenter = identer,
                   stønadstype = stønadstype,
                   eksternId = eksternId)
 
 fun Fagsak.tilFagsakDao() =
         FagsakDao(id = id,
-                  personId = personId,
+                  fagsakPersonId = fagsakPersonId,
                   søkerIdenter = søkerIdenter,
                   stønadstype = stønadstype,
                   eksternId = eksternId,

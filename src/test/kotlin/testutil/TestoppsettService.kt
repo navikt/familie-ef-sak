@@ -1,10 +1,10 @@
 package no.nav.familie.ef.sak.testutil
 
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
-import no.nav.familie.ef.sak.fagsak.PersonRepository
+import no.nav.familie.ef.sak.fagsak.FagsakPersonRepository
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakDao
-import no.nav.familie.ef.sak.fagsak.domain.Person
+import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.fagsak.domain.tilFagsak
 import org.assertj.core.api.Assertions.assertThat
@@ -15,19 +15,19 @@ import org.springframework.stereotype.Service
 @Profile("integrasjonstest")
 @Service
 class TestoppsettService(
-        private val personRepository: PersonRepository,
+        private val fagsakPersonRepository: FagsakPersonRepository,
         private val fagsakRepository: FagsakRepository,
 ) {
 
-    fun opprettPerson(ident: String) = personRepository.insert(Person(identer = setOf(PersonIdent(ident))))
+    fun opprettPerson(ident: String) = fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent(ident))))
 
-    fun opprettPerson(person: Person) = personRepository.insert(person)
+    fun opprettPerson(person: FagsakPerson) = fagsakPersonRepository.insert(person)
 
     fun lagreFagsak(fagsak: Fagsak): Fagsak {
         val person = hentEllerOpprettPerson(fagsak)
         sjekkPersonOgFagsakInneholderSammeIdenter(person, fagsak)
         return fagsakRepository.insert(FagsakDao(id = fagsak.id,
-                                                 personId = person.id,
+                                                 fagsakPersonId = person.id,
                                                  stønadstype = fagsak.stønadstype,
                                                  eksternId = fagsak.eksternId,
                                                  migrert = fagsak.migrert,
@@ -35,17 +35,17 @@ class TestoppsettService(
                                                  søkerIdenter = fagsak.søkerIdenter)).tilFagsak(person.identer)
     }
 
-    private fun hentEllerOpprettPerson(fagsak: Fagsak): Person {
-        val person = personRepository.findByIdOrNull(fagsak.personId)
-        return person ?: personRepository.insert(Person(fagsak.personId,
-                                                        identer = fagsak.personIdenter))
+    private fun hentEllerOpprettPerson(fagsak: Fagsak): FagsakPerson {
+        val person = fagsakPersonRepository.findByIdOrNull(fagsak.fagsakPersonId)
+        return person ?: fagsakPersonRepository.insert(FagsakPerson(fagsak.fagsakPersonId,
+                                                                    identer = fagsak.personIdenter))
     }
 
     /**
      * Skal slettes når identer fjernes fra fagsak
      * Sjekker att person og fagsak opprettes med samme identer, for å unngå krøll tvers de når begge finnes
      */
-    private fun sjekkPersonOgFagsakInneholderSammeIdenter(person: Person,
+    private fun sjekkPersonOgFagsakInneholderSammeIdenter(person: FagsakPerson,
                                                           fagsak: Fagsak) {
         assertThat(person.identer.map { it.ident }).containsExactlyInAnyOrderElementsOf(fagsak.søkerIdenter.map { it.ident })
         assertThat(person.identer.map { it.ident }).containsExactlyInAnyOrderElementsOf(fagsak.personIdenter.map { it.ident })

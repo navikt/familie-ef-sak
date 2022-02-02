@@ -11,7 +11,7 @@ import java.util.UUID
 
 data class Fagsak(
         val id: UUID,
-        val personId: UUID,
+        val fagsakPersonId: UUID,
         val personIdenter: Set<PersonIdent>,
         val eksternId: EksternFagsakId,
         val stønadstype: Stønadstype,
@@ -29,7 +29,7 @@ data class Fagsak(
 @Table("fagsak")
 data class FagsakDao(@Id
                      val id: UUID = UUID.randomUUID(),
-                     val personId: UUID,
+                     val fagsakPersonId: UUID,
                      @MappedCollection(idColumn = "fagsak_id")
                      val eksternId: EksternFagsakId = EksternFagsakId(),
                      @Column("stonadstype")
@@ -59,7 +59,7 @@ data class FagsakDao(@Id
 fun FagsakDao.tilFagsak(personIdenter: Set<PersonIdent>): Fagsak =
         Fagsak(
                 id = id,
-                personId = personId,
+                fagsakPersonId = fagsakPersonId,
                 personIdenter = personIdenter,
                 eksternId = eksternId,
                 stønadstype = stønadstype,

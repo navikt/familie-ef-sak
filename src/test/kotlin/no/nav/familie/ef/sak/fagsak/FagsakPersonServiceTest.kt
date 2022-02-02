@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.fagsak
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.fagsak.domain.Person
+import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
@@ -15,7 +15,7 @@ import java.util.UUID
 
 internal class FagsakPersonServiceTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var personRepository: PersonRepository
+    @Autowired private lateinit var fagsakPersonRepository: FagsakPersonRepository
     @Autowired private lateinit var jdbcTemplate: JdbcTemplate
     @Autowired private lateinit var fagsakPersonService: FagsakPersonService
 
@@ -32,10 +32,10 @@ internal class FagsakPersonServiceTest : OppslagSpringRunnerTest() {
     internal fun `oppdaterIdent - skal oppdatere person med ny ident`() {
         val aktivIdent = "1"
         val annenIdent = "2"
-        val personId = personRepository.insert(Person(identer = setOf(PersonIdent(aktivIdent)))).id
+        val personId = fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent(aktivIdent)))).id
         jdbcTemplate.update("UPDATE person_ident SET endret_tid=(endret_tid - INTERVAL '1 DAY')")
 
-        val person = personRepository.findByIdOrThrow(personId)
+        val person = fagsakPersonRepository.findByIdOrThrow(personId)
         assertThat(person.hentAktivIdent()).isEqualTo(aktivIdent)
         val oppdatertPerson = fagsakPersonService.oppdaterIdent(person, annenIdent)
 
@@ -47,10 +47,10 @@ internal class FagsakPersonServiceTest : OppslagSpringRunnerTest() {
     internal fun `oppdaterIdent - tidligere ident blir aktiv på nytt`() {
         val aktivIdent = "1"
         val annenIdent = "2"
-        val personId = personRepository.insert(Person(identer = setOf(PersonIdent(aktivIdent), PersonIdent(annenIdent)))).id
+        val personId = fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent(aktivIdent), PersonIdent(annenIdent)))).id
         jdbcTemplate.update("UPDATE person_ident SET endret_tid=(endret_tid - INTERVAL '1 DAY') WHERE ident = '2'")
 
-        val person = personRepository.findByIdOrThrow(personId)
+        val person = fagsakPersonRepository.findByIdOrThrow(personId)
         assertThat(person.hentAktivIdent()).isEqualTo(aktivIdent)
         val oppdatertPerson = fagsakPersonService.oppdaterIdent(person, annenIdent)
 

@@ -10,19 +10,19 @@ import org.springframework.data.relational.core.mapping.MappedCollection
 import java.time.LocalDateTime
 import java.util.UUID
 
-data class Person(@Id
-                  val id: UUID = UUID.randomUUID(),
-                  @MappedCollection(idColumn = "person_id")
-                  val identer: Set<PersonIdent>,
-                  val opprettetAv: String = SikkerhetContext.hentSaksbehandler(),
-                  val opprettetTid: LocalDateTime = SporbarUtils.now()) {
+data class FagsakPerson(@Id
+                        val id: UUID = UUID.randomUUID(),
+                        @MappedCollection(idColumn = "fagsak_person_id")
+                        val identer: Set<PersonIdent>,
+                        val opprettetAv: String = SikkerhetContext.hentSaksbehandler(),
+                        val opprettetTid: LocalDateTime = SporbarUtils.now()) {
 
     fun hentAktivIdent(): String {
         return identer.maxByOrNull { it.sporbar.endret.endretTid }?.ident ?: error("Fant ingen ident på person $id")
     }
 
     // Kopi av Fagsak -> fagsakMedOppdatertGjeldendeIdent
-    fun medOppdatertGjeldendeIdent(gjeldendePersonIdent: String): Person {
+    fun medOppdatertGjeldendeIdent(gjeldendePersonIdent: String): FagsakPerson {
         val personIdentForGjeldendeIdent: PersonIdent = this.identer.find { it.ident == gjeldendePersonIdent }?.let {
             it.copy(sporbar = it.sporbar.copy(endret = Endret()))
         } ?: PersonIdent(ident = gjeldendePersonIdent)

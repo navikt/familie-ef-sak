@@ -3,7 +3,7 @@ package no.nav.familie.ef.sak.repository
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPersonOld
-import no.nav.familie.ef.sak.fagsak.domain.Person
+import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import org.assertj.core.api.Assertions.assertThat
@@ -29,22 +29,22 @@ internal class InsertUpdateRepositoryImplTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal lagre entitet`() {
-        val person = testoppsettService.opprettPerson(Person(identer = emptySet()))
+        val person = testoppsettService.opprettPerson(FagsakPerson(identer = emptySet()))
         fagsakRepository.insert(fagsakDao(personId = person.id))
         assertThat(fagsakRepository.count()).isEqualTo(1)
     }
 
     @Test
     internal fun `skal lagre entiteter`() {
-        val person1 = testoppsettService.opprettPerson(Person(identer = emptySet()))
-        val person2 = testoppsettService.opprettPerson(Person(identer = emptySet()))
+        val person1 = testoppsettService.opprettPerson(FagsakPerson(identer = emptySet()))
+        val person2 = testoppsettService.opprettPerson(FagsakPerson(identer = emptySet()))
         fagsakRepository.insertAll(listOf(fagsakDao(personId = person1.id), fagsakDao(personId = person2.id)))
         assertThat(fagsakRepository.count()).isEqualTo(2)
     }
 
     @Test
     internal fun `skal oppdatere entitet`() {
-        val person = testoppsettService.opprettPerson(Person(identer = emptySet()))
+        val person = testoppsettService.opprettPerson(FagsakPerson(identer = emptySet()))
         val fagsak = fagsakRepository.insert(fagsakDao(stønadstype = Stønadstype.BARNETILSYN, personId = person.id))
         fagsakRepository.update(fagsak.copy(stønadstype = Stønadstype.OVERGANGSSTØNAD))
 
@@ -56,8 +56,8 @@ internal class InsertUpdateRepositoryImplTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal oppdatere entiteter`() {
-        val person1 = testoppsettService.opprettPerson(Person(identer = emptySet()))
-        val person2 = testoppsettService.opprettPerson(Person(identer = emptySet()))
+        val person1 = testoppsettService.opprettPerson(FagsakPerson(identer = emptySet()))
+        val person2 = testoppsettService.opprettPerson(FagsakPerson(identer = emptySet()))
         val fagsaker = fagsakRepository.insertAll(listOf(fagsakDao(stønadstype = Stønadstype.BARNETILSYN, personId = person1.id),
                                                          fagsakDao(stønadstype = Stønadstype.SKOLEPENGER, personId = person2.id)))
         fagsakRepository.updateAll(fagsaker.map { it.copy(stønadstype = Stønadstype.OVERGANGSSTØNAD) })
@@ -78,7 +78,7 @@ internal class InsertUpdateRepositoryImplTest : OppslagSpringRunnerTest() {
     internal fun `skal oppdatere endretTid på rot-entitet, men ikke barne-entiteter `() {
         val personIdent = "12345"
         val nyPersonIdent = "1234"
-        val person = testoppsettService.opprettPerson(Person(identer = setOf(PersonIdent(personIdent))))
+        val person = testoppsettService.opprettPerson(FagsakPerson(identer = setOf(PersonIdent(personIdent))))
         val fagsak = fagsakRepository.insert(fagsakDao(stønadstype = Stønadstype.BARNETILSYN,
                                                        personId = person.id,
                                                        identer = setOf(FagsakPersonOld(personIdent))))

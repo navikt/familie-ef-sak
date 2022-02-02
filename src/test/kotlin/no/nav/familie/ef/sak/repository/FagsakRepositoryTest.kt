@@ -3,10 +3,10 @@ package no.nav.familie.ef.sak.repository
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
-import no.nav.familie.ef.sak.fagsak.PersonRepository
+import no.nav.familie.ef.sak.fagsak.FagsakPersonRepository
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPersonOld
-import no.nav.familie.ef.sak.fagsak.domain.Person
+import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.domain.Endret
@@ -22,13 +22,13 @@ import java.time.LocalDateTime
 
 internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var personRepository: PersonRepository
+    @Autowired private lateinit var fagsakPersonRepository: FagsakPersonRepository
     @Autowired private lateinit var fagsakRepository: FagsakRepository
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
 
     @Test
     internal fun `skal ikke være mulig med flere stønader av samme typen for samme person`() {
-        val person = personRepository.insert(Person(identer = setOf(PersonIdent("1"))))
+        val person = fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent("1"))))
         Stønadstype.values().forEach {
             fagsakRepository.insert(fagsakDao(personId = person.id, stønadstype = it))
         }
@@ -41,8 +41,8 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `2 ulike personer skal kunne ha samme type stønad`() {
-        val person1 = personRepository.insert(Person(identer = setOf(PersonIdent("1"))))
-        val person2 = personRepository.insert(Person(identer = setOf(PersonIdent("2"))))
+        val person1 = fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent("1"))))
+        val person2 = fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent("2"))))
         fagsakRepository.insert(fagsakDao(personId = person1.id, stønadstype = Stønadstype.OVERGANGSSTØNAD))
         fagsakRepository.insert(fagsakDao(personId = person2.id, stønadstype = Stønadstype.OVERGANGSSTØNAD))
     }
