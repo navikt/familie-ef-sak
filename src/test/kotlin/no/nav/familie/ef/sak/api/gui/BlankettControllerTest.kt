@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.api.gui
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
-import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
+import no.nav.familie.ef.sak.fagsak.domain.FagsakPersonOld
 import no.nav.familie.ef.sak.oppgave.OppgaveRepository
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
@@ -43,7 +43,7 @@ class BlankettControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `Oppgave finnes allerede i db returner eksisterende bahandlingsid`() {
 
-        val fagsak = testoppsettService.lagreFagsak(fagsak(setOf(FagsakPerson(""))))
+        val fagsak = testoppsettService.lagreFagsak(fagsak(setOf(FagsakPersonOld(""))))
         val behandling = behandlingRepository.insert(behandling(fagsak))
         val oppgave = oppgaveRepository.insert(oppgave(behandling, false))
         val respons: ResponseEntity<Ressurs<UUID>> = opprettBlankettBehandling(oppgave.gsakOppgaveId)

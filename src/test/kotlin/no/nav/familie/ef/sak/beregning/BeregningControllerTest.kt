@@ -7,23 +7,20 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
-import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
+import no.nav.familie.ef.sak.fagsak.domain.FagsakPersonOld
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.vedtak.VedtakService
-import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.AvslagÅrsak
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
-import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Avslå
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
-import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.ef.søknad.SøknadMedVedlegg
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
@@ -36,7 +33,6 @@ import org.springframework.boot.test.web.client.exchange
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
-import java.time.YearMonth
 import java.util.UUID
 
 class BeregningControllerTest : OppslagSpringRunnerTest() {
@@ -55,7 +51,7 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `Skal klare å inserte ett vedtak med resultatet avslå`() {
-        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(FagsakPerson(""))))
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(FagsakPersonOld(""))))
         val behandling = behandlingRepository.insert(behandling(fagsak,
                                                                 steg = StegType.VEDTA_BLANKETT,
                                                                 type = BehandlingType.BLANKETT,
@@ -70,7 +66,7 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `Skal klare å inserte ett vedtak med resultatet innvilge`() {
-        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(FagsakPerson(""))))
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(FagsakPersonOld(""))))
         val behandling = behandlingRepository.insert(behandling(fagsak,
                                                                 steg = StegType.VEDTA_BLANKETT,
                                                                 type = BehandlingType.BLANKETT,
@@ -108,7 +104,7 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
     }
 
     private fun lagFagsakOgBehandling(): Behandling {
-        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(FagsakPerson(""))))
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(FagsakPersonOld(""))))
         val behandling = behandlingRepository.insert(behandling(fagsak,
                                                                 steg = StegType.VEDTA_BLANKETT,
                                                                 type = BehandlingType.FØRSTEGANGSBEHANDLING,

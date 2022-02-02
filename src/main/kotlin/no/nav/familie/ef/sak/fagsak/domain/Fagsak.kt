@@ -14,7 +14,7 @@ data class Fagsak(
         val eksternId: EksternFagsakId,
         val stønadstype: Stønadstype,
         val migrert: Boolean,
-        val søkerIdenter: Set<FagsakPerson>,
+        val søkerIdenter: Set<FagsakPersonOld>,
         val sporbar: Sporbar
 ) {
     fun erAktivIdent(personIdent: String): Boolean = hentAktivIdent() == personIdent
@@ -35,7 +35,7 @@ data class FagsakDao(@Id
                      @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                      val sporbar: Sporbar = Sporbar(),
                      @MappedCollection(idColumn = "fagsak_id")
-                     val søkerIdenter: Set<FagsakPerson> = setOf()) {
+                     val søkerIdenter: Set<FagsakPersonOld> = setOf()) {
 
     fun hentAktivIdent(): String {
         return søkerIdenter.maxByOrNull { it.sporbar.endret.endretTid }?.ident ?: error("Fant ingen ident på fagsak $id")
@@ -44,9 +44,9 @@ data class FagsakDao(@Id
     fun erAktivIdent(personIdent: String): Boolean = hentAktivIdent() == personIdent
 
     fun fagsakMedOppdatertGjeldendeIdent(gjeldendePersonIdent: String): FagsakDao {
-        val fagsakPersonForGjeldendeIdent: FagsakPerson = this.søkerIdenter.find { it.ident == gjeldendePersonIdent }?.let {
+        val fagsakPersonForGjeldendeIdent: FagsakPersonOld = this.søkerIdenter.find { it.ident == gjeldendePersonIdent }?.let {
             it.copy(sporbar = it.sporbar.copy(endret = Endret()))
-        } ?: FagsakPerson(ident = gjeldendePersonIdent)
+        } ?: FagsakPersonOld(ident = gjeldendePersonIdent)
         val søkerIdenterUtenGjeldende = this.søkerIdenter.filter { it.ident != gjeldendePersonIdent }
 
         return this.copy(søkerIdenter = søkerIdenterUtenGjeldende.toSet() + fagsakPersonForGjeldendeIdent)

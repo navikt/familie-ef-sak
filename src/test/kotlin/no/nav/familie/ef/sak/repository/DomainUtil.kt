@@ -10,7 +10,7 @@ import no.nav.familie.ef.sak.beregning.Inntektsperiode
 import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakDao
-import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
+import no.nav.familie.ef.sak.fagsak.domain.FagsakPersonOld
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.felles.domain.SporbarUtils
@@ -73,7 +73,7 @@ fun Behandling.innvilgetOgFerdigstilt() =
                   status = BehandlingStatus.FERDIGSTILT)
 
 
-fun fagsak(identer: Set<FagsakPerson> = setOf(),
+fun fagsak(identer: Set<FagsakPersonOld> = setOf(),
            stønadstype: Stønadstype = Stønadstype.OVERGANGSSTØNAD,
            id: UUID = UUID.randomUUID(),
            eksternId: EksternFagsakId = EksternFagsakId(),
@@ -86,7 +86,7 @@ fun fagsak(identer: Set<FagsakPerson> = setOf(),
                sporbar = sporbar)
 
 fun fagsakDao(id: UUID = UUID.randomUUID(),
-              identer: Set<FagsakPerson> = emptySet(),
+              identer: Set<FagsakPersonOld> = emptySet(),
               stønadstype: Stønadstype = Stønadstype.OVERGANGSSTØNAD,
               eksternId: EksternFagsakId = EksternFagsakId()): FagsakDao =
         FagsakDao(id = id,
@@ -105,8 +105,8 @@ fun vilkårsvurdering(behandlingId: UUID,
                          barnId = barnId,
                          delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurdering))
 
-fun fagsakpersoner(identer: Set<String>): Set<FagsakPerson> = identer.map {
-    FagsakPerson(ident = it)
+fun fagsakpersoner(identer: Set<String>): Set<FagsakPersonOld> = identer.map {
+    FagsakPersonOld(ident = it)
 }.toSet()
 
 fun tilkjentYtelse(behandlingId: UUID, personIdent: String): TilkjentYtelse = TilkjentYtelse(

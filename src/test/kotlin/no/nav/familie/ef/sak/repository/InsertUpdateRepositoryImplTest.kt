@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.repository
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
-import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
+import no.nav.familie.ef.sak.fagsak.domain.FagsakPersonOld
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
@@ -71,12 +71,12 @@ internal class InsertUpdateRepositoryImplTest : OppslagSpringRunnerTest() {
         val personIdent = "12345"
         val nyPersonIdent = "1234"
         val fagsak = fagsakRepository.insert(fagsakDao(stønadstype = Stønadstype.BARNETILSYN,
-                                                    identer = setOf(FagsakPerson(personIdent))))
+                                                    identer = setOf(FagsakPersonOld(personIdent))))
         Thread.sleep(200)
         val oppdatertFagsak = fagsakRepository.update(
                 fagsak.copy(stønadstype = Stønadstype.OVERGANGSSTØNAD,
                             søkerIdenter = fagsak.søkerIdenter.map { it.copy(ident = nyPersonIdent) }
-                                                   .toSet() + FagsakPerson("99999"))
+                                                   .toSet() + FagsakPersonOld("99999"))
         )
         val oppdatertSøkerIdent = oppdatertFagsak.søkerIdenter.first { it.ident == nyPersonIdent }
         val originalSøkerIdent = fagsak.søkerIdenter.first { it.ident == personIdent }

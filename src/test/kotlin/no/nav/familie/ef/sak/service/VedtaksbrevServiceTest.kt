@@ -16,7 +16,7 @@ import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevAvsnitt
 import no.nav.familie.ef.sak.brev.dto.SignaturDto
 import no.nav.familie.ef.sak.brev.dto.VedtaksbrevFritekstDto
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
+import no.nav.familie.ef.sak.fagsak.domain.FagsakPersonOld
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
@@ -31,7 +31,7 @@ import org.junit.jupiter.api.assertThrows
 
 internal class VedtaksbrevServiceTest {
 
-    private val fagsak = fagsak(setOf(FagsakPerson("")))
+    private val fagsak = fagsak(setOf(FagsakPersonOld("")))
     private val behandling = behandling(fagsak)
 
     private val brevClient = mockk<BrevClient>()

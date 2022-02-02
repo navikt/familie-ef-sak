@@ -7,7 +7,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.dto.BehandlingDto
 import no.nav.familie.ef.sak.behandling.dto.HenlagtDto
 import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak
-import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
+import no.nav.familie.ef.sak.fagsak.domain.FagsakPersonOld
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -33,7 +33,7 @@ internal class BehandlingControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `Skal returnere 200 OK med status IKKE_TILGANG dersom man ikke har tilgang til brukeren`() {
-        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(FagsakPerson("ikkeTilgang"))))
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(FagsakPersonOld("ikkeTilgang"))))
         val behandling = behandlingRepository.insert(behandling(fagsak))
         val respons = hentBehandling(behandling.id)
 
@@ -44,7 +44,7 @@ internal class BehandlingControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `Skal henlegge behandling`() {
-        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(FagsakPerson("12345678901"))))
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(FagsakPersonOld("12345678901"))))
         val behandling = behandlingRepository.insert(behandling(fagsak, type = BehandlingType.BLANKETT))
         val respons = henlegg(behandling.id, HenlagtDto(årsak = HenlagtÅrsak.BEHANDLES_I_GOSYS))
 
@@ -54,7 +54,7 @@ internal class BehandlingControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `Skal ikke være mulig å henlegge blankett med annet enn BEHANDLES_I_GOSYS`() {
-        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(FagsakPerson("12345678901"))))
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(FagsakPersonOld("12345678901"))))
         val behandling = behandlingRepository.insert(behandling(fagsak, type = BehandlingType.BLANKETT))
         val respons = henlegg(behandling.id, HenlagtDto(årsak = HenlagtÅrsak.FEILREGISTRERT))
 
@@ -64,7 +64,7 @@ internal class BehandlingControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `Skal henlegge FØRSTEGANGSBEHANDLING`() {
-        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(FagsakPerson("12345678901"))))
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(FagsakPersonOld("12345678901"))))
         val behandling = behandlingRepository.insert(behandling(fagsak, type = BehandlingType.FØRSTEGANGSBEHANDLING))
         val respons = henlegg(behandling.id, HenlagtDto(årsak = HenlagtÅrsak.FEILREGISTRERT))
 

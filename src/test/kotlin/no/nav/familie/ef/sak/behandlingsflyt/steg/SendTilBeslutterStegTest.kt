@@ -21,7 +21,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask.OpprettOppg
 import no.nav.familie.ef.sak.brev.VedtaksbrevRepository
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
+import no.nav.familie.ef.sak.fagsak.domain.FagsakPersonOld
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
@@ -87,7 +87,7 @@ internal class SendTilBeslutterStegTest {
                                  tilbakekrevingService,
                                  vurderingService)
     private val fagsak = fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD,
-                                identer = setOf(FagsakPerson(ident = "12345678901")))
+                                identer = setOf(FagsakPersonOld(ident = "12345678901")))
     private val saksbehandlerNavn = "saksbehandlernavn"
     private val vedtaksbrev = Vedtaksbrev(behandlingId = UUID.randomUUID(),
                                           saksbehandlerBrevrequest = "",
