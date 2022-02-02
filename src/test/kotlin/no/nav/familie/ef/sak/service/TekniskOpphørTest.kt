@@ -11,7 +11,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillBehandlingTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.PollStatusTekniskOpphør
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
-import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
+import no.nav.familie.ef.sak.fagsak.domain.FagsakPersonOld
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.infrastruktur.config.IverksettClientMock
@@ -46,7 +46,7 @@ internal class TekniskOpphørTest : OppslagSpringRunnerTest() {
         mockBrukerContext("saksbehandler")
         every { iverksettClient.hentStatus(any()) } returns IverksettStatus.OK_MOT_OPPDRAG
 
-        fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(FagsakPerson(ident = ident))))
+        fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(FagsakPersonOld(ident = ident))))
         behandling = behandlingRepository.insert(behandling(fagsak,
                                                             status = BehandlingStatus.FERDIGSTILT,
                                                             resultat = BehandlingResultat.INNVILGET))

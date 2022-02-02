@@ -5,7 +5,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
+import no.nav.familie.ef.sak.fagsak.domain.FagsakPersonOld
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadDatoerDto
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
@@ -40,7 +40,7 @@ internal class SøknadControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `Skal returnere 200 OK med status IKKE_TILGANG dersom man ikke har tilgang til brukeren`() {
-        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(FagsakPerson("ikkeTilgang"))))
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(FagsakPersonOld("ikkeTilgang"))))
         val behandling = behandlingRepository.insert(behandling(fagsak))
         val respons = hentSøknadData(behandling.id)
 

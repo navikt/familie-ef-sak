@@ -10,7 +10,7 @@ import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
 import no.nav.familie.ef.sak.behandlingshistorikk.dto.BehandlingshistorikkDto
 import no.nav.familie.ef.sak.behandlingshistorikk.dto.HendelseshistorikkDto
-import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
+import no.nav.familie.ef.sak.fagsak.domain.FagsakPersonOld
 import no.nav.familie.ef.sak.felles.domain.JsonWrapper
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
@@ -40,7 +40,7 @@ internal class BehandlingshistorikkControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `Skal returnere 200 OK med status IKKE_TILGANG dersom man ikke har tilgang til brukeren`() {
-        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(FagsakPerson("ikkeTilgang"))))
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(FagsakPersonOld("ikkeTilgang"))))
         val behandling = behandlingRepository.insert(behandling(fagsak))
         val respons = hentHistorikk(behandling.id)
 
@@ -51,7 +51,7 @@ internal class BehandlingshistorikkControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal kun returnere den første hendelsen av typen OPPRETTET - etterfølgende hendelser av denne typen skal lukes vekk`() {
-        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(FagsakPerson(""))))
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(FagsakPersonOld(""))))
         val behandling = behandlingRepository.insert(behandling(fagsak))
 
         leggInnHistorikk(behandling, "1", LocalDateTime.now(), StegType.VILKÅR)
@@ -64,7 +64,7 @@ internal class BehandlingshistorikkControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal returnere hendelser av alle typer i riktig rekkefølge for invilget behandling `() {
-        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(FagsakPerson(""))))
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(FagsakPersonOld(""))))
         val behandling = behandlingRepository.insert(behandling(fagsak))
 
         leggInnHistorikk(behandling, "1", LocalDateTime.now(), StegType.VILKÅR)
@@ -87,7 +87,7 @@ internal class BehandlingshistorikkControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal returnere hendelser av alle typer i riktig rekkefølge for henlagt behandling`() {
-        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(FagsakPerson(""))))
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(FagsakPersonOld(""))))
         val behandling = behandlingRepository.insert(behandling(fagsak))
 
         leggInnHistorikk(behandling, "1", LocalDateTime.now(), StegType.VILKÅR)
@@ -107,7 +107,7 @@ internal class BehandlingshistorikkControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal returnere alle hendelser dersom en behandling blir underkjent i totrinnskontroll, deretter sendt til beslutter på nytt og deretter godkjent`() {
-        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(FagsakPerson(""))))
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(FagsakPersonOld(""))))
         val behandling = behandlingRepository.insert(behandling(fagsak))
 
         leggInnHistorikk(behandling, "1", LocalDateTime.now(), StegType.VILKÅR)
@@ -131,7 +131,7 @@ internal class BehandlingshistorikkControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal returnere metadata som json`() {
-        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(FagsakPerson(""))))
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(FagsakPersonOld(""))))
         val behandling = behandlingRepository.insert(behandling(fagsak))
 
         val jsonMap = mapOf("key" to "value")

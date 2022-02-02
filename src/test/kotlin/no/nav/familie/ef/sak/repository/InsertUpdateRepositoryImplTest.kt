@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.repository
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
-import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
+import no.nav.familie.ef.sak.fagsak.domain.FagsakPersonOld
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
@@ -17,29 +17,29 @@ internal class InsertUpdateRepositoryImplTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `skal kaste exception hvis man bruker save eller saveAll`() {
         assertThat(catchThrowable {
-            fagsakRepository.save(fagsak())
+            fagsakRepository.save(fagsakDao())
         }).isInstanceOf(DbActionExecutionException::class.java)
 
         assertThat(catchThrowable {
-            fagsakRepository.saveAll(listOf(fagsak(), fagsak()))
+            fagsakRepository.saveAll(listOf(fagsakDao(), fagsakDao()))
         }).isInstanceOf(DbActionExecutionException::class.java)
     }
 
     @Test
     internal fun `skal lagre entitet`() {
-        fagsakRepository.insert(fagsak())
+        fagsakRepository.insert(fagsakDao())
         assertThat(fagsakRepository.count()).isEqualTo(1)
     }
 
     @Test
     internal fun `skal lagre entiteter`() {
-        fagsakRepository.insertAll(listOf(fagsak(), fagsak()))
+        fagsakRepository.insertAll(listOf(fagsakDao(), fagsakDao()))
         assertThat(fagsakRepository.count()).isEqualTo(2)
     }
 
     @Test
     internal fun `skal oppdatere entitet`() {
-        val fagsak = fagsakRepository.insert(fagsak(stønadstype = Stønadstype.BARNETILSYN))
+        val fagsak = fagsakRepository.insert(fagsakDao(stønadstype = Stønadstype.BARNETILSYN))
         fagsakRepository.update(fagsak.copy(stønadstype = Stønadstype.OVERGANGSSTØNAD))
 
         assertThat(fagsakRepository.count()).isEqualTo(1)
@@ -50,8 +50,8 @@ internal class InsertUpdateRepositoryImplTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal oppdatere entiteter`() {
-        val fagsaker = fagsakRepository.insertAll(listOf(fagsak(stønadstype = Stønadstype.BARNETILSYN),
-                                                         fagsak(stønadstype = Stønadstype.SKOLEPENGER)))
+        val fagsaker = fagsakRepository.insertAll(listOf(fagsakDao(stønadstype = Stønadstype.BARNETILSYN),
+                                                         fagsakDao(stønadstype = Stønadstype.SKOLEPENGER)))
         fagsakRepository.updateAll(fagsaker.map { it.copy(stønadstype = Stønadstype.OVERGANGSSTØNAD) })
 
         assertThat(fagsakRepository.count()).isEqualTo(2)
@@ -70,13 +70,13 @@ internal class InsertUpdateRepositoryImplTest : OppslagSpringRunnerTest() {
     internal fun `skal oppdatere endretTid på rot-entitet, men ikke barne-entiteter `() {
         val personIdent = "12345"
         val nyPersonIdent = "1234"
-        val fagsak = fagsakRepository.insert(fagsak(stønadstype = Stønadstype.BARNETILSYN,
-                                                    identer = setOf(FagsakPerson(personIdent))))
+        val fagsak = fagsakRepository.insert(fagsakDao(stønadstype = Stønadstype.BARNETILSYN,
+                                                    identer = setOf(FagsakPersonOld(personIdent))))
         Thread.sleep(200)
         val oppdatertFagsak = fagsakRepository.update(
                 fagsak.copy(stønadstype = Stønadstype.OVERGANGSSTØNAD,
                             søkerIdenter = fagsak.søkerIdenter.map { it.copy(ident = nyPersonIdent) }
-                                                   .toSet() + FagsakPerson("99999"))
+                                                   .toSet() + FagsakPersonOld("99999"))
         )
         val oppdatertSøkerIdent = oppdatertFagsak.søkerIdenter.first { it.ident == nyPersonIdent }
         val originalSøkerIdent = fagsak.søkerIdenter.first { it.ident == personIdent }
@@ -92,11 +92,11 @@ internal class InsertUpdateRepositoryImplTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `skal kaste exception hvis man oppdaterer entiteter som ikke finnes`() {
         assertThat(catchThrowable {
-            fagsakRepository.update(fagsak())
+            fagsakRepository.update(fagsakDao())
         }).isInstanceOf(DbActionExecutionException::class.java)
 
         assertThat(catchThrowable {
-            fagsakRepository.updateAll(listOf(fagsak(), fagsak()))
+            fagsakRepository.updateAll(listOf(fagsakDao(), fagsakDao()))
         }).isInstanceOf(DbActionExecutionException::class.java)
     }
 }

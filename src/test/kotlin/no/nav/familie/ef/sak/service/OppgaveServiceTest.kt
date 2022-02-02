@@ -11,8 +11,8 @@ import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.arbeidsfordeling.Arbeidsfordelingsenhet
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
-import no.nav.familie.ef.sak.fagsak.domain.Fagsak
-import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
+import no.nav.familie.ef.sak.fagsak.domain.FagsakDao
+import no.nav.familie.ef.sak.fagsak.domain.FagsakPersonOld
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.infrastruktur.exception.IntegrasjonException
 import no.nav.familie.ef.sak.oppgave.Oppgave
@@ -22,6 +22,7 @@ import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
+import no.nav.familie.ef.sak.repository.fagsakDao
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.FinnMappeResponseDto
@@ -310,11 +311,11 @@ internal class OppgaveServiceTest {
         every { pdlClient.hentAktørIder(any()) } returns PdlIdenter(listOf(PdlIdent(aktørIdentFraPdl, false)))
     }
 
-    private fun lagTestFagsak(): Fagsak {
-        return Fagsak(id = FAGSAK_ID,
-                      stønadstype = Stønadstype.OVERGANGSSTØNAD,
-                      eksternId = EksternFagsakId(FAGSAK_EKSTERN_ID),
-                      søkerIdenter = setOf(FagsakPerson(ident = FNR)))
+    private fun lagTestFagsak(): FagsakDao {
+        return fagsakDao(id = FAGSAK_ID,
+                         stønadstype = Stønadstype.OVERGANGSSTØNAD,
+                         eksternId = EksternFagsakId(FAGSAK_EKSTERN_ID),
+                         identer = setOf(FagsakPersonOld(ident = FNR)))
     }
 
     private fun lagTestOppgave(): Oppgave {
