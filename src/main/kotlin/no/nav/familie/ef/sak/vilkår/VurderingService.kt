@@ -119,11 +119,9 @@ class VurderingService(private val behandlingService: BehandlingService,
                                            barnId = barnId)
         }
 
-        val nyeBarnVurderinger = barnPåGjeldendeBehandling
-                .filter { barn -> vurderingerKopi.none { it.value.barnId == barn.id } }
-                .map { OppdaterVilkår.lagVilkårsvurderingForNyttBarn(metadata, nyBehandlingsId, it.id) }
+        // TODO: Legg inn vilkårsvurdering for barn som ikke finnes i forrige behandling
 
-        vilkårsvurderingRepository.insertAll(vurderingerKopi.values.toList() + nyeBarnVurderinger)
+        vilkårsvurderingRepository.insertAll(vurderingerKopi.values.toList())
         vurderingerKopi.forEach { (forrigeId, vurdering) ->
             vilkårsvurderingRepository.oppdaterEndretTid(vurdering.id,
                                                          tidligereVurderinger.getValue(forrigeId).sporbar.endret.endretTid)
@@ -135,6 +133,7 @@ class VurderingService(private val behandlingService: BehandlingService,
         return OppdaterVilkår.erAlleVilkårsvurderingerOppfylt(lagredeVilkårsvurderinger)
     }
 
+    // TODO: Denne støtter alle barn som kommer fra søknader, men ikke barn som kommer inn utenom søknader
     fun utledBarnId(barnId: UUID?,
                     alleBarnPåForrigeBehandling: List<BehandlingBarn>,
                     alleBarnPåGjeldendeBehandling: List<BehandlingBarn>): UUID? =
@@ -144,6 +143,6 @@ class VurderingService(private val behandlingService: BehandlingService,
                     (barnFraTidligereVurdering?.personIdent != null && it.personIdent == barnFraTidligereVurdering.personIdent) ||
                     (barnFraTidligereVurdering?.søknadBarnId != null && it.søknadBarnId == barnFraTidligereVurdering.søknadBarnId)
                 }
-                barnForGjeldendeVurdering?.id
+                barnForGjeldendeVurdering?.id ?: error("Kunne ikke finne matchende barn for vilkårsvurdering")
             }
 }
