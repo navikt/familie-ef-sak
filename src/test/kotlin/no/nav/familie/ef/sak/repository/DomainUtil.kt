@@ -11,6 +11,8 @@ import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakDao
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPersonOld
+import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
+import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.felles.domain.SporbarUtils
@@ -31,6 +33,7 @@ import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import org.assertj.core.api.Assertions.assertThat
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -72,27 +75,41 @@ fun Behandling.innvilgetOgFerdigstilt() =
         this.copy(resultat = BehandlingResultat.INNVILGET,
                   status = BehandlingStatus.FERDIGSTILT)
 
-
 fun fagsak(identer: Set<FagsakPersonOld> = setOf(),
            stønadstype: Stønadstype = Stønadstype.OVERGANGSSTØNAD,
            id: UUID = UUID.randomUUID(),
+           person: FagsakPerson = FagsakPerson(identer = identer.map { PersonIdent(it.ident, it.sporbar) }.toSet()),
            eksternId: EksternFagsakId = EksternFagsakId(),
-           sporbar: Sporbar = Sporbar()) =
-        Fagsak(id = id,
-               stønadstype = stønadstype,
-               søkerIdenter = identer,
-               eksternId = eksternId,
-               migrert = false,
-               sporbar = sporbar)
+           sporbar: Sporbar = Sporbar()): Fagsak {
+    assertThat(identer.map { it.ident }).containsExactlyInAnyOrderElementsOf(person.identer.map { it.ident })
+    return Fagsak(id = id,
+                  fagsakPersonId = person.id,
+                  personIdenter = person.identer,
+                  stønadstype = stønadstype,
+                  søkerIdenter = identer,
+                  eksternId = eksternId,
+                  migrert = false,
+                  sporbar = sporbar)
+}
 
 fun fagsakDao(id: UUID = UUID.randomUUID(),
               identer: Set<FagsakPersonOld> = emptySet(),
               stønadstype: Stønadstype = Stønadstype.OVERGANGSSTØNAD,
+              personId: UUID = UUID.randomUUID(),
               eksternId: EksternFagsakId = EksternFagsakId()): FagsakDao =
         FagsakDao(id = id,
+                  fagsakPersonId = personId,
                   søkerIdenter = identer,
                   stønadstype = stønadstype,
                   eksternId = eksternId)
+
+fun Fagsak.tilFagsakDao() =
+        FagsakDao(id = id,
+                  fagsakPersonId = fagsakPersonId,
+                  søkerIdenter = søkerIdenter,
+                  stønadstype = stønadstype,
+                  eksternId = eksternId,
+                  sporbar = sporbar)
 
 fun vilkårsvurdering(behandlingId: UUID,
                      resultat: Vilkårsresultat,

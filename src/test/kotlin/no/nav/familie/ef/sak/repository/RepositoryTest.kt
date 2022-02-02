@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.repository
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
+import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.felles.domain.Endret
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import org.assertj.core.api.Assertions.assertThat
@@ -22,7 +23,8 @@ internal class RepositoryTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `skal oppdatere sporbar automatisk når en entitet oppdateres`() {
         val opprinneligEndret = Endret(endretAv = "~", endretTid = LocalDateTime.MIN)
-        val fagsak = fagsakRepository.insert(fagsakDao())
+        val person = testoppsettService.opprettPerson(FagsakPerson(identer = setOf()))
+        val fagsak = fagsakRepository.insert(fagsakDao(personId = person.id))
         val opprettetSporbar = fagsakRepository.findByIdOrThrow(fagsak.id).sporbar
         val opprettetTid = fagsak.sporbar.opprettetTid
         val opprettetAv = "VL"
