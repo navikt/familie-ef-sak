@@ -37,7 +37,7 @@ class ForberedOppgaverForBarnService(private val gjeldendeBarnRepository: Gjelde
                                it.first.fødselsnummerSøker
                                ?: error("Kunne ikke finne igjen den mappede behandlingen for barn som fyller år. Dette skal ikke skje")
                            }
-                           ?: error("Kunne ikke finne fødselsnummer for søker"),
+                           ?: error("Kunne ikke finne behandlingsId fra utplukk. Dette skal ikke skje."),
                            Stønadstype.OVERGANGSSTØNAD.name,
                            barnSomFyllerAar[it.behandlingId]!!.second)
         }
