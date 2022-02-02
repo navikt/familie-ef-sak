@@ -22,6 +22,9 @@ class ForberedOppgaverForBarnService(private val gjeldendeBarnRepository: Gjelde
         val gjeldendeBarn =
                 gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, referanseDato)
         val barnSomFyllerAar = barnSomFyllerAar(gjeldendeBarn, referanseDato)
+        if (barnSomFyllerAar.isEmpty()) {
+            return
+        }
         val oppgaver = lagOppgaverForBarn(barnSomFyllerAar)
         if (oppgaver.isNotEmpty()) {
             logger.info("Fant ${oppgaver.size} oppgaver som skal opprettes ved forbereding av oppgaver for barn som fyller år")
