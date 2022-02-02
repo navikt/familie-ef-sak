@@ -13,7 +13,7 @@ import no.nav.familie.ef.sak.arbeidsfordeling.Arbeidsfordelingsenhet
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.FERDIGSTILT
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
+import no.nav.familie.ef.sak.fagsak.domain.FagsakPersonOld
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.repository.behandling
@@ -145,7 +145,7 @@ internal class TilbakekrevingServiceTest {
 
     private fun mockHentDataForGenereringAvVarselbrev(): CapturingSlot<ForhåndsvisVarselbrevRequest> {
 
-        val fagsak = fagsak(identer = setOf(FagsakPerson("12345678901")))
+        val fagsak = fagsak(identer = setOf(FagsakPersonOld("12345678901")))
         every { fagsakService.hentFagsakForBehandling(any()) } returns fagsak
         every { behandlingService.hentBehandling(any()) } returns behandling(fagsak = fagsak)
 

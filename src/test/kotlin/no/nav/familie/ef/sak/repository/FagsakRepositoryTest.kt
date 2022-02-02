@@ -4,7 +4,7 @@ import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
-import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
+import no.nav.familie.ef.sak.fagsak.domain.FagsakPersonOld
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.fagsak.domain.tilFagsak
 import no.nav.familie.ef.sak.felles.domain.Endret
@@ -125,8 +125,8 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
 
     private fun opprettFagsakMedFlereIdenter(ident: String = "1", ident2: String = "2", ident3: String = "3"): Fagsak {
         val endret2DagerSiden = Sporbar(endret = Endret(endretTid = LocalDateTime.now().plusDays(2)))
-        return fagsak(setOf(FagsakPerson(ident = ident),
-                            FagsakPerson(ident = ident2, sporbar = endret2DagerSiden),
-                            FagsakPerson(ident = ident3)))
+        return fagsak(setOf(FagsakPersonOld(ident = ident),
+                            FagsakPersonOld(ident = ident2, sporbar = endret2DagerSiden),
+                            FagsakPersonOld(ident = ident3)))
     }
 }

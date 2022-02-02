@@ -11,9 +11,8 @@ import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.arbeidsfordeling.Arbeidsfordelingsenhet
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
-import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakDao
-import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
+import no.nav.familie.ef.sak.fagsak.domain.FagsakPersonOld
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.infrastruktur.exception.IntegrasjonException
 import no.nav.familie.ef.sak.oppgave.Oppgave
@@ -316,7 +315,7 @@ internal class OppgaveServiceTest {
         return fagsakDao(id = FAGSAK_ID,
                          stønadstype = Stønadstype.OVERGANGSSTØNAD,
                          eksternId = EksternFagsakId(FAGSAK_EKSTERN_ID),
-                         identer = setOf(FagsakPerson(ident = FNR)))
+                         identer = setOf(FagsakPersonOld(ident = FNR)))
     }
 
     private fun lagTestOppgave(): Oppgave {

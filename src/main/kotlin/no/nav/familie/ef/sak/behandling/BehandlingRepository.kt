@@ -28,7 +28,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
     // language=PostgreSQL
     @Query("""SELECT fp.ident FROM fagsak f
                     JOIN behandling b ON f.id = b.fagsak_id
-                    JOIN fagsak_person fp ON b.fagsak_id=fp.fagsak_id
+                    JOIN fagsak_person_old fp ON b.fagsak_id=fp.fagsak_id
                     WHERE b.id = :behandlingId
                     ORDER BY fp.endret_tid DESC 
                     LIMIT 1
@@ -41,7 +41,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         FROM behandling b
         JOIN behandling_ekstern be ON b.id = be.behandling_id
         JOIN fagsak f ON f.id = b.fagsak_id
-        JOIN fagsak_person fp ON b.fagsak_id = fp.fagsak_id
+        JOIN fagsak_person_old fp ON b.fagsak_id = fp.fagsak_id
         WHERE fp.ident IN (:personidenter) AND f.stonadstype = :stønadstype AND b.type != 'BLANKETT'
         ORDER BY b.opprettet_tid DESC
         LIMIT 1

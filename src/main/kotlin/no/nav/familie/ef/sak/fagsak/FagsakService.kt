@@ -8,7 +8,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.dto.tilDto
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakDao
-import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
+import no.nav.familie.ef.sak.fagsak.domain.FagsakPersonOld
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.fagsak.domain.tilFagsak
 import no.nav.familie.ef.sak.fagsak.dto.FagsakDto
@@ -127,6 +127,6 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
     }
 
     private fun opprettFagsak(stønadstype: Stønadstype, personIdent: String) =
-            fagsakRepository.insert(FagsakDao(stønadstype = stønadstype, søkerIdenter = setOf(FagsakPerson(ident = personIdent))))
+            fagsakRepository.insert(FagsakDao(stønadstype = stønadstype, søkerIdenter = setOf(FagsakPersonOld(ident = personIdent))))
 
 }
