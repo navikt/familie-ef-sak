@@ -31,15 +31,15 @@ class ForberedOppgaverForBarnService(private val gjeldendeBarnRepository: Gjelde
 
     private fun lagOppgaverForBarn(barnSomFyllerAar: Map<UUID, Pair<BarnTilUtplukkForOppgave, String>>): List<OppgaveForBarn> {
         return behandlingRepository.finnEksterneIder(barnSomFyllerAar.map { it.key }.toSet()).map {
+            val utplukketBarn = barnSomFyllerAar[it.behandlingId]
+                                ?: error("Kunne ikke finne behandlingsId fra utplukk. Dette skal ikke skje.")
+            val beskrivelse = utplukketBarn.second
             OppgaveForBarn(it.behandlingId,
                            it.eksternFagsakId,
-                           barnSomFyllerAar[it.behandlingId]?.let {
-                               it.first.fødselsnummerSøker
-                               ?: error("Kunne ikke finne igjen den mappede behandlingen for barn som fyller år. Dette skal ikke skje")
-                           }
-                           ?: error("Kunne ikke finne behandlingsId fra utplukk. Dette skal ikke skje."),
+                           utplukketBarn.first.fødselsnummerSøker
+                           ?: error("Kunne ikke finne igjen den mappede behandlingen for barn som fyller år. Dette skal ikke skje"),
                            Stønadstype.OVERGANGSSTØNAD.name,
-                           barnSomFyllerAar[it.behandlingId]!!.second)
+                           beskrivelse)
         }
     }
 
