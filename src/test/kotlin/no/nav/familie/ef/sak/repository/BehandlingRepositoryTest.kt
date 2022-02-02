@@ -185,7 +185,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(first.eksternFagsakId).isEqualTo(fagsak.eksternId.id)
     }
     @Test
-    internal fun `finnEkstserneIder - send inn én behandlingId som finnes, forvent én eksternId `() {
+    internal fun `finnEksterneIder - send inn én behandlingId som finnes, forvent én eksternId `() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
         val annenFagsak = testoppsettService.lagreFagsak(fagsak())
@@ -204,7 +204,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `finnEkstserneIder - send inn behandlingIder som ikke finnes, forvent ingen treff `() {
+    internal fun `finnEksterneIder - send inn behandlingIder som ikke finnes, forvent ingen treff `() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
         val eksterneIder = behandlingRepository.finnEksterneIder(setOf(UUID.randomUUID(), UUID.randomUUID()))
@@ -212,7 +212,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `finnEkstserneIder - send inn tomt sett, forvent unntak `() {
+    internal fun `finnEksterneIder - send inn tomt sett, forvent unntak `() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
         assertThrows<Exception> {
