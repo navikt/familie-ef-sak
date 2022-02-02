@@ -1,5 +1,3 @@
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp"; --TODO slett? blir sikkert lagt inn i Charlie sin branch før denne
-
 CREATE TABLE fagsak_person (
     id            UUID PRIMARY KEY,
     opprettet_av  VARCHAR      NOT NULL DEFAULT 'VL',
