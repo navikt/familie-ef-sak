@@ -27,5 +27,4 @@ class RevurderingsController(
         return Ressurs.success(revurdering.id)
     }
 
-
 }

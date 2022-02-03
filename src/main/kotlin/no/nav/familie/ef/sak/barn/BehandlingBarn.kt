@@ -17,4 +17,12 @@ data class BehandlingBarn(@Id
                           @Column("fodsel_termindato")
                           val fødselTermindato: LocalDate? = null,
                           @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                          val sporbar: Sporbar = Sporbar())
+                          val sporbar: Sporbar = Sporbar()) {
+
+    fun erMatchendeBarn(annetBarn: BehandlingBarn): Boolean =
+            (this.personIdent != null && this.personIdent == annetBarn.personIdent) ||
+            (this.søknadBarnId != null && this.søknadBarnId == annetBarn.søknadBarnId) ||
+            (this.fødselTermindato != null && this.fødselTermindato == annetBarn.fødselTermindato)
+
+
+}
