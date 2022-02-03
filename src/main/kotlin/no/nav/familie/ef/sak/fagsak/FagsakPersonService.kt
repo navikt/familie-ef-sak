@@ -13,6 +13,8 @@ class FagsakPersonService(private val fagsakPersonRepository: FagsakPersonReposi
 
     fun hentPerson(personId: UUID): FagsakPerson = fagsakPersonRepository.findByIdOrThrow(personId)
 
+    fun finnPerson(personIdenter: Set<String>): FagsakPerson? = fagsakPersonRepository.findByIdent(personIdenter)
+
     fun hentIdenter(personId: UUID): Set<PersonIdent> {
         val personIdenter = fagsakPersonRepository.findPersonIdenter(personId)
         feilHvis(personIdenter.isEmpty()) { "Finner ikke personidenter til person=$personId" }
