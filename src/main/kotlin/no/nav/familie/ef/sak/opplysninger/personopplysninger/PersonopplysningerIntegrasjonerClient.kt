@@ -78,12 +78,6 @@ class PersonopplysningerIntegrasjonerClient(@Qualifier("azure") restOperations: 
         return postForEntity<Ressurs<NavKontorEnhet>>(integrasjonerConfig.navKontorUri, PersonIdent(ident)).getDataOrThrow()
     }
 
-    @Improvement("Fjern denne når infotrygdReplika fungerer i prod")
-    fun hentInfotrygdPerioder(request: PerioderOvergangsstønadRequest): PerioderOvergangsstønadResponse {
-        return postForEntity<Ressurs<PerioderOvergangsstønadResponse>>(integrasjonerConfig.infotrygdVedtaksperioder, request)
-                .getDataOrThrow()
-    }
-
     companion object {
 
         const val HEADER_NAV_TEMA = "Nav-Tema"

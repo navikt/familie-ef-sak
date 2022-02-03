@@ -50,9 +50,9 @@ class BlankettService(private val tilgangService: TilgangService,
         val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, Stønadstype.OVERGANGSSTØNAD)
         val behandling = behandlingService.opprettBehandlingForBlankett(BehandlingType.BLANKETT, fagsak.id, søknad, journalpost)
         opprettEfOppgave(behandling.id, oppgaveId)
-        grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
+        val grunnlagsdata = grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
 
-        barnService.opprettBarnPåBehandlingMedSøknadsdata(behandling.id, fagsak.id)
+        barnService.opprettBarnPåBehandlingMedSøknadsdata(behandling.id, fagsak.id, grunnlagsdata.grunnlagsdata.barn)
         return behandling
     }
 

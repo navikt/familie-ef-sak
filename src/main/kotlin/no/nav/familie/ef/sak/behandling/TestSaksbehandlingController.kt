@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.behandling
 
+import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
@@ -54,6 +55,7 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
                                    private val søknadService: SøknadService,
                                    private val personService: PersonService,
                                    private val grunnlagsdataService: GrunnlagsdataService,
+                                   private val barnService: BarnService,
                                    private val taskRepository: TaskRepository,
                                    private val oppgaveService: OppgaveService,
                                    private val journalpostClient: JournalpostClient,
@@ -72,7 +74,8 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
 
         if (!behandling.erMigrering()) {
             iverksettService.startBehandling(behandling, fagsak)
-            grunnlagsdataService.opprettGrunnlagsdata(behandling.id) // opprettGrunnlagsdata håndteres i migreringservice
+            val grunnlagsdata = grunnlagsdataService.opprettGrunnlagsdata(behandling.id) // opprettGrunnlagsdata håndteres i migreringservice
+            barnService.opprettBarnPåBehandlingMedSøknadsdata(behandling.id,fagsak.id, grunnlagsdata.grunnlagsdata.barn)
             behandlingshistorikkService.opprettHistorikkInnslag(Behandlingshistorikk(behandlingId = behandling.id,
                                                                                      steg = StegType.VILKÅR))
             val oppgaveId = oppgaveService.opprettOppgave(behandling.id,

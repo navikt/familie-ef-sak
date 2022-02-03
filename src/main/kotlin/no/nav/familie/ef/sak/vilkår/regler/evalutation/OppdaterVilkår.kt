@@ -14,6 +14,7 @@ import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregler.Companion.VILKÅRSREG
 import no.nav.familie.ef.sak.vilkår.regler.alleVilkårsregler
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.RegelEvaluering.utledResultat
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.RegelValidering.validerVurdering
+import no.nav.familie.ef.sak.vilkår.regler.vilkår.AleneomsorgRegel
 import java.util.UUID
 
 object OppdaterVilkår {
@@ -141,8 +142,8 @@ object OppdaterVilkår {
                                      metadata: HovedregelMetadata): List<Vilkårsvurdering> {
         return alleVilkårsregler
                 .flatMap { vilkårsregel ->
-                    if (vilkårsregel.vilkårType == VilkårType.ALENEOMSORG && metadata.søknad != null) {
-                        metadata.søknad.barn.map {
+                    if (vilkårsregel.vilkårType == VilkårType.ALENEOMSORG && metadata.barn.isNotEmpty()) {
+                        metadata.barn.map {
                             lagNyVilkårsvurdering(vilkårsregel, metadata, behandlingId, it.id)
                         }
                     } else {
@@ -150,6 +151,14 @@ object OppdaterVilkår {
                     }
                 }
     }
+
+    fun lagVilkårsvurderingForNyttBarn(metadata: HovedregelMetadata,
+                                       behandlingId: UUID,
+                                       barnId: UUID): Vilkårsvurdering = lagNyVilkårsvurdering(AleneomsorgRegel(),
+                                                                                               metadata,
+                                                                                               behandlingId,
+                                                                                               barnId)
+
 
     private fun lagNyVilkårsvurdering(vilkårsregel: Vilkårsregel,
                                       metadata: HovedregelMetadata,
