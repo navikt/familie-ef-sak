@@ -101,6 +101,20 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    internal fun `findByFagsakPersonIdAndStønadstype - skal finne fagsak`() {
+        val person = testoppsettService.opprettPerson("1")
+        val overgangsstønad = testoppsettService.lagreFagsak(fagsak(person = person))
+        val barnetilsyn = testoppsettService.lagreFagsak(fagsak(person = person, stønadstype = Stønadstype.BARNETILSYN))
+        testoppsettService.lagreFagsak(fagsak())
+
+        assertThat(fagsakRepository.findByFagsakPersonIdAndStønadstype(person.id, Stønadstype.OVERGANGSSTØNAD)!!.id)
+                .isEqualTo(overgangsstønad.id)
+        assertThat(fagsakRepository.findByFagsakPersonIdAndStønadstype(person.id, Stønadstype.BARNETILSYN)!!.id)
+                .isEqualTo(barnetilsyn.id)
+        assertThat(fagsakRepository.findByFagsakPersonIdAndStønadstype(person.id, Stønadstype.SKOLEPENGER)).isNull()
+    }
+
+    @Test
     internal fun `finnMedEksternId skal gi null når det ikke finnes fagsak for gitt id`() {
         val findByEksternId = fagsakRepository.finnMedEksternId(100000L)
         assertThat(findByEksternId).isEqualTo(null)

@@ -20,7 +20,7 @@ interface FagsakRepository : RepositoryInterface<FagsakDao, UUID>, InsertUpdateR
                     AND stonadstype = :stønadstype""")
     fun findBySøkerIdent(personIdenter: Set<String>, stønadstype: Stønadstype): FagsakDao?
 
-    fun findByFagsakPersonId(fagsakPersonId: UUID): FagsakDao?
+    fun findByFagsakPersonIdAndStønadstype(fagsakPersonId: UUID, stønadstype: Stønadstype): FagsakDao?
 
     // language=PostgreSQL
     @Query("""SELECT f.*, fe.id AS eksternid_id

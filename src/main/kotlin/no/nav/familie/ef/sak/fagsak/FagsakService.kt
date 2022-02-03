@@ -44,7 +44,7 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
         val gjeldendePersonIdent = personIdenter.gjeldende().ident
         val person = fagsakPersonService.hentEllerOpprettPerson(personIdenter.identer(), gjeldendePersonIdent)
         val oppdatertPerson = oppdatertPerson(person, gjeldendePersonIdent)
-        val fagsak = fagsakRepository.findBySøkerIdent(personIdenter.identer(), stønadstype)
+        val fagsak = fagsakRepository.findByFagsakPersonIdAndStønadstype(oppdatertPerson.id, stønadstype)
                      ?: opprettFagsak(stønadstype, oppdatertPerson)
 
         return fagsak.tilFagsakMedPerson(oppdatertPerson.identer)
