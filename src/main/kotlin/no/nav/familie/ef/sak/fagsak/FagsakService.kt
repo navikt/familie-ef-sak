@@ -74,7 +74,9 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
     }
 
     fun finnFagsakerForFagsakPersonId(fagsakPersonId: UUID): Fagsaker {
-        val fagsaker = fagsakRepository.findByFagsakPersonId(fagsakPersonId).associateBy { it.stønadstype }
+        val fagsaker = fagsakRepository.findByFagsakPersonId(fagsakPersonId)
+                .map { it.tilFagsakMedPerson() }
+                .associateBy { it.stønadstype }
         return Fagsaker(
                 overgangsstønad = fagsaker[Stønadstype.OVERGANGSSTØNAD],
                 barnetilsyn = fagsaker[Stønadstype.BARNETILSYN],

@@ -20,7 +20,7 @@ internal class FagsakPersonControllerTest : OppslagSpringRunnerTest() {
         val barnetilsyn = testoppsettService.lagreFagsak(fagsak(person = person, stønadstype = Stønadstype.BARNETILSYN))
         val skolepenger = testoppsettService.lagreFagsak(fagsak(person = person, stønadstype = Stønadstype.SKOLEPENGER))
 
-        val fagsakPersonDto = testWithBrukerContext { fagsakPersonController.hentFagsakPerson(person.id).getDataOrThrow() }
+        val fagsakPersonDto = testWithBrukerContext { fagsakPersonController.hentFagsakPersonUtvidet(person.id).getDataOrThrow() }
 
         assertThat(fagsakPersonDto.overgangsstønad?.id).isEqualTo(overgangsstønad.id)
         assertThat(fagsakPersonDto.barnetilsyn?.id).isEqualTo(barnetilsyn.id)

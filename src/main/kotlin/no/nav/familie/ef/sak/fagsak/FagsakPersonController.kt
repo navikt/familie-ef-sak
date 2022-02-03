@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.fagsak
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.fagsak.dto.FagsakPersonDto
+import no.nav.familie.ef.sak.fagsak.dto.FagsakPersonMedBehandlingerDto
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -29,10 +30,24 @@ class FagsakPersonController(
         val fagsaker = fagsakService.finnFagsakerForFagsakPersonId(person.id)
         return Ressurs.success(FagsakPersonDto(
                 person.id,
+                overgangsstønad = fagsaker.overgangsstønad?.id,
+                barnetilsyn = fagsaker.barnetilsyn?.id,
+                skolepenger = fagsaker.skolepenger?.id
+        ))
+    }
+
+    @GetMapping("{fagsakPersonId}/utvidet")
+    fun hentFagsakPersonUtvidet(@PathVariable fagsakPersonId: UUID): Ressurs<FagsakPersonMedBehandlingerDto> {
+        tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.ACCESS)
+        val person = fagsakPersonService.hentPerson(fagsakPersonId)
+        val fagsaker = fagsakService.finnFagsakerForFagsakPersonId(person.id)
+        return Ressurs.success(FagsakPersonMedBehandlingerDto(
+                person.id,
                 overgangsstønad = fagsaker.overgangsstønad?.let { fagsakService.fagsakTilDto(it) },
                 barnetilsyn = fagsaker.barnetilsyn?.let { fagsakService.fagsakTilDto(it) },
                 skolepenger = fagsaker.skolepenger?.let { fagsakService.fagsakTilDto(it) }
         ))
     }
+
 
 }

@@ -89,6 +89,11 @@ class SøkService(
         return søkEtterPersonerMedSammeAdresse(aktivIdent)
     }
 
+    fun søkEtterPersonerMedSammeAdressePåFagsakPerson(fagsakPersonId: UUID): SøkeresultatPerson {
+        val aktivIdent = fagsakPersonService.hentAktivIdent(fagsakPersonId)
+        return søkEtterPersonerMedSammeAdresse(aktivIdent)
+    }
+
     fun søkEtterPersonerMedSammeAdressePåBehandling(behandlingId: UUID): SøkeresultatPerson {
         val aktivIdent = behandlingService.hentAktivIdent(behandlingId)
         return søkEtterPersonerMedSammeAdresse(aktivIdent)

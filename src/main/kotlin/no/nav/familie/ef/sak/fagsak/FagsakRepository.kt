@@ -38,7 +38,7 @@ interface FagsakRepository : RepositoryInterface<FagsakDao, UUID>, InsertUpdateR
               WHERE ident in (:personIdenter)""")
     fun findBySøkerIdent(personIdenter: Set<String>): List<FagsakDao>
 
-    fun findByFagsakPersonId(fagsakPersonId: UUID): List<Fagsak>
+    fun findByFagsakPersonId(fagsakPersonId: UUID): List<FagsakDao>
 
     // language=PostgreSQL
     @Query("""SELECT f.*, fe.id AS eksternid_id         
