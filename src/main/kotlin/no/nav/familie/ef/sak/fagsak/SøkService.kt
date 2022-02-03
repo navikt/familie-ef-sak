@@ -57,7 +57,10 @@ class SøkService(
 
                                 val erLøpende: Boolean = fagsakService.erLøpende(behandlinger)
 
-                                FagsakForSøkeresultat(fagsakId = it.id, stønadstype = it.stønadstype, erLøpende = erLøpende)
+                                FagsakForSøkeresultat(fagsakId = it.id,
+                                                      stønadstype = it.stønadstype,
+                                                      erLøpende = erLøpende,
+                                                      erMigrert = it.migrert)
                             }
         )
     }
