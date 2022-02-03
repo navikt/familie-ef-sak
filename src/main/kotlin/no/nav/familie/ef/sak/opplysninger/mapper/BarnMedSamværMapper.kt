@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.opplysninger.mapper
 
+import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.AnnenForelderMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseHjelper
@@ -9,7 +10,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.AnnenForelder
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadsskjemaOvergangsstønad
 import no.nav.familie.ef.sak.vilkår.dto.AnnenForelderDto
 import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværDto
 import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværRegistergrunnlagDto
@@ -28,20 +28,21 @@ object BarnMedSamværMapper {
         }
     }
 
-    fun mapSøknadsgrunnlag(søknadBarn: Collection<SøknadBarn>): List<BarnMedSamværSøknadsgrunnlagDto> {
-        return søknadBarn.map(this::mapSøknadsgrunnlag)
+    fun mapSøknadsgrunnlag(behandlingBarn: List<BehandlingBarn>, søknadBarn: Collection<SøknadBarn>): List<BarnMedSamværSøknadsgrunnlagDto> {
+        val søknadsbarn = søknadBarn.associateBy { it.id }
+        return behandlingBarn.map { barn -> mapSøknadsgrunnlag(barn, barn.søknadBarnId?.let { søknadsbarn[it] } ) }
     }
 
-    private fun mapSøknadsgrunnlag(søknadsbarn: SøknadBarn): BarnMedSamværSøknadsgrunnlagDto {
-        val samvær = søknadsbarn.samvær
+    private fun mapSøknadsgrunnlag(behandlingBarn: BehandlingBarn, søknadsbarn: SøknadBarn?): BarnMedSamværSøknadsgrunnlagDto {
+        val samvær = søknadsbarn?.samvær
         return BarnMedSamværSøknadsgrunnlagDto(
-                id = søknadsbarn.id,
-                navn = søknadsbarn.navn,
-                fødselTermindato = søknadsbarn.fødselTermindato,
-                harSammeAdresse = søknadsbarn.harSkalHaSammeAdresse,
-                skalBoBorHosSøker = søknadsbarn.skalBoHosSøker,
-                forelder = søknadsbarn.annenForelder?.let { tilAnnenForelderDto(it) },
-                ikkeOppgittAnnenForelderBegrunnelse = søknadsbarn.annenForelder?.ikkeOppgittAnnenForelderBegrunnelse,
+                id = behandlingBarn.id,
+                navn = behandlingBarn.navn,
+                fødselTermindato = behandlingBarn.fødselTermindato,
+                harSammeAdresse = søknadsbarn?.harSkalHaSammeAdresse,
+                skalBoBorHosSøker = søknadsbarn?.skalBoHosSøker,
+                forelder = søknadsbarn?.annenForelder?.let { tilAnnenForelderDto(it) },
+                ikkeOppgittAnnenForelderBegrunnelse = søknadsbarn?.annenForelder?.ikkeOppgittAnnenForelderBegrunnelse,
                 spørsmålAvtaleOmDeltBosted = samvær?.spørsmålAvtaleOmDeltBosted,
                 skalAnnenForelderHaSamvær = samvær?.skalAnnenForelderHaSamvær,
                 harDereSkriftligAvtaleOmSamvær = samvær?.harDereSkriftligAvtaleOmSamvær,
@@ -55,32 +56,40 @@ object BarnMedSamværMapper {
         )
     }
 
-    fun mapRegistergrunnlag(personIdentSøker:String,
+    fun mapRegistergrunnlag(personIdentSøker: String,
                             barnMedIdent: List<BarnMedIdent>,
                             barneforeldre: List<AnnenForelderMedIdent>,
+                            behandlingBarn: List<BehandlingBarn>,
                             søknadsbarn: Collection<SøknadBarn>,
                             søkerAdresse: List<Bostedsadresse>): List<BarnMedSamværRegistergrunnlagDto> {
 
-        val alleBarn: List<MatchetBarn> = BarnMatcher.kobleSøknadsbarnOgRegisterBarn(søknadsbarn, barnMedIdent)
+        val alleBarn: List<MatchetBehandlingBarn> = BarnMatcher.kobleBehandlingBarnOgRegisterBarn(behandlingBarn, barnMedIdent)
         val forelderMap = barneforeldre.associateBy { it.personIdent }
 
         return alleBarn.map { barn ->
-            val fnr = barn.barn?.forelderBarnRelasjon?.firstOrNull {
-                it.relatertPersonsIdent != personIdentSøker && it.relatertPersonsRolle != Familierelasjonsrolle.BARN
-            }?.relatertPersonsIdent
-                      ?: barn.søknadsbarn.annenForelder?.person?.fødselsnummer
+            val fnr = utledFnrForAnnenForelder(barn, personIdentSøker, søknadsbarn)
             val pdlAnnenForelder = forelderMap[fnr]
 
             mapRegistergrunnlag(barn, søkerAdresse, pdlAnnenForelder, fnr)
         }
     }
 
-    private fun mapRegistergrunnlag(matchetBarn: MatchetBarn,
+    private fun utledFnrForAnnenForelder(barn: MatchetBehandlingBarn,
+                                         personIdentSøker: String,
+                                         søknadsbarn: Collection<SøknadBarn>): String? {
+        val fnr = barn.barn?.forelderBarnRelasjon?.firstOrNull {
+            it.relatertPersonsIdent != personIdentSøker && it.relatertPersonsRolle != Familierelasjonsrolle.BARN
+        }?.relatertPersonsIdent
+                  ?: søknadsbarn.firstOrNull { it.id == barn.behandlingBarn.søknadBarnId }?.annenForelder?.person?.fødselsnummer
+        return fnr
+    }
+
+    private fun mapRegistergrunnlag(matchetBarn: MatchetBehandlingBarn,
                                     søkerAdresse: List<Bostedsadresse>,
                                     pdlAnnenForelder: AnnenForelderMedIdent?,
                                     annenForelderFnr: String?): BarnMedSamværRegistergrunnlagDto {
         return BarnMedSamværRegistergrunnlagDto(
-                id = matchetBarn.søknadsbarn.id,
+                id = matchetBarn.behandlingBarn.id,
                 navn = matchetBarn.barn?.navn?.visningsnavn(),
                 fødselsnummer = matchetBarn.fødselsnummer,
                 harSammeAdresse = matchetBarn.barn?.let {

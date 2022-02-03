@@ -1,7 +1,10 @@
 package no.nav.familie.ef.sak.vilkår.regler.evalutation
 
+import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
+import no.nav.familie.ef.sak.testutil.søknadsBarnTilBehandlingBarn
 import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.DelvilkårsvurderingWrapper
 import no.nav.familie.ef.sak.vilkår.VilkårType
@@ -117,7 +120,8 @@ internal class OppdaterVilkårTest {
     fun `sivilstand - trenger ikke å svare på hovedvilkår som ikke er aktuelle`() {
         val søknad = SøknadsskjemaMapper.tilDomene(TestsøknadBuilder.Builder().build().søknadOvergangsstønad)
         val regel = SivilstandRegel()
-        val initDelvilkår = regel.initereDelvilkårsvurdering(HovedregelMetadata(søknad, Sivilstandstype.SKILT))
+        val barn = søknadsBarnTilBehandlingBarn(søknad.barn)
+        val initDelvilkår = regel.initereDelvilkårsvurdering(HovedregelMetadata(søknad.sivilstand, Sivilstandstype.SKILT, barn = barn))
         val aktuelleDelvilkår = initDelvilkår.filter { it.resultat == Vilkårsresultat.IKKE_TATT_STILLING_TIL }
         assertThat(initDelvilkår).hasSize(5)
         assertThat(initDelvilkår.filter { it.resultat == Vilkårsresultat.IKKE_AKTUELL }).hasSize(4)
@@ -138,7 +142,8 @@ internal class OppdaterVilkårTest {
     fun `sivilstand - sender inn svar på en annen regel enn det som man skal svare på`() {
         val søknad = SøknadsskjemaMapper.tilDomene(TestsøknadBuilder.Builder().build().søknadOvergangsstønad)
         val regel = SivilstandRegel()
-        val initDelvilkår = regel.initereDelvilkårsvurdering(HovedregelMetadata(søknad, Sivilstandstype.SKILT))
+        val barn = søknadsBarnTilBehandlingBarn(søknad.barn)
+        val initDelvilkår = regel.initereDelvilkårsvurdering(HovedregelMetadata(søknad.sivilstand, Sivilstandstype.SKILT, barn = barn))
 
         val vilkårsvurdering = Vilkårsvurdering(behandlingId = UUID.randomUUID(),
                                                 resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,

@@ -43,11 +43,12 @@ class RevurderingService(private val søknadService: SøknadService,
         val saksbehandler = SikkerhetContext.hentSaksbehandler(true)
 
         søknadService.kopierSøknad(forrigeBehandlingId, revurdering.id)
-        grunnlagsdataService.opprettGrunnlagsdata(revurdering.id)
+        val grunnlagsdata = grunnlagsdataService.opprettGrunnlagsdata(revurdering.id)
 
         // TODO: Må kunne ta imot en liste med barn
-        barnService.opprettBarnPåBehandlingMedSøknadsdata(revurdering.id, revurdering.fagsakId)
-        vurderingService.kopierVurderingerTilNyBehandling(forrigeBehandlingId, revurdering.id)
+        barnService.opprettBarnPåBehandlingMedSøknadsdata(revurdering.id, revurdering.fagsakId, grunnlagsdata.grunnlagsdata.barn)
+        val (_, metadata) = vurderingService.hentGrunnlagOgMetadata(revurdering.id)
+        vurderingService.kopierVurderingerTilNyBehandling(forrigeBehandlingId, revurdering.id, metadata)
         val oppgaveId = oppgaveService.opprettOppgave(behandlingId = revurdering.id,
                                                       oppgavetype = Oppgavetype.BehandleSak,
                                                       tilordnetNavIdent = saksbehandler,
