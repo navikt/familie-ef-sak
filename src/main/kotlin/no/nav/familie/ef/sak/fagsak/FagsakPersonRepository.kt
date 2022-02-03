@@ -18,4 +18,7 @@ interface FagsakPersonRepository : RepositoryInterface<FagsakPerson, UUID>, Inse
     @Query("SELECT * FROM person_ident WHERE fagsak_person_id = :personId")
     fun findPersonIdenter(personId: UUID): Set<PersonIdent>
 
+    @Query("SELECT ident FROM person_ident WHERE fagsak_person_id = :personId ORDER BY endret_tid DESC LIMIT 1")
+    fun hentAktivIdent(personId: UUID): String
+
 }

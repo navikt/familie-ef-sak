@@ -21,6 +21,8 @@ class FagsakPersonService(private val fagsakPersonRepository: FagsakPersonReposi
         return personIdenter
     }
 
+    fun hentAktivIdent(personId: UUID): String = fagsakPersonRepository.hentAktivIdent(personId)
+
     fun hentEllerOpprettPerson(personIdenter: Set<String>, gjeldendePersonIdent: String): FagsakPerson {
         feilHvisIkke(personIdenter.contains(gjeldendePersonIdent)) {
             "Liste med personidenter inneholder ikke gjelende personident"

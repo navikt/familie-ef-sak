@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.CustomKeyValue
 import no.nav.familie.ef.sak.Sporingsdata
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BehandlerRolle
+import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.infrastruktur.config.getValue
@@ -24,6 +25,7 @@ import java.util.UUID
 class TilgangService(private val personopplysningerIntegrasjonerClient: PersonopplysningerIntegrasjonerClient,
                      private val behandlingService: BehandlingService,
                      private val fagsakService: FagsakService,
+                     private val fagsakPersonService: FagsakPersonService,
                      private val rolleConfig: RolleConfig,
                      private val cacheManager: CacheManager,
                      private val auditLogger: AuditLogger) {
@@ -61,13 +63,24 @@ class TilgangService(private val personopplysningerIntegrasjonerClient: Personop
     }
 
     fun validerTilgangTilFagsak(fagsakId: UUID, event: AuditLoggerEvent) {
-        val personIdent = cacheManager.getValue("fagsakPersonIdent", fagsakId) {
+        val personIdent = cacheManager.getValue("fagsakIdent", fagsakId) {
             fagsakService.hentAktivIdent(fagsakId)
         }
         auditLogger.log(Sporingsdata(event, personIdent, custom1 = CustomKeyValue("fagsak", fagsakId.toString())))
         if (!harTilgangTilPersonMedRelasjoner(personIdent)) {
             throw ManglerTilgang("Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
                                  "har ikke tilgang til fagsak=$fagsakId")
+        }
+    }
+
+    fun validerTilgangTilFagsakPerson(fagsakPersonId: UUID, event: AuditLoggerEvent) {
+        val personIdent = cacheManager.getValue("fagsakPersonIdent", fagsakPersonId) {
+            fagsakPersonService.hentAktivIdent(fagsakPersonId)
+        }
+        auditLogger.log(Sporingsdata(event, personIdent, custom1 = CustomKeyValue("fagsakPersonId", fagsakPersonId.toString())))
+        if (!harTilgangTilPersonMedRelasjoner(personIdent)) {
+            throw ManglerTilgang("Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
+                                 "har ikke tilgang til fagsakPerson=$fagsakPersonId")
         }
     }
 

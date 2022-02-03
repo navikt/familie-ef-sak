@@ -6,6 +6,7 @@ import io.mockk.verify
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.integration.dto.Tilgang
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
@@ -34,9 +35,10 @@ import kotlin.test.assertFailsWith
 internal class TilgangServiceTest {
 
 
-    private val personopplysningerIntegrajsonerClient: PersonopplysningerIntegrasjonerClient = mockk()
-    private val behandlingService: BehandlingService = mockk()
-    private val fagsakService: FagsakService = mockk()
+    private val personopplysningerIntegrajsonerClient = mockk<PersonopplysningerIntegrasjonerClient>()
+    private val behandlingService = mockk<BehandlingService>()
+    private val fagsakService = mockk<FagsakService>()
+    private val fagsakPersonService = mockk<FagsakPersonService>()
     private val cacheManager = ConcurrentMapCacheManager()
     private val kode6Gruppe = "kode6"
     private val kode7Gruppe = "kode7"
@@ -45,6 +47,7 @@ internal class TilgangServiceTest {
             TilgangService(personopplysningerIntegrasjonerClient = personopplysningerIntegrajsonerClient,
                            behandlingService = behandlingService,
                            fagsakService = fagsakService,
+                           fagsakPersonService = fagsakPersonService,
                            rolleConfig = rolleConfig,
                            cacheManager = cacheManager,
                            auditLogger = mockk(relaxed = true))
@@ -146,6 +149,20 @@ internal class TilgangServiceTest {
         tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS)
         mockBrukerContext("B")
         tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS)
+
+        verify(exactly = 2) {
+            personopplysningerIntegrajsonerClient.sjekkTilgangTilPersonMedRelasjoner(any())
+        }
+    }
+
+    @Test
+    internal fun `validerTilgangTilFagsakPerson - hvis to ulike saksbehandler kaller skal den sjekke tilgang på nytt`() {
+        every { personopplysningerIntegrajsonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns Tilgang(true)
+
+        mockBrukerContext("A")
+        tilgangService.validerTilgangTilFagsakPerson(fagsak.fagsakPersonId, AuditLoggerEvent.ACCESS)
+        mockBrukerContext("B")
+        tilgangService.validerTilgangTilFagsakPerson(fagsak.fagsakPersonId, AuditLoggerEvent.ACCESS)
 
         verify(exactly = 2) {
             personopplysningerIntegrajsonerClient.sjekkTilgangTilPersonMedRelasjoner(any())
