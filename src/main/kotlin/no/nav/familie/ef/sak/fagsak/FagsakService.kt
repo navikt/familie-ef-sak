@@ -9,7 +9,6 @@ import no.nav.familie.ef.sak.behandling.dto.tilDto
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakDao
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
-import no.nav.familie.ef.sak.fagsak.domain.FagsakPersonOld
 import no.nav.familie.ef.sak.fagsak.domain.Fagsaker
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
