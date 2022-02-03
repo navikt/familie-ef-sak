@@ -10,7 +10,8 @@ import no.nav.familie.ef.sak.beregning.Inntektsperiode
 import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakDao
-import no.nav.familie.ef.sak.fagsak.domain.FagsakPersonOld
+import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
+import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.felles.domain.SporbarUtils
@@ -72,27 +73,43 @@ fun Behandling.innvilgetOgFerdigstilt() =
         this.copy(resultat = BehandlingResultat.INNVILGET,
                   status = BehandlingStatus.FERDIGSTILT)
 
-
-fun fagsak(identer: Set<FagsakPersonOld> = setOf(),
+fun fagsak(identer: Set<PersonIdent> = setOf(),
            stønadstype: Stønadstype = Stønadstype.OVERGANGSSTØNAD,
            id: UUID = UUID.randomUUID(),
            eksternId: EksternFagsakId = EksternFagsakId(),
-           sporbar: Sporbar = Sporbar()) =
-        Fagsak(id = id,
-               stønadstype = stønadstype,
-               søkerIdenter = identer,
-               eksternId = eksternId,
-               migrert = false,
-               sporbar = sporbar)
+           sporbar: Sporbar = Sporbar()): Fagsak {
+    return fagsak(stønadstype, id, FagsakPerson(identer = identer), eksternId, sporbar)
+}
+
+fun fagsak(stønadstype: Stønadstype = Stønadstype.OVERGANGSSTØNAD,
+           id: UUID = UUID.randomUUID(),
+           person: FagsakPerson,
+           eksternId: EksternFagsakId = EksternFagsakId(),
+           sporbar: Sporbar = Sporbar()): Fagsak {
+    return Fagsak(id = id,
+                  fagsakPersonId = person.id,
+                  personIdenter = person.identer,
+                  stønadstype = stønadstype,
+                  eksternId = eksternId,
+                  migrert = false,
+                  sporbar = sporbar)
+}
 
 fun fagsakDao(id: UUID = UUID.randomUUID(),
-              identer: Set<FagsakPersonOld> = emptySet(),
               stønadstype: Stønadstype = Stønadstype.OVERGANGSSTØNAD,
+              personId: UUID = UUID.randomUUID(),
               eksternId: EksternFagsakId = EksternFagsakId()): FagsakDao =
         FagsakDao(id = id,
-                  søkerIdenter = identer,
+                  fagsakPersonId = personId,
                   stønadstype = stønadstype,
                   eksternId = eksternId)
+
+fun Fagsak.tilFagsakDao() =
+        FagsakDao(id = id,
+                  fagsakPersonId = fagsakPersonId,
+                  stønadstype = stønadstype,
+                  eksternId = eksternId,
+                  sporbar = sporbar)
 
 fun vilkårsvurdering(behandlingId: UUID,
                      resultat: Vilkårsresultat,
@@ -105,8 +122,8 @@ fun vilkårsvurdering(behandlingId: UUID,
                          barnId = barnId,
                          delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurdering))
 
-fun fagsakpersoner(identer: Set<String>): Set<FagsakPersonOld> = identer.map {
-    FagsakPersonOld(ident = it)
+fun fagsakpersoner(identer: Set<String>): Set<PersonIdent> = identer.map {
+    PersonIdent(ident = it)
 }.toSet()
 
 fun tilkjentYtelse(behandlingId: UUID, personIdent: String): TilkjentYtelse = TilkjentYtelse(

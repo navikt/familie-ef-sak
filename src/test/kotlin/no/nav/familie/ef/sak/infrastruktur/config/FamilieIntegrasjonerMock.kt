@@ -100,8 +100,6 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                             .willReturn(okJson(objectMapper.writeValueAsString(medl))),
                     post(urlEqualTo(integrasjonerConfig.navKontorUri.path))
                             .willReturn(okJson(objectMapper.writeValueAsString(navKontorEnhet))),
-                    post(urlEqualTo(integrasjonerConfig.infotrygdVedtaksperioder.path))
-                            .willReturn(okJson(objectMapper.writeValueAsString(infotrygdPerioder))),
                     post(urlEqualTo(integrasjonerConfig.adressebeskyttelse.path))
                             .willReturn(okJson(objectMapper.writeValueAsString(Ressurs.success(ADRESSEBESKYTTELSEGRADERING.UGRADERT)))),
 
@@ -213,6 +211,5 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                                                                     enhetNr = "1001",
                                                                     status = "Aktiv"))
 
-        private val infotrygdPerioder = Ressurs.success(PerioderOvergangsstønadResponse(emptyList()))
     }
 }

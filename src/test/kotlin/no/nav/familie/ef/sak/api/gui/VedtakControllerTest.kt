@@ -8,7 +8,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
-import no.nav.familie.ef.sak.fagsak.domain.FagsakPersonOld
+import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
@@ -56,7 +56,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
 
 
-    private val fagsak = fagsak(setOf(FagsakPersonOld("")))
+    private val fagsak = fagsak(setOf(PersonIdent("")))
     private val behandling = behandling(fagsak)
 
     private enum class Saksbehandler(val beslutter: Boolean = false) {

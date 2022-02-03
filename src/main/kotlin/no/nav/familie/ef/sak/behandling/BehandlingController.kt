@@ -24,6 +24,7 @@ import java.util.UUID
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class BehandlingController(private val behandlingService: BehandlingService,
+                           private val henleggService: HenleggService,
                            private val stegService: StegService,
                            private val tilgangService: TilgangService) {
 
@@ -60,7 +61,7 @@ class BehandlingController(private val behandlingService: BehandlingService,
     fun henleggBehandling(@PathVariable behandlingId: UUID, @RequestBody henlagt: HenlagtDto): Ressurs<BehandlingDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
-        val henlagtBehandling = behandlingService.henleggBehandling(behandlingId, henlagt)
+        val henlagtBehandling = henleggService.henleggBehandling(behandlingId, henlagt)
         return Ressurs.success(henlagtBehandling.tilDto())
     }
 
