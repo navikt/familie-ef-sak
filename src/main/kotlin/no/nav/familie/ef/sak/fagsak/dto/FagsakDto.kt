@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import java.util.UUID
 
 data class FagsakDto(val id: UUID,
+                     val fagsakPersonId: UUID,
                      val personIdent: String,
                      val stønadstype: Stønadstype,
                      val erLøpende: Boolean,
@@ -15,6 +16,7 @@ data class FagsakDto(val id: UUID,
 
 fun Fagsak.tilDto(behandlinger: List<BehandlingDto>, erLøpende: Boolean): FagsakDto =
         FagsakDto(id = this.id,
+                  fagsakPersonId = this.fagsakPersonId,
                   personIdent = this.hentAktivIdent(),
                   stønadstype = this.stønadstype,
                   erLøpende = erLøpende,
