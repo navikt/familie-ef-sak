@@ -19,7 +19,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.PollStatusFraIverksettTask
 import no.nav.familie.ef.sak.brev.VedtaksbrevRepository
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.fagsak.domain.FagsakPersonOld
+import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
@@ -83,7 +83,7 @@ internal class BeslutteVedtakStegTest {
                                           beslutterident = innloggetBeslutter)
 
     private val fagsak = fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD,
-                                identer = setOf(FagsakPersonOld(ident = "12345678901")))
+                                identer = setOf(PersonIdent(ident = "12345678901")))
     private val behandlingId = UUID.randomUUID()
 
     private val oppgave = Oppgave(id = UUID.randomUUID(),
