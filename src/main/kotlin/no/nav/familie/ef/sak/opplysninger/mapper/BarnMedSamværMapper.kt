@@ -29,7 +29,8 @@ object BarnMedSamværMapper {
     }
 
     fun mapSøknadsgrunnlag(behandlingBarn: List<BehandlingBarn>, søknadBarn: Collection<SøknadBarn>): List<BarnMedSamværSøknadsgrunnlagDto> {
-        return behandlingBarn.map { barn -> mapSøknadsgrunnlag(barn, barn.søknadBarnId?.let { søknadBarnId -> søknadBarn.find { it.id == søknadBarnId } }) }
+        val søknadsbarn = søknadBarn.associateBy { it.id }
+        return behandlingBarn.map { barn -> mapSøknadsgrunnlag(barn, barn.søknadBarnId?.let { søknadsbarn[it] } ) }
     }
 
     private fun mapSøknadsgrunnlag(behandlingBarn: BehandlingBarn, søknadsbarn: SøknadBarn?): BarnMedSamværSøknadsgrunnlagDto {
