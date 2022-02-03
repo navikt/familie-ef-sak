@@ -16,6 +16,7 @@ import no.nav.familie.ef.sak.brev.domain.MellomlagretFrittståendeBrev
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.database.DbContainerInitializer
 import no.nav.familie.ef.sak.fagsak.domain.FagsakDao
+import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.felles.util.TokenUtil
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.oppgave.Oppgave
@@ -128,6 +129,7 @@ abstract class OppslagSpringRunnerTest {
                 Tilbakekreving::class,
                 Behandling::class,
                 FagsakDao::class,
+                FagsakPerson::class,
                 TaskLogg::class,
                 Task::class,
 

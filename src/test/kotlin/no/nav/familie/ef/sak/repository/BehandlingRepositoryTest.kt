@@ -75,11 +75,11 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `finnFnrForBehandlingId(sql) skal finne gjeldende fnr for behandlingsid`() {
-        val fagsak = testoppsettService.lagreFagsak(fagsak(setOf(FagsakPersonOld(ident = "1"),
-                                                                 FagsakPersonOld(ident = "2",
-                                                                                 sporbar = Sporbar(endret = Endret(endretTid = LocalDateTime.now()
-                                                                               .plusDays(2)))),
-                                                                 FagsakPersonOld(ident = "3"))))
+        val fagsak = testoppsettService.lagreFagsak(fagsak(setOf(
+                FagsakPersonOld(ident = "1"),
+                FagsakPersonOld(ident = "2",
+                             sporbar = Sporbar(endret = Endret(endretTid = LocalDateTime.now().plusDays(2)))),
+                FagsakPersonOld(ident = "3"))))
         val behandling = behandlingRepository.insert(behandling(fagsak))
         val fnr = behandlingRepository.finnAktivIdent(behandling.id)
         assertThat(fnr).isEqualTo("2")
