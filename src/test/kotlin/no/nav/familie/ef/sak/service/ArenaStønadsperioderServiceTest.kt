@@ -11,7 +11,6 @@ import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infotrygd.PeriodeService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.repository.behandling
@@ -23,23 +22,19 @@ import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad.Datakilde
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadRequest
-import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDate.now
 import java.time.LocalDate.of
 import java.time.YearMonth
 
-@Disabled // TODO fiks denne når man tar i bruk ny tolkning av arena-perioder
 internal class ArenaStønadsperioderServiceTest {
 
     private val pdlClient = mockk<PdlClient>()
     private val infotrygdReplikaClient = mockk<InfotrygdReplikaClient>(relaxed = true)
     private val behandlingService = mockk<BehandlingService>(relaxed = true)
-    private val personopplysningerIntergasjonerClient = mockk<PersonopplysningerIntegrasjonerClient>()
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
     private val fagsakService = mockk<FagsakService>()
     private val periodeService = PeriodeService(pdlClient,
@@ -48,9 +43,7 @@ internal class ArenaStønadsperioderServiceTest {
                                                 tilkjentYtelseService,
                                                 InfotrygdService(infotrygdReplikaClient, pdlClient))
 
-    private val service = ArenaStønadsperioderService(
-            periodeService = periodeService,
-            personopplysningerIntegrasjonerClient = personopplysningerIntergasjonerClient)
+    private val service = ArenaStønadsperioderService(periodeService = periodeService)
 
     private val ident = "01234567890"
 
@@ -59,8 +52,6 @@ internal class ArenaStønadsperioderServiceTest {
 
     @BeforeEach
     internal fun setUp() {
-        every { personopplysningerIntergasjonerClient.hentInfotrygdPerioder(any()) } returns
-                PerioderOvergangsstønadResponse(emptyList())
         every { infotrygdReplikaClient.hentPerioder(any()) } returns InfotrygdPeriodeResponse(emptyList(),
                                                                                               emptyList(),
                                                                                               emptyList())
