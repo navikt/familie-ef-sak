@@ -9,7 +9,10 @@ class FagsakPersonDto(
         val skolepenger: UUID?,
 )
 
-class FagsakPersonMedBehandlingerDto(
+/**
+ * Inneholder id til fagsakPerson samt de ulike fagsakene til personen for å kunne vise opp på behandlingsoversikten
+ */
+class FagsakPersonUtvidetDto(
         val id: UUID,
         val overgangsstønad: FagsakDto?,
         val barnetilsyn: FagsakDto?,

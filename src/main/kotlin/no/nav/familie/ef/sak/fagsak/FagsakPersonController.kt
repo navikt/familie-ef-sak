@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.fagsak
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.fagsak.dto.FagsakPersonDto
-import no.nav.familie.ef.sak.fagsak.dto.FagsakPersonMedBehandlingerDto
+import no.nav.familie.ef.sak.fagsak.dto.FagsakPersonUtvidetDto
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -37,11 +37,11 @@ class FagsakPersonController(
     }
 
     @GetMapping("{fagsakPersonId}/utvidet")
-    fun hentFagsakPersonUtvidet(@PathVariable fagsakPersonId: UUID): Ressurs<FagsakPersonMedBehandlingerDto> {
+    fun hentFagsakPersonUtvidet(@PathVariable fagsakPersonId: UUID): Ressurs<FagsakPersonUtvidetDto> {
         tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.ACCESS)
         val person = fagsakPersonService.hentPerson(fagsakPersonId)
         val fagsaker = fagsakService.finnFagsakerForFagsakPersonId(person.id)
-        return Ressurs.success(FagsakPersonMedBehandlingerDto(
+        return Ressurs.success(FagsakPersonUtvidetDto(
                 person.id,
                 overgangsstønad = fagsaker.overgangsstønad?.let { fagsakService.fagsakTilDto(it) },
                 barnetilsyn = fagsaker.barnetilsyn?.let { fagsakService.fagsakTilDto(it) },
