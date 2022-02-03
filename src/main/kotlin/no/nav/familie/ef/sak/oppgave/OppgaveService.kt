@@ -2,10 +2,9 @@ package no.nav.familie.ef.sak.oppgave
 
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
-import no.nav.familie.ef.sak.fagsak.FagsakRepository
+import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.infrastruktur.config.getValue
-import no.nav.familie.ef.sak.infrastruktur.exception.IntegrasjonException
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
@@ -14,7 +13,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.CacheManager
 import org.springframework.stereotype.Service
-import org.springframework.web.client.HttpServerErrorException
 import java.net.URI
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -26,7 +24,7 @@ import no.nav.familie.ef.sak.oppgave.Oppgave as EfOppgave
 
 @Service
 class OppgaveService(private val oppgaveClient: OppgaveClient,
-                     private val fagsakRepository: FagsakRepository,
+                     private val fagsakService: FagsakService,
                      private val oppgaveRepository: OppgaveRepository,
                      private val arbeidsfordelingService: ArbeidsfordelingService,
                      private val pdlClient: PdlClient,
@@ -40,8 +38,7 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
                        oppgavetype: Oppgavetype,
                        tilordnetNavIdent: String? = null,
                        beskrivelse: String? = null): Long {
-        val fagsak = fagsakRepository.finnFagsakTilBehandling(behandlingId)
-                     ?: error("Finner ikke fagsak til behandlingDd=${behandlingId}")
+        val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
 
         val oppgaveFinnesFraFør = oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
 

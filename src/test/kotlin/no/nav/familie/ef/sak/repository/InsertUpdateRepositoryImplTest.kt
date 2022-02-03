@@ -1,8 +1,8 @@
 package no.nav.familie.ef.sak.repository
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
+import no.nav.familie.ef.sak.fagsak.FagsakPersonRepository
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
-import no.nav.familie.ef.sak.fagsak.domain.FagsakPersonOld
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
@@ -14,6 +14,7 @@ import org.springframework.data.relational.core.conversion.DbActionExecutionExce
 
 internal class InsertUpdateRepositoryImplTest : OppslagSpringRunnerTest() {
 
+    @Autowired private lateinit var fagsakPersonRepository: FagsakPersonRepository
     @Autowired private lateinit var fagsakRepository: FagsakRepository
 
     @Test
@@ -75,25 +76,17 @@ internal class InsertUpdateRepositoryImplTest : OppslagSpringRunnerTest() {
      * dersom en gammel personIdent gjenbrukes
      */
     @Test
-    internal fun `skal oppdatere endretTid på rot-entitet, men ikke barne-entiteter `() {
+    internal fun `skal ikke oppdatere endretTid på barnEntiteter i collection`() {
         val personIdent = "12345"
         val nyPersonIdent = "1234"
+        val annenIdent = "9"
         val person = testoppsettService.opprettPerson(FagsakPerson(identer = setOf(PersonIdent(personIdent))))
-        val fagsak = fagsakRepository.insert(fagsakDao(stønadstype = Stønadstype.BARNETILSYN,
-                                                       personId = person.id,
-                                                       identer = setOf(FagsakPersonOld(personIdent))))
         Thread.sleep(200)
-        val oppdatertFagsak = fagsakRepository.update(
-                fagsak.copy(stønadstype = Stønadstype.OVERGANGSSTØNAD,
-                            søkerIdenter = fagsak.søkerIdenter.map { it.copy(ident = nyPersonIdent) }
-                                                   .toSet() + FagsakPersonOld("99999"))
-        )
-        val oppdatertSøkerIdent = oppdatertFagsak.søkerIdenter.first { it.ident == nyPersonIdent }
-        val originalSøkerIdent = fagsak.søkerIdenter.first { it.ident == personIdent }
-
-        assertThat(fagsak.sporbar.endret.endretTid).isBefore(oppdatertFagsak.sporbar.endret.endretTid)
-        assertThat(oppdatertFagsak.sporbar.opprettetTid).isBefore(oppdatertFagsak.sporbar.endret.endretTid)
-        assertThat(oppdatertFagsak.sporbar.opprettetTid).isEqualTo(fagsak.sporbar.opprettetTid)
+        val oppdatertPerson =
+                fagsakPersonRepository.update(person.copy(identer = person.identer.map { it.copy(ident = nyPersonIdent) }
+                                                                            .toSet() + PersonIdent(annenIdent)))
+        val oppdatertSøkerIdent = oppdatertPerson.identer.first { it.ident == nyPersonIdent }
+        val originalSøkerIdent = person.identer.first { it.ident == personIdent }
 
         assertThat(originalSøkerIdent.sporbar.endret.endretTid).isEqualTo(oppdatertSøkerIdent.sporbar.endret.endretTid)
         assertThat(originalSøkerIdent.sporbar.opprettetTid).isEqualTo(oppdatertSøkerIdent.sporbar.opprettetTid)

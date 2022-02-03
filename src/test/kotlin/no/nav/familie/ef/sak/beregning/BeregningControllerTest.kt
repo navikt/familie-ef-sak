@@ -7,7 +7,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
-import no.nav.familie.ef.sak.fagsak.domain.FagsakPersonOld
+import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.repository.behandling
@@ -51,7 +51,7 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `Skal klare å inserte ett vedtak med resultatet avslå`() {
-        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(FagsakPersonOld(""))))
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent(""))))
         val behandling = behandlingRepository.insert(behandling(fagsak,
                                                                 steg = StegType.VEDTA_BLANKETT,
                                                                 type = BehandlingType.BLANKETT,
@@ -66,7 +66,7 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `Skal klare å inserte ett vedtak med resultatet innvilge`() {
-        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(FagsakPersonOld(""))))
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent(""))))
         val behandling = behandlingRepository.insert(behandling(fagsak,
                                                                 steg = StegType.VEDTA_BLANKETT,
                                                                 type = BehandlingType.BLANKETT,
@@ -104,7 +104,7 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
     }
 
     private fun lagFagsakOgBehandling(): Behandling {
-        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(FagsakPersonOld(""))))
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent(""))))
         val behandling = behandlingRepository.insert(behandling(fagsak,
                                                                 steg = StegType.VEDTA_BLANKETT,
                                                                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
