@@ -21,6 +21,8 @@ data class FagsakPerson(@Id
         return identer.maxByOrNull { it.sporbar.endret.endretTid }?.ident ?: error("Fant ingen ident på person $id")
     }
 
+    fun erAktivIdent(personIdent: String): Boolean = hentAktivIdent() == personIdent
+
     // Kopi av Fagsak -> fagsakMedOppdatertGjeldendeIdent
     fun medOppdatertGjeldendeIdent(gjeldendePersonIdent: String): FagsakPerson {
         val personIdentForGjeldendeIdent: PersonIdent = this.identer.find { it.ident == gjeldendePersonIdent }?.let {

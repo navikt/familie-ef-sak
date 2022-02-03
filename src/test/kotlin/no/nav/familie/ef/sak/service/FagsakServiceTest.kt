@@ -9,7 +9,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
-import no.nav.familie.ef.sak.fagsak.domain.FagsakPersonOld
+import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.domain.Endret
 import no.nav.familie.ef.sak.felles.domain.Sporbar
@@ -49,7 +49,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         val personIdent = "23118612345"
 
         val fagsakRequest = fagsak(stønadstype = Stønadstype.BARNETILSYN,
-                                   identer = setOf(FagsakPersonOld(ident = personIdent)))
+                                   identer = setOf(PersonIdent(ident = personIdent)))
         val fagsakDB = testoppsettService.lagreFagsak(fagsakRequest)
 
         val behandling1 = Behandling(fagsakId = fagsakDB.id,
@@ -101,15 +101,15 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         val feilRegistrertIdent = "99988877712"
         val fagsakMedFeilregistrertIdent = testoppsettService.lagreFagsak(fagsak(eksternId = EksternFagsakId(id = 1234),
                                                                                  stønadstype = Stønadstype.OVERGANGSSTØNAD,
-                                                                                 identer = setOf(FagsakPersonOld(ident = gjeldendeIdent,
-                                                                                                                 sporbar = iGår),
-                                                                                                 FagsakPersonOld(ident = feilRegistrertIdent,
-                                                                                                                 sporbar = iDag))))
+                                                                                 identer = setOf(PersonIdent(ident = gjeldendeIdent,
+                                                                                                             sporbar = iGår),
+                                                                                                 PersonIdent(ident = feilRegistrertIdent,
+                                                                                                             sporbar = iDag))))
 
         assertThat(fagsakMedFeilregistrertIdent.hentAktivIdent()).isEqualTo(feilRegistrertIdent)
 
         val oppdatertFagsak = fagsakService.hentEllerOpprettFagsak(gjeldendeIdent, Stønadstype.OVERGANGSSTØNAD)
-        assertThat(oppdatertFagsak.søkerIdenter.map { it.ident }).contains(feilRegistrertIdent)
+        assertThat(oppdatertFagsak.personIdenter.map { it.ident }).containsExactlyInAnyOrder(gjeldendeIdent, feilRegistrertIdent)
         assertThat(oppdatertFagsak.hentAktivIdent()).isEqualTo(gjeldendeIdent)
         val fagsakEtterOppdatering = fagsakService.hentFagsak(fagsakMedFeilregistrertIdent.id).hentAktivIdent()
         assertThat(fagsakEtterOppdatering).isEqualTo(gjeldendeIdent)
@@ -126,13 +126,13 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         val historiskIdent = "98765432109"
         val fagsakMedHistoriskIdent = testoppsettService.lagreFagsak(fagsak(eksternId = EksternFagsakId(id = 1234),
                                                                             stønadstype = Stønadstype.OVERGANGSSTØNAD,
-                                                                            identer = setOf(FagsakPersonOld(ident = historiskIdent,
-                                                                                                            sporbar = iGår))))
+                                                                            identer = setOf(PersonIdent(ident = historiskIdent,
+                                                                                                        sporbar = iGår))))
 
         assertThat(fagsakMedHistoriskIdent.hentAktivIdent()).isEqualTo(historiskIdent)
 
         val oppdatertFagsak = fagsakService.hentEllerOpprettFagsak(gjeldendeIdent, Stønadstype.OVERGANGSSTØNAD)
-        assertThat(oppdatertFagsak.søkerIdenter.map { it.ident }).contains(historiskIdent)
+        assertThat(oppdatertFagsak.personIdenter.map { it.ident }).contains(historiskIdent)
         assertThat(oppdatertFagsak.hentAktivIdent()).isEqualTo(gjeldendeIdent)
 
         val fagsakEtterOppdatering = fagsakService.hentFagsak(fagsakMedHistoriskIdent.id)

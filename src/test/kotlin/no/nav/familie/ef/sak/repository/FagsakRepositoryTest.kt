@@ -2,10 +2,9 @@ package no.nav.familie.ef.sak.repository
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
-import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.FagsakPersonRepository
+import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
-import no.nav.familie.ef.sak.fagsak.domain.FagsakPersonOld
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
@@ -53,9 +52,7 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
         val fagsak = fagsakRepository.findByIdOrNull(fagsakPersistert.id) ?: error("Finner ikke fagsak med id")
 
         assertThat(fagsak).isNotNull
-        assertThat(fagsak.søkerIdenter).isNotEmpty
-        assertThat(fagsak.søkerIdenter.map { it.ident }).contains("12345678901")
-        assertThat(fagsak.søkerIdenter.map { it.ident }).contains("98765432109")
+        assertThat(fagsak.id).isEqualTo(fagsakPersistert.id)
     }
 
     @Test
@@ -67,27 +64,26 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
 
         val fagsak = fagsakRepository.findBySøkerIdent(setOf("12345678901"), Stønadstype.OVERGANGSSTØNAD)
                      ?: error("Finner ikke fagsak")
+        val person = fagsakPersonRepository.findByIdOrThrow(fagsak.fagsakPersonId)
 
-        assertThat(fagsak.søkerIdenter.map { it.ident }).contains("12345678901")
-        assertThat(fagsak.søkerIdenter.map { it.ident }).contains("98765432109")
+        assertThat(person.identer.map { it.ident }).contains("12345678901")
+        assertThat(person.identer.map { it.ident }).contains("98765432109")
     }
 
     @Test
     internal fun `skal returnere en liste med fagsaker hvis stønadstypen ikke satt`() {
         val ident = "12345678901"
         val person = testoppsettService.opprettPerson(ident)
-        val fagsakPerson = fagsakpersoner(setOf(ident))
         val fagsak1 = testoppsettService.lagreFagsak(fagsak(person = person,
-                                                            identer = fagsakPerson,
                                                             stønadstype = Stønadstype.OVERGANGSSTØNAD))
         val fagsak2 = testoppsettService.lagreFagsak(fagsak(person = person,
-                                                            identer = fagsakPerson,
                                                             stønadstype = Stønadstype.SKOLEPENGER))
         val fagsaker = fagsakRepository.findBySøkerIdent(setOf(ident))
 
         assertThat(fagsaker.forEach { fagsak ->
-            assertThat(fagsak.søkerIdenter.size).isEqualTo(1)
-            assertThat(fagsak.søkerIdenter.map { it.ident }).contains(ident)
+            val person = fagsakPersonRepository.findByIdOrThrow(fagsak.fagsakPersonId)
+            assertThat(person.identer.size).isEqualTo(1)
+            assertThat(person.identer.map { it.ident }).contains(ident)
         })
 
         assertThat(fagsaker.map { it.stønadstype }).contains(Stønadstype.SKOLEPENGER)
@@ -126,7 +122,6 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
         val finnFagsakTilBehandling = fagsakRepository.finnFagsakTilBehandling(behandling.id)!!
 
         assertThat(finnFagsakTilBehandling.id).isEqualTo(fagsak.id)
-        assertThat(finnFagsakTilBehandling.søkerIdenter).hasSize(3)
         assertThat(finnFagsakTilBehandling.eksternId).isEqualTo(fagsak.eksternId)
     }
 
@@ -150,18 +145,19 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
     internal fun `skal kunne søke opp fagsak basert på forskjellige personidenter - kun ett treff per fagsak`() {
         val fagsakMedFlereIdenter = testoppsettService.lagreFagsak(opprettFagsakMedFlereIdenter("4", "5", "6"))
 
-        assertThat(fagsakMedFlereIdenter.søkerIdenter).hasSize(3)
-        assertThat(fagsakRepository.findBySøkerIdent(fagsakMedFlereIdenter.søkerIdenter.map { it.ident }.toSet(),
+        assertThat(fagsakMedFlereIdenter.personIdenter).hasSize(3)
+        assertThat(fagsakRepository.findBySøkerIdent(fagsakMedFlereIdenter.personIdenter.map { it.ident }.toSet(),
                                                      Stønadstype.OVERGANGSSTØNAD)).isNotNull
-        assertThat(fagsakRepository.findBySøkerIdent(setOf(fagsakMedFlereIdenter.søkerIdenter.map { it.ident }.first()))).hasSize(
+        assertThat(fagsakRepository.findBySøkerIdent(setOf(fagsakMedFlereIdenter.personIdenter.map { it.ident }
+                                                                   .first()))).hasSize(
                 1)
-        assertThat(fagsakRepository.findBySøkerIdent(fagsakMedFlereIdenter.søkerIdenter.map { it.ident }.toSet())).hasSize(1)
+        assertThat(fagsakRepository.findBySøkerIdent(fagsakMedFlereIdenter.personIdenter.map { it.ident }.toSet())).hasSize(1)
     }
 
     private fun opprettFagsakMedFlereIdenter(ident: String = "1", ident2: String = "2", ident3: String = "3"): Fagsak {
         val endret2DagerSiden = Sporbar(endret = Endret(endretTid = LocalDateTime.now().plusDays(2)))
-        return fagsak(setOf(FagsakPersonOld(ident = ident),
-                            FagsakPersonOld(ident = ident2, sporbar = endret2DagerSiden),
-                            FagsakPersonOld(ident = ident3)))
+        return fagsak(setOf(PersonIdent(ident = ident),
+                            PersonIdent(ident = ident2, sporbar = endret2DagerSiden),
+                            PersonIdent(ident = ident3)))
     }
 }

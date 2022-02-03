@@ -8,7 +8,6 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.dto.tilDto
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakDao
-import no.nav.familie.ef.sak.fagsak.domain.FagsakPersonOld
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
@@ -43,18 +42,12 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
                                stønadstype: Stønadstype): Fagsak {
         val personIdenter = pdlClient.hentPersonidenter(personIdent, true)
         val gjeldendePersonIdent = personIdenter.gjeldende().ident
+        val person = fagsakPersonService.hentEllerOpprettPerson(personIdenter.identer(), gjeldendePersonIdent)
+        val oppdatertPerson = oppdatertPerson(person, gjeldendePersonIdent)
         val fagsak = fagsakRepository.findBySøkerIdent(personIdenter.identer(), stønadstype)
-        var person = fagsakPersonService.hentEllerOpprettPerson(personIdenter.identer(), gjeldendePersonIdent)
+                     ?: opprettFagsak(stønadstype, oppdatertPerson)
 
-        val tidligereEllerOpprettetFagsak = fagsak?.let {
-            if (featureToggleService.isEnabled("familie.ef.sak.synkroniser-personidenter")) {
-                person = fagsakPersonService.oppdaterIdent(person, gjeldendePersonIdent)
-                fagsakMedOppdatertPersonIdent(fagsak, gjeldendePersonIdent)
-            } else {
-                fagsak
-            }
-        } ?: opprettFagsak(stønadstype, person, gjeldendePersonIdent)
-        return tidligereEllerOpprettetFagsak.tilFagsakMedPerson(person.identer)
+        return fagsak.tilFagsakMedPerson(oppdatertPerson.identer)
     }
 
     fun settFagsakTilMigrert(fagsakId: UUID): Fagsak {
@@ -92,16 +85,19 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
 
     fun fagsakMedOppdatertPersonIdent(fagsakId: UUID): Fagsak {
         val fagsak = fagsakRepository.findByIdOrThrow(fagsakId)
-        var person = fagsakPersonService.hentPerson(fagsak.fagsakPersonId)
-        val oppdatertFagsak = if (featureToggleService.isEnabled("familie.ef.sak.synkroniser-personidenter")) {
-            val gjeldendePersonIdent = pdlClient.hentPersonidenter(fagsak.hentAktivIdent(), true).gjeldende().ident
-            person = fagsakPersonService.oppdaterIdent(person, gjeldendePersonIdent)
-            fagsakMedOppdatertPersonIdent(fagsak, gjeldendePersonIdent)
-        } else {
-            fagsak
-        }
-        return oppdatertFagsak.tilFagsakMedPerson(person.identer)
+        val person = fagsakPersonService.hentPerson(fagsak.fagsakPersonId)
+        val gjelendeIdent = pdlClient.hentPersonidenter(person.hentAktivIdent(), true).gjeldende().ident
+        val oppdatertPerson = oppdatertPerson(person, gjelendeIdent)
+        return fagsak.tilFagsakMedPerson(oppdatertPerson.identer)
     }
+
+    private fun oppdatertPerson(person: FagsakPerson,
+                                gjeldendePersonIdent: String) =
+            if (featureToggleService.isEnabled("familie.ef.sak.synkroniser-personidenter")) {
+                fagsakPersonService.oppdaterIdent(person, gjeldendePersonIdent)
+            } else {
+                person
+            }
 
     fun hentFagsakForBehandling(behandlingId: UUID): Fagsak {
         return fagsakRepository.finnFagsakTilBehandling(behandlingId)?.tilFagsakMedPerson()
@@ -126,17 +122,9 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
         return aktiveIdenter.associateBy({ it.first }, { it.second })
     }
 
-    private fun fagsakMedOppdatertPersonIdent(fagsak: FagsakDao, gjeldendePersonIdent: String): FagsakDao {
-        return when (fagsak.erAktivIdent(gjeldendePersonIdent)) {
-            true -> fagsak
-            false -> fagsakRepository.update(fagsak.fagsakMedOppdatertGjeldendeIdent(gjeldendePersonIdent))
-        }
-    }
-
-    private fun opprettFagsak(stønadstype: Stønadstype, fagsakPerson: FagsakPerson, gjeldendePersonIdent: String): FagsakDao {
+    private fun opprettFagsak(stønadstype: Stønadstype, fagsakPerson: FagsakPerson): FagsakDao {
         return fagsakRepository.insert(FagsakDao(stønadstype = stønadstype,
-                                                 fagsakPersonId = fagsakPerson.id,
-                                                 søkerIdenter = setOf(FagsakPersonOld(ident = gjeldendePersonIdent))))
+                                                 fagsakPersonId = fagsakPerson.id))
     }
 
     fun FagsakDao.tilFagsakMedPerson(personIdenter: Set<PersonIdent> = fagsakPersonService.hentIdenter(this.fagsakPersonId)): Fagsak {

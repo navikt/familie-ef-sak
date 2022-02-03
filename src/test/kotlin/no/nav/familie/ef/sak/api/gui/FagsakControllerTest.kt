@@ -4,7 +4,7 @@ import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.fagsak.FagsakRequest
-import no.nav.familie.ef.sak.fagsak.domain.FagsakPersonOld
+import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.fagsak.dto.FagsakDto
 import no.nav.familie.ef.sak.repository.behandling
@@ -49,7 +49,7 @@ internal class FagsakControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `Gitt fagsak med behandlinger finnes når get fagsak endpoint kalles skal det returneres 200 OK med fagsakDto`() {
-        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(FagsakPersonOld("01010199999"))))
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("01010199999"))))
         behandlingRepository.insert(behandling(fagsak))
         behandlingRepository.insert(behandling(fagsak))
 

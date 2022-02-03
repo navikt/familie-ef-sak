@@ -3,7 +3,7 @@ package no.nav.familie.ef.sak.felles.util
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.fagsak.domain.FagsakPersonOld
+import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
@@ -11,7 +11,7 @@ import java.time.LocalDateTime
 
 object BehandlingOppsettUtil {
 
-    private val fagsak = fagsak(setOf(FagsakPersonOld("1")))
+    private val fagsak = fagsak(setOf(PersonIdent("1")))
 
     private val henlagtFørstegangsbehandling = behandling(fagsak)
             .copy(type = BehandlingType.FØRSTEGANGSBEHANDLING,
