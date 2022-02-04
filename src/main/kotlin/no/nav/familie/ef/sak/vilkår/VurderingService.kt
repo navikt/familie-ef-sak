@@ -187,8 +187,3 @@ class VurderingService(private val behandlingService: BehandlingService,
 
     }
 }
-/**
- * Tidligere: A1
- * Nå: A1' og A2
- * => A1[A1']
- */
