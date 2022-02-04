@@ -61,6 +61,7 @@ internal class TilgangServiceTest {
     @BeforeEach
     internal fun setUp() {
         mockBrukerContext("A")
+        every { fagsakPersonService.hentAktivIdent(fagsak.fagsakPersonId) } returns fagsak.hentAktivIdent()
         every { behandlingService.hentAktivIdent(behandling.id) } returns fagsak.hentAktivIdent()
         every { fagsakService.hentAktivIdent(fagsak.id) } returns fagsak.hentAktivIdent()
     }
