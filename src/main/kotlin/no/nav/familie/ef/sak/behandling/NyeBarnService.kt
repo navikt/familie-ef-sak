@@ -1,17 +1,14 @@
 package no.nav.familie.ef.sak.behandling
 
+import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.BarnMinimumDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.GrunnlagsdataMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
-import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn
 import no.nav.familie.kontrakter.felles.PersonIdent
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -19,9 +16,8 @@ import java.util.UUID
 @Service
 class NyeBarnService(private val behandlingService: BehandlingService,
                      private val fagsakService: FagsakService,
-                     private val søknadService: SøknadService,
                      private val personService: PersonService,
-                     private val grunnlagsdataService: GrunnlagsdataService) {
+                     private val barnService: BarnService) {
 
     fun finnNyeBarnSidenGjeldendeBehandlingForPersonIdent(personIdent: PersonIdent): List<String> {
         val fagsak = fagsakService.finnFagsak(setOf(personIdent.ident), Stønadstype.OVERGANGSSTØNAD)
@@ -40,37 +36,18 @@ class NyeBarnService(private val behandlingService: BehandlingService,
 
     }
 
-    private fun finnNyeBarnSidenGjeldendeBehandling(behandlingId: UUID, personIdent: String): List<BarnMinimumDto> {
-        val allePdlBarnIBehandlingen = grunnlagsdataService.hentGrunnlagsdata(behandlingId).grunnlagsdata.barn
-                .map { it.personIdent }
+    private fun finnNyeBarnSidenGjeldendeBehandling(forrigeBehandlingId: UUID, personIdent: String): List<BarnMinimumDto> {
+        val alleBarnPåBehandlingen = barnService.finnBarnPåBehandling(forrigeBehandlingId)
+        val allePdlBarn = GrunnlagsdataMapper.mapBarn(personService.hentPersonMedBarn(personIdent).barn).filter { it.fødsel.gjeldende().erUnder18År() }
+        val kobledeBarn = BarnMatcher.kobleBehandlingBarnOgRegisterBarn(alleBarnPåBehandlingen, allePdlBarn)
 
-        val barnFraSøknaden = søknadService.hentOvergangsstønad(behandlingId)?.barn ?: emptySet()
-        val barnFraPdlMenIkkeIBehandlingen = barnFraPdlMenIkkeIBehandlingen(personIdent, allePdlBarnIBehandlingen)
-        val personIdenterForTerminbarn = personIdenterForTerminbarn(barnFraSøknaden, barnFraPdlMenIkkeIBehandlingen)
-
-        return barnFraPdlMenIkkeIBehandlingen
-                .filter { !personIdenterForTerminbarn.contains(it.personIdent) }
+        return allePdlBarn
+                .filter { pdlBarn -> kobledeBarn.none { it.barn?.personIdent == pdlBarn.personIdent } }
                 .map {
                     BarnMinimumDto(personIdent = it.personIdent,
                                    navn = it.navn.visningsnavn(),
                                    fødselsdato = it.fødsel.gjeldende().fødselsdato)
                 }
     }
-
-    private fun personIdenterForTerminbarn(barnFraSøknaden: Set<SøknadBarn>,
-                                           barnFraPdlMenIkkeIBehandlingen: List<BarnMedIdent>): List<String> {
-        return barnFraSøknaden.filter { !it.erBarnetFødt }
-                .mapNotNull { it.fødselTermindato }
-                .mapNotNull { BarnMatcher.forsøkMatchPåFødselsdato(it, barnFraPdlMenIkkeIBehandlingen)?.personIdent }
-    }
-
-    private fun barnFraPdlMenIkkeIBehandlingen(personIdent: String, allePdlBarnIBehandlingen: List<String>): List<BarnMedIdent> {
-        return personService.hentPersonMedBarn(personIdent).barn
-                .filter { barnFraPdl ->
-                    barnFraPdl.value.fødsel.gjeldende().erUnder18År() && allePdlBarnIBehandlingen.none { it == barnFraPdl.key }
-                }
-                .map { GrunnlagsdataMapper.mapBarn(it.value, it.key) }
-    }
-
 
 }
