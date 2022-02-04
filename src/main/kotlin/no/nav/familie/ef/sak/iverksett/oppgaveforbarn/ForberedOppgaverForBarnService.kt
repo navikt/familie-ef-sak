@@ -39,8 +39,7 @@ class ForberedOppgaverForBarnService(private val gjeldendeBarnRepository: Gjelde
             val beskrivelse = utplukketBarn.second
             OppgaveForBarn(it.behandlingId,
                            it.eksternFagsakId,
-                           utplukketBarn.first.fødselsnummerSøker
-                           ?: error("Kunne ikke finne igjen den mappede behandlingen for barn som fyller år. Dette skal ikke skje"),
+                           utplukketBarn.first.fødselsnummerSøker!!,
                            Stønadstype.OVERGANGSSTØNAD.name,
                            beskrivelse)
         }
