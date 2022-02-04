@@ -55,13 +55,14 @@ class InfotrygdService(private val infotrygdReplikaClient: InfotrygdReplikaClien
      */
     fun hentSammenslåttePerioderSomInternPerioder(personIdenter: Set<String>): InternePerioder {
         val perioder = hentPerioderFraReplika(personIdenter)
-        return InternePerioder(overgangsstønad = filtrerOgSlåSammenPerioder(perioder.overgangsstønad).map { it.tilInternPeriode() },
-                               barnetilsyn = filtrerOgSlåSammenPerioder(perioder.barnetilsyn).map { it.tilInternPeriode() },
-                               skolepenger = filtrerOgSlåSammenPerioder(perioder.skolepenger).map { it.tilInternPeriode() })
+        return InternePerioder(overgangsstønad = slåSammenPerioder(perioder.overgangsstønad).map { it.tilInternPeriode() },
+                               barnetilsyn = slåSammenPerioder(perioder.barnetilsyn).map { it.tilInternPeriode() },
+                               skolepenger = slåSammenPerioder(perioder.skolepenger).map { it.tilInternPeriode() })
     }
 
     private fun mapPerioder(perioder: List<InfotrygdPeriode>) =
-            InfotrygdStønadPerioderDto(perioder, filtrerOgSlåSammenPerioder(perioder).map { it.tilSummertInfotrygdperiodeDto() })
+            InfotrygdStønadPerioderDto(perioder.filter { it.kode != InfotrygdEndringKode.ANNULERT },
+                                       slåSammenPerioder(perioder).map { it.tilSummertInfotrygdperiodeDto() })
 
     private fun hentPerioderFraReplika(identer: Set<String>,
                                        stønadstyper: Set<StønadType> = StønadType.values().toSet()): InfotrygdPeriodeResponse {
@@ -70,10 +71,8 @@ class InfotrygdService(private val infotrygdReplikaClient: InfotrygdReplikaClien
         return infotrygdReplikaClient.hentPerioder(request)
     }
 
-    private fun filtrerOgSlåSammenPerioder(perioder: List<InfotrygdPeriode>): List<InfotrygdPeriode> {
-        val filtrertPerioder = InfotrygdPeriodeUtil.filtrerOgSorterPerioderFraInfotrygd(perioder)
-                .filter { it.kode != InfotrygdEndringKode.ANNULERT && it.kode != InfotrygdEndringKode.UAKTUELL }
-        return InfotrygdPeriodeUtil.slåSammenInfotrygdperioder(filtrertPerioder)
+    private fun slåSammenPerioder(perioder: List<InfotrygdPeriode>): List<InfotrygdPeriode> {
+        return InfotrygdPeriodeUtil.slåSammenInfotrygdperioder(perioder)
     }
 
     private fun hentPersonIdenter(personIdent: String): Set<String> {
