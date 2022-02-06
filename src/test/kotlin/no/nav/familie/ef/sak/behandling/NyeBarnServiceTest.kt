@@ -135,7 +135,8 @@ class NyeBarnServiceTest {
         assertThat(barn.size).isEqualTo(0)
     }
 
-    @Test fun `finnNyeBarnSidenGjeldendeBehandlingForPersonIdent med ett ekstra voksent barn i PDL, forvent ingen treff`() {
+    @Test
+    fun `finnNyeBarnSidenGjeldendeBehandlingForPersonIdent med ett ekstra voksent barn i PDL, forvent ingen treff`() {
         val pdlBarn = mapOf(fnrForEksisterendeBarn to pdlBarn(fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
                             fnrForVoksentBarn to pdlBarn(fødsel(fødselsdato = fødselsdatoVoksentBarn))
         )
@@ -146,7 +147,8 @@ class NyeBarnServiceTest {
         assertThat(barn.size).isEqualTo(0)
     }
 
-    @Test fun `finnNyeBarnSidenGjeldendeBehandlingForPersonIdent med ett ekstra terminbarn i PDL, forvent ingen treff`() {
+    @Test
+    fun `finnNyeBarnSidenGjeldendeBehandlingForPersonIdent med ett ekstra terminbarn i PDL, forvent ingen treff`() {
         val pdlBarn = mapOf(fnrForEksisterendeBarn to pdlBarn(fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
                             fnrForNyttBarn to pdlBarn(fødsel(fødselsdato = fødselsdatoNyttBarn))
         )
