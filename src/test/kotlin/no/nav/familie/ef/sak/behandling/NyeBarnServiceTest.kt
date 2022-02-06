@@ -55,7 +55,8 @@ class NyeBarnServiceTest {
         every { grunnlagsdataMedMetadata.grunnlagsdata } returns grunnlagsdataDomene
     }
 
-    @Test fun `finnNyeBarnSidenGjeldendeBehandling med et nytt barn i PDL siden behandling, forvent ett nytt barn`() {
+    @Test
+    fun `finnNyeBarnSidenGjeldendeBehandlingForPersonIdent med et nytt barn i PDL siden behandling, forvent ett nytt barn`() {
         val pdlBarn = mapOf(fnrForEksisterendeBarn to pdlBarn(fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
                             fnrForNyttBarn to pdlBarn(fødsel(fødselsdato = fødselsdatoNyttBarn))
         )
@@ -105,7 +106,7 @@ class NyeBarnServiceTest {
     }
 
     @Test
-    fun `finnNyeBarnSidenGjeldendeBehandling med tvillinger i PDL av terminbarn, men bare ett i behandlingen, forvent ett nytt barn`() {
+    fun `finnNyeBarnSidenGjeldendeBehandlingForPersonIdent med tvillinger i PDL av terminbarn, men bare ett i behandlingen, forvent ett nytt barn`() {
         val terminDato = LocalDate.now()
         val fødselsdato = LocalDate.now().minusWeeks(5)
         val fnrForTerminbarn = FnrGenerator.generer(fødselsdato.year, fødselsdato.month.value, fødselsdato.dayOfMonth)
@@ -123,7 +124,8 @@ class NyeBarnServiceTest {
         assertThat(barn.size).isEqualTo(1)
     }
 
-    @Test fun `finnNyeBarnSidenGjeldendeBehandling med ett og samme barn i PDL siden behandling, forvent ingen treff`() {
+    @Test
+    fun `finnNyeBarnSidenGjeldendeBehandlingForPersonIdent med ett og samme barn i PDL siden behandling, forvent ingen treff`() {
         val pdlBarn = mapOf(fnrForEksisterendeBarn to pdlBarn(fødsel(fødselsdato = fødselsdatoEksisterendeBarn)))
         every { personService.hentPersonMedBarn(any()) } returns søkerMedBarn(pdlBarn)
         every { barnService.finnBarnPåBehandling(any()) } returns listOf(behandlingBarn(fnrForEksisterendeBarn))
@@ -132,7 +134,7 @@ class NyeBarnServiceTest {
         assertThat(barn.size).isEqualTo(0)
     }
 
-    @Test fun `finnNyeBarnSidenGjeldendeBehandling med ett ekstra voksent barn i PDL, forvent ingen treff`() {
+    @Test fun `finnNyeBarnSidenGjeldendeBehandlingForPersonIdent med ett ekstra voksent barn i PDL, forvent ingen treff`() {
         val pdlBarn = mapOf(fnrForEksisterendeBarn to pdlBarn(fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
                             fnrForVoksentBarn to pdlBarn(fødsel(fødselsdato = fødselsdatoVoksentBarn))
         )
@@ -143,7 +145,7 @@ class NyeBarnServiceTest {
         assertThat(barn.size).isEqualTo(0)
     }
 
-    @Test fun `finnNyeBarnSidenGjeldendeBehandling med ett ekstra terminbarn i PDL, forvent ingen treff`() {
+    @Test fun `finnNyeBarnSidenGjeldendeBehandlingForPersonIdent med ett ekstra terminbarn i PDL, forvent ingen treff`() {
         val pdlBarn = mapOf(fnrForEksisterendeBarn to pdlBarn(fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
                             fnrForNyttBarn to pdlBarn(fødsel(fødselsdato = fødselsdatoNyttBarn))
         )
