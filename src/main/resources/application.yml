@@ -129,7 +129,7 @@ INFOTRYGD_REPLIKA_SCOPE: api://${DEPLOY_ENV}-fss.teamfamilie.familie-ef-infotryg
 spring:
   mvc:
     format:
-      date-time=iso:
+      date-time: iso
   autoconfigure.exclude: org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration
   data:
     jdbc:
