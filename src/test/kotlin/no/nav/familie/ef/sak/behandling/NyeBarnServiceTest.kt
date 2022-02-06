@@ -68,7 +68,8 @@ class NyeBarnServiceTest {
         assertThat(barn.first()).isEqualTo(fnrForNyttBarn)
     }
 
-    @Test fun `finnNyeBarnSidenGjeldendeBehandlingForPersonIdent med ett født terminbarn i PDL, forvent ingen treff`() {
+    @Test
+    fun `finnNyeBarnSidenGjeldendeBehandlingForPersonIdent med ett født terminbarn i PDL, forvent ingen treff`() {
         val terminDato = LocalDate.now()
         val fødselsdato = LocalDate.now().minusWeeks(5)
         val fnrForPdlBarn = FnrGenerator.generer(fødselsdato.year, fødselsdato.month.value, fødselsdato.dayOfMonth)
