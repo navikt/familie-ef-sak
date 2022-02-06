@@ -49,10 +49,13 @@ class VedtakService(private val vedtakRepository: VedtakRepository) {
 
     fun hentForventetInntektForVedtakOgDato(behandlingId: UUID, dato: LocalDate): Int? {
         val vedtak = vedtakRepository.findByIdOrNull(behandlingId)
+        if (vedtak?.perioder?.perioder?.any { it.datoFra.isEqualOrBefore(dato.minusMonths(1)) } == true) {
+            return vedtak.inntekter?.inntekter?.firstOrNull {
+                dato.isEqualOrAfter(it.startDato) && dato.isEqualOrBefore(it.sluttDato)
+            }?.inntekt?.toInt()
+        }
 
-        return vedtak?.inntekter?.inntekter?.firstOrNull {
-            dato.isEqualOrAfter(it.startDato) && dato.isEqualOrBefore(it.sluttDato)
-        }?.inntekt?.toInt()
+        return null
     }
 
     fun hentHarAktivtVedtak(behandlingId: UUID, localDate: LocalDate = LocalDate.now()): Boolean {

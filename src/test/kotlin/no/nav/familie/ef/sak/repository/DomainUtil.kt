@@ -142,16 +142,14 @@ fun tilkjentYtelse(behandlingId: UUID, personIdent: String): TilkjentYtelse = Ti
 
 fun vedtak(behandlingId: UUID,
            resultatType: ResultatType = ResultatType.INNVILGE,
-           inntekter: InntektWrapper = InntektWrapper(listOf(inntektsperiode()))): Vedtak =
+           inntekter: InntektWrapper = InntektWrapper(listOf(inntektsperiode())),
+           perioder: PeriodeWrapper = PeriodeWrapper(listOf(vedtaksperiode()))): Vedtak =
         Vedtak(behandlingId = behandlingId,
                resultatType = resultatType,
                periodeBegrunnelse = "OK",
                inntektBegrunnelse = "OK",
                avslåBegrunnelse = null,
-               perioder = PeriodeWrapper(listOf(Vedtaksperiode(datoFra = LocalDate.of(2021, 1, 1),
-                                                               datoTil = LocalDate.of(2021, 12, 31),
-                                                               aktivitet = AktivitetType.BARN_UNDER_ETT_ÅR,
-                                                               periodeType = VedtaksperiodeType.HOVEDPERIODE))),
+               perioder = perioder,
                inntekter = inntekter)
 
 fun inntektsperiode(startDato: LocalDate = LocalDate.of(2021, 1, 1),
@@ -159,3 +157,9 @@ fun inntektsperiode(startDato: LocalDate = LocalDate.of(2021, 1, 1),
                     inntekt: BigDecimal = BigDecimal.valueOf(100000),
                     samordningsfradrag: BigDecimal = BigDecimal.valueOf(500)) =
         Inntektsperiode(startDato, sluttDato, inntekt, samordningsfradrag)
+
+fun vedtaksperiode(startDato: LocalDate = LocalDate.of(2021, 1, 1),
+                    sluttDato: LocalDate = LocalDate.of(2021, 12, 1),
+                    aktivitetstype: AktivitetType = AktivitetType.BARN_UNDER_ETT_ÅR,
+                    vedtaksperiodeType: VedtaksperiodeType = VedtaksperiodeType.HOVEDPERIODE) =
+        Vedtaksperiode(startDato, sluttDato, aktivitetstype, vedtaksperiodeType)

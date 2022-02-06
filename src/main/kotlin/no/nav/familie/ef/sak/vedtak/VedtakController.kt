@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.vedtak.dto.TotrinnskontrollStatusDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.slf4j.LoggerFactory
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -35,6 +36,8 @@ class VedtakController(private val stegService: StegService,
                        private val totrinnskontrollService: TotrinnskontrollService,
                        private val tilgangService: TilgangService,
                        private val vedtakService: VedtakService) {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     @PostMapping("/{behandlingId}/send-til-beslutter")
     fun sendTilBeslutter(@PathVariable behandlingId: UUID): Ressurs<UUID> {
@@ -95,7 +98,7 @@ class VedtakController(private val stegService: StegService,
         for (behandlingId in behandlingIds) {
             val forventetInntekt = vedtakService.hentForventetInntektForVedtakOgDato(behandlingId, LocalDate.now().minusMonths(1))
             val ident = behandlingService.hentAktivIdent(behandlingId)
-            identToForventetInntektMap.put(ident, forventetInntekt)
+            identToForventetInntektMap[ident] = forventetInntekt
         }
         return Ressurs.success(identToForventetInntektMap)
     }
