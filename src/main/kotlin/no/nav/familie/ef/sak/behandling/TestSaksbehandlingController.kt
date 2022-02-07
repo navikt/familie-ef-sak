@@ -8,7 +8,6 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettService
@@ -24,6 +23,7 @@ import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.søknad.Barn
 import no.nav.familie.kontrakter.ef.søknad.EnumTekstverdiMedSvarId
 import no.nav.familie.kontrakter.ef.søknad.Fødselsnummer
+import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -63,19 +63,27 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
 
     @PostMapping(path = ["fagsak"], consumes = [MediaType.APPLICATION_JSON_VALUE])
     fun opprettFagsakForTestperson(@RequestBody testFagsakRequest: TestFagsakRequest): Ressurs<UUID> {
-        val fagsak = fagsakService.hentEllerOpprettFagsak(testFagsakRequest.personIdent, Stønadstype.OVERGANGSSTØNAD)
-        val søknad: SøknadOvergangsstønad = lagSøknad(testFagsakRequest.personIdent)
+        val søknadBuilder = lagSøknad(testFagsakRequest.personIdent)
         val behandling: Behandling = when (testFagsakRequest.behandlingsType) {
-            TestBehandlingsType.FØRSTEGANGSBEHANDLING -> lagFørstegangsbehandling(fagsak, søknad)
-            TestBehandlingsType.BLANKETT -> lagBlankettBehandling(fagsak, testFagsakRequest.personIdent, søknad)
-            TestBehandlingsType.MIGRERING -> lagMigreringBehandling(fagsak)
+            TestBehandlingsType.FØRSTEGANGSBEHANDLING -> lagFørstegangsbehandling(testFagsakRequest.personIdent,
+                                                                                  søknadBuilder.søknadOvergangsstønad)
+            TestBehandlingsType.BLANKETT -> lagBlankettBehandling(testFagsakRequest.personIdent,
+                                                                  søknadBuilder.søknadOvergangsstønad)
+            TestBehandlingsType.MIGRERING -> lagMigreringBehandling(testFagsakRequest.personIdent)
+            TestBehandlingsType.BARNETILSYN -> lagBarnetilsynBehandling(testFagsakRequest.personIdent,
+                                                                        søknadBuilder.søknadBarnetilsyn)
+
         }
+
+        val fagsak = fagsakService.hentFagsakForBehandling(behandling.id)
+
 
 
         if (!behandling.erMigrering()) {
             iverksettService.startBehandling(behandling, fagsak)
-            val grunnlagsdata = grunnlagsdataService.opprettGrunnlagsdata(behandling.id) // opprettGrunnlagsdata håndteres i migreringservice
-            barnService.opprettBarnPåBehandlingMedSøknadsdata(behandling.id,fagsak.id, grunnlagsdata.grunnlagsdata.barn)
+            val grunnlagsdata =
+                    grunnlagsdataService.opprettGrunnlagsdata(behandling.id) // opprettGrunnlagsdata håndteres i migreringservice
+            barnService.opprettBarnPåBehandlingMedSøknadsdata(behandling.id, fagsak.id, grunnlagsdata.grunnlagsdata.barn)
             behandlingshistorikkService.opprettHistorikkInnslag(Behandlingshistorikk(behandlingId = behandling.id,
                                                                                      steg = StegType.VILKÅR))
             val oppgaveId = oppgaveService.opprettOppgave(behandling.id,
@@ -89,7 +97,23 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
         return Ressurs.success(behandling.id)
     }
 
-    private fun lagSøknad(personIdent: String): SøknadOvergangsstønad {
+    private fun lagBarnetilsynBehandling(personIdent: String, søknadBarnetilsyn: SøknadBarnetilsyn): Behandling {
+
+        val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, Stønadstype.BARNETILSYN)
+
+        val behandling = behandlingService.opprettBehandling(BehandlingType.FØRSTEGANGSBEHANDLING,
+                                                             fagsak.id,
+                                                             behandlingsårsak = BehandlingÅrsak.SØKNAD)
+        val journalposter = behandlingService.hentBehandlingsjournalposter(behandling.id)
+        søknadService.lagreSøknadForBarnetilsyn(søknadBarnetilsyn,
+                                                behandling.id,
+                                                fagsak.id,
+                                                journalposter.firstOrNull()?.journalpostId ?: "TESTJPID")
+        return behandling
+    }
+
+
+    private fun lagSøknad(personIdent: String): TestsøknadBuilder {
         val søkerMedBarn = personService.hentPersonMedBarn(personIdent)
         val barneListe: List<Barn> = mapSøkersBarn(søkerMedBarn)
         return TestsøknadBuilder.Builder()
@@ -105,7 +129,7 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
                                 .defaultPersonMinimum(navn = "Fyren som skal bli min samboer",
                                                       fødselsdato = LocalDate.of(1979, 9, 17)),
                 )
-                .build().søknadOvergangsstønad
+                .build()
     }
 
     private fun mapSøkersBarn(søkerMedBarn: SøkerMedBarn): List<Barn> {
@@ -142,7 +166,9 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
         return barneListe
     }
 
-    private fun lagFørstegangsbehandling(fagsak: Fagsak, søknad: SøknadOvergangsstønad): Behandling {
+    private fun lagFørstegangsbehandling(personIdent: String, søknad: SøknadOvergangsstønad): Behandling {
+        val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, Stønadstype.OVERGANGSSTØNAD)
+
         val behandling = behandlingService.opprettBehandling(BehandlingType.FØRSTEGANGSBEHANDLING,
                                                              fagsak.id,
                                                              behandlingsårsak = BehandlingÅrsak.SØKNAD)
@@ -154,14 +180,19 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
         return behandling
     }
 
-    private fun lagBlankettBehandling(fagsak: Fagsak, fnr: String, søknad: SøknadOvergangsstønad): Behandling {
+    private fun lagBlankettBehandling(fnr: String, søknad: SøknadOvergangsstønad): Behandling {
+        val fagsak = fagsakService.hentEllerOpprettFagsak(fnr, Stønadstype.OVERGANGSSTØNAD)
+
         val journalpostId = arkiver(fnr)
         val journalpost = journalpostClient.hentJournalpost(journalpostId)
         return behandlingService.opprettBehandlingForBlankett(BehandlingType.BLANKETT, fagsak.id, søknad, journalpost)
     }
 
 
-    private fun lagMigreringBehandling(fagsak: Fagsak): Behandling {
+    private fun lagMigreringBehandling(personIdent: String): Behandling {
+
+        val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, Stønadstype.OVERGANGSSTØNAD)
+
         return migreringService.opprettMigrering(fagsak = fagsak,
                                                  fra = YearMonth.now(),
                                                  til = YearMonth.now().plusMonths(1),
@@ -189,5 +220,6 @@ data class TestFagsakRequest(val personIdent: String,
 enum class TestBehandlingsType {
     FØRSTEGANGSBEHANDLING,
     BLANKETT,
-    MIGRERING
+    MIGRERING,
+    BARNETILSYN
 }

@@ -45,7 +45,7 @@ internal class VilkårGrunnlagServiceTest {
     private val grunnlagsdataService = GrunnlagsdataService(grunnlagsdataRepository,
                                                             søknadService,
                                                             grunnlagsdataRegisterService,
-                                                            behandlingService)
+                                                            behandlingService, mockk())
 
     private val service = VilkårGrunnlagService(medlemskapMapper, grunnlagsdataService)
     private val behandling = behandling(fagsak())
