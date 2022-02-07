@@ -7,9 +7,11 @@ import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdEndringKode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeRequest
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSak
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSøkRequest
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 
 @Service
 class InfotrygdService(private val infotrygdReplikaClient: InfotrygdReplikaClient,
@@ -39,7 +41,9 @@ class InfotrygdService(private val infotrygdReplikaClient: InfotrygdReplikaClien
 
     fun hentSaker(personIdent: String): InfotrygdSakResponse {
         val response = infotrygdReplikaClient.hentSaker(InfotrygdSøkRequest(hentPersonIdenter(personIdent)))
-        return response.copy(saker = response.saker.sortedByDescending { it.mottattDato })
+        return response.copy(saker = response.saker
+                .sortedWith(compareByDescending<InfotrygdSak, LocalDate?>(nullsLast()) { it.vedtaksdato }
+                                    .thenByDescending(nullsLast()) { it.mottattDato }))
     }
 
     /**
