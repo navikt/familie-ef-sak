@@ -31,6 +31,14 @@ class TilbakekrevingController(private val tilgangService: TilgangService,
         return Ressurs.success(behandlingId)
     }
 
+    @PostMapping("/fagsak/{fagsakId}/opprett-tilbakekreving")
+    fun opprettManuellTilbakekreving(@PathVariable fagsakId: UUID): Ressurs<String> {
+        tilgangService.validerTilgangTilFagsak(fagsakId = fagsakId, AuditLoggerEvent.CREATE)
+        tilgangService.validerHarSaksbehandlerrolle()
+        tilbakekrevingService.opprettManuellTilbakekreving(fagsakId)
+        return Ressurs.success("Opprettelse av manuell behandling iverksatt.")
+    }
+
     @GetMapping("/{behandlingId}/er-allerede-opprettet")
     fun finnesTilbakekreving(@PathVariable behandlingId: UUID): Ressurs<Boolean> {
         return Ressurs.success(tilbakekrevingService.finnesÅpenTilbakekrevingsBehandling(behandlingId))

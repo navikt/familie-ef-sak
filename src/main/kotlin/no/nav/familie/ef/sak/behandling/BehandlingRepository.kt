@@ -15,6 +15,8 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
 
     fun findByFagsakId(fagsakId: UUID): List<Behandling>
 
+    fun findTopByFagsakIdOrderBySporbar_OpprettetTidDesc(fagsakId: UUID): Behandling
+
     fun findByFagsakIdAndStatus(fagsakId: UUID, status: BehandlingStatus): List<Behandling>
 
     // language=PostgreSQL

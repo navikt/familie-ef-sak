@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.relational.core.conversion.DbActionExecutionException
 import java.time.LocalDateTime
 import java.util.UUID
+import kotlin.test.assertEquals
 
 internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -78,7 +79,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(setOf(
                 PersonIdent(ident = "1"),
                 PersonIdent(ident = "2",
-                             sporbar = Sporbar(endret = Endret(endretTid = LocalDateTime.now().plusDays(2)))),
+                            sporbar = Sporbar(endret = Endret(endretTid = LocalDateTime.now().plusDays(2)))),
                 PersonIdent(ident = "3"))))
         val behandling = behandlingRepository.insert(behandling(fagsak))
         val fnr = behandlingRepository.finnAktivIdent(behandling.id)
@@ -236,4 +237,17 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(behandlingRepository.finnSisteIverksatteBehandlinger(OVERGANGSSTØNAD)).containsExactly(
                 behandling.id)
     }
+
+    @Test
+    fun `findTopByFagsakIdOrderBySporbar_OpprettetTidDesc skal returnere siste behandling`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
+        behandlingRepository.insert(behandling(fagsak, opprettetTid = LocalDateTime.now().minusDays(1)))
+        val behandlingNy = behandlingRepository.insert(behandling(fagsak))
+        behandlingRepository.insert(behandling(fagsak, opprettetTid = LocalDateTime.now().minusHours(1)))
+
+        val behandling = behandlingRepository.findTopByFagsakIdOrderBySporbar_OpprettetTidDesc(fagsak.id)
+
+        assertEquals(behandlingNy, behandling)
+    }
+
 }

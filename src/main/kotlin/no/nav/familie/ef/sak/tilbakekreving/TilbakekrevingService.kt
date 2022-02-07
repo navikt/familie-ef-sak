@@ -123,4 +123,18 @@ class TilbakekrevingService(private val tilbakekrevingRepository: Tilbakekreving
         return genererBrev(behandlingId, varseltekst)
     }
 
+    fun opprettManuellTilbakekreving(fagsakId: UUID) {
+        val fagsak = fagsakService.hentFagsak(fagsakId)
+        val kanBehandlingOpprettesManuelt =
+                tilbakekrevingClient.kanBehandlingOpprettesManuelt(fagsak.stønadstype, fagsak.eksternId.id)
+        if (!kanBehandlingOpprettesManuelt.kanBehandlingOpprettes) {
+            throw Feil("Kan ikke opprette manuell tilbakekreving for fagsakId=$fagsakId",
+                       frontendFeilmelding = kanBehandlingOpprettesManuelt.melding)
+        }
+
+        val behandling = behandlingService.hentSisteBehandling(fagsakId)
+
+        tilbakekrevingClient.opprettManuelTilbakekreving(fagsak.eksternId.id, behandling.eksternId.id, fagsak.stønadstype)
+    }
+
 }
