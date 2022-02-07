@@ -6,7 +6,7 @@ import java.util.UUID
 
 data class BarnTilUtplukkForOppgave(@Id
                                    val behandlingId: UUID,
-                                    val fødselsnummerSøker: String?,
+                                    val fodselsnummerSoker: String?,
                                     val fodselsnummerBarn: String?,
                                     val termindatoBarn: LocalDate?)
 

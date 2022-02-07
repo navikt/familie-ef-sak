@@ -17,7 +17,7 @@ interface GjeldendeBarnRepository : RepositoryInterface<BarnTilUtplukkForOppgave
         SELECT b.id behandling_id, pi.ident fodselsnummer_soker, bb.person_ident fodselsnummer_barn, bb.fodsel_termindato 
         FROM gjeldende_iverksatte_behandlinger b
          JOIN fagsak fs ON fs.id = b.fagsak_id
-         JOIN person_ident pi ON pi.fagsak_person_id = fs.fagsak_person_id
+         JOIN (SELECT DISTINCT ON(pi.fagsak_person_id) * FROM person_ident pi ORDER BY pi.fagsak_person_id, pi.opprettet_tid DESC) pi ON pi.fagsak_person_id = fs.fagsak_person_id
          JOIN behandling_barn bb ON bb.behandling_id = b.id
         WHERE b.stonadstype=:stønadstype AND EXISTS(SELECT 1 FROM andel_tilkjent_ytelse aty
             JOIN tilkjent_ytelse ty ON aty.tilkjent_ytelse = ty.id

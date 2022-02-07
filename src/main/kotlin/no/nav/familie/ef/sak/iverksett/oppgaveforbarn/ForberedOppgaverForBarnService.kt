@@ -39,7 +39,7 @@ class ForberedOppgaverForBarnService(private val gjeldendeBarnRepository: Gjelde
             val beskrivelse = utplukketBarn.second
             OppgaveForBarn(it.behandlingId,
                            it.eksternFagsakId,
-                           utplukketBarn.first.fødselsnummerSøker!!,
+                           utplukketBarn.first.fodselsnummerSoker!!,
                            Stønadstype.OVERGANGSSTØNAD.name,
                            beskrivelse)
         }
