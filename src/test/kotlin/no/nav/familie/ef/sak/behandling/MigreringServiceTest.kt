@@ -137,6 +137,21 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    internal fun `migrering med 0-beløp skal håndteres`() {
+        every { iverksettClient.hentStatus(any()) } returns IverksettStatus.SENDT_TIL_OPPDRAG
+
+        val migrering = opprettOgIverksettMigrering(inntektsgrunnlag = BigDecimal(1_000_000))
+
+        verifiserBehandlingErFerdigstilt(migrering)
+        with(tilkjentYtelseService.hentForBehandling(migrering.id).andelerTilkjentYtelse) {
+            assertThat(this).hasSize(1)
+            assertThat(this[0].stønadFom).isEqualTo(migrerFraDato.atDay(1))
+            assertThat(this[0].stønadTom).isEqualTo(til.atEndOfMonth())
+            assertThat(this[0].beløp).isEqualTo(0)
+        }
+    }
+
+    @Test
     internal fun `hentMigreringInfo - har ingen perioder fra neste måned i infotrygd`() {
         every { infotrygdReplikaClient.hentPerioder(any()) } returns
                 InfotrygdPeriodeResponse(emptyList(), emptyList(), emptyList())
@@ -323,12 +338,12 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         }
     }
 
-    private fun opprettOgIverksettMigrering(opphørsdato: YearMonth? = opphørsmåned): Behandling {
+    private fun opprettOgIverksettMigrering(opphørsdato: YearMonth? = opphørsmåned, inntektsgrunnlag: BigDecimal = forventetInntekt): Behandling {
         mockPerioder(opphørsdato)
 
         val fagsak = fagsakService.hentEllerOpprettFagsak("1", Stønadstype.OVERGANGSSTØNAD)
         val behandling = testWithBrukerContext(groups = listOf(rolleConfig.beslutterRolle)) {
-            migreringService.opprettMigrering(fagsak, migrerFraDato, til, forventetInntekt.toInt(), samordningsfradrag.toInt())
+            migreringService.opprettMigrering(fagsak, migrerFraDato, til, inntektsgrunnlag.toInt(), samordningsfradrag.toInt())
         }
 
         kjørTasks()
