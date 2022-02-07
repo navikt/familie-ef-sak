@@ -8,6 +8,12 @@ import org.springframework.data.relational.core.mapping.MappedCollection
 import org.springframework.data.relational.core.mapping.Table
 import java.util.UUID
 
+data class Fagsaker(
+        val overgangsstønad: Fagsak?,
+        val barnetilsyn: Fagsak?,
+        val skolepenger: Fagsak?,
+)
+
 data class Fagsak(
         val id: UUID,
         val fagsakPersonId: UUID,

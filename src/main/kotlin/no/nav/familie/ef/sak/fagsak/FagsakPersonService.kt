@@ -13,11 +13,15 @@ class FagsakPersonService(private val fagsakPersonRepository: FagsakPersonReposi
 
     fun hentPerson(personId: UUID): FagsakPerson = fagsakPersonRepository.findByIdOrThrow(personId)
 
+    fun finnPerson(personIdenter: Set<String>): FagsakPerson? = fagsakPersonRepository.findByIdent(personIdenter)
+
     fun hentIdenter(personId: UUID): Set<PersonIdent> {
         val personIdenter = fagsakPersonRepository.findPersonIdenter(personId)
         feilHvis(personIdenter.isEmpty()) { "Finner ikke personidenter til person=$personId" }
         return personIdenter
     }
+
+    fun hentAktivIdent(personId: UUID): String = fagsakPersonRepository.hentAktivIdent(personId)
 
     fun hentEllerOpprettPerson(personIdenter: Set<String>, gjeldendePersonIdent: String): FagsakPerson {
         feilHvisIkke(personIdenter.contains(gjeldendePersonIdent)) {

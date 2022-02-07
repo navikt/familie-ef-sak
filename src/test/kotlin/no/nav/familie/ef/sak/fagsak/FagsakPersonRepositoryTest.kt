@@ -3,6 +3,8 @@ package no.nav.familie.ef.sak.fagsak
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
+import no.nav.familie.ef.sak.felles.domain.Endret
+import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.testutil.hasCauseMessageContaining
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -10,6 +12,7 @@ import org.junit.jupiter.api.Test
 import org.postgresql.util.PSQLException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.IncorrectResultSizeDataAccessException
+import java.time.LocalDateTime
 
 internal class FagsakPersonRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -58,5 +61,14 @@ internal class FagsakPersonRepositoryTest : OppslagSpringRunnerTest() {
         val person2 = fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent("2"))))
         assertThat(fagsakPersonRepository.findPersonIdenter(person1.id)).containsExactlyInAnyOrderElementsOf(person1.identer)
         assertThat(fagsakPersonRepository.findPersonIdenter(person2.id)).containsExactlyInAnyOrderElementsOf(person2.identer)
+    }
+
+    @Test
+    internal fun `hentAktivIdent - skal returnere identen som har siste endretTid`() {
+        val sporbarEnDagSiden = Sporbar(endret = Endret(endretTid = LocalDateTime.now().minusDays(1)))
+        val person = fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent("1", sporbarEnDagSiden),
+                                                                                PersonIdent("2"),
+                                                                                PersonIdent("3", sporbarEnDagSiden))))
+        assertThat(fagsakPersonRepository.hentAktivIdent(person.id)).isEqualTo("2")
     }
 }

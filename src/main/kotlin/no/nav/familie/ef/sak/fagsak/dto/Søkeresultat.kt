@@ -8,6 +8,7 @@ import java.util.UUID
 data class Søkeresultat(val personIdent: String,
                         val visningsnavn: String,
                         val kjønn: Kjønn,
+                        val fagsakPersonId: UUID?,
                         val fagsaker: List<FagsakForSøkeresultat>)
 
 

@@ -46,12 +46,14 @@ class SøkService(
             throw ApiFeil("Finner ingen personer for søket", HttpStatus.BAD_REQUEST)
         }
         val fagsaker = finnFagsakEllerOpprettHvisPersonFinnesIInfotrygd(personIdenter.identer(), gjeldendePersonIdent)
+        val fagsakPerson = fagsakPersonService.finnPerson(personIdenter.identer())
 
         val person = personService.hentSøker(gjeldendePersonIdent)
 
         return Søkeresultat(personIdent = gjeldendePersonIdent,
                             kjønn = KjønnMapper.tilKjønn(person.kjønn.first().kjønn),
                             visningsnavn = NavnDto.fraNavn(person.navn.gjeldende()).visningsnavn,
+                            fagsakPersonId = fagsakPerson?.id,
                             fagsaker = fagsaker.map {
                                 val behandlinger: List<Behandling> = behandlingService.hentBehandlinger(it.id)
 
@@ -75,7 +77,7 @@ class SøkService(
             }
             throw ApiFeil("Finner ikke fagsak for søkte personen", HttpStatus.BAD_REQUEST)
         }
-        return fagsaker.map{ it.tilFagsak(fagsakPersonService.hentIdenter(it.fagsakPersonId))}
+        return fagsaker.map { it.tilFagsak(fagsakPersonService.hentIdenter(it.fagsakPersonId)) }
     }
 
     // Denne trenger ikke en tilgangskontroll då den ikke returnerer noe fra behandlingen.
@@ -84,6 +86,11 @@ class SøkService(
     // dette kan endres til å hente bosstedsadresse fra databasen når PDL-data blir lagret i databasen
     fun søkEtterPersonerMedSammeAdressePåFagsak(fagsakId: UUID): SøkeresultatPerson {
         val aktivIdent = fagsakService.hentAktivIdent(fagsakId)
+        return søkEtterPersonerMedSammeAdresse(aktivIdent)
+    }
+
+    fun søkEtterPersonerMedSammeAdressePåFagsakPerson(fagsakPersonId: UUID): SøkeresultatPerson {
+        val aktivIdent = fagsakPersonService.hentAktivIdent(fagsakPersonId)
         return søkEtterPersonerMedSammeAdresse(aktivIdent)
     }
 

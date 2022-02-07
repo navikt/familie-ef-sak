@@ -47,4 +47,10 @@ class SøkController(private val søkService: SøkService, private val tilgangSe
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(søkService.søkEtterPersonerMedSammeAdressePåFagsak(fagsakId))
     }
+
+    @GetMapping("fagsak-person/{fagsakPersonId}/samme-adresse")
+    fun søkPersonerMedSammeAdressePåFagsakPerson(@PathVariable fagsakPersonId: UUID): Ressurs<SøkeresultatPerson> {
+        tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.ACCESS)
+        return Ressurs.success(søkService.søkEtterPersonerMedSammeAdressePåFagsakPerson(fagsakPersonId))
+    }
 }

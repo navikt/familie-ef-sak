@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.behandling.dto.tilDto
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakDao
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
+import no.nav.familie.ef.sak.fagsak.domain.Fagsaker
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.fagsak.domain.tilFagsak
@@ -69,6 +70,17 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
         val behandlinger: List<Behandling> = behandlingService.hentBehandlinger(fagsak.id)
         val erLøpende = erLøpende(behandlinger)
         return fagsak.tilDto(behandlinger = behandlinger.map(Behandling::tilDto), erLøpende = erLøpende)
+    }
+
+    fun finnFagsakerForFagsakPersonId(fagsakPersonId: UUID): Fagsaker {
+        val fagsaker = fagsakRepository.findByFagsakPersonId(fagsakPersonId)
+                .map { it.tilFagsakMedPerson() }
+                .associateBy { it.stønadstype }
+        return Fagsaker(
+                overgangsstønad = fagsaker[Stønadstype.OVERGANGSSTØNAD],
+                barnetilsyn = fagsaker[Stønadstype.BARNETILSYN],
+                skolepenger = fagsaker[Stønadstype.SKOLEPENGER]
+        )
     }
 
     fun erLøpende(behandlinger: List<Behandling>): Boolean {
