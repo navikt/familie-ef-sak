@@ -60,16 +60,12 @@ class GrunnlagsdataService(private val grunnlagsdataRepository: GrunnlagsdataRep
 
     private fun hentGrunnlagsdataFraRegister(behandlingId: UUID): GrunnlagsdataDomene {
 
-
         val stønadstype = fagsakService.hentFagsakForBehandling(behandlingId).stønadstype
         val søknad = when (stønadstype) {
             Stønadstype.OVERGANGSSTØNAD -> søknadService.hentOvergangsstønad(behandlingId)
             Stønadstype.BARNETILSYN -> søknadService.hentBarnetilsyn(behandlingId)
             else -> throw Feil("Ikke implementert støtte for Støndastype $stønadstype")
         }
-
-
-
 
         return if (søknad == null) {
             hentGrunnlagsdataFraRegister(behandlingService.hentAktivIdent(behandlingId), emptyList())
