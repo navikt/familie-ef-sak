@@ -14,7 +14,7 @@ interface GjeldendeBarnRepository : RepositoryInterface<BarnTilUtplukkForOppgave
 
     // language=PostgreSQL
     @Query("""
-        SELECT b.id behandling_id, pi.ident fodselsnummer_soker, bb.person_ident fodselsnummer_barn, bb.fodsel_termindato 
+        SELECT b.id behandling_id, pi.ident fodselsnummer_soker, bb.person_ident fodselsnummer_barn, bb.fodsel_termindato termindato_barn
         FROM gjeldende_iverksatte_behandlinger b
          JOIN fagsak fs ON fs.id = b.fagsak_id
          JOIN (SELECT DISTINCT ON(pi.fagsak_person_id) * FROM person_ident pi ORDER BY pi.fagsak_person_id, pi.opprettet_tid DESC) pi ON pi.fagsak_person_id = fs.fagsak_person_id

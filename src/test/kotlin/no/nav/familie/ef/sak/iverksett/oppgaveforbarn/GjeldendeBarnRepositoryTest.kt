@@ -154,21 +154,27 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
         tilkjentYtelseRepository.insert(lagTilkjentYtelse(behandlingId = behandlingMedFremtidigAndel.id,
                                                           andelerTilkjentYtelse = listOf(fremtidigAndel)))
 
-        barnRepository.insertAll(listOf(barn(behandlingId = behandlingMedFremtidigAndel.id),
-                                        barn(behandlingId = behandlingMedFremtidigAndel.id),
-                                        barn(behandlingId = behandlingMedTidligereAndel.id)))
+        val barnListe = listOf(barn(behandlingId = behandlingMedFremtidigAndel.id, personIdent = "1"),
+                               barn(behandlingId = behandlingMedFremtidigAndel.id, personIdent = "2"),
+                               barn(behandlingId = behandlingMedTidligereAndel.id, personIdent = "3"))
+
+        barnRepository.insertAll(barnListe)
         val barnForUtplukk = gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(
                 Stønadstype.OVERGANGSSTØNAD,
                 LocalDate.now())
         assertThat(barnForUtplukk.size).isEqualTo(2)
+        barnForUtplukk.map {
+            assertThat(it).hasNoNullFieldsOrProperties()
+        }
         barnForUtplukk.forEach { assertThat(it.behandlingId).isEqualTo(behandlingMedFremtidigAndel.id) }
     }
 
-    private fun barn(behandlingId: UUID, personIdent: String? = null, termindato: LocalDate? = null): BehandlingBarn {
+    private fun barn(behandlingId: UUID, personIdent: String? = null, termindato: LocalDate? = LocalDate.now()): BehandlingBarn {
         return BehandlingBarn(behandlingId = behandlingId,
                               personIdent = personIdent,
                               fødselTermindato = termindato,
                               navn = null,
                               søknadBarnId = UUID.randomUUID())
     }
+
 }
