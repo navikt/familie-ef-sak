@@ -202,7 +202,7 @@ internal class TilbakekrevingServiceTest {
             val fagsak = fagsak(identer = setOf(PersonIdent("12345678901")))
             every { fagsakService.hentFagsak(fagsak.id) } returns fagsak
             val behandling = behandling(fagsak)
-            every { behandlingService.hentSisteBehandling(fagsak.id) } returns behandling
+            every { behandlingService.hentSisteIverksatteBehandling(fagsak.id) } returns behandling
             every { tilbakekrevingClient.kanBehandlingOpprettesManuelt(fagsak.stønadstype, fagsak.eksternId.id) }
                     .returns(KanBehandlingOpprettesManueltRespons(true, "Ok."))
             every {

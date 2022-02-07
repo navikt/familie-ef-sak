@@ -143,10 +143,6 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
         return behandlingRepository.findByFagsakId(fagsakId).sortedBy { it.sporbar.opprettetTid }
     }
 
-    fun hentSisteBehandling(fagsakId: UUID): Behandling {
-        return behandlingRepository.findTopByFagsakIdOrderBySporbar_OpprettetTidDesc(fagsakId)
-    }
-
     fun leggTilBehandlingsjournalpost(journalpostId: String, journalposttype: Journalposttype, behandlingId: UUID) {
         behandlingsjournalpostRepository.insert(Behandlingsjournalpost(behandlingId = behandlingId,
                                                                        journalpostId = journalpostId,
@@ -201,5 +197,9 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
                  HttpStatus.BAD_REQUEST) { "Kan ikke ta behandling med status ${behandling.status} av vent" }
         behandlingRepository.update(behandling.copy(status = BehandlingStatus.UTREDES))
         taskService.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId))
+    }
+
+    fun hentSisteIverksatteBehandling(fagsakId: UUID): Behandling? {
+        return behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
     }
 }

@@ -238,16 +238,4 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
                 behandling.id)
     }
 
-    @Test
-    fun `findTopByFagsakIdOrderBySporbar_OpprettetTidDesc skal returnere siste behandling`() {
-        val fagsak = testoppsettService.lagreFagsak(fagsak())
-        behandlingRepository.insert(behandling(fagsak, opprettetTid = LocalDateTime.now().minusDays(1)))
-        val behandlingNy = behandlingRepository.insert(behandling(fagsak))
-        behandlingRepository.insert(behandling(fagsak, opprettetTid = LocalDateTime.now().minusHours(1)))
-
-        val behandling = behandlingRepository.findTopByFagsakIdOrderBySporbar_OpprettetTidDesc(fagsak.id)
-
-        assertEquals(behandlingNy, behandling)
-    }
-
 }
