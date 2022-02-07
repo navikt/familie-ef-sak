@@ -11,7 +11,7 @@ data class BehandlingBarn(@Id
                           val id: UUID = UUID.randomUUID(),
                           val behandlingId: UUID,
                           @Column("soknad_barn_id")
-                          val søknadBarnId: UUID,
+                          val søknadBarnId: UUID?,
                           val personIdent: String?,
                           val navn: String?,
                           @Column("fodsel_termindato")

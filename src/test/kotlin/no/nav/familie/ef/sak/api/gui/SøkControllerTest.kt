@@ -3,7 +3,7 @@ package no.nav.familie.ef.sak.api.gui
 import io.mockk.every
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
-import no.nav.familie.ef.sak.fagsak.domain.FagsakPersonOld
+import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.fagsak.dto.Søkeresultat
 import no.nav.familie.ef.sak.felles.dto.PersonIdentDto
@@ -42,11 +42,11 @@ internal class SøkControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `Gitt person med fagsak når søk på personensident kallas skal det returneres 200 OK med Søkeresultat`() {
-        testoppsettService.lagreFagsak(fagsak(identer = setOf(FagsakPersonOld("01010199999"))))
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("01010199999"))))
 
         val response = søkPerson("01010199999")
-        assertThat(response.statusCode).isEqualTo(
-                HttpStatus.OK)
+        assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(response.body?.data?.fagsakPersonId).isEqualTo(fagsak.fagsakPersonId)
         assertThat(response.body?.data?.personIdent).isEqualTo("01010199999")
         assertThat(response.body?.data?.fagsaker?.first()?.stønadstype).isEqualTo(Stønadstype.OVERGANGSSTØNAD)
     }

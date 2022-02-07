@@ -43,9 +43,6 @@ class IntegrasjonerConfig(@Value("\${FAMILIE_INTEGRASJONER_URL}") private val in
 
     val medlemskapUri: URI = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_MEDLEMSKAP).build().toUri()
 
-    val infotrygdVedtaksperioder: URI =
-            UriComponentsBuilder.fromUri(integrasjonUri).path("api/infotrygd/vedtak-perioder").build().toUri()
-
     val navKontorUri: URI = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_NAV_KONTOR).build().toUri()
 
     companion object {

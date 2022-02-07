@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.service
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeTestUtil.lagInfotrygdPeriode
 import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
@@ -10,13 +9,15 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.kontrakter.ef.felles.StønadType
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdFinnesResponse
-import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeRequest
-import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSak
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResponse
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResultat
 import no.nav.familie.kontrakter.ef.infotrygd.Saktreff
 import no.nav.familie.kontrakter.ef.infotrygd.Vedtakstreff
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 internal class InfotrygdServiceTest {
 
@@ -61,6 +62,24 @@ internal class InfotrygdServiceTest {
         StønadType.values().forEach {
             assertThat(infotrygdService.eksisterer(ident, setOf(it))).isFalse
         }
+    }
+
+    @Test
+    internal fun `finnSaker - skal sortere de vedtaksdato desc, mottattDato desc`() {
+        fun sak(vedtaksdato: LocalDate?, mottattDato: LocalDate?) =
+                InfotrygdSak("1",
+                             resultat = InfotrygdSakResultat.INNVILGET,
+                             stønadType = StønadType.OVERGANGSSTØNAD,
+                             vedtaksdato = vedtaksdato,
+                             mottattDato = mottattDato)
+
+        val a = sak(LocalDate.of(2021, 1, 1), null)
+        val b = sak(LocalDate.of(2021, 3, 1), null)
+        val c = sak(null, LocalDate.of(2021, 3, 1))
+        val d = sak(null, LocalDate.of(2021, 1, 1))
+        every { infotrygdReplikaClient.hentSaker(any()) } returns InfotrygdSakResponse(listOf(a, b, c, d))
+
+        assertThat(infotrygdService.hentSaker(ident).saker).containsExactly(c, d, b, a)
     }
 
     private fun mockPdl(historiskIdent: String? = null) {

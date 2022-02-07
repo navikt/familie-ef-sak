@@ -16,7 +16,7 @@ import no.nav.familie.ef.sak.behandling.domain.Behandlingsjournalpost
 import no.nav.familie.ef.sak.blankett.Blankett
 import no.nav.familie.ef.sak.blankett.BlankettRepository
 import no.nav.familie.ef.sak.blankett.BlankettSteg
-import no.nav.familie.ef.sak.fagsak.domain.FagsakPersonOld
+import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.journalføring.JournalpostClient
@@ -66,7 +66,7 @@ class JournalførBlankettStegTest {
 
     private val fnr = "12345678901"
     private val fagsak = fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD,
-                                identer = setOf(FagsakPersonOld(ident = fnr)))
+                                identer = setOf(PersonIdent(ident = fnr)))
 
     private val journalpost =
             Journalpost(journalpostId = "1234",

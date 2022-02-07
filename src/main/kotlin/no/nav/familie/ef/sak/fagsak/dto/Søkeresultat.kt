@@ -8,10 +8,11 @@ import java.util.UUID
 data class Søkeresultat(val personIdent: String,
                         val visningsnavn: String,
                         val kjønn: Kjønn,
+                        val fagsakPersonId: UUID?,
                         val fagsaker: List<FagsakForSøkeresultat>)
 
 
-data class FagsakForSøkeresultat(val fagsakId: UUID, val stønadstype: Stønadstype, val erLøpende: Boolean)
+data class FagsakForSøkeresultat(val fagsakId: UUID, val stønadstype: Stønadstype, val erLøpende: Boolean, val erMigrert: Boolean)
 
 data class PersonFraSøk(
         val personIdent: String,

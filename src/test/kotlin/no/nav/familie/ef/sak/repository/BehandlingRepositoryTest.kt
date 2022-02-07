@@ -8,7 +8,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.FERDIGSTILT
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.UTREDES
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
-import no.nav.familie.ef.sak.fagsak.domain.FagsakPersonOld
+import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype.BARNETILSYN
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype.OVERGANGSSTØNAD
 import no.nav.familie.ef.sak.felles.domain.Endret
@@ -76,11 +76,11 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `finnFnrForBehandlingId(sql) skal finne gjeldende fnr for behandlingsid`() {
-        val fagsak = testoppsettService.lagreFagsak(fagsak(setOf(FagsakPersonOld(ident = "1"),
-                                                                 FagsakPersonOld(ident = "2",
-                                                                                 sporbar = Sporbar(endret = Endret(endretTid = LocalDateTime.now()
-                                                                               .plusDays(2)))),
-                                                                 FagsakPersonOld(ident = "3"))))
+        val fagsak = testoppsettService.lagreFagsak(fagsak(setOf(
+                PersonIdent(ident = "1"),
+                PersonIdent(ident = "2",
+                             sporbar = Sporbar(endret = Endret(endretTid = LocalDateTime.now().plusDays(2)))),
+                PersonIdent(ident = "3"))))
         val behandling = behandlingRepository.insert(behandling(fagsak))
         val fnr = behandlingRepository.finnAktivIdent(behandling.id)
         assertThat(fnr).isEqualTo("2")
@@ -95,7 +95,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `finnSisteBehandlingSomIkkeErBlankett`() {
         val personidenter = setOf("1", "2")
-        val fagsak = testoppsettService.lagreFagsak(fagsak(setOf(FagsakPersonOld("1"))))
+        val fagsak = testoppsettService.lagreFagsak(fagsak(setOf(PersonIdent("1"))))
         val behandling = behandlingRepository.insert(behandling(fagsak))
 
         assertThat(behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(OVERGANGSSTØNAD, personidenter))
@@ -107,7 +107,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `finnSisteBehandlingSomIkkeErBlankett - skal returnere teknisk opphør`() {
         val personidenter = setOf("1", "2")
-        val fagsak = testoppsettService.lagreFagsak(fagsak(setOf(FagsakPersonOld("1"))))
+        val fagsak = testoppsettService.lagreFagsak(fagsak(setOf(PersonIdent("1"))))
         val behandling = behandlingRepository.insert(behandling(fagsak, type = BehandlingType.TEKNISK_OPPHØR))
 
         assertThat(behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(OVERGANGSSTØNAD, personidenter))
@@ -117,7 +117,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `skal ikke returnere behandling hvis det er blankett`() {
         val personidenter = setOf("1", "2")
-        val fagsak = testoppsettService.lagreFagsak(fagsak(setOf(FagsakPersonOld("1"))))
+        val fagsak = testoppsettService.lagreFagsak(fagsak(setOf(PersonIdent("1"))))
         behandlingRepository.insert(behandling(fagsak, type = BehandlingType.BLANKETT))
 
         assertThat(behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(OVERGANGSSTØNAD, personidenter)).isNull()
@@ -125,7 +125,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `finnSisteIverksatteBehandling - skal returnere teknisk opphør hvis siste behandling er teknisk opphør`() {
-        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(FagsakPersonOld(ident))))
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent(ident))))
         behandlingRepository.insert(behandling(fagsak,
                                                status = FERDIGSTILT,
                                                opprettetTid = LocalDateTime.now().minusDays(2)))
@@ -139,7 +139,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `finnSisteIverksatteBehandling - skal ikke returnere noe hvis behandlingen ikke er ferdigstilt`() {
-        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(FagsakPersonOld(ident))))
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent(ident))))
         behandlingRepository.insert(behandling(fagsak,
                                                status = UTREDES,
                                                opprettetTid = LocalDateTime.now().minusDays(2)))
@@ -148,7 +148,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `finnSisteIverksatteBehandling - skal ikke returnere noe hvis behandlingen er type blankett`() {
-        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(FagsakPersonOld(ident))))
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent(ident))))
         behandlingRepository.insert(behandling(fagsak,
                                                status = FERDIGSTILT,
                                                type = BehandlingType.BLANKETT,
@@ -159,7 +159,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `finnSisteIverksatteBehandling skal finne id til siste ferdigstilte behandling, ikke henlagt eller blankett`() {
         val førstegangsbehandling = BehandlingOppsettUtil.iverksattFørstegangsbehandling
-        val fagsak = testoppsettService.lagreFagsak(fagsak(setOf(FagsakPersonOld("1"))).copy(id = førstegangsbehandling.fagsakId))
+        val fagsak = testoppsettService.lagreFagsak(fagsak(setOf(PersonIdent("1"))).copy(id = førstegangsbehandling.fagsakId))
 
         val behandlinger = BehandlingOppsettUtil.lagBehandlingerForSisteIverksatte()
         behandlingRepository.insertAll(behandlinger)

@@ -112,8 +112,8 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         iverksettService.startBehandling(behandling, fagsak)
         settSøknadPåBehandling(journalpostId, fagsak, behandling.id)
         knyttJournalpostTilBehandling(journalpost, behandling)
-        grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
-        barnService.opprettBarnPåBehandlingMedSøknadsdata(behandling.id, fagsak.id)
+        val grunnlagsdata = grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
+        barnService.opprettBarnPåBehandlingMedSøknadsdata(behandling.id, fagsak.id, grunnlagsdata.grunnlagsdata.barn)
 
         if (journalpost.journalstatus != Journalstatus.JOURNALFOERT) {
             oppdaterJournalpost(journalpost, journalføringRequest.dokumentTitler, fagsak.eksternId.id, saksbehandler)

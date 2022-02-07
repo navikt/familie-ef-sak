@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.testutil
 
 import io.mockk.mockk
+import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Adressebeskyttelse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.DeltBosted
@@ -23,6 +24,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Telefonnummer
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.TilrettelagtKommunikasjon
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.UtflyttingFraNorge
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.VergemaalEllerFremtidsfullmakt
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn
 import no.nav.familie.kontrakter.ef.søknad.Aktivitet
 import no.nav.familie.kontrakter.ef.søknad.Barn
 import no.nav.familie.kontrakter.ef.søknad.Bosituasjon
@@ -35,6 +37,7 @@ import no.nav.familie.kontrakter.ef.søknad.Sivilstandsplaner
 import no.nav.familie.kontrakter.ef.søknad.Stønadsstart
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
 import no.nav.familie.kontrakter.ef.søknad.Søknadsfelt
+import java.util.UUID
 
 fun pdlSøker(adressebeskyttelse: List<Adressebeskyttelse> = mockk(),
              bostedsadresse: List<Bostedsadresse> = mockk(),
@@ -110,3 +113,12 @@ fun søknad(personalia: Søknadsfelt<Personalia> = mockk(),
                               aktivitet,
                               situasjon,
                               stønadsstart)
+
+
+fun søknadsBarnTilBehandlingBarn(barn: Set<SøknadBarn>, behandlingId: UUID = UUID.randomUUID()): List<BehandlingBarn> = barn.map {
+    BehandlingBarn(behandlingId = behandlingId,
+                   søknadBarnId = it.id,
+                   personIdent = it.fødselsnummer,
+                   navn = it.navn,
+                   fødselTermindato = it.fødselTermindato)
+}

@@ -11,7 +11,7 @@ import no.nav.familie.ef.sak.vedtak.dto.TotrinnskontrollStatusDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import org.springframework.format.annotation.DateTimeFormat
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -35,6 +35,8 @@ class VedtakController(private val stegService: StegService,
                        private val totrinnskontrollService: TotrinnskontrollService,
                        private val tilgangService: TilgangService,
                        private val vedtakService: VedtakService) {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     @PostMapping("/{behandlingId}/send-til-beslutter")
     fun sendTilBeslutter(@PathVariable behandlingId: UUID): Ressurs<UUID> {
@@ -69,8 +71,7 @@ class VedtakController(private val stegService: StegService,
 
     @GetMapping("/eksternid/{eksternId}/inntekt")
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) //Familie-ef-personhendelse bruker denne
-    fun hentForventetInntektForEksternId(@PathVariable eksternId: Long,
-                                         @DateTimeFormat(pattern = "yyyy-MM-dd") dato: LocalDate?): Ressurs<Int?> {
+    fun hentForventetInntektForEksternId(@PathVariable eksternId: Long, dato: LocalDate?): Ressurs<Int?> {
         val behandlingId = behandlingService.hentBehandlingPåEksternId(eksternId).id
 
         val forventetInntekt = vedtakService.hentForventetInntektForVedtakOgDato(behandlingId, dato ?: LocalDate.now())
@@ -79,8 +80,7 @@ class VedtakController(private val stegService: StegService,
 
     @GetMapping("/eksternid/{eksternId}/harAktivtVedtak")
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) //Familie-ef-personhendelse bruker denne
-    fun hentHarAktivStonad(@PathVariable eksternId: Long,
-                           @DateTimeFormat(pattern = "yyyy-MM-dd") dato: LocalDate?): Ressurs<Boolean> {
+    fun hentHarAktivStonad(@PathVariable eksternId: Long, dato: LocalDate?): Ressurs<Boolean> {
         val behandlingId = behandlingService.hentBehandlingPåEksternId(eksternId).id
 
         val forventetInntekt = vedtakService.hentHarAktivtVedtak(behandlingId, dato ?: LocalDate.now())
@@ -95,7 +95,7 @@ class VedtakController(private val stegService: StegService,
         for (behandlingId in behandlingIds) {
             val forventetInntekt = vedtakService.hentForventetInntektForVedtakOgDato(behandlingId, LocalDate.now().minusMonths(1))
             val ident = behandlingService.hentAktivIdent(behandlingId)
-            identToForventetInntektMap.put(ident, forventetInntekt)
+            identToForventetInntektMap[ident] = forventetInntekt
         }
         return Ressurs.success(identToForventetInntektMap)
     }
