@@ -19,6 +19,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlSøker
 import no.nav.familie.kontrakter.felles.PersonIdent
+import no.nav.familie.util.FnrGenerator
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -46,8 +47,7 @@ class NyeBarnServiceTest {
     val fnrForVoksentBarn = "22100188701"
     val fødselsdatoVoksentBarn = LocalDate.of(2001, 10, 22)
 
-    @BeforeEach
-    fun init() {
+    @BeforeEach fun init() {
         every { behandlingService.finnSisteIverksatteBehandling(any()) } returns behandling
         every { fagsakService.finnFagsak(any(), any()) } returns fagsak
         every { fagsak.id } returns UUID.randomUUID()
@@ -56,9 +56,10 @@ class NyeBarnServiceTest {
     }
 
     @Test
-    fun `finnNyeBarnSidenGjeldendeBehandling med et nytt barn i PDL siden behandling, forvent ett nytt barn`() {
+    fun `finnNyeBarnSidenGjeldendeBehandlingForPersonIdent med et nytt barn i PDL siden behandling, forvent ett nytt barn`() {
         val pdlBarn = mapOf(fnrForEksisterendeBarn to pdlBarn(fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
-                            fnrForNyttBarn to pdlBarn(fødsel(fødselsdato = fødselsdatoNyttBarn)))
+                            fnrForNyttBarn to pdlBarn(fødsel(fødselsdato = fødselsdatoNyttBarn))
+        )
         every { personService.hentPersonMedBarn(any()) } returns søkerMedBarn(pdlBarn)
         every { barnService.finnBarnPåBehandling(any()) } returns listOf(behandlingBarn(fnrForEksisterendeBarn))
 
@@ -68,7 +69,64 @@ class NyeBarnServiceTest {
     }
 
     @Test
-    fun `finnNyeBarnSidenGjeldendeBehandling med ett og samme barn i PDL siden behandling, forvent ingen treff`() {
+    fun `finnNyeBarnSidenGjeldendeBehandlingForPersonIdent med ett født terminbarn i PDL, forvent ingen treff`() {
+        val terminDato = LocalDate.now()
+        val fødselsdato = LocalDate.now().minusWeeks(5)
+        val fnrForPdlBarn = FnrGenerator.generer(fødselsdato.year, fødselsdato.month.value, fødselsdato.dayOfMonth)
+        val pdlBarn = mapOf(fnrForEksisterendeBarn to pdlBarn(fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
+                            fnrForPdlBarn to pdlBarn(fødsel(fødselsdato = fødselsdato))
+        )
+        every { personService.hentPersonMedBarn(any()) } returns søkerMedBarn(pdlBarn)
+        every { barnService.finnBarnPåBehandling(any()) } returns listOf(
+                behandlingBarn(fnrForEksisterendeBarn), behandlingBarn(fødselTermindato = terminDato)
+        )
+
+        val barn = nyeBarnService.finnNyeBarnSidenGjeldendeBehandlingForPersonIdent(PersonIdent("fnr til søker"))
+        assertThat(barn.size).isEqualTo(0)
+    }
+
+    @Test
+    fun `finnNyeBarnSidenGjeldendeBehandlingForPersonIdent med tvillinger i PDL av terminbarn med alle i behandlingen, forvent ingen nye barn`() {
+        val terminDato = LocalDate.now()
+        val fødselsdato = LocalDate.now().minusWeeks(5)
+        val fnrForTerminbarn = FnrGenerator.generer(fødselsdato.year, fødselsdato.month.value, fødselsdato.dayOfMonth)
+        val fnrForTvillingbarn = FnrGenerator.generer(fødselsdato.year, fødselsdato.month.value, fødselsdato.dayOfMonth)
+        val pdlBarn = mapOf(fnrForEksisterendeBarn to pdlBarn(fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
+                            fnrForTerminbarn to pdlBarn(fødsel(fødselsdato = fødselsdato)),
+                            fnrForTvillingbarn to pdlBarn(fødsel(fødselsdato = fødselsdato))
+        )
+        every { personService.hentPersonMedBarn(any()) } returns søkerMedBarn(pdlBarn)
+        every { barnService.finnBarnPåBehandling(any()) } returns listOf(
+                behandlingBarn(fnrForEksisterendeBarn),
+                behandlingBarn(fødselTermindato = terminDato),
+                behandlingBarn(fødselTermindato = terminDato)
+        )
+
+        val barn = nyeBarnService.finnNyeBarnSidenGjeldendeBehandlingForPersonIdent(PersonIdent("fnr til søker"))
+        assertThat(barn.size).isEqualTo(0)
+    }
+
+    @Test
+    fun `finnNyeBarnSidenGjeldendeBehandlingForPersonIdent med tvillinger i PDL av terminbarn, men bare ett i behandlingen, forvent ett nytt barn`() {
+        val terminDato = LocalDate.now()
+        val fødselsdato = LocalDate.now().minusWeeks(5)
+        val fnrForTerminbarn = FnrGenerator.generer(fødselsdato.year, fødselsdato.month.value, fødselsdato.dayOfMonth)
+        val fnrForTvillingbarn = FnrGenerator.generer(fødselsdato.year, fødselsdato.month.value, fødselsdato.dayOfMonth)
+        val pdlBarn = mapOf(fnrForEksisterendeBarn to pdlBarn(fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
+                            fnrForTerminbarn to pdlBarn(fødsel(fødselsdato = fødselsdato)),
+                            fnrForTvillingbarn to pdlBarn(fødsel(fødselsdato = fødselsdato))
+        )
+        every { personService.hentPersonMedBarn(any()) } returns søkerMedBarn(pdlBarn)
+        every { barnService.finnBarnPåBehandling(any()) } returns listOf(
+                behandlingBarn(fnrForEksisterendeBarn), behandlingBarn(fødselTermindato = terminDato)
+        )
+
+        val barn = nyeBarnService.finnNyeBarnSidenGjeldendeBehandlingForPersonIdent(PersonIdent("fnr til søker"))
+        assertThat(barn.size).isEqualTo(1)
+    }
+
+    @Test
+    fun `finnNyeBarnSidenGjeldendeBehandlingForPersonIdent med ett og samme barn i PDL siden behandling, forvent ingen treff`() {
         val pdlBarn = mapOf(fnrForEksisterendeBarn to pdlBarn(fødsel(fødselsdato = fødselsdatoEksisterendeBarn)))
         every { personService.hentPersonMedBarn(any()) } returns søkerMedBarn(pdlBarn)
         every { barnService.finnBarnPåBehandling(any()) } returns listOf(behandlingBarn(fnrForEksisterendeBarn))
@@ -78,9 +136,10 @@ class NyeBarnServiceTest {
     }
 
     @Test
-    fun `finnNyeBarnSidenGjeldendeBehandling med ett ekstra voksent barn i PDL, forvent ingen treff`() {
+    fun `finnNyeBarnSidenGjeldendeBehandlingForPersonIdent med ett ekstra voksent barn i PDL, forvent ingen treff`() {
         val pdlBarn = mapOf(fnrForEksisterendeBarn to pdlBarn(fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
-                            fnrForVoksentBarn to pdlBarn(fødsel(fødselsdato = fødselsdatoVoksentBarn)))
+                            fnrForVoksentBarn to pdlBarn(fødsel(fødselsdato = fødselsdatoVoksentBarn))
+        )
         every { personService.hentPersonMedBarn(any()) } returns søkerMedBarn(pdlBarn)
         every { barnService.finnBarnPåBehandling(any()) } returns listOf(behandlingBarn(fnrForEksisterendeBarn))
 
@@ -89,12 +148,14 @@ class NyeBarnServiceTest {
     }
 
     @Test
-    fun `finnNyeBarnSidenGjeldendeBehandling med ett ekstra terminbarn i PDL, forvent ingen treff`() {
+    fun `finnNyeBarnSidenGjeldendeBehandlingForPersonIdent med ett ekstra terminbarn i PDL, forvent ingen treff`() {
         val pdlBarn = mapOf(fnrForEksisterendeBarn to pdlBarn(fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
-                            fnrForNyttBarn to pdlBarn(fødsel(fødselsdato = fødselsdatoNyttBarn)))
+                            fnrForNyttBarn to pdlBarn(fødsel(fødselsdato = fødselsdatoNyttBarn))
+        )
         every { personService.hentPersonMedBarn(any()) } returns søkerMedBarn(pdlBarn)
-        every { barnService.finnBarnPåBehandling(any()) } returns listOf(behandlingBarn(fnrForEksisterendeBarn),
-                                                                         behandlingBarn(fødselTermindato = fødselsdatoNyttBarn))
+        every { barnService.finnBarnPåBehandling(any()) } returns listOf(
+                behandlingBarn(fnrForEksisterendeBarn), behandlingBarn(fødselTermindato = fødselsdatoNyttBarn)
+        )
 
         val barn = nyeBarnService.finnNyeBarnSidenGjeldendeBehandlingForPersonIdent(PersonIdent("fnr til søker"))
         assertThat(barn.size).isEqualTo(0)
