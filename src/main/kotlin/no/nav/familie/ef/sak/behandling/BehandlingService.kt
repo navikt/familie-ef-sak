@@ -198,4 +198,8 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
         behandlingRepository.update(behandling.copy(status = BehandlingStatus.UTREDES))
         taskService.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId))
     }
+
+    fun hentSisteIverksatteBehandling(fagsakId: UUID): Behandling? {
+        return behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
+    }
 }
