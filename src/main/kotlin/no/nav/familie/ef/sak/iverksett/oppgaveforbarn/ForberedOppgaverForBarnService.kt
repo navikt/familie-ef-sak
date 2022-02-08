@@ -39,7 +39,7 @@ class ForberedOppgaverForBarnService(private val gjeldendeBarnRepository: Gjelde
             val beskrivelse = utplukketBarn.second
             OppgaveForBarn(it.behandlingId,
                            it.eksternFagsakId,
-                           utplukketBarn.first.fodselsnummerSoker!!,
+                           utplukketBarn.first.fødselsnummerSøker!!,
                            Stønadstype.OVERGANGSSTØNAD.name,
                            beskrivelse)
         }
@@ -64,7 +64,7 @@ class ForberedOppgaverForBarnService(private val gjeldendeBarnRepository: Gjelde
     }
 
     private fun fødselsdato(barnTilUtplukkForOppgave: BarnTilUtplukkForOppgave): LocalDate {
-        return barnTilUtplukkForOppgave.fodselsnummerBarn?.let {
+        return barnTilUtplukkForOppgave.fødselsnummerBarn?.let {
             Fødselsnummer(it).fødselsdato
         } ?: barnTilUtplukkForOppgave.termindatoBarn ?: error("Ingen datoer for barn funnet")
     }

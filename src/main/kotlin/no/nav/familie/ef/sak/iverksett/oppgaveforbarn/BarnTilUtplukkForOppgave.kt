@@ -1,13 +1,16 @@
 package no.nav.familie.ef.sak.iverksett.oppgaveforbarn
 
 import nonapi.io.github.classgraph.json.Id
+import org.springframework.data.relational.core.mapping.Column
 import java.time.LocalDate
 import java.util.UUID
 
 data class BarnTilUtplukkForOppgave(@Id
                                    val behandlingId: UUID,
-                                    val fodselsnummerSoker: String?,
-                                    val fodselsnummerBarn: String?,
+                                    @Column("fodselsnummer_soker")
+                                    val fødselsnummerSøker: String,
+                                    @Column("fodselsnummer_barn")
+                                    val fødselsnummerBarn: String?,
                                     val termindatoBarn: LocalDate?)
 
 data class OppgaveForBarn(val behandlingId: UUID,

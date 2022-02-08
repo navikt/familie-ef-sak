@@ -120,7 +120,7 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
                 Stønadstype.OVERGANGSSTØNAD,
                 LocalDate.now())
         assertThat(barnForUtplukk.size).isEqualTo(1)
-        assertThat(barnForUtplukk.first().fodselsnummerSoker).isEqualTo(nyesteFnrSøker)
+        assertThat(barnForUtplukk.first().fødselsnummerSøker).isEqualTo(nyesteFnrSøker)
         barnForUtplukk.forEach { assertThat(it.behandlingId).isEqualTo(behandlingMedFremtidigAndel.id) }
     }
 
