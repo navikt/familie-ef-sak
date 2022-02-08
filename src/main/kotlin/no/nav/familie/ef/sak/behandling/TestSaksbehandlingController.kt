@@ -73,7 +73,7 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
         val behandling: Behandling = when (testFagsakRequest.behandlingsType) {
             FØRSTEGANGSBEHANDLING -> lagFørstegangsbehandling(søknadBuilder.søknadOvergangsstønad, fagsak)
             BLANKETT -> lagBlankettBehandling(personIdent, søknadBuilder.søknadOvergangsstønad, fagsak)
-            MIGRERING -> lagMigreringBehandling(personIdent, fagsak)
+            MIGRERING -> lagMigreringBehandling(fagsak)
             BARNETILSYN -> lagBarnetilsynBehandling(søknadBuilder.søknadBarnetilsyn, fagsak)
         }
 
@@ -183,7 +183,7 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
     }
 
 
-    private fun lagMigreringBehandling(personIdent: String, fagsak: Fagsak): Behandling {
+    private fun lagMigreringBehandling(fagsak: Fagsak): Behandling {
         return migreringService.opprettMigrering(fagsak = fagsak,
                                                  fra = YearMonth.now(),
                                                  til = YearMonth.now().plusMonths(1),
