@@ -58,7 +58,7 @@ internal class VurderingServiceTest {
                                                     grunnlagsdataService = grunnlagsdataService,
                                                     barnService = barnService)
     private val søknad = SøknadsskjemaMapper.tilDomene(TestsøknadBuilder.Builder().setBarn(listOf(
-            TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "13071489536"),
+            TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "14041385481"),
             TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "01012067050")
     )).build().søknadOvergangsstønad)
     private val barn = søknadsBarnTilBehandlingBarn(søknad.barn)

@@ -294,7 +294,8 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     private fun opprettRevurderingOgIverksett(migrering: Behandling): Behandling {
         val revurderingDto = RevurderingDto(fagsakId = migrering.fagsakId,
                                             behandlingsårsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
-                                            kravMottatt = LocalDate.now())
+                                            kravMottatt = LocalDate.now(),
+                                            emptyList())
         val revurdering = testWithBrukerContext { revurderingService.opprettRevurderingManuelt(revurderingDto) }
         innvilgOgSendTilBeslutter(revurdering)
         godkjennTotrinnskontroll(revurdering)

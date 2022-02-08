@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.opplysninger.mapper
 
 import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.kontrakter.ef.søknad.Fødselsnummer
 import java.time.LocalDate
 import kotlin.math.abs
@@ -59,23 +58,6 @@ object BarnMatcher {
             val epochDayTermindato = fødselTermindato.toEpochDay()
             abs(epochDayForFødsel - epochDayTermindato)
         }
-    }
-
-    // TODO: Denne må støtte tvillinger
-    fun forsøkMatchPåFødselsdato(fødselTermindato: LocalDate, barnFraPdlMenIkkeIBehandlingen: List<BarnMedIdent>): BarnMedIdent? {
-        val uke20 = fødselTermindato.minusWeeks(20)
-        val uke44 = fødselTermindato.plusWeeks(4)
-
-        val nærmesteMatch = barnFraPdlMenIkkeIBehandlingen.filter {
-            val fødselsdato = it.fødsel.gjeldende().fødselsdato ?: Fødselsnummer(it.personIdent).fødselsdato
-            fødselsdato.isBefore(uke44) and fødselsdato.isAfter(uke20)
-        }.minByOrNull {
-            val epochDayForFødsel =
-                    it.fødsel.gjeldende().fødselsdato?.toEpochDay() ?: Fødselsnummer(it.personIdent).fødselsdato.toEpochDay()
-            val epochDayTermindato = fødselTermindato.toEpochDay()
-            abs(epochDayForFødsel - epochDayTermindato)
-        }
-        return nærmesteMatch
     }
 
 }
