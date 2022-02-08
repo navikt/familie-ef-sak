@@ -116,7 +116,7 @@ class MigreringService(
         }
         fagsakService.settFagsakTilMigrert(fagsak.id)
         val behandling = behandlingService.opprettMigrering(fagsak.id)
-        logger.info("Migrerer fagsak=${fagsak.id} behandling=$behandling fra=$fra til=$til")
+        logger.info("Migrerer fagsak=${fagsak.id} behandling=${behandling.id} fra=$fra til=$til")
         iverksettService.startBehandling(behandling, fagsak)
 
         grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
@@ -136,7 +136,9 @@ class MigreringService(
         val iverksettDto = iverksettingDtoMapper.tilMigreringDto(behandling)
         iverksettClient.iverksettMigrering(iverksettDto)
         taskRepository.save(PollStatusFraIverksettTask.opprettTask(behandling.id))
-        taskRepository.save(SjekkMigrertStatusIInfotrygdTask.opprettTask(behandling.id, fra.minusMonths(1)))
+        taskRepository.save(SjekkMigrertStatusIInfotrygdTask.opprettTask(behandling.id,
+                                                                         fra.minusMonths(1),
+                                                                         fagsak.hentAktivIdent()))
 
         return behandlingService.hentBehandling(behandling.id)
     }
