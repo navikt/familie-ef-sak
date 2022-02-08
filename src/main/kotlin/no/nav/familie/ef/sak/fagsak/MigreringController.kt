@@ -29,15 +29,14 @@ class MigreringController(private val migreringService: MigreringService,
                           private val tilgangService: TilgangService) {
 
     @GetMapping("{fagsakId}")
-    fun hentBehandling(@PathVariable fagsakId: UUID): Ressurs<MigreringInfo> {
+    fun hentMigreringInfo(@PathVariable fagsakId: UUID): Ressurs<MigreringInfo> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(migreringService.hentMigreringInfo(fagsakId))
     }
 
     @PostMapping("{fagsakId}")
-    fun resetSteg(@PathVariable fagsakId: UUID): Ressurs<String> {
+    fun migrerFagsak(@PathVariable fagsakId: UUID): Ressurs<UUID> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.CREATE)
-        migreringService.migrerFagsak(fagsakId)
-        return Ressurs.success("OK")
+        return Ressurs.success(migreringService.migrerFagsak(fagsakId))
     }
 }
