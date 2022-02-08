@@ -61,16 +61,34 @@ class MigreringService(
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
+    private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
-    private class MigreringException(val årsak: String) : RuntimeException()
+    private enum class MigreringExceptionType {
+        ÅPEN_SAK,
+        FLERE_IDENTER,
+        FLERE_AKTIVE_PERIODER,
+        HAR_OPPHØRSDATO,
+        MANGLER_AKTIVE_PERIODER,
+        HAR_ALLEREDE_BEHANDLINGER,
+        FEIL_STØNADSTYPE,
+        FLERE_IDENTER_VEDTAK,
+        ALLEREDE_MIGRERT
+    }
+
+    private class MigreringException(val årsak: String, val type: MigreringExceptionType) : RuntimeException()
 
     fun hentMigreringInfo(fagsakId: UUID, kjøremåned: YearMonth = kjøremåned()): MigreringInfo {
         val periode = try {
             validerSakerIInfotrygd(fagsakId)
             hentGjeldendePeriodeOgValiderState(fagsakId, kjøremåned)
         } catch (e: MigreringException) {
+            logger.info("Kan ikke migrere fagsak=$fagsakId årsak=${e.type}")
+            if (e.type == MigreringExceptionType.FLERE_IDENTER || e.type == MigreringExceptionType.FLERE_IDENTER_VEDTAK) {
+                secureLogger.info("Kan ikke migrere fagsak=$fagsakId - ${e.årsak}")
+            }
             return MigreringInfo(kanMigreres = false, e.årsak)
         }
+        logger.info("Kan migrere fagsak=$fagsakId")
 
         val fra = fra(kjøremåned, periode)
         val til = til(periode)
@@ -172,13 +190,15 @@ class MigreringService(
         validerFagsakOgBehandling(fagsak)
         val gjeldendePerioder = hentGjeldendePerioderFraInfotrygdOgValider(personIdent, kjøremåned)
         if (gjeldendePerioder.isEmpty()) {
-            throw MigreringException("Har 0 aktive perioder")
+            throw MigreringException("Har 0 aktive perioder", MigreringExceptionType.MANGLER_AKTIVE_PERIODER)
         } else if (gjeldendePerioder.size > 1) {
-            throw MigreringException("Har fler enn 1 (${gjeldendePerioder.size}) aktiv periode")
+            throw MigreringException("Har fler enn 1 (${gjeldendePerioder.size}) aktiv periode",
+                                     MigreringExceptionType.FLERE_AKTIVE_PERIODER)
         }
         val periode = gjeldendePerioder.single()
         if (periode.opphørsdato != null) { // Håndterer ikke denne nå
-            throw MigreringException("Har opphørsdato (${periode.opphørsdato}) i perioden")
+            throw MigreringException("Har opphørsdato (${periode.opphørsdato}) i perioden",
+                                     MigreringExceptionType.HAR_OPPHØRSDATO)
         }
         return periode
     }
@@ -189,12 +209,13 @@ class MigreringService(
         val sakerForOvergangsstønad =
                 infotrygdService.hentSaker(personIdent).saker.filter { it.stønadType == StønadType.OVERGANGSSTØNAD }
         sakerForOvergangsstønad.find { it.resultat == InfotrygdSakResultat.ÅPEN_SAK }?.let {
-            throw MigreringException("Har åpen sak. ${lagSakFeilinfo(it)}")
+            throw MigreringException("Har åpen sak. ${lagSakFeilinfo(it)}", MigreringExceptionType.ÅPEN_SAK)
         }
         sakerForOvergangsstønad.find { it.personIdent != personIdent }?.let {
             throw MigreringException("Finnes sak med annen personIdent for personen. ${lagSakFeilinfo(it)} " +
                                      "personIdent=${it.personIdent}. " +
-                                     "Disse sakene må oppdateres med aktivt fnr i Infotrygd")
+                                     "Disse sakene må oppdateres med aktivt fnr i Infotrygd",
+                                     MigreringExceptionType.FLERE_IDENTER)
         }
         return sakerForOvergangsstønad
     }
@@ -206,11 +227,12 @@ class MigreringService(
 
     private fun validerFagsakOgBehandling(fagsak: Fagsak) {
         if (fagsak.stønadstype != Stønadstype.OVERGANGSSTØNAD) {
-            throw MigreringException("Håndterer ikke andre stønadstyper enn overgangsstønad")
+            throw MigreringException("Håndterer ikke andre stønadstyper enn overgangsstønad",
+                                     MigreringExceptionType.FEIL_STØNADSTYPE)
         } else if (fagsak.migrert) {
-            throw MigreringException("Fagsak er allerede migrert")
+            throw MigreringException("Fagsak er allerede migrert", MigreringExceptionType.ALLEREDE_MIGRERT)
         } else if (behandlingService.hentBehandlinger(fagsak.id).any { it.type != BehandlingType.BLANKETT }) {
-            throw MigreringException("Fagsaken har allerede behandlinger")
+            throw MigreringException("Fagsaken har allerede behandlinger", MigreringExceptionType.HAR_ALLEREDE_BEHANDLINGER)
         }
     }
 
@@ -220,7 +242,8 @@ class MigreringService(
         val perioder = hentPerioder(personIdent)
         perioder.perioder.find { it.personIdent != personIdent }?.let {
             throw MigreringException("Det finnes perioder som inneholder annet fnr=${it.personIdent}. " +
-                                     "Disse vedtaken må endres til aktivt fnr i Infotrygd")
+                                     "Disse vedtaken må endres til aktivt fnr i Infotrygd",
+                                     MigreringExceptionType.FLERE_IDENTER_VEDTAK)
         }
         return perioder.summert.filter { it.stønadTom >= førsteDagenINesteMåned(kjøremåned) }
     }
