@@ -107,17 +107,17 @@ class MigreringService(
      * Henter data fra infotrygd og oppretter migrering
      */
     @Transactional
-    fun migrerFagsak(fagsakId: UUID) {
+    fun migrerFagsak(fagsakId: UUID): UUID {
         val personIdent = fagsakService.hentAktivIdent(fagsakId)
         val kjøremåned = kjøremåned()
         val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, Stønadstype.OVERGANGSSTØNAD)
         validerSakerIInfotrygd(fagsakId)
         val periode = hentGjeldendePeriodeOgValiderState(fagsakId, kjøremåned)
-        opprettMigrering(fagsak = fagsak,
-                         fra = fra(kjøremåned, periode),
-                         til = til(periode),
-                         inntektsgrunnlag = periode.inntektsgrunnlag,
-                         samordningsfradrag = periode.samordningsfradrag)
+        return opprettMigrering(fagsak = fagsak,
+                                fra = fra(kjøremåned, periode),
+                                til = til(periode),
+                                inntektsgrunnlag = periode.inntektsgrunnlag,
+                                samordningsfradrag = periode.samordningsfradrag).id
     }
 
     /**

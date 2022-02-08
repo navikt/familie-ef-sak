@@ -35,9 +35,8 @@ class MigreringController(private val migreringService: MigreringService,
     }
 
     @PostMapping("{fagsakId}")
-    fun resetSteg(@PathVariable fagsakId: UUID): Ressurs<String> {
+    fun resetSteg(@PathVariable fagsakId: UUID): Ressurs<UUID> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.CREATE)
-        migreringService.migrerFagsak(fagsakId)
-        return Ressurs.success("OK")
+        return Ressurs.success(migreringService.migrerFagsak(fagsakId))
     }
 }
