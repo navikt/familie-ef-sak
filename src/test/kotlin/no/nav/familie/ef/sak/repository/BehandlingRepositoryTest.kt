@@ -20,6 +20,7 @@ import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.relational.core.conversion.DbActionExecutionException
 import java.time.LocalDateTime
@@ -183,6 +184,41 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(first.behandlingId).isEqualTo(behandling.id)
         assertThat(first.eksternBehandlingId).isEqualTo(behandling.eksternId.id)
         assertThat(first.eksternFagsakId).isEqualTo(fagsak.eksternId.id)
+    }
+    @Test
+    internal fun `finnEksterneIder - send inn én behandlingId som finnes, forvent én eksternId `() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak))
+        val annenFagsak = testoppsettService.lagreFagsak(fagsak())
+        val annenBehandling = behandlingRepository.insert(behandling(annenFagsak))
+
+        val eksterneIder = behandlingRepository.finnEksterneIder(setOf(annenBehandling.id))
+
+        assertThat(fagsak.eksternId.id).isNotEqualTo(0L)
+        assertThat(behandling.eksternId.id).isNotEqualTo(0L)
+
+        assertThat(eksterneIder).hasSize(1)
+        val first = eksterneIder.first()
+        assertThat(first.behandlingId).isEqualTo(annenBehandling.id)
+        assertThat(first.eksternBehandlingId).isEqualTo(annenBehandling.eksternId.id)
+        assertThat(first.eksternFagsakId).isEqualTo(annenFagsak.eksternId.id)
+    }
+
+    @Test
+    internal fun `finnEksterneIder - send inn behandlingIder som ikke finnes, forvent ingen treff `() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak))
+        val eksterneIder = behandlingRepository.finnEksterneIder(setOf(UUID.randomUUID(), UUID.randomUUID()))
+        assertThat(eksterneIder.isEmpty())
+    }
+
+    @Test
+    internal fun `finnEksterneIder - send inn tomt sett, forvent unntak `() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak))
+        assertThrows<Exception> {
+            assertThat(behandlingRepository.finnEksterneIder(emptySet()))
+        }
     }
 
     @Test
