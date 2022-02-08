@@ -30,10 +30,8 @@ class NyeBarnService(private val behandlingService: BehandlingService,
 
     fun finnNyeBarnSidenGjeldendeBehandlingForFagsak(fagsakId: UUID): List<BarnMinimumDto> {
         val behandling = behandlingService.finnSisteIverksatteBehandling(fagsakId)
-                         ?: error("Kunne ikke finne behandling for fagsak - $fagsakId")
         val aktivIdent = fagsakService.hentAktivIdent(fagsakId)
-        return finnNyeBarnSidenGjeldendeBehandling(behandling.id, aktivIdent)
-
+        return behandling?.let { finnNyeBarnSidenGjeldendeBehandling(behandling.id, aktivIdent)  } ?: emptyList()
     }
 
     private fun finnNyeBarnSidenGjeldendeBehandling(forrigeBehandlingId: UUID, personIdent: String): List<BarnMinimumDto> {
