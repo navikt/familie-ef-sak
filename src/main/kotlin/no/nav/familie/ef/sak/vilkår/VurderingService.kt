@@ -155,7 +155,7 @@ class VurderingService(private val behandlingService: BehandlingService,
 
     private fun finnBarnId(barnId: UUID?, barnIdMap: Map<UUID, BehandlingBarn>): UUID? {
         return barnId?.let {
-            barnIdMap[it]?.id ?: error("Fant ikke barn på gjeldende behandling")
+            barnIdMap[it]?.id ?: error("Fant ikke barn=${it} på gjeldende behandling")
         }
     }
 
