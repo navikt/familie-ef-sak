@@ -132,7 +132,7 @@ class TilbakekrevingService(private val tilbakekrevingRepository: Tilbakekreving
                        frontendFeilmelding = kanBehandlingOpprettesManuelt.melding)
         }
 
-        val behandling = behandlingService.hentSisteIverksatteBehandling(fagsakId)
+        val behandling = behandlingService.finnSisteIverksatteBehandling(fagsakId)
                          ?: throw Feil("Kan ikke opprette manuell tilbakekreving for fagsak uten iverksatt behandling. " +
                                        "fagsakId=$fagsakId")
 

@@ -199,7 +199,4 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
         taskService.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId))
     }
 
-    fun hentSisteIverksatteBehandling(fagsakId: UUID): Behandling? {
-        return behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
-    }
 }
