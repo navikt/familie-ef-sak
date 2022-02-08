@@ -56,7 +56,7 @@ internal class PersonopplysningerServiceTest {
         grunnlagsdataService = GrunnlagsdataService(mockk(),
                                                     søknadService,
                                                     grunnlagsdataRegisterService,
-                                                    behandlingService)
+                                                    behandlingService, mockk())
         val personopplysningerMapper =
                 PersonopplysningerMapper(adresseMapper,
                                          StatsborgerskapMapper(kodeverkService),

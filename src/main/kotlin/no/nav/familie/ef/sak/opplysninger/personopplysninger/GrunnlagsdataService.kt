@@ -1,6 +1,9 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
@@ -17,7 +20,9 @@ import java.util.UUID
 class GrunnlagsdataService(private val grunnlagsdataRepository: GrunnlagsdataRepository,
                            private val søknadService: SøknadService,
                            private val grunnlagsdataRegisterService: GrunnlagsdataRegisterService,
-                           private val behandlingService: BehandlingService) {
+                           private val behandlingService: BehandlingService,
+                           private val fagsakService: FagsakService
+) {
 
     fun opprettGrunnlagsdata(behandlingId: UUID): GrunnlagsdataMedMetadata {
         val grunnlagsdataDomene = hentGrunnlagsdataFraRegister(behandlingId)
@@ -54,7 +59,14 @@ class GrunnlagsdataService(private val grunnlagsdataRepository: GrunnlagsdataRep
     }
 
     private fun hentGrunnlagsdataFraRegister(behandlingId: UUID): GrunnlagsdataDomene {
-        val søknad = søknadService.hentOvergangsstønad(behandlingId)
+
+        val stønadstype = fagsakService.hentFagsakForBehandling(behandlingId).stønadstype
+        val søknad = when (stønadstype) {
+            Stønadstype.OVERGANGSSTØNAD -> søknadService.hentOvergangsstønad(behandlingId)
+            Stønadstype.BARNETILSYN -> søknadService.hentBarnetilsyn(behandlingId)
+            else -> throw Feil("Ikke implementert støtte for Støndastype $stønadstype")
+        }
+
         return if (søknad == null) {
             hentGrunnlagsdataFraRegister(behandlingService.hentAktivIdent(behandlingId), emptyList())
         } else {
