@@ -69,7 +69,6 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
             }
             is Sanksjonert -> {
                 opprettTilkjentYtelseForSanksjonertBehandling(data, behandling, aktivIdent)
-                tilbakekrevingService
             }
         }
     }
@@ -133,7 +132,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                                                               behandling: Behandling,
                                                               aktivIdent: String) {
 
-        val andelerTilkjentYtelse: List<AndelTilkjentYtelse> = andelerForSanksjonertRevurdering(behandling, vedtak.periode.tilPeriode())
+        val andelerTilkjentYtelse = andelerForSanksjonertRevurdering(behandling, vedtak.periode.tilPeriode())
         feilHvis(andelerTilkjentYtelse.isEmpty()) { "Innvilget vedtak må ha minimum en beløpsperiode" }
 
         tilkjentYtelseService.opprettTilkjentYtelse(TilkjentYtelse(personident = aktivIdent,
@@ -187,7 +186,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
         return behandling.forrigeBehandlingId?.let {
             val forrigeTilkjenteYtelse = hentForrigeTilkjenteYtelse(behandling)
             return vurderPeriodeForOpphør(forrigeTilkjenteYtelse.andelerTilkjentYtelse, listOf(opphørsperiode))
-        } ?: throw Feil("Forsøk på å opprette sanksjon mislyktes")
+        } ?: throw Feil("Kan ikke opprette sanksjon når det ikke finnes en tidligere behandling")
     }
 
     fun vurderPeriodeForOpphør(andelTilkjentYtelser: List<AndelTilkjentYtelse>,

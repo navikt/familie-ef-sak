@@ -36,7 +36,6 @@ enum class Sanksjonsårsak {
     SAGT_OPP_STILLING,
     UNNLATT_GJENOPPTAGELSE_ARBEIDSFORHOLD,
     UNNLATT_MØTE_INNKALLING,
-    INGEN_VALGT, // Uoppnåelig verdi
 }
 
 fun ResultatType.tilVedtaksresultat(): Vedtaksresultat = when (this) {
@@ -121,9 +120,9 @@ fun Vedtak.tilVedtakDto(): VedtakDto =
             )
             ResultatType.SANKSJONERE -> Sanksjonert(
                     resultatType = this.resultatType,
-                    sanksjonsårsak = this.sanksjonsårsak ?: Sanksjonsårsak.INGEN_VALGT,
-                    periode = (this.perioder?.perioder ?: PeriodeWrapper(emptyList()).perioder).fraDomeneForSanksjon(),
-                    internBegrunnelse = this.internBegrunnelse ?: "",
+                    sanksjonsårsak = this.sanksjonsårsak ?: error("Sanksjon mangler årsak."),
+                    periode = (this.perioder?.perioder ?: emptyList()).fraDomeneForSanksjon(),
+                    internBegrunnelse = this.internBegrunnelse ?: error("Sanksjon mangler intern begrunnelse."),
             )
             else -> throw Feil("Kan ikke sette vedtaksresultat som $this - ikke implementert")
         }
