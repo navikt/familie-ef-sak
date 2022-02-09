@@ -26,8 +26,6 @@ class NyeBarnService(private val behandlingService: BehandlingService,
         val personIdenter = pdlClient.hentPersonidenter(personIdent.ident).identer()
         val fagsak = fagsakService.finnFagsak(personIdenter, Stønadstype.OVERGANGSSTØNAD)
                      ?: error("Kunne ikke finne fagsak for personident")
-        val behandling = behandlingService.finnSisteIverksatteBehandling(fagsak.id)
-                         ?: error("Kunne ikke finne behandling for fagsak")
 
         return finnNyeBarnSidenGjeldendeBehandlingForFagsak(fagsak.id).map { it.personIdent }
     }
