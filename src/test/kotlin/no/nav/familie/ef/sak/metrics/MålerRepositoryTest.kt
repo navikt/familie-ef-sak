@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.metrics.domain.MålerRepository
 import no.nav.familie.ef.sak.metrics.domain.VedtakPerUke
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -53,6 +54,17 @@ class MålerRepositoryTest : OppslagSpringRunnerTest() {
             }
         }
 
+    }
+
+    @Test
+    internal fun `finnAntallBehandlingerAvÅrsak - finner riktig antall`() {
+        assertThat(målerRepository.finnAntallBehandlingerAvÅrsak(BehandlingÅrsak.MIGRERING)).isEqualTo(0)
+        val fagsakBarneTilsyn = fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD)
+
+        testoppsettService.lagreFagsak(fagsakBarneTilsyn)
+
+        behandlingRepository.insert(behandling(fagsakBarneTilsyn, årsak = BehandlingÅrsak.MIGRERING))
+        assertThat(målerRepository.finnAntallBehandlingerAvÅrsak(BehandlingÅrsak.MIGRERING)).isEqualTo(1)
     }
 
     @Test
