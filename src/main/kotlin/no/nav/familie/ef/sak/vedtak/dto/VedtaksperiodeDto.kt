@@ -56,7 +56,7 @@ fun List<Vedtaksperiode>.fraDomene(): List<VedtaksperiodeDto> =
             )
         }
 
-fun List<Vedtaksperiode>.fraDomeneHvisSanksjon(): VedtaksperiodeDto =
+fun List<Vedtaksperiode>.fraDomeneForSanksjon(): VedtaksperiodeDto =
         VedtaksperiodeDto(
                 årMånedFra = YearMonth.from(this.first().datoFra),
                 årMånedTil = YearMonth.from(this.first().datoTil),

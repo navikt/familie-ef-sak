@@ -95,7 +95,7 @@ fun VedtakDto.tilVedtak(behandlingId: UUID): Vedtak = when (this) {
             behandlingId = behandlingId,
             sanksjonsårsak = this.sanksjonsårsak,
             perioder = PeriodeWrapper(listOf(this.periode).tilDomene()),
-            periodeBegrunnelse = this.internBegrunnelse, //@TODO: Kan periodeBegrunnelse brukes som internbegrunnelse?
+            internBegrunnelse = this.internBegrunnelse,
             resultatType = ResultatType.SANKSJONERE,
     )
 }
@@ -122,11 +122,10 @@ fun Vedtak.tilVedtakDto(): VedtakDto =
             ResultatType.SANKSJONERE -> Sanksjonert(
                     resultatType = this.resultatType,
                     sanksjonsårsak = this.sanksjonsårsak ?: Sanksjonsårsak.INGEN_VALGT,
-                    periode = (this.perioder?.perioder ?: PeriodeWrapper(emptyList()).perioder).fraDomeneHvisSanksjon(),
-                    internBegrunnelse = this.periodeBegrunnelse ?: "",
+                    periode = (this.perioder?.perioder ?: PeriodeWrapper(emptyList()).perioder).fraDomeneForSanksjon(),
+                    internBegrunnelse = this.internBegrunnelse ?: "",
             )
             else -> throw Feil("Kan ikke sette vedtaksresultat som $this - ikke implementert")
-
         }
 
 

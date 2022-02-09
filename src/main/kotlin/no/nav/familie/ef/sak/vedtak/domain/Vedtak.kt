@@ -26,7 +26,8 @@ data class Vedtak(@Id
                   val opphørFom: LocalDate? = null,
                   val beslutterIdent: String? = null,
                   @Column("sanksjon_arsak")
-                  val sanksjonsårsak: Sanksjonsårsak? = null)
+                  val sanksjonsårsak: Sanksjonsårsak? = null,
+                  val internBegrunnelse: String? = null)
 
 data class Vedtaksperiode(
         val datoFra: LocalDate,
