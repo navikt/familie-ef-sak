@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.api.gui
 
 import io.mockk.every
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
+import no.nav.familie.ef.sak.fagsak.FagsakPersonRepository
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
@@ -28,6 +29,7 @@ import org.springframework.http.ResponseEntity
 internal class SøkControllerTest : OppslagSpringRunnerTest() {
 
     @Autowired private lateinit var fagsakRepository: FagsakRepository
+    @Autowired private lateinit var fagsakPersonRepository: FagsakPersonRepository
     @Autowired private lateinit var infotrygdReplikaClient: InfotrygdReplikaClient
 
     @BeforeEach
@@ -59,7 +61,7 @@ internal class SøkControllerTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `Skal opprette fagsak når personen finne i infotrygd`() {
+    internal fun `Skal opprette fagsakPerson når personen finne i infotrygd`() {
         val personIdent = "01010199999"
         every { infotrygdReplikaClient.hentInslagHosInfotrygd(any()) } returns
                 InfotrygdFinnesResponse(emptyList(), listOf(Saktreff(personIdent, StønadType.OVERGANGSSTØNAD)))
@@ -67,8 +69,9 @@ internal class SøkControllerTest : OppslagSpringRunnerTest() {
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
         val data = response.body!!.data!!
         assertThat(data.personIdent).isEqualTo(personIdent)
-        assertThat(data.fagsaker.first().stønadstype).isEqualTo(Stønadstype.OVERGANGSSTØNAD)
-        assertThat(fagsakRepository.findBySøkerIdent(setOf(personIdent))).hasSize(1)
+        assertThat(data.fagsaker).hasSize(0)
+        assertThat(fagsakRepository.findBySøkerIdent(setOf(personIdent))).hasSize(0)
+        assertThat(fagsakPersonRepository.findByIdent(setOf(personIdent))).isNotNull
     }
 
     private fun søkPerson(personIdent: String): ResponseEntity<Ressurs<Søkeresultat>> {
