@@ -29,7 +29,7 @@ class NyeBarnService(private val behandlingService: BehandlingService,
         val behandling = behandlingService.finnSisteIverksatteBehandling(fagsak.id)
                          ?: error("Kunne ikke finne behandling for fagsak")
 
-        return finnNyeBarnSidenGjeldendeBehandling(behandling.id, personIdent.ident).map { it.personIdent }
+        return finnNyeBarnSidenGjeldendeBehandlingForFagsak(fagsak.id).map { it.personIdent }
     }
 
     fun finnNyeBarnSidenGjeldendeBehandlingForFagsak(fagsakId: UUID): List<BarnMinimumDto> {
