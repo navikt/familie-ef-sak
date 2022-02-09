@@ -89,6 +89,7 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
             ResultatType.INNVILGE -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.INNVILGET)
             ResultatType.OPPHØRT -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.OPPHØRT)
             ResultatType.AVSLÅ -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.AVSLÅTT)
+            ResultatType.SANKSJONERE -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.INNVILGET)
             else -> error("Støtter ikke resultattypen=${vedtak.resultatType}")
         }
     }
