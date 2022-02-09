@@ -50,7 +50,6 @@ enum class VedtaksperiodeType {
 
 enum class AktivitetType {
     MIGRERING,
-    SANKSJON,
     IKKE_AKTIVITETSPLIKT,
     BARN_UNDER_ETT_ÅR,
     FORSØRGER_I_ARBEID,
