@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.beregning.BeregningService
 import no.nav.familie.ef.sak.beregning.tilInntektsperioder
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.dto.Periode
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.simulering.SimuleringService
@@ -20,9 +21,11 @@ import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Avslå
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
 import no.nav.familie.ef.sak.vedtak.dto.Opphør
+import no.nav.familie.ef.sak.vedtak.dto.Sanksjonert
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.erSammenhengende
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
+import no.nav.familie.ef.sak.vedtak.dto.tilVedtak
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.UUID
@@ -64,6 +67,10 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                 simuleringService.slettSimuleringForBehandling(behandling.id)
                 tilbakekrevingService.slettTilbakekreving(behandling.id)
             }
+            is Sanksjonert -> {
+                opprettTilkjentYtelseForSanksjonertBehandling(data, behandling, aktivIdent)
+                tilbakekrevingService
+            }
         }
     }
 
@@ -78,7 +85,6 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                 "Kan ikke inneholde aktivitet eller periode av type migrering"
             }
         }
-
     }
 
     private fun harPeriodeEllerAktivitetMigrering(data: Innvilget) =
@@ -123,6 +129,18 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                                                                    samordningsfradragType = vedtak.samordningsfradragType))
     }
 
+    private fun opprettTilkjentYtelseForSanksjonertBehandling(vedtak: Sanksjonert,
+                                                              behandling: Behandling,
+                                                              aktivIdent: String) {
+
+        val andelerTilkjentYtelse: List<AndelTilkjentYtelse> = andelerForSanksjonertRevurdering(behandling, vedtak.periode.tilPeriode())
+        feilHvis(andelerTilkjentYtelse.isEmpty()) { "Innvilget vedtak må ha minimum en beløpsperiode" }
+
+        tilkjentYtelseService.opprettTilkjentYtelse(TilkjentYtelse(personident = aktivIdent,
+                                                                   behandlingId = behandling.id,
+                                                                   andelerTilkjentYtelse = andelerTilkjentYtelse))
+    }
+
     private fun finnOpphørsperioder(vedtak: Innvilget) =
             vedtak.perioder.filter { it.periodeType == VedtaksperiodeType.MIDLERTIDIG_OPPHØR }.tilPerioder()
 
@@ -162,6 +180,14 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                 forrigeTilkjentYtelse.taMedAndelerFremTilDato(minOf(fomPerioder, fomOpphørPerioder)) + beløpsperioder
         return vurderPeriodeForOpphør(nyePerioderUtenOpphør, opphørsperioder)
 
+    }
+
+    private fun andelerForSanksjonertRevurdering(behandling: Behandling,
+                                                 opphørsperiode: Periode): List<AndelTilkjentYtelse> {
+        return behandling.forrigeBehandlingId?.let {
+            val forrigeTilkjenteYtelse = hentForrigeTilkjenteYtelse(behandling)
+            return vurderPeriodeForOpphør(forrigeTilkjenteYtelse.andelerTilkjentYtelse, listOf(opphørsperiode))
+        } ?: throw Feil("Forsøk på å opprette sanksjon mislyktes")
     }
 
     fun vurderPeriodeForOpphør(andelTilkjentYtelser: List<AndelTilkjentYtelse>,
