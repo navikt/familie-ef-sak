@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.metrics.domain
 
 import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Repository
@@ -10,9 +11,13 @@ import java.util.UUID
 interface MålerRepository : CrudRepository<Behandling, UUID> {
 
     // language=PostgreSQL
+    @Query("""SELECT COUNT(*) FROM behandling WHERE arsak = :behandlingÅrsak""")
+    fun finnAntallBehandlingerAvÅrsak(behandlingÅrsak: BehandlingÅrsak): Int
+
+    // language=PostgreSQL
     @Query("""SELECT stonadstype,
-                     extract(ISOYEAR from behandling.opprettet_tid) as år,
-                     extract(WEEK from behandling.opprettet_tid) as uke,
+                     EXTRACT(ISOYEAR FROM behandling.opprettet_tid) AS år,
+                     EXTRACT(WEEK FROM behandling.opprettet_tid) AS uke,
                      COUNT(*) AS antall
               FROM fagsak
               JOIN behandling ON fagsak.id = behandling.fagsak_id
@@ -32,8 +37,8 @@ interface MålerRepository : CrudRepository<Behandling, UUID> {
     // language=PostgreSQL
     @Query("""SELECT stonadstype,
                      resultat,
-                     extract(ISOYEAR from behandling.endret_tid) as år,
-                     extract(WEEK from behandling.endret_tid) as uke,
+                     EXTRACT(ISOYEAR FROM behandling.endret_tid) AS år,
+                     EXTRACT(WEEK FROM behandling.endret_tid) AS uke,
                      COUNT(*) AS antall
               FROM fagsak
               JOIN behandling ON fagsak.id = behandling.fagsak_id
