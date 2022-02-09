@@ -4,10 +4,12 @@ import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.BarnMinimumDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.GrunnlagsdataMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.kontrakter.felles.PersonIdent
 import org.springframework.stereotype.Service
@@ -17,10 +19,12 @@ import java.util.UUID
 class NyeBarnService(private val behandlingService: BehandlingService,
                      private val fagsakService: FagsakService,
                      private val personService: PersonService,
-                     private val barnService: BarnService) {
+                     private val barnService: BarnService,
+                     private val pdlClient: PdlClient) {
 
     fun finnNyeBarnSidenGjeldendeBehandlingForPersonIdent(personIdent: PersonIdent): List<String> {
-        val fagsak = fagsakService.finnFagsak(setOf(personIdent.ident), Stønadstype.OVERGANGSSTØNAD)
+        val personIdenter = pdlClient.hentPersonidenter(personIdent.ident).identer()
+        val fagsak = fagsakService.finnFagsak(personIdenter, Stønadstype.OVERGANGSSTØNAD)
                      ?: error("Kunne ikke finne fagsak for personident")
         val behandling = behandlingService.finnSisteIverksatteBehandling(fagsak.id)
                          ?: error("Kunne ikke finne behandling for fagsak")
