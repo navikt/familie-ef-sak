@@ -19,11 +19,10 @@ import java.util.UUID
 class NyeBarnService(private val behandlingService: BehandlingService,
                      private val fagsakService: FagsakService,
                      private val personService: PersonService,
-                     private val barnService: BarnService,
-                     private val pdlClient: PdlClient) {
+                     private val barnService: BarnService) {
 
     fun finnNyeBarnSidenGjeldendeBehandlingForPersonIdent(personIdent: PersonIdent): List<String> {
-        val personIdenter = pdlClient.hentPersonidenter(personIdent.ident).identer()
+        val personIdenter = personService.hentPersonIdenter(personIdent.ident).identer()
         val fagsak = fagsakService.finnFagsak(personIdenter, Stønadstype.OVERGANGSSTØNAD)
                      ?: error("Kunne ikke finne fagsak for personident")
 
