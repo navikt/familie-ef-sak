@@ -129,7 +129,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
                                                                    journalpostId: String): Long {
         val journalpost = hentJournalpost(journalpostId)
         feilHvisIkke(journalpost.journalstatus == Journalstatus.JOURNALFOERT || journalpost.journalstatus == Journalstatus.FERDIGSTILT) {
-            "Denne journalposten er ikke journalført og bør håndteres på den generelle måten"
+            "Denne journalposten er ikke journalført og skal håndteres på vanlig måte"
         }
         val behandling = opprettBehandlingOgPopulerGrunnlagsdata(behandlingstype = journalføringRequest.behandlingstype,
                                                                  fagsakId = journalføringRequest.fagsakId,
