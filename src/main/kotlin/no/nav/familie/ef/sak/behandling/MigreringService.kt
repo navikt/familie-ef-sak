@@ -111,7 +111,7 @@ class MigreringService(
      * Henter data fra infotrygd og oppretter migrering
      */
     @Transactional
-    fun migrerFagsak(fagsakPersonId: UUID): UUID {
+    fun migrerOvergangsstønad(fagsakPersonId: UUID): UUID {
         val fagsakPerson = fagsakPersonService.hentPerson(fagsakPersonId)
         validerSakerIInfotrygd(fagsakPerson)
         val personIdent = fagsakPerson.hentAktivIdent()

@@ -28,8 +28,8 @@ class MigreringController(private val migreringService: MigreringService,
     }
 
     @PostMapping("{fagsakPersonId}")
-    fun migrerFagsak(@PathVariable fagsakId: UUID): Ressurs<UUID> {
-        tilgangService.validerTilgangTilFagsakPerson(fagsakId, AuditLoggerEvent.CREATE)
-        return Ressurs.success(migreringService.migrerFagsak(fagsakId))
+    fun migrerOvergangsstønad(@PathVariable fagsakPersonId: UUID): Ressurs<UUID> {
+        tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.CREATE)
+        return Ressurs.success(migreringService.migrerOvergangsstønad(fagsakPersonId))
     }
 }
