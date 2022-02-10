@@ -19,6 +19,9 @@ class FeatureToggleController(private val featureToggleService: FeatureToggleSer
                                           "familie.ef.sak.brevmottakere-verge-og-fullmakt",
                                           "familie.ef.sak.migrering",
                                           "familie.ef.sak.frontend-vis-sanksjon-en-maned",
+                                          "familie.ef.sak.kan-legge-til-nye-barn-paa-revurdering",
+                                          "familie.ef.sak.frontend-vis-tilbakekreving",
+                                          "familie.ef.sak.frontend-oppgavebenk-migrer-fagsak"
     )
 
     @GetMapping

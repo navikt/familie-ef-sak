@@ -36,11 +36,12 @@ class SjekkMigrertStatusIInfotrygdTask(private val migreringService: MigreringSe
 
     companion object {
 
-        fun opprettTask(behandlingId: UUID, opphørsmåned: YearMonth): Task =
+        fun opprettTask(behandlingId: UUID, opphørsmåned: YearMonth, personIdent: String): Task =
                 Task(type = TYPE,
                      payload = objectMapper.writeValueAsString(SjekkMigrertStatusIInfotrygdData(behandlingId, opphørsmåned)),
                      properties = Properties().apply {
                          this["behandlingId"] = behandlingId.toString()
+                         this["personIdent"] = personIdent
                      }).copy(triggerTid = LocalDateTime.now().plusMinutes(16))
 
 

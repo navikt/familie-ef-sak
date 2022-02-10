@@ -22,6 +22,9 @@ class ForberedOppgaverForBarnService(private val gjeldendeBarnRepository: Gjelde
         val gjeldendeBarn =
                 gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, referanseDato)
         val barnSomFyllerAar = barnSomFyllerAar(gjeldendeBarn, referanseDato)
+        if (barnSomFyllerAar.isEmpty()) {
+            return
+        }
         val oppgaver = lagOppgaverForBarn(barnSomFyllerAar)
         if (oppgaver.isNotEmpty()) {
             logger.info("Fant ${oppgaver.size} oppgaver som skal opprettes ved forbereding av oppgaver for barn som fyller år")
@@ -31,15 +34,14 @@ class ForberedOppgaverForBarnService(private val gjeldendeBarnRepository: Gjelde
 
     private fun lagOppgaverForBarn(barnSomFyllerAar: Map<UUID, Pair<BarnTilUtplukkForOppgave, String>>): List<OppgaveForBarn> {
         return behandlingRepository.finnEksterneIder(barnSomFyllerAar.map { it.key }.toSet()).map {
+            val utplukketBarn = barnSomFyllerAar[it.behandlingId]
+                                ?: error("Kunne ikke finne behandlingsId fra utplukk. Dette skal ikke skje.")
+            val beskrivelse = utplukketBarn.second
             OppgaveForBarn(it.behandlingId,
                            it.eksternFagsakId,
-                           barnSomFyllerAar[it.behandlingId]?.let {
-                               it.first.fødselsnummerSøker
-                               ?: error("Kunne ikke finne igjen den mappede behandlingen for barn som fyller år. Dette skal ikke skje")
-                           }
-                           ?: error("Kunne ikke finne fødselsnummer for søker"),
+                           utplukketBarn.first.fødselsnummerSøker,
                            Stønadstype.OVERGANGSSTØNAD.name,
-                           barnSomFyllerAar[it.behandlingId]!!.second)
+                           beskrivelse)
         }
     }
 
@@ -62,7 +64,7 @@ class ForberedOppgaverForBarnService(private val gjeldendeBarnRepository: Gjelde
     }
 
     private fun fødselsdato(barnTilUtplukkForOppgave: BarnTilUtplukkForOppgave): LocalDate {
-        return barnTilUtplukkForOppgave.fodselsnummerBarn?.let {
+        return barnTilUtplukkForOppgave.fødselsnummerBarn?.let {
             Fødselsnummer(it).fødselsdato
         } ?: barnTilUtplukkForOppgave.termindatoBarn ?: error("Ingen datoer for barn funnet")
     }

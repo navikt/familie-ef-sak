@@ -126,6 +126,10 @@ fun fagsakpersoner(identer: Set<String>): Set<PersonIdent> = identer.map {
     PersonIdent(ident = it)
 }.toSet()
 
+fun fagsakpersonerAvPersonIdenter(identer: Set<PersonIdent>): Set<PersonIdent> = identer.map {
+    PersonIdent(ident = it.ident, sporbar = it.sporbar)
+}.toSet()
+
 fun tilkjentYtelse(behandlingId: UUID, personIdent: String): TilkjentYtelse = TilkjentYtelse(
         behandlingId = behandlingId,
         personident = personIdent,

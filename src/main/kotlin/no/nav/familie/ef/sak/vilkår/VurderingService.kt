@@ -102,47 +102,88 @@ class VurderingService(private val behandlingService: BehandlingService,
      * vil oppdaterEndretTid() manuelt overskrive verdiene for endretTid til korrekte verdier.
      */
     fun kopierVurderingerTilNyBehandling(eksisterendeBehandlingId: UUID, nyBehandlingsId: UUID, metadata: HovedregelMetadata) {
+        val tidligereVurderinger = vilkårsvurderingRepository.findByBehandlingId(eksisterendeBehandlingId).associateBy { it.id }
         val barnPåForrigeBehandling = barnService.finnBarnPåBehandling(eksisterendeBehandlingId)
-        val barnPåGjeldendeBehandling = metadata.barn
-        val vurderinger = vilkårsvurderingRepository.findByBehandlingId(eksisterendeBehandlingId)
-        if (vurderinger.isEmpty()) {
+        val barnIdMap = byggBarnMapFraTidligereTilNyId(barnPåForrigeBehandling, metadata.barn)
+        validerAtVurderingerKanKopieres(tidligereVurderinger, eksisterendeBehandlingId)
+
+        val kopiAvVurderinger: Map<UUID, Vilkårsvurdering> = lagKopiAvTidligereVurderinger(tidligereVurderinger,
+                                                                                           metadata.barn,
+                                                                                           nyBehandlingsId,
+                                                                                           barnIdMap)
+
+        val nyeBarnVurderinger = opprettVurderingerForNyeBarn(kopiAvVurderinger, metadata)
+
+        vilkårsvurderingRepository.insertAll(kopiAvVurderinger.values.toList() + nyeBarnVurderinger)
+        tilbakestillEndretTidForKopierteVurderinger(kopiAvVurderinger, tidligereVurderinger)
+    }
+
+    private fun validerAtVurderingerKanKopieres(tidligereVurderinger: Map<UUID, Vilkårsvurdering>,
+                                                eksisterendeBehandlingId: UUID) {
+        if (tidligereVurderinger.isEmpty()) {
             val melding = "Tidligere behandling=$eksisterendeBehandlingId har ikke noen vilkår"
             throw Feil(melding, melding)
         }
-        val tidligereVurderinger = vurderinger.associateBy { it.id }
-        // TODO: Ikke kopier tomme aleneomsorgvurderinger dersom det finnes nye barn i revurderingen
-        val vurderingerKopi: Map<UUID, Vilkårsvurdering> = vurderinger.associate { vurdering ->
-            val barnId = utledBarnId(vurdering.barnId, barnPåForrigeBehandling, barnPåGjeldendeBehandling)
-            vurdering.id to vurdering.copy(id = UUID.randomUUID(),
-                                           behandlingId = nyBehandlingsId,
-                                           sporbar = Sporbar(),
-                                           barnId = barnId)
-        }
+    }
 
-        // TODO: Legg inn vilkårsvurdering for barn som ikke finnes i forrige behandling
+    private fun lagKopiAvTidligereVurderinger(tidligereVurderinger: Map<UUID, Vilkårsvurdering>,
+                                              barnPåGjeldendeBehandling: List<BehandlingBarn>,
+                                              nyBehandlingsId: UUID,
+                                              barnIdMap: Map<UUID, BehandlingBarn>) =
+            tidligereVurderinger.values
+                    .filter { skalKopiereVurdering(it, barnPåGjeldendeBehandling.isNotEmpty()) }
+                    .associate { vurdering ->
+                        vurdering.id to vurdering.copy(id = UUID.randomUUID(),
+                                                       behandlingId = nyBehandlingsId,
+                                                       sporbar = Sporbar(),
+                                                       barnId = finnBarnId(vurdering.barnId, barnIdMap))
+                    }
 
-        vilkårsvurderingRepository.insertAll(vurderingerKopi.values.toList())
-        vurderingerKopi.forEach { (forrigeId, vurdering) ->
+    private fun opprettVurderingerForNyeBarn(vurderingerKopi: Map<UUID, Vilkårsvurdering>,
+                                             metadata: HovedregelMetadata) =
+            metadata.barn
+                    .filter { barn -> vurderingerKopi.none { it.value.barnId == barn.id } }
+                    .map { OppdaterVilkår.lagVilkårsvurderingForNyttBarn(metadata, it.behandlingId, it.id) }
+
+    private fun tilbakestillEndretTidForKopierteVurderinger(vurderinger: Map<UUID, Vilkårsvurdering>,
+                                                            tidligereVurderinger: Map<UUID, Vilkårsvurdering>) {
+        vurderinger.forEach { (forrigeId, vurdering) ->
             vilkårsvurderingRepository.oppdaterEndretTid(vurdering.id,
                                                          tidligereVurderinger.getValue(forrigeId).sporbar.endret.endretTid)
         }
     }
+
+    private fun finnBarnId(barnId: UUID?, barnIdMap: Map<UUID, BehandlingBarn>): UUID? {
+        return barnId?.let {
+            barnIdMap[it]?.id ?: error("Fant ikke barn=${it} på gjeldende behandling")
+        }
+    }
+
+
+    private fun skalKopiereVurdering(it: Vilkårsvurdering,
+                                     harNyeBarnForVurdering: Boolean) =
+            if (it.type == VilkårType.ALENEOMSORG && it.barnId == null) {
+                !harNyeBarnForVurdering
+            } else {
+                true
+            }
 
     fun erAlleVilkårOppfylt(behandlingId: UUID): Boolean {
         val lagredeVilkårsvurderinger: List<Vilkårsvurdering> = vilkårsvurderingRepository.findByBehandlingId(behandlingId)
         return OppdaterVilkår.erAlleVilkårsvurderingerOppfylt(lagredeVilkårsvurderinger)
     }
 
-    // TODO: Denne støtter alle barn som kommer fra søknader, men ikke barn som kommer inn utenom søknader
-    fun utledBarnId(barnId: UUID?,
-                    alleBarnPåForrigeBehandling: List<BehandlingBarn>,
-                    alleBarnPåGjeldendeBehandling: List<BehandlingBarn>): UUID? =
-            barnId?.let { barnIdPåForrigeVurdering ->
-                val barnFraTidligereVurdering = alleBarnPåForrigeBehandling.firstOrNull { it.id == barnIdPåForrigeVurdering }
-                val barnForGjeldendeVurdering = alleBarnPåGjeldendeBehandling.firstOrNull {
-                    (barnFraTidligereVurdering?.personIdent != null && it.personIdent == barnFraTidligereVurdering.personIdent) ||
-                    (barnFraTidligereVurdering?.søknadBarnId != null && it.søknadBarnId == barnFraTidligereVurdering.søknadBarnId)
-                }
-                barnForGjeldendeVurdering?.id ?: error("Kunne ikke finne matchende barn for vilkårsvurdering")
-            }
+    companion object {
+
+        fun byggBarnMapFraTidligereTilNyId(barnPåForrigeBehandling: List<BehandlingBarn>,
+                                           barnPåGjeldendeBehandling: List<BehandlingBarn>): Map<UUID, BehandlingBarn> {
+            val barnFraForrigeBehandlingMap = barnPåForrigeBehandling.associateBy { it.id }.toMutableMap()
+            return barnPåGjeldendeBehandling.mapNotNull { nyttBarn ->
+                val forrigeBarnId = barnFraForrigeBehandlingMap.entries.firstOrNull { nyttBarn.erMatchendeBarn(it.value) }?.key
+                barnFraForrigeBehandlingMap.remove(forrigeBarnId)
+                forrigeBarnId?.let { Pair(forrigeBarnId, nyttBarn) }
+            }.associate { it.first to it.second }
+        }
+
+    }
 }

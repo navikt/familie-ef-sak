@@ -3,7 +3,6 @@ package no.nav.familie.ef.sak.fagsak
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.fagsak.domain.tilFagsak
 import no.nav.familie.ef.sak.fagsak.dto.FagsakForSøkeresultat
 import no.nav.familie.ef.sak.fagsak.dto.PersonFraSøk
@@ -73,7 +72,8 @@ class SøkService(
 
         if (fagsaker.isEmpty()) {
             if (infotrygdService.eksisterer(gjeldendePersonIdent)) {
-                return listOf(fagsakService.hentEllerOpprettFagsak(gjeldendePersonIdent, Stønadstype.OVERGANGSSTØNAD))
+                fagsakPersonService.hentEllerOpprettPerson(personIdenter, gjeldendePersonIdent)
+                return listOf()
             }
             throw ApiFeil("Finner ikke fagsak for søkte personen", HttpStatus.BAD_REQUEST)
         }

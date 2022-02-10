@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
+import no.nav.familie.ef.sak.behandling.dto.tilBehandlingBarn
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.fagsak.FagsakService
@@ -45,8 +46,10 @@ class RevurderingService(private val søknadService: SøknadService,
         søknadService.kopierSøknad(forrigeBehandlingId, revurdering.id)
         val grunnlagsdata = grunnlagsdataService.opprettGrunnlagsdata(revurdering.id)
 
-        // TODO: Må kunne ta imot en liste med barn
-        barnService.opprettBarnPåBehandlingMedSøknadsdata(revurdering.id, revurdering.fagsakId, grunnlagsdata.grunnlagsdata.barn)
+        barnService.opprettBarnForRevurdering(behandlingId = revurdering.id,
+                                              forrigeBehandlingId = forrigeBehandlingId,
+                                              nyeBarnPåRevurdering = revurderingInnhold.barn.tilBehandlingBarn(revurdering.id),
+                                              grunnlagsdataBarn = grunnlagsdata.grunnlagsdata.barn)
         val (_, metadata) = vurderingService.hentGrunnlagOgMetadata(revurdering.id)
         vurderingService.kopierVurderingerTilNyBehandling(forrigeBehandlingId, revurdering.id, metadata)
         val oppgaveId = oppgaveService.opprettOppgave(behandlingId = revurdering.id,
