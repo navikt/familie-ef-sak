@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.BarnMinimumDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.GrunnlagsdataMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.kontrakter.felles.PersonIdent
 import org.springframework.stereotype.Service
@@ -20,12 +21,11 @@ class NyeBarnService(private val behandlingService: BehandlingService,
                      private val barnService: BarnService) {
 
     fun finnNyeBarnSidenGjeldendeBehandlingForPersonIdent(personIdent: PersonIdent): List<String> {
-        val fagsak = fagsakService.finnFagsak(setOf(personIdent.ident), Stønadstype.OVERGANGSSTØNAD)
+        val personIdenter = personService.hentPersonIdenter(personIdent.ident).identer()
+        val fagsak = fagsakService.finnFagsak(personIdenter, Stønadstype.OVERGANGSSTØNAD)
                      ?: error("Kunne ikke finne fagsak for personident")
-        val behandling = behandlingService.finnSisteIverksatteBehandling(fagsak.id)
-                         ?: error("Kunne ikke finne behandling for fagsak")
 
-        return finnNyeBarnSidenGjeldendeBehandling(behandling.id, personIdent.ident).map { it.personIdent }
+        return finnNyeBarnSidenGjeldendeBehandlingForFagsak(fagsak.id).map { it.personIdent }
     }
 
     fun finnNyeBarnSidenGjeldendeBehandlingForFagsak(fagsakId: UUID): List<BarnMinimumDto> {
