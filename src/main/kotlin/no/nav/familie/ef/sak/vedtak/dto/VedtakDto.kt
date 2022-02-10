@@ -43,7 +43,7 @@ fun ResultatType.tilVedtaksresultat(): Vedtaksresultat = when (this) {
     ResultatType.HENLEGGE -> error("Vedtaksresultat kan ikke være henlegge")
     ResultatType.AVSLÅ -> Vedtaksresultat.AVSLÅTT
     ResultatType.OPPHØRT -> Vedtaksresultat.OPPHØRT
-    ResultatType.SANKSJONERE -> Vedtaksresultat.INNVILGET //@TODO: Oppdater til SANKSJONERT i kontrakter
+    ResultatType.SANKSJONERE -> Vedtaksresultat.INNVILGET
 }
 
 sealed class VedtakDto {

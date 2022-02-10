@@ -25,7 +25,6 @@ import no.nav.familie.ef.sak.vedtak.dto.Sanksjonert
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.erSammenhengende
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
-import no.nav.familie.ef.sak.vedtak.dto.tilVedtak
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.UUID
