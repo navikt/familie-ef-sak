@@ -11,8 +11,10 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.SjekkMigrertStatusIInfotrygdTa
 import no.nav.familie.ef.sak.beregning.BeregningService
 import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.beregning.tilInntektsperioder
+import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.fagsak.dto.MigreringInfo
 import no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeUtil.filtrerOgSorterPerioderFraInfotrygd
@@ -48,6 +50,7 @@ import java.util.UUID
 class MigreringService(
         private val taskRepository: TaskRepository,
         private val fagsakService: FagsakService,
+        private val fagsakPersonService: FagsakPersonService,
         private val behandlingService: BehandlingService,
         private val iverksettService: IverksettService,
         private val iverksettClient: IverksettClient,
@@ -77,18 +80,19 @@ class MigreringService(
 
     private class MigreringException(val årsak: String, val type: MigreringExceptionType) : RuntimeException()
 
-    fun hentMigreringInfo(fagsakId: UUID, kjøremåned: YearMonth = kjøremåned()): MigreringInfo {
+    fun hentMigreringInfo(fagsakPersonId: UUID, kjøremåned: YearMonth = kjøremåned()): MigreringInfo {
         val periode = try {
-            validerSakerIInfotrygd(fagsakId)
-            hentGjeldendePeriodeOgValiderState(fagsakId, kjøremåned)
+            val fagsakPerson = fagsakPersonService.hentPerson(fagsakPersonId)
+            validerSakerIInfotrygd(fagsakPerson)
+            hentGjeldendePeriodeOgValiderState(fagsakPerson, kjøremåned)
         } catch (e: MigreringException) {
-            logger.info("Kan ikke migrere fagsak=$fagsakId årsak=${e.type}")
+            logger.info("Kan ikke migrere fagsak=$fagsakPersonId årsak=${e.type}")
             if (e.type == MigreringExceptionType.FLERE_IDENTER || e.type == MigreringExceptionType.FLERE_IDENTER_VEDTAK) {
-                secureLogger.info("Kan ikke migrere fagsak=$fagsakId - ${e.årsak}")
+                secureLogger.info("Kan ikke migrere fagsak=$fagsakPersonId - ${e.årsak}")
             }
             return MigreringInfo(kanMigreres = false, e.årsak)
         }
-        logger.info("Kan migrere fagsak=$fagsakId")
+        logger.info("Kan migrere fagsak=$fagsakPersonId")
 
         val fra = fra(kjøremåned, periode)
         val til = til(periode)
@@ -107,12 +111,13 @@ class MigreringService(
      * Henter data fra infotrygd og oppretter migrering
      */
     @Transactional
-    fun migrerFagsak(fagsakId: UUID): UUID {
-        val personIdent = fagsakService.hentAktivIdent(fagsakId)
+    fun migrerFagsak(fagsakPersonId: UUID): UUID {
+        val fagsakPerson = fagsakPersonService.hentPerson(fagsakPersonId)
+        validerSakerIInfotrygd(fagsakPerson)
+        val personIdent = fagsakPerson.hentAktivIdent()
         val kjøremåned = kjøremåned()
         val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, Stønadstype.OVERGANGSSTØNAD)
-        validerSakerIInfotrygd(fagsakId)
-        val periode = hentGjeldendePeriodeOgValiderState(fagsakId, kjøremåned)
+        val periode = hentGjeldendePeriodeOgValiderState(fagsakPerson, kjøremåned)
         return opprettMigrering(fagsak = fagsak,
                                 fra = fra(kjøremåned, periode),
                                 til = til(periode),
@@ -184,10 +189,10 @@ class MigreringService(
         return erOpphørtIInfotrygd
     }
 
-    private fun hentGjeldendePeriodeOgValiderState(fagsakId: UUID, kjøremåned: YearMonth): SummertInfotrygdPeriodeDto {
-        val fagsak = fagsakService.hentFagsak(fagsakId)
-        val personIdent = fagsak.hentAktivIdent()
-        validerFagsakOgBehandling(fagsak)
+    private fun hentGjeldendePeriodeOgValiderState(fagsakPerson: FagsakPerson, kjøremåned: YearMonth): SummertInfotrygdPeriodeDto {
+        val personIdent = fagsakPerson.hentAktivIdent()
+        val fagsak = fagsakService.finnFagsakerForFagsakPersonId(fagsakPerson.id).overgangsstønad
+        fagsak?.let { validerFagsakOgBehandling(it) }
         val gjeldendePerioder = hentGjeldendePerioderFraInfotrygdOgValider(personIdent, kjøremåned)
         if (gjeldendePerioder.isEmpty()) {
             throw MigreringException("Har 0 aktive perioder", MigreringExceptionType.MANGLER_AKTIVE_PERIODER)
@@ -203,9 +208,8 @@ class MigreringService(
         return periode
     }
 
-    private fun validerSakerIInfotrygd(fagsakId: UUID): List<InfotrygdSak> {
-        val fagsak = fagsakService.hentFagsak(fagsakId)
-        val personIdent = fagsak.hentAktivIdent()
+    private fun validerSakerIInfotrygd(fagsakPerson: FagsakPerson): List<InfotrygdSak> {
+        val personIdent = fagsakPerson.hentAktivIdent()
         val sakerForOvergangsstønad =
                 infotrygdService.hentSaker(personIdent).saker.filter { it.stønadType == StønadType.OVERGANGSSTØNAD }
         sakerForOvergangsstønad.find { it.resultat == InfotrygdSakResultat.ÅPEN_SAK }?.let {
