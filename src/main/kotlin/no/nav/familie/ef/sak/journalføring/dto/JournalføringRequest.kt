@@ -10,6 +10,11 @@ data class JournalføringRequest(val dokumentTitler: Map<String, String>? = null
                                 val navIdent: String,
                                 val journalførendeEnhet: String)
 
+
+data class JournalføringTilNyBehandlingRequest(val fagsakId: UUID,
+                                      val behandlingstype: BehandlingType,
+                                      val navIdent: String)
+
 fun JournalføringRequest.skalJournalførePåEksisterendeBehandling(): Boolean = this.behandling.behandlingsId != null
 
 data class JournalføringBehandling(val behandlingsId: UUID? = null,
