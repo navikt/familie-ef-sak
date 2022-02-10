@@ -174,7 +174,6 @@ internal class JournalføringServiceTest {
                                                                              fagsakId,
                                                                              oppgaveId,
                                                                              JournalføringBehandling(behandlingId),
-                                                                             "Z1234567",
                                                                              "1234"))
 
         assertThat(journalførtOppgaveId).isEqualTo(oppgaveId.toLong())
@@ -216,7 +215,6 @@ internal class JournalføringServiceTest {
                                              fagsakId,
                                              oppgaveId,
                                              JournalføringBehandling(behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING),
-                                             "Z1234567",
                                              "1234"))
 
         assertThat(behandleSakOppgaveId).isEqualTo(nyOppgaveId)
@@ -244,8 +242,7 @@ internal class JournalføringServiceTest {
                 journalføringService.opprettBehandlingMedSøknadsdataFraEnFerdigstiltJournalpost(
                         journalpostId = journalpostId,
                         journalføringRequest = JournalføringTilNyBehandlingRequest(fagsakId = fagsakId,
-                                                                                   behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                                                   navIdent = "Z1234567"))
+                                                                                   behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING))
 
         assertThat(behandleSakOppgaveId).isEqualTo(nyOppgaveId)
     }
@@ -262,8 +259,7 @@ internal class JournalføringServiceTest {
             journalføringService.opprettBehandlingMedSøknadsdataFraEnFerdigstiltJournalpost(
                     journalpostId = journalpostId,
                     journalføringRequest = JournalføringTilNyBehandlingRequest(fagsakId = fagsakId,
-                                                                               behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                                               navIdent = "Z1234567"))
+                                                                               behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING))
         }
     }
 }

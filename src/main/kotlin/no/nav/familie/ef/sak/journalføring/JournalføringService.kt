@@ -121,12 +121,13 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         ferdigstillJournalføringsoppgave(journalføringRequest)
         opprettBehandlingsstatistikkTask(behandling.id, journalføringRequest.oppgaveId.toLong())
 
-        return opprettSaksbehandlingsoppgave(behandling, journalføringRequest.navIdent)
+        return opprettSaksbehandlingsoppgave(behandling, saksbehandler)
     }
 
     @Transactional
     fun opprettBehandlingMedSøknadsdataFraEnFerdigstiltJournalpost(journalføringRequest: JournalføringTilNyBehandlingRequest,
                                                                    journalpostId: String): Long {
+        val saksbehandler = SikkerhetContext.hentSaksbehandler(true)
         val journalpost = hentJournalpost(journalpostId)
         feilHvisIkke(journalpost.journalstatus == Journalstatus.JOURNALFOERT || journalpost.journalstatus == Journalstatus.FERDIGSTILT) {
             "Denne journalposten er ikke journalført og skal håndteres på vanlig måte"
@@ -137,7 +138,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
 
         opprettBehandlingsstatistikkTask(behandling.id)
 
-        return opprettSaksbehandlingsoppgave(behandling, journalføringRequest.navIdent)
+        return opprettSaksbehandlingsoppgave(behandling, saksbehandler)
     }
 
     private fun opprettBehandlingOgPopulerGrunnlagsdata(behandlingstype: BehandlingType,

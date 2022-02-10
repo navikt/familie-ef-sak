@@ -128,7 +128,6 @@ internal class JournalføringControllerTest {
                                                                             UUID.randomUUID(),
                                                                             "dummy-oppgave",
                                                                             JournalføringBehandling(UUID.randomUUID()),
-                                                                            "Z1234567",
                                                                             "9991"))
         }
     }
