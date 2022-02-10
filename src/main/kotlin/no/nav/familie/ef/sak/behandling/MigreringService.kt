@@ -86,13 +86,13 @@ class MigreringService(
             validerSakerIInfotrygd(fagsakPerson)
             hentGjeldendePeriodeOgValiderState(fagsakPerson, kjøremåned)
         } catch (e: MigreringException) {
-            logger.info("Kan ikke migrere fagsak=$fagsakPersonId årsak=${e.type}")
+            logger.info("Kan ikke migrere fagsakPerson=$fagsakPersonId årsak=${e.type}")
             if (e.type == MigreringExceptionType.FLERE_IDENTER || e.type == MigreringExceptionType.FLERE_IDENTER_VEDTAK) {
                 secureLogger.info("Kan ikke migrere fagsak=$fagsakPersonId - ${e.årsak}")
             }
             return MigreringInfo(kanMigreres = false, e.årsak)
         }
-        logger.info("Kan migrere fagsak=$fagsakPersonId")
+        logger.info("Kan migrere fagsakPerson=$fagsakPersonId")
 
         val fra = fra(kjøremåned, periode)
         val til = til(periode)
@@ -139,7 +139,8 @@ class MigreringService(
         }
         fagsakService.settFagsakTilMigrert(fagsak.id)
         val behandling = behandlingService.opprettMigrering(fagsak.id)
-        logger.info("Migrerer fagsak=${fagsak.id} behandling=${behandling.id} fra=$fra til=$til")
+        logger.info("Migrerer fagsakPerson=${fagsak.fagsakPersonId} fagsak=${fagsak.id} behandling=${behandling.id} " +
+                    "fra=$fra til=$til")
         iverksettService.startBehandling(behandling, fagsak)
 
         grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
@@ -189,7 +190,8 @@ class MigreringService(
         return erOpphørtIInfotrygd
     }
 
-    private fun hentGjeldendePeriodeOgValiderState(fagsakPerson: FagsakPerson, kjøremåned: YearMonth): SummertInfotrygdPeriodeDto {
+    private fun hentGjeldendePeriodeOgValiderState(fagsakPerson: FagsakPerson,
+                                                   kjøremåned: YearMonth): SummertInfotrygdPeriodeDto {
         val personIdent = fagsakPerson.hentAktivIdent()
         val fagsak = fagsakService.finnFagsakerForFagsakPersonId(fagsakPerson.id).overgangsstønad
         fagsak?.let { validerFagsakOgBehandling(it) }
