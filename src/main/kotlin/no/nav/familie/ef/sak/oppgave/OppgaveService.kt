@@ -140,7 +140,7 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
         oppgaveClient.ferdigstillOppgave(gsakOppgaveId)
     }
 
-    fun finnSisteOppgaveForBehandling(behandlingId: UUID): EfOppgave {
+    fun finnSisteOppgaveForBehandling(behandlingId: UUID): EfOppgave? {
         return oppgaveRepository.findTopByBehandlingIdOrderBySporbarOpprettetTidDesc(behandlingId)
     }
 
