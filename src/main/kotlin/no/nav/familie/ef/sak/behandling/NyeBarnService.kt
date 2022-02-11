@@ -29,7 +29,7 @@ class NyeBarnService(private val behandlingService: BehandlingService,
     }
 
     fun finnNyeBarnSidenGjeldendeBehandlingForFagsak(fagsakId: UUID): List<BarnMinimumDto> {
-        val behandling = behandlingService.finnSisteIverksatteBehandling(fagsakId)
+        val behandling = behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsakId)
                          ?: error("Kunne ikke finne behandling for fagsak - $fagsakId")
         val aktivIdent = fagsakService.hentAktivIdent(fagsakId)
         return finnNyeBarnSidenGjeldendeBehandling(behandling.id, aktivIdent)
