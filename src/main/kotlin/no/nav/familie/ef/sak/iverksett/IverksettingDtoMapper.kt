@@ -220,7 +220,8 @@ fun TilkjentYtelse.tilIverksettDto(): TilkjentYtelseDto = TilkjentYtelseDto(
                                    inntektsreduksjon = andel.inntektsreduksjon,
                                    kildeBehandlingId = andel.kildeBehandlingId,
                                    periodetype = Periodetype.MÅNED)
-        }
+        },
+        opphørsdato = opphørsdato
 )
 
 fun Vurdering.tilIverksettDto(): VurderingDto = VurderingDto(

@@ -132,7 +132,6 @@ internal class BeregnYtelseStegTest {
 
         @Test
         internal fun `innvilget - skal kaste feil når man sender inn uten nye beløpsperioder`() {
-            every { beregningService.beregnYtelse(any(), any()) } returns emptyList()
             assertThrows<Feil> { utførSteg(BehandlingType.REVURDERING) }
         }
 
@@ -185,32 +184,22 @@ internal class BeregnYtelseStegTest {
                 firstArg<List<Periode>>().map { lagBeløpsperiode(it.fradato, it.tildato) }
             }
 
-            val opphørsperiode = VedtaksperiodeDto(årMånedFra = opphørFom,
-                                                   årMånedTil = opphørTom,
-                                                   aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
-                                                   periodeType = VedtaksperiodeType.MIDLERTIDIG_OPPHØR)
-            val innvilgetPeriode1 = VedtaksperiodeDto(årMånedFra = innvilgetFom1,
-                                                     årMånedTil = innvilgetTom1,
-                                                     aktivitet = AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID,
-                                                     periodeType = VedtaksperiodeType.HOVEDPERIODE)
-            val innvilgetPeriode2 = VedtaksperiodeDto(årMånedFra = innvilgetFom2,
-                                                     årMånedTil = innvilgetTom2,
-                                                     aktivitet = AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID,
-                                                     periodeType = VedtaksperiodeType.HOVEDPERIODE)
+            val opphørsperiode = opphørsperiode(opphørFom, opphørTom)
+            val innvilgetPeriode1 = innvilgetPeriode(innvilgetFom1, innvilgetTom1)
+            val innvilgetPeriode2 = innvilgetPeriode(innvilgetFom2, innvilgetTom2)
 
             utførSteg(BehandlingType.FØRSTEGANGSBEHANDLING,
                       Innvilget(resultatType = ResultatType.INNVILGE,
                                 perioder = listOf(innvilgetPeriode1, opphørsperiode, innvilgetPeriode2),
-                                inntekter = listOf(Inntekt(innvilgetFom1,
-                                                           BigDecimal(100000),
-                                                           samordningsfradrag = BigDecimal.ZERO)),
+                                inntekter = listOf(inntekt(innvilgetFom1)),
                                 inntektBegrunnelse = "null",
                                 periodeBegrunnelse = "null"
                       ),
                       forrigeBehandlingId = UUID.randomUUID())
             assertThat(slot.captured.andelerTilkjentYtelse.size).isEqualTo(2)
             assertThat(slot.captured.andelerTilkjentYtelse.firstOrNull()?.stønadFom).isEqualTo(innvilgetFom1.atDay(1))
-            assertThat(slot.captured.andelerTilkjentYtelse.firstOrNull()?.stønadTom).isEqualTo(opphørFom.minusMonths(1).atEndOfMonth())
+            assertThat(slot.captured.andelerTilkjentYtelse.firstOrNull()?.stønadTom).isEqualTo(opphørFom.minusMonths(1)
+                                                                                                       .atEndOfMonth())
             assertThat(slot.captured.andelerTilkjentYtelse.lastOrNull()?.stønadFom).isEqualTo(innvilgetFom2.atDay(1))
             assertThat(slot.captured.andelerTilkjentYtelse.lastOrNull()?.stønadTom).isEqualTo(innvilgetTom2.atEndOfMonth())
         }
@@ -233,25 +222,17 @@ internal class BeregnYtelseStegTest {
                 firstArg<List<Periode>>().map { lagBeløpsperiode(it.fradato, it.tildato) }
             }
 
-            val opphørsperiode = VedtaksperiodeDto(årMånedFra = opphørFom,
-                                                   årMånedTil = opphørTom,
-                                                   aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
-                                                   periodeType = VedtaksperiodeType.MIDLERTIDIG_OPPHØR)
-            val innvilgetPeriode = VedtaksperiodeDto(årMånedFra = innvilgetFom,
-                                                     årMånedTil = innvilgetTom,
-                                                     aktivitet = AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID,
-                                                     periodeType = VedtaksperiodeType.HOVEDPERIODE)
+            val opphørsperiode = opphørsperiode(opphørFom, opphørTom)
+            val innvilgetPeriode = innvilgetPeriode(innvilgetFom, innvilgetTom)
             assertThrows<Feil> {
                 utførSteg(BehandlingType.REVURDERING,
-                      Innvilget(resultatType = ResultatType.INNVILGE,
-                                perioder = listOf(opphørsperiode, innvilgetPeriode),
-                                inntekter = listOf(Inntekt(innvilgetFom,
-                                                           BigDecimal(100000),
-                                                           samordningsfradrag = BigDecimal.ZERO)),
-                                inntektBegrunnelse = "null",
-                                periodeBegrunnelse = "null"
-                      ),
-                      forrigeBehandlingId = UUID.randomUUID())
+                          Innvilget(resultatType = ResultatType.INNVILGE,
+                                    perioder = listOf(opphørsperiode, innvilgetPeriode),
+                                    inntekter = listOf(inntekt(innvilgetFom)),
+                                    inntektBegrunnelse = "null",
+                                    periodeBegrunnelse = "null"
+                          ),
+                          forrigeBehandlingId = UUID.randomUUID())
 
             }
         }
@@ -279,20 +260,12 @@ internal class BeregnYtelseStegTest {
                 firstArg<List<Periode>>().map { lagBeløpsperiode(it.fradato, it.tildato) }
             }
 
-            val opphørsperiode = VedtaksperiodeDto(årMånedFra = opphørFom,
-                                                   årMånedTil = opphørTom,
-                                                   aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
-                                                   periodeType = VedtaksperiodeType.MIDLERTIDIG_OPPHØR)
-            val innvilgetPeriode = VedtaksperiodeDto(årMånedFra = innvilgetFom,
-                                                     årMånedTil = innvilgetTom,
-                                                     aktivitet = AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID,
-                                                     periodeType = VedtaksperiodeType.HOVEDPERIODE)
+            val opphørsperiode = opphørsperiode(opphørFom, opphørTom)
+            val innvilgetPeriode = innvilgetPeriode(innvilgetFom, innvilgetTom)
             utførSteg(BehandlingType.REVURDERING,
                       Innvilget(resultatType = ResultatType.INNVILGE,
                                 perioder = listOf(opphørsperiode, innvilgetPeriode),
-                                inntekter = listOf(Inntekt(innvilgetFom,
-                                                           BigDecimal(100000),
-                                                           samordningsfradrag = BigDecimal.ZERO)),
+                                inntekter = listOf(inntekt(innvilgetFom)),
                                 inntektBegrunnelse = "null",
                                 periodeBegrunnelse = "null"
                       ),
@@ -332,24 +305,13 @@ internal class BeregnYtelseStegTest {
                 firstArg<List<Periode>>().map { lagBeløpsperiode(it.fradato, it.tildato) }
             }
 
-            val innvilgetPeriode1 = VedtaksperiodeDto(årMånedFra = innvilgetFom1,
-                                                     årMånedTil = innvilgetTom1,
-                                                     aktivitet = AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID,
-                                                     periodeType = VedtaksperiodeType.HOVEDPERIODE)
-            val opphørsperiode = VedtaksperiodeDto(årMånedFra = opphørFom,
-                                                   årMånedTil = opphørTom,
-                                                   aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
-                                                   periodeType = VedtaksperiodeType.MIDLERTIDIG_OPPHØR)
-            val innvilgetPeriode2 = VedtaksperiodeDto(årMånedFra = innvilgetFom2,
-                                                     årMånedTil = innvilgetTom2,
-                                                     aktivitet = AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID,
-                                                     periodeType = VedtaksperiodeType.HOVEDPERIODE)
+            val innvilgetPeriode1 = innvilgetPeriode(innvilgetFom1, innvilgetTom1)
+            val opphørsperiode = opphørsperiode(opphørFom, opphørTom)
+            val innvilgetPeriode2 = innvilgetPeriode(innvilgetFom2, innvilgetTom2)
             utførSteg(BehandlingType.REVURDERING,
                       Innvilget(resultatType = ResultatType.INNVILGE,
                                 perioder = listOf(innvilgetPeriode1, opphørsperiode, innvilgetPeriode2),
-                                inntekter = listOf(Inntekt(innvilgetFom1,
-                                                           BigDecimal(100000),
-                                                           samordningsfradrag = BigDecimal.ZERO)),
+                                inntekter = listOf(inntekt(innvilgetFom1)),
                                 inntektBegrunnelse = "null",
                                 periodeBegrunnelse = "null"
                       ),
@@ -530,17 +492,6 @@ internal class BeregnYtelseStegTest {
             verify { simuleringService.slettSimuleringForBehandling(any()) }
         }
 
-        private fun utførSteg(type: BehandlingType,
-                              vedtak: VedtakDto = Innvilget(resultatType = ResultatType.INNVILGE,
-                                                            periodeBegrunnelse = "",
-                                                            inntektBegrunnelse = ""),
-                              forrigeBehandlingId: UUID? = null) {
-            steg.utførSteg(behandling(fagsak(), type = type, forrigeBehandlingId = forrigeBehandlingId), data = vedtak)
-        }
-
-        private fun lagBeløpsperiode(fom: LocalDate, tom: LocalDate) =
-                Beløpsperiode(Periode(fom, tom), null, BigDecimal.ZERO, BigDecimal.ZERO)
-
     }
 
     @Nested
@@ -705,7 +656,8 @@ internal class BeregnYtelseStegTest {
             val beløpsperioder = listOf(lagAndelTilkjentYtelse(100, nyAndelFom1, nyAndelTom1),
                                         lagAndelTilkjentYtelse(150, nyAndelFom2, nyAndelTom2))
 
-            val nyeAndeler = steg.slåSammenAndelerSomSkalVidereføres(beløpsperioder, lagTilkjentYtelse(forrigeAndeler), opphørsperioder)
+            val nyeAndeler =
+                    steg.slåSammenAndelerSomSkalVidereføres(beløpsperioder, lagTilkjentYtelse(forrigeAndeler), opphørsperioder)
 
             assertThat(nyeAndeler).hasSize(3)
             assertThat(nyeAndeler[0].stønadFom).isEqualTo(forrigeAndelFom)
@@ -835,5 +787,200 @@ internal class BeregnYtelseStegTest {
             assertThat(nyeAndeler).hasSize(0)
 
         }
+    }
+
+    @Nested
+    inner class InnvilgetMedOpphør {
+
+        @Test
+        internal fun `skal kunne innvilge med opphør bak i tid`() {
+            val opphørFom = YearMonth.of(2021, 5)
+            val andelFom = YearMonth.of(2021, 6)
+            val andelTom = YearMonth.of(2022, 6)
+
+            val slot = slot<TilkjentYtelse>()
+            every { tilkjentYtelseService.opprettTilkjentYtelse(capture(slot)) } answers { firstArg() }
+            every { tilkjentYtelseService.hentForBehandling(any()) } returns
+                    lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, andelFom.atDay(1), andelTom.atEndOfMonth())))
+            every { beregningService.beregnYtelse(any(), any()) } answers {
+                firstArg<List<Periode>>().map { lagBeløpsperiode(it.fradato, it.tildato) }
+            }
+
+            val opphørsperiode = opphørsperiode(opphørFom, opphørFom)
+            val innvilgetPeriode1 = innvilgetPeriode(andelFom, andelTom)
+
+            utførSteg(BehandlingType.REVURDERING,
+                      Innvilget(resultatType = ResultatType.INNVILGE,
+                                perioder = listOf(opphørsperiode, innvilgetPeriode1),
+                                inntekter = listOf(inntekt(andelTom)),
+                                inntektBegrunnelse = "null",
+                                periodeBegrunnelse = "null"
+                      ),
+                      forrigeBehandlingId = UUID.randomUUID())
+
+            assertThat(slot.captured.andelerTilkjentYtelse).hasSize(1)
+            assertThat(slot.captured.andelerTilkjentYtelse[0].stønadFom).isEqualTo(andelFom.atDay(1))
+            assertThat(slot.captured.andelerTilkjentYtelse[0].stønadTom).isEqualTo(andelTom.atEndOfMonth())
+            assertThat(slot.captured.opphørsdato).isEqualTo(opphørFom.atDay(1))
+        }
+
+        @Test
+        internal fun `skal kunne innvilge med opphør med opphør midt i en periode - setter ikke opphørsdato`() {
+            val opphørFom = YearMonth.of(2021, 8)
+            val andelFom = YearMonth.of(2021, 6)
+            val andelTom = YearMonth.of(2022, 6)
+            val innvilgetFom = opphørFom.plusMonths(1)
+            val innvilgetTom = andelTom
+
+            val slot = slot<TilkjentYtelse>()
+            every { tilkjentYtelseService.opprettTilkjentYtelse(capture(slot)) } answers { firstArg() }
+            every { tilkjentYtelseService.hentForBehandling(any()) } returns
+                    lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, andelFom.atDay(1), andelTom.atEndOfMonth())))
+            every { beregningService.beregnYtelse(any(), any()) } answers {
+                firstArg<List<Periode>>().map { lagBeløpsperiode(it.fradato, it.tildato) }
+            }
+
+            val opphørsperiode = opphørsperiode(opphørFom, opphørFom)
+            val innvilgetPeriode1 = innvilgetPeriode(innvilgetFom, innvilgetTom)
+
+            utførSteg(BehandlingType.REVURDERING,
+                      Innvilget(resultatType = ResultatType.INNVILGE,
+                                perioder = listOf(opphørsperiode, innvilgetPeriode1),
+                                inntekter = listOf(inntekt(andelTom)),
+                                inntektBegrunnelse = "null",
+                                periodeBegrunnelse = "null"
+                      ),
+                      forrigeBehandlingId = UUID.randomUUID())
+
+            val andelerTilkjentYtelse = slot.captured.andelerTilkjentYtelse.sortedBy { it.stønadFom }
+            assertThat(andelerTilkjentYtelse).hasSize(2)
+            assertThat(andelerTilkjentYtelse[0].stønadFom).isEqualTo(andelFom.atDay(1))
+            assertThat(andelerTilkjentYtelse[0].stønadTom).isEqualTo(opphørFom.atDay(1).minusDays(1))
+            assertThat(andelerTilkjentYtelse[1].stønadFom).isEqualTo(innvilgetFom.atDay(1))
+            assertThat(andelerTilkjentYtelse[1].stønadTom).isEqualTo(innvilgetTom.atEndOfMonth())
+            assertThat(slot.captured.opphørsdato).isNull()
+        }
+
+        @Test
+        internal fun `opphør etter innvilget periode - setter ikke opphørsdato`() {
+            val opphørFom = YearMonth.of(2022, 7)
+            val andelFom = YearMonth.of(2021, 6)
+            val andelTom = YearMonth.of(2022, 6)
+
+            val slot = slot<TilkjentYtelse>()
+            every { tilkjentYtelseService.opprettTilkjentYtelse(capture(slot)) } answers { firstArg() }
+            every { tilkjentYtelseService.hentForBehandling(any()) } returns
+                    lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, andelFom.atDay(1), andelTom.atEndOfMonth())))
+            every { beregningService.beregnYtelse(any(), any()) } answers {
+                firstArg<List<Periode>>().map { lagBeløpsperiode(it.fradato, it.tildato) }
+            }
+
+            val opphørsperiode = opphørsperiode(opphørFom, opphørFom)
+            val innvilgetPeriode1 = innvilgetPeriode(andelFom, andelTom)
+
+            utførSteg(BehandlingType.REVURDERING,
+                      Innvilget(resultatType = ResultatType.INNVILGE,
+                                perioder = listOf(innvilgetPeriode1, opphørsperiode),
+                                inntekter = listOf(inntekt(andelTom)),
+                                inntektBegrunnelse = "null",
+                                periodeBegrunnelse = "null"
+                      ),
+                      forrigeBehandlingId = UUID.randomUUID())
+
+            assertThat(slot.captured.andelerTilkjentYtelse).hasSize(1)
+            assertThat(slot.captured.andelerTilkjentYtelse[0].stønadFom).isEqualTo(andelFom.atDay(1))
+            assertThat(slot.captured.andelerTilkjentYtelse[0].stønadTom).isEqualTo(andelTom.atEndOfMonth())
+            assertThat(slot.captured.opphørsdato).isNull()
+        }
+
+    }
+
+    @Nested
+    inner class Opphør {
+
+        @Test
+        internal fun `skal kunne opphør bak i tid`() {
+            val opphørFom = YearMonth.of(2021, 1)
+            val andelFom = YearMonth.of(2021, 6).atDay(1)
+            val andelTom = YearMonth.of(2021, 6).atEndOfMonth()
+
+            val slot = slot<TilkjentYtelse>()
+            every { tilkjentYtelseService.opprettTilkjentYtelse(capture(slot)) } answers { firstArg() }
+            every { tilkjentYtelseService.hentForBehandling(any()) } returns
+                    lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, andelFom, andelTom)))
+
+            utførSteg(BehandlingType.REVURDERING,
+                      Opphør(opphørFom = opphørFom, begrunnelse = "null"),
+                      forrigeBehandlingId = UUID.randomUUID())
+
+            assertThat(slot.captured.andelerTilkjentYtelse).hasSize(0)
+            assertThat(slot.captured.opphørsdato).isEqualTo(opphørFom.atDay(1))
+        }
+
+        @Test
+        internal fun `skal kunne opphør midt i en tidligere periode`() {
+            val opphørFom = YearMonth.of(2021, 8)
+            val andelFom = YearMonth.of(2021, 6).atDay(1)
+            val andelTom = YearMonth.of(2022, 6).atEndOfMonth()
+
+            val slot = slot<TilkjentYtelse>()
+            every { tilkjentYtelseService.opprettTilkjentYtelse(capture(slot)) } answers { firstArg() }
+            every { tilkjentYtelseService.hentForBehandling(any()) } returns
+                    lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, andelFom, andelTom)))
+
+            utførSteg(BehandlingType.REVURDERING,
+                      Opphør(opphørFom = opphørFom, begrunnelse = "null"),
+                      forrigeBehandlingId = UUID.randomUUID())
+
+            assertThat(slot.captured.opphørsdato).isEqualTo(opphørFom.atDay(1))
+            assertThat(slot.captured.andelerTilkjentYtelse).hasSize(1)
+            assertThat(slot.captured.andelerTilkjentYtelse[0].stønadFom).isEqualTo(andelFom)
+            assertThat(slot.captured.andelerTilkjentYtelse[0].stønadTom).isEqualTo(opphørFom.atDay(1).minusDays(1))
+        }
+
+        @Test
+        internal fun `skal ikke kunne opphør frem i tid`() {
+            val opphørFom = YearMonth.of(2022, 1)
+            val andelFom = YearMonth.of(2021, 6).atDay(1)
+            val andelTom = YearMonth.of(2021, 6).atEndOfMonth()
+
+            every { tilkjentYtelseService.opprettTilkjentYtelse(any()) } answers { firstArg() }
+            every { tilkjentYtelseService.hentForBehandling(any()) } returns
+                    lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, andelFom, andelTom)))
+
+            utførSteg(BehandlingType.REVURDERING,
+                      Opphør(opphørFom = opphørFom, begrunnelse = "null"),
+                      forrigeBehandlingId = UUID.randomUUID())
+        }
+
+    }
+
+    private fun lagBeløpsperiode(fom: LocalDate, tom: LocalDate) =
+            Beløpsperiode(Periode(fom, tom), null, BigDecimal.ZERO, BigDecimal.ZERO)
+
+    private fun opphørsperiode(opphørFom: YearMonth, opphørTom: YearMonth) =
+            VedtaksperiodeDto(årMånedFra = opphørFom,
+                              årMånedTil = opphørTom,
+                              aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
+                              periodeType = VedtaksperiodeType.MIDLERTIDIG_OPPHØR)
+
+    private fun innvilgetPeriode(andelFom: YearMonth, andelTom: YearMonth) =
+            VedtaksperiodeDto(årMånedFra = andelFom,
+                              årMånedTil = andelTom,
+                              aktivitet = AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID,
+                              periodeType = VedtaksperiodeType.HOVEDPERIODE)
+
+    private fun inntekt(andelTom: YearMonth) =
+            Inntekt(andelTom,
+                    BigDecimal(100000),
+                    samordningsfradrag = BigDecimal.ZERO)
+
+
+    private fun utførSteg(type: BehandlingType,
+                          vedtak: VedtakDto = Innvilget(resultatType = ResultatType.INNVILGE,
+                                                        periodeBegrunnelse = "",
+                                                        inntektBegrunnelse = ""),
+                          forrigeBehandlingId: UUID? = null) {
+        steg.utførSteg(behandling(fagsak(), type = type, forrigeBehandlingId = forrigeBehandlingId), data = vedtak)
     }
 }
