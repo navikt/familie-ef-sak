@@ -89,34 +89,17 @@ object AndelHistorikkBeregner {
     private fun lagHistorikk(tilkjentYtelser: List<TilkjentYtelse>,
                              vedtaksliste: List<Vedtak>,
                              behandlinger: List<Behandling>): List<AndelHistorikkDto> {
-
-        val (vedtakSanksjon, vedtakIkkeSanksjon) = vedtaksliste.partition { it.resultatType == ResultatType.SANKSJONERE }
-        val (ytelserSanksjon, ytelserIkkeSanksjon) = tilkjentYtelser.partition {
-            it.behandlingId in vedtakSanksjon.map { it.behandlingId }
+        val (sanksjonsvedtak, vedtakMinusSanksjon) = vedtaksliste.partition { it.resultatType == ResultatType.SANKSJONERE }
+        val (ytelserForSanksjonsvedtak, ytelserForVedtakMinusSanksjon) = tilkjentYtelser.partition {
+            it.behandlingId in sanksjonsvedtak.map { it.behandlingId }
                     .toSet()
         }
 
-
-        val historikkUtenSanksjon = lagHistorikkHolders(sorterTilkjentYtelser(ytelserIkkeSanksjon), vedtakIkkeSanksjon)
-
         val behandlingerPåId = behandlinger.associate { it.id to it }
-        val vedtakSanksjonPåId = vedtakSanksjon.associate { it.behandlingId to it }
-        val historikkForSanksjon = sorterTilkjentYtelser(ytelserSanksjon).map {
-            AndelHistorikkDto(behandlingId = it.behandlingId,
-                              behandlingType = behandlingerPåId.getValue(it.behandlingId).type,
-                              vedtakstidspunkt = it.vedtakstidspunkt,
-                              saksbehandler = it.sporbar.opprettetAv,
-                              andel = it.andelerTilkjentYtelse.first().tilDto(),
-                              aktivitet = vedtakSanksjonPåId.getValue(it.behandlingId).perioder?.perioder?.first()?.aktivitet
-                                          ?: error("Finner ikke aktivitet for sanksjonert vedtak=${it.behandlingId}"),
-                              periodeType = vedtakSanksjonPåId.getValue(it.behandlingId).perioder?.perioder?.first()?.periodeType
-                                            ?: error("Finner ikke periodetype for sanksjonert vedtak=${it.behandlingId}"),
-                              endring = null,
-                              sanksjonsårsak = vedtakSanksjonPåId.get(it.behandlingId)?.sanksjonsårsak
-                                               ?: error("Finner ikke sanksjonsårsak for sanksjonert vedtak=${it.behandlingId}"))
-        }
+        val vedtakshistorikkForSanksjon = lagHistorikkForSanksjonsvedtak(sanksjonsvedtak, ytelserForSanksjonsvedtak, behandlingerPåId)
 
-        val hist1 = historikkUtenSanksjon.map {
+        val historikkHoldersForVedtakMinusSanksjon = lagHistorikkHolders(ytelserForVedtakMinusSanksjon, vedtakMinusSanksjon)
+        val vedtakshistorikkMinusSanksjon = historikkHoldersForVedtakMinusSanksjon.map {
             AndelHistorikkDto(behandlingId = it.behandlingId,
                               behandlingType = behandlingerPåId.getValue(it.behandlingId).type,
                               vedtakstidspunkt = it.vedtakstidspunkt,
@@ -127,7 +110,7 @@ object AndelHistorikkBeregner {
                               endring = it.endring)
         }
 
-        return hist1 + historikkForSanksjon;
+        return sorterVedtaksHistorikk(vedtakshistorikkMinusSanksjon + vedtakshistorikkForSanksjon);
     }
 
     private fun lagHistorikkHolders(tilkjentYtelser: List<TilkjentYtelse>,
@@ -193,10 +176,6 @@ object AndelHistorikkBeregner {
     private fun finnVedtaksperiodeForAndel(andel: AndelTilkjentYtelse, vedtaksperioder: List<Vedtaksperiode>): Vedtaksperiode {
         return vedtaksperioder.first { andel.stønadFom in it.datoFra..it.datoTil }
     }
-
-    private fun sorterTilkjentYtelser(tilkjentYtelser: List<TilkjentYtelse>): List<TilkjentYtelse> =
-            tilkjentYtelser.sortedBy { it.sporbar.opprettetTid }
-                    .map { it.copy(andelerTilkjentYtelse = it.andelerTilkjentYtelse.sortedBy(AndelTilkjentYtelse::stønadFom)) }
 
     private fun lagNyAndel(tilkjentYtelse: TilkjentYtelse,
                            andel: AndelTilkjentYtelse,
@@ -265,4 +244,28 @@ object AndelHistorikkBeregner {
             historikk.endring?.type == EndringType.FJERNET ||
             historikk.endring?.type == EndringType.ERSTATTET ||
             historikk.kontrollert == tilkjentYtelse.id
+
+    private fun lagHistorikkForSanksjonsvedtak(sanksjonsvedtak: List<Vedtak>,
+                                               tilkjentYtelserForSanksjon: List<TilkjentYtelse>,
+                                               behandlingerPåId: Map<UUID, Behandling>): List<AndelHistorikkDto> {
+        val sanksjonsvedtakPåId = sanksjonsvedtak.associate { it.behandlingId to it }
+
+        return tilkjentYtelserForSanksjon.map {
+            AndelHistorikkDto(behandlingId = it.behandlingId,
+                              behandlingType = behandlingerPåId.getValue(it.behandlingId).type,
+                              vedtakstidspunkt = it.vedtakstidspunkt,
+                              saksbehandler = it.sporbar.opprettetAv,
+                              andel = it.andelerTilkjentYtelse.first().tilDto(),
+                              aktivitet = sanksjonsvedtakPåId.getValue(it.behandlingId).perioder?.perioder?.first()?.aktivitet
+                                          ?: error("Finner ikke aktivitet for sanksjonert vedtak=${it.behandlingId}"),
+                              periodeType = sanksjonsvedtakPåId.getValue(it.behandlingId).perioder?.perioder?.first()?.periodeType
+                                            ?: error("Finner ikke periodetype for sanksjonert vedtak=${it.behandlingId}"),
+                              endring = null,
+                              sanksjonsårsak = sanksjonsvedtakPåId.get(it.behandlingId)?.sanksjonsårsak
+                                               ?: error("Finner ikke sanksjonsårsak for sanksjonert vedtak=${it.behandlingId}"))
+        }
+    }
+
+    private fun sorterVedtaksHistorikk(historikk: List<AndelHistorikkDto>): List<AndelHistorikkDto> = historikk.sortedBy { it.andel.stønadFra }
+
 }
