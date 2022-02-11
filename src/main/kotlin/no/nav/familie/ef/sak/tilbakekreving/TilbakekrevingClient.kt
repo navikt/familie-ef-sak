@@ -40,7 +40,8 @@ class TilbakekrevingClient(@Qualifier("azure") restOperations: RestOperations,
                                  stønadstype.toString(),
                                  "fagsak",
                                  eksternFagsakId.toString(),
-                                 "kanBehandlingOpprettesManuelt/v1")
+                                 "kanBehandlingOpprettesManuelt",
+                                 "v1")
                     .encode()
                     .build()
                     .toUri()
