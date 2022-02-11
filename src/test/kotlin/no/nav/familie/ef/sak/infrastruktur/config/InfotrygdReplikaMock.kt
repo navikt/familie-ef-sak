@@ -5,19 +5,15 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeTestUtil.lagInfotrygdPeriode
 import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
-import no.nav.familie.kontrakter.ef.felles.StønadType
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdFinnesResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeRequest
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPerioderArenaResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResponse
-import no.nav.familie.kontrakter.ef.infotrygd.Vedtakstreff
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
-import java.time.LocalDate
-import java.time.YearMonth
 
 @Configuration
 @Profile("mock-infotrygd-replika")
@@ -39,16 +35,13 @@ class InfotrygdReplikaMock {
                 val firstArg = firstArg<InfotrygdPeriodeRequest>()
                 val personIdent = firstArg.personIdenter.first()
                 InfotrygdPeriodeResponse(
-                        //emptyList(),
-                        //emptyList(),
-                        listOf(lagInfotrygdPeriode(personIdent, stønadTom = YearMonth.now().plusMonths(2).atEndOfMonth())),
-                        listOf(lagInfotrygdPeriode(personIdent)),
-                        emptyList()
+                    listOf(lagInfotrygdPeriode()),
+                    listOf(lagInfotrygdPeriode(personIdent)),
+                    emptyList()
                 )
             }
             every { client.hentSaker(any()) } returns InfotrygdSakResponse(emptyList())
-            //every { client.hentInslagHosInfotrygd(any()) } answers { InfotrygdFinnesResponse(emptyList(), emptyList()) }
-            every { client.hentInslagHosInfotrygd(any()) } answers { InfotrygdFinnesResponse(listOf(Vedtakstreff("", StønadType.OVERGANGSSTØNAD, true)), emptyList()) }
+            every { client.hentInslagHosInfotrygd(any()) } answers { InfotrygdFinnesResponse(emptyList(), emptyList()) }
         }
     }
 
