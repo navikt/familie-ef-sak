@@ -51,10 +51,17 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
     fun hentAktivIdent(behandlingId: UUID): String = behandlingRepository.finnAktivIdent(behandlingId)
 
     fun hentEksterneIder(behandlingIder: Set<UUID>) = behandlingIder.takeIf { it.isNotEmpty() }
-            ?.let { behandlingRepository.finnEksterneIder(it) } ?: emptySet()
+                                                              ?.let { behandlingRepository.finnEksterneIder(it) } ?: emptySet()
 
     fun finnSisteIverksatteBehandling(fagsakId: UUID) =
             behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
+
+    fun finnSisteIverksatteBehandlingMedEventuellAvslått(fagsakId: UUID): Behandling? =
+            behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
+            ?: hentBehandlinger(fagsakId)
+                    .filter { it.type != BehandlingType.BLANKETT && it.status == FERDIGSTILT && it.resultat != HENLAGT }
+                    .lastOrNull()
+
 
     fun finnGjeldendeIverksatteBehandlinger(stonadstype: Stønadstype) =
             behandlingRepository.finnSisteIverksatteBehandlinger(stonadstype)

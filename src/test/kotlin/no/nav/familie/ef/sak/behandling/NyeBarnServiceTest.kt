@@ -50,7 +50,7 @@ class NyeBarnServiceTest {
     val fødselsdatoVoksentBarn = LocalDate.of(2001, 10, 22)
 
     @BeforeEach fun init() {
-        every { behandlingService.finnSisteIverksatteBehandling(any()) } returns behandling
+        every { behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(any()) } returns behandling
         every { fagsakService.finnFagsak(any(), any()) } returns fagsak
         every { fagsak.id } returns UUID.randomUUID()
         every { behandling.id } returns UUID.randomUUID()
