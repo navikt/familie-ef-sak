@@ -10,6 +10,8 @@ import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
+import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -26,7 +28,8 @@ data class AndelHistorikkDto(val behandlingId: UUID,
                              val andel: AndelTilkjentYtelseDto,
                              val aktivitet: AktivitetType,
                              val periodeType: VedtaksperiodeType,
-                             val endring: HistorikkEndring?)
+                             val endring: HistorikkEndring?,
+                             val sanksjonsårsak: Sanksjonsårsak? = null)
 
 data class HistorikkEndring(val type: EndringType,
                             val behandlingId: UUID,
@@ -86,12 +89,36 @@ object AndelHistorikkBeregner {
     private fun lagHistorikk(tilkjentYtelser: List<TilkjentYtelse>,
                              vedtaksliste: List<Vedtak>,
                              behandlinger: List<Behandling>): List<AndelHistorikkDto> {
-        val historikk = lagHistorikkHolders(sorterTilkjentYtelser(tilkjentYtelser), vedtaksliste)
-        val behandlingerPåId = behandlinger.associate { it.id to it.type }
 
-        return historikk.map {
+        val (vedtakSanksjon, vedtakIkkeSanksjon) = vedtaksliste.partition { it.resultatType == ResultatType.SANKSJONERE }
+        val (ytelserSanksjon, ytelserIkkeSanksjon) = tilkjentYtelser.partition {
+            it.behandlingId in vedtakSanksjon.map { it.behandlingId }
+                    .toSet()
+        }
+
+
+        val historikkUtenSanksjon = lagHistorikkHolders(sorterTilkjentYtelser(ytelserIkkeSanksjon), vedtakIkkeSanksjon)
+
+        val behandlingerPåId = behandlinger.associate { it.id to it }
+        val vedtakSanksjonPåId = vedtakSanksjon.associate { it.behandlingId to it }
+        val historikkForSanksjon = sorterTilkjentYtelser(ytelserSanksjon).map {
             AndelHistorikkDto(behandlingId = it.behandlingId,
-                              behandlingType = behandlingerPåId.getValue(it.behandlingId),
+                              behandlingType = behandlingerPåId.getValue(it.behandlingId).type,
+                              vedtakstidspunkt = it.vedtakstidspunkt,
+                              saksbehandler = it.sporbar.opprettetAv,
+                              andel = it.andelerTilkjentYtelse.first().tilDto(),
+                              aktivitet = vedtakSanksjonPåId.getValue(it.behandlingId).perioder?.perioder?.first()?.aktivitet
+                                          ?: error("Finner ikke aktivitet for sanksjonert vedtak=${it.behandlingId}"),
+                              periodeType = vedtakSanksjonPåId.getValue(it.behandlingId).perioder?.perioder?.first()?.periodeType
+                                            ?: error("Finner ikke periodetype for sanksjonert vedtak=${it.behandlingId}"),
+                              endring = null,
+                              sanksjonsårsak = vedtakSanksjonPåId.get(it.behandlingId)?.sanksjonsårsak
+                                               ?: error("Finner ikke sanksjonsårsak for sanksjonert vedtak=${it.behandlingId}"))
+        }
+
+        val hist1 = historikkUtenSanksjon.map {
+            AndelHistorikkDto(behandlingId = it.behandlingId,
+                              behandlingType = behandlingerPåId.getValue(it.behandlingId).type,
                               vedtakstidspunkt = it.vedtakstidspunkt,
                               saksbehandler = it.saksbehandler,
                               andel = it.andel.tilDto(),
@@ -99,6 +126,8 @@ object AndelHistorikkBeregner {
                               periodeType = it.vedtaksperiode.periodeType,
                               endring = it.endring)
         }
+
+        return hist1 + historikkForSanksjon;
     }
 
     private fun lagHistorikkHolders(tilkjentYtelser: List<TilkjentYtelse>,
