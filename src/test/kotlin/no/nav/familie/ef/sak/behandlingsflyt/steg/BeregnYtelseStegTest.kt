@@ -168,6 +168,25 @@ internal class BeregnYtelseStegTest {
         }
 
         @Test
+        internal fun `skal opphøre vedtak fra samme måned som forrige andel starter`() {
+            val opphørFom = YearMonth.of(2021, 1)
+
+            val forrigeAndelFom = LocalDate.of(2021, 1, 1)
+            val forrigeAndelTom = LocalDate.of(2021, 12, 31)
+
+            val slot = slot<TilkjentYtelse>()
+            every { tilkjentYtelseService.opprettTilkjentYtelse(capture(slot)) } answers { firstArg() }
+            every { tilkjentYtelseService.hentForBehandling(any()) } returns
+                    lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, forrigeAndelFom, forrigeAndelTom)))
+
+            utførSteg(BehandlingType.REVURDERING,
+                      Opphør(opphørFom = opphørFom, begrunnelse = "null"),
+                      forrigeBehandlingId = UUID.randomUUID())
+
+            assertThat(slot.captured.andelerTilkjentYtelse).hasSize(0)
+        }
+
+        @Test
         internal fun `skal kunne ha ingen stønadsperiode for en førstegangsbehandling`() {
             val innvilgetFom1 = YearMonth.of(2021, 1)
             val innvilgetTom1 = YearMonth.of(2021, 5)
