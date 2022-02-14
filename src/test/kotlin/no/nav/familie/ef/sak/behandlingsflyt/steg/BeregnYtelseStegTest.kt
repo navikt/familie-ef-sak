@@ -12,8 +12,8 @@ import no.nav.familie.ef.sak.beregning.BeregningService
 import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.dto.Periode
+import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
@@ -55,7 +55,7 @@ internal class BeregnYtelseStegTest {
     private val simuleringService = mockk<SimuleringService>()
     private val tilbakekrevingService = mockk<TilbakekrevingService>(relaxed = true)
     private val fagsakService = mockk<FagsakService>(relaxed = true)
-    private val featureToggleService = mockk<FeatureToggleService>(relaxed = true)
+    private val featureToggleService = mockFeatureToggleService()
 
     private val steg = BeregnYtelseSteg(tilkjentYtelseService,
                                         beregningService,
@@ -65,15 +65,18 @@ internal class BeregnYtelseStegTest {
                                         fagsakService,
                                         featureToggleService)
 
+    private val slot = slot<TilkjentYtelse>()
+
     @BeforeEach
     internal fun setUp() {
-        every { featureToggleService.isEnabled(any()) } returns true
         every { fagsakService.fagsakMedOppdatertPersonIdent(any()) } returns fagsak(fagsakpersoner(setOf("123")))
         every { simuleringService.hentOgLagreSimuleringsresultat(any()) }
                 .returns(Simuleringsresultat(behandlingId = UUID.randomUUID(),
                                              data = DetaljertSimuleringResultat(emptyList()),
                                              beriketData = BeriketSimuleringsresultat(mockk(),
                                                                                       mockk())))
+        slot.clear()
+        every { tilkjentYtelseService.opprettTilkjentYtelse(capture(slot)) } answers { firstArg() }
     }
 
     @Nested
@@ -86,8 +89,6 @@ internal class BeregnYtelseStegTest {
             val nyAndelFom = LocalDate.of(2022, 1, 1)
             val nyAndelTom = LocalDate.of(2022, 1, 31)
 
-            val slot = slot<TilkjentYtelse>()
-            every { tilkjentYtelseService.opprettTilkjentYtelse(capture(slot)) } answers { firstArg() }
             every { tilkjentYtelseService.hentForBehandling(any()) } returns
                     lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, forrigeAndelFom, forrigeAndelTom)))
             every { beregningService.beregnYtelse(any(), any()) } returns listOf(lagBeløpsperiode(nyAndelFom, nyAndelTom))
@@ -108,14 +109,11 @@ internal class BeregnYtelseStegTest {
             }
         }
 
-
         @Test
         internal fun `revurdering - førstegangsbehandling er avslått - kun nye andeler som skal gjelde`() {
             val nyAndelFom = LocalDate.of(2022, 1, 1)
             val nyAndelTom = LocalDate.of(2022, 1, 31)
 
-            val slot = slot<TilkjentYtelse>()
-            every { tilkjentYtelseService.opprettTilkjentYtelse(capture(slot)) } answers { firstArg() }
             every { tilkjentYtelseService.hentForBehandling(any()) } throws IllegalArgumentException("Hjelp")
             every { beregningService.beregnYtelse(any(), any()) } returns listOf(lagBeløpsperiode(nyAndelFom, nyAndelTom))
 
@@ -155,8 +153,6 @@ internal class BeregnYtelseStegTest {
             val forventetNyAndelFom = LocalDate.of(2021, 1, 1)
             val forventetNyAndelTom = LocalDate.of(2021, 5, 31)
 
-            val slot = slot<TilkjentYtelse>()
-            every { tilkjentYtelseService.opprettTilkjentYtelse(capture(slot)) } answers { firstArg() }
             every { tilkjentYtelseService.hentForBehandling(any()) } returns
                     lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, forrigeAndelFom, forrigeAndelTom)))
 
@@ -197,8 +193,6 @@ internal class BeregnYtelseStegTest {
             val innvilgetFom2 = YearMonth.of(2021, 9)
             val innvilgetTom2 = YearMonth.of(2022, 3)
 
-            val slot = slot<TilkjentYtelse>()
-            every { tilkjentYtelseService.opprettTilkjentYtelse(capture(slot)) } answers { firstArg() }
 //            every { tilkjentYtelseService.hentForBehandling(any()) } returns
 //                    lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, forrigeAndelFom, forrigeAndelTom)))
             every { beregningService.beregnYtelse(any(), any()) } answers {
@@ -210,19 +204,17 @@ internal class BeregnYtelseStegTest {
             val innvilgetPeriode2 = innvilgetPeriode(innvilgetFom2, innvilgetTom2)
 
             utførSteg(BehandlingType.FØRSTEGANGSBEHANDLING,
-                      Innvilget(resultatType = ResultatType.INNVILGE,
-                                perioder = listOf(innvilgetPeriode1, opphørsperiode, innvilgetPeriode2),
-                                inntekter = listOf(inntekt(innvilgetFom1)),
-                                inntektBegrunnelse = "null",
-                                periodeBegrunnelse = "null"
-                      ),
+                      innvilget(listOf(innvilgetPeriode1, opphørsperiode, innvilgetPeriode2),
+                                listOf(inntekt(innvilgetFom1))),
                       forrigeBehandlingId = UUID.randomUUID())
-            assertThat(slot.captured.andelerTilkjentYtelse.size).isEqualTo(2)
-            assertThat(slot.captured.andelerTilkjentYtelse.firstOrNull()?.stønadFom).isEqualTo(innvilgetFom1.atDay(1))
-            assertThat(slot.captured.andelerTilkjentYtelse.firstOrNull()?.stønadTom).isEqualTo(opphørFom.minusMonths(1)
+
+            val andelerTilkjentYtelse = slot.captured.andelerTilkjentYtelse
+            assertThat(andelerTilkjentYtelse.size).isEqualTo(2)
+            assertThat(andelerTilkjentYtelse.firstOrNull()?.stønadFom).isEqualTo(innvilgetFom1.atDay(1))
+            assertThat(andelerTilkjentYtelse.firstOrNull()?.stønadTom).isEqualTo(opphørFom.minusMonths(1)
                                                                                                        .atEndOfMonth())
-            assertThat(slot.captured.andelerTilkjentYtelse.lastOrNull()?.stønadFom).isEqualTo(innvilgetFom2.atDay(1))
-            assertThat(slot.captured.andelerTilkjentYtelse.lastOrNull()?.stønadTom).isEqualTo(innvilgetTom2.atEndOfMonth())
+            assertThat(andelerTilkjentYtelse.lastOrNull()?.stønadFom).isEqualTo(innvilgetFom2.atDay(1))
+            assertThat(andelerTilkjentYtelse.lastOrNull()?.stønadTom).isEqualTo(innvilgetTom2.atEndOfMonth())
         }
 
 
@@ -235,8 +227,6 @@ internal class BeregnYtelseStegTest {
             val forrigeAndelFom = LocalDate.of(2021, 1, 1)
             val forrigeAndelTom = LocalDate.of(2021, 12, 31)
 
-            val slot = slot<TilkjentYtelse>()
-            every { tilkjentYtelseService.opprettTilkjentYtelse(capture(slot)) } answers { firstArg() }
             every { tilkjentYtelseService.hentForBehandling(any()) } returns
                     lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, forrigeAndelFom, forrigeAndelTom)))
             every { beregningService.beregnYtelse(any(), any()) } answers {
@@ -247,17 +237,10 @@ internal class BeregnYtelseStegTest {
             val innvilgetPeriode = innvilgetPeriode(innvilgetFom, innvilgetTom)
             assertThrows<Feil> {
                 utførSteg(BehandlingType.REVURDERING,
-                          Innvilget(resultatType = ResultatType.INNVILGE,
-                                    perioder = listOf(opphørsperiode, innvilgetPeriode),
-                                    inntekter = listOf(inntekt(innvilgetFom)),
-                                    inntektBegrunnelse = "null",
-                                    periodeBegrunnelse = "null"
-                          ),
+                          innvilget(listOf(opphørsperiode, innvilgetPeriode), listOf(inntekt(innvilgetFom))),
                           forrigeBehandlingId = UUID.randomUUID())
-
             }
         }
-
 
         @Test
         internal fun `skal innvilge med opphør som første periode`() {
@@ -273,8 +256,6 @@ internal class BeregnYtelseStegTest {
             val forventetNyAndelFom2 = LocalDate.of(2021, 9, 1)
             val forventetNyAndelTom2 = LocalDate.of(2022, 3, 31)
 
-            val slot = slot<TilkjentYtelse>()
-            every { tilkjentYtelseService.opprettTilkjentYtelse(capture(slot)) } answers { firstArg() }
             every { tilkjentYtelseService.hentForBehandling(any()) } returns
                     lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, forrigeAndelFom, forrigeAndelTom)))
             every { beregningService.beregnYtelse(any(), any()) } answers {
@@ -284,12 +265,8 @@ internal class BeregnYtelseStegTest {
             val opphørsperiode = opphørsperiode(opphørFom, opphørTom)
             val innvilgetPeriode = innvilgetPeriode(innvilgetFom, innvilgetTom)
             utførSteg(BehandlingType.REVURDERING,
-                      Innvilget(resultatType = ResultatType.INNVILGE,
-                                perioder = listOf(opphørsperiode, innvilgetPeriode),
-                                inntekter = listOf(inntekt(innvilgetFom)),
-                                inntektBegrunnelse = "null",
-                                periodeBegrunnelse = "null"
-                      ),
+                      innvilget(listOf(opphørsperiode, innvilgetPeriode),
+                                listOf(inntekt(innvilgetFom))),
                       forrigeBehandlingId = UUID.randomUUID())
 
             assertThat(slot.captured.andelerTilkjentYtelse).hasSize(2)
@@ -298,7 +275,6 @@ internal class BeregnYtelseStegTest {
             assertThat(slot.captured.andelerTilkjentYtelse.last().stønadFom).isEqualTo(forventetNyAndelFom2)
             assertThat(slot.captured.andelerTilkjentYtelse.last().stønadTom).isEqualTo(forventetNyAndelTom2)
         }
-
 
         @Test
         internal fun `skal innvilge med opphør midt i perioden`() {
@@ -318,8 +294,6 @@ internal class BeregnYtelseStegTest {
             val forventetNyAndelFom3 = LocalDate.of(2021, 9, 1)
             val forventetNyAndelTom3 = LocalDate.of(2022, 3, 31)
 
-            val slot = slot<TilkjentYtelse>()
-            every { tilkjentYtelseService.opprettTilkjentYtelse(capture(slot)) } answers { firstArg() }
             every { tilkjentYtelseService.hentForBehandling(any()) } returns
                     lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, forrigeAndelFom, forrigeAndelTom)))
             every { beregningService.beregnYtelse(any(), any()) } answers {
@@ -329,13 +303,10 @@ internal class BeregnYtelseStegTest {
             val innvilgetPeriode1 = innvilgetPeriode(innvilgetFom1, innvilgetTom1)
             val opphørsperiode = opphørsperiode(opphørFom, opphørTom)
             val innvilgetPeriode2 = innvilgetPeriode(innvilgetFom2, innvilgetTom2)
+
             utførSteg(BehandlingType.REVURDERING,
-                      Innvilget(resultatType = ResultatType.INNVILGE,
-                                perioder = listOf(innvilgetPeriode1, opphørsperiode, innvilgetPeriode2),
-                                inntekter = listOf(inntekt(innvilgetFom1)),
-                                inntektBegrunnelse = "null",
-                                periodeBegrunnelse = "null"
-                      ),
+                      innvilget(listOf(innvilgetPeriode1, opphørsperiode, innvilgetPeriode2),
+                                listOf(inntekt(innvilgetFom1))),
                       forrigeBehandlingId = UUID.randomUUID())
 
             assertThat(slot.captured.andelerTilkjentYtelse).hasSize(3)
@@ -355,8 +326,6 @@ internal class BeregnYtelseStegTest {
             val forrigeAndelFom = LocalDate.of(2021, 1, 1)
             val forrigeAndelTom = LocalDate.of(2021, 3, 31)
 
-            val slot = slot<TilkjentYtelse>()
-            every { tilkjentYtelseService.opprettTilkjentYtelse(capture(slot)) } answers { firstArg() }
             every { tilkjentYtelseService.hentForBehandling(any()) } returns
                     lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, forrigeAndelFom, forrigeAndelTom)))
 
@@ -376,8 +345,6 @@ internal class BeregnYtelseStegTest {
             val andel2Fom = LocalDate.of(2021, 9, 1)
             val andel2Tom = LocalDate.of(2021, 12, 31)
 
-            val slot = slot<TilkjentYtelse>()
-            every { tilkjentYtelseService.opprettTilkjentYtelse(capture(slot)) } answers { firstArg() }
             every { tilkjentYtelseService.hentForBehandling(any()) } returns
                     lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, andel1Fom, andel1Tom),
                                              lagAndelTilkjentYtelse(200, andel2Fom, andel2Tom)))
@@ -385,10 +352,10 @@ internal class BeregnYtelseStegTest {
             utførSteg(BehandlingType.REVURDERING,
                       Opphør(opphørFom = opphørFom, begrunnelse = "null"),
                       forrigeBehandlingId = UUID.randomUUID())
+
             assertThat(slot.captured.andelerTilkjentYtelse).hasSize(1)
             assertThat(slot.captured.andelerTilkjentYtelse.first().stønadFom).isEqualTo(andel1Fom)
             assertThat(slot.captured.andelerTilkjentYtelse.first().stønadTom).isEqualTo(andel1Tom)
-
         }
 
         @Test
@@ -401,8 +368,6 @@ internal class BeregnYtelseStegTest {
             val andel2Fom = LocalDate.of(2021, 9, 1)
             val andel2Tom = LocalDate.of(2021, 12, 31)
 
-            val slot = slot<TilkjentYtelse>()
-            every { tilkjentYtelseService.opprettTilkjentYtelse(capture(slot)) } answers { firstArg() }
             every { tilkjentYtelseService.hentForBehandling(any()) } returns
                     lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, andel1Fom, andel1Tom),
                                              lagAndelTilkjentYtelse(200, andel2Fom, andel2Tom)))
@@ -412,9 +377,7 @@ internal class BeregnYtelseStegTest {
                           Opphør(opphørFom = opphørFom, begrunnelse = "null"),
                           forrigeBehandlingId = UUID.randomUUID())
             }
-
         }
-
 
         @Test
         internal fun `skal opphøre hvis opphørsdato samsvarer med startdato for andel`() {
@@ -428,8 +391,6 @@ internal class BeregnYtelseStegTest {
             val forventetNyAndelFom = LocalDate.of(2021, 1, 1)
             val forventetNyAndelTom = LocalDate.of(2021, 6, 30)
 
-            val slot = slot<TilkjentYtelse>()
-            every { tilkjentYtelseService.opprettTilkjentYtelse(capture(slot)) } answers { firstArg() }
             every { tilkjentYtelseService.hentForBehandling(any()) } returns
                     lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, andel1Fom, andel1Tom),
                                              lagAndelTilkjentYtelse(200, andel2Fom, andel2Tom)))
@@ -457,8 +418,6 @@ internal class BeregnYtelseStegTest {
             val forventetAndelFom2 = LocalDate.of(2021, 7, 1)
             val forventetAndelTom2 = LocalDate.of(2021, 7, 31)
 
-            val slot = slot<TilkjentYtelse>()
-            every { tilkjentYtelseService.opprettTilkjentYtelse(capture(slot)) } answers { firstArg() }
             every { tilkjentYtelseService.hentForBehandling(any()) } returns
                     lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, andel1Fom, andel1Tom),
                                              lagAndelTilkjentYtelse(200, andel2Fom, andel2Tom)))
@@ -481,8 +440,6 @@ internal class BeregnYtelseStegTest {
             val andelFom = LocalDate.of(2021, 1, 1)
             val andelTom = LocalDate.of(2021, 6, 30)
 
-            val slot = slot<TilkjentYtelse>()
-            every { tilkjentYtelseService.opprettTilkjentYtelse(capture(slot)) } answers { firstArg() }
             every { tilkjentYtelseService.hentForBehandling(any()) } returns
                     lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, andelFom, andelTom)))
 
@@ -502,7 +459,6 @@ internal class BeregnYtelseStegTest {
             }
             assertThat(feil.frontendFeilmelding).contains("Kan kun opphøre ved revurdering")
         }
-
 
         @Test
         internal fun `skal slette tilbakekreving og simulering ved avslag`() {
@@ -978,6 +934,14 @@ internal class BeregnYtelseStegTest {
 
     }
 
+    private fun innvilget(perioder: List<VedtaksperiodeDto>,
+                          inntekter: List<Inntekt>) =
+            Innvilget(resultatType = ResultatType.INNVILGE,
+                      perioder = perioder,
+                      inntekter = inntekter,
+                      inntektBegrunnelse = "null",
+                      periodeBegrunnelse = "null")
+
     private fun lagBeløpsperiode(fom: LocalDate, tom: LocalDate) =
             Beløpsperiode(Periode(fom, tom), null, BigDecimal.ZERO, BigDecimal.ZERO)
 
@@ -997,7 +961,6 @@ internal class BeregnYtelseStegTest {
             Inntekt(andelTom,
                     BigDecimal(100000),
                     samordningsfradrag = BigDecimal.ZERO)
-
 
     private fun utførSteg(type: BehandlingType,
                           vedtak: VedtakDto = Innvilget(resultatType = ResultatType.INNVILGE,
