@@ -14,7 +14,6 @@ import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.ENDRET_I
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.FOM
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.INNTEKT
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.INNTEKTSREDUKSJON
-import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.KILDE_BEHANDLING_ID
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.PERIODE_TYPE
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.SAMORDNINGSFRADRAG
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.TEST_TYPE
@@ -224,7 +223,6 @@ enum class TestType {
 
 private data class AndelHistorikkData(val testType: TestType,
                                       val behandlingId: UUID,
-                                      val kildeBehandlingId: UUID?,
                                       val beløp: Int?,
                                       val stønadFom: LocalDate?,
                                       val stønadTom: LocalDate?,
@@ -253,7 +251,6 @@ private enum class AndelHistorikkHeader(val key: String,
 
     TEST_TYPE("type", { "" }),
     BEHANDLING("behandling_id", { hentBehandlingId(it.behandlingId) }),
-    KILDE_BEHANDLING_ID("kilde_behandling_id", { "" }),
     FOM("fom", { YearMonth.from(it.andel.stønadFra) }, 11),
     TOM("tom", { YearMonth.from(it.andel.stønadTil) }, 11),
     BELØP("beløp", { it.andel.beløp }, 8),
@@ -296,7 +293,6 @@ object AndelHistorikkParser {
                        row: Map<String, String>) =
             AndelHistorikkData(testType = type,
                                behandlingId = behandlingId,
-                               kildeBehandlingId = row.getOptionalInt(KILDE_BEHANDLING_ID)?.let { generateBehandlingId(it) },
                                beløp = row.getOptionalInt(BELØP),
                                stønadFom = row.getOptionalValue(FOM)?.let { YearMonth.parse(it).atDay(1) },
                                stønadTom = row.getOptionalValue(TOM)?.let { YearMonth.parse(it).atEndOfMonth() },
@@ -316,7 +312,7 @@ object AndelHistorikkParser {
                                 inntekt = andel.inntekt!!,
                                 inntektsreduksjon = andel.inntektsreduksjon!!,
                                 samordningsfradrag = andel.samordningsfradrag!!,
-                                kildeBehandlingId = andel.kildeBehandlingId ?: andel.endretI ?: andel.behandlingId)
+                                kildeBehandlingId = andel.endretI ?: andel.behandlingId)
 
     private fun Map<String, String>.getValue(header: AndelHistorikkHeader) = getValue(header.key)
     private fun Map<String, String>.getOptionalValue(header: AndelHistorikkHeader) = get(header.key)?.let { emptyAsNull(it) }
