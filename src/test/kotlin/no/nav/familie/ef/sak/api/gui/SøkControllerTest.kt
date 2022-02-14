@@ -74,6 +74,20 @@ internal class SøkControllerTest : OppslagSpringRunnerTest() {
         assertThat(fagsakPersonRepository.findByIdent(setOf(personIdent))).isNotNull
     }
 
+    @Test
+    internal fun `Skal feile hvis personIdenten har feil lengde`() {
+        val response = søkPerson("010101999990")
+        assertThat(response.body.status).isEqualTo(Ressurs.Status.FEILET)
+        assertThat(response.body.frontendFeilmelding).isEqualTo("Ugyldig personident. Det må være 11 sifre")
+    }
+
+    @Test
+    internal fun `Skal feile hvis personIdenten inneholder noe annet enn tall`() {
+        val response = søkPerson("010et1ord02")
+        assertThat(response.body.status).isEqualTo(Ressurs.Status.FEILET)
+        assertThat(response.body.frontendFeilmelding).isEqualTo("Ugyldig personident. Det kan kun inneholde tall")
+    }
+
     private fun søkPerson(personIdent: String): ResponseEntity<Ressurs<Søkeresultat>> {
         return restTemplate.exchange(localhost("/api/sok/"),
                                      HttpMethod.POST,
