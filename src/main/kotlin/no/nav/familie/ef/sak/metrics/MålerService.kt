@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.metrics
 
+import io.micrometer.core.instrument.Gauge
 import io.micrometer.core.instrument.Metrics
 import io.micrometer.core.instrument.MultiGauge
 import io.micrometer.core.instrument.Tags
@@ -8,6 +9,7 @@ import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
+import java.util.concurrent.atomic.AtomicReference
 
 @Service
 class MålerService(private val målerRepository: MålerRepository) {
@@ -15,14 +17,20 @@ class MålerService(private val målerRepository: MålerRepository) {
     private val åpneBehandlingerPerUkeGauge = MultiGauge.builder("KlarTilBehandlingPerUke").register(Metrics.globalRegistry)
     private val åpneBehandlingerGauge = MultiGauge.builder("KlarTilBehandling").register(Metrics.globalRegistry)
     private val vedtakGauge = MultiGauge.builder("Vedtak").register(Metrics.globalRegistry)
+    private val antallMigreringerTeller: AtomicReference<Double> = AtomicReference(0.0)
+    private val antallMigreringerGauge = Gauge.builder("AntallMigreringer",
+                                                       antallMigreringerTeller,
+                                                       AtomicReference<Double>::get).register(Metrics.globalRegistry)
+
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Scheduled(initialDelay = 60 * 1000L, fixedDelay = OPPDATERINGSFREKVENS)
     fun antallMigreringer() {
         val antallBehandlinger = målerRepository.finnAntallBehandlingerAvÅrsak(BehandlingÅrsak.MIGRERING)
+        logger.info("Antall migreringer forrige gang=${antallMigreringerGauge.value()}")
         logger.info("Antall migreringer=$antallBehandlinger")
-        Metrics.gauge("AntallMigreringer", antallBehandlinger)
+        antallMigreringerTeller.set(antallBehandlinger.toDouble())
     }
 
     @Scheduled(initialDelay = 60 * 1000L, fixedDelay = OPPDATERINGSFREKVENS)
