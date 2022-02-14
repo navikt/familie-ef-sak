@@ -878,7 +878,7 @@ internal class BeregnYtelseStegTest {
     inner class Opphør {
 
         @Test
-        internal fun `skal kunne opphør bak i tid`() {
+        internal fun `skal kunne opphøre bak i tid`() {
             val opphørFom = YearMonth.of(2021, 1)
             val andelFom = YearMonth.of(2021, 6).atDay(1)
             val andelTom = YearMonth.of(2021, 6).atEndOfMonth()
@@ -897,7 +897,7 @@ internal class BeregnYtelseStegTest {
         }
 
         @Test
-        internal fun `skal kunne opphør midt i en tidligere periode`() {
+        internal fun `skal kunne opphøre midt i en tidligere periode`() {
             val opphørFom = YearMonth.of(2021, 8)
             val andelFom = YearMonth.of(2021, 6).atDay(1)
             val andelTom = YearMonth.of(2022, 6).atEndOfMonth()
@@ -918,7 +918,7 @@ internal class BeregnYtelseStegTest {
         }
 
         @Test
-        internal fun `skal ikke kunne opphør frem i tid`() {
+        internal fun `skal ikke kunne opphøre frem i tid`() {
             val opphørFom = YearMonth.of(2022, 1)
             val andelFom = YearMonth.of(2021, 6).atDay(1)
             val andelTom = YearMonth.of(2021, 6).atEndOfMonth()
