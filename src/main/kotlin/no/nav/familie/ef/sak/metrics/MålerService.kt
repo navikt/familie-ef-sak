@@ -20,7 +20,7 @@ class MålerService(private val målerRepository: MålerRepository) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    @Scheduled(initialDelay = 1 * 1000L, fixedDelay = 5000)
+    @Scheduled(initialDelay = 60 * 1000L, fixedDelay = OPPDATERINGSFREKVENS)
     fun antallMigreringer() {
         val antallMigreringer = målerRepository.finnAntallBehandlingerAvÅrsak(BehandlingÅrsak.MIGRERING)
         logger.info("Antall migreringer=$antallMigreringer")
