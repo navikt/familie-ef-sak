@@ -43,7 +43,12 @@ class PersonopplysningerIntegrasjonerClient(@Qualifier("azure") restOperations: 
     }
 
     fun hentMedlemskapsinfo(ident: String): Medlemskapsinfo {
-        return postForEntity<Ressurs<Medlemskapsinfo>>(integrasjonerConfig.medlemskapUri, PersonIdent(ident)).data!!
+        // TODO slett
+        return try {
+            postForEntity<Ressurs<Medlemskapsinfo>>(integrasjonerConfig.medlemskapUri, PersonIdent(ident)).data!!
+        } catch(e: Exception) {
+            Medlemskapsinfo(ident, emptyList(), emptyList(), emptyList())
+        }
     }
 
     fun hentNavEnhetForPersonMedRelasjoner(ident: String): List<Arbeidsfordelingsenhet> {
