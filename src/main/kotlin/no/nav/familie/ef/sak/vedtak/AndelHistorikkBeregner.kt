@@ -197,6 +197,7 @@ object AndelHistorikkBeregner {
     private fun AndelHistorikkHolder.finnEndringstype(tidligereAndel: AndelTilkjentYtelse,
                                                       vedtaksperiode: Vedtaksperiode): EndringType? {
         return when {
+            erSanksjonMedSammePerioder(tidligereAndel, vedtaksperiode) -> null
             aktivitetEllerPeriodeTypeHarEndretSeg(vedtaksperiode) -> EndringType.ERSTATTET
             this.andel.beløp != tidligereAndel.beløp -> EndringType.ERSTATTET
             this.andel.inntekt != tidligereAndel.inntekt -> EndringType.ERSTATTET
@@ -206,6 +207,12 @@ object AndelHistorikkBeregner {
             else -> null // Uendret
         }
     }
+
+    private fun AndelHistorikkHolder.erSanksjonMedSammePerioder(tidligereAndel: AndelTilkjentYtelse,
+                                                                vedtaksperiode: Vedtaksperiode) =
+            this.vedtaksperiode.periodeType == VedtaksperiodeType.SANKSJON && vedtaksperiode.periodeType == VedtaksperiodeType.SANKSJON
+            && this.vedtaksperiode.datoFra == tidligereAndel.stønadFom && this.vedtaksperiode.datoTil == tidligereAndel.stønadTom
+
 
     private fun AndelHistorikkHolder.aktivitetEllerPeriodeTypeHarEndretSeg(vedtaksperiode: Vedtaksperiode) =
             this.vedtaksperiode.aktivitet != vedtaksperiode.aktivitet ||

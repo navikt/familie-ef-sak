@@ -143,6 +143,11 @@ class AndelHistorikkBeregnerTest {
             run("/økonomi/sanksjon_revurderes.csv")
         }
 
+        @Test
+        internal fun `revurderer en sanksjon der beløpet endres`() {
+            run("/økonomi/sanksjon_revurdering_nytt_beløp.csv")
+        }
+
         @Disabled // Har ikke støtte for denne ennå, må kunne håndtere tidligere_behandling_id når andel for sanksjon opprettes
         @Test
         internal fun `revurderer med sanksjon 2 ganger`() {
@@ -248,6 +253,7 @@ private enum class AndelHistorikkHeader(val key: String,
 
     TEST_TYPE("type", { "" }),
     BEHANDLING("behandling_id", { hentBehandlingId(it.behandlingId) }),
+    KILDE_BEHANDLING_ID("kilde_behandling_id", { "" }),
     FOM("fom", { YearMonth.from(it.andel.stønadFra) }, 11),
     TOM("tom", { YearMonth.from(it.andel.stønadTil) }, 11),
     BELØP("beløp", { it.andel.beløp }, 8),
@@ -290,6 +296,7 @@ object AndelHistorikkParser {
                        row: Map<String, String>) =
             AndelHistorikkData(testType = type,
                                behandlingId = behandlingId,
+                               kildeBehandlingId = row.getOptionalInt(KILDE_BEHANDLING_ID)?.let { generateBehandlingId(it) },
                                beløp = row.getOptionalInt(BELØP),
                                stønadFom = row.getOptionalValue(FOM)?.let { YearMonth.parse(it).atDay(1) },
                                stønadTom = row.getOptionalValue(TOM)?.let { YearMonth.parse(it).atEndOfMonth() },
@@ -309,7 +316,7 @@ object AndelHistorikkParser {
                                 inntekt = andel.inntekt!!,
                                 inntektsreduksjon = andel.inntektsreduksjon!!,
                                 samordningsfradrag = andel.samordningsfradrag!!,
-                                kildeBehandlingId = andel.endretI ?: andel.behandlingId)
+                                kildeBehandlingId = andel.kildeBehandlingId ?: andel.endretI ?: andel.behandlingId)
 
     private fun Map<String, String>.getValue(header: AndelHistorikkHeader) = getValue(header.key)
     private fun Map<String, String>.getOptionalValue(header: AndelHistorikkHeader) = get(header.key)?.let { emptyAsNull(it) }
