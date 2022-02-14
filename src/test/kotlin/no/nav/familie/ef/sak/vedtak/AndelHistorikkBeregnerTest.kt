@@ -129,6 +129,16 @@ class AndelHistorikkBeregnerTest {
         internal fun `sanksjon i starten på en periode`() {
             run("/økonomi/sanksjon_starten.csv")
         }
+
+        @Test
+        internal fun `sanksjon overlapper 2 perioder`() {
+            run("/økonomi/sanksjon_overlapper_2_andeler.csv")
+        }
+
+        @Test
+        internal fun `revuderer sanksjon og setter tilbake til den første perioden på nytt`() {
+            run("/økonomi/sanksjon_revurderes.csv")
+        }
     }
 
     private fun run(filnavn: String, tilOgMedBehandlingId: Int? = null) {
