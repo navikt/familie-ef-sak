@@ -59,7 +59,7 @@ class SøkController(private val søkService: SøkService, private val tilgangSe
 
     private fun validerPersonIdent(personIdentRequest: PersonIdentDto) {
         feilHvis(personIdentRequest.personIdent.length != 11) { "Ugyldig personident. Det må være 11 sifre" }
-        feilHvis(!personIdentRequest.personIdent.matches("[0-9]".toRegex())) { "Ugyldig personident. Det kan kun inneholde tall" }
+        feilHvis(!personIdentRequest.personIdent.matches("[0-9]+".toRegex())) { "Ugyldig personident. Det kan kun inneholde tall" }
     }
 
 }
