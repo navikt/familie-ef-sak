@@ -26,6 +26,7 @@ import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -326,8 +327,10 @@ object AndelHistorikkParser {
                     val resultat: ResultatType
                     var periodeWrapper: PeriodeWrapper? = null
                     var opphørFom: LocalDate? = null
+                    var sanksjonsårsak: Sanksjonsårsak? = null
                     if (vedtaksperioder.singleOrNull()?.takeIf { it.periodeType == VedtaksperiodeType.SANKSJON } != null) {
                         resultat = ResultatType.SANKSJONERE
+                        sanksjonsårsak = Sanksjonsårsak.SAGT_OPP_STILLING
                         periodeWrapper = mapVedtaksperioder(vedtaksperioder)
                     } else if (vedtaksperioder.all { it.stønadFom != null && it.stønadTom != null }) {
                         resultat = ResultatType.INNVILGE
@@ -348,7 +351,8 @@ object AndelHistorikkParser {
                            inntekter = null,
                            saksbehandlerIdent = null,
                            opphørFom = opphørFom,
-                           beslutterIdent = null)
+                           beslutterIdent = null,
+                           sanksjonsårsak = sanksjonsårsak)
 
                 }
     }
