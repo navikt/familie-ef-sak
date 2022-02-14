@@ -28,7 +28,6 @@ import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.net.URL
@@ -114,6 +113,17 @@ class AndelHistorikkBeregnerTest {
         run("/økonomi/filtrer_tilOgMedBehandling_er_andre_behandlingen.csv", tilOgMedBehandlingId = 2)
     }
 
+    @Test
+    internal fun `revurerer behandling uten endringer`() {
+        run("/økonomi/revurder_på_nytt_uten_endringer_som_først_splittets.csv")
+    }
+
+    @Test
+    internal fun `revurderer behandling med nytt beløp, som sen revurderes uten endringer`() {
+        run("/økonomi/revurder_på_nytt_uten_endringer.csv")
+    }
+
+
     @Nested
     inner class Sanksjon {
 
@@ -147,7 +157,6 @@ class AndelHistorikkBeregnerTest {
             run("/økonomi/sanksjon_revurdering_nytt_beløp.csv")
         }
 
-        @Disabled // Har ikke støtte for denne ennå, må kunne håndtere tidligere_behandling_id når andel for sanksjon opprettes
         @Test
         internal fun `revurderer med sanksjon 2 ganger`() {
             run("/økonomi/sanksjon_flere.csv")
