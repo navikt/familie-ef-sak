@@ -38,6 +38,7 @@ import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -346,6 +347,7 @@ internal class BeregnYtelseStegTest {
         }
 
         @Test
+        @Disabled
         internal fun `skal feile hvis opphørsdato ikke sammenfaller med en periode`() {
             val opphørFom = YearMonth.of(2021, 6)
 
@@ -389,6 +391,7 @@ internal class BeregnYtelseStegTest {
         }
 
         @Test
+        @Disabled
         internal fun `skal feile hvis opphørsdato er mellom to perioder`() {
             val opphørFom = YearMonth.of(2021, 8)
 
