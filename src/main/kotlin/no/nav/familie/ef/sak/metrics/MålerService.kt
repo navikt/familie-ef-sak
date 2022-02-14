@@ -22,9 +22,9 @@ class MålerService(private val målerRepository: MålerRepository) {
 
     @Scheduled(initialDelay = 60 * 1000L, fixedDelay = OPPDATERINGSFREKVENS)
     fun antallMigreringer() {
-        val antallMigreringer = målerRepository.finnAntallBehandlingerAvÅrsak(BehandlingÅrsak.MIGRERING)
-        logger.info("Antall migreringer=$antallMigreringer")
-        antallMigreringerGauge.set(antallMigreringer)
+        val antallBehandlinger = målerRepository.finnAntallBehandlingerAvÅrsak(BehandlingÅrsak.MIGRERING)
+        logger.info("Antall migreringer=$antallBehandlinger")
+        antallMigreringerGauge.set(antallBehandlinger)
     }
 
     @Scheduled(initialDelay = 60 * 1000L, fixedDelay = OPPDATERINGSFREKVENS)
