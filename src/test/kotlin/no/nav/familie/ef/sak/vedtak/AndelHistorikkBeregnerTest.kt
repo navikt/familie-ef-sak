@@ -27,6 +27,7 @@ import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.net.URL
 import java.time.LocalDate
@@ -111,6 +112,25 @@ class AndelHistorikkBeregnerTest {
         run("/økonomi/filtrer_tilOgMedBehandling_er_andre_behandlingen.csv", tilOgMedBehandlingId = 2)
     }
 
+    @Nested
+    inner class Sanksjon {
+
+        @Test
+        internal fun `sanksjon midt i en periode`() {
+            run("/økonomi/sanksjon_midt_i.csv")
+        }
+
+        @Test
+        internal fun `sanksjon i slutten på en periode`() {
+            run("/økonomi/sanksjon_slutten.csv")
+        }
+
+        @Test
+        internal fun `sanksjon i starten på en periode`() {
+            run("/økonomi/sanksjon_starten.csv")
+        }
+    }
+
     private fun run(filnavn: String, tilOgMedBehandlingId: Int? = null) {
         AndelHistorikkRunner.run(javaClass.getResource(filnavn)!!, tilOgMedBehandlingId)
     }
@@ -127,7 +147,7 @@ object AndelHistorikkRunner {
         val behandlinger = grupper.input.map { it.behandlingId }.distinct().mapIndexed { index, id ->
             behandling(id = id, opprettetTid = now.plusMinutes(index.toLong()))
         }
-        val behandlingId = tilOgMedBehandlingId?.let { generateBehandlingId(it)}
+        val behandlingId = tilOgMedBehandlingId?.let { generateBehandlingId(it) }
 
         val output = AndelHistorikkBeregner.lagHistorikk(grupper.input, grupper.vedtaksliste, behandlinger, behandlingId)
 
@@ -136,6 +156,12 @@ object AndelHistorikkRunner {
 
     private fun validerInput(grupper: ParsetAndelHistorikkData) {
         validerVedtaksperioderIkkeOverlapper(grupper)
+        validerHarMaks1SanksjonPerVedtak(grupper)
+    }
+
+    private fun validerHarMaks1SanksjonPerVedtak(grupper: ParsetAndelHistorikkData) {
+        grupper.vedtaksliste.mapNotNull { it.perioder?.perioder }
+                .forEach { perioder -> perioder.count { it.periodeType == VedtaksperiodeType.SANKSJON } < 2 }
     }
 
     private fun validerVedtaksperioderIkkeOverlapper(grupper: ParsetAndelHistorikkData) {
@@ -200,7 +226,7 @@ private enum class AndelHistorikkHeader(val key: String,
                                         val value: (AndelHistorikkDto) -> Any?,
                                         val minHeaderValue: Int = key.length) {
 
-    TEST_TYPE("type", {""}),
+    TEST_TYPE("type", { "" }),
     BEHANDLING("behandling_id", { hentBehandlingId(it.behandlingId) }),
     FOM("fom", { YearMonth.from(it.andel.stønadFra) }, 11),
     TOM("tom", { YearMonth.from(it.andel.stønadTil) }, 11),
@@ -288,19 +314,20 @@ object AndelHistorikkParser {
                 .groupBy({ it.first }, { it.second })
                 .map { (behandlingId, vedtaksperioder) ->
                     val resultat: ResultatType
-                    val periodeWrapper: PeriodeWrapper?
-                    val opphørFom: LocalDate?
-                    if (vedtaksperioder.all { it.stønadFom != null && it.stønadTom != null }) {
+                    var periodeWrapper: PeriodeWrapper? = null
+                    var opphørFom: LocalDate? = null
+                    if (vedtaksperioder.singleOrNull()?.takeIf { it.periodeType == VedtaksperiodeType.SANKSJON } != null) {
+                        resultat = ResultatType.SANKSJONERE
+                        periodeWrapper = mapVedtaksperioder(vedtaksperioder)
+                    } else if (vedtaksperioder.all { it.stønadFom != null && it.stønadTom != null }) {
                         resultat = ResultatType.INNVILGE
-                        opphørFom = null
                         periodeWrapper = mapVedtaksperioder(vedtaksperioder)
                     } else {
                         feilHvis(vedtaksperioder.size > 1) {
                             "Kan kun være en vedtaksperiode som er av typen opphør"
                         }
                         resultat = ResultatType.OPPHØRT
-                        periodeWrapper = null
-                        opphørFom = vedtaksperioder.single().stønadFom
+                        opphørFom = vedtaksperioder.single().stønadFom ?: error("Mangler stønadFom i opphør")
                     }
                     Vedtak(behandlingId = behandlingId,
                            resultatType = resultat,
