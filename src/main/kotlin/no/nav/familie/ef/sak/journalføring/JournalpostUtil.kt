@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.journalføring.dto
+package no.nav.familie.ef.sak.journalføring
 
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.felles.Behandlingstema
