@@ -152,6 +152,7 @@ class AndelHistorikkBeregnerTest {
         internal fun `revurderer med sanksjon 2 ganger`() {
             run("/økonomi/sanksjon_flere.csv")
         }
+
     }
 
     private fun run(filnavn: String, tilOgMedBehandlingId: Int? = null) {
