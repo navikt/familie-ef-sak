@@ -16,7 +16,7 @@ class MålerService(private val målerRepository: MålerRepository) {
     private val åpneBehandlingerPerUkeGauge = MultiGauge.builder("KlarTilBehandlingPerUke").register(Metrics.globalRegistry)
     private val åpneBehandlingerGauge = MultiGauge.builder("KlarTilBehandling").register(Metrics.globalRegistry)
     private val vedtakGauge = MultiGauge.builder("Vedtak").register(Metrics.globalRegistry)
-    private val antallMigreringerGauge = Metrics.gauge("AntallMigreringer", AtomicInteger())!!
+    private val antallMigreringerGauge = Metrics.gauge("AntallMigreringer", AtomicInteger()) ?: error("Forventer not null")
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
