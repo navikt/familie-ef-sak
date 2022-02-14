@@ -17,6 +17,8 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fødsel
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlBarn
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlSøker
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.util.FnrGenerator
@@ -48,11 +50,13 @@ class NyeBarnServiceTest {
     val fødselsdatoVoksentBarn = LocalDate.of(2001, 10, 22)
 
     @BeforeEach fun init() {
-        every { behandlingService.finnSisteIverksatteBehandling(any()) } returns behandling
+        every { behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(any()) } returns behandling
         every { fagsakService.finnFagsak(any(), any()) } returns fagsak
         every { fagsak.id } returns UUID.randomUUID()
         every { behandling.id } returns UUID.randomUUID()
         every { grunnlagsdataMedMetadata.grunnlagsdata } returns grunnlagsdataDomene
+        every { personService.hentPersonIdenter(any()) } returns PdlIdenter(listOf(PdlIdent("fnr til søker", false)))
+        every { fagsakService.hentAktivIdent(any()) } returns "fnr til søker"
     }
 
     @Test

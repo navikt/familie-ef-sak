@@ -32,15 +32,17 @@ class TilbakekrevingClient(@Qualifier("azure") restOperations: RestOperations,
             .toUri()
 
     private val opprettManueltTilbakekrevingUri =
-            UriComponentsBuilder.fromUri(familieTilbakeUri).pathSegment("manuelt/task/v1").build().toUri()
+            UriComponentsBuilder.fromUri(familieTilbakeUri).pathSegment("api/behandling/manuelt/task/v1").build().toUri()
 
     private fun kanBehandlingOpprettesManueltUri(stønadstype: Stønadstype, eksternFagsakId: Long) =
             UriComponentsBuilder.fromUri(familieTilbakeUri)
-                    .pathSegment("ytelsestype",
+                    .pathSegment("api",
+                                 "ytelsestype",
                                  stønadstype.toString(),
                                  "fagsak",
                                  eksternFagsakId.toString(),
-                                 "kanBehandlingOpprettesManuelt/v1")
+                                 "kanBehandlingOpprettesManuelt",
+                                 "v1")
                     .build()
                     .toUri()
 
