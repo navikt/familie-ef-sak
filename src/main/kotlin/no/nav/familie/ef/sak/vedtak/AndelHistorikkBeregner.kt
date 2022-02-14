@@ -266,6 +266,6 @@ object AndelHistorikkBeregner {
         }
     }
 
-    private fun sorterVedtaksHistorikk(historikk: List<AndelHistorikkDto>): List<AndelHistorikkDto> = historikk.sortedBy { it.andel.stønadFra }
+    fun sorterVedtaksHistorikk(historikk: List<AndelHistorikkDto>): List<AndelHistorikkDto> = historikk.sortedBy { it.andel.stønadFra }
 
 }

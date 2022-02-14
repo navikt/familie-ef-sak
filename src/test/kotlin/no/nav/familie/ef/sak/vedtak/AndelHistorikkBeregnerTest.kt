@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.tilDto
+import no.nav.familie.ef.sak.vedtak.AndelHistorikkBeregner.sorterVedtaksHistorikk
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.AKTIVITET
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.BEHANDLING
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.BELØP
@@ -131,7 +132,7 @@ object AndelHistorikkRunner {
 
         val output = AndelHistorikkBeregner.lagHistorikk(grupper.input, grupper.vedtaksliste, behandlinger, behandlingId)
 
-        assertThat(toString(output)).isEqualTo(toString(grupper.expectedOutput))
+        assertThat(toString(output)).isEqualTo(toString(sorterVedtaksHistorikk(grupper.expectedOutput)))
     }
 
     private fun validerInput(grupper: ParsetAndelHistorikkData) {
