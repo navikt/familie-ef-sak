@@ -109,8 +109,8 @@ object AndelHistorikkBeregner {
 
         tilkjentYtelser.forEach { tilkjentYtelse ->
             val vedtaksperioder = vedtaksperioderPåBehandling.getValue(tilkjentYtelse.behandlingId)
-
-            tilkjentYtelse.andelerTilkjentYtelse.forEach { andel ->
+            val andelerFraSanksjon = lagAndelerFraSanksjoner(vedtaksperioder, tilkjentYtelse)
+            (tilkjentYtelse.andelerTilkjentYtelse + andelerFraSanksjon).forEach { andel ->
                 val andelFraHistorikk = finnTilsvarendeAndelIHistorikk(historikk, andel)
                 val index = finnIndeksForNyAndel(historikk, andel)
                 val vedtaksperiode = finnVedtaksperiodeForAndel(andel, vedtaksperioder)
@@ -126,6 +126,20 @@ object AndelHistorikkBeregner {
         }
         return historikk
     }
+
+    private fun lagAndelerFraSanksjoner(vedtaksperioder: List<Vedtaksperiode>,
+                                        tilkjentYtelse: TilkjentYtelse) =
+            vedtaksperioder.filter { it.periodeType == VedtaksperiodeType.SANKSJON }
+                    .map {
+                        AndelTilkjentYtelse(beløp = 0,
+                                            stønadFom = it.datoFra,
+                                            stønadTom = it.datoTil,
+                                            "",
+                                            0,
+                                            0,
+                                            0,
+                                            tilkjentYtelse.behandlingId)
+                    }
 
     /**
      * Markerer endrede med riktig type endret

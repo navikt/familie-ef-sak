@@ -24,17 +24,14 @@ object VedtakHistorikkBeregner {
             val nyePerioder = vedtak.perioder?.perioder ?: error("Finner ikke perioder på vedtak=${vedtak.behandlingId}")
             val førsteFraDato = nyePerioder.first().datoFra
             avkortTidligerePerioder(acc.lastOrNull(), førsteFraDato) + nyePerioder
-        //} else if (vedtak.resultatType == ResultatType.SANKSJONERE) {
-        //    splitOppPerioderSomErSanksjonert(acc, vedtak)
+        } else if (vedtak.resultatType == ResultatType.SANKSJONERE) {
+            splitOppPerioderSomErSanksjonert(acc, vedtak)
         } else {
             val opphørFom = vedtak.opphørFom ?: error("Mangler dato for opphør på vedtak=${vedtak.behandlingId}")
             avkortTidligerePerioder(acc.lastOrNull(), opphørFom)
         }
     }
 
-    // TODO burde denna ha med vedtaksperiode som er sanksjon? For å få med att det er sanksjon kanskje?
-    // gjøres med nyePerioder.add(vedtaksperiodeSanksjon) ?
-    // Då AndelHistorikkBeregnern utgår fra andeler, så blir de likevel ikke med
     private fun splitOppPerioderSomErSanksjonert(acc: List<Pair<UUID, List<Vedtaksperiode>>>, vedtak: Vedtak): List<Vedtaksperiode> {
         val vedtaksperiodeSanksjon =
                 vedtak.perioder?.perioder?.singleOrNull() ?: error("Sanksjon må ha en periode vedtak=${vedtak.behandlingId}")

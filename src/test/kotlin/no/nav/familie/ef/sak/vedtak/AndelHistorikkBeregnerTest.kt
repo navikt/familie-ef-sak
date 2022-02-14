@@ -14,6 +14,7 @@ import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.ENDRET_I
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.FOM
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.INNTEKT
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.INNTEKTSREDUKSJON
+import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.KILDE_BEHANDLING_ID
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.PERIODE_TYPE
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.SAMORDNINGSFRADRAG
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.TEST_TYPE
@@ -28,6 +29,7 @@ import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.net.URL
@@ -140,6 +142,12 @@ class AndelHistorikkBeregnerTest {
         internal fun `revuderer sanksjon og setter tilbake til den første perioden på nytt`() {
             run("/økonomi/sanksjon_revurderes.csv")
         }
+
+        @Disabled // Har ikke støtte for denne ennå, må kunne håndtere tidligere_behandling_id når andel for sanksjon opprettes
+        @Test
+        internal fun `revurderer med sanksjon 2 ganger`() {
+            run("/økonomi/sanksjon_flere.csv")
+        }
     }
 
     private fun run(filnavn: String, tilOgMedBehandlingId: Int? = null) {
@@ -211,6 +219,7 @@ enum class TestType {
 
 private data class AndelHistorikkData(val testType: TestType,
                                       val behandlingId: UUID,
+                                      val kildeBehandlingId: UUID?,
                                       val beløp: Int?,
                                       val stønadFom: LocalDate?,
                                       val stønadTom: LocalDate?,
