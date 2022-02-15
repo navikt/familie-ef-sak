@@ -118,8 +118,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
             BehandlingType.REVURDERING -> {
                 val opphørsperioder = finnOpphørsperioder(vedtak)
                 val andeler = andelerForInnvilgetRevurdering(behandling, andelerTilkjentYtelse, opphørsperioder)
-                val opphørsdato = opphørsperioder.minOfOrNull { it.fradato }
-                        ?.takeIf { stønadsdato -> andeler.minOfOrNull { it.stønadFom }?.isAfter(stønadsdato) ?: false }
+                val opphørsdato = opphørsdatoHvisFørFørsteAndelSinFomDato(opphørsperioder, andeler)
                 andeler to opphørsdato
             }
             else -> error("Steg ikke støttet for type=${behandling.type}")
@@ -132,6 +131,11 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                                                                    samordningsfradragType = vedtak.samordningsfradragType,
                                                                    opphørsdato = opphørsdato))
     }
+
+    private fun opphørsdatoHvisFørFørsteAndelSinFomDato(opphørsperioder: List<Periode>,
+                                                        andeler: List<AndelTilkjentYtelse>): LocalDate? =
+            opphørsperioder.minOfOrNull { it.fradato }
+                    ?.takeIf { stønadsdato -> andeler.minOfOrNull { it.stønadFom }?.isAfter(stønadsdato) ?: false }
 
     private fun opprettTilkjentYtelseForSanksjonertBehandling(vedtak: Sanksjonert,
                                                               behandling: Behandling,

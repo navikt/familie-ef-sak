@@ -38,7 +38,6 @@ import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -212,7 +211,7 @@ internal class BeregnYtelseStegTest {
             assertThat(andelerTilkjentYtelse.size).isEqualTo(2)
             assertThat(andelerTilkjentYtelse.firstOrNull()?.stønadFom).isEqualTo(innvilgetFom1.atDay(1))
             assertThat(andelerTilkjentYtelse.firstOrNull()?.stønadTom).isEqualTo(opphørFom.minusMonths(1)
-                                                                                                       .atEndOfMonth())
+                                                                                         .atEndOfMonth())
             assertThat(andelerTilkjentYtelse.lastOrNull()?.stønadFom).isEqualTo(innvilgetFom2.atDay(1))
             assertThat(andelerTilkjentYtelse.lastOrNull()?.stønadTom).isEqualTo(innvilgetTom2.atEndOfMonth())
         }
@@ -319,8 +318,7 @@ internal class BeregnYtelseStegTest {
         }
 
         @Test
-        @Disabled
-        internal fun `skal feile hvis opphørsdato ikke sammenfaller med en periode`() {
+        internal fun `skal ikke feile hvis opphørsdato ikke sammenfaller med en periode`() {
             val opphørFom = YearMonth.of(2021, 6)
 
             val forrigeAndelFom = LocalDate.of(2021, 1, 1)
@@ -329,11 +327,13 @@ internal class BeregnYtelseStegTest {
             every { tilkjentYtelseService.hentForBehandling(any()) } returns
                     lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, forrigeAndelFom, forrigeAndelTom)))
 
-            assertThrows<Feil> {
-                utførSteg(BehandlingType.REVURDERING,
-                          Opphør(opphørFom = opphørFom, begrunnelse = "null"),
-                          forrigeBehandlingId = UUID.randomUUID())
-            }
+            utførSteg(BehandlingType.REVURDERING,
+                      Opphør(opphørFom = opphørFom, begrunnelse = "null"),
+                      forrigeBehandlingId = UUID.randomUUID())
+
+            assertThat(slot.captured.andelerTilkjentYtelse).hasSize(1)
+            assertThat(slot.captured.andelerTilkjentYtelse.first().stønadFom).isEqualTo(forrigeAndelFom)
+            assertThat(slot.captured.andelerTilkjentYtelse.first().stønadTom).isEqualTo(forrigeAndelTom)
         }
 
         @Test
@@ -359,8 +359,7 @@ internal class BeregnYtelseStegTest {
         }
 
         @Test
-        @Disabled
-        internal fun `skal feile hvis opphørsdato er mellom to perioder`() {
+        internal fun `skal ikke feile hvis opphørsdato er mellom to perioder`() {
             val opphørFom = YearMonth.of(2021, 8)
 
             val andel1Fom = LocalDate.of(2021, 1, 1)
@@ -372,11 +371,14 @@ internal class BeregnYtelseStegTest {
                     lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, andel1Fom, andel1Tom),
                                              lagAndelTilkjentYtelse(200, andel2Fom, andel2Tom)))
 
-            assertThrows<Feil> {
-                utførSteg(BehandlingType.REVURDERING,
-                          Opphør(opphørFom = opphørFom, begrunnelse = "null"),
-                          forrigeBehandlingId = UUID.randomUUID())
-            }
+            utførSteg(BehandlingType.REVURDERING,
+                      Opphør(opphørFom = opphørFom, begrunnelse = "null"),
+                      forrigeBehandlingId = UUID.randomUUID())
+
+            assertThat(slot.captured.andelerTilkjentYtelse).hasSize(1)
+            assertThat(slot.captured.andelerTilkjentYtelse.first().stønadFom).isEqualTo(andel1Fom)
+            assertThat(slot.captured.andelerTilkjentYtelse.first().stønadTom).isEqualTo(andel1Tom)
+
         }
 
         @Test
