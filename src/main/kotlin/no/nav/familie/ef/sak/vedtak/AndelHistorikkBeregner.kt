@@ -159,7 +159,8 @@ object AndelHistorikkBeregner {
             andelFraHistorikk.endring = lagEndring(endringType, tilkjentYtelse)
 
             return if (endringType == EndringType.SPLITTET) {
-                andelFraHistorikk.andel = andelHistorikk.copy(stønadTom = andel.stønadTom)
+                andelFraHistorikk.andel = andelHistorikk.copy(stønadTom = andel.stønadTom,
+                                                              kildeBehandlingId = andel.kildeBehandlingId)
                 andelFraHistorikk.copy(andel = andelHistorikk.copy(stønadFom = andel.stønadTom.plusDays(1)),
                                        endring = lagEndring(EndringType.FJERNET, tilkjentYtelse))
             } else {
