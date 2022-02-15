@@ -87,7 +87,7 @@ internal class JournalføringServiceTest {
                                           journalposttype = Journalposttype.I,
                                           journalstatus = Journalstatus.MOTTATT,
                                           tema = "ENF",
-                                          behandlingstema = "ab0180",
+                                          behandlingstema = "ab0071",
                                           dokumenter =
                                           listOf(DokumentInfo(dokumentInfoIdMedJsonVerdi,
                                                               "Vedlegg1",
