@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.opplysninger.søknad.domain
 
+import no.nav.familie.ef.sak.opplysninger.søknad.SøknadDatoerDto
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
@@ -58,3 +59,5 @@ data class Situasjon(val gjelderDetteDeg: GjelderDeg = GjelderDeg(emptyList()),
                      val oppsigelseDokumentasjon: Dokumentasjon? = null)
 
 data class GjelderDeg(val verdier: List<String>)
+
+fun SøknadsskjemaOvergangsstønad.tilSøknadDatoer(): SøknadDatoerDto = SøknadDatoerDto(this.datoMottatt, this.søkerFra)

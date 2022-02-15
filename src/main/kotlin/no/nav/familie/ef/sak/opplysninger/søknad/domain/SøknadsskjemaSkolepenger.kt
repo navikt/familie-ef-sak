@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.opplysninger.søknad.domain
 
+import no.nav.familie.ef.sak.opplysninger.søknad.SøknadDatoerDto
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
@@ -29,3 +30,4 @@ data class SøknadsskjemaSkolepenger(@Id
                                     val utdanning: UnderUtdanning,
                                     val utdanningsutgifter: Dokumentasjon? = null) : ISøknadsskjema
 
+fun SøknadsskjemaSkolepenger.tilSøknadDatoer(): SøknadDatoerDto = SøknadDatoerDto(this.datoMottatt, null)

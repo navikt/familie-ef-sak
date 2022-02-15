@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.opplysninger.søknad.domain
 
+import no.nav.familie.ef.sak.opplysninger.søknad.SøknadDatoerDto
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
@@ -42,3 +43,5 @@ data class BarnetilsynDokumentasjon(val barnepassordningFaktura: Dokumentasjon? 
                                     val arbeidstid: Dokumentasjon? = null,
                                     val roterendeArbeidstid: Dokumentasjon? = null,
                                     val spesielleBehov: Dokumentasjon? = null)
+
+fun SøknadsskjemaBarnetilsyn.tilSøknadDatoer(): SøknadDatoerDto = SøknadDatoerDto(this.datoMottatt, this.søkerFra)
