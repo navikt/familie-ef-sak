@@ -109,6 +109,8 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         val journalpost = hentJournalpost(journalpostId)
         val behandlingstype = journalføringRequest.behandling.behandlingstype
                               ?: throw ApiFeil("Kan ikke journalføre til ny behandling uten behandlingstype", BAD_REQUEST)
+        feilHvisIkke(journalpost.harStrukturertSøknad()) { "Journalposten inneholder ikke en digital søknad" }
+
         val behandling = opprettBehandlingOgPopulerGrunnlagsdata(behandlingstype = behandlingstype,
                                                                  fagsakId = journalføringRequest.fagsakId,
                                                                  journalpost = journalpost)

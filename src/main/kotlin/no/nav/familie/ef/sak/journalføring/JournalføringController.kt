@@ -35,7 +35,7 @@ class JournalføringController(private val journalføringService: Journalføring
     fun hentJournalPost(@PathVariable journalpostId: String): Ressurs<JournalføringResponse> {
         val (journalpost, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
         tilgangService.validerTilgangTilPersonMedBarn(personIdent, AuditLoggerEvent.ACCESS)
-        return Ressurs.success(JournalføringResponse(journalpost, personIdent))
+        return Ressurs.success(JournalføringResponse(journalpost, personIdent, journalpost.harStrukturertSøknad()))
     }
 
     @GetMapping("/{journalpostId}/dokument/{dokumentInfoId}")
@@ -69,9 +69,10 @@ class JournalføringController(private val journalføringService: Journalføring
         feilHvisIkke(featureToggleService.isEnabled("familie.ef.sak.opprett-behandling-for-ferdigstilt-journalpost")) {
             "Funksjonen opprettBehandlingPåFerdigstiltJournalføring er skrudd av for denne brukeren"
         }
-        val (_, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
+        val (journalpost, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
         tilgangService.validerTilgangTilPersonMedBarn(personIdent, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
+        feilHvisIkke(journalpost.harStrukturertSøknad()) { "Journalposten inneholder ikke en digital søknad" }
         return Ressurs.success(journalføringService.opprettBehandlingMedSøknadsdataFraEnFerdigstiltJournalpost(request,
                                                                                                                journalpostId))
     }
