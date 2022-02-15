@@ -97,12 +97,14 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                                                           vedtak: Opphør,
                                                           aktivIdent: String) {
         feilHvis(behandling.type != BehandlingType.REVURDERING) { "Kan kun opphøre ved revurdering" }
-        val nyeAndeler = andelerForOpphør(behandling, vedtak.opphørFom.atDay(1))
+        val opphørsdato = vedtak.opphørFom.atDay(1)
+        val nyeAndeler = andelerForOpphør(behandling, opphørsdato)
+        val tilkjentYtelseOpphørsdato = if (nyeAndeler.isEmpty()) opphørsdato else null
         tilkjentYtelseService.opprettTilkjentYtelse(TilkjentYtelse(personident = aktivIdent,
                                                                    behandlingId = behandling.id,
                                                                    andelerTilkjentYtelse = nyeAndeler,
                                                                    samordningsfradragType = null,
-                                                                   opphørsdato = vedtak.opphørFom.atDay(1)))
+                                                                   opphørsdato = tilkjentYtelseOpphørsdato))
     }
 
     private fun opprettTilkjentYtelseForInnvilgetBehandling(vedtak: Innvilget,
@@ -225,12 +227,12 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
     private fun andelerForOpphør(behandling: Behandling, opphørFom: LocalDate): List<AndelTilkjentYtelse> {
         val forrigeTilkjenteYtelse = hentForrigeTilkjenteYtelse(behandling)
 
-        /*
-        Skal vi verfisere att man opphør en periode i EF/Infotrygd?
-        feilHvis(forrigeTilkjenteYtelse.andelerTilkjentYtelse.none { andel ->
-            andel.stønadFom <= opphørFom && andel.stønadTom >= opphørFom
-        }) { "Opphørsdato sammenfaller ikke med løpende vedtaksperioder" }
-         */
+        feilHvis(forrigeTilkjenteYtelse.andelerTilkjentYtelse.maxOfOrNull { it.stønadTom }?.isBefore(opphørFom) ?: false) {
+            "Kan ikke opphøre frem i tiden"
+        }
+        feilHvis(forrigeTilkjenteYtelse.opphørsdato != null && forrigeTilkjenteYtelse.opphørsdato < opphørFom) {
+            "Forrige vedtak er allerede opphørt fra ${forrigeTilkjenteYtelse.opphørsdato}"
+        }
 
         return forrigeTilkjenteYtelse.taMedAndelerFremTilDato(opphørFom)
     }
