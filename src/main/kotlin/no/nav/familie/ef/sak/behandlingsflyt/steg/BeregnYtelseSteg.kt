@@ -101,7 +101,8 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
         tilkjentYtelseService.opprettTilkjentYtelse(TilkjentYtelse(personident = aktivIdent,
                                                                    behandlingId = behandling.id,
                                                                    andelerTilkjentYtelse = nyeAndeler,
-                                                                   samordningsfradragType = null))
+                                                                   samordningsfradragType = null,
+                                                                   opphørsdato = vedtak.opphørFom.atDay(1)))
     }
 
     private fun opprettTilkjentYtelseForInnvilgetBehandling(vedtak: Innvilget,
@@ -112,20 +113,29 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
         val andelerTilkjentYtelse: List<AndelTilkjentYtelse> = lagBeløpsperioderForInnvilgetVedtak(vedtak, behandling, aktivIdent)
         feilHvis(andelerTilkjentYtelse.isEmpty()) { "Innvilget vedtak må ha minimum en beløpsperiode" }
 
-        val nyeAndeler = when (behandling.type) {
-            BehandlingType.FØRSTEGANGSBEHANDLING -> andelerTilkjentYtelse
+        val (nyeAndeler, opphørsdato) = when (behandling.type) {
+            BehandlingType.FØRSTEGANGSBEHANDLING -> andelerTilkjentYtelse to null
             BehandlingType.REVURDERING -> {
                 val opphørsperioder = finnOpphørsperioder(vedtak)
-                andelerForInnvilgetRevurdering(behandling, andelerTilkjentYtelse, opphørsperioder)
+                val andeler = andelerForInnvilgetRevurdering(behandling, andelerTilkjentYtelse, opphørsperioder)
+                val opphørsdato = opphørsdatoHvisFørFørsteAndelSinFomDato(opphørsperioder, andeler)
+                andeler to opphørsdato
             }
             else -> error("Steg ikke støttet for type=${behandling.type}")
         }
 
+
         tilkjentYtelseService.opprettTilkjentYtelse(TilkjentYtelse(personident = aktivIdent,
                                                                    behandlingId = behandling.id,
                                                                    andelerTilkjentYtelse = nyeAndeler,
-                                                                   samordningsfradragType = vedtak.samordningsfradragType))
+                                                                   samordningsfradragType = vedtak.samordningsfradragType,
+                                                                   opphørsdato = opphørsdato))
     }
+
+    private fun opphørsdatoHvisFørFørsteAndelSinFomDato(opphørsperioder: List<Periode>,
+                                                        andeler: List<AndelTilkjentYtelse>): LocalDate? =
+            opphørsperioder.minOfOrNull { it.fradato }
+                    ?.takeIf { stønadsdato -> andeler.minOfOrNull { it.stønadFom }?.isAfter(stønadsdato) ?: false }
 
     private fun opprettTilkjentYtelseForSanksjonertBehandling(vedtak: Sanksjonert,
                                                               behandling: Behandling,
@@ -215,9 +225,12 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
     private fun andelerForOpphør(behandling: Behandling, opphørFom: LocalDate): List<AndelTilkjentYtelse> {
         val forrigeTilkjenteYtelse = hentForrigeTilkjenteYtelse(behandling)
 
+        /*
+        Skal vi verfisere att man opphør en periode i EF/Infotrygd?
         feilHvis(forrigeTilkjenteYtelse.andelerTilkjentYtelse.none { andel ->
             andel.stønadFom <= opphørFom && andel.stønadTom >= opphørFom
         }) { "Opphørsdato sammenfaller ikke med løpende vedtaksperioder" }
+         */
 
         return forrigeTilkjenteYtelse.taMedAndelerFremTilDato(opphørFom)
     }
