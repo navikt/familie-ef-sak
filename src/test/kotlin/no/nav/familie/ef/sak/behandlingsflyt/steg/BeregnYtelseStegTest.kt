@@ -942,6 +942,23 @@ internal class BeregnYtelseStegTest {
             }.hasMessageContaining("Forrige vedtak er allerede opphørt")
         }
 
+        @Test
+        internal fun `skal opphøre etter datoet for ett tidligere opphør`() {
+            val opphørFom = YearMonth.of(2022, 1)
+            val andelFom = YearMonth.of(2022, 6).atDay(1)
+            val andelTom = YearMonth.of(2022, 6).atEndOfMonth()
+
+            every { tilkjentYtelseService.hentForBehandling(any()) } returns
+                    lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, andelFom, andelTom)),
+                                      opphørsdato = opphørFom.atDay(1).minusDays(1))
+
+            utførSteg(BehandlingType.REVURDERING,
+                      Opphør(opphørFom = opphørFom, begrunnelse = "null"),
+                      forrigeBehandlingId = UUID.randomUUID())
+            assertThat(slot.captured.opphørsdato).isEqualTo(opphørFom.atDay(1))
+            assertThat(slot.captured.andelerTilkjentYtelse).isEmpty()
+        }
+
     }
 
     private fun innvilget(perioder: List<VedtaksperiodeDto>,

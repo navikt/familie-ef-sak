@@ -230,7 +230,9 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
         feilHvis(forrigeTilkjenteYtelse.andelerTilkjentYtelse.maxOfOrNull { it.stønadTom }?.isBefore(opphørFom) ?: false) {
             "Kan ikke opphøre frem i tiden"
         }
-        feilHvis(forrigeTilkjenteYtelse.opphørsdato != null && forrigeTilkjenteYtelse.opphørsdato < opphørFom) {
+
+        feilHvis(forrigeTilkjenteYtelse.andelerTilkjentYtelse.isEmpty() &&
+                 forrigeTilkjenteYtelse.opphørsdato != null && forrigeTilkjenteYtelse.opphørsdato < opphørFom) {
             "Forrige vedtak er allerede opphørt fra ${forrigeTilkjenteYtelse.opphørsdato}"
         }
 
