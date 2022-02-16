@@ -859,6 +859,106 @@ internal class BeregnYtelseStegTest {
     }
 
     @Nested
+    inner class InnvilgeMedOpphør {
+
+        @Test
+        internal fun `kan ikke innvilge med opphør, uten opphørsperioder`() {
+            val opphørFom = YearMonth.of(2021, 1)
+            val andelFom = YearMonth.of(2021, 6).atDay(1)
+            val andelTom = YearMonth.of(2021, 6).atEndOfMonth()
+
+            every { tilkjentYtelseService.hentForBehandling(any()) } returns
+                    lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, andelFom, andelTom)))
+
+            assertThatThrownBy {
+                utførSteg(BehandlingType.REVURDERING,
+                          innvilget(listOf(opphørsperiode(opphørFom, opphørFom)), listOf(inntekt(opphørFom))),
+                          forrigeBehandlingId = UUID.randomUUID())
+            }.hasMessageContaining("Må ha innvilgelsesperioder i tillegg til opphørsperioder")
+        }
+
+        @Test
+        internal fun `skal kunne innvilge med opphør før andeler sitt startdato, med ny innvilget periode - setter nytt opphørsdato`() {
+            val opphørFom = YearMonth.of(2021, 1)
+            val nyttInnvilgetFom = opphørFom.plusMonths(1)
+            val andelFom = YearMonth.of(2021, 6).atDay(1)
+            val andelTom = YearMonth.of(2021, 6).atEndOfMonth()
+
+            every { tilkjentYtelseService.hentForBehandling(any()) } returns
+                    lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, andelFom, andelTom)))
+            every { beregningService.beregnYtelse(any(), any()) } answers {
+                firstArg<List<Periode>>().map { lagBeløpsperiode(it.fradato, it.tildato) }
+            }
+
+            utførSteg(BehandlingType.REVURDERING,
+                      innvilget(listOf(opphørsperiode(opphørFom, opphørFom),
+                                       innvilgetPeriode(nyttInnvilgetFom, nyttInnvilgetFom)),
+                                listOf(inntekt(opphørFom))),
+                      forrigeBehandlingId = UUID.randomUUID())
+
+            assertThat(slot.captured.opphørsdato).isEqualTo(opphørFom.atDay(1))
+            assertThat(slot.captured.andelerTilkjentYtelse).hasSize(1)
+            assertThat(slot.captured.andelerTilkjentYtelse[0].stønadFom).isEqualTo(nyttInnvilgetFom.atDay(1))
+            assertThat(slot.captured.andelerTilkjentYtelse[0].stønadTom).isEqualTo(nyttInnvilgetFom.atEndOfMonth())
+        }
+
+        @Test
+        internal fun `finnes tidligere opphørsdato fra før, og vurderer med opphør etter det datoet - beholder tidligere opphørsdato`() {
+            val tidligereOpphør = YearMonth.of(2020, 1).atDay(1)
+            val nyttOpphørsdato = YearMonth.of(2021, 1)
+            val nyttInnvilgetFom = nyttOpphørsdato.plusMonths(1)
+            val andelFom = YearMonth.of(2021, 6).atDay(1)
+            val andelTom = YearMonth.of(2021, 6).atEndOfMonth()
+
+            every { tilkjentYtelseService.hentForBehandling(any()) } returns
+                    lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, andelFom, andelTom)),
+                                      opphørsdato = tidligereOpphør)
+            every { beregningService.beregnYtelse(any(), any()) } answers {
+                firstArg<List<Periode>>().map { lagBeløpsperiode(it.fradato, it.tildato) }
+            }
+
+            utførSteg(BehandlingType.REVURDERING,
+                      innvilget(listOf(opphørsperiode(nyttOpphørsdato, nyttOpphørsdato),
+                                       innvilgetPeriode(nyttInnvilgetFom, nyttInnvilgetFom)),
+                                listOf(inntekt(nyttOpphørsdato))),
+                      forrigeBehandlingId = UUID.randomUUID())
+
+            assertThat(slot.captured.opphørsdato).isEqualTo(tidligereOpphør)
+            assertThat(slot.captured.andelerTilkjentYtelse).hasSize(1)
+            assertThat(slot.captured.andelerTilkjentYtelse[0].stønadFom).isEqualTo(nyttInnvilgetFom.atDay(1))
+            assertThat(slot.captured.andelerTilkjentYtelse[0].stønadTom).isEqualTo(nyttInnvilgetFom.atEndOfMonth())
+        }
+
+        @Test
+        internal fun `finnes tidligere opphørsdato fra før, og vurderer med opphør etter før det datoet`() {
+            val tidligereOpphør = YearMonth.of(2021, 6).atDay(1)
+            val nyttOpphørsdato = YearMonth.of(2021, 1)
+            val nyttInnvilgetFom = nyttOpphørsdato.plusMonths(1)
+            val andelFom = YearMonth.of(2021, 6).atDay(1)
+            val andelTom = YearMonth.of(2021, 6).atEndOfMonth()
+
+            every { tilkjentYtelseService.hentForBehandling(any()) } returns
+                    lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, andelFom, andelTom)),
+                                      opphørsdato = tidligereOpphør)
+            every { beregningService.beregnYtelse(any(), any()) } answers {
+                firstArg<List<Periode>>().map { lagBeløpsperiode(it.fradato, it.tildato) }
+            }
+
+            utførSteg(BehandlingType.REVURDERING,
+                      innvilget(listOf(opphørsperiode(nyttOpphørsdato, nyttOpphørsdato),
+                                       innvilgetPeriode(nyttInnvilgetFom, nyttInnvilgetFom)),
+                                listOf(inntekt(nyttOpphørsdato))),
+                      forrigeBehandlingId = UUID.randomUUID())
+
+            assertThat(slot.captured.opphørsdato).isEqualTo(nyttOpphørsdato.atDay(1))
+            assertThat(slot.captured.andelerTilkjentYtelse).hasSize(1)
+            assertThat(slot.captured.andelerTilkjentYtelse[0].stønadFom).isEqualTo(nyttInnvilgetFom.atDay(1))
+            assertThat(slot.captured.andelerTilkjentYtelse[0].stønadTom).isEqualTo(nyttInnvilgetFom.atEndOfMonth())
+        }
+
+    }
+
+    @Nested
     inner class Opphør {
 
         @Test
@@ -943,20 +1043,59 @@ internal class BeregnYtelseStegTest {
         }
 
         @Test
-        internal fun `skal opphøre etter datoet for ett tidligere opphør`() {
-            val opphørFom = YearMonth.of(2022, 1)
+        internal fun `skal opphøre før ett tidligere opphør, skal sette nytt opphørsdato`() {
+            val tidligereOpphør = YearMonth.of(2022, 1).atDay(1)
+            val opphørFom = YearMonth.of(2021, 1)
             val andelFom = YearMonth.of(2022, 6).atDay(1)
             val andelTom = YearMonth.of(2022, 6).atEndOfMonth()
 
             every { tilkjentYtelseService.hentForBehandling(any()) } returns
                     lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, andelFom, andelTom)),
-                                      opphørsdato = opphørFom.atDay(1).minusDays(1))
+                                      opphørsdato = tidligereOpphør)
 
             utførSteg(BehandlingType.REVURDERING,
                       Opphør(opphørFom = opphørFom, begrunnelse = "null"),
                       forrigeBehandlingId = UUID.randomUUID())
             assertThat(slot.captured.opphørsdato).isEqualTo(opphørFom.atDay(1))
             assertThat(slot.captured.andelerTilkjentYtelse).isEmpty()
+        }
+
+        @Test
+        internal fun `skal opphøre etter datoet for ett tidligere opphør, men før tidligere andeler - beholder tidligere opphørsdato`() {
+            val tidligereOpphør = YearMonth.of(2021, 1).atDay(1)
+            val opphørFom = YearMonth.of(2022, 1)
+            val andelFom = YearMonth.of(2022, 6).atDay(1)
+            val andelTom = YearMonth.of(2022, 6).atEndOfMonth()
+
+            every { tilkjentYtelseService.hentForBehandling(any()) } returns
+                    lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, andelFom, andelTom)),
+                                      opphørsdato = tidligereOpphør)
+
+            utførSteg(BehandlingType.REVURDERING,
+                      Opphør(opphørFom = opphørFom, begrunnelse = "null"),
+                      forrigeBehandlingId = UUID.randomUUID())
+            assertThat(slot.captured.opphørsdato).isEqualTo(tidligereOpphør)
+            assertThat(slot.captured.andelerTilkjentYtelse).isEmpty()
+        }
+
+        @Test
+        internal fun `skal opphøre etter datoet for ett tidligere opphør, men etter tidligere andeler - beholder tidligere opphørsdato`() {
+            val tidligereOpphør = YearMonth.of(2021, 1).atDay(1)
+            val opphørFom = YearMonth.of(2022, 8)
+            val andelFom = YearMonth.of(2022, 6).atDay(1)
+            val andelTom = YearMonth.of(2022, 10).atEndOfMonth()
+
+            every { tilkjentYtelseService.hentForBehandling(any()) } returns
+                    lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, andelFom, andelTom)),
+                                      opphørsdato = tidligereOpphør)
+
+            utførSteg(BehandlingType.REVURDERING,
+                      Opphør(opphørFom = opphørFom, begrunnelse = "null"),
+                      forrigeBehandlingId = UUID.randomUUID())
+            assertThat(slot.captured.opphørsdato).isEqualTo(tidligereOpphør)
+            assertThat(slot.captured.andelerTilkjentYtelse).hasSize(1)
+            assertThat(slot.captured.andelerTilkjentYtelse[0].stønadFom).isEqualTo(andelFom)
+            assertThat(slot.captured.andelerTilkjentYtelse[0].stønadTom).isEqualTo(opphørFom.atDay(1).minusDays(1))
         }
 
     }
