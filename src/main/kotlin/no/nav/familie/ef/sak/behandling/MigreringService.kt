@@ -17,7 +17,6 @@ import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.fagsak.dto.MigreringInfo
-import no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeUtil.filtrerOgSorterPerioderFraInfotrygd
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infotrygd.InfotrygdStønadPerioderDto
 import no.nav.familie.ef.sak.infotrygd.SummertInfotrygdPeriodeDto
@@ -36,6 +35,7 @@ import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.ef.felles.StønadType
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdEndringKode
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSak
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResultat
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -174,18 +174,25 @@ class MigreringService(
     fun erOpphørtIInfotrygd(behandlingId: UUID, opphørsmåned: YearMonth): Boolean {
         val personIdent = behandlingService.hentAktivIdent(behandlingId)
         val perioder = hentPerioder(personIdent)
-        val perioderStønadTom = filtrerOgSorterPerioderFraInfotrygd(perioder.perioder)
-                .find { it.kode == InfotrygdEndringKode.OVERTFØRT_NY_LØSNING }?.opphørsdato
+        val perioderStønadTom = perioder.perioder.find { it.kode == InfotrygdEndringKode.OVERTFØRT_NY_LØSNING }?.opphørsdato
         val maxStønadTom = perioder.summert.maxOf { it.stønadTom }
         val stønadTomErLike =
                 perioderStønadTom == maxStønadTom // liten ekstrasjekk, som verifiserer att summertePerioder er riktig
         val stønadTomErFørEllerLikOpphørsmåned = YearMonth.of(maxStønadTom.year, maxStønadTom.month) <= opphørsmåned
         val erOpphørtIInfotrygd = stønadTomErLike && stønadTomErFørEllerLikOpphørsmåned
         if (!erOpphørtIInfotrygd) {
-            logger.warn("erOpphørtIInfotrygd - Datoer ikke like behandling=$behandlingId " +
-                        "sistePeriodenTom=$perioderStønadTom " +
-                        "summertMaxTom=$maxStønadTom " +
-                        "opphørsmåned=$opphørsmåned")
+            val logMessage = "erOpphørtIInfotrygd - Datoer ikke like behandling=$behandlingId " +
+                             "sistePeriodenTom=$perioderStønadTom " +
+                             "summertMaxTom=$maxStønadTom " +
+                             "opphørsmåned=$opphørsmåned"
+            logger.warn(logMessage)
+            val periodeInformasjon = perioder.perioder
+                    .sortedWith(compareBy<InfotrygdPeriode>({ it.stønadId }, { it.vedtakId }, { it.stønadFom }).reversed())
+                    .map {
+                        "InfotrygdPeriode(stønadId=${it.stønadId}, vedtakId=${it.vedtakId}, kode=${it.kode}, " +
+                        "stønadFom=${it.stønadFom}, stønadTom=${it.stønadTom}, opphørsdato=${it.opphørsdato})"
+                    }
+            secureLogger.info("$logMessage $periodeInformasjon")
         }
         return erOpphørtIInfotrygd
     }
