@@ -85,9 +85,9 @@ internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest()
         val response: ResponseEntity<Ressurs<PerioderOvergangsstønadResponse>> =
                 restTemplate.exchange(localhost("/api/ekstern/perioder/full-overgangsstonad"),
                                       HttpMethod.POST,
-                                      HttpEntity(PersonIdent("ikke_tlgang"), headers))
+                                      HttpEntity(PersonIdent("ikkeTilgang"), headers))
 
-        assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(response.body!!.status).isEqualTo(Ressurs.Status.SUKSESS)
+        assertThat(response.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
+        assertThat(response.body!!.status).isEqualTo(Ressurs.Status.IKKE_TILGANG)
     }
 }
