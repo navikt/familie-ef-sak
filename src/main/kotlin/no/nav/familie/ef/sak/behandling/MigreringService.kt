@@ -36,6 +36,7 @@ import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.ef.felles.StønadType
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdEndringKode
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSak
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResultat
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -182,10 +183,18 @@ class MigreringService(
         val stønadTomErFørEllerLikOpphørsmåned = YearMonth.of(maxStønadTom.year, maxStønadTom.month) <= opphørsmåned
         val erOpphørtIInfotrygd = stønadTomErLike && stønadTomErFørEllerLikOpphørsmåned
         if (!erOpphørtIInfotrygd) {
-            logger.warn("erOpphørtIInfotrygd - Datoer ikke like behandling=$behandlingId " +
-                        "sistePeriodenTom=$perioderStønadTom " +
-                        "summertMaxTom=$maxStønadTom " +
-                        "opphørsmåned=$opphørsmåned")
+            val logMessage = "erOpphørtIInfotrygd - Datoer ikke like behandling=$behandlingId " +
+                             "sistePeriodenTom=$perioderStønadTom " +
+                             "summertMaxTom=$maxStønadTom " +
+                             "opphørsmåned=$opphørsmåned"
+            logger.warn(logMessage)
+            val periodeInformasjon = perioder.perioder
+                    .sortedWith(compareBy<InfotrygdPeriode>({ it.stønadId }, { it.vedtakId }, { it.stønadFom }).reversed())
+                    .map {
+                        "InfotrygdPeriode(stønadId=${it.stønadId}, vedtakId=${it.vedtakId}, kode=${it.kode}, " +
+                        "stønadFom=${it.stønadFom}, stønadTom=${it.stønadTom}, opphørsdato=${it.opphørsdato})"
+                    }
+            secureLogger.info("$logMessage $periodeInformasjon")
         }
         return erOpphørtIInfotrygd
     }
