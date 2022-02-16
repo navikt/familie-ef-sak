@@ -20,6 +20,7 @@ import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.vedtak.TotrinnskontrollService
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
@@ -36,6 +37,7 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
                          private val iverksettClient: IverksettClient,
                          private val iverksettingDtoMapper: IverksettingDtoMapper,
                          private val totrinnskontrollService: TotrinnskontrollService,
+                         private val tilkjentYtelseService: TilkjentYtelseService,
                          private val vedtaksbrevRepository: VedtaksbrevRepository,
                          private val behandlingService: BehandlingService,
                          private val vedtakService: VedtakService) : BehandlingSteg<BeslutteVedtakDto> {
@@ -48,6 +50,9 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
     }
 
     override fun utførOgReturnerNesteSteg(behandling: Behandling, data: BeslutteVedtakDto): StegType {
+        feilHvis(tilkjentYtelseService.hentForBehandling(behandling.id).opphørsdato != null) {
+            "Det går ikke å beslutte denne akkurat nå, pga endringer i systemet. Endringene kan ta 1-2 dager"
+        }
         fagsakService.fagsakMedOppdatertPersonIdent(behandling.fagsakId)
         val saksbehandler = totrinnskontrollService.lagreTotrinnskontrollOgReturnerBehandler(behandling, data)
         val beslutter = SikkerhetContext.hentSaksbehandler(strict = true)
@@ -80,8 +85,8 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
     }
 
     private fun opprettTaskForBehandlingsstatistikk(behandlingId: UUID, oppgaveId: Long?) =
-        taskRepository.save(BehandlingsstatistikkTask.opprettBesluttetTask(behandlingId = behandlingId,
-                                                                           oppgaveId = oppgaveId))
+            taskRepository.save(BehandlingsstatistikkTask.opprettBesluttetTask(behandlingId = behandlingId,
+                                                                               oppgaveId = oppgaveId))
 
     fun oppdaterResultatPåBehandling(behandlingId: UUID) {
         val vedtak = vedtakService.hentVedtak(behandlingId)
