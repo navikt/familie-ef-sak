@@ -15,6 +15,7 @@ import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
@@ -37,6 +38,7 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
                          private val iverksettClient: IverksettClient,
                          private val iverksettingDtoMapper: IverksettingDtoMapper,
                          private val totrinnskontrollService: TotrinnskontrollService,
+                         private val featureToggleService: FeatureToggleService,
                          private val tilkjentYtelseService: TilkjentYtelseService,
                          private val vedtaksbrevRepository: VedtaksbrevRepository,
                          private val behandlingService: BehandlingService,
@@ -50,7 +52,7 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
     }
 
     override fun utførOgReturnerNesteSteg(behandling: Behandling, data: BeslutteVedtakDto): StegType {
-        feilHvis(tilkjentYtelseService.hentForBehandling(behandling.id).opphørsdato != null) {
+        feilHvis(!featureToggleService.isEnabled("familie.ef.sak-ty-opphorsdato") && tilkjentYtelseService.hentForBehandling(behandling.id).opphørsdato != null) {
             "Det går ikke å beslutte denne akkurat nå, pga endringer i systemet. Endringene kan ta 1-2 dager"
         }
         fagsakService.fagsakMedOppdatertPersonIdent(behandling.fagsakId)

@@ -24,6 +24,7 @@ import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
+import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
 import no.nav.familie.ef.sak.oppgave.Oppgave
@@ -70,6 +71,7 @@ internal class BeslutteVedtakStegTest {
                                                         iverksett,
                                                         iverksettingDtoMapper,
                                                         totrinnskontrollService,
+                                                        mockFeatureToggleService(),
                                                         tilkjentYtelseService,
                                                         vedtaksbrevRepository,
                                                         behandlingService,
