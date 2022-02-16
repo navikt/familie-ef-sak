@@ -17,7 +17,6 @@ import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.fagsak.dto.MigreringInfo
-import no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeUtil.filtrerOgSorterPerioderFraInfotrygd
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infotrygd.InfotrygdStønadPerioderDto
 import no.nav.familie.ef.sak.infotrygd.SummertInfotrygdPeriodeDto
@@ -175,8 +174,7 @@ class MigreringService(
     fun erOpphørtIInfotrygd(behandlingId: UUID, opphørsmåned: YearMonth): Boolean {
         val personIdent = behandlingService.hentAktivIdent(behandlingId)
         val perioder = hentPerioder(personIdent)
-        val perioderStønadTom = filtrerOgSorterPerioderFraInfotrygd(perioder.perioder)
-                .find { it.kode == InfotrygdEndringKode.OVERTFØRT_NY_LØSNING }?.opphørsdato
+        val perioderStønadTom = perioder.perioder.find { it.kode == InfotrygdEndringKode.OVERTFØRT_NY_LØSNING }?.opphørsdato
         val maxStønadTom = perioder.summert.maxOf { it.stønadTom }
         val stønadTomErLike =
                 perioderStønadTom == maxStønadTom // liten ekstrasjekk, som verifiserer att summertePerioder er riktig
