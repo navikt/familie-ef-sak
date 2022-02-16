@@ -52,8 +52,8 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
     }
 
     override fun utførOgReturnerNesteSteg(behandling: Behandling, data: BeslutteVedtakDto): StegType {
-        val enabled = !featureToggleService.isEnabled("familie.ef.sak-ty-opphorsdato")
-        feilHvis(enabled && tilkjentYtelseService.hentForBehandling(behandling.id).opphørsdato != null) {
+        val enabled = featureToggleService.isEnabled("familie.ef.sak-ty-opphorsdato")
+        feilHvis(!enabled && tilkjentYtelseService.hentForBehandling(behandling.id).opphørsdato != null) {
             "Det går ikke å beslutte denne akkurat nå, pga endringer i systemet. Endringene kan ta 1-2 dager"
         }
         fagsakService.fagsakMedOppdatertPersonIdent(behandling.fagsakId)
