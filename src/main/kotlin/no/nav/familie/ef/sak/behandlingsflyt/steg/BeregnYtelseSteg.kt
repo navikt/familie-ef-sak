@@ -156,14 +156,16 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
     private fun validerOpphørsperioder(opphørsperioder: List<Periode>,
                                        vedtaksperioder: List<Periode>,
                                        forrigeTilkjenteYtelse: TilkjentYtelse?) {
-        if (forrigeTilkjenteYtelse == null) return
         val førsteOpphørsdato = opphørsperioder.minOfOrNull { it.fradato }
         val førsteVedtaksFradato = vedtaksperioder.minOfOrNull { it.fradato }
-        val tidligereAndelerHarKun0Beløp = forrigeTilkjenteYtelse.andelerTilkjentYtelse.all { it.beløp == 0 }
         val harKunOpphørEllerOpphørFørInnvilgetPeriode =
                 førsteOpphørsdato != null && (førsteVedtaksFradato == null || førsteOpphørsdato < førsteVedtaksFradato)
-        feilHvis(tidligereAndelerHarKun0Beløp && harKunOpphørEllerOpphørFørInnvilgetPeriode) {
-            "Har ikke støtte for å starte med opphørsperiode når alle tidligere perioder har 0 i stønad"
+        feilHvis(forrigeTilkjenteYtelse == null && harKunOpphørEllerOpphørFørInnvilgetPeriode) {
+            "Har ikke støtte for å innvilge med opphør først, når man mangler tidligere behandling å opphøre"
+        }
+        val harKun0Beløp = forrigeTilkjenteYtelse?.andelerTilkjentYtelse?.all { it.beløp == 0 } ?: false
+        feilHvis(harKun0Beløp && harKunOpphørEllerOpphørFørInnvilgetPeriode) {
+            "Har ikke støtte for å innvilge med opphør først, når man kun har perioder med 0 som beløp fra før"
         }
     }
 

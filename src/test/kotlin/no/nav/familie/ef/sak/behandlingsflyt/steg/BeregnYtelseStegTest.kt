@@ -861,6 +861,22 @@ internal class BeregnYtelseStegTest {
         }
 
         @Test
+        internal fun `kan ikke innvilge med opphør før innvilget perioder når man ikke har tidligere behandling`() {
+            val opphørFom = YearMonth.of(2021, 1)
+            val innvilgetMåned = opphørFom.plusMonths(1)
+
+            every { beregningService.beregnYtelse(any(), any()) } answers {
+                firstArg<List<Periode>>().map { lagBeløpsperiode(it.fradato, it.tildato) }
+            }
+
+            assertThatThrownBy {
+                utførSteg(BehandlingType.REVURDERING,
+                          innvilget(listOf(opphørsperiode(opphørFom, opphørFom),
+                                           innvilgetPeriode(innvilgetMåned, innvilgetMåned)), listOf(inntekt(opphørFom))))
+            }.hasMessageContaining("Har ikke støtte for å innvilge med opphør først, når man mangler tidligere behandling å opphøre")
+        }
+
+        @Test
         internal fun `kan ikke innvilge med opphør, når tidligere andeler kun inneholder 0-beløp`() {
             val opphørFom = YearMonth.of(2021, 1)
             val andelFom = YearMonth.of(2021, 6).atDay(1)
@@ -878,7 +894,7 @@ internal class BeregnYtelseStegTest {
                           innvilget(listOf(opphørsperiode(opphørFom, opphørFom),
                                            innvilgetPeriode(innvilgetMåned, innvilgetMåned)), listOf(inntekt(opphørFom))),
                           forrigeBehandlingId = UUID.randomUUID())
-            }.hasMessageContaining("Har ikke støtte for å starte med opphørsperiode når alle tidligere perioder har 0 i stønad")
+            }.hasMessageContaining("Har ikke støtte for å innvilge med opphør først, når man kun har perioder med 0 som beløp fra før")
         }
 
         @Test
