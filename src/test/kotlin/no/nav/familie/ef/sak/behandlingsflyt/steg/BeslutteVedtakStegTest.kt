@@ -24,7 +24,6 @@ import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
-import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
 import no.nav.familie.ef.sak.oppgave.Oppgave
@@ -32,8 +31,6 @@ import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
-import no.nav.familie.ef.sak.repository.tilkjentYtelse
-import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.vedtak.TotrinnskontrollService
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
@@ -63,7 +60,6 @@ internal class BeslutteVedtakStegTest {
     private val iverksett = mockk<IverksettClient>()
     private val vedtakService = mockk<VedtakService>()
     private val behandlingService = mockk<BehandlingService>()
-    private val tilkjentYtelseService = mockk<TilkjentYtelseService>(relaxed = true)
 
     private val beslutteVedtakSteg = BeslutteVedtakSteg(taskRepository,
                                                         fagsakService,
@@ -71,8 +67,6 @@ internal class BeslutteVedtakStegTest {
                                                         iverksett,
                                                         iverksettingDtoMapper,
                                                         totrinnskontrollService,
-                                                        mockFeatureToggleService(),
-                                                        tilkjentYtelseService,
                                                         vedtaksbrevRepository,
                                                         behandlingService,
                                                         vedtakService)
@@ -104,7 +98,6 @@ internal class BeslutteVedtakStegTest {
     internal fun setUp() {
         mockBrukerContext(innloggetBeslutter)
         taskSlot = mutableListOf()
-        every { tilkjentYtelseService.hentForBehandling(any()) } returns tilkjentYtelse(UUID.randomUUID(), "")
         every {
             fagsakService.hentAktivIdent(any())
         } returns fagsak.hentAktivIdent()

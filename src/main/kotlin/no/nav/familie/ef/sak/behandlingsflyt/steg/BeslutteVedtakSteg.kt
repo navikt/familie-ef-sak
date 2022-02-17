@@ -38,8 +38,6 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
                          private val iverksettClient: IverksettClient,
                          private val iverksettingDtoMapper: IverksettingDtoMapper,
                          private val totrinnskontrollService: TotrinnskontrollService,
-                         private val featureToggleService: FeatureToggleService,
-                         private val tilkjentYtelseService: TilkjentYtelseService,
                          private val vedtaksbrevRepository: VedtaksbrevRepository,
                          private val behandlingService: BehandlingService,
                          private val vedtakService: VedtakService) : BehandlingSteg<BeslutteVedtakDto> {
@@ -52,10 +50,6 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
     }
 
     override fun utførOgReturnerNesteSteg(behandling: Behandling, data: BeslutteVedtakDto): StegType {
-        val enabled = featureToggleService.isEnabled("familie.ef.sak.ty-opphorsdato")
-        feilHvis(!enabled && tilkjentYtelseService.hentForBehandling(behandling.id).opphørsdato != null) {
-            "Det går ikke å beslutte denne akkurat nå, pga endringer i systemet. Endringene kan ta 1-2 dager"
-        }
         fagsakService.fagsakMedOppdatertPersonIdent(behandling.fagsakId)
         val saksbehandler = totrinnskontrollService.lagreTotrinnskontrollOgReturnerBehandler(behandling, data)
         val beslutter = SikkerhetContext.hentSaksbehandler(strict = true)

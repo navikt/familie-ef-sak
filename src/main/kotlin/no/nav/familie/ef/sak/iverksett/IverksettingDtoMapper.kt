@@ -2,8 +2,6 @@ package no.nav.familie.ef.sak.iverksett
 
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.barn.BarnService
-import no.nav.familie.ef.sak.barn.BehandlingBarn
-import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
@@ -221,7 +219,7 @@ fun TilkjentYtelse.tilIverksettDto(): TilkjentYtelseDto = TilkjentYtelseDto(
                                    kildeBehandlingId = andel.kildeBehandlingId,
                                    periodetype = Periodetype.MÅNED)
         },
-        opphørsdato = opphørsdato
+        startdato = startdato
 )
 
 fun Vurdering.tilIverksettDto(): VurderingDto = VurderingDto(

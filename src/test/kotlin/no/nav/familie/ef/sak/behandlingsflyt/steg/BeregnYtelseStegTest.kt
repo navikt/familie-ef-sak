@@ -784,7 +784,7 @@ internal class BeregnYtelseStegTest {
             assertThat(slot.captured.andelerTilkjentYtelse).hasSize(1)
             assertThat(slot.captured.andelerTilkjentYtelse[0].stønadFom).isEqualTo(andelFom.atDay(1))
             assertThat(slot.captured.andelerTilkjentYtelse[0].stønadTom).isEqualTo(andelTom.atEndOfMonth())
-            assertThat(slot.captured.opphørsdato).isEqualTo(opphørFom.atDay(1))
+            assertThat(slot.captured.startdato).isEqualTo(opphørFom.atDay(1))
         }
 
         @Test
@@ -821,7 +821,7 @@ internal class BeregnYtelseStegTest {
             assertThat(andelerTilkjentYtelse[0].stønadTom).isEqualTo(opphørFom.atDay(1).minusDays(1))
             assertThat(andelerTilkjentYtelse[1].stønadFom).isEqualTo(innvilgetFom.atDay(1))
             assertThat(andelerTilkjentYtelse[1].stønadTom).isEqualTo(innvilgetTom.atEndOfMonth())
-            assertThat(slot.captured.opphørsdato).isNull()
+            assertThat(slot.captured.startdato).isNull()
         }
 
         @Test
@@ -853,7 +853,7 @@ internal class BeregnYtelseStegTest {
             assertThat(slot.captured.andelerTilkjentYtelse).hasSize(1)
             assertThat(slot.captured.andelerTilkjentYtelse[0].stønadFom).isEqualTo(andelFom.atDay(1))
             assertThat(slot.captured.andelerTilkjentYtelse[0].stønadTom).isEqualTo(andelTom.atEndOfMonth())
-            assertThat(slot.captured.opphørsdato).isNull()
+            assertThat(slot.captured.startdato).isNull()
         }
 
     }
@@ -878,6 +878,27 @@ internal class BeregnYtelseStegTest {
         }
 
         @Test
+        internal fun `kan ikke innvilge med opphør, når tidligere andeler kun inneholder 0-beløp`() {
+            val opphørFom = YearMonth.of(2021, 1)
+            val andelFom = YearMonth.of(2021, 6).atDay(1)
+            val andelTom = YearMonth.of(2021, 6).atEndOfMonth()
+            val innvilgetMåned = opphørFom.plusMonths(1)
+
+            every { tilkjentYtelseService.hentForBehandling(any()) } returns
+                    lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(0, andelFom, andelTom)))
+            every { beregningService.beregnYtelse(any(), any()) } answers {
+                firstArg<List<Periode>>().map { lagBeløpsperiode(it.fradato, it.tildato) }
+            }
+
+            assertThatThrownBy {
+                utførSteg(BehandlingType.REVURDERING,
+                          innvilget(listOf(opphørsperiode(opphørFom, opphørFom),
+                                           innvilgetPeriode(innvilgetMåned, innvilgetMåned)), listOf(inntekt(opphørFom))),
+                          forrigeBehandlingId = UUID.randomUUID())
+            }.hasMessageContaining("Har ikke støtte for å opphøre når alle tidligere perioder har 0 i stønad")
+        }
+
+        @Test
         internal fun `skal kunne innvilge med opphør før andeler sitt startdato, med ny innvilget periode - setter nytt opphørsdato`() {
             val opphørFom = YearMonth.of(2021, 1)
             val nyttInnvilgetFom = opphørFom.plusMonths(1)
@@ -896,7 +917,7 @@ internal class BeregnYtelseStegTest {
                                 listOf(inntekt(opphørFom))),
                       forrigeBehandlingId = UUID.randomUUID())
 
-            assertThat(slot.captured.opphørsdato).isEqualTo(opphørFom.atDay(1))
+            assertThat(slot.captured.startdato).isEqualTo(opphørFom.atDay(1))
             assertThat(slot.captured.andelerTilkjentYtelse).hasSize(1)
             assertThat(slot.captured.andelerTilkjentYtelse[0].stønadFom).isEqualTo(nyttInnvilgetFom.atDay(1))
             assertThat(slot.captured.andelerTilkjentYtelse[0].stønadTom).isEqualTo(nyttInnvilgetFom.atEndOfMonth())
@@ -923,7 +944,7 @@ internal class BeregnYtelseStegTest {
                                 listOf(inntekt(nyttOpphørsdato))),
                       forrigeBehandlingId = UUID.randomUUID())
 
-            assertThat(slot.captured.opphørsdato).isEqualTo(tidligereOpphør)
+            assertThat(slot.captured.startdato).isEqualTo(tidligereOpphør)
             assertThat(slot.captured.andelerTilkjentYtelse).hasSize(1)
             assertThat(slot.captured.andelerTilkjentYtelse[0].stønadFom).isEqualTo(nyttInnvilgetFom.atDay(1))
             assertThat(slot.captured.andelerTilkjentYtelse[0].stønadTom).isEqualTo(nyttInnvilgetFom.atEndOfMonth())
@@ -950,7 +971,7 @@ internal class BeregnYtelseStegTest {
                                 listOf(inntekt(nyttOpphørsdato))),
                       forrigeBehandlingId = UUID.randomUUID())
 
-            assertThat(slot.captured.opphørsdato).isEqualTo(nyttOpphørsdato.atDay(1))
+            assertThat(slot.captured.startdato).isEqualTo(nyttOpphørsdato.atDay(1))
             assertThat(slot.captured.andelerTilkjentYtelse).hasSize(1)
             assertThat(slot.captured.andelerTilkjentYtelse[0].stønadFom).isEqualTo(nyttInnvilgetFom.atDay(1))
             assertThat(slot.captured.andelerTilkjentYtelse[0].stønadTom).isEqualTo(nyttInnvilgetFom.atEndOfMonth())
@@ -975,7 +996,7 @@ internal class BeregnYtelseStegTest {
                       forrigeBehandlingId = UUID.randomUUID())
 
             assertThat(slot.captured.andelerTilkjentYtelse).hasSize(0)
-            assertThat(slot.captured.opphørsdato).isEqualTo(opphørFom.atDay(1))
+            assertThat(slot.captured.startdato).isEqualTo(opphørFom.atDay(1))
         }
 
         @Test
@@ -991,7 +1012,7 @@ internal class BeregnYtelseStegTest {
                       Opphør(opphørFom = opphørFom, begrunnelse = "null"),
                       forrigeBehandlingId = UUID.randomUUID())
 
-            assertThat(slot.captured.opphørsdato).isNull()
+            assertThat(slot.captured.startdato).isNull()
             assertThat(slot.captured.andelerTilkjentYtelse).hasSize(1)
             assertThat(slot.captured.andelerTilkjentYtelse[0].stønadFom).isEqualTo(andelFom)
             assertThat(slot.captured.andelerTilkjentYtelse[0].stønadTom).isEqualTo(opphørFom.atDay(1).minusDays(1))
@@ -1015,16 +1036,19 @@ internal class BeregnYtelseStegTest {
 
         @Test
         internal fun `skal kunne opphøre før datoet for ett tidligere opphør`() {
-            val opphørFom = YearMonth.of(2022, 1)
+            val opphørFom = YearMonth.of(2021, 1)
+            val tidligereAndelFom = YearMonth.of(2022, 1).atDay(1)
+            val tidligereAndelTom = YearMonth.of(2022, 1).atEndOfMonth()
 
             every { tilkjentYtelseService.hentForBehandling(any()) } returns
-                    lagTilkjentYtelse(listOf(), opphørsdato = opphørFom.atDay(1).plusMonths(1))
+                    lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, tidligereAndelFom, tidligereAndelTom)),
+                                      opphørsdato = opphørFom.atDay(1).plusMonths(1))
 
 
             utførSteg(BehandlingType.REVURDERING,
                       Opphør(opphørFom = opphørFom, begrunnelse = "null"),
                       forrigeBehandlingId = UUID.randomUUID())
-            assertThat(slot.captured.opphørsdato).isEqualTo(opphørFom.atDay(1))
+            assertThat(slot.captured.startdato).isEqualTo(opphørFom.atDay(1))
             assertThat(slot.captured.andelerTilkjentYtelse).isEmpty()
         }
 
@@ -1056,7 +1080,7 @@ internal class BeregnYtelseStegTest {
             utførSteg(BehandlingType.REVURDERING,
                       Opphør(opphørFom = opphørFom, begrunnelse = "null"),
                       forrigeBehandlingId = UUID.randomUUID())
-            assertThat(slot.captured.opphørsdato).isEqualTo(opphørFom.atDay(1))
+            assertThat(slot.captured.startdato).isEqualTo(opphørFom.atDay(1))
             assertThat(slot.captured.andelerTilkjentYtelse).isEmpty()
         }
 
@@ -1074,7 +1098,7 @@ internal class BeregnYtelseStegTest {
             utførSteg(BehandlingType.REVURDERING,
                       Opphør(opphørFom = opphørFom, begrunnelse = "null"),
                       forrigeBehandlingId = UUID.randomUUID())
-            assertThat(slot.captured.opphørsdato).isEqualTo(tidligereOpphør)
+            assertThat(slot.captured.startdato).isEqualTo(tidligereOpphør)
             assertThat(slot.captured.andelerTilkjentYtelse).isEmpty()
         }
 
@@ -1092,7 +1116,7 @@ internal class BeregnYtelseStegTest {
             utførSteg(BehandlingType.REVURDERING,
                       Opphør(opphørFom = opphørFom, begrunnelse = "null"),
                       forrigeBehandlingId = UUID.randomUUID())
-            assertThat(slot.captured.opphørsdato).isEqualTo(tidligereOpphør)
+            assertThat(slot.captured.startdato).isEqualTo(tidligereOpphør)
             assertThat(slot.captured.andelerTilkjentYtelse).hasSize(1)
             assertThat(slot.captured.andelerTilkjentYtelse[0].stønadFom).isEqualTo(andelFom)
             assertThat(slot.captured.andelerTilkjentYtelse[0].stønadTom).isEqualTo(opphørFom.atDay(1).minusDays(1))
