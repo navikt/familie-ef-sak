@@ -148,10 +148,22 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
 
         val forrigeOpphørsdato = forrigeTilkjenteYtelse?.startdato
         val opphørsdato = opphørsdatoHvisFørFørsteAndelSinFomDato(opphørsperioder, nyeAndeler, forrigeOpphørsdato)
-        feilHvis(forrigeTilkjenteYtelse?.andelerTilkjentYtelse?.all { it.beløp == 0 } == true && opphørsdato != null) {
-            "Har ikke støtte for å opphøre når alle tidligere perioder har 0 i stønad"
-        }
+        validerOpphørsperioder(opphørsperioder, finnInnvilgedePerioder(vedtak), forrigeTilkjenteYtelse)
         return nyeAndeler to opphørsdato
+    }
+
+    private fun validerOpphørsperioder(opphørsperioder: List<Periode>,
+                                       vedtaksperioder: List<Periode>,
+                                       forrigeTilkjenteYtelse: TilkjentYtelse?) {
+        if (forrigeTilkjenteYtelse == null) return
+        val minOpphørsdato = opphørsperioder.minOfOrNull { it.fradato }
+        val minVedtaksperiod = vedtaksperioder.minOfOrNull { it.fradato }
+        val tidligereAndelerHarKun0Beløp = forrigeTilkjenteYtelse.andelerTilkjentYtelse.all { it.beløp == 0 }
+        val harKunOpphørEllerOpphørFørInnvilgetPeriode =
+                minOpphørsdato != null && (minVedtaksperiod == null || minOpphørsdato < minVedtaksperiod)
+        feilHvis(tidligereAndelerHarKun0Beløp && harKunOpphørEllerOpphørFørInnvilgetPeriode) {
+            "Har ikke støtte for å starte med opphørsperiode når alle tidligere perioder har 0 i stønad"
+        }
     }
 
     private fun beregnNyeAndelerForRevurdering(forrigeTilkjenteYtelse: TilkjentYtelse?,
