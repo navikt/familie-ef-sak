@@ -18,6 +18,8 @@ data class SøknadsskjemaSkolepenger(@Id
                                     override val navn: String,
                                     override val telefonnummer: String?,
                                     override val datoMottatt: LocalDateTime,
+                                    @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "sivilstand_")
+                                    val sivilstand: Sivilstand,
                                     @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "medlemskap_")
                                     val medlemskap: Medlemskap,
                                     @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "bosituasjon_")
