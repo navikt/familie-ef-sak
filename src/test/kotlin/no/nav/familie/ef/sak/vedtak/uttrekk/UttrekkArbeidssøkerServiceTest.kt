@@ -396,7 +396,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
     private fun opprettEkstraFagsak() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(setOf("2"))))
         val behandling = behandlingRepository.insert(
-                behandling(fagsakMedPerson = fagsak,
+                behandling(fagsak = fagsak,
                            type = BehandlingType.REVURDERING,
                            forrigeBehandlingId = behandling2.id,
                            opprettetTid = behandling2.sporbar.opprettetTid.plusDays(1)))

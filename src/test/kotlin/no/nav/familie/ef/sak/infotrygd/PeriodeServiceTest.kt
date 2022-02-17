@@ -5,7 +5,7 @@ import io.mockk.mockk
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.fagsak.domain.FagsakMedPerson
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeTestUtil.lagInfotrygdPeriode
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
@@ -150,8 +150,8 @@ internal class PeriodeServiceTest {
         every { replikaClient.hentPerioder(any()) } returns InfotrygdPeriodeResponse(overgangsstønad, emptyList(), emptyList())
     }
 
-    private fun mockFagsak(fagsakMedPerson: FagsakMedPerson? = this.fagsak) {
-        every { fagsakService.finnFagsak(setOf(personIdent), Stønadstype.OVERGANGSSTØNAD) } returns fagsakMedPerson
+    private fun mockFagsak(fagsak: Fagsak? = this.fagsak) {
+        every { fagsakService.finnFagsak(setOf(personIdent), Stønadstype.OVERGANGSSTØNAD) } returns fagsak
     }
 
     private fun mockBehandling(behandling: Behandling? = this.behandling) {

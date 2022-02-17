@@ -44,10 +44,10 @@ class MålerRepositoryTest : OppslagSpringRunnerTest() {
                 BehandlingStatus.values().forEach { status -> // per status
                     if (status == BehandlingStatus.FERDIGSTILT) {
                         BehandlingResultat.values().forEach { resultat -> // per resultat for ferdigstilte
-                            behandlingRepository.insert(behandling(fagsakMedPerson = fagsak, status = status, resultat = resultat))
+                            behandlingRepository.insert(behandling(fagsak = fagsak, status = status, resultat = resultat))
                         }
                     } else {
-                        behandlingRepository.insert(behandling(fagsakMedPerson = fagsak, status = status))
+                        behandlingRepository.insert(behandling(fagsak = fagsak, status = status))
                     }
                 }
             }

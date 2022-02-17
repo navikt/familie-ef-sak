@@ -107,6 +107,6 @@ class TilkjentYtelseServiceTest {
     companion object {
 
         val fagsak = fagsak()
-        val behandling = behandling(fagsakMedPerson = fagsak)
+        val behandling = behandling(fagsak = fagsak)
     }
 }

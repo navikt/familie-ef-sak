@@ -8,8 +8,8 @@ import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.beregning.Inntektsperiode
 import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
-import no.nav.familie.ef.sak.fagsak.domain.FagsakMedPerson
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.fagsak.domain.FagsakDomain
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
@@ -46,7 +46,7 @@ fun oppgave(behandling: Behandling,
                 type = type,
                 erFerdigstilt = erFerdigstilt)
 
-fun behandling(fagsakMedPerson: FagsakMedPerson = fagsak(),
+fun behandling(fagsak: Fagsak = fagsak(),
                status: BehandlingStatus = BehandlingStatus.OPPRETTET,
                steg: StegType = StegType.VILKÅR,
                id: UUID = UUID.randomUUID(),
@@ -57,7 +57,7 @@ fun behandling(fagsakMedPerson: FagsakMedPerson = fagsak(),
                årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
                henlagtÅrsak: HenlagtÅrsak? = HenlagtÅrsak.FEILREGISTRERT
 ): Behandling =
-        Behandling(fagsakId = fagsakMedPerson.id,
+        Behandling(fagsakId = fagsak.id,
                    forrigeBehandlingId = forrigeBehandlingId,
                    id = id,
                    type = type,
@@ -77,7 +77,7 @@ fun fagsak(identer: Set<PersonIdent> = setOf(),
            stønadstype: Stønadstype = Stønadstype.OVERGANGSSTØNAD,
            id: UUID = UUID.randomUUID(),
            eksternId: EksternFagsakId = EksternFagsakId(),
-           sporbar: Sporbar = Sporbar()): FagsakMedPerson {
+           sporbar: Sporbar = Sporbar()): Fagsak {
     return fagsak(stønadstype, id, FagsakPerson(identer = identer), eksternId, sporbar)
 }
 
@@ -85,31 +85,31 @@ fun fagsak(stønadstype: Stønadstype = Stønadstype.OVERGANGSSTØNAD,
            id: UUID = UUID.randomUUID(),
            person: FagsakPerson,
            eksternId: EksternFagsakId = EksternFagsakId(),
-           sporbar: Sporbar = Sporbar()): FagsakMedPerson {
-    return FagsakMedPerson(id = id,
-                           fagsakPersonId = person.id,
-                           personIdenter = person.identer,
-                           stønadstype = stønadstype,
-                           eksternId = eksternId,
-                           migrert = false,
-                           sporbar = sporbar)
+           sporbar: Sporbar = Sporbar()): Fagsak {
+    return Fagsak(id = id,
+                  fagsakPersonId = person.id,
+                  personIdenter = person.identer,
+                  stønadstype = stønadstype,
+                  eksternId = eksternId,
+                  migrert = false,
+                  sporbar = sporbar)
 }
 
 fun fagsakDao(id: UUID = UUID.randomUUID(),
               stønadstype: Stønadstype = Stønadstype.OVERGANGSSTØNAD,
               personId: UUID = UUID.randomUUID(),
-              eksternId: EksternFagsakId = EksternFagsakId()): Fagsak =
-        Fagsak(id = id,
-               fagsakPersonId = personId,
-               stønadstype = stønadstype,
-               eksternId = eksternId)
+              eksternId: EksternFagsakId = EksternFagsakId()): FagsakDomain =
+        FagsakDomain(id = id,
+                     fagsakPersonId = personId,
+                     stønadstype = stønadstype,
+                     eksternId = eksternId)
 
-fun FagsakMedPerson.tilFagsakDao() =
-        Fagsak(id = id,
-               fagsakPersonId = fagsakPersonId,
-               stønadstype = stønadstype,
-               eksternId = eksternId,
-               sporbar = sporbar)
+fun Fagsak.tilFagsakDao() =
+        FagsakDomain(id = id,
+                     fagsakPersonId = fagsakPersonId,
+                     stønadstype = stønadstype,
+                     eksternId = eksternId,
+                     sporbar = sporbar)
 
 fun vilkårsvurdering(behandlingId: UUID,
                      resultat: Vilkårsresultat,

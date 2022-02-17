@@ -9,12 +9,12 @@ import org.springframework.data.relational.core.mapping.Table
 import java.util.UUID
 
 data class Fagsaker(
-        val overgangsstønad: FagsakMedPerson?,
-        val barnetilsyn: FagsakMedPerson?,
-        val skolepenger: FagsakMedPerson?,
+        val overgangsstønad: Fagsak?,
+        val barnetilsyn: Fagsak?,
+        val skolepenger: Fagsak?,
 )
 
-data class FagsakMedPerson(
+data class Fagsak(
         val id: UUID,
         val fagsakPersonId: UUID,
         val personIdenter: Set<PersonIdent>,
@@ -33,21 +33,21 @@ data class FagsakMedPerson(
 }
 
 @Table("fagsak")
-data class Fagsak(@Id
+data class FagsakDomain(@Id
                   val id: UUID = UUID.randomUUID(),
-                  val fagsakPersonId: UUID,
-                  @MappedCollection(idColumn = "fagsak_id")
+                        val fagsakPersonId: UUID,
+                        @MappedCollection(idColumn = "fagsak_id")
                   val eksternId: EksternFagsakId = EksternFagsakId(),
-                  @Column("stonadstype")
+                        @Column("stonadstype")
                   val stønadstype: Stønadstype,
-                  val migrert: Boolean = false,
-                  @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+                        val migrert: Boolean = false,
+                        @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                   val sporbar: Sporbar = Sporbar()) {
 
 }
 
-fun Fagsak.tilFagsakMedPerson(personIdenter: Set<PersonIdent>): FagsakMedPerson =
-        FagsakMedPerson(
+fun FagsakDomain.tilFagsakMedPerson(personIdenter: Set<PersonIdent>): Fagsak =
+        Fagsak(
                 id = id,
                 fagsakPersonId = fagsakPersonId,
                 personIdenter = personIdenter,

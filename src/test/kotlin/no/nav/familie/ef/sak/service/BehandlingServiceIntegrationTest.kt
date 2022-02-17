@@ -25,7 +25,7 @@ internal class BehandlingServiceIntegrationTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `opprettBehandling skal ikke være mulig å opprette en revurdering om forrige behandling ikke er ferdigstilt`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
-        behandlingRepository.insert(behandling(fagsakMedPerson = fagsak,
+        behandlingRepository.insert(behandling(fagsak = fagsak,
                                                status = BehandlingStatus.UTREDES))
         assertThatThrownBy {
             behandlingService.opprettBehandling(BehandlingType.REVURDERING,
@@ -47,7 +47,7 @@ internal class BehandlingServiceIntegrationTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `opprettBehandling - skal ikke være mulig å opprette en revurdering hvis forrige behandling er blankett`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
-        behandlingRepository.insert(behandling(fagsakMedPerson = fagsak,
+        behandlingRepository.insert(behandling(fagsak = fagsak,
                                                status = BehandlingStatus.FERDIGSTILT,
                                                type = BehandlingType.BLANKETT))
         assertThatThrownBy {
@@ -60,7 +60,7 @@ internal class BehandlingServiceIntegrationTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `opprettBehandling - skal ikke være mulig å opprette en revurdering om forrige behandling er teknisk opphør`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
-        behandlingRepository.insert(behandling(fagsakMedPerson = fagsak,
+        behandlingRepository.insert(behandling(fagsak = fagsak,
                                                status = BehandlingStatus.FERDIGSTILT,
                                                type = BehandlingType.TEKNISK_OPPHØR))
         assertThat(catchThrowable {

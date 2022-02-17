@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.fagsak
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
-import no.nav.familie.ef.sak.fagsak.domain.FagsakMedPerson
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.tilFagsakMedPerson
 import no.nav.familie.ef.sak.fagsak.dto.FagsakForSøkeresultat
 import no.nav.familie.ef.sak.fagsak.dto.PersonFraSøk
@@ -67,7 +67,7 @@ class SøkService(
     }
 
     private fun finnFagsakEllerOpprettHvisPersonFinnesIInfotrygd(personIdenter: Set<String>,
-                                                                 gjeldendePersonIdent: String): List<FagsakMedPerson> {
+                                                                 gjeldendePersonIdent: String): List<Fagsak> {
         val fagsaker = fagsakRepository.findBySøkerIdent(personIdenter)
 
         if (fagsaker.isEmpty()) {

@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.fagsak.dto
 
 import no.nav.familie.ef.sak.behandling.dto.BehandlingDto
-import no.nav.familie.ef.sak.fagsak.domain.FagsakMedPerson
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import java.util.UUID
 
@@ -14,7 +14,7 @@ data class FagsakDto(val id: UUID,
                      val behandlinger: List<BehandlingDto>,
                      val eksternId: Long)
 
-fun FagsakMedPerson.tilDto(behandlinger: List<BehandlingDto>, erLøpende: Boolean): FagsakDto =
+fun Fagsak.tilDto(behandlinger: List<BehandlingDto>, erLøpende: Boolean): FagsakDto =
         FagsakDto(id = this.id,
                   fagsakPersonId = this.fagsakPersonId,
                   personIdent = this.hentAktivIdent(),

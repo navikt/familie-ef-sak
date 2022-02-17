@@ -40,7 +40,7 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
     @Test
     fun `Opprett og hent andeler tilkjent ytelse`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
-        val behandling = behandlingRepository.insert(behandling(fagsakMedPerson = fagsak))
+        val behandling = behandlingRepository.insert(behandling(fagsak = fagsak))
         val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(opprettBehandling(), 2)
 
         val tilkjentYtelseId = repository.insert(tilkjentYtelse).id

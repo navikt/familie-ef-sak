@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.behandlingsflyt.task
 
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.fagsak.domain.FagsakMedPerson
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
@@ -35,8 +35,8 @@ class StartBehandlingTask(private val iverksettClient: IverksettClient,
         }
     }
 
-    private fun finnesEnIverksattBehandlingFor(fagsakMedPerson: FagsakMedPerson) =
-            behandlingRepository.finnSisteIverksatteBehandling(fagsakMedPerson.id) != null
+    private fun finnesEnIverksattBehandlingFor(fagsak: Fagsak) =
+            behandlingRepository.finnSisteIverksatteBehandling(fagsak.id) != null
 
     companion object {
 
