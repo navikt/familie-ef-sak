@@ -144,14 +144,29 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
         val opphørsperioder = finnOpphørsperioder(vedtak)
 
         val forrigeTilkjenteYtelse = behandling.forrigeBehandlingId?.let { hentForrigeTilkjenteYtelse(behandling) }
+        validerOpphørsperioder(opphørsperioder, finnInnvilgedePerioder(vedtak), forrigeTilkjenteYtelse)
+
         val nyeAndeler = beregnNyeAndelerForRevurdering(forrigeTilkjenteYtelse, andelerTilkjentYtelse, opphørsperioder)
 
         val forrigeOpphørsdato = forrigeTilkjenteYtelse?.startdato
         val opphørsdato = opphørsdatoHvisFørFørsteAndelSinFomDato(opphørsperioder, nyeAndeler, forrigeOpphørsdato)
-        feilHvis(forrigeTilkjenteYtelse?.andelerTilkjentYtelse?.all { it.beløp == 0 } == true && opphørsdato != null) {
-            "Har ikke støtte for å opphøre når alle tidligere perioder har 0 i stønad"
-        }
         return nyeAndeler to opphørsdato
+    }
+
+    private fun validerOpphørsperioder(opphørsperioder: List<Periode>,
+                                       vedtaksperioder: List<Periode>,
+                                       forrigeTilkjenteYtelse: TilkjentYtelse?) {
+        val førsteOpphørsdato = opphørsperioder.minOfOrNull { it.fradato }
+        val førsteVedtaksFradato = vedtaksperioder.minOfOrNull { it.fradato }
+        val harKunOpphørEllerOpphørFørInnvilgetPeriode =
+                førsteOpphørsdato != null && (førsteVedtaksFradato == null || førsteOpphørsdato < førsteVedtaksFradato)
+        feilHvis(forrigeTilkjenteYtelse == null && harKunOpphørEllerOpphørFørInnvilgetPeriode) {
+            "Har ikke støtte for å innvilge med opphør først, når man mangler tidligere behandling å opphøre"
+        }
+        val harKun0Beløp = forrigeTilkjenteYtelse?.andelerTilkjentYtelse?.all { it.beløp == 0 } ?: false
+        feilHvis(harKun0Beløp && harKunOpphørEllerOpphørFørInnvilgetPeriode) {
+            "Har ikke støtte for å innvilge med opphør først, når man kun har perioder med 0 som beløp fra før"
+        }
     }
 
     private fun beregnNyeAndelerForRevurdering(forrigeTilkjenteYtelse: TilkjentYtelse?,

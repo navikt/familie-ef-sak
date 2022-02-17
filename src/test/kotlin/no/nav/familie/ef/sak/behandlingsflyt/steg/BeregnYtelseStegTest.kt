@@ -773,12 +773,8 @@ internal class BeregnYtelseStegTest {
             val innvilgetPeriode1 = innvilgetPeriode(andelFom, andelTom)
 
             utførSteg(BehandlingType.REVURDERING,
-                      Innvilget(resultatType = ResultatType.INNVILGE,
-                                perioder = listOf(opphørsperiode, innvilgetPeriode1),
-                                inntekter = listOf(inntekt(andelTom)),
-                                inntektBegrunnelse = "null",
-                                periodeBegrunnelse = "null"
-                      ),
+                      innvilget(listOf(opphørsperiode, innvilgetPeriode1),
+                                listOf(inntekt(andelTom))),
                       forrigeBehandlingId = UUID.randomUUID())
 
             assertThat(slot.captured.andelerTilkjentYtelse).hasSize(1)
@@ -807,12 +803,8 @@ internal class BeregnYtelseStegTest {
             val innvilgetPeriode1 = innvilgetPeriode(innvilgetFom, innvilgetTom)
 
             utførSteg(BehandlingType.REVURDERING,
-                      Innvilget(resultatType = ResultatType.INNVILGE,
-                                perioder = listOf(opphørsperiode, innvilgetPeriode1),
-                                inntekter = listOf(inntekt(andelTom)),
-                                inntektBegrunnelse = "null",
-                                periodeBegrunnelse = "null"
-                      ),
+                      innvilget(listOf(opphørsperiode, innvilgetPeriode1),
+                                listOf(inntekt(andelTom))),
                       forrigeBehandlingId = UUID.randomUUID())
 
             val andelerTilkjentYtelse = slot.captured.andelerTilkjentYtelse.sortedBy { it.stønadFom }
@@ -842,12 +834,8 @@ internal class BeregnYtelseStegTest {
             val innvilgetPeriode1 = innvilgetPeriode(andelFom, andelTom)
 
             utførSteg(BehandlingType.REVURDERING,
-                      Innvilget(resultatType = ResultatType.INNVILGE,
-                                perioder = listOf(innvilgetPeriode1, opphørsperiode),
-                                inntekter = listOf(inntekt(andelTom)),
-                                inntektBegrunnelse = "null",
-                                periodeBegrunnelse = "null"
-                      ),
+                      innvilget(listOf(innvilgetPeriode1, opphørsperiode),
+                                listOf(inntekt(andelTom))),
                       forrigeBehandlingId = UUID.randomUUID())
 
             assertThat(slot.captured.andelerTilkjentYtelse).hasSize(1)
@@ -855,11 +843,6 @@ internal class BeregnYtelseStegTest {
             assertThat(slot.captured.andelerTilkjentYtelse[0].stønadTom).isEqualTo(andelTom.atEndOfMonth())
             assertThat(slot.captured.startdato).isNull()
         }
-
-    }
-
-    @Nested
-    inner class InnvilgeMedOpphør {
 
         @Test
         internal fun `kan ikke innvilge med opphør, uten opphørsperioder`() {
@@ -875,6 +858,22 @@ internal class BeregnYtelseStegTest {
                           innvilget(listOf(opphørsperiode(opphørFom, opphørFom)), listOf(inntekt(opphørFom))),
                           forrigeBehandlingId = UUID.randomUUID())
             }.hasMessageContaining("Må ha innvilgelsesperioder i tillegg til opphørsperioder")
+        }
+
+        @Test
+        internal fun `kan ikke innvilge med opphør før innvilget perioder når man ikke har tidligere behandling`() {
+            val opphørFom = YearMonth.of(2021, 1)
+            val innvilgetMåned = opphørFom.plusMonths(1)
+
+            every { beregningService.beregnYtelse(any(), any()) } answers {
+                firstArg<List<Periode>>().map { lagBeløpsperiode(it.fradato, it.tildato) }
+            }
+
+            assertThatThrownBy {
+                utførSteg(BehandlingType.REVURDERING,
+                          innvilget(listOf(opphørsperiode(opphørFom, opphørFom),
+                                           innvilgetPeriode(innvilgetMåned, innvilgetMåned)), listOf(inntekt(opphørFom))))
+            }.hasMessageContaining("Har ikke støtte for å innvilge med opphør først, når man mangler tidligere behandling å opphøre")
         }
 
         @Test
@@ -895,7 +894,54 @@ internal class BeregnYtelseStegTest {
                           innvilget(listOf(opphørsperiode(opphørFom, opphørFom),
                                            innvilgetPeriode(innvilgetMåned, innvilgetMåned)), listOf(inntekt(opphørFom))),
                           forrigeBehandlingId = UUID.randomUUID())
-            }.hasMessageContaining("Har ikke støtte for å opphøre når alle tidligere perioder har 0 i stønad")
+            }.hasMessageContaining("Har ikke støtte for å innvilge med opphør først, når man kun har perioder med 0 som beløp fra før")
+        }
+
+        @Test
+        internal fun `skal kunne innvilge når vi kun har 0-perioder fra før`() {
+            val andelFom = YearMonth.of(2021, 6).atDay(1)
+            val andelTom = YearMonth.of(2021, 6).atEndOfMonth()
+            val innvilgetMåned = YearMonth.of(2021, 1)
+
+            every { tilkjentYtelseService.hentForBehandling(any()) } returns
+                    lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(0, andelFom, andelTom)))
+            every { beregningService.beregnYtelse(any(), any()) } answers {
+                firstArg<List<Periode>>().map { lagBeløpsperiode(it.fradato, it.tildato) }
+            }
+
+            utførSteg(BehandlingType.REVURDERING,
+                      innvilget(listOf(innvilgetPeriode(innvilgetMåned, innvilgetMåned)), listOf(inntekt(innvilgetMåned))),
+                      forrigeBehandlingId = UUID.randomUUID())
+
+            assertThat(slot.captured.startdato).isNull()
+            assertThat(slot.captured.andelerTilkjentYtelse).hasSize(1)
+            assertThat(slot.captured.andelerTilkjentYtelse[0].stønadFom).isEqualTo(innvilgetMåned.atDay(1))
+            assertThat(slot.captured.andelerTilkjentYtelse[0].stønadTom).isEqualTo(innvilgetMåned.atEndOfMonth())
+        }
+
+        @Test
+        internal fun `skal kunne innvilge når vi kun har 0-perioder og opphørsdato fra før`() {
+            val opphørFom = YearMonth.of(2021, 1)
+            val andelFom = YearMonth.of(2021, 6).atDay(1)
+            val andelTom = YearMonth.of(2021, 6).atEndOfMonth()
+            val innvilgetMåned = opphørFom.plusMonths(1)
+
+            every { tilkjentYtelseService.hentForBehandling(any()) } returns
+                    lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(0, andelFom, andelTom)),
+                                      opphørsdato = opphørFom.atDay(1))
+            every { beregningService.beregnYtelse(any(), any()) } answers {
+                firstArg<List<Periode>>().map { lagBeløpsperiode(it.fradato, it.tildato) }
+            }
+
+            utførSteg(BehandlingType.REVURDERING,
+                      innvilget(listOf(innvilgetPeriode(innvilgetMåned, innvilgetMåned)),
+                                listOf(inntekt(innvilgetMåned))),
+                      forrigeBehandlingId = UUID.randomUUID())
+
+            assertThat(slot.captured.startdato).isEqualTo(opphørFom.atDay(1))
+            assertThat(slot.captured.andelerTilkjentYtelse).hasSize(1)
+            assertThat(slot.captured.andelerTilkjentYtelse[0].stønadFom).isEqualTo(innvilgetMåned.atDay(1))
+            assertThat(slot.captured.andelerTilkjentYtelse[0].stønadTom).isEqualTo(innvilgetMåned.atEndOfMonth())
         }
 
         @Test
