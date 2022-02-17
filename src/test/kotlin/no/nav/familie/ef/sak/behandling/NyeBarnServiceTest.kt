@@ -8,7 +8,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.NyeBarnService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.fagsak.domain.FagsakMedPerson
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
@@ -38,7 +38,7 @@ class NyeBarnServiceTest {
     val nyeBarnService = NyeBarnService(behandlingService, fagsakService, personService, barnService)
 
     val grunnlagsdataMedMetadata = mockk<GrunnlagsdataMedMetadata>()
-    val fagsak = mockk<Fagsak>()
+    val fagsakMedPerson = mockk<FagsakMedPerson>()
     val behandling = mockk<Behandling>()
     val grunnlagsdataDomene = mockk<GrunnlagsdataDomene>()
 
@@ -51,8 +51,8 @@ class NyeBarnServiceTest {
 
     @BeforeEach fun init() {
         every { behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(any()) } returns behandling
-        every { fagsakService.finnFagsak(any(), any()) } returns fagsak
-        every { fagsak.id } returns UUID.randomUUID()
+        every { fagsakService.finnFagsak(any(), any()) } returns fagsakMedPerson
+        every { fagsakMedPerson.id } returns UUID.randomUUID()
         every { behandling.id } returns UUID.randomUUID()
         every { grunnlagsdataMedMetadata.grunnlagsdata } returns grunnlagsdataDomene
         every { personService.hentPersonIdenter(any()) } returns PdlIdenter(listOf(PdlIdent("fnr til søker", false)))

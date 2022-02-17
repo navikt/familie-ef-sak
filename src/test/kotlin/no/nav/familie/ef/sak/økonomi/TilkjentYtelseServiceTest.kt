@@ -11,7 +11,6 @@ import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -108,6 +107,6 @@ class TilkjentYtelseServiceTest {
     companion object {
 
         val fagsak = fagsak()
-        val behandling = behandling(fagsak = fagsak)
+        val behandling = behandling(fagsakMedPerson = fagsak)
     }
 }

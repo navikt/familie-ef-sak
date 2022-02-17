@@ -6,7 +6,7 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.fagsak.domain.FagsakMedPerson
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
@@ -231,19 +231,19 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         behandlingService.leggTilBehandlingsjournalpost(journalpost.journalpostId, journalpost.journalposttype, behandling.id)
     }
 
-    private fun settSøknadPåBehandling(journalpostId: String, fagsak: Fagsak, behandlingId: UUID) {
-        when (fagsak.stønadstype) {
+    private fun settSøknadPåBehandling(journalpostId: String, fagsakMedPerson: FagsakMedPerson, behandlingId: UUID) {
+        when (fagsakMedPerson.stønadstype) {
             Stønadstype.OVERGANGSSTØNAD -> {
                 val søknad = hentSøknadFraJournalpostForOvergangsstønad(journalpostId)
-                søknadService.lagreSøknadForOvergangsstønad(søknad, behandlingId, fagsak.id, journalpostId)
+                søknadService.lagreSøknadForOvergangsstønad(søknad, behandlingId, fagsakMedPerson.id, journalpostId)
             }
             Stønadstype.BARNETILSYN -> {
                 val søknad = hentSøknadFraJournalpostForBarnetilsyn(journalpostId)
-                søknadService.lagreSøknadForBarnetilsyn(søknad, behandlingId, fagsak.id, journalpostId)
+                søknadService.lagreSøknadForBarnetilsyn(søknad, behandlingId, fagsakMedPerson.id, journalpostId)
             }
             Stønadstype.SKOLEPENGER -> {
                 val søknad = hentSøknadFraJournalpostForSkolepenger(journalpostId)
-                søknadService.lagreSøknadForSkolepenger(søknad, behandlingId, fagsak.id, journalpostId)
+                søknadService.lagreSøknadForSkolepenger(søknad, behandlingId, fagsakMedPerson.id, journalpostId)
             }
         }
     }

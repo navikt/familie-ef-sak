@@ -79,7 +79,7 @@ internal class SimuleringServiceTest {
     @Test
     internal fun `skal bruke lagret tilkjentYtelse for simulering`() {
         val forrigeBehandlingId = behandling(fagsak).id
-        val behandling = behandling(fagsak = fagsak,
+        val behandling = behandling(fagsakMedPerson = fagsak,
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     forrigeBehandlingId = forrigeBehandlingId)
 
@@ -111,7 +111,7 @@ internal class SimuleringServiceTest {
     @Test
     internal fun `skal bruke lagret vedtak for simulering av blankett`() {
 
-        val behandling = behandling(fagsak = fagsak, type = BehandlingType.BLANKETT)
+        val behandling = behandling(fagsakMedPerson = fagsak, type = BehandlingType.BLANKETT)
 
         val årMånedFraStart = YearMonth.of(2021, 1)
         val årMånedGEndring = YearMonth.of(2021, 5)
@@ -163,7 +163,7 @@ internal class SimuleringServiceTest {
     @Test
     internal fun `skal feile hvis behandlingen ikke er redigerbar og mangler lagret simulering`() {
         val behandling =
-                behandling(fagsak = fagsak, type = BehandlingType.FØRSTEGANGSBEHANDLING, status = BehandlingStatus.FATTER_VEDTAK)
+                behandling(fagsakMedPerson = fagsak, type = BehandlingType.FØRSTEGANGSBEHANDLING, status = BehandlingStatus.FATTER_VEDTAK)
         every { behandlingService.hentBehandling(any()) } returns behandling
         assertThrows<RuntimeException> {
             simuleringService.simuler(behandling.id)
@@ -173,7 +173,7 @@ internal class SimuleringServiceTest {
     @Test
     internal fun `skal hente lagret simulering hvis behandlingen ikke er redigerbar`() {
         val behandling =
-                behandling(fagsak = fagsak, type = BehandlingType.FØRSTEGANGSBEHANDLING, status = BehandlingStatus.FATTER_VEDTAK)
+                behandling(fagsakMedPerson = fagsak, type = BehandlingType.FØRSTEGANGSBEHANDLING, status = BehandlingStatus.FATTER_VEDTAK)
         every { behandlingService.hentBehandling(any()) } returns behandling
         every {
             simuleringsresultatRepository.findByIdOrNull(behandling.id)
@@ -187,7 +187,7 @@ internal class SimuleringServiceTest {
     @Test
     internal fun `skal berike simlueringsresultat`() {
         val forrigeBehandlingId = behandling(fagsak).id
-        val behandling = behandling(fagsak = fagsak,
+        val behandling = behandling(fagsakMedPerson = fagsak,
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     forrigeBehandlingId = forrigeBehandlingId)
 

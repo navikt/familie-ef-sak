@@ -13,7 +13,7 @@ import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.beregning.tilInntektsperioder
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.fagsak.domain.FagsakMedPerson
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.fagsak.dto.MigreringInfo
@@ -118,7 +118,7 @@ class MigreringService(
         val kjøremåned = kjøremåned()
         val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, Stønadstype.OVERGANGSSTØNAD)
         val periode = hentGjeldendePeriodeOgValiderState(fagsakPerson, kjøremåned)
-        return opprettMigrering(fagsak = fagsak,
+        return opprettMigrering(fagsakMedPerson = fagsak,
                                 fra = fra(kjøremåned, periode),
                                 til = til(periode),
                                 inntektsgrunnlag = periode.inntektsgrunnlag,
@@ -129,7 +129,7 @@ class MigreringService(
      * Skal kun kalles direkte fra denne klassen eller [TestSaksbehandlingController]
      */
     @Transactional
-    fun opprettMigrering(fagsak: Fagsak,
+    fun opprettMigrering(fagsakMedPerson: FagsakMedPerson,
                          fra: YearMonth,
                          til: YearMonth,
                          inntektsgrunnlag: Int,
@@ -137,11 +137,11 @@ class MigreringService(
         feilHvisIkke(featureToggleService.isEnabled("familie.ef.sak.migrering")) {
             "Feature toggle for migrering er disabled"
         }
-        fagsakService.settFagsakTilMigrert(fagsak.id)
-        val behandling = behandlingService.opprettMigrering(fagsak.id)
-        logger.info("Migrerer fagsakPerson=${fagsak.fagsakPersonId} fagsak=${fagsak.id} behandling=${behandling.id} " +
+        fagsakService.settFagsakTilMigrert(fagsakMedPerson.id)
+        val behandling = behandlingService.opprettMigrering(fagsakMedPerson.id)
+        logger.info("Migrerer fagsakPerson=${fagsakMedPerson.fagsakPersonId} fagsak=${fagsakMedPerson.id} behandling=${behandling.id} " +
                     "fra=$fra til=$til")
-        iverksettService.startBehandling(behandling, fagsak)
+        iverksettService.startBehandling(behandling, fagsakMedPerson)
 
         grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
         vurderingService.opprettVilkårForMigrering(behandling)
@@ -162,7 +162,7 @@ class MigreringService(
         taskRepository.save(PollStatusFraIverksettTask.opprettTask(behandling.id))
         taskRepository.save(SjekkMigrertStatusIInfotrygdTask.opprettTask(behandling.id,
                                                                          fra.minusMonths(1),
-                                                                         fagsak.hentAktivIdent()))
+                                                                         fagsakMedPerson.hentAktivIdent()))
 
         return behandlingService.hentBehandling(behandling.id)
     }
@@ -238,13 +238,13 @@ class MigreringService(
                "registrertDato=${sak.registrertDato} mottattDato=${sak.mottattDato}"
     }
 
-    private fun validerFagsakOgBehandling(fagsak: Fagsak) {
-        if (fagsak.stønadstype != Stønadstype.OVERGANGSSTØNAD) {
+    private fun validerFagsakOgBehandling(fagsakMedPerson: FagsakMedPerson) {
+        if (fagsakMedPerson.stønadstype != Stønadstype.OVERGANGSSTØNAD) {
             throw MigreringException("Håndterer ikke andre stønadstyper enn overgangsstønad",
                                      MigreringExceptionType.FEIL_STØNADSTYPE)
-        } else if (fagsak.migrert) {
+        } else if (fagsakMedPerson.migrert) {
             throw MigreringException("Fagsak er allerede migrert", MigreringExceptionType.ALLEREDE_MIGRERT)
-        } else if (behandlingService.hentBehandlinger(fagsak.id).any { it.type != BehandlingType.BLANKETT }) {
+        } else if (behandlingService.hentBehandlinger(fagsakMedPerson.id).any { it.type != BehandlingType.BLANKETT }) {
             throw MigreringException("Fagsaken har allerede behandlinger", MigreringExceptionType.HAR_ALLEREDE_BEHANDLINGER)
         }
     }

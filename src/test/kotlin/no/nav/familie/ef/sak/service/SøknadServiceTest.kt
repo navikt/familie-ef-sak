@@ -3,7 +3,7 @@ package no.nav.familie.ef.sak.service
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.Behandling
-import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.fagsak.domain.FagsakMedPerson
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadRepository
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadsskjemaOvergangsstønad
@@ -56,8 +56,8 @@ internal class SøknadServiceTest : OppslagSpringRunnerTest() {
     }
 
     private fun lagreSøknad(behandling: Behandling,
-                            fagsak: Fagsak): SøknadsskjemaOvergangsstønad {
-        søknadService.lagreSøknadForOvergangsstønad(Testsøknad.søknadOvergangsstønad, behandling.id, fagsak.id, "1L")
+                            fagsakMedPerson: FagsakMedPerson): SøknadsskjemaOvergangsstønad {
+        søknadService.lagreSøknadForOvergangsstønad(Testsøknad.søknadOvergangsstønad, behandling.id, fagsakMedPerson.id, "1L")
         return søknadService.hentOvergangsstønad(behandling.id)!!
     }
 }

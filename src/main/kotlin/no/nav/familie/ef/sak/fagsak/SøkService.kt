@@ -2,8 +2,8 @@ package no.nav.familie.ef.sak.fagsak
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
-import no.nav.familie.ef.sak.fagsak.domain.Fagsak
-import no.nav.familie.ef.sak.fagsak.domain.tilFagsak
+import no.nav.familie.ef.sak.fagsak.domain.FagsakMedPerson
+import no.nav.familie.ef.sak.fagsak.domain.tilFagsakMedPerson
 import no.nav.familie.ef.sak.fagsak.dto.FagsakForSøkeresultat
 import no.nav.familie.ef.sak.fagsak.dto.PersonFraSøk
 import no.nav.familie.ef.sak.fagsak.dto.Søkeresultat
@@ -67,7 +67,7 @@ class SøkService(
     }
 
     private fun finnFagsakEllerOpprettHvisPersonFinnesIInfotrygd(personIdenter: Set<String>,
-                                                                 gjeldendePersonIdent: String): List<Fagsak> {
+                                                                 gjeldendePersonIdent: String): List<FagsakMedPerson> {
         val fagsaker = fagsakRepository.findBySøkerIdent(personIdenter)
 
         if (fagsaker.isEmpty()) {
@@ -77,7 +77,7 @@ class SøkService(
             }
             throw ApiFeil("Finner ikke fagsak for søkte personen", HttpStatus.BAD_REQUEST)
         }
-        return fagsaker.map { it.tilFagsak(fagsakPersonService.hentIdenter(it.fagsakPersonId)) }
+        return fagsaker.map { it.tilFagsakMedPerson(fagsakPersonService.hentIdenter(it.fagsakPersonId)) }
     }
 
     // Denne trenger ikke en tilgangskontroll då den ikke returnerer noe fra behandlingen.

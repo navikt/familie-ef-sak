@@ -5,7 +5,7 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BehandlerRolle
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.fagsak.domain.FagsakMedPerson
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.iverksett.IverksettClient
@@ -70,14 +70,14 @@ class SimuleringService(private val iverksettClient: IverksettClient,
         return simuleringsresultat.beriketData.oppsummering
     }
 
-    private fun simulerMedTilkjentYtelse(behandling: Behandling, fagsak: Fagsak): BeriketSimuleringsresultat {
+    private fun simulerMedTilkjentYtelse(behandling: Behandling, fagsakMedPerson: FagsakMedPerson): BeriketSimuleringsresultat {
         val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(behandling.id)
 
         val tilkjentYtelseMedMedtadata =
                 tilkjentYtelse.tilTilkjentYtelseMedMetaData(saksbehandlerId = SikkerhetContext.hentSaksbehandler(),
                                                             eksternBehandlingId = behandling.eksternId.id,
-                                                            stønadstype = fagsak.stønadstype,
-                                                            eksternFagsakId = fagsak.eksternId.id)
+                                                            stønadstype = fagsakMedPerson.stønadstype,
+                                                            eksternFagsakId = fagsakMedPerson.eksternId.id)
 
         return iverksettClient.simuler(SimuleringDto(
                 nyTilkjentYtelseMedMetaData = tilkjentYtelseMedMedtadata,

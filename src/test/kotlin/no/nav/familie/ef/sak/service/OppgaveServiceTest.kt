@@ -11,7 +11,7 @@ import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.arbeidsfordeling.Arbeidsfordelingsenhet
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
-import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.fagsak.domain.FagsakMedPerson
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.infrastruktur.exception.IntegrasjonException
@@ -311,7 +311,7 @@ internal class OppgaveServiceTest {
         every { pdlClient.hentAktørIder(any()) } returns PdlIdenter(listOf(PdlIdent(aktørIdentFraPdl, false)))
     }
 
-    private fun lagTestFagsak(): Fagsak {
+    private fun lagTestFagsak(): FagsakMedPerson {
         return fagsak(id = FAGSAK_ID,
                       stønadstype = Stønadstype.OVERGANGSSTØNAD,
                       eksternId = EksternFagsakId(FAGSAK_EKSTERN_ID),

@@ -73,7 +73,7 @@ internal class TilbakekrevingServiceTest {
 
         @Test
         internal fun `skal ikke være mulig å lagre tilbakekreving for låst behandlig `() {
-            every { behandlingService.hentBehandling(any()) } returns behandling(fagsak = fagsak(), status = FERDIGSTILT)
+            every { behandlingService.hentBehandling(any()) } returns behandling(fagsakMedPerson = fagsak(), status = FERDIGSTILT)
             val tilbakekrevingDto =
                     TilbakekrevingDto(valg = Tilbakekrevingsvalg.AVVENT,
                                       varseltekst = "",
@@ -87,7 +87,7 @@ internal class TilbakekrevingServiceTest {
 
         @Test
         internal fun `Skal kaste feil dersom vi forsøker lagre tilbakekreving med varsl som mangler varseltekst`() {
-            every { behandlingService.hentBehandling(any()) } returns behandling(fagsak = fagsak())
+            every { behandlingService.hentBehandling(any()) } returns behandling(fagsakMedPerson = fagsak())
             val tilbakekrevingDto =
                     TilbakekrevingDto(valg = Tilbakekrevingsvalg.OPPRETT_MED_VARSEL,
                                       varseltekst = null,
@@ -103,7 +103,7 @@ internal class TilbakekrevingServiceTest {
 
         @Test
         internal fun `Skal kaste feil dersom vi forsøker lagre tilbakekreving med varsel som har tom varseltekst`() {
-            every { behandlingService.hentBehandling(any()) } returns behandling(fagsak = fagsak())
+            every { behandlingService.hentBehandling(any()) } returns behandling(fagsakMedPerson = fagsak())
             val tilbakekrevingDto =
                     TilbakekrevingDto(valg = Tilbakekrevingsvalg.OPPRETT_MED_VARSEL,
                                       varseltekst = "   ",
@@ -118,7 +118,7 @@ internal class TilbakekrevingServiceTest {
 
         @Test
         internal fun `Skal lagre forventet tilbakekreving entitet når alt går bra`() {
-            every { behandlingService.hentBehandling(any()) } returns behandling(fagsak = fagsak())
+            every { behandlingService.hentBehandling(any()) } returns behandling(fagsakMedPerson = fagsak())
             val tilbakekrevingSlot = slot<Tilbakekreving>()
             val forventetBegrunnelse = "tekst her"
             val varseltekst = "Dette er en varseltekst"
@@ -160,7 +160,7 @@ internal class TilbakekrevingServiceTest {
 
         @Test
         internal fun `Varselbrev feiler hvis behandling er låst`() {
-            every { behandlingService.hentBehandling(any()) } returns behandling(fagsak = fagsak(), status = FERDIGSTILT)
+            every { behandlingService.hentBehandling(any()) } returns behandling(fagsakMedPerson = fagsak(), status = FERDIGSTILT)
             val assertFails = assertFailsWith<Feil> { tilbakekrevingService.genererBrev(UUID.randomUUID(), "Varsel, varsel") }
             assertThat(assertFails.frontendFeilmelding).isEqualTo("Kan ikke generere forhåndsvisning av varselbrev på en ferdigstilt behandling.")
         }
@@ -169,7 +169,7 @@ internal class TilbakekrevingServiceTest {
 
             val fagsak = fagsak(identer = setOf(PersonIdent("12345678901")))
             every { fagsakService.hentFagsakForBehandling(any()) } returns fagsak
-            every { behandlingService.hentBehandling(any()) } returns behandling(fagsak = fagsak)
+            every { behandlingService.hentBehandling(any()) } returns behandling(fagsakMedPerson = fagsak)
 
             every { simuleringService.simuler(any()) } returns simuleringsoppsummering
             every { arbeidsfordelingService.hentNavEnhet(any()) } returns Arbeidsfordelingsenhet("123", "123")

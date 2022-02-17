@@ -9,7 +9,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.fagsak.domain.FagsakMedPerson
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettService
@@ -96,16 +96,16 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
         return Ressurs.success(behandling.id)
     }
 
-    private fun lagBarnetilsynBehandling(søknadBarnetilsyn: SøknadBarnetilsyn, fagsak: Fagsak): Behandling {
+    private fun lagBarnetilsynBehandling(søknadBarnetilsyn: SøknadBarnetilsyn, fagsakMedPerson: FagsakMedPerson): Behandling {
 
 
         val behandling = behandlingService.opprettBehandling(BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                             fagsak.id,
+                                                             fagsakMedPerson.id,
                                                              behandlingsårsak = BehandlingÅrsak.SØKNAD)
         val journalposter = behandlingService.hentBehandlingsjournalposter(behandling.id)
         søknadService.lagreSøknadForBarnetilsyn(søknadBarnetilsyn,
                                                 behandling.id,
-                                                fagsak.id,
+                                                fagsakMedPerson.id,
                                                 journalposter.firstOrNull()?.journalpostId ?: "TESTJPID")
         return behandling
     }
@@ -164,27 +164,27 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
         return barneListe
     }
 
-    private fun lagFørstegangsbehandling(søknad: SøknadOvergangsstønad, fagsak: Fagsak): Behandling {
+    private fun lagFørstegangsbehandling(søknad: SøknadOvergangsstønad, fagsakMedPerson: FagsakMedPerson): Behandling {
         val behandling = behandlingService.opprettBehandling(BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                             fagsak.id,
+                                                             fagsakMedPerson.id,
                                                              behandlingsårsak = BehandlingÅrsak.SØKNAD)
         val journalposter = behandlingService.hentBehandlingsjournalposter(behandling.id)
         søknadService.lagreSøknadForOvergangsstønad(søknad,
                                                     behandling.id,
-                                                    fagsak.id,
+                                                    fagsakMedPerson.id,
                                                     journalposter.firstOrNull()?.journalpostId ?: "TESTJPID")
         return behandling
     }
 
-    private fun lagBlankettBehandling(fnr: String, søknad: SøknadOvergangsstønad, fagsak: Fagsak): Behandling {
+    private fun lagBlankettBehandling(fnr: String, søknad: SøknadOvergangsstønad, fagsakMedPerson: FagsakMedPerson): Behandling {
         val journalpostId = arkiver(fnr)
         val journalpost = journalpostClient.hentJournalpost(journalpostId)
-        return behandlingService.opprettBehandlingForBlankett(BehandlingType.BLANKETT, fagsak.id, søknad, journalpost)
+        return behandlingService.opprettBehandlingForBlankett(BehandlingType.BLANKETT, fagsakMedPerson.id, søknad, journalpost)
     }
 
 
-    private fun lagMigreringBehandling(fagsak: Fagsak): Behandling {
-        return migreringService.opprettMigrering(fagsak = fagsak,
+    private fun lagMigreringBehandling(fagsakMedPerson: FagsakMedPerson): Behandling {
+        return migreringService.opprettMigrering(fagsakMedPerson = fagsakMedPerson,
                                                  fra = YearMonth.now(),
                                                  til = YearMonth.now().plusMonths(1),
                                                  inntektsgrunnlag = 0,

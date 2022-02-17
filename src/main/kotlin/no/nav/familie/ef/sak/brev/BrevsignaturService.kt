@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.brev
 
 import no.nav.familie.ef.sak.brev.dto.SignaturDto
-import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.fagsak.domain.FagsakMedPerson
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG
@@ -13,9 +13,9 @@ import org.springframework.stereotype.Service
 class BrevsignaturService(val personopplysningerService: PersonopplysningerService) {
 
 
-    fun lagSignaturMedEnhet(fagsak: Fagsak): SignaturDto {
+    fun lagSignaturMedEnhet(fagsakMedPerson: FagsakMedPerson): SignaturDto {
         val harStrengtFortroligAdresse: Boolean =
-                personopplysningerService.hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(fagsak.hentAktivIdent())
+                personopplysningerService.hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(fagsakMedPerson.hentAktivIdent())
                         .let { it == STRENGT_FORTROLIG || it == STRENGT_FORTROLIG_UTLAND }
 
         return if (harStrengtFortroligAdresse) {

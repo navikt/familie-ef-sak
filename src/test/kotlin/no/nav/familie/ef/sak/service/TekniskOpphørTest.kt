@@ -10,7 +10,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillBehandlingTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.PollStatusTekniskOpphør
-import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.fagsak.domain.FagsakMedPerson
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
@@ -38,7 +38,7 @@ internal class TekniskOpphørTest : OppslagSpringRunnerTest() {
     @Autowired lateinit var tilkjentYtelseService: TilkjentYtelseService
 
     private val ident = "1234"
-    private lateinit var fagsak: Fagsak
+    private lateinit var fagsakMedPerson: FagsakMedPerson
     private lateinit var behandling: Behandling
 
     @BeforeEach
@@ -46,8 +46,8 @@ internal class TekniskOpphørTest : OppslagSpringRunnerTest() {
         mockBrukerContext("saksbehandler")
         every { iverksettClient.hentStatus(any()) } returns IverksettStatus.OK_MOT_OPPDRAG
 
-        fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent(ident = ident))))
-        behandling = behandlingRepository.insert(behandling(fagsak,
+        fagsakMedPerson = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent(ident = ident))))
+        behandling = behandlingRepository.insert(behandling(fagsakMedPerson,
                                                             status = BehandlingStatus.FERDIGSTILT,
                                                             resultat = BehandlingResultat.INNVILGET))
     }
@@ -60,7 +60,7 @@ internal class TekniskOpphørTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal opprette ny behandling for teknisk opphør`() {
-        håndterTekniskOpphør(fagsak)
+        håndterTekniskOpphør(fagsakMedPerson)
 
         val sistIverksattBehandling = finnSistIverksatteBehandling()
         assertThat(sistIverksattBehandling!!.id).isNotEqualTo(behandling.id)
@@ -72,7 +72,7 @@ internal class TekniskOpphørTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal ikke lagre tilkjent ytelse for behandling`() {
-        håndterTekniskOpphør(fagsak)
+        håndterTekniskOpphør(fagsakMedPerson)
 
         val sistIverksattBehandlingId = finnSistIverksatteBehandling()!!.id
 
@@ -80,10 +80,10 @@ internal class TekniskOpphørTest : OppslagSpringRunnerTest() {
                 .isEmpty()
     }
 
-    private fun finnSistIverksatteBehandling() = behandlingRepository.finnSisteIverksatteBehandling(fagsak.id)
+    private fun finnSistIverksatteBehandling() = behandlingRepository.finnSisteIverksatteBehandling(fagsakMedPerson.id)
 
-    private fun håndterTekniskOpphør(fagsak: Fagsak) {
-        tekniskOpphørService.håndterTeknisktOpphør(fagsak.id)
+    private fun håndterTekniskOpphør(fagsakMedPerson: FagsakMedPerson) {
+        tekniskOpphørService.håndterTeknisktOpphør(fagsakMedPerson.id)
 
         clearBrukerContext() // må kjøre task i context av system
         runPollStatusTekniskOpphør()

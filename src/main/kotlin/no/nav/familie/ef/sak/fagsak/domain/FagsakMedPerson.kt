@@ -9,12 +9,12 @@ import org.springframework.data.relational.core.mapping.Table
 import java.util.UUID
 
 data class Fagsaker(
-        val overgangsstønad: Fagsak?,
-        val barnetilsyn: Fagsak?,
-        val skolepenger: Fagsak?,
+        val overgangsstønad: FagsakMedPerson?,
+        val barnetilsyn: FagsakMedPerson?,
+        val skolepenger: FagsakMedPerson?,
 )
 
-data class Fagsak(
+data class FagsakMedPerson(
         val id: UUID,
         val fagsakPersonId: UUID,
         val personIdenter: Set<PersonIdent>,
@@ -33,21 +33,21 @@ data class Fagsak(
 }
 
 @Table("fagsak")
-data class FagsakDao(@Id
-                     val id: UUID = UUID.randomUUID(),
-                     val fagsakPersonId: UUID,
-                     @MappedCollection(idColumn = "fagsak_id")
-                     val eksternId: EksternFagsakId = EksternFagsakId(),
-                     @Column("stonadstype")
-                     val stønadstype: Stønadstype,
-                     val migrert: Boolean = false,
-                     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                     val sporbar: Sporbar = Sporbar()) {
+data class Fagsak(@Id
+                  val id: UUID = UUID.randomUUID(),
+                  val fagsakPersonId: UUID,
+                  @MappedCollection(idColumn = "fagsak_id")
+                  val eksternId: EksternFagsakId = EksternFagsakId(),
+                  @Column("stonadstype")
+                  val stønadstype: Stønadstype,
+                  val migrert: Boolean = false,
+                  @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+                  val sporbar: Sporbar = Sporbar()) {
 
 }
 
-fun FagsakDao.tilFagsak(personIdenter: Set<PersonIdent>): Fagsak =
-        Fagsak(
+fun Fagsak.tilFagsakMedPerson(personIdenter: Set<PersonIdent>): FagsakMedPerson =
+        FagsakMedPerson(
                 id = id,
                 fagsakPersonId = fagsakPersonId,
                 personIdenter = personIdenter,

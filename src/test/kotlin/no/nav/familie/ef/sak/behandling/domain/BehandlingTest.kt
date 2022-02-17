@@ -16,7 +16,7 @@ import org.junit.jupiter.api.assertThrows
 
 internal class BehandlingTest {
 
-    val behandling = behandling(fagsak = fagsak())
+    val behandling = behandling(fagsakMedPerson = fagsak())
 
     @Test
     internal fun `Skal kunne helegge FØRSTEGANGSBEHANDLING`() {

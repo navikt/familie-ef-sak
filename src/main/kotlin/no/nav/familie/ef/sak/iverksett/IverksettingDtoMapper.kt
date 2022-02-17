@@ -8,7 +8,7 @@ import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.brev.BrevmottakereRepository
 import no.nav.familie.ef.sak.brev.domain.MottakerRolle
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.fagsak.domain.FagsakMedPerson
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
@@ -135,9 +135,9 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
             }
 
 
-    private fun mapFagsakdetaljer(fagsak: Fagsak) = FagsakdetaljerDto(fagsakId = fagsak.id,
-                                                                      eksternId = fagsak.eksternId.id,
-                                                                      stønadstype = StønadType.OVERGANGSSTØNAD)
+    private fun mapFagsakdetaljer(fagsakMedPerson: FagsakMedPerson) = FagsakdetaljerDto(fagsakId = fagsakMedPerson.id,
+                                                                                        eksternId = fagsakMedPerson.eksternId.id,
+                                                                                        stønadstype = StønadType.OVERGANGSSTØNAD)
 
     @Improvement("Årsak og Type må utledes når vi støtter revurdering")
     private fun mapBehandlingsdetaljer(behandling: Behandling,
@@ -167,8 +167,8 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
                                tilbakekreving = tilbakekreving,
                                brevmottakere = brevmottakere)
 
-    private fun mapSøkerDto(fagsak: Fagsak, behandling: Behandling): SøkerDto {
-        val personIdent = fagsak.hentAktivIdent()
+    private fun mapSøkerDto(fagsakMedPerson: FagsakMedPerson, behandling: Behandling): SøkerDto {
+        val personIdent = fagsakMedPerson.hentAktivIdent()
         val barn = barnService.finnBarnPåBehandling(behandling.id)
         val (grunnlagsdata) = grunnlagsdataService.hentGrunnlagsdata(behandling.id)
         val alleBarn = BarnMatcher.kobleBehandlingBarnOgRegisterBarn(barn, grunnlagsdata.barn)

@@ -10,7 +10,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.dto.RevurderingBarnDto
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
-import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.fagsak.domain.FagsakMedPerson
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadRepository
@@ -47,7 +47,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
     @Autowired lateinit var barnRepository: BarnRepository
     @Autowired lateinit var søknadRepository: SøknadRepository
 
-    private lateinit var fagsak: Fagsak
+    private lateinit var fagsakMedPerson: FagsakMedPerson
     private val personIdent = "123456789012"
     private val behandlingsårsak = BehandlingÅrsak.NYE_OPPLYSNINGER
     private val kravMottatt = LocalDate.of(2021, 9, 9)
@@ -58,8 +58,8 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
     fun setUp() {
         BrukerContextUtil.mockBrukerContext("Heider")
         val identer = fagsakpersoner(setOf(personIdent))
-        fagsak = testoppsettService.lagreFagsak(fagsak(identer = identer))
-        revurderingDto = RevurderingDto(fagsak.id, behandlingsårsak, kravMottatt, emptyList())
+        fagsakMedPerson = testoppsettService.lagreFagsak(fagsak(identer = identer))
+        revurderingDto = RevurderingDto(fagsakMedPerson.id, behandlingsårsak, kravMottatt, emptyList())
     }
 
     @AfterEach
@@ -69,7 +69,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal opprette revurdering`() {
-        val behandling = behandlingRepository.insert(behandling(fagsak = fagsak,
+        val behandling = behandlingRepository.insert(behandling(fagsakMedPerson = fagsakMedPerson,
                                                                 status = BehandlingStatus.FERDIGSTILT,
                                                                 resultat = BehandlingResultat.INNVILGET))
         val søknad = lagreSøknad(behandling)
@@ -87,7 +87,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
      */
     @Test
     internal fun `skal opprette revurdering med en avslått førstegangsbehandling`() {
-        val behandling = behandlingRepository.insert(behandling(fagsak = fagsak,
+        val behandling = behandlingRepository.insert(behandling(fagsakMedPerson = fagsakMedPerson,
                                                                 status = BehandlingStatus.FERDIGSTILT,
                                                                 resultat = BehandlingResultat.AVSLÅTT))
         opprettVilkår(behandling, lagreSøknad(behandling))
@@ -104,12 +104,12 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
      */
     @Test
     internal fun `skal peke til forrige iverksatte behandling hvis den finnes`() {
-        val behandling = behandlingRepository.insert(behandling(fagsak = fagsak,
+        val behandling = behandlingRepository.insert(behandling(fagsakMedPerson = fagsakMedPerson,
                                                                 status = BehandlingStatus.FERDIGSTILT,
                                                                 resultat = BehandlingResultat.INNVILGET))
         opprettVilkår(behandling, lagreSøknad(behandling))
 
-        val revurdering1 = behandlingRepository.insert(behandling(fagsak = fagsak,
+        val revurdering1 = behandlingRepository.insert(behandling(fagsakMedPerson = fagsakMedPerson,
                                                                   type = BehandlingType.REVURDERING,
                                                                   status = BehandlingStatus.FERDIGSTILT,
                                                                   resultat = BehandlingResultat.AVSLÅTT))
@@ -124,7 +124,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `revurdering - skal kopiere vilkår`() {
-        val behandling = behandlingRepository.insert(behandling(fagsak = fagsak,
+        val behandling = behandlingRepository.insert(behandling(fagsakMedPerson = fagsakMedPerson,
                                                                 status = BehandlingStatus.FERDIGSTILT,
                                                                 resultat = BehandlingResultat.INNVILGET))
         val søknad = lagreSøknad(behandling)
@@ -161,7 +161,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `revurdering med nye barn - skal kopiere vilkår`() {
-        val behandling = behandlingRepository.insert(behandling(fagsak = fagsak,
+        val behandling = behandlingRepository.insert(behandling(fagsakMedPerson = fagsakMedPerson,
                                                                 status = BehandlingStatus.FERDIGSTILT,
                                                                 resultat = BehandlingResultat.INNVILGET))
         val søknad = lagreSøknad(behandling)
@@ -189,7 +189,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal ikke være mulig å opprette fagsak hvis siste behandling ikke er ferdig`() {
-        behandlingRepository.insert(behandling(fagsak = fagsak, status = BehandlingStatus.UTREDES))
+        behandlingRepository.insert(behandling(fagsakMedPerson = fagsakMedPerson, status = BehandlingStatus.UTREDES))
 
         assertThat(catchThrowable { revurderingService.opprettRevurderingManuelt(revurderingDto) })
                 .hasMessageContaining("Det finnes en behandling på fagsaken som ikke er ferdigstilt")

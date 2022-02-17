@@ -6,13 +6,12 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.dto.tilDto
+import no.nav.familie.ef.sak.fagsak.domain.FagsakMedPerson
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
-import no.nav.familie.ef.sak.fagsak.domain.FagsakDao
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.Fagsaker
-import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
-import no.nav.familie.ef.sak.fagsak.domain.tilFagsak
+import no.nav.familie.ef.sak.fagsak.domain.tilFagsakMedPerson
 import no.nav.familie.ef.sak.fagsak.dto.FagsakDto
 import no.nav.familie.ef.sak.fagsak.dto.tilDto
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
@@ -40,7 +39,7 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
 
     @Transactional
     fun hentEllerOpprettFagsak(personIdent: String,
-                               stønadstype: Stønadstype): Fagsak {
+                               stønadstype: Stønadstype): FagsakMedPerson {
         val personIdenter = pdlClient.hentPersonidenter(personIdent, true)
         val gjeldendePersonIdent = personIdenter.gjeldende().ident
         val person = fagsakPersonService.hentEllerOpprettPerson(personIdenter.identer(), gjeldendePersonIdent)
@@ -51,7 +50,7 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
         return fagsak.tilFagsakMedPerson(oppdatertPerson.identer)
     }
 
-    fun settFagsakTilMigrert(fagsakId: UUID): Fagsak {
+    fun settFagsakTilMigrert(fagsakId: UUID): FagsakMedPerson {
         val fagsak = fagsakRepository.findByIdOrThrow(fagsakId)
         feilHvis(fagsak.migrert) {
             "Fagsak er allerede migrert"
@@ -59,17 +58,17 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
         return fagsakRepository.update(fagsak.copy(migrert = true)).tilFagsakMedPerson()
     }
 
-    fun finnFagsak(personIdenter: Set<String>, stønadstype: Stønadstype): Fagsak? =
+    fun finnFagsak(personIdenter: Set<String>, stønadstype: Stønadstype): FagsakMedPerson? =
             fagsakRepository.findBySøkerIdent(personIdenter, stønadstype)?.tilFagsakMedPerson()
 
     fun hentFagsakMedBehandlinger(fagsakId: UUID): FagsakDto {
         return fagsakTilDto(hentFagsak(fagsakId))
     }
 
-    fun fagsakTilDto(fagsak: Fagsak): FagsakDto {
-        val behandlinger: List<Behandling> = behandlingService.hentBehandlinger(fagsak.id)
+    fun fagsakTilDto(fagsakMedPerson: FagsakMedPerson): FagsakDto {
+        val behandlinger: List<Behandling> = behandlingService.hentBehandlinger(fagsakMedPerson.id)
         val erLøpende = erLøpende(behandlinger)
-        return fagsak.tilDto(behandlinger = behandlinger.map(Behandling::tilDto), erLøpende = erLøpende)
+        return fagsakMedPerson.tilDto(behandlinger = behandlinger.map(Behandling::tilDto), erLøpende = erLøpende)
     }
 
     fun finnFagsakerForFagsakPersonId(fagsakPersonId: UUID): Fagsaker {
@@ -93,9 +92,9 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
                        ?.let { tilkjentYtelseService.harLøpendeUtbetaling(it.id) } ?: false
     }
 
-    fun hentFagsak(fagsakId: UUID): Fagsak = fagsakRepository.findByIdOrThrow(fagsakId).tilFagsakMedPerson()
+    fun hentFagsak(fagsakId: UUID): FagsakMedPerson = fagsakRepository.findByIdOrThrow(fagsakId).tilFagsakMedPerson()
 
-    fun fagsakMedOppdatertPersonIdent(fagsakId: UUID): Fagsak {
+    fun fagsakMedOppdatertPersonIdent(fagsakId: UUID): FagsakMedPerson {
         val fagsak = fagsakRepository.findByIdOrThrow(fagsakId)
         val person = fagsakPersonService.hentPerson(fagsak.fagsakPersonId)
         val gjelendeIdent = pdlClient.hentPersonidenter(person.hentAktivIdent(), true).gjeldende().ident
@@ -111,14 +110,14 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
                 person
             }
 
-    fun hentFagsakForBehandling(behandlingId: UUID): Fagsak {
+    fun hentFagsakForBehandling(behandlingId: UUID): FagsakMedPerson {
         return fagsakRepository.finnFagsakTilBehandling(behandlingId)?.tilFagsakMedPerson()
                ?: throw Feil("Finner ikke fagsak til behandlingId=$behandlingId")
     }
 
     fun hentEksternId(fagsakId: UUID): Long = fagsakRepository.findByIdOrThrow(fagsakId).eksternId.id
 
-    fun hentFagsakPåEksternId(eksternFagsakId: Long): Fagsak =
+    fun hentFagsakPåEksternId(eksternFagsakId: Long): FagsakMedPerson =
             fagsakRepository.finnMedEksternId(eksternFagsakId)?.tilFagsakMedPerson()
             ?: error("Kan ikke finne fagsak med eksternId=$eksternFagsakId")
 
@@ -134,13 +133,14 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
         return aktiveIdenter.associateBy({ it.first }, { it.second })
     }
 
-    private fun opprettFagsak(stønadstype: Stønadstype, fagsakPerson: FagsakPerson): FagsakDao {
-        return fagsakRepository.insert(FagsakDao(stønadstype = stønadstype,
-                                                 fagsakPersonId = fagsakPerson.id))
+    private fun opprettFagsak(stønadstype: Stønadstype, fagsakPerson: FagsakPerson): Fagsak {
+        return fagsakRepository.insert(Fagsak(stønadstype = stønadstype,
+                                              fagsakPersonId = fagsakPerson.id))
     }
 
-    fun FagsakDao.tilFagsakMedPerson(personIdenter: Set<PersonIdent> = fagsakPersonService.hentIdenter(this.fagsakPersonId)): Fagsak {
-        return this.tilFagsak(personIdenter)
+    fun Fagsak.tilFagsakMedPerson(): FagsakMedPerson {
+        val personIdenter = fagsakPersonService.hentIdenter(this.fagsakPersonId)
+        return this.tilFagsakMedPerson(personIdenter)
     }
 
 }

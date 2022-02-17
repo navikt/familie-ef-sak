@@ -4,7 +4,7 @@ import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.fagsak.FagsakPersonRepository
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
-import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.fagsak.domain.FagsakMedPerson
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
@@ -168,7 +168,7 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(fagsakRepository.findBySøkerIdent(fagsakMedFlereIdenter.personIdenter.map { it.ident }.toSet())).hasSize(1)
     }
 
-    private fun opprettFagsakMedFlereIdenter(ident: String = "1", ident2: String = "2", ident3: String = "3"): Fagsak {
+    private fun opprettFagsakMedFlereIdenter(ident: String = "1", ident2: String = "2", ident3: String = "3"): FagsakMedPerson {
         val endret2DagerSiden = Sporbar(endret = Endret(endretTid = LocalDateTime.now().plusDays(2)))
         return fagsak(setOf(PersonIdent(ident = ident),
                             PersonIdent(ident = ident2, sporbar = endret2DagerSiden),
