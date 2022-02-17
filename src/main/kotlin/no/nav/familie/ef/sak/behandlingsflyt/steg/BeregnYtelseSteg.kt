@@ -144,11 +144,12 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
         val opphørsperioder = finnOpphørsperioder(vedtak)
 
         val forrigeTilkjenteYtelse = behandling.forrigeBehandlingId?.let { hentForrigeTilkjenteYtelse(behandling) }
+        validerOpphørsperioder(opphørsperioder, finnInnvilgedePerioder(vedtak), forrigeTilkjenteYtelse)
+
         val nyeAndeler = beregnNyeAndelerForRevurdering(forrigeTilkjenteYtelse, andelerTilkjentYtelse, opphørsperioder)
 
         val forrigeOpphørsdato = forrigeTilkjenteYtelse?.startdato
         val opphørsdato = opphørsdatoHvisFørFørsteAndelSinFomDato(opphørsperioder, nyeAndeler, forrigeOpphørsdato)
-        validerOpphørsperioder(opphørsperioder, finnInnvilgedePerioder(vedtak), forrigeTilkjenteYtelse)
         return nyeAndeler to opphørsdato
     }
 
@@ -156,11 +157,11 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                                        vedtaksperioder: List<Periode>,
                                        forrigeTilkjenteYtelse: TilkjentYtelse?) {
         if (forrigeTilkjenteYtelse == null) return
-        val minOpphørsdato = opphørsperioder.minOfOrNull { it.fradato }
-        val minVedtaksperiod = vedtaksperioder.minOfOrNull { it.fradato }
+        val førsteOpphørsdato = opphørsperioder.minOfOrNull { it.fradato }
+        val førsteVedtaksFradato = vedtaksperioder.minOfOrNull { it.fradato }
         val tidligereAndelerHarKun0Beløp = forrigeTilkjenteYtelse.andelerTilkjentYtelse.all { it.beløp == 0 }
         val harKunOpphørEllerOpphørFørInnvilgetPeriode =
-                minOpphørsdato != null && (minVedtaksperiod == null || minOpphørsdato < minVedtaksperiod)
+                førsteOpphørsdato != null && (førsteVedtaksFradato == null || førsteOpphørsdato < førsteVedtaksFradato)
         feilHvis(tidligereAndelerHarKun0Beløp && harKunOpphørEllerOpphørFørInnvilgetPeriode) {
             "Har ikke støtte for å starte med opphørsperiode når alle tidligere perioder har 0 i stønad"
         }
