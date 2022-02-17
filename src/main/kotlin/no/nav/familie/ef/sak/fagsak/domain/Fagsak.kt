@@ -34,15 +34,15 @@ data class Fagsak(
 
 @Table("fagsak")
 data class FagsakDomain(@Id
-                  val id: UUID = UUID.randomUUID(),
+                        val id: UUID = UUID.randomUUID(),
                         val fagsakPersonId: UUID,
                         @MappedCollection(idColumn = "fagsak_id")
-                  val eksternId: EksternFagsakId = EksternFagsakId(),
+                        val eksternId: EksternFagsakId = EksternFagsakId(),
                         @Column("stonadstype")
-                  val stønadstype: Stønadstype,
+                        val stønadstype: Stønadstype,
                         val migrert: Boolean = false,
                         @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                  val sporbar: Sporbar = Sporbar()) {
+                        val sporbar: Sporbar = Sporbar()) {
 
 }
 
