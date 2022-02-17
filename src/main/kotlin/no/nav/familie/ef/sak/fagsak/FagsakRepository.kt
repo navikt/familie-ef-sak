@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.fagsak
 
-import no.nav.familie.ef.sak.fagsak.domain.FagsakDao
+import no.nav.familie.ef.sak.fagsak.domain.FagsakDomain
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.InsertUpdateRepository
 import no.nav.familie.ef.sak.repository.RepositoryInterface
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository
 import java.util.UUID
 
 @Repository
-interface FagsakRepository : RepositoryInterface<FagsakDao, UUID>, InsertUpdateRepository<FagsakDao> {
+interface FagsakRepository : RepositoryInterface<FagsakDomain, UUID>, InsertUpdateRepository<FagsakDomain> {
 
     // language=PostgreSQL
     @Query("""SELECT distinct f.*, fe.id AS eksternid_id
@@ -18,9 +18,9 @@ interface FagsakRepository : RepositoryInterface<FagsakDao, UUID>, InsertUpdateR
                     LEFT JOIN person_ident pi ON pi.fagsak_person_id = f.fagsak_person_id 
                     WHERE ident IN (:personIdenter)
                     AND stonadstype = :stønadstype""")
-    fun findBySøkerIdent(personIdenter: Set<String>, stønadstype: Stønadstype): FagsakDao?
+    fun findBySøkerIdent(personIdenter: Set<String>, stønadstype: Stønadstype): FagsakDomain?
 
-    fun findByFagsakPersonIdAndStønadstype(fagsakPersonId: UUID, stønadstype: Stønadstype): FagsakDao?
+    fun findByFagsakPersonIdAndStønadstype(fagsakPersonId: UUID, stønadstype: Stønadstype): FagsakDomain?
 
     // language=PostgreSQL
     @Query("""SELECT f.*, fe.id AS eksternid_id
@@ -29,23 +29,23 @@ interface FagsakRepository : RepositoryInterface<FagsakDao, UUID>, InsertUpdateR
                     JOIN behandling b 
                         ON b.fagsak_id = f.id 
                     WHERE b.id = :behandlingId""")
-    fun finnFagsakTilBehandling(behandlingId: UUID): FagsakDao?
+    fun finnFagsakTilBehandling(behandlingId: UUID): FagsakDomain?
 
     // language=PostgreSQL
     @Query("""SELECT distinct f.*, fe.id AS eksternid_id FROM fagsak f 
                 JOIN fagsak_ekstern fe ON fe.fagsak_id = f.id
                 JOIN person_ident pi ON pi.fagsak_person_id = f.fagsak_person_id 
               WHERE ident in (:personIdenter)""")
-    fun findBySøkerIdent(personIdenter: Set<String>): List<FagsakDao>
+    fun findBySøkerIdent(personIdenter: Set<String>): List<FagsakDomain>
 
-    fun findByFagsakPersonId(fagsakPersonId: UUID): List<FagsakDao>
+    fun findByFagsakPersonId(fagsakPersonId: UUID): List<FagsakDomain>
 
     // language=PostgreSQL
     @Query("""SELECT f.*, fe.id AS eksternid_id         
                     FROM fagsak f         
                     JOIN fagsak_ekstern fe ON fe.fagsak_id = f.id       
                     WHERE fe.id = :eksternId""")
-    fun finnMedEksternId(eksternId: Long): FagsakDao?
+    fun finnMedEksternId(eksternId: Long): FagsakDomain?
 
     // language=PostgreSQL
     @Query("""SELECT pi.ident FROM fagsak f
