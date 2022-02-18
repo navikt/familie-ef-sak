@@ -59,5 +59,3 @@ data class Situasjon(val gjelderDetteDeg: GjelderDeg = GjelderDeg(emptyList()),
                      val oppsigelseDokumentasjon: Dokumentasjon? = null)
 
 data class GjelderDeg(val verdier: List<String>)
-
-fun SøknadsskjemaOvergangsstønad.tilSøknadDatoer(): SøknadDatoerDto = SøknadDatoerDto(this.datoMottatt, this.søkerFra)

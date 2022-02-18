@@ -23,8 +23,9 @@ class SøknadController(private val søknadService: SøknadService,
     @GetMapping("/{behandlingId}/datoer")
     fun hentSøknadDatoer(@PathVariable behandlingId: UUID): Ressurs<SøknadDatoerDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
-        val søknadsdatoer = søknadService.hentSøknadsdatoer(behandlingId)
-        feilHvis(søknadsdatoer == null) { "Kan ikke hente søknad til behandlingen" }
-        return Ressurs.success(søknadsdatoer)
+        val søknadsgrunnlag = søknadService.hentSøknadsgrunnlag(behandlingId)
+        feilHvis(søknadsgrunnlag == null) { "Mangler søknad for behandling=$behandlingId" }
+        return Ressurs.success(SøknadDatoerDto(søknadsdato = søknadsgrunnlag.datoMottatt,
+                                               søkerStønadFra = søknadsgrunnlag.søkerFra))
     }
 }

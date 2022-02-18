@@ -1,15 +1,14 @@
 package no.nav.familie.ef.sak.opplysninger.søknad
 
 import no.nav.familie.ef.sak.felles.domain.Sporbar
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknadsverdier
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknad
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadMapper
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadType
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadsskjemaBarnetilsyn
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadsskjemaOvergangsstønad
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadsskjemaSkolepenger
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknadsverdier
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.tilSøknadsverdier
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.tilSøknadDatoer
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
@@ -30,15 +29,6 @@ class SøknadService(
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
-
-    fun hentSøknadsdatoer(behandlingId: UUID): SøknadDatoerDto? {
-        val søknad = hentSøknad(behandlingId) ?: return null
-        return when (søknad.type) {
-            SøknadType.OVERGANGSSTØNAD -> hentOvergangsstønad(behandlingId)?.tilSøknadDatoer()
-            SøknadType.BARNETILSYN -> hentBarnetilsyn(behandlingId)?.tilSøknadDatoer()
-            SøknadType.SKOLEPENGER -> hentSkolepenger(behandlingId)?.tilSøknadDatoer()
-        }
-    }
 
     fun hentSøknadsgrunnlag(behandlingId: UUID): Søknadsverdier? {
         val søknad = hentSøknad(behandlingId) ?: return null
