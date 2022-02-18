@@ -172,17 +172,20 @@ class MigreringService(
      * Den sjekker også att de summerte periodene sin max(stønadFom) går til den samme måneden
      */
     fun erOpphørtIInfotrygd(behandlingId: UUID, opphørsmåned: YearMonth): Boolean {
+        val opphørsdato = opphørsmåned.atEndOfMonth()
         val personIdent = behandlingService.hentAktivIdent(behandlingId)
         val perioder = hentPerioder(personIdent)
-        val perioderStønadTom = perioder.perioder.find { it.kode == InfotrygdEndringKode.OVERTFØRT_NY_LØSNING }?.opphørsdato
+        val overførtNyLøsningOpphørsdato =
+                perioder.perioder.find { it.kode == InfotrygdEndringKode.OVERTFØRT_NY_LØSNING }?.opphørsdato
         val maxStønadTom = perioder.summert.maxOf { it.stønadTom }
-        val stønadTomErLike =
-                perioderStønadTom == maxStønadTom // liten ekstrasjekk, som verifiserer att summertePerioder er riktig
-        val stønadTomErFørEllerLikOpphørsmåned = YearMonth.of(maxStønadTom.year, maxStønadTom.month) <= opphørsmåned
-        val erOpphørtIInfotrygd = stønadTomErLike && stønadTomErFørEllerLikOpphørsmåned
+
+        val summertMaxTomErFørOpphørsmåned = maxStønadTom <= opphørsdato
+        val overførtTilNyLøsningOpphørErFørOpphørsdato =
+                overførtNyLøsningOpphørsdato != null && overførtNyLøsningOpphørsdato <= opphørsdato
+        val erOpphørtIInfotrygd = summertMaxTomErFørOpphørsmåned && overførtTilNyLøsningOpphørErFørOpphørsdato
         if (!erOpphørtIInfotrygd) {
             val logMessage = "erOpphørtIInfotrygd - Datoer ikke like behandling=$behandlingId " +
-                             "sistePeriodenTom=$perioderStønadTom " +
+                             "sistePeriodenTom=$overførtNyLøsningOpphørsdato " +
                              "summertMaxTom=$maxStønadTom " +
                              "opphørsmåned=$opphørsmåned"
             logger.warn(logMessage)
