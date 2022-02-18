@@ -14,8 +14,11 @@ object FnrUtil {
     }
 
     fun validerIdent(personIdent: String) {
-        if(!FNR_REGEX.matches(personIdent)) {
-            throw ApiFeil("Fødselsnummer må inneholde 11 siffer", HttpStatus.BAD_REQUEST)
+        if (personIdent.length != 11) {
+            throw ApiFeil("Ugyldig personident. Det må være 11 sifre", HttpStatus.BAD_REQUEST)
+        }
+        if (!FNR_REGEX.matches(personIdent)) {
+            throw ApiFeil("Ugyldig personident. Det kan kun inneholde tall", HttpStatus.BAD_REQUEST)
         }
     }
 }
