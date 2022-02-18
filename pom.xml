@@ -18,10 +18,6 @@
             <id>confluent</id>
             <url>https://packages.confluent.io/maven/</url>
         </repository>
-        <repository>
-            <id>github</id>
-            <url>https://maven.pkg.github.com/navikt/familie-felles</url>
-        </repository>
     </repositories>
 
     <properties>
@@ -37,7 +33,8 @@
         <prosessering.version>1.20211125150647_a7c6f64</prosessering.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
         <kontrakter.version>2.0_20220217093059_3870509</kontrakter.version>
-
+        <cucumber.version>7.2.3</cucumber.version>
+        <junit-vintage-engine.version>5.8.2</junit-vintage-engine.version>
 
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
@@ -222,6 +219,27 @@
             <version>${unleash.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>io.cucumber</groupId>
+            <artifactId>cucumber-java8</artifactId>
+            <version>${cucumber.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.cucumber</groupId>
+            <artifactId>cucumber-junit</artifactId>
+            <version>${cucumber.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
+            <version>${junit-vintage-engine.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
     </dependencies>
 
     <profiles>
@@ -306,7 +324,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.22.2</version>
+                <version>3.0.0-M5</version>
             </plugin>
         </plugins>
     </build>
