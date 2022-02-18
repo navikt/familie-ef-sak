@@ -379,7 +379,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
                                                                    stønadTom = til.atEndOfMonth())
         val kodePeriode2 = opphørsdato?.let { InfotrygdEndringKode.OVERTFØRT_NY_LØSNING } ?: InfotrygdEndringKode.NY
         val periodeForKallNr2 = periode.copy(vedtakId = 2,
-                                             opphørsdato = opphørsdato?.minusMonths(1)?.atEndOfMonth(),
+                                             opphørsdato = opphørsdato?.atEndOfMonth(),
                                              kode = kodePeriode2)
         every { infotrygdReplikaClient.hentPerioder(any()) } returns
                 InfotrygdPeriodeResponse(listOf(periode), emptyList(), emptyList()) andThen
