@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.tilBeløpsperiode
+import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
@@ -37,7 +38,7 @@ class BeregningController(private val stegService: StegService,
                           private val tilkjentYtelseService: TilkjentYtelseService,
                           private val tilgangService: TilgangService,
                           private val vurderingService: VurderingService,
-                          private val featureToggleService: FeatureToggleService) {
+                          private val vedtakService: VedtakService) {
 
     @PostMapping
     fun beregnYtelserForRequest(@RequestBody beregningRequest: BeregningRequest): Ressurs<List<Beløpsperiode>> {
@@ -74,7 +75,8 @@ class BeregningController(private val stegService: StegService,
     @GetMapping("/{behandlingId}")
     fun hentBeregnetBeløp(@PathVariable behandlingId: UUID): Ressurs<List<Beløpsperiode>> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
-        return Ressurs.success(tilkjentYtelseService.hentForBehandling(behandlingId).tilBeløpsperiode())
+        val startDatoForVedtak = vedtakService.hentVedtak(behandlingId).perioder?.perioder?.minByOrNull { it.datoFra }?.datoFra
+        return Ressurs.success(tilkjentYtelseService.hentForBehandling(behandlingId).tilBeløpsperiode(startDatoForVedtak))
     }
 
 }

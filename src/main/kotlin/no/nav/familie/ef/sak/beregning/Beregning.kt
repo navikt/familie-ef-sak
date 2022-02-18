@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.beregning
 
 import no.nav.familie.ef.sak.felles.dto.Periode
+import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradragType
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -11,6 +12,7 @@ data class Beløpsperiode(val periode: Periode,
 
 data class Beregningsgrunnlag(val inntekt: BigDecimal,
                               val samordningsfradrag: BigDecimal,
+                              val samordningsfradragType: SamordningsfradragType? = null,
                               val avkortningPerMåned: BigDecimal,
                               val fullOvergangsStønadPerMåned: BigDecimal? = null,
                               val grunnbeløp: BigDecimal? = null)
