@@ -3,7 +3,7 @@ package no.nav.familie.ef.sak.tilkjentytelse
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.util.isEqualOrAfter
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.iverksett.tilIverksettDto
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkBeregner
@@ -55,7 +55,7 @@ class TilkjentYtelseService(private val behandlingService: BehandlingService,
     }
 
     fun slettTilkjentYtelseForBehandling(behandlingId: UUID) {
-        feilHvis(behandlingService.hentBehandling(behandlingId).status.behandlingErLåstForVidereRedigering()) {
+        brukerfeilHvis(behandlingService.hentBehandling(behandlingId).status.behandlingErLåstForVidereRedigering()) {
             "Kan ikke reberegne tilkjent ytelse for en behandling som er låst for videre redigering"
         }
         tilkjentYtelseRepository.findByBehandlingId(behandlingId)?.let { tilkjentYtelseRepository.deleteById(it.id) }

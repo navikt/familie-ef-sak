@@ -19,6 +19,7 @@ import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
@@ -191,8 +192,7 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
     @Transactional
     fun settPåVent(behandlingId: UUID) {
         val behandling = hentBehandling(behandlingId)
-        feilHvis(behandling.status.behandlingErLåstForVidereRedigering(),
-                 HttpStatus.BAD_REQUEST) { "Kan ikke sette behandling med status ${behandling.status} på vent" }
+        brukerfeilHvis(behandling.status.behandlingErLåstForVidereRedigering()) { "Kan ikke sette behandling med status ${behandling.status} på vent" }
 
         behandlingRepository.update(behandling.copy(status = BehandlingStatus.SATT_PÅ_VENT))
         taskService.save(BehandlingsstatistikkTask.opprettVenterTask(behandlingId))
@@ -201,8 +201,7 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
     @Transactional
     fun taAvVent(behandlingId: UUID) {
         val behandling = hentBehandling(behandlingId)
-        feilHvis(behandling.status != BehandlingStatus.SATT_PÅ_VENT,
-                 HttpStatus.BAD_REQUEST) { "Kan ikke ta behandling med status ${behandling.status} av vent" }
+        brukerfeilHvis(behandling.status != BehandlingStatus.SATT_PÅ_VENT) { "Kan ikke ta behandling med status ${behandling.status} av vent" }
         behandlingRepository.update(behandling.copy(status = BehandlingStatus.UTREDES))
         taskService.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId))
     }

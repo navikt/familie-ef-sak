@@ -14,6 +14,7 @@ import no.nav.familie.ef.sak.brev.dto.VedtaksbrevFritekstDto
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
@@ -129,7 +130,7 @@ class VedtaksbrevService(private val brevClient: BrevClient,
     }
 
     private fun validerBeslutterIkkeErLikSaksbehandler(vedtaksbrev: Vedtaksbrev) {
-        feilHvis(vedtaksbrev.beslutterident.isNullOrBlank()){
+        brukerfeilHvis(vedtaksbrev.beslutterident.isNullOrBlank()){
             "Vedtaksbrevet er ikke signert av beslutter"
         }
         when (vedtaksbrev.saksbehandlerident) {

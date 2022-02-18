@@ -13,8 +13,8 @@ import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.brev.domain.VedtaksbrevKonstanter.IKKE_SATT_IDENT_PÅ_GAMLE_VEDTAKSBREV
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
@@ -51,7 +51,7 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
         if (behandling.type !== BehandlingType.BLANKETT && !vedtaksbrevRepository.existsById(behandling.id)) {
             throw Feil("Brev mangler for behandling=${behandling.id}")
         }
-        feilHvis(saksbehandlerMåTaStilingTilTilbakekreving(behandling)) {
+        brukerfeilHvis(saksbehandlerMåTaStilingTilTilbakekreving(behandling)) {
             "Feilutbetaling detektert. Må ta stilling til feilutbetalingsvarsel under simulering"
         }
         validerRiktigTilstandVedInvilgelse(behandling)
@@ -62,7 +62,7 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
     private fun validerRiktigTilstandVedInvilgelse(behandling: Behandling) {
         val vedtak = vedtakService.hentVedtak(behandling.id)
         if (vedtak.resultatType == INNVILGE) {
-            feilHvisIkke(vurderingService.erAlleVilkårOppfylt(behandling.id)) {
+            brukerfeilHvisIkke(vurderingService.erAlleVilkårOppfylt(behandling.id)) {
                 "Kan ikke innvilge hvis ikke alle vilkår er oppfylt for behandlingId: ${behandling.id}"
             }
         }
@@ -128,11 +128,11 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
     }
 
     private fun validerSammeIdent(vedtaksbrev: Vedtaksbrev) {
-        feilHvis(vedtaksbrev.saksbehandlerident != SikkerhetContext.hentSaksbehandler(true)) { "En annen saksbehandler har signert vedtaksbrevet" }
+        brukerfeilHvis(vedtaksbrev.saksbehandlerident != SikkerhetContext.hentSaksbehandler(true)) { "En annen saksbehandler har signert vedtaksbrevet" }
     }
 
     private fun validerSammeSignatur(vedtaksbrev: Vedtaksbrev) {
-        feilHvis(vedtaksbrev.saksbehandlersignatur != SikkerhetContext.hentSaksbehandlerNavn(
+        brukerfeilHvis(vedtaksbrev.saksbehandlersignatur != SikkerhetContext.hentSaksbehandlerNavn(
                 strict = true)) {
             "En annen saksbehandler har signert vedtaksbrevet"
         }

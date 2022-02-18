@@ -14,7 +14,7 @@ import no.nav.familie.ef.sak.brev.VedtaksbrevRepository
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
@@ -96,7 +96,7 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
 
     private fun validerBeslutterVedtaksbrev(vedtaksbrev: Vedtaksbrev) {
 
-        feilHvis(vedtaksbrev.beslutterident == null || vedtaksbrev.beslutterident.isBlank()) {
+        brukerfeilHvis(vedtaksbrev.beslutterident == null || vedtaksbrev.beslutterident.isBlank()) {
             "Beklager. Det har skjedd en feil. Last brevsiden på nytt, kontroller brevet og prøv igjen."
         }
 
@@ -105,7 +105,7 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
     }
 
     private fun validerSammeBeslutterIdent(vedtaksbrev: Vedtaksbrev) {
-        feilHvis(vedtaksbrev.beslutterident != SikkerhetContext.hentSaksbehandler(true)) { "En annen beslutter har signert vedtaksbrevet" }
+        brukerfeilHvis(vedtaksbrev.beslutterident != SikkerhetContext.hentSaksbehandler(true)) { "En annen beslutter har signert vedtaksbrevet" }
     }
 
     private fun ferdigstillOppgave(behandling: Behandling): Long? {

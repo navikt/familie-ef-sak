@@ -7,7 +7,7 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.simulering.SimuleringService
@@ -53,11 +53,11 @@ class TilbakekrevingService(private val tilbakekrevingRepository: Tilbakekreving
     }
 
     private fun validerTilbakekreving(behandling: Behandling, tilbakekrevingDto: TilbakekrevingDto) {
-        feilHvis(tilbakekrevingDto.valg == Tilbakekrevingsvalg.OPPRETT_MED_VARSEL
-                 && tilbakekrevingDto.varseltekst.isNullOrBlank()) {
+        brukerfeilHvis(tilbakekrevingDto.valg == Tilbakekrevingsvalg.OPPRETT_MED_VARSEL
+                       && tilbakekrevingDto.varseltekst.isNullOrBlank()) {
             "Må fylle ut varseltekst for å lage tilbakekreving med varsel"
         }
-        feilHvis(behandling.status.behandlingErLåstForVidereRedigering()) {
+        brukerfeilHvis(behandling.status.behandlingErLåstForVidereRedigering()) {
             "Behandlingen er låst for redigering"
         }
     }
@@ -100,7 +100,7 @@ class TilbakekrevingService(private val tilbakekrevingRepository: Tilbakekreving
     }
 
     private fun validerIkkeFerdigstiltBehandling(behandlingId: UUID) {
-        feilHvis(behandlingService.hentBehandling(behandlingId).status == BehandlingStatus.FERDIGSTILT)
+        brukerfeilHvis(behandlingService.hentBehandling(behandlingId).status == BehandlingStatus.FERDIGSTILT)
         { "Kan ikke generere forhåndsvisning av varselbrev på en ferdigstilt behandling." }
     }
 
