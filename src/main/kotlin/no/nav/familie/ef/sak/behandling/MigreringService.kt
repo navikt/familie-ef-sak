@@ -184,10 +184,10 @@ class MigreringService(
 
     private fun validerSimulering(behandling: Behandling) {
         val simulering = simuleringService.hentLagretSimuleringsresultat(behandling.id)
-        if (simulering.feilutbetaling.compareTo(BigDecimal.ZERO) == 0) {
+        if (simulering.feilutbetaling.compareTo(BigDecimal.ZERO) != 0) {
             throw MigreringException("Feilutbetaling er ${simulering.feilutbetaling}",
                                      MigreringExceptionType.SIMULERING_FEILUTBETALING)
-        } else if (simulering.etterbetaling.compareTo(BigDecimal.ZERO) == 0) {
+        } else if (simulering.etterbetaling.compareTo(BigDecimal.ZERO) != 0) {
             throw MigreringException("Etterbetaling er ${simulering.etterbetaling}",
                                      MigreringExceptionType.SIMULERING_ETTERBETALING)
         }
