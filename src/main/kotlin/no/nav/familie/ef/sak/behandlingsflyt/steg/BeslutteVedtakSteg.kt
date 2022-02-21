@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.blankett.JournalførBlankettTask
 import no.nav.familie.ef.sak.brev.VedtaksbrevRepository
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
@@ -26,6 +27,7 @@ import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -63,7 +65,8 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
                 else -> {
                     val vedtaksbrev = vedtaksbrevRepository.findByIdOrThrow(behandling.id)
                     validerBeslutterVedtaksbrev(vedtaksbrev)
-                    val fil = vedtaksbrev.beslutterPdf ?: throw Feil("Beslutter-pdf er null, beslutter må kontrollere brevet.")
+                    val fil = vedtaksbrev.beslutterPdf ?: throw ApiFeil("Beslutter-pdf er null, beslutter må kontrollere brevet.",
+                                                                        HttpStatus.BAD_REQUEST)
                     val iverksettDto = iverksettingDtoMapper.tilDto(behandling, beslutter)
                     oppdaterResultatPåBehandling(behandling.id)
                     opprettPollForStatusOppgave(behandling.id)

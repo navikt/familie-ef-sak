@@ -52,8 +52,8 @@ class ApiExceptionHandler {
     @ExceptionHandler(Feil::class)
     fun handleThrowable(feil: Feil): ResponseEntity<Ressurs<Nothing>> {
         val metodeSomFeiler = finnMetodeSomFeiler(feil)
-        secureLogger.warn("En håndtert feil har oppstått(${feil.httpStatus}): ${feil.frontendFeilmelding}", feil)
-        logger.warn("En håndtert feil har oppstått(${feil.httpStatus}) metode=$metodeSomFeiler exception=${rootCause(feil)}: ${feil.message} ")
+        secureLogger.error("En håndtert feil har oppstått(${feil.httpStatus}): ${feil.frontendFeilmelding}", feil)
+        logger.error("En håndtert feil har oppstått(${feil.httpStatus}) metode=$metodeSomFeiler exception=${rootCause(feil)}: ${feil.message} ")
         return ResponseEntity.status(feil.httpStatus).body(Ressurs.failure(frontendFeilmelding = feil.frontendFeilmelding))
     }
 

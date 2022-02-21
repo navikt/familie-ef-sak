@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.blankett.BlankettRepository
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
@@ -184,7 +185,7 @@ internal class VurderingStegServiceTest {
             vurderingStegService.oppdaterVilkår(SvarPåVurderingerDto(id = vilkårsvurdering.id,
                                                                      behandlingId = behandlingId,
                                                                      listOf()))
-        }).isInstanceOf(Feil::class.java)
+        }).isInstanceOf(ApiFeil::class.java)
                 .hasMessageContaining("er låst for videre redigering")
         verify(exactly = 0) { vilkårsvurderingRepository.insertAll(any()) }
     }

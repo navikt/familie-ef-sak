@@ -18,7 +18,7 @@ import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.domain.Sporbar
-import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
@@ -175,12 +175,8 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
 
     private fun validerAtBehandlingenKanHenlegges(behandling: Behandling) {
         if (!behandling.kanHenlegges()) {
-            throw Feil(
-                    "Kan ikke henlegge en behandling med status ${behandling.status} for ${behandling.type}",
-                    "Kan ikke henlegge en behandling med status ${behandling.status} for ${behandling.type}",
-                    HttpStatus.BAD_REQUEST,
-                    null
-            )
+            throw ApiFeil("Kan ikke henlegge en behandling med status ${behandling.status} for ${behandling.type}",
+                          HttpStatus.BAD_REQUEST)
         }
     }
 
