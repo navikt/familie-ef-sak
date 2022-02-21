@@ -177,9 +177,12 @@ class MigreringService(
         val iverksettDto = iverksettingDtoMapper.tilMigreringDto(behandling)
         iverksettClient.iverksettMigrering(iverksettDto)
         taskRepository.save(PollStatusFraIverksettTask.opprettTask(behandling.id))
-        taskRepository.save(SjekkMigrertStatusIInfotrygdTask.opprettTask(behandling.id,
-                                                                         fra.minusMonths(1),
-                                                                         fagsak.hentAktivIdent()))
+
+        if (til >= YearMonth.now()) {
+            taskRepository.save(SjekkMigrertStatusIInfotrygdTask.opprettTask(behandling.id,
+                                                                             fra.minusMonths(1),
+                                                                             fagsak.hentAktivIdent()))
+        }
 
         return behandlingService.hentBehandling(behandling.id)
     }
