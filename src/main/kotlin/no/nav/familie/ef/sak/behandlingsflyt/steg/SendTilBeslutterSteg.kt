@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.brev.VedtaksbrevRepository
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.brev.domain.VedtaksbrevKonstanter.IKKE_SATT_IDENT_PÅ_GAMLE_VEDTAKSBREV
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
@@ -27,6 +28,7 @@ import no.nav.familie.ef.sak.vedtak.dto.ResultatType.INNVILGE
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.util.UUID
@@ -45,7 +47,7 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
 
     override fun validerSteg(behandling: Behandling) {
         if (behandling.steg != stegType()) {
-            throw Feil("Behandling er i feil steg=${behandling.steg}")
+            throw ApiFeil("Behandling er i feil steg=${behandling.steg}", HttpStatus.BAD_REQUEST)
         }
 
         if (behandling.type !== BehandlingType.BLANKETT && !vedtaksbrevRepository.existsById(behandling.id)) {
