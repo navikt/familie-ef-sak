@@ -88,9 +88,8 @@ class SimuleringService(private val iverksettClient: IverksettClient,
                     forrigeBehandlingId = behandling.forrigeBehandlingId
             ))
         } catch (exception: Exception) {
-            secureLogger.error("Kan ikke utføre simulering for behandling=${behandling.id}", exception)
             throw Feil(message = "Kunne ikke utføre simulering",
-                       frontendFeilmelding = "Kunne ikke utføre simulering",
+                       frontendFeilmelding = "Kunne ikke utføre simulering. Vennligst prøv på nytt",
                        httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
                        throwable = exception)
         }
