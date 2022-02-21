@@ -82,7 +82,6 @@ class MigreringService(
         MANGLER_PERIODER,
         FEIL_FOM_DATO,
         FEIL_TOM_DATO,
-        SAMME_MÅNED, // Pga kjøredatoer legges denne til midlertidlig
         SIMULERING_FEILUTBETALING,
         SIMULERING_ETTERBETALING,
     }
@@ -268,7 +267,7 @@ class MigreringService(
         val periode = gjeldendePerioder.single()
         validerFomDato(periode)
         validerTomDato(periode)
-        return periode.copy(stønadFom = maxOf(førsteDagenINesteMåned(kjøremåned), periode.stønadFom))
+        return periode.copy(stønadFom = maxOf(kjøremåned.atDay(1), periode.stønadFom))
     }
 
     /**
@@ -284,10 +283,6 @@ class MigreringService(
         if (stønadFom > nyFomDato) {
             throw MigreringException("Startdato er annet enn første i måneden, dato=$stønadFom",
                                      MigreringExceptionType.FEIL_FOM_DATO)
-        }
-        if (tomMåned == YearMonth.now()) {
-            throw MigreringException("Kan ikke migrere når tom-dato er samme måned som måneden for migrering",
-                                     MigreringExceptionType.SAMME_MÅNED)
         }
         return periode.copy(stønadFom = YearMonth.of(stønadTom.year, stønadTom.month).atDay(1))
     }

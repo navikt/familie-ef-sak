@@ -215,8 +215,9 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
 
         val migreringInfo = migreringService.hentMigreringInfo(fagsak.fagsakPersonId)
 
-        assertThat(migreringInfo.kanMigreres).isFalse
-        assertThat(migreringInfo.årsak).isEqualTo("Kan ikke migrere når tom-dato er samme måned som måneden for migrering")
+        assertThat(migreringInfo.kanMigreres).isTrue
+        assertThat(migreringInfo.stønadFom).isEqualTo(YearMonth.now())
+        assertThat(migreringInfo.stønadTom).isEqualTo(YearMonth.now())
     }
 
     @Test
@@ -250,7 +251,6 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `hentMigreringInfo - har perioder til og med neste måned i infotrygd`() {
         val nå = YearMonth.of(2021, 1)
-        val nesteMåned = nå.plusMonths(1)
         val stønadFom = nå.minusMonths(1).atDay(1)
         val stønadTomMåned = nå.plusMonths(3)
         val stønadTom = stønadTomMåned.atEndOfMonth()
@@ -265,10 +265,9 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
 
         val migreringInfo = migreringService.hentMigreringInfo(fagsak.fagsakPersonId, nå)
 
-        val forventetStønadFom = nesteMåned.atDay(1)
         assertThat(migreringInfo.kanMigreres).isTrue
         assertThat(migreringInfo.årsak).isNull()
-        assertThat(migreringInfo.stønadFom).isEqualTo(nesteMåned)
+        assertThat(migreringInfo.stønadFom).isEqualTo(nå)
         assertThat(migreringInfo.stønadTom).isEqualTo(stønadTomMåned)
         assertThat(migreringInfo.inntektsgrunnlag).isEqualTo(10)
         assertThat(migreringInfo.samordningsfradrag).isEqualTo(5)
@@ -276,7 +275,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
 
         val beløpsperiode = migreringInfo.beløpsperioder!![0]
         assertThat(beløpsperiode.beløp.toInt()).isEqualTo(18998)
-        assertThat(beløpsperiode.periode.fradato).isEqualTo(forventetStønadFom)
+        assertThat(beløpsperiode.periode.fradato).isEqualTo(nå.atDay(1))
         assertThat(beløpsperiode.periode.tildato).isEqualTo(stønadTom)
     }
 
@@ -381,12 +380,20 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     }
 
     private fun opprettOgIverksettMigrering(opphørsdato: YearMonth? = opphørsmåned,
-                                            inntektsgrunnlag: BigDecimal = forventetInntekt): Behandling {
-        mockPerioder(opphørsdato)
+                                            inntektsgrunnlag: BigDecimal = forventetInntekt,
+                                            migrerFraDato: YearMonth = this.migrerFraDato,
+                                            migrerTilDato: YearMonth = til,
+                                            mockPerioder: () -> Unit = { mockPerioder(opphørsdato) }): Behandling {
+
+        mockPerioder()
 
         val fagsak = fagsakService.hentEllerOpprettFagsak("1", Stønadstype.OVERGANGSSTØNAD)
         val behandling = testWithBrukerContext(groups = listOf(rolleConfig.beslutterRolle)) {
-            migreringService.opprettMigrering(fagsak, migrerFraDato, til, inntektsgrunnlag.toInt(), samordningsfradrag.toInt())
+            migreringService.opprettMigrering(fagsak,
+                                              migrerFraDato,
+                                              migrerTilDato,
+                                              inntektsgrunnlag.toInt(),
+                                              samordningsfradrag.toInt())
         }
 
         kjørTasks()
@@ -396,10 +403,10 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     /**
      * Mocker 2 vedtak, hvor vedtakId2 har høyest precedence, og setter opphørsdato på denne hvis det er type opphør
      */
-    private fun mockPerioder(opphørsdato: YearMonth?) {
+    private fun mockPerioder(opphørsdato: YearMonth?, stønadFom: YearMonth = periodeFraMåned, stønadTom: YearMonth = til) {
         val periode = InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(vedtakId = 1,
-                                                                   stønadFom = periodeFraMåned.atDay(1),
-                                                                   stønadTom = til.atEndOfMonth())
+                                                                   stønadFom = stønadFom.atDay(1),
+                                                                   stønadTom = stønadTom.atEndOfMonth())
         val kodePeriode2 = opphørsdato?.let { InfotrygdEndringKode.OVERTFØRT_NY_LØSNING } ?: InfotrygdEndringKode.NY
         val periodeForKallNr2 = periode.copy(vedtakId = 2,
                                              opphørsdato = opphørsdato?.atEndOfMonth(),
