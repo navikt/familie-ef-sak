@@ -2,15 +2,13 @@ package no.nav.familie.ef.sak.brev
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.brev.domain.BrevmottakerOrganisasjon
 import no.nav.familie.ef.sak.brev.domain.BrevmottakerPerson
-import no.nav.familie.ef.sak.brev.domain.Brevmottakere
-import no.nav.familie.ef.sak.brev.domain.MottakerRolle
-import no.nav.familie.ef.sak.brev.domain.MottakerRolle.*
-import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.brev.domain.MottakerRolle.BRUKER
+import no.nav.familie.ef.sak.brev.domain.MottakerRolle.FULLMAKT
+import no.nav.familie.ef.sak.brev.domain.MottakerRolle.VERGE
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.repository.behandling
-import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.data.repository.findByIdOrNull
@@ -28,7 +26,7 @@ internal class BrevmottakereServiceTest {
 
         val brevmottakereDto = BrevmottakereDto(personer = emptyList(), organisasjoner = emptyList())
 
-        assertThrows<Feil> {
+        assertThrows<ApiFeil> {
             brevmottakereService.lagreBrevmottakere(behandlingId = behandling.id, brevmottakereDto = brevmottakereDto)
         }
     }
@@ -38,7 +36,7 @@ internal class BrevmottakereServiceTest {
 
         every { brevmottakereRepository.findByIdOrNull(behandling.id) } returns mockk()
 
-        assertThrows<Feil> {
+        assertThrows<ApiFeil> {
             brevmottakereService.lagreBrevmottakere(behandlingId = behandling.id,
                                                     brevmottakereDto = brevmottakereDtoMed3Mottakere)
         }

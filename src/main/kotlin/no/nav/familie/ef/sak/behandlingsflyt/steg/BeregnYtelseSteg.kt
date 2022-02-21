@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.dto.Periode
 import no.nav.familie.ef.sak.felles.util.min
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.simulering.SimuleringService
@@ -77,10 +78,10 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
         if (data is Innvilget) {
             val harOpphørsperioder = data.perioder.any { it.periodeType == VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
             val harInnvilgedePerioder = data.perioder.any { it.periodeType != VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
-            feilHvis(harOpphørsperioder && !harInnvilgedePerioder) {
+            brukerfeilHvis(harOpphørsperioder && !harInnvilgedePerioder) {
                 "Må ha innvilgelsesperioder i tillegg til opphørsperioder"
             }
-            feilHvis(!behandling.erMigrering() && harPeriodeEllerAktivitetMigrering(data)) {
+            brukerfeilHvis(!behandling.erMigrering() && harPeriodeEllerAktivitetMigrering(data)) {
                 "Kan ikke inneholde aktivitet eller periode av type migrering"
             }
         }
@@ -97,7 +98,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
     private fun opprettTilkjentYtelseForOpphørtBehandling(behandling: Behandling,
                                                           vedtak: Opphør,
                                                           aktivIdent: String) {
-        feilHvis(behandling.type != BehandlingType.REVURDERING) { "Kan kun opphøre ved revurdering" }
+        brukerfeilHvis(behandling.type != BehandlingType.REVURDERING) { "Kan kun opphøre ved revurdering" }
         val opphørsdato = vedtak.opphørFom.atDay(1)
         val forrigeTilkjenteYtelse = hentForrigeTilkjenteYtelse(behandling)
         val nyeAndeler = andelerForOpphør(forrigeTilkjenteYtelse, opphørsdato)
@@ -120,9 +121,9 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                                                             behandling: Behandling,
                                                             aktivIdent: String) {
 
-        feilHvis(!vedtak.perioder.erSammenhengende()) { "Periodene må være sammenhengende" }
+        brukerfeilHvis(!vedtak.perioder.erSammenhengende()) { "Periodene må være sammenhengende" }
         val andelerTilkjentYtelse: List<AndelTilkjentYtelse> = lagBeløpsperioderForInnvilgetVedtak(vedtak, behandling, aktivIdent)
-        feilHvis(andelerTilkjentYtelse.isEmpty()) { "Innvilget vedtak må ha minimum en beløpsperiode" }
+        brukerfeilHvis(andelerTilkjentYtelse.isEmpty()) { "Innvilget vedtak må ha minimum en beløpsperiode" }
 
         val (nyeAndeler, opphørsdato) = when (behandling.type) {
             BehandlingType.FØRSTEGANGSBEHANDLING -> andelerTilkjentYtelse to null
@@ -189,7 +190,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                                                               aktivIdent: String) {
 
         val andelerTilkjentYtelse = andelerForSanksjonertRevurdering(behandling, vedtak.periode.tilPeriode())
-        feilHvis(andelerTilkjentYtelse.isEmpty()) { "Innvilget vedtak må ha minimum en beløpsperiode" }
+        brukerfeilHvis(andelerTilkjentYtelse.isEmpty()) { "Innvilget vedtak må ha minimum en beløpsperiode" }
 
         tilkjentYtelseService.opprettTilkjentYtelse(TilkjentYtelse(personident = aktivIdent,
                                                                    behandlingId = behandling.id,
@@ -261,16 +262,16 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
     }
 
     private fun andelerForOpphør(forrigeTilkjentYtelse: TilkjentYtelse, opphørFom: LocalDate): List<AndelTilkjentYtelse> {
-        feilHvis(forrigeTilkjentYtelse.andelerTilkjentYtelse.maxOfOrNull { it.stønadTom }?.isBefore(opphørFom) ?: false) {
+        brukerfeilHvis(forrigeTilkjentYtelse.andelerTilkjentYtelse.maxOfOrNull { it.stønadTom }?.isBefore(opphørFom) ?: false) {
             "Kan ikke opphøre frem i tiden"
         }
 
-        feilHvis(forrigeTilkjentYtelse.andelerTilkjentYtelse.isEmpty() &&
+        brukerfeilHvis(forrigeTilkjentYtelse.andelerTilkjentYtelse.isEmpty() &&
                  forrigeTilkjentYtelse.startdato != null && forrigeTilkjentYtelse.startdato < opphørFom) {
             "Forrige vedtak er allerede opphørt fra ${forrigeTilkjentYtelse.startdato}"
         }
 
-        feilHvis(forrigeTilkjentYtelse.andelerTilkjentYtelse.all { it.beløp == 0 }) {
+        brukerfeilHvis(forrigeTilkjentYtelse.andelerTilkjentYtelse.all { it.beløp == 0 }) {
             "Har ikke støtte for å opphøre når alle tidligere perioder har 0 i stønad"
         }
 
