@@ -21,4 +21,3 @@ Egenskap: Andelhistorikk: Endring i inntekt
       | BehandlingId | Endringstype | Endret i behandlingId |
       | 1            | ERSTATTET    | 2                     |
       | 2            |              |                       |
-

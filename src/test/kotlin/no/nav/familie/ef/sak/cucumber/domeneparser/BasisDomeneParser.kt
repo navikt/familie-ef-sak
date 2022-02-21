@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser
 
 import io.cucumber.datatable.DataTable
 import no.nav.familie.ef.sak.vedtak.EndringType
+import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -121,8 +122,8 @@ abstract class BasisDomeneParser {
             return parseInt(domenebegrep, rad)
         }
 
-        fun parseResultatType(rad: Map<String, String>): ResultatType {
-            val verdi = verdi(VedtakDomenebegrep.RESULTAT_TYPE.nøkkel, rad)
+        fun parseResultatType(rad: Map<String, String>): ResultatType? {
+            val verdi = valgfriVerdi(VedtakDomenebegrep.RESULTAT_TYPE.nøkkel, rad) ?: return null
             return ResultatType.valueOf(verdi)
         }
 
@@ -131,6 +132,10 @@ abstract class BasisDomeneParser {
             return EndringType.valueOf(verdi)
         }
 
+        fun parseAktivitetType(rad: Map<String, String>): AktivitetType? {
+            val verdi = valgfriVerdi(VedtakDomenebegrep.AKTIVITET_TYPE.nøkkel, rad) ?: return null
+            return AktivitetType.valueOf(verdi)
+        }
 
         fun <T> mapDataTable(dataTable: DataTable, radMapper: RadMapper<T>): List<T> {
             return dataTable.asMaps().map { radMapper.mapRad(it) }
