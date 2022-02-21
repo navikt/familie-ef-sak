@@ -289,7 +289,7 @@ class MigreringService(
             throw MigreringException("Startdato er annet enn første i måneden, dato=$stønadFom",
                                      MigreringExceptionType.FEIL_FOM_DATO)
         }
-        if (periode.beløp == 0) {
+        if (periode.beløp > 0) {
             throw MigreringException("Beløp er 0 på siste perioden har ikke støtte for det ennå, fom=$stønadFom",
                                      MigreringExceptionType.BELØP_0)
         }
