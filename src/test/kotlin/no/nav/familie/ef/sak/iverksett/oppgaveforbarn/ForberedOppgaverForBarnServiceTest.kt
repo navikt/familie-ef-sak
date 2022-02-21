@@ -13,7 +13,6 @@ import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.util.FnrGenerator
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.UUID
@@ -87,7 +86,6 @@ internal class ForberedOppgaverForBarnServiceTest {
         verify(exactly = 0) { OppgaveBeskrivelse.beskrivelseBarnFyllerEttÅr() }
     }
 
-    @Disabled
     @Test
     fun `barn blir seks mnd om 1 uker pluss en dag, sjekk om fyller innen 1 uke, forvent ingen kall`() {
         val fødselsdato = LocalDate.now().minusMonths(6).plusWeeks(1).plusDays(1)
@@ -99,7 +97,6 @@ internal class ForberedOppgaverForBarnServiceTest {
         verify(exactly = 0) { OppgaveBeskrivelse.beskrivelseBarnFyllerEttÅr() }
     }
 
-    @Disabled
     @Test
     fun `8 av 14 barn blir 6 mnd innen 1 uke, sjekk fyller innen 1 uke, forvent 8 kall til beskrivelseBarnBlirSeksMnd`() {
         val fødselsdatoer = (0..14).asSequence().map { LocalDate.now().minusMonths(6).plusDays(it.toLong()) }.toList()
