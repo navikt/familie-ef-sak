@@ -29,7 +29,7 @@ fun AndelTilkjentYtelse.tilDto(): AndelTilkjentYtelseDto {
 }
 
 fun TilkjentYtelse.tilBeløpsperiode(startDato: LocalDate?): List<Beløpsperiode> {
-    return this.andelerTilkjentYtelse.filter { andel -> andel.stønadFom >= startDato}.map { andel ->
+    return this.andelerTilkjentYtelse.filter { andel -> andel.stønadFom >= startDato }.map { andel ->
         Beløpsperiode(beløp = andel.beløp.toBigDecimal(),
                       periode = Periode(fradato = andel.stønadFom, tildato = andel.stønadTom),
                       beregningsgrunnlag = Beregningsgrunnlag(inntekt = andel.inntekt.toBigDecimal(),

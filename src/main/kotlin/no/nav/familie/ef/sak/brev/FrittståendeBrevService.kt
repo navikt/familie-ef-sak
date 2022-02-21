@@ -83,8 +83,6 @@ class FrittståendeBrevService(private val brevClient: BrevClient,
                 Stønadstype.SKOLEPENGER -> FrittståendeBrevType.MANGELBREV_SKOLEPENGER
             }
 
-
-
 }
 
 
