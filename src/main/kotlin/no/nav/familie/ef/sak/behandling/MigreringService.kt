@@ -310,7 +310,7 @@ class MigreringService(
                                      MigreringExceptionType.FEIL_TOM_DATO)
         }
         if (dato.isBefore(LocalDate.now().minusMonths(12))) {
-            throw MigreringException("Sluttdato er tidligere enn 1 år bak i tiden, dato=$dato",
+            throw MigreringException("Kan ikke migrere når forrige utbetaling i infotrygd er mer enn 1 år tilbake i tid, dato=$dato",
                                      MigreringExceptionType.FEIL_TOM_DATO)
         }
     }
