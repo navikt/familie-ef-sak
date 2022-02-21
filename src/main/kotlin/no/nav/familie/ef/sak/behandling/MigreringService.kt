@@ -246,7 +246,7 @@ class MigreringService(
         val gjeldendePerioder = perioder.summert
         val perioderFremITiden = gjeldendePerioder.filter { it.stønadTom >= førsteDagenINesteMåned(kjøremåned) }
         if (perioderFremITiden.isNotEmpty()) {
-            return gjeldendePeriodeFremITiden(gjeldendePerioder, kjøremåned)
+            return gjeldendePeriodeFremITiden(perioderFremITiden, kjøremåned)
         }
 
         if (!featureToggleService.isEnabled("familie-ef-sak.migrering-bak-i-tiden")) {
