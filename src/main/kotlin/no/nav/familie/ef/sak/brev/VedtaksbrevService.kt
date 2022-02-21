@@ -13,8 +13,9 @@ import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevRequestDto
 import no.nav.familie.ef.sak.brev.dto.VedtaksbrevFritekstDto
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.domain.Fil
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
@@ -129,7 +130,7 @@ class VedtaksbrevService(private val brevClient: BrevClient,
     }
 
     private fun validerBeslutterIkkeErLikSaksbehandler(vedtaksbrev: Vedtaksbrev) {
-        feilHvis(vedtaksbrev.beslutterident.isNullOrBlank()){
+        brukerfeilHvis(vedtaksbrev.beslutterident.isNullOrBlank()) {
             "Vedtaksbrevet er ikke signert av beslutter"
         }
         when (vedtaksbrev.saksbehandlerident) {
@@ -140,15 +141,15 @@ class VedtaksbrevService(private val brevClient: BrevClient,
 
     private fun validerUlikeSignaturnavn(vedtaksbrev: Vedtaksbrev) {
         if (vedtaksbrev.saksbehandlersignatur == vedtaksbrev.besluttersignatur) {
-            throw Feil(message = "Beslutter er lik behandler",
-                       frontendFeilmelding = "Beslutter kan ikke behandle en behandling som den selv har sendt til beslutter")
+            throw ApiFeil("Beslutter kan ikke behandle en behandling som den selv har sendt til beslutter",
+                          HttpStatus.BAD_REQUEST)
         }
     }
 
     private fun validerUlikeIdenter(vedtaksbrev: Vedtaksbrev) {
         if (vedtaksbrev.saksbehandlerident == vedtaksbrev.beslutterident) {
-            throw Feil(message = "Beslutter er lik behandler",
-                       frontendFeilmelding = "Beslutter kan ikke behandle en behandling som den selv har sendt til beslutter")
+            throw ApiFeil("Beslutter kan ikke behandle en behandling som den selv har sendt til beslutter",
+                          HttpStatus.BAD_REQUEST)
         }
     }
 

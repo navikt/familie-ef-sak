@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak.FEILREGISTRERT
 import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak.TRUKKET_TILBAKE
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.felles.domain.Sporbar
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import org.springframework.data.annotation.Id
@@ -45,7 +46,7 @@ data class Behandling(@Id
 
     init {
         if (resultat == BehandlingResultat.HENLAGT) {
-            feilHvis(henlagtÅrsak == null) { "Kan ikke henlegge behandling uten en årsak" }
+            brukerfeilHvis(henlagtÅrsak == null) { "Kan ikke henlegge behandling uten en årsak" }
             when (henlagtÅrsak) {
                 BEHANDLES_I_GOSYS -> feilHvis(this.type !== BehandlingType.BLANKETT) { "Bare blankett kan henlegges med årsak BEHANDLES_I_GOSYS" }
                 FEILREGISTRERT -> feilHvis(this.type == BehandlingType.BLANKETT) { "Blankett kan bare henlegges med årsak BEHANDLES_I_GOSYS" }
