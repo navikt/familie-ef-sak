@@ -42,7 +42,9 @@ class GrunnlagsdataService(private val grunnlagsdataRepository: GrunnlagsdataRep
     @Transactional
     fun oppdaterOgHentNyGrunnlagsdata(behandlingId: UUID): GrunnlagsdataMedMetadata {
         val behandling = behandlingService.hentBehandling(behandlingId)
-        brukerfeilHvis(behandling.status.behandlingErLåstForVidereRedigering()) { "Kan ikke laste inn nye grunnlagsdata for behandling med status ${behandling.status}" }
+        brukerfeilHvis(behandling.status.behandlingErLåstForVidereRedigering()) {
+            "Kan ikke laste inn nye grunnlagsdata for behandling med status ${behandling.status}"
+        }
         slettGrunnlagsdataHvisFinnes(behandlingId)
         opprettGrunnlagsdata(behandlingId)
         return hentGrunnlagsdata(behandlingId)

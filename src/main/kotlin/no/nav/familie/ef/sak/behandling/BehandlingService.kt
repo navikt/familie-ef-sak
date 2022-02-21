@@ -192,7 +192,9 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
     @Transactional
     fun settPåVent(behandlingId: UUID) {
         val behandling = hentBehandling(behandlingId)
-        brukerfeilHvis(behandling.status.behandlingErLåstForVidereRedigering()) { "Kan ikke sette behandling med status ${behandling.status} på vent" }
+        brukerfeilHvis(behandling.status.behandlingErLåstForVidereRedigering()) {
+            "Kan ikke sette behandling med status ${behandling.status} på vent"
+        }
 
         behandlingRepository.update(behandling.copy(status = BehandlingStatus.SATT_PÅ_VENT))
         taskService.save(BehandlingsstatistikkTask.opprettVenterTask(behandlingId))
@@ -201,7 +203,9 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
     @Transactional
     fun taAvVent(behandlingId: UUID) {
         val behandling = hentBehandling(behandlingId)
-        brukerfeilHvis(behandling.status != BehandlingStatus.SATT_PÅ_VENT) { "Kan ikke ta behandling med status ${behandling.status} av vent" }
+        brukerfeilHvis(behandling.status != BehandlingStatus.SATT_PÅ_VENT) {
+            "Kan ikke ta behandling med status ${behandling.status} av vent"
+        }
         behandlingRepository.update(behandling.copy(status = BehandlingStatus.UTREDES))
         taskService.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId))
     }
