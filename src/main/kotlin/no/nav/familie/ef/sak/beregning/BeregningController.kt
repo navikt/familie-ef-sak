@@ -6,7 +6,6 @@ import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.felles.dto.Periode
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.tilBeløpsperiode
@@ -78,10 +77,11 @@ class BeregningController(private val stegService: StegService,
     fun hentBeregnetBeløp(@PathVariable behandlingId: UUID): Ressurs<List<Beløpsperiode>> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         val vedtakForBehandling = vedtakService.hentVedtak(behandlingId)
-        if ( vedtakForBehandling.resultatType === ResultatType.OPPHØRT) {
+        if (vedtakForBehandling.resultatType === ResultatType.OPPHØRT) {
             throw Feil("Kan ikke vise fremtidige beløpsperioder for opphørt vedtak med id=$behandlingId")
         }
         val startDatoForVedtak = vedtakForBehandling.perioder?.perioder?.minByOrNull { it.datoFra }?.datoFra
+                                 ?: error("Fant ingen startdato for vedtak på behandling med id=$behandlingId")
         return Ressurs.success(tilkjentYtelseService.hentForBehandling(behandlingId).tilBeløpsperiode(startDatoForVedtak))
     }
 
