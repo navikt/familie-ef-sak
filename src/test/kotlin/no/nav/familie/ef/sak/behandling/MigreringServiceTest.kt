@@ -175,7 +175,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         val sluttMåned = opphørsmåned.minusMonths(2)
         val periode = InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(stønadFom = startdato,
                                                                    stønadTom = sluttMåned.atEndOfMonth(),
-                                                                   beløp = 0)
+                                                                   beløp = 1)
         every { infotrygdReplikaClient.hentPerioder(any()) } returns
                 InfotrygdPeriodeResponse(listOf(periode), emptyList(), emptyList())
         val fagsak = fagsakService.hentEllerOpprettFagsak("1", Stønadstype.OVERGANGSSTØNAD)

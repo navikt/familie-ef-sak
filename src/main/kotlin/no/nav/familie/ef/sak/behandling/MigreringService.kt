@@ -46,6 +46,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
@@ -84,6 +85,7 @@ class MigreringService(
         FEIL_TOM_DATO,
         SIMULERING_FEILUTBETALING,
         SIMULERING_ETTERBETALING,
+        BELØP_0,
     }
 
     private class MigreringException(val årsak: String, val type: MigreringExceptionType) : RuntimeException(årsak)
@@ -284,6 +286,10 @@ class MigreringService(
             throw MigreringException("Startdato er annet enn første i måneden, dato=$stønadFom",
                                      MigreringExceptionType.FEIL_FOM_DATO)
         }
+        if (periode.beløp == 0) {
+            throw MigreringException("Beløp er 0 på siste perioden har ikke støtte for det ennå, fom=$stønadFom",
+                                     MigreringExceptionType.BELØP_0)
+        }
         return periode.copy(stønadFom = YearMonth.of(stønadTom.year, stønadTom.month).atDay(1))
     }
 
@@ -298,6 +304,10 @@ class MigreringService(
         val dato = periode.stønadTom
         if (YearMonth.of(dato.year, dato.month).atEndOfMonth() != dato) {
             throw MigreringException("Sluttdato er annet enn siste i måneden, dato=$dato",
+                                     MigreringExceptionType.FEIL_TOM_DATO)
+        }
+        if (dato.isBefore(LocalDate.now().minusMonths(12))) {
+            throw MigreringException("Sluttdato er tidligere enn 1 år bak i tiden, dato=$dato",
                                      MigreringExceptionType.FEIL_TOM_DATO)
         }
     }
