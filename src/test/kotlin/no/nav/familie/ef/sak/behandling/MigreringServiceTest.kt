@@ -46,6 +46,9 @@ import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResultat
 import no.nav.familie.kontrakter.ef.iverksett.IverksettStatus
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
+import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
+import no.nav.familie.kontrakter.felles.simulering.Simuleringsoppsummering
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.prosessering.error.TaskExceptionUtenStackTrace
@@ -95,6 +98,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         every { iverksettClient.hentStatus(any()) } answers {
             responseFraInfotrygd.poll()
         }
+        mockSimulering()
     }
 
     @AfterEach
@@ -152,15 +156,35 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `hentMigreringInfo - har ingen perioder fra neste måned i infotrygd`() {
+    internal fun `migrering feiler når man har etterbetaling`() {
+        mockSimulering(etterbetaling = 1)
+        assertThatThrownBy { opprettOgIverksettMigrering() }
+                .hasMessageContaining("Etterbetaling er 1")
+    }
+
+    @Test
+    internal fun `migrering feiler når man har feilutbetaling`() {
+        mockSimulering(feilutbetaling = 2)
+        assertThatThrownBy { opprettOgIverksettMigrering() }
+                .hasMessageContaining("Feilutbetaling er 2")
+    }
+
+    @Test
+    internal fun `hentMigreringInfo - historisk periode`() {
+        val startdato = YearMonth.now().minusYears(1).atDay(1)
+        val sluttMåned = opphørsmåned.minusMonths(2)
+        val periode = InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(stønadFom = startdato,
+                                                                   stønadTom = sluttMåned.atEndOfMonth(),
+                                                                   beløp = 0)
         every { infotrygdReplikaClient.hentPerioder(any()) } returns
-                InfotrygdPeriodeResponse(emptyList(), emptyList(), emptyList())
+                InfotrygdPeriodeResponse(listOf(periode), emptyList(), emptyList())
         val fagsak = fagsakService.hentEllerOpprettFagsak("1", Stønadstype.OVERGANGSSTØNAD)
 
         val migreringInfo = migreringService.hentMigreringInfo(fagsak.fagsakPersonId)
 
-        assertThat(migreringInfo.kanMigreres).isFalse
-        assertThat(migreringInfo.årsak).isEqualTo("Har 0 aktive perioder")
+        assertThat(migreringInfo.kanMigreres).isTrue
+        assertThat(migreringInfo.stønadFom).isEqualTo(sluttMåned)
+        assertThat(migreringInfo.stønadTom).isEqualTo(sluttMåned)
     }
 
     @Test
@@ -192,7 +216,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         val migreringInfo = migreringService.hentMigreringInfo(fagsak.fagsakPersonId)
 
         assertThat(migreringInfo.kanMigreres).isFalse
-        assertThat(migreringInfo.årsak).isEqualTo("Har 0 aktive perioder")
+        assertThat(migreringInfo.årsak).isEqualTo("Kan ikke migrere når tom-dato er samme måned som måneden for migrering")
     }
 
     @Test
@@ -228,14 +252,13 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         val nå = YearMonth.of(2021, 1)
         val nesteMåned = nå.plusMonths(1)
         val stønadFom = nå.minusMonths(1).atDay(1)
-        val stønadTom = nesteMåned.atEndOfMonth()
-        val infotrygdPeriode =
-                InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(
-                        stønadFom = stønadFom,
-                        stønadTom = stønadTom,
-                        inntektsgrunnlag = 10,
-                        samordningsfradrag = 5
-                )
+        val stønadTomMåned = nå.plusMonths(3)
+        val stønadTom = stønadTomMåned.atEndOfMonth()
+        val infotrygdPeriode = InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(
+                stønadFom = stønadFom,
+                stønadTom = stønadTom,
+                inntektsgrunnlag = 10,
+                samordningsfradrag = 5)
         every { infotrygdReplikaClient.hentPerioder(any()) } returns
                 InfotrygdPeriodeResponse(listOf(infotrygdPeriode), emptyList(), emptyList())
         val fagsak = fagsakService.hentEllerOpprettFagsak("1", Stønadstype.OVERGANGSSTØNAD)
@@ -246,7 +269,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         assertThat(migreringInfo.kanMigreres).isTrue
         assertThat(migreringInfo.årsak).isNull()
         assertThat(migreringInfo.stønadFom).isEqualTo(nesteMåned)
-        assertThat(migreringInfo.stønadTom).isEqualTo(nesteMåned)
+        assertThat(migreringInfo.stønadTom).isEqualTo(stønadTomMåned)
         assertThat(migreringInfo.inntektsgrunnlag).isEqualTo(10)
         assertThat(migreringInfo.samordningsfradrag).isEqualTo(5)
         assertThat(migreringInfo.beløpsperioder).hasSize(1)
@@ -384,6 +407,20 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         every { infotrygdReplikaClient.hentPerioder(any()) } returns
                 InfotrygdPeriodeResponse(listOf(periode), emptyList(), emptyList()) andThen
                 InfotrygdPeriodeResponse(listOf(periodeForKallNr2), emptyList(), emptyList())
+    }
+
+    private fun mockSimulering(etterbetaling: Int = 0, feilutbetaling: Int = 0) {
+        val oppsummering = Simuleringsoppsummering(perioder = emptyList(),
+                                                   fomDatoNestePeriode = null,
+                                                   etterbetaling = BigDecimal(etterbetaling),
+                                                   feilutbetaling = BigDecimal(feilutbetaling),
+                                                   fom = null,
+                                                   tomDatoNestePeriode = null,
+                                                   forfallsdatoNestePeriode = null,
+                                                   tidSimuleringHentet = null,
+                                                   tomSisteUtbetaling = null)
+        every { iverksettClient.simuler(any()) } returns
+                BeriketSimuleringsresultat(DetaljertSimuleringResultat(emptyList()), oppsummering)
     }
 
     private fun kjørTasks(erMigrering: Boolean = true) {
