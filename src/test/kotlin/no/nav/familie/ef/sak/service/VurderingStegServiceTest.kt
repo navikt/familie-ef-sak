@@ -13,11 +13,13 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.blankett.BlankettRepository
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.tilSøknadsverdier
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
@@ -79,7 +81,7 @@ internal class VurderingStegServiceTest {
     private val søknad = SøknadsskjemaMapper.tilDomene(TestsøknadBuilder.Builder().setBarn(listOf(
             TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "14041385481"),
             TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "01012067050")
-    )).build().søknadOvergangsstønad)
+    )).build().søknadOvergangsstønad).tilSøknadsverdier()
     private val barn = søknadsBarnTilBehandlingBarn(søknad.barn)
     private val behandling = behandling(fagsak(), BehandlingStatus.OPPRETTET)
     private val behandlingId = UUID.randomUUID()
@@ -89,7 +91,7 @@ internal class VurderingStegServiceTest {
         every { behandlingService.hentBehandling(behandlingId) } returns behandling
         every { behandlingService.hentAktivIdent(behandlingId) } returns søknad.fødselsnummer
         every { behandlingService.oppdaterStatusPåBehandling(any(), any()) } returns behandling
-        every { søknadService.hentOvergangsstønad(any()) }.returns(søknad)
+        every { søknadService.hentSøknadsgrunnlag(any()) }.returns(søknad)
         every { blankettRepository.deleteById(any()) } just runs
         every { taskRepository.save(any()) } answers { firstArg() }
         every { personopplysningerIntegrasjonerClient.hentMedlemskapsinfo(any()) }
@@ -184,7 +186,7 @@ internal class VurderingStegServiceTest {
             vurderingStegService.oppdaterVilkår(SvarPåVurderingerDto(id = vilkårsvurdering.id,
                                                                      behandlingId = behandlingId,
                                                                      listOf()))
-        }).isInstanceOf(Feil::class.java)
+        }).isInstanceOf(ApiFeil::class.java)
                 .hasMessageContaining("er låst for videre redigering")
         verify(exactly = 0) { vilkårsvurderingRepository.insertAll(any()) }
     }

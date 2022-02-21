@@ -5,7 +5,7 @@ import no.nav.familie.ef.sak.fagsak.dto.Søkeresultat
 import no.nav.familie.ef.sak.fagsak.dto.SøkeresultatPerson
 import no.nav.familie.ef.sak.fagsak.dto.SøkeresultatUtenFagsak
 import no.nav.familie.ef.sak.felles.dto.PersonIdentDto
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.felles.util.FnrUtil.validerIdent
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -58,8 +58,7 @@ class SøkController(private val søkService: SøkService, private val tilgangSe
     }
 
     private fun validerPersonIdent(personIdentRequest: PersonIdentDto) {
-        feilHvis(personIdentRequest.personIdent.length != 11) { "Ugyldig personident. Det må være 11 sifre" }
-        feilHvis(!personIdentRequest.personIdent.matches("[0-9]+".toRegex())) { "Ugyldig personident. Det kan kun inneholde tall" }
+        validerIdent(personIdentRequest.personIdent)
     }
 
 }

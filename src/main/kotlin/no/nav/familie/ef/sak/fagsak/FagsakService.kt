@@ -7,12 +7,11 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.dto.tilDto
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
-import no.nav.familie.ef.sak.fagsak.domain.FagsakDao
+import no.nav.familie.ef.sak.fagsak.domain.FagsakDomain
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.Fagsaker
-import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
-import no.nav.familie.ef.sak.fagsak.domain.tilFagsak
+import no.nav.familie.ef.sak.fagsak.domain.tilFagsakMedPerson
 import no.nav.familie.ef.sak.fagsak.dto.FagsakDto
 import no.nav.familie.ef.sak.fagsak.dto.tilDto
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
@@ -134,13 +133,14 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
         return aktiveIdenter.associateBy({ it.first }, { it.second })
     }
 
-    private fun opprettFagsak(stønadstype: Stønadstype, fagsakPerson: FagsakPerson): FagsakDao {
-        return fagsakRepository.insert(FagsakDao(stønadstype = stønadstype,
-                                                 fagsakPersonId = fagsakPerson.id))
+    private fun opprettFagsak(stønadstype: Stønadstype, fagsakPerson: FagsakPerson): FagsakDomain {
+        return fagsakRepository.insert(FagsakDomain(stønadstype = stønadstype,
+                                                    fagsakPersonId = fagsakPerson.id))
     }
 
-    fun FagsakDao.tilFagsakMedPerson(personIdenter: Set<PersonIdent> = fagsakPersonService.hentIdenter(this.fagsakPersonId)): Fagsak {
-        return this.tilFagsak(personIdenter)
+    fun FagsakDomain.tilFagsakMedPerson(): Fagsak {
+        val personIdenter = fagsakPersonService.hentIdenter(this.fagsakPersonId)
+        return this.tilFagsakMedPerson(personIdenter)
     }
 
 }

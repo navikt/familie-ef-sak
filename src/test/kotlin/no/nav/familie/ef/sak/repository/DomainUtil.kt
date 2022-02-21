@@ -9,7 +9,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.beregning.Inntektsperiode
 import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
-import no.nav.familie.ef.sak.fagsak.domain.FagsakDao
+import no.nav.familie.ef.sak.fagsak.domain.FagsakDomain
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
@@ -98,18 +98,18 @@ fun fagsak(stønadstype: Stønadstype = Stønadstype.OVERGANGSSTØNAD,
 fun fagsakDao(id: UUID = UUID.randomUUID(),
               stønadstype: Stønadstype = Stønadstype.OVERGANGSSTØNAD,
               personId: UUID = UUID.randomUUID(),
-              eksternId: EksternFagsakId = EksternFagsakId()): FagsakDao =
-        FagsakDao(id = id,
-                  fagsakPersonId = personId,
-                  stønadstype = stønadstype,
-                  eksternId = eksternId)
+              eksternId: EksternFagsakId = EksternFagsakId()): FagsakDomain =
+        FagsakDomain(id = id,
+                     fagsakPersonId = personId,
+                     stønadstype = stønadstype,
+                     eksternId = eksternId)
 
 fun Fagsak.tilFagsakDao() =
-        FagsakDao(id = id,
-                  fagsakPersonId = fagsakPersonId,
-                  stønadstype = stønadstype,
-                  eksternId = eksternId,
-                  sporbar = sporbar)
+        FagsakDomain(id = id,
+                     fagsakPersonId = fagsakPersonId,
+                     stønadstype = stønadstype,
+                     eksternId = eksternId,
+                     sporbar = sporbar)
 
 fun vilkårsvurdering(behandlingId: UUID,
                      resultat: Vilkårsresultat,

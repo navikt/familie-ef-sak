@@ -20,7 +20,7 @@ fun lagTilkjentYtelse(andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
                        vedtakstidspunkt = vedtaksdato.atStartOfDay().truncatedTo(ChronoUnit.MILLIS),
                        type = type,
                        andelerTilkjentYtelse = andelerTilkjentYtelse,
-                       opphørsdato = opphørsdato)
+                       startdato = opphørsdato)
 
 fun lagAndelTilkjentYtelse(beløp: Int,
                            fraOgMed: LocalDate,

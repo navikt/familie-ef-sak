@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.journalføring
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
@@ -72,7 +73,7 @@ class JournalføringController(private val journalføringService: Journalføring
         val (journalpost, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
         tilgangService.validerTilgangTilPersonMedBarn(personIdent, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
-        feilHvisIkke(journalpost.harStrukturertSøknad()) { "Journalposten inneholder ikke en digital søknad" }
+        brukerfeilHvisIkke(journalpost.harStrukturertSøknad()) { "Journalposten inneholder ikke en digital søknad" }
         return Ressurs.success(journalføringService.opprettBehandlingMedSøknadsdataFraEnFerdigstiltJournalpost(request,
                                                                                                                journalpostId))
     }

@@ -33,20 +33,20 @@ data class Fagsak(
 }
 
 @Table("fagsak")
-data class FagsakDao(@Id
-                     val id: UUID = UUID.randomUUID(),
-                     val fagsakPersonId: UUID,
-                     @MappedCollection(idColumn = "fagsak_id")
-                     val eksternId: EksternFagsakId = EksternFagsakId(),
-                     @Column("stonadstype")
-                     val stønadstype: Stønadstype,
-                     val migrert: Boolean = false,
-                     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                     val sporbar: Sporbar = Sporbar()) {
+data class FagsakDomain(@Id
+                        val id: UUID = UUID.randomUUID(),
+                        val fagsakPersonId: UUID,
+                        @MappedCollection(idColumn = "fagsak_id")
+                        val eksternId: EksternFagsakId = EksternFagsakId(),
+                        @Column("stonadstype")
+                        val stønadstype: Stønadstype,
+                        val migrert: Boolean = false,
+                        @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+                        val sporbar: Sporbar = Sporbar()) {
 
 }
 
-fun FagsakDao.tilFagsak(personIdenter: Set<PersonIdent>): Fagsak =
+fun FagsakDomain.tilFagsakMedPerson(personIdenter: Set<PersonIdent>): Fagsak =
         Fagsak(
                 id = id,
                 fagsakPersonId = fagsakPersonId,
