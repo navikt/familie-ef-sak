@@ -1,7 +1,5 @@
 package no.nav.familie.ef.sak.barn
 
-import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
 import no.nav.familie.ef.sak.opplysninger.mapper.MatchetBehandlingBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
@@ -14,11 +12,10 @@ import java.util.UUID
 class BarnService(
         private val barnRepository: BarnRepository,
         private val søknadService: SøknadService,
-        private val fagsakService: FagsakService,
 ) {
 
     fun opprettBarnPåBehandlingMedSøknadsdata(behandlingId: UUID, fagsakId: UUID, grunnlagsdataBarn: List<BarnMedIdent>) {
-        val barnFraSøknad = finnSøknadsbarnOgMapTilBehandlingBarn(behandlingId = behandlingId, fagsakId = fagsakId)
+        val barnFraSøknad = finnSøknadsbarnOgMapTilBehandlingBarn(behandlingId = behandlingId)
         val barnPåBehandlingen = BarnMatcher.kobleBehandlingBarnOgRegisterBarn(barnFraSøknad, grunnlagsdataBarn)
                 .map {
                     BehandlingBarn(id = it.behandlingBarn.id,
@@ -59,13 +56,8 @@ class BarnService(
         return BarnMatcher.kobleBehandlingBarnOgRegisterBarn(alleAktuelleBarn, grunnlagsdataBarn)
     }
 
-    private fun finnSøknadsbarnOgMapTilBehandlingBarn(behandlingId: UUID, fagsakId: UUID): List<BehandlingBarn> {
-        val fagsak = fagsakService.hentFagsak(fagsakId)
-        val barnFraSøknad = when (fagsak.stønadstype) {
-                                Stønadstype.OVERGANGSSTØNAD -> søknadService.hentOvergangsstønad(behandlingId)?.barn
-                                Stønadstype.BARNETILSYN -> søknadService.hentBarnetilsyn(behandlingId)?.barn
-                                Stønadstype.SKOLEPENGER -> søknadService.hentSkolepenger(behandlingId)?.barn
-                            } ?: emptyList()
+    private fun finnSøknadsbarnOgMapTilBehandlingBarn(behandlingId: UUID): List<BehandlingBarn> {
+        val barnFraSøknad = søknadService.hentSøknadsgrunnlag(behandlingId)?.barn ?: emptyList()
         return barnFraSøknad.map {
             BehandlingBarn(behandlingId = behandlingId,
                            søknadBarnId = it.id,

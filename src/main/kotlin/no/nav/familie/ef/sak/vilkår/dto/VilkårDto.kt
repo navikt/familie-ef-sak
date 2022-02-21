@@ -10,9 +10,10 @@ data class VilkårGrunnlagDto(val tidligereVedtaksperioder: TidligereVedtaksperi
                              val medlemskap: MedlemskapDto,
                              val sivilstand: SivilstandInngangsvilkårDto,
                              val bosituasjon: BosituasjonDto?,
-                             val barnMedSamvær: List<BarnMedSamværDto>,
+                             val barnMedSamvær: List<BarnMedSamværDto>, // TODO: Ta med fødselsdato
                              val sivilstandsplaner: SivilstandsplanerDto,
                              val aktivitet: AktivitetDto?,
-                             val sagtOppEllerRedusertStilling: SagtOppEllerRedusertStillingDto?,
+                             val sagtOppEllerRedusertStilling: SagtOppEllerRedusertStillingDto?, // Gjelder OS
+                             // val barnepassordninger: List<BarnepassordningerDto> // Gjelder BT
                              val lagtTilEtterFerdigstilling: Boolean,
                              val registeropplysningerOpprettetTid: LocalDateTime)

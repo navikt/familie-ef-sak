@@ -59,7 +59,7 @@ class VurderingService(private val behandlingService: BehandlingService,
     }
 
     fun hentGrunnlagOgMetadata(behandlingId: UUID): Pair<VilkårGrunnlagDto, HovedregelMetadata> {
-        val søknad = søknadService.hentOvergangsstønad(behandlingId)
+        val søknad = søknadService.hentSøknadsgrunnlag(behandlingId)
         val personIdent = behandlingService.hentAktivIdent(behandlingId)
         val barn = barnService.finnBarnPåBehandling(behandlingId)
         val grunnlag = vilkårGrunnlagService.hentGrunnlag(behandlingId, søknad, personIdent, barn)
