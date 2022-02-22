@@ -67,6 +67,7 @@ class FrittståendeBrevService(private val brevClient: BrevClient,
                 FrittståendeBrevKategori.INFORMASJONSBREV, FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT ->
                     utledBrevtypeInfobrev(stønadstype)
                 FrittståendeBrevKategori.INNHENTING_AV_OPPLYSNINGER -> utledBrevtypeMangelbrev(stønadstype)
+                FrittståendeBrevKategori.VARSEL_OM_SANKSJON -> utledBrevtypeSanksjonsbrev(stønadstype)
             }
 
     private fun utledBrevtypeInfobrev(stønadstype: Stønadstype) =
@@ -83,6 +84,12 @@ class FrittståendeBrevService(private val brevClient: BrevClient,
                 Stønadstype.SKOLEPENGER -> FrittståendeBrevType.MANGELBREV_SKOLEPENGER
             }
 
+    private fun utledBrevtypeSanksjonsbrev(stønadstype: Stønadstype) =
+            when (stønadstype) {
+                Stønadstype.OVERGANGSSTØNAD -> FrittståendeBrevType.SANKSJONSBREV_OVERGANGSTØNAD
+                Stønadstype.BARNETILSYN -> FrittståendeBrevType.SANKSJONSBREV_BARNETILSYN
+                Stønadstype.SKOLEPENGER -> FrittståendeBrevType.SANKSJONSBREV_SKOLEPENGER
+            }
 }
 
 
