@@ -4,13 +4,12 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -43,8 +42,9 @@ class GrunnlagsdataService(private val grunnlagsdataRepository: GrunnlagsdataRep
     @Transactional
     fun oppdaterOgHentNyGrunnlagsdata(behandlingId: UUID): GrunnlagsdataMedMetadata {
         val behandling = behandlingService.hentBehandling(behandlingId)
-        feilHvis(behandling.status.behandlingErLåstForVidereRedigering(),
-                 HttpStatus.BAD_REQUEST) { "Kan ikke laste inn nye grunnlagsdata for behandling med status ${behandling.status}" }
+        brukerfeilHvis(behandling.status.behandlingErLåstForVidereRedigering()) {
+            "Kan ikke laste inn nye grunnlagsdata for behandling med status ${behandling.status}"
+        }
         slettGrunnlagsdataHvisFinnes(behandlingId)
         opprettGrunnlagsdata(behandlingId)
         return hentGrunnlagsdata(behandlingId)

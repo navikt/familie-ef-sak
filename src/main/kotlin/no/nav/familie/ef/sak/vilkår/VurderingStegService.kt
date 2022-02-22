@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.blankett.BlankettRepository
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
@@ -136,8 +137,7 @@ class VurderingStegService(private val behandlingService: BehandlingService,
 
     private fun validerLåstForVidereRedigering(behandlingId: UUID) {
         if (behandlingErLåstForVidereRedigering(behandlingId)) {
-            throw Feil("Bruker prøver å oppdatere en vilkårsvurdering der behandling=$behandlingId er låst for videre redigering",
-                       "Behandlingen er låst for videre redigering")
+            throw ApiFeil("Behandlingen er låst for videre redigering", HttpStatus.BAD_REQUEST)
         }
     }
 

@@ -104,6 +104,7 @@ object SøknadsskjemaMapper {
                                         datoMottatt = kontraktsøknad.innsendingsdetaljer.verdi.datoMottatt.verdi,
                                         medlemskap = tilDomene(kontraktsøknad.medlemskapsdetaljer.verdi),
                                         bosituasjon = tilDomene(kontraktsøknad.bosituasjon.verdi),
+                                        sivilstand = tilDomene(kontraktsøknad.sivilstandsdetaljer.verdi),
                                         sivilstandsplaner = tilDomene(kontraktsøknad.sivilstandsplaner?.verdi),
                                         barn = tilDomene(kontraktsøknad.barn.verdi),
                                         utdanning = tilDomene(kontraktsøknad.utdanning.verdi)!!,

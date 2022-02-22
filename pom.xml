@@ -36,9 +36,8 @@
         <felles.version>1.20211217154554_3bb883e</felles.version>
         <prosessering.version>1.20211125150647_a7c6f64</prosessering.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>2.0_20220217093059_3870509</kontrakter.version>
+        <kontrakter.version>2.0_20220222213922_64795e8</kontrakter.version>
         <cucumber.version>7.2.3</cucumber.version>
-        <junit-vintage-engine.version>5.8.2</junit-vintage-engine.version>
 
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>

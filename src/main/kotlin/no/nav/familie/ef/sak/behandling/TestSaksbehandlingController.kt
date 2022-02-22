@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.TestBehandlingsType.*
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.behandling.migrering.MigreringService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
