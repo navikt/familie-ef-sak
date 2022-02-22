@@ -3,8 +3,7 @@ package no.nav.familie.ef.sak.iverksett
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.dto.BehandlingDto
-import no.nav.familie.ef.sak.fagsak.FagsakRepository
-import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
+import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
@@ -29,7 +28,6 @@ import java.util.UUID
 
 internal class SimuleringControllerTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var fagsakRepository: FagsakRepository
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
     @Autowired private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
     @Autowired private lateinit var simuleringsresultatRepository: SimuleringsresultatRepository
@@ -42,7 +40,7 @@ internal class SimuleringControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `Skal returnere 200 OK for simulering av behandling`() {
         val personIdent = "12345678901"
-        val fagsak = fagsakRepository.insert(fagsak(identer = setOf(FagsakPerson(personIdent))))
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent(personIdent))))
         val behandling = behandlingRepository.insert(behandling(fagsak))
         tilkjentYtelseRepository
                 .insert(TilkjentYtelse(behandlingId = behandling.id,

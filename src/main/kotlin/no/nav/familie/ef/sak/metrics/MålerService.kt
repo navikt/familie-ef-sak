@@ -4,18 +4,28 @@ import io.micrometer.core.instrument.Metrics
 import io.micrometer.core.instrument.MultiGauge
 import io.micrometer.core.instrument.Tags
 import no.nav.familie.ef.sak.metrics.domain.MålerRepository
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
+import java.util.concurrent.atomic.AtomicInteger
 
 @Service
 class MålerService(private val målerRepository: MålerRepository) {
 
-    val åpneBehandlingerPerUkeGauge = MultiGauge.builder("KlarTilBehandlingPerUke").register(Metrics.globalRegistry)
-    val åpneBehandlingerGauge = MultiGauge.builder("KlarTilBehandling").register(Metrics.globalRegistry)
-    val vedtakGauge = MultiGauge.builder("Vedtak").register(Metrics.globalRegistry)
+    private val åpneBehandlingerPerUkeGauge = MultiGauge.builder("KlarTilBehandlingPerUke").register(Metrics.globalRegistry)
+    private val åpneBehandlingerGauge = MultiGauge.builder("KlarTilBehandling").register(Metrics.globalRegistry)
+    private val vedtakGauge = MultiGauge.builder("Vedtak").register(Metrics.globalRegistry)
+    private val antallMigreringerGauge = Metrics.gauge("AntallMigreringer", AtomicInteger()) ?: error("Forventer not null")
 
     private val logger = LoggerFactory.getLogger(this::class.java)
+
+    @Scheduled(initialDelay = 60 * 1000L, fixedDelay = OPPDATERINGSFREKVENS)
+    fun antallMigreringer() {
+        val antallBehandlinger = målerRepository.finnAntallBehandlingerAvÅrsak(BehandlingÅrsak.MIGRERING)
+        logger.info("Antall migreringer=$antallBehandlinger")
+        antallMigreringerGauge.set(antallBehandlinger)
+    }
 
     @Scheduled(initialDelay = 60 * 1000L, fixedDelay = OPPDATERINGSFREKVENS)
     fun åpneBehandlingerPerUke() {

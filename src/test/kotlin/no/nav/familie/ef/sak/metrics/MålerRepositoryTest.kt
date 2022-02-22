@@ -4,7 +4,6 @@ import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
-import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.metrics.domain.BehandlingerPerStatus
 import no.nav.familie.ef.sak.metrics.domain.ForekomsterPerUke
@@ -12,6 +11,7 @@ import no.nav.familie.ef.sak.metrics.domain.MålerRepository
 import no.nav.familie.ef.sak.metrics.domain.VedtakPerUke
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -27,9 +27,6 @@ class MålerRepositoryTest : OppslagSpringRunnerTest() {
     @Autowired
     lateinit var behandlingRepository: BehandlingRepository
 
-    @Autowired
-    lateinit var fagsakRepository: FagsakRepository
-
     private val år = LocalDate.now().get(IsoFields.WEEK_BASED_YEAR)
     private val uke = LocalDate.now().get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)
 
@@ -40,7 +37,7 @@ class MålerRepositoryTest : OppslagSpringRunnerTest() {
         val fagsakSkolepenger = fagsak(stønadstype = Stønadstype.SKOLEPENGER)
         val fagsaker = listOf(fagsakBarneTilsyn, fagsakOvergangsstønad, fagsakSkolepenger)
 
-        fagsaker.forEach(fagsakRepository::insert)
+        fagsaker.forEach(testoppsettService::lagreFagsak)
 
         repeat(3) { // 3 behandlinger
             fagsaker.forEach { fagsak -> // per stønadstype
@@ -56,6 +53,17 @@ class MålerRepositoryTest : OppslagSpringRunnerTest() {
             }
         }
 
+    }
+
+    @Test
+    internal fun `finnAntallBehandlingerAvÅrsak - finner riktig antall`() {
+        assertThat(målerRepository.finnAntallBehandlingerAvÅrsak(BehandlingÅrsak.MIGRERING)).isEqualTo(0)
+        val fagsakBarneTilsyn = fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD)
+
+        testoppsettService.lagreFagsak(fagsakBarneTilsyn)
+
+        behandlingRepository.insert(behandling(fagsakBarneTilsyn, årsak = BehandlingÅrsak.MIGRERING))
+        assertThat(målerRepository.finnAntallBehandlingerAvÅrsak(BehandlingÅrsak.MIGRERING)).isEqualTo(1)
     }
 
     @Test

@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.infrastruktur.exception
 
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.security.token.support.core.exceptions.JwtTokenMissingException
 import org.slf4j.LoggerFactory
 import org.springframework.core.NestedExceptionUtils
 import org.springframework.http.HttpStatus
@@ -31,16 +32,28 @@ class ApiExceptionHandler {
                 .body(Ressurs.failure(errorMessage = "Uventet feil", frontendFeilmelding = "En uventet feil oppstod."))
     }
 
+    @ExceptionHandler(JwtTokenMissingException::class)
+    fun handleJwtTokenMissingException(jwtTokenMissingException: JwtTokenMissingException): ResponseEntity<Ressurs<Nothing>> {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(Ressurs.failure(errorMessage = "401 Unauthorized JwtTokenMissingException",
+                                      frontendFeilmelding = "En uventet feil oppstod: Kall ikke autorisert"))
+    }
+
     @ExceptionHandler(ApiFeil::class)
     fun handleThrowable(feil: ApiFeil): ResponseEntity<Ressurs<Nothing>> {
+        val metodeSomFeiler = finnMetodeSomFeiler(feil)
+        secureLogger.info("En håndtert feil har oppstått(${feil.httpStatus}): ${feil.feil}", feil)
+        logger.info("En håndtert feil har oppstått(${feil.httpStatus}) metode=$metodeSomFeiler exception=${rootCause(feil)}: ${feil.message} ")
         return ResponseEntity.status(feil.httpStatus).body(Ressurs.funksjonellFeil(frontendFeilmelding = feil.feil,
                                                                                    melding = feil.feil))
     }
 
     @ExceptionHandler(Feil::class)
     fun handleThrowable(feil: Feil): ResponseEntity<Ressurs<Nothing>> {
-        secureLogger.warn("En håndtert feil har oppstått(${feil.httpStatus}): ${feil.frontendFeilmelding}", feil)
-        logger.warn("En håndtert feil har oppstått(${feil.httpStatus}) exception=${rootCause(feil)}: ${feil.message} ")
+        val metodeSomFeiler = finnMetodeSomFeiler(feil)
+        secureLogger.error("En håndtert feil har oppstått(${feil.httpStatus}): ${feil.frontendFeilmelding}", feil)
+        logger.error("En håndtert feil har oppstått(${feil.httpStatus}) metode=$metodeSomFeiler exception=${rootCause(feil)}: ${feil.message} ")
         return ResponseEntity.status(feil.httpStatus).body(Ressurs.failure(frontendFeilmelding = feil.frontendFeilmelding))
     }
 

@@ -2,19 +2,16 @@ package no.nav.familie.ef.sak.vedtak.uttrekk
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
-import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.domain.Sort
 import java.time.YearMonth
 
 internal class UttrekkArbeidssøkerRepositoryTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var fagsakRepository: FagsakRepository
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
     @Autowired private lateinit var repository: UttrekkArbeidssøkerRepository
 
@@ -22,7 +19,7 @@ internal class UttrekkArbeidssøkerRepositoryTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     internal fun setUp() {
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
         for (i in 1..10) {
             repository.insert(UttrekkArbeidssøkere(fagsakId = fagsak.id,

@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.infotrygd
 
 import no.nav.familie.ef.sak.felles.util.isEqualOrAfter
 import no.nav.familie.ef.sak.felles.util.isEqualOrBefore
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdEndringKode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
 import java.time.LocalDate
 
@@ -41,11 +42,12 @@ object InfotrygdPeriodeUtil {
      * Slår sammen perioder fra infotrygd, disse skal ikke slås sammen tvers ulike stønadId'er
      */
     fun slåSammenInfotrygdperioder(infotrygdperioder: List<InfotrygdPeriode>): List<InfotrygdPeriode> {
-        return infotrygdperioder
+        return filtrerOgSorterPerioderFraInfotrygd(infotrygdperioder)
+                .filter { it.kode != InfotrygdEndringKode.ANNULERT && it.kode != InfotrygdEndringKode.UAKTUELL }
                 .groupBy { it.stønadId }
                 .values
                 .flatMap(this::slåSammenPerioder)
-                .sortedBy { it.stønadFom }
+                .sortedByDescending { it.stønadFom }
     }
 
     private fun slåSammenPerioder(perioder: List<InfotrygdPeriode>): MutableList<InfotrygdPeriode> {

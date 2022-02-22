@@ -52,7 +52,7 @@ internal class GrunnlagsdataServiceTest {
     private val service = GrunnlagsdataService(grunnlagsdataRepository = grunnlagsdataRepository,
                                                søknadService = søknadService,
                                                grunnlagsdataRegisterService = grunnlagsdataRegisterService,
-                                               behandlingService = behandlingService)
+                                               behandlingService = behandlingService, mockk())
 
     @BeforeEach
     internal fun setUp() {

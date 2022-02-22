@@ -1,46 +1,55 @@
 package no.nav.familie.ef.sak.opplysninger.mapper
 
+import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.Barn
 import no.nav.familie.kontrakter.ef.søknad.Fødselsnummer
+import java.time.LocalDate
 import kotlin.math.abs
+
 
 object BarnMatcher {
 
-    fun kobleSøknadsbarnOgRegisterBarn(søknadsbarn: Set<Barn>, barn: List<BarnMedIdent>): List<MatchetBarn> {
+    fun kobleBehandlingBarnOgRegisterBarn(behandlingBarn: List<BehandlingBarn>,
+                                          barn: List<BarnMedIdent>): List<MatchetBehandlingBarn> {
         val barnMap = barn.associateBy { it.personIdent }
-        val søknadsbarnMedFnrMatchetTilPdlBarn =
-                søknadsbarn.map {
-                    val firstOrNull = barnMap.entries.firstOrNull { entry -> it.fødselsnummer == entry.key }
-                    MatchetBarn(firstOrNull?.key, firstOrNull?.value, it)
-                }
+        val behandlingBarnFnrMatchetTilPdlBarn = behandlingBarn.map {
+            val firstOrNull = barnMap.entries.firstOrNull { entry -> it.personIdent == entry.key }
+            MatchetBehandlingBarn(firstOrNull?.key, firstOrNull?.value, it)
+        }
 
-        val pdlBarnIkkeISøknad =
-                barnMap.filter { entry ->
-                    søknadsbarn.firstOrNull { it.fødselsnummer == entry.key } == null
-                }.toMutableMap()
+        val pdlBarnIkkeIBehandlingBarn =
+                barnMap.filter { entry -> behandlingBarn.none { it.personIdent == entry.key } }.toMutableMap()
 
-        return søknadsbarnMedFnrMatchetTilPdlBarn.map {
+        return behandlingBarnFnrMatchetTilPdlBarn.map {
             if (it.barn != null) {
                 it
             } else {
-                val barnForsøktMatchetPåFødselsdato = forsøkMatchPåFødselsdato(it, pdlBarnIkkeISøknad)
+                val barnForsøktMatchetPåFødselsdato = forsøkMatchPåFødselsdato(it, pdlBarnIkkeIBehandlingBarn)
                 if (barnForsøktMatchetPåFødselsdato.fødselsnummer != null) {
-                    pdlBarnIkkeISøknad.remove(barnForsøktMatchetPåFødselsdato.fødselsnummer)
+                    pdlBarnIkkeIBehandlingBarn.remove(barnForsøktMatchetPåFødselsdato.fødselsnummer)
                 }
                 barnForsøktMatchetPåFødselsdato
             }
         }
+
     }
 
-    private fun forsøkMatchPåFødselsdato(barn: MatchetBarn,
-                                         pdlBarnIkkeISøknad: Map<String, BarnMedIdent>): MatchetBarn {
+    private fun forsøkMatchPåFødselsdato(barn: MatchetBehandlingBarn,
+                                         pdlBarnIkkeISøknad: Map<String, BarnMedIdent>): MatchetBehandlingBarn {
 
-        val fødselTermindato = barn.søknadsbarn.fødselTermindato ?: return barn
+        val fødselTermindato = barn.behandlingBarn.fødselTermindato ?: return barn
+        val nærmesteMatch = nærmesteMatch(pdlBarnIkkeISøknad, fødselTermindato) ?: return barn
+
+        return barn.copy(fødselsnummer = nærmesteMatch.key, barn = nærmesteMatch.value)
+
+    }
+
+    private fun nærmesteMatch(pdlBarnIkkeISøknad: Map<String, BarnMedIdent>,
+                              fødselTermindato: LocalDate): Map.Entry<String, BarnMedIdent>? {
         val uke20 = fødselTermindato.minusWeeks(20)
         val uke44 = fødselTermindato.plusWeeks(4)
 
-        val nærmesteMatch = pdlBarnIkkeISøknad.entries.filter {
+        return pdlBarnIkkeISøknad.entries.filter {
             val fødselsnummer = Fødselsnummer(it.key)
             val fødselsdato = fødselsnummer.fødselsdato
             fødselsdato.isBefore(uke44) and fødselsdato.isAfter(uke20)
@@ -48,12 +57,11 @@ object BarnMatcher {
             val epochDayForFødsel = Fødselsnummer(it.key).fødselsdato.toEpochDay()
             val epochDayTermindato = fødselTermindato.toEpochDay()
             abs(epochDayForFødsel - epochDayTermindato)
-        } ?: return barn
-
-        return barn.copy(fødselsnummer = nærmesteMatch.key, barn = nærmesteMatch.value)
-
+        }
     }
 
 }
 
-data class MatchetBarn(val fødselsnummer: String?, val barn: BarnMedIdent?, val søknadsbarn: Barn)
+data class MatchetBehandlingBarn(val fødselsnummer: String?,
+                                 val barn: BarnMedIdent?,
+                                 val behandlingBarn: BehandlingBarn)

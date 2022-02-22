@@ -109,8 +109,8 @@ object AndelHistorikkBeregner {
 
         tilkjentYtelser.forEach { tilkjentYtelse ->
             val vedtaksperioder = vedtaksperioderPåBehandling.getValue(tilkjentYtelse.behandlingId)
-
-            tilkjentYtelse.andelerTilkjentYtelse.forEach { andel ->
+            val andelerFraSanksjon = lagAndelerFraSanksjoner(vedtaksperioder, tilkjentYtelse)
+            (tilkjentYtelse.andelerTilkjentYtelse + andelerFraSanksjon).forEach { andel ->
                 val andelFraHistorikk = finnTilsvarendeAndelIHistorikk(historikk, andel)
                 val index = finnIndeksForNyAndel(historikk, andel)
                 val vedtaksperiode = finnVedtaksperiodeForAndel(andel, vedtaksperioder)
@@ -126,6 +126,20 @@ object AndelHistorikkBeregner {
         }
         return historikk
     }
+
+    private fun lagAndelerFraSanksjoner(vedtaksperioder: List<Vedtaksperiode>,
+                                        tilkjentYtelse: TilkjentYtelse) =
+            vedtaksperioder.filter { it.periodeType == VedtaksperiodeType.SANKSJON }
+                    .map {
+                        AndelTilkjentYtelse(beløp = 0,
+                                            stønadFom = it.datoFra,
+                                            stønadTom = it.datoTil,
+                                            "",
+                                            0,
+                                            0,
+                                            0,
+                                            tilkjentYtelse.behandlingId)
+                    }
 
     /**
      * Markerer endrede med riktig type endret
@@ -145,7 +159,8 @@ object AndelHistorikkBeregner {
             andelFraHistorikk.endring = lagEndring(endringType, tilkjentYtelse)
 
             return if (endringType == EndringType.SPLITTET) {
-                andelFraHistorikk.andel = andelHistorikk.copy(stønadTom = andel.stønadTom)
+                andelFraHistorikk.andel = andelHistorikk.copy(stønadTom = andel.stønadTom,
+                                                              kildeBehandlingId = andel.kildeBehandlingId)
                 andelFraHistorikk.copy(andel = andelHistorikk.copy(stønadFom = andel.stønadTom.plusDays(1)),
                                        endring = lagEndring(EndringType.FJERNET, tilkjentYtelse))
             } else {
@@ -183,6 +198,7 @@ object AndelHistorikkBeregner {
     private fun AndelHistorikkHolder.finnEndringstype(tidligereAndel: AndelTilkjentYtelse,
                                                       vedtaksperiode: Vedtaksperiode): EndringType? {
         return when {
+            erSanksjonMedSammePerioder(tidligereAndel, vedtaksperiode) -> null
             aktivitetEllerPeriodeTypeHarEndretSeg(vedtaksperiode) -> EndringType.ERSTATTET
             this.andel.beløp != tidligereAndel.beløp -> EndringType.ERSTATTET
             this.andel.inntekt != tidligereAndel.inntekt -> EndringType.ERSTATTET
@@ -192,6 +208,12 @@ object AndelHistorikkBeregner {
             else -> null // Uendret
         }
     }
+
+    private fun AndelHistorikkHolder.erSanksjonMedSammePerioder(tidligereAndel: AndelTilkjentYtelse,
+                                                                vedtaksperiode: Vedtaksperiode) =
+            this.vedtaksperiode.periodeType == VedtaksperiodeType.SANKSJON && vedtaksperiode.periodeType == VedtaksperiodeType.SANKSJON
+            && this.vedtaksperiode.datoFra == tidligereAndel.stønadFom && this.vedtaksperiode.datoTil == tidligereAndel.stønadTom
+
 
     private fun AndelHistorikkHolder.aktivitetEllerPeriodeTypeHarEndretSeg(vedtaksperiode: Vedtaksperiode) =
             this.vedtaksperiode.aktivitet != vedtaksperiode.aktivitet ||

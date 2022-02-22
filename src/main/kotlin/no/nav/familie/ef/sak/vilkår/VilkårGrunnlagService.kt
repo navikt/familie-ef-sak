@@ -1,11 +1,13 @@
 package no.nav.familie.ef.sak.vilkår
 
+import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMedSamværMapper
 import no.nav.familie.ef.sak.opplysninger.mapper.SivilstandMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioder
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadsskjemaOvergangsstønad
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknadsverdier
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.AktivitetMapper
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.BosituasjonMapper
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SagtOppEllerRedusertStillingMapper
@@ -27,17 +29,19 @@ class VilkårGrunnlagService(private val medlemskapMapper: MedlemskapMapper,
 
 
     fun hentGrunnlag(behandlingId: UUID,
-                     søknad: SøknadsskjemaOvergangsstønad?): VilkårGrunnlagDto {
+                     søknad: Søknadsverdier?,
+                     personident: String,
+                     barn: List<BehandlingBarn>): VilkårGrunnlagDto {
         val registergrunnlagData = grunnlagsdataService.hentGrunnlagsdata(behandlingId)
         val grunnlagsdata = registergrunnlagData.grunnlagsdata
 
-        val aktivitet = søknad?.let { AktivitetMapper.tilDto(aktivitet = it.aktivitet, situasjon = it.situasjon, barn = it.barn) }
-        // TODO barn må kanskje legges til i en revurdering av migrering på noen måte?
-        val barnMedSamvær = søknad?.let { mapBarnMedSamvær(grunnlagsdata, it) } ?: emptyList()
+        val aktivitet = søknad?.let { AktivitetMapper.tilDto(aktivitet = it.aktivitet, situasjon = it.situasjon, søknadBarn = it.barn) }
+        val søknadsbarn = søknad?.barn ?: emptyList()
+        val barnMedSamvær = mapBarnMedSamvær(søknad?.fødselsnummer ?: personident, grunnlagsdata, barn, søknadsbarn)
         val medlemskap = medlemskapMapper.tilDto(grunnlagsdata, søknad?.medlemskap)
         val sivilstand = SivilstandMapper.tilDto(grunnlagsdata, søknad?.sivilstand)
         val sivilstandsplaner = SivilstandsplanerMapper.tilDto(sivilstandsplaner = søknad?.sivilstandsplaner)
-        val sagtOppEllerRedusertStilling = søknad?.let { SagtOppEllerRedusertStillingMapper.tilDto(situasjon = it.situasjon) }
+        val sagtOppEllerRedusertStilling = søknad?.situasjon?.let { SagtOppEllerRedusertStillingMapper.tilDto(situasjon = it) }
 
         return VilkårGrunnlagDto(tidligereVedtaksperioder = mapTidligereVedtaksperioder(grunnlagsdata.tidligereVedtaksperioder),
                                  medlemskap = medlemskap,
@@ -60,14 +64,17 @@ class VilkårGrunnlagService(private val medlemskapMapper: MedlemskapMapper,
         return TidligereVedtaksperioderDto(infotrygd = infotrygd)
     }
 
-    private fun mapBarnMedSamvær(grunnlagsdata: GrunnlagsdataDomene,
-                                 søknad: SøknadsskjemaOvergangsstønad): List<BarnMedSamværDto> {
-        val søker = grunnlagsdata.søker
-        val barnMedSamværRegistergrunnlag = BarnMedSamværMapper.mapRegistergrunnlag(grunnlagsdata.barn,
+    private fun mapBarnMedSamvær(personIdentSøker: String,
+                                 grunnlagsdata: GrunnlagsdataDomene,
+                                 barn: List<BehandlingBarn>,
+                                 søknadsbarn: Collection<SøknadBarn>): List<BarnMedSamværDto> {
+        val barnMedSamværRegistergrunnlag = BarnMedSamværMapper.mapRegistergrunnlag(personIdentSøker,
+                                                                                    grunnlagsdata.barn,
                                                                                     grunnlagsdata.annenForelder,
-                                                                                    søknad,
-                                                                                    søker.bostedsadresse)
-        return BarnMedSamværMapper.slåSammenBarnMedSamvær(BarnMedSamværMapper.mapSøknadsgrunnlag(søknad.barn),
+                                                                                    barn,
+                                                                                    søknadsbarn,
+                                                                                    grunnlagsdata.søker.bostedsadresse)
+        return BarnMedSamværMapper.slåSammenBarnMedSamvær(BarnMedSamværMapper.mapSøknadsgrunnlag(barn, søknadsbarn),
                                                           barnMedSamværRegistergrunnlag)
                 .sortedByDescending {
                     it.registergrunnlag.fødselsnummer?.let { fødsesnummer -> Fødselsnummer(fødsesnummer).fødselsdato }

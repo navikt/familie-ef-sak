@@ -1,0 +1,1 @@
+ALTER TABLE fagsak_person RENAME TO fagsak_person_old;

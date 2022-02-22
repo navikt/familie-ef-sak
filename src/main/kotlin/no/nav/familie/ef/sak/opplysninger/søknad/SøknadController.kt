@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.opplysninger.søknad
 
+import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -21,10 +22,10 @@ class SøknadController(private val søknadService: SøknadService,
 
     @GetMapping("/{behandlingId}/datoer")
     fun hentSøknadDatoer(@PathVariable behandlingId: UUID): Ressurs<SøknadDatoerDto> {
-        tilgangService.validerTilgangTilBehandling(behandlingId)
-        val overgangsstønad = søknadService.hentOvergangsstønad(behandlingId)
-        feilHvis(overgangsstønad == null) { "Kan ikke hente søknad til behandlingen" }
-        return Ressurs.success(SøknadDatoerDto(søknadsdato = overgangsstønad.datoMottatt,
-                                               søkerStønadFra = overgangsstønad.søkerFra))
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
+        val søknadsgrunnlag = søknadService.hentSøknadsgrunnlag(behandlingId)
+        feilHvis(søknadsgrunnlag == null) { "Mangler søknad for behandling=$behandlingId" }
+        return Ressurs.success(SøknadDatoerDto(søknadsdato = søknadsgrunnlag.datoMottatt,
+                                               søkerStønadFra = søknadsgrunnlag.søkerFra))
     }
 }

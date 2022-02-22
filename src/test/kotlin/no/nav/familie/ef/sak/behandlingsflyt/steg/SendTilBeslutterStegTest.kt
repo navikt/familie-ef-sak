@@ -21,14 +21,14 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask.OpprettOppg
 import no.nav.familie.ef.sak.brev.VedtaksbrevRepository
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.fagsak.domain.Fagsak
-import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
+import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
-import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.oppgave.OppgaveService
+import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
@@ -86,15 +86,16 @@ internal class SendTilBeslutterStegTest {
                                  simuleringService,
                                  tilbakekrevingService,
                                  vurderingService)
-    private val fagsak = Fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD,
-                                søkerIdenter = setOf(FagsakPerson(ident = "12345678901")))
+    private val fagsak = fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD,
+                                identer = setOf(PersonIdent(ident = "12345678901")))
     private val saksbehandlerNavn = "saksbehandlernavn"
     private val vedtaksbrev = Vedtaksbrev(behandlingId = UUID.randomUUID(),
                                           saksbehandlerBrevrequest = "",
                                           brevmal = "",
                                           saksbehandlersignatur = saksbehandlerNavn,
-                                          "",
-                                          null)
+                                          beslutterPdf = null,
+                                          enhet = "enhet",
+                                          saksbehandlerident = saksbehandlerNavn)
 
     private val behandling = Behandling(fagsakId = fagsak.id,
                                         type = BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -135,7 +136,7 @@ internal class SendTilBeslutterStegTest {
     }
 
     @AfterEach
-    internal fun tearDown(){
+    internal fun tearDown() {
         clearBrukerContext()
     }
 
@@ -151,7 +152,8 @@ internal class SendTilBeslutterStegTest {
         every { vurderingService.erAlleVilkårOppfylt(any()) } returns false
         val innvilgetBehandling = behandling.copy(resultat = INNVILGET)
         every { vedtakService.hentVedtak(any()) } returns lagVedtak(ResultatType.INNVILGE)
-        val frontendFeilmelding = assertThrows<Feil> { beslutteVedtakSteg.validerSteg(innvilgetBehandling) }.frontendFeilmelding
+        val frontendFeilmelding =
+                assertThrows<ApiFeil> { beslutteVedtakSteg.validerSteg(innvilgetBehandling) }.feil
         val forvetetFeilmelding = "Kan ikke innvilge hvis ikke alle vilkår er oppfylt for behandlingId: ${innvilgetBehandling.id}"
         assertThat(frontendFeilmelding).isEqualTo(forvetetFeilmelding)
     }
@@ -163,8 +165,8 @@ internal class SendTilBeslutterStegTest {
         // behandling og vedtak er av relevant type og
         // saksbehandler ikke har tatt stilling til tilbakekrevingsvarsel.
         mockTilbakekrevingValideringsfeil()
-        val feil = assertThrows<Feil> { beslutteVedtakSteg.validerSteg(revurdering) }
-        assertThat(feil.frontendFeilmelding).isEqualTo("Feilutbetaling detektert. Må ta stilling til feilutbetalingsvarsel under simulering")
+        val feil = assertThrows<ApiFeil> { beslutteVedtakSteg.validerSteg(revurdering) }
+        assertThat(feil.feil).isEqualTo("Feilutbetaling detektert. Må ta stilling til feilutbetalingsvarsel under simulering")
     }
 
     @Test
@@ -207,7 +209,7 @@ internal class SendTilBeslutterStegTest {
         every { vedtakService.hentVedtak(any()) } returns lagVedtak(ResultatType.INNVILGE)
         mockBrukerContext("Saksbehandler B")
 
-        assertThrows<Feil> { beslutteVedtakSteg.validerSteg(behandling) }
+        assertThrows<ApiFeil> { beslutteVedtakSteg.validerSteg(behandling) }
 
         clearBrukerContext()
     }

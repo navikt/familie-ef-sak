@@ -9,11 +9,12 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.arbeidsfordeling.Arbeidsfordelingsenhet
-import no.nav.familie.ef.sak.fagsak.FagsakRepository
+import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
-import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
+import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
+import no.nav.familie.ef.sak.infrastruktur.exception.IntegrasjonException
 import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.oppgave.OppgaveClient
 import no.nav.familie.ef.sak.oppgave.OppgaveRepository
@@ -21,6 +22,7 @@ import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
+import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.FinnMappeResponseDto
@@ -35,6 +37,7 @@ import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager
 import java.net.URI
 import java.time.LocalDate
@@ -46,14 +49,14 @@ internal class OppgaveServiceTest {
 
     private val oppgaveClient = mockk<OppgaveClient>()
     private val arbeidsfordelingService = mockk<ArbeidsfordelingService>()
-    private val fagsakRepository = mockk<FagsakRepository>()
+    private val fagsakService = mockk<FagsakService>()
     private val oppgaveRepository = mockk<OppgaveRepository>()
     private val pdlClient = mockk<PdlClient>()
     private val cacheManager = ConcurrentMapCacheManager()
 
     private val oppgaveService =
             OppgaveService(oppgaveClient,
-                           fagsakRepository,
+                           fagsakService,
                            oppgaveRepository,
                            arbeidsfordelingService,
                            pdlClient,
@@ -88,6 +91,29 @@ internal class OppgaveServiceTest {
     }
 
     @Test
+    fun `Opprett oppgave som feiler med fordeling skal prøve på nytt med 4489`() {
+        val aktørIdentFraPdl = "AKTØERIDENT"
+        val slot = slot<OpprettOppgaveRequest>()
+        mockOpprettOppgave(slot, aktørIdentFraPdl)
+        every { arbeidsfordelingService.hentNavEnhet(any()) } returns null
+        oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak)
+
+        verify(exactly = 2) { oppgaveClient.opprettOppgave(any()) }
+    }
+
+    @Test
+    fun `Opprett oppgave som feiler på en ukjent måte skal bare kaste feil videre`() {
+        val aktørIdentFraPdl = "AKTØERIDENT"
+        val slot = slot<OpprettOppgaveRequest>()
+        mockOpprettOppgave(slot, aktørIdentFraPdl)
+        every { oppgaveClient.opprettOppgave(any()) } throws IntegrasjonException("En merkelig feil vi ikke kjenner til")
+        assertThrows<IntegrasjonException> {
+            oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak)
+        }
+    }
+
+
+    @Test
     fun `Skal legge i mappe når vi oppretter godkjenne vedtak-oppgave for 4489`() {
         val aktørIdentFraPdl = "AKTØERIDENT"
         val slot = slot<OpprettOppgaveRequest>()
@@ -109,7 +135,7 @@ internal class OppgaveServiceTest {
     @Test
     fun `Skal ikke legge oppgave i mappe når det er godkjenne vedtak-oppgave for enhet ulik 4489`() {
         val aktørIdentFraPdl = "AKTØERIDENT"
-        every { fagsakRepository.finnFagsakTilBehandling(BEHANDLING_ID) } returns lagTestFagsak()
+        every { fagsakService.hentFagsakForBehandling(BEHANDLING_ID) } returns lagTestFagsak()
         every { oppgaveRepository.insert(any()) } returns lagTestOppgave()
         every {
             oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any())
@@ -267,22 +293,29 @@ internal class OppgaveServiceTest {
 
     private fun mockOpprettOppgave(slot: CapturingSlot<OpprettOppgaveRequest>,
                                    aktørIdentFraPdl: String) {
-        every { fagsakRepository.finnFagsakTilBehandling(BEHANDLING_ID) } returns lagTestFagsak()
+        every { fagsakService.hentFagsakForBehandling(BEHANDLING_ID) } returns lagTestFagsak()
         every { oppgaveRepository.insert(any()) } returns lagTestOppgave()
         every {
             oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any())
         } returns null
         every { arbeidsfordelingService.hentNavEnhet(any()) } returns Arbeidsfordelingsenhet(enhetId = ENHETSNUMMER,
                                                                                              enhetNavn = ENHETSNAVN)
-        every { oppgaveClient.opprettOppgave(capture(slot)) } returns GSAK_OPPGAVE_ID
+        every { oppgaveClient.opprettOppgave(capture(slot)) } answers {
+            val oppgaveRequest: OpprettOppgaveRequest = firstArg()
+            if (oppgaveRequest.enhetsnummer == null) {
+                throw IntegrasjonException("Fant ingen gyldig arbeidsfordeling for oppgaven")
+            } else {
+                GSAK_OPPGAVE_ID
+            }
+        }
         every { pdlClient.hentAktørIder(any()) } returns PdlIdenter(listOf(PdlIdent(aktørIdentFraPdl, false)))
     }
 
     private fun lagTestFagsak(): Fagsak {
-        return Fagsak(id = FAGSAK_ID,
+        return fagsak(id = FAGSAK_ID,
                       stønadstype = Stønadstype.OVERGANGSSTØNAD,
                       eksternId = EksternFagsakId(FAGSAK_EKSTERN_ID),
-                      søkerIdenter = setOf(FagsakPerson(ident = FNR)))
+                      identer = setOf(PersonIdent(ident = FNR)))
     }
 
     private fun lagTestOppgave(): Oppgave {

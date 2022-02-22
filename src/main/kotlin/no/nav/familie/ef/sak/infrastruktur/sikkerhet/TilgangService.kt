@@ -1,9 +1,15 @@
 package no.nav.familie.ef.sak.infrastruktur.sikkerhet
 
+import no.nav.familie.ef.sak.AuditLogger
+import no.nav.familie.ef.sak.AuditLoggerEvent
+import no.nav.familie.ef.sak.CustomKeyValue
+import no.nav.familie.ef.sak.Sporingsdata
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BehandlerRolle
+import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
+import no.nav.familie.ef.sak.infrastruktur.config.getValue
 import no.nav.familie.ef.sak.infrastruktur.exception.ManglerTilgang
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext.hentGrupperFraToken
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
@@ -19,10 +25,16 @@ import java.util.UUID
 class TilgangService(private val personopplysningerIntegrasjonerClient: PersonopplysningerIntegrasjonerClient,
                      private val behandlingService: BehandlingService,
                      private val fagsakService: FagsakService,
+                     private val fagsakPersonService: FagsakPersonService,
                      private val rolleConfig: RolleConfig,
-                     private val cacheManager: CacheManager) {
+                     private val cacheManager: CacheManager,
+                     private val auditLogger: AuditLogger) {
 
-    fun validerTilgangTilPerson(personIdent: String) {
+    /**
+     * Kun ved tilgangskontroll for enskild person, ellers bruk [validerTilgangTilPersonMedBarn]
+     */
+    fun validerTilgangTilPerson(personIdent: String, event: AuditLoggerEvent) {
+        auditLogger.log(Sporingsdata(event, personIdent))
         val harTilgang = personopplysningerIntegrasjonerClient.sjekkTilgangTilPerson(personIdent).harTilgang
         if (!harTilgang) {
             throw ManglerTilgang("Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
@@ -30,7 +42,8 @@ class TilgangService(private val personopplysningerIntegrasjonerClient: Personop
         }
     }
 
-    fun validerTilgangTilPersonMedBarn(personIdent: String) {
+    fun validerTilgangTilPersonMedBarn(personIdent: String, event: AuditLoggerEvent) {
+        auditLogger.log(Sporingsdata(event, personIdent))
         val harTilgang = harTilgangTilPersonMedRelasjoner(personIdent)
         if (!harTilgang) {
             throw ManglerTilgang("Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
@@ -38,26 +51,43 @@ class TilgangService(private val personopplysningerIntegrasjonerClient: Personop
         }
     }
 
-    private fun harTilgangTilPersonMedRelasjoner(personIdent: String): Boolean {
-        return harSaksbehandlerTilgang("validerTilgangTilPersonMedBarn", personIdent) {
-            personopplysningerIntegrasjonerClient.sjekkTilgangTilPersonMedRelasjoner(personIdent).harTilgang
+    fun validerTilgangTilBehandling(behandlingId: UUID, event: AuditLoggerEvent) {
+        val personIdent = cacheManager.getValue("behandlingPersonIdent", behandlingId) {
+            behandlingService.hentAktivIdent(behandlingId)
         }
-    }
-
-    fun validerTilgangTilBehandling(behandlingId: UUID) {
-        val harTilgang = harSaksbehandlerTilgang("validerTilgangTilBehandling", behandlingId) {
-            val personIdent = behandlingService.hentAktivIdent(behandlingId)
-            harTilgangTilPersonMedRelasjoner(personIdent)
-        }
-        if (!harTilgang) {
+        auditLogger.log(Sporingsdata(event, personIdent, custom1 = CustomKeyValue("behandling", behandlingId.toString())))
+        if (!harTilgangTilPersonMedRelasjoner(personIdent)) {
             throw ManglerTilgang("Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
                                  "har ikke tilgang til behandling=$behandlingId")
         }
     }
 
-    fun validerTilgangTilFagsak(fagsakId: UUID) {
-        val personIdent = fagsakService.hentAktivIdent(fagsakId)
-        validerTilgangTilPersonMedBarn(personIdent)
+    fun validerTilgangTilFagsak(fagsakId: UUID, event: AuditLoggerEvent) {
+        val personIdent = cacheManager.getValue("fagsakIdent", fagsakId) {
+            fagsakService.hentAktivIdent(fagsakId)
+        }
+        auditLogger.log(Sporingsdata(event, personIdent, custom1 = CustomKeyValue("fagsak", fagsakId.toString())))
+        if (!harTilgangTilPersonMedRelasjoner(personIdent)) {
+            throw ManglerTilgang("Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
+                                 "har ikke tilgang til fagsak=$fagsakId")
+        }
+    }
+
+    fun validerTilgangTilFagsakPerson(fagsakPersonId: UUID, event: AuditLoggerEvent) {
+        val personIdent = cacheManager.getValue("fagsakPersonIdent", fagsakPersonId) {
+            fagsakPersonService.hentAktivIdent(fagsakPersonId)
+        }
+        auditLogger.log(Sporingsdata(event, personIdent, custom1 = CustomKeyValue("fagsakPersonId", fagsakPersonId.toString())))
+        if (!harTilgangTilPersonMedRelasjoner(personIdent)) {
+            throw ManglerTilgang("Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
+                                 "har ikke tilgang til fagsakPerson=$fagsakPersonId")
+        }
+    }
+
+    private fun harTilgangTilPersonMedRelasjoner(personIdent: String): Boolean {
+        return harSaksbehandlerTilgang("validerTilgangTilPersonMedBarn", personIdent) {
+            personopplysningerIntegrasjonerClient.sjekkTilgangTilPersonMedRelasjoner(personIdent).harTilgang
+        }
     }
 
     fun validerHarSaksbehandlerrolle() {

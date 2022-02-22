@@ -6,6 +6,7 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.blankett.BlankettRepository
@@ -13,10 +14,12 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataServic
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.tilSøknadsverdier
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.vilkårsvurdering
+import no.nav.familie.ef.sak.testutil.søknadsBarnTilBehandlingBarn
 import no.nav.familie.ef.sak.vilkår.DelvilkårsvurderingWrapper
 import no.nav.familie.ef.sak.vilkår.VilkårGrunnlagService
 import no.nav.familie.ef.sak.vilkår.VilkårType
@@ -46,24 +49,28 @@ internal class VurderingServiceTest {
     private val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
     private val personopplysningerIntegrasjonerClient = mockk<PersonopplysningerIntegrasjonerClient>()
     private val blankettRepository = mockk<BlankettRepository>()
+    private val barnService = mockk<BarnService>()
     private val vilkårGrunnlagService = mockk<VilkårGrunnlagService>()
     private val grunnlagsdataService = mockk<GrunnlagsdataService>()
     private val vurderingService = VurderingService(behandlingService = behandlingService,
                                                     søknadService = søknadService,
                                                     vilkårsvurderingRepository = vilkårsvurderingRepository,
                                                     vilkårGrunnlagService = vilkårGrunnlagService,
-                                                    grunnlagsdataService = grunnlagsdataService)
+                                                    grunnlagsdataService = grunnlagsdataService,
+                                                    barnService = barnService)
     private val søknad = SøknadsskjemaMapper.tilDomene(TestsøknadBuilder.Builder().setBarn(listOf(
-            TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "13071489536"),
+            TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "14041385481"),
             TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "01012067050")
-    )).build().søknadOvergangsstønad)
+    )).build().søknadOvergangsstønad).tilSøknadsverdier()
+    private val barn = søknadsBarnTilBehandlingBarn(søknad.barn)
     private val behandling = behandling(fagsak(), BehandlingStatus.OPPRETTET)
     private val behandlingId = UUID.randomUUID()
 
     @BeforeEach
     fun setUp() {
+        every { behandlingService.hentAktivIdent(behandlingId) } returns søknad.fødselsnummer
         every { behandlingService.hentBehandling(behandlingId) } returns behandling
-        every { søknadService.hentOvergangsstønad(any()) }.returns(søknad)
+        every { søknadService.hentSøknadsgrunnlag(any()) }.returns(søknad)
         every { blankettRepository.deleteById(any()) } just runs
         every { personopplysningerIntegrasjonerClient.hentMedlemskapsinfo(any()) }
                 .returns(Medlemskapsinfo(personIdent = søknad.fødselsnummer,
@@ -71,9 +78,10 @@ internal class VurderingServiceTest {
                                          uavklartePerioder = emptyList(),
                                          avvistePerioder = emptyList()))
         every { vilkårsvurderingRepository.insertAll(any()) } answers { firstArg() }
+        every { barnService.finnBarnPåBehandling(behandlingId) } returns barn
         val sivilstand = SivilstandInngangsvilkårDto(mockk(relaxed = true),
                                                      SivilstandRegistergrunnlagDto(Sivilstandstype.GIFT, "Navn", null))
-        every { vilkårGrunnlagService.hentGrunnlag(any(), any()) } returns VilkårGrunnlagDto(mockk(relaxed = true),
+        every { vilkårGrunnlagService.hentGrunnlag(any(), any(), any(), any()) } returns VilkårGrunnlagDto(mockk(relaxed = true),
                                                                                              mockk(relaxed = true),
                                                                                              sivilstand,
                                                                                              mockk(relaxed = true),
@@ -123,7 +131,8 @@ internal class VurderingServiceTest {
     internal fun `skal ikke returnere delvilkår som er ikke aktuelle til frontend`() {
         val delvilkårsvurdering =
                 SivilstandRegel().initereDelvilkårsvurdering(HovedregelMetadata(mockk(),
-                                                                                Sivilstandstype.ENKE_ELLER_ENKEMANN))
+                                                                                Sivilstandstype.ENKE_ELLER_ENKEMANN,
+                                                                                barn = emptyList()))
         every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns
                 listOf(Vilkårsvurdering(behandlingId = behandlingId,
                                         type = VilkårType.SIVILSTAND,

@@ -4,6 +4,7 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.MappedCollection
+import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDate
 import java.util.UUID
 
@@ -13,31 +14,32 @@ interface IBarn {
     val annenForelder: IAnnenForelder?
 }
 
-data class Barn(@Id
-                val id: UUID = UUID.randomUUID(),
-                val navn: String? = null,
-                @Column("fodselsnummer")
-                override val fødselsnummer: String? = null,
-                val harSkalHaSammeAdresse: Boolean,
-                @Column("skal_bo_hos_soker")
-                val skalBoHosSøker: String? = null,
-                @Column("ikke_registrert_pa_sokers_adresse_beskrivelse")
-                val ikkeRegistrertPåSøkersAdresseBeskrivelse: String?,
-                @Column("er_barnet_fodt")
-                val erBarnetFødt: Boolean,
-                @Column("fodsel_termindato")
-                val fødselTermindato: LocalDate? = null,
-                val terminbekreftelse: Dokumentasjon? = null,
-                @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "annen_forelder_")
-                override val annenForelder: AnnenForelder? = null,
-                @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "samver_")
-                val samvær: Samvær? = null,
-                val skalHaBarnepass: Boolean? = null,
-                @Column("serlige_tilsynsbehov")
-                val særligeTilsynsbehov: String? = null,
-                @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "barnepass_")
-                val barnepass: Barnepass? = null,
-                val lagtTilManuelt: Boolean) : IBarn
+@Table("soknad_barn")
+data class SøknadBarn(@Id
+                      val id: UUID = UUID.randomUUID(),
+                      val navn: String? = null,
+                      @Column("fodselsnummer")
+                      override val fødselsnummer: String? = null,
+                      val harSkalHaSammeAdresse: Boolean,
+                      @Column("skal_bo_hos_soker")
+                      val skalBoHosSøker: String? = null,
+                      @Column("ikke_registrert_pa_sokers_adresse_beskrivelse")
+                      val ikkeRegistrertPåSøkersAdresseBeskrivelse: String?,
+                      @Column("er_barnet_fodt")
+                      val erBarnetFødt: Boolean,
+                      @Column("fodsel_termindato")
+                      val fødselTermindato: LocalDate? = null,
+                      val terminbekreftelse: Dokumentasjon? = null,
+                      @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "annen_forelder_")
+                      override val annenForelder: AnnenForelder? = null,
+                      @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "samver_")
+                      val samvær: Samvær? = null,
+                      val skalHaBarnepass: Boolean? = null,
+                      @Column("serlige_tilsynsbehov")
+                      val særligeTilsynsbehov: String? = null,
+                      @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "barnepass_")
+                      val barnepass: Barnepass? = null,
+                      val lagtTilManuelt: Boolean) : IBarn
 
 interface IAnnenForelder {
 
@@ -55,6 +57,7 @@ data class Barnepass(@Column("arsak_barnepass")
                      @MappedCollection(idColumn = "barn_id")
                      val barnepassordninger: Set<Barnepassordning>?)
 
+@Table("soknad_barnepassordning")
 data class Barnepassordning(val hvaSlagsBarnepassordning: String? = null,
                             val navn: String,
                             @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL)

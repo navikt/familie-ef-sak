@@ -26,11 +26,11 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
     fun finnMedEksternId(eksternId: Long): Behandling?
 
     // language=PostgreSQL
-    @Query("""SELECT fp.ident FROM fagsak f
+    @Query("""SELECT pi.ident FROM fagsak f
                     JOIN behandling b ON f.id = b.fagsak_id
-                    JOIN fagsak_person fp ON b.fagsak_id=fp.fagsak_id
+                    JOIN person_ident pi ON f.fagsak_person_id=pi.fagsak_person_id
                     WHERE b.id = :behandlingId
-                    ORDER BY fp.endret_tid DESC 
+                    ORDER BY pi.endret_tid DESC 
                     LIMIT 1
                     """)
     fun finnAktivIdent(behandlingId: UUID): String
@@ -41,8 +41,8 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         FROM behandling b
         JOIN behandling_ekstern be ON b.id = be.behandling_id
         JOIN fagsak f ON f.id = b.fagsak_id
-        JOIN fagsak_person fp ON b.fagsak_id = fp.fagsak_id
-        WHERE fp.ident IN (:personidenter) AND f.stonadstype = :stønadstype AND b.type != 'BLANKETT'
+        JOIN person_ident pi ON f.fagsak_person_id = pi.fagsak_person_id
+        WHERE pi.ident IN (:personidenter) AND f.stonadstype = :stønadstype AND b.type != 'BLANKETT'
         ORDER BY b.opprettet_tid DESC
         LIMIT 1
     """)
@@ -67,7 +67,8 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         SELECT b.id behandling_id, be.id ekstern_behandling_id, fe.id ekstern_fagsak_id
         FROM behandling b
             JOIN behandling_ekstern be ON b.id = be.behandling_id
-            JOIN fagsak_ekstern fe ON b.fagsak_id = fe.fagsak_id
+            JOIN fagsak_ekstern fe ON b.fagsak_id = fe.fagsak_id 
+        WHERE behandling_id IN (:behandlingId)
         """)
     fun finnEksterneIder(behandlingId: Set<UUID>): Set<EksternId>
 

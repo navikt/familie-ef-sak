@@ -15,6 +15,7 @@ import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.web.client.RestOperations
+import java.net.URI
 
 class EregClientTest {
 
@@ -27,7 +28,7 @@ class EregClientTest {
         @JvmStatic
         fun start() {
             server.start()
-            eregClient = EregClient(server.baseUrl(), restOperations)
+            eregClient = EregClient(URI.create(server.baseUrl()), restOperations)
         }
 
         @AfterAll
@@ -67,7 +68,7 @@ class EregClientTest {
 
     private val orgnumre = listOf("972674818","947064649")
 
-    private val queryMappingForHentOrganisasjon: MappingBuilder = WireMock.post(WireMock.urlPathEqualTo("/api/ereg"))
+    private val queryMappingForHentOrganisasjon: MappingBuilder = WireMock.get(WireMock.urlPathEqualTo("/api/ereg"))
 
     private val eregHentOrganisasjonResponse =
         """
@@ -143,9 +144,6 @@ class EregClientTest {
                         }
                     ],
                     "sistEndret": "2021-06-02"
-                },
-                "virksomhetDetaljer": {
-                    "enhetstype": "BEDR"
                 }
             },
             {
@@ -219,9 +217,6 @@ class EregClientTest {
                         }
                     ],
                     "sistEndret": "2021-06-02"
-                },
-                "virksomhetDetaljer": {
-                    "enhetstype": "BEDR"
                 }
             }
         ]

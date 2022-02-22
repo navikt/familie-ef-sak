@@ -22,9 +22,9 @@ import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
-import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
@@ -47,14 +47,12 @@ internal class BehandlingServiceTest {
     private val behandlingRepository: BehandlingRepository = mockk()
     private val behandlingshistorikkService: BehandlingshistorikkService = mockk(relaxed = true)
     private val taskService: TaskService = mockk(relaxed = true)
-    private val oppgaveService: OppgaveService = mockk(relaxed = true)
     private val behandlingService =
             BehandlingService(mockk(),
                               behandlingRepository,
                               behandlingshistorikkService,
                               taskService,
                               mockk(),
-                              oppgaveService,
                               mockFeatureToggleService())
     private val behandlingSlot = slot<Behandling>()
 
@@ -121,7 +119,7 @@ internal class BehandlingServiceTest {
         internal fun `skal ikke kunne henlegge behandling hvor vedtak fattes`() {
             val behandling =
                     behandling(fagsak(), type = BehandlingType.FØRSTEGANGSBEHANDLING, status = BehandlingStatus.FATTER_VEDTAK)
-            henleggOgForventFeilmelding(behandling, FEILREGISTRERT)
+            henleggOgForventApiFeilmelding(behandling, FEILREGISTRERT)
         }
 
         @Test
@@ -129,22 +127,22 @@ internal class BehandlingServiceTest {
             val behandling = behandling(fagsak(),
                                         type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                         status = BehandlingStatus.IVERKSETTER_VEDTAK)
-            henleggOgForventFeilmelding(behandling, TRUKKET_TILBAKE)
+            henleggOgForventApiFeilmelding(behandling, TRUKKET_TILBAKE)
         }
 
         @Test
         internal fun `skal ikke kunne henlegge behandling som er ferdigstilt`() {
             val behandling =
                     behandling(fagsak(), type = BehandlingType.FØRSTEGANGSBEHANDLING, status = BehandlingStatus.FERDIGSTILT)
-            henleggOgForventFeilmelding(behandling, TRUKKET_TILBAKE)
+            henleggOgForventApiFeilmelding(behandling, TRUKKET_TILBAKE)
         }
 
-        private fun henleggOgForventFeilmelding(behandling: Behandling, henlagtÅrsak: HenlagtÅrsak) {
+        private fun henleggOgForventApiFeilmelding(behandling: Behandling, henlagtÅrsak: HenlagtÅrsak) {
             every {
                 behandlingRepository.findByIdOrThrow(any())
             } returns behandling
 
-            val feil: Feil = assertThrows {
+            val feil: ApiFeil = assertThrows {
                 behandlingService.henleggBehandling(behandling.id, HenlagtDto(henlagtÅrsak))
             }
 
@@ -180,7 +178,7 @@ internal class BehandlingServiceTest {
                 behandlingRepository.findByIdOrThrow(any())
             } returns behandling.copy(status = BehandlingStatus.FATTER_VEDTAK)
 
-            val feil: Feil = assertThrows { behandlingService.settPåVent(UUID.randomUUID()) }
+            val feil: ApiFeil = assertThrows { behandlingService.settPåVent(UUID.randomUUID()) }
 
             assertThat(feil.httpStatus).isEqualTo(HttpStatus.BAD_REQUEST)
         }
@@ -214,7 +212,7 @@ internal class BehandlingServiceTest {
                 behandlingRepository.findByIdOrThrow(any())
             } returns behandling.copy(status = BehandlingStatus.FATTER_VEDTAK)
 
-            val feil: Feil = assertThrows { behandlingService.taAvVent(UUID.randomUUID()) }
+            val feil: ApiFeil = assertThrows { behandlingService.taAvVent(UUID.randomUUID()) }
 
             assertThat(feil.httpStatus).isEqualTo(HttpStatus.BAD_REQUEST)
         }

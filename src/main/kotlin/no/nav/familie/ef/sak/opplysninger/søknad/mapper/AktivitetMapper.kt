@@ -4,7 +4,7 @@ import no.nav.familie.ef.sak.opplysninger.søknad.domain.Aksjeselskap
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Aktivitet
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Arbeidsgiver
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Arbeidssøker
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.Barn
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Selvstendig
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Situasjon
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.TidligereUtdanning
@@ -21,21 +21,21 @@ import no.nav.familie.ef.sak.vilkår.dto.VirksomhetDto
 
 object AktivitetMapper {
 
-    fun tilDto(aktivitet: Aktivitet, situasjon: Situasjon, barn: Set<Barn>): AktivitetDto {
+    fun tilDto(aktivitet: Aktivitet?, situasjon: Situasjon?, søknadBarn: Set<SøknadBarn>): AktivitetDto {
         return AktivitetDto(
-            arbeidssituasjon = aktivitet.hvordanErArbeidssituasjonen.verdier,
-            arbeidsforhold = tilArbeidforholdDto(aktivitet.arbeidsforhold),
-            selvstendig = tilSelvstendigDto(aktivitet.firmaer),
-            aksjeselskap = tilAksjeselskapDto(aktivitet.aksjeselskap),
-            arbeidssøker = tilArbeidssøkerDto(aktivitet.arbeidssøker),
-            underUtdanning = tilUnderUtdanningDto(aktivitet.underUtdanning),
-            virksomhet = aktivitet.virksomhet?.let {
+                arbeidssituasjon = aktivitet?.hvordanErArbeidssituasjonen?.verdier ?: emptyList(),
+                arbeidsforhold = tilArbeidforholdDto(aktivitet?.arbeidsforhold),
+                selvstendig = tilSelvstendigDto(aktivitet?.firmaer),
+                aksjeselskap = tilAksjeselskapDto(aktivitet?.aksjeselskap),
+                arbeidssøker = tilArbeidssøkerDto(aktivitet?.arbeidssøker),
+                underUtdanning = tilUnderUtdanningDto(aktivitet?.underUtdanning),
+                virksomhet = aktivitet?.virksomhet?.let {
                 VirksomhetDto(virksomhetsbeskrivelse = it.virksomhetsbeskrivelse)
             },
-            tidligereUtdanninger = tilTidligereUtdanningDto(aktivitet.tidligereUtdanninger),
-            gjelderDeg = situasjon.gjelderDetteDeg.verdier,
-            særligeTilsynsbehov = tilSærligeTilsynsbehovDto(barn),
-            datoOppstartJobb = situasjon.oppstartNyJobb
+                tidligereUtdanninger = tilTidligereUtdanningDto(aktivitet?.tidligereUtdanninger),
+                gjelderDeg = situasjon?.gjelderDetteDeg?.verdier ?: emptyList(),
+                særligeTilsynsbehov = tilSærligeTilsynsbehovDto(søknadBarn),
+                datoOppstartJobb = situasjon?.oppstartNyJobb
         )
     }
 
@@ -102,18 +102,18 @@ object AktivitetMapper {
         }
     }
 
-    private fun tilTidligereUtdanningDto(tidligereUtdanning: Set<TidligereUtdanning>): List<TidligereUtdanningDto> {
-        return tidligereUtdanning.map {
+    private fun tilTidligereUtdanningDto(tidligereUtdanning: Set<TidligereUtdanning>?): List<TidligereUtdanningDto> {
+        return tidligereUtdanning?.map {
             TidligereUtdanningDto(
                 linjeKursGrad = it.linjeKursGrad,
                 fra = it.fra,
                 til = it.til
             )
-        }
+        } ?: emptyList()
     }
 
-    private fun tilSærligeTilsynsbehovDto(barn: Set<Barn>): List<SærligeTilsynsbehovDto> {
-        return barn.filter { it.særligeTilsynsbehov != null }.map {
+    private fun tilSærligeTilsynsbehovDto(søknadBarn: Set<SøknadBarn>): List<SærligeTilsynsbehovDto> {
+        return søknadBarn.filter { it.særligeTilsynsbehov != null }.map {
             SærligeTilsynsbehovDto(
                 id = it.id,
                 navn = it.navn,

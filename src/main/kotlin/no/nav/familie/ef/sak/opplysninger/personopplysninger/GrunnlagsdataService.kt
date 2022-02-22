@@ -1,13 +1,15 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -17,11 +19,17 @@ import java.util.UUID
 class GrunnlagsdataService(private val grunnlagsdataRepository: GrunnlagsdataRepository,
                            private val søknadService: SøknadService,
                            private val grunnlagsdataRegisterService: GrunnlagsdataRegisterService,
-                           private val behandlingService: BehandlingService) {
+                           private val behandlingService: BehandlingService,
+                           private val fagsakService: FagsakService
+) {
 
-    fun opprettGrunnlagsdata(behandlingId: UUID) {
-        val grunnlagsdata = hentGrunnlagsdataFraRegister(behandlingId)
-        grunnlagsdataRepository.insert(Grunnlagsdata(behandlingId = behandlingId, data = grunnlagsdata))
+    fun opprettGrunnlagsdata(behandlingId: UUID): GrunnlagsdataMedMetadata {
+        val grunnlagsdataDomene = hentGrunnlagsdataFraRegister(behandlingId)
+        val grunnlagsdata = Grunnlagsdata(behandlingId = behandlingId, data = grunnlagsdataDomene)
+        grunnlagsdataRepository.insert(grunnlagsdata)
+        return GrunnlagsdataMedMetadata(grunnlagsdata.data,
+                                        grunnlagsdata.lagtTilEtterFerdigstilling,
+                                        grunnlagsdata.sporbar.opprettetTid)
     }
 
     fun hentGrunnlagsdata(behandlingId: UUID): GrunnlagsdataMedMetadata {
@@ -34,8 +42,9 @@ class GrunnlagsdataService(private val grunnlagsdataRepository: GrunnlagsdataRep
     @Transactional
     fun oppdaterOgHentNyGrunnlagsdata(behandlingId: UUID): GrunnlagsdataMedMetadata {
         val behandling = behandlingService.hentBehandling(behandlingId)
-        feilHvis(behandling.status.behandlingErLåstForVidereRedigering(),
-                 HttpStatus.BAD_REQUEST) { "Kan ikke laste inn nye grunnlagsdata for behandling med status ${behandling.status}" }
+        brukerfeilHvis(behandling.status.behandlingErLåstForVidereRedigering()) {
+            "Kan ikke laste inn nye grunnlagsdata for behandling med status ${behandling.status}"
+        }
         slettGrunnlagsdataHvisFinnes(behandlingId)
         opprettGrunnlagsdata(behandlingId)
         return hentGrunnlagsdata(behandlingId)
@@ -50,8 +59,15 @@ class GrunnlagsdataService(private val grunnlagsdataRepository: GrunnlagsdataRep
     }
 
     private fun hentGrunnlagsdataFraRegister(behandlingId: UUID): GrunnlagsdataDomene {
-        val søknad = søknadService.hentOvergangsstønad(behandlingId)
-        return if(søknad == null) {
+
+        val stønadstype = fagsakService.hentFagsakForBehandling(behandlingId).stønadstype
+        val søknad = when (stønadstype) {
+            Stønadstype.OVERGANGSSTØNAD -> søknadService.hentOvergangsstønad(behandlingId)
+            Stønadstype.BARNETILSYN -> søknadService.hentBarnetilsyn(behandlingId)
+            else -> throw Feil("Ikke implementert støtte for Støndastype $stønadstype")
+        }
+
+        return if (søknad == null) {
             hentGrunnlagsdataFraRegister(behandlingService.hentAktivIdent(behandlingId), emptyList())
         } else {
             val personIdent = søknad.fødselsnummer

@@ -7,8 +7,11 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.beregning.Inntektsperiode
+import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.fagsak.domain.FagsakDomain
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
+import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.felles.domain.SporbarUtils
@@ -70,9 +73,43 @@ fun Behandling.innvilgetOgFerdigstilt() =
         this.copy(resultat = BehandlingResultat.INNVILGET,
                   status = BehandlingStatus.FERDIGSTILT)
 
+fun fagsak(identer: Set<PersonIdent> = setOf(),
+           stønadstype: Stønadstype = Stønadstype.OVERGANGSSTØNAD,
+           id: UUID = UUID.randomUUID(),
+           eksternId: EksternFagsakId = EksternFagsakId(),
+           sporbar: Sporbar = Sporbar()): Fagsak {
+    return fagsak(stønadstype, id, FagsakPerson(identer = identer), eksternId, sporbar)
+}
 
-fun fagsak(identer: Set<FagsakPerson> = setOf(), stønadstype: Stønadstype = Stønadstype.OVERGANGSSTØNAD) =
-        Fagsak(stønadstype = stønadstype, søkerIdenter = identer)
+fun fagsak(stønadstype: Stønadstype = Stønadstype.OVERGANGSSTØNAD,
+           id: UUID = UUID.randomUUID(),
+           person: FagsakPerson,
+           eksternId: EksternFagsakId = EksternFagsakId(),
+           sporbar: Sporbar = Sporbar()): Fagsak {
+    return Fagsak(id = id,
+                  fagsakPersonId = person.id,
+                  personIdenter = person.identer,
+                  stønadstype = stønadstype,
+                  eksternId = eksternId,
+                  migrert = false,
+                  sporbar = sporbar)
+}
+
+fun fagsakDao(id: UUID = UUID.randomUUID(),
+              stønadstype: Stønadstype = Stønadstype.OVERGANGSSTØNAD,
+              personId: UUID = UUID.randomUUID(),
+              eksternId: EksternFagsakId = EksternFagsakId()): FagsakDomain =
+        FagsakDomain(id = id,
+                     fagsakPersonId = personId,
+                     stønadstype = stønadstype,
+                     eksternId = eksternId)
+
+fun Fagsak.tilFagsakDao() =
+        FagsakDomain(id = id,
+                     fagsakPersonId = fagsakPersonId,
+                     stønadstype = stønadstype,
+                     eksternId = eksternId,
+                     sporbar = sporbar)
 
 fun vilkårsvurdering(behandlingId: UUID,
                      resultat: Vilkårsresultat,
@@ -85,8 +122,12 @@ fun vilkårsvurdering(behandlingId: UUID,
                          barnId = barnId,
                          delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurdering))
 
-fun fagsakpersoner(identer: Set<String>): Set<FagsakPerson> = identer.map {
-    FagsakPerson(ident = it)
+fun fagsakpersoner(identer: Set<String>): Set<PersonIdent> = identer.map {
+    PersonIdent(ident = it)
+}.toSet()
+
+fun fagsakpersonerAvPersonIdenter(identer: Set<PersonIdent>): Set<PersonIdent> = identer.map {
+    PersonIdent(ident = it.ident, sporbar = it.sporbar)
 }.toSet()
 
 fun tilkjentYtelse(behandlingId: UUID, personIdent: String): TilkjentYtelse = TilkjentYtelse(
@@ -103,17 +144,26 @@ fun tilkjentYtelse(behandlingId: UUID, personIdent: String): TilkjentYtelse = Ti
                                     samordningsfradrag = 0,
                                     kildeBehandlingId = behandlingId)))
 
-fun vedtak(behandlingId: UUID, resultatType: ResultatType = ResultatType.INNVILGE): Vedtak =
+fun vedtak(behandlingId: UUID,
+           resultatType: ResultatType = ResultatType.INNVILGE,
+           inntekter: InntektWrapper = InntektWrapper(listOf(inntektsperiode())),
+           perioder: PeriodeWrapper = PeriodeWrapper(listOf(vedtaksperiode()))): Vedtak =
         Vedtak(behandlingId = behandlingId,
                resultatType = resultatType,
                periodeBegrunnelse = "OK",
                inntektBegrunnelse = "OK",
                avslåBegrunnelse = null,
-               perioder = PeriodeWrapper(listOf(Vedtaksperiode(datoFra = LocalDate.of(2021, 1, 1),
-                                                               datoTil = LocalDate.of(2021, 12, 31),
-                                                               aktivitet = AktivitetType.BARN_UNDER_ETT_ÅR,
-                                                               periodeType = VedtaksperiodeType.HOVEDPERIODE))),
-               inntekter = InntektWrapper(listOf(Inntektsperiode(startDato = LocalDate.of(2021, 1, 1),
-                                                                 sluttDato = LocalDate.of(2021, 12, 1),
-                                                                 inntekt = BigDecimal.valueOf(100000),
-                                                                 samordningsfradrag = BigDecimal.valueOf(500)))))
+               perioder = perioder,
+               inntekter = inntekter)
+
+fun inntektsperiode(startDato: LocalDate = LocalDate.of(2021, 1, 1),
+                    sluttDato: LocalDate = LocalDate.of(2021, 12, 1),
+                    inntekt: BigDecimal = BigDecimal.valueOf(100000),
+                    samordningsfradrag: BigDecimal = BigDecimal.valueOf(500)) =
+        Inntektsperiode(startDato, sluttDato, inntekt, samordningsfradrag)
+
+fun vedtaksperiode(startDato: LocalDate = LocalDate.of(2021, 1, 1),
+                    sluttDato: LocalDate = LocalDate.of(2021, 12, 1),
+                    aktivitetstype: AktivitetType = AktivitetType.BARN_UNDER_ETT_ÅR,
+                    vedtaksperiodeType: VedtaksperiodeType = VedtaksperiodeType.HOVEDPERIODE) =
+        Vedtaksperiode(startDato, sluttDato, aktivitetstype, vedtaksperiodeType)

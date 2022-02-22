@@ -80,7 +80,7 @@ internal class OppgaveControllerTest {
     @Test
     internal fun `skal feile hvis bruker er veileder`() {
         every {
-            tilgangService.validerTilgangTilPersonMedBarn(any())
+            tilgangService.validerTilgangTilPersonMedBarn(any(), any())
         } just Runs
 
         every {
@@ -126,7 +126,7 @@ internal class OppgaveControllerTest {
 
     private fun tilgangOgRolleJustRuns() {
         every {
-            tilgangService.validerTilgangTilPersonMedBarn(any())
+            tilgangService.validerTilgangTilPersonMedBarn(any(), any())
         } just Runs
 
         every {

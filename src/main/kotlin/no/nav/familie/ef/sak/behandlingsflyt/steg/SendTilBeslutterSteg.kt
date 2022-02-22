@@ -9,10 +9,13 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask.OpprettOppgaveTaskData
 import no.nav.familie.ef.sak.brev.VedtaksbrevRepository
+import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
+import no.nav.familie.ef.sak.brev.domain.VedtaksbrevKonstanter.IKKE_SATT_IDENT_PÅ_GAMLE_VEDTAKSBREV
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
@@ -25,6 +28,7 @@ import no.nav.familie.ef.sak.vedtak.dto.ResultatType.INNVILGE
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.util.UUID
@@ -43,13 +47,13 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
 
     override fun validerSteg(behandling: Behandling) {
         if (behandling.steg != stegType()) {
-            throw Feil("Behandling er i feil steg=${behandling.steg}")
+            throw ApiFeil("Behandling er i feil steg=${behandling.steg}", HttpStatus.BAD_REQUEST)
         }
 
         if (behandling.type !== BehandlingType.BLANKETT && !vedtaksbrevRepository.existsById(behandling.id)) {
             throw Feil("Brev mangler for behandling=${behandling.id}")
         }
-        feilHvis(saksbehandlerMåTaStilingTilTilbakekreving(behandling)) {
+        brukerfeilHvis(saksbehandlerMåTaStilingTilTilbakekreving(behandling)) {
             "Feilutbetaling detektert. Må ta stilling til feilutbetalingsvarsel under simulering"
         }
         validerRiktigTilstandVedInvilgelse(behandling)
@@ -60,7 +64,7 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
     private fun validerRiktigTilstandVedInvilgelse(behandling: Behandling) {
         val vedtak = vedtakService.hentVedtak(behandling.id)
         if (vedtak.resultatType == INNVILGE) {
-            feilHvisIkke(vurderingService.erAlleVilkårOppfylt(behandling.id)) {
+            brukerfeilHvisIkke(vurderingService.erAlleVilkårOppfylt(behandling.id)) {
                 "Kan ikke innvilge hvis ikke alle vilkår er oppfylt for behandlingId: ${behandling.id}"
             }
         }
@@ -117,7 +121,21 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
 
     private fun validerSaksbehandlersignatur(behandling: Behandling) {
         val vedtaksbrev = vedtaksbrevRepository.findByIdOrThrow(behandling.id)
-        feilHvis(vedtaksbrev.saksbehandlersignatur != SikkerhetContext.hentSaksbehandlerNavn(strict = true)) {
+
+        when (vedtaksbrev.saksbehandlerident) {
+            IKKE_SATT_IDENT_PÅ_GAMLE_VEDTAKSBREV -> validerSammeSignatur(vedtaksbrev)
+            else -> validerSammeIdent(vedtaksbrev)
+        }
+
+    }
+
+    private fun validerSammeIdent(vedtaksbrev: Vedtaksbrev) {
+        brukerfeilHvis(vedtaksbrev.saksbehandlerident != SikkerhetContext.hentSaksbehandler(true)) { "En annen saksbehandler har signert vedtaksbrevet" }
+    }
+
+    private fun validerSammeSignatur(vedtaksbrev: Vedtaksbrev) {
+        brukerfeilHvis(vedtaksbrev.saksbehandlersignatur != SikkerhetContext.hentSaksbehandlerNavn(
+                strict = true)) {
             "En annen saksbehandler har signert vedtaksbrevet"
         }
     }

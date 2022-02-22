@@ -4,6 +4,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
 import com.github.tomakehurst.wiremock.WireMockServer
 import no.nav.familie.ef.sak.avstemming.KonsistensavstemmingJobb
+import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.Behandlingsjournalpost
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
@@ -14,7 +15,8 @@ import no.nav.familie.ef.sak.brev.domain.MellomlagretFritekstbrev
 import no.nav.familie.ef.sak.brev.domain.MellomlagretFrittståendeBrev
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.database.DbContainerInitializer
-import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.fagsak.domain.FagsakDomain
+import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.felles.util.TokenUtil
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.oppgave.Oppgave
@@ -22,6 +24,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdat
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknad
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadsskjemaOvergangsstønad
 import no.nav.familie.ef.sak.simulering.Simuleringsresultat
+import no.nav.familie.ef.sak.testutil.TestoppsettService
 import no.nav.familie.ef.sak.tilbakekreving.domain.Tilbakekreving
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
@@ -77,6 +80,7 @@ abstract class OppslagSpringRunnerTest {
     @Autowired @Qualifier("kodeverkCache") private lateinit var cacheManagerKodeverk: CacheManager
     @Autowired private lateinit var rolleConfig: RolleConfig
     @Autowired private lateinit var mockOAuth2Server: MockOAuth2Server
+    @Autowired lateinit var testoppsettService: TestoppsettService
 
     @LocalServerPort
     private var port: Int? = 0
@@ -106,6 +110,7 @@ abstract class OppslagSpringRunnerTest {
                 UttrekkArbeidssøkere::class,
                 KonsistensavstemmingJobb::class,
                 Simuleringsresultat::class,
+                BehandlingBarn::class,
                 Søknad::class,
                 SøknadsskjemaOvergangsstønad::class,
                 TilkjentYtelse::class,
@@ -123,7 +128,8 @@ abstract class OppslagSpringRunnerTest {
                 Grunnlagsdata::class,
                 Tilbakekreving::class,
                 Behandling::class,
-                Fagsak::class,
+                FagsakDomain::class,
+                FagsakPerson::class,
                 TaskLogg::class,
                 Task::class,
 

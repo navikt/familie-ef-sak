@@ -2,27 +2,23 @@ package no.nav.familie.ef.sak.repository
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
-import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.oppgave.OppgaveRepository
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.dao.EmptyResultDataAccessException
 import java.time.LocalDateTime
 import java.util.UUID
 
 internal class OppgaveRepositoryTest : OppslagSpringRunnerTest() {
 
     @Autowired private lateinit var oppgaveRepository: OppgaveRepository
-    @Autowired private lateinit var fagsakRepository: FagsakRepository
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
 
     @Test
     internal fun findByBehandlingIdAndTypeAndErFerdigstiltIsFalse() {
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
         val oppgave = oppgaveRepository.insert(oppgave(behandling, erFerdigstilt = true))
 
@@ -40,7 +36,7 @@ internal class OppgaveRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal finne nyeste oppgave for behandling`() {
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
         val sporbar = Sporbar(opprettetTid = LocalDateTime.now().plusDays(1))
         oppgaveRepository.insert(oppgave(behandling, erFerdigstilt = true, gsakOppgaveId = 1))
@@ -49,14 +45,14 @@ internal class OppgaveRepositoryTest : OppslagSpringRunnerTest() {
         oppgaveRepository.insert(oppgave(behandling, erFerdigstilt = true, gsakOppgaveId = 4))
 
         assertThat(oppgaveRepository.findTopByBehandlingIdOrderBySporbarOpprettetTidDesc(behandling.id)).isNotNull
-        assertThat(oppgaveRepository.findTopByBehandlingIdOrderBySporbarOpprettetTidDesc(behandling.id).gsakOppgaveId)
+        assertThat(oppgaveRepository.findTopByBehandlingIdOrderBySporbarOpprettetTidDesc(behandling.id)?.gsakOppgaveId)
                 .isEqualTo(2)
 
     }
 
     @Test
     internal fun `skal finne nyeste oppgave for riktig behandling`() {
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
         val behandling2 = behandlingRepository.insert(behandling(fagsak))
 
@@ -64,19 +60,17 @@ internal class OppgaveRepositoryTest : OppslagSpringRunnerTest() {
         oppgaveRepository.insert(oppgave(behandling2, erFerdigstilt = true, gsakOppgaveId = 2))
 
         assertThat(oppgaveRepository.findTopByBehandlingIdOrderBySporbarOpprettetTidDesc(behandling.id)).isNotNull()
-        assertThat(oppgaveRepository.findTopByBehandlingIdOrderBySporbarOpprettetTidDesc(behandling.id).gsakOppgaveId)
+        assertThat(oppgaveRepository.findTopByBehandlingIdOrderBySporbarOpprettetTidDesc(behandling.id)?.gsakOppgaveId)
                 .isEqualTo(1)
 
     }
 
     @Test
-    internal fun `skal feile hvis det ikke finnes en oppgave for behandlingen`() {
-        val fagsak = fagsakRepository.insert(fagsak())
+    internal fun `skal ikke feile hvis det ikke finnes en oppgave for behandlingen`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
 
-        assertThrows<EmptyResultDataAccessException> {
-            oppgaveRepository.findTopByBehandlingIdOrderBySporbarOpprettetTidDesc(behandling.id)
-        }
+        assertThat(oppgaveRepository.findTopByBehandlingIdOrderBySporbarOpprettetTidDesc(behandling.id)).isNull()
 
     }
 

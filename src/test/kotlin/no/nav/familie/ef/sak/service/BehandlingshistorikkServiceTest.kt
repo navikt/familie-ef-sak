@@ -9,7 +9,6 @@ import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.tilHendelseshistorikkDto
 import no.nav.familie.ef.sak.behandlingshistorikk.dto.HendelseshistorikkDto
-import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
@@ -24,13 +23,12 @@ internal class BehandlingshistorikkServiceTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var behandlingshistorikkService: BehandlingshistorikkService
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
     @Autowired private lateinit var behandlingshistorikkRepository: BehandlingshistorikkRepository
-    @Autowired private lateinit var fagsakRepository: FagsakRepository
 
     @Test
     fun `lagre behandling og hent historikk`() {
 
         /** Lagre */
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
         val behandlingHistorikk =
                 behandlingshistorikkRepository.insert(Behandlingshistorikk(behandlingId = behandling.id,
@@ -50,7 +48,7 @@ internal class BehandlingshistorikkServiceTest : OppslagSpringRunnerTest() {
     fun `Finn hendelseshistorikk på behandling uten historikk`() {
 
         /** Lagre */
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
 
         /** Hent */
@@ -62,7 +60,7 @@ internal class BehandlingshistorikkServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `finn seneste behandlinghistorikk`() {
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
 
         insert(behandling, "A", LocalDateTime.now().minusDays(1))
@@ -75,7 +73,7 @@ internal class BehandlingshistorikkServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `finn seneste behandlinghistorikk med type`() {
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
 
         insert(behandling, "A", LocalDateTime.now().minusDays(1))

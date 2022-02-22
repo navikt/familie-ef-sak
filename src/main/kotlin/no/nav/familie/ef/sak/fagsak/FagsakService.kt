@@ -7,8 +7,11 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.dto.tilDto
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.fagsak.domain.FagsakDomain
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
+import no.nav.familie.ef.sak.fagsak.domain.Fagsaker
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
+import no.nav.familie.ef.sak.fagsak.domain.tilFagsakMedPerson
 import no.nav.familie.ef.sak.fagsak.dto.FagsakDto
 import no.nav.familie.ef.sak.fagsak.dto.tilDto
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
@@ -19,10 +22,12 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
 class FagsakService(private val fagsakRepository: FagsakRepository,
+                    private val fagsakPersonService: FagsakPersonService,
                     private val behandlingService: BehandlingService,
                     private val pdlClient: PdlClient,
                     private val tilkjentYtelseService: TilkjentYtelseService,
@@ -32,19 +37,17 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
         return fagsakTilDto(hentEllerOpprettFagsak(personIdent, stønadstype))
     }
 
+    @Transactional
     fun hentEllerOpprettFagsak(personIdent: String,
                                stønadstype: Stønadstype): Fagsak {
         val personIdenter = pdlClient.hentPersonidenter(personIdent, true)
         val gjeldendePersonIdent = personIdenter.gjeldende().ident
-        val fagsak = fagsakRepository.findBySøkerIdent(personIdenter.identer(), stønadstype)
+        val person = fagsakPersonService.hentEllerOpprettPerson(personIdenter.identer(), gjeldendePersonIdent)
+        val oppdatertPerson = oppdatertPerson(person, gjeldendePersonIdent)
+        val fagsak = fagsakRepository.findByFagsakPersonIdAndStønadstype(oppdatertPerson.id, stønadstype)
+                     ?: opprettFagsak(stønadstype, oppdatertPerson)
 
-        return fagsak?.let {
-            return if (featureToggleService.isEnabled("familie.ef.sak.synkroniser-personidenter")) {
-                fagsakMedOppdatertPersonIdent(fagsak, gjeldendePersonIdent)
-            } else {
-                fagsak
-            }
-        } ?: opprettFagsak(stønadstype, gjeldendePersonIdent)
+        return fagsak.tilFagsakMedPerson(oppdatertPerson.identer)
     }
 
     fun settFagsakTilMigrert(fagsakId: UUID): Fagsak {
@@ -52,11 +55,11 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
         feilHvis(fagsak.migrert) {
             "Fagsak er allerede migrert"
         }
-        return fagsakRepository.update(fagsak.copy(migrert = true))
+        return fagsakRepository.update(fagsak.copy(migrert = true)).tilFagsakMedPerson()
     }
 
     fun finnFagsak(personIdenter: Set<String>, stønadstype: Stønadstype): Fagsak? =
-            fagsakRepository.findBySøkerIdent(personIdenter, stønadstype)
+            fagsakRepository.findBySøkerIdent(personIdenter, stønadstype)?.tilFagsakMedPerson()
 
     fun hentFagsakMedBehandlinger(fagsakId: UUID): FagsakDto {
         return fagsakTilDto(hentFagsak(fagsakId))
@@ -66,6 +69,17 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
         val behandlinger: List<Behandling> = behandlingService.hentBehandlinger(fagsak.id)
         val erLøpende = erLøpende(behandlinger)
         return fagsak.tilDto(behandlinger = behandlinger.map(Behandling::tilDto), erLøpende = erLøpende)
+    }
+
+    fun finnFagsakerForFagsakPersonId(fagsakPersonId: UUID): Fagsaker {
+        val fagsaker = fagsakRepository.findByFagsakPersonId(fagsakPersonId)
+                .map { it.tilFagsakMedPerson() }
+                .associateBy { it.stønadstype }
+        return Fagsaker(
+                overgangsstønad = fagsaker[Stønadstype.OVERGANGSSTØNAD],
+                barnetilsyn = fagsaker[Stønadstype.BARNETILSYN],
+                skolepenger = fagsaker[Stønadstype.SKOLEPENGER]
+        )
     }
 
     fun erLøpende(behandlinger: List<Behandling>): Boolean {
@@ -78,33 +92,40 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
                        ?.let { tilkjentYtelseService.harLøpendeUtbetaling(it.id) } ?: false
     }
 
-    fun hentFagsak(fagsakId: UUID): Fagsak = fagsakRepository.findByIdOrThrow(fagsakId)
+    fun hentFagsak(fagsakId: UUID): Fagsak = fagsakRepository.findByIdOrThrow(fagsakId).tilFagsakMedPerson()
 
     fun fagsakMedOppdatertPersonIdent(fagsakId: UUID): Fagsak {
         val fagsak = fagsakRepository.findByIdOrThrow(fagsakId)
-        return if (featureToggleService.isEnabled("familie.ef.sak.synkroniser-personidenter")) {
-            val gjeldendePersonIdent = pdlClient.hentPersonidenter(fagsak.hentAktivIdent(), true).gjeldende().ident
-            fagsakMedOppdatertPersonIdent(fagsak, gjeldendePersonIdent)
-        } else {
-            fagsak
-        }
+        val person = fagsakPersonService.hentPerson(fagsak.fagsakPersonId)
+        val gjelendeIdent = pdlClient.hentPersonidenter(person.hentAktivIdent(), true).gjeldende().ident
+        val oppdatertPerson = oppdatertPerson(person, gjelendeIdent)
+        return fagsak.tilFagsakMedPerson(oppdatertPerson.identer)
     }
 
+    private fun oppdatertPerson(person: FagsakPerson,
+                                gjeldendePersonIdent: String) =
+            if (featureToggleService.isEnabled("familie.ef.sak.synkroniser-personidenter")) {
+                fagsakPersonService.oppdaterIdent(person, gjeldendePersonIdent)
+            } else {
+                person
+            }
+
     fun hentFagsakForBehandling(behandlingId: UUID): Fagsak {
-        return fagsakRepository.finnFagsakTilBehandling(behandlingId)
+        return fagsakRepository.finnFagsakTilBehandling(behandlingId)?.tilFagsakMedPerson()
                ?: throw Feil("Finner ikke fagsak til behandlingId=$behandlingId")
     }
 
     fun hentEksternId(fagsakId: UUID): Long = fagsakRepository.findByIdOrThrow(fagsakId).eksternId.id
 
-    fun hentFagsakPåEksternId(eksternFagsakId: Long): Fagsak = fagsakRepository.finnMedEksternId(eksternFagsakId)
-                                                               ?: error("Kan ikke finne fagsak med eksternId=$eksternFagsakId")
+    fun hentFagsakPåEksternId(eksternFagsakId: Long): Fagsak =
+            fagsakRepository.finnMedEksternId(eksternFagsakId)?.tilFagsakMedPerson()
+            ?: error("Kan ikke finne fagsak med eksternId=$eksternFagsakId")
 
     fun hentAktivIdent(fagsakId: UUID): String = fagsakRepository.finnAktivIdent(fagsakId)
 
     fun hentAktiveIdenter(fagsakId: Set<UUID>): Map<UUID, String> {
         if (fagsakId.isEmpty()) return emptyMap()
-        
+
         val aktiveIdenter = fagsakRepository.finnAktivIdenter(fagsakId)
         feilHvis(!aktiveIdenter.map { it.first }.containsAll(fagsakId)) {
             "Finner ikke ident til fagsaker ${aktiveIdenter.map { it.first }.filterNot(fagsakId::contains)}"
@@ -112,14 +133,14 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
         return aktiveIdenter.associateBy({ it.first }, { it.second })
     }
 
-    private fun fagsakMedOppdatertPersonIdent(fagsak: Fagsak, gjeldendePersonIdent: String): Fagsak {
-        return when (fagsak.erAktivIdent(gjeldendePersonIdent)) {
-            true -> fagsak
-            false -> fagsakRepository.update(fagsak.fagsakMedOppdatertGjeldendeIdent(gjeldendePersonIdent))
-        }
+    private fun opprettFagsak(stønadstype: Stønadstype, fagsakPerson: FagsakPerson): FagsakDomain {
+        return fagsakRepository.insert(FagsakDomain(stønadstype = stønadstype,
+                                                    fagsakPersonId = fagsakPerson.id))
     }
 
-    private fun opprettFagsak(stønadstype: Stønadstype, personIdent: String) =
-            fagsakRepository.insert(Fagsak(stønadstype = stønadstype, søkerIdenter = setOf(FagsakPerson(ident = personIdent))))
+    fun FagsakDomain.tilFagsakMedPerson(): Fagsak {
+        val personIdenter = fagsakPersonService.hentIdenter(this.fagsakPersonId)
+        return this.tilFagsakMedPerson(personIdenter)
+    }
 
 }

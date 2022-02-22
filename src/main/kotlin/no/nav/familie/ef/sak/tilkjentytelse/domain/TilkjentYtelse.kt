@@ -2,7 +2,9 @@ package no.nav.familie.ef.sak.tilkjentytelse.domain
 
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.felles.domain.SporbarUtils
+import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradragType
 import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -16,6 +18,9 @@ data class TilkjentYtelse(@Id
                           val vedtakstidspunkt: LocalDateTime = SporbarUtils.now(),
                           val type: TilkjentYtelseType = TilkjentYtelseType.FØRSTEGANGSBEHANDLING,
                           val andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+                          val samordningsfradragType: SamordningsfradragType? = null,
+                          @Column("opphorsdato")
+                          val startdato: LocalDate? = null,
                           @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                           val sporbar: Sporbar = Sporbar())
 

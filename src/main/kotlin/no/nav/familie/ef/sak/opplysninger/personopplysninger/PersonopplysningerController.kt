@@ -1,6 +1,8 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger
 
+import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.dto.PersonIdentDto
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
@@ -26,37 +28,46 @@ import java.util.UUID
 class PersonopplysningerController(private val personopplysningerService: PersonopplysningerService,
                                    private val tilgangService: TilgangService,
                                    private val behandlingService: BehandlingService,
-                                   private val fagsakService: FagsakService) {
+                                   private val fagsakService: FagsakService,
+                                   private val fagsakPersonService: FagsakPersonService) {
 
     @PostMapping
     fun personopplysninger(@RequestBody personIdent: PersonIdentDto): Ressurs<PersonopplysningerDto> {
-        tilgangService.validerTilgangTilPersonMedBarn(personIdent.personIdent)
+        tilgangService.validerTilgangTilPersonMedBarn(personIdent.personIdent, AuditLoggerEvent.ACCESS)
         return Ressurs.success(personopplysningerService.hentPersonopplysninger(personIdent.personIdent))
     }
 
     @GetMapping("/behandling/{behandlingId}")
     fun personopplysninger(@PathVariable behandlingId: UUID): Ressurs<PersonopplysningerDto> {
-        tilgangService.validerTilgangTilBehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(personopplysningerService.hentPersonopplysninger(behandlingId))
     }
 
+
     @GetMapping("/fagsak/{fagsakId}")
     fun personopplysningerFraFagsakId(@PathVariable fagsakId: UUID): Ressurs<PersonopplysningerDto> {
-        tilgangService.validerTilgangTilFagsak(fagsakId)
+        tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
         val aktivIdent = fagsakService.hentAktivIdent(fagsakId)
+        return Ressurs.success(personopplysningerService.hentPersonopplysninger(aktivIdent))
+    }
+
+    @GetMapping("/fagsak-person/{fagsakPersonId}")
+    fun personopplysningerFraFagsakPersonId(@PathVariable fagsakPersonId: UUID): Ressurs<PersonopplysningerDto> {
+        tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.ACCESS)
+        val aktivIdent = fagsakPersonService.hentAktivIdent(fagsakPersonId)
         return Ressurs.success(personopplysningerService.hentPersonopplysninger(aktivIdent))
     }
 
     @GetMapping("/nav-kontor/behandling/{behandlingId}")
     fun hentNavKontor(@PathVariable behandlingId: UUID): Ressurs<NavKontorEnhet> {
-        tilgangService.validerTilgangTilBehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         val aktivIdent = behandlingService.hentAktivIdent(behandlingId)
         return Ressurs.success(personopplysningerService.hentNavKontor(aktivIdent))
     }
 
     @PostMapping("/nav-kontor")
     fun hentNavKontorTilFagsak(@RequestBody personIdent: PersonIdentDto): Ressurs<NavKontorEnhet> {
-        tilgangService.validerTilgangTilPersonMedBarn(personIdent.personIdent)
+        tilgangService.validerTilgangTilPersonMedBarn(personIdent.personIdent, AuditLoggerEvent.ACCESS)
         return Ressurs.success(personopplysningerService.hentNavKontor(personIdent.personIdent))
     }
 

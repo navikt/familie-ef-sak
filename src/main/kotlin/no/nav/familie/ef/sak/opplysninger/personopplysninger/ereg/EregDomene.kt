@@ -6,8 +6,7 @@ data class OrganisasjonDto(
     val organisasjonsnummer: String,
     val type: String,
     val navn: Navn,
-    val organisasjonDetaljer: OrganisasjonDetaljer,
-    val virksomhetDetaljer: VirksomhetDetaljer
+    val organisasjonDetaljer: OrganisasjonDetaljer
 )
 
 data class Navn(
@@ -68,8 +67,4 @@ data class Postadresse(
     val landkode: String?,
     val postnummer: String?,
     val poststed: String?
-)
-
-data class VirksomhetDetaljer(
-    val enhetstype: String?
 )

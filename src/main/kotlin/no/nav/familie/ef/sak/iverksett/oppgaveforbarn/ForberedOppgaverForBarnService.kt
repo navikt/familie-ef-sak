@@ -17,11 +17,14 @@ class ForberedOppgaverForBarnService(private val gjeldendeBarnRepository: Gjelde
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun forberedOppgaverForAlleBarnSomFyllerAarNesteUke(sisteKjøring: LocalDate) {
+    fun forberedOppgaverForAlleBarnSomFyllerAarNesteUke(sisteKjøring: LocalDate, kjøreDato: LocalDate = LocalDate.now()) {
         val referanseDato = referanseDato(sisteKjøring)
         val gjeldendeBarn =
                 gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, referanseDato)
-        val barnSomFyllerAar = barnSomFyllerAar(gjeldendeBarn, referanseDato)
+        val barnSomFyllerAar = barnSomFyllerAar(gjeldendeBarn, referanseDato, kjøreDato)
+        if (barnSomFyllerAar.isEmpty()) {
+            return
+        }
         val oppgaver = lagOppgaverForBarn(barnSomFyllerAar)
         if (oppgaver.isNotEmpty()) {
             logger.info("Fant ${oppgaver.size} oppgaver som skal opprettes ved forbereding av oppgaver for barn som fyller år")
@@ -31,26 +34,26 @@ class ForberedOppgaverForBarnService(private val gjeldendeBarnRepository: Gjelde
 
     private fun lagOppgaverForBarn(barnSomFyllerAar: Map<UUID, Pair<BarnTilUtplukkForOppgave, String>>): List<OppgaveForBarn> {
         return behandlingRepository.finnEksterneIder(barnSomFyllerAar.map { it.key }.toSet()).map {
+            val utplukketBarn = barnSomFyllerAar[it.behandlingId]
+                                ?: error("Kunne ikke finne behandlingsId fra utplukk. Dette skal ikke skje.")
+            val beskrivelse = utplukketBarn.second
             OppgaveForBarn(it.behandlingId,
                            it.eksternFagsakId,
-                           barnSomFyllerAar[it.behandlingId]?.let {
-                               it.first.fødselsnummerSøker
-                               ?: error("Kunne ikke finne igjen den mappede behandlingen for barn som fyller år. Dette skal ikke skje")
-                           }
-                           ?: error("Kunne ikke finne fødselsnummer for søker"),
+                           utplukketBarn.first.fødselsnummerSøker,
                            Stønadstype.OVERGANGSSTØNAD.name,
-                           barnSomFyllerAar[it.behandlingId]!!.second)
+                           beskrivelse)
         }
     }
 
     private fun barnSomFyllerAar(barnTilUtplukkForOppgave: List<BarnTilUtplukkForOppgave>,
-                                 referanseDato: LocalDate): Map<UUID, Pair<BarnTilUtplukkForOppgave, String>> {
+                                 referanseDato: LocalDate,
+                                 kjøreDato: LocalDate): Map<UUID, Pair<BarnTilUtplukkForOppgave, String>> {
         val barnSomFyllerAar = mutableMapOf<UUID, Pair<BarnTilUtplukkForOppgave, String>>()
         barnTilUtplukkForOppgave.forEach { barn ->
             val fødselsdato = fødselsdato(barn)
-            if (barnBlirEttÅr(referanseDato, fødselsdato)) {
+            if (barnBlirEttÅr(referanseDato, fødselsdato, kjøreDato)) {
                 barnSomFyllerAar[barn.behandlingId] = Pair(barn, OppgaveBeskrivelse.beskrivelseBarnFyllerEttÅr())
-            } else if (barnBlirSeksMnd(referanseDato, fødselsdato)) {
+            } else if (barnBlirSeksMnd(referanseDato, fødselsdato, kjøreDato)) {
                 barnSomFyllerAar[barn.behandlingId] = Pair(barn, OppgaveBeskrivelse.beskrivelseBarnBlirSeksMnd())
             }
         }
@@ -62,23 +65,19 @@ class ForberedOppgaverForBarnService(private val gjeldendeBarnRepository: Gjelde
     }
 
     private fun fødselsdato(barnTilUtplukkForOppgave: BarnTilUtplukkForOppgave): LocalDate {
-        return barnTilUtplukkForOppgave.fodselsnummerBarn?.let {
+        return barnTilUtplukkForOppgave.fødselsnummerBarn?.let {
             Fødselsnummer(it).fødselsdato
         } ?: barnTilUtplukkForOppgave.termindatoBarn ?: error("Ingen datoer for barn funnet")
     }
 
-    private fun barnBlirEttÅr(referanseDato: LocalDate, fødselsdato: LocalDate): Boolean {
-        return barnErUnder(12L, referanseDato, fødselsdato)
-               && LocalDate.now().plusWeeks(1) >= fødselsdato.plusYears(1)
+    private fun barnBlirEttÅr(referanseDato: LocalDate, fødselsdato: LocalDate, kjøreDato: LocalDate = LocalDate.now()): Boolean {
+        return referanseDato <= fødselsdato.plusYears(1)
+               && kjøreDato.plusWeeks(1) >= fødselsdato.plusYears(1)
     }
 
-    private fun barnBlirSeksMnd(referanseDato: LocalDate, fødselsdato: LocalDate): Boolean {
-        return barnErUnder(6L, referanseDato, fødselsdato)
-               && LocalDate.now().plusWeeks(1) >= fødselsdato.plusMonths(6L)
-    }
-
-    private fun barnErUnder(antallMnd: Long, referanseDato: LocalDate, fødselsdato: LocalDate): Boolean {
-        return referanseDato <= fødselsdato.plusMonths(antallMnd)
+    private fun barnBlirSeksMnd(referanseDato: LocalDate, fødselsdato: LocalDate, kjøreDato: LocalDate = LocalDate.now()): Boolean {
+        return referanseDato <= fødselsdato.plusDays(182)
+               && kjøreDato.plusWeeks(1) >= fødselsdato.plusDays(182L)
     }
 
     private fun referanseDato(sisteKjøring: LocalDate): LocalDate {

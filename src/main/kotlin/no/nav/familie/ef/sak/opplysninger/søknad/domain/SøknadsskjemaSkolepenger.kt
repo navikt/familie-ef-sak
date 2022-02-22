@@ -17,6 +17,8 @@ data class SøknadsskjemaSkolepenger(@Id
                                     override val navn: String,
                                     override val telefonnummer: String?,
                                     override val datoMottatt: LocalDateTime,
+                                    @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "sivilstand_")
+                                    val sivilstand: Sivilstand,
                                     @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "medlemskap_")
                                     val medlemskap: Medlemskap,
                                     @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "bosituasjon_")
@@ -24,8 +26,7 @@ data class SøknadsskjemaSkolepenger(@Id
                                     @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "sivilstandsplaner_")
                                     val sivilstandsplaner: Sivilstandsplaner? = null,
                                     @MappedCollection(idColumn = "soknadsskjema_id")
-                                    override val barn: Set<Barn>,
+                                    override val barn: Set<SøknadBarn>,
                                     @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "aktivitet_under_utdanning_")
                                     val utdanning: UnderUtdanning,
                                     val utdanningsutgifter: Dokumentasjon? = null) : ISøknadsskjema
-

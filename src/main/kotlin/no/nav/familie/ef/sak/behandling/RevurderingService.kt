@@ -1,10 +1,12 @@
 package no.nav.familie.ef.sak.behandling
 
+import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
+import no.nav.familie.ef.sak.behandling.dto.tilBehandlingBarn
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.fagsak.FagsakService
@@ -16,6 +18,7 @@ import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
@@ -25,8 +28,10 @@ class RevurderingService(private val søknadService: SøknadService,
                          private val vurderingService: VurderingService,
                          private val grunnlagsdataService: GrunnlagsdataService,
                          private val taskRepository: TaskRepository,
+                         private val barnService: BarnService,
                          private val fagsakService: FagsakService) {
 
+    @Transactional
     fun opprettRevurderingManuelt(revurderingInnhold: RevurderingDto): Behandling {
         fagsakService.fagsakMedOppdatertPersonIdent(revurderingInnhold.fagsakId)
         val revurdering = behandlingService.opprettBehandling(BehandlingType.REVURDERING,
@@ -39,8 +44,14 @@ class RevurderingService(private val søknadService: SøknadService,
         val saksbehandler = SikkerhetContext.hentSaksbehandler(true)
 
         søknadService.kopierSøknad(forrigeBehandlingId, revurdering.id)
-        grunnlagsdataService.opprettGrunnlagsdata(revurdering.id)
-        vurderingService.kopierVurderingerTilNyBehandling(forrigeBehandlingId, revurdering.id)
+        val grunnlagsdata = grunnlagsdataService.opprettGrunnlagsdata(revurdering.id)
+
+        barnService.opprettBarnForRevurdering(behandlingId = revurdering.id,
+                                              forrigeBehandlingId = forrigeBehandlingId,
+                                              nyeBarnPåRevurdering = revurderingInnhold.barn.tilBehandlingBarn(revurdering.id),
+                                              grunnlagsdataBarn = grunnlagsdata.grunnlagsdata.barn)
+        val (_, metadata) = vurderingService.hentGrunnlagOgMetadata(revurdering.id)
+        vurderingService.kopierVurderingerTilNyBehandling(forrigeBehandlingId, revurdering.id, metadata)
         val oppgaveId = oppgaveService.opprettOppgave(behandlingId = revurdering.id,
                                                       oppgavetype = Oppgavetype.BehandleSak,
                                                       tilordnetNavIdent = saksbehandler,

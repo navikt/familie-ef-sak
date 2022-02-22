@@ -16,19 +16,19 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
+import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.domain.Sporbar
-import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
-import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.repository.findAllByIdOrThrow
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -44,7 +44,6 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
                         private val behandlingshistorikkService: BehandlingshistorikkService,
                         private val taskService: TaskService,
                         private val søknadService: SøknadService,
-                        private val oppgaveService: OppgaveService,
                         private val featureToggleService: FeatureToggleService) {
 
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -52,10 +51,21 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
 
     fun hentAktivIdent(behandlingId: UUID): String = behandlingRepository.finnAktivIdent(behandlingId)
 
-    fun hentEksterneIder(behandlingIder: Set<UUID>) = behandlingRepository.finnEksterneIder(behandlingIder)
+    fun hentEksterneIder(behandlingIder: Set<UUID>) = behandlingIder.takeIf { it.isNotEmpty() }
+                                                              ?.let { behandlingRepository.finnEksterneIder(it) } ?: emptySet()
 
     fun finnSisteIverksatteBehandling(fagsakId: UUID) =
             behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
+
+    fun finnSisteIverksatteBehandlingMedEventuellAvslått(fagsakId: UUID): Behandling? =
+            behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
+            ?: hentBehandlinger(fagsakId)
+                    .filter { it.type != BehandlingType.BLANKETT && it.status == FERDIGSTILT && it.resultat != HENLAGT }
+                    .lastOrNull()
+
+
+    fun finnGjeldendeIverksatteBehandlinger(stonadstype: Stønadstype) =
+            behandlingRepository.finnSisteIverksatteBehandlinger(stonadstype)
 
     @Transactional
     fun opprettBehandlingForBlankett(behandlingType: BehandlingType,
@@ -75,6 +85,7 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
         return behandlingsjournalpostRepository.findAllByBehandlingId(behandlingId)
     }
 
+    @Transactional
     fun opprettMigrering(fagsakId: UUID): Behandling {
         return opprettBehandling(behandlingType = BehandlingType.REVURDERING,
                                  fagsakId = fagsakId,
@@ -82,6 +93,7 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
                                  erMigrering = true)
     }
 
+    @Transactional
     fun opprettBehandling(behandlingType: BehandlingType,
                           fagsakId: UUID,
                           status: BehandlingStatus = BehandlingStatus.OPPRETTET,
@@ -147,6 +159,7 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
                                                                        journalpostType = journalposttype))
     }
 
+    @Transactional
     fun henleggBehandling(behandlingId: UUID, henlagt: HenlagtDto): Behandling {
         val behandling = hentBehandling(behandlingId)
         validerAtBehandlingenKanHenlegges(behandling)
@@ -157,24 +170,13 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
         behandlingshistorikkService.opprettHistorikkInnslag(behandling = henlagtBehandling,
                                                             utfall = StegUtfall.HENLAGT,
                                                             metadata = henlagt)
-        val henlagtBehandlingFraDb = behandlingRepository.update(henlagtBehandling)
-        ferdigstillOppgaveTask(henlagtBehandlingFraDb)
-        return henlagtBehandlingFraDb
-    }
-
-    private fun ferdigstillOppgaveTask(behandling: Behandling) {
-        oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(behandlingId = behandling.id, Oppgavetype.BehandleSak)
-        oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(behandlingId = behandling.id, Oppgavetype.BehandleUnderkjentVedtak)
+        return behandlingRepository.update(henlagtBehandling)
     }
 
     private fun validerAtBehandlingenKanHenlegges(behandling: Behandling) {
         if (!behandling.kanHenlegges()) {
-            throw Feil(
-                    "Kan ikke henlegge en behandling med status ${behandling.status} for ${behandling.type}",
-                    "Kan ikke henlegge en behandling med status ${behandling.status} for ${behandling.type}",
-                    HttpStatus.BAD_REQUEST,
-                    null
-            )
+            throw ApiFeil("Kan ikke henlegge en behandling med status ${behandling.status} for ${behandling.type}",
+                          HttpStatus.BAD_REQUEST)
         }
     }
 
@@ -186,8 +188,9 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
     @Transactional
     fun settPåVent(behandlingId: UUID) {
         val behandling = hentBehandling(behandlingId)
-        feilHvis(behandling.status.behandlingErLåstForVidereRedigering(),
-                 HttpStatus.BAD_REQUEST) { "Kan ikke sette behandling med status ${behandling.status} på vent" }
+        brukerfeilHvis(behandling.status.behandlingErLåstForVidereRedigering()) {
+            "Kan ikke sette behandling med status ${behandling.status} på vent"
+        }
 
         behandlingRepository.update(behandling.copy(status = BehandlingStatus.SATT_PÅ_VENT))
         taskService.save(BehandlingsstatistikkTask.opprettVenterTask(behandlingId))
@@ -196,9 +199,11 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
     @Transactional
     fun taAvVent(behandlingId: UUID) {
         val behandling = hentBehandling(behandlingId)
-        feilHvis(behandling.status != BehandlingStatus.SATT_PÅ_VENT,
-                 HttpStatus.BAD_REQUEST) { "Kan ikke ta behandling med status ${behandling.status} av vent" }
+        brukerfeilHvis(behandling.status != BehandlingStatus.SATT_PÅ_VENT) {
+            "Kan ikke ta behandling med status ${behandling.status} av vent"
+        }
         behandlingRepository.update(behandling.copy(status = BehandlingStatus.UTREDES))
         taskService.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId))
     }
+
 }

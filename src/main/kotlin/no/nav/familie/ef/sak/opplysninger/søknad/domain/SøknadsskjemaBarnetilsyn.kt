@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.opplysninger.søknad.domain
 
+import no.nav.familie.ef.sak.opplysninger.søknad.SøknadDatoerDto
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
@@ -27,7 +28,7 @@ data class SøknadsskjemaBarnetilsyn(@Id
                                     @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "sivilstandsplaner_")
                                     val sivilstandsplaner: Sivilstandsplaner? = null,
                                     @MappedCollection(idColumn = "soknadsskjema_id")
-                                    override val barn: Set<Barn>,
+                                    override val barn: Set<SøknadBarn>,
                                     @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "aktivitet_")
                                     val aktivitet: Aktivitet,
                                     @Column("soker_fra")

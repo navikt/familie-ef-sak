@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.beregning
 
 import no.nav.familie.ef.sak.felles.dto.Periode
-import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -206,7 +206,7 @@ internal class BeregningServiceTest {
                                               inntekt = inntekt,
                                               samordningsfradrag = 0.toBigDecimal())
 
-        assertThrows<Feil> {
+        assertThrows<ApiFeil> {
             beregningService.beregnYtelse(inntektsperioder = listOf(inntektsperiode),
                                           vedtaksperioder = listOf(vedtakperiode))
         }
@@ -228,7 +228,7 @@ internal class BeregningServiceTest {
                                                       samordningsfradrag = 0.toBigDecimal()))
 
 
-        assertThrows<Feil> {
+        assertThrows<ApiFeil> {
             (beregningService.beregnYtelse(inntektsperioder = inntektsperioder,
                                            vedtaksperioder = listOf(vedtakperiode)))
         }
@@ -247,7 +247,7 @@ internal class BeregningServiceTest {
                                                       inntekt = inntekt,
                                                       samordningsfradrag = 0.toBigDecimal()))
 
-        assertThrows<Feil> {
+        assertThrows<ApiFeil> {
             beregningService.beregnYtelse(inntektsperioder = inntektsperioder,
                                           vedtaksperioder = vedtakperioder)
         }

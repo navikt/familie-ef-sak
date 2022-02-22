@@ -16,10 +16,14 @@ class FeatureToggleController(private val featureToggleService: FeatureToggleSer
     private val funksjonsbrytere = listOf("familie.ef.sak.tekniskopphor",
                                           "familie.ef.sak.frontend-vis-ikke-publiserte-brevmaler",
                                           "familie.ef.sak.frontend-vis-oppdatering-av-registeropplysninger",
-                                          "familie.ef.sak.innvilge-med-opphoer",
                                           "familie.ef.sak.brevmottakere-verge-og-fullmakt",
-                                          "familie.ef.sak.endringslogg",
                                           "familie.ef.sak.migrering",
+                                          "familie.ef.sak.frontend-vis-sanksjon-en-maned",
+                                          "familie.ef.sak.kan-legge-til-nye-barn-paa-revurdering",
+                                          "familie.ef.sak.frontend-vis-tilbakekreving",
+                                          "familie.ef.sak.frontend-oppgavebenk-migrer-fagsak",
+                                          "familie.ef.sak.opprett-behandling-for-ferdigstilt-journalpost",
+                                          "familie.ef.sak.frontend-behandle-barnetilsyn-i-ny-losning",
     )
 
     @GetMapping

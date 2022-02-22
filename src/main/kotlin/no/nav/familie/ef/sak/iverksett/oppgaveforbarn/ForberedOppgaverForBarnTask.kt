@@ -1,8 +1,6 @@
 package no.nav.familie.ef.sak.iverksett.oppgaveforbarn
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -28,7 +26,7 @@ class ForberedOppgaverForBarnTask(val taskRepository: TaskRepository,
 
     override fun doTask(task: Task) {
         if (featureToggleService.isEnabled("familie.ef.iverksett.opprett-oppgaver-barnsomfylleraar")) {
-            val sisteKjøring = objectMapper.readValue<LocalDate>(task.payload)
+            val sisteKjøring = LocalDate.parse(task.payload)
             forberedOppgaverForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(sisteKjøring)
         } else {
             logger.warn("Feature toggle opprett-oppgaver-barnsomfylleraar er ikke enablet")

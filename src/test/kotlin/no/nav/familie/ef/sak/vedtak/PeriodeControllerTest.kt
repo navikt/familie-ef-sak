@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.vedtak
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
-import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
@@ -19,7 +18,6 @@ import org.springframework.http.ResponseEntity
 
 internal class PeriodeControllerTest : OppslagSpringRunnerTest() {
 
-    @Autowired lateinit var fagsakRepository: FagsakRepository
     @Autowired lateinit var behandlingRepository: BehandlingRepository
 
     @BeforeEach
@@ -29,7 +27,7 @@ internal class PeriodeControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `kan kalle på andelshistorikk uten query param`() {
-        val fagsak = fagsakRepository.insert(fagsak(fagsakpersoner(setOf("1"))))
+        val fagsak = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(setOf("1"))))
         behandlingRepository.insert(behandling(fagsak))
 
         val response: ResponseEntity<Ressurs<List<AndelHistorikkDto>>> =
@@ -42,7 +40,7 @@ internal class PeriodeControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `kan kalle på endepunkt med query param`() {
-        val fagsak = fagsakRepository.insert(fagsak(fagsakpersoner(setOf("1"))))
+        val fagsak = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(setOf("1"))))
         behandlingRepository.insert(behandling(fagsak))
 
         val response: ResponseEntity<Ressurs<List<AndelHistorikkDto>>> =

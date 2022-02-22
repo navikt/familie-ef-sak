@@ -127,6 +127,10 @@ FAMILIE_EF_PROXY_SCOPE: api://${DEPLOY_ENV}-fss.teamfamilie.familie-ef-proxy/.de
 INFOTRYGD_REPLIKA_SCOPE: api://${DEPLOY_ENV}-fss.teamfamilie.familie-ef-infotrygd/.default
 
 spring:
+  mvc:
+    format:
+      date: iso
+      date-time: iso
   autoconfigure.exclude: org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration
   data:
     jdbc:

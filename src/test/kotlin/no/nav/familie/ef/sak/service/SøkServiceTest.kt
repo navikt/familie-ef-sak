@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.service
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.SøkService
@@ -38,7 +39,9 @@ internal class SøkServiceTest {
     private val adresseMapper: AdresseMapper = AdresseMapper(KodeverkServiceMock().kodeverkService())
     private val behandlingService = mockk<BehandlingService>()
     private val infotrygdService = mockk<InfotrygdService>()
+    private val fagsakPersonService = mockk<FagsakPersonService>()
     private val søkService = SøkService(fagsakRepository,
+                                        fagsakPersonService,
                                         behandlingService,
                                         personService,
                                         pdlSaksbehandlerClient,

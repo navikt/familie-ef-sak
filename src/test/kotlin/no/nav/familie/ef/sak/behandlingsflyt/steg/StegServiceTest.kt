@@ -6,11 +6,11 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkRepository
 import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
-import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
+import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradragType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
@@ -31,7 +31,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal håndtere en ny søknad`() {
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.UTREDES))
 
         stegService.håndterVilkår(behandling)
@@ -39,7 +39,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal legge inn historikkinnslag for beregn ytelse selv om behandlingen står på send til beslutter`() {
-        val fagsak = fagsakRepository.insert(fagsak(fagsakpersoner(setOf("0101017227"))))
+        val fagsak = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(setOf("0101017227"))))
         val behandling = behandlingRepository.insert(behandling(fagsak,
                                                                 status = BehandlingStatus.UTREDES,
                                                                 steg = StegType.SEND_TIL_BESLUTTER))
@@ -55,7 +55,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
                                                                                 periodeBegrunnelse = "ok",
                                                                                 inntektBegrunnelse = "okok",
                                                                                 perioder = listOf(vedtaksperiode),
-                                                                                inntekter = listOf(inntek)))
+                                                                                inntekter = listOf(inntek),
+                                                                                samordningsfradragType = SamordningsfradragType.UFØRETRYGD))
 
         assertThat(behandlingshistorikkRepository.findByBehandlingIdOrderByEndretTidDesc(behandling.id).first().steg)
                 .isEqualTo(StegType.BEREGNE_YTELSE)
@@ -64,7 +65,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal feile håndtering av ny søknad hvis en behandling er ferdigstilt`() {
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak, steg = StegType.BEHANDLING_FERDIGSTILT))
 
         assertThrows<IllegalStateException> {
@@ -74,7 +75,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal feile håndtering av ny søknad hvis en behandling er sendt til beslutter`() {
-        val fagsak = fagsakRepository.insert(fagsak())
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak, steg = StegType.BESLUTTE_VEDTAK))
 
         assertThrows<IllegalStateException> {

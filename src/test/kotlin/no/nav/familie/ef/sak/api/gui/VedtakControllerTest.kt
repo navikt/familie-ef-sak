@@ -8,11 +8,11 @@ import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
-import no.nav.familie.ef.sak.fagsak.FagsakRepository
-import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
+import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
@@ -47,7 +47,6 @@ import java.util.UUID
 
 internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var fagsakRepository: FagsakRepository
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
     @Autowired private lateinit var rolleConfig: RolleConfig
     @Autowired private lateinit var vedtaksbrevService: VedtaksbrevService
@@ -58,7 +57,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
 
 
-    private val fagsak = fagsak(setOf(FagsakPerson("")))
+    private val fagsak = fagsak(setOf(PersonIdent("")))
     private val behandling = behandling(fagsak)
 
     private enum class Saksbehandler(val beslutter: Boolean = false) {
@@ -69,7 +68,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     internal fun setUp() {
-        fagsakRepository.insert(fagsak)
+        testoppsettService.lagreFagsak(fagsak)
     }
 
     @Test
@@ -146,7 +145,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         validerTotrinnskontrollKanFatteVedtak(BESLUTTER_2)
 
         godkjennTotrinnskontroll(SAKSBEHANDLER, responseServerError())
-        godkjennTotrinnskontroll(BESLUTTER, responseServerError())
+        godkjennTotrinnskontroll(BESLUTTER, responseBadRequest())
         godkjennTotrinnskontroll(BESLUTTER_2)
     }
 
@@ -186,7 +185,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         validerTotrinnskontrollIkkeAutorisert(BESLUTTER)
         validerTotrinnskontrollKanFatteVedtak(BESLUTTER_2)
 
-        godkjennTotrinnskontroll(BESLUTTER, responseServerError())
+        godkjennTotrinnskontroll(BESLUTTER, responseBadRequest())
 
         godkjennTotrinnskontroll(BESLUTTER_2)
     }
@@ -228,6 +227,10 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
     private fun <T> responseServerError(): (ResponseEntity<Ressurs<T>>) -> Unit = {
         assertThat(it.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+    private fun <T> responseBadRequest(): (ResponseEntity<Ressurs<T>>) -> Unit = {
+        assertThat(it.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
     }
 
     private fun sendTilBeslutter(saksbehandler: Saksbehandler,
@@ -315,7 +318,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     private fun lagSaksbehandlerBrev(saksbehandlerSignatur: String) {
         val brevRequest = objectMapper.readTree("123")
         mockBrukerContext(saksbehandlerSignatur)
-        vedtaksbrevService.lagSaksbehandlerBrev(behandling.id, brevRequest, "brevMal")
+        vedtaksbrevService.lagSaksbehandlerSanitybrev(behandling.id, brevRequest, "brevMal")
         clearBrukerContext()
     }
 
@@ -324,6 +327,8 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         try {
             vedtaksbrevService.lagBeslutterBrev(behandling.id)
         } catch (e: Feil) {
+            // Ønsker ikke å kaste feil fra denne hvis det eks er "feil steg", feil steg ønsker vi å teste i beslutteVedtak
+        } catch (e: ApiFeil) {
             // Ønsker ikke å kaste feil fra denne hvis det eks er "feil steg", feil steg ønsker vi å teste i beslutteVedtak
         }
         clearBrukerContext()

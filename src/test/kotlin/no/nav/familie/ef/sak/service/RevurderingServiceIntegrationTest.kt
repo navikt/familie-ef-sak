@@ -1,14 +1,15 @@
 package no.nav.familie.ef.sak.service
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
+import no.nav.familie.ef.sak.barn.BarnRepository
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.RevurderingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.behandling.dto.RevurderingBarnDto
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
-import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
@@ -20,13 +21,15 @@ import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.repository.vilkårsvurdering
+import no.nav.familie.ef.sak.testutil.søknadsBarnTilBehandlingBarn
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
+import no.nav.familie.ef.sak.vilkår.regler.vilkår.AleneomsorgRegel
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.SivilstandRegel
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
-import no.nav.familie.kontrakter.ef.søknad.Testsøknad
+import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.AfterEach
@@ -39,9 +42,9 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
     @Autowired lateinit var revurderingService: RevurderingService
     @Autowired lateinit var behandlingRepository: BehandlingRepository
-    @Autowired lateinit var fagsakRepository: FagsakRepository
     @Autowired lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
     @Autowired lateinit var søknadService: SøknadService
+    @Autowired lateinit var barnRepository: BarnRepository
     @Autowired lateinit var søknadRepository: SøknadRepository
 
     private lateinit var fagsak: Fagsak
@@ -55,8 +58,8 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
     fun setUp() {
         BrukerContextUtil.mockBrukerContext("Heider")
         val identer = fagsakpersoner(setOf(personIdent))
-        fagsak = fagsakRepository.insert(fagsak(identer = identer))
-        revurderingDto = RevurderingDto(fagsak.id, behandlingsårsak, kravMottatt)
+        fagsak = testoppsettService.lagreFagsak(fagsak(identer = identer))
+        revurderingDto = RevurderingDto(fagsak.id, behandlingsårsak, kravMottatt, emptyList())
     }
 
     @AfterEach
@@ -128,15 +131,60 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         opprettVilkår(behandling, søknad)
 
         val revurdering = revurderingService.opprettRevurderingManuelt(revurderingDto)
-        val vilkårForBehandling = vilkårsvurderingRepository.findByBehandlingId(behandling.id)[0]
-        val vilkårForRevurdering = vilkårsvurderingRepository.findByBehandlingId(revurdering.id)[0]
+        val sivilstandVilkårForBehandling = vilkårsvurderingRepository.findByBehandlingId(behandling.id).first { it.type == VilkårType.SIVILSTAND }
+        val sivilstandVilkårForRevurdering = vilkårsvurderingRepository.findByBehandlingId(revurdering.id).first { it.type == VilkårType.SIVILSTAND }
+        val aleneomsorgVilkårForBehandling = vilkårsvurderingRepository.findByBehandlingId(behandling.id).first { it.type == VilkårType.ALENEOMSORG }
+        val aleneomsorgVilkårForRevurdering = vilkårsvurderingRepository.findByBehandlingId(revurdering.id).first { it.type == VilkårType.ALENEOMSORG }
+        val barnPåBehandling = barnRepository.findByBehandlingId(revurdering.id).first()
 
-        assertThat(vilkårForBehandling.id).isNotEqualTo(vilkårForRevurdering.id)
-        assertThat(vilkårForBehandling.behandlingId).isNotEqualTo(vilkårForRevurdering.behandlingId)
-        assertThat(vilkårForBehandling.sporbar.opprettetTid).isNotEqualTo(vilkårForRevurdering.sporbar.opprettetTid)
+        assertThat(sivilstandVilkårForBehandling.id).isNotEqualTo(sivilstandVilkårForRevurdering.id)
+        assertThat(sivilstandVilkårForBehandling.behandlingId).isNotEqualTo(sivilstandVilkårForRevurdering.behandlingId)
+        assertThat(sivilstandVilkårForBehandling.sporbar.opprettetTid).isNotEqualTo(sivilstandVilkårForRevurdering.sporbar.opprettetTid)
+        assertThat(sivilstandVilkårForBehandling.sporbar.endret.endretTid).isEqualTo(sivilstandVilkårForRevurdering.sporbar.endret.endretTid)
+        assertThat(sivilstandVilkårForRevurdering.barnId).isNull()
+        assertThat(sivilstandVilkårForBehandling.barnId).isNull()
 
-        assertThat(vilkårForBehandling).usingRecursiveComparison().ignoringFields("id", "sporbar", "behandlingId")
-                .isEqualTo(vilkårForRevurdering)
+        assertThat(aleneomsorgVilkårForBehandling.id).isNotEqualTo(aleneomsorgVilkårForRevurdering.id)
+        assertThat(aleneomsorgVilkårForBehandling.barnId).isNotEqualTo(aleneomsorgVilkårForRevurdering.barnId)
+        assertThat(aleneomsorgVilkårForBehandling.behandlingId).isNotEqualTo(aleneomsorgVilkårForRevurdering.behandlingId)
+        assertThat(aleneomsorgVilkårForBehandling.sporbar.opprettetTid).isNotEqualTo(aleneomsorgVilkårForRevurdering.sporbar.opprettetTid)
+        assertThat(aleneomsorgVilkårForBehandling.sporbar.endret.endretTid).isEqualTo(aleneomsorgVilkårForRevurdering.sporbar.endret.endretTid)
+        assertThat(aleneomsorgVilkårForBehandling.barnId).isNotNull
+        assertThat(aleneomsorgVilkårForRevurdering.barnId).isEqualTo(barnPåBehandling.id)
+
+
+        assertThat(sivilstandVilkårForBehandling).usingRecursiveComparison().ignoringFields("id", "sporbar", "behandlingId", "barnId")
+                .isEqualTo(sivilstandVilkårForRevurdering)
+        assertThat(aleneomsorgVilkårForBehandling).usingRecursiveComparison().ignoringFields("id", "sporbar", "behandlingId", "barnId")
+                .isEqualTo(aleneomsorgVilkårForRevurdering)
+    }
+
+    @Test
+    internal fun `revurdering med nye barn - skal kopiere vilkår`() {
+        val behandling = behandlingRepository.insert(behandling(fagsak = fagsak,
+                                                                status = BehandlingStatus.FERDIGSTILT,
+                                                                resultat = BehandlingResultat.INNVILGET))
+        val søknad = lagreSøknad(behandling)
+        opprettVilkår(behandling, søknad)
+        val nyttBarn = RevurderingBarnDto(personIdent = "44445555666")
+
+        val revurdering = revurderingService.opprettRevurderingManuelt(revurderingDto.copy(barn = listOf(nyttBarn)))
+        val vilkårForBehandling = vilkårsvurderingRepository.findByBehandlingId(behandling.id)
+        val vilkårForRevurdering = vilkårsvurderingRepository.findByBehandlingId(revurdering.id)
+        val barnPåBehandling = barnRepository.findByBehandlingId(revurdering.id)
+
+        assertThat(vilkårForBehandling).hasSize(2)
+        assertThat(vilkårForRevurdering).hasSize(3)
+        assertThat(vilkårForBehandling.filter { it.barnId != null }).hasSize(1)
+        assertThat(vilkårForRevurdering.filter { it.barnId != null }).hasSize(2)
+        assertThat(vilkårForBehandling.mapNotNull { it.barnId }).isNotIn(barnPåBehandling.map { it.id })
+        assertThat(vilkårForRevurdering.mapNotNull { it.barnId }.sorted()).isEqualTo(barnPåBehandling.map { it.id }.sorted())
+        assertThat(vilkårForBehandling.map { it.behandlingId }).isNotIn(vilkårForRevurdering.map { it.behandlingId })
+        assertThat(vilkårForBehandling.map { it.sporbar.opprettetTid }).isNotIn(vilkårForRevurdering.map { it.sporbar.opprettetTid })
+
+        assertThat(vilkårForBehandling.first { it.type == VilkårType.SIVILSTAND }).usingRecursiveComparison()
+                .ignoringFields("id", "sporbar", "behandlingId", "barnId")
+                .isEqualTo(vilkårForRevurdering.first { it.type == VilkårType.SIVILSTAND })
     }
 
     @Test
@@ -157,20 +205,36 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
             søknadRepository.findByBehandlingId(revurdering1.id)!!.soknadsskjemaId
 
     private fun lagreSøknad(behandling: Behandling): SøknadsskjemaOvergangsstønad {
-        søknadService.lagreSøknadForOvergangsstønad(Testsøknad.søknadOvergangsstønad, behandling.id, behandling.fagsakId, "1L")
-        return søknadService.hentOvergangsstønad(behandling.id)!!
+        val søknad = TestsøknadBuilder.Builder().setBarn(listOf(
+                TestsøknadBuilder.Builder()
+                        .defaultBarn("Navn navnesen", "27062188745", fødselTermindato = LocalDate.of(2021, 6, 27))
+        )).build().søknadOvergangsstønad
+        søknadService.lagreSøknadForOvergangsstønad(søknad, behandling.id, behandling.fagsakId, "1L")
+        val overgangsstønad = søknadService.hentOvergangsstønad(behandling.id) ?: error("Fant ikke overgangsstønad for testen")
+        barnRepository.insertAll(søknadsBarnTilBehandlingBarn(overgangsstønad.barn, behandling.id))
+        return overgangsstønad
     }
 
     private fun opprettVilkår(behandling: Behandling,
                               søknad: SøknadsskjemaOvergangsstønad) {
-        val barnId = søknad.barn.first().id
+        val barn = barnRepository.findByBehandlingId(behandling.id)
         val delvilkårsvurdering =
-                SivilstandRegel().initereDelvilkårsvurdering(HovedregelMetadata(søknad,
-                                                                                Sivilstandstype.ENKE_ELLER_ENKEMANN))
-        vilkårsvurderingRepository.insert(vilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT,
-                                                           type = VilkårType.SIVILSTAND,
-                                                           behandlingId = behandling.id,
-                                                           barnId = barnId,
-                                                           delvilkårsvurdering = delvilkårsvurdering))
+                SivilstandRegel().initereDelvilkårsvurdering(HovedregelMetadata(søknad.sivilstand,
+                                                                                Sivilstandstype.ENKE_ELLER_ENKEMANN,
+                                                                                barn = emptyList()))
+
+        val delvilkårsvurderingAleneomsorg =
+                AleneomsorgRegel().initereDelvilkårsvurdering(HovedregelMetadata(søknad.sivilstand,
+                                                                                 Sivilstandstype.ENKE_ELLER_ENKEMANN,
+                                                                                 barn = barn))
+        vilkårsvurderingRepository.insertAll(listOf(vilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT,
+                                                                     type = VilkårType.SIVILSTAND,
+                                                                     behandlingId = behandling.id,
+                                                                     delvilkårsvurdering = delvilkårsvurdering),
+                                                    vilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT,
+                                                                     type = VilkårType.ALENEOMSORG,
+                                                                     behandlingId = behandling.id,
+                                                                     barnId = barn.first().id,
+                                                                     delvilkårsvurdering = delvilkårsvurderingAleneomsorg)))
     }
 }
