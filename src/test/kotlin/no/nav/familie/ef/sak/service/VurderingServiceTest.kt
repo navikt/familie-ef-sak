@@ -14,6 +14,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataServic
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.tilSøknadsverdier
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
@@ -60,7 +61,7 @@ internal class VurderingServiceTest {
     private val søknad = SøknadsskjemaMapper.tilDomene(TestsøknadBuilder.Builder().setBarn(listOf(
             TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "14041385481"),
             TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "01012067050")
-    )).build().søknadOvergangsstønad)
+    )).build().søknadOvergangsstønad).tilSøknadsverdier()
     private val barn = søknadsBarnTilBehandlingBarn(søknad.barn)
     private val behandling = behandling(fagsak(), BehandlingStatus.OPPRETTET)
     private val behandlingId = UUID.randomUUID()
@@ -69,7 +70,7 @@ internal class VurderingServiceTest {
     fun setUp() {
         every { behandlingService.hentAktivIdent(behandlingId) } returns søknad.fødselsnummer
         every { behandlingService.hentBehandling(behandlingId) } returns behandling
-        every { søknadService.hentOvergangsstønad(any()) }.returns(søknad)
+        every { søknadService.hentSøknadsgrunnlag(any()) }.returns(søknad)
         every { blankettRepository.deleteById(any()) } just runs
         every { personopplysningerIntegrasjonerClient.hentMedlemskapsinfo(any()) }
                 .returns(Medlemskapsinfo(personIdent = søknad.fødselsnummer,

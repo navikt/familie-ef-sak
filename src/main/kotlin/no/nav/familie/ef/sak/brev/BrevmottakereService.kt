@@ -3,7 +3,7 @@ package no.nav.familie.ef.sak.brev
 import no.nav.familie.ef.sak.brev.domain.Brevmottakere
 import no.nav.familie.ef.sak.brev.domain.OrganisasjonerWrapper
 import no.nav.familie.ef.sak.brev.domain.PersonerWrapper
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -38,10 +38,10 @@ class BrevmottakereService(val brevmottakereRepository: BrevmottakereRepository)
         val antallPersonmottakere = brevmottakere.personer.size
         val antallOrganisasjonMottakere = brevmottakere.organisasjoner.size
         val antallMottakere = antallPersonmottakere + antallOrganisasjonMottakere
-        feilHvis(antallMottakere == 0) {
+        brukerfeilHvis(antallMottakere == 0) {
             "Vedtaksbrevet må ha minst 1 mottaker"
         }
-        feilHvis(antallMottakere > 2) {
+        brukerfeilHvis(antallMottakere > 2) {
             "Vedtaksbrevet kan ikke ha mer enn 2 mottakere"
         }
     }
