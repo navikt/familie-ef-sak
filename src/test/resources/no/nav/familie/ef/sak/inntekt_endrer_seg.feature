@@ -18,7 +18,7 @@ Egenskap: Andelhistorikk: Endring i inntekt
     Når lag andelhistorikk kjøres
 
     Så forvent følgende historikk
-      | BehandlingId | Endringstype | Endret i behandlingId |
-      | 1            | ERSTATTET    | 2                     |
-      | 2            |              |                       |
+      | BehandlingId | Endringstype | Endret i behandlingId | Inntekt |
+      | 1            | ERSTATTET    | 2                     | 0       |
+      | 2            |              |                       | 1       |
 
