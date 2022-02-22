@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.behandlingsflyt.task
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.familie.ef.sak.behandling.MigreringService
+import no.nav.familie.ef.sak.behandling.migrering.MigreringService
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
