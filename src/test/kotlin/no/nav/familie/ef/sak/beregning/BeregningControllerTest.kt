@@ -6,7 +6,6 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
-import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
@@ -68,7 +67,10 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
                                                                 type = BehandlingType.BLANKETT,
                                                                 status = BehandlingStatus.UTREDES))
         val vedtakDto = Avslå(avslåBegrunnelse = "avslår vedtaket", avslåÅrsak = AvslagÅrsak.VILKÅR_IKKE_OPPFYLT)
-        val vedtak = Vedtak(behandlingId = behandling.id, avslåBegrunnelse = "avslår vedtaket", avslåÅrsak = AvslagÅrsak.VILKÅR_IKKE_OPPFYLT, resultatType = ResultatType.AVSLÅ)
+        val vedtak = Vedtak(behandlingId = behandling.id,
+                            avslåBegrunnelse = "avslår vedtaket",
+                            avslåÅrsak = AvslagÅrsak.VILKÅR_IKKE_OPPFYLT,
+                            resultatType = ResultatType.AVSLÅ)
         val respons: ResponseEntity<Ressurs<UUID>> = fatteVedtak(behandling.id, vedtakDto)
 
 
@@ -119,7 +121,8 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
         val (fagsak, behandling) = lagFagsakOgBehandling(StegType.BEHANDLING_FERDIGSTILT)
         val revurdering = lagRevurdering(stegType = StegType.BESLUTTE_VEDTAK, fagsak)
 
-        val responsFørstegangsbehandling: ResponseEntity<Ressurs<List<Beløpsperiode>>> = hentBeløpsperioderForBehandling(behandling.id)
+        val responsFørstegangsbehandling: ResponseEntity<Ressurs<List<Beløpsperiode>>> =
+                hentBeløpsperioderForBehandling(behandling.id)
         val beløpsperioderFørstegangsbehandling = responsFørstegangsbehandling.body.data
         assertThat(beløpsperioderFørstegangsbehandling).hasSize(1)
         assertThat(beløpsperioderFørstegangsbehandling?.first()?.periode?.fradato).isEqualTo(LocalDate.of(2022, 1, 1))
@@ -134,7 +137,7 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
         assertThat(beløpsperioderRevurdering?.first()?.beløp).isEqualTo(BigDecimal(12_000))
     }
 
-    private fun lagFagsakOgBehandling(stegType: StegType = StegType.VEDTA_BLANKETT): Pair<Fagsak,Behandling> {
+    private fun lagFagsakOgBehandling(stegType: StegType = StegType.VEDTA_BLANKETT): Pair<Fagsak, Behandling> {
         val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("12345678910"))))
         val førstegangsbehandling = behandlingRepository.insert(behandling(fagsak,
                                                                            steg = stegType,
@@ -144,14 +147,10 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
         val søknad = SøknadMedVedlegg(Testsøknad.søknadOvergangsstønad, emptyList())
         val tilkjentYtelse = lagTilkjentYtelse(behandlingId = førstegangsbehandling.id,
                                                andelerTilkjentYtelse = listOf(lagAndelTilkjentYtelse(
-                                                       fraOgMed = LocalDate.of(2022,
-                                                                               1,
-                                                                               1),
+                                                       fraOgMed = LocalDate.of(2022, 1, 1),
                                                        kildeBehandlingId = førstegangsbehandling.id,
                                                        beløp = 10_000,
-                                                       tilOgMed = LocalDate.of(2022,
-                                                                               4,
-                                                                               30),
+                                                       tilOgMed = LocalDate.of(2022, 4, 30),
                                                )))
         val vedtakDto = Innvilget(resultatType = ResultatType.INNVILGE,
                                   periodeBegrunnelse = "periode begrunnelse",
@@ -177,21 +176,17 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
                                                                  steg = stegType,
                                                                  type = BehandlingType.REVURDERING,
                                                                  status = BehandlingStatus.UTREDES))
-        val tilkjentYtelse = lagTilkjentYtelse(behandlingId = revurdering.id, andelerTilkjentYtelse = listOf(
-                lagAndelTilkjentYtelse(fraOgMed = LocalDate.of(2022,
-                                                               1,
-                                                               1),
-                                       beløp = 10_000,
-                                       kildeBehandlingId = revurdering.id,
-                                       tilOgMed = LocalDate.of(2022,
-                                                               2, 28)),
-                lagAndelTilkjentYtelse(fraOgMed = LocalDate.of(2022,
-                                                               3,
-                                                               1),
-                                       beløp = 12_000,
-                                       kildeBehandlingId = revurdering.id,
-                                       tilOgMed = LocalDate.of(2022,
-                                                               6, 30))))
+        val tilkjentYtelse =
+                lagTilkjentYtelse(behandlingId = revurdering.id,
+                                  andelerTilkjentYtelse =
+                                  listOf(lagAndelTilkjentYtelse(fraOgMed = LocalDate.of(2022, 1, 1),
+                                                                beløp = 10_000,
+                                                                kildeBehandlingId = revurdering.id,
+                                                                tilOgMed = LocalDate.of(2022, 2, 28)),
+                                         lagAndelTilkjentYtelse(fraOgMed = LocalDate.of(2022, 3, 1),
+                                                                beløp = 12_000,
+                                                                kildeBehandlingId = revurdering.id,
+                                                                tilOgMed = LocalDate.of(2022, 6, 30))))
 
         val vedtakDto = Innvilget(resultatType = ResultatType.INNVILGE,
                                   periodeBegrunnelse = "periode begrunnelse",

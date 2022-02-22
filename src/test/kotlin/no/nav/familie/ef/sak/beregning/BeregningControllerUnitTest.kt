@@ -34,22 +34,19 @@ internal class BeregningControllerUnitTest {
     @Test
     internal fun `skal kaste feil dersom vedtak har resultattypen OPPHØRT`() {
 
-        every { vedtakService.hentVedtak(any()) } returns Vedtak(behandlingId = UUID.randomUUID(),
-                                                                 resultatType = ResultatType.OPPHØRT,
-                                                                 perioder = PeriodeWrapper(perioder = listOf(
-                                                                         Vedtaksperiode(LocalDate.of(2022, 1, 1),
-                                                                                        datoTil = LocalDate.of(2022, 4, 30),
-                                                                                        aktivitet = AktivitetType.BARN_UNDER_ETT_ÅR,
-                                                                                        periodeType = VedtaksperiodeType.MIDLERTIDIG_OPPHØR))))
-        every { tilkjentytelseService.hentForBehandling(any()) } returns lagTilkjentYtelse(
-                andelerTilkjentYtelse = listOf(lagAndelTilkjentYtelse(
-                        fraOgMed = LocalDate.of(2022,
-                                                1,
-                                                1),
+        every { vedtakService.hentVedtak(any()) } returns
+                Vedtak(behandlingId = UUID.randomUUID(),
+                       resultatType = ResultatType.OPPHØRT,
+                       perioder =
+                       PeriodeWrapper(perioder = listOf(Vedtaksperiode(LocalDate.of(2022, 1, 1),
+                                                                       datoTil = LocalDate.of(2022, 4, 30),
+                                                                       aktivitet = AktivitetType.BARN_UNDER_ETT_ÅR,
+                                                                       periodeType = VedtaksperiodeType.MIDLERTIDIG_OPPHØR))))
+        every { tilkjentytelseService.hentForBehandling(any()) } returns
+                lagTilkjentYtelse(andelerTilkjentYtelse = listOf(lagAndelTilkjentYtelse(
+                        fraOgMed = LocalDate.of(2022, 1, 1),
                         beløp = 10_000,
-                        tilOgMed = LocalDate.of(2022,
-                                                4,
-                                                30),
+                        tilOgMed = LocalDate.of(2022, 4, 30),
                 )))
         assertThrows<Feil> { beregningController.hentBeregnetBeløp(UUID.randomUUID()) }
 
