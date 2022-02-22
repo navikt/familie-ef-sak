@@ -221,6 +221,26 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    internal fun `hentMigreringInfo - siste periode har 0 som beløp, migrerer fra måneden bak den`() {
+        val periode = InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(beløp = 0, vedtakId = 1)
+        val månedenFør = YearMonth.from(periode.stønadFom).minusMonths(1)
+        val periode2 = InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(stønadFom = månedenFør.atDay(1),
+                                                                    stønadTom = månedenFør.atEndOfMonth(),
+                                                                    vedtakId = 2,
+                                                                    beløp = 2)
+        every { infotrygdReplikaClient.hentPerioder(any()) } returns
+                InfotrygdPeriodeResponse(listOf(periode, periode2), emptyList(), emptyList())
+        val fagsak = fagsakService.hentEllerOpprettFagsak("1", Stønadstype.OVERGANGSSTØNAD)
+
+        val migreringInfo = migreringService.hentMigreringInfo(fagsak.fagsakPersonId)
+
+        assertThat(migreringInfo.kanMigreres).isTrue
+        assertThat(migreringInfo.stønadFom).isEqualTo(månedenFør)
+        assertThat(migreringInfo.stønadTom).isEqualTo(månedenFør)
+        assertThat(migreringInfo.beløpsperioder?.first()?.beløp?.toInt()).isEqualTo(19949)
+    }
+
+    @Test
     internal fun `hentMigreringInfo - sak inneholder annen ident`() {
         every { infotrygdReplikaClient.hentSaker(any()) } returns
                 InfotrygdSakResponse(listOf(InfotrygdSak("2",

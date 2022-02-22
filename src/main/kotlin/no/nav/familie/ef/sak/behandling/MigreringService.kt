@@ -81,6 +81,7 @@ class MigreringService(
         FLERE_IDENTER_VEDTAK,
         ALLEREDE_MIGRERT,
         MANGLER_PERIODER,
+        MANGLER_PERIODER_MED_BELØP,
         FEIL_FOM_DATO,
         FEIL_TOM_DATO,
         ELDRE_PERIODER,
@@ -252,9 +253,16 @@ class MigreringService(
             throw MigreringException("Mangler aktive perioder", MigreringExceptionType.MANGLER_AKTIVE_PERIODER)
         }
 
-        val sistePeriode = gjeldendePerioder.maxByOrNull { it.stønadFom }
-                           ?: throw MigreringException("Har ikke noen perioder å migrere",
-                                                       MigreringExceptionType.MANGLER_PERIODER)
+        if (gjeldendePerioder.isEmpty()) {
+            throw MigreringException("Har ikke noen perioder å migrere",
+                                     MigreringExceptionType.MANGLER_PERIODER)
+        }
+        val perioderMedBeløp = gjeldendePerioder.filter { it.beløp != 0 }
+        if (perioderMedBeløp.isEmpty()) {
+            throw MigreringException("Har ikke noen perioder med beløp å migrere",
+                                     MigreringExceptionType.MANGLER_PERIODER_MED_BELØP)
+        }
+        val sistePeriode = perioderMedBeløp.maxByOrNull { it.stønadFom } ?: error("Finner ikke noen perioder")
 
         return sisteMånedenPåPeriodeBakITiden(sistePeriode)
     }
