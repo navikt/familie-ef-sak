@@ -4,13 +4,15 @@ import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.felles.dto.Periode
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.tilBeløpsperiode
+import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
+import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
 import no.nav.familie.ef.sak.vilkår.VurderingService
@@ -37,7 +39,7 @@ class BeregningController(private val stegService: StegService,
                           private val tilkjentYtelseService: TilkjentYtelseService,
                           private val tilgangService: TilgangService,
                           private val vurderingService: VurderingService,
-                          private val featureToggleService: FeatureToggleService) {
+                          private val vedtakService: VedtakService) {
 
     @PostMapping
     fun beregnYtelserForRequest(@RequestBody beregningRequest: BeregningRequest): Ressurs<List<Beløpsperiode>> {
@@ -59,7 +61,7 @@ class BeregningController(private val stegService: StegService,
 
     private fun validerAlleVilkårOppfyltDersomInvilgelse(vedtak: VedtakDto, behandlingId: UUID) {
         if (vedtak is Innvilget) {
-            feilHvisIkke(vurderingService.erAlleVilkårOppfylt(behandlingId)) { "Kan ikke fullføre en behandling med resultat innvilget hvis ikke alle vilkår er oppfylt" }
+            brukerfeilHvisIkke(vurderingService.erAlleVilkårOppfylt(behandlingId)) { "Kan ikke fullføre en behandling med resultat innvilget hvis ikke alle vilkår er oppfylt" }
         }
     }
 
@@ -74,7 +76,13 @@ class BeregningController(private val stegService: StegService,
     @GetMapping("/{behandlingId}")
     fun hentBeregnetBeløp(@PathVariable behandlingId: UUID): Ressurs<List<Beløpsperiode>> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
-        return Ressurs.success(tilkjentYtelseService.hentForBehandling(behandlingId).tilBeløpsperiode())
+        val vedtakForBehandling = vedtakService.hentVedtak(behandlingId)
+        if (vedtakForBehandling.resultatType === ResultatType.OPPHØRT) {
+            throw Feil("Kan ikke vise fremtidige beløpsperioder for opphørt vedtak med id=$behandlingId")
+        }
+        val startDatoForVedtak = vedtakForBehandling.perioder?.perioder?.minByOrNull { it.datoFra }?.datoFra
+                                 ?: error("Fant ingen startdato for vedtak på behandling med id=$behandlingId")
+        return Ressurs.success(tilkjentYtelseService.hentForBehandling(behandlingId).tilBeløpsperiode(startDatoForVedtak))
     }
 
 }

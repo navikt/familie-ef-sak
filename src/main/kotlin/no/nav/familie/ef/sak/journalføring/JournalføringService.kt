@@ -9,7 +9,7 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettService
 import no.nav.familie.ef.sak.journalføring.dto.DokumentVariantformat
@@ -109,7 +109,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         val journalpost = hentJournalpost(journalpostId)
         val behandlingstype = journalføringRequest.behandling.behandlingstype
                               ?: throw ApiFeil("Kan ikke journalføre til ny behandling uten behandlingstype", BAD_REQUEST)
-        feilHvisIkke(journalpost.harStrukturertSøknad()) { "Journalposten inneholder ikke en digital søknad" }
+        brukerfeilHvisIkke(journalpost.harStrukturertSøknad()) { "Journalposten inneholder ikke en digital søknad" }
 
         val behandling = opprettBehandlingOgPopulerGrunnlagsdata(behandlingstype = behandlingstype,
                                                                  fagsakId = journalføringRequest.fagsakId,
@@ -131,7 +131,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
                                                                    journalpostId: String): Long {
         val saksbehandler = SikkerhetContext.hentSaksbehandler(true)
         val journalpost = hentJournalpost(journalpostId)
-        feilHvisIkke(journalpost.journalstatus == Journalstatus.JOURNALFOERT || journalpost.journalstatus == Journalstatus.FERDIGSTILT) {
+        brukerfeilHvisIkke(journalpost.journalstatus == Journalstatus.JOURNALFOERT || journalpost.journalstatus == Journalstatus.FERDIGSTILT) {
             "Denne journalposten er ikke journalført og skal håndteres på vanlig måte"
         }
         val behandling = opprettBehandlingOgPopulerGrunnlagsdata(behandlingstype = journalføringRequest.behandlingstype,

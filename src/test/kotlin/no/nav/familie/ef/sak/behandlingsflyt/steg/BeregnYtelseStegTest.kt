@@ -13,7 +13,7 @@ import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.dto.Periode
 import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
@@ -132,7 +132,7 @@ internal class BeregnYtelseStegTest {
         @Test
         internal fun `innvilget - skal kaste feil når man sender inn uten nye beløpsperioder`() {
             every { beregningService.beregnYtelse(any(), any()) } returns emptyList()
-            assertThrows<Feil> { utførSteg(BehandlingType.REVURDERING) }
+            assertThrows<ApiFeil> { utførSteg(BehandlingType.REVURDERING) }
         }
 
         @Test
@@ -235,7 +235,7 @@ internal class BeregnYtelseStegTest {
 
             val opphørsperiode = opphørsperiode(opphørFom, opphørTom)
             val innvilgetPeriode = innvilgetPeriode(innvilgetFom, innvilgetTom)
-            assertThrows<Feil> {
+            assertThrows<ApiFeil> {
                 utførSteg(BehandlingType.REVURDERING,
                           innvilget(listOf(opphørsperiode, innvilgetPeriode), listOf(inntekt(innvilgetFom))),
                           forrigeBehandlingId = UUID.randomUUID())
@@ -436,12 +436,12 @@ internal class BeregnYtelseStegTest {
 
         @Test
         internal fun `skal feile ved opphør, dersom behandlingstype ikke er revurdering`() {
-            val feil = assertThrows<Feil> {
+            val feil = assertThrows<ApiFeil> {
                 utførSteg(BehandlingType.FØRSTEGANGSBEHANDLING,
                           Opphør(opphørFom = YearMonth.of(2021, 6), begrunnelse = "null"),
                           forrigeBehandlingId = UUID.randomUUID())
             }
-            assertThat(feil.frontendFeilmelding).contains("Kan kun opphøre ved revurdering")
+            assertThat(feil.feil).contains("Kan kun opphøre ved revurdering")
         }
 
         @Test

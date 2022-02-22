@@ -1,14 +1,6 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser
 
 import io.cucumber.datatable.DataTable
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.BasisDomeneParser.Companion.parseAktivitetType
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.BasisDomeneParser.Companion.parseEndringType
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.BasisDomeneParser.Companion.parseInt
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.BasisDomeneParser.Companion.parseResultatType
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.BasisDomeneParser.Companion.parseString
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.BasisDomeneParser.Companion.parseValgfriDato
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.BasisDomeneParser.Companion.parseValgfriInt
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.BasisDomeneParser.Companion.parseValgfriString
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelseType
@@ -36,12 +28,17 @@ object VedtakDomeneParser {
         }
     }
 
-    fun mapBehandlingForHistorikkEndring(dataTable: DataTable): List<Pair<UUID, HistorikkEndring?>> {
+    fun mapBehandlingForHistorikkEndring(dataTable: DataTable): List<ForventetHistorikk> {
         return dataTable.asMaps().map {
             BehandlingForHistorikkEndringMapper().mapRad(it)
         }
     }
 
+    class ForventetHistorikk(
+            val id: UUID,
+            val historikkEndring: HistorikkEndring?,
+            val inntekt: Int
+    )
 
     fun mapAndelTilkjentYtelse(dataTable: DataTable): List<AndelTilkjentYtelse?> {
         return dataTable.asMaps().map {
@@ -130,16 +127,24 @@ object VedtakDomeneParser {
 
     class BehandlingForHistorikkEndringMapper {
 
-        fun mapRad(rad: Map<String, String>): Pair<UUID, HistorikkEndring?> {
-            if (parseEndringType(rad) == null && parseValgfriInt(VedtakDomenebegrep.ENDRET_I_BEHANDLING_ID, rad) == null)
-                return behandlingIdTilUUID[parseInt(VedtakDomenebegrep.BEHANDLING_ID, rad)]!! to null
+        fun mapRad(rad: Map<String, String>): ForventetHistorikk {
+            if (parseEndringType(rad) == null) {
+                return ForventetHistorikk(
+                        id = behandlingIdTilUUID[parseInt(VedtakDomenebegrep.BEHANDLING_ID, rad)]!!,
+                        historikkEndring = null,
+                        inntekt = parseValgfriInt(VedtakDomenebegrep.INNTEKT, rad) ?: 0
+                )
 
-            return behandlingIdTilUUID[parseInt(VedtakDomenebegrep.BEHANDLING_ID, rad)]!! to
-                    HistorikkEndring(
+            }
+            return ForventetHistorikk(
+                    id = behandlingIdTilUUID[parseInt(VedtakDomenebegrep.BEHANDLING_ID, rad)]!!,
+                    historikkEndring = HistorikkEndring(
                             type = parseEndringType(rad)!!,
                             behandlingId = behandlingIdTilUUID[parseInt(VedtakDomenebegrep.ENDRET_I_BEHANDLING_ID, rad)]!!,
                             vedtakstidspunkt = LocalDateTime.now()
-                    )
+                    ),
+                    inntekt = parseValgfriInt(VedtakDomenebegrep.INNTEKT, rad) ?: 0
+            )
         }
     }
 

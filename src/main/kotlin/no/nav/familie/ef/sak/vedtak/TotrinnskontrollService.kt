@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall.BESLUTTE_VEDTAK_GODKJENT
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext.NAVIDENT_REGEX
@@ -22,6 +23,7 @@ import no.nav.familie.ef.sak.vedtak.dto.TotrinnkontrollStatus.UAKTUELT
 import no.nav.familie.ef.sak.vedtak.dto.TotrinnskontrollDto
 import no.nav.familie.ef.sak.vedtak.dto.TotrinnskontrollStatusDto
 import no.nav.familie.kontrakter.felles.objectMapper
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -45,8 +47,8 @@ class TotrinnskontrollService(private val behandlingshistorikkService: Behandlin
         }
 
         if (beslutterErLikBehandler(sisteBehandlingshistorikk)) {
-            throw Feil(message = "Beslutter er lik behandler",
-                       frontendFeilmelding = "Beslutter kan ikke behandle en behandling som den selv har sendt til beslutter")
+            throw ApiFeil("Beslutter kan ikke behandle en behandling som den selv har sendt til beslutter",
+                          HttpStatus.BAD_REQUEST)
         }
 
         val nyStatus = if (beslutteVedtak.godkjent) BehandlingStatus.IVERKSETTER_VEDTAK else BehandlingStatus.UTREDES

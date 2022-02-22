@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
@@ -45,7 +46,7 @@ class VurderingService(private val behandlingService: BehandlingService,
     @Transactional
     fun opprettVilkårForMigrering(behandling: Behandling) {
         feilHvisIkke(behandling.erMigrering()) { "Kan kun opprette maskinellt opprettede vurderinger på migreringer" }
-        feilHvis(behandling.status.behandlingErLåstForVidereRedigering()) { "Behandling er låst for videre redigering" }
+        brukerfeilHvis(behandling.status.behandlingErLåstForVidereRedigering()) { "Behandling er låst for videre redigering" }
         feilHvis(vilkårsvurderingRepository.findByBehandlingId(behandling.id).isNotEmpty()) { "Vilkår finnes allerede" }
         val (_, metadata) = hentGrunnlagOgMetadata(behandling.id)
 
@@ -59,7 +60,7 @@ class VurderingService(private val behandlingService: BehandlingService,
     }
 
     fun hentGrunnlagOgMetadata(behandlingId: UUID): Pair<VilkårGrunnlagDto, HovedregelMetadata> {
-        val søknad = søknadService.hentOvergangsstønad(behandlingId)
+        val søknad = søknadService.hentSøknadsgrunnlag(behandlingId)
         val personIdent = behandlingService.hentAktivIdent(behandlingId)
         val barn = barnService.finnBarnPåBehandling(behandlingId)
         val grunnlag = vilkårGrunnlagService.hentGrunnlag(behandlingId, søknad, personIdent, barn)

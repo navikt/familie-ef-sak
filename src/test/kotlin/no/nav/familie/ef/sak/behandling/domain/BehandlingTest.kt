@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak
 import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak.BEHANDLES_I_GOSYS
 import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak.FEILREGISTRERT
 import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak.TRUKKET_TILBAKE
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
@@ -50,8 +51,8 @@ internal class BehandlingTest {
 
     @Test
     internal fun `Skal ikke kunne henlegge uten årsak `() {
-        val feil: Feil = assertThrows { lagBehandlingMed(HENLAGT, null, FØRSTEGANGSBEHANDLING) }
-        assertThat(feil.frontendFeilmelding).isEqualTo("Kan ikke henlegge behandling uten en årsak")
+        val feil: ApiFeil = assertThrows { lagBehandlingMed(HENLAGT, null, FØRSTEGANGSBEHANDLING) }
+        assertThat(feil.feil).isEqualTo("Kan ikke henlegge behandling uten en årsak")
     }
 
     private fun lagBehandlingMed(behandlingResultat: BehandlingResultat,

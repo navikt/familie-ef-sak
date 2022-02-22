@@ -7,7 +7,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataServic
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioder
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadsskjemaOvergangsstønad
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknadsverdier
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.AktivitetMapper
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.BosituasjonMapper
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SagtOppEllerRedusertStillingMapper
@@ -29,7 +29,7 @@ class VilkårGrunnlagService(private val medlemskapMapper: MedlemskapMapper,
 
 
     fun hentGrunnlag(behandlingId: UUID,
-                     søknad: SøknadsskjemaOvergangsstønad?,
+                     søknad: Søknadsverdier?,
                      personident: String,
                      barn: List<BehandlingBarn>): VilkårGrunnlagDto {
         val registergrunnlagData = grunnlagsdataService.hentGrunnlagsdata(behandlingId)
@@ -41,7 +41,7 @@ class VilkårGrunnlagService(private val medlemskapMapper: MedlemskapMapper,
         val medlemskap = medlemskapMapper.tilDto(grunnlagsdata, søknad?.medlemskap)
         val sivilstand = SivilstandMapper.tilDto(grunnlagsdata, søknad?.sivilstand)
         val sivilstandsplaner = SivilstandsplanerMapper.tilDto(sivilstandsplaner = søknad?.sivilstandsplaner)
-        val sagtOppEllerRedusertStilling = søknad?.let { SagtOppEllerRedusertStillingMapper.tilDto(situasjon = it.situasjon) }
+        val sagtOppEllerRedusertStilling = søknad?.situasjon?.let { SagtOppEllerRedusertStillingMapper.tilDto(situasjon = it) }
 
         return VilkårGrunnlagDto(tidligereVedtaksperioder = mapTidligereVedtaksperioder(grunnlagsdata.tidligereVedtaksperioder),
                                  medlemskap = medlemskap,

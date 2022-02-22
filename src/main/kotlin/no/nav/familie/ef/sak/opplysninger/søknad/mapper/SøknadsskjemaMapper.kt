@@ -6,7 +6,6 @@ import no.nav.familie.ef.sak.opplysninger.søknad.domain.AnnenForelder
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Arbeidsgiver
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Arbeidssituasjon
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Arbeidssøker
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Barnepass
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Barnepassordning
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.BarnetilsynDokumentasjon
@@ -22,6 +21,7 @@ import no.nav.familie.ef.sak.opplysninger.søknad.domain.Selvstendig
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Situasjon
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Sivilstand
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Sivilstandsplaner
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadType
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadsskjemaBarnetilsyn
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadsskjemaOvergangsstønad
@@ -104,6 +104,7 @@ object SøknadsskjemaMapper {
                                         datoMottatt = kontraktsøknad.innsendingsdetaljer.verdi.datoMottatt.verdi,
                                         medlemskap = tilDomene(kontraktsøknad.medlemskapsdetaljer.verdi),
                                         bosituasjon = tilDomene(kontraktsøknad.bosituasjon.verdi),
+                                        sivilstand = tilDomene(kontraktsøknad.sivilstandsdetaljer.verdi),
                                         sivilstandsplaner = tilDomene(kontraktsøknad.sivilstandsplaner?.verdi),
                                         barn = tilDomene(kontraktsøknad.barn.verdi),
                                         utdanning = tilDomene(kontraktsøknad.utdanning.verdi)!!,

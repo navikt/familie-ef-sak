@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.kontrakter.ef.felles.StønadType
 import no.nav.familie.kontrakter.ef.iverksett.TilkjentYtelseMedMetadata
+import java.time.LocalDate
 
 fun TilkjentYtelse.tilDto(): TilkjentYtelseDto {
     return TilkjentYtelseDto(behandlingId = this.behandlingId,
@@ -27,12 +28,13 @@ fun AndelTilkjentYtelse.tilDto(): AndelTilkjentYtelseDto {
 
 }
 
-fun TilkjentYtelse.tilBeløpsperiode(): List<Beløpsperiode> {
-    return this.andelerTilkjentYtelse.map { andel ->
+fun TilkjentYtelse.tilBeløpsperiode(startDato: LocalDate): List<Beløpsperiode> {
+    return this.andelerTilkjentYtelse.filter { andel -> andel.stønadFom >= startDato }.map { andel ->
         Beløpsperiode(beløp = andel.beløp.toBigDecimal(),
                       periode = Periode(fradato = andel.stønadFom, tildato = andel.stønadTom),
                       beregningsgrunnlag = Beregningsgrunnlag(inntekt = andel.inntekt.toBigDecimal(),
                                                               samordningsfradrag = andel.samordningsfradrag.toBigDecimal(),
+                                                              samordningsfradragType = this.samordningsfradragType,
                                                               avkortningPerMåned = andel.inntektsreduksjon.toBigDecimal()),
                       beløpFørSamordning = andel.beløp.plus(andel.samordningsfradrag).toBigDecimal())
     }

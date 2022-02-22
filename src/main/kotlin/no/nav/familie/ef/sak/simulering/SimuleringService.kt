@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BehandlerRolle
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.iverksett.IverksettClient
@@ -16,6 +17,7 @@ import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.kontrakter.ef.iverksett.SimuleringDto
 import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
 import no.nav.familie.kontrakter.felles.simulering.Simuleringsoppsummering
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -79,10 +81,17 @@ class SimuleringService(private val iverksettClient: IverksettClient,
                                                             stønadstype = fagsak.stønadstype,
                                                             eksternFagsakId = fagsak.eksternId.id)
 
-        return iverksettClient.simuler(SimuleringDto(
-                nyTilkjentYtelseMedMetaData = tilkjentYtelseMedMedtadata,
-                forrigeBehandlingId = behandling.forrigeBehandlingId
-        ))
+        try {
+            return iverksettClient.simuler(SimuleringDto(
+                    nyTilkjentYtelseMedMetaData = tilkjentYtelseMedMedtadata,
+                    forrigeBehandlingId = behandling.forrigeBehandlingId
+            ))
+        } catch (exception: Exception) {
+            throw Feil(message = "Kunne ikke utføre simulering",
+                       frontendFeilmelding = "Kunne ikke utføre simulering. Vennligst prøv på nytt",
+                       httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+                       throwable = exception)
+        }
     }
 
     private fun simulerForBlankett(behandling: Behandling): Simuleringsoppsummering {

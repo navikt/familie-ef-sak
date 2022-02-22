@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataServic
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdata
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.tilSøknadsverdier
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
@@ -54,13 +55,13 @@ internal class VilkårGrunnlagServiceTest {
     private val søknad = SøknadsskjemaMapper.tilDomene(TestsøknadBuilder.Builder().setBarn(listOf(
             TestsøknadBuilder.Builder().defaultBarn("Navn1 navnesen", fødselTermindato = LocalDate.now().plusMonths(4)),
             TestsøknadBuilder.Builder().defaultBarn("Navn2 navnesen", fødselTermindato = LocalDate.now().plusMonths(6))
-    )).build().søknadOvergangsstønad)
+    )).build().søknadOvergangsstønad).tilSøknadsverdier()
     private val barn = søknadsBarnTilBehandlingBarn(søknad.barn)
     private val medlemskapsinfo = Medlemskapsinfo(søknad.fødselsnummer, emptyList(), emptyList(), emptyList())
 
     @BeforeEach
     internal fun setUp() {
-        every { søknadService.hentOvergangsstønad(behandlingId) } returns søknad
+        every { søknadService.hentSøknadsgrunnlag(behandlingId) } returns søknad
         every { personopplysningerIntegrasjonerClient.hentMedlemskapsinfo(any()) } returns medlemskapsinfo
         every { featureToggleService.isEnabled(any(), any()) } returns false
     }
