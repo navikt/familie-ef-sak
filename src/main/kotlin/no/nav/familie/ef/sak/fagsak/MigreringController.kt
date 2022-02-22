@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.fagsak
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
-import no.nav.familie.ef.sak.behandling.MigreringService
+import no.nav.familie.ef.sak.behandling.migrering.MigreringService
 import no.nav.familie.ef.sak.fagsak.dto.MigreringInfo
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
