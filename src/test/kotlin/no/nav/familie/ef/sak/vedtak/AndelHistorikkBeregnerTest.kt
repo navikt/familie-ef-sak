@@ -39,11 +39,6 @@ import java.util.UUID
 class AndelHistorikkBeregnerTest {
 
     @Test
-    internal fun `inntek_endrer_seg`() {
-        run("/økonomi/inntekt_endrer_seg.csv")
-    }
-
-    @Test
     internal fun `når vi revurderer fra midt i en tidligere periode lagrer vi ikke ned hele vedtakshistorikken`() {
         run("/økonomi/hele_vedtaket_blir_ikke_med.csv")
     }
