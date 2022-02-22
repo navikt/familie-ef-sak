@@ -87,7 +87,6 @@ internal class ForberedOppgaverForBarnServiceTest {
         verify(exactly = 0) { OppgaveBeskrivelse.beskrivelseBarnFyllerEttÅr() }
     }
 
-    @Disabled //TODO: Fjern disabled
     @Test
     fun `barn blir seks mnd om 1 uker pluss en dag, sjekk om fyller innen 1 uke, forvent ingen kall`() {
         val fødselsdato = LocalDate.now().minusDays(182).plusWeeks(1).plusDays(1)
@@ -99,7 +98,6 @@ internal class ForberedOppgaverForBarnServiceTest {
         verify(exactly = 0) { OppgaveBeskrivelse.beskrivelseBarnFyllerEttÅr() }
     }
 
-    @Disabled //TODO: Fjern disabled
     @Test
     fun `barn født 29 august skal ikke få opprettet ny oppgave ved kjøring 21 februar`() {
         val fødselsdato = LocalDate.of(2022, 8, 29)
