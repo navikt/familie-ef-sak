@@ -97,9 +97,7 @@ class MigreringService(
             hentGjeldendePeriodeOgValiderState(fagsakPerson, kjøremåned)
         } catch (e: MigreringException) {
             logger.info("Kan ikke migrere fagsakPerson=$fagsakPersonId årsak=${e.type}")
-            if (e.type == MigreringExceptionType.FLERE_IDENTER || e.type == MigreringExceptionType.FLERE_IDENTER_VEDTAK) {
-                secureLogger.info("Kan ikke migrere fagsakPerson=$fagsakPersonId - ${e.årsak}")
-            }
+            secureLogger.info("Kan ikke migrere fagsakPerson=$fagsakPersonId - ${e.årsak}")
             return MigreringInfo(kanMigreres = false, e.årsak)
         }
         logger.info("Kan migrere fagsakPerson=$fagsakPersonId")
