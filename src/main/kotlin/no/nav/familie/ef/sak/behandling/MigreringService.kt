@@ -83,6 +83,7 @@ class MigreringService(
         MANGLER_PERIODER,
         FEIL_FOM_DATO,
         FEIL_TOM_DATO,
+        ELDRE_PERIODER,
         SIMULERING_FEILUTBETALING,
         SIMULERING_ETTERBETALING,
         BELØP_0,
@@ -97,9 +98,7 @@ class MigreringService(
             hentGjeldendePeriodeOgValiderState(fagsakPerson, kjøremåned)
         } catch (e: MigreringException) {
             logger.info("Kan ikke migrere fagsakPerson=$fagsakPersonId årsak=${e.type}")
-            if (e.type == MigreringExceptionType.FLERE_IDENTER || e.type == MigreringExceptionType.FLERE_IDENTER_VEDTAK) {
-                secureLogger.info("Kan ikke migrere fagsakPerson=$fagsakPersonId - ${e.årsak}")
-            }
+            secureLogger.info("Kan ikke migrere fagsakPerson=$fagsakPersonId - ${e.årsak}")
             return MigreringInfo(kanMigreres = false, e.årsak)
         }
         logger.info("Kan migrere fagsakPerson=$fagsakPersonId")
@@ -309,9 +308,9 @@ class MigreringService(
             throw MigreringException("Sluttdato er annet enn siste i måneden, dato=$dato",
                                      MigreringExceptionType.FEIL_TOM_DATO)
         }
-        if (dato.isBefore(LocalDate.now().minusMonths(12))) {
-            throw MigreringException("Kan ikke migrere når forrige utbetaling i infotrygd er mer enn 1 år tilbake i tid, dato=$dato",
-                                     MigreringExceptionType.FEIL_TOM_DATO)
+        if (dato.isBefore(LocalDate.now().minusYears(3))) {
+            throw MigreringException("Kan ikke migrere når forrige utbetaling i infotrygd er mer enn 3 år tilbake i tid, dato=$dato",
+                                     MigreringExceptionType.ELDRE_PERIODER)
         }
     }
 
