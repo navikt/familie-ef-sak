@@ -62,7 +62,7 @@ class MigreringService(
         private val infotrygdService: InfotrygdService,
         private val beregningService: BeregningService,
         private val simuleringService: SimuleringService,
-        private val infotrygdPeriodeMigreringService: InfotrygdPeriodeMigreringService
+        private val infotrygdPeriodeValideringService: InfotrygdPeriodeValideringService
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -210,7 +210,7 @@ class MigreringService(
         val personIdent = fagsakPerson.hentAktivIdent()
         val fagsak = fagsakService.finnFagsakerForFagsakPersonId(fagsakPerson.id).overgangsstønad
         fagsak?.let { validerFagsakOgBehandling(it) }
-        return infotrygdPeriodeMigreringService.hentPeriodeForMigrering(personIdent, kjøremåned)
+        return infotrygdPeriodeValideringService.hentPeriodeForMigrering(personIdent, kjøremåned)
     }
 
     private fun validerFagsakOgBehandling(fagsak: Fagsak) {

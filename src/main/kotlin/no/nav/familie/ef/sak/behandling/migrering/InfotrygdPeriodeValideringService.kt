@@ -11,7 +11,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 @Service
-class InfotrygdPeriodeMigreringService(
+class InfotrygdPeriodeValideringService(
         private val infotrygdService: InfotrygdService
 ) {
 
@@ -19,11 +19,11 @@ class InfotrygdPeriodeMigreringService(
         validerSakerIInfotrygd(personIdent)
         val perioder = infotrygdService.hentDtoPerioder(personIdent).overgangsstønad
         validerHarKunEnIdentPåPerioder(perioder, personIdent)
-        return periodeFremITidenEllerBakITiden(perioder, kjøremåned)
+        return periodeFremEllerBakITiden(perioder, kjøremåned)
     }
 
-    private fun periodeFremITidenEllerBakITiden(perioder: InfotrygdStønadPerioderDto,
-                                                kjøremåned: YearMonth): SummertInfotrygdPeriodeDto {
+    private fun periodeFremEllerBakITiden(perioder: InfotrygdStønadPerioderDto,
+                                          kjøremåned: YearMonth): SummertInfotrygdPeriodeDto {
         val gjeldendePerioder = perioder.summert
         val perioderFremITiden = gjeldendePerioder.filter { it.stønadTom >= førsteDagenINesteMåned(kjøremåned) }
         if (perioderFremITiden.isNotEmpty()) {
