@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.infotrygd
 
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdAktivitetstype
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
 import java.time.LocalDate
 
@@ -21,7 +22,8 @@ data class SummertInfotrygdPeriodeDto(
         val inntektsgrunnlag: Int,
         val inntektsreduksjon: Int,
         val samordningsfradrag: Int,
-        val beløp: Int
+        val beløp: Int,
+        val aktivitet: InfotrygdAktivitetstype?
 )
 
 fun InfotrygdPeriode.tilSummertInfotrygdperiodeDto(): SummertInfotrygdPeriodeDto =
@@ -32,5 +34,6 @@ fun InfotrygdPeriode.tilSummertInfotrygdperiodeDto(): SummertInfotrygdPeriodeDto
                 inntektsgrunnlag = this.inntektsgrunnlag,
                 inntektsreduksjon = this.inntektsreduksjon,
                 samordningsfradrag = this.samordningsfradrag,
-                beløp = this.beløp
+                beløp = this.beløp,
+                aktivitet = this.aktivitetstype
         )

@@ -35,6 +35,7 @@ import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
 import no.nav.familie.ef.sak.vilkår.VurderingService
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdAktivitetstype
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdEndringKode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -81,7 +82,7 @@ class MigreringService(
 
         val fra = fra(periode)
         val til = til(periode)
-        val vedtaksperioder = vedtaksperioder(fra, til)
+        val vedtaksperioder = vedtaksperioder(fra, til, erReellArbeidssøker(periode))
         val inntekter = inntekter(fra, periode.inntektsgrunnlag, periode.samordningsfradrag)
         val beregnYtelse = beregningService.beregnYtelse(vedtaksperioder.tilPerioder(), inntekter.tilInntektsperioder())
         return MigreringInfo(kanMigreres = true,
@@ -107,7 +108,8 @@ class MigreringService(
                                     fra = fra(periode),
                                     til = til(periode),
                                     inntektsgrunnlag = periode.inntektsgrunnlag,
-                                    samordningsfradrag = periode.samordningsfradrag).id
+                                    samordningsfradrag = periode.samordningsfradrag,
+                                    erReellArbeidssøker = erReellArbeidssøker(periode)).id
         } catch (e: MigreringException) {
             logger.warn("Kan ikke migrere fagsakPerson=$fagsakPersonId årsak=${e.type}")
             secureLogger.warn("Kan ikke migrere fagsakPerson=$fagsakPersonId - ${e.årsak}")
@@ -123,7 +125,8 @@ class MigreringService(
                          fra: YearMonth,
                          til: YearMonth,
                          inntektsgrunnlag: Int,
-                         samordningsfradrag: Int): Behandling {
+                         samordningsfradrag: Int,
+                         erReellArbeidssøker: Boolean = false): Behandling {
         feilHvisIkke(featureToggleService.isEnabled("familie.ef.sak.migrering")) {
             "Feature toggle for migrering er disabled"
         }
@@ -136,7 +139,7 @@ class MigreringService(
         grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
         vurderingService.opprettVilkårForMigrering(behandling)
 
-        val vedtaksperioder = vedtaksperioder(fra, til)
+        val vedtaksperioder = vedtaksperioder(fra, til, erReellArbeidssøker)
         val inntekter = inntekter(fra, inntektsgrunnlag, samordningsfradrag)
         beregnYtelseSteg.utførSteg(behandling, Innvilget(resultatType = ResultatType.INNVILGE,
                                                          periodeBegrunnelse = null,
@@ -239,10 +242,16 @@ class MigreringService(
                            forventetInntekt = BigDecimal(inntektsgrunnlag),
                            samordningsfradrag = BigDecimal(samordningsfradrag)))
 
+    private fun erReellArbeidssøker(periode: SummertInfotrygdPeriodeDto): Boolean =
+            periode.aktivitet == InfotrygdAktivitetstype.TILMELDT_SOM_REELL_ARBEIDSSØKER
+
     private fun vedtaksperioder(fra: YearMonth,
-                                til: YearMonth) =
-            listOf(VedtaksperiodeDto(årMånedFra = fra,
-                                     årMånedTil = til,
-                                     aktivitet = AktivitetType.MIGRERING,
-                                     periodeType = VedtaksperiodeType.MIGRERING))
+                                til: YearMonth,
+                                erReellArbeidssøker: Boolean): List<VedtaksperiodeDto> {
+        val aktivitet = if (erReellArbeidssøker) AktivitetType.FORSØRGER_REELL_ARBEIDSSØKER else AktivitetType.MIGRERING
+        return listOf(VedtaksperiodeDto(årMånedFra = fra,
+                                        årMånedTil = til,
+                                        aktivitet = aktivitet,
+                                        periodeType = VedtaksperiodeType.MIGRERING))
+    }
 }
