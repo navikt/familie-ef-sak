@@ -83,6 +83,7 @@ class MigreringService(
         MANGLER_PERIODER,
         FEIL_FOM_DATO,
         FEIL_TOM_DATO,
+        ELDRE_PERIODER,
         SIMULERING_FEILUTBETALING,
         SIMULERING_ETTERBETALING,
         BELØP_0,
@@ -310,8 +311,8 @@ class MigreringService(
                                      MigreringExceptionType.FEIL_TOM_DATO)
         }
         if (dato.isBefore(LocalDate.now().minusYears(3))) {
-            throw MigreringException("Kan ikke migrere når forrige utbetaling i infotrygd er mer enn 1 år tilbake i tid, dato=$dato",
-                                     MigreringExceptionType.FEIL_TOM_DATO)
+            throw MigreringException("Kan ikke migrere når forrige utbetaling i infotrygd er mer enn 3 år tilbake i tid, dato=$dato",
+                                     MigreringExceptionType.ELDRE_PERIODER)
         }
     }
 
