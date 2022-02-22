@@ -48,7 +48,7 @@ class FeatureToggleConfig(private val enabled: Boolean,
                 return unleash.isEnabled(toggleId, defaultValue)
             }
 
-            override fun shutdown() {
+            override fun destroy() {
                 unleash.shutdown()
             }
         }
@@ -71,6 +71,10 @@ class FeatureToggleConfig(private val enabled: Boolean,
                     return true
                 }
                 return defaultValue
+            }
+
+            override fun destroy() {
+
             }
         }
     }

@@ -1,6 +1,8 @@
 package no.nav.familie.ef.sak.infrastruktur.featuretoggle
 
-interface FeatureToggleService {
+import org.springframework.beans.factory.DisposableBean
+
+interface FeatureToggleService : DisposableBean {
 
     fun isEnabled(toggleId: String): Boolean {
         return isEnabled(toggleId, false)
@@ -8,5 +10,4 @@ interface FeatureToggleService {
 
     fun isEnabled(toggleId: String, defaultValue: Boolean): Boolean
 
-    fun shutdown() {}
 }
