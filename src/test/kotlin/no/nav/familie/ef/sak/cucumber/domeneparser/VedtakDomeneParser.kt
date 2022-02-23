@@ -10,9 +10,11 @@ import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
+import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.AbstractMap
 import java.util.UUID
 
 object VedtakDomeneParser {
@@ -35,33 +37,62 @@ object VedtakDomeneParser {
     class ForventetHistorikk(
             val id: UUID,
             val historikkEndring: HistorikkEndring?,
-            val inntekt: Int
+            val inntekt: Int,
+            val beløp: Int,
+            val aktivitetType: AktivitetType
     )
 
-    fun mapAndelTilkjentYtelse(dataTable: DataTable): List<AndelTilkjentYtelse> {
+    fun mapAndelTilkjentYtelse(dataTable: DataTable): List<AndelTilkjentYtelse?> {
         return dataTable.asMaps().map {
             AndelTilkjentYtelseMapper().mapRad(it)
         }
     }
 
-
-    fun lagDefaultTilkjentYtelseFraAndel(dataTable: DataTable): List<TilkjentYtelse> {
-        return dataTable.asMaps().map {
-            val andel = AndelTilkjentYtelseMapper().mapRad(it)
-            lagTilkjentYtelse(listOf(andel), UUID.randomUUID(), andel.kildeBehandlingId)
+    fun lagDefaultTilkjentYtelseUtenAndel(dataTable: DataTable): MutableList<TilkjentYtelse> {
+        val tilkjentYtelser = mutableListOf<TilkjentYtelse>()
+        dataTable.asMaps().map {
+            val behandlingId = behandlingIdTilUUID[parseInt(VedtakDomenebegrep.BEHANDLING_ID, it)]!!
+            tilkjentYtelser.add(lagTilkjentYtelse(listOf(), UUID.randomUUID(), behandlingId))
         }
+        return tilkjentYtelser
+    }
+
+    fun lagDefaultTilkjentYtelseFraAndel(dataTable: DataTable): MutableList<TilkjentYtelse> {
+        val behandlingIdTilAndelTilkjentYtelseList = mutableListOf<Pair<UUID, AndelTilkjentYtelse>>()
+        dataTable.asMaps().map {
+            val andel = AndelTilkjentYtelseMapper().mapRad(it)
+            val behandlingId = behandlingIdTilUUID[parseInt(VedtakDomenebegrep.BEHANDLING_ID, it)]!!
+            val behandlingIdTilAndelTilkjentYtelse = AbstractMap.SimpleEntry(behandlingId, andel).toPair()
+            behandlingIdTilAndelTilkjentYtelseList.add(behandlingIdTilAndelTilkjentYtelse)
+        }
+
+        val tilkjentYtelser = mutableListOf<TilkjentYtelse>()
+        behandlingIdTilAndelTilkjentYtelseList.groupBy { it.first }.forEach {
+            val andelerTilkjentYtelse = it.value.map { p -> p.second }
+            tilkjentYtelser.add(lagTilkjentYtelse(andelerTilkjentYtelse, UUID.randomUUID(), it.key))
+        }
+        return tilkjentYtelser
+
     }
 
     class VedtakMapper {
 
         fun mapRad(rad: Map<String, String>): Vedtak {
+
+            val datoFra = parseValgfriDato(VedtakDomenebegrep.FRA_OG_MED_DATO, rad) ?: LocalDate.now()
+            val datoTil = parseValgfriDato(VedtakDomenebegrep.TIL_OG_MED_DATO, rad) ?: LocalDate.now()
             return Vedtak(
                     behandlingId = behandlingIdTilUUID[parseInt(VedtakDomenebegrep.BEHANDLING_ID, rad)]!!,
-                    resultatType = parseResultatType(rad),
-                    perioder = PeriodeWrapper(listOf(Vedtaksperiode(LocalDate.now(),
-                                                                    LocalDate.now().plusYears(1),
-                                                                    AktivitetType.BARN_UNDER_ETT_ÅR,
-                                                                    VedtaksperiodeType.HOVEDPERIODE)))
+                    resultatType = parseResultatType(rad) ?: ResultatType.INNVILGE,
+                    perioder = PeriodeWrapper(listOf(
+                            Vedtaksperiode(
+                                    datoFra = datoFra,
+                                    datoTil = datoTil,
+                                    aktivitet = parseAktivitetType(rad) ?: AktivitetType.BARN_UNDER_ETT_ÅR,
+                                    periodeType = VedtaksperiodeType.HOVEDPERIODE
+                            )
+                    )),
+                    opphørFom = parseValgfriDato(VedtakDomenebegrep.OPPHØRSDATO, rad)
             )
         }
     }
@@ -91,7 +122,8 @@ object VedtakDomeneParser {
                     inntekt = parseValgfriInt(VedtakDomenebegrep.INNTEKT, rad) ?: 0,
                     inntektsreduksjon = parseValgfriInt(VedtakDomenebegrep.INNTEKTSREDUKSJON, rad) ?: 0,
                     samordningsfradrag = parseValgfriInt(VedtakDomenebegrep.SAMORDNINGSFRADRAG, rad) ?: 0,
-                    kildeBehandlingId = behandlingIdTilUUID[parseInt(VedtakDomenebegrep.BEHANDLING_ID, rad)]!!
+                    kildeBehandlingId = behandlingIdTilUUID[parseValgfriInt(VedtakDomenebegrep.ENDRET_I_BEHANDLING_ID, rad)]
+                                        ?: behandlingIdTilUUID[parseInt(VedtakDomenebegrep.BEHANDLING_ID, rad)]!!
             )
         }
     }
@@ -103,7 +135,9 @@ object VedtakDomeneParser {
                 return ForventetHistorikk(
                         id = behandlingIdTilUUID[parseInt(VedtakDomenebegrep.BEHANDLING_ID, rad)]!!,
                         historikkEndring = null,
-                        inntekt = parseInt(VedtakDomenebegrep.INNTEKT, rad)
+                        inntekt = parseValgfriInt(VedtakDomenebegrep.INNTEKT, rad) ?: 0,
+                        beløp = parseValgfriInt(VedtakDomenebegrep.BELØP, rad) ?: 0,
+                        aktivitetType = parseAktivitetType(rad) ?: AktivitetType.BARN_UNDER_ETT_ÅR
                 )
 
             }
@@ -114,7 +148,9 @@ object VedtakDomeneParser {
                             behandlingId = behandlingIdTilUUID[parseInt(VedtakDomenebegrep.ENDRET_I_BEHANDLING_ID, rad)]!!,
                             vedtakstidspunkt = LocalDateTime.now()
                     ),
-                    inntekt = parseInt(VedtakDomenebegrep.INNTEKT, rad)
+                    inntekt = parseValgfriInt(VedtakDomenebegrep.INNTEKT, rad) ?: 0,
+                    beløp = parseValgfriInt(VedtakDomenebegrep.BELØP, rad) ?: 0,
+                    aktivitetType = parseAktivitetType(rad) ?: AktivitetType.BARN_UNDER_ETT_ÅR
             )
         }
     }
@@ -131,10 +167,11 @@ enum class VedtakDomenebegrep(val nøkkel: String) : Domenenøkkel {
     BELØP("Beløp"),
     FRA_OG_MED_DATO("Fra og med dato"),
     TIL_OG_MED_DATO("Til og med dato"),
+    AKTIVITET_TYPE("Aktivitet"),
     BEHANDLING_ID("BehandlingId"),
     ENDRET_I_BEHANDLING_ID("Endret i behandlingId"),
     ENDRING_TYPE("Endringstype"),
-    HISTORIKKENDRING("Historikkendring"),
+    OPPHØRSDATO("Opphørsdato")
     ;
 
     override fun nøkkel(): String {

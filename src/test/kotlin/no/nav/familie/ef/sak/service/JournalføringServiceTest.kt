@@ -19,7 +19,6 @@ import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
-import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.iverksett.IverksettService
 import no.nav.familie.ef.sak.journalføring.JournalføringService
 import no.nav.familie.ef.sak.journalføring.JournalpostClient

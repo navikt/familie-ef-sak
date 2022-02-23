@@ -6,8 +6,8 @@ import no.nav.familie.ef.sak.opplysninger.mapper.SivilstandMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioder
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknadsverdier
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknadsverdier
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.AktivitetMapper
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.BosituasjonMapper
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SagtOppEllerRedusertStillingMapper
