@@ -37,7 +37,9 @@ object VedtakDomeneParser {
     class ForventetHistorikk(
             val id: UUID,
             val historikkEndring: HistorikkEndring?,
-            val inntekt: Int
+            val inntekt: Int,
+            val beløp: Int,
+            val aktivitetType: AktivitetType
     )
 
     fun mapAndelTilkjentYtelse(dataTable: DataTable): List<AndelTilkjentYtelse?> {
@@ -89,7 +91,8 @@ object VedtakDomeneParser {
                                     aktivitet = parseAktivitetType(rad) ?: AktivitetType.BARN_UNDER_ETT_ÅR,
                                     periodeType = VedtaksperiodeType.HOVEDPERIODE
                             )
-                    ))
+                    )),
+                    opphørFom = parseValgfriDato(VedtakDomenebegrep.OPPHØRSDATO, rad)
             )
         }
     }
@@ -132,7 +135,9 @@ object VedtakDomeneParser {
                 return ForventetHistorikk(
                         id = behandlingIdTilUUID[parseInt(VedtakDomenebegrep.BEHANDLING_ID, rad)]!!,
                         historikkEndring = null,
-                        inntekt = parseValgfriInt(VedtakDomenebegrep.INNTEKT, rad) ?: 0
+                        inntekt = parseValgfriInt(VedtakDomenebegrep.INNTEKT, rad) ?: 0,
+                        beløp = parseValgfriInt(VedtakDomenebegrep.BELØP, rad) ?: 0,
+                        aktivitetType = parseAktivitetType(rad) ?: AktivitetType.BARN_UNDER_ETT_ÅR
                 )
 
             }
@@ -143,7 +148,9 @@ object VedtakDomeneParser {
                             behandlingId = behandlingIdTilUUID[parseInt(VedtakDomenebegrep.ENDRET_I_BEHANDLING_ID, rad)]!!,
                             vedtakstidspunkt = LocalDateTime.now()
                     ),
-                    inntekt = parseValgfriInt(VedtakDomenebegrep.INNTEKT, rad) ?: 0
+                    inntekt = parseValgfriInt(VedtakDomenebegrep.INNTEKT, rad) ?: 0,
+                    beløp = parseValgfriInt(VedtakDomenebegrep.BELØP, rad) ?: 0,
+                    aktivitetType = parseAktivitetType(rad) ?: AktivitetType.BARN_UNDER_ETT_ÅR
             )
         }
     }
@@ -164,7 +171,7 @@ enum class VedtakDomenebegrep(val nøkkel: String) : Domenenøkkel {
     BEHANDLING_ID("BehandlingId"),
     ENDRET_I_BEHANDLING_ID("Endret i behandlingId"),
     ENDRING_TYPE("Endringstype"),
-    HISTORIKKENDRING("Historikkendring"),
+    OPPHØRSDATO("Opphørsdato")
     ;
 
     override fun nøkkel(): String {

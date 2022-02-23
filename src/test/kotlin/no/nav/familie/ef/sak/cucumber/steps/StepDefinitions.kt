@@ -76,6 +76,8 @@ class StepDefinitions {
                 Assertions.assertThat(beregnetAndelHistorikk.endring?.behandlingId).isEqualTo(endretIBehandlingId)
             }
             Assertions.assertThat(beregnetAndelHistorikk?.andel?.inntekt).isEqualTo(forventetHistorikkEndringer.first { it.id == behandlingId }.inntekt)
+            Assertions.assertThat(beregnetAndelHistorikk?.andel?.beløp).isEqualTo(forventetHistorikkEndringer.first { it.id == behandlingId }.beløp)
+            Assertions.assertThat(beregnetAndelHistorikk?.aktivitet).isEqualTo(forventetHistorikkEndringer.first { it.id == behandlingId }.aktivitetType)
         }
 
         /*

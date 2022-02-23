@@ -6,9 +6,9 @@ Egenskap: Andelhistorikk: Vedtak opphører midt i periode
   Scenario: Periode fjernes som følge av opphør i sin helhet
 
     Gitt følgende vedtak
-      | BehandlingId | Fra og med dato | Til og med dato |
-      | 1            | 01.01.2021      | 31.01.2021      |
-      | 2            | 01.01.2021      |                 |
+      | BehandlingId | Fra og med dato | Til og med dato | Vedtaksresultat | Opphørsdato |
+      | 1            | 01.01.2021      | 31.01.2021      |                 |             |
+      | 2            | 01.01.2021      | 31.01.2021      | OPPHØRT         | 31.01.2021  |
 
     Og følgende andeler tilkjent ytelse
       | BehandlingId | Fra og med dato | Til og med dato |

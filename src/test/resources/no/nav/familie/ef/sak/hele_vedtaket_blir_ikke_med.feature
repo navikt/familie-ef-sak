@@ -19,8 +19,8 @@ Egenskap: Andelhistorikk: Nytt vedtak som overlapper delvis med forrige vedtak
     Når lag andelhistorikk kjøres
 
     Så forvent følgende historikk
-      | BehandlingId | Endringstype | Endret i behandlingId | Fra og med dato | Til og med dato |
-      | 1            | SPLITTET     | 2                     | 01.01.2021      | 31.01.2021      |
-      | 1            | FJERNET      | 2                     | 01.02.2021      | 31.03.2021      |
-      | 2            |              |                       | 01.02.2021      | 31.03.2021      |
+      | BehandlingId | Endringstype | Endret i behandlingId | Fra og med dato | Til og med dato | Beløp | Aktivitet         |
+      | 1            | SPLITTET     | 2                     | 01.01.2021      | 31.01.2021      | 1000  | BARN_UNDER_ETT_ÅR |
+      | 1            | FJERNET      | 2                     | 01.02.2021      | 31.03.2021      | 1000  | BARN_UNDER_ETT_ÅR |
+      | 2            |              |                       | 01.02.2021      | 31.03.2021      | 2000  | BARNET_ER_SYKT    |
 
