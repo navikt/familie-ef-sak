@@ -102,4 +102,15 @@ internal class InsertUpdateRepositoryImplTest : OppslagSpringRunnerTest() {
             fagsakRepository.updateAll(listOf(fagsakDao(), fagsakDao()))
         }).isInstanceOf(DbActionExecutionException::class.java)
     }
+
+    @Test
+    internal fun `insert skal være transactional`() {
+        fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent("1"))))
+        try {
+            fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent("1"))))
+        } catch (e: Exception) {
+
+        }
+        assertThat(fagsakPersonRepository.findAll()).hasSize(1)
+    }
 }
