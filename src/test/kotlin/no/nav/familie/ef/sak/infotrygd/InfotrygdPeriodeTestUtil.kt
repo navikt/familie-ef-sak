@@ -24,7 +24,7 @@ object InfotrygdPeriodeTestUtil {
                             utgifterBarnetilsyn: Int = 1,
                             kode: InfotrygdEndringKode = InfotrygdEndringKode.NY,
                             sakstype: InfotrygdSakstype = InfotrygdSakstype.SØKNAD,
-                            aktivitetstype: InfotrygdAktivitetstype = InfotrygdAktivitetstype.BRUKERKONTAKT,
+                            aktivitetstype: InfotrygdAktivitetstype? = InfotrygdAktivitetstype.BRUKERKONTAKT,
                             kodeOvergangsstønad: InfotrygdOvergangsstønadKode? = InfotrygdOvergangsstønadKode.BARN_UNDER_1_3_ÅR
     ): InfotrygdPeriode {
         return InfotrygdPeriode(personIdent = personIdent,
