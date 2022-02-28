@@ -122,7 +122,7 @@ internal class PeriodeServiceTest {
         assertThat(perioder[0].datakilde).isEqualTo(PeriodeOvergangsstønad.Datakilde.EF)
         assertThat(perioder[0].stønadFom).isEqualTo(fom)
         assertThat(perioder[0].stønadTom).isEqualTo(tom)
-        assertThat(perioder[0].beløp).isEqualTo(1)
+        assertThat(perioder[0].månedsbeløp).isEqualTo(1)
     }
 
     @Test
@@ -143,7 +143,7 @@ internal class PeriodeServiceTest {
         val perioder = service.hentPerioderForOvergangsstønadFraEfOgInfotrygd(personIdent)
 
         assertThat(perioder).hasSize(1)
-        assertThat(perioder[0].beløp).isEqualTo(2)
+        assertThat(perioder[0].månedsbeløp).isEqualTo(2)
     }
 
     private fun mockReplika(overgangsstønad: List<InfotrygdPeriode>) {

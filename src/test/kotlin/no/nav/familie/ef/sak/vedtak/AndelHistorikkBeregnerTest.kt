@@ -39,61 +39,6 @@ import java.util.UUID
 class AndelHistorikkBeregnerTest {
 
     @Test
-    internal fun `inntek_endrer_seg`() {
-        run("/økonomi/inntekt_endrer_seg.csv")
-    }
-
-    @Test
-    internal fun `når vi revurderer fra midt i en tidligere periode lagrer vi ikke ned hele vedtakshistorikken`() {
-        run("/økonomi/hele_vedtaket_blir_ikke_med.csv")
-    }
-
-    @Test
-    internal fun `aktivitet og vedtaksperiodetype endrer seg`() {
-        run("/økonomi/aktivitet_periodetype_endrer_seg.csv")
-    }
-
-    @Test
-    internal fun `periode2_slettes`() {
-        run("/økonomi/periode2_slettes.csv")
-    }
-
-    @Test
-    internal fun `periode2_slettes_og_får_en_ny_periode`() {
-        run("/økonomi/periode2_slettes_og_får_en_ny_periode.csv")
-    }
-
-    @Test
-    internal fun `periode_blir_lagt_til_på_nytt`() {
-        run("/økonomi/periode_blir_lagt_til_på_nytt.csv")
-    }
-
-    @Test
-    internal fun `periode_splittes_g_omregning`() {
-        run("/økonomi/periode_splittes_g_omregning.csv")
-    }
-
-    @Test
-    internal fun `opphør, vedtaket har ikke noen perioder og tilkjente ytelsen har inge andeler`() {
-        run("/økonomi/opphør.csv")
-    }
-
-    @Test
-    internal fun `opphør midt i periode, `() {
-        run("/økonomi/opphør_midt_i_periode.csv")
-    }
-
-    @Test
-    internal fun `periode_splittes`() {
-        run("/økonomi/periode_splittes.csv")
-    }
-
-    @Test
-    internal fun `periode_splittes_og_sen_fjernes`() {
-        run("/økonomi/periode_splittes_og_sen_fjernes.csv")
-    }
-
-    @Test
     internal fun `periode forlenges`() {
         run("/økonomi/periode_forlenges.csv")
     }

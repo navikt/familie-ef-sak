@@ -4,9 +4,9 @@ import no.nav.familie.ef.sak.opplysninger.søknad.domain.Aksjeselskap
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Aktivitet
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Arbeidsgiver
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Arbeidssøker
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Selvstendig
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Situasjon
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.TidligereUtdanning
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.UnderUtdanning
 import no.nav.familie.ef.sak.vilkår.dto.AksjeselskapDto

@@ -16,7 +16,9 @@ data class InternPeriode(
         val personIdent: String,
         val inntektsreduksjon: Int,
         val samordningsfradrag: Int,
-        val beløp: Int, // netto_belop
+        val utgifterBarnetilsyn: Int,
+        val månedsbeløp: Int,
+        val engangsbeløp: Int,
         val stønadFom: LocalDate,
         val stønadTom: LocalDate,
         val opphørsdato: LocalDate?,

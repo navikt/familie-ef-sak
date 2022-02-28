@@ -47,6 +47,11 @@ class FeatureToggleConfig(private val enabled: Boolean,
             override fun isEnabled(toggleId: String, defaultValue: Boolean): Boolean {
                 return unleash.isEnabled(toggleId, defaultValue)
             }
+
+            // Spring trigger denne ved shutdown. Gjøres for å unngå at unleash fortsetter å gjøre kall ut
+            override fun destroy() {
+                unleash.shutdown()
+            }
         }
     }
 
@@ -67,6 +72,10 @@ class FeatureToggleConfig(private val enabled: Boolean,
                     return true
                 }
                 return defaultValue
+            }
+
+            override fun destroy() {
+                // Dummy featureToggleService trenger ikke destroy, då den ikke har en unleash å lukke
             }
         }
     }

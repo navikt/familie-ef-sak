@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
@@ -23,6 +24,7 @@ class FagsakPersonService(private val fagsakPersonRepository: FagsakPersonReposi
 
     fun hentAktivIdent(personId: UUID): String = fagsakPersonRepository.hentAktivIdent(personId)
 
+    @Transactional
     fun hentEllerOpprettPerson(personIdenter: Set<String>, gjeldendePersonIdent: String): FagsakPerson {
         feilHvisIkke(personIdenter.contains(gjeldendePersonIdent)) {
             "Liste med personidenter inneholder ikke gjelende personident"
@@ -31,6 +33,7 @@ class FagsakPersonService(private val fagsakPersonRepository: FagsakPersonReposi
                 ?: fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent(gjeldendePersonIdent)))))
     }
 
+    @Transactional
     fun oppdaterIdent(fagsakPerson: FagsakPerson, gjeldendePersonIdent: String): FagsakPerson {
         return if (fagsakPerson.hentAktivIdent() != gjeldendePersonIdent) {
             fagsakPersonRepository.update(fagsakPerson.medOppdatertGjeldendeIdent(gjeldendePersonIdent))
