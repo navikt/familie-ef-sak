@@ -64,7 +64,8 @@ class VedleggService(private val behandlingService: BehandlingService,
                 journalpostId = journalpost.journalpostId,
                 dato = mestRelevanteDato(journalpost),
                 journalstatus = journalpost.journalstatus,
-                journalposttype = journalpost.journalposttype
+                journalposttype = journalpost.journalposttype,
+                logiskeVedlegg = dokumentInfo.logiskeVedlegg?.map { LogiskVedleggDto(tittel = it.tittel) }
         )
     }
 
