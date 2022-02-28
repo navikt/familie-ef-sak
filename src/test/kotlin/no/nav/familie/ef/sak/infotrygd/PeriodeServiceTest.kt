@@ -70,10 +70,10 @@ internal class PeriodeServiceTest {
     @Test
     internal fun `perioder overlapper ikke - skal returnere perioder fra infotrygd og ef`() {
         mockBehandling()
-        val infotrygdFom = LocalDate.of(2021,1,1)
-        val infotrygdTom = LocalDate.of(2021,1,31)
-        val efFom = LocalDate.of(2021,2,1)
-        val efTom = LocalDate.of(2021,3,31)
+        val infotrygdFom = LocalDate.of(2021, 1, 1)
+        val infotrygdTom = LocalDate.of(2021, 1, 31)
+        val efFom = LocalDate.of(2021, 2, 1)
+        val efTom = LocalDate.of(2021, 3, 31)
         mockTilkjentYtelse(lagAndelTilkjentYtelse(1, efFom, efTom))
         mockReplika(listOf(lagInfotrygdPeriode(stønadFom = infotrygdFom, stønadTom = infotrygdTom)))
         val perioder = service.hentPerioderForOvergangsstønadFraEfOgInfotrygd(personIdent)
@@ -91,10 +91,10 @@ internal class PeriodeServiceTest {
     @Test
     internal fun `perioden fra EF avkorter periode fra infotrygd`() {
         mockBehandling()
-        val infotrygdFom = LocalDate.of(2021,1,1)
-        val infotrygdTom = LocalDate.of(2021,3,31)
-        val efFom = LocalDate.of(2021,2,1)
-        val efTom = LocalDate.of(2021,3,31)
+        val infotrygdFom = LocalDate.of(2021, 1, 1)
+        val infotrygdTom = LocalDate.of(2021, 3, 31)
+        val efFom = LocalDate.of(2021, 2, 1)
+        val efTom = LocalDate.of(2021, 3, 31)
         mockTilkjentYtelse(lagAndelTilkjentYtelse(1, efFom, efTom))
         mockReplika(listOf(lagInfotrygdPeriode(stønadFom = infotrygdFom, stønadTom = infotrygdTom)))
         val perioder = service.hentPerioderForOvergangsstønadFraEfOgInfotrygd(personIdent)
@@ -144,6 +144,33 @@ internal class PeriodeServiceTest {
 
         assertThat(perioder).hasSize(1)
         assertThat(perioder[0].månedsbeløp).isEqualTo(2)
+    }
+
+    @Test
+    internal fun `skal endre tom-datoer på overlappende perioder tvers fagsystem`() {
+        val periode1fom = LocalDate.of(2021, 1, 1)
+        val periode1tom = LocalDate.of(2021, 1, 31)
+        val periode2fom = LocalDate.of(2021, 2, 1)
+        val periode2tom = LocalDate.of(2021, 3, 31)
+        val efFra = LocalDate.of(2021, 3, 1)
+        val efTil = LocalDate.of(2021, 3, 31)
+
+        mockBehandling()
+        mockTilkjentYtelse(lagAndelTilkjentYtelse(100, fraOgMed = efFra, tilOgMed = efTil))
+        mockReplika(listOf(lagInfotrygdPeriode(stønadFom = periode1fom, stønadTom = periode1tom, beløp = 1),
+                           lagInfotrygdPeriode(stønadFom = periode2fom, stønadTom = periode2tom, beløp = 2)))
+        val perioder = service.hentPerioderForOvergangsstønadFraEfOgInfotrygd(personIdent)
+
+        assertThat(perioder).hasSize(3)
+        assertThat(perioder[0].stønadFom).isEqualTo(efFra)
+        assertThat(perioder[0].stønadTom).isEqualTo(efTil)
+
+        assertThat(perioder[1].stønadFom).isEqualTo(periode2fom)
+        assertThat(perioder[1].stønadTom).isNotEqualTo(periode2tom)
+        assertThat(perioder[1].stønadTom).isEqualTo(efFra.minusDays(1))
+
+        assertThat(perioder[2].stønadFom).isEqualTo(periode1fom)
+        assertThat(perioder[2].stønadTom).isEqualTo(periode1tom)
     }
 
     private fun mockReplika(overgangsstønad: List<InfotrygdPeriode>) {
