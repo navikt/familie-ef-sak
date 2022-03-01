@@ -11,8 +11,10 @@ object InternPeriodeUtil {
         val perioderFraInfotrygdSomBeholdes = infotrygdperioder.mapNotNull {
             if (it.stønadFom >= førstePerioden.stønadFom) {
                 null
-            } else {
+            } else if (it.stønadTom > førstePerioden.stønadFom) {
                 it.copy(stønadTom = førstePerioden.stønadFom.minusDays(1))
+            } else {
+                it
             }
         }
         return efPerioder + perioderFraInfotrygdSomBeholdes

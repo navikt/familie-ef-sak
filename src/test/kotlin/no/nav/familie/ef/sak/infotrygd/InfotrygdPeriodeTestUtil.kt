@@ -21,9 +21,10 @@ object InfotrygdPeriodeTestUtil {
                             inntektsgrunnlag: Int = 1,
                             inntektsreduksjon: Int = 1,
                             samordningsfradrag: Int = 1,
+                            utgifterBarnetilsyn: Int = 1,
                             kode: InfotrygdEndringKode = InfotrygdEndringKode.NY,
                             sakstype: InfotrygdSakstype = InfotrygdSakstype.SØKNAD,
-                            aktivitetstype: InfotrygdAktivitetstype = InfotrygdAktivitetstype.BRUKERKONTAKT,
+                            aktivitetstype: InfotrygdAktivitetstype? = InfotrygdAktivitetstype.BRUKERKONTAKT,
                             kodeOvergangsstønad: InfotrygdOvergangsstønadKode? = InfotrygdOvergangsstønadKode.BARN_UNDER_1_3_ÅR
     ): InfotrygdPeriode {
         return InfotrygdPeriode(personIdent = personIdent,
@@ -38,7 +39,10 @@ object InfotrygdPeriodeTestUtil {
                                 inntektsgrunnlag = inntektsgrunnlag,
                                 inntektsreduksjon = inntektsreduksjon,
                                 samordningsfradrag = samordningsfradrag,
+                                utgifterBarnetilsyn = utgifterBarnetilsyn,
                                 beløp = beløp,
+                                månedsbeløp = beløp,
+                                engangsbeløp = beløp,
                                 startDato = LocalDate.now(),
                                 vedtakstidspunkt = LocalDateTime.now(),
                                 stønadFom = stønadFom,

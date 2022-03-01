@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
+import no.nav.familie.ef.sak.behandling.migrering.MigreringService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillBehandlingTask
@@ -30,6 +31,7 @@ import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ef.sak.tilbakekreving.domain.Tilbakekrevingsvalg
 import no.nav.familie.ef.sak.tilbakekreving.dto.TilbakekrevingDto
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
+import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
@@ -39,6 +41,7 @@ import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.felles.StønadType
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdAktivitetstype
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdEndringKode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSak
@@ -72,6 +75,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var behandlingService: BehandlingService
     @Autowired private lateinit var revurderingService: RevurderingService
     @Autowired private lateinit var migreringService: MigreringService
+    @Autowired private lateinit var vedtakService: VedtakService
     @Autowired private lateinit var tilkjentYtelseService: TilkjentYtelseService
     @Autowired private lateinit var taskRepository: TaskRepository
     @Autowired private lateinit var taskWorker: TaskWorker
@@ -121,8 +125,25 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
             assertThat(this.resultat).isEqualTo(BehandlingResultat.INNVILGET)
             assertThat(this.steg).isEqualTo(StegType.BEHANDLING_FERDIGSTILT)
         }
+        with(vedtakService.hentVedtak(migrering.id)) {
+            val perioder = this.perioder!!.perioder
+            assertThat(perioder).hasSize(1)
+            assertThat(perioder[0].aktivitet).isEqualTo(AktivitetType.MIGRERING)
+            assertThat(perioder[0].periodeType).isEqualTo(VedtaksperiodeType.MIGRERING)
+        }
         assertThat(simuleringsresultatRepository.findByIdOrNull(migrering.id)).isNotNull
         verifiserVurderinger(migrering)
+    }
+
+    @Test
+    internal fun `skal sette aktivitet til reell arbeidssøker hvis aktivitet i infotrygd er reell arbeidssøker`() {
+        val migrering = opprettOgIverksettMigrering(erReellArbeidssøker = true)
+        with(vedtakService.hentVedtak(migrering.id)) {
+            val perioder = this.perioder!!.perioder
+            assertThat(perioder).hasSize(1)
+            assertThat(perioder[0].aktivitet).isEqualTo(AktivitetType.FORSØRGER_REELL_ARBEIDSSØKER)
+            assertThat(perioder[0].periodeType).isEqualTo(VedtaksperiodeType.MIGRERING)
+        }
     }
 
     @Test
@@ -403,6 +424,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
                                             inntektsgrunnlag: BigDecimal = forventetInntekt,
                                             migrerFraDato: YearMonth = this.migrerFraDato,
                                             migrerTilDato: YearMonth = til,
+                                            erReellArbeidssøker: Boolean = false,
                                             mockPerioder: () -> Unit = { mockPerioder(opphørsdato) }): Behandling {
 
         mockPerioder()
@@ -413,7 +435,8 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
                                               migrerFraDato,
                                               migrerTilDato,
                                               inntektsgrunnlag.toInt(),
-                                              samordningsfradrag.toInt())
+                                              samordningsfradrag.toInt(),
+                                              erReellArbeidssøker = erReellArbeidssøker)
         }
 
         kjørTasks()
@@ -423,7 +446,9 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     /**
      * Mocker 2 vedtak, hvor vedtakId2 har høyest precedence, og setter opphørsdato på denne hvis det er type opphør
      */
-    private fun mockPerioder(opphørsdato: YearMonth?, stønadFom: YearMonth = periodeFraMåned, stønadTom: YearMonth = til) {
+    private fun mockPerioder(opphørsdato: YearMonth? = opphørsmåned,
+                             stønadFom: YearMonth = periodeFraMåned,
+                             stønadTom: YearMonth = til) {
         val periode = InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(vedtakId = 1,
                                                                    stønadFom = stønadFom.atDay(1),
                                                                    stønadTom = stønadTom.atEndOfMonth())
