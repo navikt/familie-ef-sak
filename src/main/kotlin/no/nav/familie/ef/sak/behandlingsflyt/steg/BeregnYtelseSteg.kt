@@ -177,6 +177,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                 slåSammenAndelerSomSkalVidereføres(andelerTilkjentYtelse, forrigeTilkjenteYtelse, opphørsperioder)
             } ?: andelerTilkjentYtelse
 
+    // TODO trnger vi å gjøre noe med å sette startdato?
     private fun opphørsdatoHvisFørFørsteAndelSinFomDato(opphørsperioder: List<Periode>,
                                                         andeler: List<AndelTilkjentYtelse>,
                                                         forrigeOpphørsdato: LocalDate?): LocalDate? {
