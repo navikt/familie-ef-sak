@@ -101,7 +101,7 @@ class PatchService(private val jdbcTemplate: JdbcTemplate,
         }
         val perioder1 = vedtak.perioder.perioder.map { it.copy(aktivitet = AktivitetType.FORSØRGER_REELL_ARBEIDSSØKER) }
         val perioder = vedtak.perioder.copy(perioder = perioder1)
-        logger.info("Oppdaterer $fagsakId som reell arbeidssøker")
+        logger.info("Oppdaterer fagsak=$fagsakId behandling=$behandlingId som reell arbeidssøker oppdaterVedtak=$oppdaterVedtak")
         if (oppdaterVedtak) {
             vedtakRepository.update(vedtak.copy(perioder = perioder))
         }
