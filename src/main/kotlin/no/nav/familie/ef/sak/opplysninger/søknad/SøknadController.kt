@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.opplysninger.søknad
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -24,7 +24,7 @@ class SøknadController(private val søknadService: SøknadService,
     fun hentSøknadDatoer(@PathVariable behandlingId: UUID): Ressurs<SøknadDatoerDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         val søknadsgrunnlag = søknadService.hentSøknadsgrunnlag(behandlingId)
-        feilHvis(søknadsgrunnlag == null) { "Mangler søknad for behandling=$behandlingId" }
+        brukerfeilHvis(søknadsgrunnlag == null) { "Mangler søknad for behandling=$behandlingId" }
         return Ressurs.success(SøknadDatoerDto(søknadsdato = søknadsgrunnlag.datoMottatt,
                                                søkerStønadFra = søknadsgrunnlag.søkerFra))
     }
