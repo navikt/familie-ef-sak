@@ -31,7 +31,7 @@
         <java.version>17</java.version>
         <kotlin.version>1.6.10</kotlin.version>
         <kotlin-coroutines.version>1.6.0</kotlin-coroutines.version>
-        <springdoc.version>1.6.5</springdoc.version>
+        <springdoc.version>1.6.6</springdoc.version>
         <mockk.version>1.12.2</mockk.version>
         <felles.version>1.20211217154554_3bb883e</felles.version>
         <prosessering.version>1.20211125150647_a7c6f64</prosessering.version>
