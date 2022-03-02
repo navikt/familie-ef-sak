@@ -41,6 +41,11 @@ internal class PatchStardatoServiceTest : OppslagSpringRunnerTest() {
     private val behandling4dato = behandling1dato.minusMonths(2)
 
     @Test
+    internal fun `sjekker sql`() {
+        patchStardatoService.patch(false)
+    }
+
+    @Test
     internal fun `skal oppdatere startdato på innvilget vedtak`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(setOf("1"))))
         val behandling = opprettBehandling(fagsak, lagInnvilget(behandling1dato), FØRSTEGANGSBEHANDLING)

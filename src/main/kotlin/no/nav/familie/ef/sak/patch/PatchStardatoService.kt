@@ -8,7 +8,8 @@ import no.nav.security.token.support.core.api.Unprotected
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
-import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.GetMapping
@@ -30,7 +31,7 @@ class PatchStartdatoController(private val patchStardatoService: PatchStardatoSe
 }
 
 @Service
-class PatchStardatoService(private val jdbcTemplate: JdbcTemplate,
+class PatchStardatoService(private val jdbcTemplate: NamedParameterJdbcTemplate,
                            private val behandlingService: BehandlingService,
                            private val vedtakRepository: VedtakRepository) {
 
@@ -38,16 +39,16 @@ class PatchStardatoService(private val jdbcTemplate: JdbcTemplate,
 
     @Transactional
     fun patch(oppdaterVedtak: Boolean) {
-        val vedtaksresultater = setOf(ResultatType.OPPHØRT, ResultatType.INNVILGE, ResultatType.SANKSJONERE)
+        val vedtaksresultater = setOf(ResultatType.OPPHØRT, ResultatType.INNVILGE, ResultatType.SANKSJONERE).map { it.name }
         val fagsaker = jdbcTemplate.query(
                 """SELECT fagsak_id FROM behandling b
                     | JOIN vedtak v ON v.behandling_id = b.id
                     | JOIN tilkjent_ytelse ty ON ty.behandling_id = b.id
                     | WHERE b.type <> 'BLANKETT' 
-                    | AND v.resultat_type IN ?
-                    |""".trimMargin(), { rs, _ ->
+                    | AND v.resultat_type IN (:resultater)
+                    |""".trimMargin(), MapSqlParameterSource(mapOf("resultater" to vedtaksresultater))) { rs, _ ->
             UUID.fromString(rs.getString("fagsak_id"))
-        }, vedtaksresultater).toSet()
+        }.toSet()
 
         logger.info("Patcher ${fagsaker.size} fagsaker")
         fagsaker.forEach { fagsakId ->
@@ -101,9 +102,9 @@ class PatchStardatoService(private val jdbcTemplate: JdbcTemplate,
             }
 
             val startdatoer =
-                    jdbcTemplate.query("SELECT behandling_id, opphorsdato FROM tilkjent_ytelse WHERE behandling_id = ?",
-                                       { rs, _ -> rs.getDate("opphorsdato")?.toLocalDate() },
-                                       behandlingId)
+                    jdbcTemplate.query("SELECT behandling_id, opphorsdato FROM tilkjent_ytelse WHERE behandling_id = :behandlingId",
+                                       MapSqlParameterSource(mapOf("behandlingId" to behandlingId))
+                    ) { rs, _ -> rs.getDate("opphorsdato")?.toLocalDate() }
             if (startdatoer.size != 1) {
                 logger.info("fagsak=$fagsakId behandling=$behandlingId finner ikke tilkjent ytelse")
                 return // avslutter for hele fagsaken, burde ikke kunne finne tilkjente ytelser for senere behandlinger heller.
@@ -114,10 +115,11 @@ class PatchStardatoService(private val jdbcTemplate: JdbcTemplate,
                 return@forEach
             }
 
-            logger.info("fagsak=$fagsakId behandling=$behandlingId oppdaterer tilkjentYtelseStartdati=$tilkjentYtelseStartdato startdato=$minStartDato")
+            logger.info("fagsak=$fagsakId behandling=$behandlingId oppdaterer vedtak=$vedtaksresultat tilkjentYtelseStartdati=$tilkjentYtelseStartdato startdato=$minStartDato")
             if (oppdaterVedtak) {
-                jdbcTemplate.update("UPDATE tilkjent_ytelse SET opphorsdato = ? WHERE behandling_id =?",
-                                    minStartDato, behandlingId)
+                jdbcTemplate.update("UPDATE tilkjent_ytelse SET opphorsdato = :startdato WHERE behandling_id = :behandlingId",
+                                    MapSqlParameterSource(mapOf("behandlingId" to behandlingId,
+                                                                "startdato" to minStartDato!!)))
             }
         }
     }
