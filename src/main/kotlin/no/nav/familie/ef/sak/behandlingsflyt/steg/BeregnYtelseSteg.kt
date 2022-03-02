@@ -171,6 +171,9 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
     private fun validerOpphørsperioder(opphørsperioder: List<Periode>,
                                        vedtaksperioder: List<Periode>,
                                        forrigeTilkjenteYtelse: TilkjentYtelse?) {
+        if (featureToggleService.isEnabled("familie.ef.sak.startdato")) {
+            return
+        }
         val førsteOpphørsdato = opphørsperioder.minOfOrNull { it.fradato }
         val førsteVedtaksFradato = vedtaksperioder.minOfOrNull { it.fradato }
         val harKunOpphørEllerOpphørFørInnvilgetPeriode =
