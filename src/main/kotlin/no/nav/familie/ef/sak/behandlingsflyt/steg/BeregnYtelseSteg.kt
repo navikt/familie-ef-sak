@@ -151,7 +151,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
         val opphørsperioder = finnOpphørsperioder(vedtak)
 
         val forrigeTilkjenteYtelse = behandling.forrigeBehandlingId?.let { hentForrigeTilkjenteYtelse(behandling) }
-        validerStartcato(forrigeTilkjenteYtelse)
+        validerStartdato(forrigeTilkjenteYtelse)
         validerOpphørsperioder(opphørsperioder, finnInnvilgedePerioder(vedtak), forrigeTilkjenteYtelse)
 
         val nyeAndeler = beregnNyeAndelerForRevurdering(forrigeTilkjenteYtelse, andelerTilkjentYtelse, opphørsperioder)
@@ -161,8 +161,9 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
         return nyeAndeler to opphørsdato
     }
 
-    private fun validerStartcato(forrigeTilkjenteYtelse: TilkjentYtelse?) {
-        feilHvis(featureToggleService.isEnabled("familie.ef.sak.startdato") && forrigeTilkjenteYtelse != null && forrigeTilkjenteYtelse.startdato == null) {
+    private fun validerStartdato(forrigeTilkjenteYtelse: TilkjentYtelse?) {
+        feilHvis(featureToggleService.isEnabled("familie.ef.sak.startdato") &&
+                 forrigeTilkjenteYtelse != null && forrigeTilkjenteYtelse.startdato == null) {
             "Mangler startdato på tilkjent ytelse behandlingId=${forrigeTilkjenteYtelse?.behandlingId}"
         }
     }
