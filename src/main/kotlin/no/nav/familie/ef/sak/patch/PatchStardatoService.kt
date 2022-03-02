@@ -40,6 +40,7 @@ class PatchStardatoService(private val jdbcTemplate: JdbcTemplate,
         val fagsaker = jdbcTemplate.query(
                 """SELECT fagsak_id FROM behandling b
                     | JOIN vedtak v ON v.behandling_id = b.id
+                    | JOIN tilkjent_ytelse ty ON ty.behandling_id = b.id
                     | WHERE b.type <> 'BLANKETT' 
                     | AND v.resultat_type IN ?
                     |""".trimMargin(), { rs, _ ->
@@ -104,6 +105,10 @@ class PatchStardatoService(private val jdbcTemplate: JdbcTemplate,
             val tilkjentYtelseStartdato = tilkjentYtelser.single()
             if (tilkjentYtelseStartdato != null && tilkjentYtelseStartdato != minStartDato) {
                 logger.warn("fagsak=$fagsakId behandling=$behandlingId oppdaterer fra $tilkjentYtelseStartdato til $minStartDato")
+            }
+            if (tilkjentYtelseStartdato == minStartDato) {
+                logger.info("fagsak=$fagsakId behandling=$behandlingId allerede like")
+                return@forEach
             }
 
             logger.info("fagsak=$fagsakId behandling=$behandlingId oppdaterer startdato=$minStartDato")
