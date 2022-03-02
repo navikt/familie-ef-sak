@@ -171,9 +171,6 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
     private fun validerOpphørsperioder(opphørsperioder: List<Periode>,
                                        vedtaksperioder: List<Periode>,
                                        forrigeTilkjenteYtelse: TilkjentYtelse?) {
-        if (featureToggleService.isEnabled("familie.ef.sak.startdato")) {
-            return
-        }
         val førsteOpphørsdato = opphørsperioder.minOfOrNull { it.fradato }
         val førsteVedtaksFradato = vedtaksperioder.minOfOrNull { it.fradato }
         val harKunOpphørEllerOpphørFørInnvilgetPeriode =
@@ -182,7 +179,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
             "Har ikke støtte for å innvilge med opphør først, når man mangler tidligere behandling å opphøre"
         }
         val harKun0Beløp = forrigeTilkjenteYtelse?.andelerTilkjentYtelse?.all { it.beløp == 0 } ?: false
-        feilHvis(harKun0Beløp && harKunOpphørEllerOpphørFørInnvilgetPeriode) {
+        feilHvis(!featureToggleService.isEnabled("familie.ef.sak.startdato") && harKun0Beløp && harKunOpphørEllerOpphørFørInnvilgetPeriode) {
             "Har ikke støtte for å innvilge med opphør først, når man kun har perioder med 0 som beløp fra før"
         }
     }
