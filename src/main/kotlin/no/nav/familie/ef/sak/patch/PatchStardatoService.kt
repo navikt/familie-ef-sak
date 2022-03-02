@@ -49,7 +49,11 @@ class PatchStardatoService(private val jdbcTemplate: JdbcTemplate,
 
         logger.info("Patcher ${fagsaker.size} fagsaker")
         fagsaker.forEach { fagsakId ->
-            patch(fagsakId, oppdaterVedtak)
+            try {
+                patch(fagsakId, oppdaterVedtak)
+            } catch (e: Exception) {
+                logger.warn("Feilet patching av $fagsakId", e)
+            }
         }
         logger.info("Patch done")
     }
