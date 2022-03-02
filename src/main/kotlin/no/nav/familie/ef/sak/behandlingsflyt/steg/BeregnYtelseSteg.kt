@@ -297,7 +297,8 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
             "Forrige vedtak er allerede opphørt fra ${forrigeTilkjentYtelse.startdato}"
         }
 
-        brukerfeilHvis(forrigeTilkjentYtelse.andelerTilkjentYtelse.all { it.beløp == 0 }) {
+        brukerfeilHvis(!featureToggleService.isEnabled("familie.ef.sak.startdato") &&
+                       forrigeTilkjentYtelse.andelerTilkjentYtelse.all { it.beløp == 0 }) {
             "Har ikke støtte for å opphøre når alle tidligere perioder har 0 i stønad"
         }
 
