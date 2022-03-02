@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -35,6 +36,7 @@ class PatchStardatoService(private val jdbcTemplate: JdbcTemplate,
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
+    @Transactional
     fun patch(oppdaterVedtak: Boolean) {
         val vedtaksresultater = setOf(ResultatType.OPPHØRT, ResultatType.INNVILGE, ResultatType.SANKSJONERE)
         val fagsaker = jdbcTemplate.query(
@@ -72,7 +74,7 @@ class PatchStardatoService(private val jdbcTemplate: JdbcTemplate,
             val behandlingId = behandling.id
             val vedtak = vedtakRepository.findByIdOrNull(behandlingId)
             if (vedtak == null) {
-                logger.warn("fagsak=$fagsakId behandling=$behandlingId mangler vedtak " +
+                logger.info("fagsak=$fagsakId behandling=$behandlingId mangler vedtak " +
                             "status=${behandling.status} resultat=${behandling.resultat}")
                 return@forEach
             }
@@ -82,12 +84,12 @@ class PatchStardatoService(private val jdbcTemplate: JdbcTemplate,
                 ResultatType.INNVILGE -> vedtak.perioder?.perioder?.minOfOrNull { it.datoFra }
                 ResultatType.OPPHØRT -> vedtak.opphørFom
                 else -> {
-                    logger.info("fagsak=$fagsakId behandling=$behandlingId feil vedtaksresultat=$vedtaksresultat")
+                    logger.warn("fagsak=$fagsakId behandling=$behandlingId feil vedtaksresultat=$vedtaksresultat")
                     return@forEach
                 }
             }
             if (minDato == null) {
-                logger.warn("fagsak=$fagsakId behandling=$behandlingId mangler minDato vedtaksresultat=$vedtaksresultat")
+                logger.info("fagsak=$fagsakId behandling=$behandlingId mangler minDato vedtaksresultat=$vedtaksresultat")
             }
             if (minStartDato == null || (minDato != null && minDato < minStartDato)) {
                 minStartDato = minDato
@@ -98,24 +100,21 @@ class PatchStardatoService(private val jdbcTemplate: JdbcTemplate,
                 return // avslutter for hele fagsaken
             }
 
-            val tilkjentYtelser =
+            val startdatoer =
                     jdbcTemplate.query("SELECT behandling_id, opphorsdato FROM tilkjent_ytelse WHERE behandling_id = ?",
                                        { rs, _ -> rs.getDate("opphorsdato")?.toLocalDate() },
                                        behandlingId)
-            if (tilkjentYtelser.size != 1) {
-                logger.warn("fagsak=$fagsakId behandling=$behandlingId finner ikke tilkjent ytelse")
-                return@forEach
+            if (startdatoer.size != 1) {
+                logger.info("fagsak=$fagsakId behandling=$behandlingId finner ikke tilkjent ytelse")
+                return // avslutter for hele fagsaken, burde ikke kunne finne tilkjente ytelser for senere behandlinger heller.
             }
-            val tilkjentYtelseStartdato = tilkjentYtelser.single()
-            if (tilkjentYtelseStartdato != null && tilkjentYtelseStartdato != minStartDato) {
-                logger.warn("fagsak=$fagsakId behandling=$behandlingId oppdaterer fra $tilkjentYtelseStartdato til $minStartDato")
-            }
+            val tilkjentYtelseStartdato = startdatoer.single()
             if (tilkjentYtelseStartdato == minStartDato) {
                 logger.info("fagsak=$fagsakId behandling=$behandlingId allerede like")
                 return@forEach
             }
 
-            logger.info("fagsak=$fagsakId behandling=$behandlingId oppdaterer startdato=$minStartDato")
+            logger.info("fagsak=$fagsakId behandling=$behandlingId oppdaterer tilkjentYtelseStartdati=$tilkjentYtelseStartdato startdato=$minStartDato")
             if (oppdaterVedtak) {
                 jdbcTemplate.update("UPDATE tilkjent_ytelse SET opphorsdato = ? WHERE behandling_id =?",
                                     minStartDato, behandlingId)
