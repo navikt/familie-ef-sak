@@ -43,15 +43,10 @@ class PatchService(private val jdbcTemplate: JdbcTemplate,
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     fun patch(oppdaterVedtak: Boolean) {
-        val fagsaker = jdbcTemplate.query("""SELECT fagsak_id, COUNT(*)
+        val fagsaker = jdbcTemplate.query("""SELECT fagsak_id, b.id as behandling_id 
            FROM behandling b
-                    JOIN fagsak f ON b.fagsak_id = f.id
-           WHERE f.migrert = TRUE
-             AND resultat <> 'HENLAGT'
-             AND b.type <> 'BLANKETT'
-             AND resultat <> 'AVSLÅTT'
-           GROUP BY fagsak_id
-           HAVING COUNT(*) = 1""") { rs, _ ->
+           JOIN vedtak v ON v.behandling_id = b.id
+           WHERE b.arsak = 'MIGRERING'""") { rs, _ ->
             UUID.fromString(rs.getString("fagsak_id"))
         }.toSet()
 
@@ -72,20 +67,22 @@ class PatchService(private val jdbcTemplate: JdbcTemplate,
         val behandlingId = behandling.id
         if (!behandling.erMigrering()) {
             logger.info("fagsak=$fagsakId behandling=$behandlingId er ikke en migrering")
+            return
         }
         val ty = tilkjentYtelseService.hentForBehandling(behandlingId)
-        if (ty.andelerTilkjentYtelse.none { it.stønadTom > LocalDate.of(2021, 2, 27) }) {
+        if (ty.andelerTilkjentYtelse.none { it.stønadTom > LocalDate.of(2021, 2, 27) }) { // todo lavere? Sjekk opp dette med hilde - burde vi sette den på alle?
             logger.info("fagsak=$fagsakId har ikke noen aktive andeler")
             return
         }
         val personIdent = behandlingService.hentAktivIdent(behandlingId)
 
-        val periode = infotrygdService.hentDtoPerioder(personIdent).overgangsstønad.perioder
-                .find { it.kode == InfotrygdEndringKode.OVERTFØRT_NY_LØSNING }
-        if (periode == null) {
+        val infotrygdperioder = infotrygdService.hentDtoPerioder(personIdent).overgangsstønad.perioder
+                .filter { it.kode == InfotrygdEndringKode.OVERTFØRT_NY_LØSNING }
+        if(infotrygdperioder.size != 1) {
             logger.info("fagsak=$fagsakId finner ikke periode for overført til ny løsning")
             return
         }
+        val periode = infotrygdperioder.single()
         if (periode.aktivitetstype != InfotrygdAktivitetstype.TILMELDT_SOM_REELL_ARBEIDSSØKER) {
             logger.info("fagsak=$fagsakId er ikke reell arbeidssøker")
             return
@@ -103,6 +100,7 @@ class PatchService(private val jdbcTemplate: JdbcTemplate,
         val perioder = vedtak.perioder.copy(perioder = perioder1)
         logger.info("Oppdaterer fagsak=$fagsakId behandling=$behandlingId som reell arbeidssøker oppdaterVedtak=$oppdaterVedtak")
         if (oppdaterVedtak) {
+            error("Fiks pr")
             vedtakRepository.update(vedtak.copy(perioder = perioder))
         }
     }
