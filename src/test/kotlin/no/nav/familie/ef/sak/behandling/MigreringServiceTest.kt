@@ -26,7 +26,7 @@ import no.nav.familie.ef.sak.infrastruktur.config.IverksettClientMock
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
-import no.nav.familie.ef.sak.patch.PatchService
+import no.nav.familie.ef.sak.patch.PatchAktivitetService
 import no.nav.familie.ef.sak.simulering.SimuleringsresultatRepository
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ef.sak.tilbakekreving.domain.Tilbakekrevingsvalg
@@ -88,7 +88,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var rolleConfig: RolleConfig
     @Autowired private lateinit var iverksettClient: IverksettClient
     @Autowired private lateinit var infotrygdReplikaClient: InfotrygdReplikaClient
-    @Autowired private lateinit var patchService: PatchService
+    @Autowired private lateinit var patchAktivitetService: PatchAktivitetService
 
     private val periodeFraMåned = YearMonth.now().minusMonths(10)
     private val opphørsmåned = YearMonth.now()
@@ -370,7 +370,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         assertThat(vedtakService.hentVedtak(migrering.id).perioder!!.perioder.single().aktivitet)
                 .isEqualTo(AktivitetType.MIGRERING)
 
-        patchService.patch(true)
+        patchAktivitetService.patch(true)
 
         assertThat(vedtakService.hentVedtak(migrering.id).perioder!!.perioder.single().aktivitet)
                 .isEqualTo(AktivitetType.FORSØRGER_REELL_ARBEIDSSØKER)
