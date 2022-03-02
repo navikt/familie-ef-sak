@@ -26,6 +26,7 @@ import no.nav.familie.ef.sak.infrastruktur.config.IverksettClientMock
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
+import no.nav.familie.ef.sak.patch.PatchAktivitetService
 import no.nav.familie.ef.sak.simulering.SimuleringsresultatRepository
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ef.sak.tilbakekreving.domain.Tilbakekrevingsvalg
@@ -87,6 +88,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var rolleConfig: RolleConfig
     @Autowired private lateinit var iverksettClient: IverksettClient
     @Autowired private lateinit var infotrygdReplikaClient: InfotrygdReplikaClient
+    @Autowired private lateinit var patchAktivitetService: PatchAktivitetService
 
     private val periodeFraMåned = YearMonth.now().minusMonths(10)
     private val opphørsmåned = YearMonth.now()
@@ -361,6 +363,19 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         assertThat(migreringInfo.kanMigreres).isTrue
     }
 
+    @Test
+    internal fun `skal patche migrert person - oppdaterer vedtak til reell arbeidssøker`() {
+        val mockPerioder = { mockPerioder(aktivitetstype = InfotrygdAktivitetstype.TILMELDT_SOM_REELL_ARBEIDSSØKER) }
+        val migrering = opprettOgIverksettMigrering(mockPerioder = mockPerioder)
+        assertThat(vedtakService.hentVedtak(migrering.id).perioder!!.perioder.single().aktivitet)
+                .isEqualTo(AktivitetType.MIGRERING)
+
+        patchAktivitetService.patch(true)
+
+        assertThat(vedtakService.hentVedtak(migrering.id).perioder!!.perioder.single().aktivitet)
+                .isEqualTo(AktivitetType.FORSØRGER_REELL_ARBEIDSSØKER)
+    }
+
     private fun verifiserVurderinger(migrering: Behandling) {
         val vilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(migrering.id)
         val alleVurderingerManglerSvar = vilkårsvurderinger.flatMap { it.delvilkårsvurdering.delvilkårsvurderinger }
@@ -448,14 +463,16 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
      */
     private fun mockPerioder(opphørsdato: YearMonth? = opphørsmåned,
                              stønadFom: YearMonth = periodeFraMåned,
-                             stønadTom: YearMonth = til) {
+                             stønadTom: YearMonth = til,
+                             aktivitetstype: InfotrygdAktivitetstype = InfotrygdAktivitetstype.BRUKERKONTAKT) {
         val periode = InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(vedtakId = 1,
                                                                    stønadFom = stønadFom.atDay(1),
                                                                    stønadTom = stønadTom.atEndOfMonth())
         val kodePeriode2 = opphørsdato?.let { InfotrygdEndringKode.OVERTFØRT_NY_LØSNING } ?: InfotrygdEndringKode.NY
         val periodeForKallNr2 = periode.copy(vedtakId = 2,
                                              opphørsdato = opphørsdato?.atEndOfMonth(),
-                                             kode = kodePeriode2)
+                                             kode = kodePeriode2,
+                                             aktivitetstype = aktivitetstype)
         every { infotrygdReplikaClient.hentPerioder(any()) } returns
                 InfotrygdPeriodeResponse(listOf(periode), emptyList(), emptyList()) andThen
                 InfotrygdPeriodeResponse(listOf(periodeForKallNr2), emptyList(), emptyList())
