@@ -1,8 +1,6 @@
 package no.nav.familie.ef.sak.vilkår.regler.evalutation
 
-import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
 import no.nav.familie.ef.sak.testutil.søknadsBarnTilBehandlingBarn
 import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
@@ -18,7 +16,7 @@ import no.nav.familie.ef.sak.vilkår.regler.RegelId
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår.erAlleVilkårTattStillingTil
-import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår.utledResultatForAleneomsorg
+import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår.utledResultatForVilkårSomGjelderFlereBarn
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.SivilstandRegel
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import org.assertj.core.api.Assertions.assertThat
@@ -159,51 +157,51 @@ internal class OppdaterVilkårTest {
 
     @Test
     fun `utledResultatForAleneomsorg - gir OPPFYLT hvis en er OPPFYLT`() {
-        assertThat(utledResultatForAleneomsorg(listOf(aleneomsorg(Vilkårsresultat.OPPFYLT))))
+        assertThat(utledResultatForVilkårSomGjelderFlereBarn(listOf(aleneomsorg(Vilkårsresultat.OPPFYLT))))
                 .isEqualTo(Vilkårsresultat.OPPFYLT)
-        assertThat(utledResultatForAleneomsorg(listOf(aleneomsorg(Vilkårsresultat.OPPFYLT),
-                                                      aleneomsorg(Vilkårsresultat.IKKE_OPPFYLT))))
+        assertThat(utledResultatForVilkårSomGjelderFlereBarn(listOf(aleneomsorg(Vilkårsresultat.OPPFYLT),
+                                                                    aleneomsorg(Vilkårsresultat.IKKE_OPPFYLT))))
                 .isEqualTo(Vilkårsresultat.OPPFYLT)
-        assertThat(utledResultatForAleneomsorg(listOf(aleneomsorg(Vilkårsresultat.OPPFYLT),
-                                                      aleneomsorg(Vilkårsresultat.IKKE_TATT_STILLING_TIL))))
+        assertThat(utledResultatForVilkårSomGjelderFlereBarn(listOf(aleneomsorg(Vilkårsresultat.OPPFYLT),
+                                                                    aleneomsorg(Vilkårsresultat.IKKE_TATT_STILLING_TIL))))
                 .isEqualTo(Vilkårsresultat.OPPFYLT)
-        assertThat(utledResultatForAleneomsorg(listOf(aleneomsorg(Vilkårsresultat.OPPFYLT),
-                                                      aleneomsorg(Vilkårsresultat.SKAL_IKKE_VURDERES))))
+        assertThat(utledResultatForVilkårSomGjelderFlereBarn(listOf(aleneomsorg(Vilkårsresultat.OPPFYLT),
+                                                                    aleneomsorg(Vilkårsresultat.SKAL_IKKE_VURDERES))))
                 .isEqualTo(Vilkårsresultat.OPPFYLT)
     }
 
     @Test
     fun `utledResultatForAleneomsorg - gir IKKE_OPPFYLT hvis en er oppfylt og resten er IKKE_OPPFYLT eller SKAL_IKKE_VURDERES`() {
-        assertThat(utledResultatForAleneomsorg(listOf(aleneomsorg(Vilkårsresultat.IKKE_OPPFYLT))))
+        assertThat(utledResultatForVilkårSomGjelderFlereBarn(listOf(aleneomsorg(Vilkårsresultat.IKKE_OPPFYLT))))
                 .isEqualTo(Vilkårsresultat.IKKE_OPPFYLT)
-        assertThat(utledResultatForAleneomsorg(listOf(aleneomsorg(Vilkårsresultat.IKKE_OPPFYLT),
-                                                      aleneomsorg(Vilkårsresultat.SKAL_IKKE_VURDERES))))
+        assertThat(utledResultatForVilkårSomGjelderFlereBarn(listOf(aleneomsorg(Vilkårsresultat.IKKE_OPPFYLT),
+                                                                    aleneomsorg(Vilkårsresultat.SKAL_IKKE_VURDERES))))
                 .isEqualTo(Vilkårsresultat.IKKE_OPPFYLT)
-        assertThat(utledResultatForAleneomsorg(listOf(aleneomsorg(Vilkårsresultat.IKKE_OPPFYLT),
-                                                      aleneomsorg(Vilkårsresultat.IKKE_TATT_STILLING_TIL))))
+        assertThat(utledResultatForVilkårSomGjelderFlereBarn(listOf(aleneomsorg(Vilkårsresultat.IKKE_OPPFYLT),
+                                                                    aleneomsorg(Vilkårsresultat.IKKE_TATT_STILLING_TIL))))
                 .isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
     }
 
     @Test
     fun `utledResultatForAleneomsorg - gir SKAL_IKKE_VURDERES hvis kun SKAL_IKKE_VURDERES`() {
-        assertThat(utledResultatForAleneomsorg(listOf(aleneomsorg(Vilkårsresultat.SKAL_IKKE_VURDERES))))
+        assertThat(utledResultatForVilkårSomGjelderFlereBarn(listOf(aleneomsorg(Vilkårsresultat.SKAL_IKKE_VURDERES))))
                 .isEqualTo(Vilkårsresultat.SKAL_IKKE_VURDERES)
     }
 
     @Test
     fun `utledResultatForAleneomsorg - gir IKKE_TATT_STILLING_TIL om det finnes IKKE_TATT_STILLING_TIL og SKAL_IKKE_VURDERES`() {
-        assertThat(utledResultatForAleneomsorg(listOf(aleneomsorg(Vilkårsresultat.IKKE_TATT_STILLING_TIL))))
+        assertThat(utledResultatForVilkårSomGjelderFlereBarn(listOf(aleneomsorg(Vilkårsresultat.IKKE_TATT_STILLING_TIL))))
                 .isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
-        assertThat(utledResultatForAleneomsorg(listOf(aleneomsorg(Vilkårsresultat.IKKE_TATT_STILLING_TIL),
-                                                      aleneomsorg(Vilkårsresultat.SKAL_IKKE_VURDERES))))
+        assertThat(utledResultatForVilkårSomGjelderFlereBarn(listOf(aleneomsorg(Vilkårsresultat.IKKE_TATT_STILLING_TIL),
+                                                                    aleneomsorg(Vilkårsresultat.SKAL_IKKE_VURDERES))))
                 .isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
     }
 
     @Test
     fun `utledResultatForAleneomsorg - skal kaste feil hvis vilkåren inneholder noe annet enn aleneomsorg`() {
         val vilkårForSivilstand = aleneomsorg(Vilkårsresultat.IKKE_TATT_STILLING_TIL).copy(type = VilkårType.SIVILSTAND)
-        assertThat(catchThrowable { utledResultatForAleneomsorg(listOf(vilkårForSivilstand)) })
-                .hasMessage("Denne metoden kan kun kalles med vilkår for Aleneomsorg")
+        assertThat(catchThrowable { utledResultatForVilkårSomGjelderFlereBarn(listOf(vilkårForSivilstand)) })
+                .hasMessage("Denne metoden kan kun kalles med vilkår som kan ha flere barn")
     }
 
     @Test

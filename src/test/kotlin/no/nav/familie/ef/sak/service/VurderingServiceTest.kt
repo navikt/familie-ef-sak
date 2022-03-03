@@ -10,6 +10,9 @@ import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.blankett.BlankettRepository
+import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.fagsak.domain.Stønadstype.BARNETILSYN
+import no.nav.familie.ef.sak.fagsak.domain.Stønadstype.OVERGANGSSTØNAD
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
@@ -52,12 +55,14 @@ internal class VurderingServiceTest {
     private val barnService = mockk<BarnService>()
     private val vilkårGrunnlagService = mockk<VilkårGrunnlagService>()
     private val grunnlagsdataService = mockk<GrunnlagsdataService>()
+    private val fagsakService = mockk<FagsakService>()
     private val vurderingService = VurderingService(behandlingService = behandlingService,
                                                     søknadService = søknadService,
                                                     vilkårsvurderingRepository = vilkårsvurderingRepository,
                                                     vilkårGrunnlagService = vilkårGrunnlagService,
                                                     grunnlagsdataService = grunnlagsdataService,
-                                                    barnService = barnService)
+                                                    barnService = barnService,
+                                                    fagsakService = fagsakService)
     private val søknad = SøknadsskjemaMapper.tilDomene(TestsøknadBuilder.Builder().setBarn(listOf(
             TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "14041385481"),
             TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "01012067050")
@@ -79,6 +84,7 @@ internal class VurderingServiceTest {
                                          avvistePerioder = emptyList()))
         every { vilkårsvurderingRepository.insertAll(any()) } answers { firstArg() }
         every { barnService.finnBarnPåBehandling(behandlingId) } returns barn
+        every { fagsakService.hentFagsakForBehandling(behandlingId) } returns fagsak(stønadstype = OVERGANGSSTØNAD)
         val sivilstand = SivilstandInngangsvilkårDto(mockk(relaxed = true),
                                                      SivilstandRegistergrunnlagDto(Sivilstandstype.GIFT, "Navn", null))
         every { vilkårGrunnlagService.hentGrunnlag(any(), any(), any(), any()) } returns VilkårGrunnlagDto(mockk(relaxed = true),
@@ -94,13 +100,13 @@ internal class VurderingServiceTest {
     }
 
     @Test
-    fun `skal opprette nye Vilkårsvurdering for alle vilkår dersom ingen vurderinger finnes`() {
+    fun `skal opprette nye Vilkårsvurdering for overgangsstønad med alle vilkår dersom ingen vurderinger finnes`() {
         every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns emptyList()
 
         val nyeVilkårsvurderinger = slot<List<Vilkårsvurdering>>()
         every { vilkårsvurderingRepository.insertAll(capture(nyeVilkårsvurderinger)) } answers
                 { it.invocation.args.first() as List<Vilkårsvurdering> }
-        val vilkår = VilkårType.hentVilkår()
+        val vilkår = VilkårType.hentVilkårForStønad(OVERGANGSSTØNAD)
 
 
         vurderingService.hentEllerOpprettVurderinger(behandlingId)
@@ -109,6 +115,29 @@ internal class VurderingServiceTest {
         assertThat(nyeVilkårsvurderinger.captured.map { it.type }.distinct()).containsExactlyInAnyOrderElementsOf(vilkår)
         assertThat(nyeVilkårsvurderinger.captured.filter { it.type == VilkårType.ALENEOMSORG }).hasSize(2)
         assertThat(nyeVilkårsvurderinger.captured.filter { it.barnId != null }).hasSize(2)
+        assertThat(nyeVilkårsvurderinger.captured.map { it.resultat }
+                           .toSet()).containsOnly(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
+        assertThat(nyeVilkårsvurderinger.captured.map { it.behandlingId }.toSet()).containsOnly(behandlingId)
+    }
+
+    @Test
+    fun `skal opprette nye Vilkårsvurdering for barnetilsyn med alle vilkår dersom ingen vurderinger finnes`() {
+        every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns emptyList()
+        every { fagsakService.hentFagsakForBehandling(behandlingId) } returns fagsak(stønadstype = BARNETILSYN)
+
+        val nyeVilkårsvurderinger = slot<List<Vilkårsvurdering>>()
+        every { vilkårsvurderingRepository.insertAll(capture(nyeVilkårsvurderinger)) } answers
+                { it.invocation.args.first() as List<Vilkårsvurdering> }
+        val vilkår = VilkårType.hentVilkårForStønad(BARNETILSYN)
+
+
+        vurderingService.hentEllerOpprettVurderinger(behandlingId)
+
+        assertThat(nyeVilkårsvurderinger.captured).hasSize(vilkår.size + 2) // 2 barn, Ekstra aleneomsorgsvilkår og aldersvilkår
+        assertThat(nyeVilkårsvurderinger.captured.map { it.type }.distinct()).containsExactlyInAnyOrderElementsOf(vilkår)
+        assertThat(nyeVilkårsvurderinger.captured.filter { it.type == VilkårType.ALENEOMSORG }).hasSize(2)
+        assertThat(nyeVilkårsvurderinger.captured.filter { it.type == VilkårType.ALDER_PÅ_BARN }).hasSize(2)
+        assertThat(nyeVilkårsvurderinger.captured.filter { it.barnId != null }).hasSize(4)
         assertThat(nyeVilkårsvurderinger.captured.map { it.resultat }
                            .toSet()).containsOnly(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
         assertThat(nyeVilkårsvurderinger.captured.map { it.behandlingId }.toSet()).containsOnly(behandlingId)
@@ -188,7 +217,7 @@ internal class VurderingServiceTest {
     internal fun `Skal returnere ikke oppfylt hvis noen vurderinger er SKAL_IKKE_VURDERES`() {
         val vilkårsvurderinger = lagVilkårsvurderingerMedResultat()
         // Guard
-        assertThat((vilkårsvurderinger.map { it.type }.containsAll(VilkårType.hentVilkår()))).isTrue()
+        assertThat((vilkårsvurderinger.map { it.type }.containsAll(VilkårType.hentVilkårForStønad(OVERGANGSSTØNAD)))).isTrue()
         every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns vilkårsvurderinger
 
 
@@ -203,7 +232,7 @@ internal class VurderingServiceTest {
 
     private fun lagVilkårsvurderinger(behandlingId: UUID,
                                       resultat: Vilkårsresultat = OPPFYLT): List<Vilkårsvurdering> {
-        return VilkårType.hentVilkår().map {
+        return VilkårType.hentVilkårForStønad(OVERGANGSSTØNAD).map {
             vilkårsvurdering(behandlingId = behandlingId,
                              resultat = resultat,
                              type = it,

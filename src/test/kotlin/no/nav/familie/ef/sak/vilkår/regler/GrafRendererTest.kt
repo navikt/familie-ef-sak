@@ -18,7 +18,7 @@ internal class GrafRendererTest {
 
     @Test
     internal fun `print alle vilkår`() {
-        val vilkårsregler = Vilkårsregler.VILKÅRSREGLER.vilkårsregler.filter { it.key != VilkårType.SIVILSTAND }.map {
+        val vilkårsregler = Vilkårsregler.ALLE_VILKÅRSREGLER.vilkårsregler.filter { it.key != VilkårType.SIVILSTAND }.map {
             val regler = it.value.regler
             mapOf("name" to it.key,
                   "children" to it.value.hovedregler.map { regelId -> mapSpørsmål(regler, regelId) })
