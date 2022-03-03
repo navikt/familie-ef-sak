@@ -68,7 +68,7 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
     fun fagsakTilDto(fagsak: Fagsak): FagsakDto {
         val behandlinger: List<Behandling> = behandlingService.hentBehandlinger(fagsak.id)
         val erLøpende = erLøpende(behandlinger)
-        return fagsak.tilDto(behandlinger = behandlinger.map(Behandling::tilDto), erLøpende = erLøpende)
+        return fagsak.tilDto(behandlinger = behandlinger.map((Behandling::tilDto)), erLøpende = erLøpende)
     }
 
     fun finnFagsakerForFagsakPersonId(fagsakPersonId: UUID): Fagsaker {
