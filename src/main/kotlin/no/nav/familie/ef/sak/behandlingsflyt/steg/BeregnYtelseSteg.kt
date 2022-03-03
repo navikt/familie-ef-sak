@@ -179,7 +179,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
             "Har ikke støtte for å innvilge med opphør først, når man mangler tidligere behandling å opphøre"
         }
         val harKun0Beløp = forrigeTilkjenteYtelse?.andelerTilkjentYtelse?.all { it.beløp == 0 } ?: false
-        feilHvis(harKun0Beløp && harKunOpphørEllerOpphørFørInnvilgetPeriode) {
+        feilHvis(!featureToggleService.isEnabled("familie.ef.sak.startdato") && harKun0Beløp && harKunOpphørEllerOpphørFørInnvilgetPeriode) {
             "Har ikke støtte for å innvilge med opphør først, når man kun har perioder med 0 som beløp fra før"
         }
     }
@@ -297,7 +297,8 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
             "Forrige vedtak er allerede opphørt fra ${forrigeTilkjentYtelse.startdato}"
         }
 
-        brukerfeilHvis(forrigeTilkjentYtelse.andelerTilkjentYtelse.all { it.beløp == 0 }) {
+        brukerfeilHvis(!featureToggleService.isEnabled("familie.ef.sak.startdato") &&
+                       forrigeTilkjentYtelse.andelerTilkjentYtelse.all { it.beløp == 0 }) {
             "Har ikke støtte for å opphøre når alle tidligere perioder har 0 i stønad"
         }
 
