@@ -126,7 +126,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
         brukerfeilHvis(andelerTilkjentYtelse.isEmpty()) { "Innvilget vedtak må ha minimum en beløpsperiode" }
 
         val (nyeAndeler, opphørsdato) = when (behandling.type) {
-            BehandlingType.FØRSTEGANGSBEHANDLING -> andelerTilkjentYtelse to null
+            BehandlingType.FØRSTEGANGSBEHANDLING -> andelerTilkjentYtelse to datoForFørstegangsbehandling(andelerTilkjentYtelse)
             BehandlingType.REVURDERING -> nyeAndelerForRevurderingMedOpphørsdato(behandling, vedtak, andelerTilkjentYtelse)
             else -> error("Steg ikke støttet for type=${behandling.type}")
         }
@@ -139,12 +139,19 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                                                                    startdato = opphørsdato))
     }
 
+    private fun datoForFørstegangsbehandling(andelerTilkjentYtelse: List<AndelTilkjentYtelse>): LocalDate? {
+        return if (featureToggleService.isEnabled("familie.ef.sak.startdato")) {
+            andelerTilkjentYtelse.minOfOrNull { it.stønadFom } // eller minOf? Må vel alltid ha en andel hvis man innvilget en førstegangsbehandling?
+        } else null
+    }
+
     private fun nyeAndelerForRevurderingMedOpphørsdato(behandling: Behandling,
                                                        vedtak: Innvilget,
                                                        andelerTilkjentYtelse: List<AndelTilkjentYtelse>): Pair<List<AndelTilkjentYtelse>, LocalDate?> {
         val opphørsperioder = finnOpphørsperioder(vedtak)
 
         val forrigeTilkjenteYtelse = behandling.forrigeBehandlingId?.let { hentForrigeTilkjenteYtelse(behandling) }
+        validerStartdato(forrigeTilkjenteYtelse)
         validerOpphørsperioder(opphørsperioder, finnInnvilgedePerioder(vedtak), forrigeTilkjenteYtelse)
 
         val nyeAndeler = beregnNyeAndelerForRevurdering(forrigeTilkjenteYtelse, andelerTilkjentYtelse, opphørsperioder)
@@ -152,6 +159,13 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
         val forrigeOpphørsdato = forrigeTilkjenteYtelse?.startdato
         val opphørsdato = opphørsdatoHvisFørFørsteAndelSinFomDato(opphørsperioder, nyeAndeler, forrigeOpphørsdato)
         return nyeAndeler to opphørsdato
+    }
+
+    private fun validerStartdato(forrigeTilkjenteYtelse: TilkjentYtelse?) {
+        feilHvis(featureToggleService.isEnabled("familie.ef.sak.startdato") &&
+                 forrigeTilkjenteYtelse != null && forrigeTilkjenteYtelse.startdato == null) {
+            "Mangler startdato på tilkjent ytelse behandlingId=${forrigeTilkjenteYtelse?.behandlingId}"
+        }
     }
 
     private fun validerOpphørsperioder(opphørsperioder: List<Periode>,
@@ -165,7 +179,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
             "Har ikke støtte for å innvilge med opphør først, når man mangler tidligere behandling å opphøre"
         }
         val harKun0Beløp = forrigeTilkjenteYtelse?.andelerTilkjentYtelse?.all { it.beløp == 0 } ?: false
-        feilHvis(harKun0Beløp && harKunOpphørEllerOpphørFørInnvilgetPeriode) {
+        feilHvis(!featureToggleService.isEnabled("familie.ef.sak.startdato") && harKun0Beløp && harKunOpphørEllerOpphørFørInnvilgetPeriode) {
             "Har ikke støtte for å innvilge med opphør først, når man kun har perioder med 0 som beløp fra før"
         }
     }
@@ -177,12 +191,24 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                 slåSammenAndelerSomSkalVidereføres(andelerTilkjentYtelse, forrigeTilkjenteYtelse, opphørsperioder)
             } ?: andelerTilkjentYtelse
 
+
     private fun opphørsdatoHvisFørFørsteAndelSinFomDato(opphørsperioder: List<Periode>,
                                                         andeler: List<AndelTilkjentYtelse>,
                                                         forrigeOpphørsdato: LocalDate?): LocalDate? {
-        val nyttOpphørsdato = opphørsperioder.minOfOrNull { it.fradato }
-                ?.takeIf { stønadsdato -> andeler.minOfOrNull { it.stønadFom }?.isAfter(stønadsdato) ?: false }
+        val nyttOpphørsdato = nyttOpphørsdato(opphørsperioder, andeler)
         return min(nyttOpphørsdato, forrigeOpphørsdato)
+    }
+
+    // TODO når featureToggleService fjernes kan opphørsdatoHvisFørFørsteAndelSinFomDato gjøre en min på vedtakens sine perioder
+    // og ikke forholde seg til både opphørsperioder og andeler
+    private fun nyttOpphørsdato(opphørsperioder: List<Periode>,
+                                andeler: List<AndelTilkjentYtelse>): LocalDate? {
+        return if (featureToggleService.isEnabled("familie.ef.sak.startdato")) {
+            min(opphørsperioder.minOfOrNull { it.fradato }, andeler.minOfOrNull { it.stønadFom })
+        } else {
+            opphørsperioder.minOfOrNull { it.fradato }
+                    ?.takeIf { stønadsdato -> andeler.minOfOrNull { it.stønadFom }?.isAfter(stønadsdato) ?: false }
+        }
     }
 
     private fun opprettTilkjentYtelseForSanksjonertBehandling(vedtak: Sanksjonert,
@@ -267,11 +293,12 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
         }
 
         brukerfeilHvis(forrigeTilkjentYtelse.andelerTilkjentYtelse.isEmpty() &&
-                 forrigeTilkjentYtelse.startdato != null && forrigeTilkjentYtelse.startdato < opphørFom) {
+                       forrigeTilkjentYtelse.startdato != null && forrigeTilkjentYtelse.startdato <= opphørFom) {
             "Forrige vedtak er allerede opphørt fra ${forrigeTilkjentYtelse.startdato}"
         }
 
-        brukerfeilHvis(forrigeTilkjentYtelse.andelerTilkjentYtelse.all { it.beløp == 0 }) {
+        brukerfeilHvis(!featureToggleService.isEnabled("familie.ef.sak.startdato") &&
+                       forrigeTilkjentYtelse.andelerTilkjentYtelse.all { it.beløp == 0 }) {
             "Har ikke støtte for å opphøre når alle tidligere perioder har 0 i stønad"
         }
 
