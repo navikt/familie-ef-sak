@@ -35,7 +35,6 @@ class BehandlingController(private val behandlingService: BehandlingService,
     fun hentBehandling(@PathVariable behandlingId: UUID): Ressurs<BehandlingDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         val behandling: Behandling = behandlingService.hentBehandling(behandlingId)
-        tilgangService.validerTilgangTilFagsak(behandling.fagsakId, AuditLoggerEvent.ACCESS)
         val fagsak: Fagsak = fagsakService.hentFagsak(behandling.fagsakId)
         val behandlingDto = behandling.tilDto(fagsak.stønadstype)
         return Ressurs.success(behandlingDto)
@@ -67,7 +66,6 @@ class BehandlingController(private val behandlingService: BehandlingService,
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
         val henlagtBehandling = henleggService.henleggBehandling(behandlingId, henlagt)
-        tilgangService.validerTilgangTilFagsak(henlagtBehandling.fagsakId, AuditLoggerEvent.ACCESS)
         val fagsak: Fagsak = fagsakService.hentFagsak(henlagtBehandling.fagsakId)
         return Ressurs.success(henlagtBehandling.tilDto(fagsak.stønadstype))
     }
@@ -76,7 +74,6 @@ class BehandlingController(private val behandlingService: BehandlingService,
     fun hentBehandling(@PathVariable eksternBehandlingId: Long): Ressurs<BehandlingDto> {
         val behandling: Behandling = behandlingService.hentBehandlingPåEksternId(eksternBehandlingId)
         tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS)
-        tilgangService.validerTilgangTilFagsak(behandling.fagsakId, AuditLoggerEvent.ACCESS)
         val fagsak: Fagsak = fagsakService.hentFagsak(behandling.fagsakId)
         val behandlingDto = behandling.tilDto(fagsak.stønadstype)
         return Ressurs.success(behandlingDto)
