@@ -11,7 +11,7 @@ import java.util.UUID
 interface MålerRepository : CrudRepository<Behandling, UUID> {
 
     // language=PostgreSQL
-    @Query("""SELECT COUNT(*) FROM behandling WHERE arsak = :behandlingårsak""")
+    @Query("""SELECT COUNT(*) FROM behandling WHERE arsak = :behandlingÅrsak""")
     fun finnAntallBehandlingerAvÅrsak(behandlingÅrsak: BehandlingÅrsak): Int
 
     // language=PostgreSQL
@@ -49,12 +49,12 @@ interface MålerRepository : CrudRepository<Behandling, UUID> {
     @Query("""
         SELECT COUNT(*)
         FROM gjeldende_iverksatte_behandlinger gib
-         JOIN fagsak fs ON fs.id = gib.fagsak_id
-         JOIN behandling b ON b.fagsak_id = fs.id
-         JOIN vedtak v ON v.behandling_id = b.id
+        JOIN fagsak fs ON fs.id = gib.fagsak_id
+        JOIN behandling b ON b.fagsak_id = fs.id
+        JOIN vedtak v ON v.behandling_id = b.id
         WHERE gib.stonadstype = 'OVERGANGSSTØNAD' AND gib.arsak='SANKSJON_1_MND'
     """)
-    fun finnAntallSanksjoner() : Int
+    fun finnAntallSanksjoner(): Int
 
 
 }
