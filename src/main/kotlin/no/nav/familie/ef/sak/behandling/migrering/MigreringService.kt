@@ -76,7 +76,7 @@ class MigreringService(
         } catch (e: MigreringException) {
             logger.info("Kan ikke migrere fagsakPerson=$fagsakPersonId årsak=${e.type}")
             secureLogger.info("Kan ikke migrere fagsakPerson=$fagsakPersonId - ${e.årsak}")
-            return MigreringInfo(kanMigreres = false, e.årsak)
+            return MigreringInfo(kanMigreres = false, e.årsak, kanGåVidereTilJournalføring = e.type.kanGåVidereTilJournalføring)
         }
         logger.info("Kan migrere fagsakPerson=$fagsakPersonId")
 
