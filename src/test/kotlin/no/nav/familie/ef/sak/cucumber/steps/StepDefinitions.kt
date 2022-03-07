@@ -3,11 +3,12 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.steps
 import io.cucumber.datatable.DataTable
 import io.cucumber.java.no.Gitt
 import io.cucumber.java.no.Når
-import io.cucumber.java.no.Og
 import io.cucumber.java.no.Så
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BeregnYtelseSteg
 import no.nav.familie.ef.sak.beregning.BeregningService
 import no.nav.familie.ef.sak.fagsak.FagsakService
@@ -85,10 +86,12 @@ class StepDefinitions {
         val tilkjentYtelser = mockTilkjentYtelse()
         val lagredeVedtak = mockLagreVedtak()
 
-        val behandlinger = vedtak.map { it.behandlingId }.distinct().mapIndexed { index, id ->
-            val behandling = behandling(id = id, opprettetTid = LocalDateTime.now().plusMinutes(index.toLong()))
-            behandling.id to behandling
-        }.toMap()
+        val behandlinger = vedtak.map { it.behandlingId }.distinct().foldIndexed(listOf<Behandling>()) { index, acc, id ->
+            acc + behandling(id = id,
+                                        opprettetTid = LocalDateTime.now().plusMinutes(index.toLong()),
+                                        type = BehandlingType.REVURDERING,
+                                        forrigeBehandlingId = acc.lastOrNull()?.id)
+        }.associateBy { it.id }
 
         //Skriver over inntekt hvis inntekter er definiert
         val vedtakMedInntekt = vedtak.map {
@@ -153,8 +156,13 @@ class StepDefinitions {
                 Assertions.assertThat(beregnetAndelHistorikk.endring!!.type).isEqualTo(endringType)
                 Assertions.assertThat(beregnetAndelHistorikk.endring?.behandlingId).isEqualTo(endretIBehandlingId)
             }
-            Assertions.assertThat(beregnetAndelHistorikk.andel.inntekt).isEqualTo(forventetHistorikkEndring.inntekt)
-            Assertions.assertThat(beregnetAndelHistorikk.andel.beløp).isEqualTo(forventetHistorikkEndring.beløp)
+            forventetHistorikkEndring.inntekt?.let {
+                Assertions.assertThat(beregnetAndelHistorikk.andel.inntekt).isEqualTo(it)
+            }
+            forventetHistorikkEndring.beløp?.let {
+                Assertions.assertThat(beregnetAndelHistorikk.andel.beløp).isEqualTo(it)
+            }
+
             Assertions.assertThat(beregnetAndelHistorikk.aktivitet).isEqualTo(forventetHistorikkEndring.aktivitetType)
         }
 

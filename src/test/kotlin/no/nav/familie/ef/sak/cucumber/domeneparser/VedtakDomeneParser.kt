@@ -86,8 +86,8 @@ object VedtakDomeneParser {
             val historikkEndring: HistorikkEndring?,
             val stønadFra: LocalDate,
             val stønadTil: LocalDate,
-            val inntekt: Int,
-            val beløp: Int,
+            val inntekt: Int?,
+            val beløp: Int?,
             val aktivitetType: AktivitetType
     )
 
@@ -195,8 +195,8 @@ object VedtakDomeneParser {
                             .atDay(1),
                     stønadTil = parseValgfriÅrMåned(VedtakDomenebegrep.TIL_OG_MED_DATO, rad)?.atEndOfMonth() ?: YearMonth.now()
                             .atEndOfMonth(),
-                    inntekt = parseValgfriInt(VedtakDomenebegrep.INNTEKT, rad) ?: 0,
-                    beløp = parseValgfriInt(VedtakDomenebegrep.BELØP, rad) ?: 19950,
+                    inntekt = parseValgfriInt(VedtakDomenebegrep.INNTEKT, rad),
+                    beløp = parseValgfriInt(VedtakDomenebegrep.BELØP, rad),
                     aktivitetType = parseAktivitetType(rad) ?: AktivitetType.BARN_UNDER_ETT_ÅR
             )
         }
