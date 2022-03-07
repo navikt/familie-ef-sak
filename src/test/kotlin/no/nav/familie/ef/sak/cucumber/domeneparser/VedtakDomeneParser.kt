@@ -17,6 +17,7 @@ import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.AbstractMap
 import java.util.UUID
 
@@ -173,11 +174,10 @@ object VedtakDomeneParser {
                                 vedtakstidspunkt = LocalDateTime.now()
                         )
                     },
-                    stønadFra = parseValgfriÅrMåned(VedtakDomenebegrep.FRA_OG_MED_DATO, rad)?.atDay(1) ?: LocalDate.now(),
-                    stønadTil = parseValgfriÅrMåned(VedtakDomenebegrep.TIL_OG_MED_DATO, rad)?.atEndOfMonth()
-                                ?: LocalDate.now().plusYears(1),
+                    stønadFra = parseValgfriÅrMåned(VedtakDomenebegrep.FRA_OG_MED_DATO, rad)?.atDay(1) ?: YearMonth.now().atDay(1),
+                    stønadTil = parseValgfriÅrMåned(VedtakDomenebegrep.TIL_OG_MED_DATO, rad)?.atEndOfMonth() ?: YearMonth.now().atEndOfMonth(),
                     inntekt = parseValgfriInt(VedtakDomenebegrep.INNTEKT, rad) ?: 0,
-                    beløp = parseValgfriInt(VedtakDomenebegrep.BELØP, rad) ?: 0,
+                    beløp = parseValgfriInt(VedtakDomenebegrep.BELØP, rad) ?: 19950,
                     aktivitetType = parseAktivitetType(rad) ?: AktivitetType.BARN_UNDER_ETT_ÅR
             )
         }
