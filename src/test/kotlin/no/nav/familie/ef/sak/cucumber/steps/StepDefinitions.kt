@@ -9,8 +9,6 @@ import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.VedtakD
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.VedtakDomeneParser.lagDefaultTilkjentYtelseUtenAndel
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.VedtakDomenebegrep
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.parseEndringType
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.parseInt
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriDato
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriInt
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
@@ -18,7 +16,6 @@ import no.nav.familie.ef.sak.vedtak.AndelHistorikkBeregner
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import org.assertj.core.api.Assertions
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 class StepDefinitions {
@@ -56,28 +53,25 @@ class StepDefinitions {
     fun forvent_følgende_historik(dataTable: DataTable) {
         val forventetHistorikkEndringer = VedtakDomeneParser.mapBehandlingForHistorikkEndring(dataTable)
 
-        dataTable.asMaps().map {
+        dataTable.asMaps().mapIndexed { index, it ->
             val endringType = parseEndringType(it)
-            val behandlingId =
-                    VedtakDomeneParser.behandlingIdTilUUID[parseInt(VedtakDomenebegrep.BEHANDLING_ID, it)]!!
-            val stønadFra = parseValgfriDato(VedtakDomenebegrep.FRA_OG_MED_DATO, it) ?: LocalDate.now()
-            val stønadTil = parseValgfriDato(VedtakDomenebegrep.TIL_OG_MED_DATO, it) ?: LocalDate.now().plusYears(1)
             val endretIBehandlingId = VedtakDomeneParser.behandlingIdTilUUID[parseValgfriInt(VedtakDomenebegrep.ENDRET_I_BEHANDLING_ID, it)]
-            val beregnetAndelHistorikk = beregnetAndelHistorikkList.firstOrNull {
-                it.behandlingId == behandlingId &&
-                it.andel.stønadFra == stønadFra &&
-                it.andel.stønadTil == stønadTil
-            }
+            val beregnetAndelHistorikk = beregnetAndelHistorikkList[index]
+            val forventetHistorikkEndring = forventetHistorikkEndringer[index]
+
             Assertions.assertThat(beregnetAndelHistorikk).isNotNull
+            Assertions.assertThat(beregnetAndelHistorikk.andel.stønadFra).isEqualTo(forventetHistorikkEndring.stønadFra)
+            Assertions.assertThat(beregnetAndelHistorikk.andel.stønadTil).isEqualTo(forventetHistorikkEndring.stønadTil)
+            Assertions.assertThat(beregnetAndelHistorikk.behandlingId).isEqualTo(forventetHistorikkEndring.behandlingId)
             if (endringType == null) {
-                Assertions.assertThat(beregnetAndelHistorikk?.endring).isNull()
+                Assertions.assertThat(beregnetAndelHistorikk.endring).isNull()
             } else {
-                Assertions.assertThat(beregnetAndelHistorikk!!.endring!!.type).isEqualTo(endringType)
+                Assertions.assertThat(beregnetAndelHistorikk.endring!!.type).isEqualTo(endringType)
                 Assertions.assertThat(beregnetAndelHistorikk.endring?.behandlingId).isEqualTo(endretIBehandlingId)
             }
-            Assertions.assertThat(beregnetAndelHistorikk?.andel?.inntekt).isEqualTo(forventetHistorikkEndringer.first { it.id == behandlingId }.inntekt)
-            Assertions.assertThat(beregnetAndelHistorikk?.andel?.beløp).isEqualTo(forventetHistorikkEndringer.first { it.id == behandlingId }.beløp)
-            Assertions.assertThat(beregnetAndelHistorikk?.aktivitet).isEqualTo(forventetHistorikkEndringer.first { it.id == behandlingId }.aktivitetType)
+            Assertions.assertThat(beregnetAndelHistorikk.andel.inntekt).isEqualTo(forventetHistorikkEndring.inntekt)
+            Assertions.assertThat(beregnetAndelHistorikk.andel.beløp).isEqualTo(forventetHistorikkEndring.beløp)
+            Assertions.assertThat(beregnetAndelHistorikk.aktivitet).isEqualTo(forventetHistorikkEndring.aktivitetType)
         }
 
         /*
