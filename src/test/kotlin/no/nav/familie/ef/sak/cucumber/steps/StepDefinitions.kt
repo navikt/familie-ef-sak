@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.steps
 import io.cucumber.datatable.DataTable
 import io.cucumber.java.no.Gitt
 import io.cucumber.java.no.Når
+import io.cucumber.java.no.Og
 import io.cucumber.java.no.Så
 import io.mockk.every
 import io.mockk.mockk
@@ -25,6 +26,7 @@ import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkBeregner
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtak
@@ -36,6 +38,7 @@ import java.util.UUID
 class StepDefinitions {
 
     private var vedtak = listOf<Vedtak>()
+    private var inntekter = mapOf<UUID, InntektWrapper>()
     private var tilkjentYtelse = mutableListOf<TilkjentYtelse>()
     private var beregnetAndelHistorikkList = listOf<AndelHistorikkDto>()
 
@@ -48,18 +51,23 @@ class StepDefinitions {
     private val featureToggleService = mockFeatureToggleService()
 
     private val beregnYtelseSteg = BeregnYtelseSteg(tilkjentYtelseService,
-                                        beregningService,
-                                        simuleringService,
-                                        vedtakService,
-                                        tilbakekrevingService,
-                                        fagsakService,
-                                        featureToggleService)
+                                                    beregningService,
+                                                    simuleringService,
+                                                    vedtakService,
+                                                    tilbakekrevingService,
+                                                    fagsakService,
+                                                    featureToggleService)
 
     private val slot = slot<TilkjentYtelse>()
 
     @Gitt("følgende vedtak")
     fun følgende_vedtak(dataTable: DataTable) {
         vedtak = VedtakDomeneParser.mapVedtak(dataTable)
+    }
+
+    @Gitt("følgende inntekter")
+    fun følgende_inntekter(dataTable: DataTable) {
+        inntekter = VedtakDomeneParser.mapInntekter(dataTable)
     }
 
     @Gitt("følgende andeler tilkjent ytelse")
@@ -79,13 +87,21 @@ class StepDefinitions {
 
         val behandlinger = vedtak.map { it.behandlingId }.distinct().mapIndexed { index, id ->
             val behandling = behandling(id = id, opprettetTid = LocalDateTime.now().plusMinutes(index.toLong()))
-             behandling.id to behandling
+            behandling.id to behandling
         }.toMap()
 
-        vedtak.forEach {
+        //Skriver over inntekt hvis inntekter er definiert
+        val vedtakMedInntekt = vedtak.map {
+            it.copy(inntekter = inntekter[it.behandlingId] ?: it.inntekter)
+        }
+
+        vedtakMedInntekt.forEach {
             beregnYtelseSteg.utførSteg(behandlinger.getValue(it.behandlingId), it.tilVedtakDto())
         }
-        beregnetAndelHistorikkList = AndelHistorikkBeregner.lagHistorikk(tilkjentYtelser.values.toList(), lagredeVedtak, behandlinger.values.toList(), null)
+        beregnetAndelHistorikkList = AndelHistorikkBeregner.lagHistorikk(tilkjentYtelser.values.toList(),
+                                                                         lagredeVedtak,
+                                                                         behandlinger.values.toList(),
+                                                                         null)
     }
 
     private fun mockLagreVedtak(): MutableList<Vedtak> {
@@ -122,7 +138,8 @@ class StepDefinitions {
 
         dataTable.asMaps().mapIndexed { index, it ->
             val endringType = parseEndringType(it)
-            val endretIBehandlingId = VedtakDomeneParser.behandlingIdTilUUID[parseValgfriInt(VedtakDomenebegrep.ENDRET_I_BEHANDLING_ID, it)]
+            val endretIBehandlingId =
+                    VedtakDomeneParser.behandlingIdTilUUID[parseValgfriInt(VedtakDomenebegrep.ENDRET_I_BEHANDLING_ID, it)]
             val beregnetAndelHistorikk = beregnetAndelHistorikkList[index]
             val forventetHistorikkEndring = forventetHistorikkEndringer[index]
 

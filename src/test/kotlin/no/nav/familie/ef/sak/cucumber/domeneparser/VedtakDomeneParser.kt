@@ -58,6 +58,23 @@ object VedtakDomeneParser {
         }
     }
 
+    fun mapInntekter(dataTable: DataTable): Map<UUID, InntektWrapper> {
+        return dataTable.asMaps().groupBy {
+            it.getValue(VedtakDomenebegrep.BEHANDLING_ID.nøkkel)
+        }.values.associate { rader ->
+            val inntektsperioder = rader.fold(mutableListOf<Inntektsperiode>()) { acc, rad ->
+                val datoFra = parseValgfriÅrMåned(VedtakDomenebegrep.FRA_OG_MED_DATO, rad)?.atDay(1) ?: LocalDate.now()
+                acc.removeLastOrNull()?.copy(sluttDato = datoFra.minusDays(1))?.let { acc.add(it) }
+                acc.add(Inntektsperiode(datoFra,
+                                        LocalDate.MAX,
+                                        BigDecimal(parseValgfriInt(VedtakDomenebegrep.INNTEKT, rad) ?: 0),
+                                        BigDecimal(parseValgfriInt(VedtakDomenebegrep.SAMORDNINGSFRADRAG, rad) ?: 0)))
+                acc
+            }
+            behandlingIdTilUUID[parseInt(VedtakDomenebegrep.BEHANDLING_ID, rader.first())]!! to InntektWrapper(inntektsperioder)
+        }
+    }
+
     fun mapBehandlingForHistorikkEndring(dataTable: DataTable): List<ForventetHistorikk> {
         return dataTable.asMaps().map {
             BehandlingForHistorikkEndringMapper().mapRad(it)
@@ -174,8 +191,10 @@ object VedtakDomeneParser {
                                 vedtakstidspunkt = LocalDateTime.now()
                         )
                     },
-                    stønadFra = parseValgfriÅrMåned(VedtakDomenebegrep.FRA_OG_MED_DATO, rad)?.atDay(1) ?: YearMonth.now().atDay(1),
-                    stønadTil = parseValgfriÅrMåned(VedtakDomenebegrep.TIL_OG_MED_DATO, rad)?.atEndOfMonth() ?: YearMonth.now().atEndOfMonth(),
+                    stønadFra = parseValgfriÅrMåned(VedtakDomenebegrep.FRA_OG_MED_DATO, rad)?.atDay(1) ?: YearMonth.now()
+                            .atDay(1),
+                    stønadTil = parseValgfriÅrMåned(VedtakDomenebegrep.TIL_OG_MED_DATO, rad)?.atEndOfMonth() ?: YearMonth.now()
+                            .atEndOfMonth(),
                     inntekt = parseValgfriInt(VedtakDomenebegrep.INNTEKT, rad) ?: 0,
                     beløp = parseValgfriInt(VedtakDomenebegrep.BELØP, rad) ?: 19950,
                     aktivitetType = parseAktivitetType(rad) ?: AktivitetType.BARN_UNDER_ETT_ÅR
