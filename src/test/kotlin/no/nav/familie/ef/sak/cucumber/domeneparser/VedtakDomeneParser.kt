@@ -46,17 +46,19 @@ object VedtakDomeneParser {
                     behandlingId = behandlingIdTilUUID[parseInt(VedtakDomenebegrep.BEHANDLING_ID, rad)]!!,
                     resultatType = parseResultatType(rad) ?: ResultatType.INNVILGE,
                     perioder = PeriodeWrapper(perioder),
-                    inntekter = InntektWrapper(perioder.firstOrNull()
-                                                       ?.let {
-                                                           listOf(Inntektsperiode(it.datoFra,
-                                                                                  LocalDate.MAX,
-                                                                                  BigDecimal.ZERO,
-                                                                                  BigDecimal.ZERO))
-                                                       } ?: emptyList()),
+                    inntekter = InntektWrapper(lagDefaultInntektsperiode(perioder)),
                     opphørFom = parseValgfriÅrMåned(VedtakDomenebegrep.OPPHØRSDATO, rad)?.atDay(1)
             )
         }
     }
+
+    private fun lagDefaultInntektsperiode(perioder: List<Vedtaksperiode>) =
+            perioder.firstOrNull()?.let {
+                listOf(Inntektsperiode(it.datoFra,
+                                       LocalDate.MAX,
+                                       BigDecimal.ZERO,
+                                       BigDecimal.ZERO))
+            } ?: emptyList()
 
     fun mapInntekter(dataTable: DataTable): Map<UUID, InntektWrapper> {
         return dataTable.asMaps().groupBy {

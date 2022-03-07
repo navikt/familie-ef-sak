@@ -33,10 +33,14 @@ import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtak
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtakDto
 import org.assertj.core.api.Assertions
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID
 
 class StepDefinitions {
+
+    private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     private var vedtak = listOf<Vedtak>()
     private var inntekter = mapOf<UUID, InntektWrapper>()
@@ -139,31 +143,15 @@ class StepDefinitions {
     fun forvent_følgende_historik(dataTable: DataTable) {
         val forventetHistorikkEndringer = VedtakDomeneParser.mapBehandlingForHistorikkEndring(dataTable)
 
-        dataTable.asMaps().mapIndexed { index, it ->
-            val endringType = parseEndringType(it)
-            val endretIBehandlingId =
-                    VedtakDomeneParser.behandlingIdTilUUID[parseValgfriInt(VedtakDomenebegrep.ENDRET_I_BEHANDLING_ID, it)]
-            val beregnetAndelHistorikk = beregnetAndelHistorikkList[index]
-            val forventetHistorikkEndring = forventetHistorikkEndringer[index]
-
-            Assertions.assertThat(beregnetAndelHistorikk).isNotNull
-            Assertions.assertThat(beregnetAndelHistorikk.andel.stønadFra).isEqualTo(forventetHistorikkEndring.stønadFra)
-            Assertions.assertThat(beregnetAndelHistorikk.andel.stønadTil).isEqualTo(forventetHistorikkEndring.stønadTil)
-            Assertions.assertThat(beregnetAndelHistorikk.behandlingId).isEqualTo(forventetHistorikkEndring.behandlingId)
-            if (endringType == null) {
-                Assertions.assertThat(beregnetAndelHistorikk.endring).isNull()
-            } else {
-                Assertions.assertThat(beregnetAndelHistorikk.endring!!.type).isEqualTo(endringType)
-                Assertions.assertThat(beregnetAndelHistorikk.endring?.behandlingId).isEqualTo(endretIBehandlingId)
+        dataTable.asMaps().forEachIndexed { index, it ->
+            val andelHistorikkDto = beregnetAndelHistorikkList[index]
+            try {
+                assertBeregnetAndel(it, index, forventetHistorikkEndringer, andelHistorikkDto)
+            } catch (e: Throwable) {
+                logger.info("Expected: {}", it)
+                logger.info("Actual: {}", andelHistorikkDto)
+                throw Throwable("Feilet rad $index", e)
             }
-            forventetHistorikkEndring.inntekt?.let {
-                Assertions.assertThat(beregnetAndelHistorikk.andel.inntekt).isEqualTo(it)
-            }
-            forventetHistorikkEndring.beløp?.let {
-                Assertions.assertThat(beregnetAndelHistorikk.andel.beløp).isEqualTo(it)
-            }
-
-            Assertions.assertThat(beregnetAndelHistorikk.aktivitet).isEqualTo(forventetHistorikkEndring.aktivitetType)
         }
 
         /*
@@ -185,6 +173,37 @@ class StepDefinitions {
             }
         }
          */
+    }
+
+    private fun assertBeregnetAndel(it: MutableMap<String, String>,
+                                    index: Int,
+                                    forventetHistorikkEndringer: List<VedtakDomeneParser.ForventetHistorikk>,
+                                    andelHistorikkDto: AndelHistorikkDto
+    ) {
+        val endringType = parseEndringType(it)
+        val endretIBehandlingId =
+                VedtakDomeneParser.behandlingIdTilUUID[parseValgfriInt(VedtakDomenebegrep.ENDRET_I_BEHANDLING_ID, it)]
+        val beregnetAndelHistorikk = andelHistorikkDto
+        val forventetHistorikkEndring = forventetHistorikkEndringer[index]
+
+        Assertions.assertThat(beregnetAndelHistorikk).isNotNull
+        Assertions.assertThat(beregnetAndelHistorikk.andel.stønadFra).isEqualTo(forventetHistorikkEndring.stønadFra)
+        Assertions.assertThat(beregnetAndelHistorikk.andel.stønadTil).isEqualTo(forventetHistorikkEndring.stønadTil)
+        Assertions.assertThat(beregnetAndelHistorikk.behandlingId).isEqualTo(forventetHistorikkEndring.behandlingId)
+        if (endringType == null) {
+            Assertions.assertThat(beregnetAndelHistorikk.endring).isNull()
+        } else {
+            Assertions.assertThat(beregnetAndelHistorikk.endring!!.type).isEqualTo(endringType)
+            Assertions.assertThat(beregnetAndelHistorikk.endring?.behandlingId).isEqualTo(endretIBehandlingId)
+        }
+        forventetHistorikkEndring.inntekt?.let {
+            Assertions.assertThat(beregnetAndelHistorikk.andel.inntekt).isEqualTo(it)
+        }
+        forventetHistorikkEndring.beløp?.let {
+            Assertions.assertThat(beregnetAndelHistorikk.andel.beløp).isEqualTo(it)
+        }
+
+        Assertions.assertThat(beregnetAndelHistorikk.aktivitet).isEqualTo(forventetHistorikkEndring.aktivitetType)
     }
 
 }

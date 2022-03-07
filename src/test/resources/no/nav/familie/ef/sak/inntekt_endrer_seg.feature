@@ -10,7 +10,7 @@ Egenskap: Andelhistorikk: Endring i inntekt
       | 1            | INNVILGE        |
       | 2            | INNVILGE        |
 
-    Og følgende andeler tilkjent ytelse
+    Og følgende inntekter
       | BehandlingId | Inntekt |
       | 1            | 0       |
       | 2            | 1       |
