@@ -135,27 +135,15 @@ object VedtakDomeneParser {
     class BehandlingForHistorikkEndringMapper {
 
         fun mapRad(rad: Map<String, String>): ForventetHistorikk {
-            if (parseEndringType(rad) == null) {
-                return ForventetHistorikk(
-                        behandlingId = behandlingIdTilUUID[parseInt(VedtakDomenebegrep.BEHANDLING_ID, rad)]!!,
-                        historikkEndring = null,
-                        stønadFra = parseValgfriÅrMåned(VedtakDomenebegrep.FRA_OG_MED_DATO, rad)?.atDay(1)
-                                    ?: LocalDate.now(),
-                        stønadTil = parseValgfriÅrMåned(VedtakDomenebegrep.TIL_OG_MED_DATO, rad)?.atEndOfMonth()
-                                    ?: LocalDate.now().plusYears(1),
-                        inntekt = parseValgfriInt(VedtakDomenebegrep.INNTEKT, rad) ?: 0,
-                        beløp = parseValgfriInt(VedtakDomenebegrep.BELØP, rad) ?: 0,
-                        aktivitetType = parseAktivitetType(rad) ?: AktivitetType.BARN_UNDER_ETT_ÅR
-                )
-
-            }
             return ForventetHistorikk(
                     behandlingId = behandlingIdTilUUID[parseInt(VedtakDomenebegrep.BEHANDLING_ID, rad)]!!,
-                    historikkEndring = HistorikkEndring(
-                            type = parseEndringType(rad)!!,
-                            behandlingId = behandlingIdTilUUID[parseInt(VedtakDomenebegrep.ENDRET_I_BEHANDLING_ID, rad)]!!,
-                            vedtakstidspunkt = LocalDateTime.now()
-                    ),
+                    historikkEndring = parseEndringType(rad)?.let { endringType ->
+                        HistorikkEndring(
+                                type = endringType,
+                                behandlingId = behandlingIdTilUUID[parseInt(VedtakDomenebegrep.ENDRET_I_BEHANDLING_ID, rad)]!!,
+                                vedtakstidspunkt = LocalDateTime.now()
+                        )
+                    },
                     stønadFra = parseValgfriÅrMåned(VedtakDomenebegrep.FRA_OG_MED_DATO, rad)?.atDay(1) ?: LocalDate.now(),
                     stønadTil = parseValgfriÅrMåned(VedtakDomenebegrep.TIL_OG_MED_DATO, rad)?.atEndOfMonth()
                                 ?: LocalDate.now().plusYears(1),
