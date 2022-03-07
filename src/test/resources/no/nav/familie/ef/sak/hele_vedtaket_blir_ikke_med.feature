@@ -7,20 +7,20 @@ Egenskap: Andelhistorikk: Nytt vedtak som overlapper delvis med forrige vedtak
 
     Gitt følgende vedtak
       | BehandlingId | Vedtaksresultat | Fra og med dato | Til og med dato | Aktivitet         |
-      | 1            | INNVILGE        | 01.01.2021      | 31.03.2021      | BARN_UNDER_ETT_ÅR |
-      | 2            | INNVILGE        | 01.02.2021      | 31.03.2021      | BARNET_ER_SYKT    |
+      | 1            | INNVILGE        | 01.2021         | 03.2021         | BARN_UNDER_ETT_ÅR |
+      | 2            | INNVILGE        | 02.2021         | 03.2021         | BARNET_ER_SYKT    |
 
     Og følgende andeler tilkjent ytelse
       | BehandlingId | Beløp | Fra og med dato | Til og med dato |
-      | 1            | 1000  | 01.01.2021      | 31.03.2021      |
-      | 2            | 1000  | 01.01.2021      | 31.01.2021      |
-      | 2            | 2000  | 01.02.2021      | 31.03.2021      |
+      | 1            | 1000  | 01.2021         | 03.2021         |
+      | 2            | 1000  | 01.2021         | 01.2021         |
+      | 2            | 2000  | 02.2021         | 03.2021         |
 
     Når lag andelhistorikk kjøres
 
     Så forvent følgende historikk
       | BehandlingId | Endringstype | Endret i behandlingId | Fra og med dato | Til og med dato | Beløp | Aktivitet         |
-      | 1            | SPLITTET     | 2                     | 01.01.2021      | 31.01.2021      | 1000  | BARN_UNDER_ETT_ÅR |
-      | 1            | FJERNET      | 2                     | 01.02.2021      | 31.03.2021      | 1000  | BARN_UNDER_ETT_ÅR |
-      | 2            |              |                       | 01.02.2021      | 31.03.2021      | 2000  | BARNET_ER_SYKT    |
+      | 1            | SPLITTET     | 2                     | 01.2021         | 01.2021         | 1000  | BARN_UNDER_ETT_ÅR |
+      | 1            | FJERNET      | 2                     | 02.2021         | 03.2021         | 1000  | BARN_UNDER_ETT_ÅR |
+      | 2            |              |                       | 02.2021         | 03.2021         | 2000  | BARNET_ER_SYKT    |
 
