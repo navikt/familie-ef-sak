@@ -17,6 +17,7 @@ class MålerService(private val målerRepository: MålerRepository) {
     private val åpneBehandlingerGauge = MultiGauge.builder("KlarTilBehandling").register(Metrics.globalRegistry)
     private val vedtakGauge = MultiGauge.builder("Vedtak").register(Metrics.globalRegistry)
     private val antallMigreringerGauge = Metrics.gauge("AntallMigreringer", AtomicInteger()) ?: error("Forventer not null")
+    private val antallSanksjonerGauge = Metrics.gauge("AntallSanksjoner", AtomicInteger()) ?: error("Forventer not null")
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -25,6 +26,13 @@ class MålerService(private val målerRepository: MålerRepository) {
         val antallBehandlinger = målerRepository.finnAntallBehandlingerAvÅrsak(BehandlingÅrsak.MIGRERING)
         logger.info("Antall migreringer=$antallBehandlinger")
         antallMigreringerGauge.set(antallBehandlinger)
+    }
+
+    @Scheduled(initialDelay = 60 * 1000L, fixedDelay = OPPDATERINGSFREKVENS)
+    fun antallSanksjoner() {
+        val antallSanksjoner = 0
+//        logger.info("Antall migreringer=$antallBehandlinger")
+//        antallSanksjonerGauge.set(antallBehandlinger)
     }
 
     @Scheduled(initialDelay = 60 * 1000L, fixedDelay = OPPDATERINGSFREKVENS)
