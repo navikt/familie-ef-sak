@@ -26,6 +26,8 @@ import no.nav.familie.ef.sak.vedtak.AndelHistorikkBeregner
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
+import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
+import no.nav.familie.ef.sak.vedtak.dto.tilVedtak
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtakDto
 import org.assertj.core.api.Assertions
 import java.time.LocalDateTime
@@ -38,9 +40,9 @@ class StepDefinitions {
     private var beregnetAndelHistorikkList = listOf<AndelHistorikkDto>()
 
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>(relaxed = true)
-    private val beregningService = mockk<BeregningService>()
+    private val beregningService = BeregningService()
     private val vedtakService = mockk<VedtakService>(relaxed = true)
-    private val simuleringService = mockk<SimuleringService>()
+    private val simuleringService = mockk<SimuleringService>(relaxed = true)
     private val tilbakekrevingService = mockk<TilbakekrevingService>(relaxed = true)
     private val fagsakService = mockk<FagsakService>(relaxed = true)
     private val featureToggleService = mockFeatureToggleService()
@@ -72,6 +74,8 @@ class StepDefinitions {
 
     @Når("lag andelhistorikk kjøres")
     fun `lag andelhistorikk kjøres`() {
+        val tilkjentYtelser = mockTilkjentYtelse()
+        val lagredeVedtak = mockLagreVedtak()
 
         val behandlinger = vedtak.map { it.behandlingId }.distinct().mapIndexed { index, id ->
             val behandling = behandling(id = id, opprettetTid = LocalDateTime.now().plusMinutes(index.toLong()))
@@ -81,10 +85,6 @@ class StepDefinitions {
         vedtak.forEach {
             beregnYtelseSteg.utførSteg(behandlinger.getValue(it.behandlingId), it.tilVedtakDto())
         }
-
-        val tilkjentYtelser = mockTilkjentYtelse()
-        val lagredeVedtak = mockLagreVedtak()
-
         beregnetAndelHistorikkList = AndelHistorikkBeregner.lagHistorikk(tilkjentYtelser.values.toList(), lagredeVedtak, behandlinger.values.toList(), null)
     }
 
@@ -93,8 +93,8 @@ class StepDefinitions {
         every {
             vedtakService.lagreVedtak(any(), any())
         } answers {
-            lagredeVedtak.add(firstArg())
-            firstArg()
+            lagredeVedtak.add(firstArg<VedtakDto>().tilVedtak(secondArg()))
+            secondArg()
         }
         return lagredeVedtak
     }
