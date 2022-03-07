@@ -163,7 +163,7 @@ fun inntektsperiode(startDato: LocalDate = LocalDate.of(2021, 1, 1),
         Inntektsperiode(startDato, sluttDato, inntekt, samordningsfradrag)
 
 fun vedtaksperiode(startDato: LocalDate = LocalDate.of(2021, 1, 1),
-                    sluttDato: LocalDate = LocalDate.of(2021, 12, 1),
-                    aktivitetstype: AktivitetType = AktivitetType.BARN_UNDER_ETT_ÅR,
-                    vedtaksperiodeType: VedtaksperiodeType = VedtaksperiodeType.HOVEDPERIODE) =
+                   sluttDato: LocalDate = LocalDate.of(2021, 12, 1),
+                   aktivitetstype: AktivitetType = AktivitetType.BARN_UNDER_ETT_ÅR,
+                   vedtaksperiodeType: VedtaksperiodeType = VedtaksperiodeType.HOVEDPERIODE) =
         Vedtaksperiode(startDato, sluttDato, aktivitetstype, vedtaksperiodeType)

@@ -14,6 +14,8 @@ import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.fagsak.domain.tilFagsakMedPerson
 import no.nav.familie.ef.sak.fagsak.dto.FagsakDto
 import no.nav.familie.ef.sak.fagsak.dto.tilDto
+import no.nav.familie.ef.sak.infotrygd.InfotrygdService
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
@@ -21,6 +23,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -31,7 +34,8 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
                     private val behandlingService: BehandlingService,
                     private val pdlClient: PdlClient,
                     private val tilkjentYtelseService: TilkjentYtelseService,
-                    private val featureToggleService: FeatureToggleService) {
+                    private val featureToggleService: FeatureToggleService,
+                    private val infotrygdService: InfotrygdService) {
 
     fun hentEllerOpprettFagsakMedBehandlinger(personIdent: String, stønadstype: Stønadstype): FagsakDto {
         return fagsakTilDto(hentEllerOpprettFagsak(personIdent, stønadstype))
@@ -49,6 +53,22 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
 
         return fagsak.tilFagsakMedPerson(oppdatertPerson.identer)
     }
+
+    @Transactional
+    fun finnFagsakEllerOpprettHvisPersonFinnesIInfotrygd(personIdenter: Set<String>,
+                                                         gjeldendePersonIdent: String): List<Fagsak> {
+        val fagsaker = fagsakRepository.findBySøkerIdent(personIdenter)
+
+        if (fagsaker.isEmpty()) {
+            if (infotrygdService.eksisterer(gjeldendePersonIdent)) {
+                fagsakPersonService.hentEllerOpprettPerson(personIdenter, gjeldendePersonIdent)
+                return listOf()
+            }
+            throw ApiFeil("Finner ikke fagsak for søkte personen", HttpStatus.BAD_REQUEST)
+        }
+        return fagsaker.map { it.tilFagsakMedPerson(fagsakPersonService.hentIdenter(it.fagsakPersonId)) }
+    }
+
 
     fun settFagsakTilMigrert(fagsakId: UUID): Fagsak {
         val fagsak = fagsakRepository.findByIdOrThrow(fagsakId)
@@ -117,9 +137,11 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
 
     fun hentEksternId(fagsakId: UUID): Long = fagsakRepository.findByIdOrThrow(fagsakId).eksternId.id
 
-    fun hentFagsakPåEksternId(eksternFagsakId: Long): Fagsak =
-            fagsakRepository.finnMedEksternId(eksternFagsakId)?.tilFagsakMedPerson()
-            ?: error("Kan ikke finne fagsak med eksternId=$eksternFagsakId")
+    fun hentFagsakPåEksternId(eksternFagsakId: Long): FagsakDto {
+        val fagsak = fagsakRepository.finnMedEksternId(eksternFagsakId)?.tilFagsakMedPerson()
+                     ?: error("Kan ikke finne fagsak med eksternId=$eksternFagsakId")
+        return fagsakTilDto(fagsak)
+    }
 
     fun hentAktivIdent(fagsakId: UUID): String = fagsakRepository.finnAktivIdent(fagsakId)
 
