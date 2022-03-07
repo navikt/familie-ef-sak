@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.infotrygd
 
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdAktivitetstype
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
 import java.time.LocalDate
 
@@ -25,7 +26,8 @@ data class SummertInfotrygdPeriodeDto(
         @Deprecated("Bruk månedsbeløp / engangsbeløp")
         val beløp: Int,
         val månedsbeløp: Int,
-        val engangsbeløp: Int
+        val engangsbeløp: Int,
+        val aktivitet: InfotrygdAktivitetstype?
 )
 
 fun InfotrygdPeriode.tilSummertInfotrygdperiodeDto(): SummertInfotrygdPeriodeDto =
@@ -39,5 +41,6 @@ fun InfotrygdPeriode.tilSummertInfotrygdperiodeDto(): SummertInfotrygdPeriodeDto
                 utgifterBarnetilsyn = this.utgifterBarnetilsyn,
                 beløp = this.månedsbeløp,
                 månedsbeløp = this.månedsbeløp,
-                engangsbeløp = this.engangsbeløp
+                engangsbeløp = this.engangsbeløp,
+                aktivitet = this.aktivitetstype
         )

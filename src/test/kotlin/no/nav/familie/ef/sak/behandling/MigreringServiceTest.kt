@@ -26,11 +26,13 @@ import no.nav.familie.ef.sak.infrastruktur.config.IverksettClientMock
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
+import no.nav.familie.ef.sak.patch.PatchAktivitetService
 import no.nav.familie.ef.sak.simulering.SimuleringsresultatRepository
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ef.sak.tilbakekreving.domain.Tilbakekrevingsvalg
 import no.nav.familie.ef.sak.tilbakekreving.dto.TilbakekrevingDto
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
+import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
@@ -40,6 +42,7 @@ import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.felles.StønadType
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdAktivitetstype
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdEndringKode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSak
@@ -73,6 +76,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var behandlingService: BehandlingService
     @Autowired private lateinit var revurderingService: RevurderingService
     @Autowired private lateinit var migreringService: MigreringService
+    @Autowired private lateinit var vedtakService: VedtakService
     @Autowired private lateinit var tilkjentYtelseService: TilkjentYtelseService
     @Autowired private lateinit var taskRepository: TaskRepository
     @Autowired private lateinit var taskWorker: TaskWorker
@@ -84,6 +88,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var rolleConfig: RolleConfig
     @Autowired private lateinit var iverksettClient: IverksettClient
     @Autowired private lateinit var infotrygdReplikaClient: InfotrygdReplikaClient
+    @Autowired private lateinit var patchAktivitetService: PatchAktivitetService
 
     private val periodeFraMåned = YearMonth.now().minusMonths(10)
     private val opphørsmåned = YearMonth.now()
@@ -122,8 +127,25 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
             assertThat(this.resultat).isEqualTo(BehandlingResultat.INNVILGET)
             assertThat(this.steg).isEqualTo(StegType.BEHANDLING_FERDIGSTILT)
         }
+        with(vedtakService.hentVedtak(migrering.id)) {
+            val perioder = this.perioder!!.perioder
+            assertThat(perioder).hasSize(1)
+            assertThat(perioder[0].aktivitet).isEqualTo(AktivitetType.MIGRERING)
+            assertThat(perioder[0].periodeType).isEqualTo(VedtaksperiodeType.MIGRERING)
+        }
         assertThat(simuleringsresultatRepository.findByIdOrNull(migrering.id)).isNotNull
         verifiserVurderinger(migrering)
+    }
+
+    @Test
+    internal fun `skal sette aktivitet til reell arbeidssøker hvis aktivitet i infotrygd er reell arbeidssøker`() {
+        val migrering = opprettOgIverksettMigrering(erReellArbeidssøker = true)
+        with(vedtakService.hentVedtak(migrering.id)) {
+            val perioder = this.perioder!!.perioder
+            assertThat(perioder).hasSize(1)
+            assertThat(perioder[0].aktivitet).isEqualTo(AktivitetType.FORSØRGER_REELL_ARBEIDSSØKER)
+            assertThat(perioder[0].periodeType).isEqualTo(VedtaksperiodeType.MIGRERING)
+        }
     }
 
     @Test
@@ -186,6 +208,23 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         assertThat(migreringInfo.kanMigreres).isTrue
         assertThat(migreringInfo.stønadFom).isEqualTo(sluttMåned)
         assertThat(migreringInfo.stønadTom).isEqualTo(sluttMåned)
+    }
+
+    @Test
+    internal fun `hentMigreringInfo - periode eldre enn 3 år - kan gå videre til journalføring`() {
+        val stønadsmåned = YearMonth.now().minusYears(3).minusMonths(1)
+        val periode = InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(stønadFom = stønadsmåned.atDay(1),
+                                                                   stønadTom = stønadsmåned.atEndOfMonth(),
+                                                                   beløp = 1)
+        every { infotrygdReplikaClient.hentPerioder(any()) } returns
+                InfotrygdPeriodeResponse(listOf(periode), emptyList(), emptyList())
+        val fagsak = fagsakService.hentEllerOpprettFagsak("1", Stønadstype.OVERGANGSSTØNAD)
+
+        val migreringInfo = migreringService.hentMigreringInfo(fagsak.fagsakPersonId)
+
+        assertThat(migreringInfo.kanMigreres).isFalse
+        assertThat(migreringInfo.kanGåVidereTilJournalføring).isTrue
+        assertThat(migreringInfo.årsak).contains("Kan ikke migrere når forrige utbetaling i infotrygd er mer enn 3 år tilbake")
     }
 
     @Test
@@ -324,6 +363,42 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    internal fun `hentMigreringInfo - har saker, men ingen perioder i Infotrygd, kan gå videre til journalføring`() {
+        val nå = YearMonth.of(2021, 1)
+        every { infotrygdReplikaClient.hentSaker(any()) } returns
+                InfotrygdSakResponse(listOf(InfotrygdSak("1",
+                                                         stønadType = StønadType.OVERGANGSSTØNAD,
+                                                         resultat = InfotrygdSakResultat.INNVILGET)))
+        every { infotrygdReplikaClient.hentPerioder(any()) } returns
+                InfotrygdPeriodeResponse(emptyList(), emptyList(), emptyList())
+        val fagsak = fagsakService.hentEllerOpprettFagsak("1", Stønadstype.OVERGANGSSTØNAD)
+
+        val migreringInfo = migreringService.hentMigreringInfo(fagsak.fagsakPersonId, nå)
+
+        assertThat(migreringInfo.kanMigreres).isFalse
+        assertThat(migreringInfo.kanGåVidereTilJournalføring).isTrue
+        assertThat(migreringInfo.årsak).contains("Har ikke noen perioder å migrere")
+    }
+
+    @Test
+    internal fun `hentMigreringInfo - har åpne saker, men ingen perioder i Infotrygd - kan ikke migreres`() {
+        val nå = YearMonth.of(2021, 1)
+        every { infotrygdReplikaClient.hentSaker(any()) } returns
+                InfotrygdSakResponse(listOf(InfotrygdSak("1",
+                                                         stønadType = StønadType.OVERGANGSSTØNAD,
+                                                         resultat = InfotrygdSakResultat.ÅPEN_SAK)))
+        every { infotrygdReplikaClient.hentPerioder(any()) } returns
+                InfotrygdPeriodeResponse(emptyList(), emptyList(), emptyList())
+        val fagsak = fagsakService.hentEllerOpprettFagsak("1", Stønadstype.OVERGANGSSTØNAD)
+
+        val migreringInfo = migreringService.hentMigreringInfo(fagsak.fagsakPersonId, nå)
+
+        assertThat(migreringInfo.kanMigreres).isFalse
+        assertThat(migreringInfo.kanGåVidereTilJournalføring).isFalse
+        assertThat(migreringInfo.årsak).contains("Har åpen sak. ")
+    }
+
+    @Test
     internal fun `hentMigreringInfo - har ikke fagsak, men fagsakPerson`() {
         every { infotrygdReplikaClient.hentPerioder(any()) } returns
                 InfotrygdPeriodeResponse(listOf(
@@ -339,6 +414,19 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         val migreringInfo = migreringService.hentMigreringInfo(fagsakPerson.id)
 
         assertThat(migreringInfo.kanMigreres).isTrue
+    }
+
+    @Test
+    internal fun `skal patche migrert person - oppdaterer vedtak til reell arbeidssøker`() {
+        val mockPerioder = { mockPerioder(aktivitetstype = InfotrygdAktivitetstype.TILMELDT_SOM_REELL_ARBEIDSSØKER) }
+        val migrering = opprettOgIverksettMigrering(mockPerioder = mockPerioder)
+        assertThat(vedtakService.hentVedtak(migrering.id).perioder!!.perioder.single().aktivitet)
+                .isEqualTo(AktivitetType.MIGRERING)
+
+        patchAktivitetService.patch(true)
+
+        assertThat(vedtakService.hentVedtak(migrering.id).perioder!!.perioder.single().aktivitet)
+                .isEqualTo(AktivitetType.FORSØRGER_REELL_ARBEIDSSØKER)
     }
 
     private fun verifiserVurderinger(migrering: Behandling) {
@@ -404,6 +492,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
                                             inntektsgrunnlag: BigDecimal = forventetInntekt,
                                             migrerFraDato: YearMonth = this.migrerFraDato,
                                             migrerTilDato: YearMonth = til,
+                                            erReellArbeidssøker: Boolean = false,
                                             mockPerioder: () -> Unit = { mockPerioder(opphørsdato) }): Behandling {
 
         mockPerioder()
@@ -414,7 +503,8 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
                                               migrerFraDato,
                                               migrerTilDato,
                                               inntektsgrunnlag.toInt(),
-                                              samordningsfradrag.toInt())
+                                              samordningsfradrag.toInt(),
+                                              erReellArbeidssøker = erReellArbeidssøker)
         }
 
         kjørTasks()
@@ -424,14 +514,18 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     /**
      * Mocker 2 vedtak, hvor vedtakId2 har høyest precedence, og setter opphørsdato på denne hvis det er type opphør
      */
-    private fun mockPerioder(opphørsdato: YearMonth?, stønadFom: YearMonth = periodeFraMåned, stønadTom: YearMonth = til) {
+    private fun mockPerioder(opphørsdato: YearMonth? = opphørsmåned,
+                             stønadFom: YearMonth = periodeFraMåned,
+                             stønadTom: YearMonth = til,
+                             aktivitetstype: InfotrygdAktivitetstype = InfotrygdAktivitetstype.BRUKERKONTAKT) {
         val periode = InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(vedtakId = 1,
                                                                    stønadFom = stønadFom.atDay(1),
                                                                    stønadTom = stønadTom.atEndOfMonth())
         val kodePeriode2 = opphørsdato?.let { InfotrygdEndringKode.OVERTFØRT_NY_LØSNING } ?: InfotrygdEndringKode.NY
         val periodeForKallNr2 = periode.copy(vedtakId = 2,
                                              opphørsdato = opphørsdato?.atEndOfMonth(),
-                                             kode = kodePeriode2)
+                                             kode = kodePeriode2,
+                                             aktivitetstype = aktivitetstype)
         every { infotrygdReplikaClient.hentPerioder(any()) } returns
                 InfotrygdPeriodeResponse(listOf(periode), emptyList(), emptyList()) andThen
                 InfotrygdPeriodeResponse(listOf(periodeForKallNr2), emptyList(), emptyList())
