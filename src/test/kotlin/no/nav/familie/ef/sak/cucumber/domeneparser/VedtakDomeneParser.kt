@@ -81,8 +81,8 @@ object VedtakDomeneParser {
 
         fun mapRad(rad: Map<String, String>): Vedtak {
 
-            val datoFra = parseValgfriDato(VedtakDomenebegrep.FRA_OG_MED_DATO, rad) ?: LocalDate.now()
-            val datoTil = parseValgfriDato(VedtakDomenebegrep.TIL_OG_MED_DATO, rad) ?: LocalDate.now()
+            val datoFra = parseValgfriÅrMåned(VedtakDomenebegrep.FRA_OG_MED_DATO, rad)?.atDay(1) ?: LocalDate.now()
+            val datoTil = parseValgfriÅrMåned(VedtakDomenebegrep.TIL_OG_MED_DATO, rad)?.atEndOfMonth() ?: LocalDate.now()
             return Vedtak(
                     behandlingId = behandlingIdTilUUID[parseInt(VedtakDomenebegrep.BEHANDLING_ID, rad)]!!,
                     resultatType = parseResultatType(rad) ?: ResultatType.INNVILGE,
@@ -94,7 +94,7 @@ object VedtakDomeneParser {
                                     periodeType = VedtaksperiodeType.HOVEDPERIODE
                             )
                     )),
-                    opphørFom = parseValgfriDato(VedtakDomenebegrep.OPPHØRSDATO, rad)
+                    opphørFom = parseValgfriÅrMåned(VedtakDomenebegrep.OPPHØRSDATO, rad)?.atDay(1)
             )
         }
     }
@@ -118,8 +118,10 @@ object VedtakDomeneParser {
         fun mapRad(rad: Map<String, String>): AndelTilkjentYtelse {
             return AndelTilkjentYtelse(
                     beløp = parseValgfriInt(VedtakDomenebegrep.BELØP, rad) ?: 0,
-                    stønadFom = parseValgfriDato(VedtakDomenebegrep.FRA_OG_MED_DATO, rad) ?: LocalDate.now(),
-                    stønadTom = parseValgfriDato(VedtakDomenebegrep.TIL_OG_MED_DATO, rad) ?: LocalDate.now().plusYears(1),
+                    stønadFom = parseValgfriÅrMåned(VedtakDomenebegrep.FRA_OG_MED_DATO, rad)?.atDay(1)
+                                ?: LocalDate.now(),
+                    stønadTom = parseValgfriÅrMåned(VedtakDomenebegrep.TIL_OG_MED_DATO, rad)?.atEndOfMonth()
+                                ?: LocalDate.now().plusYears(1),
                     personIdent = parseValgfriString(VedtakDomenebegrep.PERSONIDENT, rad) ?: "1",
                     inntekt = parseValgfriInt(VedtakDomenebegrep.INNTEKT, rad) ?: 0,
                     inntektsreduksjon = parseValgfriInt(VedtakDomenebegrep.INNTEKTSREDUKSJON, rad) ?: 0,
@@ -137,8 +139,10 @@ object VedtakDomeneParser {
                 return ForventetHistorikk(
                         behandlingId = behandlingIdTilUUID[parseInt(VedtakDomenebegrep.BEHANDLING_ID, rad)]!!,
                         historikkEndring = null,
-                        stønadFra = parseValgfriDato(VedtakDomenebegrep.FRA_OG_MED_DATO, rad) ?: LocalDate.now(),
-                        stønadTil = parseValgfriDato(VedtakDomenebegrep.TIL_OG_MED_DATO, rad) ?: LocalDate.now().plusYears(1),
+                        stønadFra = parseValgfriÅrMåned(VedtakDomenebegrep.FRA_OG_MED_DATO, rad)?.atDay(1)
+                                    ?: LocalDate.now(),
+                        stønadTil = parseValgfriÅrMåned(VedtakDomenebegrep.TIL_OG_MED_DATO, rad)?.atEndOfMonth()
+                                    ?: LocalDate.now().plusYears(1),
                         inntekt = parseValgfriInt(VedtakDomenebegrep.INNTEKT, rad) ?: 0,
                         beløp = parseValgfriInt(VedtakDomenebegrep.BELØP, rad) ?: 0,
                         aktivitetType = parseAktivitetType(rad) ?: AktivitetType.BARN_UNDER_ETT_ÅR
@@ -152,8 +156,9 @@ object VedtakDomeneParser {
                             behandlingId = behandlingIdTilUUID[parseInt(VedtakDomenebegrep.ENDRET_I_BEHANDLING_ID, rad)]!!,
                             vedtakstidspunkt = LocalDateTime.now()
                     ),
-                    stønadFra = parseValgfriDato(VedtakDomenebegrep.FRA_OG_MED_DATO, rad) ?: LocalDate.now(),
-                    stønadTil = parseValgfriDato(VedtakDomenebegrep.TIL_OG_MED_DATO, rad) ?: LocalDate.now().plusYears(1),
+                    stønadFra = parseValgfriÅrMåned(VedtakDomenebegrep.FRA_OG_MED_DATO, rad)?.atDay(1) ?: LocalDate.now(),
+                    stønadTil = parseValgfriÅrMåned(VedtakDomenebegrep.TIL_OG_MED_DATO, rad)?.atEndOfMonth()
+                                ?: LocalDate.now().plusYears(1),
                     inntekt = parseValgfriInt(VedtakDomenebegrep.INNTEKT, rad) ?: 0,
                     beløp = parseValgfriInt(VedtakDomenebegrep.BELØP, rad) ?: 0,
                     aktivitetType = parseAktivitetType(rad) ?: AktivitetType.BARN_UNDER_ETT_ÅR
