@@ -6,12 +6,13 @@ import java.time.LocalDate
 import java.util.UUID
 
 data class BarnTilUtplukkForOppgave(@Id
-                                   val behandlingId: UUID,
+                                    val behandlingId: UUID,
                                     @Column("fodselsnummer_soker")
                                     val fødselsnummerSøker: String,
                                     @Column("fodselsnummer_barn")
                                     val fødselsnummerBarn: String?,
-                                    val termindatoBarn: LocalDate?)
+                                    val termindatoBarn: LocalDate?,
+                                    val fraMigrering: Boolean)
 
 data class OppgaveForBarn(val behandlingId: UUID,
                           val eksternFagsakId: Long,

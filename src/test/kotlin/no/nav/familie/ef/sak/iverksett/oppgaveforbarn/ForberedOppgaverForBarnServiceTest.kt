@@ -257,7 +257,9 @@ internal class ForberedOppgaverForBarnServiceTest {
         } returns listOf(opprettBarn(behandlingId = behandlingId, termindato = termindato))
         every {
             gjeldendeBarnRepository.finnBarnTilMigrerteBehandlinger(Stønadstype.OVERGANGSSTØNAD, any())
-        } returns listOf(opprettBarn(behandlingId = migrertBehandlingId, fødselsnummer = generateFnr(fødselsdato)))
+        } returns listOf(opprettBarn(behandlingId = migrertBehandlingId,
+                                     fødselsnummer = generateFnr(fødselsdato),
+                                     fraMigrering = true))
 
         opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(SISTE_KJØRING_EN_UKE_SIDEN)
 
@@ -272,8 +274,9 @@ internal class ForberedOppgaverForBarnServiceTest {
 
     private fun opprettBarn(behandlingId: UUID = UUID.randomUUID(),
                             fødselsnummer: String? = null,
-                            termindato: LocalDate? = null): BarnTilUtplukkForOppgave {
-        return BarnTilUtplukkForOppgave(behandlingId, "12345678910", fødselsnummer, termindato)
+                            termindato: LocalDate? = null,
+                            fraMigrering: Boolean = false): BarnTilUtplukkForOppgave {
+        return BarnTilUtplukkForOppgave(behandlingId, "12345678910", fødselsnummer, termindato, fraMigrering)
     }
 
 

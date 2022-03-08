@@ -443,6 +443,17 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
                     .isEmpty()
         }
 
+        @Test
+        internal fun `skal finne barn på uttrekk til oppgaver når det har blitt laget en revurdering på barn uten å velge noen barn`() {
+            val migrering = opprettOgIverksettMigrering()
+            val revurdering = opprettRevurderingOgIverksett(migrering)
+            assertThat(gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(OVERGANGSSTØNAD, LocalDate.now()))
+                    .isEmpty()
+            val migrerteBarn = gjeldendeBarnRepository.finnBarnTilMigrerteBehandlinger(OVERGANGSSTØNAD, LocalDate.now())
+            assertThat(migrerteBarn).hasSize(2)
+            assertThat(migrerteBarn.map { it.behandlingId }.toSet()).containsExactly(revurdering.id)
+        }
+
     }
 
     private fun verifiserVurderinger(migrering: Behandling) {

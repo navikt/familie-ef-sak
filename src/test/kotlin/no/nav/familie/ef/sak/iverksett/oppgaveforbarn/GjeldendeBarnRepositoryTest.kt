@@ -56,6 +56,7 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
 
         val barnForUtplukk = finnBarnAvGjeldendeIverksatteBehandlinger()
         assertThat(barnForUtplukk.size).isEqualTo(1)
+        assertThat(barnForUtplukk.all { !it.fraMigrering }).isTrue
         barnForUtplukk.forEach { assertThat(it.behandlingId).isEqualTo(behandlingMedFremtidigAndel.id) }
     }
 
@@ -151,6 +152,7 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
             assertThat(resultat[0].fødselsnummerSøker).isEqualTo(fnrSøker)
             assertThat(resultat[0].fødselsnummerBarn).isEqualTo(fnrBarn)
             assertThat(resultat[0].termindatoBarn).isNull()
+            assertThat(resultat[0].fraMigrering).isTrue
         }
 
         @Test

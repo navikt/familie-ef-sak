@@ -14,7 +14,8 @@ interface GjeldendeBarnRepository : RepositoryInterface<BarnTilUtplukkForOppgave
 
     // language=PostgreSQL
     @Query("""
-        SELECT b.id behandling_id, pi.ident fodselsnummer_soker, bb.person_ident fodselsnummer_barn, bb.fodsel_termindato termindato_barn
+        SELECT b.id behandling_id, pi.ident fodselsnummer_soker, bb.person_ident fodselsnummer_barn, 
+          bb.fodsel_termindato termindato_barn, false fraMigrering
         FROM gjeldende_iverksatte_behandlinger b
          JOIN fagsak f ON f.id = b.fagsak_id
          JOIN (SELECT DISTINCT ON(pi.fagsak_person_id) * FROM person_ident pi ORDER BY pi.fagsak_person_id, pi.opprettet_tid DESC) pi ON pi.fagsak_person_id = f.fagsak_person_id
@@ -30,8 +31,7 @@ interface GjeldendeBarnRepository : RepositoryInterface<BarnTilUtplukkForOppgave
 
     @Query("""
         SELECT b.id behandling_id, pi.ident fodselsnummer_soker, 
-         JSON_ARRAY_ELEMENTS(data -> 'barn') ->> 'personIdent' fodselsnummer_barn, 
-         null as termindato_barn
+         JSON_ARRAY_ELEMENTS(data -> 'barn') ->> 'personIdent' fodselsnummer_barn, null as termindato_barn, true fraMigrering
         FROM gjeldende_iverksatte_behandlinger b
          JOIN fagsak f ON b.fagsak_id = f.id
          JOIN (SELECT DISTINCT ON(pi.fagsak_person_id) * FROM person_ident pi ORDER BY pi.fagsak_person_id, pi.opprettet_tid DESC) pi ON pi.fagsak_person_id = f.fagsak_person_id

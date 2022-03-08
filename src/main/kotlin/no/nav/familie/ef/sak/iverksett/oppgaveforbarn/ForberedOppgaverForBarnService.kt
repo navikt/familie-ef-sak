@@ -22,6 +22,8 @@ class ForberedOppgaverForBarnService(private val gjeldendeBarnRepository: Gjelde
         val gjeldendeBarn =
                 gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, referanseDato) +
                 gjeldendeBarnRepository.finnBarnTilMigrerteBehandlinger(Stønadstype.OVERGANGSSTØNAD, referanseDato)
+        logger.info("Fant totalt ${gjeldendeBarn.size} barn, " +
+                    "av hvilke ${gjeldendeBarn.count { it.fraMigrering }} er fra migrerte behandlinger")
         val barnSomFyllerAar = barnSomFyllerAar(gjeldendeBarn, referanseDato, kjøreDato)
         if (barnSomFyllerAar.isEmpty()) {
             return
