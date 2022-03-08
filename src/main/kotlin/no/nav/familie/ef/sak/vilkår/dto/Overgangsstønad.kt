@@ -18,7 +18,8 @@ data class AktivitetDto(val arbeidssituasjon: List<String>,
                         val tidligereUtdanninger: List<TidligereUtdanningDto>,
                         val gjelderDeg: List<String>,
                         val særligeTilsynsbehov: List<SærligeTilsynsbehovDto>,
-                        val datoOppstartJobb: LocalDate?)
+                        val datoOppstartJobb: LocalDate?,
+                        val erIArbeid: String?)
 
 data class SagtOppEllerRedusertStillingDto(val sagtOppEllerRedusertStilling: String?,
                                            val årsak: String?,

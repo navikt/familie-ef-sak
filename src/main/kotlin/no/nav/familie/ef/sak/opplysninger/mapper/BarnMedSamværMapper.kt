@@ -60,8 +60,8 @@ object BarnMedSamværMapper {
     private fun mapBarnepassordning(it: Barnepassordning) =
             BarnepassordningDto(type = it.hvaSlagsBarnepassordning,
                                 navn = it.navn,
-                                fra = it.datoperiode?.fra,
-                                til = it.datoperiode?.til,
+                                fra = it.datoperiode.fra,
+                                til = it.datoperiode.til,
                                 beløp = it.beløp)
 
     private fun mapSøknadsgrunnlag(behandlingBarn: BehandlingBarn, søknadsbarn: SøknadBarn?): BarnMedSamværSøknadsgrunnlagDto {
