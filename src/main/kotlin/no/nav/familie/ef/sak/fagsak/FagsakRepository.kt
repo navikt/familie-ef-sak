@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.fagsak
 
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakDomain
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.InsertUpdateRepository
