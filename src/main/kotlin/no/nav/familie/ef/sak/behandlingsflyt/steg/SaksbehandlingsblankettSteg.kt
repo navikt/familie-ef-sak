@@ -48,10 +48,12 @@ class SaksbehandlingsblankettSteg(private val blankettService: BlankettService,
 
     private fun opprettArkiverDokumentRequest(saksbehandling: Saksbehandling,
                                               blankettPdf: ByteArray): ArkiverDokumentRequest {
-        val fagsak = fagsakService.hentFagsak(saksbehandling.fagsakId)
-        val personIdent = fagsak.hentAktivIdent()
-        val enhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(personIdent)
-        return lagArkiverBlankettRequestMotNyLøsning(personIdent, blankettPdf, enhet, fagsak.eksternId.id, saksbehandling.id)
+        val enhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(saksbehandling.ident)
+        return lagArkiverBlankettRequestMotNyLøsning(saksbehandling.ident,
+                                                     blankettPdf,
+                                                     enhet,
+                                                     saksbehandling.eksternFagsakId,
+                                                     saksbehandling.id)
     }
 
     override fun stegType(): StegType {
