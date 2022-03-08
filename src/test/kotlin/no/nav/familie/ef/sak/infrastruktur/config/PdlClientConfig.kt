@@ -44,6 +44,8 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.UtflyttingFraNo
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Vegadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.VergeEllerFullmektig
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.VergemaalEllerFremtidsfullmakt
+import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.lagKjønn
+import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.lagNavn
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
@@ -138,19 +140,6 @@ class PdlClientConfig {
 
         private val folkeregistermetadata = Folkeregistermetadata(LocalDateTime.of(2010, Month.AUGUST, 30, 10, 10),
                                                                   LocalDateTime.of(2018, Month.JANUARY, 15, 12, 55))
-
-
-        private fun lagKjønn(kjønnType: KjønnType = KjønnType.KVINNE) = listOf(Kjønn(kjønnType))
-
-
-        private fun lagNavn(fornavn: String = "Fornavn",
-                            mellomnavn: String? = "mellomnavn",
-                            etternavn: String = "Etternavn"): List<Navn> {
-            return listOf(Navn(fornavn,
-                               mellomnavn,
-                               etternavn,
-                               metadataGjeldende))
-        }
 
         private fun barn(): Map<String, PdlBarn> =
                 mapOf(barnFnr to PdlBarn(adressebeskyttelse = listOf(),

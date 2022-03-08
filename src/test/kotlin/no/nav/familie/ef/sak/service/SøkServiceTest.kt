@@ -23,7 +23,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PersonSøkResul
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PersonSøkTreff
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.UkjentBosted
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Vegadresse
-import no.nav.familie.ef.sak.testutil.pdlSøker
+import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.pdlSøker
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

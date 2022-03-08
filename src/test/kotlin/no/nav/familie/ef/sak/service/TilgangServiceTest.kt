@@ -24,7 +24,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
-import no.nav.familie.ef.sak.testutil.pdlSøker
+import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.pdlSøker
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
