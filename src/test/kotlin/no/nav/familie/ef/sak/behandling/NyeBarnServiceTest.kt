@@ -20,8 +20,8 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlSøker
+import no.nav.familie.ef.sak.testutil.FnrGeneratorUtil.genererFnr
 import no.nav.familie.kontrakter.felles.PersonIdent
-import no.nav.familie.util.FnrGenerator
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -76,7 +76,7 @@ class NyeBarnServiceTest {
     fun `finnNyeBarnSidenGjeldendeBehandlingForPersonIdent med ett født terminbarn i PDL, forvent ingen treff`() {
         val terminDato = LocalDate.now()
         val fødselsdato = LocalDate.now().minusWeeks(5)
-        val fnrForPdlBarn = FnrGenerator.generer(fødselsdato.year, fødselsdato.month.value, fødselsdato.dayOfMonth)
+        val fnrForPdlBarn = genererFnr(fødselsdato)
         val pdlBarn = mapOf(fnrForEksisterendeBarn to pdlBarn(fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
                             fnrForPdlBarn to pdlBarn(fødsel(fødselsdato = fødselsdato))
         )
@@ -93,8 +93,8 @@ class NyeBarnServiceTest {
     fun `finnNyeBarnSidenGjeldendeBehandlingForPersonIdent med tvillinger i PDL av terminbarn med alle i behandlingen, forvent ingen nye barn`() {
         val terminDato = LocalDate.now()
         val fødselsdato = LocalDate.now().minusWeeks(5)
-        val fnrForTerminbarn = FnrGenerator.generer(fødselsdato.year, fødselsdato.month.value, fødselsdato.dayOfMonth)
-        val fnrForTvillingbarn = FnrGenerator.generer(fødselsdato.year, fødselsdato.month.value, fødselsdato.dayOfMonth)
+        val fnrForTerminbarn = genererFnr(fødselsdato)
+        val fnrForTvillingbarn = genererFnr(fødselsdato)
         val pdlBarn = mapOf(fnrForEksisterendeBarn to pdlBarn(fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
                             fnrForTerminbarn to pdlBarn(fødsel(fødselsdato = fødselsdato)),
                             fnrForTvillingbarn to pdlBarn(fødsel(fødselsdato = fødselsdato))
@@ -114,8 +114,8 @@ class NyeBarnServiceTest {
     fun `finnNyeBarnSidenGjeldendeBehandlingForPersonIdent med tvillinger i PDL av terminbarn, men bare ett i behandlingen, forvent ett nytt barn`() {
         val terminDato = LocalDate.now()
         val fødselsdato = LocalDate.now().minusWeeks(5)
-        val fnrForTerminbarn = FnrGenerator.generer(fødselsdato.year, fødselsdato.month.value, fødselsdato.dayOfMonth)
-        val fnrForTvillingbarn = FnrGenerator.generer(fødselsdato.year, fødselsdato.month.value, fødselsdato.dayOfMonth)
+        val fnrForTerminbarn = genererFnr(fødselsdato)
+        val fnrForTvillingbarn = genererFnr(fødselsdato)
         val pdlBarn = mapOf(fnrForEksisterendeBarn to pdlBarn(fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
                             fnrForTerminbarn to pdlBarn(fødsel(fødselsdato = fødselsdato)),
                             fnrForTvillingbarn to pdlBarn(fødsel(fødselsdato = fødselsdato))
