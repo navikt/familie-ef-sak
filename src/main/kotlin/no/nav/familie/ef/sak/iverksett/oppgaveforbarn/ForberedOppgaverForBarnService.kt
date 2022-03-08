@@ -20,7 +20,8 @@ class ForberedOppgaverForBarnService(private val gjeldendeBarnRepository: Gjelde
     fun forberedOppgaverForAlleBarnSomFyllerAarNesteUke(sisteKjøring: LocalDate, kjøreDato: LocalDate = LocalDate.now()) {
         val referanseDato = referanseDato(sisteKjøring)
         val gjeldendeBarn =
-                gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, referanseDato)
+                gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, referanseDato) +
+                gjeldendeBarnRepository.finnBarnTilMigrerteBehandlinger(Stønadstype.OVERGANGSSTØNAD, referanseDato)
         val barnSomFyllerAar = barnSomFyllerAar(gjeldendeBarn, referanseDato, kjøreDato)
         if (barnSomFyllerAar.isEmpty()) {
             return
@@ -75,7 +76,9 @@ class ForberedOppgaverForBarnService(private val gjeldendeBarnRepository: Gjelde
                && kjøreDato.plusWeeks(1) >= fødselsdato.plusYears(1)
     }
 
-    private fun barnBlirSeksMnd(referanseDato: LocalDate, fødselsdato: LocalDate, kjøreDato: LocalDate = LocalDate.now()): Boolean {
+    private fun barnBlirSeksMnd(referanseDato: LocalDate,
+                                fødselsdato: LocalDate,
+                                kjøreDato: LocalDate = LocalDate.now()): Boolean {
         return referanseDato <= fødselsdato.plusDays(182)
                && kjøreDato.plusWeeks(1) >= fødselsdato.plusDays(182L)
     }

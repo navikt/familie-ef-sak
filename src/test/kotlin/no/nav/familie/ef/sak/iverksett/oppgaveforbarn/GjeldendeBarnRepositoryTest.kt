@@ -4,20 +4,28 @@ import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.barn.BarnRepository
 import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.domain.Sporbar
+import no.nav.familie.ef.sak.felles.util.opprettBarnMedIdent
+import no.nav.familie.ef.sak.felles.util.opprettGrunnlagsdata
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.GjeldendeBarnRepository
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRepository
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdata
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.repository.fagsakpersonerAvPersonIdenter
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
+import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
@@ -30,41 +38,23 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
     @Autowired private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
     @Autowired private lateinit var barnRepository: BarnRepository
+    @Autowired private lateinit var grunnlagsdataRepository: GrunnlagsdataRepository
 
     @Test
     internal fun `finnBarnAvGjeldendeIverksatteBehandlinger med fremtidig andel, forvent barn fra behandling med fremtidig andel `() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(setOf("12345678910"))))
-        val behandlingMedTidligereAndel = behandlingRepository.insert(behandling(fagsak,
-                                                                                 status = BehandlingStatus.FERDIGSTILT,
-                                                                                 resultat = BehandlingResultat.INNVILGET,
-                                                                                 opprettetTid = LocalDateTime.now().minusDays(2)))
+        val behandlingMedTidligereAndel = lagreInnvilgetBehandling(fagsak)
 
-        val tidligereAndel = lagAndelTilkjentYtelse(beløp = 1,
-                                                    kildeBehandlingId = behandlingMedTidligereAndel.id,
-                                                    fraOgMed = LocalDate.now().minusMonths(2),
-                                                    tilOgMed = LocalDate.now().minusMonths(1))
+        lagreHistoriskAndel(behandlingMedTidligereAndel, beløp = 1)
 
-        tilkjentYtelseRepository.insert(lagTilkjentYtelse(behandlingId = behandlingMedTidligereAndel.id,
-                                                          andelerTilkjentYtelse = listOf(tidligereAndel)))
+        val behandlingMedFremtidigAndel = lagreInnvilgetBehandling(fagsak, behandlingMedTidligereAndel)
 
-        val behandlingMedFremtidigAndel = behandlingRepository.insert(behandling(fagsak,
-                                                                                 status = BehandlingStatus.FERDIGSTILT,
-                                                                                 resultat = BehandlingResultat.INNVILGET,
-                                                                                 opprettetTid = LocalDateTime.now().minusDays(2)))
-
-        val fremtidigAndel = lagAndelTilkjentYtelse(beløp = 1, kildeBehandlingId = behandlingMedFremtidigAndel.id,
-                                                    fraOgMed = LocalDate.now().minusMonths(1),
-                                                    tilOgMed = LocalDate.now().plusMonths(1))
-
-        tilkjentYtelseRepository.insert(lagTilkjentYtelse(behandlingId = behandlingMedFremtidigAndel.id,
-                                                          andelerTilkjentYtelse = listOf(fremtidigAndel)))
+        lagreFremtidligAndel(behandlingMedFremtidigAndel, beløp = 1)
 
         barnRepository.insertAll(listOf(barn(behandlingId = behandlingMedFremtidigAndel.id),
                                         barn(behandlingId = behandlingMedTidligereAndel.id)))
 
-        val barnForUtplukk = gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(
-                Stønadstype.OVERGANGSSTØNAD,
-                LocalDate.now())
+        val barnForUtplukk = finnBarnAvGjeldendeIverksatteBehandlinger()
         assertThat(barnForUtplukk.size).isEqualTo(1)
         barnForUtplukk.forEach { assertThat(it.behandlingId).isEqualTo(behandlingMedFremtidigAndel.id) }
     }
@@ -73,23 +63,13 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
     internal fun `finnBarnAvGjeldendeIverksatteBehandlinger med fremtidig andel med null i inntekt, forvent ingen treff `() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(setOf("12345678910"))))
 
-        val behandlingMedFremtidigAndel = behandlingRepository.insert(behandling(fagsak,
-                                                                                 status = BehandlingStatus.FERDIGSTILT,
-                                                                                 resultat = BehandlingResultat.INNVILGET,
-                                                                                 opprettetTid = LocalDateTime.now().minusDays(2)))
+        val behandlingMedFremtidigAndel = lagreInnvilgetBehandling(fagsak)
 
-        val fremtidigAndel = lagAndelTilkjentYtelse(beløp = 0, kildeBehandlingId = behandlingMedFremtidigAndel.id,
-                                                    fraOgMed = LocalDate.now().minusMonths(1),
-                                                    tilOgMed = LocalDate.now().plusMonths(1))
-
-        tilkjentYtelseRepository.insert(lagTilkjentYtelse(behandlingId = behandlingMedFremtidigAndel.id,
-                                                          andelerTilkjentYtelse = listOf(fremtidigAndel)))
+        lagreFremtidligAndel(behandlingMedFremtidigAndel, beløp = 0)
 
         barnRepository.insertAll(listOf(barn(behandlingId = behandlingMedFremtidigAndel.id)))
 
-        val barnForUtplukk = gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(
-                Stønadstype.OVERGANGSSTØNAD,
-                LocalDate.now())
+        val barnForUtplukk = finnBarnAvGjeldendeIverksatteBehandlinger()
         assertThat(barnForUtplukk.size).isEqualTo(0)
     }
 
@@ -102,23 +82,12 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
                 eldsteFnrSøker, Sporbar(opprettetTid = LocalDateTime.now().minusDays(1)))))))
 
 
-        val behandlingMedFremtidigAndel = behandlingRepository.insert(behandling(fagsak,
-                                                                                 status = BehandlingStatus.FERDIGSTILT,
-                                                                                 resultat = BehandlingResultat.INNVILGET,
-                                                                                 opprettetTid = LocalDateTime.now().minusDays(2)))
-
-        val fremtidigAndel = lagAndelTilkjentYtelse(beløp = 1, kildeBehandlingId = behandlingMedFremtidigAndel.id,
-                                                    fraOgMed = LocalDate.now().minusMonths(1),
-                                                    tilOgMed = LocalDate.now().plusMonths(1))
-
-        tilkjentYtelseRepository.insert(lagTilkjentYtelse(behandlingId = behandlingMedFremtidigAndel.id,
-                                                          andelerTilkjentYtelse = listOf(fremtidigAndel)))
+        val behandlingMedFremtidigAndel = lagreInnvilgetBehandling(fagsak)
+        lagreFremtidligAndel(behandlingMedFremtidigAndel, beløp = 1)
 
         barnRepository.insertAll(listOf(barn(behandlingId = behandlingMedFremtidigAndel.id)))
 
-        val barnForUtplukk = gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(
-                Stønadstype.OVERGANGSSTØNAD,
-                LocalDate.now())
+        val barnForUtplukk = finnBarnAvGjeldendeIverksatteBehandlinger()
         assertThat(barnForUtplukk.size).isEqualTo(1)
         assertThat(barnForUtplukk.first().fødselsnummerSøker).isEqualTo(nyesteFnrSøker)
         barnForUtplukk.forEach { assertThat(it.behandlingId).isEqualTo(behandlingMedFremtidigAndel.id) }
@@ -147,26 +116,101 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
                                                                                  resultat = BehandlingResultat.INNVILGET,
                                                                                  opprettetTid = LocalDateTime.now().minusDays(2)))
 
-        val fremtidigAndel = lagAndelTilkjentYtelse(beløp = 1, kildeBehandlingId = behandlingMedFremtidigAndel.id,
-                                                    fraOgMed = LocalDate.now().minusMonths(1),
-                                                    tilOgMed = LocalDate.now().plusMonths(1))
-
-        tilkjentYtelseRepository.insert(lagTilkjentYtelse(behandlingId = behandlingMedFremtidigAndel.id,
-                                                          andelerTilkjentYtelse = listOf(fremtidigAndel)))
+        lagreFremtidligAndel(behandlingMedFremtidigAndel, beløp = 1)
 
         val barnListe = listOf(barn(behandlingId = behandlingMedFremtidigAndel.id, personIdent = "1"),
                                barn(behandlingId = behandlingMedFremtidigAndel.id, personIdent = "2"),
                                barn(behandlingId = behandlingMedTidligereAndel.id, personIdent = "3"))
 
         barnRepository.insertAll(barnListe)
-        val barnForUtplukk = gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(
-                Stønadstype.OVERGANGSSTØNAD,
-                LocalDate.now())
+        val barnForUtplukk = finnBarnAvGjeldendeIverksatteBehandlinger()
         assertThat(barnForUtplukk.size).isEqualTo(2)
         barnForUtplukk.map {
             assertThat(it).hasNoNullFieldsOrProperties()
         }
         barnForUtplukk.forEach { assertThat(it.behandlingId).isEqualTo(behandlingMedFremtidigAndel.id) }
+    }
+
+    @Nested
+    inner class FinnBarnTilMigrerteBehandlinger {
+
+        @Test
+        internal fun `skal finne barn til de som er migrert og ikke har behandlingBarn`() {
+            val fnrSøker = "12345678910"
+            val fnrBarn = "1"
+            val fagsak = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(setOf(fnrSøker)), migrert = true))
+            val behandling = lagreInnvilgetBehandling(fagsak)
+            val grunnlagsdataDomene = opprettGrunnlagsdata().copy(barn = listOf(opprettBarnMedIdent(fnrBarn)))
+            grunnlagsdataRepository.insert(Grunnlagsdata(behandling.id, grunnlagsdataDomene))
+
+            assertThat(finnBarnAvGjeldendeIverksatteBehandlinger()).isEmpty()
+            val resultat = finnBarnTilMigrerteBehandlinger()
+            assertThat(resultat).hasSize(1)
+            assertThat(resultat[0].behandlingId).isEqualTo(behandling.id)
+            assertThat(resultat[0].fødselsnummerSøker).isEqualTo(fnrSøker)
+            assertThat(resultat[0].fødselsnummerBarn).isEqualTo(fnrBarn)
+            assertThat(resultat[0].termindatoBarn).isNull()
+        }
+
+        @Test
+        internal fun `skal ikke finne barn til de som ikke er migrert og ikke har behandlingBarn`() {
+            val fnrSøker = "12345678910"
+            val fnrBarn = "1"
+            val fagsak = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(setOf(fnrSøker)), migrert = false))
+            val behandling = lagreInnvilgetBehandling(fagsak)
+            val grunnlagsdataDomene = opprettGrunnlagsdata().copy(barn = listOf(opprettBarnMedIdent(fnrBarn)))
+            grunnlagsdataRepository.insert(Grunnlagsdata(behandling.id, grunnlagsdataDomene))
+
+            assertThat(finnBarnAvGjeldendeIverksatteBehandlinger()).isEmpty()
+            assertThat(finnBarnTilMigrerteBehandlinger()).isEmpty()
+        }
+
+        @Test
+        internal fun `finner ikke barn når det finnes behandlingbarn på personen`() {
+            val fagsak = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(setOf("12345678910")), migrert = true))
+            val behandling = lagreInnvilgetBehandling(fagsak)
+            val grunnlagsdataDomene = opprettGrunnlagsdata().copy(barn = listOf(opprettBarnMedIdent("1")))
+            grunnlagsdataRepository.insert(Grunnlagsdata(behandling.id, grunnlagsdataDomene))
+
+            barnRepository.insert(barn(behandlingId = behandling.id, personIdent = "1"))
+
+            assertThat(finnBarnAvGjeldendeIverksatteBehandlinger()).hasSize(1)
+            assertThat(finnBarnTilMigrerteBehandlinger()).isEmpty()
+        }
+    }
+
+    private fun finnBarnTilMigrerteBehandlinger() =
+            gjeldendeBarnRepository.finnBarnTilMigrerteBehandlinger(Stønadstype.OVERGANGSSTØNAD, LocalDate.now())
+
+    private fun finnBarnAvGjeldendeIverksatteBehandlinger() =
+            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, LocalDate.now())
+
+    private fun lagreInnvilgetBehandling(fagsak: Fagsak,
+                                         tidligereBehandling: Behandling? = null,
+                                         opprettetTid: LocalDateTime = tidligereBehandling?.sporbar?.opprettetTid?.plusHours(1)
+                                                                       ?: LocalDateTime.now()) =
+            behandlingRepository.insert(behandling(fagsak,
+                                                   status = BehandlingStatus.FERDIGSTILT,
+                                                   resultat = BehandlingResultat.INNVILGET,
+                                                   forrigeBehandlingId = tidligereBehandling?.id,
+                                                   opprettetTid = opprettetTid))
+
+    private fun lagreHistoriskAndel(behandling: Behandling, beløp: Int): TilkjentYtelse {
+        val andel = lagAndelTilkjentYtelse(beløp = beløp,
+                                           kildeBehandlingId = behandling.id,
+                                           fraOgMed = LocalDate.now().minusMonths(2),
+                                           tilOgMed = LocalDate.now().minusMonths(1))
+        return tilkjentYtelseRepository.insert(lagTilkjentYtelse(behandlingId = behandling.id,
+                                                                 andelerTilkjentYtelse = listOf(andel)))
+    }
+
+    private fun lagreFremtidligAndel(behandling: Behandling, beløp: Int): TilkjentYtelse {
+        val andel = lagAndelTilkjentYtelse(beløp = beløp,
+                                           kildeBehandlingId = behandling.id,
+                                           fraOgMed = LocalDate.now().minusMonths(1),
+                                           tilOgMed = LocalDate.now().plusMonths(1))
+        return tilkjentYtelseRepository.insert(lagTilkjentYtelse(behandlingId = behandling.id,
+                                                                 andelerTilkjentYtelse = listOf(andel)))
     }
 
     private fun barn(behandlingId: UUID, personIdent: String? = null, termindato: LocalDate? = LocalDate.now()): BehandlingBarn {
